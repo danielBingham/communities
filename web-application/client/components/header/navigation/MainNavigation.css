@@ -1,0 +1,61 @@
+#about-navigation {}
+#about-navigation svg {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    margin-right: 6px;
+    margin-bottom: -2px;
+}
+#about-navigation a:link, 
+#about-navigation a:active, 
+#about-navigation a:visited,
+#about-navigation a:hover {
+    padding: 5px;
+    margin: 0 5px;
+}
+
+
+#main-navigation {
+    position: relative;
+    cursor: pointer;
+}
+#main-navigation svg {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    margin-right: 6px;
+    margin-bottom: -2px;
+}
+#main-navigation svg.arrow {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin-left: 3px;
+    margin-bottom: -2px;
+}
+
+#explore-menu {
+    position: absolute;
+    top: 52px;
+    left: 0;
+    text-align: left;
+    background-color: var(--header-menu-background-color);
+    border-bottom: thin solid var(--header-menu-border-color);
+    border-left: thin solid var(--header-menu-border-color);
+    border-right: thin solid var(--header-menu-border-color);
+    box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    padding: 10px 0 10px 0;
+    z-index: 1000;
+}
+#explore-menu .menu-section {
+    padding: 5px 0;
+    border-bottom: thin solid var(--header-menu-spacer-color);
+}
+#explore-menu .menu-section.bottom {
+    border-bottom: none;
+}
+#explore-menu .menu-item {
+    white-space: nowrap;
+    padding: 5px 10px 5px 10px;
+}
+#explore-menu .menu-item:hover { }

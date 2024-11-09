@@ -1,0 +1,42 @@
+#authentication-navigation {
+    position: relative;
+    cursor: pointer;
+    white-space: nowrap;
+}
+#authentication-navigation svg {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    margin-right: 6px;
+    margin-bottom: -4px;
+}
+#authentication-navigation svg.arrow {
+    width: 14px;
+    height: 14px;
+    margin-left: -2px;
+    margin-bottom: -2px;
+}
+
+#authentication-navigation .logged-in-user {
+    display: inline-block;
+    text-align: left;
+    white-space: nowrap;
+}
+#authentication-navigation.not-authenticated {
+    padding: 0;
+}
+#authentication-navigation.not-authenticated a:link, 
+#authentication-navigation.not-authenticated a:active, 
+#authentication-navigation.not-authenticated a:visited,
+#authentication-navigation.not-authenticated a:hover {
+    padding: 5px;
+    margin: 0 5px;
+}
+
+#authentication-navigation a.logout:link, 
+#authentication-navigation a.logout:active, 
+#authentication-navigation a.logout:visited,
+#authentication-navigation a.logout:hover {
+    padding: 5px;
+    margin: 0 5px;
+}

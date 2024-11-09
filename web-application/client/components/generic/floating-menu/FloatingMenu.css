@@ -1,0 +1,96 @@
+.floating-menu { }
+.floating-menu { 
+    display: inline-block;
+    position: relative;
+}
+
+
+.floating-menu .menu-trigger {
+    font-size: 14px;
+    cursor: pointer;
+}
+.floating-menu .menu-trigger svg {
+    display: inline-block;
+    width: 14px;
+}
+.floating-menu .menu-trigger a:link {
+    color: var(--main-text-color);
+}
+.floating-menu .menu-trigger a:active,
+.floating-menu .menu-trigger a:hover,
+.floating-menu .menu-trigger a:visited {
+    color: var(--main-text-color);
+    filter: brightness(90%);
+}
+
+
+.floating-menu .menu-body {
+    position: absolute;
+    top: 2em;
+    left: 0;
+    text-align: left;
+    background-color: white; 
+    border: thin solid var(--floating-menu-border-color);
+    box-shadow: 0 0 12px -7px rgba(100,100,100,0.4);
+    padding: 0;
+    z-index: 1000;
+
+}
+
+
+.floating-menu .menu-body .menu-header {
+    border-bottom: thin solid var(--floating-menu-border-color);
+}
+.floating-menu .menu-body .menu-header .menu-header-top {
+    display: grid;
+    grid-template-columns: 6fr 1fr;
+    border-bottom: thin solid var(--floating-menu-border-color);
+}
+.floating-menu .menu-body .menu-header .menu-title { 
+    padding: 10px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+.floating-menu .menu-body .menu-header .menu-escape {
+    padding: 10px;
+}
+.floating-menu .menu-body .menu-header .menu-escape a:link {
+    color: var(--floating-menu-icon-color);
+}
+.floating-menu .menu-body .menu-header .menu-escape a:active,
+.floating-menu .menu-body .menu-header .menu-escape a:hover,
+.floating-menu .menu-body .menu-header .menu-escape a:visited {
+    color: var(--floating-menu-icon-color);
+    filter: brightness(90%);
+}
+.floating-menu .menu-body .menu-header .menu-escape svg {
+    width: 1.2em;
+    height: 1.2em;
+}
+.floating-menu .menu-body .menu-header .menu-header-bottom {
+    padding: 5px;
+}
+
+
+.floating-menu .menu-body .menu-item {
+    display: block;
+    text-transform:capitalize;
+    white-space: nowrap;
+    padding-left: 20px;
+}
+.floating-menu .menu-body a.menu-item:link {
+    color: var(--main-text-color);
+}
+.floating-menu .menu-body a.menu-item:visited {
+    color: var(--main-text-color);
+}
+
+.floating-menu .menu-body a.menu-item:active,
+.floating-menu .menu-body a.menu-item:hover {
+    color: white;
+    background-color: var(--primary-highlight-color);
+}
+.floating-menu .menu-body .menu-item a:active,
+.floating-menu .menu-body .menu-item a:hover {
+    color: white;
+}

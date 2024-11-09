@@ -1,0 +1,273 @@
+/**************************************************************************************************
+ *         API Router v0 
+ *
+ * This is the RESTful API router.  It contains all of our backend API routes.
+ *
+ * NOTE: This file is versioned and loaded on ``/api/0.0.0/``.  So ``/users`` is
+ * really ``/api/0.0.0/users``.  This is so that we can load multiple versions
+ * of the api as we make changes and leave past versions still accessible.
+ **************************************************************************************************/
+module.exports = function(core) {
+    const express = require('express')
+    const multer = require('multer')
+    const backend = require('@danielbingham/peerreview-backend')
+
+    const ControllerError = require('./errors/ControllerError')
+
+    const router = express.Router()
+
+    /******************************************************************************
+     * Feature Flag Management and Migration Rest Routes
+     *****************************************************************************/
+    const FeatureController = require('./controllers/FeatureController')
+    const featureController = new FeatureController(core)
+
+    router.get('/features', function(request, response, next) {
+        featureController.getFeatures(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.post('/features', function(request, response, next) {
+        featureController.postFeatures(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.get('/feature/:name', function(request, response, next) {
+        featureController.getFeature(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.patch('/feature/:name', function(request, response, next) {
+        featureController.patchFeature(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    /**************************************************************************
+     * Job REST Routes
+     **************************************************************************/
+    const JobController = require('./controllers/JobController')
+    const jobController = new JobController(core)
+
+    router.get('/jobs', function(request, response, next) {
+        jobController.getJobs(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.post('/jobs', function(request, response, next) {
+        jobController.postJob(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.get('/job/:id', function(request, response, next) {
+        jobController.getJob(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.patch('/job/:id', function(request, response, next) {
+        jobController.patchJob(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.delete('/job/:id', function(request, response, next) {
+        jobController.deleteJob(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    /******************************************************************************
+     *          File REST Routes
+     ******************************************************************************/
+    const FileController = require('./controllers/FileController')
+    const fileController = new FileController(core)
+
+    const upload = new multer({ dest: 'public/uploads/tmp' })
+
+    router.post('/upload', upload.single('file'), function(request, response, next) {
+        fileController.upload(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.delete('/file/:id', function(request, response, next) {
+        fileController.deleteFile(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    /******************************************************************************
+     *          User REST Routes
+     ******************************************************************************/
+    const UserController = require('./controllers/UserController')
+    const userController = new UserController(core)
+
+    // Get a list of all users.
+    router.get('/users', function(request, response, next) {
+        userController.getUsers(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    // Create a new user 
+    router.post('/users', function(request, response, next) {
+        userController.postUsers(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    // Get the details of a single user 
+    router.get('/user/:id', function(request, response, next) {
+        userController.getUser(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    // Edit an existing user with partial data.
+    router.patch('/user/:id', function(request, response, next) {
+        return userController.patchUser(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    // Delete an existing user.
+    router.delete('/user/:id', function(request, response, next) {
+        return userController.deleteUser(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    /**************************************************************************
+     *      Notification REST Routes
+     *************************************************************************/
+    const NotificationController = require('./controllers/NotificationController')
+    const notificationController = new NotificationController(core)
+
+    router.get('/notifications', function(request, response, next) {
+        notificationController.getNotifications(request, response).catch(function(error) {
+            next(error)
+        })
+
+    })
+
+    router.patch('/notifications', function(request, response, next) {
+        notificationController.patchNotifications(request,response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.patch('/notification/:id', function(request, response, next) {
+        notificationController.patchNotification(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    /******************************************************************************
+     *          Authentication REST Routes
+     ******************************************************************************/
+    const AuthenticationController = require('./controllers/AuthenticationController')
+    const authenticationController = new AuthenticationController(core)
+
+    router.post('/authentication', function(request, response, next) {
+        authenticationController.postAuthentication(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.patch('/authentication', function(request, response, next) {
+        authenticationController.patchAuthentication(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.get('/authentication', function(request, response, next) {
+        authenticationController.getAuthentication(request,response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.delete('/authentication', function(request, response) {
+        // Delete isn't async
+        authenticationController.deleteAuthentication(request, response)
+    })
+
+    /**************************************************************************
+     *      Token Handling REST Routes
+     * ************************************************************************/
+    const TokenController = require('./controllers/TokenController')
+    const tokenController = new TokenController(core)
+
+    router.get('/token/:token', function(request, response, next) {
+        tokenController.getToken(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.post('/tokens', function(request, response, next) {
+        tokenController.postToken(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+
+    /******************************************************************************
+     *          Tag REST Routes
+     ******************************************************************************/
+
+    const TagController = require('./controllers/TagController')
+    const tagController = new TagController(core)
+
+    // Get a list of all tags.
+    router.get('/tags', function(request, response, next) {
+        tagController.getTags(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    // Create a new tag 
+    router.post('/tags', function(request, response, next) {
+        tagController.postTags(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    // Get the details of a single tag 
+    router.get('/tag/:id', function(request, response, next) {
+        tagController.getTag(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    // Edit an existing tag with partial data.
+    router.patch('/tag/:id', function(request, response, next) {
+        tagController.patchTag(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    // Delete an existing tag.
+    router.delete('/tag/:id', function(request, response, next) {
+        tagController.deleteTag(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+
+    /**************************************************************************
+     *      API 404 
+     *************************************************************************/
+
+    router.use('*', function(request, response) {
+        throw new ControllerError(404, 'no-resource', `Request for non-existent resource ${request.originalUrl}.`)
+    })
+
+    return router
+}
+
+

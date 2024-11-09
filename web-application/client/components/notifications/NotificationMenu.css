@@ -1,0 +1,67 @@
+/******************************************************************************
+ *
+ *  JournalHub -- Universal Scholarly Publishing 
+ *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
+.notification-menu {
+    color: var(--header-text-color);
+}
+.notification-menu .menu-trigger svg {
+    color: var(--header-text-color);
+    width: 24px;
+    height: 24px;
+    margin-bottom: -6px;
+    padding: 0 5px;
+}
+.notification-menu .empty-list {
+    padding: 10px 20px;
+    white-space: nowrap;
+    color: black;
+}
+.notification-menu .notification-trigger {
+    position: relative;
+}
+.notification-menu .notification-trigger .unread-indicator {
+    position: absolute;
+    top: 2px;
+    right: 4px;
+    font-size: 10px;
+    padding: 2px 4px;
+
+    color: white;
+
+    border-radius: 14px;
+    background-color: var(--input-highlight-color);
+}
+.notification-menu .notification-body {
+    max-height: 400px;
+    overflow: auto;
+    margin-left: -120px;
+    top: 42px;
+}
+.notification-menu .notification-header {
+    padding: 5px 10px;
+    text-align: right;
+    border-bottom: thin solid var(--floating-menu-border-color);
+}
+.notification-menu .notification-header a:link, 
+.notification-menu .notification-header a:active,
+.notification-menu .notification-header a:visited {
+    color: black; 
+    font-size: 12px;
+}
+

@@ -1,0 +1,195 @@
+:root {
+
+    /**************************************************************************
+     * Color Palette
+     *************************************************************************/
+
+
+    --primary-color-lightest: #f9fbfc;
+    --primary-color-light: #e6ecf2;
+    --primary-color-main: #398fe5;
+    --primary-color-main-highlight: #67a6e5;
+    --primary-color-dark: #44484c;
+    --primary-color-darkest: #161819; 
+
+    --secondary-color-lightest: #faece1;
+    --secondary-color-light: #facfaf;
+    --secondary-color-main: #FB994C;
+    --secondary-color-main-highlight: #fab37d;
+    --secondary-color-dark: #4d4845;
+    --secondary-color-darkest: #1a1919;
+
+    --success-color-lightest: #e2fae1;
+    --success-color-light: #b3faaf;
+    --success-color-main: #45CB3E;
+    --success-color-main-highlight: #6dcc68;
+    --success-color-dark: #454d45;
+    --success-color-darkest: #191a19;
+
+    --danger-color-lightest: #f7dfdf;
+    --danger-color-light: #f7adb0;
+    --danger-color-main: #F84B50;
+    --danger-color-main-highlight: #f77c80; 
+    --danger-color-dark: #4d4545;
+    --danger-color-darkest: #1a1919;
+
+    /**************************************************************************
+     * End Color Palette
+     *************************************************************************/
+
+    /**
+     * Highlight colors
+     *
+     * Used to highlight menu selections.
+     **/
+    --primary-highlight-color: var(--primary-color-main);
+    --success-highlight-color: var(--success-color-main);
+    --warn-highlight-color: var(--danger-color-dark);
+
+    /** Header colors **/
+    --header-background-color: var(--primary-color-lightest);
+    --header-border-color: var(--primary-color-light);
+    --header-text-color: var(--primary-color-darkest);
+    --header-text-highlight-color: var(--primary-color-dark);
+    --header-spacer-color: var(--primary-color-light);
+
+    /** Footer colors **/
+    --footer-background-color: var(--primary-color-lightest);
+    --footer-border-color: var(--primary-color-light);
+    --footer-text-color: var(--primary-color-darkest);
+
+    /** Header menu colors **/ 
+    --header-menu-background-color: var(--primary-color-lightest);
+    --header-menu-border-color: var(--primary-color-light);
+    --header-menu-spacer-color: var(--primary-color-light);
+    --header-menu-text-color: var(--primary-color-darkest);
+    --header-menu-text-highlight-color: var(--primary-color-dark);
+    --header-menu-background-highlight-color: var(--primary-color-main);
+
+
+    /** Page Header **/
+    --page-header-background-color: var(--primary-color-lightest);
+
+    /** Page **/
+    --page-background-color: white;
+    --page-text-color: var(--primary-color-darkest);
+    --page-border-color: none;
+
+    /** Page Tab Bar **/
+    --tab-bar-background-color: var(--primary-color-lightest);
+    --tab-bar-border-color: var(--primary-color-light);
+    --tab-bar-text-color: var(--primary-color-darkest);
+    --tab-bar-icon-color: var(--primary-color-darkest);
+
+    /** Main **/
+    --main-background-color: white;
+    --main-border-color: var(--primary-color-light);
+    --main-text-color: var(--primary-color-darkest);
+    --main-icon-color: var(--primary-color-light);
+    --main-icon-highlight-color: var(--primary-color-main);
+
+    --icon-color: var(--primary-color-darkest);
+
+    --floating-menu-border-color: var(--primary-color-light);
+    --floating-menu-icon-color: var(--primary-color-light);
+
+    --card-header-background-color: var(--primary-color-lightest);
+    --card-border-color: var(--primary-color-light);
+    --dots-menu-color: var(--primary-color-light);
+
+    --input-background-color: var(--primary-color-lightest);
+    --input-focus-background-color: white;
+    --input-border-color: var(--primary-color-light);
+    --input-highlight-color: var(--primary-color-main);
+
+    --link-color: var(--primary-color-main);
+    --link-highlight-color: var(--primary-color-main-highlight);
+
+    --button-color: var(--primary-color-lightest);
+    --button-border-color: var(--primary-color-light);
+
+    --button-primary-color: var(--primary-color-main);
+    --button-highlight-color: var(--primary-color-main-highlight);
+    --button-warn-color: var(--danger-color-main);
+}
+
+html {
+    height: 100%;
+}
+
+body {
+    padding: 0;
+    margin: 0;
+    height: 100%;
+
+    font-family: Roboto, Arial, sans-serif; 
+    /*font-family: "Atkinson Hyperlegible", Roboto, Arial, sans-serif;*/
+    font-size: 14px;
+    font-weight: 400;
+    font-style: normal;
+    background-color: white;
+}
+
+a:link, a:active, a:visited {
+    text-decoration: none;
+    color: var(--link-color); 
+}
+
+a:hover {
+    text-decoration: none;
+    color: var(--link-highlight-color); 
+}
+
+input[type="text"], input[type="password"], textarea {
+    padding: 5px;
+    border: thin solid var(--input-border-color);
+}
+input:focus, textarea:focus, select:focus {
+    outline-color: var(--input-highlight-color) !important;
+}
+
+input[type="submit"] {
+    all: unset;
+
+    display: inline-block;
+    border-radius: 5px;
+    padding: 5px 15px;
+    margin: 5px;
+    cursor: pointer;
+
+    background-color: var(--button-primary-color);
+    border: thin solid var(--button-primary-color);
+    color: white;
+}
+input[type="submit"]:hover {
+    filter: opacity(80%);
+}
+
+svg.icon { 
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    margin-bottom: -0.2em;
+}
+
+#root {
+    height: 100vh;
+    width: 100%;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+}
+
+main {
+    box-sizing: border-box;
+    margin: 0 auto;
+    width: 100%;
+    color: var(--main-text-color);
+    background-color: var(--main-background-color);
+    padding-bottom: 50px;
+}
+
+.maintenance-mode {
+    width: 800px;
+    margin: 100px auto;
+    text-align: center;
+}

@@ -1,0 +1,23 @@
+{
+  "name": "@communities/worker",
+  "version": "0.3.10",
+  "private": true,
+  "main": "index.js",
+  "repository": { },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "scripts": {
+    "start": "node ./index.js",
+    "dev": "export NODE_ENV=development && node ./index.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.294.0",
+    "@communities/backend": "^0.3.10",
+    "bull": "^4.10.4",
+    "pg": "^8.7.3"
+  },
+  "devDependencies": {
+    "dotenv": "^16.0.3"
+  }
+}

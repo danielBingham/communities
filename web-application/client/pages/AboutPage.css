@@ -1,0 +1,29 @@
+#about-page .page-body {
+    width: 800px;
+    padding: 30px 200px 125px 200px;
+
+    font-size: 18px;
+    line-height: 1.7em;
+}
+#about-page h1 {
+    text-align: center;
+}
+#about-page h2 {
+    margin-top: 80px;
+}
+#about-page h3 {
+    margin-top: 60px;
+}
+#about-page h4 {
+    margin-top: 40px;
+}
+
+
+#about-page h2 a:link, #about-page h2 a:active, #about-page h2 a:visited {
+    color: #333;
+    text-decoration: none;
+}
+#about-page h2 a:hover {
+    color: #666;
+    text-decoration: none;
+}

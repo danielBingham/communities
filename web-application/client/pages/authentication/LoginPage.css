@@ -1,0 +1,19 @@
+#login-page .page-body {
+    display: block;
+    margin: 50px auto;
+    padding: 20px;
+    width: 500px;
+    border: thin solid var(--main-border-color);
+    background-color: white;
+}
+#login-page .inner-wrapper {
+    margin: 10px auto;
+    width: 430px;
+    text-align: center;
+}
+#login-page .forgot-password {
+    padding: 10px;
+}
+#login-page .register {
+    padding: 10px;
+}

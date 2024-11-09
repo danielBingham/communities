@@ -1,0 +1,56 @@
+.user-profile-edit-form { }
+.user-profile-edit-form .profile-picture {
+    display: grid;
+    grid-template-columns: 150px auto;
+    padding: 20px 120px;
+}
+.user-profile-edit-form .profile-picture .profile-wrapper {
+    grid-column: 1 / 2;
+}
+.user-profile-edit-form .profile-picture .input-wrapper {
+    grid-column: 2 / 3;
+    align-self: center;
+}
+.user-profile-edit-form .profile-picture .profile-wrapper .profile-image svg {
+    width: 150px;
+    color: var(--input-border-color);
+}
+.user-profile-edit-form .profile-picture .file-upload label {
+    display: block;
+    font-weight: bold;
+    padding: 10px 0;
+}
+.user-profile-edit-form .form-field {
+    padding: 20px;
+}
+.user-profile-edit-form .form-field label {
+    display: inline-block;
+    width: 150px;
+    text-align: right;
+    padding: 5px 20px 5px 5px;
+}
+.user-profile-edit-form .form-field input {
+    padding: 5px;
+    border: thin solid var(--input-border-color);
+    width: 800px;
+}
+.user-profile-edit-form .form-text {
+    padding: 20px 20px 20px 120px;
+}
+.user-profile-edit-form .form-text label {
+    display: block;
+    padding: 10px 10px 10px 0;
+}
+.user-profile-edit-form .form-text textarea {
+    width: 900px;
+    height: 200px;
+    border: thin solid var(--input-border-color);
+}
+.user-profile-edit-form .submit {
+    text-align: center;
+}
+.user-profile-edit-form .error {
+    text-align: center;
+    color: red;
+    padding: 10px;
+}

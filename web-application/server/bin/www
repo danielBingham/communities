@@ -1,0 +1,121 @@
+#!/usr/bin/env node
+
+console.log('Beginning server bootstrapping...')
+
+/**
+ * Module dependencies.
+ */
+var { app, core } = require('../app')
+const fs = require('fs')
+
+/**
+ * Normalize a port into a number, string, or false.
+ */
+
+function normalizePort(val) {
+  var port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}
+
+/**
+ * Create HTTP server.
+ */
+let server = null
+if ( process.env.NODE_ENV == 'development') {
+    const https = require('https')
+    const httpsOptions = {
+      key: fs.readFileSync('./security/key.pem'),
+      cert: fs.readFileSync('./security/cert.pem')
+    }
+    server = https.createServer(httpsOptions, app)
+} else {
+    const http = require('http')
+    server = http.createServer(app);
+}
+
+
+
+
+/**
+ * Event listener for HTTP server "error" event.
+ */
+
+function onError(error) {
+  core.logger.error('ERROR.')
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  var bind = typeof port === 'string'
+    ? 'Pipe ' + port
+    : 'Port ' + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      core.logger.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      core.logger.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      core.logger.error(error)
+      throw error;
+  }
+}
+server.on('error', onError);
+
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+function onListening() {
+  var addr = server.address();
+  var bind = typeof addr === 'string'
+    ? 'pipe ' + addr
+    : 'port ' + addr.port;
+  core.logger.info('Listening on ' + bind);
+}
+server.on('listening', onListening);
+
+
+/**
+ * Get port from environment and store in Express.
+ */
+
+var port = normalizePort(process.env.PORT || '3000');
+app.set('port', port);
+core.logger.info(`Starting up server on port ${port}.`)
+
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+server.listen(port);
+
+const shutdownServer = function() {
+    core.logger.info('Attempting a graceful shutdown...')
+    // Close the http server so we stop taking new connections before we close
+    // down the resources needed to process those connections.
+    server.close(async function() {
+        // Now close down the resources needed to process the http connections.
+        await core.shutdown()
+
+        core.logger.info('Shutdown complete.')
+        process.exit(0)
+    })
+}
+
+process.on('SIGTERM', shutdownServer)
+process.on('SIGINT', shutdownServer)
