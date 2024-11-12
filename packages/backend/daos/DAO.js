@@ -18,7 +18,11 @@
  *
  ******************************************************************************/
 
-export class DAO {
+const Uuid = require('uuid')
+
+const DAOError = require('../errors/DAOError')
+
+module.exports = class DAO {
 
     constructor(core) {
         this.core = core
@@ -26,10 +30,14 @@ export class DAO {
         this.entityMaps = {}
     }
 
-    getSelectionString(entityName) {
-        const string = ''
+    getSelectionString(entityName, shouldGetFull) {
+        let string = ''
         for(const [field, meta] of Object.entries(this.entityMaps[entityName].fields)) {
-            if ( meta.select == 'never' || meta.select == 'initialize' ) {
+            if ( meta.select == 'never' || meta.select == 'override' ) {
+                continue
+            }
+
+            if ( ! shouldGetFull && meta.select == 'full' ) {
                 continue
             }
 
@@ -43,9 +51,9 @@ export class DAO {
 
     hydrate(entityName, row) {
         const entity = {}
-        for(const [field, meta] of Object.entries(this.entityMaps[entityName])) {
-            if ( meta.select == 'initialize' ) {
-                entity[meta.key] = meta.selectDefault
+        for(const [field, meta] of Object.entries(this.entityMaps[entityName].fields)) {
+            if ( meta.select == 'override' ) {
+                entity[meta.key] = meta.selectOverride()
             } else if ( row[`${entityName}_${meta.key}`] == undefined ) {
                 entity[meta.key] = null
             } else {
@@ -62,6 +70,10 @@ export class DAO {
     async insert(entityName, entities) {
         if ( ! Array.isArray(entities) ) {
             entities = [ entities ]
+        }
+
+        if ( entities.length <= 0 ) {
+            return
         }
 
         let columns = '('
@@ -94,6 +106,15 @@ export class DAO {
                     continue
                 }
 
+                // If they haven't included a primary key, generate one.
+                // The database would generate one if it were left out, but 
+                // it has the same effect as us generating one here and here we
+                // can add it into the entity and we can have some entities include 
+                // their own while others don't more easily.
+                if ( meta.insert == 'primary' && ! ( meta.key in entity)) {
+                    entity[meta.key] = Uuid.v4()
+                }
+
                 if ( meta.insert == 'override' ) {
                     row += ( row == '(' ? '' : ', ' ) + `${meta.insertOverride}`
                 } else {
@@ -112,14 +133,18 @@ export class DAO {
 
         let sql = `
             INSERT INTO ${this.entityMaps[entityName].table} ${columns}
-                VALUES ${rows}`
-
+                VALUES ${rows}
+        `
         await this.core.database.query(sql, params)
     }
 
     async update(entityName, entity) {
         let fields = ''
         let where = ''
+        let params = []
+
+        const table = this.entityMaps[entityName].table
+
         for(const [field, meta] of Object.entries(this.entityMaps[entityName].fields)) {
 
             // Primary keys go into the `where` statement.
@@ -140,7 +165,7 @@ export class DAO {
             if ( ! ( meta.key in entity ) && meta.update == 'required' ) {
                 throw new DAOError('missing-field',
                     `Required '${meta.key}' not found in ${entityName}.`)
-            } else if ( ! meta.key in entity ) {
+            } else if ( ! (meta.key in entity) ) {
                 continue
             }
 
@@ -162,6 +187,9 @@ export class DAO {
             UPDATE ${this.entityMaps[entityName].table}
                 SET ${fields}
             WHERE ${where}`
+
+        console.log(sql)
+        console.log(params)
 
         await this.core.database.query(sql, params)
     }

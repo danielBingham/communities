@@ -23,8 +23,8 @@ import {
     cleanupRequest as cleanupTrackedRequest, 
     garbageCollectRequests as garbageCollectTrackedRequests } from './helpers/requestTracker'
 
-export const fieldsSlice = createSlice({
-    name: 'fields',
+export const tagsSlice = createSlice({
+    name: 'tags',
     initialState: {
         
         // ======== Standard State ============================================
@@ -38,8 +38,8 @@ export const fieldsSlice = createSlice({
         requests: {},
 
         /**
-         * A dictionary of fields we've retrieved from the backend, keyed by
-         * field.id.
+         * A dictionary of tags we've retrieved from the backend, keyed by
+         * tag.id.
          *
          * @type {object}
          */
@@ -49,8 +49,8 @@ export const fieldsSlice = createSlice({
          *
          * An object containing queries made to query supporting endpoints.
          *
-         * In the case of fields: /fields, /field/:id/children, and
-         * /field/:id/parents
+         * In the case of tags: /tags, /tag/:id/children, and
+         * /tag/:id/parents
          *
          * Structure:
          * {
@@ -73,12 +73,12 @@ export const fieldsSlice = createSlice({
         // ======== State Manipulation Helpers ================================
         // @see ./helpers/state.js
 
-        setFieldsInDictionary: setInDictionary,
-        removeField: removeEntity,
-        makeFieldQuery: makeQuery,
-        setFieldQueryResults: setQueryResults,
-        clearFieldQuery: clearQuery,
-        clearFieldQueries: clearQueries,
+        setTagsInDictionary: setInDictionary,
+        removeTag: removeEntity,
+        makeTagQuery: makeQuery,
+        setTagQueryResults: setQueryResults,
+        clearTagQuery: clearQuery,
+        clearTagQueries: clearQueries,
 
         // ========== Request Tracking Methods =============
 
@@ -94,9 +94,9 @@ export const fieldsSlice = createSlice({
 
 
 /**
- * GET /fields or GET /fields?...
+ * GET /tags or GET /tags?...
  *
- * Get all fields in the database.  Populates state.dictionary and state.list.
+ * Get all tags in the database.  Populates state.dictionary and state.list.
  * Can be used to run queries.
  *
  * Makes the request asynchronously and returns a id that can be used to track
@@ -104,20 +104,20 @@ export const fieldsSlice = createSlice({
  *
  * @returns {string} A uuid requestId that can be used to track this request.
  */
-export const getFields = function(name, params) {
+export const getTags = function(name, params) {
     return function(dispatch, getState) {
 
         const queryString = makeSearchParams(params)
-        const endpoint = '/fields' + ( params ? '?' + queryString.toString() : '')
+        const endpoint = '/tags' + ( params ? '?' + queryString.toString() : '')
 
-        dispatch(fieldsSlice.actions.makeFieldQuery({ name: name }))
+        dispatch(tagsSlice.actions.makeTagQuery({ name: name }))
 
-        return makeTrackedRequest(dispatch, getState, fieldsSlice,
+        return makeTrackedRequest(dispatch, getState, tagsSlice,
             'GET', endpoint, null,
             function(response) {
-                dispatch(fieldsSlice.actions.setFieldsInDictionary({ dictionary: response.dictionary}))
+                dispatch(tagsSlice.actions.setTagsInDictionary({ dictionary: response.dictionary}))
 
-                dispatch(fieldsSlice.actions.setFieldQueryResults({ name: name, meta: response.meta, list: response.list }))
+                dispatch(tagsSlice.actions.setTagQueryResults({ name: name, meta: response.meta, list: response.list }))
 
                 dispatch(setRelationsInState(response.relations))
             }
@@ -127,26 +127,26 @@ export const getFields = function(name, params) {
 }
 
 /**
- * POST /fields
+ * POST /tags
  *
- * Create a new field.
+ * Create a new tag.
  *  
  * Makes the request asynchronously and returns a id that can be used to track
  * the request and retreive the results from the state slice.
  *
- * @param {object} field - A populated field object, minus the `id` member.
+ * @param {object} tag - A populated tag object, minus the `id` member.
  *
  * @returns {string} A uuid requestId that can be used to track this request.
  */
-export const postFields = function(field) {
+export const postTags = function(tag) {
     return function(dispatch, getState) {
-        const endpoint = '/fields'
-        const body = field
-        dispatch(fieldsSlice.actions.bustRequestCache())
-        return makeTrackedRequest(dispatch, getState, fieldsSlice,
+        const endpoint = '/tags'
+        const body = tag
+        dispatch(tagsSlice.actions.bustRequestCache())
+        return makeTrackedRequest(dispatch, getState, tagsSlice,
             'POST', endpoint, body,
             function(response) {
-                dispatch(fieldsSlice.actions.setFieldsInDictionary({ entity: response.entity}))
+                dispatch(tagsSlice.actions.setTagsInDictionary({ entity: response.entity}))
 
                 dispatch(setRelationsInState(response.relations))
             }
@@ -156,23 +156,23 @@ export const postFields = function(field) {
 
 
 /**
- * GET /field/:id
+ * GET /tag/:id
  *
- * Get a single field.
+ * Get a single tag.
  *
  * Makes the request asynchronously and returns a id that can be used to track
  * the request and retreive the results from the state slice.
  *
- * @param {int} id - The id of the field we want to retrieve.
+ * @param {int} id - The id of the tag we want to retrieve.
  *
  * @returns {string} A uuid requestId that can be used to track this request.
  */
-export const getField = function(id) {
+export const getTag = function(id) {
     return function(dispatch, getState) {
-        return makeTrackedRequest(dispatch, getState, fieldsSlice,
-            'GET', `/field/${id}`, null,
+        return makeTrackedRequest(dispatch, getState, tagsSlice,
+            'GET', `/tag/${id}`, null,
             function(response) {
-                dispatch(fieldsSlice.actions.setFieldsInDictionary({ entity: response.entity}))
+                dispatch(tagsSlice.actions.setTagsInDictionary({ entity: response.entity}))
 
                 dispatch(setRelationsInState(response.relations))
             }
@@ -181,24 +181,24 @@ export const getField = function(id) {
 }
 
 /**
- * PUT /field/:id
+ * PUT /tag/:id
  *
- * Replace a field wholesale. 
+ * Replace a tag wholesale. 
  *
  * Makes the request asynchronously and returns a id that can be used to track
  * the request and retreive the results from the state slice.
  *
- * @param {object} field - A populated field object.
+ * @param {object} tag - A populated tag object.
  *
  * @returns {string} A uuid requestId that can be used to track this request.
  */
-export const putField = function(field) {
+export const putTag = function(tag) {
     return function(dispatch, getState) {
-        dispatch(fieldsSlice.actions.bustRequestCache())
-        return makeTrackedRequest(dispatch, getState, fieldsSlice,
-            'PUT', `/field/${field.id}`, field,
+        dispatch(tagsSlice.actions.bustRequestCache())
+        return makeTrackedRequest(dispatch, getState, tagsSlice,
+            'PUT', `/tag/${tag.id}`, tag,
             function(response) {
-                dispatch(fieldsSlice.actions.setFieldsInDictionary({ entity: response.entity}))
+                dispatch(tagsSlice.actions.setTagsInDictionary({ entity: response.entity}))
 
                 dispatch(setRelationsInState(response.relations))
             }
@@ -207,24 +207,24 @@ export const putField = function(field) {
 }
 
 /**
- * PATCH /field/:id
+ * PATCH /tag/:id
  *
- * Update a field from a partial `field` object. 
+ * Update a tag from a partial `tag` object. 
  *
  * Makes the request asynchronously and returns a id that can be used to track
  * the request and retreive the results from the state slice.
  *
- * @param {object} field - A populate field object.
+ * @param {object} tag - A populate tag object.
  *
  * @returns {string} A uuid requestId that can be used to track this request.
  */
-export const patchField = function(field) {
+export const patchTag = function(tag) {
     return function(dispatch, getState) {
-        dispatch(fieldsSlice.actions.bustRequestCache())
-        return makeTrackedRequest(dispatch, getState, fieldsSlice,
-            'PATCH', `/field/${field.id}`, field,
+        dispatch(tagsSlice.actions.bustRequestCache())
+        return makeTrackedRequest(dispatch, getState, tagsSlice,
+            'PATCH', `/tag/${tag.id}`, tag,
             function(response) {
-                dispatch(fieldsSlice.actions.setFieldsInDictionary({ entity: response.entity}))
+                dispatch(tagsSlice.actions.setTagsInDictionary({ entity: response.entity}))
 
                 dispatch(setRelationsInState(response.relations))
             }
@@ -233,24 +233,24 @@ export const patchField = function(field) {
 }
 
 /**
- * DELETE /field/:id
+ * DELETE /tag/:id
  *
- * Delete a field. 
+ * Delete a tag. 
  *
  * Makes the request asynchronously and returns a id that can be used to track
  * the request and retreive the results from the state slice.
  *
- * @param {object} field - A populated field object.
+ * @param {object} tag - A populated tag object.
  *
  * @returns {string} A uuid requestId that can be used to track this request.
  */
-export const deleteField = function(field) {
+export const deleteTag = function(tag) {
     return function(dispatch, getState) {
-        dispatch(fieldsSlice.actions.bustRequestCache())
-        return makeTrackedRequest(dispatch, getState, fieldsSlice,
-            'DELETE', `/field/${field.id}`, null,
+        dispatch(tagsSlice.actions.bustRequestCache())
+        return makeTrackedRequest(dispatch, getState, tagsSlice,
+            'DELETE', `/tag/${tag.id}`, null,
             function(response) {
-                dispatch(fieldsSlice.actions.setFieldsInDictionary({ entity: response.entity}))
+                dispatch(tagsSlice.actions.setTagsInDictionary({ entity: response.entity}))
             }
         )
     }
@@ -258,9 +258,9 @@ export const deleteField = function(field) {
 
 
 export const { 
-    setFieldsInDictionary, removeField, 
-    makeFieldQuery, clearFieldQuery, setFieldQueryResults,
+    setTagsInDictionary, removeTag, 
+    makeTagQuery, clearTagQuery, setTagQueryResults,
     cleanupRequest 
-}  = fieldsSlice.actions
+}  = tagsSlice.actions
 
-export default fieldsSlice.reducer
+export default tagsSlice.reducer

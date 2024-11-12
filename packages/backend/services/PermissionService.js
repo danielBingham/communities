@@ -18,7 +18,7 @@
  *
  ******************************************************************************/
 
-const PermissionDAO = requre('../daos/PermissionDAO')
+const PermissionDAO = require('../daos/PermissionDAO')
 
 const ServiceError = require('../errors/ServiceError')
 

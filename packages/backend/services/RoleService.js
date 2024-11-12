@@ -18,15 +18,15 @@
  *
  ******************************************************************************/
 
-import { Uuid } from 'uuid'
+const Uuid = require('uuid')
 
-import ServiceError from '../errors/ServiceError'
+const ServiceError = require('../errors/ServiceError')
 
-import { RoleDAO } from '../daos/RoleDAO'
+const RoleDAO  = require('../daos/RoleDAO')
 
-import { PermissionService } from './PermissionService'
+const PermissionService = require('./PermissionService')
 
-export class RoleService {
+module.exports = class RoleService {
 
     constructor(core) {
         this.core = core

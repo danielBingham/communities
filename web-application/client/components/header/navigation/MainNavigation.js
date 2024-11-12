@@ -61,17 +61,6 @@ const MainNavigation = function(props) {
             <div id="about-navigation" className="navigation-block">
                 <Link to="/"><HomeIcon />Home</Link>
                 <Link to="/about"><QuestionMarkCircleIcon />About</Link>
-                <a href="https://blog.peer-review.io"><NewspaperIcon />News</a>
-            </div>
-            <div ref={menuRef} id="main-navigation" className="navigation-block">
-                <span className="explore-menu-trigger"><a href="" onClick={toggleMenu}><GlobeAltIcon />Explore{ menuVisible ? <ChevronUpIcon className="arrow" /> : <ChevronDownIcon className="arrow" /> }</a></span>
-                <div id="explore-menu" className="floating-menu" style={{ display: ( menuVisible ? 'block' : 'none' ) }} >
-                    <div className="menu-item" onClick={toggleMenu}><Link to="/"><DocumentCheckIcon />Papers</Link></div>
-                    <div className="menu-item" onClick={toggleMenu}><Link to="/preprints"><DocumentIcon/>Preprints</Link></div>
-                    <div className="menu-item" onClick={toggleMenu}><Link to="/journals"><BookOpenIcon />Journals</Link></div>
-                    <div className="menu-item" onClick={toggleMenu}><Link to="/fields"><TagIcon />Taxonomy</Link></div>
-                    <div className="menu-item" onClick={toggleMenu}><Link to="/users"><UserCircleIcon />Users</Link></div>
-                </div>
             </div>
         </>
     )

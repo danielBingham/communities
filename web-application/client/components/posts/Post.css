@@ -1,0 +1,63 @@
+.post {
+    border: thin solid var(--main-border-color);
+    border-radius: 7px;
+    padding: 0;
+    width: 650px;
+    margin: 20px auto;
+    font-size: 16px;
+}
+.post .header {
+    font-size: 14px;
+    padding: 10px 10px 5px 10px;
+}
+.post .content {
+    padding: 15px 10px;
+    white-space: pre-line;
+}
+.post .reactions {
+    display: flex;
+    border-top: thin solid var(--main-border-color);
+    font-size: 12px;
+}
+.post .reactions .group {
+    padding: 0 5px;
+    flex-grow: 1;
+    display: flex;
+    text-align: center;
+    padding: 7px;
+}
+.post .reactions .group a {
+    display: inline-block;
+    padding: 0 5px;
+    flex-grow: 1;
+}
+.post .reactions .group a svg {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    margin-left: 5px;
+    margin-bottom: -2px;
+    color: var(--primary-color-main);
+}
+.post .reactions .group.block,
+.post .reactions .group.share {
+    border-left: thin solid var(--main-border-color);
+}
+.post .reactions .group.block a:link,
+.post .reactions .group.block a:visited,
+.post .reactions .group.block a:active,
+.post .reactions .group.block svg {
+    color: var(--danger-color-main);
+}
+
+.post .comments {
+    border-top: thin solid var(--main-border-color);
+    padding: 10px;
+}
+.post .comments textarea {
+    border-radius: 10px;
+    padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
+    resize: none;
+}

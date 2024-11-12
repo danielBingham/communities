@@ -1,1 +1,33 @@
-#home-page {}
+#home-page {
+    display: grid;
+    grid-template-columns: 1fr 4fr 1fr;
+    width: 1200px;
+    margin: 50px auto;
+}
+
+.right-sidebar .controls {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.places h2 {
+    text-align: center;
+    font-weight: 400;
+    padding: 0;
+    margin: 0;
+}
+.places h2 svg { 
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-bottom: -3px;
+}
+.places .explanation { 
+    color: var(--primary-color-dark);
+    font-style: italic;
+}
+.posts {
+    padding: 20px;
+}

@@ -48,7 +48,7 @@ module.exports = class NotificationController {
 
         const userId = request.session.user.id
 
-        const results = await this.notificationDAO.selectNotifications('WHERE user_notifications.user_id = $1', [ userId ])
+        const results = await this.notificationDAO.selectNotifications('WHERE notifications.user_id = $1', [ userId ])
 
         results.meta = {}
         results.relations = []
@@ -88,7 +88,7 @@ module.exports = class NotificationController {
         }
 
         const results = await this.notificationDAO.selectNotifications(
-            'WHERE user_notifications.id = ANY($1::bigint[])', [ notifications.map((n) => n.id) ])
+            'WHERE notifications.id = ANY($1::bigint[])', [ notifications.map((n) => n.id) ])
 
         results.meta = {}
         results.relations = []
@@ -123,7 +123,7 @@ module.exports = class NotificationController {
             throw new ControllerError(400, 'no-content', `Failed to update a notification because no content was provided.`)
         }
 
-        const results = await this.notificationDAO.selectNotifications('WHERE user_notifications.id = $1', [ id ] )
+        const results = await this.notificationDAO.selectNotifications('WHERE notifications.id = $1', [ id ] )
         const entity = results.dictionary[id]
         if ( ! entity ) {
             throw new ControllerError(500, 'server-error', `Notification(${id}) doesn't exist after update.`)

@@ -69,7 +69,7 @@ module.exports = class NotificationsDAO {
                 is_read as "notification_isRead",
                 created_date as "notification_createdDate",
                 updated_date as "notification_updatedDate"
-            FROM user_notifications
+            FROM notifications
             ${where}
             ORDER BY created_date desc
         `
@@ -81,7 +81,7 @@ module.exports = class NotificationsDAO {
 
     async insertNotification(notification) {
         const results = await this.database.query(`
-            INSERT INTO user_notifications 
+            INSERT INTO notifications 
                 ( user_id, description, path, type, is_read, created_date )
             VALUES
                 ( $1, $2, $3, $4, false, now() )
@@ -98,7 +98,7 @@ module.exports = class NotificationsDAO {
     async updateNotification(notification) {
         if ( notification.isRead == false || notification.isRead == true ) {
             const results = await this.database.query(`
-                UPDATE user_notifications SET is_read = $1, updated_date = now() WHERE user_id = $2
+                UPDATE notifications SET is_read = $1, updated_date = now() WHERE user_id = $2
             `, [ notification.isRead, notification.userId ])
 
             if ( results.rowCount <= 0 ) {
@@ -113,7 +113,7 @@ module.exports = class NotificationsDAO {
 
     async deleteNotification(id) {
         const results = await this.database.query(`
-            DELETE FROM user_notifications WHERE id = $1
+            DELETE FROM notifications WHERE id = $1
         `, [ id ] )
 
         if ( results.rowCount <= 0 ) {

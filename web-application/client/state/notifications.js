@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  JournalHub -- Universal Scholarly Publishing 
+ *  Communities -- Non-profit, cooperative social media 
  *  Copyright (C) 2022 - 2024 Daniel Bingham 
  *
  *  This program is free software: you can redistribute it and/or modify

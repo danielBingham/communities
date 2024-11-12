@@ -99,7 +99,7 @@ module.exports = class TokenController {
                 id: token.userId,
                 status: 'confirmed'
             }
-            await this.userDAO.updatePartialUser(userUpdate)
+            await this.userDAO.updateUser(userUpdate)
             // TODO better to hang on to it and mark it as used?
             await this.tokenDAO.deleteToken(token)
 

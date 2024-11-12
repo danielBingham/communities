@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom'
 import { Page, PageBody } from '/components/generic/Page'
 
 import LoginForm from '/components/authentication/LoginForm'
-import ORCIDAuthenticationButton from '/components/authentication/ORCIDAuthenticationButton'
 
 import './LoginPage.css'
 
@@ -15,7 +14,6 @@ const LoginPage = function(props) {
             <PageBody>
                 <LoginForm />
                 <div className="inner-wrapper">
-                    <ORCIDAuthenticationButton />
                     <div className="forgot-password">
                         <Link to="/reset-password-request">Forgot password?</Link>
                     </div>

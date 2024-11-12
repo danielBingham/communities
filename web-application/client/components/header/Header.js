@@ -7,9 +7,7 @@ import {
 } from '@heroicons/react/24/outline'
 
 import MainNavigation from './navigation/MainNavigation'
-import CreationNavigation from './navigation/CreationNavigation'
 import AuthenticationNavigation from './navigation/AuthenticationNavigation'
-import DashboardsNavigation from './navigation/DashboardsNavigation'
 import NotificationMenu from '/components/notifications/NotificationMenu'
 
 import './Header.css'
@@ -30,11 +28,9 @@ const Header = function(props) {
     
     return (
         <header>
-            <div id="site-title"><Link to="/"><img src="/favicon.svg" /> JournalHub</Link></div>
+            <div id="site-title"><Link to="/">Communities</Link></div>
             <div id="navigation">
                 <MainNavigation />
-                { currentUser && <CreationNavigation /> }
-                { currentUser && <DashboardsNavigation /> }
                 { currentUser && <NotificationMenu /> }
                 <AuthenticationNavigation />
             </div>

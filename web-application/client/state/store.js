@@ -1,24 +1,15 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { combineReducers } from 'redux'
 
-import systemReducer from './system'
-import featuresReducer from './features'
-import jobsReducer from './jobs'
 import authenticationReducer from './authentication'
-import usersReducer from './users'
-import notificationsReducer from './notifications'
-import papersReducer from './papers'
-import paperVersionsReducer from './paperVersions'
-import paperEventsReducer from './paperEvents'
-import paperCommentsReducer from './paperComments'
-import reviewsReducer from './reviews'
-import journalsReducer from './journals'
-import journalSubmissionsReducer from './journalSubmissions'
-import fieldsReducer from './fields'
-import settingsReducer from './settings'
+import featuresReducer from './features'
 import filesReducer from './files'
-import responsesReducer from './responses'
-import testingReducer from './testing'
+import jobsReducer from './jobs'
+import notificationsReducer from './notifications'
+import postsReducer from './posts'
+import tagsReducer from './tags'
+import systemReducer from './system'
+import usersReducer from './users'
 
 
 const reducers = combineReducers({
@@ -28,18 +19,9 @@ const reducers = combineReducers({
     authentication: authenticationReducer,
     users: usersReducer,
     notifications: notificationsReducer,
-    papers: papersReducer,
-    paperVersions: paperVersionsReducer,
-    paperEvents: paperEventsReducer,
-    paperComments: paperCommentsReducer,
-    reviews: reviewsReducer,
-    journals: journalsReducer,
-    journalSubmissions: journalSubmissionsReducer,
-    fields: fieldsReducer,
-    settings: settingsReducer,
+    posts: postsReducer,
+    tags: tagsReducer,
     files: filesReducer,
-    responses: responsesReducer,
-    testing: testingReducer
 })
 
 const rootReducer = function(state, action) {

@@ -60,11 +60,15 @@ CREATE TABLE users (
 CREATE INDEX users__name ON users (name);
 CREATE INDEX users__name_trgm ON users USING GIN (name gin_trgm_ops);
 
+CREATE INDEX users_display_name ON users (display_name);
+CREATE INDEX users__display_name_trgm ON users USING GIN (display_name gin_trgm_ops);
+
 CREATE TYPE user_relationship_status AS ENUM('pending', 'confirmed');
 CREATE TABLE user_relationships (
     user_id uuid REFERENCES users(id) ON DELETE CASCADE NOT NULL,
     friend_id uuid REFERENCES users(id) ON DELETE CASCADE NOT NULL,
-    status user_relationship_status NOT NULL,
+
+    status user_relationship_status NOT NULL
 );
 CREATE INDEX user_relationships__user_id ON users (id);
 CREATE INDEX user_relationships__friend_id ON users (id);
@@ -85,7 +89,7 @@ CREATE TABLE notifications (
     created_date timestamptz,
     updated_date timestamptz
 );
-CREATE INDEX notifications__user_id ON user_notifications (user_id);
+CREATE INDEX notifications__user_id ON notifications (user_id);
 
 
 /******************************************************************************
@@ -95,7 +99,7 @@ CREATE INDEX notifications__user_id ON user_notifications (user_id);
 CREATE TYPE token_type AS ENUM('email-confirmation', 'reset-password', 'invitation');
 CREATE TABLE tokens (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id bigint REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+    user_id uuid REFERENCES users(id) ON DELETE CASCADE NOT NULL,
 
     token varchar(1024),
     type token_type NOT NULL,
@@ -103,6 +107,7 @@ CREATE TABLE tokens (
     created_date timestamptz,
     updated_date timestamptz
 );
+CREATE INDEX tokens__user_id ON tokens (user_id);
 CREATE INDEX tokens__token ON tokens (token);
 
 
@@ -148,7 +153,7 @@ CREATE INDEX tags__name_trgm ON tags USING GIN (name gin_trgm_ops);
  *****************************************************************************/
 
 /* Used by both posts and post_comments */
-CREATE TYPE reaction_type (
+CREATE TYPE reaction_type AS ENUM(
     /** positive **/
     'like',
     'agree',
@@ -171,12 +176,13 @@ CREATE TABLE posts (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id uuid REFERENCES users (id) NOT NULL,
 
-    engagement integer DEFAULT 0,
+    activity real DEFAULT 1,
     content text,
 
     created_date timestamptz,
     updated_date timestamptz
 );
+CREATE INDEX posts__user_id ON posts (user_id);
 
 CREATE TABLE post_tags (
     post_id uuid REFERENCES posts (id) NOT NULL,
@@ -209,6 +215,8 @@ CREATE TABLE post_comments (
     created_date timestamptz,
     updated_date timestamptz
 );
+CREATE INDEX post_comments__post_id ON post_comments (post_id);
+CREATE INDEX post_comments__user_id ON post_comments (user_id);
 
 CREATE TABLE post_comment_reactions (
     post_comment_id uuid REFERENCES post_comments (id) NOT NULL,
@@ -225,6 +233,29 @@ CREATE TABLE post_comment_reactions (
  * Permissions
  ******************************************************************************/
 
+CREATE TABLE roles (
+    id  uuid PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
+    name    varchar(1024) NOT NULL,
+    display_name varchar(1024) NOT NULL,
+    description varchar(1024) NOT NULL,
+    programattic boolean NOT NULL DEFAULT false,
+
+    created_date timestamptz,
+    updated_date timestamptz
+);
+CREATE INDEX roles__name ON roles (name);
+
+INSERT INTO roles (name, display_name, description, programattic) VALUES ('public', 'Public', 'The general public.', true);
+
+CREATE TABLE user_roles (
+    role_id uuid REFERENCES roles(id) NOT NULL,
+    user_id uuid REFERENCES users(id) NOT NULL,
+
+    created_date timestamptz,
+
+    PRIMARY KEY(role_id, user_id)
+);
+
 CREATE TABLE permissions (
     id uuid PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
 
@@ -239,22 +270,11 @@ CREATE TABLE permissions (
     created_date timestamptz,
     updated_date timestamptz
 );
+CREATE INDEX permissions__entity ON permissions (entity);
+CREATE INDEX permissions__action ON permissions (action);
 
-CREATE TABLE roles (
-    id  uuid PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
-    name    varchar(1024) NOT NULL,
-    display_name varchar(1024) NOT NULL,
-    description varchar(1024) NOT NULL,
-    programattic boolean NOT NULL DEFAULT false,
+CREATE INDEX permissions__user_id ON permissions (user_id);
+CREATE INDEX permissions__role_id ON permissions (role_id);
 
-    created_date timestamptz,
-    updated_date timestamptz
-);
-INSERT INTO roles (name, display_name, description, programattic) VALUES ('public', 'Public', 'The general public.', true);
+CREATE INDEX permissions__post_id ON permissions (post_id);
 
-CREATE TABLE user_roles (
-    role_id uuid REFERENCS roles(id) NOT NULL,
-    user_id uuid REFERENCES users(id) NOT NULL,
-
-    created_date timestamptz
-);

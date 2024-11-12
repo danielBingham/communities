@@ -18,9 +18,9 @@
  *
  ******************************************************************************/
 
-import { DAO } from './DAO'
+const DAO = require('./DAO')
 
-export class RoleDAO extends DAO {
+module.exports = class RoleDAO extends DAO {
     constructor(core) {
         super(core)
 

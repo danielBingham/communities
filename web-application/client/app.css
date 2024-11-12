@@ -111,6 +111,9 @@
     --button-primary-color: var(--primary-color-main);
     --button-highlight-color: var(--primary-color-main-highlight);
     --button-warn-color: var(--danger-color-main);
+
+    --tag-background-color: white;
+    --tag-border-color: var(--primary-color-light);
 }
 
 html {

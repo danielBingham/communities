@@ -252,7 +252,7 @@ module.exports = class UserController {
         }
 
         try {
-            user.id = await this.userDAO.insertUser(user)
+            await this.userDAO.insertUsers(user)
         } catch ( error ) {
             if ( error instanceof backend.DAOError ) {
                 // `insertUser()` check both of the following:
@@ -271,6 +271,7 @@ module.exports = class UserController {
         }
 
         const createdUserResults = await this.userDAO.selectUsers('WHERE users.id=$1', [user.id])
+        console.log(createdUserResults)
 
         if ( ! createdUserResults.dictionary[user.id] ) {
             throw new ControllerError(500, 'server-error', `No user found after insertion. Looking for id ${user.id}.`)
@@ -291,8 +292,6 @@ module.exports = class UserController {
 
             await this.emailService.sendEmailConfirmation(createdUser, token)
         }
-
-        await this.settingsDAO.initializeSettingsForUser(createdUser)
 
         const results = await this.userDAO.selectCleanUsers('WHERE users.id=$1', [ user.id ])
 
@@ -338,44 +337,6 @@ module.exports = class UserController {
             entity: results.dictionary[request.params.id],
             relations: relations
         })
-    }
-
-    /**
-     * PUT /user/:id
-     *
-     * Replace an existing user wholesale with the provided JSON.
-     *
-     * NOT IMPLEMENTED.
-     */
-    async putUser(request, response) {
-        // We're not using this right now and can't think of a situation where
-        // we would use it.  So for now, it's being marked unimplemented and
-        // ignored.  
-        throw new ControllerError(501, 'not-implemented', `Attempt to call unimplemented PUT /user for user(${request.params.id}).`)
-        /*const user = request.body
-        user.password = this.auth.hashPassword(user.password)
-
-        const results = await this.database.query(`
-                    UPDATE users SET name = $1 AND email = $2 AND password = $3 AND updated_date = now() 
-                        WHERE id = $4 
-                        RETURNING id
-                `,
-            [ user.name, user.email, user.password, request.params.id ]
-        )
-
-        if (results.rowCount == 0 && results.rows.length == 0) {
-            return response.status(404).json({error: 'no-resource'})
-        }
-
-        const returnUsers = await this.userDAO.selectUsers('WHERE users.id=$1', results.rows[0].id)
-        if ( returnUsers.length == 0 ) {
-            throw new Error('Updated user somehow does not exist.')
-        }
-
-        if ( request.session && request.session.user && request.session.user.id == returnUsers[0].id) {
-            request.session.user = returnUsers[0]
-        }
-        return response.status(200).json(returnUsers[0]) */
     }
 
     /**

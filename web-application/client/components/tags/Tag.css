@@ -1,27 +1,28 @@
-.field {
+.tag {
     display: inline-block;
     margin: 5px;
-    background-color: #ddd;
+    background-color: var(--tag-background-color);
+    border: thin solid var(--tag-border-color);
     font-size: 12px !important;
     padding: 0 !important;
     line-height: 1em !important;
     border-radius: 4px;
 }
-.field:hover {
+.tag:hover {
     filter: brightness(130%);
 }
 
-.field a:link, .field a:active, .field a:visited, .field a:hover, .field span {
+.tag a:link, .tag a:active, .tag a:visited, .tag a:hover, .tag span {
     display: inline-block;
     color: inherit;
     padding: 7px;
 }
-.field .remove {
+.tag .remove {
     display: inline-block;
     margin-left: 5px;
     padding: 0 5px 0 0;
 }
-.field .remove svg {
+.tag .remove svg {
     width: 12px;
     height: 12px;
     margin-bottom: -1px;

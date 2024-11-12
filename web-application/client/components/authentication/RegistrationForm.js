@@ -19,10 +19,10 @@ import './RegistrationForm.css'
 const RegistrationForm = function(props) { 
 
     // ======= Render State =========================================
-    
+   
+    const [displayName, setDisplayName] = useState('')
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
-    const [institution, setInstitution] = useState('')
     const [password, setPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
 
@@ -143,9 +143,9 @@ const RegistrationForm = function(props) {
         }
 
         const user = {
+            displayName: displayName,
             name: name,
             email: email,
-            institution: institution,
             password: password
         }
 
@@ -206,6 +206,7 @@ const RegistrationForm = function(props) {
 
     // Error views, we'll populate these as we check the various error states.
     let overallErrorView = null
+    let displayNameErrorView = null
     let nameErrorView = null
     let emailErrorView = null
     let passwordErrorView = null
@@ -256,6 +257,16 @@ const RegistrationForm = function(props) {
             <form onSubmit={onSubmit}>
                 <div className="error"> {overallErrorView} </div>
 
+                <div className="display-name field-wrapper">
+                    <label htmlFor="name">Display Name:</label>
+                    <input type="text" 
+                        name="displayName" 
+                        value={displayName} 
+                        onBlur={ (event) => isValid('displayName') }
+                        onChange={ (event) => setDisplayName(event.target.value) } />
+                    <div className="error">{ displayNameErrorView }</div>
+                </div>
+
                 <div className="name field-wrapper">
                     <label htmlFor="name">Name:</label>
                     <input type="text" 
@@ -274,16 +285,6 @@ const RegistrationForm = function(props) {
                         onBlur={ (event) => isValid('email') }
                         onChange={ (event) => setEmail(event.target.value) } />
                     <div className="error">{emailErrorView}</div>
-                </div>
-
-                <div className="institution field-wrapper">
-                    <label htmlFor="institution">Institution:</label>
-                    <input type="text" 
-                        name="institution" 
-                        value={institution}
-                        onBlur={ (event) => isValid('institution') }
-                        onChange={ (event) => setInstitution(event.target.value) } />
-                    <div className="error"></div>
                 </div>
 
                 <div className="password field-wrapper">

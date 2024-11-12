@@ -22,7 +22,6 @@ const bcrypt = require('bcrypt');
 const ServiceError = require('../errors/ServiceError')
 
 const UserDAO = require('../daos/UserDAO')
-const SettingsDAO = require('../daos/SettingsDAO')
 
 module.exports = class AuthenticationService {
 
@@ -31,7 +30,6 @@ module.exports = class AuthenticationService {
         this.logger = core.logger
 
         this.userDAO = new UserDAO(core)
-        this.settingsDAO = new SettingsDAO(core)
     }
 
     /**
@@ -60,15 +58,9 @@ module.exports = class AuthenticationService {
 
         const user = results.dictionary[id]
 
-        const settings = await this.settingsDAO.selectSettings('WHERE user_settings.user_id = $1', [ id ])
-        if ( settings.length == 0 ) {
-            throw new ServiceError('no-settings', 'Failed to retrieve settings for authenticated user.')
-        }
-
         request.session.user = user
         return {
             user: request.session.user,
-            settings: settings[0] 
         }
     }
 

@@ -18,113 +18,115 @@
  *
  ******************************************************************************/
 const DAOError = require('../errors/DAOError')
+const DAO = require('./DAO')
 const FileDAO = require('./FileDAO')
 
 const PAGE_SIZE = 20
 
-module.exports = class UserDAO {
+module.exports = class UserDAO extends DAO {
 
 
     constructor(core) {
+        super(core)
         this.core = core
 
         this.database = core.database
         this.logger = core.logger
 
-        this.fileDAO = new FileDAO(core)
-
-        this.fieldMap = {
-            'id': {
-                insert: 'allowed',
-                update: 'primary',
-                key: 'id'
-            },
-            'name': {
-                insert: 'required',
-                update: 'denied',
-                key: 'name',
-            },
-            'display_name': {
-                insert: 'required',
-                update: 'allowed',
-                key: 'displayName'
-            },
-            'email': {
-                insert: 'required',
-                update: 'allowed',
-                key: 'email'
-            },
-            'password': {
-                insert: 'required',
-                update: 'allowed',
-                key: 'password'
-            },
-            'status': {
-                insert: 'allowed',
-                update: 'allowed',
-                key: 'status'
-            },
-            'permissions': {
-                insert: 'denied',
-                update: 'denied',
-                key: 'permissions'
-            },
-            'about': {
-                insert: 'allowed',
-                update: 'allowed',
-                key: 'about'
-            },
-            'location': {
-                insert: 'allowed',
-                update: 'allowed',
-                key: 'location'
-            },
-            'created_date': {
-                insert: 'override',
-                insertOverride: 'now()',
-                update: 'denied',
-                key: 'createdDate'
-            },
-            'updated_date': {
-                insert: 'override',
-                insertOverride: 'now()',
-                update: 'override',
-                updateOverride: 'now()',
-                key: 'updatedDate'
+        this.entityMaps = {
+            'User': {
+                table: 'users',
+                fields: {
+                    'id': {
+                        insert: 'primary',
+                        update: 'primary',
+                        select: 'always',
+                        key: 'id'
+                    },
+                    'file_id': {
+                        insert: 'allowed',
+                        update: 'allowed',
+                        select: 'always',
+                        key: 'fileId'
+                    },
+                    'name': {
+                        insert: 'required',
+                        update: 'denied',
+                        select: 'always',
+                        key: 'name',
+                    },
+                    'display_name': {
+                        insert: 'required',
+                        update: 'allowed',
+                        select: 'always',
+                        key: 'displayName'
+                    },
+                    'email': {
+                        insert: 'required',
+                        update: 'allowed',
+                        select: 'full',
+                        key: 'email'
+                    },
+                    'password': {
+                        insert: 'required',
+                        update: 'allowed',
+                        select: 'never',
+                        key: 'password'
+                    },
+                    'status': {
+                        insert: 'allowed',
+                        update: 'allowed',
+                        select: 'full',
+                        key: 'status'
+                    },
+                    'permissions': {
+                        insert: 'denied',
+                        update: 'denied',
+                        select: 'full',
+                        key: 'permissions'
+                    },
+                    'about': {
+                        insert: 'allowed',
+                        update: 'allowed',
+                        select: 'always',
+                        key: 'about'
+                    },
+                    'location': {
+                        insert: 'allowed',
+                        update: 'allowed',
+                        select: 'full',
+                        key: 'location'
+                    },
+                    'created_date': {
+                        insert: 'override',
+                        insertOverride: 'now()',
+                        update: 'denied',
+                        select: 'always',
+                        key: 'createdDate'
+                    },
+                    'updated_date': {
+                        insert: 'override',
+                        insertOverride: 'now()',
+                        update: 'override',
+                        updateOverride: 'now()',
+                        select: 'always',
+                        key: 'updatedDate'
+                    }
+                }
             }
         }
-
-
-
     }
 
     getUserSelectionString() {
-        return `
-            users.id as "User_id", 
-            users.file_id as "User_fileId",
-            users.name as "User_name", 
-            users.display_name as "User_displayName",
-            users.email as "User_email", 
-            users.status as "User_status", 
-            users.permissions as "User_permissions",
-            users.about as "User_about",
-            users.location as "User_location", 
-            users.created_date as "User_createdDate", 
-            users.updated_date as "User_updatedDate"
-        `
+        return this.getSelectionString('User', true)
     }
 
     getCleanUserSelectionString() {
-        return `
-            users.id as "User_id", 
-            users.file_id as "User_fileId",
-            users.name as "User_name", 
-            users.display_name as "User_displayName",
-            users.about as "User_about",
-            users.created_date as "User_createdDate", 
-            users.updated_date as "User_updatedDate"
-        `
+        return this.getSelectionString('User', false)
+    }
 
+    hydrateUser(row) {
+        return this.hydrate('User', row)
     }
 
     /**
@@ -134,35 +136,15 @@ module.exports = class UserDAO {
      *
      * @return {Object}     The users parsed into a dictionary keyed using user.id. 
      */
-    hydrateUsers(rows, clean) {
+    hydrateUsers(rows) {
         // Users
         const dictionary = {}
         const list = []
 
         for( const row of rows ) {
-            const user = {
-                id: ( row.user_id !== undefined ? row.user_id : null),
-                name: ( row.user_name !== undefined ? row.User_name : null),
-                displayName: ( row.User_displayName !== undefined ? row.User_displayName: null),
-                about: ( row.User_about !== undefined ? row.User_about: null),
-                createdDate: ( row.User_createdDate !== undefined ? row.User_createdDate : null),
-                updatedDate: ( row.User_updatedDate !== undefined ? row.User_updatedDate : null),
-            }
+            const user = this.hydrateUser(row)
 
-            if ( ! clean ) {
-                user.email = ( row.User_email !== undefined ? row.User_email : null)
-                user.location = ( row.User_location !== undefined ? row.User_location : null), 
-                user.status = ( row.User_status !== undefined ? row.User_status : null)
-                user.permissions = ( row.User_permissions !== undefined ? row.User_permissions : null)
-            }
-
-            if ( row.file_id ) {
-                user.file = this.fileDAO.hydrateFile(row)
-            } else {
-                user.file = null
-            }
-
-            if ( ! dictionary[row.user_id] ) {
+            if ( ! dictionary[user.id] ) {
                 dictionary[user.id] = user
                 list.push(user.id)
             }
@@ -213,19 +195,15 @@ module.exports = class UserDAO {
 
         const sql = `
                 SELECT 
-                    ${ clean === true ? this.cleanSelectionString : this.selectionString},
-
-                    ${this.fileDAO.getFilesSelectionString()}
-
+                    ${ clean === true ? this.getCleanUserSelectionString(): this.getUserSelectionString()}
                 FROM users
-                    LEFT OUTER JOIN files ON files.id = users.file_id
                 ${where} 
                 ORDER BY ${order} 
                 ${paging}
         `
 
         const results = await this.database.query(sql, params)
-        return this.hydrateUsers(results.rows, (clean === true))
+        return this.hydrateUsers(results.rows)
     }
 
     async countUsers(where, params, page) {
@@ -260,10 +238,10 @@ module.exports = class UserDAO {
     }
 
     async insertUsers(users) {
-        await this.insert('User', 'users', this.fieldMap, users)
+        await this.insert('User', users)
     }
 
     async updateUser(user) {
-        await this.update('User', 'users', this.fieldMap, user)
+        await this.update('User', user)
     }
 }

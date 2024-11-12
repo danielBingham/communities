@@ -17,9 +17,9 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import { DAO } from './DAO'
+const DAO  = require('./DAO')
 
-export class PermissionDAO extends DAO {
+module.exports = class PermissionDAO extends DAO {
 
     constructor(core) {
         super(core)

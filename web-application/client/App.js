@@ -28,7 +28,6 @@ import PrivacyPage from '/pages/PrivacyPage'
 
 import RegistrationPage from '/pages/authentication/RegistrationPage'
 import LoginPage from '/pages/authentication/LoginPage'
-import OrcidAuthenticationPage from '/pages/authentication/OrcidAuthenticationPage'
 import EmailConfirmationPage from '/pages/authentication/EmailConfirmationPage'
 import ResetPasswordPage from '/pages/authentication/ResetPasswordPage'
 import ResetPasswordRequestPage from '/pages/authentication/ResetPasswordRequestPage'
@@ -38,19 +37,6 @@ import UserProfilePage from '/pages/users/UserProfilePage'
 import UserAccountPage from '/pages/users/UserAccountPage'
 import UserProfileEditForm from '/components/users/account/UserProfileEditForm'
 import UserAccountDetailsForm from '/components/users/account/UserAccountDetailsForm'
-
-import FieldPage from '/pages/fields/FieldPage'
-
-import SubmitPage from '/pages/papers/SubmitPage'
-import PaperPage from '/pages/papers/PaperPage'
-import PaperSearchPage from '/pages/papers/PaperSearchPage'
-
-import ReviewDashboardPage from '/pages/dashboards/ReviewDashboardPage'
-import AuthorDashboardPage from '/pages/dashboards/AuthorDashboardPage'
-import EditorDashboardPage from '/pages/dashboards/EditorDashboardPage'
-
-import CreateJournalPage from '/pages/journals/CreateJournalPage'
-import JournalPage from '/pages/journals/JournalPage'
 
 import ErrorBoundary from '/errors/ErrorBoundary'
 import Spinner from '/components/Spinner'
@@ -212,60 +198,22 @@ const App = function(props) {
                         { /* ========== Authentication Controls =============== */ }
                         <Route path="/register" element={ <RegistrationPage /> } />
                         <Route path="/login" element={ <LoginPage /> } />
-                        <Route path="/orcid/authentication" element={<OrcidAuthenticationPage />} />
-                        <Route path="/orcid/connect" element={<OrcidAuthenticationPage />} />
                         <Route path="/email-confirmation" element={ <EmailConfirmationPage />} />
                         <Route path="/reset-password" element={ <ResetPasswordPage /> } />
                         <Route path="/reset-password-request" element={ <ResetPasswordRequestPage /> } />
                         <Route path="/accept-invitation" element={ <AcceptInvitationPage /> } />
 
                         { /* ========== Users ================================= */ }
-                        <Route path="/user/:id">
-                            <Route path=":pageTab" element={ <UserProfilePage /> } />
+                        <Route path="/:name">
+                            <Route path=":postId" element={ <UserProfilePage /> } />
                             <Route index element={ <UserProfilePage /> } />
                         </Route>
                         <Route path="/account">
                             <Route path=":pageTab" element={ <UserAccountPage /> } />
                             <Route index element={ <UserAccountPage /> } />
                         </Route>
-
-                        { /* ========== fields ================================= */ }
-                        <Route path="/field/:id">
-                            <Route path=":pageTab" element={ <FieldPage /> } />
-                            <Route index element={ <FieldPage /> } />
-                        </Route>
-                        
-                        { /* ========= Dashboards ============================ */ }
-                        <Route path="/review">
-                            <Route path=":pageTab" element={ <ReviewDashboardPage /> } />
-                            <Route index element={ <ReviewDashboardPage /> } />
-                        </Route>
-                        <Route path="/edit">
-                            <Route path=":pageTab" element={ <EditorDashboardPage /> } />
-                            <Route index element={ <EditorDashboardPage />} />
-                        </Route>
-                        <Route path="/author">
-                            <Route path=":pageTab" element={ <AuthorDashboardPage /> } />
-                            <Route index element={ <AuthorDashboardPage /> } />
-                        </Route>
-
-                        { /* ========= Papers ===================== */ }
-                        <Route path="/submit" element={ <SubmitPage /> }  />
-                        <Route path="/search" element={ <PaperSearchPage /> } />
-                        <Route path="/paper/:id">
-                            <Route path=":pageTab" element={ <PaperPage /> } />
-                            <Route index element={ <PaperPage /> } />
-                        </Route> 
-
-                        { /* ========= Journals ============================= */ }
-                        <Route path="/create" element={ <CreateJournalPage /> } />
-                        <Route path="/journal/:id">
-                            <Route path=":pageTab" element={ <JournalPage /> } />
-                            <Route index element={ <JournalPage /> } />
-                        </Route>
                     </Routes>
                 </main>
-                <Footer />
             </Router>
         </ErrorBoundary>
     )

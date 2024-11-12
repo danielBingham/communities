@@ -11,7 +11,6 @@ import Spinner from '/components/Spinner'
 import { Page, PageBody, PageHeader, PageTabBar, PageTab } from '/components/generic/Page'
 
 import UserView from '/components/users/UserView'
-import PaperList from '/components/papers/list/PaperList'
 
 import './UserProfilePage.css'
 
@@ -62,21 +61,14 @@ const UserProfilePage = function(props) {
 
     // ======= Render ===============================================
 
-    const selectedTab = ( pageTab ? pageTab : 'papers')
 
     let content = ( <Spinner local={true} /> )
     if ( request && request.state == 'fulfilled' ) {
-        if ( selectedTab == 'papers' ) {
-            content = (
-                <PaperList type="published" authors={[ id ]}  />
-            )
-        } else if ( selectedTab == 'biography' ) {
-            content = (
-                <div className="user-bio">
-                    { user.bio && <div className="bio"><ReactMarkdown children={ user.bio } /> </div>}
-                </div>
-            )
-        }
+        content = (
+            <div className="user-bio">
+                { user.bio && <div className="bio"><ReactMarkdown children={ user.bio } /> </div>}
+            </div>
+        )
     }
 
     return (
@@ -84,14 +76,6 @@ const UserProfilePage = function(props) {
             <PageHeader>
                 <UserView id={id} />
             </PageHeader>
-            <PageTabBar>
-                <PageTab url={`/user/${id}/papers`} tab="papers" initial={true}>
-                    <DocumentCheckIcon /> Papers
-                </PageTab>
-                <PageTab url={`/user/${id}/biography`} tab="biography">
-                    Biography
-                </PageTab>
-            </PageTabBar>
             <PageBody>
                 <div className="tab-content">
                     { content }

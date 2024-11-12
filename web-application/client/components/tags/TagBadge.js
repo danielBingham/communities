@@ -2,23 +2,23 @@ import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { Link } from 'react-router-dom'
 
-import { getField, cleanupRequest } from '/state/fields'
+import { getTag, cleanupRequest } from '/state/tags'
 
-import Field from './Field'
+import Tag from './Tag'
 
 import Spinner from '/components/Spinner'
-import './FieldBadge.css'
+import './TagBadge.css'
 
 /**
- * Show a Badge for a field.  This shows the tag, as well as the number of
- * papers in the field and a description for it.
+ * Show a Badge for a tag.  This shows the tag, as well as the number of
+ * papers in the tag and a description for it.
  *
  * TODO Show an actual number of papers, rather than a dummy.
  *
  * @param {object} props    The react props object.
- * @param {object} props.field  The field we want to display a badge for.
+ * @param {object} props.tag  The tag we want to display a badge for.
  */
-const FieldBadge = function(props) {
+const TagBadge = function(props) {
 
     // ======= Request Tracking =====================================
     
@@ -27,14 +27,14 @@ const FieldBadge = function(props) {
         if ( ! requestId ) {
             return null
         } else {
-            return state.fields.requests[requestId]
+            return state.tags.requests[requestId]
         }
     })
 
     // ======= Redux State ==========================================
     
-    const field = useSelector(function(state) {
-        return state.fields.dictionary[props.id]
+    const tag = useSelector(function(state) {
+        return state.tags.dictionary[props.id]
     })
 
     // ======= Effect Handling ======================================
@@ -42,8 +42,8 @@ const FieldBadge = function(props) {
     const dispatch = useDispatch()
 
     useEffect(function() {
-        if ( ! field ) {
-            setRequestId(dispatch(getField(props.id)))
+        if ( ! tag ) {
+            setRequestId(dispatch(getTag(props.id)))
         }
     }, [ props.id ])
 
@@ -62,20 +62,20 @@ const FieldBadge = function(props) {
     // ======= Render ===============================================
   
     let content = ( <Spinner local={true} /> )
-    if ( field ) {
+    if ( tag ) {
         content = (
             <>
-                <div className="wrapper"><Field id={field.id} noLink={props.noLink} target={props.target} /></div>
-                <div className="description">{ field.description }</div>
+                <div className="wrapper"><Tag id={tag.id} noLink={props.noLink} target={props.target} /></div>
+                <div className="description">{ tag.description }</div>
             </>
         )
     }
 
     return (
-        <div className='field-badge'>
+        <div className='tag-badge'>
             { content }
         </div>
     )
 }
 
-export default FieldBadge
+export default TagBadge

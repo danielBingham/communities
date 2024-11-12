@@ -18,13 +18,15 @@
  *
  ******************************************************************************/
 
-import { DAO } from './DAO'
+const DAO  = require('./DAO')
 
 const PAGE_SIZE = 20
 
-export class PostDAO extends DAO {
+module.exports = class PostDAO extends DAO {
 
     constructor(core) {
+        super(core)
+
         this.core = core
 
         this.entityMaps = {
@@ -32,7 +34,7 @@ export class PostDAO extends DAO {
                 table: 'posts',
                 fields: {
                     'id': {
-                        insert: 'allowed',
+                        insert: 'primary',
                         update: 'primary',
                         select: 'always',
                         key: 'id'
@@ -43,11 +45,11 @@ export class PostDAO extends DAO {
                         select: 'always',
                         key: 'userId'
                     },
-                    'engagement': {
+                    'activity': {
                         insert: 'allowed',
                         update: 'allowed',
                         select: 'always',
-                        key: 'engagement'
+                        key: 'activity'
                     },
                     'content': {
                         insert: 'required',
@@ -73,16 +75,29 @@ export class PostDAO extends DAO {
                     'post_reactions': {
                         insert: 'denied',
                         update: 'denied',
-                        select: 'initialize',
-                        selectDefault: [],
+                        select: 'override',
+                        selectOverride: function(row) {
+                            return []
+                        },
                         key: 'reactions'
                     },
                     'post_comments': {
                         insert: 'denied',
                         update: 'denied',
-                        select: 'initialize',
-                        selectDefault: [],
+                        select: 'override',
+                        selectOverride: function(row) {
+                            return []
+                        },
                         key: 'comments'
+                    },
+                    'post_tags': {
+                        insert: 'denied',
+                        update: 'denied',
+                        select: 'override',
+                        selectOverride: function(row) {
+                            return []
+                        },
+                        key: 'tags'
                     }
                 }
             },
@@ -98,7 +113,7 @@ export class PostDAO extends DAO {
                     'tag_id': {
                         insert: 'required',
                         update: 'primary',
-                        select: 'never',
+                        select: 'always',
                         key: 'tagId'
                     },
                     'created_date': {
@@ -193,8 +208,10 @@ export class PostDAO extends DAO {
                     'post_comment_reactions': {
                         insert: 'denied',
                         update: 'denied',
-                        select: 'initialize',
-                        selectDefault: [],
+                        select: 'override',
+                        selectOverride: function() {
+                            return []
+                        },
                         key: 'reactions'
                     }
                 }
@@ -280,10 +297,10 @@ export class PostDAO extends DAO {
         const dictionary = {}
         const list = []
 
-        postTagDictionary = {}
-        postReactionDictionary = {}
-        postCommentDictionary = {}
-        postCommentReactionDictionary = {}
+        const postTagDictionary = {}
+        const postReactionDictionary = {}
+        const postCommentDictionary = {}
+        const postCommentReactionDictionary = {}
 
         for(const row of rows) {
 
@@ -293,51 +310,61 @@ export class PostDAO extends DAO {
                 list.push(row.Post_id)
             }
 
-            if ( ! ( row.Post_id in postTagDictionary)) {
+            // Hydrate PostTags.
+            if ( row.PostTag_tagId !== null && ! ( row.Post_id in postTagDictionary)) {
                 postTagDictionary[row.Post_id] = {}
             }
 
-            if ( ! (row.PostTag_tagId in postTagDictionary)) {
+            if ( row.PostTag_tagId !== null && ! (row.PostTag_tagId in postTagDictionary)) {
                 dictionary[row.Post_id].tags.push(row.PostTag_tagId)
                 postTagDictionary[row.Post_id][row.PostTag_tagId] = true
             }
 
             // Hydrate PostReactions.
-            if ( ! (row.PostReaction_postId in postReactionDictionary) ) {
+            if ( row.PostReaction_postId !== null 
+                && ! (row.PostReaction_postId in postReactionDictionary) ) 
+            {
                 postReactionDictionary[row.PostReaction_postId] = {}
             }
 
-            if ( ! (row.PostReaction_userId in postReactionDictionary[row.PostReaction_postId])) {
-                postReactionDictionary[row.PostReaction_postId][row.PostReaction_userId] = this.hydratePostReaction(row)
-                dictionary[row.Post_id].reactions.push(postReactionDictionary[row.PostReaction_postId][row.PostReaction_userId])
+            if ( row.PostReaction_userId !== null 
+                && ! (row.PostReaction_userId in postReactionDictionary[row.PostReaction_postId])) 
+            {
+                const reaction = this.hydratePostReaction(row)
+                postReactionDictionary[reaction.postId][reaction.userId] = reaction
+                dictionary[reaction.postId].reactions.push(reaction)
             }
 
             // Hydrate PostComments.
-            if ( ! (row.PostComment_id in postCommentDictionary) ) {
-                postCommentDictionary[row.PostComment_id] = this.hydratePostComment(row)
-                dictionary[row.Post_id].comments.push(postCommentDicionary[row.PostComment_id])
+            if ( row.PostComment_id !== null && ! (row.PostComment_postId in postCommentDictionary)) {
+                postCommentDictionary[row.PostComment_postId] = {}
+            }
+
+            if ( row.PostComment_id !== null && ! (row.PostComment_id in postCommentDictionary) ) {
+                postCommentDictionary[row.PostComment_postId][row.PostComment_id] = this.hydratePostComment(row)
+                dictionary[row.Post_id].comments.push(postCommentDictionary[row.PostComment_id])
             }
 
             // Hydrate PostCommentReactions.
-            if ( ! (row.PostCommentReaction_postId in postReactionDictionary) ) {
-                postReactionDictionary[row.PostCommentReaction_postId] = {}
+            if ( row.PostCommentReaction_postId !== null && ! (row.PostCommentReaction_postId in postReactionDictionary) ) {
+                postCommentReactionDictionary[row.PostCommentReaction_postId] = {}
             }
 
-            if ( ! ( row.PostCommentReaction_userId in postReactionDictionary[row.PostCommentReaction_postId] )) {
-                postReactionDictionary[row.PostCommentReaction_postId][row.PostCommentReaction_userId] = this.hydratePostCommentReaction(row)
+            if ( row.PostCommentReaction_userId !== null && ! ( row.PostCommentReaction_userId in postReactionDictionary[row.PostCommentReaction_postId] )) {
+                postCommentReactionDictionary[row.PostCommentReaction_postId][row.PostCommentReaction_userId] = this.hydratePostCommentReaction(row)
                 postCommentDictionary[row.PostComment_id].reactions.push(postReactionDictionary[row.PostCommentReaction_postId][row.PostCommentReaction_userId])
             }
         }
-
 
         return { dictionary: dictionary, list: list }
     }
 
     async selectPosts(query) {
-        where = query.where ? '' : `WHERE ${query.where}`
-        params = query.params ? [] : query.params
-        page = query.page 
-        order = query.order ? `ORDER BY posts.engagement DESC, posts.created_date DESC` : `ORDER BY ${query.order}`
+        let where = query.where ? `WHERE ${query.where}` : ''
+        let params = query.params ? query.params : []
+        let page = query.page 
+        let order = query.order ? `ORDER BY ${query.order}` : 
+            `ORDER BY posts.activity/((EXTRACT(EPOCH from now()) - EXTRACT(EPOCH from posts.created_date))/(60*60)) DESC, posts.created_date DESC`
 
         if ( page ) {
             const postIds = await this.getPostPage(query)
@@ -349,7 +376,7 @@ export class PostDAO extends DAO {
             }
         }
 
-        const results = await this.core.query(`
+        const sql = `
             SELECT
                 ${this.getPostSelectionString()},
                 ${this.getPostReactionSelectionString()},
@@ -363,7 +390,10 @@ export class PostDAO extends DAO {
                 LEFT OUTER JOIN post_tags ON posts.id = post_tags.post_id
             ${where}
             ${order}
-        `, params)
+        `
+
+        console.log(sql)
+        const results = await this.core.database.query(sql, params)
 
         if ( results.rows.length <= 0 ) {
             return { dictionary: {}, list: [] }
@@ -373,11 +403,11 @@ export class PostDAO extends DAO {
     }
 
     async getPostPageMeta(query) {
-        where = query.where ? '' : `WHERE ${query.where}`
-        params = query.params ? [] : query.params
-        page = query.page ? 1 : query.page
+        let where = query.where ? '' : `WHERE ${query.where}`
+        let params = query.params ? [] : query.params
+        let page = query.page ? 1 : query.page
 
-        const results = await this.core.query(`
+        const results = await this.core.database.query(`
             SELECT COUNT(*) as count FROM (
                 SELECT DISTINCT
                     posts.id
@@ -385,6 +415,7 @@ export class PostDAO extends DAO {
                     LEFT OUTER JOIN post_reactions ON posts.id = post_reactions.post_id
                     LEFT OUTER JOIN post_comments ON posts.id = post_comments.post_id
                     LEFT OUTER JOIN post_comment_reactions on post_comments.id = post_comment_reactions.post_comment_id
+                    LEFT OUTER JOIN post_tags ON post_tags.post_id = posts.id
                 ${where}
             ) as temp
         `, params)
@@ -399,20 +430,23 @@ export class PostDAO extends DAO {
     }
 
     async getPostPage(query) {
-        where = query.where ? '' : `WHERE ${query.where}`
-        params = query.params ? [] : query.params
-        page = query.page ? 1 : query.page
-        order = query.order ? `ORDER BY posts.engagement DESC, posts.created_date DESC` : `ORDER BY ${query.order}`
+        let where = query.where ? '' : `WHERE ${query.where}`
+        let params = query.params ? [] : query.params
+        let page = query.page ? 1 : query.page
+        let order = query.order ? `ORDER BY ${query.order}` : `ORDER BY posts.activity DESC, posts.created_date DESC` 
 
-        const results = await this.core.query(`
+        const results = await this.core.database.query(`
             SELECT DISTINCT
-                posts.id, posts.engagement, posts.created_date
+                posts.id, posts.activity, posts.created_date
             FROM posts
                 LEFT OUTER JOIN post_reactions ON posts.id = post_reactions.post_id
                 LEFT OUTER JOIN post_comments ON posts.id = post_comments.post_id
                 LEFT OUTER JOIN post_comment_reactions on post_comments.id = post_comment_reactions.post_comment_id
+                LEFT OUTER JOIN post_tags ON post_tags.post_id = posts.id
             ${where}
             ${order}
+            LIMIT ${PAGE_SIZE}
+            OFFSET ${PAGE_SIZE*(page-1)}
         `, params)
 
         return results.rows.map((r) => r.id)
@@ -422,11 +456,11 @@ export class PostDAO extends DAO {
         await this.insert('Post', posts)
     }
 
-    async insertPostTag(postTags) {
+    async insertPostTags(postTags) {
         await this.insert('PostTag', postTags)
     }
 
-    async insertPostReaction(postReactions) {
+    async insertPostReactions(postReactions) {
         await this.insert('PostReaction', postReactions)
     }
 

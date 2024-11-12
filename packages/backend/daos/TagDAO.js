@@ -20,15 +20,17 @@
 
 const PAGE_SIZE = 20 
 
-import { DAO } from './DAO'
+const DAO  = require('./DAO')
 
 module.exports = class TagDAO extends DAO {
 
     constructor(core) {
+        super(core)
+
         this.database = core.database
         this.logger = core.logger
 
-        this.entitiesMap = {
+        this.entityMaps = {
             'Tag': {
                 table: 'tags',
                 fields: {

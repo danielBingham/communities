@@ -1,4 +1,4 @@
-FROM postgres:14.2
+FROM postgis/postgis:17-3.5-alpine
 
 ENV POSTGRES_PASSWORD='password'
 

@@ -15,7 +15,6 @@ import {
     cleanupRequest as cleanupTrackedRequest, 
     garbageCollectRequests } from './helpers/requestTracker'
 
-import { addSettingsToDictionary } from '/state/settings'
 import { reset } from '/state/system'
 import { setUsersInDictionary } from '/state/users'
 
@@ -107,7 +106,6 @@ export const getAuthentication = function(onCompletion) {
                 if ( responseBody && responseBody.user ) {
                     dispatch(authenticationSlice.actions.setCurrentUser(responseBody.user))
                     dispatch(authenticationSlice.actions.setSettings(responseBody.settings))
-                    dispatch(addSettingsToDictionary(responseBody.settings))
                     dispatch(setUsersInDictionary({ entity: responseBody.user }))
                 } else if ( responseBody ) {
                     dispatch(authenticationSlice.actions.setCurrentUser(null))
@@ -149,7 +147,6 @@ export const postAuthentication = function(email, password) {
             function(responseBody) {
                 dispatch(authenticationSlice.actions.setCurrentUser(responseBody.user))
                 dispatch(authenticationSlice.actions.setSettings(responseBody.settings))
-                dispatch(addSettingsToDictionary(responseBody.settings))
                 dispatch(setUsersInDictionary({ entity: responseBody.user }))
             }
         )
@@ -237,7 +234,6 @@ export const postOrcidAuthentication = function(code, connect) {
             function(responseContent) {
                 dispatch(authenticationSlice.actions.setCurrentUser(responseContent.user))
                 dispatch(authenticationSlice.actions.setSettings(responseContent.settings))
-                dispatch(addSettingsToDictionary(responseContent.settings))
                 dispatch(setUsersInDictionary({ entity: responseContent.user }))
             }
         )
@@ -254,7 +250,6 @@ export const validateToken = function(token, type) {
             function(responseContent) {
                 dispatch(authenticationSlice.actions.setCurrentUser(responseContent.user))
                 dispatch(authenticationSlice.actions.setSettings(responseContent.settings))
-                dispatch(addSettingsToDictionary(responseContent.settings))
                 dispatch(setUsersInDictionary({ entity: responseContent.user }))
             }
         )

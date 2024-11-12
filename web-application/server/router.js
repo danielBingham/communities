@@ -10,7 +10,7 @@
 module.exports = function(core) {
     const express = require('express')
     const multer = require('multer')
-    const backend = require('@danielbingham/peerreview-backend')
+    const backend = require('@danielbingham/communities-backend')
 
     const ControllerError = require('./errors/ControllerError')
 
@@ -139,6 +139,30 @@ module.exports = function(core) {
     // Delete an existing user.
     router.delete('/user/:id', function(request, response, next) {
         return userController.deleteUser(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    /**************************************************************************
+     * Post REST Routes
+     **************************************************************************/
+    const PostController = require('./controllers/PostController')
+    const postController = new PostController(core)
+
+    router.get('/posts', function(request, response, next) {
+        postController.getPosts(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.post('/posts', function(request, response, next) {
+        postController.postPosts(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.post('/post/:postId/reactions', function(request, response, next) {
+        postController.postPostReactions(request, response).catch(function(error) {
             next(error)
         })
     })
