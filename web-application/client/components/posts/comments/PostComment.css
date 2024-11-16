@@ -1,0 +1,15 @@
+.post-comment {
+    margin: 10px auto;
+    font-size: 14px;
+    background-color: var(--primary-color-lightest);
+    border-radius: 10px;
+
+}
+.post-comment .header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+.post-comment .controls-wrapper {
+    text-align: right;
+    padding-right: 10px;
+}

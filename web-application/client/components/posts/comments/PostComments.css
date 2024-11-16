@@ -1,0 +1,5 @@
+.post-comments {
+    border-top: thin solid var(--main-border-color);
+    padding: 10px;
+}
+

@@ -172,10 +172,12 @@ CREATE TYPE reaction_type AS ENUM(
     'block'
 );
 
+CREATE TYPE post_status AS ENUM('writing', 'editing', 'posted');
 CREATE TABLE posts (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id uuid REFERENCES users (id) NOT NULL,
 
+    status post_status default 'writing' NOT NULL,
     activity real DEFAULT 1,
     content text,
 
@@ -205,11 +207,13 @@ CREATE TABLE post_reactions (
     PRIMARY KEY(post_id, user_id)
 );
 
+CREATE TYPE post_comment_status AS ENUM('writing', 'editing', 'posted');
 CREATE TABLE post_comments (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     post_id uuid REFERENCES posts (id) NOT NULL,
     user_id uuid REFERENCES users (id) NOT NULL,
 
+    status post_comment_status DEFAULT 'writing' NOT NULL,
     content text,
 
     created_date timestamptz,

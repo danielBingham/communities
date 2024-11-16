@@ -7,6 +7,7 @@ import filesReducer from './files'
 import jobsReducer from './jobs'
 import notificationsReducer from './notifications'
 import postsReducer from './posts'
+import postCommentsReducer from './postComments'
 import tagsReducer from './tags'
 import systemReducer from './system'
 import usersReducer from './users'
@@ -20,6 +21,7 @@ const reducers = combineReducers({
     users: usersReducer,
     notifications: notificationsReducer,
     posts: postsReducer,
+    postComments: postCommentsReducer,
     tags: tagsReducer,
     files: filesReducer,
 })

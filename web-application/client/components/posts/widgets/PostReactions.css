@@ -1,0 +1,68 @@
+.post .reactions {
+    display: flex;
+    border-top: thin solid var(--main-border-color);
+    font-size: 12px;
+}
+.post .reactions .group {
+    padding: 0 5px;
+    flex-grow: 1;
+    display: flex;
+    text-align: center;
+    padding: 7px;
+}
+.post .reactions .group a {
+    display: inline-block;
+    padding: 0 5px;
+    flex-grow: 1;
+}
+.post .reactions .group a svg {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    margin-left: 5px;
+    margin-bottom: -2px;
+    color: var(--link-color);
+}
+.post .reactions .group a:hover svg {
+    color: var(--link-highlight-color);
+}
+
+
+.post .reactions .group.block,
+.post .reactions .group.share {
+    border-left: thin solid var(--main-border-color);
+}
+.post .reactions .group.block a:link,
+.post .reactions .group.block a:visited,
+.post .reactions .group.block a:active,
+.post .reactions .group.block svg {
+    color: var(--danger-color-main);
+}
+.post .reactions .group.block a:hover,
+.post .reactions .group.block a:hover svg {
+    color: var(--danger-color-main-highlight);
+}
+
+.post .reactions .group a.reacted:link,
+.post .reactions .group a.reacted:visited,
+.post .reactions .group a.reacted:active,
+.post .reactions .group a.reacted svg {
+    color: var(--success-color-main);
+}
+
+.post .reactions .group a.reacted:hover,
+.post .reactions .group a.reacted:hover svg {
+    color: var(--success-color-main-highlight);
+}
+
+.post .reactions .group.block a.reacted:link,
+.post .reactions .group.block a.reacted:visited,
+.post .reactions .group.block a.reacted:active,
+.post .reactions .group.block a.reacted svg {
+    color: var(--secondary-color-main);
+}
+
+.post .reactions .group.block a.reacted:hover,
+.post .reactions .group.block a.reacted:hover svg {
+    color: var(--secondary-color-main-highlight);
+}

@@ -1,5 +1,7 @@
 import { setTagsInDictionary } from '../tags'
 import { setUsersInDictionary } from '../users'
+import { setPostsInDictionary } from '../posts'
+import { setPostCommentsInDictionary } from '../postComments'
 
 
 const setRelationsInState = function(relations) {
@@ -10,6 +12,10 @@ const setRelationsInState = function(relations) {
                     dispatch(setTagsInDictionary({ dictionary: dictionary }))
                 } else if ( relation == 'users' ) {
                     dispatch(setUsersInDictionary({ dictionary: dictionary }))
+                } else if ( relation == 'postComments' ) {
+                    dispatch(setPostCommentsInDictionary({ dictionary: dictionary }))
+                } else if ( relation == 'posts' ) {
+                    dispatch(setPostsInDictionary({ dictionary: dictionary }))
                 }
             }
         }

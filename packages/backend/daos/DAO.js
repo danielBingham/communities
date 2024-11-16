@@ -118,7 +118,13 @@ module.exports = class DAO {
                 if ( meta.insert == 'override' ) {
                     row += ( row == '(' ? '' : ', ' ) + `${meta.insertOverride}`
                 } else {
-                    params.push(( entity[meta.key] ? entity[meta.key] : null ))
+                    if ( ! (meta.key in entity) && ( 'insertDefault' in meta )) {
+                        params.push(meta.insertDefault()) 
+                    } else if ( ! (meta.key in entity) ) {
+                        params.push(null)
+                    } else { 
+                        params.push(entity[meta.key])
+                    }
                     row += ( row == '(' ? '' : ', ') + `$${params.length}`
                 }
             }
@@ -135,6 +141,9 @@ module.exports = class DAO {
             INSERT INTO ${this.entityMaps[entityName].table} ${columns}
                 VALUES ${rows}
         `
+
+        console.log(sql)
+        console.log(params)
         await this.core.database.query(sql, params)
     }
 
@@ -153,7 +162,7 @@ module.exports = class DAO {
                 if ( where !== '' ) {
                     where += ' AND '
                 }
-                where = `${field} = $${params.length}`
+                where += `${field} = $${params.length}`
                 continue
             } else if ( meta.update == 'primary' ) {
                 throw new DAOError('missing-field',

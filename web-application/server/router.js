@@ -161,8 +161,50 @@ module.exports = function(core) {
         })
     })
 
-    router.post('/post/:postId/reactions', function(request, response, next) {
-        postController.postPostReactions(request, response).catch(function(error) {
+    router.get('/post/:id', function(request, response, next) {
+        postController.getPost(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.post('/post/:postId/reaction', function(request, response, next) {
+        postController.postPostReaction(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.patch('/post/:postId/reaction', function(request, response, next) {
+        postController.patchPostReaction(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.delete('/post/:postId/reaction', function(request, response, next) {
+        postController.deletePostReaction(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    /**************************************************************************
+     * PostComment REST Routes
+     **************************************************************************/
+    const PostCommentController = require('./controllers/PostCommentController')
+    const postCommentController = new PostCommentController(core)
+    
+    router.post('/post/:postId/comments', function(request, response, next) {
+        postCommentController.postPostComments(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.patch('/post/:postId/comment/:id', function(request, response, next) {
+        postCommentController.patchPostComment(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.delete('/post/:postId/comment/:id', function(request, response, next) {
+        postCommentController.deletePostComment(request, response).catch(function(error) {
             next(error)
         })
     })

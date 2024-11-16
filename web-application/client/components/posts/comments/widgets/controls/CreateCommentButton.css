@@ -1,0 +1,18 @@
+a.create-comment {
+    display: block;
+    margin: 5px auto;
+    font-size: 14px;
+    border-radius: 10px;
+    padding: 5px;
+}
+
+a.create-comment:link,
+a.create-comment:visited,
+a.create-comment:active {
+    color: var(--primary-color-darkest);
+    background-color: var(--primary-color-lightest);
+}
+a.create-comment:hover {
+    color: var(--primary-color-darkest);
+    background-color: white;
+}

@@ -31,11 +31,10 @@ module.exports = class PageMetadataService {
 
         this.baseMetadata = {
             url: core.config.host,
-            applicationName: "JournalHub",
-            title: "JournalHub (alpha) - A Universal Scholarly Publishing Platform",
-            description: "JournalHub is a universal scholarly publishing platform.  It supports micropublications, pre-prints, preprint review, journal review and publishing, and post-publication review.",
+            applicationName: "Communities",
+            title: "Communities -- Non-profit Social Media",
+            description: "Communities is a non-profit social media platform.",
             image: `${core.config.host}img/how-it-works/review-example-2.png`,
-            twitterHandle: "@peerreviewio",
             type: "website"
         }
     }

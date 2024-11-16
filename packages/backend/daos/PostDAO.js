@@ -47,9 +47,21 @@ module.exports = class PostDAO extends DAO {
                     },
                     'activity': {
                         insert: 'allowed',
+                        insertDefault: function() {
+                            return 1
+                        },
                         update: 'allowed',
                         select: 'always',
                         key: 'activity'
+                    },
+                    'status': {
+                        insert: 'allowed',
+                        insertDefault: function() {
+                            return 'writing'
+                        },
+                        update: 'allowed',
+                        select: 'always',
+                        key: 'status'
                     },
                     'content': {
                         insert: 'required',
@@ -162,97 +174,6 @@ module.exports = class PostDAO extends DAO {
                         key: 'updatedDate'
                     }
                 }
-            },
-            'PostComment': {
-                table: 'post_comments',
-                fields: {
-                    'id': {
-                        insert: 'allowed',
-                        update: 'primary',
-                        select: 'always',
-                        key: 'id'
-                    },
-                    'user_id': {
-                        insert: 'required',
-                        update: 'denied',
-                        select: 'always',
-                        key: 'userId'
-                    },
-                    'post_id': {
-                        insert: 'required',
-                        update: 'denied',
-                        select: 'always',
-                        key: 'postId'
-                    },
-                    'content': {
-                        insert: 'required',
-                        update: 'allowed',
-                        select: 'always',
-                        key: 'content'
-                    },
-                    'created_date': {
-                        insert: 'override',
-                        insertOverride: 'now()',
-                        update: 'denied',
-                        select: 'always',
-                        key: 'createdDate'
-                    },
-                    'updated_date': {
-                        insert: 'override',
-                        insertOverride: 'now()',
-                        update: 'override',
-                        updateOverride: 'now()',
-                        select: 'always',
-                        key: 'updatedDate'
-                    },
-                    'post_comment_reactions': {
-                        insert: 'denied',
-                        update: 'denied',
-                        select: 'override',
-                        selectOverride: function() {
-                            return []
-                        },
-                        key: 'reactions'
-                    }
-                }
-            },
-            'PostCommentReaction': {
-                table: 'post_comment_reactions',
-                fields: {
-                    'post_comment_id': {
-                        insert: 'required',
-                        update: 'primary',
-                        select: 'always',
-                        key: 'postCommentId'
-                    },
-                    'user_id': {
-                        insert: 'required',
-                        update: 'primary',
-                        select: 'always',
-                        key: 'userId'
-                    },
-                    'reaction': {
-                        insert: 'required',
-                        update: 'allowed',
-                        select: 'always',
-                        key: 'reaction'
-                    },
-                    'created_date': {
-                        insert: 'override',
-                        insertOverride: 'now()',
-                        update: 'denied',
-                        select: 'always',
-                        key: 'createdDate'
-                    },
-                    'updated_date': {
-                        insert: 'override',
-                        insertOverride: 'now()',
-                        update: 'override',
-                        updateOverride: 'now()',
-                        select: 'always',
-                        key: 'updatedDate'
-                    }
-                }
             }
         }
     }
@@ -269,13 +190,6 @@ module.exports = class PostDAO extends DAO {
         return this.getSelectionString('PostReaction')
     }
 
-    getPostCommentSelectionString() {
-        return this.getSelectionString('PostComment')
-    }
-
-    getPostCommentReactionSelectionString() {
-        return this.getSelectionString('PostCommentReaction')
-    }
 
     hydratePost(row) {
         return this.hydrate('Post', row)
@@ -285,13 +199,6 @@ module.exports = class PostDAO extends DAO {
         return this.hydrate('PostReaction', row)
     }
 
-    hydratePostComment(row) {
-        return this.hydrate('PostComment', row)
-    }
-
-    hydratePostCommentReaction(row) {
-        return this.hydrate('PostCommentReaction', row)
-    }
 
     hydratePosts(rows) {
         const dictionary = {}
@@ -336,23 +243,9 @@ module.exports = class PostDAO extends DAO {
             }
 
             // Hydrate PostComments.
-            if ( row.PostComment_id !== null && ! (row.PostComment_postId in postCommentDictionary)) {
-                postCommentDictionary[row.PostComment_postId] = {}
-            }
-
             if ( row.PostComment_id !== null && ! (row.PostComment_id in postCommentDictionary) ) {
-                postCommentDictionary[row.PostComment_postId][row.PostComment_id] = this.hydratePostComment(row)
-                dictionary[row.Post_id].comments.push(postCommentDictionary[row.PostComment_id])
-            }
-
-            // Hydrate PostCommentReactions.
-            if ( row.PostCommentReaction_postId !== null && ! (row.PostCommentReaction_postId in postReactionDictionary) ) {
-                postCommentReactionDictionary[row.PostCommentReaction_postId] = {}
-            }
-
-            if ( row.PostCommentReaction_userId !== null && ! ( row.PostCommentReaction_userId in postReactionDictionary[row.PostCommentReaction_postId] )) {
-                postCommentReactionDictionary[row.PostCommentReaction_postId][row.PostCommentReaction_userId] = this.hydratePostCommentReaction(row)
-                postCommentDictionary[row.PostComment_id].reactions.push(postReactionDictionary[row.PostCommentReaction_postId][row.PostCommentReaction_userId])
+                postCommentDictionary[row.PostComment_id] = true 
+                dictionary[row.Post_id].comments.push(row.PostComment_id)
             }
         }
 
@@ -364,7 +257,7 @@ module.exports = class PostDAO extends DAO {
         let params = query.params ? query.params : []
         let page = query.page 
         let order = query.order ? `ORDER BY ${query.order}` : 
-            `ORDER BY posts.activity/((EXTRACT(EPOCH from now()) - EXTRACT(EPOCH from posts.created_date))/(60*60)) DESC, posts.created_date DESC`
+            `ORDER BY posts.activity/((EXTRACT(EPOCH from now()) - EXTRACT(EPOCH from posts.created_date))/(60*60)) DESC, post_comments.created_date ASC`
 
         if ( page ) {
             const postIds = await this.getPostPage(query)
@@ -380,19 +273,16 @@ module.exports = class PostDAO extends DAO {
             SELECT
                 ${this.getPostSelectionString()},
                 ${this.getPostReactionSelectionString()},
-                ${this.getPostCommentSelectionString()},
-                ${this.getPostCommentReactionSelectionString()},
+                post_comments.id as "PostComment_id",
                 ${this.getPostTagSelectionString()}
             FROM posts
                 LEFT OUTER JOIN post_reactions ON posts.id = post_reactions.post_id
                 LEFT OUTER JOIN post_comments ON posts.id = post_comments.post_id
-                LEFT OUTER JOIN post_comment_reactions on post_comments.id = post_comment_reactions.post_comment_id
                 LEFT OUTER JOIN post_tags ON posts.id = post_tags.post_id
             ${where}
             ${order}
         `
 
-        console.log(sql)
         const results = await this.core.database.query(sql, params)
 
         if ( results.rows.length <= 0 ) {
@@ -408,16 +298,10 @@ module.exports = class PostDAO extends DAO {
         let page = query.page ? 1 : query.page
 
         const results = await this.core.database.query(`
-            SELECT COUNT(*) as count FROM (
-                SELECT DISTINCT
-                    posts.id
+                SELECT 
+                    COUNT(*)
                 FROM posts
-                    LEFT OUTER JOIN post_reactions ON posts.id = post_reactions.post_id
-                    LEFT OUTER JOIN post_comments ON posts.id = post_comments.post_id
-                    LEFT OUTER JOIN post_comment_reactions on post_comments.id = post_comment_reactions.post_comment_id
-                    LEFT OUTER JOIN post_tags ON post_tags.post_id = posts.id
                 ${where}
-            ) as temp
         `, params)
 
         const count = results.rows.length <= 0 ? 0 : results.rows[0].count
@@ -436,13 +320,9 @@ module.exports = class PostDAO extends DAO {
         let order = query.order ? `ORDER BY ${query.order}` : `ORDER BY posts.activity DESC, posts.created_date DESC` 
 
         const results = await this.core.database.query(`
-            SELECT DISTINCT
-                posts.id, posts.activity, posts.created_date
+            SELECT 
+                posts.id
             FROM posts
-                LEFT OUTER JOIN post_reactions ON posts.id = post_reactions.post_id
-                LEFT OUTER JOIN post_comments ON posts.id = post_comments.post_id
-                LEFT OUTER JOIN post_comment_reactions on post_comments.id = post_comment_reactions.post_comment_id
-                LEFT OUTER JOIN post_tags ON post_tags.post_id = posts.id
             ${where}
             ${order}
             LIMIT ${PAGE_SIZE}
@@ -464,13 +344,6 @@ module.exports = class PostDAO extends DAO {
         await this.insert('PostReaction', postReactions)
     }
 
-    async insertPostComments(postComments) {
-        await this.insert('PostComment', postComments)
-    }
-
-    async insertPostCommentReactions(postCommentReactions) {
-        await this.insert('PostCommentReaction', postCommentReactions)
-    }
 
     async updatePost(post) {
         await this.update('Post', post)
@@ -480,13 +353,6 @@ module.exports = class PostDAO extends DAO {
         await this.update('PostReaction', postReaction)
     }
 
-    async updatePostComment(postComment) {
-        await this.update('PostComment', postComment)
-    }
-
-    async updatePostCommentReaction(postCommentReaction) {
-        await this.update('PostCommentReaction', postCommentReaction)
-    }
 
     async deletePost(post) {
         await this.core.database.query(`
@@ -506,15 +372,4 @@ module.exports = class PostDAO extends DAO {
         `, [ postReaction.postId, postReaction.userId])
     }
 
-    async deletePostComment(postComment) {
-        await this.core.database.query(`
-            DELETE FROM post_comments WHERE post_comments.id = $1
-        `, [ postComment.id ])
-    }
-
-    async deletePostCommentReaction(postCommentReaction) {
-        await this.core.database.query(`
-            DELETE FROM post_comment_reactions WHERE post_comment_reactions.post_id = $1 AND post_comment_reactions.user_id = $2
-        `, [ postCommentReaction.post_id, postCommentReaction.user_id])
-    }
 }

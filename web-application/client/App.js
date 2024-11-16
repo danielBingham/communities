@@ -38,6 +38,8 @@ import UserAccountPage from '/pages/users/UserAccountPage'
 import UserProfileEditForm from '/components/users/account/UserProfileEditForm'
 import UserAccountDetailsForm from '/components/users/account/UserAccountDetailsForm'
 
+import PostPage from '/pages/posts/PostPage'
+
 import ErrorBoundary from '/errors/ErrorBoundary'
 import Spinner from '/components/Spinner'
 
@@ -205,13 +207,14 @@ const App = function(props) {
 
                         { /* ========== Users ================================= */ }
                         <Route path="/:name">
-                            <Route path=":postId" element={ <UserProfilePage /> } />
+                            <Route path=":postId" element={ <PostPage /> } />
                             <Route index element={ <UserProfilePage /> } />
                         </Route>
                         <Route path="/account">
                             <Route path=":pageTab" element={ <UserAccountPage /> } />
                             <Route index element={ <UserAccountPage /> } />
                         </Route>
+
                     </Routes>
                 </main>
             </Router>
