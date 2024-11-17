@@ -52,13 +52,42 @@ module.exports = class PostController {
             params: [ postCommentIds ]
         })
 
-        console.log("Post relations: ")
-        console.log(postCommentResults)
-
         return {
             users: userResults.dictionary,
             postComments: postCommentResults.dictionary
         }
+    }
+
+    async createQuery(request) {
+        const query = {
+            where: '',
+            params: [],
+            page: 1
+        }
+
+        const currentUser = request.session.user
+
+        if ( 'userId' in request.query ) {
+            query.params.push(request.query.userId)
+            const and = query.params.length > 1 ? ' AND ' : ''
+            query.where += `${and}posts.user_id = $${query.params.length}`
+        }
+
+        // Visible posts
+        const friendResults = await this.core.database.query(`
+            SELECT
+                user_id, friend_id
+            FROM user_relationships
+                WHERE user_id = $1 OR friend_id = $1
+        `, [ currentUser.id ])
+
+        const friendIds = friendResults.rows.map((r) => r.user_id == currentUser.id ? r.friend_id : r.user_id)
+        friendIds.push(currentUser.id)
+
+        query.params.push(friendIds)
+        query.where += `${ query.params.length > 1 ? ' AND ' : ''}posts.user_id = ANY($${query.params.length}::uuid[])`
+
+        return query
     }
 
     async getPosts(request, response) {
@@ -70,20 +99,8 @@ module.exports = class PostController {
                 `You must be authenticated to retrieve posts.`)
         }
 
-        const friendResults = await this.core.database.query(`
-            SELECT
-                user_id, friend_id
-            FROM user_relationships
-                WHERE user_id = $1 OR friend_id = $1
-        `, [ currentUser.id ])
+        const query = await this.createQuery(request)
 
-        const friendIds = friendResults.rows.map((r) => r.user_id == currentUser.id ? r.friend_id : r.user_id)
-
-        const query = {
-            where: 'posts.user_id = $1 OR posts.user_id = ANY($2::uuid[])',
-            params: [ currentUser.id, friendIds ],
-            page: 1
-        }
         const results = await this.postDAO.selectPosts(query)
 
         results.meta = await this.postDAO.getPostPageMeta(query)
@@ -151,7 +168,7 @@ module.exports = class PostController {
         `, [ post.userId ])
 
         const isFriend = friendResults.rows.find((r) => r.user_id == currentUser.id || r.friend_id == currentUser.id)
-        if ( ! isFriend ) {
+        if ( ! isFriend && currentUser.id != post.userId ) {
             throw new ControllerError(404, 'not-found',
                 `User(${currentUser.id}) attempting to access Post(${postId}) without permission.`,
                 `That post either doesn't exist or you don't have permission to see it.`)

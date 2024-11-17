@@ -55,11 +55,11 @@ module.exports = class UserDAO extends DAO {
                         select: 'always',
                         key: 'name',
                     },
-                    'display_name': {
+                    'username': {
                         insert: 'required',
                         update: 'allowed',
                         select: 'always',
-                        key: 'displayName'
+                        key: 'username'
                     },
                     'email': {
                         insert: 'required',

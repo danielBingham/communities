@@ -7,7 +7,7 @@ import { Page, PageBody, PageHeader, PageTabBar, PageTab } from '/components/gen
 import Post from '/components/posts/Post'
 
 const PostPage = function() {
-    const { name, postId } = useParams()
+    const { username, postId } = useParams()
 
     return (
         <Page id={`post-${postId}`}>

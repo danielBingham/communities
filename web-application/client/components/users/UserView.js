@@ -88,9 +88,7 @@ const UserView = function(props) {
             <UserProfileImage userId={user.id} /> 
             <div className="details">
                 <div className="name"> { user.name }</div>
-                { user.orcidId && <div className="orcid"> <ORCIDTag id={ user.orcidId} /></div> }
-                { user.institution && <div className="institution"><BuildingOffice2Icon /> { user.institution } </div> }
-                { user.location && <div className="location"><MapPinIcon /> { user.location }</div> }
+                <div className="about"> { user.about }</div>
             </div>
         </article>
     )

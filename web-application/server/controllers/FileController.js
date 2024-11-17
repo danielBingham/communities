@@ -73,10 +73,7 @@ module.exports = class FileController {
         const type = request.file.mimetype 
         // Define which file types are valid.
         const validTypes = [
-            // For papers.
-            'application/pdf',
-
-            // For Profile images.
+            // For post and profile images.
             'image/jpeg',
             'image/png'
         ]
@@ -115,7 +112,38 @@ module.exports = class FileController {
         }
 
         this.fileService.removeLocalFile(currentPath)
-        return response.status(200).json(files[0])
+        return response.status(200).json({
+            entity: files[0],
+            relations: {}
+        })
+    }
+
+    /**
+     * GET /file/:id
+     *
+     * Get a file.
+     *
+     * @param {Object} request  Standard Express request object.
+     * @param {int} request.params.id   The database id of the file we wish to get.
+     * @param {Object} response Standard Express response object.
+     *
+     * @returns {Promise}   Resolves to void.
+     */
+    async getFile(request, response) {
+        // Everyone has permissions to get files right now.  We may add
+        // stricter permissions in the future.
+
+        const id = request.params.id
+
+        const files = await this.fileDAO.selectFiles('WHERE files.id = $1', [ id ])
+        if ( files.length <= 0) {
+            throw new ControllerError(500, 'insertion-failure', `Failed to select newly inserted file ${id}.`)
+        }
+
+        return response.status(200).json({
+            entity: files[0],
+            relations: {}
+        })
     }
 
     /**
@@ -163,20 +191,6 @@ module.exports = class FileController {
             throw new ControllerError(403, 'not-authorized', `User(${request.session.user.id}) attempting to delete file(${files[0].id}, which they don't own.`)
         }
 
-        const results = await this.database.query(`
-            SELECT
-                papers.id, papers.is_draft
-            FROM papers
-                LEFT OUTER JOIN paper_versions ON papers.id = paper_versions.paper_id
-            WHERE paper_versions.file_id = $1 AND papers.is_draft = false
-        `, [ request.params.id ])
-
-        // 3. File must not be in use by a published paper.
-        if ( results.rows.length > 0 ) {
-            throw new ControllerError(403, 'not-authorized:published',
-                `User(${request.session.user.id}) attempting to delete File(${request.params.id}) that is attached to a published paper.`)
-        }
-
         // NOTE: We don't need to worry about files in use as profile images,
         // because the database constraint will simply set the users.file_id
         // field to null when the file is deleted.
@@ -191,6 +205,11 @@ module.exports = class FileController {
         // Database constraints should handle any cascading here.
         const fileId = request.params.id
         await this.fileDAO.deleteFile(fileId)
-        return response.status(200).json({ fileId: fileId })
+        return response.status(200).json({ 
+            entity: { 
+                id: fileId 
+            },
+            relations: {}
+        })
     }
 }

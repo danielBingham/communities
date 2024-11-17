@@ -1,1 +1,7 @@
-#user-profile-page { }
+#user-profile-page { 
+    display: grid;
+    grid-template-columns: 2fr 3fr;
+    width: 1400px;
+    margin: 50px auto;
+    background-color: var(--page-background-color);
+}

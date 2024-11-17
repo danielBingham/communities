@@ -1,14 +1,12 @@
 .user-view {
     padding: 20px 0;
-    text-align: left;
+    text-align: center;
 }
 .user-view .profile-image {
-    display: inline-block;
-    float: left;
-    margin-right: 10px;
-    margin-bottom: 10px;
-    width: 150px;
-    height: 150px;
+    display: block;
+    margin: 10px auto;
+    width: 200px;
+    height: 200px;
 }
 .user-view .details {
     min-height: 150px;
@@ -21,8 +19,7 @@
     padding: 12px;
 }
 .user-view .name {
-    font-weight: bold;
-    font-size: 1.4em;
+    font-size: 2em;
 }
 .user-view .details svg {
     width: 20px;

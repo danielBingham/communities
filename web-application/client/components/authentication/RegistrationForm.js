@@ -20,13 +20,14 @@ const RegistrationForm = function(props) {
 
     // ======= Render State =========================================
    
-    const [displayName, setDisplayName] = useState('')
+    const [username, setUsername] = useState('')
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
 
     const [nameError, setNameError] = useState(null)
+    const [usernameError, setUsernameError] = useState(null)
     const [emailError, setEmailError] = useState(null)
     const [passwordError, setPasswordError] = useState(null)
     const [passwordConfirmationError, setPasswordConfirmationError] = useState(null)
@@ -87,6 +88,18 @@ const RegistrationForm = function(props) {
             }
         }
 
+        if ( ! field || field == 'username' ) {
+            if ( ! username || username.length == 0 ) {
+                setUsernameError('no-username')
+                error = true
+            } else if ( username.length > 512 ) {
+                setUsernameError('username-too-long')
+                error = true
+            } else if ( usernameError ) {
+                setUsernameError(null)
+            }
+        }
+
         if ( ! field || field == 'email' ) {
             if ( ! email || email.length == 0 ) {
                 setEmailError('no-email')
@@ -143,8 +156,8 @@ const RegistrationForm = function(props) {
         }
 
         const user = {
-            displayName: displayName,
             name: name,
+            username: username,
             email: email,
             password: password
         }
@@ -206,7 +219,7 @@ const RegistrationForm = function(props) {
 
     // Error views, we'll populate these as we check the various error states.
     let overallErrorView = null
-    let displayNameErrorView = null
+    let usernameErrorView = null
     let nameErrorView = null
     let emailErrorView = null
     let passwordErrorView = null
@@ -226,6 +239,12 @@ const RegistrationForm = function(props) {
         nameErrorView = ( <>Name is required!</> )
     } else if ( nameError && nameError == 'name-too-long' ) {
         nameErrorView = ( <>Name is too long. Limit is 512 characters.</> )
+    }
+
+    if ( usernameError && usernameError == 'no-username' ) {
+        usernameErrorView = ( <>Username is required!</> )
+    } else if ( usernameError && usernameError == 'username-too-long' ) {
+        usernameErrorView = ( <>Username is too long. Limit is 512 characters.</> )
     }
 
     if ( emailError && emailError == 'no-email' ) {
@@ -257,16 +276,6 @@ const RegistrationForm = function(props) {
             <form onSubmit={onSubmit}>
                 <div className="error"> {overallErrorView} </div>
 
-                <div className="display-name field-wrapper">
-                    <label htmlFor="name">Display Name:</label>
-                    <input type="text" 
-                        name="displayName" 
-                        value={displayName} 
-                        onBlur={ (event) => isValid('displayName') }
-                        onChange={ (event) => setDisplayName(event.target.value) } />
-                    <div className="error">{ displayNameErrorView }</div>
-                </div>
-
                 <div className="name field-wrapper">
                     <label htmlFor="name">Name:</label>
                     <input type="text" 
@@ -275,6 +284,16 @@ const RegistrationForm = function(props) {
                         onBlur={ (event) => isValid('name') }
                         onChange={ (event) => setName(event.target.value) } />
                     <div className="error">{ nameErrorView }</div>
+                </div>
+
+                <div className="username field-wrapper">
+                    <label htmlFor="name">Username:</label>
+                    <input type="text" 
+                        name="username" 
+                        value={username} 
+                        onBlur={ (event) => isValid('username') }
+                        onChange={ (event) => setUsername(event.target.value) } />
+                    <div className="error">{ usernameErrorView }</div>
                 </div>
 
                 <div className="email field-wrapper">

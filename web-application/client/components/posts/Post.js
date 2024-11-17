@@ -60,7 +60,7 @@ const Post = function({ id }) {
     return (
         <div id={post.id} className="post">
             <div className="header"> 
-                <UserTag id={post.userId} /> posted <a href={`/${user.name}/${id}`}><DateTag timestamp={post.createdDate} /></a>
+                <UserTag id={post.userId} /> posted <a href={`/${user.username}/${id}`}><DateTag timestamp={post.createdDate} /></a>
             </div>
             <div className="content">
                 { post.content }

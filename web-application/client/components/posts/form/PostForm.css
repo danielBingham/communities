@@ -1,5 +1,6 @@
 .post-form {
     border: thin solid var(--main-border-color);
+    background-color: white;
     width: 600px;
     margin: 0 auto;
     padding: 10px;
@@ -10,6 +11,10 @@
     height: 200px;
     box-sizing: border-box;
     resize: none;
+}
+.post-form .controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
 }
 .post-form .buttons {
     text-align: right;

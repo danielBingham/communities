@@ -1,0 +1,14 @@
+.post-list {
+    border-top: 1px solid var(--main-border-color);
+    padding: 0;
+    margin: 20px auto;
+    width: 700px;
+}
+.post-list .sort-menu {
+    float: right;
+    margin-top: -8px;
+    margin-right: 40px;
+    padding: 0 10px;
+    text-align: right;
+    background-color: var(--main-background-color);
+}

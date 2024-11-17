@@ -52,9 +52,9 @@ const UserTag = function(props) {
     if ( user ) {
         let name = null
         if ( props.link == false ) {
-            name = user.displayName
+            name = user.name
         } else {
-            name = ( <Link to={ `/user/${user.id}` }>{user.displayName}</Link> )
+            name = ( <Link to={ `/${user.username}` }>{user.name}</Link> )
         }
 
         content = ( <> <UserProfileImage userId={user.id} /> { name } </> ) 

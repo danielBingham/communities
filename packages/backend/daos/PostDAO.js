@@ -45,6 +45,12 @@ module.exports = class PostDAO extends DAO {
                         select: 'always',
                         key: 'userId'
                     },
+                    'file_id': {
+                        insert: allowed,
+                        update: allowed,
+                        select: always,
+                        key: 'fileId'
+                    },
                     'activity': {
                         insert: 'allowed',
                         insertDefault: function() {

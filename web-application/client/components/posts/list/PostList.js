@@ -1,44 +1,24 @@
 import React, { useState, useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 
-import { getPosts, cleanupRequest } from '/state/posts'
-
+import PaginationControls from '/components/PaginationControls'
 import Post from '/components/posts/Post'
 import Spinner from '/components/Spinner'
 
-const PostList = function() {
+import './PostList.css'
 
-    const [requestId,setRequestId] = useState(null)
-    const request = useSelector(function(state) {
-        if ( requestId in state.posts.requests) {
-            return state.posts.requests[requestId]
-        } else {
-            return null
-        }
-    })
-    const postIds = useSelector(function(state) {
-        if ( 'post-list' in state.posts.queries ) {
-            return state.posts.queries['post-list'].list
+const PostList = function({ queryName }) {
+
+    const query = useSelector(function(state) {
+        if ( queryName in state.posts.queries ) {
+            return state.posts.queries[queryName]
         } else {
             return null 
         }
     })
 
-    const dispatch = useDispatch()
 
-    useEffect(function() {
-        if ( ! request ) {
-            setRequestId(dispatch(getPosts('post-list')))
-        }
-    }, [ request ])
-
-    useEffect(function() {
-        if ( requestId ) {
-            dispatch(cleanupRequest({ requestId: requestId }))
-        }
-    }, [ requestId ])
-
-    if ( postIds === null ) {
+    if ( query === null ) {
         return (
             <div className="post-list">
                 <Spinner local={true} />
@@ -47,13 +27,15 @@ const PostList = function() {
     }
 
     const postViews = []
-    for(const postId of postIds) {
+    for(const postId of query.list) {
         postViews.push(<Post key={postId} id={postId} />)
     }
 
     return (
         <div className="post-list">
+            <div className="sort-menu">Sort: Active</div>
             { postViews }
+            <PaginationControls meta={query.meta} />
         </div>
     )
 

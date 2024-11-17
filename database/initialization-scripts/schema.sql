@@ -42,7 +42,7 @@ CREATE TABLE users (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 
     name varchar(512) NOT NULL,
-    display_name varchar(512),
+    username varchar(512),
 
     email varchar(512),
     password varchar(256),
@@ -58,10 +58,8 @@ CREATE TABLE users (
     updated_date timestamptz 
 );
 CREATE INDEX users__name ON users (name);
+CREATE INDEX users_username ON users (username);
 CREATE INDEX users__name_trgm ON users USING GIN (name gin_trgm_ops);
-
-CREATE INDEX users_display_name ON users (display_name);
-CREATE INDEX users__display_name_trgm ON users USING GIN (display_name gin_trgm_ops);
 
 CREATE TYPE user_relationship_status AS ENUM('pending', 'confirmed');
 CREATE TABLE user_relationships (
@@ -156,16 +154,8 @@ CREATE INDEX tags__name_trgm ON tags USING GIN (name gin_trgm_ops);
 CREATE TYPE reaction_type AS ENUM(
     /** positive **/
     'like',
-    'agree',
-
-    /** neutral **/
-    'support',
-    'comfort',
-    'commiserate',
-    'celebrate',
 
     /** negative **/
-    'disagree',
     'dislike',
 
     /** block **/
@@ -177,6 +167,8 @@ CREATE TABLE posts (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id uuid REFERENCES users (id) NOT NULL,
 
+    file_id uuid REFERENCES files (id) DEFAULT NULL,
+
     status post_status default 'writing' NOT NULL,
     activity real DEFAULT 1,
     content text,
@@ -185,6 +177,7 @@ CREATE TABLE posts (
     updated_date timestamptz
 );
 CREATE INDEX posts__user_id ON posts (user_id);
+CREATE INDEX posts__file_id ON posts (file_id);
 
 CREATE TABLE post_tags (
     post_id uuid REFERENCES posts (id) NOT NULL,
@@ -196,16 +189,17 @@ CREATE TABLE post_tags (
 );
 
 CREATE TABLE post_reactions (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     post_id uuid REFERENCES posts (id) NOT NULL,
     user_id uuid REFERENCES users (id) NOT NULL,
 
     reaction reaction_type NOT NULL,
 
     created_date timestamptz,
-    updated_date timestamptz,
-
-    PRIMARY KEY(post_id, user_id)
+    updated_date timestamptz
 );
+CREATE INDEX post_reactions__post_id ON post_reactions (post_id);
+CREATE INDEX post_reactions__user_id ON post_reactions (user_id);
 
 CREATE TYPE post_comment_status AS ENUM('writing', 'editing', 'posted');
 CREATE TABLE post_comments (
@@ -221,17 +215,6 @@ CREATE TABLE post_comments (
 );
 CREATE INDEX post_comments__post_id ON post_comments (post_id);
 CREATE INDEX post_comments__user_id ON post_comments (user_id);
-
-CREATE TABLE post_comment_reactions (
-    post_comment_id uuid REFERENCES post_comments (id) NOT NULL,
-    user_id uuid REFERENCES users (id) NOT NULL,
-
-    reaction reaction_type NOT NULL,
-
-    created_date timestamptz,
-    updated_date timestamptz,
-    PRIMARY KEY(post_comment_id, user_id)
-);
 
 /******************************************************************************
  * Permissions

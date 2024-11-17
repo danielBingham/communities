@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch} from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 
 import { postPosts, cleanupRequest } from '/state/posts'
 
+import FileUploadInput from '/components/files/FileUploadInput'
 import Button from '/components/generic/button/Button'
 
 import './PostForm.css'
@@ -10,6 +12,7 @@ import './PostForm.css'
 const PostForm = function() {
 
     const [content,setContent] = useState('')
+    const [file,setFile] = useState(null)
 
     const [requestId,setRequestId] = useState(null)
     const request = useSelector(function(state) {
@@ -25,10 +28,12 @@ const PostForm = function() {
     })
 
     const dispatch = useDispatch()
+    const navigate = useNavigate()
 
     const submit = function() {
         const post = {
             userId: currentUser.id,
+            fileId: file ? file.id : null,
             content: content,
             tags: []
         }
@@ -37,6 +42,12 @@ const PostForm = function() {
 
         setContent('')
     }
+
+    useEffect(function() {
+        if ( request && request.state == 'fulfilled') {
+            navigate(`/${currentUser.username}/${request.result.entity.id}`)
+        }
+    }, [ request ])
     
     useEffect(function() {
         if ( requestId ) {
@@ -52,9 +63,12 @@ const PostForm = function() {
                 placeholder="Write your post..."
             >
             </textarea>
-            <div className="buttons">
-                <Button type="secondary-warn">Cancel</Button>
-                <Button type="primary" onClick={(e) => submit()}>Post</Button>
+            <div className="controls">
+                <FileUploadInput setFile={setFile} types={[ 'image/jpeg', 'image/png' ]} />
+                <div className="buttons">
+                    <Button type="secondary-warn">Cancel</Button>
+                    <Button type="primary" onClick={(e) => submit()}>Post</Button>
+                </div>
             </div>
         </div>
 

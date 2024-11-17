@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
+import { getFile, cleanupRequest } from '/state/files'
+
 import { UserCircleIcon } from '@heroicons/react/24/solid'
 
 import Spinner from '/components/Spinner'
@@ -19,8 +21,20 @@ const UserProfileImage = function({ userId, className }) {
     // ======= Redux State ==========================================
     
     const user = useSelector(function(state) {
-        if ( state.users.dictionary[userId] ) {
+        if ( userId in state.users.dictionary ) {
             return state.users.dictionary[userId]
+        } else {
+            return null
+        }
+    })
+
+    if ( ! user ) {
+        throw new Error('User must be rerieved to display profile image.')
+    }
+
+    const file = useSelector(function(state) {
+        if ( user.fileId !== null && user.fileId in state.files.dictionary ) {
+            return state.files.dictionary[user.fileId]
         } else {
             return null
         }
@@ -31,10 +45,10 @@ const UserProfileImage = function({ userId, className }) {
     const dispatch = useDispatch()
 
     useEffect(function() {
-        if ( ! user ) {
-            setRequestId(dispatch(getUser(userId)))
+        if ( user.fileId !== null ) {
+            setRequestId(dispatch(getFile(user.fileId)))
         }
-    }, [])
+    }, [ user.fileId ])
 
     // Cleanup our request.
     useEffect(function() {
@@ -46,12 +60,12 @@ const UserProfileImage = function({ userId, className }) {
     }, [ requestId])
 
     let content = ( <Spinner local={true} /> )
-    if ( user.file ) {
-        const url = new URL(user.file.filepath, user.file.location)
+    if ( user?.fileId && file ) {
+        const url = new URL(file.filepath, file.location)
         content = (
             <img src={url.href} />
         )
-    } else {
+    } else if ( ! user.fileId || request && request.state == 'fulfilled' ) {
         content = (
             <UserCircleIcon />
         )

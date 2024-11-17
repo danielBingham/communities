@@ -1,7 +1,15 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { v4 as uuidv4 } from 'uuid'
 
-import logger from '/logger'
+import setRelationsInState from './helpers/relations'
+
+import {
+    setInDictionary,
+    removeEntity,
+    makeQuery,
+    setQueryResults,
+    clearQuery,
+    clearQueries
+} from './helpers/state'
 
 import { 
     makeTrackedRequest,
@@ -16,6 +24,8 @@ import {
 export const filesSlice = createSlice({
     name: 'files',
     initialState: {
+        // ======== Standard State ============================================
+        
         /**
          * A dictionary of requests in progress or that we've made and completed,
          * keyed with a uuid requestId.
@@ -25,39 +35,48 @@ export const filesSlice = createSlice({
         requests: {},
 
         /**
-         * A dictionary of files we've retrieved from the backend, keyed by
-         * file.id.
+         * A dictionary of posts we've retrieved from the backend, keyed by
+         * post.id.
          *
          * @type {object}
          */
-        dictionary: {}
+        dictionary: {},
+
+        /**
+         *
+         * An object containing queries made to query supporting endpoints.
+         *
+         * In the case of posts: /posts, /post/:id/children, and
+         * /post/:id/parents
+         *
+         * Structure:
+         * {
+         *  queryName: {
+         *      meta: {
+         *          page: <int>,
+         *          count: <int>,
+         *          pageSize: <int>,
+         *          numberOfPages: <int>
+         *      },
+         *      list: [] 
+         *  },
+         *  ...
+         * }
+         */
+        queries: {}
 
     },
     reducers: {
 
-        /**
-         * Add one or more files to the state dictionary.  
-         *
-         * Does NOT add them to the list.
-         *
-         * @param {object} state - The redux state slice.
-         * @param {object} action - The redux action we're reducing.
-         * @param {object[] | object} action.payload - The files we want to add.  Can
-         * either be an array of files or a single file object.
-         */
-        addFilesToDictionary: function(state, action) {
-            if ( action.payload && action.payload.length ) {
-                for( const file of action.payload) {
-                    state.dictionary[file.id] = file
-                }
-            } else {
-                state.dictionary[action.payload.id] = action.payload
-            }
-        },
+        // ======== State Manipulation Helpers ================================
+        // @see ./helpers/state.js
 
-        removeFile: function(state, action) {
-            delete state.dictionary[action.payload.id]
-        },
+        setFilesInDictionary: setInDictionary,
+        removeFile: removeEntity,
+        makeFileQuery: makeQuery,
+        setFileQueryResults: setQueryResults,
+        clearFileQuery: clearQuery,
+        clearFileQueries: clearQueries,
 
         // ========== Request Tracking Methods =============
 
@@ -91,8 +110,35 @@ export const uploadFile = function(file) {
         dispatch(filesSlice.actions.bustRequestCache())
         return makeTrackedRequest(dispatch, getState, filesSlice,
             'POST', `/upload`, formData,
-            function(file) {
-                dispatch(filesSlice.actions.addFilesToDictionary(file))
+            function(response) {
+                dispatch(filesSlice.actions.setFilesInDictionary({ entity: response.entity }))
+
+                dispatch(setRelationsInState(response.relations))
+            }
+        )
+    }
+}
+
+/**
+ * GET /file/:id
+ *
+ * Get a single file.
+ *
+ * Makes the request asynchronously and returns a id that can be used to track
+ * the request and retreive the results from the state slice.
+ *
+ * @param {int} id - The id of the file we want to retrieve.
+ *
+ * @returns {string} A uuid requestId that can be used to track this request.
+ */
+export const getFile = function(id) {
+    return function(dispatch, getState) {
+        return makeTrackedRequest(dispatch, getState, filesSlice,
+            'GET', `/file/${id}`, null,
+            function(response) {
+                dispatch(filesSlice.actions.setFilesInDictionary({ entity: response.entity}))
+
+                dispatch(setRelationsInState(response.relations))
             }
         )
     }
@@ -115,8 +161,8 @@ export const deleteFile = function(fileId) {
         dispatch(filesSlice.actions.bustRequestCache())
         return makeTrackedRequest(dispatch, getState, filesSlice,
             'DELETE', `/file/${fileId}`, null,
-            function(file) {
-                dispatch(filesSlice.actions.removeFile(fileId))
+            function(response) {
+                dispatch(filesSlice.actions.removeFile({ entity: response.entity }))
             }
         )
     }

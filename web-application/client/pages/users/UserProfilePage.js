@@ -2,20 +2,17 @@ import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
 
-import ReactMarkdown from 'react-markdown'
-import { DocumentCheckIcon, TagIcon } from '@heroicons/react/24/outline'
-
-import { getUser, cleanupRequest } from '/state/users'
+import { getUsers, cleanupRequest } from '/state/users'
 
 import Spinner from '/components/Spinner'
-import { Page, PageBody, PageHeader, PageTabBar, PageTab } from '/components/generic/Page'
 
 import UserView from '/components/users/UserView'
+import PostsByUserFeed from '/components/feeds/PostsByUserFeed'
 
 import './UserProfilePage.css'
 
 const UserProfilePage = function(props) {
-    const { id, pageTab} = useParams()
+    const { name } = useParams()
 
     // ======= Request Tracking =====================================
 
@@ -29,9 +26,21 @@ const UserProfilePage = function(props) {
     })
 
     // ======= Redux State ==========================================
-    
+   
+    const id = useSelector(function(state) {
+        if ( 'UserProfilePage' in state.users.queries ) {
+            return state.users.queries['UserProfilePage'].list[0]
+        } else {
+            return null
+        }
+    })
+
     const user = useSelector(function(state) {
-        return state.users.dictionary[id]
+        if ( id !== null ) {
+            return state.users.dictionary[id]
+        } else {
+            return null
+        }
     })
 
     const currentUser = useSelector(function(state) {
@@ -41,14 +50,12 @@ const UserProfilePage = function(props) {
     // ================= User Action Handling  ================================
     
     const dispatch = useDispatch()
-    const navigate = useNavigate()
 
     // ======= Effect Handling ======================================
 
     useEffect(function() {
-        setRequestId(dispatch(getUser(id)))
+        setRequestId(dispatch(getUsers('UserProfilePage', { username: name })))
     }, [ ])
-
 
     useEffect(function() {
         return function cleanup() {
@@ -62,26 +69,21 @@ const UserProfilePage = function(props) {
     // ======= Render ===============================================
 
 
-    let content = ( <Spinner local={true} /> )
-    if ( request && request.state == 'fulfilled' ) {
-        content = (
-            <div className="user-bio">
-                { user.bio && <div className="bio"><ReactMarkdown children={ user.bio } /> </div>}
-            </div>
+    if ( ! user ) {
+        return (
+            <Spinner local={true} />
         )
     }
 
     return (
-        <Page id="user-profile-page">
-            <PageHeader>
+        <div id="user-profile-page">
+            <div className='right-sidebar'>
                 <UserView id={id} />
-            </PageHeader>
-            <PageBody>
-                <div className="tab-content">
-                    { content }
-                </div>
-            </PageBody>
-        </Page>
+            </div>
+            <div className='main'>
+                <PostsByUserFeed id={id} />
+            </div>
+        </div>
     )
 }
 

@@ -1,10 +1,25 @@
 #home-page {
     display: grid;
-    grid-template-columns: 1fr 4fr 1fr;
-    width: 1200px;
+    grid-template-columns: 1fr 3fr 1fr;
+    width: 1400px;
     margin: 50px auto;
+    background-color: var(--page-background-color);
 }
 
+.left-sidebar {
+/*    border: thin solid var(--main-border-color);
+    background-color: white;
+    border-radius: 10px;
+    padding: 10px;*/
+}
+
+
+.right-sidebar {
+    /*border: thin solid var(--main-border-color);
+    background-color: white;
+    border-radius: 10px;
+    padding: 10px;*/
+}
 .right-sidebar .controls {
     text-align: center;
     margin-bottom: 10px;
@@ -28,6 +43,6 @@
     color: var(--primary-color-dark);
     font-style: italic;
 }
-.posts {
+.feed {
     padding: 20px;
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useLayoutEffect } from 'react'
+import React, { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { DocumentTextIcon } from '@heroicons/react/24/outline'
@@ -7,6 +7,7 @@ import { XCircleIcon } from '@heroicons/react/24/solid'
 import { uploadFile, deleteFile, cleanupRequest } from '/state/files'
 
 import Spinner from '/components/Spinner'
+import Button from '/components/generic/button/Button'
 
 import './FileUploadInput.css'
 
@@ -23,6 +24,8 @@ const FileUploadInput = function(props) {
     const [fileData, setFileData] = useState(null)
 
     const [ typeError, setTypeError ] = useState(null)
+
+    const hiddenFileInput = useRef(null)
 
     // ============ Request Tracking ================================
    
@@ -106,9 +109,9 @@ const FileUploadInput = function(props) {
 
     useEffect(function() {
         if ( uploadRequest && uploadRequest.state == 'fulfilled') {
-            const file = uploadRequest.result
-            setFile(file)
-            props.setFile(file)
+            const response = uploadRequest.result
+            setFile(response.entity)
+            props.setFile(response.entity)
         }
     }, [ uploadRequest ])
 
@@ -154,14 +157,12 @@ const FileUploadInput = function(props) {
     } else { 
         // We're not waiting for any thing, render the content.
         if ( fileData && file ) {
+            console.log(file)
+            const url = new URL(file.filepath, file.location)
             content = (
                 <div className="file">
-                    <div className="document-icon"><DocumentTextIcon /></div>
-                    <div className="file-details">
-                        <div className="filename"><span className="label">File Name:</span> {fileData.name}</div>
-                        <div className="filetype"><span className="label">Type: </span> {file.type}</div>
-                    </div>
                     <div className="close-icon"><XCircleIcon onClick={removeFile} /></div>
+                    <img src={url.href} width={100} />
                 </div>
             )
         } else if (( fileData && ! file) ) {
@@ -173,12 +174,13 @@ const FileUploadInput = function(props) {
             }
             content = (
                 <div className="upload-input">
-                    <h3>Select a File</h3>
-                    <div className="explanation">Please select the file containing your document. Supported document formats are: pdf.</div>
+                    <Button type="primary" onClick={(e) => hiddenFileInput.current.click()}>Add Image</Button>
                     <input type="file"
                         name="file"
                         accept={props.types.join(',')}
                         onChange={onChange} 
+                        style={{ display: 'none' }}
+                        ref={hiddenFileInput}
                     />
                     { typeErrorView }
                 </div>
@@ -188,7 +190,7 @@ const FileUploadInput = function(props) {
 
     // Perform the render.
     return (
-        <div className="file-upload field-wrapper">
+        <div className="file-upload">
             { content }
             { props.error && <div className="error">{ props.error }</div> }
         </div>

@@ -85,8 +85,6 @@ module.exports = class UserController {
             return
         }
 
-        let count = 0
-
         const result = {
             where: 'WHERE',
             params: [],
@@ -97,19 +95,22 @@ module.exports = class UserController {
         }
 
         if ( query.name && query.name.length > 0) {
-            count += 1
-            const and = count > 1 ? ' AND ' : ''
-            result.where += `${and} SIMILARITY(users.name, $${count}) > 0`
             result.params.push(query.name)
-            result.order = `SIMILARITY(users.name, $${count}) desc`
+            const and = result.params.length > 1 ? ' AND ' : ''
+            result.where += `${and} SIMILARITY(users.name, $${result.params.length}) > 0`
+            result.order = `SIMILARITY(users.name, $${result.params.length}) desc`
+        }
+
+        if ( query.username && query.username.length > 0 ) {
+            result.params.push(query.username)
+            const and = result.params.length > 1 ? ' AND ' : ''
+            result.where += `${and} users.username = $${result.params.length}`
         }
 
         if ( query.ids && query.ids.length > 0 ) {
-            count += 1
-            const and = count > 1 ? ' AND ' : ''
-
-            result.where += `${and} users.id = ANY($${count}::bigint[])`
             result.params.push(query.ids)
+            const and = result.params.length > 1 ? ' AND ' : ''
+            result.where += `${and} users.id = ANY($${result.params.length}::bigint[])`
         }
 
         if ( query.page && ! options.ignorePage ) {
@@ -224,8 +225,8 @@ module.exports = class UserController {
         // response.
         //
         const userExistsResults = await this.database.query(
-            'SELECT id, email FROM users WHERE email=$1',
-            [ user.email ]
+            'SELECT id, username, email FROM users WHERE email=$1 OR username=$2',
+            [ user.email, user.username ]
         )
 
         // 1. request.body.email must not already be attached to a user in the
@@ -544,7 +545,7 @@ module.exports = class UserController {
             delete user.file
         }
 
-        await this.userDAO.updatePartialUser(user)
+        await this.userDAO.updateUser(user)
 
         // Issue #132 - We're going to allow the user's email to be returned in this case,
         // because only authenticated users may call this endpoint and then

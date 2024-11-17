@@ -47,7 +47,7 @@
     --warn-highlight-color: var(--danger-color-dark);
 
     /** Header colors **/
-    --header-background-color: var(--primary-color-lightest);
+    --header-background-color: white;
     --header-border-color: var(--primary-color-light);
     --header-text-color: var(--primary-color-darkest);
     --header-text-highlight-color: var(--primary-color-dark);
@@ -71,7 +71,7 @@
     --page-header-background-color: var(--primary-color-lightest);
 
     /** Page **/
-    --page-background-color: white;
+    --page-background-color: var(--primary-color-lightest);
     --page-text-color: var(--primary-color-darkest);
     --page-border-color: none;
 
@@ -82,7 +82,7 @@
     --tab-bar-icon-color: var(--primary-color-darkest);
 
     /** Main **/
-    --main-background-color: white;
+    --main-background-color: var(--primary-color-lightest);
     --main-border-color: var(--primary-color-light);
     --main-text-color: var(--primary-color-darkest);
     --main-icon-color: var(--primary-color-light);
