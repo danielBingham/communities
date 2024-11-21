@@ -35,7 +35,7 @@
 .list .list-row-content {}
 .list .list-grid-content {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
 }
 .list .list-no-content {
     padding: 20px;

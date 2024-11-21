@@ -67,7 +67,7 @@ const FriendButton = function({ userId }) {
     if ( ! friend ) {
         content = (<Button type="primary" onClick={() => addFriend()}>Add Friend</Button>)
     } else if (friend && friend.userId == currentUser.id && friend.status == 'pending' ) {
-        content = (<div>Friend Request Pending...</div> )
+        content = (<Button type="secondary-warn" onClick={() => rejectFriend()}>Cancel Friend Request</Button>)
     } else if ( friend && friend.friendId == currentUser.id && friend.status == 'pending' ) {
         content = (
             <div>

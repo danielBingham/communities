@@ -40,7 +40,7 @@ module.exports = class EmailService {
 
     async sendNotificationEmail(address, subject, body) {
         await this.sendEmail({
-            "From": "no-reply@communities.social",
+            "From": "no-reply@peer-review.io",
             "To": address,
             "Subject": subject,
             "TextBody": body,
@@ -58,7 +58,7 @@ Please confirm your email address by following the link: ${confirmationLink}`
 
 
         await this.sendEmail({
-            "From": "no-reply@communities.social",
+            "From": "no-reply@peer-review.io",
             "To": user.email,
             "Subject": `[Communities] Welcome to Communities, ${user.name}!`,
             "TextBody": emailTextBody,
@@ -75,7 +75,7 @@ Please confirm your email address by following the link: ${confirmationLink}`
 
 
         await this.sendEmail({
-            "From": "no-reply@communities.social",
+            "From": "no-reply@peer-review.io",
             "To": user.email,
             "Subject": "[Communities] Please reset your password",
             "TextBody": emailTextBody,
@@ -98,7 +98,7 @@ Please confirm your email address by following the link: ${confirmationLink}`
         come kick the tires, click the following link: ${invitationLink}`
 
         await this.sendEmail({
-            "From": "no-reply@communities.social",
+            "From": "no-reply@peer-review.io",
             "To": user.email,
             "Subject": `${inviter.name} invites you to join Communities`,
             "TextBody": emailTextBody,

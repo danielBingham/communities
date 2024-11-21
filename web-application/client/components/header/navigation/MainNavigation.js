@@ -1,12 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import {  Link } from 'react-router-dom'
+import {  useLocation, Link } from 'react-router-dom'
 
 import { 
-    HomeIcon,
-    UsersIcon,
-    QuestionMarkCircleIcon,
+    HomeIcon as HomeIconOutline,
+    UsersIcon as UsersIconOutline,
+    QuestionMarkCircleIcon as QuestionMarkCircleIconOutline,
 } from '@heroicons/react/24/outline'
+import { 
+    HomeIcon as HomeIconSolid,
+    UsersIcon as UsersIconSolid,
+    QuestionMarkCircleIcon as QuestionMarkCircleIconSolid,
+} from '@heroicons/react/24/solid'
 
 import './MainNavigation.css'
 
@@ -52,12 +57,14 @@ const MainNavigation = function(props) {
 
     // ======= Render ===============================================
 
+    const location = useLocation()
+    console.log(location)
     return (
         <>
             <div id="about-navigation" className="navigation-block">
-                <Link to="/"><HomeIcon />Home</Link>
-                <Link to="/about"><QuestionMarkCircleIcon />About</Link>
-                { currentUser && <Link to="/friends"><UsersIcon /> Friends</Link> }
+                <Link to="/">{ location.pathname == '/' ? <HomeIconSolid /> : <HomeIconOutline /> }Home</Link>
+                <Link to="/about">{ location.pathname == '/about' ? <QuestionMarkCircleIconSolid /> : <QuestionMarkCircleIconOutline /> }About</Link>
+                { currentUser && <Link to="/friends">{ location.pathname.startsWith('/friends') ? <UsersIconSolid /> : <UsersIconOutline /> }Friends</Link> }
             </div>
         </>
     )

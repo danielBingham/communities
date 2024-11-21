@@ -97,6 +97,13 @@ module.exports = class UserDAO extends DAO {
                         select: 'full',
                         key: 'location'
                     },
+                    'invitations': {
+                        insert: 'allowd',
+                        insertDefault: 50,
+                        update: 'allowed',
+                        select: 'full',
+                        key: 'invitations'
+                    },
                     'created_date': {
                         insert: 'override',
                         insertOverride: 'now()',

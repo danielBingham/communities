@@ -19,8 +19,8 @@ const ContributionView = function() {
                     data. <br />  
                 <p>We <strong>need user contributions</strong> for this to work.  
                 If only 5% of the users who use the
-                    platform <strong>contribute $10 / month</strong> then we'll be comfortably
-                sustainable.</p>
+                    platform <strong>contribute $10 per month</strong> then we'll be comfortably
+                sustainable. Please contribute if you can!</p>
                 <p><strong>Beta:</strong> If you've already set up a contribution, <a href={portalURI}>click here</a> to manage it.</p>
             </div>
             <div className="contribution-grid">
