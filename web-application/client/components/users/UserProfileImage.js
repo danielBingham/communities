@@ -15,7 +15,7 @@ const UserProfileImage = function({ userId, className }) {
     
     const [ requestId, setRequestId ] = useState(null)
     const request = useSelector(function(state) {
-        return state.users.requests[requestId]
+        return state.files.requests[requestId]
     })
 
     // ======= Redux State ==========================================

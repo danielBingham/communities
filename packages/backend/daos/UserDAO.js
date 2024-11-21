@@ -113,6 +113,44 @@ module.exports = class UserDAO extends DAO {
                         key: 'updatedDate'
                     }
                 }
+            },
+            'UserRelationship': {
+                table: 'user_relationships',
+                fields: {
+                    'user_id': {
+                        insert: 'primary',
+                        update: 'primary',
+                        select: 'always',
+                        key: 'userId'
+                    },
+                    'friend_id': {
+                        insert: 'primary',
+                        update: 'primary',
+                        select: 'always',
+                        key: 'friendId'
+                    },
+                    'status': {
+                        insert: 'allowed',
+                        update: 'allowed',
+                        select: 'always',
+                        key: 'status'
+                    },
+                    'created_date': {
+                        insert: 'override',
+                        insertOverride: 'now()',
+                        update: 'denied',
+                        select: 'always',
+                        key: 'createdDate'
+                    },
+                    'updated_date': {
+                        insert: 'override',
+                        insertOverride: 'now()',
+                        update: 'override',
+                        updateOverride: 'now()',
+                        select: 'always',
+                        key: 'updatedDate'
+                    }
+                }
             }
         }
     }
@@ -243,5 +281,25 @@ module.exports = class UserDAO extends DAO {
 
     async updateUser(user) {
         await this.update('User', user)
+    }
+
+    async deleteUser(user) {
+        await this.core.database.query(`
+            DELETE FROM users WHERE id = $1
+        `, [ user.id ])
+    }
+
+    async insertUserRelationships(userRelationships) {
+        await this.insert('UserRelationship', userRelationships)
+    }
+
+    async updateUserRelationship(userRelationship) {
+        await this.update('UserRelationship', userRelationship)
+    }
+
+    async deleteUserRelationship(userRelationship) {
+        await this.core.database.query(`
+            DELETE FROM user_relationships WHERE (user_id = $1 AND friend_id = $2) OR (user_id = $2 AND friend_id = $1)
+        `, [ userRelationship.userId, userRelationship.friendId ])
     }
 }

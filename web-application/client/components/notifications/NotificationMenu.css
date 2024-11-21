@@ -34,6 +34,7 @@
 }
 .notification-menu .notification-trigger {
     position: relative;
+    padding: 0 20px;
 }
 .notification-menu .notification-trigger .unread-indicator {
     position: absolute;
@@ -50,11 +51,11 @@
 .notification-menu .notification-body {
     max-height: 400px;
     overflow: auto;
-    margin-left: -120px;
-    top: 42px;
+    margin-left: -60px;
+    top: 52px;
 }
 .notification-menu .notification-header {
-    padding: 5px 10px;
+    padding: 0px 10px 5px 10px;
     text-align: right;
     border-bottom: thin solid var(--floating-menu-border-color);
 }

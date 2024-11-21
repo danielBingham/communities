@@ -1,4 +1,3 @@
-.floating-menu { }
 .floating-menu { 
     display: inline-block;
     position: relative;
@@ -31,10 +30,10 @@
     text-align: left;
     background-color: white; 
     border: thin solid var(--floating-menu-border-color);
-    box-shadow: 0 0 12px -7px rgba(100,100,100,0.4);
-    padding: 0;
+    box-shadow: 0px 0px 5px -3px rgba(0,0,0,0.25);
+    padding: 5px 0;
     z-index: 1000;
-
+    border-radius: 7px;
 }
 
 

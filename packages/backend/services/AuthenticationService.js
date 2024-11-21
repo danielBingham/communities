@@ -22,14 +22,18 @@ const bcrypt = require('bcrypt');
 const ServiceError = require('../errors/ServiceError')
 
 const UserDAO = require('../daos/UserDAO')
+const FileDAO = require('../daos/FileDAO')
 
 module.exports = class AuthenticationService {
 
     constructor(core) {
+        this.core = core
+
         this.database = core.database
         this.logger = core.logger
 
         this.userDAO = new UserDAO(core)
+        this.fileDAO = new FileDAO(core)
     }
 
     /**
@@ -50,7 +54,7 @@ module.exports = class AuthenticationService {
     /**
      *
      */
-    async loginUser(id, request) {
+    async getSessionForUserId(id ) {
         const results = await this.userDAO.selectUsers('WHERE users.id=$1', [id])
         if ( results.list.length <= 0) {
             throw new ServiceError('no-user', 'Failed to get full record for authenticated user!')
@@ -58,9 +62,27 @@ module.exports = class AuthenticationService {
 
         const user = results.dictionary[id]
 
-        request.session.user = user
+        const friendResults = await this.core.database.query(`
+            SELECT user_id, friend_id, status FROM user_relationships
+                WHERE user_id = $1 OR friend_id = $1
+        `, [ user.id])
+
+        const friends = friendResults.rows.map((r) => { 
+            return { userId: r.user_id, friendId: r.friend_id, status: r.status }
+        })
+
+        let file = null
+        if ( user.fileId !== null ) {
+            const fileResults = await this.fileDAO.selectFiles(`WHERE files.id = $1`, [ user.fileId ])
+            console.log(fileResults)
+            file = fileResults[0]
+        }
+        
+
         return {
-            user: request.session.user,
+            user: user,
+            friends: friends,
+            file: file
         }
     }
 

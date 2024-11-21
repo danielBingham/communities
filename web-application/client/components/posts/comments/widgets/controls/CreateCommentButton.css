@@ -9,7 +9,7 @@ a.create-comment {
 a.create-comment:link,
 a.create-comment:visited,
 a.create-comment:active {
-    color: var(--primary-color-darkest);
+    color: var(--primary-color-dark);
     background-color: var(--primary-color-lightest);
 }
 a.create-comment:hover {

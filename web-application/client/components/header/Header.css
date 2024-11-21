@@ -1,20 +1,30 @@
 header {
-    display: flex;
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     margin: 0;
-    padding: 5px 50px;
+    padding: 0 50px;
     border-bottom: thin solid var(--header-border-color);
     background-color: var(--header-background-color);
     color: var(--header-text-color);
     min-width: 1200px;
+    box-shadow: 0px 0px 6px -3px rgba(0,0,0,0.25);
+    z-index: 10;
 }
 
 header #site-title {
+    display: block;
     font-family: "Nunito", serif;
     font-size: 30px;
+    line-height: 1em;
     font-weight: 300;
+    align-items: center;
+    height: 30px;
 
-    flex-grow: 1;
-    padding: 11px 0;
+    padding: 17px 0;
 
     text-align: left;
 }
@@ -31,16 +41,14 @@ header #site-title .wip {
 
 header #navigation {
     text-align: right;
-    flex-grow: 1;
 
     font-size: 18px;
-    padding: 3px 0;
 }
 
 header .navigation-block {
     display: inline-block;
     margin-left: 7px;
-    padding: 11px 0;
+    padding: 21px 0;
 }
 header .navigation-block .floating-menu a:link, 
 header .navigation-block .floating-menu a:active, 
@@ -63,4 +71,11 @@ header a:link, header a:active, header a:visited {
 
 header a:hover {
     color: var(--header-text-highlight-color);
+}
+header svg {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    margin-right: 6px;
+    margin-bottom: -2px;
 }

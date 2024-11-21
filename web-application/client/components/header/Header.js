@@ -2,9 +2,6 @@ import React from 'react'
 import { useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 
-import { 
-    BookOpenIcon
-} from '@heroicons/react/24/outline'
 
 import MainNavigation from './navigation/MainNavigation'
 import AuthenticationNavigation from './navigation/AuthenticationNavigation'

@@ -137,14 +137,32 @@ module.exports = function(core) {
 
     // Edit an existing user with partial data.
     router.patch('/user/:id', function(request, response, next) {
-        return userController.patchUser(request, response).catch(function(error) {
+        userController.patchUser(request, response).catch(function(error) {
             next(error)
         })
     })
 
     // Delete an existing user.
     router.delete('/user/:id', function(request, response, next) {
-        return userController.deleteUser(request, response).catch(function(error) {
+        userController.deleteUser(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.post('/user/:userId/friends', function(request, response, next) {
+        userController.postFriends(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.patch('/user/:userId/friend/:friendId', function(request, response, next) {
+        userController.patchFriend(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+    
+    router.delete('/user/:userId/friend/:friendId', function(request, response, next) {
+        userController.deleteFriend(request, response).catch(function(error) {
             next(error)
         })
     })

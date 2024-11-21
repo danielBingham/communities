@@ -1,9 +1,11 @@
-#about-page .page-body {
+#about-page {
     width: 800px;
     padding: 30px 200px 125px 200px;
 
     font-size: 18px;
     line-height: 1.7em;
+
+    margin: 50px auto;
 }
 #about-page h1 {
     text-align: center;
@@ -18,6 +20,10 @@
     margin-top: 40px;
 }
 
+#about-page .beta {
+    font-size: 14px;
+    font-style: italic;
+}
 
 #about-page h2 a:link, #about-page h2 a:active, #about-page h2 a:visited {
     color: #333;

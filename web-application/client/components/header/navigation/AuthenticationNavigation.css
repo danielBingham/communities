@@ -1,3 +1,7 @@
+#authentication-navigation.navigation-block.authenticated {
+    padding: 13px 0;
+}
+
 #authentication-navigation {
     position: relative;
     cursor: pointer;
@@ -9,6 +13,12 @@
     height: 18px;
     margin-right: 6px;
     margin-bottom: -4px;
+}
+#authentication-navigation .user-tag .profile-image svg {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    margin-bottom: -15px;
 }
 #authentication-navigation svg.arrow {
     width: 14px;

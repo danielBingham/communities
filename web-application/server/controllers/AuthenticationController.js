@@ -59,13 +59,24 @@ module.exports = class AuthenticationController {
          * 
          * **********************************************************/
         if (request.session.user) {
+            const session = await this.auth.getSessionForUserId(request.session.user.id)
+
+            console.log(session)
+            request.session.user = session.user
+            request.session.friends = session.friends
+            request.session.file = session.file
+
             return response.status(200).json({
-                user: request.session.user
+                user: request.session.user,
+                friends: request.session.friends,
+                file: request.session.file
             })
 
         } else {
             return response.status(200).json({
-                user: null
+                user: null,
+                friends: [],
+                file: null
             })
         }
     }
@@ -97,9 +108,16 @@ module.exports = class AuthenticationController {
         try {
             const userId = await this.auth.authenticateUser(credentials)
 
-            const responseBody = await this.auth.loginUser(userId, request)
+            const session = await this.auth.getSessionForUserId(userId)
+            request.session.user = session.user
+            request.session.friends = session.friends
+            request.session.file = session.file
 
-            return response.status(200).json(responseBody)
+            response.status(200).json({
+                user: request.session.user,
+                friends: request.session.friends,
+                file: request.session.file
+            })
         } catch (error ) {
             if ( error instanceof backend.ServiceError ) {
                 if ( error.type == 'no-user' ) {

@@ -103,15 +103,38 @@ module.exports = class TokenController {
             // TODO better to hang on to it and mark it as used?
             await this.tokenDAO.deleteToken(token)
 
-            const responseBody = await this.authenticationService.loginUser(token.userId, request)
+            const session = await this.authenticationService.getSessionForUserId(token.userId)
+            request.session.user = session.user
+            request.session.friends = session.friends
+            request.session.file = session.file
 
-            return response.status(200).json(responseBody)
+            response.status(200).json({
+                user: request.session.user,
+                friends: request.session.friends,
+                file: request.session.file
+            })
         } else if ( token.type == 'reset-password' ) {
-            const responseBody = await this.authenticationService.loginUser(token.userId, request)
-            return response.status(200).json(responseBody)
+            const session = await this.authenticationService.getSessionForUserId(token.userId)
+            request.session.user = session.user
+            request.session.friends = session.friends
+            request.session.file = session.file
+
+            response.status(200).json({
+                user: request.session.user,
+                friends: request.session.friends,
+                file: request.session.file
+            })
         } else if ( token.type == 'invitation' ) {
-            const responseBody = await this.authenticationService.loginUser(token.userId, request)
-            return response.status(200).json(responseBody)
+            const session = await this.authenticationService.getSessionForUserId(token.userId)
+            request.session.user = session.user
+            request.session.friends = session.friends
+            request.session.file = session.file
+
+            response.status(200).json({
+                user: request.session.user,
+                friends: request.session.friends,
+                file: request.session.file
+            })
         }
     }
 

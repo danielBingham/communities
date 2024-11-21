@@ -2,6 +2,7 @@
     display: flex;
     border-top: thin solid var(--main-border-color);
     font-size: 12px;
+    margin: 0 auto;
 }
 .post .reactions .group {
     padding: 0 5px;

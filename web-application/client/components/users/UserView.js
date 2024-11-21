@@ -3,14 +3,11 @@ import { Link, useParams, useSearchParams } from 'react-router-dom'
 
 import { useDispatch, useSelector } from 'react-redux'
 
-import ReactMarkdown from 'react-markdown'
-
 import { getUser, cleanupRequest } from '/state/users'
 
-import ORCIDTag from '/components/authentication/ORCIDTag'
 import UserProfileImage from '/components/users/UserProfileImage'
+import FriendButton from '/components/friends/FriendButton'
 
-import {  BuildingOffice2Icon, MapPinIcon } from '@heroicons/react/24/outline'
 import Spinner from '/components/Spinner'
 
 import './UserView.css'
@@ -88,6 +85,7 @@ const UserView = function(props) {
             <UserProfileImage userId={user.id} /> 
             <div className="details">
                 <div className="name"> { user.name }</div>
+                <div className="friendship"><FriendButton userId={user.id} /></div>
                 <div className="about"> { user.about }</div>
             </div>
         </article>

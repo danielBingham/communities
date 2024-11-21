@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom'
 import { getUser, cleanupRequest } from '/state/users'
 
 import UserProfileImage from '/components/users/UserProfileImage'
-import Field from '/components/fields/Field'
+import FriendButton from '/components/friends/FriendButton'
 import Spinner from '/components/Spinner'
 import './UserBadge.css'
 
@@ -23,22 +23,17 @@ const UserBadge = function(props) {
     const user = useSelector(function(state) {
         return state.users.dictionary[props.id]
     })
-
-    const paper = useSelector(function(state) {
-        if ( props.paperId ) {
-            return state.papers.dictionary[props.paperId]
-        } else {
-            return null
-        }
-    })
+    
 
     // ======= Effect Handling ======================================
     
     const dispatch = useDispatch()
 
     useEffect(function() {
-        setRequestId(dispatch(getUser(props.id)))
-    }, [ props.id, props.paperId ])
+        if ( ! user ) {
+            setRequestId(dispatch(getUser(props.id)))
+        }
+    }, [ props.id ])
 
     // Clean up our request.
     useEffect(function() {
@@ -56,10 +51,10 @@ const UserBadge = function(props) {
             <div className="user-badge">
                 <div className="badge-grid">
                     <UserProfileImage userId={user.id} />
-                    <div className="info-wrapper">
-                        <div className="user-tag" ><Link to={ `/user/${user.id}` }>{user.name}</Link></div> 
-                        <div className="institution">{user.institution}</div>
-                    </div>
+                    <div className="details" >
+                        <div className="name"><Link to={ `/${user.username}` }>{user.name}</Link></div>
+                        <FriendButton userId={user.id} />
+                    </div> 
                 </div>
             </div>
         )

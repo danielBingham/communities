@@ -4,17 +4,9 @@ import {  Link } from 'react-router-dom'
 
 import { 
     HomeIcon,
-    ChevronUpIcon, 
-    ChevronDownIcon, 
-    BookOpenIcon, 
-    TagIcon, 
-    UserCircleIcon, 
-    DocumentIcon,
-    DocumentCheckIcon,
+    UsersIcon,
     QuestionMarkCircleIcon,
-    NewspaperIcon
 } from '@heroicons/react/24/outline'
-import { GlobeAltIcon } from '@heroicons/react/24/outline'
 
 import './MainNavigation.css'
 
@@ -28,6 +20,10 @@ const MainNavigation = function(props) {
     const [ menuVisible, setMenuVisible ] = useState(false)
 
     const menuRef = useRef(null)
+
+    const currentUser = useSelector(function(state) {
+        return state.authentication.currentUser
+    })
 
     // ======= Actions and Event Handling ===========================
 
@@ -61,6 +57,7 @@ const MainNavigation = function(props) {
             <div id="about-navigation" className="navigation-block">
                 <Link to="/"><HomeIcon />Home</Link>
                 <Link to="/about"><QuestionMarkCircleIcon />About</Link>
+                { currentUser && <Link to="/friends"><UsersIcon /> Friends</Link> }
             </div>
         </>
     )

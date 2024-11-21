@@ -17,6 +17,7 @@ import {
 
 import { reset } from '/state/system'
 import { setUsersInDictionary } from '/state/users'
+import { setFilesInDictionary } from '/state/files'
 
 export const authenticationSlice = createSlice({
     name: 'authentication',
@@ -36,7 +37,7 @@ export const authenticationSlice = createSlice({
          */
         currentUser: null,
 
-        settings: null
+        friends: []
     },
     reducers: {
 
@@ -44,8 +45,8 @@ export const authenticationSlice = createSlice({
             state.currentUser = action.payload
         },
 
-        setSettings: function(state, action) {
-            state.settings = action.payload
+        setFriends: function(state, action) {
+            state.friends = action.payload
         },
 
         // ========== Request Tracking Methods =============
@@ -105,11 +106,15 @@ export const getAuthentication = function(onCompletion) {
             function(responseBody ) {
                 if ( responseBody && responseBody.user ) {
                     dispatch(authenticationSlice.actions.setCurrentUser(responseBody.user))
-                    dispatch(authenticationSlice.actions.setSettings(responseBody.settings))
+                    dispatch(authenticationSlice.actions.setFriends(responseBody.friends))
                     dispatch(setUsersInDictionary({ entity: responseBody.user }))
+
+                    if ( responseBody.file ) {
+                        dispatch(setFilesInDictionary({ entity: responseBody.file }))
+                    }
                 } else if ( responseBody ) {
                     dispatch(authenticationSlice.actions.setCurrentUser(null))
-                    dispatch(authenticationSlice.actions.setSettings(responseBody.settings))
+                    dispatch(authenticationSlice.actions.setFriends([]))
                 }
 
                 if ( onCompletion ) {
@@ -146,8 +151,12 @@ export const postAuthentication = function(email, password) {
             'POST', endpoint, body,
             function(responseBody) {
                 dispatch(authenticationSlice.actions.setCurrentUser(responseBody.user))
-                dispatch(authenticationSlice.actions.setSettings(responseBody.settings))
+                dispatch(authenticationSlice.actions.setFriends(responseBody.friends))
                 dispatch(setUsersInDictionary({ entity: responseBody.user }))
+
+                if ( responseBody.file ) {
+                    dispatch(setFilesInDictionary({ entity: responseBody.file }))
+                }
             }
         )
     }
@@ -208,38 +217,6 @@ export const deleteAuthentication = function() {
     }
 }
 
-/**
- * POST /orcid/authentication
- *
- * Attempt to authenticate a user with the backend, starting the user's session on success.
- *
- * Makes the request async and returns an id that can be used to track the
- * request and get the results of a completed request from this state slice.
- *
- * @param {string} email - The email of the user we'd like to authenticate.
- * @param {string} password - Their password.
- *
- * @returns {string} A uuid requestId we can use to track this request.
- */
-export const postOrcidAuthentication = function(code, connect) {
-    return function(dispatch, getState) {
-        const endpoint = '/orcid/authentication'
-        const body = {
-            code: code,
-            connect: connect
-        }
-
-        return makeTrackedRequest(dispatch, getState, authenticationSlice,
-            'POST', endpoint, body,
-            function(responseContent) {
-                dispatch(authenticationSlice.actions.setCurrentUser(responseContent.user))
-                dispatch(authenticationSlice.actions.setSettings(responseContent.settings))
-                dispatch(setUsersInDictionary({ entity: responseContent.user }))
-            }
-        )
-    }
-}
-
 export const validateToken = function(token, type) {
     return function(dispatch, getState) {
         const queryString = makeSearchParams({type: type}) 
@@ -249,8 +226,12 @@ export const validateToken = function(token, type) {
             'GET', endpoint, null,
             function(responseContent) {
                 dispatch(authenticationSlice.actions.setCurrentUser(responseContent.user))
-                dispatch(authenticationSlice.actions.setSettings(responseContent.settings))
+                dispatch(authenticationSlice.actions.setFriends(responseBody.friends))
                 dispatch(setUsersInDictionary({ entity: responseContent.user }))
+
+                if ( responseBody.file ) {
+                    dispatch(setFilesInDictionary({ entity: responseBody.file }))
+                }
             }
         )
     }
@@ -268,6 +249,6 @@ export const createToken = function(params) {
     }
 }
 
-export const { setCurrentUser, setSettings, cleanupRequest} = authenticationSlice.actions
+export const { setCurrentUser, setFriends, cleanupRequest} = authenticationSlice.actions
 
 export default authenticationSlice.reducer

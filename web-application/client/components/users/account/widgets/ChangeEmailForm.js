@@ -184,7 +184,6 @@ const ChangeEmailForm = function(props) {
     return (
         <div className="change-email-form">
             <form onSubmit={onSubmit}>
-                <h2>Change Email</h2>
                 <div className="form-field email">
                     <label htmlFor="email">New Email</label>
                     <input type="text"

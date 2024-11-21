@@ -154,7 +154,11 @@ app.get('/config', function(request, response) {
         backend: core.config.backend, 
         environment: process.env.NODE_ENV,
         log_level: core.config.log_level,
-        maintenance_mode: process.env.MAINTENANCE_MODE === 'true' ? true : false
+        maintenance_mode: process.env.MAINTENANCE_MODE === 'true' ? true : false,
+        stripe: {
+            portal: core.config.stripe.portal,
+            links: core.config.stripe.links
+        }
     })
 })
 

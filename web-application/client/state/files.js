@@ -170,6 +170,6 @@ export const deleteFile = function(fileId) {
 
 
 
-export const {  addFilesToDictionary, removeFile, makeRequest, failRequest, completeRequest, cleanupRequest }  = filesSlice.actions
+export const {  setFilesInDictionary, removeFile, makeRequest, failRequest, completeRequest, cleanupRequest }  = filesSlice.actions
 
 export default filesSlice.reducer

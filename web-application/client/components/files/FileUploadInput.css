@@ -3,13 +3,5 @@
 }
 .file-upload .file {
     width: 100px;
-}
-.file-upload .file .close-icon svg {
-    width: 24px;
-    height: 24px;
-    padding: 5px;
-    color: var(--main-icon-color);
-}
-.file-upload .file .close-icon svg:hover {
-    color: var(--main-icon-highlight-color);
+    margin: auto;
 }

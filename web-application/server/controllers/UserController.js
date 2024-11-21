@@ -23,13 +23,15 @@
  * Restful routes for manipulating users.
  *
  ******************************************************************************/
-const backend = require('@danielbingham/peerreview-backend')
+const backend = require('@danielbingham/communities-backend')
 
 const ControllerError = require('../errors/ControllerError')
 
 module.exports = class UserController {
 
     constructor(core) {
+        this.core = core
+
         this.database = core.database
         this.logger = core.logger
         this.config = core.config
@@ -39,10 +41,24 @@ module.exports = class UserController {
 
         this.userDAO = new backend.UserDAO(core)
         this.tokenDAO = new backend.TokenDAO(core)
+        this.fileDAO = new backend.FileDAO(core)
     }
 
     async getRelations(results, requestedRelations) {
-        return {}
+        const fileIds = []
+        for(const userId of results.list) {
+            const user = results.dictionary[userId]
+            fileIds.push(user.fileId)
+        }
+        const fileResults = await this.fileDAO.selectFiles(`WHERE files.id = ANY($1::uuid[])`, [ fileIds ])
+        const fileDictionary = {}
+        for(const file of fileResults) {
+            fileDictionary[file.id] = file
+        }
+
+        return {
+            files: fileDictionary
+        }
     }
 
     /**
@@ -76,7 +92,7 @@ module.exports = class UserController {
      * }
      * ```
      */
-    async parseQuery(query, options) {
+    async parseQuery(currentUser, query, options) {
         options = options || {
             ignorePage: false
         }
@@ -110,7 +126,20 @@ module.exports = class UserController {
         if ( query.ids && query.ids.length > 0 ) {
             result.params.push(query.ids)
             const and = result.params.length > 1 ? ' AND ' : ''
-            result.where += `${and} users.id = ANY($${result.params.length}::bigint[])`
+            result.where += `${and} users.id = ANY($${result.params.length}::uuid[])`
+        }
+
+        if ( query.friendOf ) {
+            const friendResults = await this.core.database.query(`
+                SELECT user_id, friend_id FROM user_relationships
+                    WHERE (user_id = $1 OR friend_id = $1) AND status = ANY($2::user_relationship_status[])
+            `, [ query.friendOf, currentUser.id == query.friendOf ? [ 'confirmed', 'pending'] : [ 'confirmed'] ])
+
+            const friendIds = friendResults.rows.map((r) => r.user_id == currentUser.id ? r.friend_id : r.user_id)
+
+            result.params.push(friendIds)
+            const and = result.params.length > 1 ? ' AND ' : ''
+            result.where += `${and} users.id = ANY($${result.params.length}::uuid[])`
         }
 
         if ( query.page && ! options.ignorePage ) {
@@ -153,7 +182,7 @@ module.exports = class UserController {
          * 
          * **********************************************************/
 
-        const { where, params, order, page, emptyResult, requestedRelations } = await this.parseQuery(request.query)
+        const { where, params, order, page, emptyResult, requestedRelations } = await this.parseQuery(request.session.user, request.query)
 
         if ( emptyResult ) {
             return response.status(200).json({
@@ -272,7 +301,6 @@ module.exports = class UserController {
         }
 
         const createdUserResults = await this.userDAO.selectUsers('WHERE users.id=$1', [user.id])
-        console.log(createdUserResults)
 
         if ( ! createdUserResults.dictionary[user.id] ) {
             throw new ControllerError(500, 'server-error', `No user found after insertion. Looking for id ${user.id}.`)
@@ -537,12 +565,8 @@ module.exports = class UserController {
             }
         }
 
-        // We only need the Id.
-        if ( user.file ) {
-            user.fileId = user.file.id
-            delete user.file
-        } else if ( user.file !== undefined ) {
-            delete user.file
+        if ( existingUser.fileId && existingUser.fileId != user.fileId ) {
+            await this.fileDAO.deleteFile(existingUser.fileId)
         }
 
         await this.userDAO.updateUser(user)
@@ -613,4 +637,108 @@ module.exports = class UserController {
         return response.status(200).json({userId: request.params.id})*/
     }
 
+    async postFriends(request, response) {
+        const currentUser = request.session.user
+
+        if ( ! currentUser ) {
+            throw new ControllerError(401, 'not-authenticated',
+                `User attempting to submit friend request is not authenticated.`,
+                `You may not submit a friend request without authenticating.`)
+        }
+
+        const userId = request.params.userId
+        const friendId = request.body.friendId
+
+        if ( currentUser.id !== userId ) {
+            throw new ControllerError(403, 'not-authorized',
+                `User(${currentUser.id}) attempting to submit friend request on behalf of User(${userId}). Denied.`,
+                `You may not submit a friend request for another user.`)
+        }
+
+        const userRelationship = {
+            userId: userId,
+            friendId: friendId,
+            status: 'pending'
+        }
+
+        await this.userDAO.insertUserRelationships(userRelationship)
+
+        request.session.friends.push(userRelationship)
+
+        response.status(200).json({
+            friends: request.session.friends
+        })
+    }
+
+    async patchFriend(request, response) {
+        const currentUser = request.session.user
+
+        if ( ! currentUser ) {
+            throw new ControllerError(401, 'not-authenticated',
+                `User attempting to accept friend request is not authenticated.`,
+                `You may not accept a friend request without authenticating.`)
+        }
+
+        const userId = request.params.userId
+        const friendId = request.params.friendId
+
+        if ( currentUser.id !== friendId ) {
+            throw new ControllerError(403, 'not-authorized',
+                `User(${currentUser.id}) attempting to accept friend request on behalf of User(${friendId}). Denied.`,
+                `You may not accept a friend request for another user.`)
+        }
+
+        if ( request.body.status !== 'confirmed' ) {
+            throw new ControllerError(400, 'invalid',
+                `User(${currentUser.id}) provided wrong status when confirming friend request.`,
+                `You may only provide 'confirmed' as status to PATCH.  If you want to reject the request, use DELETE.`)
+        }
+
+        const userRelationship = {
+            userId: userId,
+            friendId: friendId,
+            status: request.body.status 
+        }
+
+        await this.userDAO.updateUserRelationship(userRelationship)
+
+        request.session.friends
+            .find((f) => f.userId == userId && f.friendId == friendId).status = 'confirmed'
+
+        response.status(200).json({
+            friends: request.session.friends
+        })
+    }
+
+    async deleteFriend(request, response) {
+        const currentUser = request.session.user
+
+        if ( ! currentUser ) {
+            throw new ControllerError(401, 'not-authenticated',
+                `User attempting to remove friend is not authenticated.`,
+                `You may not accept a friend request without authenticating.`)
+        }
+
+        const userId = request.params.userId
+        const friendId = request.params.friendId
+
+        if ( currentUser.id !== userId && currentUser.id !== friendId ) {
+            throw new ControllerError(403, 'not-authorized',
+                `User(${currentUser.id}) attempting to delete relationship for User(${userId}) and User(${friendId}). Denied.`,
+                `You may not delete other user's friends.`)
+        }
+
+        const relationship = { userId: userId, friendId: friendId }
+        console.log(relationship)
+        await this.userDAO.deleteUserRelationship(relationship)
+
+        request.session.friends = request.session.friends
+            .filter((f) => ! (f.userId == userId && f.friendId == friendId) && ! (f.userId == friendId && f.friendId == userId))
+
+        console.log(request.session.friends)
+
+        response.status(200).json({
+            friends: request.session.friends
+        })
+    }
 } 

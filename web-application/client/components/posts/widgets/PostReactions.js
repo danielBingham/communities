@@ -92,9 +92,9 @@ const PostReactions = function({ postId }) {
                     onClick={(e) => { e.preventDefault(); react('dislike') }} 
                 ><HandThumbDownIcon /> Dislike { 'dislike' in reactionCounts ? `(${reactionCounts['dislike']})` : '' }</a>
             </div>
-            <div className="group share">
+            {/*<div className="group share">
                 <a href=""><ArrowPathRoundedSquareIcon /> Share</a>
-            </div>
+            </div>*/}
             <div className="group block">
                 <a href=""
                     className={`${ userReaction?.reaction == 'block' ? 'reacted' : ''} block`}

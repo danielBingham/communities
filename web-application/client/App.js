@@ -35,8 +35,8 @@ import AcceptInvitationPage from '/pages/authentication/AcceptInvitationPage'
 
 import UserProfilePage from '/pages/users/UserProfilePage'
 import UserAccountPage from '/pages/users/UserAccountPage'
-import UserProfileEditForm from '/components/users/account/UserProfileEditForm'
-import UserAccountDetailsForm from '/components/users/account/UserAccountDetailsForm'
+
+import FriendsPage from '/pages/friends/FriendsPage'
 
 import PostPage from '/pages/posts/PostPage'
 
@@ -214,6 +214,13 @@ const App = function(props) {
                             <Route path=":pageTab" element={ <UserAccountPage /> } />
                             <Route index element={ <UserAccountPage /> } />
                         </Route>
+
+                        { /* ========== Friends ================================= */ }
+                        <Route path="/friends">
+                            <Route path=":pageTab" element={ <FriendsPage />} />
+                            <Route index element={<FriendsPage />} />
+                        </Route>
+                            
 
                     </Routes>
                 </main>

@@ -1,0 +1,16 @@
+.contribution-view .intro{
+    margin: 0 auto;
+    width: 900px; 
+    font-size: 20px;
+    line-height: 1.7em;
+}
+.contribution-view .contribution-grid {
+    display: grid;
+    margin-top: 50px;
+    grid-template-columns: 1fr 1fr 1fr;
+
+}
+.contribution-view .additional-contributions {
+    margin: 20px auto;
+    text-align: center;
+}

@@ -9,6 +9,7 @@ import UserTag from '/components/users/UserTag'
 
 import PostReactions from '/components/posts/widgets/PostReactions'
 import PostComments from '/components/posts/comments/PostComments'
+import PostImage from '/components/posts/PostImage'
 
 import './Post.css'
 
@@ -65,6 +66,7 @@ const Post = function({ id }) {
             <div className="content">
                 { post.content }
             </div>
+            <PostImage id={id} />
             <PostReactions postId={id} />
             <PostComments postId={id} />
         </div>

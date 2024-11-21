@@ -122,15 +122,6 @@ const UserListView = function(props) {
     const sort = searchParams.get('sort') ? searchParams.get('sort') : 'newest'
     return (
         <List className="user-list">
-            <ListHeader>
-                <ListTitle><UserCircleIcon/>Users</ListTitle>
-                <ListControls>
-                    <ListControl url={`?${newestParams.toString()}`} 
-                        onClick={() => setSort('newest')} 
-                        selected={sort == 'newest'} 
-                        name="Newest" />
-                </ListControls>
-            </ListHeader>
             <ListGridContent>
                 { content } 
             </ListGridContent>

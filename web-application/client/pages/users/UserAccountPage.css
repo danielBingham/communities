@@ -1,15 +1,33 @@
-#user-account-page .login-notice {
-    border: thin solid var(--main-border-color);
-    background-color: white;
-    padding: 20px;
-    text-align: center;
+#user-account-page {
+    display: grid;
+    grid-template-columns: 320px auto;
+    width: 1400px;
+    margin: 50px auto;
 }
-#user-account-page .orcid-connection h2 {
-    text-align: center;
+#user-account-page .right-sidebar div {
+    padding: 10px;
+    font-size: 18px;
 }
-#user-account-page .orcid-connection p {
-    margin: 1.6em auto;
-    width: 600px;
+#user-account-page .right-sidebar div:hover {
+    background-color: var(--primary-color-light);
+    border-radius: 10px;
+}
+#user-account-page .right-sidebar svg {
+    width: 22px;
+    margin-right: 5px;
+    margin-bottom: -5px;
+    color: var(--icon-color);
+}
+#user-account-page .right-sidebar a:link,
+#user-account-page .right-sidebar a:visited,
+#user-account-page .right-sidebar a:active {
+    color: var(--primary-color-darkest);
+}
+#user-account-page .right-sidebar .active a {
+    font-weight: bold;
 }
 
 
+#user-account-page .content {
+    padding: 0 30px;
+}

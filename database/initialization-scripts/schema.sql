@@ -41,10 +41,10 @@ CREATE TYPE user_permissions AS ENUM('user', 'moderator', 'admin', 'superadmin')
 CREATE TABLE users (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 
-    name varchar(512) NOT NULL,
-    username varchar(512),
+    name varchar(512) DEFAULT '',
+    username varchar(512) DEFAULT '',
 
-    email varchar(512),
+    email varchar(512) NOT NULL,
     password varchar(256),
 
     status user_status DEFAULT 'unconfirmed',
@@ -54,6 +54,8 @@ CREATE TABLE users (
 
     location geography(POINT),
 
+    invitations int DEFAULT 50,
+
     created_date timestamptz,
     updated_date timestamptz 
 );
@@ -61,15 +63,24 @@ CREATE INDEX users__name ON users (name);
 CREATE INDEX users_username ON users (username);
 CREATE INDEX users__name_trgm ON users USING GIN (name gin_trgm_ops);
 
+/**
+ * Insert the admin user. Initial password is "PasswordPassword". It will be
+ * changed as soon as the environment is finished creating. 
+ */
+INSERT INTO users (name, username, email, password, status, permissions, created_date, updated_date)
+    VALUES ('Administrator', 'administrator', 'contact@communities.social', '$2b$10$ywAqKPvFH51jeILdx.Piy.mm5ci37vMpy7G4lEBWObfIzOif5ZgzK', 'confirmed', 'superadmin', now(), now());
+
 CREATE TYPE user_relationship_status AS ENUM('pending', 'confirmed');
 CREATE TABLE user_relationships (
     user_id uuid REFERENCES users(id) ON DELETE CASCADE NOT NULL,
     friend_id uuid REFERENCES users(id) ON DELETE CASCADE NOT NULL,
 
-    status user_relationship_status NOT NULL
+    status user_relationship_status NOT NULL,
+
+    created_date timestamptz,
+    updated_date timestamptz,
+    PRIMARY KEY(user_id, friend_id)
 );
-CREATE INDEX user_relationships__user_id ON users (id);
-CREATE INDEX user_relationships__friend_id ON users (id);
 
 /******************************************************************************
  * Notifications 

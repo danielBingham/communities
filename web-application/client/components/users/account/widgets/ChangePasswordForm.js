@@ -192,7 +192,6 @@ const ChangePasswordForm = function(props) {
     return (
         <div className="change-password-form">
             <form onSubmit={onSubmit}>
-                <h2>Change Password</h2>
                 <div className="form-field new-password">
                     <label htmlFor="new-password">New Password</label>
                     <input type="password"

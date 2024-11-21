@@ -1,0 +1,26 @@
+.welcome-splash {
+    margin: 200px auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+.welcome-splash .intro {
+    font-size: 24px;
+    line-height: 1.7em;
+}
+.welcome-splash .intro .beta {
+    font-size: 16px;
+    font-style: italic;
+}
+
+.welcome-splash .login {
+    padding: 20px;
+    width: 500px;
+    margin: auto;
+    border-radius: 7px;
+    background-color: white;
+    border: thin solid var(--main-border-color);
+    box-shadow: 0 0 7px -5px rgba(0,0,0,0.25);
+}
+.welcome-splash .login .forgot-password {
+    text-align: center;
+}

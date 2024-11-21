@@ -33,7 +33,7 @@ const PostList = function({ queryName }) {
 
     return (
         <div className="post-list">
-            <div className="sort-menu">Sort: Active</div>
+            {/*<div className="sort-menu">Sort: Active</div> */}
             { postViews }
             <PaginationControls meta={query.meta} />
         </div>

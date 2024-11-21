@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useLayoutEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { DocumentTextIcon } from '@heroicons/react/24/outline'
-import { XCircleIcon } from '@heroicons/react/24/solid'
+import { XCircleIcon, PhotoIcon } from '@heroicons/react/24/solid'
 
 import { uploadFile, deleteFile, cleanupRequest } from '/state/files'
 
@@ -19,9 +19,8 @@ import './FileUploadInput.css'
  */
 const FileUploadInput = function(props) {
     // ============ Render State ====================================
-  
-    const [file, setFile] = useState(null)
-    const [fileData, setFileData] = useState(null)
+    const [currentFileId, setCurrentFileId] = useState(null)
+    const [newFileId, setNewFileId] = useState(null)
 
     const [ typeError, setTypeError ] = useState(null)
 
@@ -47,47 +46,78 @@ const FileUploadInput = function(props) {
         }
     })
 
+    const currentFile = useSelector(function(state) {
+        if ( currentFileId in state.files.dictionary ) {
+            return state.files.dictionary[currentFileId]
+        } else {
+            return null
+        }
+    })
+
+    const newFile = useSelector(function(state) {
+        if ( newFileId in state.files.dictionary ) {
+            return state.files.dictionary[newFileId]
+        } else {
+            return null
+        }
+    })
+
     // ============ Actions and Event Handling ======================
     //
     const dispatch = useDispatch()
     
     const onChange = function(event) {
-        if ( ! fileData && ! file ) {
-            const file = event.target.files[0]
-            if ( ! props.types.includes(file.type) ) {
-                setTypeError('invalid-type')
-                return
-            }
-
-            setFileData(file)
-            setUploadRequestId(dispatch(uploadFile(file)))
-        } else {
-            // We shouldn't be able to get here, because we should always show
-            // a spinner when we have fileData but no file, and we don't show
-            // an input when we have both fileData and file.  Which means the
-            // user shouldn't be able to change the file input.
-            throw new Error('We are in an invalid state.')
+        const uploadedFileData = event.target.files[0]
+        if ( ! props.types.includes(uploadedFileData.type) ) {
+            setTypeError('invalid-type')
+            return
         }
+
+        setUploadRequestId(dispatch(uploadFile(uploadedFileData)))
     }
 
     const removeFile = function(event) {
-        setTypeError(null)
-        setDeleteRequestId(dispatch(deleteFile(file.id)))
+        if ( currentFileId ) {
+            props.setFileId(null)
+            setCurrentFileId(null)
+        } else if ( newFileId ) {
+            setTypeError(null)
+            setDeleteRequestId(dispatch(deleteFile(newFileId)))
+        }
     }
 
     // ============ Effect Handling ==================================
 
-    useLayoutEffect(function() {
-        if ( props.file ) {
-            setFile(props.file)
-        }
-    }, [])
+    useEffect(function() {
+        if ( props.fileId ) {
+            setCurrentFileId(props.fileId)
 
-    useLayoutEffect(function() {
+            // New File is no longer new.
+            if ( newFileId == props.fileId) {
+                setNewFileId(null)
+            }
+        }
+    }, [ props.fileId ])
+
+    useEffect(function() {
+        if ( uploadRequest && uploadRequest.state == 'fulfilled') {
+            const uploadedFile = uploadRequest.result.entity
+
+            setNewFileId(uploadedFile.id)
+            props.setFileId(uploadedFile.id)
+        }
+    }, [ uploadRequest ])
+
+    useEffect(function() {
         if ( deleteRequest && deleteRequest.state == 'fulfilled') {
-            setFileData(null)
-            setFile(null)
-            props.setFile(null)
+            const deletedFile = deleteRequest.result.entity
+
+            if ( currentFileId == deletedFile.id ) {
+                setCurrentFileId(null)
+                props.setFileId(null)
+            } else if ( newFileId == deletedFile.id ) {
+                setNewFileId(null)
+            }
 
             // ISSUE #133 - With out the line below, this effect will fire a
             // second time and read the request as fulfilled a second time
@@ -105,15 +135,6 @@ const FileUploadInput = function(props) {
             } 
         }
     }, [ deleteRequest ])
-
-
-    useEffect(function() {
-        if ( uploadRequest && uploadRequest.state == 'fulfilled') {
-            const response = uploadRequest.result
-            setFile(response.entity)
-            props.setFile(response.entity)
-        }
-    }, [ uploadRequest ])
 
     // Clean up our upload request.
     useEffect(function() {
@@ -133,9 +154,23 @@ const FileUploadInput = function(props) {
         }
     }, [ deleteRequestId ])
 
-
-
     // ============ Render ==========================================
+    //
+    let currentFileView = null 
+    if ( newFile || currentFile ) {
+        let url = null
+        if ( newFile ) {
+            url = new URL(newFile.filepath, newFile.location)
+        } else if ( currentFile ) {
+            url = new URL(currentFile.filepath, currentFile.location)
+        }
+        currentFileView = (
+            <div className="file" style={{ width: `${props.width}px` }}>
+                <img src={url.href} width={ props.width ? props.width : 100}  />
+                <a href="" onClick={(e) => { e.preventDefault(); removeFile() }}>Remove file</a>
+            </div>
+        )
+    }
 
     let content = null
     // Spinner while we wait for requests to process so that we can't start a new request on top of an existing one.
@@ -155,18 +190,10 @@ const FileUploadInput = function(props) {
     } else if ( uploadRequest && uploadRequest.state == 'failed' ) {
         content = (<div className="error"> { uploadRequest.error }</div>)
     } else { 
+
         // We're not waiting for any thing, render the content.
-        if ( fileData && file ) {
-            console.log(file)
-            const url = new URL(file.filepath, file.location)
-            content = (
-                <div className="file">
-                    <div className="close-icon"><XCircleIcon onClick={removeFile} /></div>
-                    <img src={url.href} width={100} />
-                </div>
-            )
-        } else if (( fileData && ! file) ) {
-            content = ( <Spinner local={true} /> )
+        if ( currentFileView ) {
+            content = currentFileView
         } else {
             let typeErrorView = null
             if ( typeError ) {
@@ -174,7 +201,8 @@ const FileUploadInput = function(props) {
             }
             content = (
                 <div className="upload-input">
-                    <Button type="primary" onClick={(e) => hiddenFileInput.current.click()}>Add Image</Button>
+                    { props.blankImage ? props.blankImage : '' }
+                    <Button type="primary" onClick={(e) => hiddenFileInput.current.click()}><PhotoIcon /> Upload Image</Button>
                     <input type="file"
                         name="file"
                         accept={props.types.join(',')}

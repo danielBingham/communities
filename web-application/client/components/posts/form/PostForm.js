@@ -12,7 +12,7 @@ import './PostForm.css'
 const PostForm = function() {
 
     const [content,setContent] = useState('')
-    const [file,setFile] = useState(null)
+    const [fileId,setFileId] = useState(null)
 
     const [requestId,setRequestId] = useState(null)
     const request = useSelector(function(state) {
@@ -33,7 +33,7 @@ const PostForm = function() {
     const submit = function() {
         const post = {
             userId: currentUser.id,
-            fileId: file ? file.id : null,
+            fileId: fileId,
             content: content,
             tags: []
         }
@@ -64,7 +64,7 @@ const PostForm = function() {
             >
             </textarea>
             <div className="controls">
-                <FileUploadInput setFile={setFile} types={[ 'image/jpeg', 'image/png' ]} />
+                <FileUploadInput fileId={fileId} setFileId={setFileId} types={[ 'image/jpeg', 'image/png' ]} />
                 <div className="buttons">
                     <Button type="secondary-warn">Cancel</Button>
                     <Button type="primary" onClick={(e) => submit()}>Post</Button>

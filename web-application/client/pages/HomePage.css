@@ -1,9 +1,11 @@
 #home-page {
-    display: grid;
-    grid-template-columns: 1fr 3fr 1fr;
     width: 1400px;
     margin: 50px auto;
     background-color: var(--page-background-color);
+}
+.home-feeds {
+    display: grid;
+    grid-template-columns: 1fr 3fr 1fr;
 }
 
 .left-sidebar {

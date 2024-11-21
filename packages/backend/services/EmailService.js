@@ -40,7 +40,7 @@ module.exports = class EmailService {
 
     async sendNotificationEmail(address, subject, body) {
         await this.sendEmail({
-            "From": "no-reply@peer-review.io",
+            "From": "no-reply@communities.social",
             "To": address,
             "Subject": subject,
             "TextBody": body,
@@ -52,16 +52,15 @@ module.exports = class EmailService {
         const confirmationLink = this.config.host + `email-confirmation?token=${token.token}`
 
 
-        const emailTextBody = `Welcome to JournalHub, ${user.name}!
+        const emailTextBody = `Welcome to Communities, ${user.name}!
 
-Please confirm your email address by following the link below:
-${confirmationLink}`
+Please confirm your email address by following the link: ${confirmationLink}`
 
 
         await this.sendEmail({
-            "From": "no-reply@peer-review.io",
+            "From": "no-reply@communities.social",
             "To": user.email,
-            "Subject": `[JournalHub] Welcome to JournalHub, ${user.name}!`,
+            "Subject": `[Communities] Welcome to Communities, ${user.name}!`,
             "TextBody": emailTextBody,
             "MessageStream": "email-confirmation"
         })
@@ -72,14 +71,13 @@ ${confirmationLink}`
 
         const emailTextBody = `Hello ${user.name},
 
-        Please use the following link to reset your password:
-${resetLink}`
+        Please use the following link to reset your password: ${resetLink}`
 
 
         await this.sendEmail({
-            "From": "no-reply@peer-review.io",
+            "From": "no-reply@communities.social",
             "To": user.email,
-            "Subject": "[JournalHub] Please reset your password",
+            "Subject": "[Communities] Please reset your password",
             "TextBody": emailTextBody,
             "MessageStream": "password-reset"
         })
@@ -90,24 +88,19 @@ ${resetLink}`
 
         const emailTextBody = `Hello ${user.name},
 
-        You have been invited to join Peer Review by ${inviter.name} (${inviter.email})!  Peer
-        Review is an open source, diamond open access (free to access, free to
-        publish) academic publishing platform.  Our goal is to build an open
-        platform where scholars can get constructive feedback, work together to
-        maintain the integrity of the literature, and share their work with
-        each other and the world.
+        You have been invited to join Communities by ${inviter.name} (${inviter.email})!  
 
-        If you join, you can use the platform to publish your work, to review
-        the work of your peers, and to help ensure that good work is
-        highlighted, and dishonest work is marked as such.
+        Communities is a non-profit, user supported social media platform built
+        to help users build community, connect, and organize. We're on a
+        mission to de-enshitify the internet.
 
-        To accept the invitation click the following link : ${invitationLink}`
-
+        We're currently in invite only private beta.  If you'd like to join and
+        come kick the tires, click the following link: ${invitationLink}`
 
         await this.sendEmail({
-            "From": "no-reply@peer-review.io",
+            "From": "no-reply@communities.social",
             "To": user.email,
-            "Subject": `${inviter.name} invites you to join Peer Review`,
+            "Subject": `${inviter.name} invites you to join Communities`,
             "TextBody": emailTextBody,
             "MessageStream": "invitation"
         })

@@ -8,6 +8,8 @@ import { FloatingMenu, FloatingMenuBody, FloatingMenuTrigger, FloatingMenuItem }
 import EditPostComment from '/components/posts/comments/widgets/controls/EditPostComment'
 import DeletePostComment from '/components/posts/comments/widgets/controls/DeletePostComment'
 
+import './PostCommentDotsMenu.css'
+
 const PostCommentDotsMenu = function({ postId, id }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
