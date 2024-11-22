@@ -78,6 +78,7 @@ module.exports = class TokenDAO {
             const token = {
                 id: row.token_id,
                 userId: row.token_userId,
+                creatorId: row.token_creatorId,
                 token: row.token_token,
                 type: row.token_type,
                 createdDate: row.token_createdDate,
@@ -99,8 +100,13 @@ module.exports = class TokenDAO {
 
         const sql = `
             SELECT 
-                tokens.id as token_id, tokens.user_id as "token_userId", tokens.token as token_token, tokens.type as token_type,
-                tokens.created_date as "token_createdDate", tokens.updated_date as "token_updatedDate"
+                tokens.id as token_id, 
+                tokens.user_id as "token_userId", 
+                tokens.creator_id as "token_creatorId",
+                tokens.token as token_token, 
+                tokens.type as token_type,
+                tokens.created_date as "token_createdDate", 
+                tokens.updated_date as "token_updatedDate"
             FROM tokens
             ${where}
         `
@@ -116,10 +122,10 @@ module.exports = class TokenDAO {
 
     async insertToken(token) {
         const results = await this.database.query(`
-            INSERT INTO tokens (user_id, token, type, created_date, updated_date)
-                VALUES ( $1, $2, $3, now(), now())
+            INSERT INTO tokens (user_id, creator_id, token, type, created_date, updated_date)
+                VALUES ( $1, $2, $3, $4, now(), now())
                 RETURNING id
-        `, [ token.userId, token.token, token.type ])
+        `, [ token.userId, token.creatorId, token.token, token.type ])
 
         if ( results.rows.length <= 0 ) {
             throw new DAOError('insert-failed', `Attempt to insert token failed.`)

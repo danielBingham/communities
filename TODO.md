@@ -6,8 +6,10 @@
  - [x] Finding Friends 
     - [x] Friend requests
  - [x] Contribution subscriptions
- - [ ] Invite only registration
-   - [ ] User invites
+ - [x] Invite only registration
+   - [x] User invites
+ - [ ] State for Reactions
+  - [ ] Block Confirm modal
  - [ ] Notifications
    - [ ] Notification Messges
  - [ ] Account deletion
@@ -17,7 +19,7 @@
  - [ ] Comment versioning
     - [ ] edit rollback
  - [ ] Permissions check (Make sure people can only access what they should)
- - [ ] Splash page
+ - [x] Splash page
 
 ## Follow Up
  - [ ] Admin page

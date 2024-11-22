@@ -102,7 +102,7 @@ module.exports = class UserController {
         }
 
         const result = {
-            where: 'WHERE',
+            where: `WHERE users.status = 'confirmed'`,
             params: [],
             page: 1,
             order: '',
@@ -110,23 +110,21 @@ module.exports = class UserController {
             requestedRelations: query.relations ? query.relations : []
         }
 
+
         if ( query.name && query.name.length > 0) {
             result.params.push(query.name)
-            const and = result.params.length > 1 ? ' AND ' : ''
-            result.where += `${and} SIMILARITY(users.name, $${result.params.length}) > 0`
+            result.where += ` AND SIMILARITY(users.name, $${result.params.length}) > 0`
             result.order = `SIMILARITY(users.name, $${result.params.length}) desc`
         }
 
         if ( query.username && query.username.length > 0 ) {
             result.params.push(query.username)
-            const and = result.params.length > 1 ? ' AND ' : ''
-            result.where += `${and} users.username = $${result.params.length}`
+            result.where += ` AND users.username = $${result.params.length}`
         }
 
         if ( query.ids && query.ids.length > 0 ) {
             result.params.push(query.ids)
-            const and = result.params.length > 1 ? ' AND ' : ''
-            result.where += `${and} users.id = ANY($${result.params.length}::uuid[])`
+            result.where += ` AND users.id = ANY($${result.params.length}::uuid[])`
         }
 
         if ( query.friendOf ) {
@@ -138,8 +136,7 @@ module.exports = class UserController {
             const friendIds = friendResults.rows.map((r) => r.user_id == currentUser.id ? r.friend_id : r.user_id)
 
             result.params.push(friendIds)
-            const and = result.params.length > 1 ? ' AND ' : ''
-            result.where += `${and} users.id = ANY($${result.params.length}::uuid[])`
+            result.where += ` AND users.id = ANY($${result.params.length}::uuid[])`
         }
 
         if ( query.page && ! options.ignorePage ) {
@@ -246,7 +243,14 @@ module.exports = class UserController {
          *
          * **********************************************************/
 
-        const loggedInUser = request.session.user
+        const currentUser = request.session.user
+
+        if ( ! currentUser ) {
+            throw new ControllerError(401, 'not-authenticated',
+                `Unauthenticated User attempting to create new User.`,
+                `We're currently in invite-only beta, so you must recieve an invite to register. 
+                Reach out to contact@communities.social if you'd like an invite.`)
+        }
 
         user.email = user.email.toLowerCase()
 
@@ -261,7 +265,9 @@ module.exports = class UserController {
         // 1. request.body.email must not already be attached to a user in the
         // database.
         if (userExistsResults.rowCount > 0) {
-            throw new ControllerError(409, 'user-exists', `Attempting to create a user(${userExistsResults.rows[0].id}) that already exists!`)
+            throw new ControllerError(403, 'not-authorized', 
+                `Attempting to create a User(${userExistsResults.rows[0].id}) that already exists!`,
+                `You aren't allowed to do that.`)
         }
 
         // If we're creating a user with a password, then this is just a normal
@@ -271,14 +277,21 @@ module.exports = class UserController {
         // Corresponds to:
         // Validation: 2. Invitation => no password needed
         // Validation: 3. Registration => must include password
-        if ( user.password && ! loggedInUser ) {
+        if ( user.password && ! currentUser ) {
             user.password = this.auth.hashPassword(user.password)
             user.status = 'unconfirmed'
-        } else if ( loggedInUser ) {
-            user.status = 'invited'
+        } else if ( currentUser ) {
+            if ( currentUser.invitations >= 1 ) {
+                user.status = 'invited'
+            } else {
+                throw new ControllerError(403, 'not-authorized',
+                    `User(${currentUser.id}) attempting to invite a user without any invitations.`,
+                    `You are out of invitations for the time being. More invitations will be issued in the future.`)
+            }
         } else {
-            throw new ControllerError(400, 'bad-data:no-password',
-                `Users creating accounts must include a password!`)
+            throw new ControllerError(400, 'invalid',
+                `Users creating accounts must include a password!`,
+                `You must include a password.`)
         }
 
         try {
@@ -289,9 +302,13 @@ module.exports = class UserController {
                 // 4. request.body.name is required.
                 // 5. request.body.email is required. 
                 if ( error.type == 'name-missing' ) {
-                    throw new ControllerError(400, 'bad-data:no-name', error.message)
+                    throw new ControllerError(400, 'invalid', 
+                        error.message,
+                        `You must include a name.`)
                 } else if ( error.type == 'email-missing' ) {
-                    throw new ControllerError(400, 'bad-data:no-email', error.message)
+                    throw new ControllerError(400, 'bad-data', 
+                        error.message,
+                        `You must include an email.`)
                 } else {
                     throw error
                 }
@@ -303,20 +320,41 @@ module.exports = class UserController {
         const createdUserResults = await this.userDAO.selectUsers('WHERE users.id=$1', [user.id])
 
         if ( ! createdUserResults.dictionary[user.id] ) {
-            throw new ControllerError(500, 'server-error', `No user found after insertion. Looking for id ${user.id}.`)
+            throw new ControllerError(500, 'server-error', 
+                `No user found after insertion. Looking for id ${user.id}.`,
+                `We created the user, but couldn't find them after creation. Please report bug.`)
         }
 
         const createdUser = createdUserResults.dictionary[user.id]
 
-        if ( loggedInUser ) {
+        if ( currentUser ) {
             const token = this.tokenDAO.createToken('invitation')
             token.userId = createdUser.id
+            token.creatorId = currentUser.id
             token.id = await this.tokenDAO.insertToken(token)
 
-            await this.emailService.sendInvitation(loggedInUser, createdUser, token)
+            await this.emailService.sendInvitation(currentUser, createdUser, token)
+
+            // Update the current user and decrement their invitations.
+            const userPatch = {
+                id: currentUser.id,
+                invitations: currentUser.invitations-1
+            }
+            await this.userDAO.updateUser(userPatch)
+           
+            // In the case of a user invitation, we don't actually want to
+            // return the newly created user (it's basically empty).  We want
+            // to return the updated currentUser who has less invitations now.
+            currentUser.invitations = currentUser.invitations-1
+            response.status(201).json({
+                entity: currentUser,
+                relations: {}
+            })
+            return
         } else {
             const token = this.tokenDAO.createToken('email-confirmation')
             token.userId = createdUser.id
+            token.creatorId = createdUser.id
             token.id = await this.tokenDAO.insertToken(token)
 
             await this.emailService.sendEmailConfirmation(createdUser, token)
@@ -325,7 +363,9 @@ module.exports = class UserController {
         const results = await this.userDAO.selectCleanUsers('WHERE users.id=$1', [ user.id ])
 
         if (! results.dictionary[user.id] ) {
-            throw new ControllerError(500, 'server-error', `No user found after insertion. Looking for id ${user.id}.`)
+            throw new ControllerError(500, 'server-error', 
+                `No user found after insertion. Looking for id ${user.id}.`,
+                `We created the user, but couldn't find them after creation. Please report bug.`)
         }
 
         const relations = await this.getRelations(results)
@@ -354,7 +394,7 @@ module.exports = class UserController {
          * Anyone may call this endpoint.
          * 
          * **********************************************************/
-        const results = await this.userDAO.selectCleanUsers('WHERE users.id = $1', [request.params.id])
+        const results = await this.userDAO.selectCleanUsers(`WHERE users.id = $1 && users.status = 'confirmed'`, [request.params.id])
 
         if ( ! results.dictionary[ request.params.id] ) {
             throw new ControllerError(404, 'not-found', `User(${request.params.id}) not found.`)
@@ -409,8 +449,10 @@ module.exports = class UserController {
          * 
          * **********************************************************/
 
+        const currentUser = request.session.user
+
         // 1. User must be logged in.
-        if ( ! request.session.user ) {
+        if ( ! currentUser ) {
             throw new ControllerError(403, 'not-authorized', 
                 `Unauthenticated user attempting to update user(${user.id}).`)
         } 
@@ -422,7 +464,7 @@ module.exports = class UserController {
         // for instance), then make sure to strip the email out of the returned
         // user at the botton of this function.  Or at least, spend some time
         // considering whether you need to.
-        if ( request.session.user.id != id) {
+        if ( currentUser.id != id) {
             throw new ControllerError(403, 'not-authorized', 
                 `User(${request.session.user.id}) attempted to update another user(${id}).`)
         }
@@ -445,123 +487,131 @@ module.exports = class UserController {
 
         const existingUser = existingUsers.dictionary[id]
 
+        let authentication = null 
+        let token = null
 
-        // 4. If a password is included, then oldPassword or a valid token are
-        // required.
-        if( user.password ) {
-            // If we make it through this conditional with out throwing an
-            // error, then the user is authenticated and their attempt to
-            // change their password is valid.  Carry on.
-            if ( user.token ) {
-                let token = null
-                try {
-                    token = await this.tokenDAO.validateToken(user.token, [ 'reset-password', 'invitation' ])
-                } catch (error ) {
-                    if ( error instanceof backend.DAOError ) {
-                        throw new ControllerError(403, 'not-authorized:authentication-failure', error.message)
-                    } else {
-                        throw error
-                    }
+        // If the user has a token, then they are authenticated and any change
+        // they are making is valid. A reset password token allows change of
+        // password and an invitation token allows a change of everything.
+        //
+        // TODO Should we prevent changing email with only a reset password token?
+        if ( user.token ) {
+            try {
+                token = await this.tokenDAO.validateToken(user.token, [ 'reset-password', 'invitation' ])
+            } catch (error ) {
+                if ( error instanceof backend.DAOError ) {
+                    throw new ControllerError(403, 'not-authorized', error.message)
+                } else {
+                    throw error
                 }
-                
-                if ( token.userId != user.id ) {
-                    throw new ControllerError(403, 'not-authorized:authentication-failure',
-                        `User(${user.id}) attempted to change their password with a valid token that wasn't theirs!`)
-                }
+            }
+            
+            if ( token.userId != user.id ) {
+                throw new ControllerError(403, 'not-authorized',
+                    `User(${user.id}) attempted to change their password with a valid token that wasn't theirs!`)
+            }
 
-                // If this was an invitation token, then we need to update their status.
-                if ( token.type == 'invitation' ) {
+
+            // If this was an invitation token, and they aren't including
+            // an email, then go ahead and confirm the email in the database.
+            // 
+            // If they did include an email, we'll check it below.
+            if ( token.type == 'invitation' ) {
+                if ( ! ("email" in user)) { 
                     user.status = 'confirmed'
                 }
 
-                await this.tokenDAO.deleteToken(token)
-                // Token was valid.  Clean it off the user object before we use
-                // it as a patch.
-                delete user.token
-            } else if ( user.oldPassword ) {
-                try {
-                    const existingUserId = await this.auth.authenticateUser({ 
-                        email: request.session.user.email, 
-                        password: user.oldPassword
-                    })
+            }
 
-                    if ( existingUserId != user.id) {
-                        throw new ControllerError(403, 'not-authorized:authentication-failure',
-                            `User(${user.id}) gave credentials that matched User(${existingUserId})!`)
-                    }
 
-                    // OldPassword was valid and the user successfully
-                    // authenticated. Now clean it off the user object before
-                    // we use it as a patch.
-                    delete user.oldPassword
-                } catch (error ) {
-                    if ( error instanceof backend.ServiceError ) {
-                        if ( error.type == 'authentication-failed' || error.type == 'no-user' || error.type == 'no-user-password' ) {
-                            throw new ControllerError(403, 'not-authorized:authentication-failure', error.message)
-                        } else if ( error.type == 'multiple-users' ) {
-                            throw new ControllerError(400, 'multiple-users', error.message)
-                        } else if ( error.type == 'no-credential-password' ) {
-                            throw new ControllerError(400, 'no-password', error.message)
-                        } else {
-                            throw error
-                        }
+            // They've successfully authenticated with the token.
+            authentication = token.type 
+
+            // Token was valid.  Clean it off the user object before we use
+            // it as a patch.
+            delete user.token
+
+            // Delete the token now that we're done with it.  We still
+            // have it in local and can use it later, but we don't want to
+            // leave it hanging if we hit a different error later.
+            //
+            // TODO Do we want to let the token hang?!
+            await this.tokenDAO.deleteToken(token)
+        } 
+        
+        // If they include the oldPassword, attempt to authenticate them with
+        // that.
+        else if ( user.oldPassword ) {
+            try {
+                const existingUserId = await this.auth.authenticateUser({ 
+                    email: request.session.user.email, 
+                    password: user.oldPassword
+                })
+
+                if ( existingUserId != user.id) {
+                    throw new ControllerError(403, 'not-authorized',
+                        `User(${user.id}) gave credentials that matched User(${existingUserId})!`)
+                }
+
+                // OldPassword was valid and the user successfully
+                // authenticated. Now clean it off the user object before
+                // we use it as a patch.
+                delete user.oldPassword
+
+
+                // They've successfully authenticated with old password.
+                authentication = 'password' 
+            } catch (error ) {
+                if ( error instanceof backend.ServiceError ) {
+                    if ( error.type == 'authentication-failed' || error.type == 'no-user' || error.type == 'no-user-password' ) {
+                        throw new ControllerError(403, 'not-authorized', error.message)
+                    } else if ( error.type == 'multiple-users' ) {
+                        throw new ControllerError(400, 'invalid', error.message)
+                    } else if ( error.type == 'no-credential-password' ) {
+                        throw new ControllerError(400, 'invalid', error.message)
                     } else {
                         throw error
                     }
+                } else {
+                    throw error
                 }
+            }
+        }
 
-                // User authenticated successfully.
-            } else {
+
+        // 4. If a password is included, then they need to be authenticated.
+        //
+        // Any of the authentication methods are valid: oldPassword, invitation
+        // token, and reset-password token all allow changing the password.
+        if( user.password ) {
+            if ( authentication === null ) {
                 throw new ControllerError(403, 'authentication-failure',
                     `User(${user.id}) attempted to change their password with out reauthenticating.`)
             }
 
-
             user.password  = await this.auth.hashPassword(user.password)
         }
 
-        // 5. If an email is included, then oldPassword is required.
+        // 5. If an email is included, then they need to be authenticated.
+        //
+        // Only invitation and oldPassword authentications are valid.
         if ( user.email ) {
-            if ( user.oldPassword ) {
-                try {
-                    const existingUserId = await this.auth.authenticateUser({ 
-                        email: request.session.user.email, 
-                        password: user.oldPassword
-                    })
+            if ( authentication === null ) {
+                throw new ControllerError(403, 'not-authorized',
+                    `User(${user.id}) attempted to change their email with out reauthenticating.`)
+            } else if (authentication == 'reset-password') {
+                throw new ControllerError(403, 'not-authorized'
+                    `User(${user.id}) attempted to use a reset-password token to update email.`)
+            }
 
-                    if ( existingUserId != user.id) {
-                        throw new ControllerError(403, 'not-authorized:authentication-failure',
-                            `User(${user.id}) gave credentials that matched User(${existingUserId})!`)
-                    }
-
-                    // We're about to change their email, so the new email is
-                    // unconfirmed. Make sure to update the status.
-                    user.status = 'unconfirmed'
-
-                    // OldPassword was valid and the user successfully
-                    // authenticated. Now clean it off the user object before
-                    // we use it as a patch.
-                    delete user.oldPassword
-                } catch (error ) {
-                    if ( error instanceof backend.ServiceError ) {
-                        if ( error.type == 'authentication-failed' || error.type == 'no-user' || error.type == 'no-user-password' ) {
-                            throw new ControllerError(403, 'not-authorized:authentication-failure', error.message)
-                        } else if ( error.type == 'multiple-users' ) {
-                            throw new ControllerError(400, 'multiple-users', error.message)
-                        } else if ( error.type == 'no-credential-password' ) {
-                            throw new ControllerError(400, 'no-password', error.message)
-                        } else {
-                            throw error
-                        }
-                    } else {
-                        throw error
-                    }
-                }
-
-                // User authenticated successfully.
-            } else {
-                throw new ControllerError(403, 'authentication-failure',
-                    `User(${user.id}) attempted to change their password with out reauthenticating.`)
+            // If this is an invitation and they aren't changing their email, then go 
+            // ahead and confirm it since the token they are using came from their email.
+            if ( authentication == "invitation" && user.email == existingUser.email ) {
+                user.status = 'confirmed'
+            } else if ( user.email != existingUser.email ) {
+                // Otherwise, if we're about to change their email, then the
+                // new email is unconfirmed. Make sure to update the status.
+                user.status = 'unconfirmed'
             }
         }
 
@@ -570,6 +620,15 @@ module.exports = class UserController {
         }
 
         await this.userDAO.updateUser(user)
+
+        if ( token && token.type == 'invitation') {
+            // Since the user already exists, go ahead and insert the friend relationship.
+            await this.userDAO.insertUserRelationships({ 
+                userId: token.creatorId,
+                friendId: user.id,
+                status: "confirmed"
+            })
+        }
 
         // Issue #132 - We're going to allow the user's email to be returned in this case,
         // because only authenticated users may call this endpoint and then

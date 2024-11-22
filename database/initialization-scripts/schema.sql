@@ -110,6 +110,9 @@ CREATE TABLE tokens (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id uuid REFERENCES users(id) ON DELETE CASCADE NOT NULL,
 
+    /** User who created the token, for invitations. **/
+    creator_id uuid REFERENCES users (id),
+
     token varchar(1024),
     type token_type NOT NULL,
 
@@ -117,8 +120,8 @@ CREATE TABLE tokens (
     updated_date timestamptz
 );
 CREATE INDEX tokens__user_id ON tokens (user_id);
+CREATE INDEX tokens__creator_id ON tokens (creator_id);
 CREATE INDEX tokens__token ON tokens (token);
-
 
 /******************************************************************************
  * Files 

@@ -23,6 +23,8 @@ const UserInvite = function() {
         }
     })
 
+    const currentUser = useSelector((state) => state.authentication.currentUser)
+
     const dispatch = useDispatch()
 
     const invite = function(event) {
@@ -38,7 +40,6 @@ const UserInvite = function() {
             email: email
         })))
     }
-
 
     useEffect(function() {
         return function cleanup() {
@@ -71,6 +72,7 @@ const UserInvite = function() {
 
     return (
         <div className="user-invite">
+            <div className="invitations-available">You have { currentUser.invitations } invitations available.</div>
             <input type="text" onChange={(e) => setEmail(e.target.value)} value={email}  name="email" placeholder="Enter email..." />
             { request && request.state == 'pending' ? <Spinner local={true} /> : <Button type="primary" onClick={invite}>Send Invite</Button> }
             <div className="errors">

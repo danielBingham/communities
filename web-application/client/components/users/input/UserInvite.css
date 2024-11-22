@@ -1,6 +1,11 @@
 .user-invite {
     text-align: center;
 }
+.user-invite .invitations-available {
+    text-align: center;
+    font-size: 16px;
+    padding: 10px;
+}
 .user-invite input[type=text] {
     display: inline-block;
     width: 400px;

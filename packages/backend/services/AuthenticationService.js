@@ -39,7 +39,7 @@ module.exports = class AuthenticationService {
     /**
      * Returns a promise that will resolve with the completed hash.
      */
-    hashPassword(password) {
+    async hashPassword(password) {
         return bcrypt.hashSync(password, 10);
     }
 
@@ -47,7 +47,7 @@ module.exports = class AuthenticationService {
      * Returns a promise that will resolve with `true` or `false` depending on
      * whether they match.
      */
-    checkPassword(password, hash) {
+    async checkPassword(password, hash) {
         return bcrypt.compareSync(password, hash);
     }
 

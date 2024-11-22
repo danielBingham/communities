@@ -12,12 +12,13 @@ const AcceptInvitationForm = function(props) {
     // ======= Render State =========================================
     
     const [ name, setName ] = useState('')
+    const [ username, setUsername ] = useState('')
     const [ email, setEmail ] = useState('')
     const [ password, setPassword ] = useState('')
     const [ confirmPassword, setConfirmPassword ] = useState('')
-    const [ institution, setInstitution ] = useState('')
 
     const [nameError, setNameError] = useState(null)
+    const [ usernameError, setUsernameError ] = useState(null)
     const [emailError, setEmailError] = useState(null)
     const [passwordError, setPasswordError] = useState(null)
     const [confirmPasswordError, setConfirmPasswordError] = useState(null)
@@ -65,6 +66,18 @@ const AcceptInvitationForm = function(props) {
                 setNameError('name-too-long')
                 error = true
             } else if ( nameError ) {
+                setNameError(null)
+            }
+        }
+
+        if ( ! field || field == 'username' ) {
+            if ( ! username || username.length == 0 ) {
+                setNameError('no-username')
+                error = true
+            } else if ( username.length > 512 ) {
+                setNameError('username-too-long')
+                error = true
+            } else if ( usernameError ) {
                 setNameError(null)
             }
         }
@@ -124,9 +137,9 @@ const AcceptInvitationForm = function(props) {
         const user = {
             id: currentUser.id,
             name: name,
+            username: username,
             email: email,
             password: password,
-            institution: institution,
             token: token
         }
 
@@ -135,8 +148,7 @@ const AcceptInvitationForm = function(props) {
 
     // ======= Effect Handling ======================================
     
-    useLayoutEffect(function() {
-        setName(currentUser.name)
+    useEffect(function() {
         setEmail(currentUser.email)
     }, [ currentUser ])
 
@@ -157,8 +169,8 @@ const AcceptInvitationForm = function(props) {
     // Error views, we'll populate these as we check the various error states.
     let overallErrorView = null
     let nameErrorView = null
+    let usernameErrorView = null
     let emailErrorView = null
-    let institutionErrorView = null
     let passwordErrorView = null
     let confirmPasswordErrorView = null
 
@@ -176,6 +188,12 @@ const AcceptInvitationForm = function(props) {
         nameErrorView = ( <>Name is required!</> )
     } else if ( nameError && nameError == 'name-too-long' ) {
         nameErrorView = ( <>Name is too long. Limit is 512 characters.</> )
+    }
+
+    if ( usernameError && usernameError == 'no-username' ) {
+        usernameErrorView = ( <>Username is required!</> )
+    } else if ( usernameError && usernameError == 'username-too-long' ) {
+        usernameErrorView = ( <>Username is too long. Limit is 512 characters.</> )
     }
 
     if ( emailError && emailError == 'no-email' ) {
@@ -200,7 +218,7 @@ const AcceptInvitationForm = function(props) {
 
     return (
         <div className="accept-invitation-form">
-            <p>Select a password and update your information to complete your registration.</p>
+            <div className="instructions">Welcome to Communities, please complete your registration!</div>
             <form onSubmit={acceptInvitation}>
                 <div className="name field-wrapper">
                     <label htmlFor="name">Name:</label>
@@ -212,6 +230,16 @@ const AcceptInvitationForm = function(props) {
                     <div className="error"> { nameErrorView } </div>
                 </div>
 
+                <div className="username field-wrapper">
+                    <label htmlFor="username">Username:</label>
+                    <input type="text" 
+                        name="username" 
+                        value={username} 
+                        onBlur={ (event) => isValid('username') }
+                        onChange={ (event) => setUsername(event.target.value) } />
+                    <div className="error"> { usernameErrorView } </div>
+                </div>
+
                 <div className="email field-wrapper">
                     <label htmlFor="email">Email:</label>
                     <input type="text" 
@@ -220,16 +248,6 @@ const AcceptInvitationForm = function(props) {
                         onBlur={ (event) => isValid('email') }
                         onChange={ (event) => setEmail(event.target.value) } />
                     <div className="error"> { emailErrorView } </div>
-                </div>
-
-                <div className="institution field-wrapper">
-                    <label htmlFor="institution">Institution:</label>
-                    <input type="text" 
-                        name="institution" 
-                        value={institution}
-                        onBlur={ (event) => isValid('institution') }
-                        onChange={ (event) => setInstitution(event.target.value) } />
-                    <div className="error"> { institutionErrorView } </div>
                 </div>
 
                 <div className="password field-wrapper">

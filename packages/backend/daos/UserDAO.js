@@ -50,13 +50,13 @@ module.exports = class UserDAO extends DAO {
                         key: 'fileId'
                     },
                     'name': {
-                        insert: 'required',
-                        update: 'denied',
+                        insert: 'allowed',
+                        update: 'allowed',
                         select: 'always',
                         key: 'name',
                     },
                     'username': {
-                        insert: 'required',
+                        insert: 'allowed',
                         update: 'allowed',
                         select: 'always',
                         key: 'username'
@@ -68,7 +68,7 @@ module.exports = class UserDAO extends DAO {
                         key: 'email'
                     },
                     'password': {
-                        insert: 'required',
+                        insert: 'allowed',
                         update: 'allowed',
                         select: 'never',
                         key: 'password'
@@ -98,8 +98,10 @@ module.exports = class UserDAO extends DAO {
                         key: 'location'
                     },
                     'invitations': {
-                        insert: 'allowd',
-                        insertDefault: 50,
+                        insert: 'allowed',
+                        insertDefault: function() {
+                            return 50
+                        },
                         update: 'allowed',
                         select: 'full',
                         key: 'invitations'

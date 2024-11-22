@@ -113,19 +113,9 @@ module.exports = class TokenController {
                 friends: request.session.friends,
                 file: request.session.file
             })
-        } else if ( token.type == 'reset-password' ) {
+        } else if ( token.type == 'reset-password' || token.type == 'invitation') {
             const session = await this.authenticationService.getSessionForUserId(token.userId)
-            request.session.user = session.user
-            request.session.friends = session.friends
-            request.session.file = session.file
 
-            response.status(200).json({
-                user: request.session.user,
-                friends: request.session.friends,
-                file: request.session.file
-            })
-        } else if ( token.type == 'invitation' ) {
-            const session = await this.authenticationService.getSessionForUserId(token.userId)
             request.session.user = session.user
             request.session.friends = session.friends
             request.session.file = session.file
@@ -157,7 +147,6 @@ module.exports = class TokenController {
      * @returns {Promise}   Resolves to void.
      */
     async postToken(request, response) {
-        const tokenParams  = request.body
 
         /*************************************************************
          * Permissions Checking and Input Validation
@@ -172,6 +161,7 @@ module.exports = class TokenController {
          * TODO Rate limit (only x requests per Y period)
          * 
          * **********************************************************/
+        const tokenParams  = request.body
 
         // Validation: 2. request.body.type must be 'reset-password'
         if ( tokenParams.type == 'reset-password' ) {
@@ -185,6 +175,7 @@ module.exports = class TokenController {
 
             const token = this.tokenDAO.createToken(tokenParams.type)
             token.userId = user.id
+            token.creatorId = null
             token.id = await this.tokenDAO.insertToken(token)
 
             await this.emailService.sendPasswordReset(user, token)

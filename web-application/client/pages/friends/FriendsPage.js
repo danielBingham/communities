@@ -1,5 +1,6 @@
-import React from 'react'
-import { Link, useParams } from 'react-router-dom'
+import React, { useEffect } from 'react'
+import { useSelector } from 'react-redux'
+import { useNavigate, Link, useParams } from 'react-router-dom'
 
 import { 
     UserGroupIcon as UserGroupIconOutline,
@@ -22,8 +23,24 @@ import UserListView from '/components/users/list/UserListView'
 import './FriendsPage.css'
 
 const FriendsPage = function() {
-
     const { pageTab } = useParams()
+
+    const currentUser = useSelector((state) => state.authentication.currentUser)
+
+    const navigate = useNavigate()
+    useEffect(function() {
+        if ( ! currentUser ) {
+            navigate("/")
+        }
+    }, [ currentUser ])
+
+    if ( ! currentUser ) {
+        return (
+            <div id="friends-page">
+                <Spinner />
+            </div>
+        )
+    }
 
     const selectedTab = ( pageTab ? pageTab : 'friends')
 

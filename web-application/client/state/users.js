@@ -91,6 +91,23 @@ export const usersSlice = createSlice({
     }
 })
 
+const updateCurrentUser = function(response) {
+    return function(dispatch, getState) {
+        // If the user we just got is the same as the one in the session,
+        // update the session.  The server will have already done this for
+        // the backend, doubling the login on the frontend just saves us a
+        // request.
+        const state = getState()
+        if ( 
+            state.authentication.currentUser 
+            && state.authentication.currentUser.id == response.entity.id
+            && 'status' in response.entity // We only want to update the currentUser if we got the fullUser record back.
+        ) { 
+            dispatch(setCurrentUser(response.entity))
+        }
+    }
+}
+
 /**
  * GET /users?...
  *
@@ -143,6 +160,8 @@ export const postUsers = function(user) {
                 dispatch(usersSlice.actions.setUsersInDictionary({ entity: response.entity }))
 
                 dispatch(setRelationsInState(response.relations))
+
+                dispatch(updateCurrentUser(response))
             }
         )
     }
@@ -169,14 +188,7 @@ export const getUser = function(id) {
 
                 dispatch(setRelationsInState(response.relations))
 
-                // If the user we just got is the same as the one in the session,
-                // update the session.  The server will have already done this for
-                // the backend, doubling the login on the frontend just saves us a
-                // request.
-                const state = getState()
-                if ( state.authentication.currentUser && state.authentication.currentUser.id == response.entity.id) {
-                    dispatch(setCurrentUser(response.entity))
-                }
+                dispatch(updateCurrentUser(response))
             }
         )
     }
@@ -204,14 +216,7 @@ export const patchUser = function(user) {
 
                 dispatch(setRelationsInState(response.relations))
 
-                // If the user we just got is the same as the one in the session,
-                // update the session.  The server will have already done this for
-                // the backend, doubling the login on the frontend just saves us a
-                // request.
-                const state = getState()
-                if ( state.authentication.currentUser && state.authentication.currentUser.id == response.entity.id) {
-                    dispatch(setCurrentUser(response.entity))
-                }
+                dispatch(updateCurrentUser(response))
             }
         )
     }

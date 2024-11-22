@@ -224,10 +224,10 @@ export const validateToken = function(token, type) {
 
         return makeTrackedRequest(dispatch, getState, authenticationSlice,
             'GET', endpoint, null,
-            function(responseContent) {
-                dispatch(authenticationSlice.actions.setCurrentUser(responseContent.user))
+            function(responseBody) {
+                dispatch(authenticationSlice.actions.setCurrentUser(responseBody.user))
                 dispatch(authenticationSlice.actions.setFriends(responseBody.friends))
-                dispatch(setUsersInDictionary({ entity: responseContent.user }))
+                dispatch(setUsersInDictionary({ entity: responseBody.user }))
 
                 if ( responseBody.file ) {
                     dispatch(setFilesInDictionary({ entity: responseBody.file }))
@@ -242,7 +242,7 @@ export const createToken = function(params) {
         const endpoint = `/tokens`
         return makeTrackedRequest(dispatch, getState, authenticationSlice,
             'POST', endpoint, params,
-            function(responseContent) {
+            function(responseBody) {
 
             }
         )
