@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
-import { postPostReaction, patchPostReaction, deletePostReaction, cleanupRequest } from '/state/posts'
+import { postPostReaction, patchPostReaction, deletePostReaction, cleanupRequest } from '/state/postReactions'
 
 import { XCircleIcon, 
     HandThumbUpIcon, 
@@ -9,15 +9,19 @@ import { XCircleIcon,
     ArrowPathRoundedSquareIcon
 } from '@heroicons/react/16/solid'
 
+import BlockConfirmation from '/components/posts/widgets/BlockConfirmation'
 import Spinner from '/components/Spinner'
 
 import './PostReactions.css'
 
 const PostReactions = function({ postId }) {
+
+    const [blockConfirmation, setBlockConfirmation] = useState(false)
+
     const [requestId,setRequestId] = useState(null)
     const request = useSelector(function(state) {
-        if ( requestId in state.posts.requests ) {
-            return state.posts.requests[requestId]
+        if ( requestId in state.postReactions.requests ) {
+            return state.postReactions.requests[requestId]
         } else {
             return null
         }
@@ -35,7 +39,12 @@ const PostReactions = function({ postId }) {
         }
     })
 
-    const userReaction = post.reactions.find((r) => r.userId == currentUser?.id)
+    const postReactions = useSelector(function(state) {
+        return state.postReactions.dictionary
+    })
+
+    const userReactionId = post.reactions.find((rid) => postReactions[rid].userId == currentUser?.id)
+    const userReaction = postReactions[userReactionId]
 
     const dispatch = useDispatch()
 
@@ -61,16 +70,9 @@ const PostReactions = function({ postId }) {
         }
     }, [ requestId ])
 
-    if ( request && request.state !== 'fulfilled' ) {
-        return (
-            <div className="rections">
-                <Spinner local={true} />
-            </div>
-        )
-    }
-
     const reactionCounts = {}
-    for( const reaction of post.reactions) {
+    for( const reactionId of post.reactions) {
+        const reaction = postReactions[reactionId]
         if ( ! ( reaction.reaction in reactionCounts ) ) {
             reactionCounts[reaction.reaction] = 1
         } else {
@@ -96,10 +98,22 @@ const PostReactions = function({ postId }) {
                 <a href=""><ArrowPathRoundedSquareIcon /> Share</a>
             </div>*/}
             <div className="group block">
-                <a href=""
-                    className={`${ userReaction?.reaction == 'block' ? 'reacted' : ''} block`}
-                    onClick={(e) => { e.preventDefault(); react('block') }} 
-                ><XCircleIcon /> Block { 'block' in reactionCounts ? `(${reactionCounts['block']})` : '' }</a>
+                { userReaction?.reaction != 'block' && <>
+                    <a href=""
+                        className={`${ userReaction?.reaction == 'block' ? 'reacted' : ''} block`}
+                        onClick={(e) => { e.preventDefault(); setBlockConfirmation(true) }} 
+                    ><XCircleIcon /> Block { 'block' in reactionCounts ? `(${reactionCounts['block']})` : '' }</a>
+                    <BlockConfirmation
+                        isVisible={blockConfirmation} 
+                        execute={() => { setBlockConfirmation(false); react('block') }} 
+                        cancel={() => setBlockConfirmation(false)} 
+                    />
+                </>}
+                { userReaction?.reaction == 'block' && 
+                    <a href=""
+                        className={`${ userReaction?.reaction == 'block' ? 'reacted' : ''} block`}
+                        onClick={(e) => { e.preventDefault(); react('block') }} 
+                    ><XCircleIcon /> Block { 'block' in reactionCounts ? `(${reactionCounts['block']})` : '' }</a>}
             </div>
         </div>
     )

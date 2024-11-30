@@ -1,0 +1,4 @@
+.sort-control-menu .sort-option { padding: 5px 20px; }
+.sort-control-menu .sort-option.current {
+    border-left: thin solid var(--primary-color-main);
+}

@@ -48,4 +48,5 @@
     text-align: center;
     color: red;
     padding: 10px;
+    grid-column: 1 / 3 ;
 }

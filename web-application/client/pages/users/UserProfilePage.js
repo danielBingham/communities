@@ -46,6 +46,13 @@ const UserProfilePage = function(props) {
     const currentUser = useSelector(function(state) {
         return state.authentication.currentUser
     })
+   
+    const navigate = useNavigate()
+    useEffect(function() {
+        if ( ! currentUser ) {
+            navigate('/')
+        }
+    }, [])
 
     // ================= User Action Handling  ================================
     
@@ -69,9 +76,9 @@ const UserProfilePage = function(props) {
     // ======= Render ===============================================
 
 
-    if ( ! user ) {
+    if ( ! user || ! currentUser ) {
         return (
-            <Spinner local={true} />
+            <Spinner />
         )
     }
 

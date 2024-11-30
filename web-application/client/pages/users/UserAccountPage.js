@@ -38,11 +38,16 @@ const UserAccountPage = function(props) {
     const navigate = useNavigate()
     useEffect(function() {
         if ( ! currentUser ) {
-            navigate('/login')
+            navigate('/')
         }
     }, [])
 
     // ======= Render =====================================
+
+    if ( ! currentUser ) {
+        return <Spinner />
+    }
+
     const selectedTab = ( pageTab ? pageTab : 'profile')
 
     let content = ( <Spinner local={true} /> )

@@ -11,6 +11,7 @@
 .floating-menu .menu-trigger svg {
     display: inline-block;
     width: 14px;
+    margin-bottom: -3px;
 }
 .floating-menu .menu-trigger a:link {
     color: var(--main-text-color);

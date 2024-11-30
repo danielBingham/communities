@@ -3,8 +3,6 @@ import { useParams } from 'react-router-dom'
 
 import FieldView from '/components/fields/FieldView'
 
-import { DocumentCheckIcon, TagIcon, ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/outline'
-
 import Spinner from '/components/Spinner'
 import { Page, PageBody, PageHeader, PageTabBar, PageTab } from '/components/generic/Page'
 
@@ -17,6 +15,21 @@ const FieldPage = function(props) {
     const selectedTab = ( pageTab ? pageTab : 'papers')
 
     let content = ( <Spinner local={true} /> )
+
+    const currentUser = useSelector(function(state) {
+        return state.authentication.currentUser
+    })
+   
+    const navigate = useNavigate()
+    useEffect(function() {
+        if ( ! currentUser ) {
+            navigate('/')
+        }
+    }, [])
+
+    if ( ! currentUser ) {
+        return <Spinner />
+    }
 
     return (
         <Page id="field-page">

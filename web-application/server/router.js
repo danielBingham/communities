@@ -191,20 +191,27 @@ module.exports = function(core) {
         })
     })
 
-    router.post('/post/:postId/reaction', function(request, response, next) {
-        postController.postPostReaction(request, response).catch(function(error) {
+    /**************************************************************************
+     * PostReaction REST Routes
+     **************************************************************************/
+
+    const PostReactionController = require('./controllers/PostReactionController')
+    const postReactionController = new PostReactionController(core)
+
+    router.post('/post/:postId/reactions', function(request, response, next) {
+        postReactionController.postPostReactions(request, response).catch(function(error) {
             next(error)
         })
     })
 
     router.patch('/post/:postId/reaction', function(request, response, next) {
-        postController.patchPostReaction(request, response).catch(function(error) {
+        postReactionController.patchPostReaction(request, response).catch(function(error) {
             next(error)
         })
     })
 
     router.delete('/post/:postId/reaction', function(request, response, next) {
-        postController.deletePostReaction(request, response).catch(function(error) {
+        postReactionController.deletePostReaction(request, response).catch(function(error) {
             next(error)
         })
     })

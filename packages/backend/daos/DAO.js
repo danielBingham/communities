@@ -141,9 +141,6 @@ module.exports = class DAO {
             INSERT INTO ${this.entityMaps[entityName].table} ${columns}
                 VALUES ${rows}
         `
-
-        console.log(sql)
-        console.log(params)
         await this.core.database.query(sql, params)
     }
 
@@ -187,7 +184,7 @@ module.exports = class DAO {
             if ( meta.update == 'override' ) {
                 fields += ( fields == '' ? '' : ', ') + `${field} = ${meta.updateOverride}`
             } else {
-                params.push(( entity[meta.key] ? entity[meta.key] : null ))
+                params.push(( entity[meta.key] !== null ? entity[meta.key] : null ))
                 fields += ( fields == '' ? '' : ', ') + `${field} = $${params.length}`
             }
         }
@@ -199,7 +196,6 @@ module.exports = class DAO {
 
         console.log(sql)
         console.log(params)
-
         await this.core.database.query(sql, params)
     }
 }

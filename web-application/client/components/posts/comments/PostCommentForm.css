@@ -10,3 +10,7 @@
     text-align: right;
     font-size: 12px;
 }
+.post-comment-form .error {
+    text-align: center;
+    color: var(--danger-color-main);
+}

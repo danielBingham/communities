@@ -15,6 +15,8 @@ import './Post.css'
 
 const Post = function({ id }) {
 
+    const [showMore, setShowMore] = useState(false) 
+
     const [ requestId, setRequestId ] = useState(null)
     const request = useSelector(function(state) {
         if( requestId in state.posts.requests) {
@@ -63,9 +65,15 @@ const Post = function({ id }) {
             <div className="header"> 
                 <UserTag id={post.userId} /> posted <a href={`/${user.username}/${id}`}><DateTag timestamp={post.createdDate} /></a>
             </div>
-            <div className="content">
+            { post.content && post.content.length > 0 && (post.content.length <= 1000 || showMore) && <div className="content">
                 { post.content }
-            </div>
+                { post.content.length >= 1000 && showMore && <div className="show-more">
+                    <a href="" onClick={(e) => { e.preventDefault(); setShowMore(false) }}>Hide More.</a></div>}
+            </div> }
+            { post.content && post.content.length > 0 && post.content.length > 1000 && ! showMore && <div className="content">
+                { post.content.substring(0,1000) }...
+                <div className="show-more"><a href="" onClick={(e) => { e.preventDefault(); setShowMore(true) }}>Show More.</a></div>
+            </div> }
             <PostImage id={id} />
             <PostReactions postId={id} />
             <PostComments postId={id} />

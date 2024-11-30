@@ -14,6 +14,8 @@ const PostForm = function() {
     const [content,setContent] = useState('')
     const [fileId,setFileId] = useState(null)
 
+    const [error,setError] = useState('')
+
     const [requestId,setRequestId] = useState(null)
     const request = useSelector(function(state) {
         if ( requestId in state.posts.requests ) {
@@ -43,6 +45,16 @@ const PostForm = function() {
         setContent('')
     }
 
+    const onChange = function(event) {
+        const newContent = event.target.value
+        if ( newContent.length > 10000 ) {
+            setError('overlength')
+        } else {
+            setError('')
+            setContent(newContent)
+        }
+    }
+
     useEffect(function() {
         if ( request && request.state == 'fulfilled') {
             navigate(`/${currentUser.username}/${request.result.entity.id}`)
@@ -55,14 +67,22 @@ const PostForm = function() {
         }
     }, [requestId])
 
+    let errorView = null
+    if ( error == 'overlength') {
+        errorView = (
+            <div className="error">Posts are limited to 10,000 characters...</div>
+        )
+    }
+
     return (
         <div className="post-form">
             <textarea 
-                onChange={(e) => setContent(e.target.value)} 
+                onChange={onChange} 
                 value={content}
                 placeholder="Write your post..."
             >
             </textarea>
+            { errorView }
             <div className="controls">
                 <FileUploadInput fileId={fileId} setFileId={setFileId} types={[ 'image/jpeg', 'image/png' ]} />
                 <div className="buttons">

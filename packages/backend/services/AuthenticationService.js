@@ -74,7 +74,6 @@ module.exports = class AuthenticationService {
         let file = null
         if ( user.fileId !== null ) {
             const fileResults = await this.fileDAO.selectFiles(`WHERE files.id = $1`, [ user.fileId ])
-            console.log(fileResults)
             file = fileResults[0]
         }
         

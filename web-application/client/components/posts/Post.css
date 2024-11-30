@@ -16,4 +16,7 @@
     padding: 15px 10px;
     white-space: pre-line;
 }
-
+.post .show-more {
+    padding: 10px;
+    text-align: center;
+}

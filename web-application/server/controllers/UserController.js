@@ -360,7 +360,12 @@ module.exports = class UserController {
             await this.emailService.sendEmailConfirmation(createdUser, token)
         }
 
-        const results = await this.userDAO.selectCleanUsers('WHERE users.id=$1', [ user.id ])
+        let results = null
+        if ( currentUser && currentUser.id == user.id ) {
+            results = await this.userDAO.selectUsers(`WHERE users.id = $1`, [ user.id ])
+        } else {
+            results = await this.userDAO.selectCleanUsers('WHERE users.id=$1', [ user.id ])
+        }
 
         if (! results.dictionary[user.id] ) {
             throw new ControllerError(500, 'server-error', 
@@ -394,7 +399,14 @@ module.exports = class UserController {
          * Anyone may call this endpoint.
          * 
          * **********************************************************/
-        const results = await this.userDAO.selectCleanUsers(`WHERE users.id = $1 && users.status = 'confirmed'`, [request.params.id])
+        const currentUser = request.session.user
+
+        let results = null
+        if ( currentUser && currentUser.id == request.params.id ) {
+            results = await this.userDAO.selectUsers(`WHERE users.id = $1 AND users.status = 'confirmed'`, [ request.params.id ])
+        } else {
+            results = await this.userDAO.selectCleanUsers(`WHERE users.id = $1 AND users.status = 'confirmed'`, [request.params.id])
+        }
 
         if ( ! results.dictionary[ request.params.id] ) {
             throw new ControllerError(404, 'not-found', `User(${request.params.id}) not found.`)
@@ -788,13 +800,11 @@ module.exports = class UserController {
         }
 
         const relationship = { userId: userId, friendId: friendId }
-        console.log(relationship)
         await this.userDAO.deleteUserRelationship(relationship)
 
         request.session.friends = request.session.friends
             .filter((f) => ! (f.userId == userId && f.friendId == friendId) && ! (f.userId == friendId && f.friendId == userId))
 
-        console.log(request.session.friends)
 
         response.status(200).json({
             friends: request.session.friends

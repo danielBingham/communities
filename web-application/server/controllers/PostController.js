@@ -18,7 +18,7 @@
  *
  ******************************************************************************/
 
-const { PostDAO, PostCommentDAO, UserDAO }  = require('@danielbingham/communities-backend')
+const { PostDAO, PostCommentDAO, PostReactionDAO, UserDAO }  = require('@danielbingham/communities-backend')
 const ControllerError = require('../errors/ControllerError')
 
 
@@ -29,6 +29,7 @@ module.exports = class PostController {
 
         this.postDAO = new PostDAO(core)
         this.postCommentDAO = new PostCommentDAO(core)
+        this.postReactionDAO = new PostReactionDAO(core)
         this.userDAO = new UserDAO(core)
     }
 
@@ -41,20 +42,20 @@ module.exports = class PostController {
         }
         const userResults = await this.userDAO.selectUsers(`WHERE users.id = ANY($1::uuid[])`, [ userIds ])
 
-        const postCommentIds = []
-        for(const postId of results.list) {
-            const post = results.dictionary[postId]
-
-            postCommentIds.push(...post.comments)
-        }
         const postCommentResults = await this.postCommentDAO.selectPostComments({
-            where: `post_comments.id = ANY($1::uuid[])`,
-            params: [ postCommentIds ]
+            where: `post_comments.post_id = ANY($1::uuid[])`,
+            params: [ results.list]
+        })
+
+        const postReactionResults = await this.postReactionDAO.selectPostReactions({
+            where: `post_reactions.post_id = ANY($1::uuid[])`,
+            params: [ results.list ]
         })
 
         return {
             users: userResults.dictionary,
-            postComments: postCommentResults.dictionary
+            postComments: postCommentResults.dictionary,
+            postReactions: postReactionResults.dictionary
         }
     }
 
@@ -62,7 +63,8 @@ module.exports = class PostController {
         const query = {
             where: '',
             params: [],
-            page: 1
+            page: 1,
+            order: 'posts.activity/((EXTRACT(EPOCH from now()) - EXTRACT(EPOCH from posts.created_date))/(60*60)) DESC'
         }
 
         const currentUser = request.session.user
@@ -86,6 +88,13 @@ module.exports = class PostController {
 
         query.params.push(friendIds)
         query.where += `${ query.params.length > 1 ? ' AND ' : ''}posts.user_id = ANY($${query.params.length}::uuid[])`
+
+        if ( 'sort' in request.query ) {
+            const sort = request.query.sort
+            if ( sort == 'newest' ) {
+                query.order = 'posts.created_date DESC'
+            } 
+        }
 
         return query
     }
@@ -121,14 +130,27 @@ module.exports = class PostController {
 
         const post = request.body
 
+        if ( post.content && post.content.length > 10000 ) {
+            throw new ControllerError(400, 'invalid',
+                `Post too long.`,
+                `Your post was too long.  Please keep posts to 10,000 characters or under.`)
+        }
+
         await this.postDAO.insertPosts(post)
-        const tags = post.tags.map((tagId) => { return { postId: post.id, tagId: tagId }})
-        await this.postDAO.insertPostTags(tags)
 
         const results = await this.postDAO.selectPosts({
             where: `posts.id = $1`,
             params: [ post.id ]
         })
+
+        const entity = results.dictionary[post.id]
+
+        const postVersion = {
+            postId: entity.id,
+            fileId: entity.fileId,
+            content: entity.content
+        }
+        await this.postDAO.insertPostVersions(postVersion)
 
         const relations = await this.getRelations(results)
 
@@ -180,234 +202,73 @@ module.exports = class PostController {
             entity: post,
             relations: relationships
         })
-
     }
 
     async patchPost(request, response) {
+        const currentUser = request.session.user
+
+        if ( ! currentUser ) {
+            throw new ControllerError(401, 'not-authenticated',
+                `User must be authenticated to edit a post.`,
+                `You must must be authenticated to edit a post.`)
+        }
+
+        const post = request.body
+
+        if ( post.content && post.content.length > 10000 ) {
+            throw new ControllerError(400, 'invalid',
+                `Post too long.`,
+                `Your post was too long.  Please keep posts to 10,000 characters or under.`)
+        }
+
+        if ( post.status == 'writing' || post.status == 'editing' ) {
+            await this.postDAO.updatePost(post)
+        } else if ( post.status == 'reverting' ) {
+            const previousResults = await this.core.database.query(`
+                SELECT file_id, content 
+                    FROM post_versions
+                    WHERE post_id = $1 
+                    ORDER BY created_date DESC
+                    LIMIT 1
+            `, [ post.id ])
+
+            const previous = previousResults.rows[0]
+
+            const post = {
+                id: post.id,
+                fileId: previous.file_id,
+                content: previous.content
+            }
+            await this.postDAO.updatePost(post)
+        }
+
+        const results = await this.postDAO.selectPosts({
+            where: `posts.id = $1`,
+            params: [ post.id ]
+        })
+
+        const entity = results.dictionary[post.id]
+
+        if ( post.status == 'posted' ) {
+            const postVersion = {
+                postId: entity.id,
+                fileId: entity.fileId,
+                content: entity.content
+            }
+            await this.postDAO.insertPostVersions(postVersion)
+        }
+
+        const relations = await this.getRelations(results)
+
+        response.status(201).json({
+            entity: results.dictionary[results.list[0]],
+            relationships: relations
+        })
 
     }
 
     async deletePost(request, response) {
 
-    }
-
-    async postPostReaction(request, response) {
-        const currentUser = request.session.user
-
-        if ( ! currentUser ) {
-            throw new ControllerError(401, 'not-authenticated',
-                `User must be authenticated to react to a post.`,
-                `You must be authenticated to reaction to a post.`)
-        }
-
-        const postId = request.params.postId
-       
-
-        const results = await this.core.database.query(`
-            SELECT posts.activity FROM posts WHERE posts.id = $1
-        `, [ postId ])
-
-        if ( results.rows.length <= 0 ) {
-            throw new ControllerError(404, 'not-found',
-                `Post(${postId}) was not found by User(${currentUser.id}) attempting to react.`,
-                `That post either doesn't exist or you don't have permission to see it.`)
-        }
-
-        const existing = await this.core.database.query(`
-            SELECT reaction FROM post_reactions WHERE post_reactions.post_id = $1 AND post_reactions.user_id = $2
-        `, [ postId, currentUser.id])
-
-        if ( existing.rows.length > 0 ) {
-            throw new ControllerError(400, 'invalid',
-                `User(${currentUser.id}) attempted to react to Post(${postId}) twice.`,
-                `You can only react to a post once.`)
-        }
-
-        const reaction = {
-            postId: postId,
-            userId: currentUser.id,
-            reaction: request.body.reaction
-        }
-
-        await this.postDAO.insertPostReactions(reaction)
-
-        let activity = results.rows[0].activity
-        if ( reaction.reaction == 'block' ) {
-            activity -= 1
-        } else {
-            activity += 1
-        }
-
-        const post = {
-            id: postId,
-            activity: activity
-        }
-
-        await this.postDAO.updatePost(post)
-
-        const postResult = await this.postDAO.selectPosts({
-            where: `posts.id = $1`,
-            params: [ postId ]
-        })
-
-        const entity = postResult.dictionary[postId]
-
-        if ( ! entity ) {
-            throw new ControllerError(500, 'server-error',
-                `Post(${postId}) missing after update.`,
-                `Post missing after being updated.  Please report as a bug.`)
-        }
-
-        response.status(201).json({
-            entity: entity,
-            relations: await this.getRelations(postResult)
-        })
-    }
-
-    async patchPostReaction(request, response) {
-        const currentUser = request.session.user
-
-        if ( ! currentUser ) {
-            throw new ControllerError(401, 'not-authenticated',
-                `User must be authenticated to react to a post.`,
-                `You must be authenticated to reaction to a post.`)
-        }
-
-        const postId = request.params.postId
-
-        const existingPostResults = await this.core.database.query(`
-            SELECT posts.activity FROM posts WHERE posts.id = $1
-        `, [ postId ])
-
-        if ( existingPostResults.rows.length <= 0 ) {
-            throw new ControllerError(404, 'not-found',
-                `Post(${postId}) was not found by User(${currentUser.id}) attempting to react.`,
-                `That post either doesn't exist or you don't have permission to see it.`)
-        }
-
-        const existing = await this.core.database.query(`
-            SELECT user_id, reaction FROM post_reactions WHERE post_reactions.post_id = $1 AND post_reactions.user_id = $2
-        `, [ postId, currentUser.id])
-
-        if ( existing.rows.length <= 0 ) {
-            throw new ControllerError(404, 'not-found',
-                `User(${currentUser.id}) attempted to patch reaction to Post(${postId}) but not existed.`,
-                `You can't patch a reaction that doesn't exist.  Try POST to create a reaction.`)
-        }
-
-        const reaction = {
-            postId: postId,
-            userId: currentUser.id,
-            reaction: request.body.reaction
-        }
-
-        await this.postDAO.updatePostReaction(reaction)
-
-        let activity = existingPostResults.rows[0].activity
-        let existingReaction = existing.rows[0].reaction
-        if ( existingReaction != 'block' && reaction.reaction == 'block' ) {
-            activity -= 2
-        } else if ( existingReaction == 'block' && reaction.reaction != 'block') {
-            activity += 2
-        }
-
-        const post = {
-            id: postId,
-            activity: activity
-        }
-
-        await this.postDAO.updatePost(post)
-
-        const postResult = await this.postDAO.selectPosts({
-            where: `posts.id = $1`,
-            params: [ postId ]
-        })
-
-        const entity = postResult.dictionary[postId]
-
-        if ( ! entity ) {
-            throw new ControllerError(500, 'server-error',
-                `Post(${postId}) missing after update.`,
-                `Post missing after being updated.  Please report as a bug.`)
-        }
-
-        response.status(201).json({
-            entity: entity,
-            relations: await this.getRelations(postResult)
-        })
-    }
-
-    async deletePostReaction(request, response) {
-        const currentUser = request.session.user
-
-        if ( ! currentUser ) {
-            throw new ControllerError(401, 'not-authenticated',
-                `User must be authenticated to react to a post.`,
-                `You must be authenticated to reaction to a post.`)
-        }
-
-        const postId = request.params.postId
-
-        const existingPostResults = await this.core.database.query(`
-            SELECT posts.activity FROM posts WHERE posts.id = $1
-        `, [ postId ])
-
-        if ( existingPostResults.rows.length <= 0 ) {
-            throw new ControllerError(404, 'not-found',
-                `Post(${postId}) was not found by User(${currentUser.id}) attempting to react.`,
-                `That post either doesn't exist or you don't have permission to see it.`)
-        }
-
-        const existing = await this.core.database.query(`
-            SELECT user_id, reaction FROM post_reactions WHERE post_reactions.post_id = $1 AND post_reactions.user_id = $2
-        `, [ postId, currentUser.id])
-
-        if ( existing.rows.length <= 0 ) {
-            throw new ControllerError(404, 'not-found',
-                `User(${currentUser.id}) attempted to delete reaction to Post(${postId}) but no reaction found.`,
-                `You can't delete a reaction that doesn't exist.`)
-        }
-
-        const reaction = {
-            postId: postId,
-            userId: currentUser.id,
-        }
-
-        await this.postDAO.deletePostReaction(reaction)
-
-        let activity = existingPostResults.rows[0].activity
-        let existingReaction = existing.rows[0].reaction
-
-        if ( existingReaction == 'block')  {
-            activity += 1
-        } else {
-            activity -= 1
-        }
-
-        const post = {
-            id: postId,
-            activity: activity
-        }
-
-        await this.postDAO.updatePost(post)
-
-        const postResult = await this.postDAO.selectPosts({
-            where: `posts.id = $1`,
-            params: [ postId ]
-        })
-
-        const entity = postResult.dictionary[postId]
-
-        if ( ! entity ) {
-            throw new ControllerError(500, 'server-error',
-                `Post(${postId}) missing after update.`,
-                `Post missing after being updated.  Please report as a bug.`)
-        }
-
-        response.status(201).json({
-            entity: entity,
-            relations: await this.getRelations(postResult)
-        })
     }
 
 }

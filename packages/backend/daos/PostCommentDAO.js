@@ -88,6 +88,13 @@ module.exports = class PostCommentDAO extends DAO {
                         key: 'reactions'
                     }
                 }
+            },
+            'PostCommentVersion': {
+                table: 'post_comment_versions',
+                fields: {
+
+
+                }
             }
         }
     }

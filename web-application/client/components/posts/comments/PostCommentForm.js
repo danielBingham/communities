@@ -11,6 +11,8 @@ import './PostCommentForm.css'
 const PostCommentForm = function({ postId, commentId }) {
     const [ content, setContent ] = useState('')
 
+    const [ error, setError ] = useState('')
+
     const [ requestId, setRequestId ] = useState(null)
     const request = useSelector(function(state) {
         if ( requestId in state.posts.requests ) {
@@ -76,6 +78,17 @@ const PostCommentForm = function({ postId, commentId }) {
         }
     }
 
+    const onChange = function(event) {
+        const newContent = event.target.value
+        if ( newContent.length > 5000) {
+            setError('length')
+        } else {
+            setError('')
+            setContent(newContent)
+        }
+
+    }
+
     // Initialize content to the content of our comment, if we have one.
     useEffect(function() {
         if ( comment !== null ) {
@@ -97,14 +110,20 @@ const PostCommentForm = function({ postId, commentId }) {
         )
     }
 
+    let errorView = null
+    if ( error == 'length' ) {
+        errorView = ( <div className="error">Comments are limited to 5000 characters...</div> )
+    }
+
     return (
         <div className="post-comment-form">
             <textarea
                 onBlur={(e) => commit()}
-                onChange={(e) => setContent(e.target.value)} 
+                onChange={onChange} 
                 value={content}
                 placeholder="Write a comment..."
             ></textarea>
+            { errorView }
             <div className="buttons">
                 <Button type="secondary-warn" onClick={(e) => cancel()}>Cancel</Button>
                 <Button type="primary" onClick={(e) => submit()}>Comment</Button>

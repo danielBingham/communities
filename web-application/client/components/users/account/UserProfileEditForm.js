@@ -48,14 +48,37 @@ const UserProfileEditForm = function(props) {
         if ( ! field || field == 'name' ) {
             if ( name.length <= 0 ) {
                 setNameError('no-name')
-            } else if ( name.length > 512 ) {
+                error = true
+            } else if ( name.length > 500 ) {
                 setNameError('too-long')
+                error = true
             } else {
                 setNameError(null)
             }
         }
 
+        if ( ! field || field == 'about' ) {
+            if ( about.length > 500 ) {
+                setAboutError('length')
+                error = true
+            } else {
+                setAboutError(null)
+            }
+        }
+
+
         return ! error
+    }
+
+    const onAboutChange = function(event) {
+        const newContent = event.target.value
+        if ( newContent.length > 250) {
+            setAboutError('length')
+        } else {
+            setAboutError('')
+            setAbout(newContent)
+        }
+
     }
 
     const onSubmit = function(event) {
@@ -133,7 +156,12 @@ const UserProfileEditForm = function(props) {
     if ( nameError && nameError == 'no-name' ) {
         nameErrorView = ( <div className="error">Name is required!</div>)
     } else if ( nameError && nameError == 'too-long' ) {
-        nameErrorView = ( <div className="error">Name is too long. Limit is 512 characters.</div> )
+        nameErrorView = ( <div className="error">Name is too long. Limit is 500 characters.</div> )
+    }
+
+    let aboutErrorView = null
+    if ( aboutError == 'length' ) {
+        aboutErrorView = ( <div className="error">About is too long.  Limit is 250 characters.</div> )
     }
 
     return (
@@ -162,7 +190,11 @@ const UserProfileEditForm = function(props) {
                 </div>
                 <div className="form-text about">
                     <label htmlFor="about">About You</label>
-                    <textarea name="about" value={about} onChange={ (event) => setAbout(event.target.value) }></textarea>
+                    <textarea name="about" 
+                        value={about} 
+                        onChange={onAboutChange}
+                    ></textarea>
+                    { aboutErrorView }
                 </div>
                 <div className="result">{result}</div>
                 <div className="form-submit submit">

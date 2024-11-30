@@ -4,6 +4,10 @@
     margin: 20px auto;
     width: 700px;
 }
+.post-list .controls {
+    text-align: right;
+    padding: 10px 40px;
+}
 .post-list .sort-menu {
     /*float: right;*/
     /*margin-top: -8px;*/

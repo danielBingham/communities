@@ -1,13 +1,28 @@
-import React from 'react'
-import { useParams } from 'react-router-dom'
+import React, { useEffect } from 'react'
+import { useSelector } from 'react-redux'
+import { useNavigate, useParams } from 'react-router-dom'
 
-import Spinner from '/components/Spinner'
-import { Page, PageBody, PageHeader, PageTabBar, PageTab } from '/components/generic/Page'
+import { Page } from '/components/generic/Page'
 
 import Post from '/components/posts/Post'
 
 const PostPage = function() {
     const { username, postId } = useParams()
+
+    const currentUser = useSelector(function(state) {
+        return state.authentication.currentUser
+    })
+   
+    const navigate = useNavigate()
+    useEffect(function() {
+        if ( ! currentUser ) {
+            navigate('/')
+        }
+    }, [])
+
+    if ( ! currentUser ) {
+        return null
+    }
 
     return (
         <Page id={`post-${postId}`}>

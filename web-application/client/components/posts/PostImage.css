@@ -1,7 +1,7 @@
 .post-image {
     width: 100%;
     margin: 0;
-    padding: 0;
+    padding: 5px 0 0 0;
 }
 .post-image img {
     display: block;

@@ -143,26 +143,32 @@ module.exports = class PostDAO extends DAO {
                     }
                 }
             },
-            'PostReaction': {
-                table: 'post_reactions',
+            'PostVersion': {
+                table: 'post_versions',
                 fields: {
-                    'post_id': {
-                        insert: 'required',
+                    'id': {
+                        insert: 'primary',
                         update: 'primary',
+                        select: 'always',
+                        key: 'id'
+                    },
+                    'post_id': {
+                        insert: 'allowed',
+                        update: 'allowed',
                         select: 'always',
                         key: 'postId'
                     },
-                    'user_id': {
-                        insert: 'required',
-                        update: 'primary',
-                        select: 'always',
-                        key: 'userId'
-                    },
-                    'reaction': {
-                        insert: 'required',
+                    'file_id': {
+                        insert: 'allowed',
                         update: 'allowed',
                         select: 'always',
-                        key: 'reaction'
+                        key: 'fileId'
+                    },
+                    'content': {
+                        insert: 'allowed',
+                        update: 'allowed',
+                        select: 'always',
+                        key: 'content'
                     },
                     'created_date': {
                         insert: 'override',
@@ -192,19 +198,9 @@ module.exports = class PostDAO extends DAO {
         return this.getSelectionString('PostTag')
     }
 
-    getPostReactionSelectionString() {
-        return this.getSelectionString('PostReaction')
-    }
-
-
     hydratePost(row) {
         return this.hydrate('Post', row)
     }
-
-    hydratePostReaction(row) {
-        return this.hydrate('PostReaction', row)
-    }
-
 
     hydratePosts(rows) {
         const dictionary = {}
@@ -213,7 +209,6 @@ module.exports = class PostDAO extends DAO {
         const postTagDictionary = {}
         const postReactionDictionary = {}
         const postCommentDictionary = {}
-        const postCommentReactionDictionary = {}
 
         for(const row of rows) {
 
@@ -234,18 +229,10 @@ module.exports = class PostDAO extends DAO {
             }
 
             // Hydrate PostReactions.
-            if ( row.PostReaction_postId !== null 
-                && ! (row.PostReaction_postId in postReactionDictionary) ) 
+            if ( row.PostReaction_id !== null && ! (row.PostReaction_id in postReactionDictionary) ) 
             {
-                postReactionDictionary[row.PostReaction_postId] = {}
-            }
-
-            if ( row.PostReaction_userId !== null 
-                && ! (row.PostReaction_userId in postReactionDictionary[row.PostReaction_postId])) 
-            {
-                const reaction = this.hydratePostReaction(row)
-                postReactionDictionary[reaction.postId][reaction.userId] = reaction
-                dictionary[reaction.postId].reactions.push(reaction)
+                postReactionDictionary[row.PostReaction_id] = true
+                dictionary[row.Post_id].reactions.push(row.PostReaction_id)
             }
 
             // Hydrate PostComments.
@@ -260,10 +247,10 @@ module.exports = class PostDAO extends DAO {
 
     async selectPosts(query) {
         let where = query.where ? `WHERE ${query.where}` : ''
-        let params = query.params ? query.params : []
+        let params = query.params ? [ ...query.params ] : []
         let page = query.page 
         let order = query.order ? `ORDER BY ${query.order}` : 
-            `ORDER BY posts.activity/((EXTRACT(EPOCH from now()) - EXTRACT(EPOCH from posts.created_date))/(60*60)) DESC, post_comments.created_date ASC`
+            `ORDER BY posts.activity/((EXTRACT(EPOCH from now()) - EXTRACT(EPOCH from posts.created_date))/(60*60)) DESC`
 
         if ( page ) {
             const postIds = await this.getPostPage(query)
@@ -278,9 +265,9 @@ module.exports = class PostDAO extends DAO {
         const sql = `
             SELECT
                 ${this.getPostSelectionString()},
-                ${this.getPostReactionSelectionString()},
+                ${this.getPostTagSelectionString()},
                 post_comments.id as "PostComment_id",
-                ${this.getPostTagSelectionString()}
+                post_reactions.id as "PostReaction_id"
             FROM posts
                 LEFT OUTER JOIN post_reactions ON posts.id = post_reactions.post_id
                 LEFT OUTER JOIN post_comments ON posts.id = post_comments.post_id
@@ -299,9 +286,9 @@ module.exports = class PostDAO extends DAO {
     }
 
     async getPostPageMeta(query) {
-        let where = query.where ? '' : `WHERE ${query.where}`
-        let params = query.params ? [] : query.params
-        let page = query.page ? 1 : query.page
+        let where = query.where ? `WHERE ${query.where}` : ''
+        let params = query.params ? [ ...query.params ] : []
+        let page = query.page ? query.page : 1
 
         const results = await this.core.database.query(`
                 SELECT 
@@ -320,10 +307,10 @@ module.exports = class PostDAO extends DAO {
     }
 
     async getPostPage(query) {
-        let where = query.where ? '' : `WHERE ${query.where}`
-        let params = query.params ? [] : query.params
-        let page = query.page ? 1 : query.page
-        let order = query.order ? `ORDER BY ${query.order}` : `ORDER BY posts.activity DESC, posts.created_date DESC` 
+        let where = query.where ? `WHERE ${query.where}` : ''
+        let params = query.params ? [ ...query.params ] : []
+        let page = query.page ? query.page : 1 
+        let order = query.order ? `ORDER BY ${query.order}` : `ORDER BY posts.activity/((EXTRACT(EPOCH from now()) - EXTRACT(EPOCH from posts.created_date))/(60*60)) DESC` 
 
         const results = await this.core.database.query(`
             SELECT 
@@ -346,19 +333,17 @@ module.exports = class PostDAO extends DAO {
         await this.insert('PostTag', postTags)
     }
 
-    async insertPostReactions(postReactions) {
-        await this.insert('PostReaction', postReactions)
+    async insertPostVersions(postVersions) {
+        await this.insert('PostVersion', postVersions)
     }
-
 
     async updatePost(post) {
         await this.update('Post', post)
     }
 
-    async updatePostReaction(postReaction) {
-        await this.update('PostReaction', postReaction)
+    async updatePostVersion(postVersion) {
+        await this.update('PostVersion', postVersion)
     }
-
 
     async deletePost(post) {
         await this.core.database.query(`
@@ -370,12 +355,6 @@ module.exports = class PostDAO extends DAO {
         await this.core.database.query(`
             DELETE FROM post_tags WHERE post_tags.post_id = $1 AND post_tags.tag_id = $2
         `, [ postTag.postId, postTag.tagId ])
-    }
-
-    async deletePostReaction(postReaction) {
-        await this.core.database.query(`
-            DELETE FROM post_reactions WHERE post_reactions.post_id = $1 AND post_reactions.user_id = $2
-        `, [ postReaction.postId, postReaction.userId])
     }
 
 }

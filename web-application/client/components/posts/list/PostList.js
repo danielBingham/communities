@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 
+import SortControl from '/components/posts/list/controls/SortControl'
 import PaginationControls from '/components/PaginationControls'
 import Post from '/components/posts/Post'
 import Spinner from '/components/Spinner'
@@ -17,7 +18,6 @@ const PostList = function({ queryName }) {
         }
     })
 
-
     if ( query === null ) {
         return (
             <div className="post-list">
@@ -33,7 +33,9 @@ const PostList = function({ queryName }) {
 
     return (
         <div className="post-list">
-            {/*<div className="sort-menu">Sort: Active</div> */}
+            <div className="controls">
+                <SortControl /> 
+            </div>
             { postViews }
             <PaginationControls meta={query.meta} />
         </div>

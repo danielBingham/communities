@@ -26,7 +26,7 @@ CREATE TYPE feature_status AS ENUM(
     'uninitialized'
 );
 CREATE TABLE features (
-    name varchar(256) PRIMARY KEY,
+    name text PRIMARY KEY,
     status feature_status DEFAULT 'created',
     created_date timestamptz,
     updated_date timestamptz
@@ -41,16 +41,16 @@ CREATE TYPE user_permissions AS ENUM('user', 'moderator', 'admin', 'superadmin')
 CREATE TABLE users (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 
-    name varchar(512) DEFAULT '',
-    username varchar(512) DEFAULT '',
+    name text DEFAULT '',
+    username text DEFAULT '',
 
-    email varchar(512) NOT NULL,
-    password varchar(256),
+    email text NOT NULL,
+    password text,
 
     status user_status DEFAULT 'unconfirmed',
     permissions user_permissions DEFAULT 'user',
 
-    about varchar(1024) DEFAULT NULL,
+    about text DEFAULT NULL,
 
     location geography(POINT),
 
@@ -90,9 +90,9 @@ CREATE TABLE notifications (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id uuid REFERENCES users(id) ON DELETE CASCADE NOT NULL, 
 
-    type varchar(1024),
+    type text,
     description text,
-    path varchar(1024),
+    path text,
     is_read boolean,
 
     created_date timestamptz,
@@ -113,7 +113,7 @@ CREATE TABLE tokens (
     /** User who created the token, for invitations. **/
     creator_id uuid REFERENCES users (id),
 
-    token varchar(1024),
+    token text,
     type token_type NOT NULL,
 
     created_date timestamptz,
@@ -131,9 +131,9 @@ CREATE TABLE files (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id uuid REFERENCES users(id) ON DELETE CASCADE,
 
-    location varchar(1024), /* This is the S3/Spaces bucket URL. */
-    filepath varchar(1024),
-    type varchar(256),
+    location text, /* This is the S3/Spaces bucket URL. */
+    filepath text,
+    type text,
 
     created_date timestamptz,
     updated_date timestamptz
@@ -151,7 +151,7 @@ CREATE INDEX users__file_id ON users (file_id);
 
 CREATE TABLE tags (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    name varchar(512),
+    name text,
     description text,
 
     created_date timestamptz,
@@ -176,15 +176,15 @@ CREATE TYPE reaction_type AS ENUM(
     'block'
 );
 
-CREATE TYPE post_status AS ENUM('writing', 'editing', 'posted');
+CREATE TYPE post_status AS ENUM('writing', 'editing', 'reverting', 'posted');
 CREATE TABLE posts (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id uuid REFERENCES users (id) NOT NULL,
+    user_id uuid REFERENCES users (id) ON DELETE CASCADE NOT NULL,
 
     file_id uuid REFERENCES files (id) DEFAULT NULL,
 
     status post_status default 'writing' NOT NULL,
-    activity real DEFAULT 1,
+    activity bigint DEFAULT 1,
     content text,
 
     created_date timestamptz,
@@ -192,6 +192,20 @@ CREATE TABLE posts (
 );
 CREATE INDEX posts__user_id ON posts (user_id);
 CREATE INDEX posts__file_id ON posts (file_id);
+
+CREATE TABLE post_versions (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    post_id uuid REFERENCES posts (id) ON DELETE CASCADE NOT NULL,
+
+    file_id uuid REFERENCES files (id) DEFAULT NULL,
+
+    content text,
+
+    created_date timestamptz,
+    updated_date timestamptz
+);
+CREATE INDEX post_versions__post_id ON post_versions (post_id);
+CREATE INDEX post_versions__file_id ON post_versions (file_id);
 
 CREATE TABLE post_tags (
     post_id uuid REFERENCES posts (id) NOT NULL,
@@ -204,8 +218,8 @@ CREATE TABLE post_tags (
 
 CREATE TABLE post_reactions (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    post_id uuid REFERENCES posts (id) NOT NULL,
-    user_id uuid REFERENCES users (id) NOT NULL,
+    post_id uuid REFERENCES posts (id) ON DELETE CASCADE NOT NULL,
+    user_id uuid REFERENCES users (id) ON DELETE CASCADE NOT NULL,
 
     reaction reaction_type NOT NULL,
 
@@ -215,11 +229,11 @@ CREATE TABLE post_reactions (
 CREATE INDEX post_reactions__post_id ON post_reactions (post_id);
 CREATE INDEX post_reactions__user_id ON post_reactions (user_id);
 
-CREATE TYPE post_comment_status AS ENUM('writing', 'editing', 'posted');
+CREATE TYPE post_comment_status AS ENUM('writing', 'editing', 'reverting', 'posted');
 CREATE TABLE post_comments (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    post_id uuid REFERENCES posts (id) NOT NULL,
-    user_id uuid REFERENCES users (id) NOT NULL,
+    post_id uuid REFERENCES posts (id) ON DELETE CASCADE NOT NULL,
+    user_id uuid REFERENCES users (id) ON DELETE CASCADE NOT NULL,
 
     status post_comment_status DEFAULT 'writing' NOT NULL,
     content text,
@@ -230,15 +244,26 @@ CREATE TABLE post_comments (
 CREATE INDEX post_comments__post_id ON post_comments (post_id);
 CREATE INDEX post_comments__user_id ON post_comments (user_id);
 
+CREATE TABLE post_comment_versions (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    post_comment_id uuid REFERENCES post_comments (id) ON DELETE CASCADE NOT NULL,
+
+    content text,
+
+    created_date timestamptz,
+    updated_date timestamptz
+);
+CREATE INDEX post_comment_versions__post_comment_id ON post_comment_versions (post_comment_id);
+
 /******************************************************************************
  * Permissions
  ******************************************************************************/
 
 CREATE TABLE roles (
     id  uuid PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
-    name    varchar(1024) NOT NULL,
-    display_name varchar(1024) NOT NULL,
-    description varchar(1024) NOT NULL,
+    name    text NOT NULL,
+    display_name text NOT NULL,
+    description text NOT NULL,
     programattic boolean NOT NULL DEFAULT false,
 
     created_date timestamptz,
@@ -260,8 +285,8 @@ CREATE TABLE user_roles (
 CREATE TABLE permissions (
     id uuid PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
 
-    entity varchar(512) NOT NULL,
-    action varchar(512) NOT NULL,
+    entity text NOT NULL,
+    action text NOT NULL,
 
     user_id uuid REFERENCES users(id) DEFAULT NULL,
     role_id uuid REFERENCES roles(id) DEFAULT NULL,

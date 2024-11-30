@@ -105,7 +105,6 @@ export const postsSlice = createSlice({
  */
 export const getPosts = function(name, params) {
     return function(dispatch, getState) {
-
         const queryString = makeSearchParams(params)
         const endpoint = '/posts' + ( params ? '?' + queryString.toString() : '')
 
@@ -121,7 +120,6 @@ export const getPosts = function(name, params) {
                 dispatch(setRelationsInState(response.relations))
             }
         )
-
     }
 }
 
@@ -228,112 +226,6 @@ export const deletePost = function(post) {
         )
     }
 } 
-
-/**
- * POST /post/:postId/reaction
- *
- * Add a reaction to a post. 
- *  
- * Makes the request asynchronously and returns a id that can be used to track
- * the request and retreive the results from the state slice.
- *
- * @param {object} post - A populated post object, minus the `id` member.
- *
- * @returns {string} A uuid requestId that can be used to track this request.
- */
-export const postPostReaction = function(reaction) {
-    return function(dispatch, getState) {
-        const endpoint = `/post/${reaction.postId}/reaction`
-        const body = reaction
-        dispatch(postsSlice.actions.bustRequestCache())
-        return makeTrackedRequest(dispatch, getState, postsSlice,
-            'POST', endpoint, body,
-            function(response) {
-                dispatch(postsSlice.actions.setPostsInDictionary({ entity: response.entity}))
-
-                dispatch(setRelationsInState(response.relations))
-            }
-        )
-    }
-}
-
-/**
- * PATCH /post/:postId/reaction
- *
- * Update a post reaction from a partial `reaction` object. 
- *
- * Makes the request asynchronously and returns a id that can be used to track
- * the request and retreive the results from the state slice.
- *
- * @param {object} reaction - A populated reaction object.
- *
- * @returns {string} A uuid requestId that can be used to track this request.
- */
-export const patchPostReaction = function(reaction) {
-    return function(dispatch, getState) {
-        dispatch(postsSlice.actions.bustRequestCache())
-        return makeTrackedRequest(dispatch, getState, postsSlice,
-            'PATCH', `/post/${reaction.postId}/reaction`, reaction,
-            function(response) {
-                dispatch(postsSlice.actions.setPostsInDictionary({ entity: response.entity}))
-
-                dispatch(setRelationsInState(response.relations))
-            }
-        )
-    }
-}
-
-/**
- * DELETE /post/:postId/reaction
- *
- * Delete a post reaction. 
- *
- * Makes the request asynchronously and returns a id that can be used to track
- * the request and retreive the results from the state slice.
- *
- * @param {object} reaction - A populated reaction object.
- *
- * @returns {string} A uuid requestId that can be used to track this request.
- */
-export const deletePostReaction = function(reaction) {
-    return function(dispatch, getState) {
-        dispatch(postsSlice.actions.bustRequestCache())
-        return makeTrackedRequest(dispatch, getState, postsSlice,
-            'DELETE', `/post/${reaction.postId}/reaction`, null,
-            function(response) {
-                dispatch(postsSlice.actions.setPostsInDictionary({ entity: response.entity}))
-            }
-        )
-    }
-} 
-
-/**
- * POST /post/:postId/comments
- *
- * Add a comment to a post. 
- *  
- * Makes the request asynchronously and returns a id that can be used to track
- * the request and retreive the results from the state slice.
- *
- * @param {object} post - A populated post object, minus the `id` member.
- *
- * @returns {string} A uuid requestId that can be used to track this request.
- */
-export const postPostComments = function(comment) {
-    return function(dispatch, getState) {
-        const endpoint = `/post/${comment.postId}/comments`
-        const body = comment 
-        dispatch(postsSlice.actions.bustRequestCache())
-        return makeTrackedRequest(dispatch, getState, postsSlice,
-            'POST', endpoint, body,
-            function(response) {
-                dispatch(postsSlice.actions.setPostsInDictionary({ entity: response.entity}))
-
-                dispatch(setRelationsInState(response.relations))
-            }
-        )
-    }
-}
 
 
 export const { 

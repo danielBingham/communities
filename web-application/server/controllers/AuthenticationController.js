@@ -61,7 +61,6 @@ module.exports = class AuthenticationController {
         if (request.session.user) {
             const session = await this.auth.getSessionForUserId(request.session.user.id)
 
-            console.log(session)
             request.session.user = session.user
             request.session.friends = session.friends
             request.session.file = session.file

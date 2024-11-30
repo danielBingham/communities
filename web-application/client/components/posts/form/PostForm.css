@@ -13,6 +13,10 @@
     box-sizing: border-box;
     resize: none;
 }
+.post-form .error {
+    padding: 5px;
+    color: var(--danger-color-main);
+}
 .post-form .controls {
     display: grid;
     grid-template-columns: 1fr 1fr;
