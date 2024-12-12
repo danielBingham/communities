@@ -2,4 +2,18 @@
     border-top: thin solid var(--main-border-color);
     padding: 10px;
 }
+.post-comments .show-comments {
+    text-align: center;
+}
+.post-comments .show-comments a:link,
+.post-comments .show-comments a:visited,
+.post-comments .show-comments a:active {
+    display: block;
+    border-radius: 10px;
+    background-color: var(--primary-color-lightest);
+}
+
+.post-comments .show-comments a:hover {
+    background-color: white;
+}
 

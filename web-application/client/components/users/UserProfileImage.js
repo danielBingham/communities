@@ -21,12 +21,15 @@ const UserProfileImage = function({ userId, className }) {
     // ======= Redux State ==========================================
     
     const user = useSelector(function(state) {
-        if ( userId in state.users.dictionary ) {
+        if ( state.authentication.currentUser && userId == state.authentication.currentUser.id ) {
+            return state.authentication.currentUser
+        } else if ( userId in state.users.dictionary ) {
             return state.users.dictionary[userId]
         } else {
             return null
         }
     })
+
 
     if ( ! user ) {
         throw new Error('User must be rerieved to display profile image.')

@@ -62,6 +62,9 @@ const FileUploadInput = function(props) {
         }
     })
 
+    console.log(`fileId: ${props.fileId}, currentFileId: ${currentFileId}.`)
+    console.log(currentFile)
+
     // ============ Actions and Event Handling ======================
     //
     const dispatch = useDispatch()
@@ -80,6 +83,10 @@ const FileUploadInput = function(props) {
         if ( currentFileId ) {
             props.setFileId(null)
             setCurrentFileId(null)
+
+            if ( props.onChange ) {
+                props.onChange(null)
+            }
         } else if ( newFileId ) {
             setTypeError(null)
             setDeleteRequestId(dispatch(deleteFile(newFileId)))
@@ -105,6 +112,10 @@ const FileUploadInput = function(props) {
 
             setNewFileId(uploadedFile.id)
             props.setFileId(uploadedFile.id)
+
+            if ( props.onChange ) {
+                props.onChange(uploadedFile.id)
+            }
         }
     }, [ uploadRequest ])
 
@@ -115,6 +126,10 @@ const FileUploadInput = function(props) {
             if ( currentFileId == deletedFile.id ) {
                 setCurrentFileId(null)
                 props.setFileId(null)
+
+                if ( props.onChange ) {
+                    props.onChange(null)
+                }
             } else if ( newFileId == deletedFile.id ) {
                 setNewFileId(null)
             }

@@ -10,7 +10,13 @@
 }
 .post .header {
     font-size: 14px;
-    padding: 10px 10px 5px 10px;
+    padding: 10px;
+    display: grid;
+    grid-template-columns: 5fr 1fr;
+}
+.post .header .controls {
+    text-align: right;
+    padding-right: 10px;
 }
 .post .content {
     padding: 15px 10px;

@@ -26,7 +26,7 @@ const PostPage = function() {
 
     return (
         <Page id={`post-${postId}`}>
-            <Post id={postId} /> 
+            <Post id={postId} expanded={true} /> 
         </Page>
     )
 }

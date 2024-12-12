@@ -176,14 +176,12 @@ CREATE TYPE reaction_type AS ENUM(
     'block'
 );
 
-CREATE TYPE post_status AS ENUM('writing', 'editing', 'reverting', 'posted');
 CREATE TABLE posts (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id uuid REFERENCES users (id) ON DELETE CASCADE NOT NULL,
 
     file_id uuid REFERENCES files (id) DEFAULT NULL,
 
-    status post_status default 'writing' NOT NULL,
     activity bigint DEFAULT 1,
     content text,
 
@@ -229,13 +227,11 @@ CREATE TABLE post_reactions (
 CREATE INDEX post_reactions__post_id ON post_reactions (post_id);
 CREATE INDEX post_reactions__user_id ON post_reactions (user_id);
 
-CREATE TYPE post_comment_status AS ENUM('writing', 'editing', 'reverting', 'posted');
 CREATE TABLE post_comments (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     post_id uuid REFERENCES posts (id) ON DELETE CASCADE NOT NULL,
     user_id uuid REFERENCES users (id) ON DELETE CASCADE NOT NULL,
 
-    status post_comment_status DEFAULT 'writing' NOT NULL,
     content text,
 
     created_date timestamptz,

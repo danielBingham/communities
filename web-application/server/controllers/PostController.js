@@ -18,7 +18,7 @@
  *
  ******************************************************************************/
 
-const { PostDAO, PostCommentDAO, PostReactionDAO, UserDAO }  = require('@danielbingham/communities-backend')
+const { PostDAO, PostCommentDAO, PostReactionDAO, UserDAO, FileDAO }  = require('@danielbingham/communities-backend')
 const ControllerError = require('../errors/ControllerError')
 
 
@@ -31,6 +31,7 @@ module.exports = class PostController {
         this.postCommentDAO = new PostCommentDAO(core)
         this.postReactionDAO = new PostReactionDAO(core)
         this.userDAO = new UserDAO(core)
+        this.fileDAO = new FileDAO(core)
     }
 
     async getRelations(results, requestedRelations) {
@@ -52,14 +53,24 @@ module.exports = class PostController {
             params: [ results.list ]
         })
 
+        const fileIds = []
+        for(const postId of results.list) {
+            const post = results.dictionary[postId]
+            fileIds.push(post.fileId)
+        }
+        const postFileResults = await this.fileDAO.selectFiles(`WHERE files.id = ANY($1::uuid[])`, [ fileIds ])
+        const fileDictionary = postFileResults.reduce((dictionary, file) => { dictionary[file.id] = file; return dictionary }, {})
+
         return {
             users: userResults.dictionary,
             postComments: postCommentResults.dictionary,
-            postReactions: postReactionResults.dictionary
+            postReactions: postReactionResults.dictionary,
+            files: fileDictionary 
         }
     }
 
     async createQuery(request) {
+        console.log(request.query)
         const query = {
             where: '',
             params: [],
@@ -94,6 +105,10 @@ module.exports = class PostController {
             if ( sort == 'newest' ) {
                 query.order = 'posts.created_date DESC'
             } 
+        }
+
+        if ( 'page' in request.query) {
+            query.page = request.query.page
         }
 
         return query
@@ -145,6 +160,12 @@ module.exports = class PostController {
 
         const entity = results.dictionary[post.id]
 
+        if ( ! entity ) {
+            throw new ControllerError(500, 'server-error',
+                `Post(${post.id}) missing after creation.`,
+                `Post(${post.id}) missing after being created.  Please report as a bug.`)
+        }
+
         const postVersion = {
             postId: entity.id,
             fileId: entity.fileId,
@@ -175,11 +196,19 @@ module.exports = class PostController {
             where: `posts.id = $1`,
             params: [ postId ]
         })
+
         const post = postResults.dictionary[postId]
+
         if ( ! post ) {
             throw new ControllerError(404, 'not-found',
                 `User(${currentUser.id}) attempting to access Post(${postId}) that doesn't exist.`,
-                `That post either doesn't exist or you don't have permission to see it.`)
+                `That post either doesn't exist or you don't have permission to access it.`)
+        }
+
+        if ( currentUser.id !== post.userId && post.status !== 'posted' ) {
+            throw new ControllerError(404, 'not-found',
+                `User(${currentUser.id}) attempting to access Post(${postId}) not posted.`,
+                `That post either doesn't exist or you don't have permission to access it.`)
         }
 
         const friendResults = await this.core.database.query(`
@@ -221,7 +250,7 @@ module.exports = class PostController {
                 `Your post was too long.  Please keep posts to 10,000 characters or under.`)
         }
 
-        if ( post.status == 'writing' || post.status == 'editing' ) {
+        if ( post.status == 'writing' || post.status == 'editing' || post.status == 'posted') {
             await this.postDAO.updatePost(post)
         } else if ( post.status == 'reverting' ) {
             const previousResults = await this.core.database.query(`
@@ -234,12 +263,12 @@ module.exports = class PostController {
 
             const previous = previousResults.rows[0]
 
-            const post = {
+            const postRevert = {
                 id: post.id,
                 fileId: previous.file_id,
                 content: previous.content
             }
-            await this.postDAO.updatePost(post)
+            await this.postDAO.updatePost(postRevert)
         }
 
         const results = await this.postDAO.selectPosts({
@@ -268,6 +297,32 @@ module.exports = class PostController {
     }
 
     async deletePost(request, response) {
+        const currentUser = request.session.user
+        const postId = request.params.id
+
+        if ( ! currentUser ) {
+            throw new ControllerError(401, 'not-authenticated',
+                `User must be authenticated to edit a post.`,
+                `You must must be authenticated to edit a post.`)
+        }
+
+
+        const existingResults = await this.postDAO.selectPosts({
+            where: `posts.id = $1`,
+            params: [ postId ]
+        })
+
+        const existing = existingResults.dictionary[postId]
+
+        if ( existing.userId !== currentUser.id ) {
+            throw new ControllerError(403, 'not-authorized',
+                `User(${currentUser.id}) attempting to delete Post(${postId}) of User(${existing.userId}).`,
+                `You may not delete another user's posts.`)
+        }
+
+        await this.postDAO.deletePost(existing)
+
+        response.status(201).json({})
 
     }
 

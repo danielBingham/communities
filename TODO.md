@@ -16,11 +16,13 @@
     - [x] Posts
     - [x] User About
     - [x] Post Comments
- - [ ] Post versioning
+ - [x] Comment versioning
+    - [x] edit rollback
+ - [x] Post versioning
     - [ ] editing
     - [ ] deletion
- - [ ] Comment versioning
-    - [ ] edit rollback
+ - [ ] Link highlights
+   - [ ] Link previews
  - [ ] Notifications
    - [ ] Notification Messges
  - [ ] Account deletion

@@ -66,18 +66,21 @@ export const postsSlice = createSlice({
          * }
          */
         queries: {}
-
     },
     reducers: {
         // ======== State Manipulation Helpers ================================
         // @see ./helpers/state.js
 
-        setPostsInDictionary: setInDictionary,
+        setPostsInDictionary: setInDictionary, 
         removePost: removeEntity,
         makePostQuery: makeQuery,
         setPostQueryResults: setQueryResults,
         clearPostQuery: clearQuery,
         clearPostQueries: clearQueries,
+
+        clearInProgress: function(state, action) {
+            state.inProgress = null
+        },
 
         // ========== Request Tracking Methods =============
 
@@ -221,7 +224,7 @@ export const deletePost = function(post) {
         return makeTrackedRequest(dispatch, getState, postsSlice,
             'DELETE', `/post/${post.id}`, null,
             function(response) {
-                dispatch(postsSlice.actions.setPostsInDictionary({ entity: response.entity}))
+                dispatch(postsSlice.actions.removePost({ entity: post}))
             }
         )
     }

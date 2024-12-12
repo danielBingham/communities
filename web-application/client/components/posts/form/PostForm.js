@@ -9,7 +9,7 @@ import Button from '/components/generic/button/Button'
 
 import './PostForm.css'
 
-const PostForm = function() {
+const PostForm = function({ postId }) {
 
     const [content,setContent] = useState('')
     const [fileId,setFileId] = useState(null)
@@ -32,20 +32,42 @@ const PostForm = function() {
     const dispatch = useDispatch()
     const navigate = useNavigate()
 
+    const getDraftKey = function() {
+        if ( postId ) {
+            return `draft.${postId}`
+        } else {
+            return `draft`
+        }
+    }
+
     const submit = function() {
         const post = {
             userId: currentUser.id,
             fileId: fileId,
-            content: content,
-            tags: []
+            content: content
         }
 
-        setRequestId(dispatch(postPosts(post)))
-
-        setContent('')
+        if ( ! postId ) {
+            setRequestId(dispatch(postPosts(post)))
+        } else { 
+            post.id = postId
+            setRequestId(dispatch(patchPost(post)))
+        }
     }
 
-    const onChange = function(event) {
+    const cancel = function() {
+        localStorage.removeItem(getDraftKey())
+
+        setFileId(null)
+        setContent('')
+        setError('')
+    }
+
+    const onFileChange = function(fileId) {
+        setFileId(fileId)
+    }
+
+    const onContentChange = function(event) {
         const newContent = event.target.value
         if ( newContent.length > 10000 ) {
             setError('overlength')
@@ -56,14 +78,36 @@ const PostForm = function() {
     }
 
     useEffect(function() {
+        let draft = {
+            content: '',
+            fileId: null
+        }
+
+        const existingDraft = JSON.parse(localStorage.getItem(getDraftKey()))
+        if ( existingDraft ) {
+            draft = existingDraft
+        }
+
+        setContent(draft.content)
+        setFileId(draft.fileId)
+    }, [ postId ])
+
+    useEffect(function() {
+        localStorage.setItem(getDraftKey(), JSON.stringify({ content: content, fileId: fileId }))
+    }, [ postId, content, fileId ])
+
+    useEffect(function() {
         if ( request && request.state == 'fulfilled') {
+            localStorage.removeItem(getDraftKey())
             navigate(`/${currentUser.username}/${request.result.entity.id}`)
         }
     }, [ request ])
     
     useEffect(function() {
-        if ( requestId ) {
-            dispatch(cleanupRequest({ requestId: requestId }))
+        return function cleanup() {
+            if ( requestId ) {
+                dispatch(cleanupRequest({ requestId: requestId }))
+            }
         }
     }, [requestId])
 
@@ -74,24 +118,24 @@ const PostForm = function() {
         )
     }
 
+    console.log(`Content: ${content}, FileId: ${fileId}.`)
+
     return (
         <div className="post-form">
             <textarea 
-                onChange={onChange} 
+                onChange={onContentChange} 
                 value={content}
-                placeholder="Write your post..."
             >
             </textarea>
             { errorView }
             <div className="controls">
-                <FileUploadInput fileId={fileId} setFileId={setFileId} types={[ 'image/jpeg', 'image/png' ]} />
+                <FileUploadInput onChange={onFileChange} fileId={fileId} setFileId={setFileId} types={[ 'image/jpeg', 'image/png' ]} />
                 <div className="buttons">
-                    <Button type="secondary-warn">Cancel</Button>
+                    <Button type="secondary-warn" onClick={(e) => cancel()}>Cancel</Button>
                     <Button type="primary" onClick={(e) => submit()}>Post</Button>
                 </div>
             </div>
         </div>
-
     )
 
 }

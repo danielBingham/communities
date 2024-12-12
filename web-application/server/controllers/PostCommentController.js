@@ -140,6 +140,13 @@ module.exports = class PostCommentController {
                 `Postcomment(${comment.id}) missing after being updated.  Please report as a bug.`)
         }
 
+        const postCommentVersion = {
+            postCommentId: entity.id,
+            content: entity.content,
+        }
+
+        await this.postCommentDAO.insertPostCommentVersions(postCommentVersion)
+
         response.status(201).json({
             entity: entity,
             relations: await this.getRelations(results)
@@ -208,7 +215,7 @@ module.exports = class PostCommentController {
                 `You provided the wrong postId in the route, please provide the correct one.`)
         }
 
-        if ( request.body.status != 'writing' && request.body.status != 'editing' && request.body.status != 'posted' ) {
+        if ( request.body.status != 'writing' && request.body.status != 'editing' && request.body.status != 'posted' && request.body.status != 'reverting' ) {
             throw new ControllerError(400, 'invalid',
                 `User(${currentUser.id}) provided an invalid status when patching Comment(${commentId}).`,
                 `You provided an invalid status.`)
@@ -225,7 +232,28 @@ module.exports = class PostCommentController {
             comment.content = request.body.content
         }
 
-        await this.postCommentDAO.updatePostComment(comment)
+        console.log(`Comment patch: `)
+        console.log(comment)
+
+        if ( comment.status == 'writing' || comment.status == 'editing' || comment.status == 'posted' ) {
+            await this.postCommentDAO.updatePostComment(comment)
+        } else if ( comment.status == 'reverting' ) {
+            const previousResults = await this.core.database.query(`
+                SELECT content FROM post_comment_versions
+                    WHERE post_comment_id = $1
+                    ORDER BY created_date DESC
+                    LIMIT 1
+            `, [ comment.id ])
+
+            const previous = previousResults.rows[0]
+
+            const commentRevert = {
+                id: comment.id,
+                status: 'posted',
+                content: previous.content
+            }
+            await this.postCommentDAO.updatePostComment(commentRevert)
+        }
 
         const results = await this.postCommentDAO.selectPostComments({
             where: `post_comments.id = $1`,
@@ -239,6 +267,15 @@ module.exports = class PostCommentController {
                 `PostComment(${comment.id}) missing after update.`,
                 `Postcomment(${comment.id}) missing after being updated.  Please report as a bug.`)
         }
+
+        if ( entity.status == 'posted' ) {
+            const postCommentVersion = {
+                postCommentId: entity.id,
+                content: entity.content
+            }
+            await this.postCommentDAO.insertPostCommentVersions(postCommentVersion)
+        }
+
         response.status(200).json({
             entity: entity,
             relations: await this.getRelations(results)

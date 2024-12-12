@@ -64,14 +64,11 @@ const PostCommentForm = function({ postId, commentId }) {
         if ( comment.status == 'writing' ) {
             setRequestId(dispatch(deletePostComment(comment)))
         } else if (comment.status == 'editing' ) {
-            // TODO We need to implement comment versioning so we can rollback
-            // to the previous version.
             const commentPatch = {
                 id: commentId,
                 postId: postId,
                 userId: currentUser.id,
-                status: 'posted',
-                content: comment.content 
+                status: 'reverting'
             }
 
             setRequestId(dispatch(patchPostComment(commentPatch)))

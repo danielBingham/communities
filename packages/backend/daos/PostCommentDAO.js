@@ -77,23 +77,45 @@ module.exports = class PostCommentDAO extends DAO {
                         updateOverride: 'now()',
                         select: 'always',
                         key: 'updatedDate'
-                    },
-                    'post_comment_reactions': {
-                        insert: 'denied',
-                        update: 'denied',
-                        select: 'override',
-                        selectOverride: function() {
-                            return []
-                        },
-                        key: 'reactions'
                     }
                 }
             },
             'PostCommentVersion': {
                 table: 'post_comment_versions',
                 fields: {
-
-
+                    'id': {
+                        insert: 'primary',
+                        update: 'primary',
+                        select: 'always',
+                        key: 'id'
+                    },
+                    'post_comment_id': {
+                        insert: 'required',
+                        update: 'denied',
+                        select: 'always',
+                        key: 'postCommentId'
+                    },
+                    'content': {
+                        insert: 'allowed',
+                        update: 'allowed',
+                        select: 'always',
+                        key: 'content'
+                    },
+                    'created_date': {
+                        insert: 'override',
+                        insertOverride: 'now()',
+                        update: 'denied',
+                        select: 'always',
+                        key: 'createdDate'
+                    },
+                    'updated_date': {
+                        insert: 'override',
+                        insertOverride: 'now()',
+                        update: 'override',
+                        updateOverride: 'now()',
+                        select: 'always',
+                        key: 'updatedDate'
+                    }
                 }
             }
         }
@@ -197,8 +219,16 @@ module.exports = class PostCommentDAO extends DAO {
         await this.insert('PostComment', postComments)
     }
 
+    async insertPostCommentVersions(postCommentVersions) {
+        await this.insert('PostCommentVersion', postCommentVersions)
+    }
+
     async updatePostComment(postComment) {
         await this.update('PostComment', postComment)
+    }
+
+    async updatePostCommentVersion(postCommentVersion) {
+        await this.update('PostCommentVersion', postCommentVersion)
     }
 
     async deletePostComment(postComment) {

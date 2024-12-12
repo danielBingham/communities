@@ -22,10 +22,11 @@ const EditPostComment = function({ postId, id }) {
     }
 
     useEffect(function() {
-        if ( requestId ) {
-            dispatch(cleanupRequest({ requestId: requestId }))
+        return function cleanup() {
+            if ( requestId ) {
+                dispatch(cleanupRequest({ requestId: requestId }))
+            }
         }
-
     }, [ requestId ])
 
     return (

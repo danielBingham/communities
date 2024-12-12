@@ -1,0 +1,40 @@
+import React from 'react'
+import { useSelector } from 'react-redux'
+
+import { EllipsisHorizontalIcon } from '@heroicons/react/24/solid'
+
+import { FloatingMenu, FloatingMenuBody, FloatingMenuTrigger, FloatingMenuItem } from '/components/generic/floating-menu/FloatingMenu'
+
+import EditPost from '/components/posts/widgets/EditPost'
+import DeletePost from '/components/posts/widgets/DeletePost'
+
+import './PostDotsMenu.css'
+
+const PostDotsMenu = function({ postId }) {
+
+    const currentUser = useSelector((state) => state.authentication.currentUser)
+    const post = useSelector(function(state) {
+        if ( postId in state.posts.dictionary ) {
+            return  state.posts.dictionary[postId]
+        } else {
+            return null
+        }
+    })
+
+    // User can only see the dots menu if this is their post.
+    if ( ! currentUser || post === null || currentUser.id != post.userId ) {
+        return null
+    }
+
+    return (
+        <FloatingMenu className="post-dots-menu">
+            <FloatingMenuTrigger showArrow={false}><EllipsisHorizontalIcon /></FloatingMenuTrigger>
+            <FloatingMenuBody>
+                <EditPost postId={postId} />
+                <DeletePost postId={postId} />
+            </FloatingMenuBody>
+        </FloatingMenu>
+    )
+}
+
+export default PostDotsMenu

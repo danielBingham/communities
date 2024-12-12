@@ -2,11 +2,12 @@
     position: fixed;
     left: 50%;
     top: 50%;
-    width: 200px;
+    width: 220px;
     height: 100px;
     text-align: center;
-    margin-left: -100px;
+    margin-left: -110px;
     margin-top: -50px;
+    padding: 10px 10px;
     border: thin solid var(--main-border-color);
     background-color: white;
     z-index: 1000;

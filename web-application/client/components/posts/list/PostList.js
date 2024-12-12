@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux'
 
 import SortControl from '/components/posts/list/controls/SortControl'
 import PaginationControls from '/components/PaginationControls'
+import PostForm from '/components/posts/form/PostForm'
 import Post from '/components/posts/Post'
 import Spinner from '/components/Spinner'
 
@@ -26,9 +27,15 @@ const PostList = function({ queryName }) {
         )
     }
 
+    const editing = JSON.parse(localStorage.getItem('editing'))
+
     const postViews = []
     for(const postId of query.list) {
-        postViews.push(<Post key={postId} id={postId} />)
+        if ( editing !== null && postId in editing ) {
+            postViews.push(<PostForm key={postId} postId={postId} />)
+        } else {
+            postViews.push(<Post key={postId} id={postId} />)
+        }
     }
 
     return (

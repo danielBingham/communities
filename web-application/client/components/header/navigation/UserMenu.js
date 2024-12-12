@@ -58,6 +58,10 @@ const UserMenu = function(props) {
     const handleLogout = function(event) {
         event.preventDefault()
 
+        // Clear local storage so their drafts don't carry over to another
+        // login session.
+        localStorage.clear()
+
         setDeleteAuthenticationRequestId(dispatch(deleteAuthentication()))
     }
 

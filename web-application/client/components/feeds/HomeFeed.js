@@ -22,17 +22,21 @@ const HomeFeed = function() {
 
     useEffect(function() {
         const sort = searchParams.get('sort') ? searchParams.get('sort') : 'active'
-        setRequestId(dispatch(getPosts('HomeFeed', { sort: sort })))
+        const page = searchParams.get('page') ? searchParams.get('page') : 1
+        setRequestId(dispatch(getPosts('HomeFeed', { sort: sort, page: page })))
     }, [ ])
 
     useEffect(function() {
         const sort = searchParams.get('sort') ? searchParams.get('sort') : 'active'
-        setRequestId(dispatch(getPosts('HomeFeed', { sort: sort })))
+        const page = searchParams.get('page') ? searchParams.get('page') : 1
+        setRequestId(dispatch(getPosts('HomeFeed', { sort: sort, page: page })))
     }, [ searchParams ])
 
     useEffect(function() {
-        if ( requestId ) {
-            dispatch(cleanupRequest({ requestId: requestId }))
+        return function cleanup() {
+            if ( requestId ) {
+                dispatch(cleanupRequest({ requestId: requestId }))
+            }
         }
     }, [ requestId ])
 

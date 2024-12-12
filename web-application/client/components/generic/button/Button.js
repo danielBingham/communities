@@ -10,8 +10,9 @@ const Button = function({ type, disabled, className, onClick, children }) {
             className={`button ${ type ? type : 'default' } ${ className ? className : '' }`} 
             onClick={(e) => {
                 e.preventDefault()
-
-                onClick(e)
+                if ( onClick ) {
+                    onClick(e)
+                }
             }}
             disabled={disabled}
         >

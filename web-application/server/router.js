@@ -191,6 +191,18 @@ module.exports = function(core) {
         })
     })
 
+    router.patch('/post/:id', function(request, response, next) {
+        postController.patchPost(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.delete('/post/:id', function(request, response, next) {
+        postController.deletePost(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
     /**************************************************************************
      * PostReaction REST Routes
      **************************************************************************/

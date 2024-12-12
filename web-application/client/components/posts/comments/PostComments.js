@@ -7,7 +7,8 @@ import CreateCommentButton from '/components/posts/comments/widgets/controls/Cre
 
 import './PostComments.css'
 
-const PostComments = function({ postId }) {
+const PostComments = function({ postId, expanded }) {
+    const [showComments, setShowComments] = useState(false)
 
     const post = useSelector(function(state) {
         if ( postId in state.posts.dictionary ) {
@@ -25,6 +26,12 @@ const PostComments = function({ postId }) {
         }
     })
 
+    useEffect(function() {
+        if ( expanded ) {
+            setShowComments(true)
+        }
+    }, [])
+
 
     let commentViews = []
     let isWriting = false
@@ -37,6 +44,24 @@ const PostComments = function({ postId }) {
             } else {
                 commentViews.push(<PostComment key={commentId} postId={postId} id={commentId} />)
             }
+        }
+    }
+    
+    if ( ! showComments ) {
+        if ( commentViews.length > 0 ) {
+            return (
+                <div className="post-comments">
+                    <div className="show-comments">
+                        <a href="" onClick={(e) => { e.preventDefault(); setShowComments(true)}}>Show { commentViews.length } comments.</a>
+                    </div>
+                </div>
+            )
+        } else {
+            return (
+                <div className="post-comments">
+                { ! isWriting &&  <CreateCommentButton postId={postId} /> }
+                </div>
+            )
         }
     }
 

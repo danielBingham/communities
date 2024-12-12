@@ -1,22 +1,22 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 
-import { deletePostComment, cleanupRequest } from '/state/postComments'
+import { deletePost, cleanupRequest } from '/state/posts'
 
 import { FloatingMenuItem } from '/components/generic/floating-menu/FloatingMenu'
 
 import AreYouSure from '/components/AreYouSure'
 
-const DeletePostComment = function({ postId, id } ) {
+const DeletePost = function({ postId } ) {
     const [ areYouSure, setAreYouSure ] = useState(false)
 
     const [ requestId, setRequestId ] = useState(null)
 
     const dispatch = useDispatch()
 
-    const deleteComment = function() {
+    const executeDelete = function() {
         setAreYouSure(false)
-        setRequestId(dispatch(deletePostComment({ postId: postId, id: id })))
+        setRequestId(dispatch(deletePost({ id: postId })))
     }
 
     useEffect(function() {
@@ -32,12 +32,12 @@ const DeletePostComment = function({ postId, id } ) {
         <FloatingMenuItem onClick={(e) => setAreYouSure(true)} className="delete">delete</FloatingMenuItem>
         <AreYouSure 
             isVisible={areYouSure} 
-            action="delete this comment" 
-            execute={deleteComment} 
+            action="delete this post" 
+            execute={executeDelete} 
             cancel={() => setAreYouSure(false)} 
         /> 
         </>
     )
 }
 
-export default DeletePostComment
+export default DeletePost

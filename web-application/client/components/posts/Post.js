@@ -7,13 +7,14 @@ import Spinner from '/components/Spinner'
 import DateTag from '/components/DateTag'
 import UserTag from '/components/users/UserTag'
 
+import PostDotsMenu from '/components/posts/widgets/PostDotsMenu'
 import PostReactions from '/components/posts/widgets/PostReactions'
 import PostComments from '/components/posts/comments/PostComments'
 import PostImage from '/components/posts/PostImage'
 
 import './Post.css'
 
-const Post = function({ id }) {
+const Post = function({ id, expanded }) {
 
     const [showMore, setShowMore] = useState(false) 
 
@@ -44,6 +45,9 @@ const Post = function({ id }) {
         if ( ! post ) {
             setRequestId(dispatch(getPost(id)))
         }
+        if ( expanded ) {
+            setShowMore(true)
+        }
     }, [])
 
     useEffect(function() {
@@ -54,29 +58,32 @@ const Post = function({ id }) {
 
     if ( ! post || ! user ) {
         return (
-            <div className="post">
-                <Spinner local={true} />
-            </div>
+            null
         )
     }
 
     return (
         <div id={post.id} className="post">
             <div className="header"> 
-                <UserTag id={post.userId} /> posted <a href={`/${user.username}/${id}`}><DateTag timestamp={post.createdDate} /></a>
+                <div className="details">
+                    <UserTag id={post.userId} /> posted <a href={`/${user.username}/${id}`}><DateTag timestamp={post.createdDate} /></a>
+                </div>
+                <div className="controls">
+                    <PostDotsMenu postId={post.id} />
+                </div>
             </div>
             { post.content && post.content.length > 0 && (post.content.length <= 1000 || showMore) && <div className="content">
                 { post.content }
-                { post.content.length >= 1000 && showMore && <div className="show-more">
-                    <a href="" onClick={(e) => { e.preventDefault(); setShowMore(false) }}>Hide More.</a></div>}
-            </div> }
+                {/*{ post.content.length >= 1000 && showMore && <div className="show-more">
+                    <a href="" onClick={(e) => { e.preventDefault(); setShowMore(false) }}>Hide More.</a></div> */}
+            </div> } 
             { post.content && post.content.length > 0 && post.content.length > 1000 && ! showMore && <div className="content">
                 { post.content.substring(0,1000) }...
                 <div className="show-more"><a href="" onClick={(e) => { e.preventDefault(); setShowMore(true) }}>Show More.</a></div>
             </div> }
             <PostImage id={id} />
             <PostReactions postId={id} />
-            <PostComments postId={id} />
+            <PostComments postId={id} expanded={expanded} />
         </div>
     )
 }
