@@ -18,7 +18,8 @@
     - [x] Post Comments
  - [x] Comment versioning
     - [x] edit rollback
- - [x] Post versioning
+ - [-] ~Post versioning~
+ - [ ] Local storage for drafts
     - [ ] editing
     - [ ] deletion
  - [ ] Link highlights

@@ -3,7 +3,11 @@ import { useSelector, useDispatch } from 'react-redux'
 
 import { getFile, deleteFile, cleanupRequest } from '/state/files'
 
-const DraftPostImage = function({ fileId, setFileId, width }) {
+import Button from '/components/generic/button/Button'
+
+import "./DraftImageFile.css"
+
+const DraftImageFile = function({ fileId, setFileId, width, deleteOnRemove }) {
 
     const [requestId, setRequestId] = useState(null)
     const request = useSelector(function(state) {
@@ -26,7 +30,10 @@ const DraftPostImage = function({ fileId, setFileId, width }) {
 
     const remove = function() {
         setFileId(null)
-        setRequestId(dispatch(deleteFile(fileId)))
+
+        if ( deleteOnRemove !== false ) {
+            setRequestId(dispatch(deleteFile(fileId)))
+        }
     }
 
     useEffect(function() {
@@ -48,17 +55,17 @@ const DraftPostImage = function({ fileId, setFileId, width }) {
         let url = new URL(file.filepath, file.location)
         content = (
             <div className="file" style={{ width: `${width}px` }}>
-                <img src={url.href} width={ width ? width : 100}  />
-                <a href="" onClick={(e) => { e.preventDefault(); remove() }}>Remove file</a>
+                <div><img src={url.href} width={ width ? width : 100}  /></div>
+                <Button type='secondary-warn' onClick={() => { remove() }}>Remove file</Button>
             </div>
         )
     }
 
     return (
-        <div className="draft-file">
+        <div className="draft-image-file">
             { content }
         </div>
     )
 }
 
-export default DraftPostImage
+export default DraftImageFile

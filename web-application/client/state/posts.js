@@ -65,7 +65,17 @@ export const postsSlice = createSlice({
          *  ...
          * }
          */
-        queries: {}
+        queries: {},
+
+        /**
+         * Posts which are currently being edited.
+         *
+         * {
+         *   [ postId ]: boolean
+         * }
+         *   
+         **/
+        editing: {}
     },
     reducers: {
         // ======== State Manipulation Helpers ================================
@@ -80,6 +90,16 @@ export const postsSlice = createSlice({
 
         clearInProgress: function(state, action) {
             state.inProgress = null
+        },
+
+        startPostEdit: function(state, action) {
+            const postId = action.payload
+            state.editing[postId] = true
+        },
+
+        finishPostEdit: function(state, action) {
+            const postId = action.payload
+            delete state.editing[postId]
         },
 
         // ========== Request Tracking Methods =============
@@ -234,7 +254,8 @@ export const deletePost = function(post) {
 export const { 
     setPostsInDictionary, removePost, 
     makePostQuery, clearPostQuery, setPostQueryResults,
-    cleanupRequest 
+    cleanupRequest,
+    startPostEdit, finishPostEdit
 }  = postsSlice.actions
 
 export default postsSlice.reducer

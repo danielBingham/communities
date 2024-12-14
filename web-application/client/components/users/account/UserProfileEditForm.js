@@ -5,6 +5,8 @@ import { UserCircleIcon } from '@heroicons/react/24/outline'
 
 import { patchUser, cleanupRequest } from '/state/users'
 
+import UserProfileImage from '/components/users/UserProfileImage'
+import DraftImageFile from '/components/files/DraftImageFile'
 import FileUploadInput from '/components/files/FileUploadInput'
 import Spinner from '/components/Spinner'
 
@@ -37,6 +39,7 @@ const UserProfileEditForm = function(props) {
     const currentUser = useSelector(function(state) {
         return state.authentication.currentUser
     })
+
 
     // ======= Actions and Event Handling ===========================
 
@@ -170,13 +173,13 @@ const UserProfileEditForm = function(props) {
                 <div className="form-field profile-image">
                     <label></label>
                     <div>
-                        <FileUploadInput 
+                        { ! fileId && <div className="current-image"><UserProfileImage userId={currentUser.id} /></div> }
+                        { fileId && <DraftImageFile fileId={fileId} setFileId={setFileId} width={150} /> }
+                        { ! fileId && <FileUploadInput 
                             fileId={fileId}
                             setFileId={setFileId} 
                             types={[ 'image/jpeg', 'image/png' ]} 
-                            blankImage={ <UserCircleIcon className="image" />}
-                            width={200}
-                        />
+                        /> }
                     </div>
                 </div>
                 <div className="form-field name">

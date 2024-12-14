@@ -9,19 +9,32 @@
 }
 .post-form textarea {
     width: 100%;
-    height: 150px;
+    height: 200px;
     box-sizing: border-box;
     resize: none;
+    padding: 10px;
 }
 .post-form .error {
     padding: 5px;
     color: var(--danger-color-main);
 }
+.post-form .attachments {
+    padding: 10px 0;
+    text-align: center;
+}
 .post-form .controls {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    padding: 10px;
+}
+.post-form .controls .draft-image-file {
+    display: block;
+    width: 150px;
+    margin: 0 auto;
+    text-align: center;
 }
 .post-form .buttons {
     text-align: right;
     padding: 5px;
+    align-self: end;
 }

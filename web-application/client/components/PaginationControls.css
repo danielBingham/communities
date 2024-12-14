@@ -1,6 +1,7 @@
 .page-controls {
     padding: 20px;
     text-align: center;
+    font-size: 16px;
 }
 .page-controls .control {
     display: inline-block;

@@ -1,19 +1,14 @@
 import React from 'react'
+import { useDispatch } from 'react-redux'
 
+import { startPostEdit } from '/state/posts'
 import { FloatingMenuItem } from '/components/generic/floating-menu/FloatingMenu'
 
 const EditPost = function({ postId }) {
+    const dispatch = useDispatch()
 
     const executeEdit = function() {
-        let editing = JSON.parse(localStorage.getItem('editing'))
-        if ( editing !== null ) {
-            editing[postId] = true
-        } else {
-            editing = { 
-                [postId]: true
-            }
-        }
-        localStorage.setItem('editing', JSON.stringify(editing))
+        dispatch(startPostEdit(postId))
     }
 
     return (

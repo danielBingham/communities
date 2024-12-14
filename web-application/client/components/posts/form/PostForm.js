@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch} from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
-import { postPosts, cleanupRequest } from '/state/posts'
+import { deleteFile, cleanupRequest as cleanupFileRequest } from '/state/files'
+import { postPosts, patchPost, cleanupRequest, finishPostEdit } from '/state/posts'
 
 import FileUploadInput from '/components/files/FileUploadInput'
+import DraftImageFile from '/components/files/DraftImageFile'
 import Button from '/components/generic/button/Button'
 
 import './PostForm.css'
@@ -25,8 +27,26 @@ const PostForm = function({ postId }) {
         }
     })
 
+    const [deleteRequestId,setDeleteRequestId] = useState(null)
+    const deleteRequest = useSelector(function(state) {
+        if ( requestId in state.files.requests ) {
+            return state.files.requests[requestId]
+        } else {
+            return null
+        }
+    })
+
+
     const currentUser = useSelector(function(state) {
         return state.authentication.currentUser
+    })
+
+    const post = useSelector(function(state) {
+        if ( postId in state.posts.dictionary ) {
+            return state.posts.dictionary[postId]
+        } else {
+            return null
+        }
     })
 
     const dispatch = useDispatch()
@@ -41,17 +61,23 @@ const PostForm = function({ postId }) {
     }
 
     const submit = function() {
-        const post = {
+        const newPost = {
             userId: currentUser.id,
             fileId: fileId,
             content: content
         }
 
         if ( ! postId ) {
-            setRequestId(dispatch(postPosts(post)))
+            setRequestId(dispatch(postPosts(newPost)))
         } else { 
-            post.id = postId
-            setRequestId(dispatch(patchPost(post)))
+            newPost.id = postId
+            setRequestId(dispatch(patchPost(newPost)))
+            
+            if ( post.fileId !== fileId ) {
+                setDeleteRequestId(dispatch(deleteFile(post.fileId)))
+            }
+
+            dispatch(finishPostEdit(postId))
         }
     }
 
@@ -61,6 +87,14 @@ const PostForm = function({ postId }) {
         setFileId(null)
         setContent('')
         setError('')
+
+        if ( ! post || ( fileId !== null && post.fileId !== fileId )) {
+            setDeleteRequestId(dispatch(deleteFile(fileId)))
+        }
+
+        if ( postId ) {
+            dispatch(finishPostEdit(postId))
+        }
     }
 
     const onFileChange = function(fileId) {
@@ -78,14 +112,24 @@ const PostForm = function({ postId }) {
     }
 
     useEffect(function() {
+        console.log(`Post: `)
+        console.log(post)
         let draft = {
-            content: '',
-            fileId: null
+            content: post ? post.content : '',
+            fileId: post ? post.fileId : null
         }
 
+        console.log(`Draft: `)
+        console.log(draft)
+
         const existingDraft = JSON.parse(localStorage.getItem(getDraftKey()))
+
+        console.log(`Exiting draft: `)
+        console.log(existingDraft)
         if ( existingDraft ) {
             draft = existingDraft
+        } else {
+            localStorage.setItem(getDraftKey(), JSON.stringify(draft))
         }
 
         setContent(draft.content)
@@ -111,6 +155,14 @@ const PostForm = function({ postId }) {
         }
     }, [requestId])
 
+    useEffect(function() {
+        return function cleanup() {
+            if ( deleteRequestId ) {
+                dispatch(cleanupFileRequest({ requestId: deleteRequestId }))
+            }
+        }
+    }, [ deleteRequestId ])
+
     let errorView = null
     if ( error == 'overlength') {
         errorView = (
@@ -118,18 +170,28 @@ const PostForm = function({ postId }) {
         )
     }
 
-    console.log(`Content: ${content}, FileId: ${fileId}.`)
+    let imageView = null
+    if ( fileId ) {
+        imageView = (
+            <DraftImageFile fileId={fileId} setFileId={setFileId} width={150} deleteOnRemove={ ! post || post.fileId != fileId } />
+        )
+    } else {
+        imageView = (
+            <FileUploadInput onChange={onFileChange} fileId={fileId} setFileId={setFileId} types={[ 'image/jpeg', 'image/png' ]} />
+        )
+    }
 
     return (
         <div className="post-form">
             <textarea 
                 onChange={onContentChange} 
                 value={content}
+                placeholder="Write your post..."
             >
             </textarea>
             { errorView }
             <div className="controls">
-                <FileUploadInput onChange={onFileChange} fileId={fileId} setFileId={setFileId} types={[ 'image/jpeg', 'image/png' ]} />
+                { imageView }
                 <div className="buttons">
                     <Button type="secondary-warn" onClick={(e) => cancel()}>Cancel</Button>
                     <Button type="primary" onClick={(e) => submit()}>Post</Button>

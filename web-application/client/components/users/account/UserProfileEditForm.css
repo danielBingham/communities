@@ -4,7 +4,12 @@
     padding: 10px;
     align-items: center;
 }
-.user-profile-edit-form .profile-image svg.image {
+.user-profile-edit-form .profile-image .current-image svg {
+    display: block;
+    width: 150px;
+    margin: 10px auto;
+}
+.user-profile-edit-form .profile-image .draft-image-file {
     display: block;
     width: 150px;
     margin: 10px auto;
