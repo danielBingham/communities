@@ -250,26 +250,7 @@ module.exports = class PostController {
                 `Your post was too long.  Please keep posts to 10,000 characters or under.`)
         }
 
-        if ( post.status == 'writing' || post.status == 'editing' || post.status == 'posted') {
-            await this.postDAO.updatePost(post)
-        } else if ( post.status == 'reverting' ) {
-            const previousResults = await this.core.database.query(`
-                SELECT file_id, content 
-                    FROM post_versions
-                    WHERE post_id = $1 
-                    ORDER BY created_date DESC
-                    LIMIT 1
-            `, [ post.id ])
-
-            const previous = previousResults.rows[0]
-
-            const postRevert = {
-                id: post.id,
-                fileId: previous.file_id,
-                content: previous.content
-            }
-            await this.postDAO.updatePost(postRevert)
-        }
+        await this.postDAO.updatePost(post)
 
         const results = await this.postDAO.selectPosts({
             where: `posts.id = $1`,
@@ -278,14 +259,12 @@ module.exports = class PostController {
 
         const entity = results.dictionary[post.id]
 
-        if ( post.status == 'posted' ) {
-            const postVersion = {
-                postId: entity.id,
-                fileId: entity.fileId,
-                content: entity.content
-            }
-            await this.postDAO.insertPostVersions(postVersion)
+        const postVersion = {
+            postId: entity.id,
+            fileId: entity.fileId,
+            content: entity.content
         }
+        await this.postDAO.insertPostVersions(postVersion)
 
         const relations = await this.getRelations(results)
 

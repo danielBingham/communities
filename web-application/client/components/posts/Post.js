@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 
 import { getPost, cleanupRequest } from '/state/posts'
 
@@ -40,6 +41,7 @@ const Post = function({ id, expanded }) {
     })
 
     const dispatch = useDispatch()
+    const navigate = useNavigate()
 
     useEffect(function() {
         if ( ! post ) {
@@ -56,10 +58,19 @@ const Post = function({ id, expanded }) {
         }
     }, [ requestId ])
 
-    if ( ! post || ! user ) {
+    if ( (request && request !== null && request.state == 'failed' && ( ! post || ! user ))) {
         return (
-            null
+            <div id={id} className="post">
+                <div className='error 404'>
+                    <h1>404 Error</h1>
+                    That post does not seem to exist.
+                </div>
+            </div>
         )
+    }
+
+    if ( (! request || request.state == 'pending') && ! post ) {
+        return null
     }
 
     return (

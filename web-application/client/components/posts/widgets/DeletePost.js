@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { useDispatch } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 
 import { deletePost, cleanupRequest } from '/state/posts'
 
@@ -11,13 +12,27 @@ const DeletePost = function({ postId } ) {
     const [ areYouSure, setAreYouSure ] = useState(false)
 
     const [ requestId, setRequestId ] = useState(null)
+    const request = useSelector(function(state) {
+        if ( requestId in state.posts.requests) {
+            return state.posts.requests[requestId]
+        } else {
+            return null
+        }
+    })
 
     const dispatch = useDispatch()
+    const navigate = useNavigate()
 
     const executeDelete = function() {
         setAreYouSure(false)
         setRequestId(dispatch(deletePost({ id: postId })))
     }
+
+    useEffect(function() {
+        if ( requestId ) {
+            navigate('/')
+        }
+    }, [ requestId ])
 
     useEffect(function() {
         return function cleanup() {

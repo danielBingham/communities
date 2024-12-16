@@ -47,7 +47,7 @@ const PostComments = function({ postId, expanded }) {
         }
     }
     
-    if ( ! showComments ) {
+    if ( ! showComments && ! isWriting ) {
         if ( commentViews.length > 0 ) {
             return (
                 <div className="post-comments">

@@ -18,12 +18,14 @@
     - [x] Post Comments
  - [x] Comment versioning
     - [x] edit rollback
- - [-] ~Post versioning~
- - [ ] Local storage for drafts
+ - [x] Post versioning
+ - [x] Local storage for post drafts
+    - [x] editing
+    - [x] deletion
+ - [ ] Local storage for comment drafts
     - [ ] editing
     - [ ] deletion
  - [ ] Link highlights
-   - [ ] Link previews
  - [ ] Notifications
    - [ ] Notification Messges
  - [ ] Account deletion
@@ -35,6 +37,7 @@
 - [ ] Redirect to home screen from all pages.
 
 ## Follow Up
+ - [ ] Link previews
  - [ ] Admin page
    - [ ] Track contributions
    - [ ] Track total users
