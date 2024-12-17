@@ -68,7 +68,14 @@ export const postCommentsSlice = createSlice({
         queries: {},
 
         // Specific state
-        commentsByPost: {}
+        commentsByPost: {},
+
+        // Which comments are currently being edited?
+        //
+        // { 
+        //  [id]: boolean
+        // }
+        editing: {}
 
     },
     reducers: {
@@ -109,6 +116,16 @@ export const postCommentsSlice = createSlice({
         setPostCommentQueryResults: setQueryResults,
         clearPostCommentQuery: clearQuery,
         clearPostCommentQueries: clearQueries,
+
+        startPostCommentEdit: function(state, action) {
+            const commentId = action.payload
+            state.editing[commentId] = true
+        },
+
+        finishPostCommentEdit: function(state, action) {
+            const commentId = action.payload
+            delete state.editing[commentId]
+        },
 
         // ========== Request Tracking Methods =============
 
@@ -266,7 +283,8 @@ export const deletePostComment = function(comment) {
 export const { 
     setPostCommentsInDictionary, removePostComment, 
     makePostCommentQuery, clearPostCommentQuery, setPostCommentQueryResults,
-    cleanupRequest 
+    cleanupRequest,
+    startPostCommentEdit, finishPostCommentEdit
 }  = postCommentsSlice.actions
 
 export default postCommentsSlice.reducer

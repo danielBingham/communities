@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
+import { TrashIcon } from '@heroicons/react/24/outline'
+
 import { deletePost, cleanupRequest } from '/state/posts'
 
 import { FloatingMenuItem } from '/components/generic/floating-menu/FloatingMenu'
@@ -44,7 +46,7 @@ const DeletePost = function({ postId } ) {
 
     return (
         <>
-        <FloatingMenuItem onClick={(e) => setAreYouSure(true)} className="delete">delete</FloatingMenuItem>
+            <FloatingMenuItem onClick={(e) => setAreYouSure(true)} className="delete"><TrashIcon /> delete</FloatingMenuItem>
         <AreYouSure 
             isVisible={areYouSure} 
             action="delete this post" 

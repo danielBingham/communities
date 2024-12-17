@@ -22,9 +22,9 @@
  - [x] Local storage for post drafts
     - [x] editing
     - [x] deletion
- - [ ] Local storage for comment drafts
-    - [ ] editing
-    - [ ] deletion
+ - [x] Local storage for comment drafts
+    - [x] editing
+    - [x] deletion
  - [ ] Link highlights
  - [ ] Notifications
    - [ ] Notification Messges

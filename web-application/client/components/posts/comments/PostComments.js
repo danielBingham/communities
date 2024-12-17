@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
+import { startPostCommentEdit } from '/state/postComments'
+
 import PostCommentForm from '/components/posts/comments/PostCommentForm'
 import PostComment from '/components/posts/comments/PostComment'
-import CreateCommentButton from '/components/posts/comments/widgets/controls/CreateCommentButton'
 
 import './PostComments.css'
 
@@ -18,13 +19,11 @@ const PostComments = function({ postId, expanded }) {
         }
     })
 
-    const comments = useSelector(function(state) {
-        if ( postId in state.postComments.commentsByPost ) {
-            return state.postComments.commentsByPost[postId]
-        } else {
-            return null
-        }
+    const editing = useSelector(function(state) {
+        return state.postComments.editing
     })
+
+    const dispatch = useDispatch()
 
     useEffect(function() {
         if ( expanded ) {
@@ -32,43 +31,49 @@ const PostComments = function({ postId, expanded }) {
         }
     }, [])
 
+    useEffect(function() {
+        if ( post !== null ) {
+            for(const commentId of post.comments) {
+                const editDraft = localStorage.getItem(`commentDraft.${postId}.${commentId}`)
+                if ( editDraft && ! (commentId in editing)) {
+                    dispatch(startPostCommentEdit(commentId))
+                    setShowComments(true)
+                }
+            }
+
+            const draft = localStorage.getItem(`commentDraft.${postId}`)
+            if ( draft ) {
+                setShowComments(true)
+            }
+        }
+    }, [ postId, post ])
+
+    if ( ! showComments && post && post.comments.length > 0 ) {
+        return (
+            <div className="post-comments">
+                <div className="show-comments">
+                    <a href="" onClick={(e) => { e.preventDefault(); setShowComments(true)}}>Show { post.comments.length } comments.</a>
+                </div>
+            </div>
+        )
+    }
 
     let commentViews = []
-    let isWriting = false
-    if ( post && comments ) {
+    if ( post ) {
         for (const commentId of post.comments ) {
-            const comment = comments[commentId]
-            if ( comment.status == 'writing' || comment.status == 'editing' ) {
-                isWriting = comment.status == 'writing'
-                commentViews.push(<PostCommentForm key={commentId} postId={postId} commentId={commentId} />)
+            const draftEdit = localStorage.getItem(`commentDraft.${postId}.${commentId}`)
+            if ( draftEdit || (commentId in editing) ) {
+                commentViews.push(<PostCommentForm key={commentId} postId={postId} commentId={commentId} setShowComments={setShowComments} />)
             } else {
                 commentViews.push(<PostComment key={commentId} postId={postId} id={commentId} />)
             }
-        }
-    }
-    
-    if ( ! showComments && ! isWriting ) {
-        if ( commentViews.length > 0 ) {
-            return (
-                <div className="post-comments">
-                    <div className="show-comments">
-                        <a href="" onClick={(e) => { e.preventDefault(); setShowComments(true)}}>Show { commentViews.length } comments.</a>
-                    </div>
-                </div>
-            )
-        } else {
-            return (
-                <div className="post-comments">
-                { ! isWriting &&  <CreateCommentButton postId={postId} /> }
-                </div>
-            )
         }
     }
 
     return (
         <div className="post-comments">
             { commentViews }
-            { ! isWriting &&  <CreateCommentButton postId={postId} /> }
+            <PostCommentForm postId={postId} setShowComments={setShowComments} /> 
         </div>
     )
 }

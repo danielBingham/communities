@@ -1,6 +1,8 @@
 import React from 'react'
 import { useDispatch } from 'react-redux'
 
+import { PencilIcon } from '@heroicons/react/24/outline'
+
 import { startPostEdit } from '/state/posts'
 import { FloatingMenuItem } from '/components/generic/floating-menu/FloatingMenu'
 
@@ -12,7 +14,7 @@ const EditPost = function({ postId }) {
     }
 
     return (
-        <FloatingMenuItem onClick={executeEdit} className="edit">edit</FloatingMenuItem> 
+        <FloatingMenuItem onClick={executeEdit} className="edit"><PencilIcon /> edit</FloatingMenuItem> 
     )
 
 }

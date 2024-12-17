@@ -2,13 +2,16 @@
     position: fixed;
     left: 50%;
     top: 50%;
-    width: 220px;
-    height: 100px;
+    transform: translateX(-50%) translateY(-50%);
+
+   /* width: 220px;
+    height: 100px; */
     text-align: center;
-    margin-left: -110px;
-    margin-top: -50px;
-    padding: 10px 10px;
+    /*margin-left: -110px;
+    margin-top: -50px;*/
+    padding: 20px;
     border: thin solid var(--main-border-color);
+    border-radius: 10px;
     background-color: white;
     z-index: 1000;
 }

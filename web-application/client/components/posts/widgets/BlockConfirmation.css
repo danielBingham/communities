@@ -3,10 +3,11 @@
     box-sizing: border-box;
     left: 50%;
     top: 50%;
+    transform: translateX(-50%) translateY(-50%);
     width: 650px;
-    height: 450px;
+/*    height: 450px; 
     margin-left: -325px;
-    margin-top: -225px;
+    margin-top: -225px; */
     border: thin solid var(--main-border-color);
     border-radius: 10px;
     background-color: white;

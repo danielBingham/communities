@@ -112,20 +112,13 @@ const PostForm = function({ postId }) {
     }
 
     useEffect(function() {
-        console.log(`Post: `)
-        console.log(post)
         let draft = {
             content: post ? post.content : '',
             fileId: post ? post.fileId : null
         }
 
-        console.log(`Draft: `)
-        console.log(draft)
-
         const existingDraft = JSON.parse(localStorage.getItem(getDraftKey()))
 
-        console.log(`Exiting draft: `)
-        console.log(existingDraft)
         if ( existingDraft ) {
             draft = existingDraft
         } else {

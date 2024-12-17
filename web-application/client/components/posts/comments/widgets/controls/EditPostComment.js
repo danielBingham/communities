@@ -1,36 +1,24 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 
-import { patchPostComment, cleanupRequest } from '/state/postComments'
+import { PencilIcon } from '@heroicons/react/24/outline'
+
+import { startPostCommentEdit } from '/state/postComments'
 
 import { FloatingMenuItem } from '/components/generic/floating-menu/FloatingMenu'
 
-const EditPostComment = function({ postId, id }) {
+import './EditPostComment.css'
 
-    const [ requestId, setRequestId ] = useState(null)
+const EditPostComment = function({ postId, id }) {
 
     const dispatch = useDispatch()
 
     const editComment = function() {
-        const commentPatch = {
-            id: id,
-            postId: postId,
-            status: 'editing'
-        }
-
-        setRequestId(dispatch(patchPostComment(commentPatch)))
+        dispatch(startPostCommentEdit(id))
     }
 
-    useEffect(function() {
-        return function cleanup() {
-            if ( requestId ) {
-                dispatch(cleanupRequest({ requestId: requestId }))
-            }
-        }
-    }, [ requestId ])
-
     return (
-        <FloatingMenuItem onClick={editComment} className="edit">edit</FloatingMenuItem> 
+        <FloatingMenuItem onClick={editComment} className="edit"><PencilIcon /> edit</FloatingMenuItem> 
     )
 
 }
