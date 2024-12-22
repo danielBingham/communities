@@ -168,6 +168,36 @@ module.exports = function(core) {
     })
 
     /**************************************************************************
+     * Link Preview REST Routes
+     **************************************************************************/
+    const LinkPreviewController = require('./controllers/LinkPreviewController')
+    const linkPreviewController = new LinkPreviewController(core)
+
+    router.get('/link-previews', function(request, response, next) {
+        linkPreviewController.getLinkPreviews(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.post('/link-previews', function(request, response, next) {
+        linkPreviewController.postLinkPreviews(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.get('/link-preview/:id', function(request, response, next) {
+        linkPreviewController.getLinkPreview(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.patch('/link-preview/:id', function(request, response, next) {
+        linkPreviewController.patchLinkPreview(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    /**************************************************************************
      * Post REST Routes
      **************************************************************************/
     const PostController = require('./controllers/PostController')
@@ -202,6 +232,7 @@ module.exports = function(core) {
             next(error)
         })
     })
+
 
     /**************************************************************************
      * PostReaction REST Routes

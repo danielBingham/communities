@@ -18,7 +18,7 @@
  *
  ******************************************************************************/
 
-const { PostDAO, PostCommentDAO, PostReactionDAO, UserDAO, FileDAO }  = require('@danielbingham/communities-backend')
+const { LinkPreviewService, PostDAO, PostCommentDAO, PostReactionDAO, UserDAO, FileDAO }  = require('@danielbingham/communities-backend')
 const ControllerError = require('../errors/ControllerError')
 
 
@@ -32,6 +32,8 @@ module.exports = class PostController {
         this.postReactionDAO = new PostReactionDAO(core)
         this.userDAO = new UserDAO(core)
         this.fileDAO = new FileDAO(core)
+
+        this.linkPreviewService = new LinkPreviewService(core)
     }
 
     async getRelations(results, requestedRelations) {
@@ -70,7 +72,6 @@ module.exports = class PostController {
     }
 
     async createQuery(request) {
-        console.log(request.query)
         const query = {
             where: '',
             params: [],
@@ -302,7 +303,22 @@ module.exports = class PostController {
         await this.postDAO.deletePost(existing)
 
         response.status(201).json({})
+    }
 
+    async postLinkPreview(request, response) {
+        const currentUser = request.session.user
+
+        if ( ! currentUser ) {
+            throw new ControllerError(401, 'not-authenticated',
+                `User must be authenticated to generate a link preview.`,
+                `You must must be authenticated to generate a link preview`)
+        }
+
+        const url = request.body.url
+
+        const preview = await this.linkPreviewService.getPreview(url)
+
+        response.status(200).json(preview)
     }
 
 }

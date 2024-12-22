@@ -1,7 +1,7 @@
 .page {}
 
 .page .page-body {
-    width: 1200px;
+    min-width: 1000px;
     min-height: 400px;
     margin: 50px auto;
     background-color: var(--page-background-color);

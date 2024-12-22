@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { useSelector} from 'react-redux'
-import { useNavigate, useParams, Link } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
 
 import { 
     UserCircleIcon as UserCircleIconOutline, 
@@ -25,6 +25,8 @@ import ChangePasswordForm from '/components/users/account/widgets/ChangePassword
 import ChangeEmailForm from '/components/users/account/widgets/ChangeEmailForm'
 import ContributionView from '/components/contribution/ContributionView'
 
+import LoginForm from '/components/authentication/LoginForm'
+
 import './UserAccountPage.css'
 
 const UserAccountPage = function(props) {
@@ -35,17 +37,14 @@ const UserAccountPage = function(props) {
         return state.authentication.currentUser
     })
    
-    const navigate = useNavigate()
-    useEffect(function() {
-        if ( ! currentUser ) {
-            navigate('/')
-        }
-    }, [])
 
     // ======= Render =====================================
 
+    // Protect this page so the user must be logged in.
     if ( ! currentUser ) {
-        return <Spinner />
+        return (
+            <LoginForm />
+        )
     }
 
     const selectedTab = ( pageTab ? pageTab : 'profile')

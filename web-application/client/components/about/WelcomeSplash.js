@@ -21,14 +21,7 @@ const WelcomeSplash = function() {
                     We're currently in invite-only beta.  If you have an invite, register through the link in your email.
                 </div>
             </div>
-            <div className="login">
-                <LoginForm /> 
-                <div className="inner-wrapper">
-                    <div className="forgot-password">
-                        <Link to="/reset-password-request">Forgot password?</Link>
-                    </div>
-                </div>
-            </div>
+            <LoginForm /> 
         </div>
     )
 }

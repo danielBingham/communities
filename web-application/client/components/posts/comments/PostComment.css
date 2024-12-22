@@ -1,9 +1,23 @@
+@keyframes highlight {
+    0% {
+        background-color: var(--secondary-color-lightest);
+    }
+    100% {
+        background-color: var(--primary-color-lightest);
+    }
+}
+
 .post-comment {
     margin: 10px auto;
     font-size: 14px;
     background-color: var(--primary-color-lightest);
     border-radius: 10px;
-
+}
+.post-comment.highlight {
+    animation-duration: 0.75s;
+    animation-direction: forwards;
+    animation-timing-function: ease-out;
+    animation-name: highlight;
 }
 .post-comment .header {
     display: grid;

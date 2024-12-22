@@ -25,10 +25,19 @@
  - [x] Local storage for comment drafts
     - [x] editing
     - [x] deletion
- - [ ] Link highlights
- - [ ] Notifications
-   - [ ] Notification Messges
+ - [x] Notifications
+   - [x] Comment Notification
+   - [x] Friend Request Notification
+   - [x] Friend Request Accepted Notification
+   - [x] Deep linking for Notifications
+ - [x] Link highlights ~(ReactMarkdown?)~
+ - [ ] Post Links 
+    - [ ] Link previews
+ - [ ] Image Gallery (Up to 10 images?)
+ - [ ] Suggested Friends instead of Browse
+   - [ ] User Search
  - [ ] Account deletion
+ - [ ] Mobile View
  - [ ] Permissions check (Make sure people can only access what they should)
 
 ## Bugs
@@ -37,15 +46,12 @@
 - [ ] Redirect to home screen from all pages.
 
 ## Follow Up
- - [ ] Link previews
  - [ ] Admin page
    - [ ] Track contributions
    - [ ] Track total users
    - [ ] Increase / Decrease invites
  - [ ] Public Posts
  - [ ] Post sharing
- - [ ] Post Links 
-    - [ ] Link previews
  - [ ] Post tags
     - [ ] Tag Feeds
  - [ ] User location

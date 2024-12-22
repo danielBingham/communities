@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useLayoutEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -46,7 +46,6 @@ const LoginForm = function(props) {
     // ======= Actions and Event Handling ===========================
    
     const dispatch = useDispatch()
-    const navigate = useNavigate()
 
     /**
      * Handle the form's submission by attempting to authenticate the user.
@@ -72,15 +71,6 @@ const LoginForm = function(props) {
     }
 
     // ======= Effect Handling ======================================
-    
-    useEffect(function() {
-        // If we're logged in then we don't want to be here.  We don't really
-        // care if we were already logged in or if this is the result of a
-        // successful authentication.
-        if ( currentUser ) {
-            navigate("/")
-        }
-    })
 
     // Clean up our request.
     useEffect(function() {
@@ -148,6 +138,11 @@ const LoginForm = function(props) {
                     <input type="submit" name="login" value="Login" />
                 </div>
             </form>
+            <div className="inner-wrapper">
+                <div className="forgot-password">
+                    <Link to="/reset-password-request">Forgot password?</Link>
+                </div>
+            </div>
         </div>
     )
 }

@@ -57,7 +57,6 @@ const PostCommentForm = function({ postId, commentId, setShowComments }) {
     }
 
     const submit = function() {
-        console.log(`Submit Comment(${commentId}) on Post(${postId}).`)
         const newComment = {
             postId: postId,
             userId: currentUser.id,
@@ -66,10 +65,8 @@ const PostCommentForm = function({ postId, commentId, setShowComments }) {
         }
 
         if ( ! commentId ) {
-            console.log(`Posting comment for Post(${postId}).`)
             setRequestId(dispatch(postPostComments(newComment)))
         } else {
-            console.log(`Patching Comment(${commentId}) on Post(${postId}).`)
             newComment.id = commentId
             setRequestId(dispatch(patchPostComment(newComment)))
         }
@@ -100,18 +97,15 @@ const PostCommentForm = function({ postId, commentId, setShowComments }) {
 
     // Initialize content to the content of our comment, if we have one.
     useEffect(function() {
-        console.log(`Initializing for Post(${postId}) and Comment(${commentId}).`)
         let draft = {
             content: comment ? comment.content : ''
         }
 
         const existingDraft = JSON.parse(localStorage.getItem(getDraftKey()))
-        console.log(`Existing draft for Key(${getDraftKey()}): ${localStorage.getItem(getDraftKey())}`)
         if ( existingDraft ) {
             draft = existingDraft
             setShowForm(true)
         } else if ( commentId && comment ) {
-            console.log(`Initializing Draft for key: ${getDraftKey()}`)
             localStorage.setItem(getDraftKey(), JSON.stringify(draft))
         }
 
@@ -119,16 +113,13 @@ const PostCommentForm = function({ postId, commentId, setShowComments }) {
     }, [ commentId ])
 
     useEffect(function() {
-        console.log(`Updating local storage for Post(${postId}) and Comment(${commentId})`)
         if ( ! request && (showForm || commentId )) {
             localStorage.setItem(getDraftKey(), JSON.stringify({ content: content }))
         }
     }, [ commentId, content, request])
 
     useEffect(function() {
-        console.log(`Checking Request(${requestId}) in State(${request?.state}) for Post(${postId}) and Comment(${commentId})`)
         if ( request && request.state == 'fulfilled') {
-            console.log(`Request completed for Post(${postId}) and Comment(${commentId})`)
             localStorage.removeItem(getDraftKey())
 
             setContent('')
@@ -144,9 +135,7 @@ const PostCommentForm = function({ postId, commentId, setShowComments }) {
     }, [ commentId, request ])
 
     useEffect(function() {
-        console.log(`Setting request cleanup for id: ${requestId}`)
         return function cleanup() {
-            console.log(`Cleaning up request: ${requestId}.`)
             if ( requestId ) {
                 dispatch(cleanupRequest({ requestId: requestId }))
             }
@@ -171,7 +160,6 @@ const PostCommentForm = function({ postId, commentId, setShowComments }) {
     }
 
     const draft = localStorage.getItem(getDraftKey())
-    console.log(`postId: ${postId}, commentId: ${commentId}, showForm: ${showForm}, Request: ${request?.state}, draft: ${draft}`)
     if ( ! commentId && ! showForm ) {
         return (
             <a href="" onClick={(e) => { e.preventDefault(); startComment() } } className="create-comment">Start a comment...</a>

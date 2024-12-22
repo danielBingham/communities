@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 
 import { getUsers, cleanupRequest } from '/state/users'
 
@@ -8,6 +8,8 @@ import Spinner from '/components/Spinner'
 
 import UserView from '/components/users/UserView'
 import PostsByUserFeed from '/components/feeds/PostsByUserFeed'
+
+import LoginForm from '/components/authentication/LoginForm'
 
 import './UserProfilePage.css'
 
@@ -46,13 +48,6 @@ const UserProfilePage = function(props) {
     const currentUser = useSelector(function(state) {
         return state.authentication.currentUser
     })
-   
-    const navigate = useNavigate()
-    useEffect(function() {
-        if ( ! currentUser ) {
-            navigate('/')
-        }
-    }, [])
 
     // ================= User Action Handling  ================================
     
@@ -75,8 +70,14 @@ const UserProfilePage = function(props) {
 
     // ======= Render ===============================================
 
+    // Protect this page so the user must be logged in.
+    if ( ! currentUser ) {
+        return (
+            <LoginForm />
+        )
+    }
 
-    if ( ! user || ! currentUser ) {
+    if ( ! user ) {
         return (
             <Spinner />
         )

@@ -111,10 +111,6 @@ module.exports = class PostReactionController {
             activity: activity
         }
 
-
-        console.log(`post postReaction`)
-        console.log(post)
-
         await this.postDAO.updatePost(post)
 
         const postReactionResult = await this.postReactionDAO.selectPostReactions({
@@ -192,8 +188,6 @@ module.exports = class PostReactionController {
             activity: activity
         }
 
-        console.log(`patch PostReaction`)
-        console.log(post)
         await this.postDAO.updatePost(post)
 
         const postReactionResult = await this.postReactionDAO.selectPostReactions({

@@ -38,6 +38,7 @@ module.exports = class UserController {
 
         this.auth = new backend.AuthenticationService(core)
         this.emailService = new backend.EmailService(core)
+        this.notificationService = new backend.NotificationService(core)
 
         this.userDAO = new backend.UserDAO(core)
         this.tokenDAO = new backend.TokenDAO(core)
@@ -736,6 +737,16 @@ module.exports = class UserController {
 
         request.session.friends.push(userRelationship)
 
+       
+        await this.notificationService.sendNotifications(
+            currentUser, 
+            'User:friend:create',
+            {
+                userId: userId,
+                friendId: friendId
+            }
+        )
+
         response.status(200).json({
             friends: request.session.friends
         })
@@ -775,6 +786,15 @@ module.exports = class UserController {
 
         request.session.friends
             .find((f) => f.userId == userId && f.friendId == friendId).status = 'confirmed'
+
+        await this.notificationService.sendNotifications(
+            currentUser, 
+            'User:friend:update',
+            {
+                userId: userId,
+                friendId: friendId
+            }
+        )
 
         response.status(200).json({
             friends: request.session.friends

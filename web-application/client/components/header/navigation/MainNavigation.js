@@ -58,7 +58,6 @@ const MainNavigation = function(props) {
     // ======= Render ===============================================
 
     const location = useLocation()
-    console.log(location)
     return (
         <>
             <div id="about-navigation" className="navigation-block">

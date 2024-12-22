@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
+import { useLocation } from 'react-router-dom'
 
 import DateTag from '/components/DateTag'
 import UserTag from '/components/users/UserTag'
@@ -9,6 +10,7 @@ import PostCommentDotsMenu from '/components/posts/comments/widgets/PostCommentD
 import './PostComment.css'
 
 const PostComment = function({ postId, id }) {
+    const [highlight, setHighlight] = useState(false)
 
     const comment = useSelector(function(state) {
         if ( id in state.postComments.dictionary ) {
@@ -22,10 +24,23 @@ const PostComment = function({ postId, id }) {
         return null
     }
 
+    const location = useLocation()
+    // This is necessary to enable linking to anchors in the page.
+    //
+    // TODO Techdebt Arguably we could put this on the top level App page...
+    useEffect(function() {
+        if ( document.location.hash && document.location.hash == `#comment-${id}` ) {
+            document.querySelector(document.location.hash).scrollIntoView({
+                block: 'center'
+            })
+            setHighlight(true)
+        }
+    }, [ id, location ])
+
     return (
-        <div key={comment.id} className="post-comment">
+        <div id={`comment-${comment.id}`} key={comment.id} className={`post-comment ${ highlight ? 'highlight' : ''}`}>
             <div className="header">
-                <div><UserTag id={comment.userId} /> commented <DateTag timestamp={comment.createdDate} /></div>
+                <div><UserTag id={comment.userId} /> commented <a href={`#comment-${comment.id}`}><DateTag timestamp={comment.createdDate} /></a></div>
                 <div className="controls-wrapper">
                     <PostCommentDotsMenu postId={postId} id={id} />
                 </div>

@@ -5,7 +5,7 @@
   "author": "Daniel Bingham",
   "license": "GPL-3.0",
   "private": true,
-  "repository": { },
+  "repository": {},
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   },
@@ -52,6 +52,7 @@
     "postmark": "^3.0.14",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
+    "react-linkify": "^1.0.0-alpha",
     "react-markdown": "^8.0.3",
     "react-pdf": "^7.5.1",
     "react-redux": "^8.0.1",

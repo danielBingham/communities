@@ -192,7 +192,6 @@ export const postPostComments = function(comment) {
         return makeTrackedRequest(dispatch, getState, postCommentsSlice,
             'POST', endpoint, body,
             function(response) {
-                console.log(response)
                 dispatch(postCommentsSlice.actions.setPostCommentsInDictionary({ entity: response.entity}))
 
                 dispatch(setRelationsInState(response.relations))

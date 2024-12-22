@@ -1,4 +1,11 @@
-.login-form { }
+.login-form { 
+    display: block;
+    margin: 50px auto;
+    padding: 20px;
+    width: 500px;
+    border: thin solid var(--main-border-color);
+    background-color: white;
+}
 .login-form h2 {
     text-align: center;
 }
@@ -22,4 +29,12 @@
 .login-form .error {
     text-align: center;
     color: red;
+}
+.login-form .inner-wrapper {
+    margin: 10px auto;
+    width: 430px;
+    text-align: center;
+}
+.login-form .forgot-password {
+    padding: 10px;
 }

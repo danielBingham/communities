@@ -21,11 +21,11 @@
 const Handlebars = require('handlebars')
 
 const NotificationDAO = require('../daos/NotificationDAO')
+const UserDAO = require('../daos/UserDAO')
 
 const EmailService = require('./EmailService')
 
 const ServiceError = require('../errors/ServiceError')
-
 
 module.exports = class NotificationService {
 
@@ -34,16 +34,67 @@ module.exports = class NotificationService {
         this.core = core
 
         this.notificationDAO = new NotificationDAO(core)
-        this.paperEventDAO = new PaperEventDAO(core)
-        this.paperDAO = new PaperDAO(core)
+        this.userDAO = new UserDAO(core)
 
         this.emailService = new EmailService(core)
-        this.submissionService = new SubmissionService(core)
-        this.paperEventService = new PaperEventService(core)
 
-        this.notificationDefinitions = { }
+        this.notificationDefinitions = { 
+            'Post:comment:create': {
+                email: {
+                    subject: Handlebars.compile('[Communities] {{commentAuthor.name}} commented on your post "{{postIntro}}..."'), 
+                    body: Handlebars.compile(`
+Hi {{postAuthor.name}},
 
-        this.notificationMap = { }
+{{commentAuthor.name}} left a new comment on your post "{{postIntro}}...". 
+
+Read the comment here: {{host}}/{{postAuthor.username}}/{{post.id}}#comment-{{comment.id}}.
+
+Cheers,
+The Communities Team
+                        `)
+                },
+                text: Handlebars.compile(`{{commentAuthor.name}} commented on your post, "{{postIntro}}...".`),
+                path: Handlebars.compile(`/{{postAuthor.username}}/{{post.id}}#comment-{{comment.id}}`) 
+            },
+            'User:friend:create': {
+                email: {
+                    subject: Handlebars.compile('[Communities] {{requester.name}} sent you a Friend Request'),
+                    body: Handlebars.compile(`
+Hi {{friend.name}},
+
+You have a new friend request on Communities from {{requester.name}}.
+
+To accept, log in to your account and view your friend requests: {{host}}/friends/requests
+
+Cheers,
+The Communities Team`)
+                },
+                text: Handlebars.compile(`{{requester.name}} sent you a friend request.`),
+                path: Handlebars.compile(`/friends/requests`)
+            },
+            'User:friend:update': {
+                email: {
+                    subject: Handlebars.compile('[Communities] {{friend.name}} accepted your Friend Request'),
+                    body: Handlebars.compile(`
+Hi {{requester.name}},
+
+{{friend.name}} accepted your friend request.
+
+You can now view their profile here: {{host}}/{{friend.username}}
+
+Cheers,
+The Communities Team`)
+                },
+                text: Handlebars.compile(`{{friend.name}} accepted your friend request.`),
+                path: Handlebars.compile(`/{{friend.username}}`)
+            }
+        }
+
+        this.notificationMap = { 
+            'Post:comment:create': this.sendNewCommentNotification.bind(this),
+            'User:friend:create': this.sendFriendRequestNotification.bind(this),
+            'User:friend:update': this.friendRequestAcceptedNotification.bind(this)
+        }
     }
 
     async sendNotifications(currentUser, type, context) {
@@ -93,5 +144,43 @@ module.exports = class NotificationService {
             definition.email.subject(context), 
             definition.email.body(context)
         )
+    }
+
+    async sendNewCommentNotification(currentUser, context) {
+        const userResults = await this.userDAO.selectUsers(`WHERE users.id = $1`, [ context.post.userId])
+        
+        const postAuthor = userResults.dictionary[context.post.userId]
+        if ( context.commentAuthor.id == postAuthor.id ) {
+            return
+        }
+
+        context.postIntro = context.post.content.substring(0,20)
+
+        context.postAuthor = postAuthor
+        await this.createNotification(postAuthor.id, 'Post:comment:create', context) 
+    }
+
+    async sendFriendRequestNotification(currentUser, context) {
+        const userResults = await this.userDAO.selectUsers(
+            `WHERE users.id = ANY($1::uuid[])`,
+            [  [ context.userId, context.friendId ] ]
+        )
+
+        context.friend = userResults.dictionary[context.friendId]
+        context.requester = userResults.dictionary[context.userId]
+
+        await this.createNotification(context.friendId, 'User:friend:create', context)
+    }
+
+    async friendRequestAcceptedNotification(currentUser, context) {
+        const userResults = await this.userDAO.selectUsers(
+            `WHERE users.id = ANY($1::uuid[])`,
+            [  [ context.userId, context.friendId ] ]
+        )
+
+        context.friend = userResults.dictionary[context.friendId]
+        context.requester = userResults.dictionary[context.userId]
+
+        await this.createNotification(context.userId, 'User:friend:update', context)
     }
 }

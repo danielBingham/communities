@@ -74,7 +74,6 @@
 
 .floating-menu .menu-body .menu-item {
     display: block;
-    text-transform:capitalize;
     white-space: nowrap;
     padding-left: 20px;
 }

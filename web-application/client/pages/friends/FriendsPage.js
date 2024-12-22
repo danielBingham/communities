@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { useSelector } from 'react-redux'
-import { useNavigate, Link, useParams } from 'react-router-dom'
+import { useNavigate, useLocation, Link, useParams } from 'react-router-dom'
 
 import { 
     UserGroupIcon as UserGroupIconOutline,
@@ -20,6 +20,8 @@ import YourFriendsList from '/components/friends/YourFriendsList'
 import FriendRequestsList from '/components/friends/FriendRequestsList'
 import UserListView from '/components/users/list/UserListView'
 
+import LoginForm from '/components/authentication/LoginForm'
+
 import './FriendsPage.css'
 
 const FriendsPage = function() {
@@ -27,18 +29,10 @@ const FriendsPage = function() {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
-    const navigate = useNavigate()
-    useEffect(function() {
-        if ( ! currentUser ) {
-            navigate("/")
-        }
-    }, [ currentUser ])
-
+    // Protect this page so the user must be logged in.
     if ( ! currentUser ) {
         return (
-            <div id="friends-page">
-                <Spinner />
-            </div>
+            <LoginForm />
         )
     }
 

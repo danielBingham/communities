@@ -131,6 +131,8 @@ body {
     font-weight: 400;
     font-style: normal;
     background-color: var(--main-background-color);
+
+    overflow-y: scroll;
 }
 
 a:link, a:active, a:visited {

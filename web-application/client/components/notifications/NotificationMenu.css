@@ -39,7 +39,7 @@
 .notification-menu .notification-trigger .unread-indicator {
     position: absolute;
     top: 2px;
-    right: 4px;
+    right: 24px;
     font-size: 10px;
     padding: 2px 4px;
 

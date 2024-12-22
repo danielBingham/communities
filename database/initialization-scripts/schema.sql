@@ -146,6 +146,23 @@ ALTER TABLE users ADD COLUMN file_id uuid REFERENCES files(id) ON DELETE SET NUL
 CREATE INDEX users__file_id ON users (file_id);
 
 /******************************************************************************
+ *
+ ******************************************************************************/
+
+ CREATE TABLE link_previews (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    url text,
+
+    title text,
+    description text,
+    image_url text,
+
+    created_date timestamptz,
+    updated_date timestamptz
+);
+CREATE INDEX link_previews__url ON link_previews (url);
+
+/******************************************************************************
  * Tags 
  *****************************************************************************/
 
@@ -181,6 +198,7 @@ CREATE TABLE posts (
     user_id uuid REFERENCES users (id) ON DELETE CASCADE NOT NULL,
 
     file_id uuid REFERENCES files (id) DEFAULT NULL,
+    link_preview_id uuid REFERENCES link_previews (id) DEFAULT NULL,
 
     activity bigint DEFAULT 1,
     content text,

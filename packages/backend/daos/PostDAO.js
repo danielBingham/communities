@@ -21,6 +21,171 @@
 const DAO  = require('./DAO')
 
 const PAGE_SIZE = 20
+const SCHEMA = {
+    'Post': {
+        table: 'posts',
+        fields: {
+            'id': {
+                insert: 'primary',
+                update: 'primary',
+                select: 'always',
+                key: 'id'
+            },
+            'user_id': {
+                insert: 'required',
+                update: 'denied',
+                select: 'always',
+                key: 'userId'
+            },
+            'file_id': {
+                insert: 'allowed',
+                update: 'allowed',
+                select: 'always',
+                key: 'fileId'
+            },
+            'link_preview_id': {
+                insert: 'allowed',
+                update: 'allowed',
+                select: 'always',
+                key: 'linkPreviewId'
+            },
+            'activity': {
+                insert: 'allowed',
+                insertDefault: function() {
+                    return 1
+                },
+                update: 'allowed',
+                select: 'always',
+                key: 'activity'
+            },
+            'status': {
+                insert: 'allowed',
+                insertDefault: function() {
+                    return 'writing'
+                },
+                update: 'allowed',
+                select: 'always',
+                key: 'status'
+            },
+            'content': {
+                insert: 'required',
+                update: 'allowed',
+                select: 'always',
+                key: 'content'
+            },
+            'created_date': {
+                insert: 'override',
+                insertOverride: 'now()',
+                update: 'denied',
+                select: 'always',
+                key: 'createdDate'
+            },
+            'updated_date': {
+                insert: 'override',
+                insertOverride: 'now()',
+                update: 'override',
+                updateOverride: 'now()',
+                select: 'always',
+                key: 'updatedDate'
+            },
+            'post_reactions': {
+                insert: 'denied',
+                update: 'denied',
+                select: 'override',
+                selectOverride: function(row) {
+                    return []
+                },
+                key: 'reactions'
+            },
+            'post_comments': {
+                insert: 'denied',
+                update: 'denied',
+                select: 'override',
+                selectOverride: function(row) {
+                    return []
+                },
+                key: 'comments'
+            },
+            'post_tags': {
+                insert: 'denied',
+                update: 'denied',
+                select: 'override',
+                selectOverride: function(row) {
+                    return []
+                },
+                key: 'tags'
+            }
+        }
+    },
+    'PostTag': {
+        table: 'post_tags',
+        fields: {
+            'post_id': {
+                insert: 'required',
+                update: 'primary',
+                select: 'never',
+                key: 'postId'
+            },
+            'tag_id': {
+                insert: 'required',
+                update: 'primary',
+                select: 'always',
+                key: 'tagId'
+            },
+            'created_date': {
+                insert: 'override',
+                insertOverride: 'now()',
+                update: 'denied',
+                select: 'never',
+                key: 'createdDate'
+            }
+        }
+    },
+    'PostVersion': {
+        table: 'post_versions',
+        fields: {
+            'id': {
+                insert: 'primary',
+                update: 'primary',
+                select: 'always',
+                key: 'id'
+            },
+            'post_id': {
+                insert: 'allowed',
+                update: 'allowed',
+                select: 'always',
+                key: 'postId'
+            },
+            'file_id': {
+                insert: 'allowed',
+                update: 'allowed',
+                select: 'always',
+                key: 'fileId'
+            },
+            'content': {
+                insert: 'allowed',
+                update: 'allowed',
+                select: 'always',
+                key: 'content'
+            },
+            'created_date': {
+                insert: 'override',
+                insertOverride: 'now()',
+                update: 'denied',
+                select: 'always',
+                key: 'createdDate'
+            },
+            'updated_date': {
+                insert: 'override',
+                insertOverride: 'now()',
+                update: 'override',
+                updateOverride: 'now()',
+                select: 'always',
+                key: 'updatedDate'
+            }
+        }
+    }
+}
 
 module.exports = class PostDAO extends DAO {
 
@@ -29,165 +194,7 @@ module.exports = class PostDAO extends DAO {
 
         this.core = core
 
-        this.entityMaps = {
-            'Post': {
-                table: 'posts',
-                fields: {
-                    'id': {
-                        insert: 'primary',
-                        update: 'primary',
-                        select: 'always',
-                        key: 'id'
-                    },
-                    'user_id': {
-                        insert: 'required',
-                        update: 'denied',
-                        select: 'always',
-                        key: 'userId'
-                    },
-                    'file_id': {
-                        insert: 'allowed',
-                        update: 'allowed',
-                        select: 'always',
-                        key: 'fileId'
-                    },
-                    'activity': {
-                        insert: 'allowed',
-                        insertDefault: function() {
-                            return 1
-                        },
-                        update: 'allowed',
-                        select: 'always',
-                        key: 'activity'
-                    },
-                    'status': {
-                        insert: 'allowed',
-                        insertDefault: function() {
-                            return 'writing'
-                        },
-                        update: 'allowed',
-                        select: 'always',
-                        key: 'status'
-                    },
-                    'content': {
-                        insert: 'required',
-                        update: 'allowed',
-                        select: 'always',
-                        key: 'content'
-                    },
-                    'created_date': {
-                        insert: 'override',
-                        insertOverride: 'now()',
-                        update: 'denied',
-                        select: 'always',
-                        key: 'createdDate'
-                    },
-                    'updated_date': {
-                        insert: 'override',
-                        insertOverride: 'now()',
-                        update: 'override',
-                        updateOverride: 'now()',
-                        select: 'always',
-                        key: 'updatedDate'
-                    },
-                    'post_reactions': {
-                        insert: 'denied',
-                        update: 'denied',
-                        select: 'override',
-                        selectOverride: function(row) {
-                            return []
-                        },
-                        key: 'reactions'
-                    },
-                    'post_comments': {
-                        insert: 'denied',
-                        update: 'denied',
-                        select: 'override',
-                        selectOverride: function(row) {
-                            return []
-                        },
-                        key: 'comments'
-                    },
-                    'post_tags': {
-                        insert: 'denied',
-                        update: 'denied',
-                        select: 'override',
-                        selectOverride: function(row) {
-                            return []
-                        },
-                        key: 'tags'
-                    }
-                }
-            },
-            'PostTag': {
-                table: 'post_tags',
-                fields: {
-                    'post_id': {
-                        insert: 'required',
-                        update: 'primary',
-                        select: 'never',
-                        key: 'postId'
-                    },
-                    'tag_id': {
-                        insert: 'required',
-                        update: 'primary',
-                        select: 'always',
-                        key: 'tagId'
-                    },
-                    'created_date': {
-                        insert: 'override',
-                        insertOverride: 'now()',
-                        update: 'denied',
-                        select: 'never',
-                        key: 'createdDate'
-                    }
-                }
-            },
-            'PostVersion': {
-                table: 'post_versions',
-                fields: {
-                    'id': {
-                        insert: 'primary',
-                        update: 'primary',
-                        select: 'always',
-                        key: 'id'
-                    },
-                    'post_id': {
-                        insert: 'allowed',
-                        update: 'allowed',
-                        select: 'always',
-                        key: 'postId'
-                    },
-                    'file_id': {
-                        insert: 'allowed',
-                        update: 'allowed',
-                        select: 'always',
-                        key: 'fileId'
-                    },
-                    'content': {
-                        insert: 'allowed',
-                        update: 'allowed',
-                        select: 'always',
-                        key: 'content'
-                    },
-                    'created_date': {
-                        insert: 'override',
-                        insertOverride: 'now()',
-                        update: 'denied',
-                        select: 'always',
-                        key: 'createdDate'
-                    },
-                    'updated_date': {
-                        insert: 'override',
-                        insertOverride: 'now()',
-                        update: 'override',
-                        updateOverride: 'now()',
-                        select: 'always',
-                        key: 'updatedDate'
-                    }
-                }
-            }
-        }
+        this.entityMaps = SCHEMA
     }
 
     getPostSelectionString() {

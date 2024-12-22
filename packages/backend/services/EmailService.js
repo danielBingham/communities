@@ -52,9 +52,15 @@ module.exports = class EmailService {
         const confirmationLink = this.config.host + `email-confirmation?token=${token.token}`
 
 
-        const emailTextBody = `Welcome to Communities, ${user.name}!
+        const emailTextBody = `
+Welcome to Communities, ${user.name}!
 
-Please confirm your email address by following the link: ${confirmationLink}`
+Please confirm your email address by following the link: ${confirmationLink}
+
+Cheers,
+The Communities Team
+`
+
 
 
         await this.sendEmail({
@@ -69,9 +75,16 @@ Please confirm your email address by following the link: ${confirmationLink}`
     async sendPasswordReset(user, token) {
         const resetLink = this.config.host + `reset-password?token=${token.token}`
 
-        const emailTextBody = `Hello ${user.name},
+        const emailTextBody = `
+Hello ${user.name},
 
-        Please use the following link to reset your password: ${resetLink}`
+Someone requested a passwor reset for your Communities account.
+
+If this was you, please use the following link to reset your password: ${resetLink}
+
+Cheers,
+The Communities Team
+`
 
 
         await this.sendEmail({
@@ -86,21 +99,23 @@ Please confirm your email address by following the link: ${confirmationLink}`
     async sendInvitation(inviter, user, token) {
         const invitationLink = this.config.host + `accept-invitation?token=${token.token}`
 
-        const emailTextBody = `Hello ${user.name},
+        const emailTextBody = `
+Hello ${user.email.substring(0, user.email.indexOf('@'))},
 
-        You have been invited to join Communities by ${inviter.name} (${inviter.email})!  
+You have been invited to join Communities by ${inviter.name}!  
 
-        Communities is a non-profit, user supported social media platform built
-        to help users build community, connect, and organize. We're on a
-        mission to de-enshitify the internet.
+Communities is a non-profit, user supported social media platform built to help users build community, connect, and organize. We're on a mission to de-enshitify the internet.
 
-        We're currently in invite only private beta.  If you'd like to join and
-        come kick the tires, click the following link: ${invitationLink}`
+We're currently in invite only private beta.  If you'd like to join and come kick the tires, click the following link: ${invitationLink}
+
+Cheers!
+The Communities Team`
+
 
         await this.sendEmail({
             "From": "no-reply@peer-review.io",
             "To": user.email,
-            "Subject": `${inviter.name} invites you to join Communities`,
+            "Subject": `[Communities] ${inviter.name} invites you to join Communities`,
             "TextBody": emailTextBody,
             "MessageStream": "invitation"
         })

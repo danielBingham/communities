@@ -1,10 +1,11 @@
 import React, { useEffect } from 'react'
 import { useSelector } from 'react-redux'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 
 import { Page } from '/components/generic/Page'
 
 import PostForm from '/components/posts/form/PostForm'
+import LoginForm from '/components/authentication/LoginForm'
 
 import Post from '/components/posts/Post'
 
@@ -18,16 +19,12 @@ const PostPage = function() {
     const editing = useSelector(function(state) {
         return state.posts.editing
     })
-   
-    const navigate = useNavigate()
-    useEffect(function() {
-        if ( ! currentUser ) {
-            navigate('/')
-        }
-    }, [])
 
+    // Protect this page so the user must be logged in.
     if ( ! currentUser ) {
-        return null
+        return (
+            <LoginForm />
+        )
     }
 
     const draft = localStorage.getItem(`draft.${postId}`)

@@ -20,7 +20,7 @@
 
 const Uuid = require('uuid')
 
-const { PostDAO, PostCommentDAO } = require('@danielbingham/communities-backend')
+const { NotificationService, PostDAO, PostCommentDAO } = require('@danielbingham/communities-backend')
 
 const ControllerError = require('../errors/ControllerError')
 
@@ -31,6 +31,8 @@ module.exports = class PostCommentController {
 
         this.postDAO = new PostDAO(core)
         this.postCommentDAO = new PostCommentDAO(core)
+
+        this.notificationService = new NotificationService(core)
     }
 
     async getRelations(results, requestedRelations) {
@@ -132,6 +134,8 @@ module.exports = class PostCommentController {
             params: [ comment.id ]
         })
 
+        const relations = await this.getRelations(results)
+
         const entity = results.dictionary[comment.id]
 
         if ( ! entity ) {
@@ -147,9 +151,20 @@ module.exports = class PostCommentController {
 
         await this.postCommentDAO.insertPostCommentVersions(postCommentVersion)
 
+
+        await this.notificationService.sendNotifications(
+            currentUser, 
+            'Post:comment:create',
+            {
+                post: relations.posts[postId],
+                commentAuthor: currentUser,
+                comment: entity
+            }
+        )
+
         response.status(201).json({
             entity: entity,
-            relations: await this.getRelations(results)
+            relations: relations 
         })
     }
 
@@ -232,28 +247,7 @@ module.exports = class PostCommentController {
             comment.content = request.body.content
         }
 
-        console.log(`Comment patch: `)
-        console.log(comment)
-
-        if ( comment.status == 'writing' || comment.status == 'editing' || comment.status == 'posted' ) {
-            await this.postCommentDAO.updatePostComment(comment)
-        } else if ( comment.status == 'reverting' ) {
-            const previousResults = await this.core.database.query(`
-                SELECT content FROM post_comment_versions
-                    WHERE post_comment_id = $1
-                    ORDER BY created_date DESC
-                    LIMIT 1
-            `, [ comment.id ])
-
-            const previous = previousResults.rows[0]
-
-            const commentRevert = {
-                id: comment.id,
-                status: 'posted',
-                content: previous.content
-            }
-            await this.postCommentDAO.updatePostComment(commentRevert)
-        }
+        await this.postCommentDAO.updatePostComment(comment)
 
         const results = await this.postCommentDAO.selectPostComments({
             where: `post_comments.id = $1`,
@@ -268,13 +262,11 @@ module.exports = class PostCommentController {
                 `Postcomment(${comment.id}) missing after being updated.  Please report as a bug.`)
         }
 
-        if ( entity.status == 'posted' ) {
-            const postCommentVersion = {
-                postCommentId: entity.id,
-                content: entity.content
-            }
-            await this.postCommentDAO.insertPostCommentVersions(postCommentVersion)
+        const postCommentVersion = {
+            postCommentId: entity.id,
+            content: entity.content
         }
+        await this.postCommentDAO.insertPostCommentVersions(postCommentVersion)
 
         response.status(200).json({
             entity: entity,

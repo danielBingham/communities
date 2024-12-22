@@ -1,5 +1,6 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React, { useEffect } from 'react'
+import { useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 
 import { Page, PageBody } from '/components/generic/Page'
 
@@ -9,19 +10,21 @@ import './LoginPage.css'
 
 const LoginPage = function(props) {
 
+    const currentUser = useSelector((state) => state.authentication.currentUser)
+
+    const navigate = useNavigate()
+
+    useEffect(function() {
+        if ( currentUser ) {
+            navigate('/')
+        }
+    }, [ currentUser])
+
     return (
         <Page id="login-page">
             <PageBody>
                 <LoginForm />
-                <div className="inner-wrapper">
-                    <div className="forgot-password">
-                        <Link to="/reset-password-request">Forgot password?</Link>
-                    </div>
-                    <div className="register">
-                        Don't have an account? You can <Link to="/register">create one here</Link>.
-                    </div>
-                </div>
-            </PageBody>
+           </PageBody>
         </Page>
     )
 }

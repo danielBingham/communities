@@ -183,8 +183,16 @@ const PostForm = function({ postId }) {
             >
             </textarea>
             { errorView }
+            <div className="attachments">
+                <div className="image-attachment">
+                    { imageView }
+                </div>
+                <div className="link-attachment">
+                    <Button type="primary" onClick={(e) => {}}>Add Link</Button>
+                </div>
+            </div>
             <div className="controls">
-                { imageView }
+                <div></div>
                 <div className="buttons">
                     <Button type="secondary-warn" onClick={(e) => cancel()}>Cancel</Button>
                     <Button type="primary" onClick={(e) => submit()}>Post</Button>

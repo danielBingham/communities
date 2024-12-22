@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom'
 
 import { getPost, cleanupRequest } from '/state/posts'
 
+import Linkify from 'react-linkify'
+
 import Spinner from '/components/Spinner'
 import DateTag from '/components/DateTag'
 import UserTag from '/components/users/UserTag'
@@ -84,7 +86,7 @@ const Post = function({ id, expanded }) {
                 </div>
             </div>
             { post.content && post.content.length > 0 && (post.content.length <= 1000 || showMore) && <div className="content">
-                { post.content }
+                <Linkify>{ post.content }</Linkify>
                 {/*{ post.content.length >= 1000 && showMore && <div className="show-more">
                     <a href="" onClick={(e) => { e.preventDefault(); setShowMore(false) }}>Hide More.</a></div> */}
             </div> } 

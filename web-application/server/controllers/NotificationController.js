@@ -88,7 +88,7 @@ module.exports = class NotificationController {
         }
 
         const results = await this.notificationDAO.selectNotifications(
-            'WHERE notifications.id = ANY($1::bigint[])', [ notifications.map((n) => n.id) ])
+            'WHERE notifications.id = ANY($1::uuid[])', [ notifications.map((n) => n.id) ])
 
         results.meta = {}
         results.relations = []
