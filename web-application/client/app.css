@@ -148,9 +148,15 @@ a:hover {
 input[type="text"], input[type="password"], textarea {
     padding: 5px;
     border: thin solid var(--input-border-color);
+    font-family: Roboto, Arial, sans-serif; 
+    font-size: 14px;
 }
 input:focus, textarea:focus, select:focus {
     outline-color: var(--input-highlight-color) !important;
+}
+input::placeholder, textarea::placeholder {
+    font-family: Roboto, Arial, sans-serif; 
+    font-size: 14px;
 }
 
 input[type="submit"] {
@@ -178,10 +184,9 @@ svg.icon {
 }
 
 #root {
-    height: 100vh;
     width: 100%;
     display: grid;
-    grid-template-rows: auto 1fr auto;
+    grid-template-rows: 1fr;
 }
 
 main {
@@ -199,3 +204,14 @@ main {
     margin: 100px auto;
     text-align: center;
 }
+
+@media (width >= 700px) {
+    #root {
+        height: 100vh;
+    }
+
+}
+@media (width < 700px) {
+
+}
+

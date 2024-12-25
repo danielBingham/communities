@@ -6,6 +6,7 @@ import featuresReducer from './features'
 import filesReducer from './files'
 import jobsReducer from './jobs'
 import notificationsReducer from './notifications'
+import linkPreviewsReducer from './linkPreviews'
 import postsReducer from './posts'
 import postCommentsReducer from './postComments'
 import postReactionsReducer from './postReactions'
@@ -21,6 +22,7 @@ const reducers = combineReducers({
     authentication: authenticationReducer,
     users: usersReducer,
     notifications: notificationsReducer,
+    linkPreviews: linkPreviewsReducer,
     posts: postsReducer,
     postComments: postCommentsReducer,
     postReactions: postReactionsReducer,

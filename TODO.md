@@ -31,19 +31,20 @@
    - [x] Friend Request Accepted Notification
    - [x] Deep linking for Notifications
  - [x] Link highlights ~(ReactMarkdown?)~
- - [ ] Post Links 
-    - [ ] Link previews
- - [ ] Image Gallery (Up to 10 images?)
+ - [x] Post Links 
+    - [x] Link previews
+ - [ ] Mobile View
  - [ ] Suggested Friends instead of Browse
    - [ ] User Search
  - [ ] Account deletion
- - [ ] Mobile View
+ - [ ] Image Gallery (Up to 10 images?)
  - [ ] Permissions check (Make sure people can only access what they should)
 
 ## Bugs
 - [ ] Throw an error when a user tries to accept an invite while logged in
 - [ ] When first logged in after registering from an invite, friend button doesn't recognize inviter as friend until refresh.
 - [ ] Redirect to home screen from all pages.
+- [ ] Image cropping and resizing 
 
 ## Follow Up
  - [ ] Admin page

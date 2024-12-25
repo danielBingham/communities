@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
 import { getFile, deleteFile, cleanupRequest } from '/state/files'
-
-import Button from '/components/generic/button/Button'
+import { XCircleIcon } from '@heroicons/react/24/solid'
 
 import "./DraftImageFile.css"
 
@@ -54,9 +53,9 @@ const DraftImageFile = function({ fileId, setFileId, width, deleteOnRemove }) {
     if ( file ) {
         let url = new URL(file.filepath, file.location)
         content = (
-            <div className="file" style={{ width: `${width}px` }}>
-                <div><img src={url.href} width={ width ? width : 100}  /></div>
-                <Button type='secondary-warn' onClick={() => { remove() }}>Remove file</Button>
+            <div className="file">
+                <a className="remove" href="" onClick={(e) => { e.preventDefault(); remove() }}><XCircleIcon /></a>
+                <img src={url.href} />
             </div>
         )
     }

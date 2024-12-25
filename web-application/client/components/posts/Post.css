@@ -1,12 +1,6 @@
 .post {
-    border: thin solid var(--main-border-color);
     background-color: white;
-    border-radius: 7px;
-    padding: 0;
-    width: 650px;
-    margin: 20px auto;
     font-size: 16px;
-    box-shadow: 0px 0px 5px -3px rgba(0,0,0,0.25);
 }
 .post .header {
     font-size: 14px;
@@ -19,7 +13,7 @@
     padding-right: 10px;
 }
 .post .content {
-    padding: 15px 10px;
+    padding: 0 10px 15px 10px;
     white-space: pre-line;
 }
 .post .show-more {
@@ -33,4 +27,24 @@
 .post .error h1 {
     padding: 0 0 1em 0;
     margin: 0 auto;
+}
+
+@media (width >= 700px) {
+    .post {
+        border: thin solid var(--main-border-color);
+        border-radius: 7px;
+        padding: 0;
+        width: 650px;
+        margin: 20px auto;
+        box-shadow: 0px 0px 5px -3px rgba(0,0,0,0.25);
+    }
+}
+@media (width < 700px) {
+    .post {
+        border-top: thin solid var(--main-border-color);
+        border-bottom: thin solid var(--main-border-color);
+        padding: 0;
+        width: 100%;
+        margin: 10px auto;
+    }
 }

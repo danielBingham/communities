@@ -71,7 +71,7 @@ module.exports = class LinkPreviewController {
     }
 
     async postLinkPreviews(request, response) {
-        const currentUser = require.session.user
+        const currentUser = request.session.user
 
         if ( ! currentUser ) {
             throw new ControllerError(401, 'not-authenticated',
@@ -81,22 +81,17 @@ module.exports = class LinkPreviewController {
 
         const url = request.body.url
 
-        const preview = await this.linkPreviewService.getPreview(url)
-
-        const linkPreview = {
-            url: url,
-            title: preview.title,
-            description: preview.description,
-            imageUrl: preview.imageUrl
-        }
-
+        console.log(url)
+        const linkPreview = await this.linkPreviewService.getPreview(url)
+        console.log(linkPreview)
         await this.linkPreviewDAO.insertLinkPreviews(linkPreview)
 
-        const results = await this.linkPreviewDAO.selectLinkPreview({
+        const results = await this.linkPreviewDAO.selectLinkPreviews({
             where: `link_previews.url = $1`,
-            params: [ url ]
+            params: [ linkPreview.url ]
         })
 
+        console.log(results)
         if ( results.list.length < 0 ) {
             throw new ControllerError(500, 'server-error',
                 `LinkPreview for ${url} missing after insert.`,
@@ -113,7 +108,7 @@ module.exports = class LinkPreviewController {
     }
 
     async getLinkPreview(request, response) {
-        const currentUser = require.session.user
+        const currentUser = request.session.user
 
         if ( ! currentUser ) {
             throw new ControllerError(401, 'not-authenticated',
@@ -123,7 +118,7 @@ module.exports = class LinkPreviewController {
 
         const id = request.params.id
 
-        const results = await this.linkPreviewDAO.selectLinkPreview({
+        const results = await this.linkPreviewDAO.selectLinkPreviews({
             where: `link_previews.id = $1`,
             params: [ id ]
         })

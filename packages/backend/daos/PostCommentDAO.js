@@ -48,15 +48,6 @@ module.exports = class PostCommentDAO extends DAO {
                         select: 'always',
                         key: 'postId'
                     },
-                    'status': {
-                        insert: 'allowed',
-                        insertDefault: function() {
-                            return 'writing'
-                        },
-                        update: 'allowed',
-                        select: 'always',
-                        key: 'status'
-                    },
                     'content': {
                         insert: 'required',
                         update: 'allowed',

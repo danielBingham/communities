@@ -20,6 +20,8 @@
 
 const ServiceError = require('../errors/ServiceError')
 
+const jsdom = require('jsdom')
+
 module.exports = class LinkPreviewService {
     constructor(core) {
         this.core = core
@@ -29,20 +31,49 @@ module.exports = class LinkPreviewService {
         const response = await fetch(url)
 
         if ( ! response.ok) {
-            throw new ServiceError('invalid-url', `That URL was not valid.`)
+            throw new ServiceError('request-failed', `Attempt to retrieve a link preview failed with status: ${response.status}`)
         }
 
         const data = await response.text()
 
-        const parser = new DOMParser()
-        const doc = new parser.parseFromString(data, 'text/html')
+        const dom = new jsdom.JSDOM(data)
+        const doc = dom.window.document
 
-        const title = doc.querySelector('title')?.textContent || '';
-        const description = doc.querySelector('meta[name="description"]')?.getAttribute('content') || '';
-        const image = doc.querySelector('meta[property="og:image"]')?.getAttribute('content') || '';
+        // Default to the Open Graph values and fallback to reasonable defaults if we can't find them.
+
+        let title = doc.querySelector('meta[property="og:title"]')?.getAttribute('content') || null 
+        if ( title === null ) {
+            title = doc.querySelector('title')?.textContent || ''
+        }
+
+        let description = doc.querySelector('meta[property="og:description"]')?.getAttribute('content') || null
+        if ( description === null ) {
+            description = doc.querySelector('meta[name="description"]')?.getAttribute('content') || ''
+        }
+
+        const image = doc.querySelector('meta[property="og:image"]')?.getAttribute('content') || ''
+
+        let cannonicalUrl = doc.querySelector('meta[property="og:url"]')?.getAttribute('content') || null
+        if ( cannonicalUrl === null ) {
+            cannonicalUrl = url
+        }
+
+        let siteName = doc.querySelector('meta[property="og:site_name"]')?.getAttribute('content') || null
+        if ( siteName === null ) {
+            const urlObj = new URL(url)
+            siteName = urlObj.hostname
+        }
+
+        let type = doc.querySelector('meta[property="og:type"]')?.getAttribute('content') || null
+        if ( type === null ) {
+            type = 'website'
+        }
 
         return {
+            url: cannonicalUrl,
             title: title,
+            type: type,
+            siteName: siteName,
             description: description,
             imageUrl: image
         }

@@ -154,6 +154,8 @@ CREATE INDEX users__file_id ON users (file_id);
     url text,
 
     title text,
+    type text,
+    site_name text,
     description text,
     image_url text,
 

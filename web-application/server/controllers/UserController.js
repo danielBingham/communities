@@ -140,6 +140,22 @@ module.exports = class UserController {
             result.where += ` AND users.id = ANY($${result.params.length}::uuid[])`
         }
 
+        if ( query.mutualWith ) {
+            const friendResults = await this.core.database.query(`
+                SELECT user_id, friend_id FROM user_relationships
+                    WHERE (user_id = $1 OR friend_id = $1) AND status = 'confirmed' 
+            `, [ query.friendOf ])
+
+            const friendIds = friendResults.rows.map((r) => r.user_id == currentUser.id ? r.friend_id : r.user_id)
+
+            const mutualResults = await this.core.database.query(`
+                SELECT user_id, friend_id FROM user_relationships
+                    WHERE (user_id = ANY($1::uuid[]) OR friend_id = ANY($1::uuid[])) AND status = 'confirmed'
+            `, [ query.mutualWith ])
+
+            // TODO
+        }
+
         if ( query.page && ! options.ignorePage ) {
             result.page = query.page
         } else if ( ! options.ignorePage ) {

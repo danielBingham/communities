@@ -2,7 +2,7 @@
 /*    border-top: 1px solid var(--main-border-color);*/
     padding: 0;
     margin: 20px auto;
-    width: 700px;
+    max-width: 700px;
 }
 .post-list .controls {
     text-align: right;

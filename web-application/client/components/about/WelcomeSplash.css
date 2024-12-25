@@ -12,3 +12,12 @@
     font-style: italic;
 }
 
+@media (width >= 700px) {
+    .welcome-splash {
+        max-width: 1400px;
+    }
+}
+@media (width < 700px) {
+
+}
+

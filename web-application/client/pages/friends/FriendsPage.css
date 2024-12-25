@@ -1,38 +1,57 @@
 #friends-page {
-    display: grid;
-    grid-template-columns: 320px auto;
-    margin: 50px auto;
-    width: 1400px;
 }
-#friends-page .right-sidebar {
+#friends-page .menu {
     list-style-type: none;
 }
 
-#friends-page .right-sidebar li {
+#friends-page .menu li {
     padding: 10px;
     font-size: 18px;
 }
-#friends-page .right-sidebar li:hover {
+#friends-page .menu li:hover {
     background-color: var(--primary-color-light);
     border-radius: 10px;
 }
-#friends-page .right-sidebar svg {
+#friends-page .menu svg {
     width: 22px;
     margin-right: 5px;
     margin-bottom: -5px;
     color: var(--icon-color);
 }
-#friends-page .right-sidebar a:link,
-#friends-page .right-sidebar a:visited,
-#friends-page .right-sidebar a:active {
+#friends-page .menu a:link,
+#friends-page .menu a:visited,
+#friends-page .menu a:active {
     color: var(--primary-color-darkest);
 }
-#friends-page .right-sidebar .active a {
+#friends-page .menu .active a {
     font-weight: bold;
 }
 
-#friends-page .content {
-    padding: 30px;
+
+@media (width >= 700px) {
+    #friends-page {
+        margin: 50px auto;
+        display: grid;
+        grid-template-columns: 320px auto;
+        width: 1400px;
+    }
+
+    #friends-page .content {
+        padding: 30px;
+    }
+
 }
+@media (width < 700px) {
+    #friends-page .content {
+        padding: 10px;
+        box-sizing: border-box;
+    }
 
+    #friends-page .menu {
+        text-align: center;
+    }
 
+    #friends-page .menu li {
+        display: inline-block;
+    }
+}

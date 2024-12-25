@@ -1,11 +1,6 @@
 .post-form {
-    border: thin solid var(--main-border-color);
     background-color: white;
-    width: 600px;
     margin: 0 auto;
-    padding: 10px;
-    border-radius: 7px;
-    box-shadow: 0px 0px 5px -3px rgba(0,0,0,0.25);
 }
 .post-form textarea {
     width: 100%;
@@ -18,14 +13,38 @@
     padding: 5px;
     color: var(--danger-color-main);
 }
-.post-form .attachments {
-    padding: 10px 0;
+.post-form .controls .attachment-controls .image,
+.post-form .controls .attachment-controls .link {
+    display: inline-block;
+}
+
+.post-form .attachments .attachment {
+    padding: 5px 0;
     text-align: center;
 }
+.post-form .attachments .attachment .attached {
+    display: inline-block;
+}
+.post-form .attachments .link-preview {
+    position: relative;
+}
+.post-form .attachments .link-preview .remove {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+}
+.post-form .attachments .link-preview .remove svg {
+    width: 24px;
+    height: 24px;
+    opacity: 0.75;
+    color: var(--primary-color-lightest);
+}
+
 .post-form .controls {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    padding: 10px;
+    padding: 5px;
 }
 .post-form .controls .draft-image-file {
     display: block;
@@ -35,6 +54,41 @@
 }
 .post-form .buttons {
     text-align: right;
-    padding: 5px;
     align-self: end;
+}
+
+@media (width >= 700px) {
+    .post-form {
+        border: thin solid var(--main-border-color);
+        width: 600px;
+        padding: 10px;
+        border-radius: 7px;
+        box-shadow: 0px 0px 5px -3px rgba(0,0,0,0.25);
+    }
+
+
+}
+@media (width < 700px) {
+    .post-form {
+        border-top: thin solid var(--main-border-color);
+        border-bottom: thin solid var(--main-border-color);
+        box-sizing: border-box;
+        width: 100%;
+        margin: 0 auto;
+        padding: 10px 0;
+        box-shadow: 0px 0px 5px -3px rgba(0,0,0,0.25);
+    }
+    .post-form textarea {
+        width: 100%;
+        height: 200px;
+        box-sizing: border-box;
+        resize: none;
+        padding: 10px;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+    }
+    .post-form textarea:focus {
+        border-radius: none;
+    }
 }

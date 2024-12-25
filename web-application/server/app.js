@@ -173,7 +173,7 @@ app.get('/features', function(request, response) {
  * Handle requests for static image and pdf files.  We'll send these directly
  * to the public path.
  */
-app.get(/.*\.(svg|pdf|jpg|png)$/, function(request, response) {
+app.get(/.*\.(svg|ico|pdf|jpg|png)$/, function(request, response) {
     const filepath = path.join(process.cwd(), 'public', request.originalUrl)
     response.sendFile(filepath)
 })

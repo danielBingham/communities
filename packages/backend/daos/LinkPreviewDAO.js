@@ -1,6 +1,5 @@
 /******************************************************************************
- *
- *  Communities -- Non-profit, cooperative social media 
+ * Communities -- Non-profit, cooperative social media 
  *  Copyright (C) 2022 - 2024 Daniel Bingham 
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -42,6 +41,18 @@ const SCHEMA = {
                 update: 'allowed',
                 select: 'always',
                 key: 'title'
+            },
+            'type': {
+                insert: 'allowed',
+                update: 'allowed',
+                select: 'always',
+                key: 'type'
+            },
+            'site_name': {
+                insert: 'allowed',
+                update: 'allowed',
+                select: 'always',
+                key: 'siteName'
             },
             'description': {
                 insert: 'allowed',
@@ -113,7 +124,7 @@ module.exports = class LinkPreviewDAO extends DAO {
 
         const sql = `
             SELECT
-                ${this.getLinkPreviewSelectionString()},
+                ${this.getLinkPreviewSelectionString()}
             FROM link_previews 
             ${where}
             ORDER BY ${order}

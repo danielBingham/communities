@@ -27,7 +27,7 @@
 .floating-menu .menu-body {
     position: absolute;
     top: 2em;
-    left: 0;
+    right: 0;
     text-align: left;
     background-color: white; 
     border: thin solid var(--floating-menu-border-color);

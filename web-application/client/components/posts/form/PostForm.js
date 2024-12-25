@@ -2,11 +2,16 @@ import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch} from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
+import { LinkIcon } from '@heroicons/react/24/outline'
+import { XCircleIcon } from '@heroicons/react/24/solid'
+
 import { deleteFile, cleanupRequest as cleanupFileRequest } from '/state/files'
 import { postPosts, patchPost, cleanupRequest, finishPostEdit } from '/state/posts'
 
 import FileUploadInput from '/components/files/FileUploadInput'
 import DraftImageFile from '/components/files/DraftImageFile'
+import LinkForm from '/components/posts/form/controls/LinkForm'
+import LinkPreview from '/components/links/view/LinkPreview'
 import Button from '/components/generic/button/Button'
 
 import './PostForm.css'
@@ -15,6 +20,9 @@ const PostForm = function({ postId }) {
 
     const [content,setContent] = useState('')
     const [fileId,setFileId] = useState(null)
+    const [linkPreviewId, setLinkPreviewId] = useState(null)
+
+    const [showLinkForm, setShowLinkForm] = useState(false)
 
     const [error,setError] = useState('')
 
@@ -64,6 +72,7 @@ const PostForm = function({ postId }) {
         const newPost = {
             userId: currentUser.id,
             fileId: fileId,
+            linkPreviewId: linkPreviewId,
             content: content
         }
 
@@ -85,6 +94,7 @@ const PostForm = function({ postId }) {
         localStorage.removeItem(getDraftKey())
 
         setFileId(null)
+        setLinkPreviewId(null)
         setContent('')
         setError('')
 
@@ -114,7 +124,8 @@ const PostForm = function({ postId }) {
     useEffect(function() {
         let draft = {
             content: post ? post.content : '',
-            fileId: post ? post.fileId : null
+            fileId: post ? post.fileId : null,
+            linkPreviewId: post ? post.linkPreviewId : null
         }
 
         const existingDraft = JSON.parse(localStorage.getItem(getDraftKey()))
@@ -127,11 +138,12 @@ const PostForm = function({ postId }) {
 
         setContent(draft.content)
         setFileId(draft.fileId)
+        setLinkPreviewId(draft.linkPreviewId)
     }, [ postId ])
 
     useEffect(function() {
-        localStorage.setItem(getDraftKey(), JSON.stringify({ content: content, fileId: fileId }))
-    }, [ postId, content, fileId ])
+        localStorage.setItem(getDraftKey(), JSON.stringify({ content: content, fileId: fileId, linkPreviewId: linkPreviewId }))
+    }, [ postId, content, fileId, linkPreviewId ])
 
     useEffect(function() {
         if ( request && request.state == 'fulfilled') {
@@ -163,15 +175,45 @@ const PostForm = function({ postId }) {
         )
     }
 
-    let imageView = null
-    if ( fileId ) {
-        imageView = (
-            <DraftImageFile fileId={fileId} setFileId={setFileId} width={150} deleteOnRemove={ ! post || post.fileId != fileId } />
+    let attachmentView = null
+    let attachmentControlsView = null
+    if ( ! fileId && ! linkPreviewId && ! showLinkForm) {
+        attachmentControlsView = (
+            <div className="attachment-controls">
+                <div className="image">
+                    <FileUploadInput 
+                        text="Add Image"
+                        onChange={onFileChange} 
+                        fileId={fileId} 
+                        setFileId={setFileId} 
+                        types={[ 'image/jpeg', 'image/png' ]} 
+                    />
+                </div>
+                <div className="link">
+                    <Button type="primary" onClick={(e) => {setShowLinkForm(true)}}><LinkIcon /> Add Link</Button>
+                </div>
+            </div>
         )
-    } else {
-        imageView = (
-            <FileUploadInput onChange={onFileChange} fileId={fileId} setFileId={setFileId} types={[ 'image/jpeg', 'image/png' ]} />
+    } else if ( fileId ) {
+        attachmentView = (
+            <div className="attachment">
+                <div className="attached">
+                    <DraftImageFile fileId={fileId} setFileId={setFileId} width={150} deleteOnRemove={ ! post || post.fileId != fileId } />
+                </div>
+            </div>
         )
+    } else if ( linkPreviewId ) {
+        attachmentView = (
+            <div className="link-preview">
+                <a className="remove" href="" onClick={(e) => { e.preventDefault(); setLinkPreviewId(null) }}><XCircleIcon /></a>
+                <LinkPreview id={linkPreviewId} />
+            </div>
+        )
+    } else if ( showLinkForm ) {
+        attachmentView = (
+            <LinkForm setLinkPreviewId={setLinkPreviewId} setShowLinkForm={setShowLinkForm} />
+        )
+
     }
 
     return (
@@ -184,15 +226,10 @@ const PostForm = function({ postId }) {
             </textarea>
             { errorView }
             <div className="attachments">
-                <div className="image-attachment">
-                    { imageView }
-                </div>
-                <div className="link-attachment">
-                    <Button type="primary" onClick={(e) => {}}>Add Link</Button>
-                </div>
+                { attachmentView }
             </div>
             <div className="controls">
-                <div></div>
+                <div>{ attachmentControlsView }</div>
                 <div className="buttons">
                     <Button type="secondary-warn" onClick={(e) => cancel()}>Cancel</Button>
                     <Button type="primary" onClick={(e) => submit()}>Post</Button>

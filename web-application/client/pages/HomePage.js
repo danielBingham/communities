@@ -56,15 +56,11 @@ const HomePage = function(props) {
         } else {
             content = (
                 <div className="home-feeds">
-                    <div className="left-sidebar">
-                    </div>
                     <div className="content">
                         <PostForm postId={postInProgressId} />
                         <div className="feed">
                             <HomeFeed /> 
                         </div>
-                    </div>
-                    <div className="right-sidebar">
                     </div>
                 </div>
             )

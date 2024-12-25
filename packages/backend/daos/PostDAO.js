@@ -58,15 +58,6 @@ const SCHEMA = {
                 select: 'always',
                 key: 'activity'
             },
-            'status': {
-                insert: 'allowed',
-                insertDefault: function() {
-                    return 'writing'
-                },
-                update: 'allowed',
-                select: 'always',
-                key: 'status'
-            },
             'content': {
                 insert: 'required',
                 update: 'allowed',

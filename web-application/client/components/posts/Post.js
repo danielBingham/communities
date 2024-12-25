@@ -10,6 +10,7 @@ import Spinner from '/components/Spinner'
 import DateTag from '/components/DateTag'
 import UserTag from '/components/users/UserTag'
 
+import LinkPreview from '/components/links/view/LinkPreview'
 import PostDotsMenu from '/components/posts/widgets/PostDotsMenu'
 import PostReactions from '/components/posts/widgets/PostReactions'
 import PostComments from '/components/posts/comments/PostComments'
@@ -95,6 +96,7 @@ const Post = function({ id, expanded }) {
                 <div className="show-more"><a href="" onClick={(e) => { e.preventDefault(); setShowMore(true) }}>Show More.</a></div>
             </div> }
             <PostImage id={id} />
+            { post.linkPreviewId && <LinkPreview id={post.linkPreviewId} /> }
             <PostReactions postId={id} />
             <PostComments postId={id} expanded={expanded} />
         </div>
