@@ -14,11 +14,20 @@
     margin-right: 6px;
     margin-bottom: -4px;
 }
-#authentication-navigation .user-tag .profile-image svg {
+#authentication-navigation .profile-image svg {
     display: inline-block;
     width: 30px;
     height: 30px;
-    margin-bottom: -15px;
+}
+#authentication-navigation .profile-image img {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    margin-right: 6px;
+}
+#authentication-navigation .navigation-text {
+    display: inline-block;
+    padding: 0 5px;
 }
 #authentication-navigation svg.arrow {
     width: 14px;
@@ -49,4 +58,10 @@
 #authentication-navigation a.logout:hover {
     padding: 5px;
     margin: 0 5px;
+}
+
+@media (width < 700px) {
+    #authentication-navigation .navigation-text {
+        display: none;
+    }
 }

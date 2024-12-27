@@ -1,8 +1,13 @@
 .user-profile-edit-form .form-field {
     display: grid;
-    grid-template-columns: 150px 650px;
+    grid-template-columns: 150px auto;
     padding: 10px;
     align-items: center;
+}
+.user-profile-edit-form .profile-image {
+    display: block;
+    margin: 0 auto;
+    width: 150px;
 }
 .user-profile-edit-form .profile-image .current-image svg {
     display: block;
@@ -25,11 +30,12 @@
     box-sizing: border-box;
     padding: 5px;
     border: thin solid var(--input-border-color);
-    width: 650px;
+    width: 100%;
+    max-width: 650px;
 }
 .user-profile-edit-form .form-text {
     display: grid;
-    grid-template-columns: 150px 650px;
+    grid-template-columns: 150px auto;
     padding: 10px;
     align-items: center;
 }
@@ -42,7 +48,8 @@
 }
 .user-profile-edit-form .form-text textarea {
     box-sizing: border-box;
-    width: 650px;
+    max-width: 650px;
+    width: 100%;
     height: 200px;
     border: thin solid var(--input-border-color);
 }

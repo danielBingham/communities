@@ -73,8 +73,10 @@ const UserInvite = function() {
     return (
         <div className="user-invite">
             <div className="invitations-available">You have { currentUser.invitations } invitations available.</div>
-            <input type="text" onChange={(e) => setEmail(e.target.value)} value={email}  name="email" placeholder="Enter email..." />
-            { request && request.state == 'pending' ? <Spinner local={true} /> : <Button type="primary" onClick={invite}>Send Invite</Button> }
+            <div className="input-wrapper">
+                <input type="text" onChange={(e) => setEmail(e.target.value)} value={email}  name="email" placeholder="Enter email..." />
+                { request && request.state == 'pending' ? <Spinner local={true} /> : <Button type="primary" onClick={invite}>Send Invite</Button> }
+            </div>
             <div className="errors">
                 { submissionError && ! email && <div className="error">Email is required.</div> }
                 { requestError }

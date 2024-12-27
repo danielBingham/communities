@@ -190,7 +190,7 @@ const PostForm = function({ postId }) {
                     />
                 </div>
                 <div className="link">
-                    <Button type="primary" onClick={(e) => {setShowLinkForm(true)}}><LinkIcon /> Add Link</Button>
+                    <Button type="primary" onClick={(e) => {setShowLinkForm(true)}}><LinkIcon /><span className="attachment-button-text"> Add Link</span></Button>
                 </div>
             </div>
         )

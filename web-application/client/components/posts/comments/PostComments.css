@@ -10,7 +10,7 @@
 .post-comments .show-comments a:active {
     display: block;
     border-radius: 10px;
-    background-color: var(--primary-color-lightest);
+    padding: 5px;
 }
 
 .post-comments .show-comments a:hover {

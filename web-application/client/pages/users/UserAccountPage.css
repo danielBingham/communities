@@ -1,33 +1,60 @@
-#user-account-page {
-    display: grid;
-    grid-template-columns: 320px auto;
-    width: 1400px;
-    margin: 50px auto;
+#user-account-page .menu {
+    list-style-type: none;
 }
-#user-account-page .right-sidebar div {
+#user-account-page .menu li {
     padding: 10px;
     font-size: 18px;
 }
-#user-account-page .right-sidebar div:hover {
+#user-account-page .menu li:hover {
     background-color: var(--primary-color-light);
     border-radius: 10px;
 }
-#user-account-page .right-sidebar svg {
+#user-account-page .menu svg {
     width: 22px;
     margin-right: 5px;
     margin-bottom: -5px;
     color: var(--icon-color);
 }
-#user-account-page .right-sidebar a:link,
-#user-account-page .right-sidebar a:visited,
-#user-account-page .right-sidebar a:active {
+#user-account-page .menu a:link,
+#user-account-page .menu a:visited,
+#user-account-page .menu a:active {
     color: var(--primary-color-darkest);
 }
-#user-account-page .right-sidebar .active a {
+#user-account-page .menu .active a {
     font-weight: bold;
 }
 
+@media (width >= 750px) {
+    #user-account-page {
+        display: grid;
+        grid-template-columns: 320px auto;
+        width: 100%;
+        max-width: 1400px;
+        margin: 50px auto;
+    }
 
-#user-account-page .content {
-    padding: 0 30px;
+    #user-account-page .content {
+        padding: 0 30px;
+    }
+
+}
+@media (width < 750px) {
+    #user-account-page .content {
+        padding: 0 30px;
+        box-sizing: border-box;
+        margin: 0 auto;
+    }
+
+    #user-account-page .menu {
+        text-align: center;
+        margin: 0 auto;
+    }
+
+    #user-account-page .menu li {
+        display: inline-block;
+    }
+    
+    #user-account-page .menu li .nav-text {
+        display: none;
+    }
 }

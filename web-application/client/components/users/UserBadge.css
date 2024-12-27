@@ -1,6 +1,6 @@
 .user-badge {
     box-sizing: border-box;
-    min-width: 300px;
+    width: 340px;
     padding: 10px;
 }
 .user-badge .badge-grid {

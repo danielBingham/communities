@@ -20,7 +20,7 @@ a.create-comment {
     margin: 5px auto;
     font-size: 14px;
     border-radius: 10px;
-    padding: 5px;
+    padding: 10px;
 }
 
 a.create-comment:link,

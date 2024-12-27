@@ -22,7 +22,7 @@ const PostsByUserFeed = function({ id }) {
 
     useEffect(function() {
         setRequestId(dispatch(getPosts('PostsByUser', { userId: id })))
-    }, [ ])
+    }, [ id ])
 
     useEffect(function() {
         const sort = searchParams.get('sort') ? searchParams.get('sort') : 'active'

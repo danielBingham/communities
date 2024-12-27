@@ -170,8 +170,7 @@ const UserProfileEditForm = function(props) {
     return (
         <div className='user-profile-edit-form'>
             <form onSubmit={onSubmit}>
-                <div className="form-field profile-image">
-                    <label></label>
+                <div className="profile-image">
                     <div>
                         { ! fileId && <div className="current-image"><UserProfileImage userId={currentUser.id} /></div> }
                         { fileId && <DraftImageFile fileId={fileId} setFileId={setFileId} width={150} /> }

@@ -60,11 +60,6 @@ const MainNavigation = function(props) {
     const location = useLocation()
     return (
         <>
-            <div id="about-navigation" className="navigation-block">
-                <Link to="/">{ location.pathname == '/' ? <HomeIconSolid /> : <HomeIconOutline /> }Home</Link>
-                <Link to="/about">{ location.pathname == '/about' ? <QuestionMarkCircleIconSolid /> : <QuestionMarkCircleIconOutline /> }About</Link>
-                { currentUser && <Link to="/friends">{ location.pathname.startsWith('/friends') ? <UsersIconSolid /> : <UsersIconOutline /> }Friends</Link> }
-            </div>
         </>
     )
 

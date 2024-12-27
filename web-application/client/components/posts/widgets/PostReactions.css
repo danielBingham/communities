@@ -1,15 +1,14 @@
 .post .reactions {
     display: flex;
     border-top: thin solid var(--main-border-color);
-    font-size: 12px;
+    font-size: 14px;
     margin: 0 auto;
 }
 .post .reactions .group {
-    padding: 0 5px;
     flex-grow: 1;
     display: flex;
     text-align: center;
-    padding: 7px;
+    padding: 10px 7px;
 }
 .post .reactions .group a {
     display: inline-block;

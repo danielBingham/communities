@@ -6,6 +6,7 @@ import { ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/solid'
 
 import Button from '/components/generic/button/Button'
 
+import UserProfileImage from '/components/users/UserProfileImage'
 import UserTag from '/components/users/UserTag'
 import UserMenu from './UserMenu'
 
@@ -61,7 +62,10 @@ const AuthenticationNavigation = function(props) {
     if ( currentUser ) {
         return (
             <div ref={menuRef} id="authentication-navigation" className="navigation-block authenticated">
-                <span className="logged-in-user"><a href="" onClick={toggleMenu}><UserTag id={currentUser.id} link={false} />{ menuVisible ? <ChevronUpIcon className="arrow" /> : <ChevronDownIcon className="arrow" /> }</a></span>
+                <span className="logged-in-user">
+                    <a href="" className="no-close" onClick={toggleMenu}>
+                        <UserProfileImage userId={currentUser.id} />
+                        <span className="navigation-text">{ currentUser.name }</span>{ menuVisible ? <ChevronUpIcon className="arrow" /> : <ChevronDownIcon className="arrow" /> }</a></span>
                 <UserMenu visible={menuVisible} toggleMenu={toggleMenu} />
             </div>
         )

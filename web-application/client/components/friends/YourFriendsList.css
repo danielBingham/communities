@@ -1,5 +1,5 @@
 .friends-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fit, 340px);
     margin: 20px auto;
 }

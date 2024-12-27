@@ -94,7 +94,7 @@ export const FloatingMenuTrigger = function({ className, children, showArrow }) 
 
     return (
         <div className={`menu-trigger ${visible ? 'active' : '' } ${className ? className : ''}`} >
-            <a href="" onClick={(e) => { e.preventDefault(); toggleMenu(); }}>{ children } { ! doNotShowArrow && (visible ? <ChevronUpIcon /> : <ChevronDownIcon />) }</a>
+            <a href="" className="no-close" onClick={(e) => { e.preventDefault(); toggleMenu(); }}>{ children } { ! doNotShowArrow && (visible ? <ChevronUpIcon /> : <ChevronDownIcon />) }</a>
         </div>
     )
 

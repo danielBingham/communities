@@ -91,4 +91,7 @@
     .post-form textarea:focus {
         border-radius: none;
     }
+    .attachment-button-text {
+        display: none;
+    }
 }

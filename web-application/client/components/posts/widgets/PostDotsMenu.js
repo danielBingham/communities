@@ -28,7 +28,7 @@ const PostDotsMenu = function({ postId }) {
 
     return (
         <FloatingMenu className="post-dots-menu" closeOnClick={true}>
-            <FloatingMenuTrigger showArrow={false}><EllipsisHorizontalIcon /></FloatingMenuTrigger>
+            <FloatingMenuTrigger showArrow={false}><EllipsisHorizontalIcon className="dots" /></FloatingMenuTrigger>
             <FloatingMenuBody>
                 <EditPost postId={postId} />
                 <DeletePost postId={postId} />

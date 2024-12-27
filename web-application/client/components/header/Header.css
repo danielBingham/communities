@@ -51,10 +51,10 @@ header .navigation-block {
     margin-left: 7px;
     padding: 21px 0;
 }
-header .navigation-block .floating-menu a:link, 
-header .navigation-block .floating-menu a:active, 
-header .navigation-block .floating-menu a:visited,
-header .navigation-block .floating-menu a:hover {
+header .navigation-block a:link, 
+header .navigation-block a:active, 
+header .navigation-block a:visited,
+header .navigation-block a:hover {
     padding: 5px;
     margin: 0 5px;
 }
@@ -75,8 +75,15 @@ header a:hover {
 }
 header svg {
     display: inline-block;
+    width: 18px;
+    height: 18px;
+    margin-right: 6px;
+    margin-bottom: -2px;
 }
-header .mobile svg {
+header .mobile-menu-trigger {
+    text-align: center;
+}
+header .mobile-menu-trigger svg {
     width: 24px;
     height: 24px;
     margin-bottom: -3px
@@ -88,19 +95,15 @@ header .mobile-menu {
 
 @media (width >= 700px) {
     header .grid {
-        grid-template-columns: 1fr 1fr;
-    }
-    header svg {
-        width: 18px;
-        height: 18px;
-        margin-right: 6px;
-        margin-bottom: -2px;
+        grid-template-columns: 227px auto;
     }
 }
 @media (width < 700px) {
     header .grid {
-        grid-template-columns: 3fr 1fr;
+        grid-template-columns: 227px auto;
     }
-
+    header .nav-text {
+        display: none;
+    }
 }
 

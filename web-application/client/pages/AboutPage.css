@@ -1,7 +1,10 @@
 #about-page {
-    width: 800px;
-    padding: 30px 200px 125px 200px;
+    box-sizing: border-box;
+    max-width: 800px;
+    min-width: 340px;
+    width: 100%;
 
+    padding: 20px;
     font-size: 18px;
     line-height: 1.7em;
 

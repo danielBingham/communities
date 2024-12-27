@@ -2,3 +2,9 @@
     width: 100px;
     margin: auto;
 }
+
+@media (width < 700px) {
+    .file-upload-button-text {
+        display: none;
+    }
+}

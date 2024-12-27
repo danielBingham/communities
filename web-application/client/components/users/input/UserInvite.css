@@ -1,15 +1,21 @@
 .user-invite {
     text-align: center;
+    width: 100%;
+    max-width: 750px;
+    margin: 0 auto;
 }
 .user-invite .invitations-available {
     text-align: center;
     font-size: 16px;
     padding: 10px;
 }
+.user-invite .input-wrapper {
+    display: flex;
+}
 .user-invite input[type=text] {
     display: inline-block;
-    width: 400px;
     font-size: 16px;
     margin: 0 10px;
     border-radius: 7px;
+    flex-grow: 1
 }

@@ -57,7 +57,7 @@ const UserProfilePage = function(props) {
 
     useEffect(function() {
         setRequestId(dispatch(getUsers('UserProfilePage', { username: name })))
-    }, [ ])
+    }, [ name ])
 
     useEffect(function() {
         return function cleanup() {

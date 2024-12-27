@@ -1,8 +1,8 @@
-.change-email-form {}
 .change-email-form h2 {
     text-align: center;
 }
 .change-email-form .form-field {
+    display: flex;
     padding: 20px;
 }
 .change-email-form .form-field .error {
@@ -19,7 +19,9 @@
 .change-email-form .form-field input {
     padding: 5px;
     border: thin solid var(--input-border-color);
-    width: 750px;
+    width: 100%;
+    max-width: 750px;
+    flex-grow: 1;
 }
 .change-email-form .submit {
     text-align: center;

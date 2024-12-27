@@ -88,7 +88,7 @@ const FileUploadInput = function(props) {
         }
         content = (
             <div className="upload-input">
-                <Button type="primary" onClick={(e) => hiddenFileInput.current.click()}><PhotoIcon /> { props.text ? props.text : 'Upload Image' }</Button>
+                <Button type="primary" onClick={(e) => hiddenFileInput.current.click()}><PhotoIcon /><span className="file-upload-button-text"> { props.text ? props.text : 'Upload Image' }</span></Button>
                 <input type="file"
                     name="file"
                     accept={props.types.join(',')}

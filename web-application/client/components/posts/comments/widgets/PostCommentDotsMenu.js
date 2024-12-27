@@ -28,7 +28,7 @@ const PostCommentDotsMenu = function({ postId, id }) {
 
     return (
         <FloatingMenu className="post-comment-dots-menu">
-            <FloatingMenuTrigger showArrow={false}><EllipsisHorizontalIcon /></FloatingMenuTrigger>
+            <FloatingMenuTrigger showArrow={false}><EllipsisHorizontalIcon className="dots" /></FloatingMenuTrigger>
             <FloatingMenuBody>
                 <EditPostComment postId={postId} id={id} />
                 <DeletePostComment postId={postId} id={id} />

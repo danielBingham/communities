@@ -62,20 +62,20 @@ const UserAccountPage = function(props) {
 
     return (
         <div id="user-account-page">
-            <div className="right-sidebar">
-                <div className={ selectedTab == 'profile' ? 'active' : '' }>
-                    { selectedTab == 'profile' ? <UserCircleIconSolid /> : <UserCircleIconOutline /> } <Link to="/account/profile">Edit Profile</Link>
-                </div>
-                <div className={ selectedTab == 'change-email' ? 'active' : '' }>
-                    { selectedTab == 'change-email' ? <EnvelopIconSolid /> : <EnvelopIconOutline /> } <Link to="/account/change-email">Change Email</Link>
-                </div>
-                <div className={ selectedTab == 'change-password' ? 'active' : '' }>
-                    { selectedTab == 'change-password' ? <LockClosedIconSolid/> : <LockClosedIconOutline/> } <Link to="/account/change-password">Change Password</Link>
-                </div>
-                <div className={ selectedTab == 'contribute' ? 'active' : '' }>
-                    { selectedTab == 'contribute' ? <CreditCardIconSolid /> : <CreditCardIconOutline /> } <Link to="/account/contribute">Contribution</Link>
-                </div>
-            </div>
+            <ul className="menu">
+                <li className={ selectedTab == 'profile' ? 'active' : '' }>
+                    <Link to="/account/profile">{ selectedTab == 'profile' ? <UserCircleIconSolid /> : <UserCircleIconOutline /> } <span className="nav-text">Edit Profile</span></Link>
+                </li>
+                <li className={ selectedTab == 'change-email' ? 'active' : '' }>
+                    <Link to="/account/change-email">{ selectedTab == 'change-email' ? <EnvelopIconSolid /> : <EnvelopIconOutline /> } <span className="nav-text">Change Email</span></Link>
+                </li>
+                <li className={ selectedTab == 'change-password' ? 'active' : '' }>
+                    <Link to="/account/change-password">{ selectedTab == 'change-password' ? <LockClosedIconSolid/> : <LockClosedIconOutline/> } <span className="nav-text">Change Password</span></Link>
+                </li>
+                <li className={ selectedTab == 'contribute' ? 'active' : '' }>
+                    <Link to="/account/contribute">{ selectedTab == 'contribute' ? <CreditCardIconSolid /> : <CreditCardIconOutline /> } <span className="nav-text">Contribution</span></Link>
+                </li>
+            </ul>
             <div className="content">
                 { currentUser && content }
             </div>

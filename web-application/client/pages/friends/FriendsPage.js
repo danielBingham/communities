@@ -47,19 +47,17 @@ const FriendsPage = function() {
         content = ( <UserListView /> ) 
     } 
 
-    const isMobile = window.innerWidth < 700
-
     return (
         <div id="friends-page">
             <ul className="menu">
                 <li className={ selectedTab == 'friends' ? 'active' : '' }>
-                    <Link to="/friends">{ selectedTab == 'friends' ? <UsersIconSolid /> : <UsersIconOutline /> } { ! isMobile && <span>Your Friends</span> }</Link>
+                    <Link to="/friends">{ selectedTab == 'friends' ? <UsersIconSolid /> : <UsersIconOutline /> }<span className="nav-text">Your Friends</span></Link>
                 </li>
                 <li className={ selectedTab == 'requests' ? 'active' : '' }>
-                    <Link to="/friends/requests">{ selectedTab == 'requests' ? <UserPlusIconSolid /> : <UserPlusIconOutline /> } { ! isMobile && <span>Friend Requests</span> }</Link>
+                    <Link to="/friends/requests">{ selectedTab == 'requests' ? <UserPlusIconSolid /> : <UserPlusIconOutline /> }<span className="nav-text">Friend Requests</span></Link>
                 </li>
                 <li className={ selectedTab == 'browse' ? 'active' : '' }>
-                    <Link to="/friends/browse">{ selectedTab == 'browse' ? <UserGroupIconSolid /> : <UserGroupIconOutline /> } { ! isMobile && <span>Find Friends</span> }</Link>
+                    <Link to="/friends/browse">{ selectedTab == 'browse' ? <UserGroupIconSolid /> : <UserGroupIconOutline /> }<span className="nav-text">Find Friends</span></Link>
                 </li>
             </ul>
             <div className="content">
