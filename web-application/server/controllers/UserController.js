@@ -739,33 +739,35 @@ module.exports = class UserController {
      * DELETE /user/:id
      *
      * Delete an existing user.
-     *
-     * TODO TECHDEBT This probably needs to check to see if the user we're
-     * deleting is also the session user and then delete the session if they
-     * are.
-     *
-     * NOT IMPLEMENTED.
-     *
-     * TODO Eventually we'll need to implement this for GDPR compliance, but we
-     * need to figure out how to handle it first, since we don't want to let
-     * users delete their papers once published.
      */
     async deleteUser(request, response) {
-        // Currently leaving this unimplemented.  We will someday want to allow
-        // users to delete themselves.  Probably some day soon.  But it is not
-        // this day.  Trying to reduce the maintenance surface by removing
-        // anything we're not actively using for now.
-        throw new ControllerError(501, 'not-implemented', `Attempt to delete User(${request.params.id}).`)
-        /*const results = await this.database.query(
-            'delete from users where id = $1',
-            [ request.params.id ]
-        )
+        const currentUser = request.session.user
 
-        if ( results.rowCount == 0) {
-            return response.status(404).json({error: 'no-resource'})
+        if ( ! currentUser ) {
+            throw new ControllerError(401, 'not-authenticated',
+                `User attempting to submit friend request is not authenticated.`,
+                `You may not submit a friend request without authenticating.`)
         }
 
-        return response.status(200).json({userId: request.params.id})*/
+        const userId = request.params.id
+
+        if ( userId !== currentUser.id ) {
+            throw new ControllerError(403, 'not-authorized',
+                `User(${currentUser.id}) attempting to delete User(${userId}) without permission.`,
+                `You may not delete another user, only yourself.`)
+        }
+
+
+        await this.userDAO.deleteUser(currentUser)
+
+        request.session.destroy(function(error) {
+            if (error) {
+                console.error(error)
+                response.status(500).json({error: 'server-error'})
+            } else {
+                response.status(200).json(null)
+            }
+        })
     }
 
     async postFriends(request, response) {

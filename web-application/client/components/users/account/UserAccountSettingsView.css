@@ -1,0 +1,17 @@
+.user-settings {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+}
+.user-settings .delete-your-account {
+    padding: 20px;
+    border: thin solid var(--danger-color-light);
+    background-color: var(--danger-color-lightest);
+    border-radius: 10px;
+}
+.user-settings .explanation {
+    padding: 10px;
+}
+.user-settings .button-wrapper {
+    text-align: center;
+}

@@ -6,14 +6,16 @@ import {
     UserCircleIcon as UserCircleIconOutline, 
     EnvelopeIcon as EnvelopIconOutline, 
     LockClosedIcon as LockClosedIconOutline,
-    CreditCardIcon as CreditCardIconOutline
+    CreditCardIcon as CreditCardIconOutline,
+    Cog8ToothIcon as Cog8IconOutline
 } from '@heroicons/react/24/outline'
 
 import { 
     UserCircleIcon as UserCircleIconSolid, 
     EnvelopeIcon as EnvelopIconSolid, 
     LockClosedIcon as LockClosedIconSolid,
-    CreditCardIcon as CreditCardIconSolid
+    CreditCardIcon as CreditCardIconSolid,
+    Cog8ToothIcon as Cog8IconSolid
 } from '@heroicons/react/24/solid'
 
 import Spinner from '/components/Spinner'
@@ -24,6 +26,7 @@ import UserProfileEditForm from '/components/users/account/UserProfileEditForm'
 import ChangePasswordForm from '/components/users/account/widgets/ChangePasswordForm'
 import ChangeEmailForm from '/components/users/account/widgets/ChangeEmailForm'
 import ContributionView from '/components/contribution/ContributionView'
+import UserAccountSettingsView from '/components/users/account/UserAccountSettingsView'
 
 import LoginForm from '/components/authentication/LoginForm'
 
@@ -56,8 +59,10 @@ const UserAccountPage = function(props) {
         content = ( <ChangePasswordForm /> )
     } else if ( selectedTab == 'change-email' ) {
         content = ( <ChangeEmailForm /> )
-    }  else if ( selectedTab == 'contribute' ) {
+    } else if ( selectedTab == 'contribute' ) {
         content = ( <ContributionView /> )
+    } else if (selectedTab == 'settings') {
+        content = ( <UserAccountSettingsView /> )
     }
 
     return (
@@ -74,6 +79,9 @@ const UserAccountPage = function(props) {
                 </li>
                 <li className={ selectedTab == 'contribute' ? 'active' : '' }>
                     <Link to="/account/contribute">{ selectedTab == 'contribute' ? <CreditCardIconSolid /> : <CreditCardIconOutline /> } <span className="nav-text">Contribution</span></Link>
+                </li>
+                <li className={ selectedTab == 'settings' ? 'active' : ''}>
+                    <Link to="/account/settings">{ selectedTab == 'settings' ? <Cog8IconSolid /> : <Cog8IconOutline /> } <span className="nav-text">Settings</span></Link>
                 </li>
             </ul>
             <div className="content">

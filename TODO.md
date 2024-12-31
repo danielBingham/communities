@@ -40,8 +40,7 @@
    - [x] User Account Page
  - [x] Suggested Friends instead of Browse
    - [x] User Search
- - [ ] Make account not browsable / searchable
- - [ ] Account deletion
+ - [x] Account deletion
  - [ ] Terms of Service & Privacy Policy
  - [ ] Permissions check (Make sure people can only access what they should)
    - [ ] Lock down image S3 bucket and proxy through backend
@@ -60,6 +59,7 @@
    - [ ] Track contributions
    - [ ] Track total users
    - [ ] Increase / Decrease invites
+ - [ ] Make account not browsable / searchable
  - [ ] Public Posts
  - [ ] Post sharing
  - [ ] Post tags

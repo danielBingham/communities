@@ -240,7 +240,7 @@ export const deleteUser = function(user) {
         return makeTrackedRequest(dispatch, getState, usersSlice,
             'DELETE', `/user/${user.id}`, null,
             function(response) {
-                dispatch(usersSlice.actions.removeUser({ entity: response.entity }))
+                dispatch(usersSlice.actions.removeUser({ entity: user }))
             }
         )
     }
