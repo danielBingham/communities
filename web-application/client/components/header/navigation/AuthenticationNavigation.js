@@ -39,7 +39,18 @@ const AuthenticationNavigation = function(props) {
     const toggleMenu = function(event) {
         event.preventDefault()
 
+        if ( props.setShowMobileMenu && menuVisible) {
+            props.setShowMobileMenu(false)
+        }
+
         setMenuVisible( ! menuVisible )
+    }
+
+    const clickLogin = function(event) {
+        if ( props.setShowMobileMenu ) {
+            props.setShowMobileMenu(false)
+        }
+        navigate('login')
     }
 
     // ======= Effect Handling ======================================
@@ -72,7 +83,7 @@ const AuthenticationNavigation = function(props) {
     } else {
         return (
             <div id="authentication-navigation" className="navigation-block not-authenticated">
-                <Button type="secondary" onClick={(e) => navigate('login')}>Log In</Button>
+                <Button type="secondary" onClick={clickLogin}>Log In</Button>
                 { /*<Button type="primary" onClick={(e) => navigate('register')}>Register</Button>*/}
             </div>
         )

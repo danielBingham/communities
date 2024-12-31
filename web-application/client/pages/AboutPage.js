@@ -23,21 +23,89 @@ const AboutPage = function(props) {
                 We're currently in invite-only beta.  If you have an invite, register through the link in your email.
             </div>
             <h2>What do you mean "non-profit"?</h2>
-            <p>We're still figuring that out. In the strictest sense, we mean
-            we aren't building this to make a profit. Obviously it needs to be
-            sustainable and support a good living for those who dedicate
-            themselves to building and maintaining it full time.  And we need
-        to be able to cover the infrastructure costs.  But the goal is not to
-        get rich or rule the world. Just to make it better.</p>
-            <h2>So how is it structured?</h2>
-            <p>Right now it's not. It's the side project of a single software
-            engineer, Daniel Bingham. In the long run the goal is to
-        figure out how to structure it as a multi-stakeholder cooperative.
-        That is a cooperative governed democratically and collaboratively by
-        those building it and those using it. How we get from here to there is
-        still an open question.  As is how we structure the cooperative to
-        resist take over by the billionaires and fascists while still being
-        responsively democratic.</p>  
+            <p>We aren't building this to make a profit. It just needs
+                to be sustainable.  That means we need to cover the
+                infrastructure costs and support a good living for those who
+                dedicate themselves to building and maintaining it full
+            time.</p> 
+            <p>The goal is not to get rich or rule the world. Just to make it
+                better.</p>
+            <h2>How is it structured?</h2>
+            <p>Right now, it's not. It's the side project of a single 
+                engineer. In the long run the goal is to
+                structure it as a multi-stakeholder cooperative. A cooperative
+                governed democratically and collaboratively by those building
+                it and those using it. How we get from here to there is still
+                an open question.  As is how we structure the cooperative to
+                resist take over by the billionaires and fascists while still
+                being responsively democratic.</p>  
+            <h2>What does it mean for it to be a "beta"?</h2>
+            <p>It means it's still very much under development. It's messy.
+                There are design imperfections.  There will be bugs.  There are
+                features we want to build that we haven't gotten to build yet.
+                If you join now, you're getting in early, but you're also
+                agreeing to help us test - meaning you agree that things may
+            break on you and when it does you'll tell us about it!</p>
+            <h2>What can you do so far?</h2>
+            <p>Currently you can share text posts to your friends with attached
+                links or images. Your friends can comment and react to those
+                posts.</p>
+            <p>We use a two-way friend model rather than a one-way follower
+                model. The goal is to foster social relationships, not
+                parasocial.</p>
+            <p>There's an algorithmic feed with a very simple activity based
+            algorithm and a chronological feed that just shows posts in the
+                order they were posted.  Both are easily accessible.</p>
+            <p>The algorithmic feed borrows from consensus decision making. The
+            "like" and "dislike" reactions both increase the post's activity
+                score in the algorithm, as do comments. The "block" reaction
+                decreases the post score in the algorithm, meaning it will drop
+                in the algorithmic feed.</p>
+            <p>Block is intended to be used on posts
+                deserving of moderation and censureship: misinformation,
+                disinformation, spam, slop, hate, abuse, and violations of the
+                paradox of tolerance.  In the future, we plan to implement
+                block thresholds that will remove a post with a high-enough
+                proportion of blocks from the feed entirely.</p>
+            <p>The idea behind this system is that it allows users to be the
+            first layer of moderation on the platform.  Then the moderation
+        team can be a second layer, moderating the moderators.  We'll build an
+        appeal system for blocked posts and posts that were found to not be
+        deserving of block will be unblocked.  If users are found to be
+        consistently abusing block to attempt to silence legitimate dissent or
+        marginalized people, then they'll lose the right to block.</p>
+            <h2>What hasn't been built yet?</h2>
+            <p> Building software is an experimental process. To do it well,
+                you have build prototypes, put them in front of users, and
+                watch to see if they work the way you think they will. That's
+                the approach we'll take, though we'll use an opt-in approach
+                for the experimental testing stage.</p>
+            <p>We have lots of ideas to try.</p>
+            <p>Public posts and post sharing are
+                planned.</p>
+            <p>We want to introduce post tagging and the ability to
+                build feeds around tags or sets of tags. The idea is that this
+                would allow people to find and build communities of shared
+                interest. </p>
+            <p>We also want to build features for building location
+                feeds.  The idea is that you could add your location and we
+                would then generate feeds of posts for your neighborhood, city,
+                county, state/region, and country. You could opt in to your own
+                posts being shown in those feeds.  The thought is that this
+                would allow people to build communities of place.</p>
+            <p>We also have
+                ideas around building events and event planning features to
+                help people get off the screen and gather in the real world.
+                And we'll keep brainstorming and seeking more ideas from
+                users.</p>
+            <p>All of the brainstorming and experimenting will be guided by our
+                ultimate goals:</p> 
+            <ul>
+                <li>Help people find each other, build 
+                    community, and organize.</li>
+                <li>Foster an environment of accurate information and
+                    healthy dialog.</li>
+            </ul>
         </div>
     )
 

@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux'
 
 import { postAuthentication, cleanupRequest } from '/state/authentication'
 
+import Input from '/components/generic/input/Input'
 import Spinner from '/components/Spinner'
 
 import './LoginForm.css'
@@ -118,22 +119,23 @@ const LoginForm = function(props) {
             <h2>Login</h2>
             <form onSubmit={onSubmit}>
                 <div className="error"> { errorView } </div>
-
-                <div className="email field-wrapper">
-                    <label htmlFor="email">Email</label>
-                    <input type="text" 
-                        name="email" 
-                        value={email}
-                        onChange={ (event) => setEmail(event.target.value) } />
-                </div>
-
-                <div className="password field-wrapper">
-                    <label htmlFor="password">Password</label>
-                    <input type="password" 
-                        name="password" 
-                        value={password}
-                        onChange={ (event) => setPassword(event.target.value) } />
-                </div>
+                <Input
+                    name="email"
+                    label="Email"
+                    /*explanation="Enter the email you used to register." */
+                    value={email}
+                    className="email"
+                    onChange={ (event) => setEmail(event.target.value) } 
+                />
+                <Input
+                    name="password"
+                    type="password"
+                    label="Password"
+                    /*explanation="Enter your password."*/
+                    value={password}
+                    className="password"
+                    onChange={ (event) => setPassword(event.target.value) } 
+                />
                 <div className="submit field-wrapper">
                     <input type="submit" name="login" value="Login" />
                 </div>

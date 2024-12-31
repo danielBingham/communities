@@ -1,0 +1,28 @@
+.text-input {
+    padding: 10px 0;
+    max-width: 650px;
+}
+.text-input label {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    text-align: left;
+    padding: 5px 0;
+}
+.text-input .text-input-explanation {
+    font-size: 12px;
+    padding: 0 0 5px 5px;
+    font-style: italic;
+}
+.text-input input {
+    box-sizing: border-box;
+    padding: 5px;
+    border: thin solid var(--input-border-color);
+    width: 100%;
+    max-width: 650px;
+}
+.text-input .text-input-error {
+    padding: 5px;
+    color: red;
+    text-align: center;
+}

@@ -4,6 +4,8 @@ import { useDispatch, useSelector } from 'react-redux'
 import { patchAuthentication, cleanupRequest as cleanupAuthRequest } from '/state/authentication'
 import { patchUser, cleanupRequest } from '/state/users'
 
+import Input from '/components/generic/input/Input'
+
 import './ChangeEmailForm.css'
 
 const ChangeEmailForm = function(props) {
@@ -61,13 +63,13 @@ const ChangeEmailForm = function(props) {
 
         if ( ! field || field == 'email' ) {
             if ( ! email || email.length == 0 ) {
-                setEmailError('no-email')
+                setEmailError('Email required.')
                 error = true
             } else if ( email.length > 512 ) {
-                setEmailError('email-too-long')
+                setEmailError('Your email is too long.  Limit is 512 characters.')
                 error = true
             } else if ( ! email.includes('@') ) {
-                setEmailError('invalid-email')
+                setEmailError('Please enter a valid email.')
                 error = true
             } else if ( emailError ) {
                 setEmailError(null)
@@ -76,7 +78,7 @@ const ChangeEmailForm = function(props) {
 
         if ( ! field || field == 'password' ) {
             if ( ! password || password.length <= 0 ) {
-                setPasswordError('no-password')
+                setPasswordError('Your password is required to change your email.')
             } else {
                 setPasswordError(null)
             }
@@ -167,43 +169,30 @@ const ChangeEmailForm = function(props) {
         result = ( <div className="success">Email successfully updated!</div>)
     }
 
-    let emailErrorView = null
-    if ( emailError && emailError == 'no-email' ) {
-        emailErrorView = (<div className="error">Email required.</div> )
-    } else if ( emailError && emailError == 'email-too-long' ) {
-        emailErrorView = (<div className="error">Your email is too long.  Limit is 512 characters.</div>)
-    } else if ( emailError && emailError == 'invalid-email' ) {
-        emailErrorView = (<div className="error">Please enter a valid email.</div>)
-    }
-
-    let passwordErrorView = null
-    if ( passwordError && passwordError == 'no-password' ){
-        passwordErrorView = (<div className="error">Your password is required to change your email.</div>)
-    }
-
     return (
         <div className="change-email-form">
             <form onSubmit={onSubmit}>
-                <div className="form-field email">
-                    <label htmlFor="email">New Email</label>
-                    <input type="text"
-                        name="email"
-                        value={email}
-                        onBlur={(event) => isValid('email')}
-                        onChange={(event) => setEmail(event.target.value)}
-                    />
-                    { emailErrorView }
-                </div>
-                <div className="form-field password">
-                    <label htmlFor="password">Password</label>
-                    <input type="password"
-                        name="password"
-                        value={password}
-                        onBlur={(event) => isValid('password')}
-                        onChange={(event) => setPassword(event.target.value)}
-                    />
-                    { passwordErrorView }
-                </div>
+                <Input
+                    name="email"
+                    label="New Email"
+                    explanation="What is your new email?"
+                    value={email}
+                    className="email"
+                    onBlur={(event) => isValid('email')}
+                    onChange={(event) => setEmail(event.target.value)}
+                    error={emailError}
+                />
+                <Input
+                    name="password"
+                    type="password"
+                    label="Password"
+                    explanation="Please enter your current password to authenticate."
+                    value={password}
+                    className="password"
+                    onBlur={(event) => isValid('password')}
+                    onChange={(event) => setPassword(event.target.value)}
+                    error={passwordError}
+                />
                 <div className="error"> { errors } </div>
                 <div className="result"> { result } </div>
                 <div className="submit"> { submit } </div>

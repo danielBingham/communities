@@ -53,7 +53,7 @@ const UserBadge = function(props) {
                     <UserProfileImage userId={user.id} />
                     <div className="details" >
                         <div className="name"><Link to={ `/${user.username}` }>{user.name}</Link></div>
-                        <div className="about">{ user.about }</div>
+                        <div className="about">{ user.about?.length > 100 ? user.about.substring(0,100).trim()+'...' : user.about }</div>
                         <FriendButton userId={user.id} />
                     </div> 
                 </div>

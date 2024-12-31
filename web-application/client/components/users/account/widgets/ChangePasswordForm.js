@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { patchAuthentication, cleanupRequest as cleanupAuthenticationRequest } from '/state/authentication'
 import { patchUser, cleanupRequest } from '/state/users'
 
+import Input from '/components/generic/input/Input'
 import Spinner from '/components/Spinner'
 
 import './ChangePasswordForm.css'
@@ -192,35 +193,38 @@ const ChangePasswordForm = function(props) {
     return (
         <div className="change-password-form">
             <form onSubmit={onSubmit}>
-                <div className="form-field new-password">
-                    <label htmlFor="new-password">New Password</label>
-                    <input type="password"
-                        name="new-password"
-                        value={newPassword}
-                        onBlur={(event) => isValid('newPassword') }
-                        onChange={(event) => setNewPassword(event.target.value)}
-                    />
-                    { newPasswordErrorView }
-                </div>
-                <div className="form-field confirm-new-password">
-                    <label htmlFor="confirm-new-password">Confirm New Password</label>
-                    <input type="password"
-                        name="confirm-new-password"
-                        value={confirmNewPassword}
-                        onBlur={(event) => isValid('confirmNewPassword')}
-                        onChange={(event) => setConfirmNewPassword(event.target.value)}
-                    />
-                    { confirmPasswordErrorView }
-                </div>
-                <div className="form-field old-password">
-                    <label htmlFor="old password">Old Password</label>
-                    <input type="password"
-                        name="old-password"
-                        value={oldPassword}
-                        onChange={(event) => setOldPassword(event.target.value)}
-                    />
-                    <div className="error">{ oldPasswordError }</div>
-                </div>
+                <Input 
+                    name="new-password"
+                    type="password"
+                    label="New Password"
+                    explanation="Enter the new password you want to use."
+                    value={newPassword}
+                    className="new-password"
+                    onBlur={(event) => isValid('newPassword') }
+                    onChange={(event) => setNewPassword(event.target.value)}
+                    error={newPasswordError}
+                />
+                <Input 
+                    name="confirm-new-password"
+                    type="password"
+                    label="Confirm New Password"
+                    explanation="Please enter your new password again to confirm it."
+                    value={confirmNewPassword}
+                    className="confirm-new-password"
+                    onBlur={(event) => isValid('confirmNewPassword')}
+                    onChange={(event) => setConfirmNewPassword(event.target.value)}
+                    error={newPasswordConfirmationError}
+                />
+                <Input 
+                    name="old-password"
+                    type="password"
+                    label="Old Password"
+                    explanation="Please enter your old password to authenticate."
+                    value={oldPassword}
+                    className="old-password"
+                    onChange={(event) => setOldPassword(event.target.value)}
+                    error={oldPasswordError}
+                />
                 <div className="result">
                     { result }
                 </div>

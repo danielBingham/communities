@@ -18,7 +18,7 @@ import Spinner from '/components/Spinner'
 
 import YourFriendsList from '/components/friends/YourFriendsList'
 import FriendRequestsList from '/components/friends/FriendRequestsList'
-import UserListView from '/components/users/list/UserListView'
+import FindFriends from '/components/friends/FindFriends'
 
 import LoginForm from '/components/authentication/LoginForm'
 
@@ -43,8 +43,8 @@ const FriendsPage = function() {
         content = ( <YourFriendsList /> ) 
     } else if ( selectedTab == 'requests' ) {
         content = ( <FriendRequestsList /> ) 
-    } else if ( selectedTab == 'browse' ) {
-        content = ( <UserListView /> ) 
+    } else if ( selectedTab == 'find' ) {
+        content = ( <FindFriends /> )
     } 
 
     return (
@@ -56,8 +56,8 @@ const FriendsPage = function() {
                 <li className={ selectedTab == 'requests' ? 'active' : '' }>
                     <Link to="/friends/requests">{ selectedTab == 'requests' ? <UserPlusIconSolid /> : <UserPlusIconOutline /> }<span className="nav-text">Friend Requests</span></Link>
                 </li>
-                <li className={ selectedTab == 'browse' ? 'active' : '' }>
-                    <Link to="/friends/browse">{ selectedTab == 'browse' ? <UserGroupIconSolid /> : <UserGroupIconOutline /> }<span className="nav-text">Find Friends</span></Link>
+                <li className={ selectedTab == 'find' ? 'active' : '' }>
+                    <Link to="/friends/find">{ selectedTab == 'find' ? <UserGroupIconSolid /> : <UserGroupIconOutline /> }<span className="nav-text">Find Friends</span></Link>
                 </li>
             </ul>
             <div className="content">

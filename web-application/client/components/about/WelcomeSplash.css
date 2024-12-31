@@ -1,8 +1,3 @@
-.welcome-splash {
-    margin: 200px auto;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-}
 .welcome-splash .intro {
     font-size: 24px;
     line-height: 1.7em;
@@ -14,10 +9,23 @@
 
 @media (width >= 700px) {
     .welcome-splash {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        margin: 200px auto;
         max-width: 1400px;
+        width: 100%;
+    }
+    .welcome-splash .intro {
+        padding: 15px;
     }
 }
 @media (width < 700px) {
-
+    .welcome-splash {
+        width: 100%;
+    }
+    .welcome-splash .intro {
+        padding: 5px;
+    }
+    
 }
 

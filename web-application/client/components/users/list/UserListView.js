@@ -22,9 +22,10 @@ import PaginationControls from '/components/PaginationControls'
 
 import './UserListView.css'
 
-const UserListView = function(props) {
+const UserListView = function({ params }) {
     const [ searchParams, setSearchParams ] = useSearchParams()
-    
+   
+
     // ======= Request Tracking =====================================
 
     const [ requestId, setRequestId ] = useState(null)
@@ -37,18 +38,14 @@ const UserListView = function(props) {
     })
 
     // ======= Redux State ==========================================
-    
+
+    const userDictionary = useSelector((state) => state.users.dictionary)
     const users = useSelector(function(state) {
         if ( ! state.users.queries['UserList'] ) {
             return []
+        } else {
+            return state.users.queries['UserList'].list
         }
-        
-        const users = []
-        for( const id of state.users.queries['UserList'].list) {
-            users.push(state.users.dictionary[id])
-        }
-
-        return users 
     })
 
     const meta = useSelector(function(state) {
@@ -67,29 +64,23 @@ const UserListView = function(props) {
 
     const dispatch = useDispatch()
 
-    const setSort = function(sortBy) {
-        searchParams.set('sort', sortBy)
-        setSearchParams(searchParams)
-    }
-
     useEffect(function() {
-        const params = {}
+        const queryParams = { ...params }
 
-        params.page = searchParams.get('page')
-        if ( ! params.page ) {
-            params.page = 1
-        }
-        
-        params.sort = searchParams.get('sort')
-        if ( ! params.sort ) {
-            params.sort = 'newest'
+        queryParams.page = searchParams.get('page')
+        if ( ! queryParams.page ) {
+            queryParams.page = 1
         }
 
-        setRequestId(dispatch(getUsers('UserList', params)))
+        if ( searchParams.get('q') ) {
+            queryParams.name = searchParams.get('q')
+        }
+
+        setRequestId(dispatch(getUsers('UserList', queryParams)))
         return function cleanup() {
             dispatch(clearUserQuery({ name: 'UserList'}))
         }
-    }, [ searchParams ])
+    }, [ searchParams, params ])
 
     // Clean up our request.
     useEffect(function() {
@@ -107,8 +98,8 @@ const UserListView = function(props) {
 
     if ( users ) {
         const userBadges = []
-        for( const user of users) {
-            userBadges.push(<UserBadge key={user.id} id={user.id} />)
+        for( const userId of users) {
+            userBadges.push(<UserBadge key={userId} id={userId} />)
         }
         content = userBadges
     } else if (request && request.state == 'fulfilled') {
@@ -116,17 +107,15 @@ const UserListView = function(props) {
         noContent = (<span>No users found.</span>)
     } 
 
-    const newestParams = new URLSearchParams(searchParams.toString())
-    newestParams.set('sort', 'newest')
-
-    const sort = searchParams.get('sort') ? searchParams.get('sort') : 'newest'
     return (
-        <List className="user-list">
-            <ListGridContent>
-                { content } 
-            </ListGridContent>
-            <PaginationControls meta={meta} /> 
-        </List>
+        <div className="user-list-view">
+            <List className="user-list">
+                <ListGridContent>
+                    { content } 
+                </ListGridContent>
+                <PaginationControls meta={meta} /> 
+            </List>
+        </div>
     )
         
 }

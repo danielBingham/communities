@@ -128,6 +128,7 @@ module.exports = class UserController {
             result.where += ` AND users.id = ANY($${result.params.length}::uuid[])`
         }
 
+        // Get users who are friends of `friendOf`.
         if ( query.friendOf ) {
             const friendResults = await this.core.database.query(`
                 SELECT user_id, friend_id FROM user_relationships
@@ -140,20 +141,58 @@ module.exports = class UserController {
             result.where += ` AND users.id = ANY($${result.params.length}::uuid[])`
         }
 
-        if ( query.mutualWith ) {
+        // Get all users who have a mutual friend with currentUser.
+        if ( query.withMutuals) {
             const friendResults = await this.core.database.query(`
                 SELECT user_id, friend_id FROM user_relationships
                     WHERE (user_id = $1 OR friend_id = $1) AND status = 'confirmed' 
-            `, [ query.friendOf ])
+            `, [ currentUser.id ])
 
             const friendIds = friendResults.rows.map((r) => r.user_id == currentUser.id ? r.friend_id : r.user_id)
 
             const mutualResults = await this.core.database.query(`
                 SELECT user_id, friend_id FROM user_relationships
                     WHERE (user_id = ANY($1::uuid[]) OR friend_id = ANY($1::uuid[])) AND status = 'confirmed'
-            `, [ query.mutualWith ])
+            `, [ friendIds ])
 
-            // TODO
+            const friendMap = {}
+            for(const friendId of friendIds) {
+                friendMap[friendId] = true
+            }
+
+            const mutualIds = []
+            for(const row of mutualResults.rows) {
+                if ( row.user_id !== currentUser.id && ! ( row.user_id in friendMap)) {
+                    mutualIds.push(row.user_id)
+                }
+                if ( row.friend_id !== currentUser.id && ! (row.friend_id in friendMap)) {
+                    mutualIds.push(row.friend_id)
+                }
+            }
+
+            result.params.push(mutualIds)
+            result.where += ` AND users.id = ANY($${result.params.length}::uuid[])`
+        }
+
+        // Get friends the currentUser has in common with  `mutualWith`.
+        if ( query.mutualWith) {
+            const friendResults = await this.core.database.query(`
+                SELECT user_id, friend_id FROM user_relationships
+                    WHERE (user_id = $1 OR friend_id = $1) AND status = 'confirmed' 
+            `, [ currentUser.id ])
+
+            const friendIds = friendResults.rows.map((r) => r.user_id == currentUser.id ? r.friend_id : r.user_id)
+
+            const mutualResults = await this.core.database.query(`
+                SELECT user_id, friend_id FROM user_relationships
+                    WHERE (user_id = $1 AND friend_id = ANY($2::uuid[])) OR (friend_id = $1 AND user_id = ANY($2::uuid[])) AND status = 'confirmed'
+            `, [ query.mututalWith, friendIds ])
+        
+            let mutualIds = mutualResults.rows.map((r) => r.user_id == query.mutualWith ? r.friend_id : r.user_id)
+            mutualIds = mutualIds.filter((id) => currentUser.id !== id)
+
+            result.params.push(mutualIds)
+            result.where += ` AND users.id = ANY($${result.params.length}::uuid[])`
         }
 
         if ( query.page && ! options.ignorePage ) {
@@ -209,8 +248,12 @@ module.exports = class UserController {
                 result: []
             })
         }
+        console.log(where)
+        console.log(params)
         const meta = await this.userDAO.countUsers(where, params, page)
         const results = await this.userDAO.selectCleanUsers(where, params, order, page)
+
+        console.log(results)
         results.meta = meta
 
         results.relations = await this.getRelations(results, requestedRelations) 

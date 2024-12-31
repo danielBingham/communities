@@ -4,6 +4,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import { patchUser, cleanupRequest } from '/state/users'
 
+import Input from '/components/generic/input/Input'
+
 import './AcceptInvitationForm.css'
 
 const AcceptInvitationForm = function(props) {
@@ -18,10 +20,11 @@ const AcceptInvitationForm = function(props) {
     const [ confirmPassword, setConfirmPassword ] = useState('')
 
     const [nameError, setNameError] = useState(null)
-    const [ usernameError, setUsernameError ] = useState(null)
+    const [usernameError, setUsernameError] = useState(null)
     const [emailError, setEmailError] = useState(null)
     const [passwordError, setPasswordError] = useState(null)
     const [confirmPasswordError, setConfirmPasswordError] = useState(null)
+    const [baseError, setBaseError] = useState(null)
 
     // ======= Request Tracking =====================================
     
@@ -60,10 +63,10 @@ const AcceptInvitationForm = function(props) {
 
         if ( ! field || field == 'name' ) {
             if ( ! name || name.length == 0 ) {
-                setNameError('no-name')
+                setNameError('Name is required!')
                 error = true
             } else if ( name.length > 512 ) {
-                setNameError('name-too-long')
+                setNameError('Name is too long. Limit is 512 characters.')
                 error = true
             } else if ( nameError ) {
                 setNameError(null)
@@ -72,10 +75,10 @@ const AcceptInvitationForm = function(props) {
 
         if ( ! field || field == 'username' ) {
             if ( ! username || username.length == 0 ) {
-                setNameError('no-username')
+                setNameError('Username is required!')
                 error = true
             } else if ( username.length > 512 ) {
-                setNameError('username-too-long')
+                setNameError('Username is too long. Limit is 512 characters.')
                 error = true
             } else if ( usernameError ) {
                 setNameError(null)
@@ -84,13 +87,13 @@ const AcceptInvitationForm = function(props) {
 
         if ( ! field || field == 'email' ) {
             if ( ! email || email.length == 0 ) {
-                setEmailError('no-email')
+                setEmailError('Email is required!')
                 error = true
             } else if ( email.length > 512 ) {
-                setEmailError('email-too-long')
+                setEmailError('Email is too long.  Limit is 512 characters.')
                 error = true
             } else if ( ! email.includes('@') ) {
-                setEmailError('invalid-email')
+                setEmailError('Please enter a valid email.')
                 error = true
             } else if ( emailError ) {
                 setEmailError(null)
@@ -99,13 +102,13 @@ const AcceptInvitationForm = function(props) {
 
         if ( ! field || field == 'password' ) {
             if ( ! password || password.length == 0 ) {
-                setPasswordError('no-password')
+                setPasswordError('Password is required!')
                 error = true
             } else if ( password.length < 16 ) {
-                setPasswordError('password-too-short')
+                setPasswordError('Your password is too short.  Please choose a password at least 16 characters in length.')
                 error = true
             } else if ( password.length > 256 ) {
-                setPasswordError('password-too-long')
+                setPasswordError('Your password is too long. Limit is 256 characters.')
                 error = true
             } else if ( passwordError ) {
                 setPasswordError(null)
@@ -114,7 +117,7 @@ const AcceptInvitationForm = function(props) {
 
         if ( ! field || field =='confirmPassword' ) {
             if (password != confirmPassword) {
-                setConfirmPasswordError('password-mismatch')
+                setConfirmPasswordError('Your passwords don\'t match!')
                 error = true 
             } else if ( confirmPasswordError ) {
                 setConfirmPasswordError(null)
@@ -155,7 +158,13 @@ const AcceptInvitationForm = function(props) {
     useEffect(function() {
         if ( request && request.state == 'fulfilled' ) {
             navigate("/")
-        } 
+        } else if ( request && request.state == 'failed') {
+            if ( request.status == 409 ) {
+                setEmailError('A user with that email already exists.  Please login instead.')
+            } else {
+                setBaseError(request.error)
+            }
+        }
     }, [ request ])
 
     useEffect(function() {
@@ -166,109 +175,65 @@ const AcceptInvitationForm = function(props) {
         }
     }, [ requestId ])
 
-    // Error views, we'll populate these as we check the various error states.
-    let overallErrorView = null
-    let nameErrorView = null
-    let usernameErrorView = null
-    let emailErrorView = null
-    let passwordErrorView = null
-    let confirmPasswordErrorView = null
-
-    if ( request && request.state == 'failed') {
-        if (request.status == 409 ) {
-            emailErrorView = ( 
-                <div className="email-conflict-error">A user with that email already exists.  Please login instead.</div> 
-            )
-        } else { 
-            overallErrorView = (<div className="unknown-error">{ request.error }</div> )
-        }
-    }
-
-    if ( nameError && nameError == 'no-name' ) {
-        nameErrorView = ( <>Name is required!</> )
-    } else if ( nameError && nameError == 'name-too-long' ) {
-        nameErrorView = ( <>Name is too long. Limit is 512 characters.</> )
-    }
-
-    if ( usernameError && usernameError == 'no-username' ) {
-        usernameErrorView = ( <>Username is required!</> )
-    } else if ( usernameError && usernameError == 'username-too-long' ) {
-        usernameErrorView = ( <>Username is too long. Limit is 512 characters.</> )
-    }
-
-    if ( emailError && emailError == 'no-email' ) {
-        emailErrorView = ( <>Email is required!</> )
-    } else if ( emailError && emailError == 'email-too-long' ) {
-        emailErrorView = ( <>Email is too long.  Limit is 512 characters.</> )
-    } else if ( emailError && emailError == 'invalid-email' ) {
-        emailErrorView = (<>Please enter a valid email.</> )
-    }
-
-    if ( passwordError && passwordError == 'no-password') {
-        passwordErrorView = ( <>Password is required!</> )
-    } else if ( passwordError && passwordError == 'password-too-short') {
-        passwordErrorView = (<>Your password is too short.  Please choose a password at least 16 characters in length.  We recommend the XKCD method of passphrase selection: <a href="https://xkcd.com/936/">XKCD #936: Password Strength</a>.</> )
-    } else if ( passwordError && passwordError == 'password-too-long') {
-        passwordErrorView = (<>Your password is too long. Limit is 256 characters.</>)
-    }
-
-    if ( confirmPasswordError && confirmPasswordError == 'password-mismatch' ) {
-        confirmPasswordErrorView = ( <>Your passwords don't match!</> )
-    }
-
     return (
         <div className="accept-invitation-form">
             <div className="instructions">Welcome to Communities, please complete your registration!</div>
             <form onSubmit={acceptInvitation}>
-                <div className="name field-wrapper">
-                    <label htmlFor="name">Name:</label>
-                    <input type="text" 
-                        name="name" 
-                        value={name} 
-                        onBlur={ (event) => isValid('name') }
-                        onChange={ (event) => setName(event.target.value) } />
-                    <div className="error"> { nameErrorView } </div>
-                </div>
+                <Input
+                    name="name"
+                    label="Name"
+                    explanation="The name people will see on your profile.  We strongly encourage you to use your real name, but we don't enforce that."
+                    value={name}
+                    className="name"
+                    onBlur={ (event) => isValid('name') }
+                    onChange={ (event) => setName(event.target.value) } 
+                    error={nameError}
+                />
+                <Input
+                    name="username"
+                    label="Username"
+                    explanation="The unique username that will be used to link to your profile.  Can only contain letters, numbers, period ( . ), dash ( - ), or undercore ( _ )"
+                    value={username}
+                    className="username"
+                    onBlur={ (event) => isValid('username') }
+                    onChange={ (event) => setUsername(event.target.value) } 
+                    error={usernameError}
+                />
+                <Input
+                    name="email"
+                    label="Email"
+                    explanation="The email you will use to log in.  Will also receive notifications and will be used to reset your password if you forget it."
+                    value={email}
+                    className="email"
+                    onBlur={ (event) => isValid('email') }
+                    onChange={ (event) => setEmail(event.target.value) } 
+                    error={emailError}
+                />
 
-                <div className="username field-wrapper">
-                    <label htmlFor="username">Username:</label>
-                    <input type="text" 
-                        name="username" 
-                        value={username} 
-                        onBlur={ (event) => isValid('username') }
-                        onChange={ (event) => setUsername(event.target.value) } />
-                    <div className="error"> { usernameErrorView } </div>
-                </div>
-
-                <div className="email field-wrapper">
-                    <label htmlFor="email">Email:</label>
-                    <input type="text" 
-                        name="email" 
-                        value={email}
-                        onBlur={ (event) => isValid('email') }
-                        onChange={ (event) => setEmail(event.target.value) } />
-                    <div className="error"> { emailErrorView } </div>
-                </div>
-
-                <div className="password field-wrapper">
-                    <label htmlFor="password">Password:</label>
-                    <input type="password" 
-                        name="password" 
-                        value={password}
-                        onBlur={ (event) => isValid('password') }
-                        onChange={ (event) => setPassword(event.target.value) } />
-                    <div className="error"> { passwordErrorView } </div>
-                </div>
-
-                <div className="confirm-password field-wrapper">
-                    <label htmlFor="confirmPassword">Confirm Password:</label>
-                    <input type="password" 
-                        name="confirmPassword"
-                        value={confirmPassword}
-                        onBlur={ (event) => isValid('confirmPassword') }
-                        onChange={ (event) => setConfirmPassword(event.target.value) } 
-                    />
-                    <div className="error"> { confirmPasswordErrorView} </div>
+                <Input
+                    name="password"
+                    type="password"
+                    label="Password"
+                    explanation="The password you will use to log in. Must be at least 16 characters long.  We recommend using the passphrase approach and/or using a password manager."
+                    value={password}
+                    className="password"
+                    onBlur={ (event) => isValid('password') }
+                    onChange={ (event) => setPassword(event.target.value) } 
+                    error={passwordError}
+                />
+                <Input
+                    name="confirmPassword"
+                    type="password"
+                    label="Confirm Password"
+                    explanation="Please enter your password again to confirm it."
+                    value={confirmPassword}
+                    className="confirm-password"
+                    onBlur={ (event) => isValid('confirmPassword') }
+                    onChange={ (event) => setConfirmPassword(event.target.value) }
+                    error={confirmPasswordError}
+                />
+                <div className="base-error">
+                    { baseError }
                 </div>
                 <div className="submit field-wrapper">
                     <input type="submit" name="register" value="Accept Invitation" />

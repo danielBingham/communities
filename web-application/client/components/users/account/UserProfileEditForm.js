@@ -8,6 +8,9 @@ import { patchUser, cleanupRequest } from '/state/users'
 import UserProfileImage from '/components/users/UserProfileImage'
 import DraftImageFile from '/components/files/DraftImageFile'
 import FileUploadInput from '/components/files/FileUploadInput'
+
+import Input from '/components/generic/input/Input'
+import TextBox from '/components/generic/text-box/TextBox'
 import Spinner from '/components/Spinner'
 
 import './UserProfileEditForm.css'
@@ -50,10 +53,10 @@ const UserProfileEditForm = function(props) {
 
         if ( ! field || field == 'name' ) {
             if ( name.length <= 0 ) {
-                setNameError('no-name')
+                setNameError("Name is required!")
                 error = true
             } else if ( name.length > 500 ) {
-                setNameError('too-long')
+                setNameError("Name is too long. Limit is 500 characters.")
                 error = true
             } else {
                 setNameError(null)
@@ -76,7 +79,7 @@ const UserProfileEditForm = function(props) {
     const onAboutChange = function(event) {
         const newContent = event.target.value
         if ( newContent.length > 250) {
-            setAboutError('length')
+            setAboutError('About is too long.  Limit is 250 characters.')
         } else {
             setAboutError('')
             setAbout(newContent)
@@ -154,19 +157,6 @@ const UserProfileEditForm = function(props) {
         submit = ( <Spinner /> )
     }
 
-    let nameErrorView = null
-
-    if ( nameError && nameError == 'no-name' ) {
-        nameErrorView = ( <div className="error">Name is required!</div>)
-    } else if ( nameError && nameError == 'too-long' ) {
-        nameErrorView = ( <div className="error">Name is too long. Limit is 500 characters.</div> )
-    }
-
-    let aboutErrorView = null
-    if ( aboutError == 'length' ) {
-        aboutErrorView = ( <div className="error">About is too long.  Limit is 250 characters.</div> )
-    }
-
     return (
         <div className='user-profile-edit-form'>
             <form onSubmit={onSubmit}>
@@ -181,23 +171,26 @@ const UserProfileEditForm = function(props) {
                         /> }
                     </div>
                 </div>
-                <div className="form-field name">
-                    <label htmlFor="name">Name</label><input type="text"
-                        name="name"
-                        value={name}
-                        onBlur={(event) => isValid('name')}
-                        onChange={(event) => setName(event.target.value)}
-                    />
-                    { nameErrorView }
-                </div>
-                <div className="form-text about">
-                    <label htmlFor="about">About You</label>
-                    <textarea name="about" 
-                        value={about} 
-                        onChange={onAboutChange}
-                    ></textarea>
-                    { aboutErrorView }
-                </div>
+                <Input
+                    name="name"
+                    label="Name"
+                    explanation={`Your display name. We strongly encourage you
+                    to use your real name, but we don't enforce this.`}
+                    className="name"
+                    value={name}
+                    onBlur={(event) => isValid('name')}
+                    onChange={(event) => setName(event.target.value)}
+                    error={nameError}
+                />
+                <TextBox
+                    name="about"
+                    className="about"
+                    label="About You"
+                    explanation={`A short bio to display with your profile.  Limited to 250 characters.`}
+                    value={about}
+                    onChange={onAboutChange}
+                    error={aboutError}
+                />
                 <div className="result">{result}</div>
                 <div className="form-submit submit">
                     { submit }

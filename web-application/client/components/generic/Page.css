@@ -1,12 +1,8 @@
 .page {}
 
 .page .page-body {
-    min-width: 1000px;
-    min-height: 400px;
-    margin: 50px auto;
     background-color: var(--page-background-color);
     color: var(--page-text-color);
-    padding: 50px 20px 20px 20px;
 }
 
 .page .page-header {
@@ -70,5 +66,19 @@
     margin-right: 5px;
     margin-bottom: -5px;
     color: var(--icon-color);
+}
+
+@media (width >= 700px) {
+    .page .page-body {
+        min-width: 700px;
+        min-height: 400px;
+        margin: 50px auto;
+        padding: 50px 20px 20px 20px;
+    }
+}
+@media (width < 700px) {
+    .page .page-body {
+        margin: 20px auto;
+    }
 }
 

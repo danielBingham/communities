@@ -63,7 +63,7 @@ const AcceptInvitationPage = function(props) {
                 <p>
                     If you did get here following a valid invitation, please
                     reach out to us at <a
-                    href="mailto:contact@peer-review.io">contact@peer-review.io</a>.
+                    href="mailto:contact@communities.social">contact@communties.social</a>.
                     You won't be able to register on the email you were invited
                     with, so we'll need to get things sorted out.
                 </p>
@@ -74,7 +74,9 @@ const AcceptInvitationPage = function(props) {
     return (
         <Page id="accept-invitation-page">
             <PageBody>
-                { content }
+                <div className="form-wrapper">
+                    { content }
+                </div>
             </PageBody>
         </Page>
     )

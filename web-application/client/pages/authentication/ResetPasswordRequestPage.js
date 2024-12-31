@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 
 import { createToken, cleanupRequest } from '/state/authentication'
 
+import Input from '/components/generic/input/Input'
 import Spinner from '/components/Spinner'
 import { Page, PageBody } from '/components/generic/Page'
 
@@ -55,15 +56,21 @@ const ResetPasswordRequestPage = function(props) {
         content = (
             <>
                 <h1>Password Reset Request</h1>
-                <p>
-                    Please enter your email address to request a password reset
-                    link.  A link will be sent to the address you provide. To reset
-                    your password, click the link in the email.  You will be taken
-                    back here and able to enter a new password.
-                </p>
                 <form onSubmit={onSubmit}>
-                    <label htmlFor="reset-password-request">Email</label><input type="text" name="email" onChange={(e) => setEmail(e.target.value) } />
-                    <input type="submit" name="submit" value="Request Password Reset Link" />
+                    <Input
+                        name="email"
+                        label="Email"
+                        explanation={`Please enter your email address to request a password reset
+                        link.  A link will be sent to the address you provide. To reset
+                        your password, click the link in the email.  You will be taken
+                        back here and able to enter a new password.`}
+                        value={email}
+                        className="email"
+                        onChange={(e) => setEmail(e.target.value) }
+                    />
+                    <div className="submit">
+                        <input type="submit" name="submit" value="Request Password Reset Link" />
+                    </div>
                 </form>
             </>
         )
@@ -73,7 +80,9 @@ const ResetPasswordRequestPage = function(props) {
     return (
         <Page id="reset-password-request">
             <PageBody>
-                { content }
+                <div className="form-wrapper">
+                    { content }
+                </div>
             </PageBody>
         </Page>
     )

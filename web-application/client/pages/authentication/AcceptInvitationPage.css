@@ -1,10 +1,26 @@
-#accept-invitation-page .page-body {
-    display: block;
-    margin: 50px auto;
-    padding: 20px;
-    width: 600px;
-    border: thin solid var(--main-border-color);
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0 0 7px -5px rgba(0,0,0,0.25);
+
+@media (width > 700px) {
+    #accept-invitation-page .page-body .form-wrapper {
+        box-sizing: border-box;
+        display: block;
+        margin: 20px auto;
+        padding: 20px;
+        width: 600px;
+        border: thin solid var(--main-border-color);
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 0 7px -5px rgba(0,0,0,0.25);
+    }
+}
+@media (width <= 700px) {
+    #accept-invitation-page .page-body .form-wrapper {
+        box-sizing: border-box;
+        display: block;
+        margin: 20px auto;
+        padding: 10px;
+        width: 100%;
+        border-top: thin solid var(--main-border-color);
+        border-bottom: thin solid var(--main-border-color);
+        background-color: white;
+    }
 }

@@ -1,27 +1,9 @@
 .login-form { 
     display: block;
-    margin: 50px auto;
-    padding: 20px;
-    width: 500px;
-    border: thin solid var(--main-border-color);
     background-color: white;
 }
 .login-form h2 {
     text-align: center;
-}
-.login-form .field-wrapper {
-    padding: 10px;
-}
-.login-form label {
-    display: inline-block;
-    width: 100px;
-    padding-right: 10px;
-    text-align: right;
-}
-.login-form input[type=text], .login-form input[type=password] {
-    display: inline-block;
-    width: 310px;
-    padding: 5px;
 }
 .login-form .submit {
     text-align: center;
@@ -31,10 +13,49 @@
     color: red;
 }
 .login-form .inner-wrapper {
-    margin: 10px auto;
-    width: 430px;
     text-align: center;
 }
 .login-form .forgot-password {
     padding: 10px;
 }
+
+@media (width >= 700px) {
+    .login-form { 
+        display: block;
+        box-sizing: border-box;
+        padding: 20px;
+        border: thin solid var(--main-border-color);
+        border-radius: 10px;
+        max-width: 500px;
+        margin: 0 auto;
+        max-height: 387px;
+    }
+    .login-form .inner-wrapper {
+        margin: 10px auto;
+        width: 430px;
+    }
+    .login-form .field-wrapper {
+        display: flex;
+        box-sizing: border-box;
+        padding: 10px;
+    }
+    .login-form .field-wrapper.submit {
+        justify-content: center;
+    }
+}
+@media (width < 700px) {
+    .login-form { 
+        display: block;
+        box-sizing: border-box;
+        padding: 10px;
+        width: 100%;
+        border-top: thin solid var(--main-border-color);
+        border-bottom: thin solid var(--main-border-color);
+    }
+
+    .login-form .field-wrapper {
+        box-sizing: border-box;
+        padding: 10px 0;
+    }
+}
+

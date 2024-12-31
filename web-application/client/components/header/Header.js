@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useLayoutEffect, useEffect, useState, useRef } from 'react'
 import { useSelector } from 'react-redux'
 import { useLocation, Link } from 'react-router-dom'
 
@@ -29,21 +29,18 @@ const Header = function(props) {
     const [windowWidth, setWindowWidth] = useState(1260)
     const [showMenu, setShowMenu] = useState(false)
 
+    const menuRef = useRef(null)
+
     const currentUser = useSelector(function(state) {
         return state.authentication.currentUser
     })
 
-    const handleWindowSizeChange = function() {
+    useLayoutEffect(function() {
         setWindowWidth(window.innerWidth)
-    }
 
-    const handleMenuLinkClick = function() {
-        console.log('Clicked!')
-        setShowMenu(false)
-    }
-
-    useEffect(function() {
-        setWindowWidth(window.innerWidth)
+        const handleWindowSizeChange = function() {
+            setWindowWidth(window.innerWidth)
+        }
 
         window.addEventListener('resize', handleWindowSizeChange)
         return function cleanup() {
@@ -53,17 +50,18 @@ const Header = function(props) {
     }, [])
 
     useEffect(function() {
-        const anchors = document.querySelectorAll('header a:not(.no-close)')
-        for(const anchor of anchors) {
-            anchor.addEventListener('click', handleMenuLinkClick) 
+        const onBodyClick = function(event) {
+            if (menuRef.current && ! menuRef.current.contains(event.target) ) 
+            {
+                setShowMenu(false)
+            } 
         }
+        document.body.addEventListener('mousedown', onBodyClick)
+
         return function cleanup() {
-            const anchors = document.querySelectorAll('header a:not(.no-close)')
-            for(const anchor of anchors) {
-                anchor.removeEventListener('click', handleMenuLinkClick)
-            }
+            document.body.removeEventListener('mousedown', onBodyClick)
         }
-    }, [handleMenuLinkClick])
+    }, [ ])
 
     // ======= Render ===============================================
 
@@ -80,14 +78,14 @@ const Header = function(props) {
                             { currentUser && <Link to="/friends">{ location.pathname.startsWith('/friends') ? <UsersIconSolid /> : <UsersIconOutline /> }Friends</Link> }
                         </div>
                         { currentUser && <NotificationMenu /> }
-                        <AuthenticationNavigation />
+                        <AuthenticationNavigation  />
                     </div>
                 </div>
             </header>
         )
     } else {
         return (
-            <header className="mobile">
+            <header className="mobile" ref={menuRef}>
                 <div className="grid">
                     <div id="site-title"><Link to="/"><img src="/favicon-32x32.png" />ommunities</Link></div>
                     <div id="navigation">
@@ -96,14 +94,14 @@ const Header = function(props) {
                         </div>
                     </div>
                 </div>
-                { showMenu && <div className="mobile-menu">
+                { showMenu && <div className="mobile-menu" >
                     <div id="about-navigation" className="navigation-block">
-                        <Link to="/">{ location.pathname == '/' ? <HomeIconSolid /> : <HomeIconOutline /> }<span className="nav-text">Home</span></Link>
-                        <Link to="/about">{ location.pathname == '/about' ? <QuestionMarkCircleIconSolid /> : <QuestionMarkCircleIconOutline /> }<span className="nav-text">About</span></Link>
-                        { currentUser && <Link to="/friends">{ location.pathname.startsWith('/friends') ? <UsersIconSolid /> : <UsersIconOutline /> }<span className="nav-text">Friends</span></Link> }
+                        <Link to="/" onClick={() => setShowMenu(false)}>{ location.pathname == '/' ? <HomeIconSolid /> : <HomeIconOutline /> }<span className="nav-text">Home</span></Link>
+                        <Link to="/about" onClick={() => setShowMenu(false)}>{ location.pathname == '/about' ? <QuestionMarkCircleIconSolid /> : <QuestionMarkCircleIconOutline /> }<span className="nav-text">About</span></Link>
+                        { currentUser && <Link to="/friends" onClick={() => setShowMenu(false)}>{ location.pathname.startsWith('/friends') ? <UsersIconSolid /> : <UsersIconOutline /> }<span className="nav-text">Friends</span></Link> }
                     </div>
-                    { currentUser && <NotificationMenu /> }
-                    <AuthenticationNavigation />
+                    { currentUser && <NotificationMenu setShowMobileMenu={setShowMenu}/> }
+                    <AuthenticationNavigation setShowMobileMenu={setShowMenu} />
                 </div> }
             </header>
         )

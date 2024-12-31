@@ -36,7 +36,7 @@ import NotificationMenuItem from './NotificationMenuItem'
 
 import './NotificationMenu.css'
 
-const NotificationMenu = function({ }) {
+const NotificationMenu = function({ setShowMobileMenu }) {
 
     // ============ Request Tracking ==========================================
 
@@ -125,7 +125,7 @@ const NotificationMenu = function({ }) {
     let notificationViews = []
     for(const id of notifications) {
         notificationViews.push(
-            <NotificationMenuItem key={id} notificationId={id} />
+            <NotificationMenuItem key={id} notificationId={id} setShowMobileMenu={setShowMobileMenu} />
         )
     }
     if ( notificationViews.length == 0 ) {
