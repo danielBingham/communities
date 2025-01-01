@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: communities-database-deployment
+  labels: 
+    application: communities
+    function: database 
+    environment: local
+spec:
+  selector:
+    matchLabels:
+      application: communities
+      function: database 
+      environment: local
+  replicas: 1
+  template: 
+    metadata:
+      name: communities-database-pod-template
+      labels:
+        application: communities
+        function: database 
+        environment: local
+        container: communities-sql 
+    spec:
+      containers:
+        - name: communities-database-container
+          image: communities-sql:latest 
+          ports:
+            - containerPort: 5432 
+          resources:
+            limits:
+              cpu: 1 
+              memory: 2Gi
+          imagePullPolicy: Never
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: communities-database
+spec:
+  selector:
+    application: communities
+    function: database 
+    environment: local
+  ports:
+    - protocol: TCP
+      port: 5432 
+      targetPort: 5432 
+
+
+
