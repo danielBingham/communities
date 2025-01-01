@@ -5,8 +5,8 @@
   "author": "Daniel Bingham",
   "license": "GPL-3.0",
   "homepage": "https://github.com/danielbingham/communities#README",
-  "bugs": { },
-  "repository": { },
+  "bugs": {},
+  "repository": {},
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/"
   },
@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.272.0",
+    "@aws-sdk/s3-request-presigner": "^3.717.0",
     "@babel/runtime": "^7.20.13",
     "@danielbingham/peerreview-model": "^0.3.7",
     "bcrypt": "^5.1.0",

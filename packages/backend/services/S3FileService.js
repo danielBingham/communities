@@ -20,7 +20,8 @@
 const fs = require('fs')
 
 const { S3 } = require('@aws-sdk/client-s3')
-const { PutObjectCommand, DeleteObjectCommand, CopyObjectCommand } = require('@aws-sdk/client-s3')
+const { PutObjectCommand, GetObjectCommand, DeleteObjectCommand, CopyObjectCommand } = require('@aws-sdk/client-s3')
+const { getSignedUrl } = require('@aws-sdk/s3-request-presigner')
 
 
 module.exports = class S3FileService {
@@ -39,14 +40,14 @@ module.exports = class S3FileService {
         this.s3Client = new S3(s3Config)
     }
 
+
     async uploadFile(sourcePath, targetPath) {
         const filestream = fs.createReadStream(sourcePath)
 
         const params = {
             Bucket: this.config.s3.bucket,
             Key: targetPath,
-            Body: filestream,
-            ACL: 'public-read'
+            Body: filestream
         }
 
         await this.s3Client.send(new PutObjectCommand(params))
@@ -56,9 +57,7 @@ module.exports = class S3FileService {
         const params = {
             Bucket: this.config.s3.bucket,
             CopySource:this. config.s3.bucket + '/' + currentPath,
-            Key: newPath,
-            ACL: 'public-read'
-
+            Key: newPath
         }
 
         await this.s3Client.send(new CopyObjectCommand(params))
@@ -67,6 +66,17 @@ module.exports = class S3FileService {
     async moveFile(currentPath, newPath) {
         await this.copyFile(currentPath, newPath)
         await this.removeFile(currentPath)
+    }
+
+    async getSignedUrl(path) {
+        console.log(path)
+        const params = {
+            Bucket: this.config.s3.bucket,
+            Key: path
+        }
+
+        const command = new GetObjectCommand(params)
+        return getSignedUrl(this.s3Client, command, { expiresIn: 60*60*24 })
     }
 
     async removeFile(path) {
