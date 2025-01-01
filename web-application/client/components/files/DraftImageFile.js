@@ -8,6 +8,8 @@ import "./DraftImageFile.css"
 
 const DraftImageFile = function({ fileId, setFileId, width, deleteOnRemove }) {
 
+    // ============ Request Tracking ==========================================
+   
     const [requestId, setRequestId] = useState(null)
     const request = useSelector(function(state) {
         if ( requestId in state.files.requests) {
@@ -17,14 +19,12 @@ const DraftImageFile = function({ fileId, setFileId, width, deleteOnRemove }) {
         }
     })
 
-    const file = useSelector(function(state) {
-        if ( fileId in state.files.dictionary ) {
-            return state.files.dictionary[fileId]
-        } else {
-            return null
-        }
-    })
+    // ============ Redux State ===============================================
+    
+    const configuration = useSelector((state) => state.system.configuration)
 
+    // ============ Actions ===================================================
+    
     const dispatch = useDispatch()
 
     const remove = function() {
@@ -35,12 +35,8 @@ const DraftImageFile = function({ fileId, setFileId, width, deleteOnRemove }) {
         }
     }
 
-    useEffect(function() {
-        if ( ! file ) {
-            setRequestId(dispatch(getFile(fileId)))
-        }
-    }, [ fileId, file ])
-
+    // =========== Effect Handling ============================================
+    
     useEffect(function() {
         return function cleanup() {
             if ( requestId ) {
@@ -49,13 +45,14 @@ const DraftImageFile = function({ fileId, setFileId, width, deleteOnRemove }) {
         }
     }, [ requestId ])
 
+    // ============ Render ====================================================
+    
     let content = null
-    if ( file ) {
-        let url = new URL(file.filepath, file.location)
+    if ( fileId) {
         content = (
             <div className="file">
                 <a className="remove" href="" onClick={(e) => { e.preventDefault(); remove() }}><XCircleIcon /></a>
-                <img src={url.href} />
+                <img src={`${configuration.backend}/file/${fileId}`} />
             </div>
         )
     }

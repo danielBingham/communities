@@ -102,6 +102,12 @@ module.exports = function(core) {
         })
     })
 
+    router.get('/file/:id/object', function(request, response, next) {
+        fileController.getFileObject(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
     router.delete('/file/:id', function(request, response, next) {
         fileController.deleteFile(request, response).catch(function(error) {
             next(error)

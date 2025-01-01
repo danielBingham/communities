@@ -41,6 +41,9 @@
  - [x] Suggested Friends instead of Browse
    - [x] User Search
  - [x] Account deletion
+ - [ ] Production Infrastructure
+ - [ ] Image cropping and resizing 
+  - [ ] User Profile Image
  - [ ] Terms of Service & Privacy Policy
  - [ ] Permissions check (Make sure people can only access what they should)
    - [ ] Lock down image S3 bucket and proxy through backend
@@ -50,8 +53,6 @@
 - [ ] When first logged in after registering from an invite, friend button doesn't recognize inviter as friend until refresh.
 - [ ] Redirect to home screen from all pages.
 - [ ] Don't log in user accepting invite until form is submitted.
-- [ ] Image cropping and resizing 
-- [ ] User Profile Image Editing
 
 ## Follow Up
  - [ ] Image Gallery (Up to 10 images?)

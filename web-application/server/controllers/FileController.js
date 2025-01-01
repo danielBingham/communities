@@ -130,20 +130,44 @@ module.exports = class FileController {
      * @returns {Promise}   Resolves to void.
      */
     async getFile(request, response) {
-        // Everyone has permissions to get files right now.  We may add
-        // stricter permissions in the future.
+
+        const currentUser = request.session.user
+        if ( ! currentUser ) {
+            throw new ControllerError(401, 'not-authenticated',
+                `User must be authenticated to view a file.`,
+                `You must be authenticated to view a file.`)
+        }
 
         const id = request.params.id
 
         const files = await this.fileDAO.selectFiles('WHERE files.id = $1', [ id ])
         if ( files.length <= 0) {
-            throw new ControllerError(500, 'insertion-failure', `Failed to select newly inserted file ${id}.`)
+            throw new ControllerError(404, 'not-found', `Failed to find file ${id}.`)
+        }
+
+        const path = files[0].filepath
+        const url = await this.fileService.getSignedUrl(path)
+
+        response.redirect(302, url)
+
+        // Everyone has permissions to get files right now.  We may add
+        // stricter permissions in the future.
+
+        /*const id = request.params.id
+
+
+        const files = await this.fileDAO.selectFiles('WHERE files.id = $1', [ id ])
+        if ( files.length <= 0) {
+            throw new ControllerError(404, 'not-found', `Failed find file ${id}.`)
         }
 
         return response.status(200).json({
             entity: files[0],
             relations: {}
-        })
+        })*/
+    }
+
+    async getFileObject(request, response) {
     }
 
     /**
