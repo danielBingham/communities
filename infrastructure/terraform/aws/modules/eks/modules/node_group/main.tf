@@ -187,6 +187,9 @@ resource "aws_security_group_rule" "nodes_to_control_plane_ingress_via_https" {
  */
 resource "aws_eks_node_group" "this" {
   cluster_name = var.cluster_name 
+  
+  version = var.node_group_version
+
   node_group_name = var.group_name 
   node_role_arn = aws_iam_role.node_group.arn
 

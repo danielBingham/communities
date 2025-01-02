@@ -94,7 +94,7 @@ resource "aws_rds_cluster" "this" {
     local.tags,
     {
       Name = "${var.application}-${var.environment}-${var.service}-database-cluster"
-      Resource = "rds_cluster.aws_rds_cluster.this"
+      Resource = "rds.aws_rds_cluster.this"
     }
   )
 }
@@ -117,7 +117,7 @@ resource "aws_rds_cluster_instance" "primary" {
     local.tags,
     {
       Name = "${var.application}-${var.environment}-${var.service}-database-primary"
-      Resource = "rds_cluster.aws_rds_cluster_instance.primary"
+      Resource = "rds.aws_rds_cluster_instance.primary"
     }
   )
 }

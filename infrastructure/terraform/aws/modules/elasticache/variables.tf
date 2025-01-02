@@ -13,6 +13,16 @@ variable "subnet_ids" {
   type = list(string)
 }
 
+variable "parameter_group_name" {
+  description = "The parameter group we want to use."
+  default = "default.redis7"
+}
+
+variable "engine_version" {
+  description = "The version of the elasticcache engine we want to run."
+  default = "7.0"
+}
+
 /**
  * Naming variables.  
  *

@@ -12,6 +12,14 @@ variable "public_subnet_ids" {
   type = list(any)
 }
 
+variable "control_plane_version" {
+  description = "The Kubernetes version to use for the control plane."
+}
+
+variable "node_group_version" {
+  description = "the kubernetes version to use for the control plane."
+}
+
 
 
 

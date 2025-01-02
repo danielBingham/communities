@@ -68,6 +68,8 @@ resource "aws_eks_cluster" "this" {
   name = "${var.application}-${var.environment}-${var.service}-eks-cluster"
   role_arn = aws_iam_role.cluster.arn
 
+  version = var.control_plane_version 
+
   vpc_config {
     subnet_ids = concat(var.private_subnet_ids, var.public_subnet_ids)
     endpoint_private_access = true
@@ -434,6 +436,7 @@ resource "aws_iam_role" "cluster_autoscaler_role" {
 module "node_group" {
   source = "./modules/node_group"
 
+  node_group_version = var.node_group_version
   group_name = "webapp"
 
   cluster_name = aws_eks_cluster.this.id

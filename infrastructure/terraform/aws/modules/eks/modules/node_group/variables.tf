@@ -10,6 +10,10 @@ variable "subnet_ids" {
   description = "The subnets we want to launch the node group into."
 }
 
+variable "node_group_version" {
+  description = "The Kuberentes version to use for the nodes."
+}
+
 variable "cluster_security_group_id" {
   description = "The id of the cluster security group.  Used to add ingress and egress rules allowing communication between the cluster control plane and the node group."
 }
