@@ -1,5 +1,5 @@
 /******************************************************************************
- * Staging Database Component
+ * Production Database Component
  *
  * This is a component module that only defines the database.  It does
  * not create any of the other infrastructure and depends on a number of other
