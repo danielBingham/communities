@@ -20,7 +20,7 @@
 
 const Uuid = require('uuid')
 
-const { PostDAO, PostReactionDAO } = require('@danielbingham/communities-backend')
+const { PostDAO, PostReactionDAO } = require('@communities/backend')
 const ControllerError = require('../errors/ControllerError')
 
 module.exports = class PostReactionController {

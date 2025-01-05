@@ -1,4 +1,4 @@
-const backend = require('@danielbingham/peerreview-backend')
+const backend = require('@communities/backend')
 const AuthenticationService = backend.AuthenticationService
 
 const AuthenticationController = require('../../../server/controllers/AuthenticationController')

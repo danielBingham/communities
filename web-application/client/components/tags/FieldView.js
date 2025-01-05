@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
-import ReactMarkdown from 'react-markdown'
-
 import { getField, cleanupRequest } from '/state/fields'
 
 import Field from '/components/fields/Field'
@@ -74,7 +72,7 @@ const FieldView = function(props) {
                 <>
                     <div className="field-details">
                         <h1>{ field.name }<Field id={field.id} /> </h1>
-                        <section className="description"><ReactMarkdown>{ field.description }</ReactMarkdown></section>
+                        <section className="description">{ field.description }</section>
                     </div>
                 </>
             )

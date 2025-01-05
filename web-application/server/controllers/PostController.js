@@ -18,7 +18,7 @@
  *
  ******************************************************************************/
 
-const { LinkPreviewService, PostDAO, PostCommentDAO, PostReactionDAO, UserDAO, FileDAO }  = require('@danielbingham/communities-backend')
+const { LinkPreviewService, PostDAO, PostCommentDAO, PostReactionDAO, UserDAO, FileDAO }  = require('@communities/backend')
 const ControllerError = require('../errors/ControllerError')
 
 

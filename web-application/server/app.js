@@ -41,7 +41,7 @@ const path = require('path')
 const fs = require('fs')
 const Uuid = require('uuid')
 
-const { Core, FeatureFlags, FeatureService, ServerSideRenderingService, PageMetadataService } = require('@danielbingham/peerreview-backend')
+const { Core, FeatureFlags, FeatureService, ServerSideRenderingService, PageMetadataService } = require('@communities/backend')
 const ControllerError = require('./errors/ControllerError')
 
 /**********************************************************************

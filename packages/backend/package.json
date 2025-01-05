@@ -1,6 +1,6 @@
 {
-  "name": "@danielbingham/communities-backend",
-  "version": "0.3.10",
+  "name": "@communities/backend",
+  "version": "0.1.0",
   "description": "The backend of Communities.",
   "author": "Daniel Bingham",
   "license": "GPL-3.0",
@@ -8,7 +8,7 @@
   "bugs": {},
   "repository": {},
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com/"
+    "registry": "https://communities-843012963492.d.codeartifact.us-east-1.amazonaws.com/npm/communities-shared-npm-repository/"
   },
   "main": "index.js",
   "scripts": {
@@ -22,12 +22,10 @@
     "@aws-sdk/client-s3": "^3.272.0",
     "@aws-sdk/s3-request-presigner": "^3.717.0",
     "@babel/runtime": "^7.20.13",
-    "@danielbingham/peerreview-model": "^0.3.7",
     "bcrypt": "^5.1.0",
     "bull": "^4.10.4",
     "handlebars": "^4.7.7",
     "mime": "^3.0.0",
-    "pdfjs-dist": "^3.3.122",
     "pg": "^8.11.1",
     "postmark": "^3.0.15",
     "sanitize-filename": "^1.6.3"

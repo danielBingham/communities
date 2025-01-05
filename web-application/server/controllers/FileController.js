@@ -20,7 +20,7 @@
 const mime = require('mime')
 const { v4: uuidv4 } = require('uuid')
 
-const backend = require('@danielbingham/peerreview-backend')
+const backend = require('@communities/backend')
 
 const ControllerError = require('../errors/ControllerError')
 

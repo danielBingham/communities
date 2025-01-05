@@ -1,5 +1,4 @@
 import React from 'react'
-import ReactMarkdown from 'react-markdown'
 
 import { Page, PageBody } from '/components/generic/Page'
 
@@ -13,7 +12,6 @@ const PrivacyPage = function(props) {
             <PageBody>
                 <article>
                     <h1>Privacy Policy</h1>
-                    <ReactMarkdown>
                         {`
 1. All content you provide is considered public with the exception of your
 email and password.  You retain ownership of your content and share it under a
@@ -37,7 +35,6 @@ Our third party processors currently consist of:
 
 We may add additional providers as needed.
             `}
-                    </ReactMarkdown>
                 </article>
             </PageBody>
         </Page>

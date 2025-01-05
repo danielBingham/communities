@@ -20,7 +20,7 @@
 
 const Uuid = require('uuid')
 
-const { NotificationService, PostDAO, PostCommentDAO } = require('@danielbingham/communities-backend')
+const { NotificationService, PostDAO, PostCommentDAO } = require('@communities/backend')
 
 const ControllerError = require('../errors/ControllerError')
 

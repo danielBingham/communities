@@ -1,4 +1,4 @@
-const backend = require('@danielbingham/peerreview-backend')
+const backend = require('@communities/backend')
 const AuthenticationService = backend.AuthenticationService
 const DAOError = backend.DAOError
 

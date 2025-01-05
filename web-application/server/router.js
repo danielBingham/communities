@@ -10,7 +10,7 @@
 module.exports = function(core) {
     const express = require('express')
     const multer = require('multer')
-    const backend = require('@danielbingham/communities-backend')
+    const backend = require('@communities/backend')
 
     const ControllerError = require('./errors/ControllerError')
 

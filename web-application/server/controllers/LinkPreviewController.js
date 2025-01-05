@@ -18,7 +18,7 @@
  *
  ******************************************************************************/
 
-const { LinkPreviewDAO, LinkPreviewService } = require('@danielbingham/communities-backend')
+const { LinkPreviewDAO, LinkPreviewService } = require('@communities/backend')
 
 module.exports = class LinkPreviewController {
     constructor(core) {

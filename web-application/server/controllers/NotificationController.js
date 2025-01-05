@@ -17,7 +17,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-const { NotificationDAO } = require('@danielbingham/peerreview-backend')
+const { NotificationDAO } = require('@communities/backend')
 
 const ControllerError = require('../errors/ControllerError')
 

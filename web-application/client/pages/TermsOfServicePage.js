@@ -1,5 +1,4 @@
 import React from 'react'
-import ReactMarkdown from 'react-markdown'
 
 import { Page, PageBody } from '/components/generic/Page'
 
@@ -13,7 +12,6 @@ const TermsOfServicePage = function(props) {
             <PageBody>
                 <article >
                     <h1>Terms of Service</h1>
-                    <ReactMarkdown>
                         {`
 1. **Use at your own risk.** Peer Review is an experimental academic publishing
 platform that is currently in beta.  The platform is provided "as is" and we
@@ -38,7 +36,6 @@ perpetrate fraud.
 
 
                 `}
-                    </ReactMarkdown>
                 </article>
             </PageBody>
         </Page>

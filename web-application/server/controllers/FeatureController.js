@@ -17,7 +17,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-const backend = require('@danielbingham/peerreview-backend')
+const backend = require('@communities/backend')
 
 const ControllerError = require('../errors/ControllerError')
 

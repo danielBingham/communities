@@ -23,7 +23,7 @@
  * Restful routes for manipulating users.
  *
  ******************************************************************************/
-const backend = require('@danielbingham/communities-backend')
+const backend = require('@communities/backend')
 
 const ControllerError = require('../errors/ControllerError')
 

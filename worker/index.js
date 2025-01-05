@@ -2,7 +2,7 @@ const BullQueue = require('bull')
 
 const { Client, Pool } = require('pg')
 
-const { Core, ReputationGenerationService, ServiceError } = require('@danielbingham/peerreview-backend')
+const { Core, ReputationGenerationService, ServiceError } = require('@communities/backend')
 
 const config = require('./config')
 
