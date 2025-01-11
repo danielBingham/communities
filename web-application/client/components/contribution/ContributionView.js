@@ -21,7 +21,7 @@ const ContributionView = function() {
                 If only 5% of the users who use the
                     platform <strong>contribute $10 per month</strong> then we'll be comfortably
                 sustainable. Please contribute if you can!</p>
-                <p><strong>Beta:</strong> If you've already set up a contribution, <a href={portalURI}>click here</a> to manage it.</p>
+                <p><strong>Beta:</strong> If you've already set up a contribution, <a href={portalURI}>click here</a> to manage it. If you have any issues, please reach out to <a href="mailto:contact@communities.social">contact@communities.social</a>.</p>
             </div>
             <div className="contribution-grid">
                 <ContributionCard amount={5} explanation={"Cost of a cup of coffee."} />

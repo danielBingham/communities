@@ -1,0 +1,36 @@
+.privacy {
+    box-sizing: border-box;
+    max-width: 800px;
+    min-width: 340px;
+    width: 100%;
+
+    padding: 20px;
+    font-size: 18px;
+    line-height: 1.7em;
+    margin: 0 auto;
+}
+.privacy h1 {
+    text-align: center;
+}
+.privacy h2 {
+    margin-top: 80px;
+}
+.privacy h3 {
+    margin-top: 60px;
+}
+.privacy h4 {
+    margin-top: 40px;
+}
+.privacy li {
+    padding: 10px 0;
+}
+
+
+.privacy h2 a:link, .privacy h2 a:active, .privacy h2 a:visited {
+    color: #333;
+    text-decoration: none;
+}
+.privacy h2 a:hover {
+    color: #666;
+    text-decoration: none;
+}

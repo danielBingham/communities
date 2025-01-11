@@ -191,9 +191,10 @@ const App = function(props) {
                             <Route path=":pageTab" element={ <HomePage /> } />
                             <Route index element={ <HomePage /> } />
                         </Route>
-                        <Route path="/about" element={ <AboutPage />} />
-                        <Route path="/tos" element={ <TermsOfServicePage /> } />
-                        <Route path="/privacy" element={ <PrivacyPage /> } />
+                        <Route path="/about">
+                            <Route path=":pageTab" element={ <AboutPage /> } />
+                            <Route index element={ <AboutPage />} />
+                        </Route>
                         <Route path="/admin" element={ <AdminPage />} />
 
                         { /* ========== Authentication Controls =============== */ }

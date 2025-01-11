@@ -40,7 +40,7 @@ module.exports = class EmailService {
 
     async sendNotificationEmail(address, subject, body) {
         await this.sendEmail({
-            "From": "no-reply@peer-review.io",
+            "From": "no-reply@communities.social",
             "To": address,
             "Subject": subject,
             "TextBody": body,
@@ -64,7 +64,7 @@ The Communities Team
 
 
         await this.sendEmail({
-            "From": "no-reply@peer-review.io",
+            "From": "no-reply@communities.social",
             "To": user.email,
             "Subject": `[Communities] Welcome to Communities, ${user.name}!`,
             "TextBody": emailTextBody,
@@ -78,7 +78,7 @@ The Communities Team
         const emailTextBody = `
 Hello ${user.name},
 
-Someone requested a passwor reset for your Communities account.
+Someone requested a password reset for your Communities account.
 
 If this was you, please use the following link to reset your password: ${resetLink}
 
@@ -88,7 +88,7 @@ The Communities Team
 
 
         await this.sendEmail({
-            "From": "no-reply@peer-review.io",
+            "From": "no-reply@communities.social",
             "To": user.email,
             "Subject": "[Communities] Please reset your password",
             "TextBody": emailTextBody,
@@ -113,7 +113,7 @@ The Communities Team`
 
 
         await this.sendEmail({
-            "From": "no-reply@peer-review.io",
+            "From": "no-reply@communities.social",
             "To": user.email,
             "Subject": `[Communities] ${inviter.name} invites you to join Communities`,
             "TextBody": emailTextBody,

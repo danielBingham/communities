@@ -1,38 +1,60 @@
-#about-page {
-    box-sizing: border-box;
-    max-width: 800px;
-    min-width: 340px;
-    width: 100%;
-
-    padding: 20px;
+#about-page .menu {
+    list-style-type: none;
+}
+#about-page .menu li {
+    padding: 10px;
     font-size: 18px;
-    line-height: 1.7em;
-
-    margin: 50px auto;
 }
-#about-page h1 {
-    text-align: center;
+#about-page .menu li:hover {
+    background-color: var(--primary-color-light);
+    border-radius: 10px;
 }
-#about-page h2 {
-    margin-top: 80px;
+#about-page .menu svg {
+    width: 22px;
+    margin-right: 5px;
+    margin-bottom: -5px;
+    color: var(--icon-color);
 }
-#about-page h3 {
-    margin-top: 60px;
+#about-page .menu a:link,
+#about-page .menu a:visited,
+#about-page .menu a:active {
+    color: var(--primary-color-darkest);
 }
-#about-page h4 {
-    margin-top: 40px;
-}
-
-#about-page .beta {
-    font-size: 14px;
-    font-style: italic;
+#about-page .menu .active a {
+    font-weight: bold;
 }
 
-#about-page h2 a:link, #about-page h2 a:active, #about-page h2 a:visited {
-    color: #333;
-    text-decoration: none;
+@media (width >= 750px) {
+    #about-page {
+        display: grid;
+        grid-template-columns: 320px auto;
+        width: 100%;
+        max-width: 1400px;
+        margin: 50px auto;
+    }
+
+    #about-page .content {
+        padding: 0 30px;
+    }
+
 }
-#about-page h2 a:hover {
-    color: #666;
-    text-decoration: none;
+@media (width < 750px) {
+    #about-page .content {
+        padding: 0 30px;
+        box-sizing: border-box;
+        margin: 0 auto;
+    }
+
+    #about-page .menu {
+        text-align: center;
+        margin: 0 auto;
+    }
+
+    #about-page .menu li {
+        display: inline-block;
+    }
+    
+    #about-page .menu li .nav-text {
+        display: none;
+    }
 }

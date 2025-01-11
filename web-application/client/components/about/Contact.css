@@ -1,0 +1,36 @@
+.contact {
+    box-sizing: border-box;
+    max-width: 800px;
+    min-width: 340px;
+    width: 100%;
+
+    padding: 20px;
+    font-size: 18px;
+    line-height: 1.7em;
+    margin: 0 auto;
+}
+.contact h1 {
+    text-align: center;
+}
+.contact h2 {
+    margin-top: 80px;
+}
+.contact h3 {
+    margin-top: 60px;
+}
+.contact h4 {
+    margin-top: 40px;
+}
+.contact li {
+    padding: 10px 0;
+}
+
+
+.contact h2 a:link, .contact h2 a:active, .contact h2 a:visited {
+    color: #333;
+    text-decoration: none;
+}
+.contact h2 a:hover {
+    color: #666;
+    text-decoration: none;
+}
