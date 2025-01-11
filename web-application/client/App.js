@@ -186,7 +186,6 @@ const App = function(props) {
             <Router>
                 <Header />
                 <main>
-                    { currentUser && currentUser.status == 'unconfirmed' && <NeedEmailConfirmationNotice /> }
                     <Routes>
                         <Route path="/">
                             <Route path=":pageTab" element={ <HomePage /> } />

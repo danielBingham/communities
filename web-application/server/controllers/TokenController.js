@@ -65,6 +65,9 @@ module.exports = class TokenController {
          * 
          * **********************************************************/
 
+        const currentUser = request.session.user
+
+
         // 1. :token must be included.
         if ( ! request.params.token) {
             throw new ControllerError(400, 'no-token',
@@ -114,6 +117,12 @@ module.exports = class TokenController {
                 file: request.session.file
             })
         } else if ( token.type == 'reset-password' || token.type == 'invitation') {
+            if ( currentUser && token.userId !== currentUser.id ) {
+                throw new ControllerError(409, 'logged-in',
+                    `User(${currentUser.id}) currently logged in when attempting to validate a token.`,
+                    `You cannot validate a token while currently logged in.`)
+            }
+
             const session = await this.authenticationService.getSessionForUserId(token.userId)
 
             request.session.user = session.user

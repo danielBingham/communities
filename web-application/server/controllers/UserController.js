@@ -401,6 +401,14 @@ module.exports = class UserController {
                 invitations: currentUser.invitations-1
             }
             await this.userDAO.updateUser(userPatch)
+
+            // Since the user exists, go ahead and insert the friend
+            // relationship.
+            await this.userDAO.insertUserRelationships({ 
+                userId: currentUser.id,
+                friendId: createdUser.id,
+                status: "confirmed"
+            })
            
             // In the case of a user invitation, we don't actually want to
             // return the newly created user (it's basically empty).  We want
@@ -692,15 +700,6 @@ module.exports = class UserController {
         }
 
         await this.userDAO.updateUser(user)
-
-        if ( token && token.type == 'invitation') {
-            // Since the user already exists, go ahead and insert the friend relationship.
-            await this.userDAO.insertUserRelationships({ 
-                userId: token.creatorId,
-                friendId: user.id,
-                status: "confirmed"
-            })
-        }
 
         // Issue #132 - We're going to allow the user's email to be returned in this case,
         // because only authenticated users may call this endpoint and then

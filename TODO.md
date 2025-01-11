@@ -42,19 +42,19 @@
    - [x] User Search
  - [x] Account deletion
  - [ ] Production Infrastructure
- - [ ] Image cropping and resizing 
-  - [ ] User Profile Image
  - [ ] Terms of Service & Privacy Policy
  - [ ] Permissions check (Make sure people can only access what they should)
    - [ ] Lock down image S3 bucket and proxy through backend
 
 ## Bugs
-- [ ] Throw an error when a user tries to accept an invite while logged in
-- [ ] When first logged in after registering from an invite, friend button doesn't recognize inviter as friend until refresh.
+- [x] Throw an error when a user tries to accept an invite while logged in
+- [x] When first logged in after registering from an invite, friend button doesn't recognize inviter as friend until refresh.
 - [ ] Redirect to home screen from all pages.
-- [ ] Don't log in user accepting invite until form is submitted.
+- [-] Don't log in user accepting invite until form is submitted.
 
 ## Follow Up
+ - [ ] Image cropping and resizing 
+  - [ ] User Profile Image
  - [ ] Image Gallery (Up to 10 images?)
  - [ ] Admin page
    - [ ] Track contributions

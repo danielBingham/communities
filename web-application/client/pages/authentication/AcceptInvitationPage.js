@@ -30,6 +30,10 @@ const AcceptInvitationPage = function(props) {
     const navigate = useNavigate()
 
     useEffect(function() {
+
+    }, [])
+
+    useEffect(function() {
         const token = searchParams.get('token')
 
         // If we have a user already logged in, or don't have a token, bail
@@ -57,18 +61,26 @@ const AcceptInvitationPage = function(props) {
             <AcceptInvitationForm />
         )
     } else if ( request && request.state == 'failed' ) {
-        content = (
-            <div className="error">
-                <p>Invalid token.  Something may have gone wrong on our end.</p>
-                <p>
-                    If you did get here following a valid invitation, please
-                    reach out to us at <a
-                    href="mailto:contact@communities.social">contact@communties.social</a>.
-                    You won't be able to register on the email you were invited
-                    with, so we'll need to get things sorted out.
-                </p>
-            </div>
-        )
+        if ( request.error == 'logged-in' ) {
+            content =  (
+                <div className="error">
+                    You are currently logged in.  Please log out before accepting an invitation.
+                </div>
+            )
+        } else {
+            content = (
+                <div className="error">
+                    <p>Invalid token. Something may have gone wrong on our end.</p>
+                    <p>
+                        If you did get here following a valid invitation, please
+                        reach out to us at <a
+                            href="mailto:contact@communities.social">contact@communties.social</a>,
+                        so we can figure out what went wrong and get you a new
+                        invitation.
+                    </p>
+                </div>
+            )
+        }
     }
 
     return (
@@ -77,6 +89,7 @@ const AcceptInvitationPage = function(props) {
                 <div className="form-wrapper">
                     { content }
                 </div>
+                <div className="overlay"></div>
             </PageBody>
         </Page>
     )
