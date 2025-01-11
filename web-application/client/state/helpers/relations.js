@@ -20,7 +20,7 @@ const setRelationsInState = function(relations) {
                     dispatch(setPostsInDictionary({ dictionary: dictionary }))
                 } else if ( relation == 'files' ) {
                     dispatch(setFilesInDictionary({ dictionary: dictionary }))
-                } else if ( relation = 'postReactions' ) {
+                } else if ( relation == 'postReactions' ) {
                     dispatch(setPostReactionsInDictionary({ dictionary: dictionary }))
                 }
             }

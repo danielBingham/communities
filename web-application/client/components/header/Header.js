@@ -6,12 +6,12 @@ import { Bars3Icon } from '@heroicons/react/24/solid'
 import { 
     HomeIcon as HomeIconOutline,
     UsersIcon as UsersIconOutline,
-    QuestionMarkCircleIcon as QuestionMarkCircleIconOutline,
+    InformationCircleIcon as InformationCircleIconOutline,
 } from '@heroicons/react/24/outline'
 import { 
     HomeIcon as HomeIconSolid,
     UsersIcon as UsersIconSolid,
-    QuestionMarkCircleIcon as QuestionMarkCircleIconSolid,
+    InformationCircleIcon as InformationCircleIconSolid,
 } from '@heroicons/react/24/solid'
 
 import AuthenticationNavigation from './navigation/AuthenticationNavigation'
@@ -74,7 +74,7 @@ const Header = function(props) {
                     <div id="navigation">
                         <div id="about-navigation" className="navigation-block">
                             <Link to="/">{ location.pathname == '/' ? <HomeIconSolid /> : <HomeIconOutline /> }Home</Link>
-                            <Link to="/about">{ location.pathname == '/about' ? <QuestionMarkCircleIconSolid /> : <QuestionMarkCircleIconOutline /> }About</Link>
+                            <Link to="/about">{ location.pathname == '/about' ? <InformationCircleIconSolid /> : <InformationCircleIconOutline /> }About</Link>
                             { currentUser && <Link to="/friends">{ location.pathname.startsWith('/friends') ? <UsersIconSolid /> : <UsersIconOutline /> }Friends</Link> }
                         </div>
                         { currentUser && <NotificationMenu /> }
@@ -97,7 +97,7 @@ const Header = function(props) {
                 { showMenu && <div className="mobile-menu" >
                     <div id="about-navigation" className="navigation-block">
                         <Link to="/" onClick={() => setShowMenu(false)}>{ location.pathname == '/' ? <HomeIconSolid /> : <HomeIconOutline /> }<span className="nav-text">Home</span></Link>
-                        <Link to="/about" onClick={() => setShowMenu(false)}>{ location.pathname == '/about' ? <QuestionMarkCircleIconSolid /> : <QuestionMarkCircleIconOutline /> }<span className="nav-text">About</span></Link>
+                        <Link to="/about" onClick={() => setShowMenu(false)}>{ location.pathname == '/about' ? <InformationCircleIconSolid /> : <InformationCircleIconOutline /> }<span className="nav-text">About</span></Link>
                         { currentUser && <Link to="/friends" onClick={() => setShowMenu(false)}>{ location.pathname.startsWith('/friends') ? <UsersIconSolid /> : <UsersIconOutline /> }<span className="nav-text">Friends</span></Link> }
                     </div>
                     { currentUser && <NotificationMenu setShowMobileMenu={setShowMenu}/> }

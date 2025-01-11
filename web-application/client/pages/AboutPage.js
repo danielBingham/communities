@@ -18,7 +18,7 @@ const AboutPage = function(props) {
             <p>We're not taking
                 venture capital. We won't show you ads or suggested post spam. We're not selling your
                 data.</p>
-            <p>We want to <strong>de-enshitify the internet.</strong></p>
+            <p>We want to <strong>de-enshittify the internet.</strong></p>
             <div className="beta">
                 We're currently in invite-only beta.  If you have an invite, register through the link in your email.
             </div>
@@ -48,8 +48,9 @@ const AboutPage = function(props) {
             break on you and when it does you'll tell us about it!</p>
             <h2>What can you do so far?</h2>
             <p>Currently you can share text posts to your friends with attached
-                links or images. Your friends can comment and react to those
-                posts.</p>
+                links or images. Posts are currently limited to a single image,
+                but we plan to introduce galleries soon. Your friends can
+            comment and react to those posts.</p>
             <p>We use a two-way friend model rather than a one-way follower
                 model. The goal is to foster social relationships, not
                 parasocial.</p>

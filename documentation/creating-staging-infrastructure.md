@@ -189,24 +189,11 @@ stringData:
   api_token: <api-token-from-postmark> 
 ```
 
-The ORCID ID secrets: `infrastructure/kubernetes/staging/secrets/orcid-secrets.yaml`:
-
-```yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: peer-review-orcid-secrets
-type: Opaque
-stringData:
-  client_id: <client-id from orcid> 
-  client_secret: <client-secret from orcid> 
-```
-
 
 Then use `kubectl apply -f <file>` to push the each of the secrets to the
 cluster in turn.
 
-Before you create the peer review deployment, add the ELB Readiness Gate label to the default namespace:
+Before you create the web application deployment, add the ELB Readiness Gate label to the default namespace:
 
 ```
 $ kubectl label namespace default elbv2.k8s.aws/pod-readiness-gate-inject=enabled
@@ -215,7 +202,7 @@ $ kubectl label namespace default elbv2.k8s.aws/pod-readiness-gate-inject=enable
 Finally, you'll need to create the Peer Review deployment.
 
 ```
-$ kubectl apply -f infrastructure/kubernetes/staging/peer-review.yaml
+$ kubectl apply -f infrastructure/kubernetes/staging/web-application.yaml
 ```
 
 Once you've created the AWS Load Balancer Controller and prepared the secrets
