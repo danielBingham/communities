@@ -53,7 +53,7 @@
 - [-] Don't log in user accepting invite until form is submitted.
 - [ ] View password in password fields.
 - [ ] Mobile friends page is too wide.
-- [ ] Friend requests crossing streams.
+- [x] Friend requests crossing streams.
 
 ## Follow Up
  - [ ] Image cropping and resizing 
