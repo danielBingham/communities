@@ -51,6 +51,9 @@
 - [x] When first logged in after registering from an invite, friend button doesn't recognize inviter as friend until refresh.
 - [ ] Redirect to home screen from all pages.
 - [-] Don't log in user accepting invite until form is submitted.
+- [ ] View password in password fields.
+- [ ] Mobile friends page is too wide.
+- [ ] Friend requests crossing streams.
 
 ## Follow Up
  - [ ] Image cropping and resizing 

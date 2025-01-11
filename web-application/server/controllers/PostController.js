@@ -206,12 +206,6 @@ module.exports = class PostController {
                 `That post either doesn't exist or you don't have permission to access it.`)
         }
 
-        if ( currentUser.id !== post.userId && post.status !== 'posted' ) {
-            throw new ControllerError(404, 'not-found',
-                `User(${currentUser.id}) attempting to access Post(${postId}) not posted.`,
-                `That post either doesn't exist or you don't have permission to access it.`)
-        }
-
         const friendResults = await this.core.database.query(`
             SELECT
                 user_id, friend_id

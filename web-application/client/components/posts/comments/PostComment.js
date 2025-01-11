@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { useLocation } from 'react-router-dom'
 
+import Linkify from 'react-linkify'
+
 import DateTag from '/components/DateTag'
 import UserTag from '/components/users/UserTag'
 
@@ -46,7 +48,7 @@ const PostComment = function({ postId, id }) {
                 </div>
             </div>
             <div className="content">
-                { comment.content }
+                <Linkify>{ comment.content }</Linkify>
             </div>
         </div>
     )

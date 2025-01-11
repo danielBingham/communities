@@ -10,7 +10,7 @@ if ( process.env.NODE_ENV == 'development' ) {
     require('dotenv').config()
 }
 
-module.exports = {
+const config = {
     host: process.env.HOST,
     environment: process.env.NODE_ENV,
     backend: '/api/0.0.0',
@@ -40,7 +40,28 @@ module.exports = {
     postmark: {
         api_token: process.env.POSTMARK_API_TOKEN
     },
-    stripe: {
+    stripe: {},
+    log_level: process.env.LOG_LEVEL 
+}
+
+if ( process.env.NODE_ENV == 'production' ) {
+    config.stripe = {
+        portal: "https://billing.stripe.com/p/login/28o8xf0LV92h0uc8ww",
+        links: {
+            5: "https://donate.stripe.com/fZecQm48n09F7racMU",
+            10: "https://donate.stripe.com/eVa7w234j1dJaDm3cl",
+            15: "https://donate.stripe.com/aEUaIe20f09Fh1KdQW",
+            20: "https://donate.stripe.com/bIY4jQ7kz2hNfXG28f",
+            40: "https://donate.stripe.com/3csaIegV9aOj3aUeUV",
+            50: "https://donate.stripe.com/aEUdUqbAPcWraDm5kp",
+            60: "https://donate.stripe.com/00gbMi5crg8D3aUfYY",
+            100: "https://donate.stripe.com/5kA4jQ9sH9KfeTC3cg",
+            200: "https://donate.stripe.com/fZe9Ea9sH4pVbHq003",
+            500: "https://donate.stripe.com/8wM17E6gv8GbaDm4gi"
+        }
+    }
+} else {
+    config.stripe = {
         portal: "https://billing.stripe.com/p/login/test_fZebJqdUAaMs5vWdQQ",
         links: {
             5: "https://donate.stripe.com/test_8wMaHN9Uo67H41i001",
@@ -54,6 +75,7 @@ module.exports = {
             200: "https://donate.stripe.com/test_9AQ4jp2rW7bL8hycMS",
             500: "https://donate.stripe.com/test_cN2g27c2w7bL7du8wD"
         }
-    },
-    log_level: process.env.LOG_LEVEL 
-};
+    }
+}
+
+module.exports = config

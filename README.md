@@ -18,7 +18,7 @@ docker build -t web-application:[version] web-application
 
 Tag the image with the repository:
 ```
-docker tag web-application:[version] 843012963492.dkr.ecr.us-east-1.amazonaws.com/communities-shared-docker-repository
+docker tag web-application:[version] 843012963492.dkr.ecr.us-east-1.amazonaws.com/communities/web-application
 ```
 
 Push the image:

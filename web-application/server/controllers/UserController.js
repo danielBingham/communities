@@ -787,6 +787,9 @@ module.exports = class UserController {
                 `You may not submit a friend request for another user.`)
         }
 
+        /*const existingResults = await this.core.database.query(`
+            SELECT user_id, friend_id FROM user_relationships*/
+
         const userRelationship = {
             userId: userId,
             friendId: friendId,
