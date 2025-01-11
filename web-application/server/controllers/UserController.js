@@ -787,32 +787,67 @@ module.exports = class UserController {
                 `You may not submit a friend request for another user.`)
         }
 
-        /*const existingResults = await this.core.database.query(`
-            SELECT user_id, friend_id FROM user_relationships*/
+        const existingResults = await this.core.database.query(`
+            SELECT user_id, friend_id FROM user_relationships
+                WHERE (user_id = $1 AND friend_id = $2) OR (user_id = $2 AND friend_id = $1)
+        `, [ userId, friendId])
 
-        const userRelationship = {
-            userId: userId,
-            friendId: friendId,
-            status: 'pending'
-        }
+        console.log(existingResults.rows)
 
-        await this.userDAO.insertUserRelationships(userRelationship)
-
-        request.session.friends.push(userRelationship)
-
-       
-        await this.notificationService.sendNotifications(
-            currentUser, 
-            'User:friend:create',
-            {
-                userId: userId,
-                friendId: friendId
+        // If User(friendId) already sent User(userId) their own friend
+        // request, then just confirm that relationship.
+        if ( existingResults.rows.length > 0 && existingResults.rows[0].user_id == friendId) {
+            const userRelationship = {
+                userId: friendId,
+                friendId: userId,
+                status: 'confirmed'
             }
-        )
 
-        response.status(200).json({
-            friends: request.session.friends
-        })
+            await this.userDAO.updateUserRelationship(userRelationship)
+
+            await this.notificationService.sendNotifications(
+                currentUser, 
+                'User:friend:update',
+                {
+                    userId: userRelationship.userId,
+                    friendId: userRelationship.friendId 
+                }
+            )
+
+            request.session.friends.push(userRelationship)
+
+            response.status(200).json({
+                friends: request.session.friends
+            })
+        } else if ( existingResults.rows.length > 0 && existingResults.rows[0].user_id == userId ) {
+            throw new ControllerError(400, 'request-exists',
+                `User(${userId}) already sent User(${friendId}) a friend request.`,
+                `You already sent User(${friendId}) a friend request.`)
+        } else {
+            const userRelationship = {
+                userId: userId,
+                friendId: friendId,
+                status: 'pending'
+            }
+
+            await this.userDAO.insertUserRelationships(userRelationship)
+
+            request.session.friends.push(userRelationship)
+
+           
+            await this.notificationService.sendNotifications(
+                currentUser, 
+                'User:friend:create',
+                {
+                    userId: userId,
+                    friendId: friendId
+                }
+            )
+
+            response.status(200).json({
+                friends: request.session.friends
+            })
+        }
     }
 
     async patchFriend(request, response) {

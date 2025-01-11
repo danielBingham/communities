@@ -53,7 +53,7 @@ const Post = function({ id, expanded }) {
         if ( expanded ) {
             setShowMore(true)
         }
-    }, [])
+    }, [ id ])
 
     useEffect(function() {
         if ( requestId ) {
@@ -72,7 +72,11 @@ const Post = function({ id, expanded }) {
         )
     }
 
-    if ( (! request || request.state == 'pending') && ! post ) {
+    if ( request && request.state == 'pending' ) {
+        return ( <Spinner /> )
+    }
+
+    if ( ! post ) {
         return null
     }
 

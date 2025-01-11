@@ -40,7 +40,7 @@ export default class ErrorBoundary extends React.Component {
         if (this.state.hasError) {            
             return ( 
                 <div id="error-boundary" className="page">
-                    <h1>Peer Review: Error</h1>
+                    <h1>Error</h1>
                     <p>
                         Something went wrong in a way that we couldn't handle,
                         or haven't handled yet.  Please report this as a bug.
