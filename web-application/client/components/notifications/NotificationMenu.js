@@ -36,7 +36,7 @@ import NotificationMenuItem from './NotificationMenuItem'
 
 import './NotificationMenu.css'
 
-const NotificationMenu = function({ setShowMobileMenu }) {
+const NotificationMenu = function({ }) {
 
     // ============ Request Tracking ==========================================
 
@@ -125,7 +125,7 @@ const NotificationMenu = function({ setShowMobileMenu }) {
     let notificationViews = []
     for(const id of notifications) {
         notificationViews.push(
-            <NotificationMenuItem key={id} notificationId={id} setShowMobileMenu={setShowMobileMenu} />
+            <NotificationMenuItem key={id} notificationId={id} />
         )
     }
     if ( notificationViews.length == 0 ) {
@@ -139,7 +139,7 @@ const NotificationMenu = function({ setShowMobileMenu }) {
 
     const unread = unreadNotifications.length
     return (
-        <FloatingMenu className="notification-menu">
+        <FloatingMenu className="notification-menu" closeOnClick={true}>
             <FloatingMenuTrigger className="notification-trigger" showArrow={false} >
                 <BellIcon />
                 { unread > 0 && <div className="unread-indicator">{unread}</div> }

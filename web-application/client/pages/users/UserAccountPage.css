@@ -18,6 +18,8 @@
 #user-account-page .menu a:link,
 #user-account-page .menu a:visited,
 #user-account-page .menu a:active {
+    display: block;
+    padding: 10px;
     color: var(--primary-color-darkest);
 }
 #user-account-page .menu .active a {

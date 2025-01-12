@@ -40,12 +40,25 @@ export default class ErrorBoundary extends React.Component {
         if (this.state.hasError) {            
             return ( 
                 <div id="error-boundary" className="page">
-                    <h1>Error</h1>
+                    <h1>You found a Bug!</h1>
                     <p>
-                        Something went wrong in a way that we couldn't handle,
-                        or haven't handled yet.  Please report this as a bug.
+                        Something went wrong in a way that we couldn't
+                        handle, or haven't handled yet.  This is definitely a
+                    bug, please report it by emailing <a
+                        href="mailto:contact@communities.social">contact@communities.social</a>.</p>
+                    <p>We'll need as much information as you can give us.  What
+                        were you doing before this happened?  What did you do
+                    that triggered this?
                     </p>
-                    <p>You'll find more information in your browser console.</p>
+                    <p>You'll find more information in your browser console.
+                        You can get to it by right clicking on this page and
+                        then selecting "Inspect" at the bottom of the menu.  It
+                        should pop open a window with a bunch of tabs. The
+                        "Elements" tab should be selected.  Choose the
+                        "Console" tab. If there's anything in there, scroll
+                        to the top, copy it and send it to us.  Also copy and
+                    paste
+                    the error message below.</p>
                     <div className="error-message"><span className="label">Error Message:</span> { this.state.errorMessage }</div>
                 </div>
             )

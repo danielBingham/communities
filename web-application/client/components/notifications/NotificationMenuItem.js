@@ -27,7 +27,7 @@ import { patchNotification, cleanupRequest } from '/state/notifications'
 
 import './NotificationMenuItem.css'
 
-const NotificationMenu = function({ notificationId, setShowMobileMenu}) {
+const NotificationMenu = function({ notificationId }) {
 
     // ============ Request Tracking ==========================================
 
@@ -52,10 +52,6 @@ const NotificationMenu = function({ notificationId, setShowMobileMenu}) {
     const navigate = useNavigate()
 
     const notificationClicked = function(notification) {
-        if ( setShowMobileMenu ) {
-            setShowMobileMenu(false)
-        }
-
         if ( notification.isRead == false ) {
             const patchedNotification = { ...notification }
             patchedNotification.isRead = true

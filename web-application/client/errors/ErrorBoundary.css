@@ -1,8 +1,22 @@
-#error-boundary { }
 #error-boundary h1 {
     text-align: center;
 }
-#error-boundary .error-message { }
 #error-boundary .error-message .label {
     font-weight: bold;
+}
+
+@media (width >= 750px) {
+    #error-boundary {
+        width: 100%;
+        max-width: 700px;
+        margin: 50px auto;
+    }
+
+}
+@media (width < 750px) {
+    #error-boundary {
+        padding: 0 20px;
+        box-sizing: border-box;
+        margin: 0 auto;
+    }
 }
