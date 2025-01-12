@@ -17,9 +17,7 @@ const SortControl = function({ queryName }) {
 
     useEffect(function() {
         const sort = localStorage.getItem(`${queryName}.sort`)
-        console.log(`localStorage -- ${sort}`)
         if ( sort && sort !== 'active' && sort !== searchParams.get('sort') ) {
-            console.log(`Setting ${sort}`)
             searchParams.set('sort', sort)
             setSearchParams(searchParams)
         }

@@ -21,13 +21,13 @@ const PostsByUserFeed = function({ id }) {
     const dispatch = useDispatch()
 
     useEffect(function() {
-        setRequestId(dispatch(getPosts('PostsByUser', { userId: id })))
-    }, [ id ])
+        let sort = localStorage.getItem(`PostsByUser.sort`) 
+        if ( ! sort ) {
+            sort = searchParams.get('sort') ? searchParams.get('sort') : 'active'
+        } 
 
-    useEffect(function() {
-        const sort = searchParams.get('sort') ? searchParams.get('sort') : 'active'
         setRequestId(dispatch(getPosts('PostsByUser', { userId: id, sort: sort })))
-    }, [ searchParams ])
+    }, [ id, searchParams ])
 
     useEffect(function() {
         if ( requestId ) {

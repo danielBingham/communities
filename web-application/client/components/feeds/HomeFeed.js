@@ -21,18 +21,12 @@ const HomeFeed = function() {
     const dispatch = useDispatch()
 
     useEffect(function() {
-        const sort = searchParams.get('sort') ? searchParams.get('sort') : 'active'
-        const page = searchParams.get('page') ? searchParams.get('page') : 1
-        console.log(`sort: ${sort}`)
-        setRequestId(dispatch(getPosts('HomeFeed', { sort: sort, page: page })))
-    }, [ ])
+        let sort = localStorage.getItem(`HomeFeed.sort`) 
+        if ( ! sort ) {
+            sort = searchParams.get('sort') ? searchParams.get('sort') : 'active'
+        } 
 
-    useEffect(function() {
-        console.log(`Value in SearchParams: `)
-        console.log(searchParams.get('sort'))
-        const sort = searchParams.get('sort') ? searchParams.get('sort') : 'active'
         const page = searchParams.get('page') ? searchParams.get('page') : 1
-        console.log(`searchParams -- sort: ${sort}`)
         setRequestId(dispatch(getPosts('HomeFeed', { sort: sort, page: page })))
     }, [ searchParams ])
 
