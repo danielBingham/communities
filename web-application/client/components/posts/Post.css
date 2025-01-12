@@ -2,29 +2,30 @@
     background-color: white;
     font-size: 16px;
 }
-.post .header {
+.post .post__header {
     font-size: 14px;
     padding: 10px;
     display: grid;
     grid-template-columns: 5fr 1fr;
 }
-.post .header .controls {
+.post .post__header .post__controls {
     text-align: right;
+    padding-top: 3px;
     padding-right: 10px;
 }
-.post .content {
+.post .post__content {
     padding: 0 10px 15px 10px;
     white-space: pre-line;
 }
-.post .show-more {
+.post .post__show-more {
     padding: 10px;
     text-align: center;
 }
-.post .error {
+.post .post__error {
     text-align: center;
     padding: 50px;
 }
-.post .error h1 {
+.post .post__error h1 {
     padding: 0 0 1em 0;
     margin: 0 auto;
 }

@@ -19,11 +19,17 @@
     animation-timing-function: ease-out;
     animation-name: highlight;
 }
-.post-comment .header {
+.post-comment .post-comment__header {
     display: grid;
     grid-template-columns: 5fr 1fr;
+    padding: 10px;
+    font-size: 14px;
 }
-.post-comment .controls-wrapper {
+.post-comment .post-comment__controls {
     text-align: right;
     padding-right: 10px;
+}
+.post-comment .post-comment__content {
+    padding: 0 10px 15px 10px;
+    white-space: pre-line;
 }

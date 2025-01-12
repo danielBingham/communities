@@ -192,6 +192,7 @@ svg.icon {
 main {
     box-sizing: border-box;
     margin: 0px auto;
+    min-width: 375px;
     width: 100%;
     color: var(--main-text-color);
     background-color: var(--main-background-color);

@@ -41,13 +41,13 @@ const PostComment = function({ postId, id }) {
 
     return (
         <div id={`comment-${comment.id}`} key={comment.id} className={`post-comment ${ highlight ? 'highlight' : ''}`}>
-            <div className="header">
+            <div className="post-comment__header">
                 <div><UserTag id={comment.userId} /> commented <a href={`#comment-${comment.id}`}><DateTag timestamp={comment.createdDate} /></a></div>
-                <div className="controls-wrapper">
+                <div className="post-comment__controls">
                     <PostCommentDotsMenu postId={postId} id={id} />
                 </div>
             </div>
-            <div className="content">
+            <div className="post-comment__content">
                 <Linkify>{ comment.content }</Linkify>
             </div>
         </div>

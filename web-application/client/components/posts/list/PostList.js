@@ -60,7 +60,7 @@ const PostList = function({ queryName }) {
 
     return (
         <div className="post-list">
-            <div className="controls">
+            <div className="post-list__controls">
                 <SortControl queryName={queryName} /> 
             </div>
             { postViews }

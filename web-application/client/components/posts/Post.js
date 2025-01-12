@@ -82,22 +82,22 @@ const Post = function({ id, expanded }) {
 
     return (
         <div id={post.id} className="post">
-            <div className="header"> 
-                <div className="details">
+            <div className="post__header"> 
+                <div className="post__details">
                     <UserTag id={post.userId} /> posted <a href={`/${user.username}/${id}`}><DateTag timestamp={post.createdDate} /></a>
                 </div>
-                <div className="controls">
+                <div className="post__controls">
                     <PostDotsMenu postId={post.id} />
                 </div>
             </div>
-            { post.content && post.content.length > 0 && (post.content.length <= 1000 || showMore) && <div className="content">
+            { post.content && post.content.length > 0 && (post.content.length <= 1000 || showMore) && <div className="post__content">
                 <Linkify>{ post.content }</Linkify>
                 {/*{ post.content.length >= 1000 && showMore && <div className="show-more">
                     <a href="" onClick={(e) => { e.preventDefault(); setShowMore(false) }}>Hide More.</a></div> */}
             </div> } 
-            { post.content && post.content.length > 0 && post.content.length > 1000 && ! showMore && <div className="content">
+            { post.content && post.content.length > 0 && post.content.length > 1000 && ! showMore && <div className="post__content">
                 { post.content.substring(0,1000) }...
-                <div className="show-more"><a href="" onClick={(e) => { e.preventDefault(); setShowMore(true) }}>Show More.</a></div>
+                <div className="post__show-more"><a href="" onClick={(e) => { e.preventDefault(); setShowMore(true) }}>Show More.</a></div>
             </div> }
             <PostImage id={id} />
             { post.linkPreviewId && <LinkPreview id={post.linkPreviewId} /> }

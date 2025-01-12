@@ -233,9 +233,11 @@ export const makeTrackedRequest = function(dispatch, getState, slice, method, en
     // Cleanup dead requests before making a new one.
     dispatch(slice.actions.garbageCollectRequests())
 
+    console.log(`Make tracked request: ${method} ${endpoint}`)
     if ( method == 'GET' ) {
         const request = dispatch(getRequestFromCache(slice, 'GET', endpoint))
         if ( request ) {
+            console.log(`Got from cache.`)
             onSuccess(request.result)
             return request.requestId
         }

@@ -136,6 +136,8 @@ export const getPosts = function(name, params) {
         return makeTrackedRequest(dispatch, getState, postsSlice,
             'GET', endpoint, null,
             function(response) {
+                console.log(`Response: GET ${endpoint}`)
+                console.log(response)
                 dispatch(postsSlice.actions.setPostsInDictionary({ dictionary: response.dictionary}))
 
                 dispatch(postsSlice.actions.setPostQueryResults({ name: name, meta: response.meta, list: response.list }))

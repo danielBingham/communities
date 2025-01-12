@@ -35,9 +35,6 @@ header #site-title img {
     margin-right: 2px;
     margin-bottom: -6px;
 }
-header #site-title .wip {
-    font-size: 10px;
-}
 
 header #navigation {
     text-align: right;
@@ -92,13 +89,13 @@ header .mobile-menu {
     text-align: center;
 }
 
-@media (width >= 700px) {
+@media (width >= 800px) {
     header .grid {
-        grid-template-columns: 227px auto;
-        padding: 0 50px;
+        grid-template-columns: 200px auto;
+        padding: 0 25px;
     }
 }
-@media (width < 700px) {
+@media (width < 800px) {
     header .grid {
         grid-template-columns: 32px auto;
         padding: 0 20px;
