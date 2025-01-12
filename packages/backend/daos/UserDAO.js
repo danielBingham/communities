@@ -23,6 +23,146 @@ const FileDAO = require('./FileDAO')
 
 const PAGE_SIZE = 20
 
+
+// Base schema.  We'll modify it with any feature flags in the
+// constructor.
+const SCHEMA = {
+    'User': {
+        table: 'users',
+        fields: {
+            'id': {
+                insert: 'primary',
+                update: 'primary',
+                select: 'always',
+                key: 'id'
+            },
+            'file_id': {
+                insert: 'allowed',
+                update: 'allowed',
+                select: 'always',
+                key: 'fileId'
+            },
+            'name': {
+                insert: 'allowed',
+                update: 'allowed',
+                select: 'always',
+                key: 'name',
+            },
+            'username': {
+                insert: 'allowed',
+                update: 'allowed',
+                select: 'always',
+                key: 'username'
+            },
+            'email': {
+                insert: 'required',
+                update: 'allowed',
+                select: 'full',
+                key: 'email'
+            },
+            'password': {
+                insert: 'allowed',
+                update: 'allowed',
+                select: 'never',
+                key: 'password'
+            },
+            'status': {
+                insert: 'allowed',
+                update: 'allowed',
+                select: 'full',
+                key: 'status'
+            },
+            'permissions': {
+                insert: 'denied',
+                update: 'denied',
+                select: 'full',
+                key: 'permissions'
+            },
+            'settings': {
+                needsFeature: '1-notification-settings',
+                insert: 'allowed',
+                update: 'allowed',
+                select: 'full',
+                key: 'settings'
+            },
+            'about': {
+                insert: 'allowed',
+                update: 'allowed',
+                select: 'always',
+                key: 'about'
+            },
+            'location': {
+                insert: 'allowed',
+                update: 'allowed',
+                select: 'full',
+                key: 'location'
+            },
+            'invitations': {
+                insert: 'allowed',
+                insertDefault: function() {
+                    return 50
+                },
+                update: 'allowed',
+                select: 'full',
+                key: 'invitations'
+            },
+            'created_date': {
+                insert: 'override',
+                insertOverride: 'now()',
+                update: 'denied',
+                select: 'always',
+                key: 'createdDate'
+            },
+            'updated_date': {
+                insert: 'override',
+                insertOverride: 'now()',
+                update: 'override',
+                updateOverride: 'now()',
+                select: 'always',
+                key: 'updatedDate'
+            }
+        }
+    },
+    'UserRelationship': {
+        table: 'user_relationships',
+        fields: {
+            'user_id': {
+                insert: 'primary',
+                update: 'primary',
+                select: 'always',
+                key: 'userId'
+            },
+            'friend_id': {
+                insert: 'primary',
+                update: 'primary',
+                select: 'always',
+                key: 'friendId'
+            },
+            'status': {
+                insert: 'allowed',
+                update: 'allowed',
+                select: 'always',
+                key: 'status'
+            },
+            'created_date': {
+                insert: 'override',
+                insertOverride: 'now()',
+                update: 'denied',
+                select: 'always',
+                key: 'createdDate'
+            },
+            'updated_date': {
+                insert: 'override',
+                insertOverride: 'now()',
+                update: 'override',
+                updateOverride: 'now()',
+                select: 'always',
+                key: 'updatedDate'
+            }
+        }
+    }
+}
+
 module.exports = class UserDAO extends DAO {
 
 
@@ -33,135 +173,7 @@ module.exports = class UserDAO extends DAO {
         this.database = core.database
         this.logger = core.logger
 
-        this.entityMaps = {
-            'User': {
-                table: 'users',
-                fields: {
-                    'id': {
-                        insert: 'primary',
-                        update: 'primary',
-                        select: 'always',
-                        key: 'id'
-                    },
-                    'file_id': {
-                        insert: 'allowed',
-                        update: 'allowed',
-                        select: 'always',
-                        key: 'fileId'
-                    },
-                    'name': {
-                        insert: 'allowed',
-                        update: 'allowed',
-                        select: 'always',
-                        key: 'name',
-                    },
-                    'username': {
-                        insert: 'allowed',
-                        update: 'allowed',
-                        select: 'always',
-                        key: 'username'
-                    },
-                    'email': {
-                        insert: 'required',
-                        update: 'allowed',
-                        select: 'full',
-                        key: 'email'
-                    },
-                    'password': {
-                        insert: 'allowed',
-                        update: 'allowed',
-                        select: 'never',
-                        key: 'password'
-                    },
-                    'status': {
-                        insert: 'allowed',
-                        update: 'allowed',
-                        select: 'full',
-                        key: 'status'
-                    },
-                    'permissions': {
-                        insert: 'denied',
-                        update: 'denied',
-                        select: 'full',
-                        key: 'permissions'
-                    },
-                    'about': {
-                        insert: 'allowed',
-                        update: 'allowed',
-                        select: 'always',
-                        key: 'about'
-                    },
-                    'location': {
-                        insert: 'allowed',
-                        update: 'allowed',
-                        select: 'full',
-                        key: 'location'
-                    },
-                    'invitations': {
-                        insert: 'allowed',
-                        insertDefault: function() {
-                            return 50
-                        },
-                        update: 'allowed',
-                        select: 'full',
-                        key: 'invitations'
-                    },
-                    'created_date': {
-                        insert: 'override',
-                        insertOverride: 'now()',
-                        update: 'denied',
-                        select: 'always',
-                        key: 'createdDate'
-                    },
-                    'updated_date': {
-                        insert: 'override',
-                        insertOverride: 'now()',
-                        update: 'override',
-                        updateOverride: 'now()',
-                        select: 'always',
-                        key: 'updatedDate'
-                    }
-                }
-            },
-            'UserRelationship': {
-                table: 'user_relationships',
-                fields: {
-                    'user_id': {
-                        insert: 'primary',
-                        update: 'primary',
-                        select: 'always',
-                        key: 'userId'
-                    },
-                    'friend_id': {
-                        insert: 'primary',
-                        update: 'primary',
-                        select: 'always',
-                        key: 'friendId'
-                    },
-                    'status': {
-                        insert: 'allowed',
-                        update: 'allowed',
-                        select: 'always',
-                        key: 'status'
-                    },
-                    'created_date': {
-                        insert: 'override',
-                        insertOverride: 'now()',
-                        update: 'denied',
-                        select: 'always',
-                        key: 'createdDate'
-                    },
-                    'updated_date': {
-                        insert: 'override',
-                        insertOverride: 'now()',
-                        update: 'override',
-                        updateOverride: 'now()',
-                        select: 'always',
-                        key: 'updatedDate'
-                    }
-                }
-            }
-        }
+        this.entityMaps = SCHEMA 
     }
 
     getUserSelectionString() {

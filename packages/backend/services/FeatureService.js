@@ -21,6 +21,7 @@
 const FeatureDAO = require('../daos/FeatureDAO')
 
 const ExampleMigration = require('../migrations/ExampleMigration')
+const NotificationSettingsMigration = require('../migrations/NotificationSettingsMigration')
 
 const ServiceError = require('../errors/ServiceError')
 const MigrationError = require('../errors/MigrationError')
@@ -56,6 +57,11 @@ module.exports = class FeatureService {
                 dependsOn: [],
                 conflictsWith: [],
                 migration: new ExampleMigration(core)
+            },
+            '1-notification-settings': {
+                dependsOn: [],
+                conflictsWith: [],
+                migration: new NotificationSettingsMigration(core)
             }
         }
     }

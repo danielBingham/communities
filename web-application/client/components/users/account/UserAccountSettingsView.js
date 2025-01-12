@@ -8,16 +8,22 @@ import { reset } from '/state/system'
 import AreYouSure from '/components/AreYouSure'
 import Button from '/components/generic/button/Button'
 
+import NotificationSettingsSection from '/components/users/account/sections/NotificationSettingsSection'
+
 import './UserAccountSettingsView.css'
 
 const UserAccountSettingsView = function() {
 
     const [ areYouSure, setAreYouSure ] = useState(false)
+    const [ toggled, setToggled ] = useState(false)
 
     const [requestId, setRequestId] = useState(null)
     const request = useSelector((state) => requestId in state.users.requests ? state.users.requests[requestId] : null)
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
+    const features = useSelector((state) => state.system.features)
+
+    const hasNotificationSettings = '1-notification-settings' in features && features['1-notification-settings'].status === 'enabled'
 
     const dispatch = useDispatch()
     const navigate = useNavigate()
@@ -54,12 +60,13 @@ const UserAccountSettingsView = function() {
     return (
         <div className="user-settings">
             <div className="danger-zone">
+                { hasNotificationSettings && <NotificationSettingsSection />}
                 <h2>Danger Zone</h2>
-                <div className="delete-your-account">
-                    <div className="explanation">Delete your account. This will delete
+                <div className="user-settings__delete-your-account">
+                    <div className="user-settings__explanation">Delete your account. This will delete
                     all of your posts and images, as well as your profile. This cannot
                     be undone. Please be certain.</div>
-                    <div className="button-wrapper">
+                    <div className="user-settings__button-wrapper">
                         <Button type="primary-warn" onClick={(e) => setAreYouSure(true)}>Delete My Account</Button>
                     </div>
                     <AreYouSure 

@@ -18,13 +18,13 @@
  *
  ******************************************************************************/
 /********************************************************************
- * Example Migration
+ * NotificationSettings Migration
  *
  * This is purely here for example and documentation purposes.
  *
  ********************************************************************/
 
-module.exports = class ExampleMigration {
+module.exports = class NotificationSettings {
 
     constructor(core) {
         this.database = core.database
@@ -47,12 +47,9 @@ module.exports = class ExampleMigration {
      */
     async initialize() {
         const sql = `
-            CREATE TABLE example (
-                id  bigserial PRIMARY KEY
-            )
+                ALTER TABLE users ADD COLUMN settings jsonb NOT NULL DEFAULT '{}'::jsonb
         `
-
-        const result = await this.database.query(sql, [])
+         await this.database.query(sql, [])
     }
 
     /**
@@ -60,7 +57,7 @@ module.exports = class ExampleMigration {
      */
     async uninitialize() {
         const sql = `
-            DROP TABLE example 
+            ALTER TABLE users DROP COLUMN settings
         `
 
         await this.database.query(sql, [])
@@ -72,21 +69,38 @@ module.exports = class ExampleMigration {
      *
      * Migrations always need to be non-destructive and rollbackable.  
      */
-    async up(targets) {
+    async up(targets) { 
+        const notificationSettings = {
+            'Post:comment:create': {
+                email: true,
+                push: true,
+                web: true
+            },
+            'User:friend:create': {
+                email: true,
+                push: true,
+                web: true
+            },
+            'User:friend:update': {
+                email: true,
+                push: true,
+                web: true
+            }
+        }
+
         const sql = `
-            ALTER TABLE example ADD COLUMN name varchar(256)
+            UPDATE users
+                SET settings = jsonb_insert(settings, '{notifications}', $1)
         `
 
-        await this.database.query(sql, [])
+        await this.database.query(sql, [ notificationSettings ])
     }
 
     /**
      * Rollback the migration.  Again, needs to be non-destructive.
      */
-    async down(targets) {
-        const sql = `
-            ALTER TABLE example DROP COLUMN name
-        `
-        await this.database.query(sql, [])
+    async down(targets) { 
+        await this.database.query(`UPDATE users SET settings = '{}'::jsonb`, [])
+
     }
 }
