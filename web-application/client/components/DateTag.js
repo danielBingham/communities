@@ -15,13 +15,13 @@ const DateTag = function({ timestamp, type }) {
     let content = null
     const diff = Math.floor(now.getTime()/1000) - secondsSinceEpoc
     if ( diff <= 60 ) {
-        content = `${diff} seconds ago`
+        content = `${diff} second${diff == 1 ? '' : 's'} ago`
     } else if ( Math.floor(diff/60) < 60 ) {
-        content = `${Math.floor(diff/60)} minutes ago`
+        content = `${Math.floor(diff/60)} minute${Math.floor(diff/60) == 1 ? '' : 's'} ago`
     } else if ( Math.floor(diff / (60*60)) < 24 ) {
-        content = `${Math.floor(diff/(60*60))} hours ago`
+        content = `${Math.floor(diff/(60*60))} hour${Math.floor(diff/(60*60)) == 1 ? '' : 's'} ago`
     } else if ( Math.floor(diff / (24*60*60)) < 30 ) {
-        content = `${Math.floor(diff / (24*60*60))} days ago`
+        content = `${Math.floor(diff / (24*60*60))} day${Math.floor(diff / (24*60*60)) == 1 ? '' : 's'} ago`
     } else {
         if ( type == 'full' ) {
             content = `at ${date.toLocaleTimeString('en-us')} on ${date.toLocaleDateString('en-us')}`
@@ -35,7 +35,7 @@ const DateTag = function({ timestamp, type }) {
     }
 
     return (
-        <div className="date-tag">{ content }</div>
+        <div className="date-tag" title={`${date.toLocaleTimeString('en-us')} on ${date.toLocaleDateString('en-us')}`}>{ content }</div>
     )
 
 }

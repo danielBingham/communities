@@ -5,6 +5,12 @@ of geography and interests.
 
 ## Deploy
 
+Log in to CodeArtifact:
+
+```
+export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
+```
+
 Login to ECR:
 
 ```
@@ -13,7 +19,7 @@ aws ecr get-login-password --region us-east-1 | docker login --username AWS --pa
 
 Build the image:
 ```
-docker build -t web-application:[version] web-application
+docker build --secret id=CODEARTIFACT_AUTH_TOKEN -t web-application:[version] web-application 
 ```
 
 Tag the image with the repository:

@@ -52,8 +52,11 @@
 - [ ] Redirect to home screen from all pages.
 - [-] Don't log in user accepting invite until form is submitted.
 - [ ] View password in password fields.
-- [ ] Mobile friends page is too wide.
+- [x] Mobile friends page is too wide.
 - [x] Friend requests crossing streams.
+- [ ] Investigate paging off by 1 error?
+- [ ] Notification menu not closing.
+- [ ] Error in first post created by newly invited user?
 
 ## Follow Up
  - [ ] Image cropping and resizing 
