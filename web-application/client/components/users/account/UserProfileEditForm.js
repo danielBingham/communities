@@ -11,6 +11,7 @@ import FileUploadInput from '/components/files/FileUploadInput'
 
 import Input from '/components/generic/input/Input'
 import TextBox from '/components/generic/text-box/TextBox'
+import Button from '/components/generic/button/Button'
 import Spinner from '/components/Spinner'
 
 import './UserProfileEditForm.css'
@@ -43,6 +44,8 @@ const UserProfileEditForm = function(props) {
         return state.authentication.currentUser
     })
 
+
+    const madeChange = fileId != currentUser.fileId || name != currentUser.name || about != currentUser.about
 
     // ======= Actions and Event Handling ===========================
 
@@ -104,6 +107,26 @@ const UserProfileEditForm = function(props) {
         setRequestId(dispatch(patchUser(user)))
     }
 
+    const cancel = function() {
+        if ( ! currentUser.name ) {
+            setName('')
+        } else {
+            setName(currentUser.name)
+        } 
+
+        if ( ! currentUser.about ) {
+            setAbout('')
+        } else {
+            setAbout(currentUser.about)
+        }
+
+        if ( ! currentUser.fileId ) {
+            setFileId(null)
+        } else {
+            setFileId(currentUser.fileId)
+        }
+    }
+
     // ======= Effect Handling ======================================
 
     useEffect(function() {
@@ -152,7 +175,7 @@ const UserProfileEditForm = function(props) {
         )
     }
 
-    let submit = ( <input type="submit" name="submit" value="Submit" /> )
+    let submit = ( <><Button type="secondary-warn" onClick={(e) => cancel()}>Cancel</Button> <input type="submit" name="submit" value="Submit" /></> )
     if ( request && request.state == 'pending') {
         submit = ( <Spinner /> )
     }
@@ -162,8 +185,8 @@ const UserProfileEditForm = function(props) {
             <form onSubmit={onSubmit}>
                 <div className="profile-image">
                     <div>
-                        { ! fileId && <div className="current-image"><UserProfileImage userId={currentUser.id} /></div> }
-                        { fileId && <DraftImageFile fileId={fileId} setFileId={setFileId} width={150} /> }
+                        { ! fileId && <UserCircleIcon /> }
+                        { fileId && <DraftImageFile fileId={fileId} setFileId={setFileId} width={150} deleteOnRemove={false} /> }
                         { ! fileId && <FileUploadInput 
                             fileId={fileId}
                             setFileId={setFileId} 
@@ -191,7 +214,10 @@ const UserProfileEditForm = function(props) {
                     onChange={onAboutChange}
                     error={aboutError}
                 />
-                <div className="result">{result}</div>
+                <div className="result">
+                    { madeChange && <span>Submit to save your changes...</span> }
+                    {result}
+                </div>
                 <div className="form-submit submit">
                     { submit }
                 </div>
