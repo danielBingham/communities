@@ -692,7 +692,7 @@ module.exports = class UserController {
             }
         }
 
-        if ( existingUser.fileId && existingUser.fileId != user.fileId ) {
+        if ( existingUser.fileId && user.fileId !== undefined && existingUser.fileId != user.fileId ) {
             await this.fileDAO.deleteFile(existingUser.fileId)
         }
 
