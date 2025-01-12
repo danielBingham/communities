@@ -61,7 +61,7 @@ const PostList = function({ queryName }) {
     return (
         <div className="post-list">
             <div className="controls">
-                <SortControl /> 
+                <SortControl queryName={queryName} /> 
             </div>
             { postViews }
             <PaginationControls meta={query.meta} />

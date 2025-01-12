@@ -5,14 +5,6 @@
     max-width: 700px;
 }
 .post-list .controls {
-    text-align: right;
-    padding: 10px 40px;
-}
-.post-list .sort-menu {
-    /*float: right;*/
-    /*margin-top: -8px;*/
-    margin-right: 40px;
-    padding: 0 10px;
-    text-align: right;
-    background-color: var(--main-background-color);
+    max-width: 650px;
+    margin: 0 auto 20px auto;
 }
