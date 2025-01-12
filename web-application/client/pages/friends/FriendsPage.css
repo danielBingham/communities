@@ -3,7 +3,6 @@
 }
 
 #friends-page .menu li {
-    padding: 10px;
     font-size: 18px;
 }
 #friends-page .menu li:hover {
@@ -19,6 +18,8 @@
 #friends-page .menu a:link,
 #friends-page .menu a:visited,
 #friends-page .menu a:active {
+    display: block;
+    padding: 10px;
     color: var(--primary-color-darkest);
 }
 #friends-page .menu .active a {
@@ -53,6 +54,7 @@
     }
     
     #friends-page .menu li .nav-text {
-        display: none;
+        display: block;
+        font-size: 10px;
     }
 }

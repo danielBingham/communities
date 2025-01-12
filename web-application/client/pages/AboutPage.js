@@ -58,13 +58,13 @@ const AboutPage = function(props) {
                     <Link to="/about">{ selectedTab == null ? <InformationCircleIconSolid/> : <InformationCircleIconOutline/> } <span className="nav-text">About</span></Link>
                 </li>
                 <li className={ selectedTab == 'faq' ? 'active' : '' }>
-                    <Link to="/about/faq">{ selectedTab == 'faq' ? <QuestionMarkCircleSolid/> : <QuestionMarkCircleOutline/> } <span className="nav-text">Frequently Asked Questions</span></Link>
+                    <Link to="/about/faq">{ selectedTab == 'faq' ? <QuestionMarkCircleSolid/> : <QuestionMarkCircleOutline/> } <span className="nav-text">FAQ</span></Link>
                 </li>
                 <li className={ selectedTab == 'tos' ? 'active' : '' }>
-                    <Link to="/about/tos">{ selectedTab == 'tos' ? <ClipboardDocumentCheckIconSolid/> : <ClipboardDocumentCheckIconOutline/> } <span className="nav-text">Terms of Service</span></Link>
+                    <Link to="/about/tos">{ selectedTab == 'tos' ? <ClipboardDocumentCheckIconSolid/> : <ClipboardDocumentCheckIconOutline/> } <span className="nav-text">Terms</span></Link>
                 </li>
                 <li className={ selectedTab == 'privacy' ? 'active' : '' }>
-                    <Link to="/about/privacy">{ selectedTab == 'privacy' ? <ShieldCheckSolid/> : <ShieldCheckOutline/> } <span className="nav-text">Privacy Policy</span></Link>
+                    <Link to="/about/privacy">{ selectedTab == 'privacy' ? <ShieldCheckSolid/> : <ShieldCheckOutline/> } <span className="nav-text">Privacy</span></Link>
                 </li>
                 <li className={ selectedTab == 'contact' ? 'active' : '' }>
                     <Link to="/about/contact">{ selectedTab == 'contact' ? <MegaphoneSolid/> : <MegaphoneOutline/> } <span className="nav-text">Contact</span></Link>

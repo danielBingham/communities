@@ -55,6 +55,7 @@
     }
     
     #user-account-page .menu li .nav-text {
-        display: none;
+        display: block;
+        font-size: 10px;
     }
 }

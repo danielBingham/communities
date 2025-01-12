@@ -11,7 +11,7 @@ const About = function({}) {
     }, [])
 
     return (
-        <article class="about">
+        <article class="about-view">
             Communities is a user-supported <strong>non-profit social network</strong>.     
             Our goal is to help people build community,
             connect, and organize. <br />

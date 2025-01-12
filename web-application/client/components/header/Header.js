@@ -87,7 +87,23 @@ const Header = function(props) {
         return (
             <header className="mobile" ref={menuRef}>
                 <div className="grid">
-                    <div id="site-title"><Link to="/"><img src="/favicon-32x32.png" />ommunities</Link></div>
+                    <div id="site-title"><Link to="/"><img src="/favicon-32x32.png" /><span className="title-text">ommunities</span></Link></div>
+                    <div id="navigation">
+                        <div id="about-navigation" className="navigation-block">
+                            <Link to="/" onClick={() => setShowMenu(false)}>{ location.pathname == '/' ? <HomeIconSolid /> : <HomeIconOutline /> }<span className="nav-text">Home</span></Link>
+                            <Link to="/about" >{ location.pathname.startsWith('/about') ? <InformationCircleIconSolid /> : <InformationCircleIconOutline /> }<span className="nav-text">About</span></Link>
+                            { currentUser && <Link to="/friends">{ location.pathname.startsWith('/friends') ? <UsersIconSolid /> : <UsersIconOutline /> }<span className="nav-text">Friends</span></Link> }
+                        </div>
+                        { currentUser && <NotificationMenu /> }
+                        <AuthenticationNavigation  />
+                        </div>
+                    </div>
+            </header>
+        )
+        /*return (
+            <header className="mobile" ref={menuRef}>
+                <div className="grid">
+                    <div id="site-title"><Link to="/"><img src="/favicon-32x32.png" /><span className="title-text">ommunities</span></Link></div>
                     <div id="navigation">
                         <div className="navigation-block mobile-menu-trigger">
                             <a href=""  className="no-close" onClick={(e) => {e.preventDefault(); setShowMenu(! showMenu)}}><Bars3Icon /></a>
@@ -104,7 +120,7 @@ const Header = function(props) {
                     <AuthenticationNavigation setShowMobileMenu={setShowMenu} />
                 </div> }
             </header>
-        )
+        )*/
     }
 
 

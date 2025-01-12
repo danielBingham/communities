@@ -1,4 +1,4 @@
-.about {
+.about-view {
     box-sizing: border-box;
     max-width: 800px;
     min-width: 340px;
@@ -9,29 +9,29 @@
     line-height: 1.7em;
     margin: 0 auto;
 }
-.about h1 {
+.about-view h1 {
     text-align: center;
 }
-.about h2 {
+.about-view h2 {
     margin-top: 80px;
 }
-.about h3 {
+.about-view h3 {
     margin-top: 60px;
 }
-.about h4 {
+.about-view h4 {
     margin-top: 40px;
 }
 
-.about .beta {
+.about-view .beta {
     font-size: 14px;
     font-style: italic;
 }
 
-.about h2 a:link, .about h2 a:active, .about h2 a:visited {
+.about-view h2 a:link, .about-view h2 a:active, .about-view h2 a:visited {
     color: #333;
     text-decoration: none;
 }
-.about h2 a:hover {
+.about-view h2 a:hover {
     color: #666;
     text-decoration: none;
 }

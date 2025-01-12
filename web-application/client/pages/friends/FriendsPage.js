@@ -3,13 +3,13 @@ import { useSelector } from 'react-redux'
 import { useNavigate, useLocation, Link, useParams } from 'react-router-dom'
 
 import { 
-    UserGroupIcon as UserGroupIconOutline,
+    MagnifyingGlassIcon as MagnifyingGlassOutline,
     UsersIcon as UsersIconOutline,
     UserPlusIcon as UserPlusIconOutline
 } from '@heroicons/react/24/outline'
 
 import { 
-    UserGroupIcon as UserGroupIconSolid,
+    MagnifyingGlassIcon as MagnifyingGlassSolid,
     UsersIcon as UsersIconSolid,
     UserPlusIcon as UserPlusIconSolid
 } from '@heroicons/react/24/solid'
@@ -57,7 +57,7 @@ const FriendsPage = function() {
                     <Link to="/friends/requests">{ selectedTab == 'requests' ? <UserPlusIconSolid /> : <UserPlusIconOutline /> }<span className="nav-text">Friend Requests</span></Link>
                 </li>
                 <li className={ selectedTab == 'find' ? 'active' : '' }>
-                    <Link to="/friends/find">{ selectedTab == 'find' ? <UserGroupIconSolid /> : <UserGroupIconOutline /> }<span className="nav-text">Find Friends</span></Link>
+                    <Link to="/friends/find">{ selectedTab == 'find' ? <MagnifyingGlassSolid /> : <MagnifyingGlassOutline /> }<span className="nav-text">Find Friends</span></Link>
                 </li>
             </ul>
             <div className="content">

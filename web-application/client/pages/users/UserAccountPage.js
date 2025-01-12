@@ -69,13 +69,13 @@ const UserAccountPage = function(props) {
         <div id="user-account-page">
             <ul className="menu">
                 <li className={ selectedTab == 'profile' ? 'active' : '' }>
-                    <Link to="/account/profile">{ selectedTab == 'profile' ? <UserCircleIconSolid /> : <UserCircleIconOutline /> } <span className="nav-text">Edit Profile</span></Link>
+                    <Link to="/account/profile">{ selectedTab == 'profile' ? <UserCircleIconSolid /> : <UserCircleIconOutline /> } <span className="nav-text">Profile</span></Link>
                 </li>
                 <li className={ selectedTab == 'change-email' ? 'active' : '' }>
-                    <Link to="/account/change-email">{ selectedTab == 'change-email' ? <EnvelopIconSolid /> : <EnvelopIconOutline /> } <span className="nav-text">Change Email</span></Link>
+                    <Link to="/account/change-email">{ selectedTab == 'change-email' ? <EnvelopIconSolid /> : <EnvelopIconOutline /> } <span className="nav-text">Email</span></Link>
                 </li>
                 <li className={ selectedTab == 'change-password' ? 'active' : '' }>
-                    <Link to="/account/change-password">{ selectedTab == 'change-password' ? <LockClosedIconSolid/> : <LockClosedIconOutline/> } <span className="nav-text">Change Password</span></Link>
+                    <Link to="/account/change-password">{ selectedTab == 'change-password' ? <LockClosedIconSolid/> : <LockClosedIconOutline/> } <span className="nav-text">Password</span></Link>
                 </li>
                 <li className={ selectedTab == 'contribute' ? 'active' : '' }>
                     <Link to="/account/contribute">{ selectedTab == 'contribute' ? <CreditCardIconSolid /> : <CreditCardIconOutline /> } <span className="nav-text">Contribution</span></Link>

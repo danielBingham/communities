@@ -13,7 +13,6 @@ header {
 
 header .grid {
     display: grid;
-    padding: 0 50px;
 }
 
 header #site-title {
@@ -96,13 +95,18 @@ header .mobile-menu {
 @media (width >= 700px) {
     header .grid {
         grid-template-columns: 227px auto;
+        padding: 0 50px;
     }
 }
 @media (width < 700px) {
     header .grid {
-        grid-template-columns: 227px auto;
+        grid-template-columns: 32px auto;
+        padding: 0 20px;
     }
     header .nav-text {
+        display: none;
+    }
+    header #site-title .title-text {
         display: none;
     }
 }
