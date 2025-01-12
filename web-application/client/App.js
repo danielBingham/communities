@@ -67,7 +67,7 @@ const App = function(props) {
     const [ featuresRequestId, setFeaturesRequestId] = useState(null)
     const featuresRequest = useSelector(function(state) {
         if ( featuresRequestId ) {
-            return state.features.requests[featuresRequestId]
+            return state.system.requests[featuresRequestId]
         } else {
             return null
         }
@@ -100,6 +100,8 @@ const App = function(props) {
         setConfigurationRequestId(dispatch(getConfiguration()))
     }, [])
 
+    // Note to self: These are system slice requests.  They go through
+    // state/system and don't hit the API backend, instead they hit the root.
     useEffect(function() {
         if ( configurationRequest && configurationRequest.state == 'fulfilled') {
             if ( ! configuration.maintenance_mode ) {

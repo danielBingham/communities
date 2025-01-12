@@ -35,7 +35,7 @@ module.exports = class FeatureFlags {
         }
     }
 
-    hasFeature(name) {
+    has(name) {
         const feature = this.features[name]
 
         return feature && feature.status == 'enabled'

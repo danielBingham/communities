@@ -47,7 +47,7 @@ Hi {{postAuthor.name}},
 
 {{commentAuthor.name}} left a new comment on your post "{{postIntro}}...". 
 
-Read the comment here: {{host}}/{{postAuthor.username}}/{{post.id}}#comment-{{comment.id}}.
+Read the comment here: {{host}}{{postAuthor.username}}/{{post.id}}#comment-{{comment.id}}.
 
 Cheers,
 The Communities Team
@@ -64,7 +64,7 @@ Hi {{friend.name}},
 
 You have a new friend request on Communities from {{requester.name}}.
 
-To accept, log in to your account and view your friend requests: {{host}}/friends/requests
+To accept, log in to your account and view your friend requests: {{host}}friends/requests
 
 Cheers,
 The Communities Team`)
@@ -80,7 +80,7 @@ Hi {{requester.name}},
 
 {{friend.name}} accepted your friend request.
 
-You can now view their profile here: {{host}}/{{friend.username}}
+You can now view their profile here: {{host}}{{friend.username}}
 
 Cheers,
 The Communities Team`)
@@ -124,26 +124,35 @@ The Communities Team`)
         
         context.host = this.core.config.host
 
-        const notification = {
-            userId: userId,
-            type: type,
-            description: definition.text(context),
-            path: definition.path(context) 
-        }
-        await this.notificationDAO.insertNotification(notification)
-
-        
         const results = await this.core.database.query(`
-            SELECT email FROM users WHERE id = $1
+            SELECT email, settings FROM users WHERE id = $1
         `, [ userId ])
 
-        const email = results.rows[0].email
+        const settings = results.rows[0].settings
 
-        await this.emailService.sendNotificationEmail(
-            email, 
-            definition.email.subject(context), 
-            definition.email.body(context)
-        )
+        // Only create the web notification if the user has web notifications
+        // turned on for that notification.
+        if ( settings.notifications[type].web ) {
+            const notification = {
+                userId: userId,
+                type: type,
+                description: definition.text(context),
+                path: definition.path(context) 
+            }
+            await this.notificationDAO.insertNotification(notification)
+        }
+
+        // Only send the email if the user has emails turned on for that
+        // notification.
+        if ( settings.notifications[type].email ) {
+            const email = results.rows[0].email
+
+            await this.emailService.sendNotificationEmail(
+                email, 
+                definition.email.subject(context), 
+                definition.email.body(context)
+            )
+        }
     }
 
     async sendNewCommentNotification(currentUser, context) {

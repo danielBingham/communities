@@ -81,9 +81,7 @@ module.exports = class LinkPreviewController {
 
         const url = request.body.url
 
-        console.log(url)
         const linkPreview = await this.linkPreviewService.getPreview(url)
-        console.log(linkPreview)
         await this.linkPreviewDAO.insertLinkPreviews(linkPreview)
 
         const results = await this.linkPreviewDAO.selectLinkPreviews({
@@ -91,7 +89,6 @@ module.exports = class LinkPreviewController {
             params: [ linkPreview.url ]
         })
 
-        console.log(results)
         if ( results.list.length < 0 ) {
             throw new ControllerError(500, 'server-error',
                 `LinkPreview for ${url} missing after insert.`,

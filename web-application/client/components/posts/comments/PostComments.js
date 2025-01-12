@@ -73,6 +73,9 @@ const PostComments = function({ postId, expanded }) {
     return (
         <div className="post-comments">
             { commentViews }
+            { showComments && post.comments.length > 0 && <div className="show-comments">
+                <a href="" onClick={(e) => { e.preventDefault(); setShowComments(false)}}>Hide { post.comments.length } comments.</a>
+            </div> }
             <PostCommentForm postId={postId} setShowComments={setShowComments} /> 
         </div>
     )

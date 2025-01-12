@@ -3,15 +3,21 @@
     max-width: 600px;
     margin: 0 auto;
 }
-.user-settings .delete-your-account {
+.user-settings__delete-your-account {
     padding: 20px;
     border: thin solid var(--danger-color-light);
     background-color: var(--danger-color-lightest);
     border-radius: 10px;
 }
-.user-settings .explanation {
+.user-settings__explanation {
     padding: 10px;
 }
-.user-settings .button-wrapper {
+.user-settings__button-wrapper {
     text-align: center;
+}
+.user-settings__notification-settings__section {
+    padding: 20px;
+    border: thin solid var(--main-border-color);
+    border-radius: 10px;
+    background-color: white;
 }

@@ -69,7 +69,6 @@ module.exports = class S3FileService {
     }
 
     async getSignedUrl(path) {
-        console.log(path)
         const params = {
             Bucket: this.config.s3.bucket,
             Key: path

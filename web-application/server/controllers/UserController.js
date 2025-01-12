@@ -248,12 +248,9 @@ module.exports = class UserController {
                 result: []
             })
         }
-        console.log(where)
-        console.log(params)
         const meta = await this.userDAO.countUsers(where, params, page)
         const results = await this.userDAO.selectCleanUsers(where, params, order, page)
 
-        console.log(results)
         results.meta = meta
 
         results.relations = await this.getRelations(results, requestedRelations) 
@@ -791,8 +788,6 @@ module.exports = class UserController {
             SELECT user_id, friend_id FROM user_relationships
                 WHERE (user_id = $1 AND friend_id = $2) OR (user_id = $2 AND friend_id = $1)
         `, [ userId, friendId])
-
-        console.log(existingResults.rows)
 
         // If User(friendId) already sent User(userId) their own friend
         // request, then just confirm that relationship.

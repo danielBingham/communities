@@ -1,0 +1,39 @@
+.toggle {
+    display: block;
+    width: 40px;
+    height: 20px;
+    border: thin solid var(--primary-color-light);
+    border-radius: 20px;
+}
+.toggle__switch {
+    display: inline-block;
+    box-sizing: border-box;
+    width: 20px;
+    height: 20px;
+    border-radius: 20px;
+    border: thin solid var(--primary-color-light);
+    background-color: white;
+}
+.toggle.on {
+    background-color: var(--primary-color-main);
+    text-align: right;
+}
+.toggle.off {
+    background-color: var(--primary-color-lightest);
+    text-align: left;
+}
+
+.toggle__wrapper {
+    display: grid;
+    grid-template-columns: auto 40px;
+    align-items: center;
+    padding: 10px;
+}
+.toggle__label {
+    font-weight: bold;
+    font-size: 18px;
+}
+.toggle__explanation {
+    font-size: 12px;
+    font-style: italic;
+}

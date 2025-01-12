@@ -33,6 +33,10 @@ module.exports = class DAO {
     getSelectionString(entityName, shouldGetFull) {
         let string = ''
         for(const [field, meta] of Object.entries(this.entityMaps[entityName].fields)) {
+            if ( meta.needsFeature && ! this.core.features.has(meta.needsFeature)) {
+                continue
+            }
+
             if ( meta.select == 'never' || meta.select == 'override' ) {
                 continue
             }
@@ -52,7 +56,9 @@ module.exports = class DAO {
     hydrate(entityName, row) {
         const entity = {}
         for(const [field, meta] of Object.entries(this.entityMaps[entityName].fields)) {
-            if ( meta.select == 'override' ) {
+            if ( meta.needsFeature && ! this.core.features.has(meta.needsFeature) ){
+                entity[meta.key] = null
+            } else if ( meta.select == 'override' ) {
                 entity[meta.key] = meta.selectOverride()
             } else if ( row[`${entityName}_${meta.key}`] == undefined ) {
                 entity[meta.key] = null
@@ -78,6 +84,9 @@ module.exports = class DAO {
 
         let columns = '('
         for (const [field, meta] of Object.entries(this.entityMaps[entityName].fields)) {
+            if ( meta.needsFeature && ! this.core.features.has(meta.needsFeature)) {
+                continue
+            }
             if ( meta.insert == 'denied' ) {
                 continue
             }
@@ -97,6 +106,10 @@ module.exports = class DAO {
         for(const entity of entities) {
             let row = '('
             for(const [field, meta] of Object.entries(this.entityMaps[entityName].fields)) {
+                if ( meta.needsFeature && ! this.core.features.has(meta.needsFeature)) {
+                    continue
+                }
+
                 if ( meta.insert == 'required' && ! ( meta.key in entity ) ) {
                     throw new DAOError('missing-field',
                         `Required '${meta.key}' not found in ${entityName}.`)
@@ -152,6 +165,9 @@ module.exports = class DAO {
         const table = this.entityMaps[entityName].table
 
         for(const [field, meta] of Object.entries(this.entityMaps[entityName].fields)) {
+            if ( meta.needsFeature && ! this.core.features.has(meta.needsFeature)) {
+                continue
+            }
 
             // Primary keys go into the `where` statement.
             if ( meta.update == 'primary' && meta.key in entity ) {
