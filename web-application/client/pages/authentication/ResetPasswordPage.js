@@ -66,7 +66,9 @@ const ResetPasswordPage = function(props) {
     return (
         <Page id="reset-password">
             <PageBody>
-            { content }
+                <div className="form-wrapper">
+                    { content }
+                </div>
             </PageBody>
         </Page>
     )

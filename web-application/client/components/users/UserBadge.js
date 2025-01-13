@@ -49,11 +49,11 @@ const UserBadge = function(props) {
     if ( user ) {
         return (
             <div className="user-badge">
-                <div className="badge-grid">
+                <div className="user-badge__grid">
                     <UserProfileImage userId={user.id} />
-                    <div className="details" >
-                        <div className="name"><Link to={ `/${user.username}` }>{user.name}</Link></div>
-                        <div className="about">{ user.about?.length > 100 ? user.about.substring(0,100).trim()+'...' : user.about }</div>
+                    <div className="user-badge__details" >
+                        <div className="user-badge__name"><Link to={ `/${user.username}` }>{user.name}</Link></div>
+                        <div className="user-badge__about">{ user.about?.length > 100 ? user.about.substring(0,100).trim()+'...' : user.about }</div>
                         <FriendButton userId={user.id} />
                     </div> 
                 </div>

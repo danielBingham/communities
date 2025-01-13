@@ -81,9 +81,22 @@ const SCHEMA = {
             'settings': {
                 needsFeature: '1-notification-settings',
                 insert: 'allowed',
+                insertDefault: function() {
+                    return {}
+                },
                 update: 'allowed',
                 select: 'full',
                 key: 'settings'
+            },
+            'notices': {
+                needsFeature: '3-notices',
+                insert: 'allowed',
+                insertDefault: function() {
+                    return {}
+                },
+                update: 'allowed',
+                select: 'full',
+                key: 'notices'
             },
             'about': {
                 insert: 'allowed',

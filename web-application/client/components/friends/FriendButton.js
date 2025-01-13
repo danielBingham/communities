@@ -67,17 +67,17 @@ const FriendButton = function({ userId }) {
     if ( ! friend ) {
         content = (<Button type="primary" onClick={() => addFriend()}>Add Friend</Button>)
     } else if (friend && friend.userId == currentUser.id && friend.status == 'pending' ) {
-        content = (<Button type="secondary-warn" onClick={() => rejectFriend()}>Cancel Friend Request</Button>)
+        content = (<Button type="secondary-warn" onClick={() => rejectFriend()}>Cancel Request</Button>)
     } else if ( friend && friend.friendId == currentUser.id && friend.status == 'pending' ) {
         content = (
             <div>
-                <Button type="primary" onClick={() => acceptFriend()}>Accept Friend Request</Button> 
-                <Button type="secondary" onClick={() => rejectFriend()}>Reject Friend Request</Button>
+                <Button type="primary" onClick={() => acceptFriend()}>Accept Request</Button> 
+                <Button type="secondary" onClick={() => rejectFriend()}>Reject Request</Button>
             </div>
         )
     } else if ( friend && friend.status == 'confirmed' ) {
         content = (
-            <Button type="secondary-warn" onClick={() => rejectFriend()}>Remove Friend</Button>
+            <Button type="secondary-warn" onClick={() => rejectFriend()}>Remove</Button>
         )
     }
 

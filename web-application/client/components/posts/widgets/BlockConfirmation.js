@@ -27,6 +27,7 @@ const BlockConfirmation = function({ isVisible, cancel, execute  }) {
                             categories, then it is not appropriate to block it.
                             Please use "dislike" instead to express your
                             displeasure, or ignore the post entirely.</p>
+                        <p><em>Blocks are not currently anonymous.  We're seeking feedback on this point.</em></p>
                     </div>
                     <div className="buttons">
                         <Button type="secondary" onClick={(e) => cancel() }>Cancel</Button> 

@@ -20,7 +20,6 @@
 
 .spinner-wrapper.local {
     display: inline-block;
-    padding: 20px;
     text-align: center;
     margin: auto auto;
 }
@@ -30,8 +29,8 @@
   display: inline-block;
   box-sizing: border-box;
   margin: auto auto;
-  width: 20px;
-  height: 20px;
+  width: 1em;
+  height: 1em;
   border-radius: 50%;
   border: 2px solid var(--primary-color-light);
   border-top-color: var(--primary-color-darkest);;

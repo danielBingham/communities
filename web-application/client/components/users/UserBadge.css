@@ -3,7 +3,7 @@
     width: 340px;
     padding: 10px;
 }
-.user-badge .badge-grid {
+.user-badge__grid {
     display: grid;
     grid-template-columns: 120px auto;
 } 
@@ -13,13 +13,13 @@
     margin-right: 5px;
     margin-bottom: 5px;
 }
-.user-badge .details {
+.user-badge__details {
     padding: 10px;
     align-items: center;
 }
-.user-badge .name {
+.user-badge__name {
     font-size: 18px;
 }
-.user-badge .about {
+.user-badge__about {
     font-size: 12px;
 }

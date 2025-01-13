@@ -6,6 +6,7 @@ import { patchAuthentication, cleanupRequest as cleanupAuthenticationRequest } f
 import { patchUser, cleanupRequest } from '/state/users'
 
 import Spinner from '/components/Spinner'
+import Input from '/components/generic/input/Input'
 
 import './ResetPasswordForm.css'
 
@@ -132,27 +133,26 @@ const ResetPasswordForm = function(props) {
 
     let content = (
         <form onSubmit={onSubmit}>
-            <h2>Reset Password</h2>
-            <div className="form-field new-password">
-                <label htmlFor="new-password">New Password</label>
-                <input type="password"
-                    name="new-password"
-                    value={newPassword}
-                    onBlur={ (event) => isValid('newPassword') }
-                    onChange={(event) => setNewPassword(event.target.value)}
-                />
-                <div className="error">{ passwordErrorView }</div>
-            </div>
-            <div className="form-field confirm-new-password">
-                <label htmlFor="confirm-new-password">Confirm New Password</label>
-                <input type="password"
-                    name="confirm-new-password"
-                    value={confirmNewPassword}
-                    onBlur={ (event) => isValid('confirmNewPassword') }
-                    onChange={(event) => setConfirmNewPassword(event.target.value)}
-                />
-                <div className="error">{ passwordConfirmationErrorView} </div>
-            </div>
+            <div className="instructions">Please enter a new password for your Communities account.</div> 
+            <Input
+                name="new-password"
+                label="New Password"
+                explanation="Enter a new password.  It must be at least 16 characters long."
+                type="password"
+                value={newPassword}
+                onBlur={ (event) => isValid('newPassword') }
+                onChange={(event) => setNewPassword(event.target.value)}
+                error={passwordErrorView} />
+            <Input
+                name="confirm-new-password"
+                label="Confirm New Password"
+                explanation="Please enter your new password again to confirm it."
+                type="password"
+                value={confirmNewPassword}
+                onBlur={ (event) => isValid('confirmNewPassword') }
+                onChange={(event) => setConfirmNewPassword(event.target.value)}
+                error={passwordConfirmationErrorView} />
+
             <div className="submit">
                 <input type="submit" name="submit" value="Reset Password" />                    
             </div>
