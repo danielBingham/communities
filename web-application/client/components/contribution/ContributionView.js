@@ -16,11 +16,9 @@ const ContributionView = function() {
             <div className="intro">
                 Communities is a <strong>non-profit social network</strong>.  We're not taking
                 venture capital, not showing you ads, and not selling your
-                    data. <br />  
+                    data. We're trying to de-enshittify the internet. <br />  
                 <p>We <strong>need user contributions</strong> for this to work.  
-                If only 5% of the users who use the
-                    platform <strong>contribute $10 per month</strong> then we'll be comfortably
-                sustainable. Please contribute if you can!</p>
+                Please contribute if you can!</p>
                 <p><strong>Beta:</strong> If you've already set up a contribution, <a href={portalURI}>click here</a> to manage it. If you have any issues, please reach out to <a href="mailto:contact@communities.social">contact@communities.social</a>.</p>
             </div>
             <div className="contribution-grid">

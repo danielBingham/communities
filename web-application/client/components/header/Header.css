@@ -89,13 +89,13 @@ header .mobile-menu {
     text-align: center;
 }
 
-@media (width >= 800px) {
+@media (width >= 850px) {
     header .grid {
         grid-template-columns: 200px auto;
         padding: 0 25px;
     }
 }
-@media (width < 800px) {
+@media (width < 850px) {
     header .grid {
         grid-template-columns: 32px auto;
         padding: 0 20px;

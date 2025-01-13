@@ -1,0 +1,7 @@
+.welcome-notice {
+    max-width: 650px;
+    font-size: 16px;
+}
+.welcome-notice__close {
+    text-align: center;
+}

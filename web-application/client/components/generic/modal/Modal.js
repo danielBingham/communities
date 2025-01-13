@@ -15,9 +15,9 @@ const Modal = function({ isVisible, setIsVisible, className, children }) {
 
     return isVisible ? createPortal(
             <div className={`modal-wrapper ${className ? className : ''}`} >
-                <div className="modal-overlay" onClick={(e) => setIsVisible(false)}></div>
+                <div className="modal__overlay" onClick={(e) => setIsVisible(false)}></div>
                 <div className="modal">
-                    <a href="" onClick={close} className="close"><XCircleIcon /></a>
+                    <a href="" onClick={close} className="modal__close"><XCircleIcon /></a>
                     { children }
                 </div>
             </div>,

@@ -7,6 +7,8 @@ import PostForm from '/components/posts/form/PostForm'
 import HomeFeed from '/components/feeds/HomeFeed'
 import WelcomeSplash from '/components/about/WelcomeSplash'
 
+import WelcomeNotice from '/components/notices/WelcomeNotice'
+
 import Spinner from '/components/Spinner'
 
 import './HomePage.css'
@@ -22,6 +24,7 @@ const HomePage = function(props) {
         }
     })
 
+    const features = useSelector((state) => state.system.features)
     const currentUser = useSelector(function(state) {
         return state.authentication.currentUser
     })
@@ -54,7 +57,14 @@ const HomePage = function(props) {
         if ( ! requestId || ! request || request.state !== 'fulfilled' ) {
             content = ( <Spinner /> )
         } else {
+            let welcomeNotice = null
+            if ( '3-notices' in features && currentUser && ! currentUser.notices?.welcomeNotice ) {
+                welcomeNotice = ( <WelcomeNotice /> )
+            }
+
             content = (
+                <>
+                { welcomeNotice }
                 <div className="home-feeds">
                     <div className="content">
                         <PostForm postId={postInProgressId} />
@@ -63,9 +73,11 @@ const HomePage = function(props) {
                         </div>
                     </div>
                 </div>
+                </>
             )
         }
     }
+
 
     return (
         <div id="home-page">

@@ -36,9 +36,26 @@ module.exports = class LinkPreviewService {
 
         const data = await response.text()
 
-        const dom = new jsdom.JSDOM(data)
-        const doc = dom.window.document
+        let dom = null
+        try {
+            dom = new jsdom.JSDOM(data)
+        } catch (error) {
+            this.core.logger.log(`LinkPreviewService:: Caught error while parsing document.`)
+            this.core.logger.error(error)
+        }
 
+        if ( dom === null ) {
+            return {
+                url: url,
+                title: '',
+                type: '',
+                siteName: '',
+                description: '',
+                imageUrl: '' 
+            }
+        }
+
+        const doc = dom.window.document
         // Default to the Open Graph values and fallback to reasonable defaults if we can't find them.
 
         let title = doc.querySelector('meta[property="og:title"]')?.getAttribute('content') || null 
