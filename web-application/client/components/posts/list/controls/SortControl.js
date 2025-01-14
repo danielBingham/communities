@@ -32,14 +32,14 @@ const SortControl = function({ queryName }) {
             <a
                 href=""
                 className={`sort-option ${sort == 'active' ? 'current' : ''}`}
-                onClick={(e) => {setSort('active')}}
+                onClick={(e) => {e.preventDefault(); setSort('active')}}
             >
                 Active 
             </a>
             <a
                 href=""
                 className={`sort-option ${sort == 'newest' ? 'current' : ''}`} 
-                onClick={(e) => {setSort('newest')}}
+                onClick={(e) => {e.preventDefault(); setSort('newest')}}
             >
                 New 
             </a>
