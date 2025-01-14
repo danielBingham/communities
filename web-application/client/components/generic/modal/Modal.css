@@ -16,7 +16,7 @@
     border-radius: 10px;
     background-color: white;
     z-index: 1000;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 .modal__overlay {
     position: fixed;
