@@ -16,6 +16,8 @@ import {
 
 import Spinner from '/components/Spinner'
 
+import WelcomeNotice from '/components/notices/WelcomeNotice'
+
 import YourFriendsList from '/components/friends/YourFriendsList'
 import FriendRequestsList from '/components/friends/FriendRequestsList'
 import FindFriends from '/components/friends/FindFriends'
@@ -27,6 +29,7 @@ import './FriendsPage.css'
 const FriendsPage = function() {
     const { pageTab } = useParams()
 
+    const features = useSelector((state) => state.system.features)
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
     // Protect this page so the user must be logged in.
@@ -47,8 +50,14 @@ const FriendsPage = function() {
         content = ( <FindFriends /> )
     } 
 
+    let welcomeNotice = null
+    if ( '3-notices' in features && currentUser && ! currentUser.notices?.welcomeNotice ) {
+        welcomeNotice = ( <WelcomeNotice /> )
+    }
+
     return (
         <div id="friends-page">
+            { welcomeNotice }
             <ul className="menu">
                 <li className={ selectedTab == 'friends' ? 'active' : '' }>
                     <Link to="/friends">{ selectedTab == 'friends' ? <UsersIconSolid /> : <UsersIconOutline /> }<span className="nav-text">Your Friends</span></Link>

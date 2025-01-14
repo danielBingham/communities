@@ -41,10 +41,10 @@
  - [x] Suggested Friends instead of Browse
    - [x] User Search
  - [x] Account deletion
- - [ ] Production Infrastructure
- - [ ] Terms of Service & Privacy Policy
+ - [x] Production Infrastructure
+ - [x] Terms of Service & Privacy Policy
  - [ ] Permissions check (Make sure people can only access what they should)
-   - [ ] Lock down image S3 bucket and proxy through backend
+   - [x] Lock down image S3 bucket and proxy through backend
 
 ## Bugs
 - [x] Throw an error when a user tries to accept an invite while logged in
@@ -55,7 +55,7 @@
 - [x] Mobile friends page is too wide.
 - [x] Friend requests crossing streams.
 - [ ] Investigate paging off by 1 error?
-- [ ] Notification menu not closing.
+- [x] Notification menu not closing.
 - [ ] Error in first post created by newly invited user?
 
 ## Follow Up

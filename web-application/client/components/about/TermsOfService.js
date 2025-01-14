@@ -11,7 +11,7 @@ const TermsOfService = function({}) {
     }, [])
 
     return (
-        <article class="tos">
+        <article className="tos">
             <h1>Terms of Service</h1>
             <ol>
                 <li><strong>Use at your own risk.</strong> Communities is

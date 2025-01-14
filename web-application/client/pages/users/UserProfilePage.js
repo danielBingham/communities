@@ -9,6 +9,7 @@ import Spinner from '/components/Spinner'
 import UserView from '/components/users/UserView'
 import PostsByUserFeed from '/components/feeds/PostsByUserFeed'
 
+import WelcomeNotice from '/components/notices/WelcomeNotice'
 import LoginForm from '/components/authentication/LoginForm'
 
 import './UserProfilePage.css'
@@ -45,6 +46,7 @@ const UserProfilePage = function(props) {
         }
     })
 
+    const features = useSelector((state) => state.system.features)
     const currentUser = useSelector(function(state) {
         return state.authentication.currentUser
     })
@@ -83,8 +85,14 @@ const UserProfilePage = function(props) {
         )
     }
 
+    let welcomeNotice = null
+    if ( '3-notices' in features && currentUser && ! currentUser.notices?.welcomeNotice ) {
+        welcomeNotice = ( <WelcomeNotice /> )
+    }
+
     return (
         <div id="user-profile-page">
+            { welcomeNotice }
             <div className='right-sidebar'>
                 <UserView id={id} />
             </div>

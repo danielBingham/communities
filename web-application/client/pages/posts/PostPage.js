@@ -7,11 +7,14 @@ import { Page } from '/components/generic/Page'
 import PostForm from '/components/posts/form/PostForm'
 import LoginForm from '/components/authentication/LoginForm'
 
+import WelcomeNotice from '/components/notices/WelcomeNotice'
+
 import Post from '/components/posts/Post'
 
 const PostPage = function() {
     const { username, postId } = useParams()
 
+    const features = useSelector((state) => state.system.features)
     const currentUser = useSelector(function(state) {
         return state.authentication.currentUser
     })
@@ -27,6 +30,11 @@ const PostPage = function() {
         )
     }
 
+    let welcomeNotice = null
+    if ( '3-notices' in features && currentUser && ! currentUser.notices?.welcomeNotice ) {
+        welcomeNotice = ( <WelcomeNotice /> )
+    }
+
     const draft = localStorage.getItem(`draft.${postId}`)
     if ( draft || postId in editing ) {
         return (
@@ -37,6 +45,7 @@ const PostPage = function() {
     } else {
         return (
             <Page id={`post-${postId}`}>
+                { welcomeNotice }
                 <Post id={postId} expanded={true} /> 
             </Page>
         )
