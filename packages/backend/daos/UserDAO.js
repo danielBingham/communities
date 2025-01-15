@@ -82,7 +82,25 @@ const SCHEMA = {
                 needsFeature: '1-notification-settings',
                 insert: 'allowed',
                 insertDefault: function() {
-                    return {}
+                    return {
+                        notifications: {
+                            'Post:comment:create': {
+                                email: true,
+                                push: true,
+                                web: true
+                            },
+                            'User:friend:create': {
+                                email: true,
+                                push: true,
+                                web: true
+                            },
+                            'User:friend:update': {
+                                email: true,
+                                push: true,
+                                web: true
+                            }
+                        }
+                    }
                 },
                 update: 'allowed',
                 select: 'full',

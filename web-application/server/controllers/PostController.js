@@ -92,7 +92,7 @@ module.exports = class PostController {
             SELECT
                 user_id, friend_id
             FROM user_relationships
-                WHERE user_id = $1 OR friend_id = $1
+                WHERE (user_id = $1 OR friend_id = $1) AND status = 'confirmed'
         `, [ currentUser.id ])
 
         const friendIds = friendResults.rows.map((r) => r.user_id == currentUser.id ? r.friend_id : r.user_id)
