@@ -34,7 +34,7 @@ module.exports = class PageMetadataService {
             applicationName: "Communities",
             title: "Communities -- Non-profit Social Media",
             description: "Communities is a non-profit social media platform.",
-            image: `${core.config.host}img/how-it-works/review-example-2.png`,
+            image: `${core.config.host}favicon-32x32.png`,
             type: "website"
         }
     }
