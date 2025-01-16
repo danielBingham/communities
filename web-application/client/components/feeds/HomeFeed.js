@@ -6,6 +6,8 @@ import { getPosts, cleanupRequest } from '/state/posts'
 
 import PostList from '/components/posts/list/PostList'
 
+import './HomeFeed.css'
+
 const HomeFeed = function() {
     const [ searchParams, setSearchParams ] = useSearchParams()
 
@@ -20,10 +22,15 @@ const HomeFeed = function() {
 
     const dispatch = useDispatch()
 
+    const setSort = function(sortBy) {
+        searchParams.set('sort', sortBy)
+        setSearchParams(searchParams)
+    }
+
     useEffect(function() {
-        let sort = localStorage.getItem(`HomeFeed.sort`) 
+        let sort = searchParams.get('sort') 
         if ( ! sort ) {
-            sort = searchParams.get('sort') ? searchParams.get('sort') : 'active'
+            sort = 'newest'
         } 
 
         const page = searchParams.get('page') ? searchParams.get('page') : 1
@@ -38,9 +45,33 @@ const HomeFeed = function() {
         }
     }, [ requestId ])
 
+    let sort = searchParams.get('sort') 
+    if ( ! sort ) {
+        sort = 'newest'
+    } 
+
 
     return (
         <div className="home-feed">
+            <div className="home-feed__controls">
+                <div className="home-feed__sort-menu">
+                    <span className="title">Sort By:</span>
+                    <a
+                        href=""
+                        className={`sort-option ${sort == 'newest' ? 'current' : ''}`} 
+                        onClick={(e) => {e.preventDefault(); setSort('newest')}}
+                    >
+                        New 
+                    </a>
+                    <a
+                        href=""
+                        className={`sort-option ${sort == 'active' ? 'current' : ''}`}
+                        onClick={(e) => {e.preventDefault(); setSort('active')}}
+                    >
+                        Active 
+                    </a>
+                </div>
+            </div>
             <PostList queryName="HomeFeed" />
         </div>
     )

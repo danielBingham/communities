@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 
 import { getPost, cleanupRequest } from '/state/posts'
 
@@ -84,7 +84,7 @@ const Post = function({ id, expanded }) {
         <div id={post.id} className="post">
             <div className="post__header"> 
                 <div className="post__details">
-                    <UserTag id={post.userId} /> posted <a href={`/${user.username}/${id}`}><DateTag timestamp={post.createdDate} /></a>
+                    <UserTag id={post.userId} /> posted <Link to={`/${user.username}/${id}`}><DateTag timestamp={post.createdDate} /></Link>
                 </div>
                 <div className="post__controls">
                     <PostDotsMenu postId={post.id} />

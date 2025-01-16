@@ -1,21 +1,10 @@
-.post .reactions {
-    display: flex;
-    border-top: thin solid var(--main-border-color);
-    font-size: 14px;
-    margin: 0 auto;
+.post .reactions .reactions__view {
+    display: block;
+    text-align: left;
+    padding: 7px 5px 5px 15px;
+    font-size: 16px;
 }
-.post .reactions .group {
-    flex-grow: 1;
-    display: flex;
-    text-align: center;
-    padding: 10px 7px;
-}
-.post .reactions .group a {
-    display: inline-block;
-    padding: 0 5px;
-    flex-grow: 1;
-}
-.post .reactions .group a svg {
+.post .reactions .reactions__view svg {
     display: inline-block;
     width: 1em;
     height: 1em;
@@ -23,46 +12,95 @@
     margin-bottom: -2px;
     color: var(--link-color);
 }
-.post .reactions .group a:hover svg {
+.post .reactions .reactions__view .block svg {
+    color: var(--danger-color-main);
+}
+
+.reactions__detail-modal .modal {
+    max-width: 600px;
+    padding: 40px 0; 
+}
+
+.reactions__detail {
+    font-size: 18px;
+    text-align: left;
+    padding: 10px 30px;
+}
+
+.reactions__detail svg.reaction {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    margin-right: 5px;
+    margin-bottom: -2px;
+    color: var(--link-color);
+}
+.reactions__detail svg.reaction.block {
+    color: var(--danger-color-main);
+}
+
+.post .reactions .reactions__controls {
+    display: flex;
+    border-top: thin solid var(--main-border-color);
+    font-size: 14px;
+    margin: 0 auto;
+}
+.post .reactions .reactions__controls .group {
+    flex-grow: 1;
+    text-align: center;
+}
+.post .reactions .reactions__controls .group a {
+    display: block;
+    padding: 10px 7px;
+}
+.post .reactions .reactions__controls .group a svg {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    margin-left: 5px;
+    margin-bottom: -2px;
+    color: var(--link-color);
+}
+.post .reactions .reactions__controls .group a:hover svg {
     color: var(--link-highlight-color);
 }
 
 
-.post .reactions .group.block,
-.post .reactions .group.share {
+.post .reactions .reactions__controls .group.block,
+.post .reactions .reactions__controls .group.share {
     border-left: thin solid var(--main-border-color);
 }
-.post .reactions .group.block a:link,
-.post .reactions .group.block a:visited,
-.post .reactions .group.block a:active,
-.post .reactions .group.block svg {
+.post .reactions .reactions__controls .group.block a:link,
+.post .reactions .reactions__controls .group.block a:visited,
+.post .reactions .reactions__controls .group.block a:active,
+.post .reactions .reactions__controls .group.block svg {
     color: var(--danger-color-main);
 }
-.post .reactions .group.block a:hover,
-.post .reactions .group.block a:hover svg {
+.post .reactions .reactions__controls .group.block a:hover,
+.post .reactions .reactions__controls .group.block a:hover svg {
     color: var(--danger-color-main-highlight);
 }
 
-.post .reactions .group a.reacted:link,
-.post .reactions .group a.reacted:visited,
-.post .reactions .group a.reacted:active,
-.post .reactions .group a.reacted svg {
+.post .reactions .reactions__controls .group a.reacted:link,
+.post .reactions .reactions__controls .group a.reacted:visited,
+.post .reactions .reactions__controls .group a.reacted:active,
+.post .reactions .reactions__controls .group a.reacted svg {
     color: var(--success-color-main);
 }
 
-.post .reactions .group a.reacted:hover,
-.post .reactions .group a.reacted:hover svg {
+.post .reactions .reactions__controls .group a.reacted:hover,
+.post .reactions .reactions__controls .group a.reacted:hover svg {
     color: var(--success-color-main-highlight);
 }
 
-.post .reactions .group.block a.reacted:link,
-.post .reactions .group.block a.reacted:visited,
-.post .reactions .group.block a.reacted:active,
-.post .reactions .group.block a.reacted svg {
+.post .reactions .reactions__controls .group.block a.reacted:link,
+.post .reactions .reactions__controls .group.block a.reacted:visited,
+.post .reactions .reactions__controls .group.block a.reacted:active,
+.post .reactions .reactions__controls .group.block a.reacted svg {
     color: var(--secondary-color-main);
 }
 
-.post .reactions .group.block a.reacted:hover,
-.post .reactions .group.block a.reacted:hover svg {
+.post .reactions .reactions__controls .group.block a.reacted:hover,
+.post .reactions .reactions__controls .group.block a.reacted:hover svg {
     color: var(--secondary-color-main-highlight);
 }

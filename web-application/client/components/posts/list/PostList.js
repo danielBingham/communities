@@ -3,7 +3,6 @@ import { useSelector, useDispatch } from 'react-redux'
 
 import { startPostEdit } from '/state/posts'
 
-import SortControl from '/components/posts/list/controls/SortControl'
 import PaginationControls from '/components/PaginationControls'
 import PostForm from '/components/posts/form/PostForm'
 import Post from '/components/posts/Post'
@@ -60,9 +59,6 @@ const PostList = function({ queryName }) {
 
     return (
         <div className="post-list">
-            <div className="post-list__controls">
-                <SortControl queryName={queryName} /> 
-            </div>
             { postViews }
             <PaginationControls meta={query.meta} />
         </div>

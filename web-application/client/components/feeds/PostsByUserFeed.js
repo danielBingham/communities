@@ -6,6 +6,8 @@ import { getPosts, cleanupRequest } from '/state/posts'
 
 import PostList from '/components/posts/list/PostList'
 
+import './PostsByUserFeed.css'
+
 const PostsByUserFeed = function({ id }) {
     const [ searchParams, setSearchParams ] = useSearchParams()
 
@@ -20,14 +22,28 @@ const PostsByUserFeed = function({ id }) {
 
     const dispatch = useDispatch()
 
+    const setSort = function(sortBy) {
+        searchParams.set('sort', sortBy)
+        setSearchParams(searchParams)
+    }
+
     useEffect(function() {
-        let sort = localStorage.getItem(`PostsByUser.sort`) 
+        let sort = searchParams.get('sort') 
         if ( ! sort ) {
-            sort = searchParams.get('sort') ? searchParams.get('sort') : 'active'
+            sort = 'newest'
         } 
 
         setRequestId(dispatch(getPosts('PostsByUser', { userId: id, sort: sort })))
-    }, [ id, searchParams ])
+    }, [ id ])
+
+    useEffect(function() {
+        let sort = searchParams.get('sort') 
+        if ( ! sort ) {
+            sort = 'newest'
+        } 
+
+        setRequestId(dispatch(getPosts('PostsByUser', { userId: id, sort: sort })))
+    }, [ searchParams ])
 
     useEffect(function() {
         if ( requestId ) {
@@ -35,10 +51,32 @@ const PostsByUserFeed = function({ id }) {
         }
     }, [ requestId ])
 
-
+    let sort = searchParams.get('sort') 
+    if ( ! sort ) {
+        sort = 'newest'
+    } 
 
     return (
         <div className="posts-by-user-feed">
+            <div className="posts-by-user-feed__controls">
+                <div className="posts-by-user-feed__sort-menu">
+                    <span className="title">Sort By:</span>
+                    <a
+                        href=""
+                        className={`sort-option ${sort == 'newest' ? 'current' : ''}`} 
+                        onClick={(e) => {e.preventDefault(); setSort('newest')}}
+                    >
+                        New 
+                    </a>
+                    <a
+                        href=""
+                        className={`sort-option ${sort == 'active' ? 'current' : ''}`}
+                        onClick={(e) => {e.preventDefault(); setSort('active')}}
+                    >
+                        Active 
+                    </a>
+                </div>
+            </div>
             <PostList queryName="PostsByUser" />
         </div>
     )

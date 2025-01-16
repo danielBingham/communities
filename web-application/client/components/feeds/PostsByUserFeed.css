@@ -1,0 +1,21 @@
+.posts-by-user-feed .posts-by-user-feed__controls {
+    max-width: 650px;
+    margin: 20px auto 20px auto;
+}
+
+.posts-by-user-feed__sort-menu { 
+    border-bottom: thin solid var(--main-border-color); 
+    text-align: left;
+}
+.posts-by-user-feed__sort-menu .title { margin-left: 5px; }
+.posts-by-user-feed__sort-menu a.sort-option { display: inline-block; padding: 10px 20px; }
+.posts-by-user-feed__sort-menu a.sort-option.current{
+    border-bottom: thin solid var(--primary-color-main);
+}
+
+.posts-by-user-feed__sort-menu a.sort-option:link,
+.posts-by-user-feed__sort-menu a.sort-option:visited,
+.posts-by-user-feed__sort-menu a.sort-option:active,
+.posts-by-user-feed__sort-menu a.sort-option:hover {
+    color: var(--main-text-color);
+}

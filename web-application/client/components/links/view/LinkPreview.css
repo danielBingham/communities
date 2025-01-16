@@ -1,5 +1,4 @@
 .link-preview {
-    border-top: thin solid var(--main-border-color);
     background-color: var(--primary-color-lightest);
 }
 .link-preview img {

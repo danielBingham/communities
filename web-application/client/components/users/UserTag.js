@@ -48,21 +48,14 @@ const UserTag = function(props) {
 
     // ======= Render ===============================================
 
-    let content = ( <Spinner local={true} /> ) 
-    if ( user ) {
-        let name = null
-        if ( props.link == false ) {
-            name = user.name
-        } else {
-            name = ( <Link to={ `/${user.username}` }>{user.name}</Link> )
-        }
-
-        content = ( <> <UserProfileImage userId={user.id} /> { name } </> ) 
+    if ( ! user ) {
+        return ( <Spinner local={true} /> )
     }
-                    
 
     return (
-        <span className="user-tag" > { content } </span> 
+        <span className="user-tag" >
+            <UserProfileImage userId={user.id} /> <Link to={`/${user.username}`}>{user.name}</Link>
+        </span> 
     )
 
 }
