@@ -35,18 +35,12 @@ export const authenticationSlice = createSlice({
          *
          * @type {object} 
          */
-        currentUser: null,
-
-        friends: []
+        currentUser: null
     },
     reducers: {
 
         setCurrentUser: function(state, action) {
             state.currentUser = action.payload
-        },
-
-        setFriends: function(state, action) {
-            state.friends = action.payload
         },
 
         // ========== Request Tracking Methods =============
@@ -106,7 +100,6 @@ export const getAuthentication = function(onCompletion) {
             function(responseBody ) {
                 if ( responseBody && responseBody.user ) {
                     dispatch(authenticationSlice.actions.setCurrentUser(responseBody.user))
-                    dispatch(authenticationSlice.actions.setFriends(responseBody.friends))
                     dispatch(setUsersInDictionary({ entity: responseBody.user }))
 
                     if ( responseBody.file ) {
@@ -114,7 +107,6 @@ export const getAuthentication = function(onCompletion) {
                     }
                 } else if ( responseBody ) {
                     dispatch(authenticationSlice.actions.setCurrentUser(null))
-                    dispatch(authenticationSlice.actions.setFriends([]))
                 }
 
                 if ( onCompletion ) {
@@ -151,7 +143,6 @@ export const postAuthentication = function(email, password) {
             'POST', endpoint, body,
             function(responseBody) {
                 dispatch(authenticationSlice.actions.setCurrentUser(responseBody.user))
-                dispatch(authenticationSlice.actions.setFriends(responseBody.friends))
                 dispatch(setUsersInDictionary({ entity: responseBody.user }))
 
                 if ( responseBody.file ) {

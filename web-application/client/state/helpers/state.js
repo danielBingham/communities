@@ -5,9 +5,9 @@
  ******************************************************************************/
 
 export const setInDictionary = function(state, action) {
-    if ( action.payload.dictionary ) {
+    if ( 'dictionary' in action.payload) {
         state.dictionary = { ...state.dictionary, ...action.payload.dictionary }
-    } else if( action.payload.entity ) {
+    } else if( 'entity' in action.payload) {
         const entity = action.payload.entity
         state.dictionary[entity.id] = entity 
     } else {

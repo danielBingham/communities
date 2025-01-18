@@ -19,7 +19,6 @@
  ******************************************************************************/
 const DAOError = require('../errors/DAOError')
 const DAO = require('./DAO')
-const FileDAO = require('./FileDAO')
 
 const PAGE_SIZE = 20
 
@@ -153,44 +152,6 @@ const SCHEMA = {
                 key: 'updatedDate'
             }
         }
-    },
-    'UserRelationship': {
-        table: 'user_relationships',
-        fields: {
-            'user_id': {
-                insert: 'primary',
-                update: 'primary',
-                select: 'always',
-                key: 'userId'
-            },
-            'friend_id': {
-                insert: 'primary',
-                update: 'primary',
-                select: 'always',
-                key: 'friendId'
-            },
-            'status': {
-                insert: 'allowed',
-                update: 'allowed',
-                select: 'always',
-                key: 'status'
-            },
-            'created_date': {
-                insert: 'override',
-                insertOverride: 'now()',
-                update: 'denied',
-                select: 'always',
-                key: 'createdDate'
-            },
-            'updated_date': {
-                insert: 'override',
-                insertOverride: 'now()',
-                update: 'override',
-                updateOverride: 'now()',
-                select: 'always',
-                key: 'updatedDate'
-            }
-        }
     }
 }
 
@@ -200,9 +161,6 @@ module.exports = class UserDAO extends DAO {
     constructor(core) {
         super(core)
         this.core = core
-
-        this.database = core.database
-        this.logger = core.logger
 
         this.entityMaps = SCHEMA 
     }
@@ -259,10 +217,10 @@ module.exports = class UserDAO extends DAO {
      * Retrieve user records from the database.
      *
      */
-    async selectUsers(where, params, order, page, clean) {
-        params = params ? params : []
-        where = where ? where : ''
-        order = order ? order : 'users.created_date desc'
+    async selectUsers(whereStatement, parameters, orderStatement, page, clean) {
+        const params = parameters ? [ ...parameters ] : []
+        let where = whereStatement ? whereStatement : ''
+        let order = orderStatement ? orderStatement : 'users.created_date desc'
 
         // We only want to include the paging terms if we actually want paging.
         // If we're making an internal call for another object, then we
@@ -292,7 +250,7 @@ module.exports = class UserDAO extends DAO {
                 ${paging}
         `
 
-        const results = await this.database.query(sql, params)
+        const results = await this.core.database.query(sql, params)
         return this.hydrateUsers(results.rows)
     }
 
@@ -307,7 +265,7 @@ module.exports = class UserDAO extends DAO {
                 ${where} 
         `
 
-        const results = await this.database.query(sql, params)
+        const results = await this.core.database.query(sql, params)
 
         if ( results.rows.length <= 0) {
             return {
@@ -339,19 +297,5 @@ module.exports = class UserDAO extends DAO {
         await this.core.database.query(`
             DELETE FROM users WHERE id = $1
         `, [ user.id ])
-    }
-
-    async insertUserRelationships(userRelationships) {
-        await this.insert('UserRelationship', userRelationships)
-    }
-
-    async updateUserRelationship(userRelationship) {
-        await this.update('UserRelationship', userRelationship)
-    }
-
-    async deleteUserRelationship(userRelationship) {
-        await this.core.database.query(`
-            DELETE FROM user_relationships WHERE (user_id = $1 AND friend_id = $2) OR (user_id = $2 AND friend_id = $1)
-        `, [ userRelationship.userId, userRelationship.friendId ])
     }
 }
