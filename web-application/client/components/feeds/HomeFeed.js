@@ -50,7 +50,6 @@ const HomeFeed = function() {
         sort = 'newest'
     } 
 
-
     return (
         <div className="home-feed">
             <div className="home-feed__controls">
