@@ -2,7 +2,7 @@ import React  from 'react'
 import { useSelector } from 'react-redux'
 
 import UserInvite from '/components/users/input/UserInvite' 
-import UserListView from '/components/users/list/UserListView'
+import FriendList from '/components/friends/list/FriendList'
 
 import './YourFriendsList.css'
 
@@ -12,7 +12,7 @@ const YourFriendsList = function() {
     return (
         <div className="your-friends-list">
             <UserInvite />
-            <UserListView params={{ friendOf: currentUser.id }} />
+            <FriendList userId={currentUser.id} />
         </div>
     )
 }

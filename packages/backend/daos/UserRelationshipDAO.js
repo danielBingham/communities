@@ -30,9 +30,9 @@ const SCHEMA = {
         fields: {
             'id': {
                 insert: 'primary',
-                update: 'allowed',
+                update: 'primary',
                 select: 'always',
-                key: 'userId'
+                key: 'id'
             },
             'user_id': {
                 insert: 'required',
@@ -44,7 +44,7 @@ const SCHEMA = {
                 insert: 'required',
                 update: 'allowed',
                 select: 'always',
-                key: 'friendId'
+                key: 'relationId'
             },
             'status': {
                 insert: 'allowed',
@@ -74,6 +74,8 @@ const SCHEMA = {
 module.exports = class UserRelationshipDAO extends DAO {
 
     constructor(core) {
+        super(core)
+
         this.core = core
 
         this.entityMaps = SCHEMA
@@ -96,12 +98,11 @@ module.exports = class UserRelationshipDAO extends DAO {
 
             if ( ! dictionary[userRelationship.id] ) {
                 dictionary[userRelationship.id] = userRelationship
-                list.push(userRelationship)
+                list.push(userRelationship.id)
             }
-
-            return { dictionary: dictionary, list: list }
         }
 
+        return { dictionary: dictionary, list: list }
     }
 
     async selectUserRelationships(query) {
@@ -136,7 +137,7 @@ module.exports = class UserRelationshipDAO extends DAO {
         `
 
         const results = await this.core.database.query(sql, params)
-        return this.hydrateUsers(results.rows)
+        return this.hydrateUserRelationships(results.rows)
     }
 
 
@@ -150,7 +151,7 @@ module.exports = class UserRelationshipDAO extends DAO {
         const results = await this.core.database.query(`
             SELECT
                 COUNT(*)
-            FROM user_relationship
+            FROM user_relationships
             ${where}
         `, params)
 
@@ -174,7 +175,7 @@ module.exports = class UserRelationshipDAO extends DAO {
     async deleteUserRelationship(userRelationship) {
         await this.core.database.query(`
             DELETE FROM user_relationships WHERE (user_id = $1 AND friend_id = $2) OR (user_id = $2 AND friend_id = $1)
-        `, [ userRelationship.userId, userRelationship.friendId ])
+        `, [ userRelationship.userId, userRelationship.relationId])
     }
 
 }

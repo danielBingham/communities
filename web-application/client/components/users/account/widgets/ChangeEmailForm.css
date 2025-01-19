@@ -2,8 +2,8 @@
     max-width: 650px;
     margin: 0 auto;
 }
-.change-email-form h2 {
-    text-align: center;
+.change-email-form__instructions {
+    padding: 30px 0;
 }
 .change-email-form .submit {
     text-align: center;

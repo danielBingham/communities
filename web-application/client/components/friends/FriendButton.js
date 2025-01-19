@@ -1,83 +1,63 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
-import { postFriends, patchFriend, deleteFriend, cleanupRequest } from '/state/users'
+import { getUserRelationship,  cleanupRequest } from '/state/userRelationships'
 
-import Button from '/components/generic/button/Button'
+import AddFriendButton from '/components/friends/controls/AddFriendButton'
+import AcceptFriendButton from '/components/friends/controls/AcceptFriendButton'
+import RemoveFriendButton from '/components/friends/controls/RemoveFriendButton'
 
 const FriendButton = function({ userId }) {
 
     const [requestId,setRequestId] = useState(null)
     const request = useSelector(function(state) {
-        if ( requestId in state.users.requests ) {
-            return state.users.requests[requestId]
+        if ( requestId in state.userRelationships.requests ) {
+            return state.userRelationships.requests[requestId]
         } else {
             return null
         }
     })
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
-    const friends = useSelector((state) => state.authentication.friends)
 
-    const dispatch = useDispatch()
-
-    const addFriend = function() {
-        const relationship = {
-            userId: currentUser.id,
-            friendId: userId,
-            status: 'pending'
-        }
-
-        setRequestId(dispatch(postFriends(relationship)))
-    }
-
-    const acceptFriend = function() {
-        const relationship = {
-            userId: userId,
-            friendId: currentUser.id,
-            status: 'confirmed'
-        }
-
-        setRequestId(dispatch(patchFriend(relationship)))
-    }
-
-    const rejectFriend = function() {
-        const relationship = {
-            userId: userId,
-            friendId: currentUser.id
-        }
-
-        setRequestId(dispatch(deleteFriend(relationship)))
-    }
-
-    useEffect(function() {
-        if ( requestId ) {
-            dispatch(cleanupRequest({ requestId: requestId }))
-        }
-    }, [ requestId ])
-
-    if ( userId == currentUser.id ) {
+    if ( ! currentUser || currentUser.id == userId) {
         return null
     }
 
+    const relationshipId = useSelector((state) => userId in state.userRelationships.byUserId ? state.userRelationships.byUserId[userId][currentUser.id] : null)
+    const relationship = useSelector((state) => relationshipId !== null && relationshipId in state.userRelationships.dictionary ? state.userRelationships.dictionary[relationshipId] : null)
 
-    const friend = friends.find((f) => f.userId == userId || f.friendId == userId)
+    const dispatch = useDispatch()
+
+    useEffect(function() {
+        if ( relationship === null ) {
+            setRequestId(dispatch(getUserRelationship(currentUser.id, userId))) 
+        }
+    }, [currentUser, userId, relationship])
+
+    useEffect(function() {
+        return function cleanup() {
+            if ( requestId ) {
+                dispatch(cleanupRequest({ requestId: requestId }))
+            }
+        }
+    }, [ requestId ])
 
     let content = null
-    if ( ! friend ) {
-        content = (<Button type="primary" onClick={() => addFriend()}>Add Friend</Button>)
-    } else if (friend && friend.userId == currentUser.id && friend.status == 'pending' ) {
-        content = (<Button type="secondary-warn" onClick={() => rejectFriend()}>Cancel Request</Button>)
-    } else if ( friend && friend.friendId == currentUser.id && friend.status == 'pending' ) {
+    if ( ! relationship) {
+        content = (<AddFriendButton userId={userId} />)
+    } else if (relationship && relationship.userId == currentUser.id && relationship.status == 'pending' ) {
+        content = (<RemoveFriendButton userId={userId} type="cancel" />)
+    } else if ( relationship && relationship.relationId == currentUser.id && relationship.status == 'pending' ) {
         content = (
             <div>
-                <Button type="primary" onClick={() => acceptFriend()}>Accept Request</Button> 
-                <Button type="secondary" onClick={() => rejectFriend()}>Reject Request</Button>
+                <AcceptFriendButton userId={userId} /> 
+                <RemoveFriendButton userId={userId} type="reject" /> 
             </div>
         )
-    } else if ( friend && friend.status == 'confirmed' ) {
+    } else if ( relationship && relationship.status == 'confirmed' ) {
         content = (
-            <Button type="secondary-warn" onClick={() => rejectFriend()}>Remove</Button>
+            <RemoveFriendButton userId={userId} type="remove" /> 
         )
     }
 

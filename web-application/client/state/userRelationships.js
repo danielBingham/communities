@@ -18,10 +18,8 @@ import {
     startRequestTracking, 
     recordRequestFailure, 
     recordRequestSuccess, 
-    useRequest,
-    bustRequestCache,
     cleanupRequest as cleanupTrackedRequest, 
-    garbageCollectRequests as garbageCollectTrackedRequests } from './helpers/requestTracker'
+} from './helpers/requestTracker'
 
 export const userRelationshipsSlice = createSlice({
     name: 'userRelationships',
@@ -64,9 +62,8 @@ export const userRelationshipsSlice = createSlice({
          */
         queries: {},
 
-        byUserId: {},
-
-        byFriendId: {}
+        byUserId: {}
+        
     },
     reducers: {
 
@@ -75,26 +72,51 @@ export const userRelationshipsSlice = createSlice({
         // @see ./helpers/state.js
 
         setUserRelationshipsInDictionary: function(state, action) {
-            setInDictionary(state, action) 
+            setInDictionary(state, action)
 
-            if ( 'dictionary' in action.payload) {
-                for( const [id, entity] of Object.entries(action.payload.dictionary)) {
-                    state.byUserId[entity.userId] = entity
-                    state.byFriendId[entity.friendId] = entity
+            if ( 'dictionary' in action.payload ) {
+                for(const [id, entity] of Object.entries(action.payload.dictionary)) {
+                    if ( entity.userId in state.byUserId ) {
+                        state.byUserId[entity.userId][entity.relationId] = entity.id
+                    } else {
+                        state.byUserId[entity.userId] = {}
+                        state.byUserId[entity.userId][entity.relationId] = entity.id
+                    }
+
+                    if ( entity.relationId in state.byUserId ) {
+                        state.byUserId[entity.relationId][entity.userId] = entity.id
+                    } else {
+                        state.byUserId[entity.relationId] = {}
+                        state.byUserId[entity.relationId][entity.userId] = entity.id
+                    }
                 }
             } else if ( 'entity' in action.payload ) {
-                state.byUserId[action.payload.entity.userId] = action.payload.entity
-                state.byFriendId[action.payload.entity.friendId] = action.payload.entity
+                const entity = action.payload.entity
+                if ( entity.userId in state.byUserId ) {
+                    state.byUserId[entity.userId][entity.relationId] = entity.id
+                } else {
+                    state.byUserId[entity.userId] = {}
+                    state.byUserId[entity.userId][entity.relationId] = entity.id
+                }
+
+                if ( entity.relationId in state.byUserId ) {
+                    state.byUserId[entity.relationId][entity.userId] = entity.id
+                } else {
+                    state.byUserId[entity.relationId] = {}
+                    state.byUserId[entity.relationId][entity.userId] = entity.id
+                }
             }
+
         },
         removeUserRelationship: function(state, action) {
             removeEntity(state, action)
 
-            if ( action.payload.entity.userId in state.byUserId ) {
-                delete state.byUserId[action.payload.entity.userId]
-            } 
-            if ( action.payload.entity.friendId in state.byFriendId ) {
-                delete state.byFriendId[action.payload.entity.friendId]
+            const entity = action.payload.entity
+            if ( entity.userId in state.byUserId ) {
+                delete state.byUserId[entity.userId][entity.relationId]
+            }
+            if ( entity.relationId in state.byUserId ) {
+                delete state.byUserId[entity.relationId][entity.userId]
             }
         },
         makeUserRelationshipQuery: makeQuery,
@@ -107,15 +129,42 @@ export const userRelationshipsSlice = createSlice({
         makeRequest: startRequestTracking, 
         failRequest: recordRequestFailure, 
         completeRequest: recordRequestSuccess,
-        useRequest: useRequest,
-        bustRequestCache: bustRequestCache,
-        cleanupRequest: cleanupTrackedRequest, 
-        garbageCollectRequests: garbageCollectTrackedRequests
+        cleanupRequest: cleanupTrackedRequest 
     }
 })
 
 /**
- * POST /user/:userId/friends
+ * GET /user/:userId/relatinships?...
+ *
+ * Get all user relationships in the database. Queryable.   
+ *
+ * Makes the request asynchronously and returns a id that can be used to track
+ * the request and retreive the results from the state slice.
+ *
+ * @returns {string} A uuid requestId that can be used to track this request.
+ */
+export const getUserRelationships = function(name, userId, params) {
+    return function(dispatch, getState) {
+        const queryString = makeSearchParams(params)
+        const endpoint = `/user/${encodeURIComponent(userId)}/relationships` + ( params ? '?' + queryString.toString() : '')
+
+        dispatch(userRelationshipsSlice.actions.makeUserRelationshipQuery({ name: name }))
+
+        return makeTrackedRequest(dispatch, getState, userRelationshipsSlice,
+            'GET', endpoint, null,
+            function(response) {
+                dispatch(userRelationshipsSlice.actions.setUserRelationshipsInDictionary({ dictionary: response.dictionary }))
+
+                dispatch(userRelationshipsSlice.actions.setUserRelationshipQueryResults({ name: name, meta: response.meta, list: response.list }))
+
+                dispatch(setRelationsInState(response.relations))
+            }
+        )
+    }
+}
+
+/**
+ * POST /user/:userId/relationships
  *
  * Create a new friend request.
  *  
@@ -126,11 +175,10 @@ export const userRelationshipsSlice = createSlice({
  *
  * @returns {string} A uuid requestId that can be used to track this request.
  */
-export const postFriends = function(relationship) {
+export const postUserRelationships = function(relationship) {
     return function(dispatch, getState) {
-        dispatch(userRelationshipsSlice.actions.bustRequestCache())
         return makeTrackedRequest(dispatch, getState, userRelationshipsSlice,
-            'POST', `/user/${relationship.userId}/friends`, relationship,
+            'POST', `/user/${encodeURIComponent(relationship.userId)}/relationships`, relationship,
             function(response) {
                 dispatch(userRelationshipsSlice.actions.setUserRelationshipsInDictionary({ entity: response.entity }))
 
@@ -141,7 +189,33 @@ export const postFriends = function(relationship) {
 }
 
 /**
- * PATCH /user/:userId/friend/:friendId
+ * GET /user/:userId/relationship/:relationId
+ *
+ * Get a single relationship between User(:userId) and User(:relationId).
+ *
+ * Makes the request asynchronously and returns a id that can be used to track
+ * the request and retreive the results from the state slice.
+ *
+ * @param {uuid} userId - The id of the requesting user.
+ * @param {uuid} relationId - The id of the user on the other side of the relationship.
+ *
+ * @returns {string} A uuid requestId that can be used to track this request.
+ */
+export const getUserRelationship = function(userId, relationId) {
+    return function(dispatch, getState) {
+        return makeTrackedRequest(dispatch, getState, userRelationshipsSlice,
+            'GET', `/user/${encodeURIComponent(userId)}/relationship/${encodeURIComponent(relationId)}`, null,
+            function(response) {
+                dispatch(userRelationshipsSlice.actions.setUserRelationshipsInDictionary({ entity: response.entity }))
+
+                dispatch(setRelationsInState(response.relations))
+            }
+        )
+    }
+}
+
+/**
+ * PATCH /user/:userId/friend/:relationId
  *
  * Update a friend relationship.
  *
@@ -152,11 +226,10 @@ export const postFriends = function(relationship) {
  *
  * @returns {string} A uuid requestId that can be used to track this request.
  */
-export const patchFriend = function(relationship) {
+export const patchUserRelationship = function(relationship) {
     return function(dispatch, getState) {
-        dispatch(userRelationshipsSlice.actions.bustRequestCache())
         return makeTrackedRequest(dispatch, getState, userRelationshipsSlice,
-            'PATCH', `/user/${relationship.userId}/friend/${relationship.friendId}`, relationship,
+            'PATCH', `/user/${relationship.userId}/relationship/${relationship.relationId}`, relationship,
             function(response) {
                 dispatch(userRelationshipsSlice.actions.setUserRelationshipsInDictionary({ entity: response.entity }))
 
@@ -168,7 +241,7 @@ export const patchFriend = function(relationship) {
 }
 
 /**
- * DELETE /user/:userId/friend/:friendId
+ * DELETE /user/:userId/friend/:relationId
  *
  * Delete a friend. 
  *
@@ -179,13 +252,12 @@ export const patchFriend = function(relationship) {
  *
  * @returns {string} A uuid requestId that can be used to track this request.
  */
-export const deleteFriend = function(relationship) {
+export const deleteUserRelationship = function(relationship) {
     return function(dispatch, getState) {
-        dispatch(userRelationshipsSlice.actions.bustRequestCache())
         return makeTrackedRequest(dispatch, getState, userRelationshipsSlice,
-            'DELETE', `/user/${relationship.userId}/friend/${relationship.friendId}`, null,
+            'DELETE', `/user/${relationship.userId}/relationship/${relationship.relationId}`, null,
             function(response) {
-                dispatch(userRelationshipsSlice.actions.setUserRelationshipsInDictionary({ entity: response.entity }))
+                dispatch(userRelationshipsSlice.actions.removeUserRelationship({ entity: response.entity }))
 
                 dispatch(setRelationsInState(response.relations))
             }
@@ -195,8 +267,8 @@ export const deleteFriend = function(relationship) {
 
 
 export const { 
-    setUsersInDictionary, removeUser, 
-    makeUserQuery, setUserQueryResults, clearUserQuery,
+    setUserRelationshipsInDictionary, removeUserRelationship, 
+    makeUserRelationshipQuery, setUserRelationshipQueryResults, clearUserRelationshipQuery,
     cleanupRequest 
 }  = userRelationshipsSlice.actions
 

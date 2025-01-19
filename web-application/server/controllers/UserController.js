@@ -41,11 +41,14 @@ module.exports = class UserController {
         this.notificationService = new backend.NotificationService(core)
 
         this.userDAO = new backend.UserDAO(core)
+        this.userRelationshipsDAO = new backend.UserRelationshipDAO(core)
         this.tokenDAO = new backend.TokenDAO(core)
         this.fileDAO = new backend.FileDAO(core)
     }
 
-    async getRelations(results, requestedRelations) {
+    async getRelations(currentUser, results, requestedRelations) {
+        
+        // Profile pictures
         const fileIds = []
         for(const userId of results.list) {
             const user = results.dictionary[userId]
@@ -57,8 +60,20 @@ module.exports = class UserController {
             fileDictionary[file.id] = file
         }
 
+        // Relationships
+        let userRelationshipDictionary = {}
+        if ( currentUser ) {
+            const userRelationshipResults = await this.userRelationshipsDAO.selectUserRelationships({
+                where: `(user_id = $1 AND friend_id = ANY($2::uuid[])) OR (user_id = ANY($2::uuid[]) AND friend_id = $1)`,
+                params: [ currentUser.id, results.list]
+            })
+
+            userRelationshipDictionary = userRelationshipResults.dictionary
+        }
+
         return {
-            files: fileDictionary
+            files: fileDictionary,
+            userRelationships: userRelationshipDictionary
         }
     }
 
@@ -103,7 +118,7 @@ module.exports = class UserController {
         }
 
         const result = {
-            where: `WHERE users.status = 'confirmed'`,
+            where: `WHERE users.status != 'invited'`,
             params: [],
             page: 1,
             order: '',
@@ -125,73 +140,6 @@ module.exports = class UserController {
 
         if ( query.ids && query.ids.length > 0 ) {
             result.params.push(query.ids)
-            result.where += ` AND users.id = ANY($${result.params.length}::uuid[])`
-        }
-
-        // Get users who are friends of `friendOf`.
-        if ( query.friendOf ) {
-            const friendResults = await this.core.database.query(`
-                SELECT user_id, friend_id FROM user_relationships
-                    WHERE (user_id = $1 OR friend_id = $1) AND status = ANY($2::user_relationship_status[])
-            `, [ query.friendOf, currentUser.id == query.friendOf ? [ 'confirmed', 'pending'] : [ 'confirmed'] ])
-
-            const friendIds = friendResults.rows.map((r) => r.user_id == currentUser.id ? r.friend_id : r.user_id)
-
-            result.params.push(friendIds)
-            result.where += ` AND users.id = ANY($${result.params.length}::uuid[])`
-        }
-
-        // Get all users who have a mutual friend with currentUser.
-        if ( query.withMutuals) {
-            const friendResults = await this.core.database.query(`
-                SELECT user_id, friend_id FROM user_relationships
-                    WHERE (user_id = $1 OR friend_id = $1) AND status = 'confirmed' 
-            `, [ currentUser.id ])
-
-            const friendIds = friendResults.rows.map((r) => r.user_id == currentUser.id ? r.friend_id : r.user_id)
-
-            const mutualResults = await this.core.database.query(`
-                SELECT user_id, friend_id FROM user_relationships
-                    WHERE (user_id = ANY($1::uuid[]) OR friend_id = ANY($1::uuid[])) AND status = 'confirmed'
-            `, [ friendIds ])
-
-            const friendMap = {}
-            for(const friendId of friendIds) {
-                friendMap[friendId] = true
-            }
-
-            const mutualIds = []
-            for(const row of mutualResults.rows) {
-                if ( row.user_id !== currentUser.id && ! ( row.user_id in friendMap)) {
-                    mutualIds.push(row.user_id)
-                }
-                if ( row.friend_id !== currentUser.id && ! (row.friend_id in friendMap)) {
-                    mutualIds.push(row.friend_id)
-                }
-            }
-
-            result.params.push(mutualIds)
-            result.where += ` AND users.id = ANY($${result.params.length}::uuid[])`
-        }
-
-        // Get friends the currentUser has in common with  `mutualWith`.
-        if ( query.mutualWith) {
-            const friendResults = await this.core.database.query(`
-                SELECT user_id, friend_id FROM user_relationships
-                    WHERE (user_id = $1 OR friend_id = $1) AND status = 'confirmed' 
-            `, [ currentUser.id ])
-
-            const friendIds = friendResults.rows.map((r) => r.user_id == currentUser.id ? r.friend_id : r.user_id)
-
-            const mutualResults = await this.core.database.query(`
-                SELECT user_id, friend_id FROM user_relationships
-                    WHERE (user_id = $1 AND friend_id = ANY($2::uuid[])) OR (friend_id = $1 AND user_id = ANY($2::uuid[])) AND status = 'confirmed'
-            `, [ query.mututalWith, friendIds ])
-        
-            let mutualIds = mutualResults.rows.map((r) => r.user_id == query.mutualWith ? r.friend_id : r.user_id)
-            mutualIds = mutualIds.filter((id) => currentUser.id !== id)
-
-            result.params.push(mutualIds)
             result.where += ` AND users.id = ANY($${result.params.length}::uuid[])`
         }
 
@@ -253,7 +201,7 @@ module.exports = class UserController {
 
         results.meta = meta
 
-        results.relations = await this.getRelations(results, requestedRelations) 
+        results.relations = await this.getRelations(request.session.user, results, requestedRelations) 
 
         return response.status(200).json(results)
     }
@@ -324,7 +272,7 @@ module.exports = class UserController {
         if (userExistsResults.rowCount > 0) {
             throw new ControllerError(403, 'not-authorized', 
                 `Attempting to create a User(${userExistsResults.rows[0].id}) that already exists!`,
-                `You aren't allowed to do that.`)
+                `That person has already been invited.`)
         }
 
         // If we're creating a user with a password, then this is just a normal
@@ -401,9 +349,9 @@ module.exports = class UserController {
 
             // Since the user exists, go ahead and insert the friend
             // relationship.
-            await this.userDAO.insertUserRelationships({ 
+            await this.userRelationshipsDAO.insertUserRelationships({ 
                 userId: currentUser.id,
-                friendId: createdUser.id,
+                relationId: createdUser.id,
                 status: "confirmed"
             })
            
@@ -438,7 +386,7 @@ module.exports = class UserController {
                 `We created the user, but couldn't find them after creation. Please report bug.`)
         }
 
-        const relations = await this.getRelations(results)
+        const relations = await this.getRelations(request.session.user, results)
 
         return response.status(201).json({ 
             entity: results.dictionary[user.id],
@@ -477,7 +425,7 @@ module.exports = class UserController {
             throw new ControllerError(404, 'not-found', `User(${request.params.id}) not found.`)
         }
 
-        const relations = await this.getRelations(results)
+        const relations = await this.getRelations(currentUser, results)
 
         return response.status(200).json({ 
             entity: results.dictionary[request.params.id],
@@ -681,11 +629,22 @@ module.exports = class UserController {
                     `User(${user.id}) attempted to use a reset-password token to update email.`)
             }
 
+
             // If this is an invitation and they aren't changing their email, then go 
             // ahead and confirm it since the token they are using came from their email.
             if ( authentication == "invitation" && user.email == existingUser.email ) {
                 user.status = 'confirmed'
             } else if ( user.email != existingUser.email ) {
+                // First we need to make sure the new email is not in use.
+                const existingEmailResults = await this.userDAO.selectUsers(`WHERE users.email = $1`, [ user.email ])
+
+                if ( existingEmailResults.list.length > 0 ) {
+                    throw new ControllerError(400, 'email-taken',
+                        `User(${user.id}) attempted to change their email to one already in use.`,
+                        `That email is already in use by another user.`)
+                }
+
+
                 // Otherwise, if we're about to change their email, then the
                 // new email is unconfirmed. Make sure to update the status.
                 user.status = 'unconfirmed'
@@ -723,7 +682,7 @@ module.exports = class UserController {
         }
 
 
-        const relations = await this.getRelations(results)
+        const relations = await this.getRelations(request.session.user, results)
 
         return response.status(200).json({ 
             entity: results.dictionary[user.id],

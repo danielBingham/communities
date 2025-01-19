@@ -164,6 +164,10 @@ module.exports = class DAO {
 
         const table = this.entityMaps[entityName].table
 
+        // This is pure error checking.  If we don't have a primary key,
+        // update's going to break or do weird shit.
+        let foundPrimary = false 
+
         for(const [field, meta] of Object.entries(this.entityMaps[entityName].fields)) {
             if ( meta.needsFeature && ! this.core.features.has(meta.needsFeature)) {
                 continue
@@ -176,6 +180,7 @@ module.exports = class DAO {
                     where += ' AND '
                 }
                 where += `${field} = $${params.length}`
+                foundPrimary = true
                 continue
             } else if ( meta.update == 'primary' ) {
                 throw new DAOError('missing-field',
@@ -203,6 +208,11 @@ module.exports = class DAO {
                 params.push(( entity[meta.key] !== null ? entity[meta.key] : null ))
                 fields += ( fields == '' ? '' : ', ') + `${field} = $${params.length}`
             }
+        }
+
+        if ( ! foundPrimary ) {
+            throw new DAOError('missing-field',
+                `Table ${table} has no primary key set for updates!`)
         }
 
         let sql = `

@@ -18,10 +18,8 @@ import {
     startRequestTracking, 
     recordRequestFailure, 
     recordRequestSuccess, 
-    useRequest,
-    bustRequestCache,
     cleanupRequest as cleanupTrackedRequest, 
-    garbageCollectRequests as garbageCollectTrackedRequests } from './helpers/requestTracker'
+} from './helpers/requestTracker'
 
 import { setCurrentUser, setFriends } from '/state/authentication'
 
@@ -84,10 +82,7 @@ export const usersSlice = createSlice({
         makeRequest: startRequestTracking, 
         failRequest: recordRequestFailure, 
         completeRequest: recordRequestSuccess,
-        useRequest: useRequest,
-        bustRequestCache: bustRequestCache,
-        cleanupRequest: cleanupTrackedRequest, 
-        garbageCollectRequests: garbageCollectTrackedRequests
+        cleanupRequest: cleanupTrackedRequest
     }
 })
 
@@ -153,7 +148,6 @@ export const getUsers = function(name, params) {
  */
 export const postUsers = function(user) {
     return function(dispatch, getState) {
-        dispatch(usersSlice.actions.bustRequestCache())
         return makeTrackedRequest(dispatch, getState, usersSlice,
             'POST', '/users', user,
             function(response) {
@@ -208,7 +202,6 @@ export const getUser = function(id) {
  */
 export const patchUser = function(user) {
     return function(dispatch, getState) {
-        dispatch(usersSlice.actions.bustRequestCache())
         return makeTrackedRequest(dispatch, getState, usersSlice,
             'PATCH', `/user/${user.id}`, user,
             function(response) {
@@ -236,7 +229,6 @@ export const patchUser = function(user) {
  */
 export const deleteUser = function(user) {
     return function(dispatch, getState) {
-        dispatch(usersSlice.actions.bustRequestCache())
         return makeTrackedRequest(dispatch, getState, usersSlice,
             'DELETE', `/user/${user.id}`, null,
             function(response) {
@@ -245,79 +237,6 @@ export const deleteUser = function(user) {
         )
     }
 } 
-
-/**
- * POST /user/:userId/friends
- *
- * Create a new friend request.
- *  
- * Makes the request asynchronously and returns a id that can be used to track
- * the request and retreive the results from the state slice.
- *
- * @param {object} user - A populated user object, minus the `id` member.
- *
- * @returns {string} A uuid requestId that can be used to track this request.
- */
-export const postFriends = function(relationship) {
-    return function(dispatch, getState) {
-        dispatch(usersSlice.actions.bustRequestCache())
-        return makeTrackedRequest(dispatch, getState, usersSlice,
-            'POST', `/user/${relationship.userId}/friends`, relationship,
-            function(response) {
-                dispatch(setFriends(response.friends))
-            }
-        )
-    }
-}
-
-/**
- * PATCH /user/:userId/friend/:friendId
- *
- * Update a friend relationship.
- *
- * Makes the request asynchronously and returns a id that can be used to track
- * the request and retreive the results from the state slice.
- *
- * @param {object} user - A populate user object.
- *
- * @returns {string} A uuid requestId that can be used to track this request.
- */
-export const patchFriend = function(relationship) {
-    return function(dispatch, getState) {
-        dispatch(usersSlice.actions.bustRequestCache())
-        return makeTrackedRequest(dispatch, getState, usersSlice,
-            'PATCH', `/user/${relationship.userId}/friend/${relationship.friendId}`, relationship,
-            function(response) {
-                dispatch(setFriends(response.friends))
-            }
-        )
-    }
-}
-
-/**
- * DELETE /user/:userId/friend/:friendId
- *
- * Delete a friend. 
- *
- * Makes the request asynchronously and returns a id that can be used to track
- * the request and retreive the results from the state slice.
- *
- * @param {object} user - A populated user object.
- *
- * @returns {string} A uuid requestId that can be used to track this request.
- */
-export const deleteFriend = function(relationship) {
-    return function(dispatch, getState) {
-        dispatch(usersSlice.actions.bustRequestCache())
-        return makeTrackedRequest(dispatch, getState, usersSlice,
-            'DELETE', `/user/${relationship.userId}/friend/${relationship.friendId}`, null,
-            function(response) {
-                dispatch(setFriends(response.friends))
-            }
-        )
-    }
-} 
-
 
 export const { 
     setUsersInDictionary, removeUser, 

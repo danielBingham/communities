@@ -140,8 +140,8 @@ module.exports = class TokenController {
     /**
      * POST /tokens
      *
-     * Create a new token.  Currently `reset-password` tokens are the only type
-     * supported by this endpoint, since invitation and email-confirmation
+     * Create a new token.  Currently `reset-password` and 'email-confirmation'
+     * tokens are the only types supported by this endpoint, since invitation
      * tokens are created on the backend.
      *
      * @param {Object} request  Standard Express request object.
@@ -165,7 +165,7 @@ module.exports = class TokenController {
          *
          * Validation:
          * 1. A User with request.body.email must exist.
-         * 2. request.body.type must be 'reset-password'
+         * 2. request.body.type must be 'reset-password' or 'email-confirmation'
          *
          * TODO Rate limit (only x requests per Y period)
          * 
@@ -189,7 +189,41 @@ module.exports = class TokenController {
 
             await this.emailService.sendPasswordReset(user, token)
 
-            return response.status(200).json(null)
+            response.status(200).json(null)
+        } else if (tokenParams.type == 'email-confirmation' ) {
+            const currentUser = request.session.user
+
+            if ( ! currentUser ) {
+                throw new ControllerError(401, 'not-authenticated',
+                    `An unauthenticated user is attempting to request an email confirmation token.`,
+                    `You must be authenticated to do that.`)
+            }
+
+            const userResults = await this.userDAO.selectUsers('WHERE email=$1', [ tokenParams.email ])
+
+            if ( userResults.list.length <= 0) {
+                return response.status(200).json(null)
+            }
+            const user = userResults.dictionary[userResults.list[0]]
+
+            if ( user.id !== currentUser.id ) {
+                throw new ControllerError(403, 'not-authorized',
+                    `User(${currentUser.id}) attempting to require email confirmation for User(${user.id}).`,
+                    `You may only request an email confirmation for yourself.`)
+            }
+
+            if ( user.status != 'unconfirmed' ) {
+                throw new ControllerError(403, 'not-authorized',
+                    `User(${user.id}) attempting to send new email confirmation when they are confirmed.`,
+                    `You are already confirmed!`)
+            }
+
+            const token = this.tokenDAO.createToken('email-confirmation')
+            token.userId = user.id
+            token.id = await this.tokenDAO.insertToken(token)
+
+            await this.emailService.sendEmailConfirmation(user, token)
+            response.status(200).json(null)
         } else {
             throw new ControllerError(400, 'invalid-token',
                 `Attempt to create an invalid token type.`)

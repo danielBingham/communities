@@ -4,6 +4,7 @@ import { setPostsInDictionary } from '../posts'
 import { setPostCommentsInDictionary } from '../postComments'
 import { setPostReactionsInDictionary } from '../postReactions'
 import { setFilesInDictionary } from '../files'
+import { setUserRelationshipsInDictionary } from '../userRelationships'
 
 
 const setRelationsInState = function(relations) {
@@ -20,8 +21,10 @@ const setRelationsInState = function(relations) {
                     dispatch(setPostsInDictionary({ dictionary: dictionary }))
                 } else if ( relation == 'files' ) {
                     dispatch(setFilesInDictionary({ dictionary: dictionary }))
-                } else if ( relation == 'postReactions' ) {
+                } else if ( relation == 'postReactions' ) { 
                     dispatch(setPostReactionsInDictionary({ dictionary: dictionary }))
+                } else if ( relation == 'userRelationships' ) {
+                    dispatch(setUserRelationshipsInDictionary({ dictionary: dictionary }))
                 }
             }
         }

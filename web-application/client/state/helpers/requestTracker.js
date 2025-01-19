@@ -1,12 +1,6 @@
 import { v4 as uuidv4 } from 'uuid'
 import logger from '/logger'
 
-const defaultCacheTTL = 60 * 1000 // 1 minute 
-const isStale = function(tracker, overrideCacheTTL) {
-    const cacheTTL = overrideCacheTTL ? overrideCacheTTL : defaultCacheTTL
-    return (Date.now() - tracker.timestamp) > cacheTTL
-}
-
 /**
  * Create a new RequstTracker object.  Will be stored in Redux so needs to be
  * serializable.
@@ -17,11 +11,9 @@ const createRequestTracker = function(requestId, method, endpoint) {
         method: method,
         endpoint: endpoint,
         timestamp: Date.now(),
-        uses: 1,
-        cleaned: false,
-        cacheBusted: false,
         state: 'pending',
         error: null,
+        errorMessage: null,
         errorData: {},
         status: null,
         result: null
@@ -68,6 +60,12 @@ export const failRequest = function(state, action) {
         tracker.error = 'unknown'
     }
 
+    if ( action.payload.errorMessage ) {
+        tracker.errorMessage = action.payload.errorMessage
+    } else {
+        tracker.errorMessage = ''
+    }
+
     if ( action.payload.errorData ) {
         tracker.errorData = action.payload.errorData
     }
@@ -91,67 +89,10 @@ export const completeRequest = function(state, action) {
 export const recordRequestSuccess = completeRequest
 
 /**
- * Reuse a cleanup request.
- */
-export const useRequest = function(state, action) {
-    const tracker = state.requests[action.payload.requestId]
-    tracker.uses += 1
-    tracker.cleaned = false
-}
-
-/**
  * Cleanup a request tracker that we're done with.
  */
 export const cleanupRequest = function(state, action) {
-    const tracker = state.requests[action.payload.requestId]
-    const cacheTTL = action.payload.cacheTTL
-
-    if ( ! tracker ) {
-        logger.warn('Warning: attempt to cleanup request that does not exist: ' + action.payload.requestId)
-        return
-    }
-
-    tracker.uses -= 1
-    // This tracker is still in use somewhere.  We're not ready to clean it
-    // yet.
-    if ( tracker.uses > 0 ) {
-        return
-    }
-
-    if ( isStale(tracker, cacheTTL) || tracker.cacheBusted ) {
-        delete state.requests[action.payload.requestId]
-    } else {
-        tracker.cleaned = true
-    }
-}
-
-/**
- * Garbage collect cleaned requests.  We don't want to wipe them out
- * immediately, because we might reuse them in the future.  So we clean them up
- * whenever a new request is made for that slice.
- */
-export const garbageCollectRequests = function(state, action) {
-    const cacheTTL = action.payload
-    for ( const requestId in state.requests ) {
-        // Only garbage collect requests that are both stale and have been
-        // cleaned.  This prevents us from collecting a request that's still in
-        // use because it's component hasn't unmounted yet.
-        if ( state.requests[requestId].cleaned && (isStale(state.requests[requestId], cacheTTL) || state.requests[requestId].cacheBusted)) {
-            delete state.requests[requestId]
-        }
-        // If the cacheTTL is set to zero, that means we don't want to track
-        // requests at all.  Every time we garbage collect, mark them as busted
-        // so that they won't be reused.
-        else if ( cacheTTL == 0 ) {
-            state.requests[requestId].cacheBusted = true
-        }
-    }
-}
-
-export const bustRequestCache = function(state, action) {
-    for ( const requestId in state.requests ) {
-        state.requests[requestId].cacheBusted = true
-    }
+    delete state.requests[action.payload.requestId]
 }
 
 /******************************************************************************
@@ -180,31 +121,6 @@ export const makeSearchParams = function(params) {
     return queryString
 }
 
-const getRequestFromCache = function(slice, method, endpoint) {
-    return function(dispatch, getState) {
-        const state = getState()
-        for ( const id in state[slice.name].requests) {
-            // It may not have been cleaned yet, because it's still in use, but
-            // we still don't want to reuse it, because some other request
-            // invalidated the data it contained.
-            if ( state[slice.name].requests[id].cacheBusted) {
-                continue
-            }
-            
-            if ( state[slice.name].requests[id].method == method && state[slice.name].requests[id].endpoint == endpoint ) {
-                const request = state[slice.name].requests[id]
-                if ( request && request.state == 'fulfilled' ) {
-                    dispatch(slice.actions.useRequest({ requestId: id }))
-                    return request
-                } else {
-                    return null
-                }
-            }
-        }
-        return null
-    }
-}
-
 /**
  * Make a request to an API endpoint.  Manages tracking the request, reusing
  * from the cache, and handling any errors.
@@ -229,18 +145,6 @@ const getRequestFromCache = function(slice, method, endpoint) {
  */
 export const makeTrackedRequest = function(dispatch, getState, slice, method, endpoint, body, onSuccess, onFailure) {
     const configuration = getState().system.configuration
-
-    // Cleanup dead requests before making a new one.
-    dispatch(slice.actions.garbageCollectRequests())
-
-    if ( method == 'GET' ) {
-        const request = dispatch(getRequestFromCache(slice, 'GET', endpoint))
-        if ( request ) {
-            onSuccess(request.result)
-            return request.requestId
-        }
-    }
-
 
     const requestId = uuidv4()
     let status = 0
@@ -301,7 +205,7 @@ export const makeTrackedRequest = function(dispatch, getState, slice, method, en
             }
             dispatch(slice.actions.completeRequest({ requestId: requestId, status: status, result: responseBody }))
         } else {
-            dispatch(slice.actions.failRequest({ requestId: requestId, status: status, error: responseBody.error, errorData: responseBody.data }))
+            dispatch(slice.actions.failRequest({ requestId: requestId, status: status, error: responseBody.error, errorMessage: responseBody.message, errorData: responseBody.data }))
             if ( onFailure ) {
                 try {
                     onFailure(responseBody)

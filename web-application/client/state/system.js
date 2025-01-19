@@ -7,9 +7,8 @@ import {
     startRequestTracking, 
     recordRequestFailure, 
     recordRequestSuccess, 
-    useRequest,
     cleanupRequest as cleanupTrackedRequest, 
-    garbageCollectRequests as garbageCollectTrackedRequests } from './helpers/requestTracker'
+} from './helpers/requestTracker'
 
 import logger from '/logger'
 
@@ -41,9 +40,7 @@ const systemSlice = createSlice({
         makeRequest: startRequestTracking, 
         failRequest: recordRequestFailure, 
         completeRequest: recordRequestSuccess, 
-        useRequest: useRequest,
-        cleanupRequest: cleanupTrackedRequest, 
-        garbageCollectRequests: garbageCollectTrackedRequests
+        cleanupRequest: cleanupTrackedRequest
     }
 })
 

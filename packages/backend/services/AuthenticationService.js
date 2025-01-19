@@ -62,15 +62,6 @@ module.exports = class AuthenticationService {
 
         const user = results.dictionary[id]
 
-        const friendResults = await this.core.database.query(`
-            SELECT user_id, friend_id, status FROM user_relationships
-                WHERE user_id = $1 OR friend_id = $1
-        `, [ user.id])
-
-        const friends = friendResults.rows.map((r) => { 
-            return { userId: r.user_id, friendId: r.friend_id, status: r.status }
-        })
-
         let file = null
         if ( user.fileId !== null ) {
             const fileResults = await this.fileDAO.selectFiles(`WHERE files.id = $1`, [ user.fileId ])
@@ -80,7 +71,6 @@ module.exports = class AuthenticationService {
 
         return {
             user: user,
-            friends: friends,
             file: file
         }
     }

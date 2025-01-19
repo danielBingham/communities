@@ -4,18 +4,21 @@
     max-width: 750px;
     margin: 0 auto;
 }
-.user-invite .invitations-available {
+.user-invite__invitations-available {
     text-align: center;
     font-size: 16px;
     padding: 10px;
 }
-.user-invite .input-wrapper {
+.user-invite__input-wrapper {
     display: flex;
 }
-.user-invite input[type=text] {
+.user-invite .user-invite__input-wrapper input[type=text] {
     display: inline-block;
     font-size: 16px;
     margin: 0 10px;
     border-radius: 7px;
     flex-grow: 1
+}
+.user-invite__success {
+    margin: 10px auto;
 }

@@ -117,6 +117,14 @@ const ChangePasswordForm = function(props) {
         }
     }, [ authRequest ])
 
+    useEffect(function() {
+        if ( request && request.state == 'fulfilled' ) {
+            setNewPassword('')
+            setConfirmNewPassword('')
+            setOldPassword('')
+        }
+    }, [ request ])
+
     // Clean up our request.
     useEffect(function() {
         return function cleanup() {

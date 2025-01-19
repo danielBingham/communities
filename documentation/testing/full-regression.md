@@ -1,0 +1,28 @@
+# Full Regression Test
+
+- [ ] From the administrator (Admin) account invite a new user.
+    - [ ] Accept the invite and register (User1).
+- [ ] Using the new user account invite a new user.
+    - [ ] From the same browser session attempt to accept the invite.
+        - [ ] Expectation: Error.
+    - [ ] From a different browser session accept the invite and register (User2).
+- [ ] As User2, send Admin a friend request.
+    - [ ] As admin, reject the friend request.  Confirm its removed.
+- [ ] As User2, make a test post.
+- [ ] As User2, send Admin a friend request.
+     - [ ] As Admin, accept the friend request.
+- [ ] As Admin, comment on User2's post.
+- [ ] As Admin, Like User2's post.
+    - [ ] As Admin, unlike User2's post.
+- [ ] As Admin, dislike User2's post.
+     - [ ] As Admin, remove dislike of User2's post.
+- [ ] As Admin, block User2's post.
+    - [ ] As Admin, remove block of User2's post.
+- [ ] As User2, click on comment notification from Admin's comment.
+- [ ] As User1, make a post with just an image.
+- [ ] As User1, make a post with just a link.
+- [ ] As User1, make a post with just text.
+- [ ] As User1, make a post with text and an image.
+- [ ] As User1, make a post with text and a link.
+- [ ] As User2, react to each of User1's posts.
+- [ ] As User2, comment on each of user1's posts.

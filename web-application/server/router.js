@@ -155,20 +155,38 @@ module.exports = function(core) {
         })
     })
 
-    router.post('/user/:userId/friends', function(request, response, next) {
-        userController.postFriends(request, response).catch(function(error) {
+    /******************************************************************************
+     *          User Relationship REST Routes
+     ******************************************************************************/
+    const UserRelationshipController = require('./controllers/UserRelationshipController')
+    const userRelationshipController = new UserRelationshipController(core)
+
+    router.get('/user/:userId/relationships', function(request, response, next) {
+        userRelationshipController.getUserRelationships(request, response).catch(function(error) {
             next(error)
         })
     })
 
-    router.patch('/user/:userId/friend/:friendId', function(request, response, next) {
-        userController.patchFriend(request, response).catch(function(error) {
+    router.post('/user/:userId/relationships', function(request, response, next) {
+        userRelationshipController.postUserRelationships(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.get('/user/:userId/relationship/:relationId', function(request, response, next) {
+        userRelationshipController.getUserRelationship(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.patch('/user/:userId/relationship/:relationId', function(request, response, next) {
+        userRelationshipController.patchUserRelationship(request, response).catch(function(error) {
             next(error)
         })
     })
     
-    router.delete('/user/:userId/friend/:friendId', function(request, response, next) {
-        userController.deleteFriend(request, response).catch(function(error) {
+    router.delete('/user/:userId/relationship/:relationId', function(request, response, next) {
+        userRelationshipController.deleteUserRelationship(request, response).catch(function(error) {
             next(error)
         })
     })

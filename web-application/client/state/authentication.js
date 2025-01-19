@@ -10,10 +10,7 @@ import {
     startRequestTracking, 
     recordRequestFailure, 
     recordRequestSuccess, 
-    useRequest,
-    bustRequestCache,
-    cleanupRequest as cleanupTrackedRequest, 
-    garbageCollectRequests } from './helpers/requestTracker'
+    cleanupRequest as cleanupTrackedRequest } from './helpers/requestTracker'
 
 import { reset } from '/state/system'
 import { setUsersInDictionary } from '/state/users'
@@ -48,18 +45,7 @@ export const authenticationSlice = createSlice({
         makeRequest: startRequestTracking, 
         failRequest: recordRequestFailure, 
         completeRequest: recordRequestSuccess,
-        useRequest: useRequest,
-        bustRequestCache: bustRequestCache,
-        cleanupRequest: function(state, action) {
-            // Don't cache authentication requests.
-            action.payload.cacheTTL = 0  
-            cleanupTrackedRequest(state, action)
-        }, 
-        garbageCollectRequests: function(state, action) {
-            // Don't cache authentication requests.
-            action.payload = 0  
-            garbageCollectRequests(state, action)
-        }
+        cleanupRequest: cleanupTrackedRequest
     }
 
 })
@@ -138,7 +124,7 @@ export const postAuthentication = function(email, password) {
             email: email,
             password: password
         }
-        dispatch(authenticationSlice.actions.bustRequestCache())
+
         return makeTrackedRequest(dispatch, getState, authenticationSlice,
             'POST', endpoint, body,
             function(responseBody) {
@@ -194,7 +180,6 @@ export const deleteAuthentication = function() {
     return function(dispatch, getState) {
         const endpoint = '/authentication'
 
-        dispatch(authenticationSlice.actions.bustRequestCache())
         return makeTrackedRequest(dispatch, getState, authenticationSlice,
             'DELETE', endpoint, null,
             function(responseBody) {
@@ -217,7 +202,6 @@ export const validateToken = function(token, type) {
             'GET', endpoint, null,
             function(responseBody) {
                 dispatch(authenticationSlice.actions.setCurrentUser(responseBody.user))
-                dispatch(authenticationSlice.actions.setFriends(responseBody.friends))
                 dispatch(setUsersInDictionary({ entity: responseBody.user }))
 
                 if ( responseBody.file ) {
@@ -240,6 +224,6 @@ export const createToken = function(params) {
     }
 }
 
-export const { setCurrentUser, setFriends, cleanupRequest} = authenticationSlice.actions
+export const { setCurrentUser, cleanupRequest} = authenticationSlice.actions
 
 export default authenticationSlice.reducer

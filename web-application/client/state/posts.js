@@ -17,10 +17,8 @@ import {
     startRequestTracking, 
     recordRequestFailure, 
     recordRequestSuccess, 
-    useRequest,
-    bustRequestCache,
     cleanupRequest as cleanupTrackedRequest, 
-    garbageCollectRequests as garbageCollectTrackedRequests } from './helpers/requestTracker'
+} from './helpers/requestTracker'
 
 export const postsSlice = createSlice({
     name: 'posts',
@@ -107,10 +105,7 @@ export const postsSlice = createSlice({
         makeRequest: startRequestTracking, 
         failRequest: recordRequestFailure, 
         completeRequest: recordRequestSuccess,
-        useRequest: useRequest,
-        bustRequestCache: bustRequestCache,
-        cleanupRequest: cleanupTrackedRequest, 
-        garbageCollectRequests: garbageCollectTrackedRequests
+        cleanupRequest: cleanupTrackedRequest
     }
 })
 
@@ -162,7 +157,6 @@ export const postPosts = function(post) {
     return function(dispatch, getState) {
         const endpoint = '/posts'
         const body = post
-        dispatch(postsSlice.actions.bustRequestCache())
         return makeTrackedRequest(dispatch, getState, postsSlice,
             'POST', endpoint, body,
             function(response) {
@@ -214,7 +208,6 @@ export const getPost = function(id) {
  */
 export const patchPost = function(post) {
     return function(dispatch, getState) {
-        dispatch(postsSlice.actions.bustRequestCache())
         return makeTrackedRequest(dispatch, getState, postsSlice,
             'PATCH', `/post/${post.id}`, post,
             function(response) {
@@ -240,7 +233,6 @@ export const patchPost = function(post) {
  */
 export const deletePost = function(post) {
     return function(dispatch, getState) {
-        dispatch(postsSlice.actions.bustRequestCache())
         return makeTrackedRequest(dispatch, getState, postsSlice,
             'DELETE', `/post/${post.id}`, null,
             function(response) {
