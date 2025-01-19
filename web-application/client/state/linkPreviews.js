@@ -17,10 +17,8 @@ import {
     startRequestTracking, 
     recordRequestFailure, 
     recordRequestSuccess, 
-    useRequest,
-    bustRequestCache,
-    cleanupRequest as cleanupTrackedRequest, 
-    garbageCollectRequests as garbageCollectTrackedRequests } from './helpers/requestTracker'
+    cleanupRequest as cleanupTrackedRequest
+} from './helpers/requestTracker'
 
 export const linkPreviewsSlice = createSlice({
     name: 'linkPreviews',
@@ -83,10 +81,7 @@ export const linkPreviewsSlice = createSlice({
         makeRequest: startRequestTracking, 
         failRequest: recordRequestFailure, 
         completeRequest: recordRequestSuccess,
-        useRequest: useRequest,
-        bustRequestCache: bustRequestCache,
         cleanupRequest: cleanupTrackedRequest, 
-        garbageCollectRequests: garbageCollectTrackedRequests
     }
 })
 
@@ -138,7 +133,6 @@ export const postLinkPreviews = function(linkPreview) {
     return function(dispatch, getState) {
         const endpoint = '/link-previews'
         const body = linkPreview
-        dispatch(linkPreviewsSlice.actions.bustRequestCache())
         return makeTrackedRequest(dispatch, getState, linkPreviewsSlice,
             'POST', endpoint, body,
             function(response) {
@@ -190,7 +184,6 @@ export const getLinkPreview = function(id) {
  */
 export const patchLinkPreview = function(linkPreview) {
     return function(dispatch, getState) {
-        dispatch(linkPreviewsSlice.actions.bustRequestCache())
         return makeTrackedRequest(dispatch, getState, linkPreviewsSlice,
             'PATCH', `/link-preview/${linkPreview.id}`, linkPreview,
             function(response) {

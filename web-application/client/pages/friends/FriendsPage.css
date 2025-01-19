@@ -33,6 +33,7 @@
         display: grid;
         grid-template-columns: 320px auto;
         width: 100%;
+        max-width:  1740px;
     }
 
     #friends-page .content {

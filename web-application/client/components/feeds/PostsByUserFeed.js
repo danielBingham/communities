@@ -46,8 +46,10 @@ const PostsByUserFeed = function({ id }) {
     }, [ searchParams ])
 
     useEffect(function() {
-        if ( requestId ) {
-            dispatch(cleanupRequest({ requestId: requestId }))
+        return function cleanup() {
+            if ( requestId ) {
+                dispatch(cleanupRequest({ requestId: requestId }))
+            }
         }
     }, [ requestId ])
 

@@ -7,6 +7,8 @@ import { validateToken, cleanupRequest } from '/state/authentication'
 import Spinner from '/components/Spinner'
 import { Page, PageBody } from '/components/generic/Page'
 
+import './EmailConfirmationPage.css'
+
 const EmailConfirmationPage = function(props) {
     const [ searchParams, setSearchParams ] = useSearchParams()
 
@@ -48,7 +50,7 @@ const EmailConfirmationPage = function(props) {
     // If the request succeeded.
     if ( request && request.state == 'fulfilled' ) {
         content = (
-            <div className="success">
+            <div className="email-confirmation-page__success">
                 <p>Thanks for confirming your email!</p>
                 <p>You can return to the home page <a href="/">here</a></p>
             </div>
@@ -58,15 +60,16 @@ const EmailConfirmationPage = function(props) {
     // If the request failed, handle errors.
     else if (request && request.state == 'failed' ) {
         content = (
-            <div className="failure">
-                <p>We were unable to confirm you email.  The token you used may have been invalid or may have expired.</p>
-                <p>If you login, you can request a new token from the settings page.</p>
+            <div className="email-confirmation-page__failure">
+                <p>We were unable to confirm you email.  The token you used may have been invalid, may have already been used, or may have expired.</p>
+                <p>If you already used this token to confirm your email, you should be logged in and should be able to go to your <a href="/">home feed</a> to use the site.</p>
+                <p>If something else went wrong, you can request a new token from the confirmation request notice.</p>
             </div>
         )
     }
     
     return (
-        <Page id="email-confirmation">
+        <Page id="email-confirmation-page">
             <PageBody>
                 { content }
             </PageBody>

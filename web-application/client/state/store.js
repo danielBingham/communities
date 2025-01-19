@@ -13,6 +13,7 @@ import postReactionsReducer from './postReactions'
 import tagsReducer from './tags'
 import systemReducer from './system'
 import usersReducer from './users'
+import userRelationshipsReducer from './userRelationships'
 
 
 const reducers = combineReducers({
@@ -21,6 +22,7 @@ const reducers = combineReducers({
     jobs: jobsReducer,
     authentication: authenticationReducer,
     users: usersReducer,
+    userRelationships: userRelationshipsReducer,
     notifications: notificationsReducer,
     linkPreviews: linkPreviewsReducer,
     posts: postsReducer,

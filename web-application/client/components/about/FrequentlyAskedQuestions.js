@@ -6,7 +6,9 @@ const FrequentlyAskedQuestions = function({}) {
 
     useEffect(function() {
         if ( document.location.hash ) {
-            document.querySelector(document.location.hash).scrollIntoView()
+            document.querySelector(document.location.hash).scrollIntoView({
+                block: 'center'
+            })
         }
     }, [])
 

@@ -39,6 +39,14 @@ const UserInvite = function() {
         setRequestId(dispatch(postUsers({
             email: email
         })))
+
+        setEmail('')
+    }
+
+    const onKeyDown = function(event) {
+        if ( event.key == 'Enter' ) {
+            invite(event)
+        } 
     }
 
     useEffect(function() {
@@ -54,11 +62,19 @@ const UserInvite = function() {
 
     if ( ! request || request.state != 'pending' ) {
         if ( request && request.state == 'failed' ) {
-            requestError = (
-                <div className="error">
-                    Something went wrong: { request.error }
-                </div>
-            )
+            if ( request.errorMessage ) {
+                requestError = (
+                    <div className="error">
+                        { request.errorMessage }
+                    </div>
+                )
+            } else {
+                requestError = (
+                    <div className="error">
+                        Something went wrong: { request.error }
+                    </div>
+                )
+            }
         }
         if ( request && request.state == 'fulfilled' ) {
             successMessage = (
@@ -72,16 +88,25 @@ const UserInvite = function() {
 
     return (
         <div className="user-invite">
-            <div className="invitations-available">You have { currentUser.invitations } invitations available.</div>
-            <div className="input-wrapper">
-                <input type="text" onChange={(e) => setEmail(e.target.value)} value={email}  name="email" placeholder="Enter email..." />
+            <div className="user-invite__invitations-available">You have { currentUser.invitations } invitations available.</div>
+            <div className="user-invite__input-wrapper">
+                <input 
+                    type="text" 
+                    onChange={(e) => setEmail(e.target.value)} 
+                    onKeyDown={onKeyDown}
+                    value={email}  
+                    name="email" 
+                    placeholder="Enter email..." 
+                />
                 { request && request.state == 'pending' ? <Spinner local={true} /> : <Button type="primary" onClick={invite}>Send Invite</Button> }
             </div>
-            <div className="errors">
+            <div className="user-invite__errors">
                 { submissionError && ! email && <div className="error">Email is required.</div> }
                 { requestError }
             </div>
-            { successMessage }
+            <div className="user-invite__success">
+                { successMessage }
+            </div>
         </div>
     )
 }

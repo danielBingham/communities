@@ -35,6 +35,8 @@ const Header = function(props) {
         return state.authentication.currentUser
     })
 
+    const location = useLocation()
+
     useLayoutEffect(function() {
         setWindowWidth(window.innerWidth)
 
@@ -65,15 +67,14 @@ const Header = function(props) {
 
     // ======= Render ===============================================
 
-    const location = useLocation()
     if ( windowWidth >= 1000) {
         return (
             <header>
                 <div className="grid">
-                    <div id="site-title"><Link to="/"><img src="/favicon-32x32.png" />ommunities</Link></div>
+                    <div id="site-title"><a href="/"><img src="/favicon-32x32.png" />ommunities</a></div>
                     <div id="navigation">
                         <div id="about-navigation" className="navigation-block">
-                            <Link to="/">{ location.pathname == '/' ? <HomeIconSolid /> : <HomeIconOutline /> }Home</Link>
+                            <a href="/">{ location.pathname == '/' ? <HomeIconSolid /> : <HomeIconOutline /> }Home</a>
                             <Link to="/about">{ location.pathname == '/about' ? <InformationCircleIconSolid /> : <InformationCircleIconOutline /> }About</Link>
                             { currentUser && <Link to="/friends">{ location.pathname.startsWith('/friends') ? <UsersIconSolid /> : <UsersIconOutline /> }Friends</Link> }
                         </div>
@@ -90,7 +91,7 @@ const Header = function(props) {
                     <div id="site-title"><Link to="/"><img src="/favicon-32x32.png" /><span className="title-text">ommunities</span></Link></div>
                     <div id="navigation">
                         <div id="about-navigation" className="navigation-block">
-                            <Link to="/" onClick={() => setShowMenu(false)}>{ location.pathname == '/' ? <HomeIconSolid /> : <HomeIconOutline /> }<span className="nav-text">Home</span></Link>
+                            <a href="/">{ location.pathname == '/' ? <HomeIconSolid /> : <HomeIconOutline /> }<span className="nav-text">Home</span></a>
                             <Link to="/about" >{ location.pathname.startsWith('/about') ? <InformationCircleIconSolid /> : <InformationCircleIconOutline /> }<span className="nav-text">About</span></Link>
                             { currentUser && <Link to="/friends">{ location.pathname.startsWith('/friends') ? <UsersIconSolid /> : <UsersIconOutline /> }<span className="nav-text">Friends</span></Link> }
                         </div>

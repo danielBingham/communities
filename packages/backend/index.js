@@ -29,6 +29,7 @@ exports.RoleDAO = require('./daos/RoleDAO')
 exports.TagDAO = require('./daos/TagDAO')
 exports.TokenDAO = require('./daos/TokenDAO')
 exports.UserDAO = require('./daos/UserDAO')
+exports.UserRelationshipDAO = require('./daos/UserRelationshipDAO')
 
 exports.DAOError = require('./errors/DAOError')
 exports.ServiceError = require('./errors/ServiceError')

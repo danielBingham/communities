@@ -17,10 +17,8 @@ import {
     startRequestTracking, 
     recordRequestFailure, 
     recordRequestSuccess, 
-    useRequest,
-    bustRequestCache,
     cleanupRequest as cleanupTrackedRequest, 
-    garbageCollectRequests as garbageCollectTrackedRequests } from './helpers/requestTracker'
+} from './helpers/requestTracker'
 
 export const postCommentsSlice = createSlice({
     name: 'postComments',
@@ -132,10 +130,7 @@ export const postCommentsSlice = createSlice({
         makeRequest: startRequestTracking, 
         failRequest: recordRequestFailure, 
         completeRequest: recordRequestSuccess,
-        useRequest: useRequest,
-        bustRequestCache: bustRequestCache,
-        cleanupRequest: cleanupTrackedRequest, 
-        garbageCollectRequests: garbageCollectTrackedRequests
+        cleanupRequest: cleanupTrackedRequest
     }
 })
 
@@ -188,7 +183,6 @@ export const postPostComments = function(comment) {
     return function(dispatch, getState) {
         const endpoint = `/post/${comment.postId}/comments`
         const body = comment 
-        dispatch(postCommentsSlice.actions.bustRequestCache())
         return makeTrackedRequest(dispatch, getState, postCommentsSlice,
             'POST', endpoint, body,
             function(response) {
@@ -240,7 +234,6 @@ export const getPostComment = function(postId, id) {
  */
 export const patchPostComment = function(comment) {
     return function(dispatch, getState) {
-        dispatch(postCommentsSlice.actions.bustRequestCache())
         return makeTrackedRequest(dispatch, getState, postCommentsSlice,
             'PATCH', `/post/${comment.postId}/comment/${comment.id}`, comment,
             function(response) {
@@ -266,7 +259,6 @@ export const patchPostComment = function(comment) {
  */
 export const deletePostComment = function(comment) {
     return function(dispatch, getState) {
-        dispatch(postCommentsSlice.actions.bustRequestCache())
         return makeTrackedRequest(dispatch, getState, postCommentsSlice,
             'DELETE', `/post/${comment.postId}/comment/${comment.id}`, null,
             function(response) {

@@ -37,10 +37,8 @@ import {
     startRequestTracking, 
     recordRequestFailure, 
     recordRequestSuccess, 
-    bustRequestCache,
-    useRequest as useTrackedRequest,
     cleanupRequest as cleanupTrackedRequest, 
-    garbageCollectRequests as garbageCollectTrackedRequests } from './helpers/requestTracker'
+} from './helpers/requestTracker'
 
 const cacheTTL = 0  // Don't cache paper notifications.  We poll for them. 
 
@@ -115,16 +113,7 @@ export const notificationsSlice = createSlice({
         makeRequest: startRequestTracking, 
         failRequest: recordRequestFailure, 
         completeRequest: recordRequestSuccess,
-        useRequest: useTrackedRequest,
-        bustRequestCache: bustRequestCache,
-        cleanupRequest: function(state, action) {
-            action.payload.cacheTTL = cacheTTL
-            cleanupTrackedRequest(state, action)
-        }, 
-        garbageCollectRequests: function(state, action) {
-            action.payload = cacheTTL
-            garbageCollectTrackedRequests(state, action)
-        }
+        cleanupRequest: cleanupTrackedRequest
     }
 })
 
@@ -184,7 +173,6 @@ export const getNotifications = function(name, params) {
  */
 export const patchNotifications = function(notifications) {
     return function(dispatch, getState) {
-        dispatch(notificationsSlice.actions.bustRequestCache())
         return makeTrackedRequest(dispatch, getState, notificationsSlice,
             'PATCH', `/notifications`, notifications,
             function(response) {
@@ -194,7 +182,6 @@ export const patchNotifications = function(notifications) {
             }
         )
     }
-
 }
 
 /**
@@ -211,7 +198,6 @@ export const patchNotifications = function(notifications) {
  */
 export const patchNotification = function(notification) {
     return function(dispatch, getState) {
-        dispatch(notificationsSlice.actions.bustRequestCache())
         return makeTrackedRequest(dispatch, getState, notificationsSlice,
             'PATCH', `/notification/${notification.id}`, notification,
             function(response) {

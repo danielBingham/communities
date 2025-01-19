@@ -6,10 +6,7 @@ import {
     startRequestTracking, 
     recordRequestFailure, 
     recordRequestSuccess, 
-    useRequest,
-    bustRequestCache as bustTrackedRequestCache,
-    cleanupRequest as cleanupTrackedRequest, 
-    garbageCollectRequests } from './helpers/requestTracker'
+    cleanupRequest as cleanupTrackedRequest } from './helpers/requestTracker'
 
 
 export const featuresSlice = createSlice({
@@ -59,18 +56,7 @@ export const featuresSlice = createSlice({
         makeRequest: startRequestTracking, 
         failRequest: recordRequestFailure, 
         completeRequest: recordRequestSuccess,
-        useRequest: useRequest,
-        bustRequestCache: bustTrackedRequestCache,
-        cleanupRequest: function(state, action) {
-            // Don't cache feature requests.
-            action.payload.cacheTTL = 0  
-            cleanupTrackedRequest(state, action)
-        }, 
-        garbageCollectRequests: function(state, action) {
-            // Don't cache feature requests.
-            action.payload = 0  
-            garbageCollectRequests(state, action)
-        }
+        cleanupRequest: cleanupTrackedRequest
     }
 
 })
@@ -171,6 +157,6 @@ export const patchFeature = function(feature) {
     }
 }
 
-export const { bustRequestCache, cleanupRequest} = featuresSlice.actions
+export const { cleanupRequest} = featuresSlice.actions
 
 export default featuresSlice.reducer

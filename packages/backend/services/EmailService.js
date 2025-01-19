@@ -53,9 +53,9 @@ module.exports = class EmailService {
 
 
         const emailTextBody = `
-Welcome to Communities, ${user.name}!
+Hello ${user.name}!
 
-Please confirm your email address by following the link: ${confirmationLink}
+Please confirm your email address by following this link: ${confirmationLink}
 
 Cheers,
 The Communities Team
@@ -66,7 +66,7 @@ The Communities Team
         await this.sendEmail({
             "From": "no-reply@communities.social",
             "To": user.email,
-            "Subject": `[Communities] Welcome to Communities, ${user.name}!`,
+            "Subject": `[Communities] Please confirm your email, ${user.name}!`,
             "TextBody": emailTextBody,
             "MessageStream": "email-confirmation"
         })

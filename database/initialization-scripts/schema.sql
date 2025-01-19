@@ -56,6 +56,9 @@ CREATE TABLE users (
 
     invitations int DEFAULT 50,
 
+    settings jsonb DEFAULT '{}'::jsonb,
+    notices jsonb DEFAULT '{}'::jsonb,
+
     created_date timestamptz,
     updated_date timestamptz 
 );
@@ -72,6 +75,7 @@ INSERT INTO users (name, username, email, password, status, permissions, created
 
 CREATE TYPE user_relationship_status AS ENUM('pending', 'confirmed');
 CREATE TABLE user_relationships (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id uuid REFERENCES users(id) ON DELETE CASCADE NOT NULL,
     friend_id uuid REFERENCES users(id) ON DELETE CASCADE NOT NULL,
 

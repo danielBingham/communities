@@ -18,10 +18,8 @@ import {
     startRequestTracking, 
     recordRequestFailure, 
     recordRequestSuccess, 
-    useRequest,
-    bustRequestCache,
     cleanupRequest as cleanupTrackedRequest, 
-    garbageCollectRequests as garbageCollectTrackedRequests } from './helpers/requestTracker'
+} from './helpers/requestTracker'
 
 export const tagsSlice = createSlice({
     name: 'tags',
@@ -85,10 +83,8 @@ export const tagsSlice = createSlice({
         makeRequest: startRequestTracking, 
         failRequest: recordRequestFailure, 
         completeRequest: recordRequestSuccess,
-        useRequest: useRequest,
-        bustRequestCache: bustRequestCache,
-        cleanupRequest: cleanupTrackedRequest, 
-        garbageCollectRequests: garbageCollectTrackedRequests
+        cleanupRequest: cleanupTrackedRequest
+        
     }
 })
 
@@ -142,7 +138,6 @@ export const postTags = function(tag) {
     return function(dispatch, getState) {
         const endpoint = '/tags'
         const body = tag
-        dispatch(tagsSlice.actions.bustRequestCache())
         return makeTrackedRequest(dispatch, getState, tagsSlice,
             'POST', endpoint, body,
             function(response) {
@@ -194,7 +189,6 @@ export const getTag = function(id) {
  */
 export const putTag = function(tag) {
     return function(dispatch, getState) {
-        dispatch(tagsSlice.actions.bustRequestCache())
         return makeTrackedRequest(dispatch, getState, tagsSlice,
             'PUT', `/tag/${tag.id}`, tag,
             function(response) {
@@ -220,7 +214,6 @@ export const putTag = function(tag) {
  */
 export const patchTag = function(tag) {
     return function(dispatch, getState) {
-        dispatch(tagsSlice.actions.bustRequestCache())
         return makeTrackedRequest(dispatch, getState, tagsSlice,
             'PATCH', `/tag/${tag.id}`, tag,
             function(response) {
@@ -246,7 +239,6 @@ export const patchTag = function(tag) {
  */
 export const deleteTag = function(tag) {
     return function(dispatch, getState) {
-        dispatch(tagsSlice.actions.bustRequestCache())
         return makeTrackedRequest(dispatch, getState, tagsSlice,
             'DELETE', `/tag/${tag.id}`, null,
             function(response) {

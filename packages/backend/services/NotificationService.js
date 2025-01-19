@@ -121,7 +121,7 @@ The Communities Team`)
             throw new ServiceError('missing-definition',
                 `Failed to find notification definitions for type '${type}'.`)
         }
-        
+       
         context.host = this.core.config.host
 
         const results = await this.core.database.query(`
@@ -172,22 +172,22 @@ The Communities Team`)
     async sendFriendRequestNotification(currentUser, context) {
         const userResults = await this.userDAO.selectUsers(
             `WHERE users.id = ANY($1::uuid[])`,
-            [  [ context.userId, context.friendId ] ]
+            [  [ context.userId, context.relationId ] ]
         )
 
-        context.friend = userResults.dictionary[context.friendId]
+        context.friend = userResults.dictionary[context.relationId]
         context.requester = userResults.dictionary[context.userId]
 
-        await this.createNotification(context.friendId, 'User:friend:create', context)
+        await this.createNotification(context.relationId, 'User:friend:create', context)
     }
 
     async friendRequestAcceptedNotification(currentUser, context) {
         const userResults = await this.userDAO.selectUsers(
             `WHERE users.id = ANY($1::uuid[])`,
-            [  [ context.userId, context.friendId ] ]
+            [  [ context.userId, context.relationId ] ]
         )
 
-        context.friend = userResults.dictionary[context.friendId]
+        context.friend = userResults.dictionary[context.relationId]
         context.requester = userResults.dictionary[context.userId]
 
         await this.createNotification(context.userId, 'User:friend:update', context)

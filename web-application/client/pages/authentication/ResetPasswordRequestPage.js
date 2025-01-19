@@ -32,6 +32,14 @@ const ResetPasswordRequestPage = function(props) {
         setSubmitted(true)
     }
 
+    useEffect(function() {
+        return function cleanup() {
+            if ( requestId ) {
+                dispatch(cleanupRequest({ requestId: requestId }))
+            }
+        }
+    }, [ requestId])
+
     let content = ( <Spinner local={true} /> )
     // If they've submitted the request.
     if ( submitted ) {

@@ -77,7 +77,7 @@ const ChangeEmailForm = function(props) {
         }
 
         if ( ! field || field == 'password' ) {
-            if ( ! password || password.length <= 0 ) {
+            if ( email && email.length > 0 && (! password || password.length <= 0) ) {
                 setPasswordError('Your password is required to change your email.')
             } else {
                 setPasswordError(null)
@@ -114,6 +114,14 @@ const ChangeEmailForm = function(props) {
         }
     }, [ authRequest ])
 
+    useEffect(function() {
+        if ( request && request.state == 'fulfilled' ) {
+            setEmail('')
+            setPassword('')
+        }
+    }, [ request ])
+
+
     // Clean up our request.
     useEffect(function() {
         return function cleanup() {
@@ -146,7 +154,8 @@ const ChangeEmailForm = function(props) {
     if ( request && request.state == 'failed' ) {
         errors.push(
             <div key="request-failed" className="request-failed">
-                Something went wrong with the request: { request.error }.
+                { request.errorMessage && <span>{request.errorMessage}</span>}
+                { ! request.errorMessage && <span>Something went wrong with the request: { request.error }.</span>}
             </div>
         )
     }
@@ -171,6 +180,12 @@ const ChangeEmailForm = function(props) {
 
     return (
         <div className="change-email-form">
+            <div className="change-email-form__instructions">To change your
+            email, enter your new email and your current password. After you
+                submit the form, we'll send a confirmation request to your
+                new address. You'll need to click the link in the request to
+                confirm your new email.  You will not be able to use the site
+                until you successfully confirm it.</div>
             <form onSubmit={onSubmit}>
                 <Input
                     name="email"

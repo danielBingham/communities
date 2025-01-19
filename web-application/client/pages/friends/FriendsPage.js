@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react'
-import { useSelector } from 'react-redux'
-import { useNavigate, useLocation, Link, useParams } from 'react-router-dom'
+import React from 'react'
+import { useSelector, } from 'react-redux'
+import { Link, useParams } from 'react-router-dom'
 
 import { 
     MagnifyingGlassIcon as MagnifyingGlassOutline,
@@ -18,9 +18,9 @@ import Spinner from '/components/Spinner'
 
 import WelcomeNotice from '/components/notices/WelcomeNotice'
 
-import YourFriendsList from '/components/friends/YourFriendsList'
-import FriendRequestsList from '/components/friends/FriendRequestsList'
-import FindFriends from '/components/friends/FindFriends'
+import YourFriendsList from '/pages/friends/views/YourFriendsList'
+import FriendRequestsList from '/pages/friends/views/FriendRequestsList'
+import FindFriends from '/pages/friends/views/FindFriends'
 
 import LoginForm from '/components/authentication/LoginForm'
 
@@ -40,7 +40,6 @@ const FriendsPage = function() {
     }
 
     const selectedTab = ( pageTab ? pageTab : 'friends')
-
     let content = ( <Spinner local={true} /> )
     if ( selectedTab == 'friends' ) {
         content = ( <YourFriendsList /> ) 

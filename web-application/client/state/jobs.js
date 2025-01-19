@@ -6,10 +6,7 @@ import {
     startRequestTracking, 
     recordRequestFailure, 
     recordRequestSuccess, 
-    useRequest,
-    bustRequestCache as bustTrackedRequestCache,
-    cleanupRequest as cleanupTrackedRequest, 
-    garbageCollectRequests } from './helpers/requestTracker'
+    cleanupRequest as cleanupTrackedRequest } from './helpers/requestTracker'
 
 
 export const jobsSlice = createSlice({
@@ -59,18 +56,7 @@ export const jobsSlice = createSlice({
         makeRequest: startRequestTracking, 
         failRequest: recordRequestFailure, 
         completeRequest: recordRequestSuccess,
-        useRequest: useRequest,
-        bustRequestCache: bustTrackedRequestCache,
-        cleanupRequest: function(state, action) {
-            // Don't cache job requests.
-            action.payload.cacheTTL = 0  
-            cleanupTrackedRequest(state, action)
-        }, 
-        garbageCollectRequests: function(state, action) {
-            // Don't cache job requests.
-            action.payload = 0  
-            garbageCollectRequests(state, action)
-        }
+        cleanupRequest: cleanupTrackedRequest
     }
 
 })

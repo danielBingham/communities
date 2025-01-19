@@ -45,7 +45,18 @@ const UserBadge = function(props) {
     }, [ requestId ])
 
     // ======= Render ===============================================
+    if( ! user && ( ! request || request.status == 'pending' )) {
+        return (<div className="user-badge"> <Spinner local={true} /></div>)
+    }
 
+    // TECHDEBT: The request will return a 404 not found in certain circumstances
+    // where someone has a userId (through a relationship gained through an
+    // invite, for example), but a user hasn't finished registering and
+    // confirmed yet.  In those circumstances, the FriendList will create a
+    // user badge with the ID, but the GET /user/:id endpoint will return 404
+    // because of the unconfirmed status.
+    //
+    // In that case, we'll just return null for now.
     if ( user ) {
         return (
             <div className="user-badge">
@@ -60,7 +71,7 @@ const UserBadge = function(props) {
             </div>
         )
     } else {
-        return (<Spinner />)
+        return (null)
     }
 
 }

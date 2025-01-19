@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { getFeatures, bustRequestCache, cleanupRequest as cleanupFeaturesRequest } from '/state/features'
+import { getFeatures, cleanupRequest as cleanupFeaturesRequest } from '/state/features'
 
 import FeatureRow from '/components/admin/features/FeatureRow'
 
@@ -34,7 +34,6 @@ const FeatureFlags = function(props) {
     const dispatch = useDispatch()
 
     useEffect(function() {
-        dispatch(bustRequestCache())
         setFeaturesRequestId(dispatch(getFeatures()))
     }, [ ])
 

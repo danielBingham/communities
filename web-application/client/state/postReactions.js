@@ -17,10 +17,8 @@ import {
     startRequestTracking, 
     recordRequestFailure, 
     recordRequestSuccess, 
-    useRequest,
-    bustRequestCache,
     cleanupRequest as cleanupTrackedRequest, 
-    garbageCollectRequests as garbageCollectTrackedRequests } from './helpers/requestTracker'
+} from './helpers/requestTracker'
 
 export const postReactionsSlice = createSlice({
     name: 'postReactions',
@@ -84,10 +82,7 @@ export const postReactionsSlice = createSlice({
         makeRequest: startRequestTracking, 
         failRequest: recordRequestFailure, 
         completeRequest: recordRequestSuccess,
-        useRequest: useRequest,
-        bustRequestCache: bustRequestCache,
-        cleanupRequest: cleanupTrackedRequest, 
-        garbageCollectRequests: garbageCollectTrackedRequests
+        cleanupRequest: cleanupTrackedRequest
     }
 })
 
@@ -107,7 +102,6 @@ export const postPostReaction = function(reaction) {
     return function(dispatch, getState) {
         const endpoint = `/post/${reaction.postId}/reactions`
         const body = reaction
-        dispatch(postReactionsSlice.actions.bustRequestCache())
         return makeTrackedRequest(dispatch, getState, postReactionsSlice,
             'POST', endpoint, body,
             function(response) {
@@ -133,7 +127,6 @@ export const postPostReaction = function(reaction) {
  */
 export const patchPostReaction = function(reaction) {
     return function(dispatch, getState) {
-        dispatch(postReactionsSlice.actions.bustRequestCache())
         return makeTrackedRequest(dispatch, getState, postReactionsSlice,
             'PATCH', `/post/${reaction.postId}/reaction`, reaction,
             function(response) {
@@ -159,7 +152,6 @@ export const patchPostReaction = function(reaction) {
  */
 export const deletePostReaction = function(reaction) {
     return function(dispatch, getState) {
-        dispatch(postReactionsSlice.actions.bustRequestCache())
         return makeTrackedRequest(dispatch, getState, postReactionsSlice,
             'DELETE', `/post/${reaction.postId}/reaction`, null,
             function(response) {

@@ -40,6 +40,8 @@ import FriendsPage from '/pages/friends/FriendsPage'
 
 import PostPage from '/pages/posts/PostPage'
 
+import EmailConfirmationNotice from '/components/notices/EmailConfirmationNotice'
+
 import ErrorBoundary from '/errors/ErrorBoundary'
 import Spinner from '/components/Spinner'
 
@@ -188,6 +190,7 @@ const App = function(props) {
             <Router>
                 <Header />
                 <main>
+                    { currentUser && currentUser.status == 'unconfirmed' && <EmailConfirmationNotice /> }
                     <Routes>
                         <Route path="/">
                             <Route path=":pageTab" element={ <HomePage /> } />
