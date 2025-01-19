@@ -23,6 +23,7 @@ const FeatureDAO = require('../daos/FeatureDAO')
 const ExampleMigration = require('../migrations/ExampleMigration')
 const NotificationSettingsMigration = require('../migrations/NotificationSettingsMigration')
 const NoticeMigration = require('../migrations/NoticeMigration')
+const RelationshipsOwnStateMigration = require('../migrations/RelationshipsOwnStateMigration')
 
 const ServiceError = require('../errors/ServiceError')
 const MigrationError = require('../errors/MigrationError')
@@ -68,6 +69,11 @@ module.exports = class FeatureService {
                 dependsOn: [],
                 conflictsWith: [],
                 migration: new NoticeMigration(core)
+            },
+            '5-relationships-own-state': {
+                dependsOn: [],
+                conflictsWith: [],
+                migration: new RelationshipsOwnStateMigration(core)
             }
         }
     }

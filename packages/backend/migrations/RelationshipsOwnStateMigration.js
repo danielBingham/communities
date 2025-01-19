@@ -18,6 +18,8 @@
  *
  ******************************************************************************/
 
+const MigrationError = require('../errors/MigrationError')
+
 module.exports = class RelationshipsOwnStateMigration {
 
     constructor(core) {
@@ -41,21 +43,42 @@ module.exports = class RelationshipsOwnStateMigration {
      */
     async initialize() {
         try {
+            this.logger.info(`Dropping old primary key...`)
             await this.database.query(`ALTER TABLE user_relationships DROP CONSTRAINT IF EXISTS user_relationships_pkey`, [])
-            await this.database.query(`ALTER TABLE user_relationships ADD COLUMN IF NOT EXISTS id uuid DEFAULT gen_random_uuid()`, [])
-            await this.database.query(`ALTER TABLE user_relationships ADD CONSTRAINT IF NOT EXISTS user_relationships_pkey PRIMARY KEY(id)`, [])
 
+            this.logger.info(`Adding new primary key 'id'...`)
+            await this.database.query(`ALTER TABLE user_relationships ADD COLUMN IF NOT EXISTS id uuid DEFAULT gen_random_uuid()`, [])
+
+            this.logger.info(`Adding new primary key constraint for 'id'...`)
+            await this.database.query(`ALTER TABLE user_relationships ADD CONSTRAINT user_relationships_pkey PRIMARY KEY(id)`, [])
+
+            this.logger.info(`Creating new index for 'user_id'...`)
             await this.database.query(`CREATE INDEX IF NOT EXISTS user_relationships__user_id ON user_relationships (user_id)`, [])
+
+            this.logger.info(`Creating new index for 'friend_id'...`)
             await this.database.query(`CREATE INDEX IF NOT EXISTS user_relationships__friend_id ON user_relationships (friend_id)`, [])
         } catch (error) {
             try {
+                this.logger.error(`Migration failed.  Attempting rollback...`)
+                this.logger.error(error)
+
+                this.logger.info(`Dropping index for 'user_id'...`)
                 await this.database.query(`DROP INDEX IF EXISTS user_relationships__user_id`, [])
+
+                this.logger.info(`Dropping index for 'friend_id'...`)
                 await this.database.query(`DROP INDEX IF EXISTS user_relationships__friend_id`, [])
 
+                this.logger.info(`Dropping primary key constraint...`)
                 await this.database.query(`ALTER TABLE user_relationships DROP CONSTRAINT IF EXISTS user_relationships_pkey`, [])
+
+                this.logger.info(`Dropping column 'id'...`)
                 await this.database.query(`ALTER TABLE user_relationships DROP COLUMN IF EXISTS id`, [])
-                await this.database.query(`ALTER TABLE user_relationships ADD CONSTRAINT IF NOT EXISTS user_relationships_pkey PRIMARY KEY(user_id, friend_id)`, [])
+
+                this.logger.info(`Adding primary key constraint for 'user_id' and 'friend_id'...`)
+                await this.database.query(`ALTER TABLE user_relationships ADD CONSTRAINT user_relationships_pkey PRIMARY KEY(user_id, friend_id)`, [])
             } catch (rollbackError) {
+                this.logger.error(`Rollback failed.`)
+                this.logger.error(rollbackError)
                 throw new MigrationError('no-rollback', rollbackError.message)
             }
             throw new MigrationError('rolled-back', error.message)
@@ -67,21 +90,43 @@ module.exports = class RelationshipsOwnStateMigration {
      */
     async uninitialize() {
         try {
+            this.logger.info(`Dropping index for 'user_id'...`)
             await this.database.query(`DROP INDEX IF EXISTS user_relationships__user_id`, [])
+
+            this.logger.info(`Dropping index for 'friend_id'...`)
             await this.database.query(`DROP INDEX IF EXISTS user_relationships__friend_id`, [])
 
+            this.logger.info(`Dropping primary key constraint...`)
             await this.database.query(`ALTER TABLE user_relationships DROP CONSTRAINT IF EXISTS user_relationships_pkey`, [])
+
+            this.logger.info(`Dropping column 'id'...`)
             await this.database.query(`ALTER TABLE user_relationships DROP COLUMN IF EXISTS id`, [])
-            await this.database.query(`ALTER TABLE user_relationships ADD CONSTRAINT IF NOT EXISTS user_relationships_pkey PRIMARY KEY(user_id, friend_id)`, [])
+
+            this.logger.info(`Adding primary key constraint for 'user_id' and 'friend_id'...`)
+            await this.database.query(`ALTER TABLE user_relationships ADD CONSTRAINT user_relationships_pkey PRIMARY KEY(user_id, friend_id)`, [])
         } catch (error) {
             try {
-                await this.database.query(`ALTER TABLE user_relationships DROP CONSTRAINT IF EXISTS user_relationships_pkey`, [])
-                await this.database.query(`ALTER TABLE user_relationships ADD COLUMN IF NOT EXISTS id uuid DEFAULT gen_random_uuid()`, [])
-                await this.database.query(`ALTER TABLE user_relationships ADD CONSTRAINT IF NOT EXISTS user_relationships_pkey PRIMARY KEY(id)`, [])
+                this.logger.error(`Migration failed.  Attempting rollback...`)
+                this.logger.error(error)
 
+                this.logger.info(`Dropping primary key constraint...`)
+                await this.database.query(`ALTER TABLE user_relationships DROP CONSTRAINT IF EXISTS user_relationships_pkey`, [])
+
+                this.logger.info(`Adding column 'id'...`)
+                await this.database.query(`ALTER TABLE user_relationships ADD COLUMN IF NOT EXISTS id uuid DEFAULT gen_random_uuid()`, [])
+
+                this.logger.info(`Adding primary key constraint for 'id'...`)
+                await this.database.query(`ALTER TABLE user_relationships ADD CONSTRAINT user_relationships_pkey PRIMARY KEY(id)`, [])
+
+                this.logger.info(`Creating index for 'user_id'...`)
                 await this.database.query(`CREATE INDEX IF NOT EXISTS user_relationships__user_id ON user_relationships (user_id)`, [])
+
+                this.logger.info(`Creating index for 'friend_id'...`)
                 await this.database.query(`CREATE INDEX IF NOT EXISTS user_relationships__friend_id ON user_relationships (friend_id)`, [])
             } catch (rollbackError) {
+                this.logger.error(`Rollback failed.`)
+                this.logger.error(rollbackError)
+
                 throw new MigrationError('no-rollback', rollbackError.message)
             }
             throw new MigrationError('rolled-back', error.message)

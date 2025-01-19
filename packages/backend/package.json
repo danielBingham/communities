@@ -1,6 +1,6 @@
 {
   "name": "@communities/backend",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "The backend of Communities.",
   "author": "Daniel Bingham",
   "license": "GPL-3.0",

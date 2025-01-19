@@ -75,7 +75,7 @@ module.exports = class Logger  {
         }
 
         const now = new Date()
-        let logPrefix = `${now.toISOString()}:Session(${this.id}):${Logger.levelDescriptions[level]}:: `
+        let logPrefix = `${now.toISOString()} ${this.id} ${Logger.levelDescriptions[level]} :: `
         if ( typeof message === 'object' ) {
             if ( level == Logger.levels.error) {
                 console.log(logPrefix + 'Error encountered.') 
