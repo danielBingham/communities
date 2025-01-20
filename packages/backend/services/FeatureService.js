@@ -24,6 +24,7 @@ const ExampleMigration = require('../migrations/ExampleMigration')
 const NotificationSettingsMigration = require('../migrations/NotificationSettingsMigration')
 const NoticeMigration = require('../migrations/NoticeMigration')
 const RelationshipsOwnStateMigration = require('../migrations/RelationshipsOwnStateMigration')
+const CommentSubscriptionsMigration = require('../migrations/CommentSubscriptionsMigration')
 
 const ServiceError = require('../errors/ServiceError')
 const MigrationError = require('../errors/MigrationError')
@@ -74,6 +75,11 @@ module.exports = class FeatureService {
                 dependsOn: [],
                 conflictsWith: [],
                 migration: new RelationshipsOwnStateMigration(core)
+            },
+            '13-comment-subscriptions-migration': {
+                dependsOn: [],
+                conflictsWith: [],
+                migration: new CommentSubscriptionsMigration(core)
             }
         }
     }

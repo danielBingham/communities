@@ -78,6 +78,7 @@ module.exports = class RelationshipsOwnStateMigration {
             await this.initForward()
         } catch (error) {
             try {
+                this.logger.error(`Initialization failed.  Attempting rollback...`)
                 await this.initBack()
             } catch (rollbackError) {
                 this.logger.error(`Rollback failed.`)
@@ -96,6 +97,7 @@ module.exports = class RelationshipsOwnStateMigration {
             await this.initBack()
         } catch (error) {
             try {
+                this.logger.error(`Uninitialization failed.  Attempting rollback...`)
                 await this.initForward()
             } catch (rollbackError) {
                 this.logger.error(`Rollback failed.`)
@@ -121,12 +123,12 @@ module.exports = class RelationshipsOwnStateMigration {
 
         this.logger.info('Building insert sql..')
         const params = []
-        const sql = `
+        let sql = `
             INSERT INTO post_subscriptions (user_id, post_id, created_date, updated_date)
                 VALUES
         `
 
-        const count = 1
+        let count = 1
         for(const row of results.rows) {
             sql += `($${params.length+1}, $${params.length+2}, now(), now()) ${count == results.rows.length ? '' : ', '}`
 
@@ -155,6 +157,7 @@ module.exports = class RelationshipsOwnStateMigration {
             await this.migrateForward()
         } catch (error) {
             try {
+                this.logger.error(`Migration failed.  Attempting rollback...`)
                 await this.migrateBack()
             } catch (rollbackError) {
                 this.logger.error(`Rollback failed.`)
@@ -174,6 +177,7 @@ module.exports = class RelationshipsOwnStateMigration {
             await this.migrateBack()
         } catch (error) {
             try {
+                this.logger.error(`Migration rollback failed.  Attempting rollback...`)
                 await this.migrateForward()
             } catch (rollbackError) {
                 this.logger.error(`Rollback failed.`)
