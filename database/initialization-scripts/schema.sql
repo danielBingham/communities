@@ -82,9 +82,10 @@ CREATE TABLE user_relationships (
     status user_relationship_status NOT NULL,
 
     created_date timestamptz,
-    updated_date timestamptz,
-    PRIMARY KEY(user_id, friend_id)
+    updated_date timestamptz
 );
+CREATE INDEX user_relationships__user_id ON user_relationships (user_id);
+CREATE INDEX user_relationships__friend_id ON user_relationships (friend_id);
 
 /******************************************************************************
  * Notifications 
@@ -274,6 +275,17 @@ CREATE TABLE post_comment_versions (
     updated_date timestamptz
 );
 CREATE INDEX post_comment_versions__post_comment_id ON post_comment_versions (post_comment_id);
+
+CREATE TABLE post_subscriptions (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id uuid REFERENCES users (id) ON DELETE CASCADE NOT NULL,
+    post_id uuid REFERENCES posts (id) ON DELETE CASCADE NOT NULL,
+
+    created_date timestamptz,
+    updated_date timestamptz
+);
+CREATE INDEX post_subscriptions__user_id ON post_subscriptions (user_id);
+CREATE INDEX post_subscriptions__post_id ON post_subscriptions (post_id);
 
 /******************************************************************************
  * Permissions
