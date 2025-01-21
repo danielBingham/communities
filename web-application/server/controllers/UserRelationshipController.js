@@ -146,13 +146,14 @@ module.exports = class UserRelationshipController {
             where: `(user_id = $1 AND friend_id = $2) OR (user_id = $2 AND friend_id = $1)`,
             params: [ userId, relationId]
         })
-       
-        const existing = existingResults.list.length > 0 ? existingResults[existingResults.list[0]] : null
+      
+        const existing = existingResults.list.length > 0 ? existingResults.dictionary[existingResults.list[0]] : null
 
         // If User(relationId) already sent User(userId) their own friend
         // request, then just confirm that relationship.
         if ( existing !== null && existing.userId == relationId) {
             const userRelationship = {
+                id: existing.id,
                 userId: relationId,
                 relationId: userId,
                 status: 'confirmed'
@@ -160,10 +161,16 @@ module.exports = class UserRelationshipController {
 
             await this.userRelationshipDAO.updateUserRelationship(userRelationship)
 
-            const results = this.userRelationshipDAO.selectUserRelationships({
+            const results = await this.userRelationshipDAO.selectUserRelationships({
                 where: `user_id = $1 AND friend_id = $2`,
-                params: [ userId, relationId ]
+                params: [ existing.userId, existing.relationId ]
             })
+
+            if ( results.list.length <= 0 ) {
+                throw new ControllerError(500, 'server-error',
+                    `UserRelationship(${existing.id}) between User(${userId}) and User(${relationId}) missing after update.`,
+                    `We couldn't find the friend relationship after updating it.  Please report this as a bug!`)
+            }
 
             const entity = results.dictionary[results.list[0]]
 

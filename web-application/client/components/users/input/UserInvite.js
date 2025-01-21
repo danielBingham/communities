@@ -12,7 +12,7 @@ import './UserInvite.css'
 const UserInvite = function() {
     const [ email, setEmail ] = useState('')
 
-    const [ submissionError, setSubmissionError ] = useState(false)
+    const [ submissionError, setSubmissionError ] = useState('')
 
     const [ requestId, setRequestId ] = useState(null)
     const request = useSelector(function(state) {
@@ -32,8 +32,13 @@ const UserInvite = function() {
         event.stopPropagation()
 
         if ( ! email ) {
-            setSubmissionError(true)
+            setSubmissionError('You must enter an email address to invite someone.')
             return
+        }
+
+        if ( ! email.includes('@') ) {
+            setSubmissionError(`'${email} is not a valid email address. Please enter a valid email address.`)
+            return 
         }
 
         setRequestId(dispatch(postUsers({
@@ -41,6 +46,7 @@ const UserInvite = function() {
         })))
 
         setEmail('')
+        setSubmissionError('')
     }
 
     const onKeyDown = function(event) {
@@ -101,7 +107,7 @@ const UserInvite = function() {
                 { request && request.state == 'pending' ? <Spinner local={true} /> : <Button type="primary" onClick={invite}>Send Invite</Button> }
             </div>
             <div className="user-invite__errors">
-                { submissionError && ! email && <div className="error">Email is required.</div> }
+                { submissionError !== '' && <div className="error">{ submissionError }</div> }
                 { requestError }
             </div>
             <div className="user-invite__success">

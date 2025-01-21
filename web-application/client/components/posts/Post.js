@@ -66,7 +66,7 @@ const Post = function({ id, expanded }) {
     if ( (request && request !== null && request.state == 'failed' && ( ! post || ! user ))) {
         return (
             <div id={id} className="post">
-                <div className='error 404'>
+                <div className="post__error 404">
                     <h1>404 Error</h1>
                     That post does not seem to exist.
                 </div>
