@@ -60,7 +60,6 @@ const PostCommentForm = function({ postId, commentId, setShowComments }) {
         const newComment = {
             postId: postId,
             userId: currentUser.id,
-            status: 'posted',
             content: content
         }
 

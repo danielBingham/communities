@@ -113,7 +113,7 @@ module.exports = class RelationshipsOwnStateMigration {
 
         this.logger.info('Retrieving post comments...')
         const results = await this.database.query(`
-            SELECT DISTINCT post_id, user_id FROM post_comments
+            SELECT DISTINCT ON (post_id, user_id) post_id, user_id FROM post_comments
         `, [])
 
         if ( results.rows.length <= 0 ) {
@@ -137,13 +137,19 @@ module.exports = class RelationshipsOwnStateMigration {
             count += 1
         }
 
-        this.logger.info('Inserting subscrpitions...')
+        this.logger.info('Inserting subscriptions...')
         await this.database.query(sql, params)
+
+        this.logger.info('Updating user settings, adding "Post:comment:create:subscriber"...')
+        await this.database.query(`UPDATE users SET settings = jsonb_insert(settings, '{ notifications, "Post:comment:create:subscriber" }', '{ "web": true, "email": true, "push": true }')`)
     }
 
     async migrateBack() {
         this.logger.info('Deleting subscriptions...')
         await this.database.query('DELETE FROM post_subscriptions', [])
+
+        this.logger.info('Updating user settings, removing "Post:comment:create:subscriber"...')
+        await this.database.query(`UPDATE users SET settings = settings #- '{ notifications, "Post:comment:create:subscriber" }'`)
     }
 
     /**

@@ -308,6 +308,30 @@ module.exports = function(core) {
     })
 
     /**************************************************************************
+     * PostSubscription REST Routes
+     **************************************************************************/
+    const PostSubscriptionController = require('./controllers/PostSubscriptionController')
+    const postSubscriptionController = new PostSubscriptionController(core)
+
+    router.post('/post/:postId/subscriptions', function(request, response, next) {
+        postSubscriptionController.postPostSubscriptions(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.get('/post/:postId/subscription', function(request, response, next) {
+        postSubscriptionController.getPostSubscription(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.delete('/post/:postId/subscription', function(request, response, next) {
+        postSubscriptionController.deletePostSubscription(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    /**************************************************************************
      *      Notification REST Routes
      *************************************************************************/
     const NotificationController = require('./controllers/NotificationController')

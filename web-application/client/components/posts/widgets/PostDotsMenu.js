@@ -5,6 +5,7 @@ import { EllipsisHorizontalIcon } from '@heroicons/react/24/solid'
 
 import { FloatingMenu, FloatingMenuBody, FloatingMenuTrigger, FloatingMenuItem } from '/components/generic/floating-menu/FloatingMenu'
 
+import SubscribeToPost from '/components/posts/widgets/SubscribeToPost'
 import EditPost from '/components/posts/widgets/EditPost'
 import DeletePost from '/components/posts/widgets/DeletePost'
 
@@ -22,16 +23,19 @@ const PostDotsMenu = function({ postId }) {
     })
 
     // User can only see the dots menu if this is their post.
-    if ( ! currentUser || post === null || currentUser.id != post.userId ) {
+    if ( ! currentUser || post === null ) {
         return null
     }
+
+    const isAuthor = currentUser && currentUser.id == post.userId
 
     return (
         <FloatingMenu className="post-dots-menu" closeOnClick={true}>
             <FloatingMenuTrigger showArrow={false}><EllipsisHorizontalIcon className="dots" /></FloatingMenuTrigger>
             <FloatingMenuBody>
-                <EditPost postId={postId} />
-                <DeletePost postId={postId} />
+                { currentUser && ! isAuthor && <SubscribeToPost postId={postId} /> }
+                { isAuthor && <EditPost postId={postId} /> }
+                { isAuthor && <DeletePost postId={postId} /> }
             </FloatingMenuBody>
         </FloatingMenu>
     )
