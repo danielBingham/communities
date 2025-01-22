@@ -191,7 +191,7 @@ module.exports = class PostCommentController {
 
         const subscription = await this.postSubscriptionDAO.getPostSubscriptionByPostAndUser(postId, currentUser.id)
 
-        if ( subscription === null && post.userId != currentUser.id ) {
+        if ( subscription === null ) {
             await this.postSubscriptionDAO.insertPostSubscriptions({
                 postId: postId,
                 userId: currentUser.id

@@ -28,52 +28,57 @@
 
 ## Posting
 
-- [ ] As User1, make a post with just text.
-- [ ] As User1, make a post with just an image.
-- [ ] As User1, make a post with just a link.
-- [ ] As User1, make a post with text and an image.
-- [ ] As User1, make a post with text and a link.
+- [x] As User1, make a post with just text.
+    - [x] As User1, view the post you just made.  As User2, open the post in a
+        different browser window and like it.  As User1, without refreshing, edit
+        the post and save the edit.  Confirm User2's like shows on post.
+- [x] As User1, make a post with just an image.
+    - [x] As User1, make a post and add an image.  Remove the image, re-add and post.
+- [x] As User1, make a post with just a link.
+    - [x] As User1, make a post with just a link.  Remove the link, re-add a new link and post.
+- [x] As User1, make a post with text and an image.
+- [x] As User1, make a post with text and a link.
 
-- [ ] As User1, write a post draft with a link.
-    - [ ] Navigate away from the home feed and back to feed.  Confirm draft remains. 
-    - [ ] Close the Communities browser window. Reopen and reload.  Confirm draft remains.
-    - [ ] Log out.  Log back in. Confirm draft is gone.
+- [x] As User1, write a post draft with a link.
+    - [x] Navigate away from the home feed and back to feed.  Confirm draft remains. 
+    - [x] Close the Communities browser window. Reopen and reload.  Confirm draft remains.
+    - [x] Log out.  Log back in. Confirm draft is gone.
 
 ## Reactions
 
-- [ ] As Admin, Like User2's post.
-    - [ ] As Admin, unlike User2's post.
-- [ ] As Admin, dislike User2's post.
-     - [ ] As Admin, remove dislike of User2's post.
-- [ ] As Admin, block User2's post.
-    - [ ] As Admin, remove block of User2's post.
-- [ ] As User2, react to each of User1's posts.
+- [x] As Admin, Like User2's post.
+    - [x] As Admin, unlike User2's post.
+- [x] As Admin, dislike User2's post.
+     - [x] As Admin, remove dislike of User2's post.
+- [x] As Admin, block User2's post.
+    - [x] As Admin, remove block of User2's post.
+- [x] As User2, react to each of User1's posts.
 
 ## Post Comments
 
-- [ ] As Admin, comment on User2's post.
-- [ ] As User2, click on comment notification from Admin's comment.
-- [ ] As User2, comment on each of user1's posts.
+- [x] As Admin, comment on User2's post.
+- [x] As User2, click on comment notification from Admin's comment.
+- [x] As User2, comment on each of user1's posts.
 
 ## Post Subscriptions
 
-- [ ] As User1, unsubscribe from a post.
-    - [ ] As User2, comment on the post User1 unsubscribed from.
+- [x] As User1, unsubscribe from a post.
+    - [x] As User2, comment on the post User1 unsubscribed from.
  
 ## Profile Editing
 
-- [ ] As User2, upload a profile image and submit form.
-- [ ] As User2, remove profile image and submit form.
-- [ ] As User2, edit name and bio and submit form.
-- [ ] As User2, edit name and bio and don't submit form.
-- [ ] As User2, change email.  Confirm email.
-- [ ] As user2, change password. Log out and log back in with new password.
+- [x] As User2, upload a profile image and submit form.
+- [x] As User2, remove profile image and submit form.
+- [x] As User2, edit name and bio and submit form.
+- [x] As User2, edit name and bio and don't submit form.
+- [x] As User2, change email.  Confirm email.
+- [x] As user2, change password. Log out and log back in with new password.
 
 ## Authentication
 
-- [ ] As User1, log out.
-- [ ] As User2, log in.
-- [ ] While logged out, request password reset for User2.
+- [x] As User1, log out.
+- [x] As User2, log in.
+- [x] While logged out, request password reset for User2.
 
 ## Settings 
 

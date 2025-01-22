@@ -111,13 +111,40 @@ module.exports = class RelationshipsOwnStateMigration {
 
     async migrateForward() {
 
+        const postMap = {}
+
+        this.logger.info('Retrieving posts...')
+        const postResults = await this.database.query(`
+            SELECT id, user_id from posts
+        `, [])
+
+        if ( postResults.rows.length > 0 ) {
+            for(const row of postResults.rows ) {
+                if ( ! ( row.id in postMap ) ) {
+                    postMap[row.id] = {}
+                }
+
+                postMap[row.id][row.user_id] = true
+            }
+        }
+
         this.logger.info('Retrieving post comments...')
-        const results = await this.database.query(`
+        const commentResults = await this.database.query(`
             SELECT DISTINCT ON (post_id, user_id) post_id, user_id FROM post_comments
         `, [])
 
-        if ( results.rows.length <= 0 ) {
-            this.logger.info('No comments to subscribe.')
+       
+        if ( commentResults.rows.length > 0 ) {
+            for(const row of commentResults.rows) {
+                if ( ! (row.post_id in postMap )) {
+                    postMap[row.post_id] = {}
+                }
+                postMap[row.post_id][row.user_id] = true
+            }
+        }
+
+        if ( postResults.rows.length <= 0 && commentResults.rows.length <= 0 ) {
+            this.logger.info('Nothing to subscribe...')
             return
         }
 
@@ -128,13 +155,16 @@ module.exports = class RelationshipsOwnStateMigration {
                 VALUES
         `
 
-        let count = 1
-        for(const row of results.rows) {
-            sql += `($${params.length+1}, $${params.length+2}, now(), now()) ${count == results.rows.length ? '' : ', '}`
 
-            params.push(row.user_id)
-            params.push(row.post_id)
-            count += 1
+        let count = 1
+        for(const [postId, users] of Object.entries(postMap)) {
+            for( const [ userId, value] of Object.entries(users)) {
+                sql += `${count > 1 ? ', ' : ''} ($${params.length+1}, $${params.length+2}, now(), now())`
+
+                params.push(userId)
+                params.push(postId)
+                count += 1
+            }
         }
 
         this.logger.info('Inserting subscriptions...')

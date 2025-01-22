@@ -189,10 +189,6 @@ The Communities Team`)
         const postAuthor = await this.userDAO.getUserById(context.post.userId) 
         context.postAuthor = postAuthor
 
-        if ( context.commentAuthor.id != context.post.userId ) {
-            await this.createNotification(postAuthor.id, 'Post:comment:create', context) 
-        }
-
         const subscriptions = await this.postSubscriptionDAO.getSubscriptionsByPost(context.post.id)
         if ( subscriptions !== null ) {
             const subscriberIds = subscriptions.map((s) => s.userId)
@@ -203,8 +199,12 @@ The Communities Team`)
                     continue
                 }
 
-                const subscriberContext = { ...context, subscriber: subscribers.dictionary[subscription.userId] }
-                await this.createNotification(subscription.userId, 'Post:comment:create:subscriber', subscriberContext)
+                if ( subscription.userId == postAuthor.id) {
+                    await this.createNotification(postAuthor.id, 'Post:comment:create', context) 
+                } else {
+                    const subscriberContext = { ...context, subscriber: subscribers.dictionary[subscription.userId] }
+                    await this.createNotification(subscription.userId, 'Post:comment:create:subscriber', subscriberContext)
+                }
             }
         }
     }

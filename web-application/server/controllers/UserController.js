@@ -257,7 +257,7 @@ module.exports = class UserController {
                 Reach out to contact@communities.social if you'd like an invite.`)
         }
 
-        user.email = user.email.toLowerCase()
+        user.email = user.email.toLowerCase().trim()
 
         if ( ! user.email.includes('@') ) {
             throw new ControllerError(400, 'invalid',

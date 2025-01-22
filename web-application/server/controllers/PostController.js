@@ -182,6 +182,12 @@ module.exports = class PostController {
         }
         await this.postDAO.insertPostVersions(postVersion)
 
+        // Subscribe the author to their post.
+        await this.postSubscriptionDAO.insertPostSubscriptions({
+            postId: entity.id,
+            userId: currentUser.id
+        })
+
         const relations = await this.getRelations(currentUser, results)
 
         response.status(201).json({

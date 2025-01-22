@@ -33,7 +33,7 @@ const PostDotsMenu = function({ postId }) {
         <FloatingMenu className="post-dots-menu" closeOnClick={true}>
             <FloatingMenuTrigger showArrow={false}><EllipsisHorizontalIcon className="dots" /></FloatingMenuTrigger>
             <FloatingMenuBody>
-                { currentUser && ! isAuthor && <SubscribeToPost postId={postId} /> }
+                { currentUser && <SubscribeToPost postId={postId} /> }
                 { isAuthor && <EditPost postId={postId} /> }
                 { isAuthor && <DeletePost postId={postId} /> }
             </FloatingMenuBody>
