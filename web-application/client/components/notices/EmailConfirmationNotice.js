@@ -24,7 +24,6 @@ const EmailConfirmationNotice = function() {
     const dispatch = useDispatch()
 
     const requestConfirmation = function() {
-        console.log('Request confirmation.')
         setRequestId(dispatch(createToken({ type: 'email-confirmation', email: currentUser.email})))
     }
 

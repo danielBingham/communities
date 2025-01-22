@@ -186,7 +186,7 @@ module.exports = class PostController {
 
         response.status(201).json({
             entity: results.dictionary[results.list[0]],
-            relationships: relations
+            relations: relations
         })
     }
 
@@ -228,11 +228,11 @@ module.exports = class PostController {
                 `That post either doesn't exist or you don't have permission to see it.`)
         }
 
-        const relationships = await this.getRelations(currentUser, postResults)
+        const relations = await this.getRelations(currentUser, postResults)
 
         response.status(200).json({
             entity: post,
-            relations: relationships
+            relations: relations 
         })
     }
 
@@ -273,7 +273,7 @@ module.exports = class PostController {
 
         response.status(201).json({
             entity: results.dictionary[results.list[0]],
-            relationships: relations
+            relations: relations
         })
 
     }

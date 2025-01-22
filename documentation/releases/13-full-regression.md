@@ -2,29 +2,29 @@
 
 ## Friend Requests
 
-- [ ] From the administrator (Admin) account invite a new user.
-    - [ ] Accept the invite and register (Test[issue#].User1).
+- [x] From the administrator (Admin) account invite a new user.
+    - [x] Accept the invite and register (Test[issue#].User1).
 
-- [ ] As User1, invite a new user.
-    - [ ] From the same browser session attempt to accept the invite.
-        - [ ] Expectation: Error.
-    - [ ] From a different browser session accept the invite and register (Test[Issue#].User2).
+- [x] As User1, invite a new user.
+    - [x] From the same browser session attempt to accept the invite.
+        - [x] Expectation: Error.
+    - [x] From a different browser session accept the invite and register (Test[Issue#].User2).
 
-- [ ] As User2, send Admin a friend request.
-    - [ ] As admin, reject the friend request.  Confirm its removed.
+- [x] As User2, send Admin a friend request.
+    - [x] As admin, reject the friend request.  Confirm its removed.
 
 
-- [ ] As User2, send Admin a friend request.
-     - [ ] As Admin, accept the friend request. Confirm request accepted.
-     - [ ] As Admin, remove User2 as a friend.
+- [x] As User2, send Admin a friend request.
+     - [x] As Admin, accept the friend request. Confirm request accepted.
+     - [x] As Admin, remove User2 as a friend.
 
-- [ ] With two browser windows open, one As Admin and one As User2, have User2
+- [x] With two browser windows open, one As Admin and one As User2, have User2
      and Admin send each other simultaneous friend requests.  Confirm relationship
      confirmed.
 
 ## User Searching
 
-- [ ] As User2, on the Find Friends page, search for "Admin", confirm list filtered.
+- [x] As User2, on the Find Friends page, search for "Admin", confirm list filtered.
 
 ## Posting
 

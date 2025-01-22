@@ -169,8 +169,6 @@ module.exports = class UserRelationshipDAO extends DAO {
             ${paging}
         `
 
-        console.log(sql)
-        console.log(params)
         const results = await this.core.database.query(sql, params)
         return this.hydrateUserRelationships(results.rows)
     }

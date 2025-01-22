@@ -43,12 +43,16 @@ const PostReactions = function({ postId }) {
         }
     })
 
+    if ( ! post ) {
+        return null
+    }
+
     const postReactions = useSelector(function(state) {
         return state.postReactions.dictionary
     })
 
-    const userReactionId = post.reactions.find((rid) => postReactions[rid].userId == currentUser?.id)
-    const userReaction = postReactions[userReactionId]
+    const userReactionId = post.reactions.find((rid) => rid in postReactions ? postReactions[rid].userId == currentUser?.id : false)
+    const userReaction = userReactionId ? postReactions[userReactionId] : null
 
     const dispatch = useDispatch()
 
@@ -79,6 +83,10 @@ const PostReactions = function({ postId }) {
     const reactionViews = []
     const reactionCounts = {}
     for( const reactionId of post.reactions) {
+        if ( ! (reactionId in postReactions)) {
+            continue 
+        }
+
         const reaction = postReactions[reactionId]
         if ( ! ( reaction.reaction in reactionCounts ) ) {
             reactionCounts[reaction.reaction] = 1
@@ -108,7 +116,7 @@ const PostReactions = function({ postId }) {
                     { reactionViews }
                 </div>
             </Modal>
-            { post.reactions.length > 0 && <div className="reactions__view">
+            { reactionViews.length > 0 && <div className="reactions__view">
                 <a href="" onClick={(e) => { e.preventDefault(); setShowReactions(true)}}>{ 'like' in reactionCounts && <span><HandThumbUpIcon /> {reactionCounts['like']}</span> }
                 { 'dislike' in reactionCounts && <span><HandThumbDownIcon /> {reactionCounts['dislike']}</span> }
                     { 'block' in reactionCounts && <span className="block"><XCircleIcon /> {reactionCounts['block']}</span>}</a>

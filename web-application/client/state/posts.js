@@ -212,7 +212,6 @@ export const patchPost = function(post) {
             'PATCH', `/post/${post.id}`, post,
             function(response) {
                 dispatch(postsSlice.actions.setPostsInDictionary({ entity: response.entity}))
-
                 dispatch(setRelationsInState(response.relations))
             }
         )

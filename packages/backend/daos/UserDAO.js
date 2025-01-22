@@ -260,8 +260,6 @@ module.exports = class UserDAO extends DAO {
                 ${paging}
         `
 
-        console.log(sql)
-        console.log(params)
         const results = await this.core.database.query(sql, params)
         return this.hydrateUsers(results.rows)
     }
