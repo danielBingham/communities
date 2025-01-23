@@ -182,6 +182,13 @@ export const makeTrackedRequest = function(dispatch, getState, slice, method, en
     dispatch(slice.actions.makeRequest({requestId: requestId, method: method, endpoint: endpoint}))
     fetch(fullEndpoint, fetchOptions).then(function(response) {
         status = response.status
+       
+        // If they've been logged out, send them to the home page, which will
+        // let them log back in again.
+        if ( status === 401 ) {
+            window.location.href = "/"
+        }
+
         responseOk = response.ok
         return response.json()
     }).then(function(responseBody) {
