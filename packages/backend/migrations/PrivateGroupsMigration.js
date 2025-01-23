@@ -20,7 +20,7 @@
 
 const MigrationError = require('../errors/MigrationError')
 
-module.exports = class CommentSubscriptionsMigration {
+module.exports = class PrivateGroupsMigration {
 
     constructor(core) {
         this.database = core.database
@@ -29,35 +29,54 @@ module.exports = class CommentSubscriptionsMigration {
     }
 
     async initForward() {
-        this.logger.info(`Create the 'post_subscriptions' table...`)
+        this.logger.info(`Create the 'groups' table...`)
         await this.database.query(`
-            CREATE TABLE IF NOT EXISTS post_subscriptions (
-                id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-                user_id uuid REFERENCES users (id) ON DELETE CASCADE NOT NULL,
-                post_id uuid REFERENCES posts (id) ON DELETE CASCADE NOT NULL,
+            CREATE TABLE IF NOT EXISTS groups (
+                id uuid primary key DEFAULT gen_random_uuid(),
+                title text,
+                slug text,
+                about text,
 
-                created_date timestamptz,
-                updated_date timestamptz
+                file_id uuid REFERENCES files (id) DEFAULT NULL,
+
+                is_discoverable boolean,
+                entrance_questions jsonb DEFAULT '{}'::jsonb
             )
         `, [])
 
-        this.logger.info(`Create the index for 'user_id'...`)
-        await this.database.query(`CREATE INDEX IF NOT EXISTS post_subscriptions__user_id ON post_subscriptions (user_id)`, [])
+        this.logger.info(`Create the index for the 'file_id' column...`)
+        await this.database.query(`CREATE INDEX IF NOT EXISTS groups__file_id ON groups (file_id)`, [])
 
-        this.logger.info(`Create the index for 'post_id'...`)
-        await this.database.query(`CREATE INDEX IF NOT EXISTS post_subscriptions__post_id ON post_subscriptions (post_id)`, [])
+        this.logger.info(`Create the 'group_member_role' type...`)
+        await this.database.query(`CREATE TYPE IF NOT EXISTS group_member_role AS ENUM("admin", "moderator", "member")`, [])
 
+        this.logger.info(`Create the 'group_members' table...`)
+        await this.database.query(`
+            CREATE TABLE IF NOT EXISTS group_members (
+                id uuid primary key DEFAULT gen_random_uuid(),
+                group_id uuid REFERENCES groups (id) ON DELETE CASCADE NOT NULL,
+                user_id uuid REFERENCES users (id) ON DELETE CASCADE NOT NULL,
+
+                is_subscribed boolean,
+                role group_member_role
+            )
+        `, [])
+
+        this.logger.info(`Create the index for the 'group_id' field...`)
+        await this.database.query(`CREATE INDEX IF NOT EXISTS group_members__group_id ON group_members (group_id)`, [])
+
+        this.logger.info(`Create the index for the 'user_id' field...`)
+        await this.database.query(`CREATE INDEX group_members__user_id ON group_members (user_id)`, [])
     }
 
     async initBack() {
-        this.logger.info(`Dropping the index for 'user_id'...`)
-        await this.database.query(`DROP INDEX IF EXISTS post_subscriptions__user_id`, [])
+        this.logger.info(`Removing the 'group_members__user_id' index...`)
+        await this.database.query(`DROP INDEX IF EXISTS group_members__user_id`, [])
 
-        this.logger.info(`Dropping the index for 'post_id'...`)
-        await this.database.query(`DROP INDEX IF EXISTS post_subscriptions__post_id`, [])
+        this.logger.info(`Removing the 'group_members_group_id' index...`)
+        await this.database.query(`DROP INDEX IF EXISTS group_members__group_id`, [])
 
-        this.logger.info(`Dropping the table...`)
-        await this.database.query(`DROP TABLE IF EXISTS post_subscriptions`, [])
+        // TODO
     }
 
 
@@ -109,78 +128,9 @@ module.exports = class CommentSubscriptionsMigration {
         }
     }
 
-    async migrateForward() {
+    async migrateForward() {}
 
-        const postMap = {}
-
-        this.logger.info('Retrieving posts...')
-        const postResults = await this.database.query(`
-            SELECT id, user_id from posts
-        `, [])
-
-        if ( postResults.rows.length > 0 ) {
-            for(const row of postResults.rows ) {
-                if ( ! ( row.id in postMap ) ) {
-                    postMap[row.id] = {}
-                }
-
-                postMap[row.id][row.user_id] = true
-            }
-        }
-
-        this.logger.info('Retrieving post comments...')
-        const commentResults = await this.database.query(`
-            SELECT DISTINCT ON (post_id, user_id) post_id, user_id FROM post_comments
-        `, [])
-
-       
-        if ( commentResults.rows.length > 0 ) {
-            for(const row of commentResults.rows) {
-                if ( ! (row.post_id in postMap )) {
-                    postMap[row.post_id] = {}
-                }
-                postMap[row.post_id][row.user_id] = true
-            }
-        }
-
-        if ( postResults.rows.length <= 0 && commentResults.rows.length <= 0 ) {
-            this.logger.info('Nothing to subscribe...')
-            return
-        }
-
-        this.logger.info('Building insert sql..')
-        const params = []
-        let sql = `
-            INSERT INTO post_subscriptions (user_id, post_id, created_date, updated_date)
-                VALUES
-        `
-
-
-        let count = 1
-        for(const [postId, users] of Object.entries(postMap)) {
-            for( const [ userId, value] of Object.entries(users)) {
-                sql += `${count > 1 ? ', ' : ''} ($${params.length+1}, $${params.length+2}, now(), now())`
-
-                params.push(userId)
-                params.push(postId)
-                count += 1
-            }
-        }
-
-        this.logger.info('Inserting subscriptions...')
-        await this.database.query(sql, params)
-
-        this.logger.info('Updating user settings, adding "Post:comment:create:subscriber"...')
-        await this.database.query(`UPDATE users SET settings = jsonb_insert(settings, '{ notifications, "Post:comment:create:subscriber" }', '{ "web": true, "email": true, "push": true }')`)
-    }
-
-    async migrateBack() {
-        this.logger.info('Deleting subscriptions...')
-        await this.database.query('DELETE FROM post_subscriptions', [])
-
-        this.logger.info('Updating user settings, removing "Post:comment:create:subscriber"...')
-        await this.database.query(`UPDATE users SET settings = settings #- '{ notifications, "Post:comment:create:subscriber" }'`)
-    }
+    async migrateBack() {}
 
     /**
      * Execute the migration for a set of targets.  Or for everyone if no

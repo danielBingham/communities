@@ -185,27 +185,49 @@ CREATE INDEX tags__name ON tags (name);
 CREATE INDEX tags__name_trgm ON tags USING GIN (name gin_trgm_ops);
 
 /******************************************************************************
+ * Groups
+ ******************************************************************************/
+
+CREATE TABLE groups (
+    id uuid primary key DEFAULT gen_random_uuid(),
+    title text,
+    slug text,
+    about text,
+
+    file_id uuid REFERENCES files (id) DEFAULT NULL,
+
+    is_discoverable boolean,
+    entrance_questions jsonb DEFAULT '{}'::jsonb
+);
+CREATE INDEX groups__file_id ON groups (file_id);
+
+CREATE TYPE group_member_role AS ENUM("admin", "moderator", "member"); 
+CREATE TABLE group_members (
+    id uuid primary key DEFAULT gen_random_uuid(),
+    group_id uuid REFERENCES groups (id) ON DELETE CASCADE NOT NULL,
+    user_id uuid REFERENCES users (id) ON DELETE CASCADE NOT NULL,
+
+    is_subscribed boolean,
+    role group_member_role
+);
+CREATE INDEX group_members__group_id ON group_members (group_id);
+CREATE INDEX group_members__user_id ON group_members (user_id);
+
+/******************************************************************************
  * Tags 
  *****************************************************************************/
 
-/* Used by both posts and post_comments */
-CREATE TYPE reaction_type AS ENUM(
-    /** positive **/
-    'like',
-
-    /** negative **/
-    'dislike',
-
-    /** block **/
-    'block'
-);
-
+CREATE TYPE post_type as ENUM("feed", "group", "event");
 CREATE TABLE posts (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id uuid REFERENCES users (id) ON DELETE CASCADE NOT NULL,
 
     file_id uuid REFERENCES files (id) DEFAULT NULL,
     link_preview_id uuid REFERENCES link_previews (id) DEFAULT NULL,
+
+    type post_type NOT NULL DEFAULT "feed" ,
+
+    group_id uuid REFERENCES groups (id) ON DELETE CASCADE DEFAULT NULL,
 
     activity bigint DEFAULT 1,
     content text,
@@ -215,6 +237,7 @@ CREATE TABLE posts (
 );
 CREATE INDEX posts__user_id ON posts (user_id);
 CREATE INDEX posts__file_id ON posts (file_id);
+CREATE INDEX posts__group_id ON posts (group_id);
 
 CREATE TABLE post_versions (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -239,6 +262,17 @@ CREATE TABLE post_tags (
     PRIMARY KEY(post_id, tag_id)
 );
 
+/* Used by both posts and post_comments */
+CREATE TYPE reaction_type AS ENUM(
+    /** positive **/
+    'like',
+
+    /** negative **/
+    'dislike',
+
+    /** block **/
+    'block'
+);
 CREATE TABLE post_reactions (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     post_id uuid REFERENCES posts (id) ON DELETE CASCADE NOT NULL,
@@ -286,6 +320,7 @@ CREATE TABLE post_subscriptions (
 );
 CREATE INDEX post_subscriptions__user_id ON post_subscriptions (user_id);
 CREATE INDEX post_subscriptions__post_id ON post_subscriptions (post_id);
+
 
 /******************************************************************************
  * Permissions
