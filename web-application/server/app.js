@@ -88,7 +88,7 @@ app.use(session({
         //secure: true,
         //secure: config.session.secure_cookie,
         sameSite: "lax",
-        maxAge: 1000 * 60 * 60 * 24 // One 24 hour period.
+        maxAge: 1000 * 60 * 60 * 24 * 14 // 14 days, two weeks
 
     } 
 }))

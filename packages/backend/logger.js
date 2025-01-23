@@ -86,8 +86,7 @@ module.exports = class Logger  {
             }
         } else {
             if ( level == Logger.levels.error) {
-                console.log(logPrefix + 'Error encountered.') 
-                console.error( message)
+                console.error(logPrefix + message)
             } else {
                 console.log(logPrefix + message)
             }
