@@ -20,7 +20,7 @@
 
 const Uuid = require('uuid')
 
-const { NotificationService, PostDAO, PostCommentDAO } = require('@communities/backend')
+const { NotificationService, PostDAO, UserRelationshipDAO, PostCommentDAO, PostSubscriptionDAO } = require('@communities/backend')
 
 const ControllerError = require('../errors/ControllerError')
 
@@ -31,11 +31,13 @@ module.exports = class PostCommentController {
 
         this.postDAO = new PostDAO(core)
         this.postCommentDAO = new PostCommentDAO(core)
+        this.userRelationshipDAO = new UserRelationshipDAO(core)
+        this.postSubscriptionDAO = new PostSubscriptionDAO(core)
 
         this.notificationService = new NotificationService(core)
     }
 
-    async getRelations(results, requestedRelations) {
+    async getRelations(currentUser, results, requestedRelations) {
         const postIds = []
         for(const commentId of results.list) {
             postIds.push(results.dictionary[commentId].postId)
@@ -46,8 +48,14 @@ module.exports = class PostCommentController {
             params: [ postIds ]
         })
 
+        const postSubscriptionResults = await this.postSubscriptionDAO.selectPostSubscriptions({
+            where: 'post_subscriptions.user_id = $1 AND post_subscriptions.post_id = ANY($2::uuid[])',
+            params: [ currentUser.id, postIds ]
+        })
+
         return {
-            posts: postResults.dictionary
+            posts: postResults.dictionary,
+            postSubscriptions: postSubscriptionResults.dictionary
         }
     }
 
@@ -61,6 +69,24 @@ module.exports = class PostCommentController {
                 `You must be authenticated to get comments.`)
         }
 
+        const post = await this.postDAO.getPostById(postId)
+
+        if ( ! post ) {
+            throw new ControllerError(404, 'not-found',
+                `User(${currentUser.id}) attempted to post a comment on Post(${postId}) that doesn't exist.`,
+                `Either that post doesn't exist or you don't have permission to view it.`)
+        }
+
+        if ( post.userId !== currentUser.id) {
+            const relationship = await this.userRelationshipDAO.getUserRelationshipByUserAndRelation(currentUser.id, post.userId)
+
+            if ( relationship === null ) {
+                throw new ControllerError(404, 'not-found',
+                    `User(${currentUser.id}) attempted to post a comment on Post(${postId}) they don't have permission to view.`,
+                    `Either that post doesn't exist or you don't have permission to view it.`)
+            }
+        }
+
         const commentResults = await this.postCommentDAO.selectPostComments({
             where: `post_comments.post_id = $1`,
             params: [ postId ]
@@ -71,7 +97,7 @@ module.exports = class PostCommentController {
             params: [ postId ]
         })
 
-        const relations = await this.getRelations(commentResults)
+        const relations = await this.getRelations(currentUser, commentResults)
 
 
         response.status(200).json({
@@ -90,6 +116,24 @@ module.exports = class PostCommentController {
             throw new ControllerError(401, 'not-authenticated',
                 `User must be authenticated to post a comment.`,
                 `You must be authenticated to post a comment.`)
+        }
+
+        const post = await this.postDAO.getPostById(postId)
+
+        if ( ! post ) {
+            throw new ControllerError(404, 'not-found',
+                `User(${currentUser.id}) attempted to post a comment on Post(${postId}) that doesn't exist.`,
+                `Either that post doesn't exist or you don't have permission to view it.`)
+        }
+
+        if ( post.userId !== currentUser.id) {
+            const relationship = await this.userRelationshipDAO.getUserRelationshipByUserAndRelation(currentUser.id, post.userId)
+
+            if ( relationship === null ) {
+                throw new ControllerError(404, 'not-found',
+                    `User(${currentUser.id}) attempted to post a comment on Post(${postId}) they don't have permission to view.`,
+                    `Either that post doesn't exist or you don't have permission to view it.`)
+            }
         }
 
         const activityResults = await this.core.database.query(`
@@ -111,7 +155,6 @@ module.exports = class PostCommentController {
             id: Uuid.v4(),
             postId: postId,
             userId: currentUser.id,
-            status: 'writing',
             content: request.body.content
         }
 
@@ -122,19 +165,17 @@ module.exports = class PostCommentController {
             activity += 1
         } 
 
-        const post = {
+        const postPatch = {
             id: postId,
             activity: activity
         }
 
-        await this.postDAO.updatePost(post)
+        await this.postDAO.updatePost(postPatch)
 
         const results = await this.postCommentDAO.selectPostComments({
             where: `post_comments.id = $1`,
             params: [ comment.id ]
         })
-
-        const relations = await this.getRelations(results)
 
         const entity = results.dictionary[comment.id]
 
@@ -143,6 +184,21 @@ module.exports = class PostCommentController {
                 `PostComment(${comment.id}) missing after update.`,
                 `Postcomment(${comment.id}) missing after being updated.  Please report as a bug.`)
         }
+    
+        // Subscribe the user if they aren't already subscribed.
+        // Don't subscribe post authors to their own posts.
+        // Authors already get notified of comments on their posts.
+
+        const subscription = await this.postSubscriptionDAO.getPostSubscriptionByPostAndUser(postId, currentUser.id)
+
+        if ( subscription === null ) {
+            await this.postSubscriptionDAO.insertPostSubscriptions({
+                postId: postId,
+                userId: currentUser.id
+            })
+        }
+
+        const relations = await this.getRelations(currentUser, results)
 
         const postCommentVersion = {
             postCommentId: entity.id,
@@ -179,6 +235,24 @@ module.exports = class PostCommentController {
                 `You must be authenticated to GET a comment.`)
         }
 
+        const post = await this.postDAO.getPostById(postId)
+
+        if ( ! post ) {
+            throw new ControllerError(404, 'not-found',
+                `User(${currentUser.id}) attempted to post a comment on Post(${postId}) that doesn't exist.`,
+                `Either that post doesn't exist or you don't have permission to view it.`)
+        }
+
+        if ( post.userId !== currentUser.id) {
+            const relationship = await this.userRelationshipDAO.getUserRelationshipByUserAndRelation(currentUser.id, post.userId)
+
+            if ( relationship === null ) {
+                throw new ControllerError(404, 'not-found',
+                    `User(${currentUser.id}) attempted to post a comment on Post(${postId}) they don't have permission to view.`,
+                    `Either that post doesn't exist or you don't have permission to view it.`)
+            }
+        }
+
         const results = await this.postCommentDAO.selectPostComments({
             where: `post_comments.id = $1`,
             params: [ id ]
@@ -190,7 +264,7 @@ module.exports = class PostCommentController {
                 `That comment either doesn't exist or you don't have permission to view it.`)
         }
 
-        const relations = await this.getRelations(results)
+        const relations = await this.getRelations(currentUser, results)
         response.status(200).json({
             entity: results.dictionary[id],
             relations: relations 
@@ -230,17 +304,8 @@ module.exports = class PostCommentController {
                 `You provided the wrong postId in the route, please provide the correct one.`)
         }
 
-        if ( request.body.status != 'writing' && request.body.status != 'editing' && request.body.status != 'posted' && request.body.status != 'reverting' ) {
-            throw new ControllerError(400, 'invalid',
-                `User(${currentUser.id}) provided an invalid status when patching Comment(${commentId}).`,
-                `You provided an invalid status.`)
-        }
-
         const comment = {
             id: commentId
-        }
-        if ( 'status' in request.body) {
-            comment.status = request.body.status
         }
 
         if ( 'content' in request.body) {
@@ -270,7 +335,7 @@ module.exports = class PostCommentController {
 
         response.status(200).json({
             entity: entity,
-            relations: await this.getRelations(results)
+            relations: await this.getRelations(currentUser, results)
         })
 
     }

@@ -10,6 +10,7 @@ import linkPreviewsReducer from './linkPreviews'
 import postsReducer from './posts'
 import postCommentsReducer from './postComments'
 import postReactionsReducer from './postReactions'
+import postSubscriptionsReducer from './postSubscriptions'
 import tagsReducer from './tags'
 import systemReducer from './system'
 import usersReducer from './users'
@@ -28,6 +29,7 @@ const reducers = combineReducers({
     posts: postsReducer,
     postComments: postCommentsReducer,
     postReactions: postReactionsReducer,
+    postSubscriptions: postSubscriptionsReducer,
     tags: tagsReducer,
     files: filesReducer,
 })

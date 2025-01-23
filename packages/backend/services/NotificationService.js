@@ -22,6 +22,7 @@ const Handlebars = require('handlebars')
 
 const NotificationDAO = require('../daos/NotificationDAO')
 const UserDAO = require('../daos/UserDAO')
+const PostSubscriptionDAO = require('../daos/PostSubscriptionDAO')
 
 const EmailService = require('./EmailService')
 
@@ -35,58 +36,80 @@ module.exports = class NotificationService {
 
         this.notificationDAO = new NotificationDAO(core)
         this.userDAO = new UserDAO(core)
+        this.postSubscriptionDAO = new PostSubscriptionDAO(core)
 
         this.emailService = new EmailService(core)
 
         this.notificationDefinitions = { 
             'Post:comment:create': {
                 email: {
-                    subject: Handlebars.compile('[Communities] {{commentAuthor.name}} commented on your post "{{postIntro}}..."'), 
+                    subject: Handlebars.compile('[Communities] {{{commentAuthor.name}}} commented on your post "{{{postIntro}}}..."'), 
                     body: Handlebars.compile(`
-Hi {{postAuthor.name}},
+Hi {{{postAuthor.name}}},
 
-{{commentAuthor.name}} left a new comment on your post "{{postIntro}}...". 
+{{{commentAuthor.name}}} left a new comment on your post "{{{postIntro}}}...":
 
-Read the comment here: {{host}}{{postAuthor.username}}/{{post.id}}#comment-{{comment.id}}.
+{{{comment.content}}}
+
+Read the comment in context here: {{{host}}}{{{postAuthor.username}}}/{{{post.id}}}#comment-{{{comment.id}}}.
 
 Cheers,
 The Communities Team
                         `)
                 },
-                text: Handlebars.compile(`{{commentAuthor.name}} commented on your post, "{{postIntro}}...".`),
-                path: Handlebars.compile(`/{{postAuthor.username}}/{{post.id}}#comment-{{comment.id}}`) 
+                text: Handlebars.compile(`{{{commentAuthor.name}}} commented, "{{{commentIntro}}}...", on your post, "{{{postIntro}}}...".`),
+                path: Handlebars.compile(`/{{{postAuthor.username}}}/{{{post.id}}}#comment-{{{comment.id}}}`) 
+            },
+            'Post:comment:create:subscriber': {
+                email: {
+                    subject: Handlebars.compile('[Communities] {{{commentAuthor.name}}} commented, "{{{commentIntro}}}", on a post, "{{{postIntro}}}...", you subscribe to, '), 
+                    body: Handlebars.compile(`
+Hi {{{subscriber.name}}},
+
+{{{commentAuthor.name}}} left a new comment on a post by {{{postAuthor.name}}}, "{{{postIntro}}}...", you subscribe to:
+
+"{{{comment.content}}}"
+
+Read the comment in context here: {{{host}}}{{{postAuthor.username}}}/{{{post.id}}}#comment-{{{comment.id}}}.
+
+Cheers,
+The Communities Team
+                        `)
+                },
+                text: Handlebars.compile(`{{{commentAuthor.name}}} commented, "{{{commentIntro}}}...", on a post, "{{{postIntro}}}...", you subscribe to.`),
+                path: Handlebars.compile(`/{{{postAuthor.username}}}/{{{post.id}}}#comment-{{{comment.id}}}`) 
             },
             'User:friend:create': {
                 email: {
-                    subject: Handlebars.compile('[Communities] {{requester.name}} sent you a Friend Request'),
+                    subject: Handlebars.compile('[Communities] {{{requester.name}}} sent you a Friend Request'),
                     body: Handlebars.compile(`
-Hi {{friend.name}},
+Hi {{{friend.name}}},
 
-You have a new friend request on Communities from {{requester.name}}.
+You have a new friend request on Communities from {{{requester.name}}}.
 
-To accept, log in to your account and view your friend requests: {{host}}friends/requests
+To accept, log in to your account and view your friend requests: {{{host}}}friends/requests
 
 Cheers,
 The Communities Team`)
                 },
-                text: Handlebars.compile(`{{requester.name}} sent you a friend request.`),
+                text: Handlebars.compile(`{{{requester.name}}} sent you a friend request.`),
                 path: Handlebars.compile(`/friends/requests`)
             },
             'User:friend:update': {
                 email: {
-                    subject: Handlebars.compile('[Communities] {{friend.name}} accepted your Friend Request'),
+                    subject: Handlebars.compile('[Communities] {{{friend.name}}} accepted your Friend Request'),
                     body: Handlebars.compile(`
-Hi {{requester.name}},
+Hi {{{requester.name}}},
 
-{{friend.name}} accepted your friend request.
+{{{friend.name}}} accepted your friend request.
 
-You can now view their profile here: {{host}}{{friend.username}}
+You can now view their profile here: {{{host}}}{{{friend.username}}}
 
 Cheers,
 The Communities Team`)
                 },
-                text: Handlebars.compile(`{{friend.name}} accepted your friend request.`),
-                path: Handlebars.compile(`/{{friend.username}}`)
+                text: Handlebars.compile(`{{{friend.name}}} accepted your friend request.`),
+                path: Handlebars.compile(`/{{{friend.username}}}`)
             }
         }
 
@@ -99,6 +122,10 @@ The Communities Team`)
 
     async sendNotifications(currentUser, type, context) {
         return await this.notificationMap[type](currentUser, context)
+    }
+
+    async getNotificationSettings(userId, type) {
+
     }
 
     /**
@@ -156,17 +183,30 @@ The Communities Team`)
     }
 
     async sendNewCommentNotification(currentUser, context) {
-        const userResults = await this.userDAO.selectUsers(`WHERE users.id = $1`, [ context.post.userId])
-        
-        const postAuthor = userResults.dictionary[context.post.userId]
-        if ( context.commentAuthor.id == postAuthor.id ) {
-            return
-        }
-
         context.postIntro = context.post.content.substring(0,20)
+        context.commentIntro = context.comment.content.substring(0,20)
 
+        const postAuthor = await this.userDAO.getUserById(context.post.userId) 
         context.postAuthor = postAuthor
-        await this.createNotification(postAuthor.id, 'Post:comment:create', context) 
+
+        const subscriptions = await this.postSubscriptionDAO.getSubscriptionsByPost(context.post.id)
+        if ( subscriptions !== null ) {
+            const subscriberIds = subscriptions.map((s) => s.userId)
+            const subscribers = await this.userDAO.selectUsers(`WHERE users.id = ANY($1::uuid[])`, [ subscriberIds])
+
+            for(const subscription of subscriptions) {
+                if ( subscription.userId == context.commentAuthor.id ) {
+                    continue
+                }
+
+                if ( subscription.userId == postAuthor.id) {
+                    await this.createNotification(postAuthor.id, 'Post:comment:create', context) 
+                } else {
+                    const subscriberContext = { ...context, subscriber: subscribers.dictionary[subscription.userId] }
+                    await this.createNotification(subscription.userId, 'Post:comment:create:subscriber', subscriberContext)
+                }
+            }
+        }
     }
 
     async sendFriendRequestNotification(currentUser, context) {

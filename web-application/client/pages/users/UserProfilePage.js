@@ -79,9 +79,21 @@ const UserProfilePage = function(props) {
         )
     }
 
-    if ( ! user ) {
+    if ( ! user && ( ! request || request.state == 'pending') ) {
         return (
             <Spinner />
+        )
+    } else if ( ! user ) {
+        // The request won't failed, because it's a search request.  So it will
+        // just return an empty result.
+        return (
+            <div id="user-profile-page">
+                <div></div>
+                <div className="main">
+                <h1>404 Error</h1>
+                <p>That user does not appear to exist.</p>
+                </div>
+            </div>
         )
     }
 

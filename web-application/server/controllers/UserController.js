@@ -257,7 +257,13 @@ module.exports = class UserController {
                 Reach out to contact@communities.social if you'd like an invite.`)
         }
 
-        user.email = user.email.toLowerCase()
+        user.email = user.email.toLowerCase().trim()
+
+        if ( ! user.email.includes('@') ) {
+            throw new ControllerError(400, 'invalid',
+                `Attempt to create a user with an invalid email: ${user.email}`,
+                `'${user.email}' is not a valid email.`)
+        }
 
         // If a user already exists with that email, send a 409 Conflict
         // response.
@@ -416,9 +422,9 @@ module.exports = class UserController {
 
         let results = null
         if ( currentUser && currentUser.id == request.params.id ) {
-            results = await this.userDAO.selectUsers(`WHERE users.id = $1 AND users.status = 'confirmed'`, [ request.params.id ])
+            results = await this.userDAO.selectUsers(`WHERE users.id = $1 AND users.status != 'invited'`, [ request.params.id ])
         } else {
-            results = await this.userDAO.selectCleanUsers(`WHERE users.id = $1 AND users.status = 'confirmed'`, [request.params.id])
+            results = await this.userDAO.selectCleanUsers(`WHERE users.id = $1 AND users.status != 'invited'`, [request.params.id])
         }
 
         if ( ! results.dictionary[ request.params.id] ) {

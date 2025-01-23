@@ -202,6 +202,16 @@ module.exports = class UserDAO extends DAO {
         return { dictionary: dictionary, list: list } 
     }
 
+    async getUserById(id, clean) {
+        const results = await this.selectUsers('WHERE users.id = $1', [ id ], '', null, clean)
+
+        if ( results.list.length <= 0 ) {
+            return null
+        }
+
+        return results.dictionary[id]
+    }
+
     /**
      * Get users with any sensitive data cleaned out of the record.  This
      * method should be used any time we plan to return the users from the

@@ -243,6 +243,19 @@ module.exports = class PostDAO extends DAO {
         return { dictionary: dictionary, list: list }
     }
 
+    async getPostById(id) {
+        const results = await this.selectPosts({
+            where: `posts.id = $1`,
+            params: [ id ]
+        })
+
+        if ( results.list.length <= 0 || ! ( id in results.dictionary)) {
+            return null
+        }
+
+        return results.dictionary[id]
+    }
+
     async selectPosts(query) {
         let where = query.where ? `WHERE ${query.where}` : ''
         let params = query.params ? [ ...query.params ] : []

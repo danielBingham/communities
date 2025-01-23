@@ -105,6 +105,39 @@ module.exports = class UserRelationshipDAO extends DAO {
         return { dictionary: dictionary, list: list }
     }
 
+    async getUserRelationshipById(id) {
+        const results = await this.selectUserRelationships({
+            where: `user_relationships.id = $1`,
+            params: [ id ]
+        })
+
+        if ( results.list.length <= 0 || ! ( id in results.dictionary) ) {
+            return null
+        }
+
+        return results.dictionary[id]
+    }
+
+    async getUserRelationshipByUserAndRelation(userId, relationId) {
+        const results = await this.selectUserRelationships({
+            where: `(user_relationships.user_id = $1 AND user_relationships.friend_id = $2) OR (user_relationships.user_id = $2 AND user_relationships.friend_id = $1)`,
+            params: [ userId, relationId]
+        })
+
+        if ( results.list.length <= 0 ) {
+            return null
+        }
+
+        const entity = results.dictionary[results.list[0]]
+
+        if ( ! (( entity.userId == userId && entity.relationId == relationId ) || (entity.userId == relationId && entity.relationId == userId)) ) {
+            this.core.logger.error(`getUserRelationshipByUserAndRelation returned an invalid result for User(${userId}) and User(${relationId})!`)
+            return null
+        }
+
+        return entity 
+    }
+
     async selectUserRelationships(query) {
         const params = query.params ? [ ...query.params ] : []
         const where = query.where ? `WHERE ${query.where}` : ''

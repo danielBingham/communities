@@ -3,6 +3,7 @@ import { setUsersInDictionary } from '../users'
 import { setPostsInDictionary } from '../posts'
 import { setPostCommentsInDictionary } from '../postComments'
 import { setPostReactionsInDictionary } from '../postReactions'
+import { setPostSubscriptionsInDictionary } from '../postSubscriptions'
 import { setFilesInDictionary } from '../files'
 import { setUserRelationshipsInDictionary } from '../userRelationships'
 
@@ -23,6 +24,8 @@ const setRelationsInState = function(relations) {
                     dispatch(setFilesInDictionary({ dictionary: dictionary }))
                 } else if ( relation == 'postReactions' ) { 
                     dispatch(setPostReactionsInDictionary({ dictionary: dictionary }))
+                } else if ( relation == 'postSubscriptions' ) {
+                    dispatch(setPostSubscriptionsInDictionary({ dictionary: dictionary }))
                 } else if ( relation == 'userRelationships' ) {
                     dispatch(setUserRelationshipsInDictionary({ dictionary: dictionary }))
                 }

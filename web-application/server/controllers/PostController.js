@@ -18,7 +18,7 @@
  *
  ******************************************************************************/
 
-const { LinkPreviewService, PostDAO, PostCommentDAO, PostReactionDAO, UserDAO, FileDAO }  = require('@communities/backend')
+const { LinkPreviewService, PostDAO, PostCommentDAO, PostReactionDAO, PostSubscriptionDAO, UserDAO, FileDAO }  = require('@communities/backend')
 const ControllerError = require('../errors/ControllerError')
 
 
@@ -30,13 +30,14 @@ module.exports = class PostController {
         this.postDAO = new PostDAO(core)
         this.postCommentDAO = new PostCommentDAO(core)
         this.postReactionDAO = new PostReactionDAO(core)
+        this.postSubscriptionDAO = new PostSubscriptionDAO(core)
         this.userDAO = new UserDAO(core)
         this.fileDAO = new FileDAO(core)
 
         this.linkPreviewService = new LinkPreviewService(core)
     }
 
-    async getRelations(results, requestedRelations) {
+    async getRelations(currentUser, results, requestedRelations) {
         const userIds = []
         for(const postId of results.list) {
             const post = results.dictionary[postId]
@@ -55,6 +56,12 @@ module.exports = class PostController {
             params: [ results.list ]
         })
 
+        const postSubscriptionResults = await this.postSubscriptionDAO.selectPostSubscriptions({
+            where: `post_subscriptions.post_id = ANY($1::uuid[]) AND post_subscriptions.user_id = $2`,
+            params: [ results.list, currentUser.id ]
+        })
+
+
         const fileIds = []
         for(const postId of results.list) {
             const post = results.dictionary[postId]
@@ -67,6 +74,7 @@ module.exports = class PostController {
             users: userResults.dictionary,
             postComments: postCommentResults.dictionary,
             postReactions: postReactionResults.dictionary,
+            postSubscriptions: postSubscriptionResults.dictionary,
             files: fileDictionary 
         }
     }
@@ -130,7 +138,7 @@ module.exports = class PostController {
 
         results.meta = await this.postDAO.getPostPageMeta(query)
 
-        results.relations = await this.getRelations(results)
+        results.relations = await this.getRelations(currentUser, results)
 
         response.status(200).json(results)
     }
@@ -174,11 +182,17 @@ module.exports = class PostController {
         }
         await this.postDAO.insertPostVersions(postVersion)
 
-        const relations = await this.getRelations(results)
+        // Subscribe the author to their post.
+        await this.postSubscriptionDAO.insertPostSubscriptions({
+            postId: entity.id,
+            userId: currentUser.id
+        })
+
+        const relations = await this.getRelations(currentUser, results)
 
         response.status(201).json({
             entity: results.dictionary[results.list[0]],
-            relationships: relations
+            relations: relations
         })
     }
 
@@ -220,11 +234,11 @@ module.exports = class PostController {
                 `That post either doesn't exist or you don't have permission to see it.`)
         }
 
-        const relationships = await this.getRelations(postResults)
+        const relations = await this.getRelations(currentUser, postResults)
 
         response.status(200).json({
             entity: post,
-            relations: relationships
+            relations: relations 
         })
     }
 
@@ -261,11 +275,11 @@ module.exports = class PostController {
         }
         await this.postDAO.insertPostVersions(postVersion)
 
-        const relations = await this.getRelations(results)
+        const relations = await this.getRelations(currentUser, results)
 
         response.status(201).json({
             entity: results.dictionary[results.list[0]],
-            relationships: relations
+            relations: relations
         })
 
     }

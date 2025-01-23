@@ -56,6 +56,11 @@ const NotificationSettingsSection = function({}) {
                     toggled={currentUser.settings.notifications['Post:comment:create'].email === true ? true : false} 
                     onClick={(e) => toggleNotificationSetting('Post:comment:create')} />
                 <Toggle 
+                    label="Subscribed Post Comment"
+                    explanation="Recieve an email notification when someone comments on a post you are subscribed to."
+                    toggled={currentUser.settings.notifications['Post:comment:create:subscriber'].email === true ? true : false} 
+                    onClick={(e) => toggleNotificationSetting('Post:comment:create:subscriber')} />
+                <Toggle 
                     label="Friend Request Recieved"
                     explanation="Recieve an email notification when someone sends you a friend request."
                     toggled={currentUser.settings.notifications['User:friend:create'].email === true ? true : false} 
