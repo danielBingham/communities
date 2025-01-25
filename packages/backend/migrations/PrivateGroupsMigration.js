@@ -39,7 +39,7 @@ module.exports = class PrivateGroupsMigration {
 
                 file_id uuid REFERENCES files (id) DEFAULT NULL,
 
-                is_discoverable boolean,
+                is_discoverable boolean DEFAULT FALSE,
                 entrance_questions jsonb DEFAULT '{}'::jsonb
             )
         `, [])
@@ -76,7 +76,17 @@ module.exports = class PrivateGroupsMigration {
         this.logger.info(`Removing the 'group_members_group_id' index...`)
         await this.database.query(`DROP INDEX IF EXISTS group_members__group_id`, [])
 
-        // TODO
+        this.logger.info(`Removing the 'group_members' table...`)
+        await this.database.query(`DROP TABLE IF EXISTS group_members`, [])
+
+        this.logger.info(`Removing the 'group_member_role' type...`)
+        await this.database.query(`DROP TYPE IF EXISTS group_member_role`, [])
+
+        this.logger.info(`Removing index 'groups__file_id'...`)
+        await this.database.query(`DROP INDEX IF EXISTS groups__file_id`, [])
+
+        this.logger.info(`Removing the 'groups' table...`)
+        await this.database.query(`DROP TABLE IF EXISTS groups`, [])
     }
 
 

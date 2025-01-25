@@ -196,7 +196,7 @@ CREATE TABLE groups (
 
     file_id uuid REFERENCES files (id) DEFAULT NULL,
 
-    is_discoverable boolean,
+    is_discoverable boolean DEFAULT FALSE,
     entrance_questions jsonb DEFAULT '{}'::jsonb
 );
 CREATE INDEX groups__file_id ON groups (file_id);
