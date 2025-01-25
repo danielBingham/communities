@@ -88,6 +88,11 @@ const SCHEMA = {
                                 push: true,
                                 web: true
                             },
+                            'Post:comment:create:subscriber': {
+                                email: true,
+                                push: true,
+                                web: true
+                            },
                             'User:friend:create': {
                                 email: true,
                                 push: true,
