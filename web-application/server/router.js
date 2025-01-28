@@ -192,6 +192,78 @@ module.exports = function(core) {
     })
 
     /**************************************************************************
+     * Groups REST routes
+     * ************************************************************************/
+    const GroupController = require('./controllers/GroupController')
+    const groupController = new GroupController(core)
+
+    router.get('/groups', function(request, response, next) {
+        groupController.getGroups(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.post('/groups', function(request, response, next) {
+        groupController.postGroups(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.get('/group/:id', function(request, response, next) {
+        groupController.getGroup(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.patch('/group/:id', function(request, response, next) {
+        groupController.patchGroup(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.delete('/group/:id', function(request, response, next) {
+        groupController.deleteGroup(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    /**************************************************************************
+     * GroupMembers REST routes
+     **************************************************************************/
+    const GroupMemberController = require('./controllers/GroupMemberController')
+    const groupMemberController = new GroupMemberController(core)
+
+    router.get('/group/:groupId/members', function(request, response, next) {
+        groupMemberController.getGroupMembers(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.post('/group/:groupId/members', function(request, response, next) {
+        groupMemberController.postGroupMembers(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.get('/group/:groupId/member/:id', function(request, response, next) {
+        groupMemberController.getGroupMember(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.patch('/group/:groupId/member/:id', function(request, response, next) {
+        groupMemberController.patchGroupMember(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.delete('/group/:groupId/member/:id', function(request, response, next) {
+        groupMemberController.deleteGroupMember(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    /**************************************************************************
      * Link Preview REST Routes
      **************************************************************************/
     const LinkPreviewController = require('./controllers/LinkPreviewController')

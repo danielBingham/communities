@@ -22,8 +22,8 @@ const DAO  = require('./DAO')
 
 const PAGE_SIZE = 20
 const SCHEMA = {
-    'Group': {
-        table: 'groups',
+    'GroupMember': {
+        table: 'group_members',
         fields: {
             'id': {
                 insert: 'primary',
@@ -31,47 +31,29 @@ const SCHEMA = {
                 select: 'always',
                 key: 'id'
             },
-            'title': {
+            'group_id': {
+                insert: 'required',
+                update: 'denied',
+                select: 'always',
+                key: 'groupId'
+            },
+            'user_id': {
+                insert: 'required',
+                update: 'denied',
+                select: 'always',
+                key: 'userId'
+            },
+            'role': {
                 insert: 'required',
                 update: 'allowed',
                 select: 'always',
-                key: 'title'
-            },
-            'slug': {
-                insert: 'required',
-                update: 'allowed',
-                select: 'always',
-                key: 'slug'
-            },
-            'about': {
-                insert: 'alowed',
-                update: 'allowed',
-                select: 'always',
-                key: 'about'
-            },
-            'file_id': {
-                insert: 'allowed',
-                update: 'allowed',
-                select: 'always',
-                key: 'fileId'
-            },
-            'is_discoverable': {
-                insert: 'allowed',
-                update: 'allowed',
-                select: 'always',
-                key: 'isDiscoverable'
-            },
-            'entrance_questions': {
-                insert: 'allowed',
-                update: 'allowed',
-                select: 'always',
-                key: 'entranceQuestions'
+                key: 'role'
             }
         }
     }
 }
 
-module.exports = class GroupDAO extends DAO {
+module.exports = class GroupMemberDAO extends DAO {
 
     constructor(core) {
         super(core)
@@ -81,33 +63,33 @@ module.exports = class GroupDAO extends DAO {
         this.entityMaps = SCHEMA
     }
 
-    getGroupSelectionString() {
-        return this.getSelectionString('Group')
+    getGroupMemberSelectionString() {
+        return this.getSelectionString('GroupMember')
     }
 
-    hydrateGroup(row) {
-        return this.hydrate('Group', row)
+    hydrateGroupMember(row) {
+        return this.hydrate('GroupMember', row)
     }
 
-    hydrateGroups(rows) {
+    hydrateGroupMembers(rows) {
         const dictionary = {}
         const list = []
 
         for(const row of rows) {
 
-            // Hydrate the group.
-            if ( ! (row.Group_id in dictionary ) ) {
-                dictionary[row.Group_id] = this.hydrateGroup(row)
-                list.push(row.Group_id)
+            // Hydrate the groupMember.
+            if ( ! (row.GroupMember_id in dictionary ) ) {
+                dictionary[row.GroupMember_id] = this.hydrateGroupMember(row)
+                list.push(row.GroupMember_id)
             }
         }
 
         return { dictionary: dictionary, list: list }
     }
 
-    async getGroupById(id) {
-        const results = await this.selectGroups({
-            where: `groups.id = $1`,
+    async getGroupMemberById(id) {
+        const results = await this.selectGroupMembers({
+            where: `groupMembers.id = $1`,
             params: [ id ]
         })
 
@@ -118,10 +100,10 @@ module.exports = class GroupDAO extends DAO {
         return results.dictionary[id]
     }
 
-    async getGroupBySlug(slug) {
-        const results = await this.selectGroups({
-            where: `groups.slug = $1`,
-            params: [ slug ]
+    async getGroupMemberByGroupAndUser(groupId, userId) {
+        const results = await this.selectGroupMembers({
+            where: `group_members.group_id = $1 AND group_members.user_id = $2`,
+            params: [ groupId, userId ]
         })
 
         if ( results.list.length <= 0 ) {
@@ -130,39 +112,19 @@ module.exports = class GroupDAO extends DAO {
 
         const entity = results.dictionary[results.list[0]]
 
-        if ( entity.slug !== slug ) {
-            this.core.logger.error(`Slug, '${entity.slug}' does not match '${slug}' in getGroupBySlug.`)
+        if ( entity.groupId !== groupId || entity.userId !== userId ) {
+            this.core.logger.info(entity)
+            this.core.logger.error(`Entity does not match query (${groupId}, ${userId}) in 'getGroupMemberByGroupAndUser'.  This should not happen.`)
             return null
         }
 
-        return entity
+        return entity 
     }
 
-    async getGroupsForUser(userId) {
-        const groupMemberResults = await this.core.database.query(`
-            SELECT group_id FROM group_members WHERE user_id = $1
-        `, [ userId ])
-
-        const groupIds = groupMemberResults.rows.map((r) => r.group_id)
-
-        const results = this.selectGroups({
-            where: `groups.id = ANY($1::uuid[])`,
-            params: [groupIds]
-        })
-
-        if ( results.list.length <= 0 ) {
-            return null
-        }
-
-        const groups = results.list.map((id) => results.dictionary[id])
-        return groups
-    }
-
-    async selectGroups(query) {
+    async selectGroupMembers(query) {
         let where = query.where ? `WHERE ${query.where}` : ''
         let params = query.params ? [ ...query.params ] : []
-        let page = query.page 
-        let order = query.order ? `${query.order}` : `groups.created_date DESC`
+        let order = query.order ? `${query.order}` : `group_members.created_date DESC`
 
         let paging = ''
         if ( query.page ) {
@@ -183,8 +145,8 @@ module.exports = class GroupDAO extends DAO {
 
         const sql = `
             SELECT
-                ${this.getGroupSelectionString()}
-            FROM groups
+                ${this.getGroupMemberSelectionString()}
+            FROM group_members
             ${where}
             ORDER BY ${order}
             ${paging}
@@ -196,10 +158,10 @@ module.exports = class GroupDAO extends DAO {
             return { dictionary: {}, list: [] }
         }
 
-        return this.hydrateGroups(results.rows)
+        return this.hydrateGroupMembers(results.rows)
     }
 
-    async getGroupPageMeta(query) {
+    async getGroupMemberPageMeta(query) {
         let where = query.where ? `WHERE ${query.where}` : ''
         let params = query.params ? [ ...query.params ] : []
         let page = query.page ? query.page : 1
@@ -207,7 +169,7 @@ module.exports = class GroupDAO extends DAO {
         const results = await this.core.database.query(`
                 SELECT 
                     COUNT(*)
-                FROM groups
+                FROM group_members
                 ${where}
         `, params)
 
@@ -220,18 +182,18 @@ module.exports = class GroupDAO extends DAO {
         }
     }
 
-    async insertGroups(groups) {
-        await this.insert('Group', groups)
+    async insertGroupMembers(groupMembers) {
+        await this.insert('GroupMember', groupMembers)
     }
 
-    async updateGroup(group) {
-        await this.update('Group', group)
+    async updateGroupMember(groupMember) {
+        await this.update('GroupMember', groupMember)
     }
 
-    async deleteGroup(group) {
+    async deleteGroupMember(groupMember) {
         await this.core.database.query(`
-            DELETE FROM groups WHERE groups.id = $1
-        `, [ group.id])
+            DELETE FROM group_members WHERE group_members.id = $1
+        `, [ groupMember.id])
     }
 
 }

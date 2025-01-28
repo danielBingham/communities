@@ -2,3 +2,67 @@
     margin: 50px auto;
     background-color: var(--page-background-color);
 }
+
+#home-page menu {
+    list-style-type: none;
+}
+#home-page menu li {
+    padding: 10px;
+    font-size: 18px;
+}
+#home-page menu li:hover {
+    background-color: var(--primary-color-light);
+    border-radius: 10px;
+}
+#home-page menu svg {
+    width: 22px;
+    margin-right: 5px;
+    margin-bottom: -5px;
+    color: var(--icon-color);
+}
+#home-page menu a:link,
+#home-page menu a:visited,
+#home-page menu a:active {
+    display: block;
+    padding: 10px;
+    color: var(--primary-color-darkest);
+}
+#home-page menu .active a {
+    font-weight: bold;
+}
+
+@media (width >= 750px) {
+    #home-page {
+        display: grid;
+        grid-template-columns: 320px auto;
+        width: 100%;
+        max-width: 1000px;
+        margin: 50px auto;
+        transform: translateX(-160px); 
+    }
+
+    #home-page .content {
+        padding: 0 30px;
+    }
+}
+@media (width < 750px) {
+    #home-page .content {
+        padding: 0 30px;
+        box-sizing: border-box;
+        margin: 0 auto;
+    }
+
+    #home-page .menu {
+        text-align: center;
+        margin: 0 auto;
+    }
+
+    #home-page .menu li {
+        display: inline-block;
+    }
+    
+    #home-page .menu li .nav-text {
+        display: block;
+        font-size: 10px;
+    }
+}

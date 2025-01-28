@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
+import { useParams, Link } from 'react-router-dom'
 
 import { getPosts, cleanupRequest } from '/state/posts'
+
+import { 
+    UserGroupIcon 
+} from '@heroicons/react/24/outline'
 
 import PostForm from '/components/posts/form/PostForm'
 import HomeFeed from '/components/feeds/HomeFeed'
@@ -14,6 +19,8 @@ import Spinner from '/components/Spinner'
 import './HomePage.css'
 
 const HomePage = function(props) {
+
+    const { pageTab } = useParams()
 
     const [requestId,setRequestId] = useState(null)
     const request = useSelector(function(state) {
@@ -66,12 +73,10 @@ const HomePage = function(props) {
                 <>
                 { welcomeNotice }
                 <div className="home-feeds">
-                    <div className="content">
                         <PostForm postId={postInProgressId} />
                         <div className="feed">
                             <HomeFeed /> 
                         </div>
-                    </div>
                 </div>
                 </>
             )
@@ -81,7 +86,14 @@ const HomePage = function(props) {
 
     return (
         <div id="home-page">
+            <menu className="home-page">
+                <li>
+                    <Link to="/groups"><UserGroupIcon /> <span className="nav-text">Groups</span></Link>
+                </li>
+            </menu>
+            <div className="content">
             { content }
+            </div>
         </div>
     )
 }

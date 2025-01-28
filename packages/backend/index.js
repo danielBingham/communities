@@ -19,6 +19,8 @@
  ******************************************************************************/
 exports.FeatureDAO = require('./daos/FeatureDAO') 
 exports.FileDAO = require('./daos/FileDAO')
+exports.GroupDAO = require('./daos/GroupDAO')
+exports.GroupMemberDAO = require('./daos/GroupMemberDAO')
 exports.NotificationDAO = require('./daos/NotificationDAO')
 exports.LinkPreviewDAO = require('./daos/LinkPreviewDAO')
 exports.PermissionDAO = require('./daos/PermissionDAO')

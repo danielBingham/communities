@@ -201,14 +201,13 @@ CREATE TABLE groups (
 );
 CREATE INDEX groups__file_id ON groups (file_id);
 
-CREATE TYPE group_member_role AS ENUM("admin", "moderator", "member"); 
+CREATE TYPE group_member_role AS ENUM('admin', 'moderator', 'member'); 
 CREATE TABLE group_members (
     id uuid primary key DEFAULT gen_random_uuid(),
     group_id uuid REFERENCES groups (id) ON DELETE CASCADE NOT NULL,
     user_id uuid REFERENCES users (id) ON DELETE CASCADE NOT NULL,
 
-    is_subscribed boolean,
-    role group_member_role
+    role group_member_role DEFAULT 'member'
 );
 CREATE INDEX group_members__group_id ON group_members (group_id);
 CREATE INDEX group_members__user_id ON group_members (user_id);
