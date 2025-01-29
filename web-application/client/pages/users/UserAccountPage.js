@@ -2,6 +2,8 @@ import React, { useEffect } from 'react'
 import { useSelector} from 'react-redux'
 import { useParams, Link } from 'react-router-dom'
 
+import { useAuthentication } from '/lib/hooks/useAuthentication'
+
 import { 
     UserCircleIcon as UserCircleIconOutline, 
     EnvelopeIcon as EnvelopIconOutline, 
@@ -36,10 +38,7 @@ const UserAccountPage = function(props) {
 
     const { pageTab } = useParams()
 
-    const currentUser = useSelector(function(state) {
-        return state.authentication.currentUser
-    })
-   
+    const currentUser = useAuthentication()
 
     // ======= Render =====================================
 

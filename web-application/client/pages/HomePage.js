@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
+import { useAuthentication } from '/lib/hooks/useAuthentication'
+
 import { getPosts, cleanupRequest } from '/state/posts'
 
 import PostForm from '/components/posts/form/PostForm'
@@ -25,9 +27,7 @@ const HomePage = function(props) {
     })
 
     const features = useSelector((state) => state.system.features)
-    const currentUser = useSelector(function(state) {
-        return state.authentication.currentUser
-    })
+    const currentUser = useAuthentication() 
 
     const postInProgressId = useSelector((state) => state.posts.inProgress)
 

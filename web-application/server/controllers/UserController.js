@@ -482,8 +482,8 @@ module.exports = class UserController {
 
         const currentUser = request.session.user
 
-        // 1. User must be logged in.
-        if ( ! currentUser ) {
+        // 1. User must be logged in unless they are using  token.
+        if ( ! currentUser && ! ( 'token' in user) ) {
             throw new ControllerError(403, 'not-authorized', 
                 `Unauthenticated user attempting to update user(${user.id}).`)
         } 
@@ -495,7 +495,7 @@ module.exports = class UserController {
         // for instance), then make sure to strip the email out of the returned
         // user at the botton of this function.  Or at least, spend some time
         // considering whether you need to.
-        if ( currentUser.id != id) {
+        if ( currentUser && currentUser.id != id) {
             throw new ControllerError(403, 'not-authorized', 
                 `User(${request.session.user.id}) attempted to update another user(${id}).`)
         }
@@ -531,15 +531,22 @@ module.exports = class UserController {
                 token = await this.tokenDAO.validateToken(user.token, [ 'reset-password', 'invitation' ])
             } catch (error ) {
                 if ( error instanceof backend.DAOError ) {
-                    throw new ControllerError(403, 'not-authorized', error.message)
+                    throw new ControllerError(403, 'not-authorized', error.message, `Invalid token.`)
                 } else {
                     throw error
                 }
             }
+
+            if ( currentUser && token.userId !== currentUser.id ) {
+                throw new ControllerError(400, 'logged-in',
+                    `User(${currentUser.id}) attempted to use token for User(${token.userId}).`,
+                    `You are currently logged in with another user.  Please log out first.`)
+            }
             
             if ( token.userId != user.id ) {
                 throw new ControllerError(403, 'not-authorized',
-                    `User(${user.id}) attempted to change their password with a valid token that wasn't theirs!`)
+                    `User(${user.id}) attempted to change their password with a valid token that wasn't theirs!`,
+                    `Invalid token.`)
             }
 
 
@@ -569,6 +576,7 @@ module.exports = class UserController {
             // TODO Do we want to let the token hang?!
             await this.tokenDAO.deleteToken(token)
         } 
+
         
         // If they include the oldPassword, attempt to authenticate them with
         // that.
@@ -608,7 +616,6 @@ module.exports = class UserController {
                 }
             }
         }
-
 
         // 4. If a password is included, then they need to be authenticated.
         //
@@ -673,8 +680,14 @@ module.exports = class UserController {
         }
 
         // If we get to this point, we know the user being updated is the same
-        // as the user in the session.  No one else is allowed to update the
-        // user.
+        // as the user in the session or is a new user registering from an
+        // invite.  Update the session.  We don't need to pull the full
+        // session, because if this is a registration, then the page will be
+        // refreshed and GET /authentication will be called which will pull the
+        // full session.
+        //
+        // TECHDEBT This isn't the cleanest flow, and it's probably going to
+        // prove a bit brittle.
         request.session.user = results.dictionary[user.id] 
 
         // If we've changed the email, then we need to send out a new

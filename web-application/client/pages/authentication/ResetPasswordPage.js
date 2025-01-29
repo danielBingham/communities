@@ -30,10 +30,10 @@ const ResetPasswordPage = function(props) {
     useEffect(function() {
         const token = searchParams.get('token')
 
-        if ( ! token ) {
+        /*if ( ! token ) {
             // TODO Is there a better way to handle this?
             navigate("/")
-        }
+        }*/
 
         setRequestId(dispatch(validateToken(token, 'reset-password')))
     }, [ searchParams ])

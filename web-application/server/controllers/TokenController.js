@@ -107,32 +107,21 @@ module.exports = class TokenController {
             await this.tokenDAO.deleteToken(token)
 
             const session = await this.authenticationService.getSessionForUserId(token.userId)
-            request.session.user = session.user
-            request.session.friends = session.friends
-            request.session.file = session.file
-
             response.status(200).json({
-                user: request.session.user,
-                friends: request.session.friends,
-                file: request.session.file
+                user: session.user,
+                file: session.file
             })
         } else if ( token.type == 'reset-password' || token.type == 'invitation') {
             if ( currentUser && token.userId !== currentUser.id ) {
                 throw new ControllerError(409, 'logged-in',
                     `User(${currentUser.id}) currently logged in when attempting to validate a token.`,
-                    `You cannot validate a token while currently logged in.`)
+                    `You cannot validate a token while logged in to another user.`)
             }
 
             const session = await this.authenticationService.getSessionForUserId(token.userId)
-
-            request.session.user = session.user
-            request.session.friends = session.friends
-            request.session.file = session.file
-
             response.status(200).json({
-                user: request.session.user,
-                friends: request.session.friends,
-                file: request.session.file
+                user: session.user,
+                file: session.file
             })
         }
     }
@@ -230,6 +219,4 @@ module.exports = class TokenController {
         }
 
     }
-
-
 }

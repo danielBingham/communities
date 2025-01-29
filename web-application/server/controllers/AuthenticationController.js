@@ -37,6 +37,7 @@ module.exports = class AuthenticationController {
 
         this.auth = new backend.AuthenticationService(core)
         this.userDAO = new backend.UserDAO(core)
+        this.tokenDAO = new backend.TokenDAO(core)
     }
 
 
@@ -105,11 +106,22 @@ module.exports = class AuthenticationController {
          *  AuthenticationService::authenticateUser()
          ************************************************************/
         try {
-            const userId = await this.auth.authenticateUser(credentials)
+            let userId = null
+            if ( 'email' in credentials) {
+                userId = await this.auth.authenticateUser(credentials)
+            } else if ( 'token' in credentials) {
+                const token = await this.tokenDAO.validateToken(credentials.token, [ 'reset-password', 'email-confirmation', 'invitation'])
+                userId = token.userId
+            }
+
+            if ( ! userId ) {
+                throw new ControllerError(403, 'authentication-failed',
+                    `No user found with either email or token.`)
+
+            }
 
             const session = await this.auth.getSessionForUserId(userId)
             request.session.user = session.user
-            request.session.friends = session.friends
             request.session.file = session.file
 
             response.status(200).json({
