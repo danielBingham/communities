@@ -37,17 +37,20 @@ module.exports = class AuthenticationService {
     }
 
     /**
-     * Returns a promise that will resolve with the completed hash.
+     * Returns the hash password.
+     *
+     * THIS IS A SYNCHRONOUS METHOD. 
      */
-    async hashPassword(password) {
+    hashPassword(password) {
         return bcrypt.hashSync(password, 10);
     }
 
     /**
-     * Returns a promise that will resolve with `true` or `false` depending on
-     * whether they match.
+     * Checks a password against the hash.
+     *
+     * THIS IS A SYNCHRONUS MEHTOD.
      */
-    async checkPassword(password, hash) {
+    checkPassword(password, hash) {
         return bcrypt.compareSync(password, hash);
     }
 
@@ -119,7 +122,6 @@ module.exports = class AuthenticationService {
         if (! passwords_match) {
             throw new ServiceError('authentication-failed', `Failed login for email ${credentials.email}.`)
         }
-
         
         return userMatch.id 
     }
