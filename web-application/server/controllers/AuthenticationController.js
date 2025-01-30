@@ -63,19 +63,16 @@ module.exports = class AuthenticationController {
             const session = await this.auth.getSessionForUserId(request.session.user.id)
 
             request.session.user = session.user
-            request.session.friends = session.friends
             request.session.file = session.file
 
             return response.status(200).json({
                 user: request.session.user,
-                friends: request.session.friends,
                 file: request.session.file
             })
 
         } else {
             return response.status(200).json({
                 user: null,
-                friends: [],
                 file: null
             })
         }
