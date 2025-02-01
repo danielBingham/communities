@@ -1,0 +1,9 @@
+main.headerless {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 1400px;
+    min-width: 375px;
+    margin: auto auto;
+    color: var(--main-text-color);
+    background-color: var(--main-background-color);
+}

@@ -1,5 +1,18 @@
 # Full Regression Test
 
+## Authentication
+
+- [ ] As User1, log out.
+- [ ] As User1, attempt to log in with the wrong password. Confirm login fails.
+- [ ] As User1, log in with the right password.  Confirm login succeeds.
+
+- [ ] As User2, attempt to login with the wrong password.  Confirm login fails.
+- [ ] As User2, attempt to login with the right password. Confirm login succeeds.
+
+- [ ] As User2, log out and request a password reset. Change User2's password.
+- [ ] As User2, log out and attempt to login with old password.  Confirm login fails.
+- [ ] As User2, attempt to login with new password.  Confirm login succeeds.
+
 ## Friend Requests
 
 - [ ] From the administrator (Admin) account invite a new user.
@@ -68,12 +81,6 @@
 - [ ] As User2, edit name and bio and don't submit form.
 - [ ] As User2, change email.  Confirm email.
 - [ ] As user2, change password. Log out and log back in with new password.
-
-## Authentication
-
-- [ ] As User1, log out.
-- [ ] As User2, log in.
-- [ ] While logged out, request password reset for User2.
 
 ## Settings 
 

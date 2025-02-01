@@ -70,7 +70,6 @@ module.exports = class AuthenticationService {
             const fileResults = await this.fileDAO.selectFiles(`WHERE files.id = $1`, [ user.fileId ])
             file = fileResults[0]
         }
-        
 
         return {
             user: user,
@@ -119,7 +118,7 @@ module.exports = class AuthenticationService {
         // 5. The passwords match.
         const userMatch = results.rows[0]
         const passwords_match = this.checkPassword(credentials.password, userMatch.password)
-        if (! passwords_match) {
+        if (passwords_match !== true) {
             throw new ServiceError('authentication-failed', `Failed login for email ${credentials.email}.`)
         }
         

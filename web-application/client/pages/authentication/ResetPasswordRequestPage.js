@@ -1,98 +1,80 @@
-import React, { useState, useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import React, { useState } from 'react'
 
-import { createToken, cleanupRequest } from '/state/authentication'
+import { useRequest } from '/lib/hooks/useRequest'
 
+import { createToken } from '/state/tokens'
+
+import CommunitiesLogo from '/components/header/CommunitiesLogo'
 import Input from '/components/generic/input/Input'
 import Spinner from '/components/Spinner'
-import { Page, PageBody } from '/components/generic/Page'
+import Button from '/components/generic/button/Button'
 
 import './ResetPasswordRequestPage.css'
 
 const ResetPasswordRequestPage = function(props) {
     const [ email, setEmail ] = useState('')
-    const [ submitted, setSubmitted ] = useState(false)
 
-    const [ requestId, setRequestId ] = useState(null)
-    const request = useSelector(function(state) {
-        if ( requestId ) {
-            return state.authentication.requests[requestId]
-        } else {
-            return null
-        }
-    })
-
-
-    const dispatch = useDispatch()
+    const [ request, makeRequest ] = useRequest()
 
     function onSubmit(event) {
         event.preventDefault()
 
-        setRequestId(dispatch(createToken({ type: 'reset-password', email: email })))
-        setSubmitted(true)
+        makeRequest(createToken({ type: 'reset-password', email: email }))
     }
 
-    useEffect(function() {
-        return function cleanup() {
-            if ( requestId ) {
-                dispatch(cleanupRequest({ requestId: requestId }))
-            }
-        }
-    }, [ requestId])
+    let content = ( <div className="error">If you see this, it's a bug.  Please report it!</div> )
+    let inProgress = request && request.state == 'in-progress'
 
-    let content = ( <Spinner local={true} /> )
     // If they've submitted the request.
-    if ( submitted ) {
-        if ( request && request.state == 'fulfilled' ) {
-            content = (
-                <span className="success">
-                    Link sent.  Check your email.  If the email does not arrive
-                    shortly, you can refresh this page to request another one.
-                </span>
-            )
-        } else if ( request && request.state == 'failed' ) {
-            content = (
-                <div className="error">
-                    Something went wrong: { request.error }
-                </div>
-            )
-        }
+    if ( request && request.state == 'fulfilled' ) {
+        content = (
+            <div className="success">
+                <p>Link sent.  Check your email.</p>
+                <p>If the email does not arrive shortly, you can refresh this
+                    page to request another one.</p> 
+                <p>Make sure to type your email correctly, as we can't tell you
+                    if you've entered an incorrect email.</p> 
+            </div>
+        )
+    } else if ( request && request.state == 'failed' ) {
+        content = (
+            <div className="error">
+                <p>Something went wrong in a way we couldn't handle.  This is a bug, please report it!</p>
+                <p>Error Type: { request.error.type }</p>
+                <p>Error Message: { request.error.message }</p>
+            </div>
+        )
     }
 
     // Otherwise, render the form.
     else {
         content = (
-            <>
-                <h1>Password Reset Request</h1>
-                <form onSubmit={onSubmit}>
-                    <Input
-                        name="email"
-                        label="Email"
-                        explanation={`Please enter your email address to request a password reset
+            <form onSubmit={onSubmit}>
+                <Input
+                    name="email"
+                    label="Account Email"
+                    explanation={`Please enter your email address to request a password reset
                         link.  A link will be sent to the address you provide. To reset
                         your password, click the link in the email.  You will be taken
                         back here and able to enter a new password.`}
-                        value={email}
-                        className="email"
-                        onChange={(e) => setEmail(e.target.value) }
-                    />
-                    <div className="submit">
-                        <input type="submit" name="submit" value="Request Password Reset Link" />
-                    </div>
-                </form>
-            </>
+                    value={email}
+                    className="email"
+                    onChange={(e) => setEmail(e.target.value) }
+                />
+                <div className="submit">
+                    { inProgress && <Button type="primary" onClick={() => {}}><Spinner /></Button> }
+                    { ! inProgress && <input type="submit" name="submit" value="Request Password Reset Link" /> }
+                </div>
+            </form>
         )
 
     }
 
     return (
-        <Page id="reset-password-request">
-            <PageBody>
-                <div className="form-wrapper">
-                    { content }
-                </div>
-            </PageBody>
-        </Page>
+        <div id="reset-password-request">
+            <div className="logo"><CommunitiesLogo /></div>
+            { content }
+        </div>
     )
 
 }

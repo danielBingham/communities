@@ -1,54 +1,68 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { useSearchParams, useNavigate } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 
-import { validateToken, cleanupRequest } from '/state/authentication'
+import { createToken, validateToken } from '/state/tokens'
+
+import { useRequest } from '/lib/hooks/useRequest'
+
+import CommunitiesLogo from '/components/header/CommunitiesLogo'
 
 import Spinner from '/components/Spinner'
-import { Page, PageBody } from '/components/generic/Page'
+import Button from '/components/generic/button/Button'
+
+import LoginForm from '/components/authentication/LoginForm'
 
 import './EmailConfirmationPage.css'
 
 const EmailConfirmationPage = function(props) {
     const [ searchParams, setSearchParams ] = useSearchParams()
+    const token = searchParams.get('token')
 
+    const [ request, makeRequest ] = useRequest()
+    const [ createTokenRequest, makeCreateTokenRequest ] = useRequest()
 
-    const [ requestId, setRequestId ] = useState(null)
-    const request = useSelector(function(state) {
-        if ( requestId) {
-            return state.authentication.requests[requestId]
-        } else {
-            return null
-        }
-    })
+    const currentUser = useSelector((state) => state.authentication.currentUser)
 
     const dispatch = useDispatch()
-    const navigate = useNavigate()
+
+    const requestNewConfirmationEmail = function() {
+        makeCreateTokenRequest(createToken({ type: 'email-confirmation', email: currentUser.email}))
+    }
 
     useEffect(function() {
-        const token = searchParams.get('token')
-
-        if ( ! token ) {
-            // TODO Is there a better way to handle this?
-            navigate("/")
+        if ( token ) {
+            makeRequest(validateToken(token, 'email-confirmation'))
         }
-
-        setRequestId(dispatch(validateToken(token, 'email-confirmation')))
-    }, [ searchParams ])
-
-    useEffect(function() {
-        return function cleanup() {
-            if ( requestId ) {
-                dispatch(cleanupRequest({ requestId: requestId }))
-            }
-        }
-    }, [ requestId ])
-
+    }, [ token ])
 
     let content = ( <Spinner /> )
 
+    // If they don't have a token and aren't logged in, just show the login
+    // form.
+    if ( ! token && ! currentUser || (currentUser && currentUser.status == 'invited')) {
+        content = (
+            <LoginForm />
+        )
+    }
+
+    else if ( ! token && currentUser && currentUser.status == 'unconfirmed' ) {
+        content = (
+            <div className="email-confirmation-page__instructions">
+                <p>Please check your email for a confirmation request and follow
+                    the link within to confirm your address.</p>
+                <p> You can use the button below to send a
+                new email if needed. If you need help, don't hesitate to reach out to <a
+                href="mailto:contact@communities.social">contact@communities.social</a>.</p>
+                <Button type="primary" onClick={(e) => requestNewConfirmationEmail()}>Resend Confirmation Email</Button>
+                { createTokenRequest && createTokenRequest.state == 'fulfilled' && <p>Confirmation request sent!</p> }
+            </div>
+        )
+
+    }
+
     // If the request succeeded.
-    if ( request && request.state == 'fulfilled' ) {
+    else if ( currentUser && currentUser.status == 'confirmed' ) {
         content = (
             <div className="email-confirmation-page__success">
                 <p>Thanks for confirming your email!</p>
@@ -61,19 +75,21 @@ const EmailConfirmationPage = function(props) {
     else if (request && request.state == 'failed' ) {
         content = (
             <div className="email-confirmation-page__failure">
-                <p>We were unable to confirm you email.  The token you used may have been invalid, may have already been used, or may have expired.</p>
-                <p>If you already used this token to confirm your email, you should be logged in and should be able to go to your <a href="/">home feed</a> to use the site.</p>
-                <p>If something else went wrong, you can request a new token from the confirmation request notice.</p>
+                <p> We were unable to confirm you email.  The token you used may have been invalid or may have expired.</p>
+                <p> You can use the button below to send a
+                new email if needed. If you need help, don't hesitate to reach out to <a
+                href="mailto:contact@communities.social">contact@communities.social</a>.</p>
+                <Button type="primary" onClick={(e) => requestNewConfirmationEmail()}>Resend Confirmation Email</Button>
+                { createTokenRequest && createTokenRequest.state == 'fulfilled' && <p>Confirmation request sent!</p> }
             </div>
         )
     }
     
     return (
-        <Page id="email-confirmation-page">
-            <PageBody>
+        <div id="email-confirmation-page">
+            <div className="logo"><CommunitiesLogo /></div>
                 { content }
-            </PageBody>
-        </Page>
+        </div>
     )
 
 }

@@ -23,29 +23,33 @@ describe('AuthenticationController', function() {
         {
             name: 'John Doe',
             email: 'john.doe@university.edu',
+            username: 'john.doe',
             password: 'password'
         },
         {
             name: 'Jane Doe',
             email: 'jane.doe@university.edu',
+            username: 'jane.doe',
             password: 'different-password'
         }
     ]
 
     const database = [
         {
-            id: 1,
-            name: 'John Doe',
-            email: 'john.doe@university.edu',
-            createdDate: 'TIMESTAMP',
-            updatedDate: 'TIMESTAMP'
+            User_id: 1,
+            User_name: 'John Doe',
+            User_email: 'john.doe@university.edu',
+            User_username: 'john.doe',
+            User_createdDate: 'TIMESTAMP',
+            User_updatedDate: 'TIMESTAMP'
         },
         {
-            id: 2,
-            name: 'Jane Doe',
-            email: 'jane.doe@university.edu',
-            createdDate: 'TIMESTAMP',
-            updatedDate: 'TIMESTAMP'
+            User_id: 2,
+            User_name: 'Jane Doe',
+            User_email: 'jane.doe@university.edu',
+            User_username: 'jane.doe',
+            User_createdDate: 'TIMESTAMP',
+            User_updatedDate: 'TIMESTAMP'
         }
     ]
 
@@ -54,6 +58,7 @@ describe('AuthenticationController', function() {
             id: 1,
             name: 'John Doe',
             email: 'john.doe@university.edu',
+            username: 'john.doe',
             createdDate: 'TIMESTAMP',
             updatedDate: 'TIMESTAMP'
         },
@@ -61,6 +66,7 @@ describe('AuthenticationController', function() {
             id: 2,
             name: 'Jane Doe',
             email: 'jane.doe@university.edu',
+            username: 'jane.doe',
             createdDate: 'TIMESTAMP',
             updatedDate: 'TIMESTAMP'
         }
@@ -96,26 +102,12 @@ describe('AuthenticationController', function() {
         get user() {
             return expectedUsers[0]
         }
-
-        get settings() {
-            return {
-                userId: expectedUsers[0].id,
-                welcomeDismissed: false,
-                fundingDismissed: false,
-                wipDismissed: false,
-                fields: []
-            }
-        }
     }
 
     class SessionReturnsUndefined {
 
         get user() {
             return undefined 
-        }
-
-        get settings() {
-            return null 
         }
     }
 
@@ -143,8 +135,7 @@ describe('AuthenticationController', function() {
 
             expect(response.status.mock.calls[0][0]).toEqual(200)
             expect(response.json.mock.calls[0][0]).toEqual({
-                user: null,
-                settings: null 
+                user: null
             })
         })
 
@@ -160,14 +151,7 @@ describe('AuthenticationController', function() {
 
             expect(response.status.mock.calls[0][0]).toEqual(200)
             expect(response.json.mock.calls[0][0]).toEqual({
-                user: expectedUsers[0],
-                settings: {
-                    userId: expectedUsers[0].id,
-                    welcomeDismissed: false,
-                    fundingDismissed: false,
-                    wipDismissed: false,
-                    fields: []
-                }
+                user: expectedUsers[0]
             })
         })
 
@@ -186,101 +170,5 @@ describe('AuthenticationController', function() {
         })
     })
 
-    xdescribe('.postAuthentication()', function() {
-        it('should hash the password and return 201 with the modified user', async function() {
-            core.database.query.mockReturnValueOnce({rowCount: 0, rows: []})
-                .mockReturnValue({rowCount:1, rows: [ { id: database[0].id } ]})
-                .mockReturnValue({rowCount:1, rows: [ database[0] ] })
-
-            // Do this so that submittedUsers[0].password doesn't get
-            // overwritten and we can use it in future tests.
-            const submittedUser = {...submittedUsers[0] }
-            const request = {
-                body: submittedUser,
-            }
-
-            const response = new Response()
-            const userController = new UserController(core)
-            await userController.postUsers(request, response)
-
-            const databaseCall = core.database.query.mock.calls[1]
-            expect(auth.checkPassword(submittedUsers[0].password, databaseCall[1][2])).toEqual(true)
-            expect(response.status.mock.calls[0][0]).toEqual(201)
-            expect(response.json.mock.calls[0][0]).toEqual(expectedUsers[0])
-        })
-
-        it('should handle a thrown error by returning 500 and an "unknown" error', async function() {
-            core.database.query.mockImplementation(function(sql, params) {
-                throw new Error('Something went wrong!')
-            })
-
-            // Do this so that submittedUsers[0].password doesn't get
-            // overwritten and we can use it in future tests.
-            const submittedUser = {...submittedUsers[0] }
-            const request = {
-                body: submittedUser,
-            }
-
-            const response = new Response()
-            const userController = new UserController(core)
-            await userController.postUsers(request, response)
-
-            expect(response.status.mock.calls[0][0]).toEqual(500)
-            expect(response.json.mock.calls[0][0]).toEqual({ error: 'unknown' })
-        })
-    })
-
-    xdescribe('.deleteAuthentication()', function() {
-        it('should return 200 and the requested user', async function() {
-            core.database.query.mockReturnValue({rowCount:1, rows: [database[0]]})
-            const request = {
-                params: {
-                    id: 1
-                }
-            }
-
-            const response = new Response()
-            const userController = new UserController(core)
-            await userController.getUser(request, response)
-
-            expect(response.status.mock.calls[0][0]).toEqual(200)
-            expect(response.json.mock.calls[0][0]).toEqual(expectedUsers[0])
-        })
-
-        it('should return 404 when the user does not exist', async function() {
-            core.database.query.mockReturnValue({rowCount:0, rows: []})
-            const request = {
-                params: {
-                    id: 3
-                }
-            }
-
-            const response = new Response()
-            const userController = new UserController(core)
-            await userController.getUser(request, response)
-
-            expect(response.status.mock.calls[0][0]).toEqual(404)
-            expect(response.json.mock.calls[0][0]).toEqual([])
-        })
-
-        it('should handle a thrown error by returning 500 and an "unknown" error', async function() {
-            core.database.query.mockImplementation(function(sql, params) {
-                throw new Error('Something went wrong!')
-            })
-
-            const request = {
-                params: {
-                    id: 1
-                }
-            }
-
-            const response = new Response()
-            const userController = new UserController(core)
-            await userController.getUser(request, response)
-
-            expect(response.status.mock.calls[0][0]).toEqual(500)
-            expect(response.json.mock.calls[0][0]).toEqual({ error: 'unknown' })
-        })
-    })
 
 })

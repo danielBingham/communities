@@ -23,6 +23,9 @@ const Input = function({ name, type, label, explanation, className, value, onCha
         }
     }
 
+    if ( value === undefined || value === null ) {
+        console.log(`No value for ${name}.`)
+    }
     const typeInternal = type == 'password' ? 'password' : 'text'
     return (
         <div className={`text-input ${className ? className : ''}`}>
