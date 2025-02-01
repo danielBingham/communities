@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useSearchParams } from 'react-router-dom'
 
-import { validateToken } from '/state/tokens'
+import { createToken, validateToken } from '/state/tokens'
 
 import { useRequest } from '/lib/hooks/useRequest'
 

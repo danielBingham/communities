@@ -242,20 +242,21 @@ const AcceptInvitationForm = function(props) {
 
     if ( tokenRequest && tokenRequest.state == 'failed' ) {
         if ( tokenRequest.error.type == 'not-authorized' ) {
-            baseError = (
-                <div className="error">
-                    <p>Invalid token. Something may have gone wrong on our end.</p>
-                    <p>
-                        If you did get here following a valid invitation, please
+            tokenError = (<div>
+                <p>Invalid token. {tokenError}</p>
+                <p>If you did get here following a valid invitation, please
                         reach out to us at <a
                             href="mailto:contact@communities.social">contact@communties.social</a>,
                         so we can figure out what went wrong and get you a new
-                        invitation.
-                    </p>
+                    invitation.</p>
+                </div>)
+        }  else if ( tokenRequest.error.type == 'logged-in') {
+            return (
+                <div className="error">
+                    <p>You appear to already be logged in to a different user.</p>
+                    <p>Please return to the <a href="/">home page</a> and logout before attempting to accept this invitation.</p>
                 </div>
             )
-        }  else if ( tokenRequest.response.status == 409 ) {
-            emailError += ' A user with that email already exists.  Please login instead.'
         }
     }
 
@@ -270,7 +271,7 @@ const AcceptInvitationForm = function(props) {
                     value={token}
                     className="token"
                     onBlur={ (event) => isValid('token') }
-                    onChange={ (event) => setName(event.target.value) } 
+                    onChange={ (event) => setToken(event.target.value) } 
                     error={tokenError}
                 /> }
                 <Input

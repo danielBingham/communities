@@ -13,7 +13,7 @@ const Contact = function({}) {
     }, [])
 
     return (
-        <article class="contact">
+        <article className="contact">
                     <h1>Contact Us!</h1>
             <p>Communities is currently in beta.  Which means we want your feedback!</p>  
             <p>Please email us the details of any bugs you find, any weirdness

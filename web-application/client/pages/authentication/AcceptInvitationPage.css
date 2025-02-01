@@ -1,4 +1,7 @@
 
+#accept-invitation-page .logo {
+    text-align: center;
+}
 @media (width > 700px) {
     #accept-invitation-page {
         margin: 0px auto;

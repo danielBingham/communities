@@ -82,7 +82,7 @@ header .mobile-menu {
     header .nav-text {
         display: none;
     }
-    header #site-title .title-text {
+    header .communities-logo .logo-text {
         display: none;
     }
 }

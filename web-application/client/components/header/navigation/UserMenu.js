@@ -77,7 +77,7 @@ const UserMenu = function(props) {
     }, [ deleteAuthenticationRequestId ])
 
     // ======= Render ===============================================
-   
+
     const isAdmin = currentUser.permissions == 'admin' || currentUser.permissions == 'superadmin'
     return (
         <div id="user-menu" className="floating-menu" style={{ display: ( props.visible ? 'block' : 'none' ) }} >

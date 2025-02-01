@@ -15,6 +15,7 @@ import { getAuthentication, cleanupRequest as cleanupAuthenticationRequest } fro
 
 import MainLayout from '/layouts/MainLayout'
 import HeaderlessLayout from '/layouts/HeaderlessLayout'
+import AuthenticatedLayout from '/layouts/AuthenticatedLayout'
 
 // Admin page for managing features.  Must be logged in and an admin to load it
 // here.
@@ -199,31 +200,32 @@ const App = function(props) {
                         { /* ========== Authentication Controls =============== */ }
                         <Route path="/login" element={ <LoginPage /> } />
                         <Route path="/reset-password-request" element={ <ResetPasswordRequestPage /> } />
-
-                        <Route path="/">
-                            <Route path=":pageTab" element={ <HomePage /> } />
-                            <Route index element={ <HomePage /> } />
-                        </Route>
                         <Route path="/about">
                             <Route path=":pageTab" element={ <AboutPage /> } />
                             <Route index element={ <AboutPage />} />
                         </Route>
-                        <Route path="/admin" element={ <AdminPage />} />
 
+                        <Route element={<AuthenticatedLayout />}>
 
-                        <Route path="/:name">
-                            <Route path=":postId" element={ <PostPage /> } />
-                            <Route index element={ <UserProfilePage /> } />
-                        </Route>
+                            <Route path="/" element={ <HomePage /> } />
 
-                        <Route path="/account">
-                            <Route path=":pageTab" element={ <UserAccountPage /> } />
-                            <Route index element={ <UserAccountPage /> } />
-                        </Route>
+                            <Route path="/friends">
+                                <Route path=":pageTab" element={ <FriendsPage />} />
+                                <Route index element={<FriendsPage />} />
+                            </Route>
 
-                        <Route path="/friends">
-                            <Route path=":pageTab" element={ <FriendsPage />} />
-                            <Route index element={<FriendsPage />} />
+                            <Route path="/account">
+                                <Route path=":pageTab" element={ <UserAccountPage /> } />
+                                <Route index element={ <UserAccountPage /> } />
+                            </Route>
+
+                            <Route path="/admin" element={ <AdminPage />} />
+
+                            <Route path="/:name">
+                                <Route path=":postId" element={ <PostPage /> } />
+                                <Route index element={ <UserProfilePage /> } />
+                            </Route>
+
                         </Route>
                     </Route>
                 </Routes>
