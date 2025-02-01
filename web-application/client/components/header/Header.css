@@ -15,27 +15,6 @@ header .grid {
     display: grid;
 }
 
-header #site-title {
-    display: block;
-    font-family: "Nunito", serif;
-    font-size: 30px;
-    line-height: 1em;
-    font-weight: 300;
-    align-items: center;
-    height: 30px;
-
-    padding: 17px 0;
-
-    text-align: left;
-}
-header #site-title img {
-    display: inline-block;
-    width: 32px;
-    height: 32px;
-    margin-right: 2px;
-    margin-bottom: -6px;
-}
-
 header #navigation {
     text-align: right;
 

@@ -1,11 +1,6 @@
 
 @media (width > 700px) {
-    #accept-invitation-page .page-body {
-        margin: 0;
-        padding: 0;
-    }
-
-    #accept-invitation-page .page-body .form-wrapper {
+    #accept-invitation-page {
         margin: 0px auto;
         box-sizing: border-box;
         display: block;
@@ -19,7 +14,7 @@
     }
 }
 @media (width <= 700px) {
-    #accept-invitation-page .page-body .form-wrapper {
+    #accept-invitation-page {
         box-sizing: border-box;
         display: block;
         padding: 10px;
@@ -29,8 +24,4 @@
         background-color: white;
         z-index:101;
     }
-}
-
-header:has(~ main > #accept-invitation-page) {
-    display: none;
 }

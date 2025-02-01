@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 
 import { cleanupRequest } from '/state/requests'
 
@@ -13,6 +13,11 @@ export function useRequest() {
         }
     })
 
+    const dispatch = useDispatch()
+    const makeRequest = function(reduxThunk) {
+        setRequestId(dispatch(reduxThunk))
+    }
+
     useEffect(function() {
         return function cleanup() {
             if ( requestId ) {
@@ -21,5 +26,5 @@ export function useRequest() {
         }
     }, [ requestId ])
 
-    return [ request, setRequestId ]
+    return [ request, makeRequest ]
 }

@@ -71,13 +71,15 @@ module.exports = class TokenController {
         // 1. :token must be included.
         if ( ! request.params.token) {
             throw new ControllerError(400, 'no-token',
-                `Attempt to redeem a token with no token!`)
+                `Attempt to redeem a token with no token!`,
+                `You must provide a token in order to redeem it.`)
         }
 
         // 2. request.query.type must be included
         if ( ! request.query.type ) {
-            throw new ControllerError(403, 'not-authorized:invalid-token',
-                `User failed to specify a type when attempting to redeem a token.`)
+            throw new ControllerError(403, 'not-authorized',
+                `User failed to specify a type when attempting to redeem a token.`,
+                `Your token is invalid.`)
         }
 
         let token = null
@@ -88,14 +90,22 @@ module.exports = class TokenController {
             token = await this.tokenDAO.validateToken(request.params.token, [ request.query.type ])
         } catch (error) {
             if ( error instanceof backend.DAOError ) {
-                throw new ControllerError(403, 'not-authorized:invalid-token', error.message)
+                throw new ControllerError(403, 'not-authorized', 
+                    error.message,
+                    `Your token is invalid.`)
             } else {
                 throw error
             }
         }
 
+        if ( currentUser && token.userId !== currentUser.id ) {
+            throw new ControllerError(409, 'logged-in',
+                `User(${currentUser.id}) currently logged in when attempting to validate a token.`,
+                `You cannot validate a token while logged in to another user.`)
+        }
+
+        // For the email-confirmation flow, we do log the user in.
         if ( token.type == 'email-confirmation' ) {
-            // Log the user in.
             // Mark their user record as confirmed.
 
             const userUpdate = {
@@ -107,16 +117,20 @@ module.exports = class TokenController {
             await this.tokenDAO.deleteToken(token)
 
             const session = await this.authenticationService.getSessionForUserId(token.userId)
+
+            // Log the user in.
+            request.session.user = session.user
+            request.session.file = session.file
+
             response.status(200).json({
-                user: session.user,
-                file: session.file
+                session: session
             })
-        } else if ( token.type == 'reset-password' || token.type == 'invitation') {
-            if ( currentUser && token.userId !== currentUser.id ) {
-                throw new ControllerError(409, 'logged-in',
-                    `User(${currentUser.id}) currently logged in when attempting to validate a token.`,
-                    `You cannot validate a token while logged in to another user.`)
-            }
+        } 
+        
+        // For reset-password and invitation tokens, we don't log the user in
+        // when we validate the token because those flows have multiple steps.
+        // The user will be logged in at a later step.
+        else if ( token.type == 'reset-password' || token.type == 'invitation') {
 
             const session = await this.authenticationService.getSessionForUserId(token.userId)
             response.status(200).json({

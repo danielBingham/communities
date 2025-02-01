@@ -66,14 +66,12 @@ module.exports = class AuthenticationController {
             request.session.file = session.file
 
             return response.status(200).json({
-                user: request.session.user,
-                file: request.session.file
+                session:  session
             })
 
         } else {
             return response.status(200).json({
-                user: null,
-                file: null
+                session: null
             })
         }
     }
@@ -117,14 +115,14 @@ module.exports = class AuthenticationController {
 
             }
 
+            console.log(userId)
             const session = await this.auth.getSessionForUserId(userId)
+            console.log(session)
             request.session.user = session.user
             request.session.file = session.file
 
             response.status(200).json({
-                user: request.session.user,
-                friends: request.session.friends,
-                file: request.session.file
+                session: session
             })
         } catch (error ) {
             if ( error instanceof backend.ServiceError ) {
@@ -180,7 +178,9 @@ module.exports = class AuthenticationController {
                 throw new ControllerError(500, 'server-error', `Failed to find User(${userId}) after authenticating them!`)
             }
 
-            return response.status(200).json(userResults.dictionary[userId])
+            return response.status(200).json({
+                user: userResults.dictionary[userId]
+            })
         } catch (error ) {
             if ( error instanceof backend.ServiceError ) {
                 if ( error.type == 'no-user' ) {

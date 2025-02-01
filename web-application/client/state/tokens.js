@@ -3,8 +3,7 @@ import * as qs from 'qs'
 
 import { makeTrackedRequest } from '/state/requests'
 
-import { setUsersInDictionary } from '/state/users'
-import { setFilesInDictionary } from '/state/files'
+import { setSession } from '/state/authentication'
 
 export const tokenSlice = createSlice({
     name: 'token',
@@ -26,12 +25,11 @@ export const validateToken = function(token, type) {
 
         return dispatch(makeTrackedRequest('GET', endpoint, null,
             function(responseBody) {
-                dispatch(tokenSlice.actions.setUserForToken({ token: token, user: responseBody.user }))
-
-                dispatch(setUsersInDictionary({ entity: responseBody.user }))
-
-                if ( responseBody.file ) {
-                    dispatch(setFilesInDictionary({ entity: responseBody.file }))
+                if ( responseBody.session ) {
+                    dispatch(tokenSlice.actions.setUserForToken({ token: token, user: responseBody.session.user }))
+                    dispatch(setSession(responseBody.session))
+                } else {
+                    dispatch(tokenSlice.actions.setUserForToken({ token: token, user: responseBody.user }))
                 }
             }
         ))

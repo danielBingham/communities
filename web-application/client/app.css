@@ -189,17 +189,6 @@ svg.icon {
     grid-template-rows: 1fr;
 }
 
-main {
-    box-sizing: border-box;
-    margin: 0px auto;
-    min-width: 375px;
-    width: 100%;
-    color: var(--main-text-color);
-    background-color: var(--main-background-color);
-    padding-top: 75px;
-    padding-bottom: 50px;
-}
-
 .maintenance-mode {
     width: 800px;
     margin: 100px auto;

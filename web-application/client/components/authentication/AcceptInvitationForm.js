@@ -34,7 +34,7 @@ const AcceptInvitationForm = function(props) {
 
     // ======= Request Tracking =====================================
 
-    const [ tokenRequest, setTokenRequestId ] = useRequest()
+    const [ tokenRequest, makeTokenRequest ] = useRequest()
 
     const [ requestId, setRequestId ] = useState(null)
     const request = useSelector(function(state) {
@@ -77,7 +77,7 @@ const AcceptInvitationForm = function(props) {
                 clearTimeout(tokenRequestRef.current)
             }
             tokenRequestRef.current = setTimeout(function() {
-                setTokenRequestId(dispatch(validateToken(token, 'invitation')))
+                makeTokenRequest(validateToken(token, 'invitation'))
             }, 500)
         }
 
@@ -181,9 +181,6 @@ const AcceptInvitationForm = function(props) {
             setTokenValidationError(['You must have a valid token to register.'])
         }
 
-        console.log(user)
-        console.log(token)
-
         const userPatch = {
             id: user.id,
             name: name,
@@ -208,7 +205,7 @@ const AcceptInvitationForm = function(props) {
         const initialToken = searchParams.get('token')
         if ( initialToken ) {
             setToken(initialToken)
-            setTokenRequestId(dispatch(validateToken(initialToken, 'invitation')))
+            makeTokenRequest(validateToken(initialToken, 'invitation'))
         }
     }, [ searchParams ])
 
@@ -243,8 +240,8 @@ const AcceptInvitationForm = function(props) {
     let passwordError = passwordValidationError.join(' ')
     let confirmPasswordError = confirmPasswordValidationError.join(' ')
 
-    if ( request && request.state == 'failed' ) {
-        if ( request.error == 'not-authorized' ) {
+    if ( tokenRequest && tokenRequest.state == 'failed' ) {
+        if ( tokenRequest.error.type == 'not-authorized' ) {
             baseError = (
                 <div className="error">
                     <p>Invalid token. Something may have gone wrong on our end.</p>
@@ -257,7 +254,7 @@ const AcceptInvitationForm = function(props) {
                     </p>
                 </div>
             )
-        }  else if ( request.status == 409 ) {
+        }  else if ( tokenRequest.response.status == 409 ) {
             emailError += ' A user with that email already exists.  Please login instead.'
         }
     }

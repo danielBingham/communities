@@ -14,6 +14,7 @@ import {
     InformationCircleIcon as InformationCircleIconSolid,
 } from '@heroicons/react/24/solid'
 
+import CommunitiesLogo from '/components/header/CommunitiesLogo'
 import AuthenticationNavigation from './navigation/AuthenticationNavigation'
 import NotificationMenu from '/components/notifications/NotificationMenu'
 
@@ -71,7 +72,7 @@ const Header = function(props) {
         return (
             <header>
                 <div className="grid">
-                    <div id="site-title"><a href="/"><img src="/favicon-32x32.png" />ommunities</a></div>
+                    <CommunitiesLogo />
                     <div id="navigation">
                         <div id="about-navigation" className="navigation-block">
                             <a href="/">{ location.pathname == '/' ? <HomeIconSolid /> : <HomeIconOutline /> }Home</a>
@@ -88,7 +89,7 @@ const Header = function(props) {
         return (
             <header className="mobile" ref={menuRef}>
                 <div className="grid">
-                    <div id="site-title"><Link to="/"><img src="/favicon-32x32.png" /><span className="title-text">ommunities</span></Link></div>
+                    <CommunitiesLogo />
                     <div id="navigation">
                         <div id="about-navigation" className="navigation-block">
                             <a href="/">{ location.pathname == '/' ? <HomeIconSolid /> : <HomeIconOutline /> }<span className="nav-text">Home</span></a>

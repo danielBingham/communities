@@ -1,14 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { v4 as uuidv4 } from 'uuid'
 
-import RequestError from '/errors/RequestError'
-
-import { 
-    startRequestTracking, 
-    recordRequestFailure, 
-    recordRequestSuccess, 
-    cleanupRequest as cleanupTrackedRequest } from './helpers/requestTracker'
-
+import logger from '/logger'
 
 export const requestsSlice = createSlice({
     name: 'requests',
@@ -19,22 +12,57 @@ export const requestsSlice = createSlice({
          * 
          * @type {object}
          */
-        requests: {},
-
-        /**
-         * A `user` object representing the currentUser.
-         *
-         * @type {object} 
-         */
-        currentUser: null
+        requests: {}
     },
     reducers: {
         // ========== Request Tracking Methods =============
 
-        makeRequest: startRequestTracking, 
-        failRequest: recordRequestFailure, 
-        completeRequest: recordRequestSuccess,
-        cleanupRequest: cleanupTrackedRequest
+        makeRequest: function(state, action) {
+            state.requests[action.payload.requestId] = {
+                requestId: action.payload.requestId,
+                method: action.payload.method,
+                endpoint: action.payload.endpoint,
+                timestamp: Date.now(),
+                state: 'pending',
+                response: null, 
+                error: null,
+            }
+        }, 
+        failRequest: function(state, action) {
+            const tracker = state.requests[action.payload.requestId]
+            if ( ! tracker ) {
+                logger.warn(`Attempt to fail tracked Request(${action.payload.requestId}) that doesn't exist.`)
+                return
+            }
+
+            tracker.state = 'failed'
+
+            tracker.response = {
+                status: action.payload.status
+            }
+
+            tracker.error = {
+                type: action.payload.error ? action.payload.error : 'unknown',
+                message: action.payload.errorMessage ? action.payload.errorMessage : '',
+                data: action.payload.errorData ? action.payload.errorData: {}
+            }
+        }, 
+        completeRequest: function(state, action) {
+            const tracker = state.requests[action.payload.requestId]
+            if ( ! tracker ) {
+                logger.warn(`Attempt to complete tracked Request(${action.payload.requestId}) that doesn't exist.`)
+                return
+            }
+
+            tracker.state = 'fulfilled'
+            tracker.response = {
+                status: action.payload.status,
+                body: action.payload.result
+            }
+        },
+        cleanupRequest: function(state, action) {
+            delete state.requests[action.payload.requestId]
+        }
     }
 
 })
@@ -82,13 +110,13 @@ export const makeTrackedRequest = function(method, endpoint, body, onSuccess, on
         }
 
         let fullEndpoint = ''
-        // System requestsSlice requests need to go to the root, rather than the API
+        // System slice requests need to go to the root, rather than the API
         // backend.  These requests include querying for the configuration that
         // contains the API backend itself, as well as for feature flags.
         if ( requestsSlice.name == 'system') {
             fullEndpoint = endpoint
         } else if (configuration == null ) {
-            // If we're querying from anything other than the system requestsSlice before
+            // If we're querying from anything other than the system slice before
             // we've got our configuration, then we have an error.
             throw new Error('Attempting to query from the API before the configuration is set!')
         } else {

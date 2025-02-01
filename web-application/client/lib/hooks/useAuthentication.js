@@ -10,7 +10,7 @@ export function useAuthentication() {
         if ( currentUser && currentUser.status == 'invited' ) {
             navigate("/accept-invitation")
         } else if (currentUser && currentUser.status == 'unconfirmed' ) {
-            navigate("/confirm-email")
+            navigate("/email-confirmation")
         }
     }, [ currentUser ])
 

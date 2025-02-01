@@ -193,8 +193,13 @@ const App = function(props) {
                         <Route path="/reset-password" element={ <ResetPasswordPage /> } />
                     </Route>
 
+                    { /* ======== Pages with Headers ====================== */ }
                     <Route element={<MainLayout />}>
-                        { /* ======== Pages with Headers ====================== */ }
+
+                        { /* ========== Authentication Controls =============== */ }
+                        <Route path="/login" element={ <LoginPage /> } />
+                        <Route path="/reset-password-request" element={ <ResetPasswordRequestPage /> } />
+
                         <Route path="/">
                             <Route path=":pageTab" element={ <HomePage /> } />
                             <Route index element={ <HomePage /> } />
@@ -205,21 +210,17 @@ const App = function(props) {
                         </Route>
                         <Route path="/admin" element={ <AdminPage />} />
 
-                        { /* ========== Authentication Controls =============== */ }
-                        <Route path="/login" element={ <LoginPage /> } />
-                        <Route path="/reset-password-request" element={ <ResetPasswordRequestPage /> } />
 
-                        { /* ========== Users ================================= */ }
                         <Route path="/:name">
                             <Route path=":postId" element={ <PostPage /> } />
                             <Route index element={ <UserProfilePage /> } />
                         </Route>
+
                         <Route path="/account">
                             <Route path=":pageTab" element={ <UserAccountPage /> } />
                             <Route index element={ <UserAccountPage /> } />
                         </Route>
 
-                        { /* ========== Friends ================================= */ }
                         <Route path="/friends">
                             <Route path=":pageTab" element={ <FriendsPage />} />
                             <Route index element={<FriendsPage />} />

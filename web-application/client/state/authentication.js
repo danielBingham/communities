@@ -50,6 +50,17 @@ export const authenticationSlice = createSlice({
 
 })
 
+export const setSession = function(session) {
+    return function(dispatch, getState) {
+        dispatch(authenticationSlice.actions.setCurrentUser(session.user))
+        dispatch(setUsersInDictionary({ entity: session.user }))
+
+        if ( session.file ) {
+            dispatch(setFilesInDictionary({ entity: session.file }))
+        }
+    }
+}
+
 /**
  * Call getAuthentication and cleanup the created request as soon as it
  * returns.  
@@ -84,14 +95,9 @@ export const getAuthentication = function(onCompletion) {
         return makeTrackedRequest(dispatch, getState, authenticationSlice,
             'GET', endpoint, null,
             function(responseBody ) {
-                if ( responseBody && responseBody.user ) {
-                    dispatch(authenticationSlice.actions.setCurrentUser(responseBody.user))
-                    dispatch(setUsersInDictionary({ entity: responseBody.user }))
-
-                    if ( responseBody.file ) {
-                        dispatch(setFilesInDictionary({ entity: responseBody.file }))
-                    }
-                } else if ( responseBody ) {
+                if ( responseBody && responseBody.session !== null) {
+                    dispatch(setSession(responseBody.session))
+                } else {
                     dispatch(authenticationSlice.actions.setCurrentUser(null))
                 }
 
@@ -128,11 +134,10 @@ export const postAuthentication = function(email, password) {
         return makeTrackedRequest(dispatch, getState, authenticationSlice,
             'POST', endpoint, body,
             function(responseBody) {
-                dispatch(authenticationSlice.actions.setCurrentUser(responseBody.user))
-                dispatch(setUsersInDictionary({ entity: responseBody.user }))
-
-                if ( responseBody.file ) {
-                    dispatch(setFilesInDictionary({ entity: responseBody.file }))
+                if ( responseBody && responseBody.session !== null) {
+                    dispatch(setSession(responseBody.session))
+                } else {
+                    dispatch(authenticationSlice.actions.setCurrentUser(null))
                 }
             }
         )
@@ -161,7 +166,11 @@ export const patchAuthentication = function(email, password) {
             password: password
         }
         return makeTrackedRequest(dispatch, getState, authenticationSlice,
-            'PATCH', endpoint, body)
+            'PATCH', endpoint, body, 
+            function(responseBody) {
+                dispatch(setUsersInDictionary({ entity: responseBody.user }))  
+            }
+        )
     }
 }
 
@@ -188,37 +197,6 @@ export const deleteAuthentication = function() {
                 // the home page.  We don't want to go through anymore render
                 // cycles because that could have undefined impacts.
                 window.location.href = "/"
-            }
-        )
-    }
-}
-
-export const validateToken = function(token, type) {
-    return function(dispatch, getState) {
-        const queryString = makeSearchParams({type: type}) 
-        const endpoint = `/token/${token}?${ queryString.toString() }`
-
-        return makeTrackedRequest(dispatch, getState, authenticationSlice,
-            'GET', endpoint, null,
-            function(responseBody) {
-                dispatch(authenticationSlice.actions.setCurrentUser(responseBody.user))
-                dispatch(setUsersInDictionary({ entity: responseBody.user }))
-
-                if ( responseBody.file ) {
-                    dispatch(setFilesInDictionary({ entity: responseBody.file }))
-                }
-            }
-        )
-    }
-}
-
-export const createToken = function(params) {
-    return function(dispatch, getState) {
-        const endpoint = `/tokens`
-        return makeTrackedRequest(dispatch, getState, authenticationSlice,
-            'POST', endpoint, params,
-            function(responseBody) {
-
             }
         )
     }

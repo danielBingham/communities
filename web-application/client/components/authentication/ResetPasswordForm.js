@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useSearchParams } from 'react-router-dom'
 
+import { useRequest } from '/lib/hooks/useRequest'
+
+import { validateToken } from '/state/tokens'
 import { patchUser, cleanupRequest } from '/state/users'
 
 import Spinner from '/components/Spinner'
@@ -12,13 +15,17 @@ import './ResetPasswordForm.css'
 const ResetPasswordForm = function(props) {
     const [ searchParams, setSearchParams ] = useSearchParams()
 
+    // ResetPasswordPage will check to ensure we have a token.  By the time
+    // we're here, we should have one.
+    const token = searchParams.get('token')
+
     // ======= Render State =========================================
 
     const [newPassword, setNewPassword] = useState('')
     const [confirmNewPassword, setConfirmNewPassword] = useState('')
 
-    const [passwordError, setPasswordError] = useState(null)
-    const [passwordConfirmationError, setPasswordConfirmationError] = useState(null)
+    const [passwordValidationError, setPasswordValidationError] = useState([])
+    const [passwordConfirmationValidationError, setPasswordConfirmationValidationError] = useState([])
 
     // ======= Request Tracking =====================================
 
@@ -31,11 +38,11 @@ const ResetPasswordForm = function(props) {
         }
     })
 
+    const [ tokenRequest, makeTokenRequest ] = useRequest()
+
     // ======= Redux State ==========================================
 
-    const currentUser = useSelector(function(state) {
-        return state.authentication.currentUser
-    })
+    const user = useSelector((state) => token in state.tokens.usersByToken ? state.tokens.usersByToken[token] : null)
 
     // ======= Actions and Event Handling ===========================
 
@@ -55,27 +62,31 @@ const ResetPasswordForm = function(props) {
         let error = false 
 
         if ( ! field || field == 'newPassword' ) {
+            const passwordErrors = []
+
             if ( ! newPassword || newPassword.length == 0 ) {
-                setPasswordError('no-password')
+                passwordErrors.push('New password is required!')
                 error = true
             } else if ( newPassword.length < 16 ) {
-                setPasswordError('password-too-short')
+                passwordErrors.push('Your new password must be at least 16 characters in length.')
                 error = true
             } else if ( newPassword.length > 256 ) {
-                setPasswordError('password-too-long')
+                passwordErrors.push('Your new password must be less than 256 characters in length.')
                 error = true
-            } else if ( passwordError ) {
-                setPasswordError(null)
-            }
+            } 
+
+            setPasswordValidationError(passwordErrors)
         }
 
         if ( ! field || field =='confirmNewPassword' ) {
+            const passwordConfirmationErrors = []
+
             if (newPassword != confirmNewPassword) {
-                setPasswordConfirmationError('password-mismatch')
+                passwordConfirmationErrors.push('Your passwords must match!')
                 error = true 
-            } else if ( passwordConfirmationError ) {
-                setPasswordConfirmationError(null)
-            }
+            } 
+
+            setPasswordConfirmationValidationError(passwordConfirmationErrors)
         }
 
         return ! error
@@ -88,20 +99,29 @@ const ResetPasswordForm = function(props) {
             return
         }
 
-        // ResetPasswordPage will check to ensure we have a token.  By the time
-        // we're here, we should have one.
-        const token = searchParams.get('token')
 
-        const user = {
-            id: currentUser.id,
+        const userPatch = {
+            id: user.id,
             password: newPassword,
             token: token
         }
 
-        setRequestId(dispatch(patchUser(user)))
+        setRequestId(dispatch(patchUser(userPatch)))
     }
 
     // ======= Effect Handling ======================================
+    
+    useEffect(function() {
+        const token = searchParams.get('token')
+
+        makeTokenRequest(validateToken(token, 'reset-password'))
+    }, [ searchParams ])
+
+    useEffect(function() {
+        if ( request && request.state == 'fulfilled' ) {
+            window.location.href = "/"
+        }
+    }, [ request ])
 
     // Clean up our request.
     useEffect(function() {
@@ -115,81 +135,93 @@ const ResetPasswordForm = function(props) {
 
     // ======= Render ===============================================
 
-    let passwordErrorView = null
-    let passwordConfirmationErrorView = null
 
-    if ( passwordError && passwordError == 'no-password') {
-        passwordErrorView = ( <>Password is required!</> )
-    } else if ( passwordError && passwordError == 'password-too-short') {
-        passwordErrorView = (<>Your password is too short.  Please choose a password at least 16 characters in length.  We recommend the XKCD method of passphrase selection: <a href="https://xkcd.com/936/">XKCD #936: Password Strength</a>.</> )
-    } else if ( passwordError && passwordError == 'password-too-long') {
-        passwordErrorView = (<>Your password is too long. Limit is 256 characters.</>)
-    }
+    let baseError = '' 
 
-    if ( passwordConfirmationError && passwordConfirmationError == 'password-mismatch' ) {
-        passwordConfirmationErrorView = ( <>Your passwords don't match!</> )
-    }
-
-    let content = (
-        <form onSubmit={onSubmit}>
-            <div className="instructions">Please enter a new password for your Communities account.</div> 
-            <Input
-                name="new-password"
-                label="New Password"
-                explanation="Enter a new password.  It must be at least 16 characters long."
-                type="password"
-                value={newPassword}
-                onBlur={ (event) => isValid('newPassword') }
-                onChange={(event) => setNewPassword(event.target.value)}
-                error={passwordErrorView} />
-            <Input
-                name="confirm-new-password"
-                label="Confirm New Password"
-                explanation="Please enter your new password again to confirm it."
-                type="password"
-                value={confirmNewPassword}
-                onBlur={ (event) => isValid('confirmNewPassword') }
-                onChange={(event) => setConfirmNewPassword(event.target.value)}
-                error={passwordConfirmationErrorView} />
-
-            <div className="submit">
-                <input type="submit" name="submit" value="Reset Password" />                    
-            </div>
-        </form>
-
+    /**
+     * Error views that we'll re-use for multiple errors.
+     */
+    const resetTokenInvalidView = (
+        <div className="reset-password-form">
+            <p>Your reset token either expired or was invalid.  Please <a
+            href="/reset-password-request">request a new reset link</a>.</p>
+        </div>
+    )
+    const loggedInErrorView = (
+        <div className="reset-password-form">
+            <span>You are currently logged in.  You cannot redeem another user's token.  Please return to the <a href="/">home</a> page to log out.</span>
+        </div>
     )
 
-    if ( request && request.state == 'in-progress') {
-        content = ( <Spinner local={true} /> )
+    // If something's wrong with the token request, then we don't want to
+    // render the form.
+    if ( tokenRequest && tokenRequest.state == 'failed' ) {
+        if ( tokenRequest.error.type == 'not-authorized') {
+            return resetTokenInvalidView 
+        } else if ( tokenRequest.error.type == 'no-token' ) {
+            return resetTokenInvalidView 
+        } else if ( tokenRequest.error.type == 'logged-in' ) {
+            return  loggedInErrorView
+        } else {
+            return resetTokenInvalidView 
+        }
     }
 
-    else if ( request && request.state == 'fulfilled' ) {
-        content = (
-            <div className="success">
-               We have logged you in and reset your password.  You can return to the homepage <a href="/">here</a>. 
-            </div>
-        )
-    } 
-
-    else if ( request && request.state == 'failed' ) {
-        content = (
-            <div className="request-failure">
-                <p>
-                    Something went wrong with the attempt to reset your
-                    password.  You can try again by going back to the <a
-                    href="/reset-password-request">reset password</a> page and
-                    requesting a new link.
-                </p>
-                <p>
-                    If the error persists, please report a bug.
-                </p>
-            </div>
-        )
+    // If something's wrong with the PATCH /user request, then we probably
+    // don't want to render the form here either, with some exceptions.
+    if ( request && request.state == 'failed' ) {
+        if ( request.error == 'not-authorized') {
+            return resetTokenInvalidView 
+        } else if ( request.error == 'logged-in' ) {
+            return loggedInErrorView 
+        } else if ( request.error == 'not-found' ) {
+            return resetTokenInvalidView 
+        } else if ( request.error == 'invalid' ) {
+            baseError += request.errorMessage
+        } else if ( request.error == 'server-error' ) {
+            return (
+                <div className="reset-password-form">
+                    <p>We hit an error on the server side that we couldn't recover from.  This is a bug!  Please report it.</p>
+                    <p>Error message: { request.errorMessage }</p>
+                </div>
+            )
+        }
     }
+
+    let passwordErrors = passwordValidationError.join(' ') 
+    let passwordConfirmationErrors = passwordConfirmationValidationError.join(' ') 
+
+    const inProgress = request && request.state == 'in-progress'
 
     return (
         <div className="reset-password-form">
-            { content }
+            <form onSubmit={onSubmit}>
+                <div className="instructions">Please enter a new password for your Communities account.</div> 
+                <Input
+                    name="new-password"
+                    label="New Password"
+                    explanation="Enter a new password.  It must be at least 16 characters long."
+                    type="password"
+                    value={newPassword}
+                    onBlur={ (event) => isValid('newPassword') }
+                    onChange={(event) => setNewPassword(event.target.value)}
+                    error={passwordErrors} />
+                <Input
+                    name="confirm-new-password"
+                    label="Confirm New Password"
+                    explanation="Please enter your new password again to confirm it."
+                    type="password"
+                    value={confirmNewPassword}
+                    onBlur={ (event) => isValid('confirmNewPassword') }
+                    onChange={(event) => setConfirmNewPassword(event.target.value)}
+                    error={passwordConfirmationErrors} />
+
+                { baseError && <div className="error">{ baseError }</div> }
+                { ! baseError && <div className="submit">
+                    { inProgress && <Button type="primary" onClick={() => {}}><Spinner /></Button> }
+                    { ! inProgress && <input type="submit" name="submit" value="Reset Password" />  }
+                </div> }
+            </form>
         </div>   
     )
 }

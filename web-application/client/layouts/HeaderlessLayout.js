@@ -1,10 +1,12 @@
 import React from 'react'
 import { Outlet } from 'react-router-dom'
 
+import './HeaderlessLayout.css'
+
 const HeaderlessLayout = function() {
 
     return (
-        <main>
+        <main className="headerless">
             <Outlet />
         </main>
     )

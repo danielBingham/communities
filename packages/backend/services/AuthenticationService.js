@@ -70,7 +70,6 @@ module.exports = class AuthenticationService {
             const fileResults = await this.fileDAO.selectFiles(`WHERE files.id = $1`, [ user.fileId ])
             file = fileResults[0]
         }
-        
 
         return {
             user: user,
