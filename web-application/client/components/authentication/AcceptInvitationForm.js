@@ -1,7 +1,10 @@
-import React, { useState, useLayoutEffect, useEffect } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import {  useSearchParams } from 'react-router-dom'
 
+import { useRequest } from '/lib/hooks/useRequest'
+
+import { validateToken } from '/state/tokens'
 import { patchUser, cleanupRequest } from '/state/users'
 
 import Input from '/components/generic/input/Input'
@@ -12,22 +15,27 @@ const AcceptInvitationForm = function(props) {
     const [ searchParams, setSearchParams ] = useSearchParams()
 
     // ======= Render State =========================================
-    
+
+    const [ token, setToken ] = useState('')
     const [ name, setName ] = useState('')
     const [ username, setUsername ] = useState('')
     const [ email, setEmail ] = useState('')
     const [ password, setPassword ] = useState('')
     const [ confirmPassword, setConfirmPassword ] = useState('')
 
-    const [nameError, setNameError] = useState(null)
-    const [usernameError, setUsernameError] = useState(null)
-    const [emailError, setEmailError] = useState(null)
-    const [passwordError, setPasswordError] = useState(null)
-    const [confirmPasswordError, setConfirmPasswordError] = useState(null)
-    const [baseError, setBaseError] = useState(null)
+    const [tokenValidationError, setTokenValidationError] = useState([])
+    const [nameValidationError, setNameValidationError] = useState([])
+    const [usernameValidationError, setUsernameValidationError] = useState([])
+    const [emailValidationError, setEmailValidationError] = useState([])
+    const [passwordValidationError, setPasswordValidationError] = useState([])
+    const [confirmPasswordValidationError, setConfirmPasswordValidationError] = useState([])
+
+    const tokenRequestRef = useRef(null)
 
     // ======= Request Tracking =====================================
-    
+
+    const [ tokenRequest, makeTokenRequest ] = useRequest()
+
     const [ requestId, setRequestId ] = useState(null)
     const request = useSelector(function(state) {
         if (requestId ) {
@@ -38,15 +46,18 @@ const AcceptInvitationForm = function(props) {
     })
 
     // ======= Redux State ==========================================
-    
-    const currentUser = useSelector(function(state) {
-        return state.authentication.currentUser
+
+    const user = useSelector(function(state) {
+        if ( token in state.tokens.usersByToken ) {
+            return state.tokens.usersByToken[token]
+        } else {
+            return null
+        }
     })
 
     // ======= Actions and Event Handling ===========================
     
     const dispatch = useDispatch()
-    const navigate = useNavigate()
 
     /**
      * Perform validation on our state and return a boolean indicating whether
@@ -61,67 +72,99 @@ const AcceptInvitationForm = function(props) {
     const isValid = function(field) {
         let error = false 
 
-        if ( ! field || field == 'name' ) {
-            if ( ! name || name.length == 0 ) {
-                setNameError('Name is required!')
-                error = true
-            } else if ( name.length > 512 ) {
-                setNameError('Name is too long. Limit is 512 characters.')
-                error = true
-            } else if ( nameError ) {
-                setNameError(null)
+        if ( field == 'token') {
+            if ( tokenRequestRef.current ) {
+                clearTimeout(tokenRequestRef.current)
             }
+            tokenRequestRef.current = setTimeout(function() {
+                makeTokenRequest(validateToken(token, 'invitation'))
+            }, 500)
+        }
+
+        if ( ! field || field == 'name' ) {
+            const nameErrors = []
+
+            if ( ! name || name.length == 0 ) {
+                nameErrors.push('Name is required!')
+                error = true
+            } 
+
+            if ( name.length > 512 ) {
+                nameErrors.push('Name is too long. Limit is 512 characters.')
+                error = true
+            } 
+
+            setNameValidationError(nameErrors)
         }
 
         if ( ! field || field == 'username' ) {
+            const usernameErrors = []
+
             if ( ! username || username.length == 0 ) {
-                setNameError('Username is required!')
+                usernameErrors.push('Username is required!')
                 error = true
-            } else if ( username.length > 512 ) {
-                setNameError('Username is too long. Limit is 512 characters.')
+            } 
+
+            if ( username.length > 512 ) {
+                usernameErrors.push('Username is too long. Limit is 512 characters.')
                 error = true
-            } else if ( usernameError ) {
-                setNameError(null)
-            }
+            }         
+
+            setUsernameValidationError(usernameErrors)
         }
 
         if ( ! field || field == 'email' ) {
+            const emailErrors = []
+
             if ( ! email || email.length == 0 ) {
-                setEmailError('Email is required!')
+                emailErrors.push('Email is required!')
                 error = true
-            } else if ( email.length > 512 ) {
-                setEmailError('Email is too long.  Limit is 512 characters.')
+            } 
+
+            if ( email.length > 512 ) {
+                emailErrors.push('Email is too long.  Limit is 512 characters.')
                 error = true
-            } else if ( ! email.includes('@') ) {
-                setEmailError('Please enter a valid email.')
+            } 
+
+            if ( ! email.includes('@') ) {
+                emailErrors.push('Please enter a valid email.')
                 error = true
-            } else if ( emailError ) {
-                setEmailError(null)
-            }
+            } 
+
+            setEmailValidationError(emailErrors)
         }
 
         if ( ! field || field == 'password' ) {
+            const passwordErrors = []
+
             if ( ! password || password.length == 0 ) {
-                setPasswordError('Password is required!')
+                passwordErrors.push('Password is required!')
                 error = true
-            } else if ( password.length < 16 ) {
-                setPasswordError('Your password is too short.  Please choose a password at least 16 characters in length.')
+            } 
+
+            if ( password.length < 16 ) {
+                passwordErrors.push('Your password is too short.  Please choose a password at least 16 characters in length.')
                 error = true
-            } else if ( password.length > 256 ) {
-                setPasswordError('Your password is too long. Limit is 256 characters.')
+            } 
+
+            if ( password.length > 256 ) {
+                passwordErrors.push('Your password is too long. Limit is 256 characters.')
                 error = true
-            } else if ( passwordError ) {
-                setPasswordError(null)
-            }
+            } 
+
+            setPasswordValidationError(passwordErrors)
+
         }
 
         if ( ! field || field =='confirmPassword' ) {
+            const passwordConfirmationErrors = []
+
             if (password != confirmPassword) {
-                setConfirmPasswordError('Your passwords don\'t match!')
+                passwordConfirmationErrors.push('Your passwords don\'t match!')
                 error = true 
-            } else if ( confirmPasswordError ) {
-                setConfirmPasswordError(null)
-            }
+            } 
+
+            setConfirmPasswordValidationError(passwordConfirmationErrors)
         }
 
         return ! error
@@ -134,11 +177,12 @@ const AcceptInvitationForm = function(props) {
             return 
         }
 
-        // We're assuming this exists, AcceptInvitationPage should have checked
-        // for us.
-        const token = searchParams.get('token')
-        const user = {
-            id: currentUser.id,
+        if ( ! user ) {
+            setTokenValidationError(['You must have a valid token to register.'])
+        }
+
+        const userPatch = {
+            id: user.id,
             name: name,
             username: username,
             email: email,
@@ -146,25 +190,29 @@ const AcceptInvitationForm = function(props) {
             token: token
         }
 
-        setRequestId(dispatch(patchUser(user)))
+        setRequestId(dispatch(patchUser(userPatch)))
     }
 
     // ======= Effect Handling ======================================
     
     useEffect(function() {
-        setEmail(currentUser.email)
-    }, [ currentUser ])
+        if ( user ) {
+            setEmail(user.email)
+        }
+    }, [ user ])
+
+    useEffect(function() {
+        const initialToken = searchParams.get('token')
+        if ( initialToken ) {
+            setToken(initialToken)
+            makeTokenRequest(validateToken(initialToken, 'invitation'))
+        }
+    }, [ searchParams ])
 
     useEffect(function() {
         if ( request && request.state == 'fulfilled' ) {
-            navigate("/")
-        } else if ( request && request.state == 'failed') {
-            if ( request.status == 409 ) {
-                setEmailError('A user with that email already exists.  Please login instead.')
-            } else {
-                setBaseError(request.error)
-            }
-        }
+            window.location.href = "/"
+        } 
     }, [ request ])
 
     useEffect(function() {
@@ -175,10 +223,57 @@ const AcceptInvitationForm = function(props) {
         }
     }, [ requestId ])
 
+    useEffect(function() {
+        return function cleanup() {
+            if ( tokenRequestRef.current ) {
+                clearTimeout(tokenRequestRef.current)
+            }
+        }
+    }, [])
+
+
+    let baseError = null
+    let tokenError = tokenValidationError.join(' ')
+    let nameError = nameValidationError.join(' ')
+    let usernameError = usernameValidationError.join(' ')
+    let emailError = emailValidationError.join(' ')
+    let passwordError = passwordValidationError.join(' ')
+    let confirmPasswordError = confirmPasswordValidationError.join(' ')
+
+    if ( tokenRequest && tokenRequest.state == 'failed' ) {
+        if ( tokenRequest.error.type == 'not-authorized' ) {
+            tokenError = (<div>
+                <p>Invalid token. {tokenError}</p>
+                <p>If you did get here following a valid invitation, please
+                        reach out to us at <a
+                            href="mailto:contact@communities.social">contact@communties.social</a>,
+                        so we can figure out what went wrong and get you a new
+                    invitation.</p>
+                </div>)
+        }  else if ( tokenRequest.error.type == 'logged-in') {
+            return (
+                <div className="error">
+                    <p>You appear to already be logged in to a different user.</p>
+                    <p>Please return to the <a href="/">home page</a> and logout before attempting to accept this invitation.</p>
+                </div>
+            )
+        }
+    }
+
     return (
         <div className="accept-invitation-form">
             <div className="instructions">Welcome to Communities, please complete your registration!</div>
             <form onSubmit={acceptInvitation}>
+                { ! user && <Input
+                    name="token"
+                    label="Token"
+                    explanation="This is the token from your invitation email.  If you followed the link in the email it will be auto-populated.  Otherwise, you'll need to copy and paste it from your invitation email."
+                    value={token}
+                    className="token"
+                    onBlur={ (event) => isValid('token') }
+                    onChange={ (event) => setToken(event.target.value) } 
+                    error={tokenError}
+                /> }
                 <Input
                     name="name"
                     label="Name"

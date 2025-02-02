@@ -13,20 +13,17 @@ import logger from '/logger'
 import { getConfiguration, getFeatures, cleanupRequest as cleanupSystemRequest } from '/state/system'
 import { getAuthentication, cleanupRequest as cleanupAuthenticationRequest } from '/state/authentication'
 
+import MainLayout from '/layouts/MainLayout'
+import HeaderlessLayout from '/layouts/HeaderlessLayout'
+import AuthenticatedLayout from '/layouts/AuthenticatedLayout'
+
 // Admin page for managing features.  Must be logged in and an admin to load it
 // here.
 import AdminPage from '/pages/AdminPage'
 
-import Header from '/components/header/Header'
-import Footer from '/components/footer/Footer'
-import NeedEmailConfirmationNotice from '/components/authentication/NeedEmailConfirmationNotice'
-
 import HomePage from '/pages/HomePage'
 import AboutPage from '/pages/AboutPage'
-import TermsOfServicePage from '/pages/TermsOfServicePage'
-import PrivacyPage from '/pages/PrivacyPage'
 
-import RegistrationPage from '/pages/authentication/RegistrationPage'
 import LoginPage from '/pages/authentication/LoginPage'
 import EmailConfirmationPage from '/pages/authentication/EmailConfirmationPage'
 import ResetPasswordPage from '/pages/authentication/ResetPasswordPage'
@@ -39,8 +36,6 @@ import UserAccountPage from '/pages/users/UserAccountPage'
 import FriendsPage from '/pages/friends/FriendsPage'
 
 import PostPage from '/pages/posts/PostPage'
-
-import EmailConfirmationNotice from '/components/notices/EmailConfirmationNotice'
 
 import ErrorBoundary from '/errors/ErrorBoundary'
 import Spinner from '/components/Spinner'
@@ -188,47 +183,52 @@ const App = function(props) {
     return (
         <ErrorBoundary>
             <Router>
-                <Header />
-                <main>
-                    { currentUser && currentUser.status == 'unconfirmed' && <EmailConfirmationNotice /> }
-                    <Routes>
-                        <Route path="/">
-                            <Route path=":pageTab" element={ <HomePage /> } />
-                            <Route index element={ <HomePage /> } />
-                        </Route>
+                <Routes>
+                    { /* ========= Headerless pages ====================== */ }
+                    { /* These pages are primarily used in various
+                    authentication flows that don't allow breaking out of the
+                    flow.  So they don't have a header. */ }
+                    <Route element={ <HeaderlessLayout /> }>
+                        <Route path="/email-confirmation" element={ <EmailConfirmationPage />} />
+                        <Route path="/accept-invitation" element={ <AcceptInvitationPage /> } />
+                        <Route path="/reset-password" element={ <ResetPasswordPage /> } />
+                    </Route>
+
+                    { /* ======== Pages with Headers ====================== */ }
+                    <Route element={<MainLayout />}>
+
+                        { /* ========== Authentication Controls =============== */ }
+                        <Route path="/login" element={ <LoginPage /> } />
+                        <Route path="/reset-password-request" element={ <ResetPasswordRequestPage /> } />
                         <Route path="/about">
                             <Route path=":pageTab" element={ <AboutPage /> } />
                             <Route index element={ <AboutPage />} />
                         </Route>
-                        <Route path="/admin" element={ <AdminPage />} />
 
-                        { /* ========== Authentication Controls =============== */ }
-                        <Route path="/register" element={ <RegistrationPage /> } />
-                        <Route path="/login" element={ <LoginPage /> } />
-                        <Route path="/email-confirmation" element={ <EmailConfirmationPage />} />
-                        <Route path="/reset-password" element={ <ResetPasswordPage /> } />
-                        <Route path="/reset-password-request" element={ <ResetPasswordRequestPage /> } />
-                        <Route path="/accept-invitation" element={ <AcceptInvitationPage /> } />
+                        <Route element={<AuthenticatedLayout />}>
 
-                        { /* ========== Users ================================= */ }
-                        <Route path="/:name">
-                            <Route path=":postId" element={ <PostPage /> } />
-                            <Route index element={ <UserProfilePage /> } />
+                            <Route path="/" element={ <HomePage /> } />
+
+                            <Route path="/friends">
+                                <Route path=":pageTab" element={ <FriendsPage />} />
+                                <Route index element={<FriendsPage />} />
+                            </Route>
+
+                            <Route path="/account">
+                                <Route path=":pageTab" element={ <UserAccountPage /> } />
+                                <Route index element={ <UserAccountPage /> } />
+                            </Route>
+
+                            <Route path="/admin" element={ <AdminPage />} />
+
+                            <Route path="/:name">
+                                <Route path=":postId" element={ <PostPage /> } />
+                                <Route index element={ <UserProfilePage /> } />
+                            </Route>
+
                         </Route>
-                        <Route path="/account">
-                            <Route path=":pageTab" element={ <UserAccountPage /> } />
-                            <Route index element={ <UserAccountPage /> } />
-                        </Route>
-
-                        { /* ========== Friends ================================= */ }
-                        <Route path="/friends">
-                            <Route path=":pageTab" element={ <FriendsPage />} />
-                            <Route index element={<FriendsPage />} />
-                        </Route>
-                            
-
-                    </Routes>
-                </main>
+                    </Route>
+                </Routes>
             </Router>
         </ErrorBoundary>
     )

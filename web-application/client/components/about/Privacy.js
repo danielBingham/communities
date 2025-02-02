@@ -13,7 +13,7 @@ const Privacy = function({}) {
     }, [])
 
     return (
-        <article class="privacy">
+        <article className="privacy">
                     <h1>Privacy Policy</h1>
             <ol>
                 <li>You

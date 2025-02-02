@@ -47,6 +47,22 @@ const LinkPreview = function({ id }) {
         description = description.substring(0,300) + '...'
     }
 
+    const url = new URL(linkPreview.url)
+    if ( url.host == 'www.youtube.com' || url.host == 'youtube.com' || url.host == 'youtu.be' ) {
+        const searchParams = url.searchParams
+        const videoId = searchParams.get("v")
+        return ( 
+            <div className="link-preview">
+                <iframe
+                    src={`https://www.youtube.com/embed/${encodeURIComponent(videoId)}`}
+                    allow="encrypted-media"
+                    allowFullScreen
+                    title="youtube video"
+                />
+            </div>
+        )
+    }
+
     return (
         <div className="link-preview">
             <a target="_blank" href={linkPreview.url}>

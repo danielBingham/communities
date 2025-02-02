@@ -16,6 +16,7 @@
 .post .post__content {
     padding: 0 10px 15px 10px;
     white-space: pre-line;
+    word-wrap: break-word;
 }
 .post .post__show-more {
     padding: 10px;

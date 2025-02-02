@@ -1,5 +1,6 @@
+
 @media (width > 700px) {
-        #email-confirmation-page .page-body {
+        #email-confirmation-page {
                 box-sizing: border-box;
                 display: block;
                 margin: 40px auto;
@@ -13,7 +14,7 @@
         }
 }
 @media (width <= 700px) {
-    #email-confirmation-page .page-body {
+    #email-confirmation-page {
         box-sizing: border-box;
         display: block;
         margin: 20px auto;

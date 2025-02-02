@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useLayoutEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 
 import { useDispatch, useSelector } from 'react-redux'
 
 import { postAuthentication, cleanupRequest } from '/state/authentication'
 
+import Button from '/components/generic/button/Button'
 import Input from '/components/generic/input/Input'
 import Spinner from '/components/Spinner'
 
@@ -84,13 +85,6 @@ const LoginForm = function(props) {
 
     // ====================== Render ==========================================
 
-    // Show a spinner if the request we made is still in progress.
-    if (request && request.state == 'pending') {
-        return (
-            <Spinner />
-        )
-    } 
-
     let errorMessage = ''
     if ( request && request.state == 'failed') {
         if ( request.status == 403 ) {
@@ -114,6 +108,7 @@ const LoginForm = function(props) {
 
     const errorView = ( <div className="error">{ errorMessage }</div> )
 
+    const isLoading = request && request.state == 'pending'
     return (
         <div className='login-form'>
             <h2>Login</h2>
@@ -137,7 +132,8 @@ const LoginForm = function(props) {
                     onChange={ (event) => setPassword(event.target.value) } 
                 />
                 <div className="submit field-wrapper">
-                    <input type="submit" name="login" value="Login" />
+                    { isLoading && <Button type="primary" onClick={() => {}}><Spinner local={true} /></Button> }
+                    { ! isLoading && <input type="submit" name="login" value="Login" /> }
                 </div>
             </form>
             <div className="inner-wrapper">

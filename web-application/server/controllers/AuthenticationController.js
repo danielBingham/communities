@@ -37,6 +37,7 @@ module.exports = class AuthenticationController {
 
         this.auth = new backend.AuthenticationService(core)
         this.userDAO = new backend.UserDAO(core)
+        this.tokenDAO = new backend.TokenDAO(core)
     }
 
 
@@ -62,20 +63,15 @@ module.exports = class AuthenticationController {
             const session = await this.auth.getSessionForUserId(request.session.user.id)
 
             request.session.user = session.user
-            request.session.friends = session.friends
             request.session.file = session.file
 
             return response.status(200).json({
-                user: request.session.user,
-                friends: request.session.friends,
-                file: request.session.file
+                session:  session
             })
 
         } else {
             return response.status(200).json({
-                user: null,
-                friends: [],
-                file: null
+                session: null
             })
         }
     }
@@ -105,17 +101,28 @@ module.exports = class AuthenticationController {
          *  AuthenticationService::authenticateUser()
          ************************************************************/
         try {
-            const userId = await this.auth.authenticateUser(credentials)
+            let userId = null
+            if ( 'email' in credentials) {
+                userId = await this.auth.authenticateUser(credentials)
+            } else if ( 'token' in credentials) {
+                const token = await this.tokenDAO.validateToken(credentials.token, [ 'reset-password', 'email-confirmation', 'invitation'])
+                userId = token.userId
+            }
 
+            if ( ! userId ) {
+                throw new ControllerError(403, 'authentication-failed',
+                    `No user found with either email or token.`)
+
+            }
+
+            console.log(userId)
             const session = await this.auth.getSessionForUserId(userId)
+            console.log(session)
             request.session.user = session.user
-            request.session.friends = session.friends
             request.session.file = session.file
 
             response.status(200).json({
-                user: request.session.user,
-                friends: request.session.friends,
-                file: request.session.file
+                session: session
             })
         } catch (error ) {
             if ( error instanceof backend.ServiceError ) {
@@ -171,7 +178,9 @@ module.exports = class AuthenticationController {
                 throw new ControllerError(500, 'server-error', `Failed to find User(${userId}) after authenticating them!`)
             }
 
-            return response.status(200).json(userResults.dictionary[userId])
+            return response.status(200).json({
+                user: userResults.dictionary[userId]
+            })
         } catch (error ) {
             if ( error instanceof backend.ServiceError ) {
                 if ( error.type == 'no-user' ) {

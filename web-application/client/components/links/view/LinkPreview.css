@@ -26,3 +26,8 @@
     font-size: 14px;
 }
 
+.link-preview iframe {
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    border: none;
+}

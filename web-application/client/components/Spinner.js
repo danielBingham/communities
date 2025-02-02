@@ -2,18 +2,12 @@ import React from 'react'
 
 import './Spinner.css'
 
-const Spinner = function(props) {
-
-    if ( props.local == true) {
-        return (
-            <div className="spinner-wrapper local">
-                <div className="spinner-local"></div>
-            </div>
-        )
-    } else {
-        return ( <div className="spinner"></div> )
-    }
-
+const Spinner = function() {
+    return (
+        <div className="spinner-wrapper">
+            <div className="spinner"></div>
+        </div>
+    )
 }
 
 export default Spinner

@@ -27,6 +27,7 @@
 #user-menu .menu-section.bottom {
     border-bottom: none;
 }
-#user-menu .menu-item {
+#user-menu .menu-item a {
+    display: block;
     padding: 5px 10px 5px 10px;
 }

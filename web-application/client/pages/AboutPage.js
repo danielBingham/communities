@@ -18,7 +18,6 @@ import {
 
 } from '@heroicons/react/24/solid'
 
-
 import About from '/components/about/About'
 import FrequentlyAskedQuestions from '/components/about/FrequentlyAskedQuestions'
 import TermsOfService from '/components/about/TermsOfService'
