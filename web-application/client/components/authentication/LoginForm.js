@@ -3,7 +3,9 @@ import { Link } from 'react-router-dom'
 
 import { useDispatch, useSelector } from 'react-redux'
 
-import { postAuthentication, cleanupRequest } from '/state/authentication'
+import { useRequest } from '/lib/hooks/useRequest'
+
+import { postAuthentication } from '/state/authentication'
 
 import Button from '/components/generic/button/Button'
 import Input from '/components/generic/input/Input'
@@ -24,16 +26,8 @@ const LoginForm = function(props) {
     const [error, setError] = useState(null)
 
     // ======= Request Tracking =====================================
-   
-    const [requestId, setRequestId] = useState(null)
-
-    const request = useSelector(function(state) {
-        if (requestId) {
-            return state.authentication.requests[requestId]
-        } else {
-            return null
-        }
-    })
+  
+    const [ request, makeRequest ] = useRequest()
 
     // ======= Redux State ==========================================
    
@@ -41,13 +35,12 @@ const LoginForm = function(props) {
         return state.authentication.currentUser
     })
 
-    const config = useSelector(function(state) {
-        return state.system.configuration
-    })
+    if ( currentUser ) {
+        console.error(`Attempting to show LoginForm while someone's already logged in.`)
+        return null
+    }
 
     // ======= Actions and Event Handling ===========================
-   
-    const dispatch = useDispatch()
 
     /**
      * Handle the form's submission by attempting to authenticate the user.
@@ -69,30 +62,21 @@ const LoginForm = function(props) {
             return
         } 
 
-        setRequestId(dispatch(postAuthentication(email, password)))
+        makeRequest(postAuthentication(email, password))
     }
 
     // ======= Effect Handling ======================================
-
-    // Clean up our request.
-    useEffect(function() {
-        return function cleanup() {
-            if ( requestId ) {
-                dispatch(cleanupRequest({ requestId: requestId }))
-            }
-        }
-    }, [ requestId ])
 
     // ====================== Render ==========================================
 
     let errorMessage = ''
     if ( request && request.state == 'failed') {
-        if ( request.status == 403 ) {
+        if ( request.response.status == 403 ) {
             errorMessage = "Login failed."
-        } else if ( request.status == 400) {
-            if ( request.error == 'no-password' ) {
+        } else if ( request.response.status == 400) {
+            if ( request.error.type == 'no-password' ) {
                 errorMessage = "Your account appears to have been created using OAuth.  Please login with the authentication method you used to create it."
-            } else if (request.error == 'password-required' ) {
+            } else if (request.error.type == 'password-required' ) {
                 errorMessage = "You must enter a password to login."
             } else {
                 errorMessage = "Login failed."

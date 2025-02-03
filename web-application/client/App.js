@@ -8,10 +8,12 @@ import {
 
 import { useDispatch, useSelector } from 'react-redux'
 
+import { useRequest } from '/lib/hooks/useRequest'
+
 import logger from '/logger'
 
 import { getConfiguration, getFeatures, cleanupRequest as cleanupSystemRequest } from '/state/system'
-import { getAuthentication, cleanupRequest as cleanupAuthenticationRequest } from '/state/authentication'
+import { getAuthentication } from '/state/authentication'
 
 import MainLayout from '/layouts/MainLayout'
 import HeaderlessLayout from '/layouts/HeaderlessLayout'
@@ -22,7 +24,13 @@ import AuthenticatedLayout from '/layouts/AuthenticatedLayout'
 import AdminPage from '/pages/AdminPage'
 
 import HomePage from '/pages/HomePage'
+
 import AboutPage from '/pages/AboutPage'
+import About from '/components/about/About'
+import FrequentlyAskedQuestions from '/components/about/FrequentlyAskedQuestions'
+import TermsOfService from '/components/about/TermsOfService'
+import Privacy from '/components/about/Privacy'
+import Contact from '/components/about/Contact'
 
 import LoginPage from '/pages/authentication/LoginPage'
 import EmailConfirmationPage from '/pages/authentication/EmailConfirmationPage'
@@ -31,9 +39,18 @@ import ResetPasswordRequestPage from '/pages/authentication/ResetPasswordRequest
 import AcceptInvitationPage from '/pages/authentication/AcceptInvitationPage'
 
 import UserProfilePage from '/pages/users/UserProfilePage'
+
 import UserAccountPage from '/pages/users/UserAccountPage'
+import UserProfileEditForm from '/components/users/account/UserProfileEditForm'
+import ChangePasswordForm from '/components/users/account/widgets/ChangePasswordForm'
+import ChangeEmailForm from '/components/users/account/widgets/ChangeEmailForm'
+import ContributionView from '/components/contribution/ContributionView'
+import UserAccountSettingsView from '/components/users/account/UserAccountSettingsView'
 
 import FriendsPage from '/pages/friends/FriendsPage'
+import YourFriendsList from '/pages/friends/views/YourFriendsList'
+import FriendRequestsList from '/pages/friends/views/FriendRequestsList'
+import FindFriends from '/pages/friends/views/FindFriends'
 
 import PostPage from '/pages/posts/PostPage'
 
@@ -70,14 +87,7 @@ const App = function(props) {
         }
     })
 
-    const [authenticationRequestId, setAuthenticationRequestId] = useState(null)
-    const authenticationRequest = useSelector(function(state) {
-        if ( ! authenticationRequestId ) {
-            return null
-        } else {
-            return state.authentication.requests[authenticationRequestId]
-        }
-    })
+    const [authenticationRequest, makeAuthenticationRequest] = useRequest()
 
     // ======= Redux State ==========================================
 
@@ -105,7 +115,7 @@ const App = function(props) {
                 // Logger is a singleton, this will effect all other imports.
                 logger.setLevel(configuration.log_level)
                 setFeaturesRequestId(dispatch(getFeatures()))
-                setAuthenticationRequestId(dispatch(getAuthentication()))
+                makeAuthenticationRequest(getAuthentication())
             }
         } else if ( configurationRequest && configurationRequest.state == 'failed') {
             if ( retries < 5 ) {
@@ -125,14 +135,6 @@ const App = function(props) {
 
     useEffect(function() {
         return function cleanup() {
-            if ( authenticationRequestId ) {
-                dispatch(cleanupAuthenticationRequest({ requestId: authenticationRequestId }))
-            }
-        }
-    }, [ authenticationRequestId ])
-
-    useEffect(function() {
-        return function cleanup() {
             if ( featuresRequestId ) {
                 dispatch(cleanupSystemRequest({ requestId: featuresRequestId }))
             }
@@ -144,13 +146,13 @@ const App = function(props) {
    if ( configuration?.maintenance_mode ) {
         return (
             <div className="maintenance-mode">
-                <h1>Peer Review - Scheduled Maintenance</h1>
-                <p>Peer Review is currently undergoing scheduled maintenance.  Please check back later.</p>
+                <h1>Communities - Scheduled Maintenance</h1>
+                <p>Communities is currently undergoing scheduled maintenance.  Please check back later.</p>
             </div>
         )
    }
 
-    if ( ! configurationRequestId || ! authenticationRequestId || ! featuresRequestId) {
+    if ( ! configurationRequestId || ! authenticationRequest || ! featuresRequestId) {
         return (
             <Spinner />
         )
@@ -200,23 +202,31 @@ const App = function(props) {
                         { /* ========== Authentication Controls =============== */ }
                         <Route path="/login" element={ <LoginPage /> } />
                         <Route path="/reset-password-request" element={ <ResetPasswordRequestPage /> } />
-                        <Route path="/about">
-                            <Route path=":pageTab" element={ <AboutPage /> } />
-                            <Route index element={ <AboutPage />} />
+                        <Route path="/about" element={ <AboutPage /> } >
+                            <Route path="faq" element={ <FrequentlyAskedQuestions /> } />
+                            <Route path="tos" element={ <TermsOfService /> } />
+                            <Route path="privacy" element={ <Privacy /> } />
+                            <Route path="contact" element={ <Contact /> } />
+                            <Route index element={ <About />} />
                         </Route>
 
                         <Route element={<AuthenticatedLayout />}>
 
                             <Route path="/" element={ <HomePage /> } />
 
-                            <Route path="/friends">
-                                <Route path=":pageTab" element={ <FriendsPage />} />
-                                <Route index element={<FriendsPage />} />
+                            <Route path="/friends" element={ <FriendsPage />}>
+                                <Route path="requests" element={ <FriendRequestsList />} />
+                                <Route path="find" element={ <FindFriends /> } />
+                                <Route index element={<YourFriendsList />} />
                             </Route>
 
-                            <Route path="/account">
-                                <Route path=":pageTab" element={ <UserAccountPage /> } />
-                                <Route index element={ <UserAccountPage /> } />
+                            <Route path="/account" element={<UserAccountPage /> }>
+                                <Route path="profile" element={ <UserProfileEditForm />  } />
+                                <Route path="change-password" element={ <ChangePasswordForm /> } />
+                                <Route path="change-email" element={ <ChangeEmailForm /> } />
+                                <Route path="contribute" element={ <ContributionView /> } />
+                                <Route path="settings" element={ <UserAccountSettingsView /> } />
+                                <Route index element={ <UserProfileEditForm/> } />
                             </Route>
 
                             <Route path="/admin" element={ <AdminPage />} />

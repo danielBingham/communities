@@ -1,6 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit'
+import * as qs from 'qs'
 
-import setRelationsInState from './helpers/relations'
+import { makeTrackedRequest } from '/state/requests'
+
+import setRelationsInState from '/lib/state/relations'
 
 import {
     setInDictionary,
@@ -9,30 +12,13 @@ import {
     setQueryResults,
     clearQuery,
     clearQueries
-} from './helpers/state'
-
-import { 
-    makeSearchParams,
-    makeTrackedRequest,
-    startRequestTracking, 
-    recordRequestFailure, 
-    recordRequestSuccess, 
-    cleanupRequest as cleanupTrackedRequest, 
-} from './helpers/requestTracker'
+} from '/lib/state'
 
 export const postReactionsSlice = createSlice({
     name: 'postReactions',
     initialState: {
         
         // ======== Standard State ============================================
-        
-        /**
-         * A dictionary of requests in progress or that we've made and completed,
-         * keyed with a uuid requestId.
-         *
-         * @type {object}
-         */
-        requests: {},
 
         /**
          * A dictionary of postReactions we've retrieved from the backend, keyed by
@@ -75,14 +61,7 @@ export const postReactionsSlice = createSlice({
         makePostReactionQuery: makeQuery,
         setPostReactionQueryResults: setQueryResults,
         clearPostReactionQuery: clearQuery,
-        clearPostReactionQueries: clearQueries,
-
-        // ========== Request Tracking Methods =============
-
-        makeRequest: startRequestTracking, 
-        failRequest: recordRequestFailure, 
-        completeRequest: recordRequestSuccess,
-        cleanupRequest: cleanupTrackedRequest
+        clearPostReactionQueries: clearQueries
     }
 })
 
@@ -100,10 +79,9 @@ export const postReactionsSlice = createSlice({
  */
 export const postPostReaction = function(reaction) {
     return function(dispatch, getState) {
-        const endpoint = `/post/${reaction.postId}/reactions`
+        const endpoint = `/post/${encodeURIComponent(reaction.postId)}/reactions`
         const body = reaction
-        return makeTrackedRequest(dispatch, getState, postReactionsSlice,
-            'POST', endpoint, body,
+        return makeTrackedRequest('POST', endpoint, body,
             function(response) {
                 dispatch(postReactionsSlice.actions.setPostReactionsInDictionary({ entity: response.entity}))
 
@@ -127,8 +105,7 @@ export const postPostReaction = function(reaction) {
  */
 export const patchPostReaction = function(reaction) {
     return function(dispatch, getState) {
-        return makeTrackedRequest(dispatch, getState, postReactionsSlice,
-            'PATCH', `/post/${reaction.postId}/reaction`, reaction,
+        return makeTrackedRequest('PATCH', `/post/${encodeURIComponent(reaction.postId)}/reaction`, reaction,
             function(response) {
                 dispatch(postReactionsSlice.actions.setPostReactionsInDictionary({ entity: response.entity}))
 
@@ -152,8 +129,7 @@ export const patchPostReaction = function(reaction) {
  */
 export const deletePostReaction = function(reaction) {
     return function(dispatch, getState) {
-        return makeTrackedRequest(dispatch, getState, postReactionsSlice,
-            'DELETE', `/post/${reaction.postId}/reaction`, null,
+        return makeTrackedRequest('DELETE', `/post/${encodeURIComponent(reaction.postId)}/reaction`, null,
             function(response) {
                 dispatch(postReactionsSlice.actions.removePostReaction({ entity: reaction }))
                 dispatch(setRelationsInState(response.relations))
@@ -162,11 +138,9 @@ export const deletePostReaction = function(reaction) {
     }
 } 
 
-
 export const { 
     setPostReactionsInDictionary, removePostReaction, 
     makePostReactionQuery, clearPostReactionQuery, setPostReactionQueryResults,
-    cleanupRequest 
 }  = postReactionsSlice.actions
 
 export default postReactionsSlice.reducer

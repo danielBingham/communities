@@ -1,16 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { v4 as uuidv4 } from 'uuid'
 
-import { 
-    makeTrackedRequest,
-    makeSearchParams,
-    startRequestTracking, 
-    recordRequestFailure, 
-    recordRequestSuccess, 
-    cleanupRequest as cleanupTrackedRequest, 
-} from './helpers/requestTracker'
-
-import logger from '/logger'
+import { makeTrackedRequest } from '/state/requests'
 
 /***
  * System slice convers data essential for the system to function and that must
@@ -33,14 +23,7 @@ const systemSlice = createSlice({
 
         setFeatures: function(state, action) {
             state.features = action.payload
-        },
-
-        // ========== Request Tracking Methods =============
-
-        makeRequest: startRequestTracking, 
-        failRequest: recordRequestFailure, 
-        completeRequest: recordRequestSuccess, 
-        cleanupRequest: cleanupTrackedRequest
+        }
     }
 })
 
@@ -56,8 +39,7 @@ const systemSlice = createSlice({
  */
 export const getConfiguration = function() {
     return function(dispatch, getState) {
-        return makeTrackedRequest(dispatch, getState, systemSlice,
-            'GET', '/config', null,
+        return makeTrackedRequest('GET', '/config', null,
             function(config) {
                 dispatch(systemSlice.actions.setConfiguration(config))
             }
@@ -77,8 +59,7 @@ export const getConfiguration = function() {
  */
 export const getFeatures = function() {
     return function(dispatch, getState) {
-        return makeTrackedRequest(dispatch, getState, systemSlice,
-            'GET', '/features', null,
+        return makeTrackedRequest('GET', '/features', null,
             function(features) {
                 dispatch(systemSlice.actions.setFeatures(features))
             }
@@ -86,5 +67,5 @@ export const getFeatures = function() {
     }
 }
 
-export const { reset, setConfiguration, setFeatures, cleanupRequest } = systemSlice.actions
+export const { reset, setConfiguration, setFeatures } = systemSlice.actions
 export default systemSlice.reducer

@@ -1,6 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit'
+import * as qs from 'qs'
 
-import setRelationsInState from './helpers/relations'
+import { makeTrackedRequest } from '/state/requests'
+
+import setRelationsInState from '/lib/state/relations'
 
 import {
     setInDictionary,
@@ -9,30 +12,13 @@ import {
     setQueryResults,
     clearQuery,
     clearQueries
-} from './helpers/state'
-
-import { 
-    makeSearchParams,
-    makeTrackedRequest,
-    startRequestTracking, 
-    recordRequestFailure, 
-    recordRequestSuccess, 
-    cleanupRequest as cleanupTrackedRequest
-} from './helpers/requestTracker'
+} from '/lib/state'
 
 export const linkPreviewsSlice = createSlice({
     name: 'linkPreviews',
     initialState: {
         
         // ======== Standard State ============================================
-        
-        /**
-         * A dictionary of requests in progress or that we've made and completed,
-         * keyed with a uuid requestId.
-         *
-         * @type {object}
-         */
-        requests: {},
 
         /**
          * A dictionary of linkPreviews we've retrieved from the backend, keyed by
@@ -74,14 +60,7 @@ export const linkPreviewsSlice = createSlice({
         makeLinkPreviewQuery: makeQuery,
         setLinkPreviewQueryResults: setQueryResults,
         clearLinkPreviewQuery: clearQuery,
-        clearLinkPreviewQueries: clearQueries,
-
-        // ========== Request Tracking Methods =============
-
-        makeRequest: startRequestTracking, 
-        failRequest: recordRequestFailure, 
-        completeRequest: recordRequestSuccess,
-        cleanupRequest: cleanupTrackedRequest, 
+        clearLinkPreviewQueries: clearQueries
     }
 })
 
@@ -99,13 +78,11 @@ export const linkPreviewsSlice = createSlice({
  */
 export const getLinkPreviews = function(name, params) {
     return function(dispatch, getState) {
-        const queryString = makeSearchParams(params)
-        const endpoint = '/link-previews' + ( params ? '?' + queryString.toString() : '')
+        const endpoint = `/link-previews${( params ? '?' + qs.stringify(params) : '' )}`
 
         dispatch(linkPreviewsSlice.actions.makeLinkPreviewQuery({ name: name }))
 
-        return makeTrackedRequest(dispatch, getState, linkPreviewsSlice,
-            'GET', endpoint, null,
+        return makeTrackedRequest('GET', endpoint, null,
             function(response) {
                 dispatch(linkPreviewsSlice.actions.setLinkPreviewsInDictionary({ dictionary: response.dictionary}))
 
@@ -132,9 +109,7 @@ export const getLinkPreviews = function(name, params) {
 export const postLinkPreviews = function(linkPreview) {
     return function(dispatch, getState) {
         const endpoint = '/link-previews'
-        const body = linkPreview
-        return makeTrackedRequest(dispatch, getState, linkPreviewsSlice,
-            'POST', endpoint, body,
+        return makeTrackedRequest('POST', endpoint, linkPreview,
             function(response) {
                 dispatch(linkPreviewsSlice.actions.setLinkPreviewsInDictionary({ entity: response.entity}))
 
@@ -159,8 +134,7 @@ export const postLinkPreviews = function(linkPreview) {
  */
 export const getLinkPreview = function(id) {
     return function(dispatch, getState) {
-        return makeTrackedRequest(dispatch, getState, linkPreviewsSlice,
-            'GET', `/link-preview/${id}`, null,
+        return makeTrackedRequest('GET', `/link-preview/${encodeURIComponent(id)}`, null,
             function(response) {
                 dispatch(linkPreviewsSlice.actions.setLinkPreviewsInDictionary({ entity: response.entity}))
 
@@ -184,8 +158,7 @@ export const getLinkPreview = function(id) {
  */
 export const patchLinkPreview = function(linkPreview) {
     return function(dispatch, getState) {
-        return makeTrackedRequest(dispatch, getState, linkPreviewsSlice,
-            'PATCH', `/link-preview/${linkPreview.id}`, linkPreview,
+        return makeTrackedRequest('PATCH', `/link-preview/${encodeURIComponent(linkPreview.id)}`, linkPreview,
             function(response) {
                 dispatch(linkPreviewsSlice.actions.setLinkPreviewsInDictionary({ entity: response.entity}))
 
@@ -198,8 +171,7 @@ export const patchLinkPreview = function(linkPreview) {
 
 export const { 
     setLinkPreviewsInDictionary, removeLinkPreview, 
-    makeLinkPreviewQuery, clearLinkPreviewQuery, setLinkPreviewQueryResults,
-    cleanupRequest
+    makeLinkPreviewQuery, clearLinkPreviewQuery, setLinkPreviewQueryResults
 }  = linkPreviewsSlice.actions
 
 export default linkPreviewsSlice.reducer

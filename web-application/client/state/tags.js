@@ -1,7 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { v4 as uuidv4 } from 'uuid'
+import * as qs from 'qs'
 
-import setRelationsInState from './helpers/relations'
+import { makeTrackedRequest } from '/state/requests'
+
+import setRelationsInState from '/lib/state/relations'
 
 import {
     setInDictionary,
@@ -10,30 +12,13 @@ import {
     setQueryResults,
     clearQuery,
     clearQueries
-} from './helpers/state'
-
-import { 
-    makeSearchParams,
-    makeTrackedRequest,
-    startRequestTracking, 
-    recordRequestFailure, 
-    recordRequestSuccess, 
-    cleanupRequest as cleanupTrackedRequest, 
-} from './helpers/requestTracker'
+} from '/lib/state'
 
 export const tagsSlice = createSlice({
     name: 'tags',
     initialState: {
         
         // ======== Standard State ============================================
-        
-        /**
-         * A dictionary of requests in progress or that we've made and completed,
-         * keyed with a uuid requestId.
-         *
-         * @type {object}
-         */
-        requests: {},
 
         /**
          * A dictionary of tags we've retrieved from the backend, keyed by
@@ -69,22 +54,14 @@ export const tagsSlice = createSlice({
     },
     reducers: {
         // ======== State Manipulation Helpers ================================
-        // @see ./helpers/state.js
+        // @see /lib/state.js
 
         setTagsInDictionary: setInDictionary,
         removeTag: removeEntity,
         makeTagQuery: makeQuery,
         setTagQueryResults: setQueryResults,
         clearTagQuery: clearQuery,
-        clearTagQueries: clearQueries,
-
-        // ========== Request Tracking Methods =============
-
-        makeRequest: startRequestTracking, 
-        failRequest: recordRequestFailure, 
-        completeRequest: recordRequestSuccess,
-        cleanupRequest: cleanupTrackedRequest
-        
+        clearTagQueries: clearQueries
     }
 })
 
@@ -102,14 +79,9 @@ export const tagsSlice = createSlice({
  */
 export const getTags = function(name, params) {
     return function(dispatch, getState) {
-
-        const queryString = makeSearchParams(params)
-        const endpoint = '/tags' + ( params ? '?' + queryString.toString() : '')
-
+        const endpoint = `/tags${( params ? '?' + qs.stringify(params) : '')}`
         dispatch(tagsSlice.actions.makeTagQuery({ name: name }))
-
-        return makeTrackedRequest(dispatch, getState, tagsSlice,
-            'GET', endpoint, null,
+        return makeTrackedRequest('GET', endpoint, null,
             function(response) {
                 dispatch(tagsSlice.actions.setTagsInDictionary({ dictionary: response.dictionary}))
 
@@ -136,10 +108,7 @@ export const getTags = function(name, params) {
  */
 export const postTags = function(tag) {
     return function(dispatch, getState) {
-        const endpoint = '/tags'
-        const body = tag
-        return makeTrackedRequest(dispatch, getState, tagsSlice,
-            'POST', endpoint, body,
+        return makeTrackedRequest('POST', '/tags', tag,
             function(response) {
                 dispatch(tagsSlice.actions.setTagsInDictionary({ entity: response.entity}))
 
@@ -164,33 +133,7 @@ export const postTags = function(tag) {
  */
 export const getTag = function(id) {
     return function(dispatch, getState) {
-        return makeTrackedRequest(dispatch, getState, tagsSlice,
-            'GET', `/tag/${id}`, null,
-            function(response) {
-                dispatch(tagsSlice.actions.setTagsInDictionary({ entity: response.entity}))
-
-                dispatch(setRelationsInState(response.relations))
-            }
-        )
-    }
-}
-
-/**
- * PUT /tag/:id
- *
- * Replace a tag wholesale. 
- *
- * Makes the request asynchronously and returns a id that can be used to track
- * the request and retreive the results from the state slice.
- *
- * @param {object} tag - A populated tag object.
- *
- * @returns {string} A uuid requestId that can be used to track this request.
- */
-export const putTag = function(tag) {
-    return function(dispatch, getState) {
-        return makeTrackedRequest(dispatch, getState, tagsSlice,
-            'PUT', `/tag/${tag.id}`, tag,
+        return makeTrackedRequest('GET', `/tag/${encodeURIComponent(id)}`, null,
             function(response) {
                 dispatch(tagsSlice.actions.setTagsInDictionary({ entity: response.entity}))
 
@@ -214,8 +157,7 @@ export const putTag = function(tag) {
  */
 export const patchTag = function(tag) {
     return function(dispatch, getState) {
-        return makeTrackedRequest(dispatch, getState, tagsSlice,
-            'PATCH', `/tag/${tag.id}`, tag,
+        return makeTrackedRequest('PATCH', `/tag/${encodeURIComponent(tag.id)}`, tag,
             function(response) {
                 dispatch(tagsSlice.actions.setTagsInDictionary({ entity: response.entity}))
 
@@ -239,8 +181,7 @@ export const patchTag = function(tag) {
  */
 export const deleteTag = function(tag) {
     return function(dispatch, getState) {
-        return makeTrackedRequest(dispatch, getState, tagsSlice,
-            'DELETE', `/tag/${tag.id}`, null,
+        return makeTrackedRequest('DELETE', `/tag/${encodeURIComponent(tag.id)}`, null,
             function(response) {
                 dispatch(tagsSlice.actions.setTagsInDictionary({ entity: response.entity}))
             }
@@ -251,8 +192,7 @@ export const deleteTag = function(tag) {
 
 export const { 
     setTagsInDictionary, removeTag, 
-    makeTagQuery, clearTagQuery, setTagQueryResults,
-    cleanupRequest 
+    makeTagQuery, clearTagQuery, setTagQueryResults
 }  = tagsSlice.actions
 
 export default tagsSlice.reducer

@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 
-import setRelationsInState from './helpers/relations'
+import setRelationsInState from '/lib/state/relations'
 
 import {
     setInDictionary,
@@ -9,27 +9,12 @@ import {
     setQueryResults,
     clearQuery,
     clearQueries
-} from './helpers/state'
-
-import { 
-    makeTrackedRequest,
-    startRequestTracking, 
-    recordRequestFailure, 
-    recordRequestSuccess, 
-    cleanupRequest as cleanupTrackedRequest } from './helpers/requestTracker'
+} from '/lib/state'
 
 export const filesSlice = createSlice({
     name: 'files',
     initialState: {
         // ======== Standard State ============================================
-        
-        /**
-         * A dictionary of requests in progress or that we've made and completed,
-         * keyed with a uuid requestId.
-         *
-         * @type {object}
-         */
-        requests: {},
 
         /**
          * A dictionary of posts we've retrieved from the backend, keyed by
@@ -73,14 +58,7 @@ export const filesSlice = createSlice({
         makeFileQuery: makeQuery,
         setFileQueryResults: setQueryResults,
         clearFileQuery: clearQuery,
-        clearFileQueries: clearQueries,
-
-        // ========== Request Tracking Methods =============
-
-        makeRequest: startRequestTracking, 
-        failRequest: recordRequestFailure, 
-        completeRequest: recordRequestSuccess,
-        cleanupRequest: cleanupTrackedRequest
+        clearFileQueries: clearQueries
     }
 })
 
@@ -101,8 +79,7 @@ export const uploadFile = function(file) {
         const formData = new FormData()
         formData.append('file', file)
 
-        return makeTrackedRequest(dispatch, getState, filesSlice,
-            'POST', `/upload`, formData,
+        return makeTrackedRequest('POST', `/upload`, formData,
             function(response) {
                 dispatch(filesSlice.actions.setFilesInDictionary({ entity: response.entity }))
 
@@ -126,8 +103,7 @@ export const uploadFile = function(file) {
  */
 export const getFile = function(id) {
     return function(dispatch, getState) {
-        return makeTrackedRequest(dispatch, getState, filesSlice,
-            'GET', `/file/${id}`, null,
+        return makeTrackedRequest( 'GET', `/file/${id}`, null,
             function(response) {
                 dispatch(filesSlice.actions.setFilesInDictionary({ entity: response.entity}))
 
@@ -162,6 +138,6 @@ export const deleteFile = function(fileId) {
 
 
 
-export const {  setFilesInDictionary, removeFile, makeRequest, failRequest, completeRequest, cleanupRequest }  = filesSlice.actions
+export const {  setFilesInDictionary, removeFile }  = filesSlice.actions
 
 export default filesSlice.reducer

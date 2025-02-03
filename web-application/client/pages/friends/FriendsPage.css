@@ -1,29 +1,43 @@
-#friends-page .menu {
+#friends-page menu.friends-page__menu {
     list-style-type: none;
 }
 
-#friends-page .menu li {
+#friends-page menu.friends-page__menu li {
     font-size: 18px;
 }
-#friends-page .menu li:hover {
+#friends-page menu.friends-page__menu li:hover {
     background-color: var(--primary-color-light);
     border-radius: 10px;
 }
-#friends-page .menu svg {
+#friends-page menu.friends-page__menu svg {
     width: 22px;
     margin-right: 5px;
     margin-bottom: -5px;
     color: var(--icon-color);
 }
-#friends-page .menu a:link,
-#friends-page .menu a:visited,
-#friends-page .menu a:active {
+#friends-page menu.friends-page__menu a:link,
+#friends-page menu.friends-page__menu a:visited,
+#friends-page menu.friends-page__menu a:active {
     display: block;
     padding: 10px;
     color: var(--primary-color-darkest);
 }
-#friends-page .menu .active a {
+#friends-page menu.friends-page__menu a.active  {
     font-weight: bold;
+}
+
+#friends-page menu.friends-page__menu .outline { 
+    display: inline-block;
+}
+#friends-page menu.friends-page__menu .active .outline { 
+    display: none;
+}
+
+#friends-page menu.friends-page__menu .solid {
+    display: none;
+}
+#friends-page menu.friends-page__menu .active .solid{
+    display: inline-block;
 }
 
 
@@ -46,15 +60,15 @@
         box-sizing: border-box;
     }
 
-    #friends-page .menu {
+    #friends-page menu.friends-page__menu {
         text-align: center;
     }
 
-    #friends-page .menu li {
+    #friends-page menu.friends-page__menu li {
         display: inline-block;
     }
     
-    #friends-page .menu li .nav-text {
+    #friends-page menu.friends-page__menu li .nav-text {
         display: block;
         font-size: 10px;
     }

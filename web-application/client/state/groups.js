@@ -1,6 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit'
+import * as qs from 'qs'
 
-import setRelationsInState from './helpers/relations'
+import { makeTrackedRequest } from '/state/requests'
+
+import setRelationsInState from '/lib/state/relations'
 
 import {
     setInDictionary,
@@ -9,30 +12,13 @@ import {
     setQueryResults,
     clearQuery,
     clearQueries
-} from './helpers/state'
-
-import { 
-    makeSearchParams,
-    makeTrackedRequest,
-    startRequestTracking, 
-    recordRequestFailure, 
-    recordRequestSuccess, 
-    cleanupRequest as cleanupTrackedRequest, 
-} from './helpers/requestTracker'
+} from '/lib/state'
 
 export const groupsSlice = createSlice({
     name: 'groups',
     initialState: {
         
         // ======== Standard State ============================================
-        
-        /**
-         * A dictionary of requests in progress or that we've made and completed,
-         * keyed with a uuid requestId.
-         *
-         * @type {object}
-         */
-        requests: {},
 
         /**
          * A dictionary of groups we've retrieved from the backend, keyed by
@@ -74,14 +60,7 @@ export const groupsSlice = createSlice({
         makeGroupQuery: makeQuery,
         setGroupQueryResults: setQueryResults,
         clearGroupQuery: clearQuery,
-        clearGroupQueries: clearQueries,
-
-        // ========== Request Tracking Methods =============
-
-        makeRequest: startRequestTracking, 
-        failRequest: recordRequestFailure, 
-        completeRequest: recordRequestSuccess,
-        cleanupRequest: cleanupTrackedRequest
+        clearGroupQueries: clearQueries
     }
 })
 
@@ -99,13 +78,11 @@ export const groupsSlice = createSlice({
  */
 export const getGroups = function(name, params) {
     return function(dispatch, getState) {
-        const queryString = makeSearchParams(params)
-        const endpoint = '/groups' + ( params ? '?' + queryString.toString() : '')
+        const endpoint = `/groups${( params ? '?' + qs.stringify(params) : '' )}`
 
         dispatch(groupsSlice.actions.makeGroupQuery({ name: name }))
 
-        return makeTrackedRequest(dispatch, getState, groupsSlice,
-            'GET', endpoint, null,
+        return makeTrackedRequest('GET', endpoint, null,
             function(response) {
                 dispatch(groupsSlice.actions.setGroupsInDictionary({ dictionary: response.dictionary}))
 
@@ -132,9 +109,8 @@ export const getGroups = function(name, params) {
 export const postGroups = function(group) {
     return function(dispatch, getState) {
         const endpoint = '/groups'
-        const body = group
-        return makeTrackedRequest(dispatch, getState, groupsSlice,
-            'POST', endpoint, body,
+
+        return makeTrackedRequest('POST', endpoint, group,
             function(response) {
                 dispatch(groupsSlice.actions.setGroupsInDictionary({ entity: response.entity}))
 
@@ -159,8 +135,7 @@ export const postGroups = function(group) {
  */
 export const getGroup = function(id) {
     return function(dispatch, getState) {
-        return makeTrackedRequest(dispatch, getState, groupsSlice,
-            'GET', `/group/${id}`, null,
+        return makeTrackedRequest('GET', `/group/${encodeURIComponent(id)}`, null,
             function(response) {
                 dispatch(groupsSlice.actions.setGroupsInDictionary({ entity: response.entity}))
 
@@ -184,8 +159,7 @@ export const getGroup = function(id) {
  */
 export const patchGroup = function(group) {
     return function(dispatch, getState) {
-        return makeTrackedRequest(dispatch, getState, groupsSlice,
-            'PATCH', `/group/${group.id}`, group,
+        return makeTrackedRequest('PATCH', `/group/${encodeURIComponent(group.id)}`, group,
             function(response) {
                 dispatch(groupsSlice.actions.setGroupsInDictionary({ entity: response.entity}))
                 dispatch(setRelationsInState(response.relations))
@@ -208,8 +182,7 @@ export const patchGroup = function(group) {
  */
 export const deleteGroup = function(group) {
     return function(dispatch, getState) {
-        return makeTrackedRequest(dispatch, getState, groupsSlice,
-            'DELETE', `/group/${group.id}`, null,
+        return makeTrackedRequest('DELETE', `/group/${encodeURIComponent(group.id)}`, null,
             function(response) {
                 dispatch(groupsSlice.actions.removeGroup({ entity: group}))
             }
@@ -220,9 +193,7 @@ export const deleteGroup = function(group) {
 
 export const { 
     setGroupsInDictionary, removeGroup, 
-    makeGroupQuery, clearGroupQuery, setGroupQueryResults,
-    cleanupRequest,
-    startGroupEdit, finishGroupEdit
+    makeGroupQuery, clearGroupQuery, setGroupQueryResults
 }  = groupsSlice.actions
 
 export default groupsSlice.reducer

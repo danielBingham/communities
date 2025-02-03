@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useParams, Link } from 'react-router-dom'
 
-import { useAuthentication } from '/lib/hooks/useAuthentication'
-
 import { getPosts, cleanupRequest } from '/state/posts'
 
 import { 
@@ -12,17 +10,12 @@ import {
 
 import PostForm from '/components/posts/form/PostForm'
 import HomeFeed from '/components/feeds/HomeFeed'
-import WelcomeSplash from '/components/about/WelcomeSplash'
-
-import WelcomeNotice from '/components/notices/WelcomeNotice'
 
 import Spinner from '/components/Spinner'
 
 import './HomePage.css'
 
 const HomePage = function(props) {
-
-    const { pageTab } = useParams()
 
     const [requestId,setRequestId] = useState(null)
     const request = useSelector(function(state) {
@@ -33,7 +26,6 @@ const HomePage = function(props) {
         }
     })
 
-    const features = useSelector((state) => state.system.features)
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
     const postInProgressId = useSelector((state) => state.posts.inProgress)
@@ -55,31 +47,7 @@ const HomePage = function(props) {
     }, [ requestId ])
 
 
-    let content = ( <Spinner /> )
-    if ( ! requestId || ! request || request.state !== 'fulfilled' ) {
-        content = ( <Spinner /> )
-    } else {
-        let welcomeNotice = null
-        if ( '3-notices' in features && currentUser && ! currentUser.notices?.welcomeNotice ) {
-            welcomeNotice = ( <WelcomeNotice /> )
-        }
-
-        content = (
-            <>
-            { welcomeNotice }
-            <div className="home-feeds">
-                <div className="content">
-                    <PostForm postId={postInProgressId} />
-                    <div className="feed">
-                        <HomeFeed /> 
-                    </div>
-                </div>
-            </div>
-            </>
-        )
-    }
-
-
+    const inProgress = ! request || request.state !== 'fulfilled'
     return (
         <div id="home-page">
             <menu className="home-page">
@@ -88,7 +56,15 @@ const HomePage = function(props) {
                 </li>
             </menu>
             <div className="content">
-            { content }
+                <div className="home-feeds">
+                    <div className="content">
+                        <PostForm postId={postInProgressId} />
+                        <div className="feed">
+                            { ! inProgress && <HomeFeed /> }
+                            { inProgress && <Spinner /> }
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     )

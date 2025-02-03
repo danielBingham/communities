@@ -1,6 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit'
+import * as qs from 'qs'
 
-import setRelationsInState from './helpers/relations'
+import { makeTrackedRequest } from '/state/requests'
+
+import setRelationsInState from '/lib/state/relations'
 
 import {
     setInDictionary,
@@ -9,30 +12,13 @@ import {
     setQueryResults,
     clearQuery,
     clearQueries
-} from './helpers/state'
-
-import { 
-    makeSearchParams,
-    makeTrackedRequest,
-    startRequestTracking, 
-    recordRequestFailure, 
-    recordRequestSuccess, 
-    cleanupRequest as cleanupTrackedRequest, 
-} from './helpers/requestTracker'
+} from '/lib/state'
 
 export const groupMembersSlice = createSlice({
     name: 'groupMembers',
     initialState: {
         
         // ======== Standard State ============================================
-        
-        /**
-         * A dictionary of requests in progress or that we've made and completed,
-         * keyed with a uuid requestId.
-         *
-         * @type {object}
-         */
-        requests: {},
 
         /**
          * A dictionary of groupMembers we've retrieved from the backend, keyed by
@@ -75,14 +61,7 @@ export const groupMembersSlice = createSlice({
         makeGroupMemberQuery: makeQuery,
         setGroupMemberQueryResults: setQueryResults,
         clearGroupMemberQuery: clearQuery,
-        clearGroupMemberQueries: clearQueries,
-
-        // ========== Request Tracking Methods =============
-
-        makeRequest: startRequestTracking, 
-        failRequest: recordRequestFailure, 
-        completeRequest: recordRequestSuccess,
-        cleanupRequest: cleanupTrackedRequest
+        clearGroupMemberQueries: clearQueries
     }
 })
 
@@ -99,13 +78,11 @@ export const groupMembersSlice = createSlice({
  */
 export const getGroupMembers = function(groupId, name, params) {
     return function(dispatch, getState) {
-        const queryString = makeSearchParams(params)
-        const endpoint = `/group/${encodeURIComponent(groupId)}/members` + ( params ? '?' + queryString.toString() : '')
+        const endpoint = `/group/${encodeURIComponent(groupId)}/members${( params ? '?' + qs.stringify(params) : '' )}` 
 
         dispatch(groupMembersSlice.actions.makeGroupQuery({ name: name }))
 
-        return makeTrackedRequest(dispatch, getState, groupMembersSlice,
-            'GET', endpoint, null,
+        return makeTrackedRequest('GET', endpoint, null,
             function(response) {
                 dispatch(groupMembersSlice.actions.setGroupMembersInDictionary({ dictionary: response.dictionary}))
 
@@ -133,8 +110,7 @@ export const postGroupMembers = function(member) {
     return function(dispatch, getState) {
         const endpoint = `/group/${encodeURIComponent(member.groupId)}/members`
         const body = member
-        return makeTrackedRequest(dispatch, getState, groupMembersSlice,
-            'POST', endpoint, body,
+        return makeTrackedRequest('POST', endpoint, body,
             function(response) {
                 dispatch(groupMembersSlice.actions.setGroupMembersInDictionary({ entity: response.entity}))
 
@@ -158,8 +134,7 @@ export const postGroupMembers = function(member) {
  */
 export const getGroupMember = function(groupId, userId) {
     return function(dispatch, getState) {
-        return makeTrackedRequest(dispatch, getState, groupMembersSlice,
-            'GET', `/group/${encodeURIComponent(groupId)}/member/${encodeURIComponent(userId)}`, null,
+        return makeTrackedRequest('GET', `/group/${encodeURIComponent(groupId)}/member/${encodeURIComponent(userId)}`, null,
             function(response) {
                 dispatch(groupMembersSlice.actions.setGroupMembersInDictionary({ entity: response.entity}))
 
@@ -183,8 +158,7 @@ export const getGroupMember = function(groupId, userId) {
  */
 export const patchGroupMember = function(member) {
     return function(dispatch, getState) {
-        return makeTrackedRequest(dispatch, getState, groupMembersSlice,
-            'PATCH', `/group/${member.groupId}/member/${member.userId}`, member,
+        return makeTrackedRequest('PATCH', `/group/${encodeURIComponent(member.groupId)}/member/${encodeURIComponent(member.userId)}`, member,
             function(response) {
                 dispatch(groupMembersSlice.actions.setGroupMembersInDictionary({ entity: response.entity}))
 
@@ -208,8 +182,7 @@ export const patchGroupMember = function(member) {
  */
 export const deleteGroupMember = function(member) {
     return function(dispatch, getState) {
-        return makeTrackedRequest(dispatch, getState, groupMembersSlice,
-            'DELETE', `/group/${member.groupId}/member/${member.userId}`, null,
+        return makeTrackedRequest('DELETE', `/group/${encodeURIComponent(member.groupId)}/member/${encodeURIComponent(member.userId)}`, null,
             function(response) {
                 dispatch(groupMembersSlice.actions.removeGroupMember({ entity: response.entity}))
                 dispatch(setRelationsInState(response.relations))
@@ -221,8 +194,7 @@ export const deleteGroupMember = function(member) {
 
 export const { 
     setGroupMembersInDictionary, removeGroupMember, 
-    makeGroupMemberQuery, clearGroupMemberQuery, setGroupMemberQueryResults,
-    cleanupRequest 
+    makeGroupMemberQuery, clearGroupMemberQuery, setGroupMemberQueryResults
 }  = groupMembersSlice.actions
 
 export default groupMembersSlice.reducer
