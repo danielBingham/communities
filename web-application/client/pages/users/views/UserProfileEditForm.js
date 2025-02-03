@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useLayoutEffect }  from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
+import { useRequest } from '/lib/hooks/useRequest'
+
 import { UserCircleIcon } from '@heroicons/react/24/outline'
 
-import { patchUser, cleanupRequest } from '/state/users'
+import { patchUser } from '/state/users'
 
 import UserProfileImage from '/components/users/UserProfileImage'
 import DraftImageFile from '/components/files/DraftImageFile'
@@ -29,21 +31,11 @@ const UserProfileEditForm = function(props) {
     
     // ======= Request Tracking =====================================
 
-    const [requestId, setRequestId] = useState(null)
-    const request = useSelector(function(state) {
-        if ( requestId ) {
-            return state.users.requests[requestId]
-        } else {
-            return null
-        }
-    })
+    const [ request, makeRequest ] = useRequest()
 
     // ======= Redux State ==========================================
 
-    const currentUser = useSelector(function(state) {
-        return state.authentication.currentUser
-    })
-
+    const currentUser = useSelector((state) =>  state.authentication.currentUser)
 
     const madeChange = fileId != currentUser.fileId || name != currentUser.name || about != currentUser.about
 
@@ -104,7 +96,7 @@ const UserProfileEditForm = function(props) {
             about: about
         }
 
-        setRequestId(dispatch(patchUser(user)))
+        makeRequest(patchUser(user))
     }
 
     const cancel = function() {
@@ -149,15 +141,6 @@ const UserProfileEditForm = function(props) {
         }
     }, [])
 
-    // Clean up request.
-    useEffect(function() {
-        return function cleanup() {
-            if ( requestId ) {
-                dispatch(cleanupRequest({ requestId: requestId }))
-            }
-        }
-    }, [ requestId ])
-
     // ======= Render ===============================================
    
     let result = null
@@ -170,7 +153,7 @@ const UserProfileEditForm = function(props) {
     } else if ( request && request.state == 'failed') {
         result = (
             <div className="request-failure">
-                Request failed: { request.error }.
+                Request failed: { request.error.message }.
             </div>
         )
     }

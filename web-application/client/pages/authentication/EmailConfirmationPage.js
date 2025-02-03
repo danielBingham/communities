@@ -24,8 +24,6 @@ const EmailConfirmationPage = function(props) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
-    const dispatch = useDispatch()
-
     const requestNewConfirmationEmail = function() {
         makeCreateTokenRequest(createToken({ type: 'email-confirmation', email: currentUser.email}))
     }

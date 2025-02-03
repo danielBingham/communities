@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
 
-import { deleteUser, cleanupRequest } from '/state/users'
+import { useRequest } from '/lib/hooks/useRequest'
+
+import { deleteUser } from '/state/users'
 import { reset } from '/state/system'
 
 import AreYouSure from '/components/AreYouSure'
@@ -17,8 +18,7 @@ const UserAccountSettingsView = function() {
     const [ areYouSure, setAreYouSure ] = useState(false)
     const [ toggled, setToggled ] = useState(false)
 
-    const [requestId, setRequestId] = useState(null)
-    const request = useSelector((state) => requestId in state.users.requests ? state.users.requests[requestId] : null)
+    const [ request, makeRequest ] = useRequest()
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const features = useSelector((state) => state.system.features)
@@ -26,11 +26,10 @@ const UserAccountSettingsView = function() {
     const hasNotificationSettings = '1-notification-settings' in features && features['1-notification-settings'].status === 'enabled'
 
     const dispatch = useDispatch()
-    const navigate = useNavigate()
 
     const deleteCurrentUser = function() {
         setAreYouSure(false)
-        setRequestId(dispatch(deleteUser(currentUser)))
+        makeRequest(deleteUser(currentUser))
     }
 
     useEffect(function() {
@@ -48,14 +47,6 @@ const UserAccountSettingsView = function() {
             window.location.href = "/"
         }
     }, [ request ])
-
-    useEffect(function() {
-        return function cleanup() {
-            if ( requestId ) {
-                dispatch(cleanupRequest({requestId: requestId}))
-            }
-        }
-    }, [ requestId ])
 
     return (
         <div className="user-settings">

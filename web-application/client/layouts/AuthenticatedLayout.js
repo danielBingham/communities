@@ -4,7 +4,7 @@ import { Outlet } from 'react-router-dom'
 
 import { useAuthentication } from '/lib/hooks/useAuthentication'
 
-import WelcomeSplash from '/components/about/WelcomeSplash'
+import WelcomeSplash from '/pages/authentication/WelcomeSplash'
 import WelcomeNotice from '/components/notices/WelcomeNotice'
 
 const AuthenticatedLayout = function() {

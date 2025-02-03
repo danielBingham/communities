@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
-import { XCircleIcon } from '@heroicons/react/24/solid'
-
 import Button from '/components/generic/button/Button'
 import UserListView from '/components/users/list/UserListView'
 

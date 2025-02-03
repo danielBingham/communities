@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
-import { useParams, Link } from 'react-router-dom'
+import React, { useEffect } from 'react'
+import { useSelector } from 'react-redux'
+import {  Link } from 'react-router-dom'
 
-import { getPosts, cleanupRequest } from '/state/posts'
+import { useRequest } from '/lib/hooks/useRequest'
+
+import { getPosts } from '/state/posts'
 
 import { 
     UserGroupIcon 
@@ -15,36 +17,23 @@ import Spinner from '/components/Spinner'
 
 import './HomePage.css'
 
-const HomePage = function(props) {
+const HomePage = function() {
 
-    const [requestId,setRequestId] = useState(null)
-    const request = useSelector(function(state) {
-        if ( requestId in state.posts.requests) {
-            return state.posts.requests[requestId]
-        } else {
-            return null
-        }
-    })
+    const [ request, makeRequest ] = useRequest()
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
     const postInProgressId = useSelector((state) => state.posts.inProgress)
 
-    const dispatch = useDispatch()
-
     useEffect(function() {
         if ( currentUser ) {
-            setRequestId(dispatch(getPosts('HomePage', { userId: currentUser.id, status: 'writing' })))
+            makeRequest(getPosts('HomePage', { userId: currentUser.id, status: 'writing' }))
         }
     }, [ currentUser ])
 
-    useEffect(function() {
-        return function cleanup() {
-            if ( requestId ) {
-                dispatch(cleanupRequest({ requestId: requestId }))
-            }
-        }
-    }, [ requestId ])
+    if ( request && request.state == 'failed' ) {
+        // TODO Handle error states.
+    }
 
 
     const inProgress = ! request || request.state !== 'fulfilled'

@@ -25,12 +25,12 @@ import AdminPage from '/pages/AdminPage'
 
 import HomePage from '/pages/HomePage'
 
-import AboutPage from '/pages/AboutPage'
-import About from '/components/about/About'
-import FrequentlyAskedQuestions from '/components/about/FrequentlyAskedQuestions'
-import TermsOfService from '/components/about/TermsOfService'
-import Privacy from '/components/about/Privacy'
-import Contact from '/components/about/Contact'
+import AboutPage from '/pages/page/AboutPage'
+import About from '/pages/about/views/About'
+import FrequentlyAskedQuestions from '/pages/about/views/FrequentlyAskedQuestions'
+import TermsOfService from '/pages/about/views/TermsOfService'
+import Privacy from '/pages/about/views/Privacy'
+import Contact from '/pages/about/views/Contact'
 
 import LoginPage from '/pages/authentication/LoginPage'
 import EmailConfirmationPage from '/pages/authentication/EmailConfirmationPage'
@@ -41,11 +41,11 @@ import AcceptInvitationPage from '/pages/authentication/AcceptInvitationPage'
 import UserProfilePage from '/pages/users/UserProfilePage'
 
 import UserAccountPage from '/pages/users/UserAccountPage'
-import UserProfileEditForm from '/components/users/account/UserProfileEditForm'
-import ChangePasswordForm from '/components/users/account/widgets/ChangePasswordForm'
-import ChangeEmailForm from '/components/users/account/widgets/ChangeEmailForm'
-import ContributionView from '/components/contribution/ContributionView'
-import UserAccountSettingsView from '/components/users/account/UserAccountSettingsView'
+import UserProfileEditForm from '/pages/users/views/UserProfileEditForm'
+import ChangePasswordForm from '/pages/users/views/ChangePasswordForm'
+import ChangeEmailForm from '/pages/users/views/ChangeEmailForm'
+import ContributionView from '/pages/users/views/ContributionView'
+import UserAccountSettingsView from '/pages/users/views/UserAccountSettingsView'
 
 import FriendsPage from '/pages/friends/FriendsPage'
 import YourFriendsList from '/pages/friends/views/YourFriendsList'
@@ -68,43 +68,19 @@ const App = function(props) {
     const [ retries, setRetries ] = useState(0)
 
     // ======= Request Tracking =====================================
-  
-    const [configurationRequestId, setConfigurationRequestId] = useState(null)
-    const configurationRequest = useSelector(function(state) {
-        if ( ! configurationRequestId ) {
-            return null
-        } else {
-            return state.system.requests[configurationRequestId]
-        }
-    })
-
-    const [ featuresRequestId, setFeaturesRequestId] = useState(null)
-    const featuresRequest = useSelector(function(state) {
-        if ( featuresRequestId ) {
-            return state.system.requests[featuresRequestId]
-        } else {
-            return null
-        }
-    })
-
+ 
+    const [ configurationRequest, makeConfigurationRequest] = useRequest()
+    const [featuresRequest, makeFeaturesRequest] = useRequest()
     const [authenticationRequest, makeAuthenticationRequest] = useRequest()
 
     // ======= Redux State ==========================================
 
-    const currentUser = useSelector(function(state) {
-        return state.authentication.currentUser
-    })
-
-    const configuration = useSelector(function(state) {
-        return state.system.configuration
-    })
+    const configuration = useSelector((state) => state.system.configuration)
 
     // ======= Effect Handling ======================================
 
-    const dispatch = useDispatch()
-
     useEffect(function() {
-        setConfigurationRequestId(dispatch(getConfiguration()))
+        makeConfigurationRequest(getConfiguration())
     }, [])
 
     // Note to self: These are system slice requests.  They go through
@@ -114,32 +90,16 @@ const App = function(props) {
             if ( ! configuration.maintenance_mode ) {
                 // Logger is a singleton, this will effect all other imports.
                 logger.setLevel(configuration.log_level)
-                setFeaturesRequestId(dispatch(getFeatures()))
+                makeFeaturesRequest(getFeatures())
                 makeAuthenticationRequest(getAuthentication())
             }
         } else if ( configurationRequest && configurationRequest.state == 'failed') {
             if ( retries < 5 ) {
-                setConfigurationRequestId(dispatch(getConfiguration()))
+                makeConfigurationRequest(getConfiguration())
                 setRetries(retries+1)
             }
         }
     }, [ configurationRequest ])
-
-    useEffect(function() {
-        return function cleanup() {
-            if ( configurationRequestId ) {
-                dispatch(cleanupSystemRequest({ requestId: configurationRequestId }))
-            }
-        }
-    }, [ configurationRequestId ])
-
-    useEffect(function() {
-        return function cleanup() {
-            if ( featuresRequestId ) {
-                dispatch(cleanupSystemRequest({ requestId: featuresRequestId }))
-            }
-        }
-    }, [ featuresRequestId ])
 
     // ======= Render ===============================================
 
@@ -152,7 +112,7 @@ const App = function(props) {
         )
    }
 
-    if ( ! configurationRequestId || ! authenticationRequest || ! featuresRequestId) {
+    if ( ! configurationRequest || ! authenticationRequest || ! featuresRequest) {
         return (
             <Spinner />
         )
