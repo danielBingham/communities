@@ -53,12 +53,17 @@ module.exports = class GroupController {
 
         const groupIds = userGroupsResults.rows.map((r) => r.group_id)
 
-        if ( request.query.userId && request.query.userId == currentUser.id ) {
-            query.where += `groups.id = ANY($1::uuid[])`
+        if ( ( 'userId' in request.query ) && request.query.userId == currentUser.id ) {
             query.params.push(groupIds)
+            query.where += `groups.id = ANY($${query.params.length}::uuid[])`
         } else {
-            query.where += `groups.id = ANY($1::uuid[]) OR is_discoverable = TRUE`
             query.params.push(groupIds)
+            query.where += `(groups.id = ANY($${query.params.length}::uuid[]) OR groups.type = 'open' OR groups.type = 'private')`
+        }
+
+        if ( request.query.slug && request.query.slug.length > 0 ) {
+            query.params.push(request.query.slug)
+            query.where += ` AND groups.slug = $${query.params.length}`
         }
 
         return query

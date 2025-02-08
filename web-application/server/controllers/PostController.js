@@ -89,13 +89,9 @@ module.exports = class PostController {
 
         const currentUser = request.session.user
 
-        if ( 'userId' in request.query ) {
-            query.params.push(request.query.userId)
-            const and = query.params.length > 1 ? ' AND ' : ''
-            query.where += `${and}posts.user_id = $${query.params.length}`
-        }
-
-        // Visible posts
+        // ========== Post Visibility ===================== 
+       
+        // Posts by friends
         const friendResults = await this.core.database.query(`
             SELECT
                 user_id, friend_id
@@ -106,8 +102,29 @@ module.exports = class PostController {
         const friendIds = friendResults.rows.map((r) => r.user_id == currentUser.id ? r.friend_id : r.user_id)
         friendIds.push(currentUser.id)
 
+        // Posts in groups
+        const groupResults = await this.core.database.query(`
+            SELECT group_id FROM group_members WHERE user_id = $1
+        `, [ currentUser.id ])
+
+        const groupIds = groupResults.rows.map((r) => r.group_id)
+
+        // Permissions 
         query.params.push(friendIds)
-        query.where += `${ query.params.length > 1 ? ' AND ' : ''}posts.user_id = ANY($${query.params.length}::uuid[])`
+        query.params.push(groupIds)
+        query.where += `(posts.user_id = ANY($${query.params.length-1}::uuid[]) OR posts.group_id = ANY($${query.params.length}::uuid[]))`
+
+        if ( 'userId' in request.query ) {
+            query.params.push(request.query.userId)
+            const and = query.params.length > 1 ? ' AND ' : ''
+            query.where += `${and}posts.user_id = $${query.params.length}`
+        }
+
+        if ( 'groupId' in request.query ) {
+            query.params.push(request.query.groupId)
+            const and = query.params.length > 1 ? ' AND ' : ''
+            query.where += `${and}posts.group_id = $${query.params.length}`
+        }
 
         if ( 'sort' in request.query ) {
             const sort = request.query.sort

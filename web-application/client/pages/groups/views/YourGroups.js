@@ -5,6 +5,10 @@ import { useRequest } from '/lib/hooks/useRequest'
 
 import { getGroups } from '/state/groups'
 
+import GroupBadge from '/components/groups/view/GroupBadge'
+
+import './YourGroups.css'
+
 const YourGroups = function() {
 
     const [request, makeRequest] = useRequest()
@@ -18,9 +22,14 @@ const YourGroups = function() {
         }
     }, [ currentUser ])
 
+    const groupViews = []
+    for(const id of groups) {
+        groupViews.push(<GroupBadge id={id} />)
+    }
+
     return (
         <div className="your-groups">
-
+            { groupViews }
         </div>
     )
 }

@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { useSelector } from 'react-redux'
-import {  Link } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 
 import { 
     HomeIcon,
@@ -44,7 +44,6 @@ const HomePage = function() {
     return (
         <div id="home-page">
             <div className="home-page__sidebar">
-                <h2>Feeds</h2>
                 <menu className="home-page__menu">
                     <li>
                         <a href="/"><HomeIcon /> Home</a>

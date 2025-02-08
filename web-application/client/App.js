@@ -55,6 +55,8 @@ import GroupsPage from '/pages/groups/GroupsPage'
 import YourGroups from '/pages/groups/views/YourGroups'
 import CreateGroup from '/pages/groups/views/CreateGroup'
 
+import GroupPage from '/pages/groups/GroupPage'
+
 import PostPage from '/pages/posts/PostPage'
 
 import ErrorBoundary from '/errors/ErrorBoundary'
@@ -194,9 +196,7 @@ const App = function(props) {
                                 <Route index element={<YourGroups />} />
                             </Route> 
 
-                            <Route path="/group" element={<GroupPage />}>
-                                <Route path=":slug" element={ <Group />} />
-                            </Route>
+                            <Route path="/group/:slug" element={<GroupPage />} />
 
                             <Route path="/:name">
                                 <Route path=":postId" element={ <PostPage /> } />

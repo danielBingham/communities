@@ -27,7 +27,7 @@ const GroupFeedMenu = function() {
         const group = groupDictionary[groupId]
 
         groupViews.push(<li key={group.slug}>
-            <a href={`/g/${group.slug}`}>${group.title}</a>
+            <a href={`/g/${group.slug}`}>{ group.title }</a>
         </li>)
     }
     groupViews.push(<li key={'view-more'}>
