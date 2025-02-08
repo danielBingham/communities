@@ -2,28 +2,23 @@ import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 
-import { getUser, cleanupRequest } from '/state/users'
+import { useRequest } from '/lib/hooks/useRequest'
+
+import { getUser } from '/state/users'
 
 import UserProfileImage from '/components/users/UserProfileImage'
 import FriendButton from '/components/friends/FriendButton'
-import Spinner from '/components/Spinner'
 import './UserBadge.css'
 
 const UserBadge = function(props) {
     
     // ======= Request Tracking =====================================
-    
-    const [ requestId, setRequestId ] = useState(null)
-    const request = useSelector(function(state) {
-        return state.users.requests[requestId]
-    })
+   
+    const [request, makeRequest] = useRequest()
 
     // ======= Redux State ==========================================
     
-    const user = useSelector(function(state) {
-        return state.users.dictionary[props.id]
-    })
-    
+    const user = useSelector((state) => props.id in state.users.dictionary ? state.users.dictionary[props.id] : null)
 
     // ======= Effect Handling ======================================
     
@@ -31,22 +26,13 @@ const UserBadge = function(props) {
 
     useEffect(function() {
         if ( ! user ) {
-            setRequestId(dispatch(getUser(props.id)))
+            makeRequest(getUser(props.id))
         }
-    }, [ props.id ])
-
-    // Clean up our request.
-    useEffect(function() {
-        return function cleanup() {
-            if ( requestId ) {
-                dispatch(cleanupRequest({ requestId: requestId }))
-            }
-        }
-    }, [ requestId ])
+    }, [ user ])
 
     // ======= Render ===============================================
     if( ! user && ( ! request || request.status == 'pending' )) {
-        return (<div className="user-badge"> <Spinner local={true} /></div>)
+        return null 
     }
 
     // TECHDEBT: The request will return a 404 not found in certain circumstances

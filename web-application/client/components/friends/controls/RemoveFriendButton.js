@@ -1,7 +1,9 @@
-import React, {useState, useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import React from 'react'
+import { useSelector } from 'react-redux'
 
-import { deleteUserRelationship, cleanupRequest } from '/state/userRelationships'
+import { useRequest } from '/lib/hooks/useRequest'
+
+import { deleteUserRelationship } from '/state/userRelationships'
 
 import Button from '/components/generic/button/Button'
 
@@ -9,22 +11,12 @@ import './RemoveFriendButton.css'
 
 const RemoveFriendButton = function({ userId, type }) {
 
-    const [requestId,setRequestId] = useState(null)
-    const request = useSelector(function(state) {
-        if ( requestId in state.userRelationships.requests ) {
-            return state.userRelationships.requests[requestId]
-        } else {
-            return null
-        }
-    })
-
+    const [request, makeRequest] = useRequest()
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
     if ( ! currentUser || currentUser.id == userId) {
         return null
     }
-
-    const dispatch = useDispatch()
 
     const removeFriend = function() {
         const relationship = {
@@ -32,16 +24,8 @@ const RemoveFriendButton = function({ userId, type }) {
             relationId: currentUser.id
         }
 
-        setRequestId(dispatch(deleteUserRelationship(relationship)))
+        makeRequest(deleteUserRelationship(relationship))
     }
-
-    useEffect(function() {
-        return function cleanup() {
-            if ( requestId ) {
-                dispatch(cleanupRequest({ requestId: requestId }))
-            }
-        }
-    }, [ requestId ])
 
     let text = 'Remove'
     if ( type == 'reject' ) {

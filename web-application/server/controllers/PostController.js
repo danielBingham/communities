@@ -84,7 +84,7 @@ module.exports = class PostController {
             where: '',
             params: [],
             page: 1,
-            order: 'posts.activity/((EXTRACT(EPOCH from now()) - EXTRACT(EPOCH from posts.created_date))/(60*60)) DESC'
+            order: '( posts.activity/POWER(CEILING((EXTRACT(EPOCH from now()) - EXTRACT(EPOCH from posts.created_date))/(60*60)), 2)) DESC'
         }
 
         const currentUser = request.session.user

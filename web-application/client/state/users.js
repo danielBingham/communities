@@ -98,7 +98,7 @@ export const getUsers = function(name, params) {
         const endpoint = `/users${( params ? '?' + qs.stringify(params) : '')}`
 
         dispatch(usersSlice.actions.makeUserQuery({ name: name }))
-        return makeTrackedRequest('GET', endpoint, null,
+        return dispatch(makeTrackedRequest('GET', endpoint, null,
             function(response) {
                 dispatch(usersSlice.actions.setUsersInDictionary({ dictionary: response.dictionary }))
 
@@ -106,7 +106,7 @@ export const getUsers = function(name, params) {
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -124,8 +124,7 @@ export const getUsers = function(name, params) {
  */
 export const postUsers = function(user) {
     return function(dispatch, getState) {
-        return makeTrackedRequest(dispatch, getState, usersSlice,
-            'POST', '/users', user,
+        return dispatch(makeTrackedRequest('POST', '/users', user,
             function(response) {
                 dispatch(usersSlice.actions.setUsersInDictionary({ entity: response.entity }))
 
@@ -133,7 +132,7 @@ export const postUsers = function(user) {
 
                 dispatch(updateCurrentUser(response))
             }
-        )
+        ))
     }
 }
 
@@ -151,7 +150,7 @@ export const postUsers = function(user) {
  */
 export const getUser = function(id) {
     return function(dispatch, getState) {
-        return makeTrackedRequest('GET', `/user/${encodeURIComponent(id)}`, null,
+        return dispatch(makeTrackedRequest('GET', `/user/${encodeURIComponent(id)}`, null,
             function(response) {
                 dispatch(usersSlice.actions.setUsersInDictionary({ entity: response.entity }))
 
@@ -159,7 +158,7 @@ export const getUser = function(id) {
 
                 dispatch(updateCurrentUser(response))
             }
-        )
+        ))
     }
 }
 
@@ -177,7 +176,7 @@ export const getUser = function(id) {
  */
 export const patchUser = function(user) {
     return function(dispatch, getState) {
-        return makeTrackedRequest('PATCH', `/user/${encodeURIComponent(user.id)}`, user,
+        return dispatch(makeTrackedRequest('PATCH', `/user/${encodeURIComponent(user.id)}`, user,
             function(response) {
                 dispatch(usersSlice.actions.setUsersInDictionary({ entity: response.entity }))
 
@@ -185,7 +184,7 @@ export const patchUser = function(user) {
 
                 dispatch(updateCurrentUser(response))
             }
-        )
+        ))
     }
 }
 
@@ -203,11 +202,11 @@ export const patchUser = function(user) {
  */
 export const deleteUser = function(user) {
     return function(dispatch, getState) {
-        return makeTrackedRequest('DELETE', `/user/${encodeURIComponent(user.id)}`, null,
+        return dispatch(makeTrackedRequest('DELETE', `/user/${encodeURIComponent(user.id)}`, null,
             function(response) {
                 dispatch(usersSlice.actions.removeUser({ entity: user }))
             }
-        )
+        ))
     }
 } 
 

@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import React, { useState } from 'react'
+import { useSelector } from 'react-redux'
 
-import { postPostReaction, patchPostReaction, deletePostReaction, cleanupRequest } from '/state/postReactions'
+import { useRequest } from '/lib/hooks/useRequest'
+
+import { postPostReaction, patchPostReaction, deletePostReaction } from '/state/postReactions'
 
 import { XCircleIcon, 
     HandThumbUpIcon, 
@@ -13,7 +15,6 @@ import UserTag from '/components/users/UserTag'
 import BlockConfirmation from '/components/posts/widgets/BlockConfirmation'
 
 import Modal from '/components/generic/modal/Modal'
-import Spinner from '/components/Spinner'
 
 import './PostReactions.css'
 
@@ -22,63 +23,37 @@ const PostReactions = function({ postId }) {
     const [showReactions, setShowReactions] = useState(false)
     const [blockConfirmation, setBlockConfirmation] = useState(false)
 
-    const [requestId,setRequestId] = useState(null)
-    const request = useSelector(function(state) {
-        if ( requestId in state.postReactions.requests ) {
-            return state.postReactions.requests[requestId]
-        } else {
-            return null
-        }
-    })
+    const [request, makeRequest] = useRequest()
 
-    const currentUser = useSelector(function(state) {
-        return state.authentication.currentUser
-    })
-
-    const post = useSelector(function(state) {
-        if ( postId in state.posts.dictionary ) {
-            return state.posts.dictionary[postId]
-        } else {
-            return null
-        }
-    })
+    const currentUser = useSelector((state) => state.authentication.currentUser)
+    const post = useSelector((state) => postId && postId in state.posts.dictionary ? state.posts.dictionary[postId] : null)
 
     if ( ! post ) {
         return null
     }
 
-    const postReactions = useSelector(function(state) {
-        return state.postReactions.dictionary
-    })
-
+    const postReactions = useSelector((state) => state.postReactions.dictionary)
     const userReactionId = post.reactions.find((rid) => rid in postReactions ? postReactions[rid].userId == currentUser?.id : false)
     const userReaction = userReactionId ? postReactions[userReactionId] : null
 
-    const dispatch = useDispatch()
-
     const react = function(reaction) {
+        if ( request && request.state == 'pending' ) {
+            return
+        }
+
         const reactionEntity = {
             postId: postId,
             reaction: reaction
         }
 
         if ( ! userReaction ) {
-            setRequestId(dispatch(postPostReaction(reactionEntity)))
+            makeRequest(postPostReaction(reactionEntity))
         } else if (reaction != userReaction.reaction ) {
-            setRequestId(dispatch(patchPostReaction(reactionEntity)))
+            makeRequest(patchPostReaction(reactionEntity))
         } else {
-            setRequestId(dispatch(deletePostReaction({ postId: postId })))
+            makeRequest(deletePostReaction({ postId: postId }))
         }
-        
     }
-
-    useEffect(function() {
-        return function cleanup() {
-            if ( requestId ) {
-                dispatch(cleanupRequest({ requestId: requestId }))
-            }
-        }
-    }, [ requestId ])
 
     const reactionViews = []
     const reactionCounts = {}

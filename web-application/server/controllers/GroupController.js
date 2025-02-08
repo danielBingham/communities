@@ -53,8 +53,13 @@ module.exports = class GroupController {
 
         const groupIds = userGroupsResults.rows.map((r) => r.group_id)
 
-        query.where += `groups.id = ANY($1::uuid[]) OR is_discoverable = TRUE`
-        query.params.push(groupIds)
+        if ( request.query.userId && request.query.userId == currentUser.id ) {
+            query.where += `groups.id = ANY($1::uuid[])`
+            query.params.push(groupIds)
+        } else {
+            query.where += `groups.id = ANY($1::uuid[]) OR is_discoverable = TRUE`
+            query.params.push(groupIds)
+        }
 
         return query
     }

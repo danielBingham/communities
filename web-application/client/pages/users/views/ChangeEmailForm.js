@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { patchAuthentication, cleanupRequest as cleanupAuthRequest } from '/state/authentication'
-import { patchUser, cleanupRequest } from '/state/users'
+import { useRequest } from '/lib/hooks/useRequest'
+
+import { patchAuthentication } from '/state/authentication'
+import { patchUser } from '/state/users'
 
 import Input from '/components/generic/input/Input'
 
@@ -20,29 +22,12 @@ const ChangeEmailForm = function(props) {
 
     // ======= Request Tracking =====================================
 
-    const [ authRequestId, setAuthRequestId] = useState(null)
-    const authRequest = useSelector(function(state) {
-        if ( authRequestId ) {
-            return state.authentication.requests[authRequestId]
-        } else {
-            return null
-        }
-    })
-
-    const [ requestId, setRequestId ] = useState(null)
-    const request = useSelector(function(state) {
-        if ( requestId ) {
-            return state.users.requests[requestId]
-        } else {
-            return null
-        }
-    })
+    const [authRequest, makeAuthRequest] = useRequest()
+    const [request, makeRequest] = useRequest()
 
     // ======= Redux State ==========================================
 
-    const currentUser = useSelector(function(state) {
-        return state.authentication.currentUser
-    })
+    const currentUser = useSelector((state) => state.authentication.currentUser)
 
     // ======= Actions and Event Handling ===========================
 
@@ -96,7 +81,7 @@ const ChangeEmailForm = function(props) {
 
         // TODO TECHDEBT : We don't need to do this.  It's built into the patch
         // endpoint now.
-        setAuthRequestId(dispatch(patchAuthentication(currentUser.email, password)))
+        makeAuthRequest(patchAuthentication(currentUser.email, password))
     }
 
     // ======= Effect Handling ======================================
@@ -109,7 +94,7 @@ const ChangeEmailForm = function(props) {
                     email: email,
                     oldPassword: password
                 }
-                setRequestId(dispatch(patchUser(user)))
+                makeRequest(patchUser(user))
             } 
         }
     }, [ authRequest ])
@@ -120,26 +105,6 @@ const ChangeEmailForm = function(props) {
             setPassword('')
         }
     }, [ request ])
-
-
-    // Clean up our request.
-    useEffect(function() {
-        return function cleanup() {
-            if ( requestId ) {
-                dispatch(cleanupRequest({ requestId: requestId }))
-            }
-        }
-    }, [ requestId ])
-
-    // Clean up authRequest.
-    useEffect(function() {
-        return function cleanup() {
-            if ( authRequestId ) {
-                dispatch(cleanupAuthRequest({ requestId: authRequestId }))
-            }
-        }
-    }, [ authRequestId ])
-
 
     // ======= Render ===============================================
 

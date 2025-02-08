@@ -95,12 +95,12 @@ export const postPostSubscriptions = function(subscription) {
     return function(dispatch, getState) {
         const endpoint = `/post/${encodeURIComponent(subscription.postId)}/subscriptions`
         const body = subscription
-        return makeTrackedRequest('POST', endpoint, body,
+        return dispatch(makeTrackedRequest('POST', endpoint, body,
             function(response) {
                 dispatch(postSubscriptionsSlice.actions.setPostSubscriptionsInDictionary({ entity: response.entity}))
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -118,12 +118,12 @@ export const postPostSubscriptions = function(subscription) {
  */
 export const getPostSubscription = function(postId) {
     return function(dispatch, getState) {
-        return makeTrackedRequest('GET', `/post/${encodeURIComponent(postId)}/subscription`,  null,
+        return dispatch(makeTrackedRequest('GET', `/post/${encodeURIComponent(postId)}/subscription`,  null,
             function(response) {
                 dispatch(postSubscriptionsSlice.actions.setPostSubscriptionsInDictionary({ entity: response.entity}))
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -141,12 +141,12 @@ export const getPostSubscription = function(postId) {
  */
 export const deletePostSubscription = function(postId) {
     return function(dispatch, getState) {
-        return makeTrackedRequest('DELETE', `/post/${encodeURIComponent(postId)}/subscription`, null,
+        return dispatch(makeTrackedRequest('DELETE', `/post/${encodeURIComponent(postId)}/subscription`, null,
             function(response) {
                 dispatch(postSubscriptionsSlice.actions.removePostSubscription({ entity: response.entity }))
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 } 
 

@@ -113,7 +113,7 @@ export const makeTrackedRequest = function(method, endpoint, body, onSuccess, on
         // System slice requests need to go to the root, rather than the API
         // backend.  These requests include querying for the configuration that
         // contains the API backend itself, as well as for feature flags.
-        if ( requestsSlice.name == 'system') {
+        if ( endpoint == '/config') {
             fullEndpoint = endpoint
         } else if (configuration == null ) {
             // If we're querying from anything other than the system slice before

@@ -1,20 +1,17 @@
-import { setTagsInDictionary } from '../tags'
-import { setUsersInDictionary } from '../users'
-import { setPostsInDictionary } from '../posts'
-import { setPostCommentsInDictionary } from '../postComments'
-import { setPostReactionsInDictionary } from '../postReactions'
-import { setPostSubscriptionsInDictionary } from '../postSubscriptions'
-import { setFilesInDictionary } from '../files'
-import { setUserRelationshipsInDictionary } from '../userRelationships'
+import { setUsersInDictionary } from '/state/users'
+import { setPostsInDictionary } from '/state/posts'
+import { setPostCommentsInDictionary } from '/state/postComments'
+import { setPostReactionsInDictionary } from '/state/postReactions'
+import { setPostSubscriptionsInDictionary } from '/state/postSubscriptions'
+import { setFilesInDictionary } from '/state/files'
+import { setUserRelationshipsInDictionary } from '/state/userRelationships'
 
 
 const setRelationsInState = function(relations) {
     return function(dispatch, getState) {
         if ( relations ) {
             for(const [relation, dictionary] of Object.entries(relations)) {
-                if ( relation == 'tags' ) {
-                    dispatch(setTagsInDictionary({ dictionary: dictionary }))
-                } else if ( relation == 'users' ) {
+                if ( relation == 'users' ) {
                     dispatch(setUsersInDictionary({ dictionary: dictionary }))
                 } else if ( relation == 'postComments' ) {
                     dispatch(setPostCommentsInDictionary({ dictionary: dictionary }))

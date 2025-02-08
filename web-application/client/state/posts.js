@@ -103,7 +103,7 @@ export const getPosts = function(name, params) {
     return function(dispatch, getState) {
         const endpoint = `/posts${( params ? '?' + qs.stringify(params) : '')}`
         dispatch(postsSlice.actions.makePostQuery({ name: name }))
-        return makeTrackedRequest('GET', endpoint, null,
+        return dispatch(makeTrackedRequest('GET', endpoint, null,
             function(response) {
                 dispatch(postsSlice.actions.setPostsInDictionary({ dictionary: response.dictionary}))
 
@@ -111,7 +111,7 @@ export const getPosts = function(name, params) {
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -131,13 +131,13 @@ export const postPosts = function(post) {
     return function(dispatch, getState) {
         const endpoint = '/posts'
         const body = post
-        return makeTrackedRequest('POST', endpoint, body,
+        return dispatch(makeTrackedRequest('POST', endpoint, body,
             function(response) {
                 dispatch(postsSlice.actions.setPostsInDictionary({ entity: response.entity}))
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -156,13 +156,13 @@ export const postPosts = function(post) {
  */
 export const getPost = function(id) {
     return function(dispatch, getState) {
-        return makeTrackedRequest('GET', `/post/${encodeURIComponent(id)}`, null,
+        return dispatch(makeTrackedRequest('GET', `/post/${encodeURIComponent(id)}`, null,
             function(response) {
                 dispatch(postsSlice.actions.setPostsInDictionary({ entity: response.entity}))
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -180,12 +180,12 @@ export const getPost = function(id) {
  */
 export const patchPost = function(post) {
     return function(dispatch, getState) {
-        return makeTrackedRequest('PATCH', `/post/${encodeURIComponent(post.id)}`, post,
+        return dispatch(makeTrackedRequest('PATCH', `/post/${encodeURIComponent(post.id)}`, post,
             function(response) {
                 dispatch(postsSlice.actions.setPostsInDictionary({ entity: response.entity}))
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -203,11 +203,11 @@ export const patchPost = function(post) {
  */
 export const deletePost = function(post) {
     return function(dispatch, getState) {
-        return makeTrackedRequest('DELETE', `/post/${encodeURIComponent(post.id)}`, null,
+        return dispatch(makeTrackedRequest('DELETE', `/post/${encodeURIComponent(post.id)}`, null,
             function(response) {
                 dispatch(postsSlice.actions.removePost({ entity: post}))
             }
-        )
+        ))
     }
 } 
 

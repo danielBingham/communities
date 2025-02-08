@@ -64,7 +64,7 @@ export const refreshAuthentication = function() {
 export const getAuthentication = function(onCompletion) {
     return function(dispatch, getState) {
         const endpoint = '/authentication'
-        return makeTrackedRequest('GET', endpoint, null,
+        return dispatch(makeTrackedRequest('GET', endpoint, null,
             function(responseBody ) {
                 if ( responseBody && responseBody.session !== null) {
                     dispatch(setSession(responseBody.session))
@@ -76,8 +76,7 @@ export const getAuthentication = function(onCompletion) {
                     onCompletion()
                 }
             }
-        )
-
+        ))
     }
 }
 
@@ -102,7 +101,7 @@ export const postAuthentication = function(email, password) {
             password: password
         }
 
-        return makeTrackedRequest('POST', endpoint, body,
+        return dispatch(makeTrackedRequest('POST', endpoint, body,
             function(responseBody) {
                 if ( responseBody && responseBody.session !== null) {
                     dispatch(setSession(responseBody.session))
@@ -110,7 +109,7 @@ export const postAuthentication = function(email, password) {
                     dispatch(authenticationSlice.actions.setCurrentUser(null))
                 }
             }
-        )
+        ))
     }
 }
 
@@ -135,11 +134,11 @@ export const patchAuthentication = function(email, password) {
             email: email,
             password: password
         }
-        return makeTrackedRequest('PATCH', endpoint, body, 
+        return dispatch(makeTrackedRequest('PATCH', endpoint, body, 
             function(responseBody) {
                 dispatch(setUsersInDictionary({ entity: responseBody.user }))  
             }
-        )
+        ))
     }
 }
 
@@ -158,7 +157,7 @@ export const deleteAuthentication = function() {
     return function(dispatch, getState) {
         const endpoint = '/authentication'
 
-        return makeTrackedRequest('DELETE', endpoint, null,
+        return dispatch(makeTrackedRequest('DELETE', endpoint, null,
             function(responseBody) {
                 dispatch(reset())
                 // As soon as we reset the redux store, we need to redirect to
@@ -166,7 +165,7 @@ export const deleteAuthentication = function() {
                 // cycles because that could have undefined impacts.
                 window.location.href = "/"
             }
-        )
+        ))
     }
 }
 

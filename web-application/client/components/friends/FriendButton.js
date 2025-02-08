@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import React, { useEffect } from 'react'
+import { useSelector } from 'react-redux'
 
-import { getUserRelationship,  cleanupRequest } from '/state/userRelationships'
+import { useRequest } from '/lib/hooks/useRequest'
+
+import { getUserRelationship } from '/state/userRelationships'
 
 import AddFriendButton from '/components/friends/controls/AddFriendButton'
 import AcceptFriendButton from '/components/friends/controls/AcceptFriendButton'
@@ -9,39 +11,21 @@ import RemoveFriendButton from '/components/friends/controls/RemoveFriendButton'
 
 const FriendButton = function({ userId }) {
 
-    const [requestId,setRequestId] = useState(null)
-    const request = useSelector(function(state) {
-        if ( requestId in state.userRelationships.requests ) {
-            return state.userRelationships.requests[requestId]
-        } else {
-            return null
-        }
-    })
-
+    const [request, makeRequest] = useRequest()
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
     if ( ! currentUser || currentUser.id == userId) {
         return null
     }
 
-    const relationshipId = useSelector((state) => userId in state.userRelationships.byUserId ? state.userRelationships.byUserId[userId][currentUser.id] : null)
+    const relationshipId = useSelector((state) => userId && userId in state.userRelationships.byUserId ? state.userRelationships.byUserId[userId][currentUser.id] : null)
     const relationship = useSelector((state) => relationshipId !== null && relationshipId in state.userRelationships.dictionary ? state.userRelationships.dictionary[relationshipId] : null)
-
-    const dispatch = useDispatch()
 
     useEffect(function() {
         if ( relationship === null ) {
-            setRequestId(dispatch(getUserRelationship(currentUser.id, userId))) 
+            makeRequest(getUserRelationship(currentUser.id, userId))
         }
     }, [currentUser, userId, relationship])
-
-    useEffect(function() {
-        return function cleanup() {
-            if ( requestId ) {
-                dispatch(cleanupRequest({ requestId: requestId }))
-            }
-        }
-    }, [ requestId ])
 
     let content = null
     if ( ! relationship) {

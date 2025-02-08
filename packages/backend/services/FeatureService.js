@@ -25,6 +25,8 @@ const NotificationSettingsMigration = require('../migrations/NotificationSetting
 const NoticeMigration = require('../migrations/NoticeMigration')
 const RelationshipsOwnStateMigration = require('../migrations/RelationshipsOwnStateMigration')
 const CommentSubscriptionsMigration = require('../migrations/CommentSubscriptionsMigration')
+const FixActivityMigration = require('../migrations/FixActivityMigration')
+const PrivateGroupsMigration = require('../migrations/PrivateGroupsMigration')
 
 const ServiceError = require('../errors/ServiceError')
 const MigrationError = require('../errors/MigrationError')
@@ -80,6 +82,16 @@ module.exports = class FeatureService {
                 dependsOn: [],
                 conflictsWith: [],
                 migration: new CommentSubscriptionsMigration(core)
+            },
+            'fix-post-activity': {
+                dependsOn: [],
+                conflictsWith: [],
+                migration: new FixActivityMigration(core)
+            },
+            '19-private-groups': {
+                dependsOn: [],
+                conflictsWith: [],
+                migration: new PrivateGroupsMigration(core)
             }
         }
     }

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { useSearchParams } from 'react-router-dom'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
 import { validateToken } from '/state/tokens'
-import { patchUser, cleanupRequest } from '/state/users'
+import { patchUser } from '/state/users'
 
 import Spinner from '/components/Spinner'
 import Input from '/components/generic/input/Input'
@@ -29,15 +29,7 @@ const ResetPasswordForm = function(props) {
 
     // ======= Request Tracking =====================================
 
-    const [requestId, setRequestId] = useState(null)
-    const request = useSelector(function(state) {
-        if ( requestId ) {
-            return state.users.requests[requestId]
-        } else {
-            return null
-        }
-    })
-
+    const [request, makeRequest] = useRequest()
     const [ tokenRequest, makeTokenRequest ] = useRequest()
 
     // ======= Redux State ==========================================
@@ -45,8 +37,6 @@ const ResetPasswordForm = function(props) {
     const user = useSelector((state) => token in state.tokens.usersByToken ? state.tokens.usersByToken[token] : null)
 
     // ======= Actions and Event Handling ===========================
-
-    const dispatch = useDispatch()
 
     /**
      * Perform validation on our state and return a boolean indicating whether
@@ -106,7 +96,7 @@ const ResetPasswordForm = function(props) {
             token: token
         }
 
-        setRequestId(dispatch(patchUser(userPatch)))
+        makeRequest(patchUser(userPatch))
     }
 
     // ======= Effect Handling ======================================
@@ -122,16 +112,6 @@ const ResetPasswordForm = function(props) {
             window.location.href = "/"
         }
     }, [ request ])
-
-    // Clean up our request.
-    useEffect(function() {
-        return function cleanup() {
-            if ( requestId ) {
-                dispatch(cleanupRequest({ requestId: requestId }))
-            }
-        }
-    }, [ requestId ])
-
 
     // ======= Render ===============================================
 

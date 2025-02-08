@@ -79,13 +79,13 @@ export const uploadFile = function(file) {
         const formData = new FormData()
         formData.append('file', file)
 
-        return makeTrackedRequest('POST', `/upload`, formData,
+        return dispatch(makeTrackedRequest('POST', `/upload`, formData,
             function(response) {
                 dispatch(filesSlice.actions.setFilesInDictionary({ entity: response.entity }))
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -103,13 +103,13 @@ export const uploadFile = function(file) {
  */
 export const getFile = function(id) {
     return function(dispatch, getState) {
-        return makeTrackedRequest( 'GET', `/file/${id}`, null,
+        return dispatch(makeTrackedRequest( 'GET', `/file/${id}`, null,
             function(response) {
                 dispatch(filesSlice.actions.setFilesInDictionary({ entity: response.entity}))
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -127,12 +127,12 @@ export const getFile = function(id) {
  */
 export const deleteFile = function(fileId) {
     return function(dispatch, getState) {
-        return makeTrackedRequest(dispatch, getState, filesSlice,
+        return dispatch(makeTrackedRequest(dispatch, getState, filesSlice,
             'DELETE', `/file/${fileId}`, null,
             function(response) {
                 dispatch(filesSlice.actions.removeFile({ entity: response.entity }))
             }
-        )
+        ))
     }
 }
 

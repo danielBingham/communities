@@ -81,13 +81,13 @@ export const postPostReaction = function(reaction) {
     return function(dispatch, getState) {
         const endpoint = `/post/${encodeURIComponent(reaction.postId)}/reactions`
         const body = reaction
-        return makeTrackedRequest('POST', endpoint, body,
+        return dispatch(makeTrackedRequest('POST', endpoint, body,
             function(response) {
                 dispatch(postReactionsSlice.actions.setPostReactionsInDictionary({ entity: response.entity}))
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -105,13 +105,13 @@ export const postPostReaction = function(reaction) {
  */
 export const patchPostReaction = function(reaction) {
     return function(dispatch, getState) {
-        return makeTrackedRequest('PATCH', `/post/${encodeURIComponent(reaction.postId)}/reaction`, reaction,
+        return dispatch(makeTrackedRequest('PATCH', `/post/${encodeURIComponent(reaction.postId)}/reaction`, reaction,
             function(response) {
                 dispatch(postReactionsSlice.actions.setPostReactionsInDictionary({ entity: response.entity}))
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -129,12 +129,12 @@ export const patchPostReaction = function(reaction) {
  */
 export const deletePostReaction = function(reaction) {
     return function(dispatch, getState) {
-        return makeTrackedRequest('DELETE', `/post/${encodeURIComponent(reaction.postId)}/reaction`, null,
+        return dispatch(makeTrackedRequest('DELETE', `/post/${encodeURIComponent(reaction.postId)}/reaction`, null,
             function(response) {
                 dispatch(postReactionsSlice.actions.removePostReaction({ entity: reaction }))
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 } 
 

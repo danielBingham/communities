@@ -1,29 +1,42 @@
-#user-account-page .menu {
+#user-account-page menu.user-account-page__menu {
     list-style-type: none;
 }
-#user-account-page .menu li {
+#user-account-page menu.user-account-page__menu li {
     padding: 10px;
     font-size: 18px;
 }
-#user-account-page .menu li:hover {
+#user-account-page menu.user-account-page__menu li:hover {
     background-color: var(--primary-color-light);
     border-radius: 10px;
 }
-#user-account-page .menu svg {
+#user-account-page menu.user-account-page__menu svg {
     width: 22px;
     margin-right: 5px;
     margin-bottom: -5px;
     color: var(--icon-color);
 }
-#user-account-page .menu a:link,
-#user-account-page .menu a:visited,
-#user-account-page .menu a:active {
+#user-account-page menu.user-account-page__menu a:link,
+#user-account-page menu.user-account-page__menu a:visited,
+#user-account-page menu.user-account-page__menu a:active {
     display: block;
     padding: 10px;
     color: var(--primary-color-darkest);
 }
-#user-account-page .menu .active a {
+#user-account-page menu.user-account-page__menu .active a {
     font-weight: bold;
+}
+#user-account-page menu.user-account-page__menu .outline { 
+    display: inline-block;
+}
+#user-account-page menu.user-account-page__menu .active .outline { 
+    display: none;
+}
+
+#user-account-page menu.user-account-page__menu .solid {
+    display: none;
+}
+#user-account-page menu.user-account-page__menu .active .solid{
+    display: inline-block;
 }
 
 @media (width >= 750px) {
@@ -47,16 +60,16 @@
         margin: 0 auto;
     }
 
-    #user-account-page .menu {
+    #user-account-page menu.user-account-page__menu {
         text-align: center;
         margin: 0 auto;
     }
 
-    #user-account-page .menu li {
+    #user-account-page menu.user-account-page__menu li {
         display: inline-block;
     }
     
-    #user-account-page .menu li .nav-text {
+    #user-account-page menu.user-account-page__menu li .nav-text {
         display: block;
         font-size: 10px;
     }

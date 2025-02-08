@@ -158,15 +158,9 @@ app.get('/config', function(request, response) {
         stripe: {
             portal: core.config.stripe.portal,
             links: core.config.stripe.links
-        }
+        },
+        features: core.features.features
     })
-})
-
-/**
- * A route to get the hash of enabled features.
- */
-app.get('/features', function(request, response) {
-    response.status(200).json(core.features.features)
 })
 
 /**

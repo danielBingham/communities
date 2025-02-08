@@ -113,7 +113,7 @@ export const getNotifications = function(name, params) {
             dispatch(notificationsSlice.actions.makeNotificationQuery({ name: name }))
         }
 
-        return makeTrackedRequest('GET', endpoint, null,
+        return dispatch(makeTrackedRequest('GET', endpoint, null,
             function(response) {
                 if ( ! params?.since ) {
                     dispatch(notificationsSlice.actions.setNotificationsInDictionary({ dictionary: response.dictionary}))
@@ -129,7 +129,7 @@ export const getNotifications = function(name, params) {
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -147,13 +147,13 @@ export const getNotifications = function(name, params) {
  */
 export const patchNotifications = function(notifications) {
     return function(dispatch, getState) {
-        return makeTrackedRequest('PATCH', `/notifications`, notifications,
+        return dispatch(makeTrackedRequest('PATCH', `/notifications`, notifications,
             function(response) {
                 dispatch(notificationsSlice.actions.setNotificationsInDictionary({ dictionary: response.dictionary }))
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -171,13 +171,13 @@ export const patchNotifications = function(notifications) {
  */
 export const patchNotification = function(notification) {
     return function(dispatch, getState) {
-        return makeTrackedRequest('PATCH', `/notification/${encodeURIComponent(notification.id)}`, notification,
+        return dispatch(makeTrackedRequest('PATCH', `/notification/${encodeURIComponent(notification.id)}`, notification,
             function(response) {
                 dispatch(notificationsSlice.actions.setNotificationsInDictionary({ entity: response.entity }))
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 

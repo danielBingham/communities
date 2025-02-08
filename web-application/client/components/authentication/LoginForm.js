@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
+import { useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 
-import { useDispatch, useSelector } from 'react-redux'
+import logger from '/logger'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
@@ -31,12 +32,10 @@ const LoginForm = function(props) {
 
     // ======= Redux State ==========================================
    
-    const currentUser = useSelector(function(state) {
-        return state.authentication.currentUser
-    })
+    const currentUser = useSelector((state) => state.authentication.currentUser)
 
     if ( currentUser ) {
-        console.error(`Attempting to show LoginForm while someone's already logged in.`)
+        logger.error(new Error(`Attempting to show LoginForm while someone's already logged in.`))
         return null
     }
 

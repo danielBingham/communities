@@ -160,7 +160,7 @@ module.exports = class PostCommentController {
 
         await this.postCommentDAO.insertPostComments(comment)
 
-        let activity = activityResults.rows[0].activity
+        let activity = parseInt(activityResults.rows[0].activity)
         if ( reactionResults.rows.length <= 0 || reactionResults.rows[0].reaction != 'block') {
             activity += 1
         } 

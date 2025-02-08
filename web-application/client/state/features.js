@@ -52,11 +52,11 @@ export const getFeatures = function() {
     return function(dispatch, getState) {
         const endpoint = '/features'
 
-        return makeTrackedRequest('GET', endpoint, null,
+        return dispatch(makeTrackedRequest('GET', endpoint, null,
             function(responseBody) {
                 dispatch(featuresSlice.actions.setDictionary(responseBody))
             }
-        )
+        ))
     }
 }
 
@@ -75,11 +75,11 @@ export const postFeatures = function(feature) {
     return function(dispatch, getState) {
         const endpoint = '/features'
 
-        return makeTrackedRequest('POST', endpoint, feature,
+        return dispatch(makeTrackedRequest('POST', endpoint, feature,
             function(responseBody) {
                 dispatch(featuresSlice.actions.setInDictionary(responseBody))
             }
-        )
+        ))
     }
 }
 
@@ -99,11 +99,11 @@ export const getFeature = function(name) {
     return function(dispatch, getState) {
         const endpoint = `/feature/${name}`
 
-        return makeTrackedRequest('GET', endpoint, null,
+        return dispatch(makeTrackedRequest('GET', endpoint, null,
             function(responseBody) {
                 dispatch(featuresSlice.actions.setInDictionary(responseBody))
             }
-        )
+        ))
     }
 }
 
@@ -123,10 +123,11 @@ export const patchFeature = function(feature) {
     return function(dispatch, getState) {
         const endpoint = `/feature/${feature.name}`
 
-        return makeTrackedRequest(function(responseBody) {
+        return dispatch(makeTrackedRequest('PATCH', endpoint, feature,
+        function(responseBody) {
                 dispatch(featuresSlice.actions.setInDictionary(responseBody))
             }
-        )
+        ))
     }
 }
 

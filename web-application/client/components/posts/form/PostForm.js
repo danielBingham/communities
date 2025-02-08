@@ -5,8 +5,10 @@ import { useNavigate } from 'react-router-dom'
 import { LinkIcon } from '@heroicons/react/24/outline'
 import { XCircleIcon } from '@heroicons/react/24/solid'
 
-import { deleteFile, cleanupRequest as cleanupFileRequest } from '/state/files'
-import { postPosts, patchPost, cleanupRequest, finishPostEdit } from '/state/posts'
+import { useRequest } from '/lib/hooks/useRequest'
+
+import { deleteFile } from '/state/files'
+import { postPosts, patchPost, finishPostEdit } from '/state/posts'
 
 import FileUploadInput from '/components/files/FileUploadInput'
 import DraftImageFile from '/components/files/DraftImageFile'
@@ -26,36 +28,12 @@ const PostForm = function({ postId }) {
 
     const [error,setError] = useState('')
 
-    const [requestId,setRequestId] = useState(null)
-    const request = useSelector(function(state) {
-        if ( requestId in state.posts.requests ) {
-            return state.posts.requests[requestId]
-        } else {
-            return null
-        }
-    })
+    const [postRequest, makePostRequest] = useRequest()
+    const [patchRequest, makePatchRequest] = useRequest()
+    const [deleteFileRequest, makeDeleteFileRequest] = useRequest()
 
-    const [deleteRequestId,setDeleteRequestId] = useState(null)
-    const deleteRequest = useSelector(function(state) {
-        if ( requestId in state.files.requests ) {
-            return state.files.requests[requestId]
-        } else {
-            return null
-        }
-    })
-
-
-    const currentUser = useSelector(function(state) {
-        return state.authentication.currentUser
-    })
-
-    const post = useSelector(function(state) {
-        if ( postId in state.posts.dictionary ) {
-            return state.posts.dictionary[postId]
-        } else {
-            return null
-        }
-    })
+    const currentUser = useSelector((state) => state.authentication.currentUser)
+    const post = useSelector((state) => postId && postId in state.posts.dictionary ? state.posts.dictionary[postId] : null)
 
     const dispatch = useDispatch()
     const navigate = useNavigate()
@@ -77,13 +55,13 @@ const PostForm = function({ postId }) {
         }
 
         if ( ! postId ) {
-            setRequestId(dispatch(postPosts(newPost)))
+            makePostRequest(postPosts(newPost))
         } else { 
             newPost.id = postId
-            setRequestId(dispatch(patchPost(newPost)))
+            makePatchRequest(patchPost(newPost))
             
             if ( post.fileId !== fileId ) {
-                setDeleteRequestId(dispatch(deleteFile(post.fileId)))
+                makeDeleteFileRequest(deleteFile(post.fileId))
             }
 
             dispatch(finishPostEdit(postId))
@@ -99,7 +77,7 @@ const PostForm = function({ postId }) {
         setError('')
 
         if ( ! post || ( fileId !== null && post.fileId !== fileId )) {
-            setDeleteRequestId(dispatch(deleteFile(fileId)))
+            makeDeleteFileRequest(deleteFile(fileId))
         }
 
         if ( postId ) {
@@ -146,27 +124,18 @@ const PostForm = function({ postId }) {
     }, [ postId, content, fileId, linkPreviewId ])
 
     useEffect(function() {
-        if ( request && request.state == 'fulfilled') {
+        if (postRequest && postRequest.state == 'fulfilled') {
             localStorage.removeItem(getDraftKey())
-            navigate(`/${currentUser.username}/${request.result.entity.id}`)
+            navigate(`/${currentUser.username}/${postRequest.response.body.entity.id}`)
         }
-    }, [ request ])
-    
-    useEffect(function() {
-        return function cleanup() {
-            if ( requestId ) {
-                dispatch(cleanupRequest({ requestId: requestId }))
-            }
-        }
-    }, [requestId])
+    }, [ postRequest ])
 
     useEffect(function() {
-        return function cleanup() {
-            if ( deleteRequestId ) {
-                dispatch(cleanupFileRequest({ requestId: deleteRequestId }))
-            }
+        if (patchRequest && patchRequest.state == 'fulfilled') {
+            localStorage.removeItem(getDraftKey())
+            navigate(`/${currentUser.username}/${patchRequest.response.body.entity.id}`)
         }
-    }, [ deleteRequestId ])
+    }, [ patchRequest ])
 
     let errorView = null
     if ( error == 'overlength') {

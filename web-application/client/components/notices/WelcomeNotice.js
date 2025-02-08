@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 
-import { patchUser, cleanupRequest } from '/state/users'
+import { useRequest } from '/lib/hooks/useRequest'
+
+import { patchUser } from '/state/users'
 
 import Button from '/components/generic/button/Button'
 import Modal from '/components/generic/modal/Modal'
@@ -12,17 +14,13 @@ import './WelcomeNotice.css'
 const WelcomeNotice = function({}) {
     const [isVisible, setIsVisible] = useState(true)
 
-    const [ requestId, setRequestId ] = useState(null)
-    const request = useSelector((state) => "requestId" in state.users.requests ? state.users.requests[requestId] : null)
+    const [ request, makeRequest] = useRequest()
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
-    
     if ( ! currentUser ) {
         console.error(new Error(`Attempt to show WelcomeNotice with no logged in user.`))
         return null
     }
-
-    const dispatch = useDispatch()
 
     useEffect(function() {
         if ( ! isVisible ) {
@@ -35,17 +33,9 @@ const WelcomeNotice = function({}) {
                 notices: notices
             }
 
-            setRequestId(dispatch(patchUser(userPatch)))
+            makeRequest(patchUser(userPatch))
         }
     }, [ isVisible ])
-
-    useEffect(function() {
-        return function cleanup() {
-            if ( requestId ) {
-                dispatch(cleanupRequest({ requestId: requestId }))
-            }
-        }
-    }, [ requestId ])
 
     return (
         <Modal isVisible={isVisible} setIsVisible={setIsVisible} noClose={true}>

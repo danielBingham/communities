@@ -53,11 +53,11 @@ export const getJobs = function() {
     return function(dispatch, getState) {
         const endpoint = '/jobs'
 
-        return makeTrackedRequest('GET', endpoint, null,
+        return dispatch(makeTrackedRequest('GET', endpoint, null,
             function(responseBody) {
                 dispatch(jobsSlice.actions.setDictionary(responseBody))
             }
-        )
+        ))
     }
 }
 
@@ -76,11 +76,11 @@ export const postJobs = function(name, data) {
     return function(dispatch, getState) {
         const endpoint = '/jobs'
 
-        return makeTrackedRequest('POST', endpoint, { name: name, data: data },
+        return dispatch(makeTrackedRequest('POST', endpoint, { name: name, data: data },
             function(responseBody) {
                 dispatch(jobsSlice.actions.setInDictionary(responseBody))
             }
-        )
+        ))
     }
 }
 
@@ -100,11 +100,11 @@ export const getJob = function(id) {
     return function(dispatch, getState) {
         const endpoint = `/job/${encodeUriComponent(id)}`
 
-        return makeTrackedRequest('GET', endpoint, null,
+        return dispatch(makeTrackedRequest('GET', endpoint, null,
             function(responseBody) {
                 dispatch(jobsSlice.actions.setInDictionary(responseBody))
             }
-        )
+        ))
     }
 }
 

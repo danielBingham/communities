@@ -29,17 +29,20 @@ module.exports = class PrivateGroupsMigration {
     }
 
     async initForward() {
+        this.logger.info(`Create the 'group_type' enum...`)
+        await this.database.query(`CREATE TYPE group_type as ENUM('open', 'private', 'hidden')`, [])
+
         this.logger.info(`Create the 'groups' table...`)
         await this.database.query(`
             CREATE TABLE IF NOT EXISTS groups (
                 id uuid primary key DEFAULT gen_random_uuid(),
+                type group_type DEFAULT 'hidden',
                 title text,
                 slug text,
                 about text,
 
                 file_id uuid REFERENCES files (id) DEFAULT NULL,
 
-                is_discoverable boolean DEFAULT FALSE,
                 entrance_questions jsonb DEFAULT '{}'::jsonb
             )
         `, [])
@@ -47,8 +50,11 @@ module.exports = class PrivateGroupsMigration {
         this.logger.info(`Create the index for the 'file_id' column...`)
         await this.database.query(`CREATE INDEX IF NOT EXISTS groups__file_id ON groups (file_id)`, [])
 
+        this.logger.info(`Create the 'group_member_status' type...`)
+        await this.database.query(`CREATE TYPE IF NOT EXISTS group_member_status AS ENUM('pending-invited', 'pending-requested', 'member')`, [])
+
         this.logger.info(`Create the 'group_member_role' type...`)
-        await this.database.query(`CREATE TYPE IF NOT EXISTS group_member_role AS ENUM("admin", "moderator", "member")`, [])
+        await this.database.query(`CREATE TYPE IF NOT EXISTS group_member_role AS ENUM('admin', 'moderator', 'member')`, [])
 
         this.logger.info(`Create the 'group_members' table...`)
         await this.database.query(`
@@ -57,7 +63,8 @@ module.exports = class PrivateGroupsMigration {
                 group_id uuid REFERENCES groups (id) ON DELETE CASCADE NOT NULL,
                 user_id uuid REFERENCES users (id) ON DELETE CASCADE NOT NULL,
 
-                is_subscribed boolean,
+                status group_member_status DEFAULT 'pending-requested',
+                entrance_answers jsonb DEFAULT '{}'::jsonb,
                 role group_member_role
             )
         `, [])
@@ -66,27 +73,51 @@ module.exports = class PrivateGroupsMigration {
         await this.database.query(`CREATE INDEX IF NOT EXISTS group_members__group_id ON group_members (group_id)`, [])
 
         this.logger.info(`Create the index for the 'user_id' field...`)
-        await this.database.query(`CREATE INDEX group_members__user_id ON group_members (user_id)`, [])
+        await this.database.query(`CREATE INDEX IF NOT EXISTS group_members__user_id ON group_members (user_id)`, [])
+
+        this.logger.info(`Create the 'post_type' enum...`)
+        await this.database.query(`CREATE TYPE IF NOT EXISTS post_type as ENUM('feed', 'group', 'event')`, [])
+
+        this.logger.info(`Add 'type' field to 'posts' table...`)
+        await this.database.query(`ALTER TABLE posts ADD COLUMN IF NOT EXISTS type post_type NOT NULL DEFAULT 'feed'`, [])
+
+        this.logger.info(`Add 'group_id' field to 'posts' table...`)
+        await this.database.query(`ALTER TABLE posts ADD COLUMN IF NOT EXISTS group_id uuid REFERENCES groups (id) DEFAULT NULL`, [])
     }
 
     async initBack() {
-        this.logger.info(`Removing the 'group_members__user_id' index...`)
+        this.logger.info(`Removing 'group_id' column from 'posts' table...`)
+        await this.database.query(`ALTER TABLE posts DROP COLUMN IF EXISTS group_id`, [])
+
+        this.logger.info(`Removing 'type' column from 'posts' table...`)
+        await this.database.query(`ALTER TABLE posts DROP COLUMN IF EXISTS type`, [])
+
+        this.logger.info(`Dropping 'post_type' enum...`)
+        await this.database.query(`DROP TYPE IF EXISTS post_type`, [])
+
+        this.logger.info(`Dropping the 'group_members__user_id' index...`)
         await this.database.query(`DROP INDEX IF EXISTS group_members__user_id`, [])
 
-        this.logger.info(`Removing the 'group_members_group_id' index...`)
+        this.logger.info(`Dropping the 'group_members_group_id' index...`)
         await this.database.query(`DROP INDEX IF EXISTS group_members__group_id`, [])
 
-        this.logger.info(`Removing the 'group_members' table...`)
+        this.logger.info(`Dropping the 'group_members' table...`)
         await this.database.query(`DROP TABLE IF EXISTS group_members`, [])
 
-        this.logger.info(`Removing the 'group_member_role' type...`)
+        this.logger.info(`Dropping the 'group_member_role' type...`)
         await this.database.query(`DROP TYPE IF EXISTS group_member_role`, [])
 
-        this.logger.info(`Removing index 'groups__file_id'...`)
+        this.logger.info(`Dropping the 'group_member_status' type...`)
+        await this.database.query(`DROP TYPE IF EXISTS group_member_status`, [])
+
+        this.logger.info(`Dropping index 'groups__file_id'...`)
         await this.database.query(`DROP INDEX IF EXISTS groups__file_id`, [])
 
-        this.logger.info(`Removing the 'groups' table...`)
+        this.logger.info(`Dropping the 'groups' table...`)
         await this.database.query(`DROP TABLE IF EXISTS groups`, [])
+
+        this.logger.info(`Dropping the 'group_type' enum...`)
+        await this.database.query(`DROP TYPE IF EXISTS group_type`, [])
     }
 
 

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 
+import { useRequest } from '/lib/hooks/useRequest'
+
 import { 
     UserCircleIcon,
     EnvelopeIcon,
@@ -28,24 +30,13 @@ const UserMenu = function(props) {
 
     // ======= Request Tracking =====================================
 
-    const [ deleteAuthenticationRequestId, setDeleteAuthenticationRequestId ] = useState(null)
-    const deleteAuthenticationRequest = useSelector(function(state) {
-        if (deleteAuthenticationRequestId) {
-            return state.authentication.requests[deleteAuthenticationRequestId]
-        } else {
-            return null
-        }
-    })
+    const [request, makeRequest] = useRequest()
 
     // ======= Redux State ==========================================
 
-    const currentUser = useSelector(function(state) {
-        return state.authentication.currentUser
-    })
+    const currentUser = useSelector((state) => state.authentication.currentUser)
 
     // ======= Actions and Event Handling ===========================
-
-    const dispatch = useDispatch()
 
     /**
      * Handle a Logout request by dispatching the appropriate action.
@@ -62,19 +53,10 @@ const UserMenu = function(props) {
         // login session.
         localStorage.clear()
 
-        setDeleteAuthenticationRequestId(dispatch(deleteAuthentication()))
+        makeRequest(deleteAuthentication())
     }
 
     // ======= Effect Handling ======================================
-
-    // Cleanup our request tracking.
-    useEffect(function() {
-        return function cleanup() {
-            if (  deleteAuthenticationRequestId ) {
-                dispatch(cleanupRequest({ requestId: deleteAuthenticationRequestId }))
-            }
-        }
-    }, [ deleteAuthenticationRequestId ])
 
     // ======= Render ===============================================
 

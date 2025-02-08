@@ -2,17 +2,16 @@ import React, { useState, useEffect } from 'react'
 import {
     BrowserRouter as Router,
     Routes,
-    Route,
-    Link
+    Route
 } from 'react-router-dom'
 
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
 import logger from '/logger'
 
-import { getConfiguration, getFeatures, cleanupRequest as cleanupSystemRequest } from '/state/system'
+import { getConfiguration } from '/state/system'
 import { getAuthentication } from '/state/authentication'
 
 import MainLayout from '/layouts/MainLayout'
@@ -25,7 +24,7 @@ import AdminPage from '/pages/AdminPage'
 
 import HomePage from '/pages/HomePage'
 
-import AboutPage from '/pages/page/AboutPage'
+import AboutPage from '/pages/about/AboutPage'
 import About from '/pages/about/views/About'
 import FrequentlyAskedQuestions from '/pages/about/views/FrequentlyAskedQuestions'
 import TermsOfService from '/pages/about/views/TermsOfService'
@@ -70,7 +69,6 @@ const App = function(props) {
     // ======= Request Tracking =====================================
  
     const [ configurationRequest, makeConfigurationRequest] = useRequest()
-    const [featuresRequest, makeFeaturesRequest] = useRequest()
     const [authenticationRequest, makeAuthenticationRequest] = useRequest()
 
     // ======= Redux State ==========================================
@@ -90,7 +88,6 @@ const App = function(props) {
             if ( ! configuration.maintenance_mode ) {
                 // Logger is a singleton, this will effect all other imports.
                 logger.setLevel(configuration.log_level)
-                makeFeaturesRequest(getFeatures())
                 makeAuthenticationRequest(getAuthentication())
             }
         } else if ( configurationRequest && configurationRequest.state == 'failed') {
@@ -112,13 +109,12 @@ const App = function(props) {
         )
    }
 
-    if ( ! configurationRequest || ! authenticationRequest || ! featuresRequest) {
+    if ( ! configurationRequest || ! authenticationRequest ) {
         return (
             <Spinner />
         )
     } else if ( (configurationRequest && configurationRequest.state != 'fulfilled')
         || (authenticationRequest && authenticationRequest.state != 'fulfilled')
-        || (featuresRequest && featuresRequest.state != 'fulfilled')
     ) {
         if (configurationRequest && configurationRequest.state == 'failed' && retries < 5) {
             return (<div className="error">Attempt to retrieve configuration from the backend failed, retrying...</div>)
@@ -126,8 +122,6 @@ const App = function(props) {
             return (<div className="error">Failed to connect to the backend.  Try refreshing.</div>)
         } else if (authenticationRequest && authenticationRequest.state == 'failed' ) {
             return (<div className="error">Authentication request failed with error: {authenticationRequest.error}.</div>)
-        } else if ( featuresRequest && featuresRequest.state == 'failed' ) {
-            return (<div className="error">Attempt to retrieve feature list failed with error: { featuresRequest.error}</div> )
         }
 
         return (
@@ -174,12 +168,6 @@ const App = function(props) {
 
                             <Route path="/" element={ <HomePage /> } />
 
-                            <Route path="/friends" element={ <FriendsPage />}>
-                                <Route path="requests" element={ <FriendRequestsList />} />
-                                <Route path="find" element={ <FindFriends /> } />
-                                <Route index element={<YourFriendsList />} />
-                            </Route>
-
                             <Route path="/account" element={<UserAccountPage /> }>
                                 <Route path="profile" element={ <UserProfileEditForm />  } />
                                 <Route path="change-password" element={ <ChangePasswordForm /> } />
@@ -190,6 +178,16 @@ const App = function(props) {
                             </Route>
 
                             <Route path="/admin" element={ <AdminPage />} />
+
+                            <Route path="/friends" element={ <FriendsPage />}>
+                                <Route path="requests" element={ <FriendRequestsList />} />
+                                <Route path="find" element={ <FindFriends /> } />
+                                <Route index element={<YourFriendsList />} />
+                            </Route>
+
+                            {/* <Route path="/groups" element={<GroupsPage />}>
+                                <Route index element={<YourGroupsPage />} />
+                            </Route> */}
 
                             <Route path="/:name">
                                 <Route path=":postId" element={ <PostPage /> } />

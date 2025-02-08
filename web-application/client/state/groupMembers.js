@@ -82,7 +82,7 @@ export const getGroupMembers = function(groupId, name, params) {
 
         dispatch(groupMembersSlice.actions.makeGroupQuery({ name: name }))
 
-        return makeTrackedRequest('GET', endpoint, null,
+        return dispatch(makeTrackedRequest('GET', endpoint, null,
             function(response) {
                 dispatch(groupMembersSlice.actions.setGroupMembersInDictionary({ dictionary: response.dictionary}))
 
@@ -90,7 +90,7 @@ export const getGroupMembers = function(groupId, name, params) {
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -110,13 +110,13 @@ export const postGroupMembers = function(member) {
     return function(dispatch, getState) {
         const endpoint = `/group/${encodeURIComponent(member.groupId)}/members`
         const body = member
-        return makeTrackedRequest('POST', endpoint, body,
+        return dispatch(makeTrackedRequest('POST', endpoint, body,
             function(response) {
                 dispatch(groupMembersSlice.actions.setGroupMembersInDictionary({ entity: response.entity}))
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -134,13 +134,13 @@ export const postGroupMembers = function(member) {
  */
 export const getGroupMember = function(groupId, userId) {
     return function(dispatch, getState) {
-        return makeTrackedRequest('GET', `/group/${encodeURIComponent(groupId)}/member/${encodeURIComponent(userId)}`, null,
+        return dispatch(makeTrackedRequest('GET', `/group/${encodeURIComponent(groupId)}/member/${encodeURIComponent(userId)}`, null,
             function(response) {
                 dispatch(groupMembersSlice.actions.setGroupMembersInDictionary({ entity: response.entity}))
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -158,13 +158,13 @@ export const getGroupMember = function(groupId, userId) {
  */
 export const patchGroupMember = function(member) {
     return function(dispatch, getState) {
-        return makeTrackedRequest('PATCH', `/group/${encodeURIComponent(member.groupId)}/member/${encodeURIComponent(member.userId)}`, member,
+        return dispatch(makeTrackedRequest('PATCH', `/group/${encodeURIComponent(member.groupId)}/member/${encodeURIComponent(member.userId)}`, member,
             function(response) {
                 dispatch(groupMembersSlice.actions.setGroupMembersInDictionary({ entity: response.entity}))
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -182,12 +182,12 @@ export const patchGroupMember = function(member) {
  */
 export const deleteGroupMember = function(member) {
     return function(dispatch, getState) {
-        return makeTrackedRequest('DELETE', `/group/${encodeURIComponent(member.groupId)}/member/${encodeURIComponent(member.userId)}`, null,
+        return dispatch(makeTrackedRequest('DELETE', `/group/${encodeURIComponent(member.groupId)}/member/${encodeURIComponent(member.userId)}`, null,
             function(response) {
                 dispatch(groupMembersSlice.actions.removeGroupMember({ entity: response.entity}))
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 } 
 

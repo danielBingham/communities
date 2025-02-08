@@ -131,7 +131,7 @@ export const getPostComments = function(postId, name, params) {
 
         dispatch(postCommentsSlice.actions.makePostCommentQuery({ name: name }))
 
-        return makeTrackedRequest('GET', endpoint, null,
+        return dispatch(makeTrackedRequest('GET', endpoint, null,
             function(response) {
                 dispatch(postCommentsSlice.actions.setPostCommentsInDictionary({ dictionary: response.dictionary}))
 
@@ -139,7 +139,7 @@ export const getPostComments = function(postId, name, params) {
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -158,13 +158,13 @@ export const getPostComments = function(postId, name, params) {
 export const postPostComments = function(comment) {
     return function(dispatch, getState) {
         const endpoint = `/post/${encodeURIComponent(comment.postId)}/comments`
-        return makeTrackedRequest('POST', endpoint, comment,
+        return dispatch(makeTrackedRequest('POST', endpoint, comment,
             function(response) {
                 dispatch(postCommentsSlice.actions.setPostCommentsInDictionary({ entity: response.entity}))
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -183,13 +183,13 @@ export const postPostComments = function(comment) {
  */
 export const getPostComment = function(postId, id) {
     return function(dispatch, getState) {
-        return makeTrackedRequest('GET', `/post/${encodeURIComponent(postId)}/comment/${encodeURIComponent(id)}`, null,
+        return dispatch(makeTrackedRequest('GET', `/post/${encodeURIComponent(postId)}/comment/${encodeURIComponent(id)}`, null,
             function(response) {
                 dispatch(postCommentsSlice.actions.setPostCommentsInDictionary({ entity: response.entity}))
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -207,13 +207,13 @@ export const getPostComment = function(postId, id) {
  */
 export const patchPostComment = function(comment) {
     return function(dispatch, getState) {
-        return makeTrackedRequest('PATCH', `/post/${encodeUriComponent(comment.postId)}/comment/${encodeURIComponent(comment.id)}`, comment,
+        return dispatch(makeTrackedRequest('PATCH', `/post/${encodeUriComponent(comment.postId)}/comment/${encodeURIComponent(comment.id)}`, comment,
             function(response) {
                 dispatch(postCommentsSlice.actions.setPostCommentsInDictionary({ entity: response.entity}))
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -231,13 +231,13 @@ export const patchPostComment = function(comment) {
  */
 export const deletePostComment = function(comment) {
     return function(dispatch, getState) {
-        return makeTrackedRequest('DELETE', `/post/${encodeURIComponent(comment.postId)}/comment/${encodeURIComponent(comment.id)}`, null,
+        return dispatch(makeTrackedRequest('DELETE', `/post/${encodeURIComponent(comment.postId)}/comment/${encodeURIComponent(comment.id)}`, null,
             function(response) {
                 dispatch(postCommentsSlice.actions.removePostComment({ entity: comment}))
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 } 
 

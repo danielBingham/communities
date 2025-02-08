@@ -8,7 +8,6 @@ import './ContributionView.css'
 const ContributionView = function() {
     const [showMore, setShowMore] = useState(false)
 
-    const currentUser = useSelector((state) => state.authentication.currentUser)
     const portalURI = useSelector((state) => state.system.configuration.stripe.portal)
 
     return (

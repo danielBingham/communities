@@ -82,7 +82,7 @@ export const getGroups = function(name, params) {
 
         dispatch(groupsSlice.actions.makeGroupQuery({ name: name }))
 
-        return makeTrackedRequest('GET', endpoint, null,
+        return dispatch(makeTrackedRequest('GET', endpoint, null,
             function(response) {
                 dispatch(groupsSlice.actions.setGroupsInDictionary({ dictionary: response.dictionary}))
 
@@ -90,7 +90,7 @@ export const getGroups = function(name, params) {
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -110,13 +110,13 @@ export const postGroups = function(group) {
     return function(dispatch, getState) {
         const endpoint = '/groups'
 
-        return makeTrackedRequest('POST', endpoint, group,
+        return dispatch(makeTrackedRequest('POST', endpoint, group,
             function(response) {
                 dispatch(groupsSlice.actions.setGroupsInDictionary({ entity: response.entity}))
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -135,13 +135,13 @@ export const postGroups = function(group) {
  */
 export const getGroup = function(id) {
     return function(dispatch, getState) {
-        return makeTrackedRequest('GET', `/group/${encodeURIComponent(id)}`, null,
+        return dispatch(makeTrackedRequest('GET', `/group/${encodeURIComponent(id)}`, null,
             function(response) {
                 dispatch(groupsSlice.actions.setGroupsInDictionary({ entity: response.entity}))
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -159,12 +159,12 @@ export const getGroup = function(id) {
  */
 export const patchGroup = function(group) {
     return function(dispatch, getState) {
-        return makeTrackedRequest('PATCH', `/group/${encodeURIComponent(group.id)}`, group,
+        return dispatch(makeTrackedRequest('PATCH', `/group/${encodeURIComponent(group.id)}`, group,
             function(response) {
                 dispatch(groupsSlice.actions.setGroupsInDictionary({ entity: response.entity}))
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -182,11 +182,11 @@ export const patchGroup = function(group) {
  */
 export const deleteGroup = function(group) {
     return function(dispatch, getState) {
-        return makeTrackedRequest('DELETE', `/group/${encodeURIComponent(group.id)}`, null,
+        return dispatch(makeTrackedRequest('DELETE', `/group/${encodeURIComponent(group.id)}`, null,
             function(response) {
                 dispatch(groupsSlice.actions.removeGroup({ entity: group}))
             }
-        )
+        ))
     }
 } 
 

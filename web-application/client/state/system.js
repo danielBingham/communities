@@ -39,33 +39,16 @@ const systemSlice = createSlice({
  */
 export const getConfiguration = function() {
     return function(dispatch, getState) {
-        return makeTrackedRequest('GET', '/config', null,
+        return dispatch(makeTrackedRequest('GET', '/config', null,
             function(config) {
+                dispatch(systemSlice.actions.setFeatures(config.features))
+                delete config.features
                 dispatch(systemSlice.actions.setConfiguration(config))
             }
-        )
+        ))
     }
 }
 
-/**
- * GET /features
- *
- * Get enabled feature flags from the backend.
- *
- * Makes the request async and returns an id that can be used to track the
- * request and get the results of a completed request from this state slice.
- *
- * @returns {string} A uuid requestId that can be used to track this request.
- */
-export const getFeatures = function() {
-    return function(dispatch, getState) {
-        return makeTrackedRequest('GET', '/features', null,
-            function(features) {
-                dispatch(systemSlice.actions.setFeatures(features))
-            }
-        )
-    }
-}
 
 export const { reset, setConfiguration, setFeatures } = systemSlice.actions
 export default systemSlice.reducer

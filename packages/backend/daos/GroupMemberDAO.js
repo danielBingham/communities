@@ -43,6 +43,19 @@ const SCHEMA = {
                 select: 'always',
                 key: 'userId'
             },
+            'status': {
+                insert: 'required',
+                update: 'allowed',
+                select: 'always',
+                key: 'status'
+            },
+            'entrance_answers': {
+                insert: 'allowed',
+                insertDefault: () => {},
+                update: 'allowed',
+                select: 'always',
+                key: 'entranceAnswers'
+            },
             'role': {
                 insert: 'required',
                 update: 'allowed',

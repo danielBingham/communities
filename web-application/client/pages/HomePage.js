@@ -2,13 +2,17 @@ import React, { useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import {  Link } from 'react-router-dom'
 
+import { 
+    HomeIcon,
+    UsersIcon,
+    UserGroupIcon
+} from '@heroicons/react/24/outline'
+
 import { useRequest } from '/lib/hooks/useRequest'
 
 import { getPosts } from '/state/posts'
 
-import { 
-    UserGroupIcon 
-} from '@heroicons/react/24/outline'
+import GroupFeedMenu from '/components/groups/menu/GroupFeedMenu'
 
 import PostForm from '/components/posts/form/PostForm'
 import HomeFeed from '/components/feeds/HomeFeed'
@@ -39,11 +43,17 @@ const HomePage = function() {
     const inProgress = ! request || request.state !== 'fulfilled'
     return (
         <div id="home-page">
-            <menu className="home-page">
-                <li>
-                    <Link to="/groups"><UserGroupIcon /> <span className="nav-text">Groups</span></Link>
-                </li>
-            </menu>
+            <div className="home-page__sidebar">
+                <h2>Feeds</h2>
+                <menu className="home-page__menu">
+                    <li>
+                        <a href="/"><HomeIcon /> Home</a>
+                    </li>
+                    <li>
+                        <GroupFeedMenu />
+                    </li>
+                </menu>
+            </div>
             <div className="content">
                 <div className="home-feeds">
                     <div className="content">

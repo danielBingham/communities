@@ -18,6 +18,10 @@ export function useRequest() {
         setRequestId(dispatch(reduxThunk))
     }
 
+    const resetRequest = function() {
+        setRequestId(null) 
+    }
+
     useEffect(function() {
         return function cleanup() {
             if ( requestId ) {
@@ -26,5 +30,5 @@ export function useRequest() {
         }
     }, [ requestId ])
 
-    return [ request, makeRequest ]
+    return [ request, makeRequest, resetRequest ]
 }

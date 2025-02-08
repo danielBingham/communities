@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate, Link } from 'react-router-dom'
 
+import { useRequest } from '/lib/hooks/useRequest'
+
 import { getPost, cleanupRequest } from '/state/posts'
 
 import Linkify from 'react-linkify'
@@ -18,52 +20,25 @@ import PostImage from '/components/posts/PostImage'
 
 import './Post.css'
 
-const Post = function({ id, expanded }) {
+const Post = function({ id, expanded, showLoading }) {
 
     const [showMore, setShowMore] = useState(false) 
 
-    const [ requestId, setRequestId ] = useState(null)
-    const request = useSelector(function(state) {
-        if( requestId in state.posts.requests) {
-            return state.posts.requests[requestId]
-        } else {
-            return null
-        }
-    })
+    const [request, makeRequest] = useRequest()
 
-    const post = useSelector(function(state) {
-        return state.posts.dictionary[id]
-    })
-
-    const user = useSelector(function(state) {
-        if ( post?.userId ) {
-            return state.users.dictionary[post.userId]
-        } else {
-            return null
-        }
-    })
-
-    const dispatch = useDispatch()
-    const navigate = useNavigate()
+    const post = useSelector((state) => id && id in state.posts.dictionary ? state.posts.dictionary[id] : null) 
+    const user = useSelector((state) => post?.userId && post.userId in state.users.dictionary ? state.users.dictionary[post.userId] : null) 
 
     useEffect(function() {
         if ( ! post ) {
-            setRequestId(dispatch(getPost(id)))
+            makeRequest(getPost(id))
         }
         if ( expanded ) {
             setShowMore(true)
         }
-    }, [ id ])
+    }, [ id, post, expanded ])
 
-    useEffect(function() {
-        return function cleanup() {
-            if ( requestId ) {
-                dispatch(cleanupRequest({ requestId: requestId }))
-            }
-        }
-    }, [ requestId ])
-
-    if ( (request && request !== null && request.state == 'failed' && ( ! post || ! user ))) {
+    if ( (request !== null && request.state == 'failed' && ( ! post || ! user ))) {
         return (
             <div id={id} className="post">
                 <div className="post__error 404">
@@ -74,8 +49,8 @@ const Post = function({ id, expanded }) {
         )
     }
 
-    if ( request && request.state == 'pending' ) {
-        return ( <Spinner /> )
+    if ( showLoading && (request && request.state == 'pending' )) {
+        return ( <div id={id} className="post"><Spinner /></div> )
     }
 
     if ( ! post ) {

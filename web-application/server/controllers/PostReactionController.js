@@ -99,7 +99,7 @@ module.exports = class PostReactionController {
 
         await this.postReactionDAO.insertPostReactions(reaction)
 
-        let activity = results.rows[0].activity
+        let activity = parseInt(results.rows[0].activity)
         if ( reaction.reaction == 'block' ) {
             activity -= 1
         } else {
@@ -175,7 +175,7 @@ module.exports = class PostReactionController {
 
         await this.postReactionDAO.updatePostReaction(reaction)
 
-        let activity = existingPostResults.rows[0].activity
+        let activity = parseInt(existingPostResults.rows[0].activity)
         let existingReaction = existing.rows[0].reaction
         if ( existingReaction != 'block' && reaction.reaction == 'block' ) {
             activity -= 2

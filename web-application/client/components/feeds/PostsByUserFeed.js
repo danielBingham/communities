@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import React, { useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
-import { getPosts, cleanupRequest } from '/state/posts'
+import { useRequest } from '/lib/hooks/useRequest'
+
+import { getPosts } from '/state/posts'
 
 import PostList from '/components/posts/list/PostList'
 
@@ -11,16 +12,7 @@ import './PostsByUserFeed.css'
 const PostsByUserFeed = function({ id }) {
     const [ searchParams, setSearchParams ] = useSearchParams()
 
-    const [requestId,setRequestId] = useState(null)
-    const request = useSelector(function(state) {
-        if ( requestId in state.posts.requests) {
-            return state.posts.requests[requestId]
-        } else {
-            return null
-        }
-    })
-
-    const dispatch = useDispatch()
+    const [request, makeRequest] = useRequest()
 
     const setSort = function(sortBy) {
         searchParams.set('sort', sortBy)
@@ -33,7 +25,7 @@ const PostsByUserFeed = function({ id }) {
             sort = 'newest'
         } 
 
-        setRequestId(dispatch(getPosts('PostsByUser', { userId: id, sort: sort })))
+        makeRequest(getPosts('PostsByUser', { userId: id, sort: sort }))
     }, [ id ])
 
     useEffect(function() {
@@ -42,16 +34,8 @@ const PostsByUserFeed = function({ id }) {
             sort = 'newest'
         } 
 
-        setRequestId(dispatch(getPosts('PostsByUser', { userId: id, sort: sort })))
+        makeRequest(getPosts('PostsByUser', { userId: id, sort: sort }))
     }, [ searchParams ])
-
-    useEffect(function() {
-        return function cleanup() {
-            if ( requestId ) {
-                dispatch(cleanupRequest({ requestId: requestId }))
-            }
-        }
-    }, [ requestId ])
 
     let sort = searchParams.get('sort') 
     if ( ! sort ) {

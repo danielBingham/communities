@@ -1,42 +1,27 @@
-import React, { useState, useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import React, { useEffect } from 'react'
+import { useSelector } from 'react-redux'
 
-import { getLinkPreview, cleanupRequest } from '/state/linkPreviews'
+import logger from '/logger'
+
+import { useRequest } from '/lib/hooks/useRequest'
+
+import { getLinkPreview } from '/state/linkPreviews'
 
 import './LinkPreview.css'
 
 const LinkPreview = function({ id }) {
 
-    const [requestId, setRequestId] = useState(null)
-    const request = useSelector(function(state) {
-        if ( requestId in state.linkPreviews.requests ) {
-            return state.linkPreviews.requests[requestId]
-        } else {
-            return null
-        }
-    })
+    const [request, makeRequest] = useRequest()
 
-    const linkPreview = useSelector(function(state) {
-        if ( id in state.linkPreviews.dictionary ) {
-            return state.linkPreviews.dictionary[id]
-        } else {
-            return null
-        }
-    })
-
-    const dispatch = useDispatch()
+    const linkPreview = useSelector((state) => id && id in state.linkPreviews.dictionary ? state.linkPreviews.dictionary[id] : null) 
 
     useEffect(function() {
-        setRequestId(dispatch(getLinkPreview(id)))
+        if ( id ) {
+            makeRequest(getLinkPreview(id))
+        } else {
+            logger.error(new Error('Attempt to load a LinkPreview without an id.'))
+        }
     }, [id])
-
-    useEffect(function() {
-        return function cleanup() {
-            if ( requestId ) {
-                dispatch(cleanupRequest({ requestId: requestId }))
-            }
-        }
-    }, [ requestId ])
 
     if ( ! linkPreview ) {
         return null
@@ -49,8 +34,14 @@ const LinkPreview = function({ id }) {
 
     const url = new URL(linkPreview.url)
     if ( url.host == 'www.youtube.com' || url.host == 'youtube.com' || url.host == 'youtu.be' ) {
-        const searchParams = url.searchParams
-        const videoId = searchParams.get("v")
+        let videoId = ''
+        if ( url.host == 'youtu.be' ) {
+            videoId = url.pathname.split('/')[1]
+        } else {
+            const searchParams = url.searchParams
+            videoId = searchParams.get("v")
+        } 
+
         return ( 
             <div className="link-preview">
                 <iframe

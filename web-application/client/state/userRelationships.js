@@ -125,7 +125,7 @@ export const getUserRelationships = function(name, userId, params) {
     return function(dispatch, getState) {
         const endpoint = `/user/${encodeURIComponent(userId)}/relationships${( params ? '?' + qs.stringify(params) : '')}`
         dispatch(userRelationshipsSlice.actions.makeUserRelationshipQuery({ name: name }))
-        return makeTrackedRequest('GET', endpoint, null,
+        return dispatch(makeTrackedRequest('GET', endpoint, null,
             function(response) {
                 dispatch(userRelationshipsSlice.actions.setUserRelationshipsInDictionary({ dictionary: response.dictionary }))
 
@@ -133,7 +133,7 @@ export const getUserRelationships = function(name, userId, params) {
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -151,13 +151,13 @@ export const getUserRelationships = function(name, userId, params) {
  */
 export const postUserRelationships = function(relationship) {
     return function(dispatch, getState) {
-        return makeTrackedRequest('POST', `/user/${encodeURIComponent(relationship.userId)}/relationships`, relationship,
+        return dispatch(makeTrackedRequest('POST', `/user/${encodeURIComponent(relationship.userId)}/relationships`, relationship,
             function(response) {
                 dispatch(userRelationshipsSlice.actions.setUserRelationshipsInDictionary({ entity: response.entity }))
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -176,13 +176,13 @@ export const postUserRelationships = function(relationship) {
  */
 export const getUserRelationship = function(userId, relationId) {
     return function(dispatch, getState) {
-        return makeTrackedRequest('GET', `/user/${encodeURIComponent(userId)}/relationship/${encodeURIComponent(relationId)}`, null,
+        return dispatch(makeTrackedRequest('GET', `/user/${encodeURIComponent(userId)}/relationship/${encodeURIComponent(relationId)}`, null,
             function(response) {
                 dispatch(userRelationshipsSlice.actions.setUserRelationshipsInDictionary({ entity: response.entity }))
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -200,14 +200,14 @@ export const getUserRelationship = function(userId, relationId) {
  */
 export const patchUserRelationship = function(relationship) {
     return function(dispatch, getState) {
-        return makeTrackedRequest('PATCH', `/user/${encodeURIComponent(relationship.userId)}/relationship/${encodeURIComponent(relationship.relationId)}`, relationship,
+        return dispatch(makeTrackedRequest('PATCH', `/user/${encodeURIComponent(relationship.userId)}/relationship/${encodeURIComponent(relationship.relationId)}`, relationship,
             function(response) {
                 dispatch(userRelationshipsSlice.actions.setUserRelationshipsInDictionary({ entity: response.entity }))
 
                 dispatch(setRelationsInState(response.relations))
 
             }
-        )
+        ))
     }
 }
 
@@ -225,13 +225,13 @@ export const patchUserRelationship = function(relationship) {
  */
 export const deleteUserRelationship = function(relationship) {
     return function(dispatch, getState) {
-        return makeTrackedRequest('DELETE', `/user/${encodeURIComponent(relationship.userId)}/relationship/${encodeURIComponent(relationship.relationId)}`, null,
+        return dispatch(makeTrackedRequest('DELETE', `/user/${encodeURIComponent(relationship.userId)}/relationship/${encodeURIComponent(relationship.relationId)}`, null,
             function(response) {
                 dispatch(userRelationshipsSlice.actions.removeUserRelationship({ entity: response.entity }))
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 } 
 

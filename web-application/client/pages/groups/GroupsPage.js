@@ -1,0 +1,36 @@
+import React from 'react'
+import { Outlet, NavLink } from 'react-router-dom'
+
+import { 
+    MagnifyingGlassIcon as MagnifyingGlassOutline,
+    UserGroupIcon as UserGroupIconOutline,
+    UserPlusIcon as UserPlusIconOutline
+} from '@heroicons/react/24/outline'
+
+import { 
+    MagnifyingGlassIcon as MagnifyingGlassSolid,
+    UserGroupIcon as UserGroupIconSolid,
+    UserPlusIcon as UserPlusIconSolid
+} from '@heroicons/react/24/solid'
+
+import './GroupsPage.css'
+
+const GroupsPage = function() {
+    return (
+        <div id="friends-page">
+            <menu className="friends-page__menu">
+                <li><NavLink to="/groups" end>
+                    <UserGroupIconSolid className="solid" /><UserGroupIconOutline className="outline" /> <span className="nav-text">Your Groups</span>
+                </NavLink> </li>
+                <li><NavLink to="/groups/find" end>
+                    <MagnifyingGlassSolid className="solid" /><MagnifyingGlassOutline className="outline" /> <span className="nav-text">Find Groups</span>
+                </NavLink></li>
+            </menu>
+            <div className="content">
+                { <Outlet /> }
+            </div>
+        </div>
+    )
+}
+
+export default GroupsPage

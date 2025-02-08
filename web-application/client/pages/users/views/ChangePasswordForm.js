@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { patchAuthentication, cleanupRequest as cleanupAuthenticationRequest } from '/state/authentication'
-import { patchUser, cleanupRequest } from '/state/users'
+import { useRequest } from '/lib/hooks/useRequest'
+
+import { patchAuthentication } from '/state/authentication'
+import { patchUser } from '/state/users'
 
 import Input from '/components/generic/input/Input'
 import Spinner from '/components/Spinner'
@@ -22,29 +24,12 @@ const ChangePasswordForm = function(props) {
 
     // ======= Request Tracking =====================================
 
-    const [requestId, setRequestId] = useState(null)
-    const request = useSelector(function(state) {
-        if ( requestId ) {
-            return state.users.requests[requestId]
-        } else {
-            return null
-        }
-    })
-
-    const [ authRequestId, setAuthRequestId] = useState(null)
-    const authRequest = useSelector(function(state) {
-        if ( authRequestId ) {
-            return state.authentication.requests[authRequestId]
-        } else {
-            return null
-        }
-    })
+    const [request, makeRequest] = useRequest()
+    const [authRequest, makeAuthRequest] = useRequest()
 
     // ======= Redux State ==========================================
 
-    const currentUser = useSelector(function(state) {
-        return state.authentication.currentUser
-    })
+    const currentUser = useSelector((state) => state.authentication.currentUser)
 
     // ======= Actions and Event Handling ===========================
 
@@ -97,8 +82,7 @@ const ChangePasswordForm = function(props) {
             return
         }
 
-        setAuthRequestId(dispatch(patchAuthentication(currentUser.email, oldPassword)))
-
+        makeAuthRequest(patchAuthentication(currentUser.email, oldPassword))
     }
 
     // ======= Effect Handling ======================================
@@ -112,7 +96,7 @@ const ChangePasswordForm = function(props) {
                     oldPassword: oldPassword
                 }
 
-                setRequestId(dispatch(patchUser(user)))
+                makeRequest(patchUser(user))
             }
         }
     }, [ authRequest ])
@@ -124,25 +108,6 @@ const ChangePasswordForm = function(props) {
             setOldPassword('')
         }
     }, [ request ])
-
-    // Clean up our request.
-    useEffect(function() {
-        return function cleanup() {
-            if ( requestId ) {
-                dispatch(cleanupRequest({ requestId: requestId }))
-            }
-        }
-    }, [ requestId ])
-
-    // Clean up our request.
-    useEffect(function() {
-        return function cleanup() {
-            if ( authRequestId ) {
-                dispatch(cleanupAuthenticationRequest({ requestId: authRequestId }))
-            }
-        }
-    }, [ authRequestId ])
-
 
     // ======= Render ===============================================
 

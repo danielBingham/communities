@@ -82,7 +82,7 @@ export const getLinkPreviews = function(name, params) {
 
         dispatch(linkPreviewsSlice.actions.makeLinkPreviewQuery({ name: name }))
 
-        return makeTrackedRequest('GET', endpoint, null,
+        return dispatch(makeTrackedRequest('GET', endpoint, null,
             function(response) {
                 dispatch(linkPreviewsSlice.actions.setLinkPreviewsInDictionary({ dictionary: response.dictionary}))
 
@@ -90,7 +90,7 @@ export const getLinkPreviews = function(name, params) {
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -109,13 +109,13 @@ export const getLinkPreviews = function(name, params) {
 export const postLinkPreviews = function(linkPreview) {
     return function(dispatch, getState) {
         const endpoint = '/link-previews'
-        return makeTrackedRequest('POST', endpoint, linkPreview,
+        return dispatch(makeTrackedRequest('POST', endpoint, linkPreview,
             function(response) {
                 dispatch(linkPreviewsSlice.actions.setLinkPreviewsInDictionary({ entity: response.entity}))
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -134,13 +134,13 @@ export const postLinkPreviews = function(linkPreview) {
  */
 export const getLinkPreview = function(id) {
     return function(dispatch, getState) {
-        return makeTrackedRequest('GET', `/link-preview/${encodeURIComponent(id)}`, null,
+        return dispatch(makeTrackedRequest('GET', `/link-preview/${encodeURIComponent(id)}`, null,
             function(response) {
                 dispatch(linkPreviewsSlice.actions.setLinkPreviewsInDictionary({ entity: response.entity}))
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -158,13 +158,13 @@ export const getLinkPreview = function(id) {
  */
 export const patchLinkPreview = function(linkPreview) {
     return function(dispatch, getState) {
-        return makeTrackedRequest('PATCH', `/link-preview/${encodeURIComponent(linkPreview.id)}`, linkPreview,
+        return dispatch(makeTrackedRequest('PATCH', `/link-preview/${encodeURIComponent(linkPreview.id)}`, linkPreview,
             function(response) {
                 dispatch(linkPreviewsSlice.actions.setLinkPreviewsInDictionary({ entity: response.entity}))
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 

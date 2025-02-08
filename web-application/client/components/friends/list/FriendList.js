@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useSearchParams } from 'react-router-dom'
 
-import { UserCircleIcon } from '@heroicons/react/24/outline'
+import { useRequest } from '/lib/hooks/useRequest'
 
-import {getUserRelationships, clearUserRelationshipQuery, cleanupRequest } from '/state/userRelationships'
+import {getUserRelationships, clearUserRelationshipQuery } from '/state/userRelationships'
 
 import UserBadge from '/components/users/UserBadge'
 
@@ -25,28 +25,14 @@ import './FriendList.css'
 const FriendList = function({ userId, params }) {
     const [ searchParams, setSearchParams ] = useSearchParams()
    
-
     // ======= Request Tracking =====================================
 
-    const [ requestId, setRequestId ] = useState(null)
-    const request = useSelector(function(state) {
-        if ( requestId ) {
-            return state.userRelationships.requests[requestId]
-        } else {
-            return null
-        }
-    })
+    const [request, makeRequest] = useRequest()
 
     // ======= Redux State ==========================================
 
     const relationshipDictionary = useSelector((state) => state.userRelationships.dictionary)
-    const relationships = useSelector(function(state) {
-        if ( ! state.userRelationships.queries['FriendList'] ) {
-            return []
-        } else {
-            return state.userRelationships.queries['FriendList'].list
-        }
-    })
+    const relationships = useSelector((state) => 'FriendList' in state.userRelationships.queries ? state.userRelationships.queries['FriendList'].list : [])
 
     const meta = useSelector(function(state) {
         if ( ! state.userRelationships.queries['FriendList'] ) {
@@ -72,20 +58,11 @@ const FriendList = function({ userId, params }) {
             queryParams.page = 1
         }
 
-        setRequestId(dispatch(getUserRelationships('FriendList', userId, queryParams)))
+        makeRequest(getUserRelationships('FriendList', userId, queryParams))
         return function cleanup() {
             dispatch(clearUserRelationshipQuery({ name: 'FriendList'}))
         }
     }, [ searchParams, params ])
-
-    // Clean up our request.
-    useEffect(function() {
-        return function cleanup() {
-            if ( requestId ) {
-                dispatch(cleanupRequest({ requestId: requestId }))
-            }
-        }
-    }, [ requestId ])
 
     // ======= Render ===============================================
 

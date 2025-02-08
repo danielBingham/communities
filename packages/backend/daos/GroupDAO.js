@@ -31,6 +31,12 @@ const SCHEMA = {
                 select: 'always',
                 key: 'id'
             },
+            'type': {
+                insert: 'required',
+                update: 'allowed',
+                select: 'always',
+                key: 'type'
+            },
             'title': {
                 insert: 'required',
                 update: 'allowed',
@@ -55,14 +61,9 @@ const SCHEMA = {
                 select: 'always',
                 key: 'fileId'
             },
-            'is_discoverable': {
-                insert: 'allowed',
-                update: 'allowed',
-                select: 'always',
-                key: 'isDiscoverable'
-            },
             'entrance_questions': {
                 insert: 'allowed',
+                insertDefault: () => {},
                 update: 'allowed',
                 select: 'always',
                 key: 'entranceQuestions'

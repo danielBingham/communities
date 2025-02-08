@@ -188,25 +188,29 @@ CREATE INDEX tags__name_trgm ON tags USING GIN (name gin_trgm_ops);
  * Groups
  ******************************************************************************/
 
+CREATE TYPE group_type as ENUM('open', 'private', 'hidden');
 CREATE TABLE groups (
     id uuid primary key DEFAULT gen_random_uuid(),
+    type group_type,
     title text,
     slug text,
     about text,
 
     file_id uuid REFERENCES files (id) DEFAULT NULL,
 
-    is_discoverable boolean DEFAULT FALSE,
     entrance_questions jsonb DEFAULT '{}'::jsonb
 );
 CREATE INDEX groups__file_id ON groups (file_id);
 
+CREATE TYPE group_member_status AS ENUM('pending-invited', 'pending-requested', 'member');
 CREATE TYPE group_member_role AS ENUM('admin', 'moderator', 'member'); 
 CREATE TABLE group_members (
     id uuid primary key DEFAULT gen_random_uuid(),
     group_id uuid REFERENCES groups (id) ON DELETE CASCADE NOT NULL,
     user_id uuid REFERENCES users (id) ON DELETE CASCADE NOT NULL,
 
+    status group_member_status DEFAULT 'pending-requested',
+    entrance_answers jsonb DEFAULT '{}'::jsonb,
     role group_member_role DEFAULT 'member'
 );
 CREATE INDEX group_members__group_id ON group_members (group_id);
@@ -216,7 +220,7 @@ CREATE INDEX group_members__user_id ON group_members (user_id);
  * Tags 
  *****************************************************************************/
 
-CREATE TYPE post_type as ENUM("feed", "group", "event");
+CREATE TYPE post_type as ENUM('feed', 'group', 'event');
 CREATE TABLE posts (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id uuid REFERENCES users (id) ON DELETE CASCADE NOT NULL,
@@ -224,7 +228,7 @@ CREATE TABLE posts (
     file_id uuid REFERENCES files (id) DEFAULT NULL,
     link_preview_id uuid REFERENCES link_previews (id) DEFAULT NULL,
 
-    type post_type NOT NULL DEFAULT "feed" ,
+    type post_type NOT NULL DEFAULT 'feed' ,
 
     group_id uuid REFERENCES groups (id) ON DELETE CASCADE DEFAULT NULL,
 

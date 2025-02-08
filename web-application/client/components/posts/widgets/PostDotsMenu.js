@@ -14,15 +14,9 @@ import './PostDotsMenu.css'
 const PostDotsMenu = function({ postId }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
-    const post = useSelector(function(state) {
-        if ( postId in state.posts.dictionary ) {
-            return  state.posts.dictionary[postId]
-        } else {
-            return null
-        }
-    })
+    const post = useSelector((state) => postId && postId in state.posts.dictionary ? state.posts.dictionary[postId] : null) 
 
-    // User can only see the dots menu if this is their post.
+    // Must have a user and a post to show dots menu.
     if ( ! currentUser || post === null ) {
         return null
     }

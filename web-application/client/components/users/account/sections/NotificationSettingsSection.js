@@ -1,14 +1,15 @@
-import React, { useState, useEffect }  from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import React  from 'react'
+import { useSelector } from 'react-redux'
 
-import { patchUser, cleanupRequest } from '/state/users'
+import { useRequest } from '/lib/hooks/useRequest'
+
+import { patchUser } from '/state/users'
 
 import Toggle from '/components/generic/toggle/Toggle'
 
 const NotificationSettingsSection = function({}) {
 
-    const [requestId, setRequestId] = useState(null)
-    const request = useSelector((state) => requestId in state.users.requests ? state.users.requests[requestId] : null)
+    const [request, makeRequest] = useRequest()
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const features = useSelector((state) => state.system.features)
@@ -23,8 +24,6 @@ const NotificationSettingsSection = function({}) {
         return null
     }
 
-    const dispatch = useDispatch()
-
     const toggleNotificationSetting = function(notification) {
         const settings = JSON.parse(JSON.stringify(currentUser.settings)) 
 
@@ -35,16 +34,8 @@ const NotificationSettingsSection = function({}) {
             settings: settings
         }
 
-        setRequestId(dispatch(patchUser(userPatch)))
+        makeRequest(patchUser(userPatch))
     }
-
-    useEffect(function() {
-        if ( requestId ) {
-            return function cleanup() {
-                dispatch(cleanupRequest({ requestId: requestId }))
-            }
-        }
-    }, [ requestId])
     
     return (
         <div className="user-settings__notification-settings">
