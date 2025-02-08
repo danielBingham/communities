@@ -11,6 +11,8 @@ import {
     clearQueries
 } from '/lib/state'
 
+import { makeTrackedRequest } from '/state/requests'
+
 export const filesSlice = createSlice({
     name: 'files',
     initialState: {
@@ -103,7 +105,7 @@ export const uploadFile = function(file) {
  */
 export const getFile = function(id) {
     return function(dispatch, getState) {
-        return dispatch(makeTrackedRequest( 'GET', `/file/${id}`, null,
+        return dispatch(makeTrackedRequest('GET', `/file/${id}`, null,
             function(response) {
                 dispatch(filesSlice.actions.setFilesInDictionary({ entity: response.entity}))
 
@@ -127,8 +129,7 @@ export const getFile = function(id) {
  */
 export const deleteFile = function(fileId) {
     return function(dispatch, getState) {
-        return dispatch(makeTrackedRequest(dispatch, getState, filesSlice,
-            'DELETE', `/file/${fileId}`, null,
+        return dispatch(makeTrackedRequest('DELETE', `/file/${fileId}`, null,
             function(response) {
                 dispatch(filesSlice.actions.removeFile({ entity: response.entity }))
             }

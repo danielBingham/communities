@@ -43,7 +43,10 @@ module.exports = class PrivateGroupsMigration {
 
                 file_id uuid REFERENCES files (id) DEFAULT NULL,
 
-                entrance_questions jsonb DEFAULT '{}'::jsonb
+                entrance_questions jsonb DEFAULT '{}'::jsonb,
+
+                created_date timestamptz,
+                updated_date timestamptz
             )
         `, [])
 
@@ -51,10 +54,10 @@ module.exports = class PrivateGroupsMigration {
         await this.database.query(`CREATE INDEX IF NOT EXISTS groups__file_id ON groups (file_id)`, [])
 
         this.logger.info(`Create the 'group_member_status' type...`)
-        await this.database.query(`CREATE TYPE IF NOT EXISTS group_member_status AS ENUM('pending-invited', 'pending-requested', 'member')`, [])
+        await this.database.query(`CREATE TYPE group_member_status AS ENUM('pending-invited', 'pending-requested', 'member')`, [])
 
         this.logger.info(`Create the 'group_member_role' type...`)
-        await this.database.query(`CREATE TYPE IF NOT EXISTS group_member_role AS ENUM('admin', 'moderator', 'member')`, [])
+        await this.database.query(`CREATE TYPE group_member_role AS ENUM('admin', 'moderator', 'member')`, [])
 
         this.logger.info(`Create the 'group_members' table...`)
         await this.database.query(`
@@ -65,7 +68,10 @@ module.exports = class PrivateGroupsMigration {
 
                 status group_member_status DEFAULT 'pending-requested',
                 entrance_answers jsonb DEFAULT '{}'::jsonb,
-                role group_member_role
+                role group_member_role,
+
+                created_date timestamptz,
+                updated_date timestamptz
             )
         `, [])
 
@@ -76,7 +82,7 @@ module.exports = class PrivateGroupsMigration {
         await this.database.query(`CREATE INDEX IF NOT EXISTS group_members__user_id ON group_members (user_id)`, [])
 
         this.logger.info(`Create the 'post_type' enum...`)
-        await this.database.query(`CREATE TYPE IF NOT EXISTS post_type as ENUM('feed', 'group', 'event')`, [])
+        await this.database.query(`CREATE TYPE post_type as ENUM('feed', 'group', 'event')`, [])
 
         this.logger.info(`Add 'type' field to 'posts' table...`)
         await this.database.query(`ALTER TABLE posts ADD COLUMN IF NOT EXISTS type post_type NOT NULL DEFAULT 'feed'`, [])

@@ -48,7 +48,7 @@ module.exports = class GroupController {
 
         // Restrict groups to only those that the user can view
         const userGroupsResults = await this.core.database.query(`
-            SELECT group_id FROM groups_members WHERE user_id = $1
+            SELECT group_id FROM group_members WHERE user_id = $1
         `, [ currentUser.id])
 
         const groupIds = userGroupsResults.rows.map((r) => r.group_id)
@@ -97,8 +97,8 @@ module.exports = class GroupController {
 
         const group = request.body
 
-        group.slug = group.slug.toLower()
-        if ( ! group.slug.match(/[a-z0-9\-_\.]/) ) {
+        group.slug = group.slug.toLowerCase()
+        if ( ! group.slug.match(/[a-z0-9-_\.]/) ) {
             throw new ControllerError(400, 'invalid',
                 `User(${currentUser}) submitted a Group with an invalid slug.`,
                 `The URL of the group may only contain letters, numbers, '-', '_', and '.'.`)
@@ -130,6 +130,7 @@ module.exports = class GroupController {
         const groupMember = {
             groupId: entity.id,
             userId: currentUser.id,
+            status: 'member',
             role: 'admin'
         }
         await this.groupMemberDAO.insertGroupMembers(groupMember)

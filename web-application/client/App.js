@@ -51,6 +51,10 @@ import YourFriendsList from '/pages/friends/views/YourFriendsList'
 import FriendRequestsList from '/pages/friends/views/FriendRequestsList'
 import FindFriends from '/pages/friends/views/FindFriends'
 
+import GroupsPage from '/pages/groups/GroupsPage'
+import YourGroups from '/pages/groups/views/YourGroups'
+import CreateGroup from '/pages/groups/views/CreateGroup'
+
 import PostPage from '/pages/posts/PostPage'
 
 import ErrorBoundary from '/errors/ErrorBoundary'
@@ -185,9 +189,14 @@ const App = function(props) {
                                 <Route index element={<YourFriendsList />} />
                             </Route>
 
-                            {/* <Route path="/groups" element={<GroupsPage />}>
-                                <Route index element={<YourGroupsPage />} />
-                            </Route> */}
+                            <Route path="/groups" element={<GroupsPage />}>
+                                <Route path="/groups/create" element={ <CreateGroup />} />
+                                <Route index element={<YourGroups />} />
+                            </Route> 
+
+                            <Route path="/group" element={<GroupPage />}>
+                                <Route path=":slug" element={ <Group />} />
+                            </Route>
 
                             <Route path="/:name">
                                 <Route path=":postId" element={ <PostPage /> } />

@@ -198,7 +198,10 @@ CREATE TABLE groups (
 
     file_id uuid REFERENCES files (id) DEFAULT NULL,
 
-    entrance_questions jsonb DEFAULT '{}'::jsonb
+    entrance_questions jsonb DEFAULT '{}'::jsonb,
+
+    created_date timestamptz,
+    updated_date timestamptz
 );
 CREATE INDEX groups__file_id ON groups (file_id);
 
@@ -211,7 +214,10 @@ CREATE TABLE group_members (
 
     status group_member_status DEFAULT 'pending-requested',
     entrance_answers jsonb DEFAULT '{}'::jsonb,
-    role group_member_role DEFAULT 'member'
+    role group_member_role DEFAULT 'member',
+
+    created_date timestamptz,
+    updated_date timestamptz
 );
 CREATE INDEX group_members__group_id ON group_members (group_id);
 CREATE INDEX group_members__user_id ON group_members (user_id);

@@ -67,6 +67,21 @@ const SCHEMA = {
                 update: 'allowed',
                 select: 'always',
                 key: 'entranceQuestions'
+            },
+            'created_date': {
+                insert: 'override',
+                insertOverride: 'now()',
+                update: 'denied',
+                select: 'always',
+                key: 'createdDate'
+            },
+            'updated_date': {
+                insert: 'override',
+                insertOverride: 'now()',
+                update: 'override',
+                updateOverride: 'now()',
+                select: 'always',
+                key: 'updatedDate'
             }
         }
     }
@@ -168,7 +183,7 @@ module.exports = class GroupDAO extends DAO {
         let paging = ''
         if ( query.page ) {
             const page = query.page ? query.page : 1
-            const pageSize = query.pageSize ? query.pageSize : DEFAULT_PAGE_SIZE
+            const pageSize = query.pageSize ? query.pageSize : PAGE_SIZE
 
             const offset = (page-1) * pageSize
             let count = params.length

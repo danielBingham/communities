@@ -61,6 +61,21 @@ const SCHEMA = {
                 update: 'allowed',
                 select: 'always',
                 key: 'role'
+            },
+            'created_date': {
+                insert: 'override',
+                insertOverride: 'now()',
+                update: 'denied',
+                select: 'always',
+                key: 'createdDate'
+            },
+            'updated_date': {
+                insert: 'override',
+                insertOverride: 'now()',
+                update: 'override',
+                updateOverride: 'now()',
+                select: 'always',
+                key: 'updatedDate'
             }
         }
     }
