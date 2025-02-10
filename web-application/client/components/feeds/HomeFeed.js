@@ -1,4 +1,5 @@
 import React, {  useEffect } from 'react'
+import { useSelector } from 'react-redux'
 import { useSearchParams } from 'react-router-dom'
 
 import { useRequest } from '/lib/hooks/useRequest'
@@ -6,6 +7,9 @@ import { useRequest } from '/lib/hooks/useRequest'
 import { getPosts } from '/state/posts'
 
 import PostList from '/components/posts/list/PostList'
+import PostForm from '/components/posts/form/PostForm'
+
+import Spinner from '/components/Spinner'
 
 import './HomeFeed.css'
 
@@ -36,6 +40,7 @@ const HomeFeed = function() {
 
     return (
         <div className="home-feed">
+            <PostForm />
             <div className="home-feed__controls">
                 <div className="home-feed__sort-menu">
                     <span className="title">Sort By:</span>
@@ -55,7 +60,7 @@ const HomeFeed = function() {
                     </a>
                 </div>
             </div>
-            <PostList queryName="HomeFeed" />
+            <PostList queryName="HomeFeed" /> 
         </div>
     )
 

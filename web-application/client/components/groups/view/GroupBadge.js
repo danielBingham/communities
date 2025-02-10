@@ -6,6 +6,8 @@ import { useRequest } from '/lib/hooks/useRequest'
 
 import { getGroup } from '/state/groups'
 
+import GroupImage from '/components/groups/view/GroupImage'
+
 import './GroupBadge.css'
 
 const GroupBadge = function({ id }) {
@@ -35,6 +37,7 @@ const GroupBadge = function({ id }) {
         return (
             <div className="group-badge">
                 <div className="group-badge__grid">
+                    <GroupImage groupId={group.id} />
                     <div className="group-badge__details" >
                         <div className="group-badge__title"><Link to={ `/group/${group.slug}` }>{group.title}</Link></div>
                         <div className="group-badge__about">{ group.about?.length > 100 ? group.about.substring(0,100).trim()+'...' : group.about }</div>

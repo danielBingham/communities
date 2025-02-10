@@ -1,12 +1,15 @@
 import React, { useEffect } from 'react'
 import { useSelector } from 'react-redux'
-import { useParams } from 'react-router-dom'
+import { useParams, NavLink, Routes, Route } from 'react-router-dom'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
 import { getGroups } from '/state/groups'
 
+import GroupFeed from '/components/groups/feed/GroupFeed'
 import GroupView from '/components/groups/view/GroupView'
+import GroupImage from '/components/groups/view/GroupImage'
+
 
 import Error404 from '/components/errors/Error404'
 import Spinner from '/components/Spinner'
@@ -44,11 +47,28 @@ const GroupPage = function() {
 
     return (
         <div id="group-page">
-            <div className='right-sidebar'>
-                <GroupView id={id} />
-            </div>
-            <div className='main'>
-                { /*<GroupPostFeed id={id} /> */}
+            <div className="group-page__grid">
+                <div className='group-page__right-sidebar'>
+                    <article id={ group.id } className='group-view'>
+                        <GroupImage groupId={group.id} />
+                        <div className="details">
+                            <div className="title"> { group.title}</div>
+                            <div className="type">{ group.type }</div>
+                            <div className="group-page__header">
+                                <menu className="group-page__controls">
+                                    <li><NavLink to={`/group/${group.slug}`} className="left-end" end>Feed</NavLink></li>
+                                    <li><NavLink to="members" className="right-end" end>Members</NavLink></li>
+                                </menu>
+                            </div>
+                            <div className="about"> { group.about }</div>
+                        </div>
+                    </article>
+                </div>
+                <div className='main'>
+                    <Routes>
+                        <Route index element={<GroupFeed id={id} />} />
+                    </Routes> 
+                </div>
             </div>
         </div>
     )

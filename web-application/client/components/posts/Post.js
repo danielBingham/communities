@@ -3,8 +3,9 @@ import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate, Link } from 'react-router-dom'
 
 import { useRequest } from '/lib/hooks/useRequest'
+import { usePostDraft } from '/lib/hooks/usePostDraft'
 
-import { getPost, cleanupRequest } from '/state/posts'
+import { getPost } from '/state/posts'
 
 import Linkify from 'react-linkify'
 
@@ -17,26 +18,35 @@ import PostDotsMenu from '/components/posts/widgets/PostDotsMenu'
 import PostReactions from '/components/posts/widgets/PostReactions'
 import PostComments from '/components/posts/comments/PostComments'
 import PostImage from '/components/posts/PostImage'
+import GroupTag from '/components/groups/view/GroupTag'
+import PostForm from '/components/posts/form/PostForm'
 
 import './Post.css'
 
 const Post = function({ id, expanded, showLoading }) {
+    console.log(`## Post(${id}, ${expanded}, ${showLoading})\n\n`)
 
-    const [showMore, setShowMore] = useState(false) 
+    const [showMore, setShowMore] = useState(expanded) 
 
     const [request, makeRequest] = useRequest()
 
     const post = useSelector((state) => id && id in state.posts.dictionary ? state.posts.dictionary[id] : null) 
     const user = useSelector((state) => post?.userId && post.userId in state.users.dictionary ? state.users.dictionary[post.userId] : null) 
 
+    console.log(`Post(${id})`)
+    console.log(post)
     useEffect(function() {
         if ( ! post ) {
             makeRequest(getPost(id))
         }
-        if ( expanded ) {
-            setShowMore(true)
-        }
-    }, [ id, post, expanded ])
+    }, [ id, post ])
+
+    const [draft, setDraft] = usePostDraft(id)
+    console.log(`Draft for ${id}...`)
+    console.log(draft)
+    if ( draft !== null) {
+        return <PostForm postId={id} groupId={ post && post.groupId} />
+    }
 
     if ( (request !== null && request.state == 'failed' && ( ! post || ! user ))) {
         return (
@@ -61,7 +71,7 @@ const Post = function({ id, expanded, showLoading }) {
         <div id={post.id} className="post">
             <div className="post__header"> 
                 <div className="post__details">
-                    <UserTag id={post.userId} /> posted <Link to={`/${user.username}/${id}`}><DateTag timestamp={post.createdDate} /></Link>
+                    <UserTag id={post.userId} /> posted <Link to={`/${user.username}/${id}`}><DateTag timestamp={post.createdDate} /></Link> { post.groupId &&<span>in <GroupTag id={post.groupId} /></span>}
                 </div>
                 <div className="post__controls">
                     <PostDotsMenu postId={post.id} />

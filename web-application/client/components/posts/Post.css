@@ -6,7 +6,7 @@
     font-size: 14px;
     padding: 10px;
     display: grid;
-    grid-template-columns: 5fr 1fr;
+    grid-template-columns: auto 24px;
 }
 .post .post__header .post__controls {
     text-align: right;

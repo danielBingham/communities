@@ -172,7 +172,7 @@ const App = function(props) {
 
                         <Route element={<AuthenticatedLayout />}>
 
-                            <Route path="/" element={ <HomePage /> } />
+                            <Route path="/*" element={ <HomePage /> } />
 
                             <Route path="/account" element={<UserAccountPage /> }>
                                 <Route path="profile" element={ <UserProfileEditForm />  } />
@@ -192,11 +192,11 @@ const App = function(props) {
                             </Route>
 
                             <Route path="/groups" element={<GroupsPage />}>
-                                <Route path="/groups/create" element={ <CreateGroup />} />
+                                <Route path="create" element={ <CreateGroup />} />
                                 <Route index element={<YourGroups />} />
                             </Route> 
 
-                            <Route path="/group/:slug" element={<GroupPage />} />
+                            <Route path="/group/:slug/*" element={<GroupPage />} />
 
                             <Route path="/:name">
                                 <Route path=":postId" element={ <PostPage /> } />

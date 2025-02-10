@@ -5,31 +5,10 @@
 
 #home-page menu {
     list-style-type: none;
+    margin: 0;
+    padding: 0;
 }
-#home-page menu li {
-    padding: 10px;
-    font-size: 18px;
-}
-#home-page menu li:hover {
-    background-color: var(--primary-color-light);
-    border-radius: 10px;
-}
-#home-page menu svg {
-    width: 22px;
-    margin-right: 5px;
-    margin-bottom: -5px;
-    color: var(--icon-color);
-}
-#home-page menu a:link,
-#home-page menu a:visited,
-#home-page menu a:active {
-    display: block;
-    padding: 10px;
-    color: var(--primary-color-darkest);
-}
-#home-page menu .active a {
-    font-weight: bold;
-}
+
 
 @media (width >= 750px) {
     #home-page {

@@ -6,10 +6,11 @@ import { useRequest } from '/lib/hooks/useRequest'
 import { getPosts } from '/state/posts'
 
 import PostList from '/components/posts/list/PostList'
+import PostForm from '/components/posts/form/PostForm'
 
 import './GroupFeed.css'
 
-const GroupFeed = function({ id }) {
+const GroupFeed = function({ id, slug }) {
     const [ searchParams, setSearchParams ] = useSearchParams()
 
     const [request, makeRequest] = useRequest()
@@ -20,22 +21,22 @@ const GroupFeed = function({ id }) {
     }
 
     useEffect(function() {
-        let sort = searchParams.get('sort') 
-        if ( ! sort ) {
-            sort = 'newest'
+        const params = {}
+        params.sort = searchParams.get('sort') 
+        if ( ! params.sort ) {
+            params.sort = 'newest'
         } 
 
-        makeRequest(getPosts('GroupFeed', { groupId: id, sort: sort }))
-    }, [ id ])
+        if ( id ) {
+            params.groupId = id
+        } else if ( slug ) {
+            params.groupSlug = slug
+        } else {
+            throw new Error('Missing identifier.')
+        }
 
-    useEffect(function() {
-        let sort = searchParams.get('sort') 
-        if ( ! sort ) {
-            sort = 'newest'
-        } 
-
-        makeRequest(getPosts('GroupFeed', { groupId: id, sort: sort }))
-    }, [ searchParams ])
+        makeRequest(getPosts('GroupFeed', params))
+    }, [ id, slug, searchParams ])
 
     let sort = searchParams.get('sort') 
     if ( ! sort ) {
@@ -44,6 +45,7 @@ const GroupFeed = function({ id }) {
 
     return (
         <div className="group-feed">
+            <PostForm groupId={id} />
             <div className="group-feed__controls">
                 <div className="group-feed__sort-menu">
                     <span className="title">Sort By:</span>

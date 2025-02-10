@@ -31,6 +31,18 @@ const SCHEMA = {
                 select: 'always',
                 key: 'id'
             },
+            'type': {
+                insert: 'required',
+                update: 'denied',
+                select: 'always',
+                key: 'type'
+            },
+            'group_id': {
+                insert: 'allowed',
+                update: 'denied',
+                select: 'always',
+                key: 'groupId'
+            },
             'user_id': {
                 insert: 'required',
                 update: 'denied',

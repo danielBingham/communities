@@ -5,6 +5,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 
 import { getGroup } from '/state/groups'
 
+import GroupImage from '/components/groups/view/GroupImage'
 import Error404 from '/components/errors/Error404'
 
 import './GroupView.css'
@@ -52,6 +53,7 @@ const GroupView = function(props) {
 
     return (
         <article id={ group.id } className='group-view'>
+            <GroupImage groupId={group.id} />
             <div className="details">
                 <div className="title"> { group.title}</div>
                 <div className="about"> { group.about }</div>

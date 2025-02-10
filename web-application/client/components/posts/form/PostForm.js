@@ -3,9 +3,12 @@ import { useSelector, useDispatch} from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
 import { LinkIcon } from '@heroicons/react/24/outline'
-import { XCircleIcon } from '@heroicons/react/24/solid'
+import { XCircleIcon, UsersIcon } from '@heroicons/react/24/solid'
+
+import logger from '/logger'
 
 import { useRequest } from '/lib/hooks/useRequest'
+import { usePostDraft } from '/lib/hooks/usePostDraft'
 
 import { deleteFile } from '/state/files'
 import { postPosts, patchPost, finishPostEdit } from '/state/posts'
@@ -15,14 +18,21 @@ import DraftImageFile from '/components/files/DraftImageFile'
 import LinkForm from '/components/posts/form/controls/LinkForm'
 import LinkPreview from '/components/links/view/LinkPreview'
 import Button from '/components/generic/button/Button'
+import PostVisibility from '/components/posts/form/controls/PostVisibility'
+
 
 import './PostForm.css'
 
-const PostForm = function({ postId }) {
+const PostForm = function({ postId, groupId }) {
 
-    const [content,setContent] = useState('')
-    const [fileId,setFileId] = useState(null)
-    const [linkPreviewId, setLinkPreviewId] = useState(null)
+    console.log(`## PostForm(${postId}, ${groupId})`)
+
+    const [draft, setDraft] = usePostDraft(postId || null)
+    console.log(draft)
+
+    const [content,setContent] = useState( draft ? draft.content : '')
+    const [fileId,setFileId] = useState(draft ? draft.fileId : null)
+    const [linkPreviewId, setLinkPreviewId] = useState(draft ? draft.linkPreviewId : null)
 
     const [showLinkForm, setShowLinkForm] = useState(false)
 
@@ -38,20 +48,18 @@ const PostForm = function({ postId }) {
     const dispatch = useDispatch()
     const navigate = useNavigate()
 
-    const getDraftKey = function() {
-        if ( postId ) {
-            return `draft.${postId}`
-        } else {
-            return `draft`
-        }
-    }
-
     const submit = function() {
         const newPost = {
+            type: 'feed',
             userId: currentUser.id,
             fileId: fileId,
             linkPreviewId: linkPreviewId,
             content: content
+        }
+
+        if ( groupId ) {
+            newPost.type = 'group'
+            newPost.groupId = groupId
         }
 
         if ( ! postId ) {
@@ -69,7 +77,7 @@ const PostForm = function({ postId }) {
     }
 
     const cancel = function() {
-        localStorage.removeItem(getDraftKey())
+        setDraft(null) 
 
         setFileId(null)
         setLinkPreviewId(null)
@@ -100,39 +108,19 @@ const PostForm = function({ postId }) {
     }
 
     useEffect(function() {
-        let draft = {
-            content: post ? post.content : '',
-            fileId: post ? post.fileId : null,
-            linkPreviewId: post ? post.linkPreviewId : null
-        }
-
-        const existingDraft = JSON.parse(localStorage.getItem(getDraftKey()))
-
-        if ( existingDraft ) {
-            draft = existingDraft
-        } else {
-            localStorage.setItem(getDraftKey(), JSON.stringify(draft))
-        }
-
-        setContent(draft.content)
-        setFileId(draft.fileId)
-        setLinkPreviewId(draft.linkPreviewId)
-    }, [ postId ])
-
-    useEffect(function() {
-        localStorage.setItem(getDraftKey(), JSON.stringify({ content: content, fileId: fileId, linkPreviewId: linkPreviewId }))
+        setDraft({ content: content, fileId: fileId, linkPreviewId: linkPreviewId })
     }, [ postId, content, fileId, linkPreviewId ])
 
     useEffect(function() {
         if (postRequest && postRequest.state == 'fulfilled') {
-            localStorage.removeItem(getDraftKey())
+            setDraft(null)
             navigate(`/${currentUser.username}/${postRequest.response.body.entity.id}`)
         }
     }, [ postRequest ])
 
     useEffect(function() {
         if (patchRequest && patchRequest.state == 'fulfilled') {
-            localStorage.removeItem(getDraftKey())
+            setDraft(null) 
             navigate(`/${currentUser.username}/${patchRequest.response.body.entity.id}`)
         }
     }, [ patchRequest ])
@@ -197,12 +185,13 @@ const PostForm = function({ postId }) {
             <div className="attachments">
                 { attachmentView }
             </div>
-            <div className="controls">
-                <div>{ attachmentControlsView }</div>
-                <div className="buttons">
-                    <Button type="secondary-warn" onClick={(e) => cancel()}>Cancel</Button>
-                    <Button type="primary" onClick={(e) => submit()}>Post</Button>
-                </div>
+            <div className="post-form__controls">
+                <div className="post-form__controls__attachments">{ attachmentControlsView }</div>
+                <div className="post-form__controls__visibility"><PostVisibility groupId={groupId} /></div>
+            </div>
+            <div className="buttons">
+                <Button type="secondary-warn" onClick={(e) => cancel()}>Cancel</Button>
+                <Button type="primary" onClick={(e) => submit()}>Post</Button>
             </div>
         </div>
     )

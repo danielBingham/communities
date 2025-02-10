@@ -20,15 +20,15 @@ const PostList = function({ queryName }) {
         }
     })
 
-    const editing = useSelector(function(state) {
+/**    const editing = useSelector(function(state) {
         return state.posts.editing
-    })
+    }) */
 
     const dispatch = useDispatch()
 
     // If we refreshed and have posts in progress in local storage,
     // then backfill those posts into redux.
-    useEffect(function() {
+    /**useEffect(function() {
         if ( query !== null ) {
             for(const postId of query.list) {
                 const draft = localStorage.getItem(`draft.${postId}`)
@@ -37,24 +37,24 @@ const PostList = function({ queryName }) {
                 }
             }
         }
-    }, [ query ])
+    }, [ query ]) */
 
     if ( query === null ) {
         return (
             <div className="post-list">
-                <Spinner local={true} />
+                <Spinner />
             </div>
         )
     }
 
     const postViews = []
     for(const postId of query.list) {
-        const draft = localStorage.getItem(`draft.${postId}`)
+        /*const draft = localStorage.getItem(`draft.${postId}`)
         if ( draft || postId in editing ) {
             postViews.push(<PostForm key={postId} postId={postId} />)
-        } else {
+        } else { */
             postViews.push(<Post key={postId} id={postId} />)
-        }
+        //}
     }
 
     return (

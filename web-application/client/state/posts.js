@@ -58,7 +58,9 @@ export const postsSlice = createSlice({
          * }
          *   
          **/
-        editing: {}
+        editing: {},
+
+        drafts: {}
     },
     reducers: {
         // ======== State Manipulation Helpers ================================
@@ -83,6 +85,14 @@ export const postsSlice = createSlice({
         finishPostEdit: function(state, action) {
             const postId = action.payload
             delete state.editing[postId]
+        },
+
+        setDraft: function(state, action) {
+            state.drafts[action.payload.id] = action.payload.draft
+        },
+
+        clearDraft: function(state, action) {
+            delete state.drafts[action.payload.id]
         }
     }
 })
@@ -215,7 +225,8 @@ export const deletePost = function(post) {
 export const { 
     setPostsInDictionary, removePost, 
     makePostQuery, clearPostQuery, setPostQueryResults,
-    startPostEdit, finishPostEdit
+    startPostEdit, finishPostEdit,
+    setDraft, clearDraft
 }  = postsSlice.actions
 
 export default postsSlice.reducer

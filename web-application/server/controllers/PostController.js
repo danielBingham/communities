@@ -112,7 +112,7 @@ module.exports = class PostController {
         // Permissions 
         query.params.push(friendIds)
         query.params.push(groupIds)
-        query.where += `(posts.user_id = ANY($${query.params.length-1}::uuid[]) OR posts.group_id = ANY($${query.params.length}::uuid[]))`
+        query.where += `((posts.user_id = ANY($${query.params.length-1}::uuid[]) AND posts.type = 'feed') OR (posts.type = 'group' AND posts.group_id = ANY($${query.params.length}::uuid[])))`
 
         if ( 'userId' in request.query ) {
             query.params.push(request.query.userId)

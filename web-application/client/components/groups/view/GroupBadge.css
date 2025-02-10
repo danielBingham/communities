@@ -7,7 +7,7 @@
     display: grid;
     grid-template-columns: 120px auto;
 } 
-.group-badge .profile-image {
+.group-badge .group-image {
     width: 120px;
     height: 120px;
     margin-right: 5px;
