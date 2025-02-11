@@ -23,6 +23,7 @@ import AuthenticatedLayout from '/layouts/AuthenticatedLayout'
 import AdminPage from '/pages/AdminPage'
 
 import HomePage from '/pages/HomePage'
+import Feed from '/components/feeds/Feed'
 
 import AboutPage from '/pages/about/AboutPage'
 import About from '/pages/about/views/About'
@@ -172,8 +173,6 @@ const App = function(props) {
 
                         <Route element={<AuthenticatedLayout />}>
 
-                            <Route path="/*" element={ <HomePage /> } />
-
                             <Route path="/account" element={<UserAccountPage /> }>
                                 <Route path="profile" element={ <UserProfileEditForm />  } />
                                 <Route path="change-password" element={ <ChangePasswordForm /> } />
@@ -197,6 +196,12 @@ const App = function(props) {
                             </Route> 
 
                             <Route path="/group/:slug/*" element={<GroupPage />} />
+
+                            <Route path="/" element={ <HomePage /> }> 
+                                <Route path="/f/:slug" element={ <Feed type="feed" /> } />
+                                <Route path="/g/:slug" element={ <Feed type="group" /> } />
+                                <Route index element={ <Feed type="feed" /> } />
+                            </Route>
 
                             <Route path="/:name">
                                 <Route path=":postId" element={ <PostPage /> } />

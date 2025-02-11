@@ -126,6 +126,28 @@ module.exports = class PostController {
             query.where += `${and}posts.group_id = $${query.params.length}`
         }
 
+        if ( 'groupSlug' in request.query ) {
+            const groupResult = await this.core.database.query(`SELECT id FROM groups WHERE slug = $1`, [ request.query.groupSlug ])
+            if ( groupResult.rows.length <= 0 ) {
+                query.page = -1 
+                return query
+            }
+
+            const groupId = groupResult.rows[0].id
+
+            query.params.push(groupId)
+            const and = query.params.length > 1 ? ' AND ' : ''
+            query.where += `${and}posts.group_id = $${query.params.length}`
+        }
+
+        if ( 'feed' in request.query )  {
+            if ( request.query.feed == 'friends' ) {
+                query.params.push(friendIds)
+                const and = query.params.length > 1 ? ' AND ' : ''
+                query.where += `${and} (posts.type = 'feed' AND posts.user_id = ANY($${query.params.length}::uuid[]))`
+            }
+        }
+
         if ( 'sort' in request.query ) {
             const sort = request.query.sort
             if ( sort == 'newest' ) {
@@ -150,6 +172,22 @@ module.exports = class PostController {
         }
 
         const query = await this.createQuery(request)
+
+        // Empty result.
+        if ( query.page === -1 ) {
+            response.status(200).json({
+                dictionary: {},
+                list: [],
+                meta: {
+                    count: 0,
+                    page: 1,
+                    pageSize: 1,
+                    numberOfPages: 1
+                },
+                relations: {}
+            })
+            return
+        }
 
         const results = await this.postDAO.selectPosts(query)
 

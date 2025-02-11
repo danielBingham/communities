@@ -3,7 +3,7 @@
     background-color: var(--page-background-color);
 }
 
-#home-page menu {
+#home-page menu.home-page__menu {
     list-style-type: none;
     margin: 0;
     padding: 0;

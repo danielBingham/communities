@@ -49,14 +49,30 @@ export const groupsSlice = createSlice({
          *  ...
          * }
          */
-        queries: {}
+        queries: {},
+
+        bySlug: {}
     },
     reducers: {
         // ======== State Manipulation Helpers ================================
         // @see ./helpers/state.js
 
-        setGroupsInDictionary: setInDictionary, 
-        removeGroup: removeEntity,
+        setGroupsInDictionary: (state, action) => {
+            setInDictionary(state, action)
+
+            if ( 'dictionary' in action.payload) {
+                for(const [id, group] of Object.entries(action.payload.dictionary)) {
+                    state.bySlug[group.slug] = group
+                }
+            } else if ( 'entity' in action.payload ) {
+                state.bySlug[action.payload.entity.slug] = action.payload.entity
+            }
+        }, 
+        removeGroup: (state, action) => {
+            removeEntity(state, action)
+
+            delete state.groupsBySlug[action.payload.entity.slug]
+        },
         makeGroupQuery: makeQuery,
         setGroupQueryResults: setQueryResults,
         clearGroupQuery: clearQuery,

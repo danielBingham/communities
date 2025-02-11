@@ -1,49 +1,55 @@
-.group-feed-menu menu {
+.feed-menu menu {
     list-style-type: none;
     margin: 0;
     padding: 0 0 0 10px;
 }
-.group-feed-menu a.header {
+.feed-menu a.header {
     padding: 10px;
     font-size: 18px;
 }
-.group-feed-menu a.header:hover {
+.feed-menu a.header:hover {
     background-color: var(--primary-color-light);
     border-radius: 10px;
 }
-.group-feed-menu a.header svg {
+.feed-menu a.header svg {
     width: 22px;
     margin-right: 5px;
     margin-bottom: -5px;
     color: var(--icon-color);
 }
-.group-feed-menu a.header:link,
-.group-feed-menu a.header:visited,
-.group-feed-menu a.header:active {
+.feed-menu a.header:link,
+.feed-menu a.header:visited,
+.feed-menu a.header:active {
     display: block;
     padding: 10px;
     color: var(--primary-color-darkest);
 }
-.group-feed-menu menu li {
+.feed-menu menu li {
     font-size: 14px;
     padding: 5px 0 5px 10px;
 }
-.group-feed-menu menu li svg,
-.group-feed-menu menu li img {
+.feed-menu menu li svg {
+    width: 1.2em;
+    height: 1.2em;
+    margin-bottom: -0.2em;
+
+}
+.feed-menu menu li img {
     width: 1.2em;
     height: 1.2em;
 }
-.group-feed-menu menu li a:link,
-.group-feed-menu menu li a:visited,
-.group-feed-menu menu li a:active {
+.feed-menu menu li a:link,
+.feed-menu menu li a:visited,
+.feed-menu menu li a:active {
     color: var(--primary-color-darkest);
 }
-.group-feed-menu menu li a:hover {
+.feed-menu menu li a:hover {
     color: var(--primary-color-dark);
 }
-.group-feed-menu menu a.active {
+
+.feed-menu menu a.active {
     font-weight: bold;
 }
-.group-feed-menu menu li.view-more {
+.feed-menu menu li.view-more {
     text-align: center;
 }

@@ -6,6 +6,7 @@ import { UserGroupIcon as UserGroupIconOutline } from '@heroicons/react/24/outli
 import { UserGroupIcon as UserGroupIconSolid} from '@heroicons/react/24/solid'
 
 import { useRequest } from '/lib/hooks/useRequest'
+import { useLocalStorage } from '/lib/hooks/useLocalStorage'
 
 import { getGroups } from '/state/groups'
 
@@ -15,7 +16,7 @@ import './GroupFeedMenu.css'
 
 const GroupFeedMenu = function() {
 
-    const [open, setOpen] = useState(false)
+    const [open, setOpen] = useLocalStorage('GroupFeedMenu.state', false)
 
     const [request, makeRequest] = useRequest()
 

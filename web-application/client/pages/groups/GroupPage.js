@@ -6,7 +6,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 
 import { getGroups } from '/state/groups'
 
-import GroupFeed from '/components/groups/feed/GroupFeed'
+import Feed from '/components/feeds/Feed'
 import GroupView from '/components/groups/view/GroupView'
 import GroupImage from '/components/groups/view/GroupImage'
 
@@ -66,7 +66,7 @@ const GroupPage = function() {
                 </div>
                 <div className='main'>
                     <Routes>
-                        <Route index element={<GroupFeed id={id} />} />
+                        <Route index element={<Feed type="group" />} />
                     </Routes> 
                 </div>
             </div>
