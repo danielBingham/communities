@@ -18,7 +18,7 @@
  *
  ******************************************************************************/
 
-const { LinkPreviewService, PostDAO, PostCommentDAO, PostReactionDAO, PostSubscriptionDAO, UserDAO, FileDAO }  = require('@communities/backend')
+const { LinkPreviewService, PostDAO, PostCommentDAO, PostReactionDAO, PostSubscriptionDAO, UserDAO, FileDAO, GroupDAO }  = require('@communities/backend')
 const ControllerError = require('../errors/ControllerError')
 
 
@@ -33,6 +33,7 @@ module.exports = class PostController {
         this.postSubscriptionDAO = new PostSubscriptionDAO(core)
         this.userDAO = new UserDAO(core)
         this.fileDAO = new FileDAO(core)
+        this.groupDAO = new GroupDAO(core)
 
         this.linkPreviewService = new LinkPreviewService(core)
     }
@@ -69,13 +70,24 @@ module.exports = class PostController {
         }
         const postFileResults = await this.fileDAO.selectFiles(`WHERE files.id = ANY($1::uuid[])`, [ fileIds ])
         const fileDictionary = postFileResults.reduce((dictionary, file) => { dictionary[file.id] = file; return dictionary }, {})
+        
+        const groupIds = []
+        for(const postId of results.list) {
+            const post = results.dictionary[postId]
+            groupIds.push(post.groupId)
+        }
+        const groupResults = await this.groupDAO.selectGroups({
+            where: `groups.id = ANY($1::uuid[])`,
+            params: [ groupIds ]
+        })
 
         return {
             users: userResults.dictionary,
             postComments: postCommentResults.dictionary,
             postReactions: postReactionResults.dictionary,
             postSubscriptions: postSubscriptionResults.dictionary,
-            files: fileDictionary 
+            files: fileDictionary,
+            groups: groupResults.dictionary
         }
     }
 
@@ -138,6 +150,20 @@ module.exports = class PostController {
             query.params.push(groupId)
             const and = query.params.length > 1 ? ' AND ' : ''
             query.where += `${and}posts.group_id = $${query.params.length}`
+        }
+
+        if ( 'username' in request.query ) {
+            const userResult = await this.core.database.query(`SELECT id FROM users WHERE username = $1`, [ request.query.username ])
+            if ( userResult .rows.length <= 0 ) {
+                query.page = -1
+                return query
+            }
+
+            const userId = userResult.rows[0].id
+
+            query.params.push(userId)
+            const and = query.params.length > 1 ? ' AND ' : ''
+            query.where += `${and}posts.user_id = $${query.params.length}`
         }
 
         if ( 'feed' in request.query )  {

@@ -25,5 +25,5 @@
     color: var(--main-text-color);
 }
 .post-list .post-list__posts {
-    margin: 20px;
+/*    margin: 20px; */
 }

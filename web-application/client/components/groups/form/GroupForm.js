@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import { GlobeAltIcon, LockOpenIcon, LockClosedIcon, UserCircleIcon } from '@heroicons/react/24/outline'
 
@@ -105,8 +106,20 @@ const GroupForm = function() {
         }
 
         setTitle(event.target.value)
-
     }
+
+    const navigate = useNavigate()
+    useEffect(() => {
+        if ( request && request.state == 'fulfilled') {
+            setTitle(null)
+            setType(null)
+            setSlug(null)
+            setAbout(null)
+            setFileId(null)
+   
+            navigate(`/group/${request.response.body.entity.slug}`)
+        }
+    }, [ request ])
 
     let baseError = null
     let titleError = titleErrors.join(' ')

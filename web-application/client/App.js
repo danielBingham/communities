@@ -55,6 +55,7 @@ import FindFriends from '/pages/friends/views/FindFriends'
 import GroupsPage from '/pages/groups/GroupsPage'
 import YourGroups from '/pages/groups/views/YourGroups'
 import CreateGroup from '/pages/groups/views/CreateGroup'
+import FindGroups from '/pages/groups/views/FindGroups'
 
 import GroupPage from '/pages/groups/GroupPage'
 
@@ -192,6 +193,7 @@ const App = function(props) {
 
                             <Route path="/groups" element={<GroupsPage />}>
                                 <Route path="create" element={ <CreateGroup />} />
+                                <Route path="find" element={ <FindGroups />} />
                                 <Route index element={<YourGroups />} />
                             </Route> 
 
@@ -203,9 +205,9 @@ const App = function(props) {
                                 <Route index element={ <Feed type="feed" /> } />
                             </Route>
 
-                            <Route path="/:name">
+                            <Route path="/:slug" element={ <UserProfilePage /> }>
                                 <Route path=":postId" element={ <PostPage /> } />
-                                <Route index element={ <UserProfilePage /> } />
+                                <Route index element={ <Feed type="user" /> } />
                             </Route>
 
                         </Route>

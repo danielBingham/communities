@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import { useSearchParams } from 'react-router-dom'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { getPosts } from '/state/posts'
+import { getPosts, clearPostQuery } from '/state/posts'
 
 import PaginationControls from '/components/PaginationControls'
 import Post from '/components/posts/Post'
@@ -33,6 +33,7 @@ const PostList = function({ name, params }) {
         return sort
     }
 
+    const dispatch = useDispatch()
     useEffect(function() {
         let queryParams = { ...params }
 
@@ -41,8 +42,12 @@ const PostList = function({ name, params }) {
         queryParams.page = searchParams.get('page') ? searchParams.get('page') : 1
 
         makeRequest(getPosts(name, queryParams))
+        return () => {
+            dispatch(clearPostQuery({ name: name}))
+        }
     }, [ searchParams, params ])
 
+    console.log(query)
     if ( query === null ) {
         return (
             <div className="post-list">

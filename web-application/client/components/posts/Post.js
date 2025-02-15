@@ -24,8 +24,6 @@ import PostForm from '/components/posts/form/PostForm'
 import './Post.css'
 
 const Post = function({ id, expanded, showLoading }) {
-    console.log(`## Post(${id}, ${expanded}, ${showLoading})\n\n`)
-
     const [showMore, setShowMore] = useState(expanded) 
 
     const [request, makeRequest] = useRequest()
@@ -33,8 +31,6 @@ const Post = function({ id, expanded, showLoading }) {
     const post = useSelector((state) => id && id in state.posts.dictionary ? state.posts.dictionary[id] : null) 
     const user = useSelector((state) => post?.userId && post.userId in state.users.dictionary ? state.users.dictionary[post.userId] : null) 
 
-    console.log(`Post(${id})`)
-    console.log(post)
     useEffect(function() {
         if ( ! post ) {
             makeRequest(getPost(id))
@@ -42,8 +38,6 @@ const Post = function({ id, expanded, showLoading }) {
     }, [ id, post ])
 
     const [draft, setDraft] = usePostDraft(id)
-    console.log(`Draft for ${id}...`)
-    console.log(draft)
     if ( draft !== null) {
         return <PostForm postId={id} groupId={ post && post.groupId} />
     }

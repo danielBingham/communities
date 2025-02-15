@@ -46,14 +46,14 @@ const SCHEMA = {
             'status': {
                 insert: 'required',
                 update: 'allowed',
-                select: 'always',
+                select: 'full',
                 key: 'status'
             },
             'entrance_answers': {
                 insert: 'allowed',
                 insertDefault: () => {},
                 update: 'allowed',
-                select: 'always',
+                select: 'full',
                 key: 'entranceAnswers'
             },
             'role': {
@@ -157,7 +157,7 @@ module.exports = class GroupMemberDAO extends DAO {
         let paging = ''
         if ( query.page ) {
             const page = query.page ? query.page : 1
-            const pageSize = query.pageSize ? query.pageSize : DEFAULT_PAGE_SIZE
+            const pageSize = query.pageSize ? query.pageSize : PAGE_SIZE
 
             const offset = (page-1) * pageSize
             let count = params.length

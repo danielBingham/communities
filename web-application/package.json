@@ -30,7 +30,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.141.0",
     "@communities/backend": "0.1.11",
-    "@heroicons/react": "^2.0.11",
+    "@heroicons/react": "^2.1.5",
     "@reduxjs/toolkit": "^1.8.1",
     "bcrypt": "^5.0.1",
     "bull": "^4.10.4",

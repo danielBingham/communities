@@ -49,15 +49,38 @@ export const groupMembersSlice = createSlice({
          *  ...
          * }
          */
-        queries: {}
+        queries: {},
+
+        byGroupAndUser: {}
 
     },
     reducers: {
         // ======== State Manipulation Helpers ================================
         // @see ./helpers/state.js
 
-        setGroupMembersInDictionary: setInDictionary,
-        removeGroupMember: removeEntity,
+        setGroupMembersInDictionary: (state, action) => {
+            setInDictionary(state, action)
+
+            const setByGroupAndUser = (entity) => {
+                if ( ! (entity.groupId in state.byGroupAndUser) ) {
+                    state.byGroupAndUser[entity.groupId] = {}
+                }
+                state.byGroupAndUser[entity.groupId][entity.userId] = entity
+            }
+
+            if ( 'dictionary' in action.payload ) {
+                for(const [id, entity] of Object.entries(action.payload.dictionary)) {
+                    setByGroupAndUser(entity)
+                }
+            } else if ('entity' in action.payload ) {
+                setByGroupAndUser(action.payload.entity)
+            }
+        },
+        removeGroupMember: (state, action) => {
+            removeEntity(state, action)
+
+            delete state.byGroupAndUser[action.payload.entity.groupId][action.payload.entity.userId]
+        },
         makeGroupMemberQuery: makeQuery,
         setGroupMemberQueryResults: setQueryResults,
         clearGroupMemberQuery: clearQuery,
@@ -80,7 +103,7 @@ export const getGroupMembers = function(groupId, name, params) {
     return function(dispatch, getState) {
         const endpoint = `/group/${encodeURIComponent(groupId)}/members${( params ? '?' + qs.stringify(params) : '' )}` 
 
-        dispatch(groupMembersSlice.actions.makeGroupQuery({ name: name }))
+        dispatch(groupMembersSlice.actions.makeGroupMemberQuery({ name: name }))
 
         return dispatch(makeTrackedRequest('GET', endpoint, null,
             function(response) {

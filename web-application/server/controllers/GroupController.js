@@ -33,7 +33,16 @@ module.exports = class GroupController {
     }
 
     async getRelations(currentUser, results, requestedRelations) {
-        return { }
+        const relations = {}
+        if ( requestedRelations && requestedRelations.includes("GroupMembers") ) {
+            const memberResults = await this.groupMemberDAO.selectGroupMembers({
+                where: `group_members.group_id = ANY($1::uuid[]) AND group_members.status = 'member'`,
+                params: [ results.list ]
+            })
+
+            relations['groupMembers'] = memberResults.dictionary
+        }
+        return relations 
     }
 
     async createQuery(request) {
@@ -41,7 +50,12 @@ module.exports = class GroupController {
             where: '',
             params: [],
             page: 1,
-            order: 'groups.created_date DESC'
+            order: 'groups.created_date DESC',
+            relations: []
+        }
+
+        if ( 'relations' in request.query && Array.isArray(request.query.relations)) {
+            query.relations = [ ...request.query.relations]
         }
 
         const currentUser = request.session.user
@@ -81,7 +95,7 @@ module.exports = class GroupController {
         const query = await this.createQuery(request)
         const results = await this.groupDAO.selectGroups(query)
         const meta = await this.groupDAO.getGroupPageMeta(query)
-        const relations = await this.getRelations(currentUser, results)
+        const relations = await this.getRelations(currentUser, results, query.relations)
 
         response.status(200).json({ 
             dictionary: results.dictionary,

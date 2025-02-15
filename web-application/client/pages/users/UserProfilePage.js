@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { useParams } from 'react-router-dom'
+import { useParams, Outlet } from 'react-router-dom'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
@@ -10,12 +10,12 @@ import Error404 from '/components/errors/Error404'
 import Spinner from '/components/Spinner'
 
 import UserView from '/components/users/UserView'
-import PostsByUserFeed from '/components/feeds/PostsByUserFeed'
+import Feed from '/components/feeds/Feed'
 
 import './UserProfilePage.css'
 
 const UserProfilePage = function(props) {
-    const { name } = useParams()
+    const { slug } = useParams()
 
     // ======= Request Tracking =====================================
 
@@ -31,8 +31,8 @@ const UserProfilePage = function(props) {
     // ======= Effect Handling ======================================
 
     useEffect(function() {
-        makeRequest(getUsers('UserProfilePage', { username: name }))
-    }, [ name ])
+        makeRequest(getUsers('UserProfilePage', { username: slug }))
+    }, [ slug ])
 
     // ======= Render ===============================================
 
@@ -58,7 +58,7 @@ const UserProfilePage = function(props) {
                 <UserView id={id} />
             </div>
             <div className='main'>
-                <PostsByUserFeed id={id} />
+                <Outlet /> 
             </div>
         </div>
     )

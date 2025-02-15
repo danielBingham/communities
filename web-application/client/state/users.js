@@ -48,7 +48,9 @@ export const usersSlice = createSlice({
          *  ...
          * }
          */
-        queries: {}
+        queries: {},
+
+        byUsername: {}
     },
     reducers: {
 
@@ -56,8 +58,22 @@ export const usersSlice = createSlice({
         // ======== State Manipulation Helpers ================================
         // @see /lib/state.js
 
-        setUsersInDictionary: setInDictionary,
-        removeUser: removeEntity,
+        setUsersInDictionary: (state, action) => {
+            setInDictionary(state, action)
+            
+            if ( 'dictionary' in action.payload) {
+                for(const [id, user] of Object.entries(action.payload.dictionary)) {
+                    state.byUsername[user.username] = user
+                }
+            } else if ( 'entity' in action.payload ) {
+                state.byUsername[action.payload.entity.username] = action.payload.entity
+            }
+        },
+        removeUser: (state, action) => {
+            removeEntity(state, action)
+
+            delete state.byUsername[action.payload.entity.username]
+        },
         makeUserQuery: makeQuery,
         setUserQueryResults: setQueryResults,
         clearUserQuery: clearQuery,

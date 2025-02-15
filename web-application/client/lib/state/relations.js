@@ -1,9 +1,10 @@
-import { setUsersInDictionary } from '/state/users'
+import { setFilesInDictionary } from '/state/files'
+import { setGroupMembersInDictionary } from '/state/groupMembers'
 import { setPostsInDictionary } from '/state/posts'
 import { setPostCommentsInDictionary } from '/state/postComments'
 import { setPostReactionsInDictionary } from '/state/postReactions'
 import { setPostSubscriptionsInDictionary } from '/state/postSubscriptions'
-import { setFilesInDictionary } from '/state/files'
+import { setUsersInDictionary } from '/state/users'
 import { setUserRelationshipsInDictionary } from '/state/userRelationships'
 
 
@@ -11,19 +12,30 @@ const setRelationsInState = function(relations) {
     return function(dispatch, getState) {
         if ( relations ) {
             for(const [relation, dictionary] of Object.entries(relations)) {
-                if ( relation == 'users' ) {
-                    dispatch(setUsersInDictionary({ dictionary: dictionary }))
-                } else if ( relation == 'postComments' ) {
-                    dispatch(setPostCommentsInDictionary({ dictionary: dictionary }))
-                } else if ( relation == 'posts' ) {
-                    dispatch(setPostsInDictionary({ dictionary: dictionary }))
-                } else if ( relation == 'files' ) {
+                if ( relation == 'files' ) {
                     dispatch(setFilesInDictionary({ dictionary: dictionary }))
-                } else if ( relation == 'postReactions' ) { 
+                } 
+                else if ( relation == 'groupMembers' ) {
+                    console.log(`Set GroupMembers...`)
+                    console.log(dictionary)
+                    dispatch(setGroupMembersInDictionary({ dictionary: dictionary }))
+                }
+                else if ( relation == 'posts' ) {
+                    dispatch(setPostsInDictionary({ dictionary: dictionary }))
+                } 
+                else if ( relation == 'postComments' ) {
+                    dispatch(setPostCommentsInDictionary({ dictionary: dictionary }))
+                } 
+                else if ( relation == 'postReactions' ) { 
                     dispatch(setPostReactionsInDictionary({ dictionary: dictionary }))
-                } else if ( relation == 'postSubscriptions' ) {
+                } 
+                else if ( relation == 'postSubscriptions' ) {
                     dispatch(setPostSubscriptionsInDictionary({ dictionary: dictionary }))
-                } else if ( relation == 'userRelationships' ) {
+                } 
+                else if ( relation == 'users' ) {
+                    dispatch(setUsersInDictionary({ dictionary: dictionary }))
+                } 
+                else if ( relation == 'userRelationships' ) {
                     dispatch(setUserRelationshipsInDictionary({ dictionary: dictionary }))
                 }
             }

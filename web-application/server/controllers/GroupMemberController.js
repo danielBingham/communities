@@ -45,6 +45,10 @@ module.exports = class GroupMemberController {
         }
 
         const currentUser = request.session.user
+        const groupId = request.params.groupId
+
+        query.params.push(groupId)
+        query.where = 'group_members.group_id = $1'
 
         return query
     }
@@ -68,7 +72,7 @@ module.exports = class GroupMemberController {
                 `Either that group doesn't exist or you don't have permission to see it.`)
         }
 
-        const member = await this.groupMemberDAO.getGroupMemberForGroupAndUser(groupId, currentUser.id)
+        const member = await this.groupMemberDAO.getGroupMemberByGroupAndUser(groupId, currentUser.id)
 
         if ( member === null && existing.isDiscoverable !== true ) {
             throw new ControllerError(404, 'not-found',
@@ -77,10 +81,11 @@ module.exports = class GroupMemberController {
         }
 
         const query = await this.createQuery(request)
-        const results = await this.groupDAO.selectGroupMembers(query)
-        const meta = await this.groupDAO.getGroupMemberPageMeta(query)
+        const results = await this.groupMemberDAO.selectGroupMembers(query)
+        const meta = await this.groupMemberDAO.getGroupMemberPageMeta(query)
         const relations = await this.getRelations(currentUser, results)
 
+        console.log(results)
         response.status(200).json({ 
             dictionary: results.dictionary,
             list: results.list,
@@ -130,31 +135,76 @@ module.exports = class GroupMemberController {
                 `That user doesn't exist.`)
         }
 
-        const userMember = await this.groupMemberDAO.getGroupMemberForGroupAndUser(groupId, currentUser.id) 
+        const userMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(groupId, currentUser.id) 
 
-        // CurrentUser must be a member of the group.
-        if ( ! userMember && group.isDiscoverable !== true ) {
-            throw new ControllerError(404, 'not-found',
-                `User(${currentUser.id}) attempting to add a member to a Group(${groupId}) they can't view.`,
-                `Either that group doesn't exist or you don't have permission to see it.`)
-        } else if ( ! userMember && group.isDiscoverable ) {
-            throw new ControllerError(403, 'not-authorized',
-                `User(${currentUser.id}) attempting to add a member to a Group(${groupId}) they aren't a member of.`,
-                `You're not authorized to add members to that group.`)
+        // Check permissions by group type.
+        if ( group.type == 'hidden' ) {
+            // If the current user isn't a member, then they can't even know the group exists.
+            if ( ! userMember ) {
+                throw new ControllerError(404, 'not-found',
+                    `User(${currentUser.id}) attempting to add a member to a Group(${groupId}) they can't view.`,
+                    `Either that group doesn't exist or you don't have permission to see it.`)
+            } 
+            // Only admins and moderators can invite.
+            else if ( userMember && userMember.role != 'admin' && userMember.role != 'moderator' ) {
+                throw new ControllerError(403, 'not-authorized',
+                    `User(${currentUser.id}) attempting to add user to Group(${groupId}) without permission.`,
+                    `You do not have permission to invite members to this group.`)
+            }
+                    
+        }
+        else if ( group.type == 'private' ) {
+            if ( userMember && ! ( userMember.role == 'admin' || userMember.role == 'moderator') ) {
+                throw new ControllerError(403, 'not-authorized',
+                    `User(${currentUser.id}) attempting to add user to Group(${groupId}) without permission.`,
+                    `You do not have permission to invite members to this group.`)
+            } else if ( ! userMember && member.userId !== currentUser.id ) {
+                throw new ControllerError(403, 'not-authorized',
+                    `User(${currentUser.id}) attempting to add user to Group(${groupId}) without permission.`,
+                    `You do not have permission to invite members to this group.`)
+            }
+        }
+        else if ( group.type == 'open') {
+            if ( userMember && ! ( userMember.role == 'admin' || userMember.role == 'moderator') ) {
+                throw new ControllerError(403, 'not-authorized',
+                    `User(${currentUser.id}) attempting to add user to Group(${groupId}) without permission.`,
+                    `You do not have permission to invite members to this group.`)
+            } else if ( ! userMember && member.userId !== currentUser.id ) {
+                throw new ControllerError(403, 'not-authorized',
+                    `User(${currentUser.id}) attempting to add user to Group(${groupId}) without permission.`,
+                    `You do not have permission to invite members to this group.`)
+            }
+        }
+        else { 
+            throw new ControllerError(500, 'server-error',
+                `Unknown type for Group(${groupId}).`,
+                `We encountered an error we couldn't recover from.  Please report it as a bug.`)
         }
 
-        // Current User must be an admin or a moderator.
-        if ( userMember.role !== 'admin' && userMember.role !== 'moderator' ) {
-            throw new ControllerError(403, 'not-authorized',
-                `User(${currentUser.id}) attempting to add a member to a Group(${groupId}) without permission.`,
-                `You're not authorized to add members to that group.`)
-        }
 
-        // If adding a admin or moderator, CurrentUser must be an admin.
-        if ( ( member.role == 'admin' || member.role == 'moderator') && userMember.role !== 'admin') {
-            throw new ControllerError(403, 'not-authorized',
-                `User(${currentUser.id}) attempting to add an admin or moderator to Group(${groupId}) without permission.`,
-                `You're not authorized to add admins or moderators to that group.`)
+        // Set the status appropriately.
+        member.role = 'member'
+        if ( group.type == 'hidden' ) {
+            member.status = 'pending-invited'
+        }
+        else if ( group.type == 'private' ) {
+            if ( member.userId == currentUser.id ) {
+                member.status = 'pending-requested'
+            } else {
+                member.status = 'pending-invited'
+            }
+        }
+        else if ( group.type == 'open' ) {
+            if ( member.userId == currentUser.id ) {
+                member.status = 'member'
+            } else {
+                member.status = 'pending-invited'
+            }
+        }
+        else { 
+            throw new ControllerError(500, 'server-error',
+                `Unknown type for Group(${groupId}).`,
+                `We encountered an error we couldn't recover from.  Please report it as a bug.`)
         }
 
         await this.groupMemberDAO.insertGroupMembers(member)

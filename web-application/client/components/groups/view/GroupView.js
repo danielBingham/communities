@@ -10,7 +10,7 @@ import Error404 from '/components/errors/Error404'
 
 import './GroupView.css'
 
-const GroupView = function(props) {
+const GroupView = function({ id }) {
 
     // ======= Request Tracking =====================================
 
@@ -18,13 +18,13 @@ const GroupView = function(props) {
 
     // ======= Redux State ==========================================
     
-    const group = useSelector((state) => state.groups.dictionary[props.id])
+    const group = useSelector((state) => state.groups.dictionary[id])
 
     // ======= Effect Handling ======================================
 
     useEffect(function() {
         if ( ! group ) {
-            makeRequest(getGroup(props.id))
+            makeRequest(getGroup(id))
         }
     }, [ group ])
 
@@ -53,9 +53,12 @@ const GroupView = function(props) {
 
     return (
         <article id={ group.id } className='group-view'>
-            <GroupImage groupId={group.id} />
-            <div className="details">
+            <div>
+                <GroupImage groupId={group.id} />
                 <div className="title"> { group.title}</div>
+                <div className="type">{ group.type }</div>
+            </div>
+            <div className="details">
                 <div className="about"> { group.about }</div>
             </div>
         </article>

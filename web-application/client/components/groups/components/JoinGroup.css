@@ -1,0 +1,6 @@
+
+@media (width < 750px) {
+    .text {
+        display: none;
+    }
+}
