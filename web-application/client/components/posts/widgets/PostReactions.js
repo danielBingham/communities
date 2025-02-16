@@ -117,7 +117,7 @@ const PostReactions = function({ postId }) {
                         <a href=""
                             className={`${ userReaction?.reaction == 'block' ? 'reacted' : ''} block`}
                             onClick={(e) => { e.preventDefault(); setBlockConfirmation(true) }} 
-                        ><XCircleIcon /> Block </a>
+                        ><XCircleIcon /> Demote</a>
                         <BlockConfirmation
                             isVisible={blockConfirmation} 
                             execute={() => { setBlockConfirmation(false); react('block') }} 
@@ -128,7 +128,7 @@ const PostReactions = function({ postId }) {
                         <a href=""
                             className={`${ userReaction?.reaction == 'block' ? 'reacted' : ''} block`}
                             onClick={(e) => { e.preventDefault(); react('block') }} 
-                        ><XCircleIcon /> Block </a>}
+                        ><XCircleIcon /> Demote</a>}
                 </div>
             </div>
         </div>

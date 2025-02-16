@@ -104,8 +104,6 @@ export const getGroups = function(name, params) {
 
                 dispatch(groupsSlice.actions.setGroupQueryResults({ name: name, meta: response.meta, list: response.list }))
 
-                console.log(`Calling setRelationsInState...`)
-                console.log(response.relations)
                 dispatch(setRelationsInState(response.relations))
             }
         ))

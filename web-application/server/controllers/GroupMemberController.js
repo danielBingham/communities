@@ -41,14 +41,45 @@ module.exports = class GroupMemberController {
             where: '',
             params: [],
             page: 1,
-            order: 'group_members.created_date DESC'
+            order: 'group_members.created_date DESC',
+            full: false
         }
 
         const currentUser = request.session.user
         const groupId = request.params.groupId
 
-        query.params.push(groupId)
-        query.where = 'group_members.group_id = $1'
+        const group = await this.groupDAO.getGroupById(groupId)
+        let currentMember = null
+        if ( currentUser ) {
+            currentMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(groupId, currentUser.id)
+        }
+
+        if ( ! group ) {
+            throw new ControllerError(404, 'not-found',
+                `No Group(${groupId}).`,
+                `That group either doesn't exist or you don't have permission to see it.`)
+        }
+
+        if ( group.type == 'open' ) {
+            query.params.push(groupId)
+            query.where = 'group_members.group_id = $1'
+        } else if ( group.type == 'private' || group.type == 'hidden') {
+            if ( ! currentMember || currentMember.status !== 'member' ) {
+                query.page = -1
+                return query
+            } else if ( currentMember.role == 'admin' || currentMember.role == 'moderator') {
+                query.params.push(groupId)
+                query.where = `group_members.group_id = $1`
+            } else {
+                query.params.push(groupId)
+                query.params.push(currentUser.id)
+                query.where = `group_members.group_id = $1 AND (group_members.status = 'member' OR group_members.user_id = $2)`
+            }
+        } else {
+            throw new ControllerError(500, 'server-error',
+                `Group(${groupId}) doesn't have a known type.`,
+                `We encountered an error we couldn't recover from.  Please report as a bug.`)
+        }
 
         return query
     }
@@ -58,34 +89,33 @@ module.exports = class GroupMemberController {
 
         if ( ! currentUser ) {
             throw new ControllerError(401, 'not-authenticated',
-                `User must be authenticated to retrieve posts.`,
-                `You must be authenticated to retrieve posts.`)
-        }
-
-        const groupId = request.params.groupId 
-
-        const existing = await this.groupDAO.getGroupById(groupId)
-        
-        if ( existing === null ) {
-            throw new ControllerError(404, 'not-found',
-                `User(${currentUser.id}) attempting to get members for Group(${groupId}), not found.`,
-                `Either that group doesn't exist or you don't have permission to see it.`)
-        }
-
-        const member = await this.groupMemberDAO.getGroupMemberByGroupAndUser(groupId, currentUser.id)
-
-        if ( member === null && existing.isDiscoverable !== true ) {
-            throw new ControllerError(404, 'not-found',
-                `User(${currentUser.id}) attempting to get members for Group(${groupId}), they don't have permission.`,
-                `Either that group doesn't exist or you don't have permission to see it.`)
+                `User must be authenticated to retrieve GroupMembers.`,
+                `You must be authenticated to retrieve GroupMembers.`)
         }
 
         const query = await this.createQuery(request)
+
+        // Empty response.
+        if ( query.page == -1 ) {
+            response.status(200).json({
+                dictionary: {},
+                list: [],
+                meta: {
+                    count: 0,
+                    page: 1,
+                    pageSize: 1,
+                    numberOfPages: 1
+                },
+                relations: {}
+            })
+            return
+        }
+
+        
         const results = await this.groupMemberDAO.selectGroupMembers(query)
         const meta = await this.groupMemberDAO.getGroupMemberPageMeta(query)
         const relations = await this.getRelations(currentUser, results)
 
-        console.log(results)
         response.status(200).json({ 
             dictionary: results.dictionary,
             list: results.list,
@@ -136,6 +166,24 @@ module.exports = class GroupMemberController {
         }
 
         const userMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(groupId, currentUser.id) 
+        const existing = await this.groupMemberDAO.getGroupMemberByGroupAndUser(groupId, member.userId)
+
+        // If a user already exists, then bail out.
+        if ( existing && existing.userId == member.userId ) {
+            if ( member.userId == currentUser.id ) {
+                throw new ControllerError(400, 'exists',
+                    `User(${member.userId}) has already been added to Group(${member.groupId}) with status '${userMember.status}'.`,
+                    `You've already been added with status '${userMember.status}'.`)
+            } else if ( userMember && (userMember.role == 'admin' || userMember.role == 'moderator')) {
+                throw new ControllerError(400, 'exists',
+                    `User(${member.userId}) has already been added to Group(${member.groupId}) with status '${userMember.status}'.`,
+                    `That user has already been added with status '${userMember.status}'.`)
+            } else {
+                throw new ControllerError(403, 'not-authorized',
+                    `User(${currentUser.id}) is not authorized to add members to Group(${groupId}).`,
+                    `You aren't authorized to add members.`)
+            }
+        }
 
         // Check permissions by group type.
         if ( group.type == 'hidden' ) {
@@ -240,7 +288,7 @@ module.exports = class GroupMemberController {
         }
 
         const groupId = request.params.groupId 
-        const memberId = request.params.id
+        const memberId = request.params.userId
 
         const existing = await this.groupDAO.getGroupById(groupId)
         
@@ -250,17 +298,22 @@ module.exports = class GroupMemberController {
                 `Either that group doesn't exist or you don't have permission to see it.`)
         }
 
-        const userMember = await this.groupMemberDAO.getGroupMemberForGroupAndUser(groupId, currentUser.id)
+        const userMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(groupId, currentUser.id)
 
-        if ( userMember === null && existing.isDiscoverable !== true ) {
+        if ( userMember === null && existing.type == 'hidden') {
             throw new ControllerError(404, 'not-found',
                 `User(${currentUser.id}) attempting to get member for Group(${groupId}), they don't have permission.`,
                 `Either that group doesn't exist or you don't have permission to see it.`)
         }
 
+        const canViewFull = ( userMember.role == 'admin' 
+            || userMember.role == 'moderator' 
+            || (currentUser && currentUser.id == userMember.userId))
+
         const results = await this.groupMemberDAO.selectGroupMembers({
             where: `group_members.group_id = $1 AND group_members.user_id = $2`,
-            params: [groupId, memberId]
+            params: [groupId, memberId],
+            full: canViewFull
         })
 
         const entity = results.dictionary[results.list[0]]
@@ -283,7 +336,7 @@ module.exports = class GroupMemberController {
         }
 
         const groupId = request.params.groupId
-        const memberId = request.params.memberId
+        const memberId = request.params.userId
 
         const member = request.body
 
@@ -318,26 +371,28 @@ module.exports = class GroupMemberController {
                 `You can't PATCH a GroupMember that doesn't exist.`)
         }
 
-        const userMember = await this.groupMemberDAO.getGroupMemberForGroupAndUser(groupId, currentUser.id) 
+        const userMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(groupId, currentUser.id) 
 
         // CurrentUser must be a member of the group.
-        if ( ! userMember && group.isDiscoverable !== true ) {
+        if ( ! userMember && group.type == 'hidden') {
             throw new ControllerError(404, 'not-found',
                 `User(${currentUser.id}) attempting to edit a member to a Group(${groupId}) they can't view.`,
                 `Either that group doesn't exist or you don't have permission to see it.`)
-        } else if ( ! userMember && group.isDiscoverable ) {
+        } else if ( ! userMember && group.type != 'hidden') {
             throw new ControllerError(403, 'not-authorized',
                 `User(${currentUser.id}) attempting to edit a member to a Group(${groupId}) they aren't a member of.`,
                 `You're not authorized to edit members of that group.`)
         }
 
-        // Current User must be an admin or a moderator.
+        // Current User must be an admin. 
         if ( userMember.role !== 'admin' ) {
             throw new ControllerError(403, 'not-authorized',
                 `User(${currentUser.id}) attempting to edit a member of a Group(${groupId}) without permission.`,
                 `You're not authorized to edit members of that group.`)
         }
 
+        // We need the primary field to update.
+        member.id = existing.id
         await this.groupMemberDAO.updateGroupMember(member)
 
         const results = await this.groupMemberDAO.selectGroupMembers({
@@ -371,7 +426,7 @@ module.exports = class GroupMemberController {
         }
 
         const groupId = request.params.groupId
-        const memberId = request.params.id
+        const memberId = request.params.userId
 
         const group = await this.groupDAO.getGroupById(groupId)
 
@@ -390,28 +445,32 @@ module.exports = class GroupMemberController {
                 `You can't PATCH a GroupMember that doesn't exist.`)
         }
 
-        const userMember = await this.groupMemberDAO.getGroupMemberForGroupAndUser(groupId, currentUser.id) 
+        const userMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(groupId, currentUser.id) 
 
         // CurrentUser must be a member of the group.
-        if ( ! userMember && group.isDiscoverable !== true ) {
+        if ( ! userMember && group.type == 'hidden') {
             throw new ControllerError(404, 'not-found',
                 `User(${currentUser.id}) attempting to remove a member to a Group(${groupId}) they can't view.`,
                 `Either that group doesn't exist or you don't have permission to see it.`)
-        } else if ( ! userMember && group.isDiscoverable ) {
+        } else if ( ! userMember && group.type != 'hidden') {
             throw new ControllerError(403, 'not-authorized',
                 `User(${currentUser.id}) attempting to remove a member to a Group(${groupId}) they aren't a member of.`,
                 `You're not authorized to remove members to that group.`)
         }
 
-        // Current User must be an admin or a moderator.
-        if ( userMember.role !== 'admin' && userMember.role !== 'moderator' ) {
+        // Current User must the member being removed or be an admin or a moderator.
+        if ( (currentUser.id != userMember.userId) 
+            && (userMember.role !== 'admin' && userMember.role !== 'moderator' )) 
+        {
             throw new ControllerError(403, 'not-authorized',
                 `User(${currentUser.id}) attempting to remove a member to a Group(${groupId}) without permission.`,
                 `You're not authorized to remove members to that group.`)
         }
 
         // If removing a admin or moderator, CurrentUser must be an admin.
-        if ( ( existing.role == 'admin' || existing.role == 'moderator') && userMember.role !== 'admin') {
+        if ( currentUser.id != userMember.userId 
+            && (( existing.role == 'admin' || existing.role == 'moderator') && userMember.role !== 'admin')) 
+        {
             throw new ControllerError(403, 'not-authorized',
                 `User(${currentUser.id}) attempting to remove an admin or moderator to Group(${groupId}) without permission.`,
                 `You're not authorized to remove admins or moderators to that group.`)

@@ -17,6 +17,8 @@ import { useRequest } from '/lib/hooks/useRequest'
 
 import { getGroups } from '/state/groups'
 
+import PostPage from '/pages/posts/PostPage'
+
 import Feed from '/components/feeds/Feed'
 import GroupView from '/components/groups/view/GroupView'
 import GroupMembersList from '/components/groups/members/list/GroupMembersList'
@@ -72,6 +74,7 @@ const GroupPage = function() {
                 <div className='main'>
                     <Routes>
                         <Route path="members" element={ <GroupMembersList groupId={group.id} />} />
+                        <Route path=":postId" element={ <PostPage /> } />
                         <Route index element={<Feed type="group" />} />
                     </Routes> 
                 </div>

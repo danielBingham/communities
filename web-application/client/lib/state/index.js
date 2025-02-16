@@ -54,9 +54,10 @@ export const setQueryResults = function(state, action) {
 export const clearQuery = function(state, action) {
     const name = action.payload.name
 
-    if ( state.queries[name] ) {
+    // If we have a name, clear that query.  Otherwise, clear them all.
+    if ( name in state.queries ) {
         delete state.queries[name]
-    }
+    } 
 }
 
 export const clearQueries = function(state, action) {

@@ -10,7 +10,7 @@ import UserProfileImage from '/components/users/UserProfileImage'
 import FriendButton from '/components/friends/FriendButton'
 import './UserBadge.css'
 
-const UserBadge = function(props) {
+const UserBadge = function({ id, children }) {
     
     // ======= Request Tracking =====================================
    
@@ -18,7 +18,7 @@ const UserBadge = function(props) {
 
     // ======= Redux State ==========================================
     
-    const user = useSelector((state) => props.id in state.users.dictionary ? state.users.dictionary[props.id] : null)
+    const user = useSelector((state) => id in state.users.dictionary ? state.users.dictionary[id] : null)
 
     // ======= Effect Handling ======================================
     
@@ -26,7 +26,7 @@ const UserBadge = function(props) {
 
     useEffect(function() {
         if ( ! user ) {
-            makeRequest(getUser(props.id))
+            makeRequest(getUser(id))
         }
     }, [ user ])
 
@@ -51,7 +51,9 @@ const UserBadge = function(props) {
                     <div className="user-badge__details" >
                         <div className="user-badge__name"><Link to={ `/${user.username}` }>{user.name}</Link></div>
                         <div className="user-badge__about">{ user.about?.length > 100 ? user.about.substring(0,100).trim()+'...' : user.about }</div>
-                        <FriendButton userId={user.id} />
+                        <div className="controls">
+                            { children }
+                        </div>
                     </div> 
                 </div>
             </div>

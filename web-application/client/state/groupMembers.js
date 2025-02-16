@@ -138,6 +138,7 @@ export const postGroupMembers = function(member) {
                 dispatch(groupMembersSlice.actions.setGroupMembersInDictionary({ entity: response.entity}))
 
                 dispatch(setRelationsInState(response.relations))
+                dispatch(groupMembersSlice.actions.clearGroupMemberQueries())
             }
         ))
     }
@@ -209,6 +210,7 @@ export const deleteGroupMember = function(member) {
             function(response) {
                 dispatch(groupMembersSlice.actions.removeGroupMember({ entity: response.entity}))
                 dispatch(setRelationsInState(response.relations))
+                dispatch(groupMembersSlice.actions.clearGroupMemberQueries())
             }
         ))
     }

@@ -6,6 +6,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 import { getGroupMembers, clearGroupMemberQuery } from '/state/groupMembers'
 
 import UserBadge from '/components/users/UserBadge'
+import GroupMembershipButton from '/components/groups/components/GroupMembershipButton'
 import PaginationControls from '/components/PaginationControls'
 import Spinner from '/components/Spinner'
 
@@ -15,20 +16,19 @@ const GroupMembersList = function({ groupId, params }) {
 
     const [request, makeRequest] = useRequest()
 
+    const currentUser = useSelector((state) => state.authentication.currentUser)
+
     const dictionary = useSelector((state) => state.groupMembers.dictionary)
-    const query = useSelector((state) => 'GroupMembersList' in state.groupMembers.queries ? state.groupMembers.queries['GroupMembersList'] : null)
+    const queries = useSelector((state) => state.groupMembers.queries)
 
-    const dispatch = useDispatch()
     useEffect(() => {
-        const queryParams = { ...params }
-        makeRequest(getGroupMembers(groupId, 'GroupMembersList', queryParams))
-
-        return () => {
-            dispatch(clearGroupMemberQuery({ name: 'GroupMembersList'})) 
+        if ( ! ('GroupMembersList' in queries)) {
+            const queryParams = { ...params }
+            makeRequest(getGroupMembers(groupId, 'GroupMembersList', queryParams))
         }
-    }, [ groupId, params ])
+    }, [ groupId, params, queries ])
 
-    if ( query === null ) {
+    if ( ! ('GroupMembersList' in queries)) {
         return (
             <div className="group-members-list">
                 <Spinner />
@@ -36,16 +36,26 @@ const GroupMembersList = function({ groupId, params }) {
         )
     }
 
+    const query = queries['GroupMembersList']
+
     const memberViews = []
     for(const id of query.list) {
         const member = dictionary[id]
 
-        memberViews.push(<UserBadge key={id} id={member.userId} />)
+        if ( ! member ) {
+            continue
+        }
+
+        memberViews.push(<UserBadge key={id} id={member.userId}>
+            { currentUser.id !== member.userId && <GroupMembershipButton groupId={groupId} userId={member.userId} /> }
+        </UserBadge>)
     }
 
     return (
         <div className="group-members-list">
-            {memberViews}        
+            <div className="group-members-list__grid">
+                {memberViews}        
+            </div>
             <PaginationControls meta={query.meta} />
         </div>
     )

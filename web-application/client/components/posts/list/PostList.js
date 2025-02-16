@@ -47,7 +47,6 @@ const PostList = function({ name, params }) {
         }
     }, [ searchParams, params ])
 
-    console.log(query)
     if ( query === null ) {
         return (
             <div className="post-list">

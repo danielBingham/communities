@@ -1,0 +1,4 @@
+.group-members-list__grid {
+    display: grid;
+    grid-template-columns: auto auto;
+}

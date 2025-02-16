@@ -35,9 +35,13 @@ module.exports = class GroupController {
     async getRelations(currentUser, results, requestedRelations) {
         const relations = {}
         if ( requestedRelations && requestedRelations.includes("GroupMembers") ) {
+            const params = [ results.list ]
+            if ( currentUser ) {
+                params.push(currentUser.id)
+            }
             const memberResults = await this.groupMemberDAO.selectGroupMembers({
-                where: `group_members.group_id = ANY($1::uuid[]) AND group_members.status = 'member'`,
-                params: [ results.list ]
+                where: `group_members.group_id = ANY($1::uuid[]) AND (group_members.status = 'member' ${ currentUser ? `OR group_members.user_id = $2` : ''})`,
+                params: params 
             })
 
             relations['groupMembers'] = memberResults.dictionary

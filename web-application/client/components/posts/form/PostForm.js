@@ -25,10 +25,7 @@ import './PostForm.css'
 
 const PostForm = function({ postId, groupId }) {
 
-    console.log(`## PostForm(${postId}, ${groupId})`)
-
     const [draft, setDraft] = usePostDraft(postId || null)
-    console.log(draft)
 
     const [content,setContent] = useState( draft ? draft.content : '')
     const [fileId,setFileId] = useState(draft ? draft.fileId : null)

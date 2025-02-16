@@ -7,6 +7,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 import {getUserRelationships, clearUserRelationshipQuery } from '/state/userRelationships'
 
 import UserBadge from '/components/users/UserBadge'
+import FriendButton from '/components/friends/FriendButton'
 
 import Spinner from '/components/Spinner'
 import { 
@@ -80,9 +81,13 @@ const FriendList = function({ userId, params }) {
             }
 
             if ( relationship.userId !== userId ) {
-                userBadges.push(<UserBadge key={relationship.userId} id={relationship.userId} />)
+                userBadges.push(<UserBadge key={relationship.userId} id={relationship.userId}>
+                    <FriendButton userId={relationship.userId} />
+                </UserBadge>)
             } else if ( relationship.relationId !== userId ) {
-                userBadges.push(<UserBadge key={relationship.relationId} id={relationship.relationId} />)
+                userBadges.push(<UserBadge key={relationship.relationId} id={relationship.relationId}>
+                    <FriendButton userId={relationship.relationId} />
+                </UserBadge>)
             } else {
                 console.error(`Relationship found with User(${userId}) on neither end!`)
             }

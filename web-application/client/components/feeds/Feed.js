@@ -15,7 +15,6 @@ import Spinner from '/components/Spinner'
 import './Feed.css'
 
 const Feed = function({ type }) {
-    console.log(`## Rendering Feed(${type})`)
     const { slug } = useParams()
 
     const [request, makeRequest] = useRequest()

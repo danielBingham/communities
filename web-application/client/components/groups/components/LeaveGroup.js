@@ -30,8 +30,15 @@ const LeaveGroup = function({ groupId }) {
         return null
     }
 
+    if ( currentMember.status == 'pending-requested' ) {
+        
+    }
+
     return (
-        <Button type="secondary-warn" onClick={() => leaveGroup()}><ArrowRightStartOnRectangleIcon /> <span>Leave</span></Button>    
+        <span>
+            { currentMember.status == 'member' &&  <Button type="secondary-warn" onClick={() => leaveGroup()}><ArrowRightStartOnRectangleIcon /> <span>Leave</span></Button>    }
+            { currentMember.status == 'pending-requested' && <Button type="secondary-warn" onClick={() => leaveGroup()}><ArrowRightStartOnRectangleIcon /><span>Cancel Request</span></Button> }
+        </span>
     )
 }
 

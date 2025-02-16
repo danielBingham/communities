@@ -116,7 +116,7 @@ module.exports = class PostController {
 
         // Posts in groups
         const groupResults = await this.core.database.query(`
-            SELECT group_id FROM group_members WHERE user_id = $1
+            SELECT group_id FROM group_members WHERE user_id = $1 AND status = 'member'
         `, [ currentUser.id ])
 
         const groupIds = groupResults.rows.map((r) => r.group_id)

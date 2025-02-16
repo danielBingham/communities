@@ -4,8 +4,7 @@ import { useNavigate } from 'react-router-dom'
 
 import { Cog6ToothIcon } from '@heroicons/react/24/solid'
 
-import LeaveGroup from '/components/groups/components/LeaveGroup'
-import JoinGroup from '/components/groups/components/JoinGroup'
+import GroupMembershipButton from '/components/groups/components/GroupMembershipButton'
 import Button from '/components/generic/button/Button'
 
 import './GroupActionMenu.css'
@@ -24,8 +23,7 @@ const GroupActionMenu = function({ groupId }) {
     return (
         <menu className="group-action-menu">
             { isAdmin && <li><Button type="primary" onClick={() => navigate(`/groups/admin/${groupId}`)}><Cog6ToothIcon /><span className="text"> Admin</span></Button></li> }
-            { currentMember && <li><LeaveGroup groupId={groupId} /></li> }
-            { ! currentMember && <li><JoinGroup groupId={groupId} /></li> }
+            <li><GroupMembershipButton groupId={groupId} userId={currentUser.id} /></li>
         </menu>
     )
 }

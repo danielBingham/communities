@@ -46,7 +46,7 @@ const SCHEMA = {
             'status': {
                 insert: 'required',
                 update: 'allowed',
-                select: 'full',
+                select: 'always',
                 key: 'status'
             },
             'entrance_answers': {
@@ -115,10 +115,11 @@ module.exports = class GroupMemberDAO extends DAO {
         return { dictionary: dictionary, list: list }
     }
 
-    async getGroupMemberById(id) {
+    async getGroupMemberById(id, full) {
         const results = await this.selectGroupMembers({
             where: `groupMembers.id = $1`,
-            params: [ id ]
+            params: [ id ],
+            full: full
         })
 
         if ( results.list.length <= 0 || ! ( id in results.dictionary)) {
@@ -128,10 +129,11 @@ module.exports = class GroupMemberDAO extends DAO {
         return results.dictionary[id]
     }
 
-    async getGroupMemberByGroupAndUser(groupId, userId) {
+    async getGroupMemberByGroupAndUser(groupId, userId, full) {
         const results = await this.selectGroupMembers({
             where: `group_members.group_id = $1 AND group_members.user_id = $2`,
-            params: [ groupId, userId ]
+            params: [ groupId, userId ],
+            full: full 
         })
 
         if ( results.list.length <= 0 ) {
@@ -153,6 +155,7 @@ module.exports = class GroupMemberDAO extends DAO {
         let where = query.where ? `WHERE ${query.where}` : ''
         let params = query.params ? [ ...query.params ] : []
         let order = query.order ? `${query.order}` : `group_members.created_date DESC`
+        let full = query.full ? query.full : false
 
         let paging = ''
         if ( query.page ) {

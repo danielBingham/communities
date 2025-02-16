@@ -30,6 +30,7 @@ const Post = function({ id, expanded, showLoading }) {
 
     const post = useSelector((state) => id && id in state.posts.dictionary ? state.posts.dictionary[id] : null) 
     const user = useSelector((state) => post?.userId && post.userId in state.users.dictionary ? state.users.dictionary[post.userId] : null) 
+    const group = useSelector((state) => post?.groupId && post.groupId in state.groups.dictionary ? state.groups.dictionary[post.groupId] : null)
 
     useEffect(function() {
         if ( ! post ) {
@@ -61,11 +62,17 @@ const Post = function({ id, expanded, showLoading }) {
         return null
     }
 
+    let postLink = `/${user.username}/${id}`
+    if ( post.groupId ) {
+        postLink = `/group/${group.slug}/${id}`
+    }
+
+
     return (
         <div id={post.id} className="post">
             <div className="post__header"> 
                 <div className="post__details">
-                    <UserTag id={post.userId} /> posted <Link to={`/${user.username}/${id}`}><DateTag timestamp={post.createdDate} /></Link> { post.groupId &&<span>in <GroupTag id={post.groupId} /></span>}
+                    <UserTag id={post.userId} /> posted <Link to={postLink}><DateTag timestamp={post.createdDate} /></Link> { post.groupId &&<span>in <GroupTag id={post.groupId} /></span>}
                 </div>
                 <div className="post__controls">
                     <PostDotsMenu postId={post.id} />

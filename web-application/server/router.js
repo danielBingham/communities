@@ -245,19 +245,19 @@ module.exports = function(core) {
         })
     })
 
-    router.get('/group/:groupId/member/:id', function(request, response, next) {
+    router.get('/group/:groupId/member/:userId', function(request, response, next) {
         groupMemberController.getGroupMember(request, response).catch(function(error) {
             next(error)
         })
     })
 
-    router.patch('/group/:groupId/member/:id', function(request, response, next) {
+    router.patch('/group/:groupId/member/:userId', function(request, response, next) {
         groupMemberController.patchGroupMember(request, response).catch(function(error) {
             next(error)
         })
     })
 
-    router.delete('/group/:groupId/member/:id', function(request, response, next) {
+    router.delete('/group/:groupId/member/:userId', function(request, response, next) {
         groupMemberController.deleteGroupMember(request, response).catch(function(error) {
             next(error)
         })

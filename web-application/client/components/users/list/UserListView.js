@@ -9,6 +9,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 import {getUsers, clearUserQuery } from '/state/users'
 
 import UserBadge from '../UserBadge'
+import FriendButton from '/components/friends/FriendButton'
 
 import Spinner from '/components/Spinner'
 import { 
@@ -76,7 +77,9 @@ const UserListView = function({ params }) {
     if ( users ) {
         const userBadges = []
         for( const userId of users) {
-            userBadges.push(<UserBadge key={userId} id={userId} />)
+            userBadges.push(<UserBadge key={userId} id={userId}>
+                <FriendButton userId={userId} />
+            </UserBadge>)
         }
         content = userBadges
     } else if (request && request.state == 'fulfilled') {
