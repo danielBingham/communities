@@ -42,10 +42,19 @@ const PostList = function({ name, params }) {
         queryParams.page = searchParams.get('page') ? searchParams.get('page') : 1
 
         makeRequest(getPosts(name, queryParams))
-        return () => {
-            dispatch(clearPostQuery({ name: name}))
-        }
     }, [ searchParams, params ])
+
+    useEffect(() => {
+        if ( ! query ) {
+            let queryParams = { ...params }
+
+            queryParams.sort = getSort() 
+
+            queryParams.page = searchParams.get('page') ? searchParams.get('page') : 1
+
+            makeRequest(getPosts(name, queryParams))
+        }
+    }, [ searchParams, params, query ])
 
     if ( query === null ) {
         return (

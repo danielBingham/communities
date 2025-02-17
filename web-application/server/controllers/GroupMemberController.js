@@ -384,8 +384,13 @@ module.exports = class GroupMemberController {
                 `You're not authorized to edit members of that group.`)
         }
 
+        if ( userMember.userId == existing.userId && existing.status == 'pending-invited' && member.status == 'member') {
+            // Pass them through, they're allowed to update themselves in this
+            // case. TECHDEBT Yeah, this is hacky, but I'm trying to push
+            // through burnout and this is what I got at the moment.
+        } 
         // Current User must be an admin. 
-        if ( userMember.role !== 'admin' ) {
+        else if ( userMember.role !== 'admin' ) {
             throw new ControllerError(403, 'not-authorized',
                 `User(${currentUser.id}) attempting to edit a member of a Group(${groupId}) without permission.`,
                 `You're not authorized to edit members of that group.`)

@@ -11,6 +11,7 @@ import Spinner from '/components/Spinner'
 
 import UserView from '/components/users/UserView'
 import Feed from '/components/feeds/Feed'
+import { Page, PageBody, PageLeftGutter, PageRightGutter } from '/components/generic/Page'
 
 import './UserProfilePage.css'
 
@@ -53,14 +54,16 @@ const UserProfilePage = function(props) {
     }
 
     return (
-        <div id="user-profile-page">
-            <div className='right-sidebar'>
+        <Page id="user-profile-page">
+            <PageLeftGutter>
                 <UserView id={id} />
-            </div>
-            <div className='main'>
+            </PageLeftGutter>
+            <PageBody className='main'>
                 <Outlet /> 
-            </div>
-        </div>
+            </PageBody>
+            <PageRightGutter>
+            </PageRightGutter>
+        </Page>
     )
 }
 

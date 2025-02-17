@@ -54,12 +54,6 @@ const GroupView = function({ id }) {
     return (
         <article id={ group.id } className='group-view'>
             <div>
-                <GroupImage groupId={group.id} />
-                <div className="title"> { group.title}</div>
-                <div className="type">{ group.type }</div>
-            </div>
-            <div className="details">
-                <div className="about"> { group.about }</div>
             </div>
         </article>
     )

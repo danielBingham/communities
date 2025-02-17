@@ -146,6 +146,7 @@ export const postPosts = function(post) {
                 dispatch(postsSlice.actions.setPostsInDictionary({ entity: response.entity}))
 
                 dispatch(setRelationsInState(response.relations))
+                dispatch(postsSlice.actions.clearPostQueries())
             }
         ))
     }
@@ -216,6 +217,7 @@ export const deletePost = function(post) {
         return dispatch(makeTrackedRequest('DELETE', `/post/${encodeURIComponent(post.id)}`, null,
             function(response) {
                 dispatch(postsSlice.actions.removePost({ entity: post}))
+                dispatch(postsSlice.actions.clearPostQueries())
             }
         ))
     }

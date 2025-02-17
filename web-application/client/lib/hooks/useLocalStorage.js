@@ -8,12 +8,17 @@ const getLocalStorage = function(key, defaultValue) {
 }
 
 export const useLocalStorage = function(key, defaultValue) {
-    const [ value, setValue ] = useState(() => getLocalStorage(key, defaultValue))
+    const [ internalValue, setInternalValue] = useState(() => getLocalStorage(key, defaultValue))
 
+    const setValue = (value) => {
+        if ( value === null ) {
+            setInternalValue(value)
+            localStorage.removeItem(key)
+        } else {
+            setInternalValue(value)
+            localStorage.setItem(key, JSON.stringify(value))
+        }
+    }
 
-    useEffect(() => {
-        localStorage.setItem(key, JSON.stringify(value))
-    }, [key, value])
-
-    return [value, setValue]
+    return [internalValue, setValue]
 }

@@ -16,12 +16,15 @@ const PostDotsMenu = function({ postId }) {
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const post = useSelector((state) => postId && postId in state.posts.dictionary ? state.posts.dictionary[postId] : null) 
 
+    const currentMember = useSelector((state) => post && currentUser && post.groupId && post.groupId in state.groupMembers.byGroupAndUser && currentUser.id in state.groupMembers.byGroupAndUser[post.groupId] ? state.groupMembers.byGroupAndUser[post.groupId][currentUser.id] : null)
+
     // Must have a user and a post to show dots menu.
     if ( ! currentUser || post === null ) {
         return null
     }
 
     const isAuthor = currentUser && currentUser.id == post.userId
+    const isModerator = currentMember && (currentMember.role == 'admin' || currentMember.role == 'moderator')
 
     return (
         <FloatingMenu className="post-dots-menu" closeOnClick={true}>
@@ -29,7 +32,7 @@ const PostDotsMenu = function({ postId }) {
             <FloatingMenuBody>
                 { currentUser && <SubscribeToPost postId={postId} /> }
                 { isAuthor && <EditPost postId={postId} /> }
-                { isAuthor && <DeletePost postId={postId} /> }
+                { (isAuthor || isModerator) && <DeletePost postId={postId} /> }
             </FloatingMenuBody>
         </FloatingMenu>
     )

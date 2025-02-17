@@ -5,7 +5,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 
 import { getGroupMembers, clearGroupMemberQuery } from '/state/groupMembers'
 
-import UserBadge from '/components/users/UserBadge'
+import GroupMemberBadge from '/components/groups/members/GroupMemberBadge'
 import GroupMembershipButton from '/components/groups/components/GroupMembershipButton'
 import PaginationControls from '/components/PaginationControls'
 import Spinner from '/components/Spinner'
@@ -46,9 +46,7 @@ const GroupMembersList = function({ groupId, params }) {
             continue
         }
 
-        memberViews.push(<UserBadge key={id} id={member.userId}>
-            { currentUser.id !== member.userId && <GroupMembershipButton groupId={groupId} userId={member.userId} /> }
-        </UserBadge>)
+        memberViews.push(<GroupMemberBadge key={id} groupId={groupId} userId={member.userId} />)
     }
 
     return (

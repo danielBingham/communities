@@ -42,6 +42,7 @@ module.exports = class UserController {
 
         this.userDAO = new backend.UserDAO(core)
         this.userRelationshipsDAO = new backend.UserRelationshipDAO(core)
+        this.groupMemberDAO = new backend.GroupMemberDAO(core)
         this.tokenDAO = new backend.TokenDAO(core)
         this.fileDAO = new backend.FileDAO(core)
     }
@@ -127,19 +128,27 @@ module.exports = class UserController {
         }
 
 
-        if ( query.name && query.name.length > 0) {
+        if ( 'name' in query && query.name.length > 0) {
             result.params.push(query.name)
             result.where += ` AND SIMILARITY(users.name, $${result.params.length}) > 0`
             result.order = `SIMILARITY(users.name, $${result.params.length}) desc`
         }
 
-        if ( query.username && query.username.length > 0 ) {
+        if ( 'username' in query && query.username.length > 0 ) {
             result.params.push(query.username)
             result.where += ` AND users.username = $${result.params.length}`
         }
 
-        if ( query.ids && query.ids.length > 0 ) {
+        if ( 'ids' in query && query.ids.length > 0 ) {
             result.params.push(query.ids)
+            result.where += ` AND users.id = ANY($${result.params.length}::uuid[])`
+        }
+
+        if ( 'isFriend' in query && query.isFriend ) {
+            const relationships = await this.userRelationshipsDAO.getUserRelationshipsForUser(currentUser.id)
+            const friendIds = relationships.map((r) => r.userId == currentUser.id ? r.relationId : r.userId)
+
+            result.params.push(friendIds)
             result.where += ` AND users.id = ANY($${result.params.length}::uuid[])`
         }
 

@@ -42,14 +42,6 @@
 
 
 @media (width >= 750px) {
-    #groups-page {
-        margin: 50px auto;
-        display: grid;
-        grid-template-columns: 320px auto;
-        width: 100%;
-        max-width:  1740px;
-    }
-
     #groups-page .content {
         padding: 30px;
     }

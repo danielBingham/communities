@@ -18,32 +18,37 @@ import {
 
 } from '@heroicons/react/24/solid'
 
+import { Page, PageBody, PageLeftGutter, PageRightGutter } from '/components/generic/Page'
 import './AboutPage.css'
 
 const AboutPage = function() {
     return (
-        <div id="about-page">
-            <menu className="about-page__menu">
-                <li><NavLink to="/about" end>
-                    <InformationCircleIconSolid className="solid" /><InformationCircleIconOutline className="outline" /> <span className="nav-text">About</span>
-                </NavLink></li>
-                <li><NavLink to="/about/faq" end>
-                    <QuestionMarkCircleSolid className="solid" /><QuestionMarkCircleOutline className="outline" /> <span className="nav-text">FAQ</span>
-                </NavLink></li>
-                <li><NavLink to="/about/tos" end>
-                    <ClipboardDocumentCheckIconSolid className="solid" /><ClipboardDocumentCheckIconOutline className="outline" /> <span className="nav-text">Terms</span>
-                </NavLink></li>
-                <li><NavLink to="/about/privacy" end>
-                    <ShieldCheckSolid className="solid" /><ShieldCheckOutline className="outline" /> <span className="nav-text">Privacy</span>
-                </NavLink></li>
-                <li><NavLink to="/about/contact">
-                    <MegaphoneSolid className="solid" /><MegaphoneOutline className="outline" /> <span className="nav-text">Contact</span>
-                </NavLink> </li>
-            </menu>
-            <div className="content">
+        <Page id="about-page">
+            <PageLeftGutter>
+                <menu className="about-page__menu">
+                    <li><NavLink to="/about" end>
+                        <InformationCircleIconSolid className="solid" /><InformationCircleIconOutline className="outline" /> <span className="nav-text">About</span>
+                    </NavLink></li>
+                    <li><NavLink to="/about/faq" end>
+                        <QuestionMarkCircleSolid className="solid" /><QuestionMarkCircleOutline className="outline" /> <span className="nav-text">FAQ</span>
+                    </NavLink></li>
+                    <li><NavLink to="/about/tos" end>
+                        <ClipboardDocumentCheckIconSolid className="solid" /><ClipboardDocumentCheckIconOutline className="outline" /> <span className="nav-text">Terms</span>
+                    </NavLink></li>
+                    <li><NavLink to="/about/privacy" end>
+                        <ShieldCheckSolid className="solid" /><ShieldCheckOutline className="outline" /> <span className="nav-text">Privacy</span>
+                    </NavLink></li>
+                    <li><NavLink to="/about/contact">
+                        <MegaphoneSolid className="solid" /><MegaphoneOutline className="outline" /> <span className="nav-text">Contact</span>
+                    </NavLink> </li>
+                </menu>
+            </PageLeftGutter>
+            <PageBody className="content">
                 <Outlet /> 
-            </div>
-        </div>
+            </PageBody>
+            <PageRightGutter>
+            </PageRightGutter>
+        </Page>
     )
 }
 

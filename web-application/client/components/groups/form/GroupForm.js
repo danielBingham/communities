@@ -97,6 +97,16 @@ const GroupForm = function() {
         makeRequest(postGroups(group))
     }
 
+    const cancel = function(event) {
+        setTitle(null)
+        setType(null)
+        setSlug(null)
+        setAbout(null)
+        setFileId(null)
+
+        navigate('/groups')
+    }
+
     const onTitleChange = function(event) {
         const currentSlug = title.toLowerCase().replaceAll(/\s/g, '-')
 

@@ -15,6 +15,7 @@ import {
 } from '@heroicons/react/24/solid'
 
 import Button from '/components/generic/button/Button'
+import { Page, PageBody, PageLeftGutter, PageRightGutter } from '/components/generic/Page'
 
 import './GroupsPage.css'
 
@@ -23,20 +24,24 @@ const GroupsPage = function() {
     const navigate = useNavigate()
 
     return (
-        <div id="groups-page">
-            <menu className="groups-page__menu">
-                <li><Button type="primary" onClick={() => navigate('/groups/create')}><PlusIconSolid /> Create Group</Button></li>
-                <li><NavLink to="/groups" end>
-                    <UserGroupIconSolid className="solid" /><UserGroupIconOutline className="outline" /> <span className="nav-text">Your Groups</span>
-                </NavLink> </li>
-                <li><NavLink to="/groups/find" end>
-                    <MagnifyingGlassSolid className="solid" /><MagnifyingGlassOutline className="outline" /> <span className="nav-text">Find Groups</span>
-                </NavLink></li>
-            </menu>
-            <div className="content">
+        <Page id="groups-page">
+            <PageLeftGutter>
+                <menu className="groups-page__menu">
+                    <li><Button type="primary" onClick={() => navigate('/groups/create')}><PlusIconSolid /> Create Group</Button></li>
+                    <li><NavLink to="/groups" end>
+                        <UserGroupIconSolid className="solid" /><UserGroupIconOutline className="outline" /> <span className="nav-text">Your Groups</span>
+                    </NavLink> </li>
+                    <li><NavLink to="/groups/find" end>
+                        <MagnifyingGlassSolid className="solid" /><MagnifyingGlassOutline className="outline" /> <span className="nav-text">Find Groups</span>
+                    </NavLink></li>
+                </menu>
+            </PageLeftGutter>
+            <PageBody className="content">
                 { <Outlet /> }
-            </div>
-        </div>
+            </PageBody>
+            <PageRightGutter>
+            </PageRightGutter>
+        </Page>
     )
 }
 

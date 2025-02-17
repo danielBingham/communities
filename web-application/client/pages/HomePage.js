@@ -26,6 +26,8 @@ const HomePage = function() {
                     <Outlet />
                 </div>
             </div>
+            <div className="home-page_right-gutter">
+            </div>
         </div>
     )
 }

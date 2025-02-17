@@ -138,6 +138,19 @@ module.exports = class UserRelationshipDAO extends DAO {
         return entity 
     }
 
+    async getUserRelationshipsForUser(userId) {
+        const results = await this.selectUserRelationships({
+            where: `user_relationships.user_id = $1 OR user_relationships.friend_id = $1`,
+            params: [ userId]
+        })
+
+        if ( results.list.length <= 0 ) {
+            return null
+        }
+
+        return results.list.map((id) => results.dictionary[id])
+    }
+
     async selectUserRelationships(query) {
         const params = query.params ? [ ...query.params ] : []
         const where = query.where ? `WHERE ${query.where}` : ''

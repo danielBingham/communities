@@ -7,6 +7,7 @@ import { getGroups } from '/state/groups'
 
 import GroupBadge from '/components/groups/view/GroupBadge'
 
+import { List, ListGridContent } from '/components/generic/list/List'
 import PaginationControls from '/components/PaginationControls'
 import Spinner from '/components/Spinner'
 
@@ -34,10 +35,12 @@ const GroupList = function({ name, params }) {
     }
 
     return (
-        <div className="group-list">
-            { groupViews }
+        <List className="group-list">
+            <ListGridContent>
+                { groupViews }
+            </ListGridContent>
             <PaginationControls meta={query.meta} />
-        </div>
+        </List>
     )
 
 }

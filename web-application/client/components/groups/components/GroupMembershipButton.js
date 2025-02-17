@@ -1,6 +1,8 @@
 import React from 'react'
 import { useSelector } from 'react-redux'
 
+import { ArrowLeftStartOnRectangleIcon, ArrowLeftEndOnRectangleIcon } from '@heroicons/react/24/solid'
+
 import { useRequest } from '/lib/hooks/useRequest'
 
 import { postGroupMembers, patchGroupMember, deleteGroupMember } from '/state/groupMembers'
@@ -155,8 +157,8 @@ const GroupMembershipButton = function({ groupId, userId }) {
     if ( ! member && ! currentMember && currentUser.id == userId ) {
         return (
             <span> 
-                { group.type == 'open' && <Button type="primary" onClick={() => joinGroup()}>Join</Button> }
-                { group.type == 'private' && <Button type="primary" onClick={() => requestEntrance()}>Request</Button> }
+                { group.type == 'open' && <Button type="primary" onClick={() => joinGroup()}><ArrowLeftEndOnRectangleIcon /> Join</Button> }
+                { group.type == 'private' && <Button type="primary" onClick={() => requestEntrance()}><ArrowLeftEndOnRectangleIcon /> Request</Button> }
             </span>
         )
     }
@@ -166,10 +168,10 @@ const GroupMembershipButton = function({ groupId, userId }) {
     if ( userId == currentUser.id && member ) {
         return (
             <span>
-                { member.status == 'pending-invited' && <Button type="primary" onClick={() => acceptInvite()}>Accept</Button> }
-                { member.status == 'pending-invited' && <Button type="secondary-warn" onClick={() => rejectInvite()}>Reject</Button> }
-                { member.status == 'pending-requested' && <Button type="secondary-warn" onClick={() => cancelRequest()}>Cancel</Button> }
-                { member.status == 'member' && <Button type="secondary-warn" onClick={() => leaveGroup()}>Leave</Button> }
+                { member.status == 'pending-invited' && <Button type="primary" onClick={() => acceptInvite()}><ArrowLeftEndOnRectangleIcon /> Accept</Button> }
+                { member.status == 'pending-invited' && <Button type="secondary-warn" onClick={() => rejectInvite()}><ArrowLeftStartOnRectangleIcon /> Reject</Button> }
+                { member.status == 'pending-requested' && <Button type="secondary-warn" onClick={() => cancelRequest()}><ArrowLeftStartOnRectangleIcon /> Cancel</Button> }
+                { member.status == 'member' && <Button type="secondary-warn" onClick={() => leaveGroup()}><ArrowLeftStartOnRectangleIcon /> Leave</Button> }
             </span>
         )
     }
@@ -179,10 +181,10 @@ const GroupMembershipButton = function({ groupId, userId }) {
     if ( currentUser.id != userId && member && canAdmin ) {
         return (
             <span>
-                { member.status == 'pending-invited' && <Button type="secondary-warn" onClick={() => cancelInvite()}>Cancel</Button> }
-                { member.status == 'pending-requested' && <Button type="primary" onClick={() => acceptRequest()}>Accept</Button> }
-                { member.status == 'pending-requested' && <Button type="secondary-warn" onClick={() => rejectRequest()}>Reject</Button> }
-                { member.status == 'member' && <Button type="secondary-warn" onClick={() => removeMember()}>Remove</Button> }
+                { member.status == 'pending-invited' && <Button type="secondary-warn" onClick={() => cancelInvite()}><ArrowLeftStartOnRectangleIcon /> Cancel</Button> }
+                { member.status == 'pending-requested' && <Button type="primary" onClick={() => acceptRequest()}><ArrowLeftEndOnRectangleIcon /> Accept</Button> }
+                { member.status == 'pending-requested' && <Button type="secondary-warn" onClick={() => rejectRequest()}><ArrowLeftStartOnRectangleIcon /> Reject</Button> }
+                { member.status == 'member' && <Button type="secondary-warn" onClick={() => removeMember()}><ArrowLeftStartOnRectangleIcon /> Remove</Button> }
             </span>
         )
     } else {

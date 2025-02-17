@@ -63,7 +63,7 @@ const Post = function({ id, expanded, showLoading }) {
     }
 
     let postLink = `/${user.username}/${id}`
-    if ( post.groupId ) {
+    if ( post.groupId && group ) {
         postLink = `/group/${group.slug}/${id}`
     }
 

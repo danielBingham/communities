@@ -11,6 +11,22 @@ export const Page = function({ id, children }) {
     )
 }
 
+export const PageLeftGutter = function({ children }) {
+    return (
+        <div className="page-left-gutter">
+            { children }
+        </div>
+    )
+}
+
+export const PageRightGutter = function({ children }) {
+    return (
+        <div className="page-right-gutter">
+            { children }
+        </div>
+    )
+}
+
 export const PageBody = function({ children }) {
     return (
         <div className="page-body">

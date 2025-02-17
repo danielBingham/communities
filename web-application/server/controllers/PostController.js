@@ -18,7 +18,7 @@
  *
  ******************************************************************************/
 
-const { LinkPreviewService, PostDAO, PostCommentDAO, PostReactionDAO, PostSubscriptionDAO, UserDAO, FileDAO, GroupDAO }  = require('@communities/backend')
+const { LinkPreviewService, PostDAO, PostCommentDAO, PostReactionDAO, PostSubscriptionDAO, UserDAO, FileDAO, GroupDAO, GroupMemberDAO }  = require('@communities/backend')
 const ControllerError = require('../errors/ControllerError')
 
 
@@ -34,6 +34,7 @@ module.exports = class PostController {
         this.userDAO = new UserDAO(core)
         this.fileDAO = new FileDAO(core)
         this.groupDAO = new GroupDAO(core)
+        this.groupMemberDAO = new GroupMemberDAO(core)
 
         this.linkPreviewService = new LinkPreviewService(core)
     }
@@ -116,10 +117,10 @@ module.exports = class PostController {
 
         // Posts in groups
         const groupResults = await this.core.database.query(`
-            SELECT group_id FROM group_members WHERE user_id = $1 AND status = 'member'
+            SELECT groups.id FROM groups LEFT OUTER JOIN group_members ON groups.id = group_members.group_id WHERE (group_members.user_id = $1 AND group_members.status = 'member') OR groups.type = 'open'
         `, [ currentUser.id ])
 
-        const groupIds = groupResults.rows.map((r) => r.group_id)
+        const groupIds = groupResults.rows.map((r) => r.id)
 
         // Permissions 
         query.params.push(friendIds)
@@ -383,7 +384,12 @@ module.exports = class PostController {
 
         const existing = existingResults.dictionary[postId]
 
-        if ( existing.userId !== currentUser.id ) {
+        let currentMember = null 
+        if ( existing.groupId ) {
+            currentMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(existing.groupId, currentUser.id)
+        }
+
+        if ( existing.userId !== currentUser.id && ! (currentMember && (currentMember.role == 'admin' || currentMember.role == 'moderator')) ) {
             throw new ControllerError(403, 'not-authorized',
                 `User(${currentUser.id}) attempting to delete Post(${postId}) of User(${existing.userId}).`,
                 `You may not delete another user's posts.`)

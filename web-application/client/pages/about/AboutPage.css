@@ -40,14 +40,6 @@
 }
 
 @media (width >= 750px) {
-    #about-page {
-        display: grid;
-        grid-template-columns: 320px auto;
-        width: 100%;
-        max-width: 1400px;
-        margin: 50px auto;
-    }
-
     #about-page .content {
         padding: 0 30px;
     }

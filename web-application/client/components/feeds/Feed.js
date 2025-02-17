@@ -27,7 +27,6 @@ const Feed = function({ type }) {
         } 
     }, [ type, slug, group ])
 
-
     const params = useMemo(() => {
         const params = {}
         if ( type == 'feed' ) {

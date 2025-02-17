@@ -1,0 +1,137 @@
+import React, { useState, useEffect, useRef } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+
+import { useRequest } from '/lib/hooks/useRequest'
+
+import { getUsers, postUsers, clearUserQuery } from '/state/users'
+import { postGroupMembers } from '/state/groupMembers'
+
+import Button from '/components/generic/button/Button'
+import Spinner from '/components/Spinner'
+
+import './GroupInvite.css'
+
+const GroupInvite = function({ groupId }) {
+
+    const userDictionary = useSelector((state) => state.users.dictionary)
+    const userQuery = useSelector((state) => 'GroupInvite' in state.users.queries ? state.users.queries['GroupInvite'] : null)
+
+    const [userId, setUserId] = useState(null)
+    const [nameOrEmail, setNameOrEmail] = useState( userId && userId in userDictionary ? userDictionary[userId].name : '')
+    
+    const [getUsersRequest, makeGetUsersRequest] = useRequest()
+    const [postUsersRequest, makePostUsersRequest] = useRequest()
+    const [postGroupMembersRequest, makePostGroupMembersRequest] = useRequest()
+
+
+    const dispatch = useDispatch()
+    const timeoutId = useRef(null)
+
+    const isEmail = (value) => {
+        const trimmed = value.trim()
+        return trimmed.match(/\S*@\S*/) !== null
+    }
+
+    const invite = () => {
+        if ( userId ) {
+            makePostGroupMembersRequest(postGroupMembers({ groupId: groupId, userId: userId }))
+        } else if ( isEmail(nameOrEmail)) {
+            makePostUsersRequest(postUsers({ email: nameOrEmail.trim()})) 
+        }
+    }
+
+    useEffect(() => {
+        if ( postUsersRequest && postUsersRequest.state == 'fulfilled') {
+            const user = postUsersRequest.response.body.entity
+            makePostGroupMembersRequest(postGroupMembers({ groupId: groupId, userId: user.id }))
+        }
+    }, [ postUsersRequest ])
+
+    /**
+     * Clear the suggestions list.
+     */
+    const clearSuggestions = function() {
+        dispatch(clearUserQuery({ name: 'GroupInvite'}))
+    }
+
+    /**
+     * Query the backend for a list of suggested users matching the given name.
+     *
+     * @param {string} name The name or partial name of the user we want to
+     * query for.
+     */
+    const suggestUsers = function(name) {
+
+        console.log(timeoutId)
+        if ( timeoutId.current ) {
+            clearTimeout(timeoutId.current)
+        }
+        timeoutId.current = setTimeout(function() {
+            console.log(`Making request for ${name}.`)
+            if ( name.length > 0) {
+                clearSuggestions()
+                makeGetUsersRequest(getUsers('GroupInvite', { name: name, isFriend: true}))
+            } 
+        }, 250)
+    }
+
+    const onChange = (event) => {
+        const value = event.target.value
+        setNameOrEmail(value)
+
+        // We don't want to make a new request until they've stopped typing,
+        // but we don't want to show old data before the request runs.
+        if ( value.length <= 0 ) {
+            clearSuggestions()
+            setUserId(null)
+        } else if ( userId && value !== userDictionary[userId].name ) {
+            setUserId(null)
+        }
+        
+        if ( ! isEmail(value) ) {
+            suggestUsers(value)
+        }
+    }
+
+    const selectSuggestion = (event, user) => {
+        event.preventDefault()
+
+        setUserId(user.id)
+        setNameOrEmail(user.name)
+        clearSuggestions()
+    }
+
+    const userSuggestions = []
+    if ( userQuery ) {
+        for(const id of userQuery.list) {
+            const user = userDictionary[id]
+            userSuggestions.push(<a key={user.username} className="suggestion" onClick={(e) => selectSuggestion(e, user)}>{ user.name }</a>)
+        }
+    }
+
+    const isPending = (postUsersRequest && postUsersRequest.state == 'pending') || (postGroupMembersRequest && postGroupMembersRequest.state == 'pending')
+    return (
+        <div className="group-invite">
+            <div className="group-invite__input-wrapper">
+                <div className="group-invite__suggestions-wrapper">
+                    <input
+                        type="text"
+                        name="nameOrEmail"
+                        value={nameOrEmail}
+                        placeholder="Name or email of the person you want to invite..."
+                        onChange={onChange}
+                    />
+                    { userSuggestions.length > 0 && <div className="group-invite__suggestions">
+                        { userSuggestions }
+                    </div> }
+                </div>
+                { isPending && <Spinner /> }
+                { ! isPending && <Button type="primary" onClick={invite}>Send Invite</Button> }
+            </div>
+        </div>
+
+    )
+
+}
+
+export default GroupInvite
