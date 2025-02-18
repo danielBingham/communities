@@ -148,7 +148,7 @@ const GroupMembershipButton = function({ groupId, userId }) {
         makeRequest(deleteGroupMember(groupMember))
     }
 
-    if ( ! currentUser || ! group ) {
+    if ( ! currentUser || ! currentMember || !member || ! group ) {
         return null
     }
 

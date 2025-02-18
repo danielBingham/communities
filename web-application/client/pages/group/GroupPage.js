@@ -5,6 +5,7 @@ import { useParams, NavLink, Routes, Route } from 'react-router-dom'
 import {
     QueueListIcon as QueueListIconOutline,
     UserGroupIcon as UserGroupIconOutline,
+    Cog6ToothIcon as Cog6ToothIconOutline,
     GlobeAltIcon,
     LockOpenIcon,
     LockClosedIcon
@@ -13,9 +14,13 @@ import {
 import { 
     QueueListIcon as QueueListIconSolid, 
     UserGroupIcon as UserGroupIconSolid,
+    Cog6ToothIcon as Cog6ToothIconSolid
 } from '@heroicons/react/24/solid'
 
 import { useRequest } from '/lib/hooks/useRequest'
+import { useGroupFromSlug, useCurrentGroupMember } from '/lib/hooks/group'
+
+import { canView, canModerate, canAdmin } from '/lib/group'
 
 import { getGroups } from '/state/groups'
 
@@ -23,9 +28,9 @@ import PostPage from '/pages/posts/PostPage'
 
 import GroupMembershipButton from '/components/groups/components/GroupMembershipButton'
 import GroupImage from '/components/groups/view/GroupImage'
-import Feed from '/components/feeds/Feed'
-import GroupInvite from '/components/groups/components/GroupInvite'
-import GroupMembersList from '/components/groups/members/list/GroupMembersList'
+
+import GroupMembersView from '/pages/group/views/GroupMembersView'
+import GroupFeedView from '/pages/group/views/GroupFeedView'
 
 import { Page, PageLeftGutter, PageRightGutter, PageBody } from '/components/generic/Page'
 import Error404 from '/components/errors/Error404'
@@ -37,17 +42,9 @@ const GroupPage = function() {
 
     const { slug } = useParams()
 
-    const [request, makeRequest] = useRequest()
+    const [group, groupError, request] = useGroupFromSlug(slug, [ 'GroupMembers' ])
+    const [currentMember, currentMemberError] = useCurrentGroupMember(group?.id)
 
-    const id = useSelector((state) => 'GroupPage' in state.groups.queries ? state.groups.queries['GroupPage'].list[0] : null)
-    const group = useSelector((state) => id !== null && id in state.groups.dictionary ? state.groups.dictionary[id] : null)
-
-    const currentUser = useSelector((state) => state.authentication.currentUser)
-    const currentMember = useSelector((state) => id && id in state.groupMembers.byGroupAndUser && currentUser.id in state.groupMembers.byGroupAndUser[id] ? state.groupMembers.byGroupAndUser[id][currentUser.id] : null)
-
-    useEffect(() => {
-        makeRequest(getGroups('GroupPage', { slug: slug, relations: [ 'GroupMembers' ] }))
-    }, [ slug ])
 
     if ( ! group && ( ! request || request.state == 'pending') )  {
         return (
@@ -74,21 +71,21 @@ const GroupPage = function() {
         type = (<span><LockClosedIcon /> Hidden</span>)
     }
 
-    const isPrivate = group.type !== 'open' && ( ! currentMember || currentMember.status != 'member')
     return (
         <Page id="group-page">
             <PageLeftGutter>
                 <div className="group-page__header">
                     <GroupImage groupId={group.id} />
-                    <div className="title"> { group.title}</div>
+                    <div className="title">{ group.title}</div>
                     <div className="type">{ type }</div>
                 </div>
                 <div className="group-page__controls">
-                    <GroupMembershipButton groupId={group.id} userId={currentUser.id} />
+                    { currentMember && <GroupMembershipButton groupId={group.id} userId={currentMember.userId} /> }
                 </div>
-                { ! isPrivate && <menu className="group-page__menu">
-                    <li><NavLink to={`/group/${group.slug}`} className="left-end" end><QueueListIconOutline className="outline" /><QueueListIconSolid className="solid" /><span className="nav-text"> Feed</span></NavLink></li>
-                    <li><NavLink to="members" className="right-end" end><UserGroupIconOutline className="outline" /><UserGroupIconSolid className="solid" /><span className="nav-text"> Members</span></NavLink></li>
+                { canView(group, currentMember) && <menu className="group-page__menu">
+                    <li><NavLink to={`/group/${group.slug}`} end><QueueListIconOutline className="outline" /><QueueListIconSolid className="solid" /><span className="nav-text"> Feed</span></NavLink></li>
+                    <li><NavLink to="members" end><UserGroupIconOutline className="outline" /><UserGroupIconSolid className="solid" /><span className="nav-text"> Members</span></NavLink></li>
+                    { canAdmin(group, currentMember) && <li><NavLink to="settings" end><Cog6ToothIconOutline className="outline" /><Cog6ToothIconSolid className="solid" /><span className="nav-text"> Settings</span></NavLink></li> }
                 </menu> }
                 <div className="details">
                     <div className="about"> { group.about }</div>
@@ -98,22 +95,15 @@ const GroupPage = function() {
             <div className="group-page__grid">
                 <div className='main'>
                     <Routes>
-                        <Route path="members" element={
+                        <Route path="members" element={ <GroupMembersView groupId={group.id} /> } />
+                        <Route path="settings" element={
                             <div>
-                                { ! isPrivate && <div>
-                                    { currentMember && (currentMember.role == 'admin' || currentMember.role == 'moderator') 
-                                        && <GroupInvite groupId={group.id} /> }
-                                    <GroupMembersList groupId={group.id} />
-                                </div> }
-                                { isPrivate && <div className="group-page__private">The contents of this group are private.</div> }
+                                { canAdmin(group, currentMember) && <div>Settings</div> }
+                                { ! canAdmin(group, currentMember) && <div>Forbidden</div> }
                             </div>
-                        } />
+                            } />
                         <Route path=":postId" element={ <PostPage /> } />
-                        <Route index element={
-                            <div>
-                                { ! isPrivate && <Feed type="group" /> }
-                                { isPrivate && <div className="group-page__private">The contents of this group are private.</div> }
-                            </div>} />
+                        <Route index element={<GroupFeedView groupId={group.id} />} />
                     </Routes> 
                 </div>
             </div>

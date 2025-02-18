@@ -57,7 +57,7 @@ import YourGroups from '/pages/groups/views/YourGroups'
 import CreateGroup from '/pages/groups/views/CreateGroup'
 import FindGroups from '/pages/groups/views/FindGroups'
 
-import GroupPage from '/pages/groups/GroupPage'
+import GroupPage from '/pages/group/GroupPage'
 
 import PostPage from '/pages/posts/PostPage'
 
