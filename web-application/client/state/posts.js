@@ -1,13 +1,12 @@
 import { createSlice } from '@reduxjs/toolkit'
 import * as qs from 'qs'
 
-import { makeTrackedRequest } from '/state/requests'
+import { makeTrackedRequest } from '/lib/state/request'
 import setRelationsInState from '/lib/state/relations'
 
 import {
     setInDictionary,
     removeEntity,
-    makeQuery,
     setQueryResults,
     clearQuery,
     clearQueries
@@ -68,7 +67,6 @@ export const postsSlice = createSlice({
 
         setPostsInDictionary: setInDictionary, 
         removePost: removeEntity,
-        makePostQuery: makeQuery,
         setPostQueryResults: setQueryResults,
         clearPostQuery: clearQuery,
         clearPostQueries: clearQueries,
@@ -112,7 +110,6 @@ export const postsSlice = createSlice({
 export const getPosts = function(name, params) {
     return function(dispatch, getState) {
         const endpoint = `/posts${( params ? '?' + qs.stringify(params) : '')}`
-        dispatch(postsSlice.actions.makePostQuery({ name: name }))
         return dispatch(makeTrackedRequest('GET', endpoint, null,
             function(response) {
                 dispatch(postsSlice.actions.setPostsInDictionary({ dictionary: response.dictionary}))
@@ -226,7 +223,7 @@ export const deletePost = function(post) {
 
 export const { 
     setPostsInDictionary, removePost, 
-    makePostQuery, clearPostQuery, setPostQueryResults,
+    clearPostQuery, setPostQueryResults,
     startPostEdit, finishPostEdit,
     setDraft, clearDraft
 }  = postsSlice.actions

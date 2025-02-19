@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 
-import { makeTrackedRequest } from '/state/requests'
+import { makeTrackedRequest } from '/lib/state/request'
 
 export const featuresSlice = createSlice({
     name: 'features',

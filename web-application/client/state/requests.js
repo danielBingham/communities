@@ -3,6 +3,8 @@ import { v4 as uuidv4 } from 'uuid'
 
 import logger from '/logger'
 
+export { makeTrackedRequest } from '/lib/state/request'
+
 export const requestsSlice = createSlice({
     name: 'requests',
     initialState: {
@@ -85,7 +87,6 @@ export const requestsSlice = createSlice({
  * @return {uuid}   A requestId that can be used to retrieve the request
  * tracker from the `slice`.  It will be stored in the `requests` object keyed
  * by the `requestId`, and can be found at `state.<slice-name>.requests[requestId]`
- */
 export const makeTrackedRequest = function(method, endpoint, body, onSuccess, onFailure) {
     return function(dispatch, getState) {
         const configuration = getState().system.configuration
@@ -172,7 +173,7 @@ export const makeTrackedRequest = function(method, endpoint, body, onSuccess, on
 
         return requestId
     }
-}
+}*/
 
 export const { cleanupRequest} = requestsSlice.actions
 

@@ -1,14 +1,13 @@
 import { createSlice } from '@reduxjs/toolkit'
 import * as qs from 'qs'
 
-import { makeTrackedRequest } from '/state/requests'
+import { makeTrackedRequest } from '/lib/state/request'
 
 import setRelationsInState from '/lib/state/relations'
 
 import {
     setInDictionary,
     removeEntity,
-    makeQuery,
     setQueryResults,
     clearQuery,
     clearQueries
@@ -81,7 +80,6 @@ export const groupMembersSlice = createSlice({
 
             delete state.byGroupAndUser[action.payload.entity.groupId][action.payload.entity.userId]
         },
-        makeGroupMemberQuery: makeQuery,
         setGroupMemberQueryResults: setQueryResults,
         clearGroupMemberQuery: clearQuery,
         clearGroupMemberQueries: clearQueries
@@ -102,8 +100,6 @@ export const groupMembersSlice = createSlice({
 export const getGroupMembers = function(groupId, name, params) {
     return function(dispatch, getState) {
         const endpoint = `/group/${encodeURIComponent(groupId)}/members${( params ? '?' + qs.stringify(params) : '' )}` 
-
-        dispatch(groupMembersSlice.actions.makeGroupMemberQuery({ name: name }))
 
         return dispatch(makeTrackedRequest('GET', endpoint, null,
             function(response) {
@@ -219,7 +215,7 @@ export const deleteGroupMember = function(member) {
 
 export const { 
     setGroupMembersInDictionary, removeGroupMember, 
-    makeGroupMemberQuery, clearGroupMemberQuery, setGroupMemberQueryResults
+    clearGroupMemberQuery, setGroupMemberQueryResults
 }  = groupMembersSlice.actions
 
 export default groupMembersSlice.reducer

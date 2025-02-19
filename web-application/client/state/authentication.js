@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 
-import { makeTrackedRequest } from '/state/requests'
+import { makeTrackedRequest } from '/lib/state/request'
 
 import { reset } from '/state/system'
 import { setUsersInDictionary } from '/state/users'

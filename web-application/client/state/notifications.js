@@ -20,14 +20,13 @@
 import { createSlice } from '@reduxjs/toolkit'
 import * as qs from 'qs'
 
-import { makeTrackedRequest } from '/state/requests'
+import { makeTrackedRequest } from '/lib/state/request'
 
 import setRelationsInState from '/lib/state/relations'
 
 import {
     setInDictionary,
     removeEntity,
-    makeQuery,
     setQueryResults,
     clearQuery,
     clearQueries
@@ -77,7 +76,6 @@ export const notificationsSlice = createSlice({
 
         setNotificationsInDictionary: setInDictionary,
         removeNotification: removeEntity,
-        makeNotificationQuery: makeQuery,
         setNotificationQueryResults: setQueryResults,
         clearNotificationQuery: clearQuery,
         clearNotificationQueries: clearQueries,
@@ -88,7 +86,13 @@ export const notificationsSlice = createSlice({
             const name = action.payload.name
             const list = action.payload.list
 
-            state.queries[name].list = [ ...state.queries[name].list, ...list ]
+            if ( name in state.queries ) {
+                state.queries[name].list = [ ...state.queries[name].list, ...list ]
+            } else {
+                state.queries[name] = {
+                    list: [ ...list ]
+                }
+            }
         }
     }
 })
@@ -107,11 +111,6 @@ export const notificationsSlice = createSlice({
 export const getNotifications = function(name, params) {
     return function(dispatch, getState) {
         const endpoint = `/notifications${( params ? '?' + qs.stringify(params) : '')}`
-
-        const state = getState()
-        if ( ! state.notifications.queries[name] ) {
-            dispatch(notificationsSlice.actions.makeNotificationQuery({ name: name }))
-        }
 
         return dispatch(makeTrackedRequest('GET', endpoint, null,
             function(response) {

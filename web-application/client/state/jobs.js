@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 import * as qs from 'qs'
 
-import { makeTrackedRequest } from '/state/requests'
+import { makeTrackedRequest } from '/lib/state/request'
 
 export const jobsSlice = createSlice({
     name: 'jobs',

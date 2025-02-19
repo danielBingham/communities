@@ -5,13 +5,12 @@ import setRelationsInState from '/lib/state/relations'
 import {
     setInDictionary,
     removeEntity,
-    makeQuery,
     setQueryResults,
     clearQuery,
     clearQueries
 } from '/lib/state'
 
-import { makeTrackedRequest } from '/state/requests'
+import { makeTrackedRequest } from '/lib/state/request'
 
 export const filesSlice = createSlice({
     name: 'files',
@@ -57,7 +56,6 @@ export const filesSlice = createSlice({
 
         setFilesInDictionary: setInDictionary,
         removeFile: removeEntity,
-        makeFileQuery: makeQuery,
         setFileQueryResults: setQueryResults,
         clearFileQuery: clearQuery,
         clearFileQueries: clearQueries

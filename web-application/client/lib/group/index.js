@@ -6,10 +6,10 @@ export const canView = function(group, currentMember) {
     return group.type === 'open' || ( currentMember && currentMember.status == 'member')
 }
 
-export const canAdmin = function(currentMember) {
+export const canAdmin = function(group, currentMember) {
     return currentMember && currentMember.role == 'admin'
 }
 
-export const canModerate = function(currentMember) {
+export const canModerate = function(group, currentMember) {
     return currentMember && (currentMember.role == 'moderator' || currentMember.role == 'admin')
 }

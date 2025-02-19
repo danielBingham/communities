@@ -76,8 +76,8 @@ const App = function(props) {
 
     // ======= Request Tracking =====================================
  
-    const [ configurationRequest, makeConfigurationRequest] = useRequest()
-    const [authenticationRequest, makeAuthenticationRequest] = useRequest()
+    const [ configurationRequest, makeConfigurationRequest] = useRequest('configuration')
+    const [authenticationRequest, makeAuthenticationRequest] = useRequest('authentication')
 
     // ======= Redux State ==========================================
 

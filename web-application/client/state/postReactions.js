@@ -1,14 +1,13 @@
 import { createSlice } from '@reduxjs/toolkit'
 import * as qs from 'qs'
 
-import { makeTrackedRequest } from '/state/requests'
+import { makeTrackedRequest } from '/lib/state/request'
 
 import setRelationsInState from '/lib/state/relations'
 
 import {
     setInDictionary,
     removeEntity,
-    makeQuery,
     setQueryResults,
     clearQuery,
     clearQueries
@@ -58,7 +57,6 @@ export const postReactionsSlice = createSlice({
 
         setPostReactionsInDictionary: setInDictionary,
         removePostReaction: removeEntity,
-        makePostReactionQuery: makeQuery,
         setPostReactionQueryResults: setQueryResults,
         clearPostReactionQuery: clearQuery,
         clearPostReactionQueries: clearQueries
@@ -140,7 +138,7 @@ export const deletePostReaction = function(reaction) {
 
 export const { 
     setPostReactionsInDictionary, removePostReaction, 
-    makePostReactionQuery, clearPostReactionQuery, setPostReactionQueryResults,
+    clearPostReactionQuery, setPostReactionQueryResults,
 }  = postReactionsSlice.actions
 
 export default postReactionsSlice.reducer

@@ -1,14 +1,13 @@
 import { createSlice } from '@reduxjs/toolkit'
 import * as qs from 'qs'
 
-import { makeTrackedRequest } from '/state/requests'
+import { makeTrackedRequest } from '/lib/state/request'
 
 import setRelationsInState from '/lib/state/relations'
 
 import {
     setInDictionary,
     removeEntity,
-    makeQuery,
     setQueryResults,
     clearQuery,
     clearQueries
@@ -96,7 +95,6 @@ export const postCommentsSlice = createSlice({
                 delete state.commentsByPost[entity.postId][entity.id]
             }
         },
-        makePostCommentQuery: makeQuery,
         setPostCommentQueryResults: setQueryResults,
         clearPostCommentQuery: clearQuery,
         clearPostCommentQueries: clearQueries,
@@ -128,8 +126,6 @@ export const postCommentsSlice = createSlice({
 export const getPostComments = function(postId, name, params) {
     return function(dispatch, getState) {
         const endpoint = `/post/${encodeUriComponent(postId)}/comments${( params ? '?' + qs.stringify(params) : '')}`
-
-        dispatch(postCommentsSlice.actions.makePostCommentQuery({ name: name }))
 
         return dispatch(makeTrackedRequest('GET', endpoint, null,
             function(response) {
@@ -244,7 +240,7 @@ export const deletePostComment = function(comment) {
 
 export const { 
     setPostCommentsInDictionary, removePostComment, 
-    makePostCommentQuery, clearPostCommentQuery, setPostCommentQueryResults,
+    clearPostCommentQuery, setPostCommentQueryResults,
     startPostCommentEdit, finishPostCommentEdit
 }  = postCommentsSlice.actions
 

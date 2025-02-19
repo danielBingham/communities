@@ -1,14 +1,13 @@
 import { createSlice } from '@reduxjs/toolkit'
 import * as qs from 'qs'
 
-import { makeTrackedRequest } from '/state/requests'
+import { makeTrackedRequest } from '/lib/state/request'
 
 import setRelationsInState from '/lib/state/relations'
 
 import {
     setInDictionary,
     removeEntity,
-    makeQuery,
     setQueryResults,
     clearQuery,
     clearQueries
@@ -57,7 +56,6 @@ export const linkPreviewsSlice = createSlice({
 
         setLinkPreviewsInDictionary: setInDictionary, 
         removeLinkPreview: removeEntity,
-        makeLinkPreviewQuery: makeQuery,
         setLinkPreviewQueryResults: setQueryResults,
         clearLinkPreviewQuery: clearQuery,
         clearLinkPreviewQueries: clearQueries
@@ -79,8 +77,6 @@ export const linkPreviewsSlice = createSlice({
 export const getLinkPreviews = function(name, params) {
     return function(dispatch, getState) {
         const endpoint = `/link-previews${( params ? '?' + qs.stringify(params) : '' )}`
-
-        dispatch(linkPreviewsSlice.actions.makeLinkPreviewQuery({ name: name }))
 
         return dispatch(makeTrackedRequest('GET', endpoint, null,
             function(response) {
@@ -171,7 +167,7 @@ export const patchLinkPreview = function(linkPreview) {
 
 export const { 
     setLinkPreviewsInDictionary, removeLinkPreview, 
-    makeLinkPreviewQuery, clearLinkPreviewQuery, setLinkPreviewQueryResults
+     clearLinkPreviewQuery, setLinkPreviewQueryResults
 }  = linkPreviewsSlice.actions
 
 export default linkPreviewsSlice.reducer

@@ -1,14 +1,13 @@
 import { createSlice, current } from '@reduxjs/toolkit'
 import * as qs from 'qs'
 
-import { makeTrackedRequest } from '/state/requests'
+import { makeTrackedRequest } from '/lib/state/request'
 
 import setRelationsInState from '/lib/state/relations'
 
 import {
     setInDictionary,
     removeEntity,
-    makeQuery,
     setQueryResults,
     clearQuery,
     clearQueries
@@ -74,7 +73,6 @@ export const usersSlice = createSlice({
 
             delete state.byUsername[action.payload.entity.username]
         },
-        makeUserQuery: makeQuery,
         setUserQueryResults: setQueryResults,
         clearUserQuery: clearQuery,
         clearUserQueries: clearQueries
@@ -112,8 +110,6 @@ const updateCurrentUser = function(response) {
 export const getUsers = function(name, params) {
     return function(dispatch, getState) {
         const endpoint = `/users${( params ? '?' + qs.stringify(params) : '')}`
-
-        dispatch(usersSlice.actions.makeUserQuery({ name: name }))
         return dispatch(makeTrackedRequest('GET', endpoint, null,
             function(response) {
                 dispatch(usersSlice.actions.setUsersInDictionary({ dictionary: response.dictionary }))
@@ -228,7 +224,7 @@ export const deleteUser = function(user) {
 
 export const { 
     setUsersInDictionary, removeUser, 
-    makeUserQuery, setUserQueryResults, clearUserQuery
+    setUserQueryResults, clearUserQuery
 }  = usersSlice.actions
 
 export default usersSlice.reducer

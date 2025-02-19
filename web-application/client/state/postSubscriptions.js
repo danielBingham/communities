@@ -1,13 +1,12 @@
 import { createSlice } from '@reduxjs/toolkit'
 import * as qs from 'qs'
 
-import { makeTrackedRequest } from '/state/requests'
+import { makeTrackedRequest } from '/lib/state/request'
 import setRelationsInState from '/lib/state/relations'
 
 import {
     setInDictionary,
     removeEntity,
-    makeQuery,
     setQueryResults,
     clearQuery,
     clearQueries
@@ -72,7 +71,6 @@ export const postSubscriptionsSlice = createSlice({
             const entity = action.payload.entity
             delete state.byPostId[entity.postId]
         },
-        makePostSubscriptionQuery: makeQuery,
         setPostSubscriptionQueryResults: setQueryResults,
         clearPostSubscriptionQuery: clearQuery,
         clearPostSubscriptionQueries: clearQueries,
@@ -152,7 +150,7 @@ export const deletePostSubscription = function(postId) {
 
 export const { 
     setPostSubscriptionsInDictionary, removePostSubscription, 
-    makePostSubscriptionQuery, clearPostSubscriptionQuery, setPostSubscriptionQueryResults,
+    clearPostSubscriptionQuery, setPostSubscriptionQueryResults,
 }  = postSubscriptionsSlice.actions
 
 export default postSubscriptionsSlice.reducer

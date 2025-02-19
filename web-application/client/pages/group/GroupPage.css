@@ -31,6 +31,9 @@
 #group-page .details .about {
     font-size: 14px;
     padding: 12px;
+    white-space: pre-line;
+    word-wrap: break-word;
+    text-align: left;
 }
 
 #group-page .group-page__controls {

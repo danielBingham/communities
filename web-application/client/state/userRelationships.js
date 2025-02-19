@@ -1,14 +1,13 @@
 import { createSlice, current } from '@reduxjs/toolkit'
 import * as qs from 'qs'
 
-import { makeTrackedRequest } from '/state/requests'
+import { makeTrackedRequest } from '/lib/state/request'
 
 import setRelationsInState from '/lib/state/relations'
 
 import {
     setInDictionary,
     removeEntity,
-    makeQuery,
     setQueryResults,
     clearQuery,
     clearQueries
@@ -104,7 +103,6 @@ export const userRelationshipsSlice = createSlice({
                 delete state.byUserId[entity.relationId][entity.userId]
             }
         },
-        makeUserRelationshipQuery: makeQuery,
         setUserRelationshipQueryResults: setQueryResults,
         clearUserRelationshipQuery: clearQuery,
         clearUserRelationshipQueries: clearQueries
@@ -124,7 +122,6 @@ export const userRelationshipsSlice = createSlice({
 export const getUserRelationships = function(name, userId, params) {
     return function(dispatch, getState) {
         const endpoint = `/user/${encodeURIComponent(userId)}/relationships${( params ? '?' + qs.stringify(params) : '')}`
-        dispatch(userRelationshipsSlice.actions.makeUserRelationshipQuery({ name: name }))
         return dispatch(makeTrackedRequest('GET', endpoint, null,
             function(response) {
                 dispatch(userRelationshipsSlice.actions.setUserRelationshipsInDictionary({ dictionary: response.dictionary }))
@@ -238,7 +235,7 @@ export const deleteUserRelationship = function(relationship) {
 
 export const { 
     setUserRelationshipsInDictionary, removeUserRelationship, 
-    makeUserRelationshipQuery, setUserRelationshipQueryResults, clearUserRelationshipQuery
+    setUserRelationshipQueryResults, clearUserRelationshipQuery
 }  = userRelationshipsSlice.actions
 
 export default userRelationshipsSlice.reducer

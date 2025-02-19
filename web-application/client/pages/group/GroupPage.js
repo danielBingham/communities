@@ -31,6 +31,7 @@ import GroupImage from '/components/groups/view/GroupImage'
 
 import GroupMembersView from '/pages/group/views/GroupMembersView'
 import GroupFeedView from '/pages/group/views/GroupFeedView'
+import GroupSettingsView from '/pages/group/views/GroupSettingsView'
 
 import { Page, PageLeftGutter, PageRightGutter, PageBody } from '/components/generic/Page'
 import Error404 from '/components/errors/Error404'
@@ -96,12 +97,7 @@ const GroupPage = function() {
                 <div className='main'>
                     <Routes>
                         <Route path="members" element={ <GroupMembersView groupId={group.id} /> } />
-                        <Route path="settings" element={
-                            <div>
-                                { canAdmin(group, currentMember) && <div>Settings</div> }
-                                { ! canAdmin(group, currentMember) && <div>Forbidden</div> }
-                            </div>
-                            } />
+                        <Route path="settings" element={<GroupSettingsView groupId={group.id} /> } />
                         <Route path=":postId" element={ <PostPage /> } />
                         <Route index element={<GroupFeedView groupId={group.id} />} />
                     </Routes> 
