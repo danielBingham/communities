@@ -13,7 +13,6 @@ import postsReducer from './posts'
 import postCommentsReducer from './postComments'
 import postReactionsReducer from './postReactions'
 import postSubscriptionsReducer from './postSubscriptions'
-import requestsReducer from './requests'
 import tokensReducer from './tokens'
 import systemReducer from './system'
 import usersReducer from './users'
@@ -33,7 +32,6 @@ const reducers = combineReducers({
     postComments: postCommentsReducer,
     postReactions: postReactionsReducer,
     postSubscriptions: postSubscriptionsReducer,
-    requests: requestsReducer,
     tokens: tokensReducer,
     users: usersReducer,
     userRelationships: userRelationshipsReducer,

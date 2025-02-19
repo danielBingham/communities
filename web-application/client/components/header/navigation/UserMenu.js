@@ -17,7 +17,7 @@ import {
 } from '@heroicons/react/24/outline'
 
 
-import { cleanupRequest, deleteAuthentication } from '/state/authentication'
+import { deleteAuthentication } from '/state/authentication'
 
 import './UserMenu.css'
 

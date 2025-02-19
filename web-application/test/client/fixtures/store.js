@@ -2,15 +2,6 @@ import { configureStore } from '@reduxjs/toolkit'
 import { combineReducers } from 'redux'
 import { createSlice } from '@reduxjs/toolkit'
 
-import { 
-    makeTrackedRequest,
-    startRequestTracking, 
-    recordRequestFailure, 
-    recordRequestSuccess, 
-    useRequest,
-    cleanupRequest as cleanupTrackedRequest, 
-    garbageCollectRequests as garbageCollectTrackedRequests } from '../../../client/state/helpers/requestTracker'
-
 /****
  * Configure a mock store.  Only includes the features necessary to test the request tracking 
  * and to reset the store.
@@ -28,16 +19,7 @@ const testSlice = createSlice({
         requests: {},
 
     },
-    reducers: {
-        // ========== Request Tracking Methods =============
-
-        makeRequest: startRequestTracking, 
-        failRequest: recordRequestFailure, 
-        completeRequest: recordRequestSuccess,
-        cleanupRequest: cleanupTrackedRequest, 
-        useRequest: useRequest,
-        garbageCollectRequests: garbageCollectTrackedRequests
-    }
+    reducers: { }
 })
 
 export const getRequest = function(onSuccess) {

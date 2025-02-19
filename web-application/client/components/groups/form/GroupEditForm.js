@@ -81,9 +81,6 @@ const GroupEditForm = function({ groupId }) {
     const navigate = useNavigate()
     useEffect(() => {
         if ( request && request.state == 'fulfilled') {
-            setTitle(null)
-            setType(null)
-            setSlug(null)
             setAbout(null)
             setFileId(null)
    

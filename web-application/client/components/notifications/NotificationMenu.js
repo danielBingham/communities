@@ -32,7 +32,7 @@ import {
     FloatingMenuBody
 } from '/components/generic/floating-menu/FloatingMenu'
 
-import { getNotifications, patchNotifications, cleanupRequest } from '/state/notifications'
+import { getNotifications, patchNotifications } from '/state/notifications'
 
 import NotificationMenuItem from './NotificationMenuItem'
 

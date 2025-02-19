@@ -36,9 +36,6 @@ const GroupMemberBadge = function({ groupId, userId }) {
         }
     }, [ user ])
 
-    console.log(user)
-    console.log(userMember)
-
     // ======= Render ===============================================
     if( ! user && ( ! request || request.status == 'pending' )) {
         return null 

@@ -1,31 +1,19 @@
-import { useState, useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import { useState } from 'react'
+import { useDispatch } from 'react-redux'
 
-export function useRequest(debug) {
-    if ( debug == 'useGroupFromSlug' ) {
-        console.log(`----- useRequest(${debug}) -----`)
-    }
+import logger from '/logger'
+
+export function useRequest() {
     const [request, setRequest] = useState(null)
-    if ( debug == 'useGroupFromSlug' ) {
-        console.log(`useRequest(${debug}):: request:`)
-        console.log(request)
-    }
 
     const dispatch = useDispatch()
     const makeRequest = function(reduxThunk) {
-        if ( debug == 'useGroupFromSlug') {
-            console.log(`useRequest(${debug}):: makeRequest()`)
-        }
         const request = {
             state: 'pending',
             response: null, 
             error: null,
         }
         setRequest(request)
-        if ( debug == 'useGroupFromSlug') {
-            console.log(`useRequest(${debug}):: makeRequest() -- Request Set`)
-            console.log(request)
-        }
 
         dispatch(reduxThunk)
             .then((response) => {
@@ -55,8 +43,5 @@ export function useRequest(debug) {
         setRequest(null) 
     }
 
-    if ( debug == 'useGroupFromSlug' ) {
-        console.log(`----- END useRequest(${debug}) -----`)
-    }
     return [ request, makeRequest, resetRequest ]
 }

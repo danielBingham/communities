@@ -208,6 +208,7 @@ module.exports = class GroupController {
     }
 
     async patchGroup(request, response) {
+        console.log(`patchGroup`)
         const currentUser = request.session.user
 
         if ( ! currentUser ) {
@@ -282,7 +283,7 @@ module.exports = class GroupController {
 
         const relations = this.getRelations(currentUser, results)
 
-        response.send(201).json({
+        response.status(201).json({
             entity: entity,
             relations: relations
         })

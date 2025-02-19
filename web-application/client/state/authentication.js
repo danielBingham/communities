@@ -45,9 +45,7 @@ export const setSession = function(session) {
  */
 export const refreshAuthentication = function() {
     return function(dispatch, getState) {
-        const requestId = dispatch(getAuthentication(function() {
-            dispatch(authenticationSlice.actions.cleanupRequest({ requestId: requestId }))
-        }))
+        dispatch(getAuthentication())
     }
 }
 
@@ -61,7 +59,7 @@ export const refreshAuthentication = function() {
  *
  * @returns {string} A uuid requestId that can be used to track this request.
  */
-export const getAuthentication = function(onCompletion) {
+export const getAuthentication = function() {
     return function(dispatch, getState) {
         const endpoint = '/authentication'
         return dispatch(makeTrackedRequest('GET', endpoint, null,
@@ -70,10 +68,6 @@ export const getAuthentication = function(onCompletion) {
                     dispatch(setSession(responseBody.session))
                 } else {
                     dispatch(authenticationSlice.actions.setCurrentUser(null))
-                }
-
-                if ( onCompletion ) {
-                    onCompletion()
                 }
             }
         ))

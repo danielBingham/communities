@@ -16,8 +16,6 @@ const setRelationsInState = function(relations) {
                     dispatch(setFilesInDictionary({ dictionary: dictionary }))
                 } 
                 else if ( relation == 'groupMembers' ) {
-                    console.log(`Set GroupMembers...`)
-                    console.log(dictionary)
                     dispatch(setGroupMembersInDictionary({ dictionary: dictionary }))
                 }
                 else if ( relation == 'posts' ) {

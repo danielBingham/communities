@@ -45,6 +45,4 @@ export const createToken = function(params) {
     }
 }
 
-export const { cleanupRequest} = tokenSlice.actions
-
 export default tokenSlice.reducer
