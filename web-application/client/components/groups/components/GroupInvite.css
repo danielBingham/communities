@@ -4,6 +4,11 @@
     max-width: 750px;
     margin: 0 auto 20px auto;
 }
+.group-invite__invitations {
+    padding: 0 0 5px 0;
+    font-size: 12px;
+    font-style: italic;
+}
 .group-invite__input-wrapper {
     display: flex;
     position: relative;

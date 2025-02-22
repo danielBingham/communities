@@ -13,6 +13,7 @@ import './GroupInvite.css'
 
 const GroupInvite = function({ groupId }) {
 
+    const currentUser = useSelector((state) => state.authentication.currentUser)
     const userDictionary = useSelector((state) => state.users.dictionary)
     const userQuery = useSelector((state) => 'GroupInvite' in state.users.queries ? state.users.queries['GroupInvite'] : null)
 
@@ -36,16 +37,9 @@ const GroupInvite = function({ groupId }) {
         if ( userId ) {
             makePostGroupMembersRequest(postGroupMembers({ groupId: groupId, userId: userId }))
         } else if ( isEmail(nameOrEmail)) {
-            makePostUsersRequest(postUsers({ email: nameOrEmail.trim()})) 
+            makePostUsersRequest(postUsers({ email: nameOrEmail.trim(), groupId: groupId})) 
         }
     }
-
-    useEffect(() => {
-        if ( postUsersRequest && postUsersRequest.state == 'fulfilled') {
-            const user = postUsersRequest.response.body.entity
-            makePostGroupMembersRequest(postGroupMembers({ groupId: groupId, userId: user.id }))
-        }
-    }, [ postUsersRequest ])
 
     /**
      * Clear the suggestions list.
@@ -61,13 +55,10 @@ const GroupInvite = function({ groupId }) {
      * query for.
      */
     const suggestUsers = function(name) {
-
-        console.log(timeoutId)
         if ( timeoutId.current ) {
             clearTimeout(timeoutId.current)
         }
         timeoutId.current = setTimeout(function() {
-            console.log(`Making request for ${name}.`)
             if ( name.length > 0) {
                 clearSuggestions()
                 makeGetUsersRequest(getUsers('GroupInvite', { name: name, isFriend: true}))
@@ -90,6 +81,8 @@ const GroupInvite = function({ groupId }) {
         
         if ( ! isEmail(value) ) {
             suggestUsers(value)
+        } else {
+            clearSuggestions()
         }
     }
 
@@ -112,6 +105,7 @@ const GroupInvite = function({ groupId }) {
     const isPending = (postUsersRequest && postUsersRequest.state == 'pending') || (postGroupMembersRequest && postGroupMembersRequest.state == 'pending')
     return (
         <div className="group-invite">
+            <div className="group-invite__invitations">Beta: You have {currentUser.invitations} invitations left.</div>
             <div className="group-invite__input-wrapper">
                 <div className="group-invite__suggestions-wrapper">
                     <input

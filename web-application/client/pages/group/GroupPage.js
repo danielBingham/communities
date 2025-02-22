@@ -54,7 +54,7 @@ const GroupPage = function() {
             </div>
         )
     } else if ( ! group ) {
-        // The request won't failed, because it's a search request.  So it will
+        // The request won't be failed, because it's a search request.  So it will
         // just return an empty result.
         return (
             <div id="group-page">
@@ -93,8 +93,7 @@ const GroupPage = function() {
                 </div>
             </PageLeftGutter>
             <PageBody>
-            <div className="group-page__grid">
-                <div className='main'>
+                <div className="group-page__main">
                     <Routes>
                         <Route path="members" element={ <GroupMembersView groupId={group.id} /> } />
                         <Route path="settings" element={<GroupSettingsView groupId={group.id} /> } />
@@ -102,7 +101,6 @@ const GroupPage = function() {
                         <Route index element={<GroupFeedView groupId={group.id} />} />
                     </Routes> 
                 </div>
-            </div>
             </PageBody>
             <PageRightGutter>
             </PageRightGutter>

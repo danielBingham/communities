@@ -88,7 +88,7 @@ module.exports = class PrivateGroupsMigration {
         await this.database.query(`ALTER TABLE posts ADD COLUMN IF NOT EXISTS type post_type NOT NULL DEFAULT 'feed'`, [])
 
         this.logger.info(`Add 'group_id' field to 'posts' table...`)
-        await this.database.query(`ALTER TABLE posts ADD COLUMN IF NOT EXISTS group_id uuid REFERENCES groups (id) DEFAULT NULL`, [])
+        await this.database.query(`ALTER TABLE posts ADD COLUMN IF NOT EXISTS group_id uuid REFERENCES groups (id) DEFAULT NULL ON DELETE CASCADE`, [])
     }
 
     async initBack() {

@@ -369,14 +369,23 @@ module.exports = class UserController {
                 relationId: createdUser.id,
                 status: "confirmed"
             })
-           
-            // In the case of a user invitation, we don't actually want to
-            // return the newly created user (it's basically empty).  We want
-            // to return the updated currentUser who has less invitations now.
+
+            if ( user.groupId ) {
+                const member = {
+                    groupId: user.groupId,
+                    userId: createdUser.id,
+                    role: 'member',
+                    status: 'pending-invited'
+                }
+                await this.groupMemberDAO.insertGroupMembers(member)
+                delete user.groupId
+            }
+
             currentUser.invitations = currentUser.invitations-1
             response.status(201).json({
                 entity: currentUser,
-                relations: {}
+                relations: {
+                }
             })
             return
         } else {

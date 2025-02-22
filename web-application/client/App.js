@@ -183,7 +183,7 @@ const App = function(props) {
                                 <Route index element={ <UserProfileEditForm/> } />
                             </Route>
 
-                            <Route path="/admin" element={ <AdminPage />} />
+                            <Route path="/admin/*" element={ <AdminPage />} />
 
                             <Route path="/friends" element={ <FriendsPage />}>
                                 <Route path="requests" element={ <FriendRequestsList />} />

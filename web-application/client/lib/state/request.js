@@ -1,3 +1,5 @@
+import logger from '/logger'
+
 export const makeTrackedRequest = function(method, endpoint, body, onSuccess, onFailure) {
     return function(dispatch, getState) {
         const configuration = getState().system.configuration
@@ -46,6 +48,7 @@ export const makeTrackedRequest = function(method, endpoint, body, onSuccess, on
             responseOk = response.ok
             return response.json()
         }).then(function(responseBody) {
+            console.log(responseOk)
             if ( responseOk ) {
                 if ( onSuccess ) {
                     try {
@@ -56,19 +59,21 @@ export const makeTrackedRequest = function(method, endpoint, body, onSuccess, on
                     }
                 }
             } else {
+                const requestError = { 
+                    status: status, 
+                    type: responseBody.error, 
+                    message: responseBody.message, 
+                    data: responseBody.data 
+                }
                 if ( onFailure ) {
                     try {
                         onFailure(responseBody)
-                        return { 
-                            status: status, 
-                            type: responseBody.error, 
-                            message: responseBody.message, 
-                            data: responseBody.data 
-                        }
                     } catch (error) {
+                        logger.error(requestError)
                         return Promise.reject(error)
                     }
-                }
+                } 
+                return Promise.reject(requestError)
             }
         })
     }

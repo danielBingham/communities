@@ -110,13 +110,33 @@ The Communities Team`)
                 },
                 text: Handlebars.compile(`{{{friend.name}}} accepted your friend request.`),
                 path: Handlebars.compile(`/{{{friend.username}}}`)
-            }
+            },
+            'Group:member:create:invited': {},
+            'Group:member:create:requested': {},
+            'Group:member:update:request:accepted': {},
+            'Group:member:update:request:rejected': {},
+            'Group:member:update:invite:accepted': {},
+            'Group:member:update:invite:rejected': {},
+            'Group:member:update:promoted:moderator': {},
+            'Group:member:update:promoted:admin': {},
+            'Group:post:deleted': {}
         }
+
+        // Notify user when invited to group.
+        // Notify moderators when user requests access.
+        // Notify user when request accepted.
+        // Notify moderator when invite accepted.
+        // Notify member when promoted to moderator.
+        // Notify moderator when promoted to admin.
+        // Notify poster when moderator deletes post.
 
         this.notificationMap = { 
             'Post:comment:create': this.sendNewCommentNotification.bind(this),
             'User:friend:create': this.sendFriendRequestNotification.bind(this),
-            'User:friend:update': this.friendRequestAcceptedNotification.bind(this)
+            'User:friend:update': this.friendRequestAcceptedNotification.bind(this),
+            'Group:member:create': this.sendGroupMemberCreatedNotification.bind(this),
+            'Group:member:update': this.sendGroupMemberUpdatedNotification.bind(this),
+            'Group:post:deleted': this.sendGroupPostDeletedNotification.bind(this)
         }
     }
 

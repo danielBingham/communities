@@ -97,10 +97,9 @@ const GroupEditForm = function({ groupId }) {
 
     const inProgress = request && request.state == 'in-progress'
     return (
-        <form onSubmit={onSubmit} className="group-form">
-            <div className="group-form__instructions">What group would you like to create?</div>
-            <div className="group-form__errors">{ baseError }</div>
-            <div className="group-form__group-image">
+        <form onSubmit={onSubmit} className="group-edit-form">
+            <div className="group-edit-form__errors">{ baseError }</div>
+            <div className="group-edit-form__group-image">
                 <div>
                     { ! fileId && <UserCircleIcon className="placeholder" /> }
                     { fileId && <DraftImageFile fileId={fileId} setFileId={setFileId} width={150} deleteOnRemove={false} /> }
@@ -120,11 +119,13 @@ const GroupEditForm = function({ groupId }) {
                 onChange={(event) => setAbout(event.target.value)}
                 error={aboutError}
             />
-            { inProgress && <Spinner /> }
-            { ! inProgress && <div className="buttons">
-                <Button type="secondary-warn" onClick={(e) => cancel()}>Cancel</Button> 
-                <input type="submit" name="submit" value="Submit" />
-            </div> }
+            <div className="group-edit-form__controls">
+                { inProgress && <Spinner /> }
+                { ! inProgress && <div className="buttons">
+                    <Button type="secondary-warn" onClick={(e) => cancel()}>Cancel</Button> 
+                    <input type="submit" name="submit" value="Submit" />
+                </div> }
+            </div>
         </form>
     )
 

@@ -50,8 +50,8 @@ const UserAccountSettingsView = function() {
 
     return (
         <div className="user-settings">
+            { hasNotificationSettings && <NotificationSettingsSection />}
             <div className="danger-zone">
-                { hasNotificationSettings && <NotificationSettingsSection />}
                 <h2>Danger Zone</h2>
                 <div className="user-settings__delete-your-account">
                     <div className="user-settings__explanation">Delete your account. This will delete

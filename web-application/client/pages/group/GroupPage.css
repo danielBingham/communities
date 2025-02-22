@@ -91,17 +91,12 @@
     font-size: 20px;
 }
 
-@media (1520px <= width) {
-    #group-page .group-page__grid {
-        display: grid;
-        grid-template-rows: auto auto;
-    }
+#group-page .group-page__main {
+    box-sizing: border-box;
+    padding: 1px; 
 }
-@media (1200px < width < 1520px) {
-    #group-page .group-page__grid {
-        display: grid;
-        grid-template-rows: auto auto;
-    }
+
+@media (1200px < width ) {
     #group-page menu.group-page__menu {
         text-align: center;
     }
@@ -116,10 +111,6 @@
     }
 }
 @media(width <= 1200px) {
-    #group-page .group-page__grid {
-        display: grid;
-        grid-template-rows: auto auto;
-    }
     #group-page menu.group-page__menu {
         text-align: center;
     }

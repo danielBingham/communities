@@ -1,0 +1,62 @@
+#admin h2 {
+    text-align: center;
+}
+
+#admin menu.admin__menu {
+    list-style-type: none;
+    margin: 20px 0;
+    padding: 0;
+    text-align: center;
+}
+#admin menu.admin__menu li {
+    font-size: 18px;
+}
+#admin menu.admin__menu a svg {
+    width: 22px;
+    margin-right: 5px;
+    margin-bottom: -5px;
+    color: var(--icon-color);
+}
+#admin menu.admin__menu a:link,
+#admin menu.admin__menu a:visited,
+#admin menu.admin__menu a:active {
+    display: block;
+    padding: 10px;
+    color: var(--primary-color-darkest);
+}
+#admin menu.admin__menu a:hover {
+    background-color: var(--primary-color-light);
+    border-radius: 10px;
+}
+#admin menu.admin__menu a.active  {
+    font-weight: bold;
+}
+
+#admin menu.admin__menu .outline { 
+    display: inline-block;
+}
+#admin menu.admin__menu .active .outline { 
+    display: none;
+}
+
+#admin menu.admin__menu .solid {
+    display: none;
+}
+#admin menu.admin__menu .active .solid{
+    display: inline-block;
+}
+
+@media (width < 750px) {
+    #admin menu.admin__menu {
+        text-align: center;
+    }
+
+    #admin menu.admin__menu li {
+        display: inline-block;
+    }
+    
+    #admin menu.admin__menu li .nav-text {
+        display: block;
+        font-size: 10px;
+    }
+}
