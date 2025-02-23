@@ -397,6 +397,17 @@ module.exports = class PostController {
 
         await this.postDAO.deletePost(existing)
 
+        if ( existing.groupId && existing.userId !== currentUser.id ) {
+            await this.notificationService.sendNotifications(
+                currentUser,
+                'Group:post:deleted',
+                {
+                    moderator: currentUser,
+                    post: existing
+                }
+            )
+        }
+
         response.status(201).json({})
     }
 

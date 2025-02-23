@@ -111,24 +111,107 @@ The Communities Team`)
                 text: Handlebars.compile(`{{{friend.name}}} accepted your friend request.`),
                 path: Handlebars.compile(`/{{{friend.username}}}`)
             },
-            'Group:member:create:invited': {},
-            'Group:member:create:requested': {},
-            'Group:member:update:request:accepted': {},
-            'Group:member:update:request:rejected': {},
-            'Group:member:update:invite:accepted': {},
-            'Group:member:update:invite:rejected': {},
-            'Group:member:update:promoted:moderator': {},
-            'Group:member:update:promoted:admin': {},
-            'Group:post:deleted': {}
-        }
+            'Group:member:create:invited': {
+                email: {
+                    subject: Handlebars.compile('[Communities] {{{inviter.name}}} invited you to join group "{{{group.name}}}"'),
+                    body: Handlebars.compile(`
+Hi {{{user.name}}},
 
-        // Notify user when invited to group.
-        // Notify moderators when user requests access.
-        // Notify user when request accepted.
-        // Notify moderator when invite accepted.
-        // Notify member when promoted to moderator.
-        // Notify moderator when promoted to admin.
-        // Notify poster when moderator deletes post.
+{{{inviter.name}}} invited you to join the {{{group.type}}} group, "{{{group.name}}}". 
+
+You can view and accept or reject the invitation here: {{{host}}}group/{{{group.slug}}}
+
+Cheers,
+The Communities Team`)
+                },
+                text: Handlebars.compile(`{{{inviter.name}}} invited you to join group "{{{group.name}}}"`),
+                path: Handlebars.compile(`/group/{{{group.slug}}}`)
+            },
+            'Group:member:create:requested': {
+                email: {
+                    subject: Handlebars.compile('[Communities]  {{{user.name}}} asked to join group, "{{{group.name}}}"'),
+                    body: Handlebars.compile(`
+Hi {{{moderator.name}}},
+
+{{{user.name}}} has asked to join the group, "{{{group.name}}}". 
+
+You can view and accept or reject their request here: {{{host}}}group/{{{group.slug}}}/members
+
+Cheers,
+The Communities Team`)
+                },
+                text: Handlebars.compile(`{{{user.name}}} asked to join group "{{{group.name}}}"`),
+                path: Handlebars.compile(`/group/{{{group.slug}}}/members`)
+
+            },
+            'Group:member:update:request:accepted': {
+                email: {
+                    subject: Handlebars.compile('[Communities] Your request to join group, "{{{group.name}}}" has been accepted!'),
+                    body: Handlebars.compile(`
+Hi {{{user.name}}},
+
+Your request to join the group, "{{{group.name}}}" has been accepted.  You are now a mameber of "{{{group.name}}}". 
+
+You can view and participate in the group here: {{{host}}}group/{{{group.slug}}}
+
+Cheers,
+The Communities Team`)
+                },
+                text: Handlebars.compile(`Your request to join group "{{{group.name}}}" has been accepted.`),
+                path: Handlebars.compile(`/group/{{{group.slug}}}`)
+            },
+            'Group:member:update:promoted:moderator': {
+                email: {
+                    subject: Handlebars.compile('[Communities] You have been promoted to "moderator" of group, "{{{group.name}}}".'),
+                    body: Handlebars.compile(`
+Hi {{{user.name}}},
+
+{{{promoter.name}}} has promoted you to the role of "moderator" of group, "{{{group.name}}}". You can now moderate posts, invite users, and approve requests to join.
+
+You can view the group here: {{{host}}}group/{{{group.slug}}}
+
+Cheers,
+The Communities Team`)
+                },
+                text: Handlebars.compile(`You have been promoted to "moderator" of group "{{{group.name}}}".`),
+                path: Handlebars.compile(`/group/{{{group.slug}}}`)
+            },
+            'Group:member:update:promoted:admin': {
+                email: {
+                    subject: Handlebars.compile('[Communities] You have been promoted to "admin" of group, "{{{group.name}}}".'),
+                    body: Handlebars.compile(`
+Hi {{{user.name}}},
+
+{{{promoter.name}}} has promoted you to the role of "admin" of group, "{{{group.name}}}". You can now administrate the group. 
+
+You can view the group here: {{{host}}}group/{{{group.slug}}}
+
+Cheers,
+The Communities Team`)
+                },
+                text: Handlebars.compile(`You have been promoted to "admin" of group "{{{group.name}}}".`),
+                path: Handlebars.compile(`/group/{{{group.slug}}}`)
+            },
+            'Group:post:deleted': {
+                email: {
+                    subject: Handlebars.compile('[Communities] Your post, "{{{shortText}}}", was deleted from group, "{{{group.name}}}".'),
+                    body: Handlebars.compile(`
+Hi {{{user.name}}},
+
+{{{moderator.name}}} deleted your post in group, "{{{group.name}}}".  The full text of the post was:
+
+{{{post.content}}}
+
+You can view the group here: {{{host}}}group/{{{group.slug}}}
+
+Cheers,
+The Communities Team`)
+                },
+                text: Handlebars.compile(`{{{moderator.name}}} deleted your post, "{{{shortText}}}" in group, "{{{group.name}}}".`),
+                path: Handlebars.compile(`/group/{{{group.slug}}}`)
+
+            }
+        }
 
         this.notificationMap = { 
             'Post:comment:create': this.sendNewCommentNotification.bind(this),
@@ -142,10 +225,6 @@ The Communities Team`)
 
     async sendNotifications(currentUser, type, context) {
         return await this.notificationMap[type](currentUser, context)
-    }
-
-    async getNotificationSettings(userId, type) {
-
     }
 
     /**
@@ -251,5 +330,65 @@ The Communities Team`)
         context.requester = userResults.dictionary[context.userId]
 
         await this.createNotification(context.userId, 'User:friend:update', context)
+    }
+
+    async sendGroupMemberCreatedNotification(currentUser, context) {
+        context.user = await this.userDAO.getUserById(context.member.userId)
+        if ( context.member.status == 'pending-invited' ) {
+            context.inviter = currentUser
+            await this.createNotification(context.user.id, 'Group:member:create:invited', context)
+        } else if ( context.member.status == 'pending-requested' ) {
+            const moderatorResults = await this.groupMemberDAO.selectGroupMembers({
+                where: `(group_members.role = 'admin' OR group_members.role = 'moderator') AND group_members.group_id = $1`,
+                params: [ context.group.id ]
+            })
+
+            for(const id of moderatorResults.list ) {
+                const moderatorMember = moderatorResults.dictionary[id]
+
+                await this.createNotification(
+                    moderatorMember.userId, 
+                    'Group:member:create:requested', 
+                    { ...context, moderator: moderatorMember }
+                )
+            }
+        }
+    }
+
+    async sendGroupMemberUpdatedNotification(currentUser, context) {
+        context.user = await this.userDAO.getUserById(context.member.userId)
+        if ( context.previousStatus == 'pending-requested' && context.member.status == 'member' ) {
+            await this.createNotification(
+                context.user.id,
+                'Group:member:update:request:accepted',
+                context  
+            )
+        } else if ( context.previousRole == 'member' && context.member.role == 'moderator' ) {
+            await this.createNotification(
+                context.user.id,
+                'Group:member:update:promoted:moderator',
+                { ...context, promoter: currentUser }
+            )
+        } else if ( context.previousRole == 'moderator' && context.member.role == 'admin' ) {
+            await this.createNotification(
+                context.user.id,
+                'Group:member:update:promoted:admin',
+                { ...context, promoter: currentUser }
+            )
+
+        }
+    }
+
+
+    async sendGroupPostDeletedNotification(currentUser, context) {
+        context.user = await this.userDAO.getUserById(context.post.userId)
+        context.group = await this.groupDAO.getGroupById(context.post.groupId)
+        context.shortText = context.post.content.substring(0, 100) + '...'
+
+        await this.createNotification(
+            context.post.userId,
+            'Group:post:deleted',
+            context
+        )
     }
 }

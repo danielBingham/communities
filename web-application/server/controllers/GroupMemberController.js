@@ -18,7 +18,7 @@
  *
  ******************************************************************************/
 
-const { GroupDAO, GroupMemberDAO, UserDAO, FileDAO }  = require('@communities/backend')
+const { GroupDAO, GroupMemberDAO, UserDAO, FileDAO, NotificationService }  = require('@communities/backend')
 const ControllerError = require('../errors/ControllerError')
 
 module.exports = class GroupMemberController {
@@ -30,6 +30,8 @@ module.exports = class GroupMemberController {
         this.groupMemberDAO = new GroupMemberDAO(core)
         this.userDAO = new UserDAO(core)
         this.fileDAO = new FileDAO(core)
+
+        this.notificationService = new NotificationService(core)
     }
 
     async getRelations(currentUser, results, requestedRelations) {
@@ -168,7 +170,7 @@ module.exports = class GroupMemberController {
         const userMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(groupId, currentUser.id) 
         const existing = await this.groupMemberDAO.getGroupMemberByGroupAndUser(groupId, member.userId)
 
-        // If a user already exists, then bail out.
+        // If a member already exists, then bail out.
         if ( existing && existing.userId == member.userId ) {
             if ( member.userId == currentUser.id ) {
                 throw new ControllerError(400, 'exists',
@@ -271,6 +273,15 @@ module.exports = class GroupMemberController {
         const entity = results.dictionary[results.list[0]]
 
         const relations = await this.getRelations(currentUser, results)
+
+        await this.notificationService.sendNotifications(
+            currentUser, 
+            'Group:member:create', 
+            {
+                group: group,
+                member: entity
+            }
+        )
 
         response.status(201).json({
             entity: entity,
@@ -414,6 +425,17 @@ module.exports = class GroupMemberController {
         const entity = results.dictionary[results.list[0]]
 
         const relations = await this.getRelations(currentUser, results)
+
+        await this.notificationService.sendNotifications(
+            currentUser, 
+            'Group:member:update', 
+            {
+                group: group,
+                previousStatus: existing.status,
+                previousRole: existing.role,
+                member: entity
+            }
+        )
 
         response.status(201).json({
             entity: entity,
