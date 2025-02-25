@@ -18,7 +18,16 @@
  *
  ******************************************************************************/
 
-const { GroupDAO, GroupMemberDAO, UserDAO, FileDAO, NotificationService }  = require('@communities/backend')
+const { 
+    FileDAO,
+    GroupDAO, 
+    GroupMemberDAO, 
+    UserDAO,  
+
+    NotificationService, 
+    PermissionService 
+}  = require('@communities/backend')
+
 const ControllerError = require('../errors/ControllerError')
 
 module.exports = class GroupMemberController {
@@ -32,6 +41,7 @@ module.exports = class GroupMemberController {
         this.fileDAO = new FileDAO(core)
 
         this.notificationService = new NotificationService(core)
+        this.permissionService = new PermissionService(core)
     }
 
     async getRelations(currentUser, results, requestedRelations) {
@@ -51,16 +61,30 @@ module.exports = class GroupMemberController {
         const groupId = request.params.groupId
 
         const group = await this.groupDAO.getGroupById(groupId)
-        let currentMember = null
-        if ( currentUser ) {
-            currentMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(groupId, currentUser.id)
-        }
-
         if ( ! group ) {
             throw new ControllerError(404, 'not-found',
                 `No Group(${groupId}).`,
                 `That group either doesn't exist or you don't have permission to see it.`)
         }
+
+        const member = await this.groupMemberDAO.getGroupMemberByGroupAndUser(group.id, currentUser.id, true)
+
+        const canViewGroup = await this.permissionService.can(currentUser, 'view', 'Group', { group: group, groupMember: member })
+        if ( ! canViewGroup ) {
+            throw new ControllerError(404, 'not-found',
+                `User(${currentUser.id}) does not have permission to view Group(${groupId}).`,
+                `That group either doesn't exist or you don't have permission to see it.`)
+        }
+
+        const canViewGroupContent = await this.permissionService.can(currentUser, 'view', 'Group:content', { group: group, groupMember: member })
+        if ( ! canViewGroupContent ) {
+            query.page = -1
+            return query
+        }
+
+
+
+
 
         if ( group.type == 'open' ) {
             query.params.push(groupId)

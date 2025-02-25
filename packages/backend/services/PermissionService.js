@@ -18,7 +18,7 @@
  *
  ******************************************************************************/
 
-const PermissionDAO = require('../daos/PermissionDAO')
+const { GroupDAO, GroupMemberDAO, UserRelationshipDAO } = require('@communities/backend')
 
 const ServiceError = require('../errors/ServiceError')
 
@@ -26,72 +26,9 @@ module.exports = class PermissionService {
     constructor(core) {
         this.core = core
 
-        this.permissionDAO = new PermissionDAO(this.core)
-
-        this.publicRoleId = null
-
-        this.contextMap = {
-            paperId: 'paper_id',
-            paperVersionId: 'paper_version_id',
-            eventId: 'event_id',
-            reviewId: 'review_id',
-            reviewCommentId: 'review_comment_id',
-            paperCommentId: 'paper_comment_id',
-            submissionId: 'submission_id',
-            journalId: 'journal_id'
-        }
-    
-    }
-
-    /**
-     * @return {Promise<string>}
-     */
-    async getPublicRoleId() {
-        if ( this.publicRoleId !== null ) {
-            return this.publicRoleId
-        }
-
-        const results = await this.core.database.query(
-            `SELECT id FROM roles WHERE name='public'`, 
-            []
-        )
-
-        if ( results.rows.length <= 0 ) {
-            throw new ServiceError('missing-public', 'Failed to find the public role id!')
-        }
-
-        this.publicRoleId = results.rows[0].id
-        return this.publicRoleId
-    }
-
-    addContextSQL(query, context, allowArray) {
-        for(const [key, value] of Object.entries(context)) {
-            if ( ! ( key in this.contextMap ) ) {
-                throw new ServiceError('invalid-context',
-                    `Invalid context '${key}'.`)
-            }
-
-            if ( allowArray && Array.isArray(value) ) {
-                query.where += ` AND ${this.contextMap[key]} = ANY($${query.params.length+1}:bigint[])`
-                query.params.push(value)
-            } else {
-                query.where += ` AND ${this.contextMap[key]} = $${query.params.length+1}`
-                query.params.push(value)
-            }
-        }
-        return query 
-    }
-
-    overrideContext(permission, context) {
-        for(const [key, value] of context) {
-            if ( ! ( key in this.contextMap ) ) {
-                throw new ServiceError('invalid-context',
-                    `Invalid context '${key}'.`)
-            }
-
-            permission[key] = value
-        }
-        return permission
+        this.groupDAO = new GroupDAO(core)
+        this.groupMemberDAO = new GroupMemberDAO(core)
+        this.userRelationshipDAO = new UserRelationshipDAO(core)
     }
 
     /**
@@ -101,68 +38,144 @@ module.exports = class PermissionService {
      * identified by `context`, false otherwise.
      */
     async can(user, action, entity, context) {
-        const query = {
-            where:  'permissions.entity = $1 and permissions.action = $2',
-            params: [ entity, action ]
+        if ( entity === 'Post' ) {
+            if ( action === 'view' ) {
+                return await this.canViewPost(user, context)
+            } else if ( action === 'update') {
+                return await this.canUpdatePost(user, context)
+            } else if ( action === 'delete') {
+                return await this.canDeletePost(user, context)
+            }
+        } else if ( entity === 'Group' ) {
+            if ( action === 'view' ) {
+                return await this.canViewGroup(user, context)
+            } else if ( action === 'update' ) {
+                return await this.canUpdateGroup(user, context)
+            } else if ( action === 'delete' ) {
+                return await this.canDeleteGroup(user, context)
+            } else if ( action === 'moderate' ) {
+                return await this.canModerateGroup(user, context)
+            }
+        } else if ( entity === 'Group:content' ) {
+            if ( action === 'view' ) {
+                return await this.canViewGroupContent(user, context)
+            }
+        } else if ( entity === 'User' ) {
+            if ( action === 'view' ) {
+                return true
+            } else if ( action === 'update' ) {
+                return user.id === context.user.id
+            } else if ( action === 'delete' ) {
+                return user.id === context.user.id
+            }
         }
 
-        const publicRoleId = await this.getPublicRoleId()
-
-        if ( user ) {
-            query.where += ` AND 
-                ( permissions.user_id = $${query.params.length+1} 
-                    OR user_roles.user_id = $${query.params.length+1} 
-                    OR permissions.role_id = $${query.params.length+2}
-                )`
-            query.params.push(user.id)
-            query.params.push(publicRoleId)
-        }  else {
-            query.where += ` AND permissions.role_id = $${query.params.length+1}`
-            query.params.push(publicRoleId)
-        }
-
-        this.addContextSQL(query, context, false)
-
-        const results = await this.permissionDAO.selectPermissions(query.where, query.params)
-
-        return results.list.length > 0
+        throw new ServiceError('unsupported', `Unsupported Entity(${entity}) or Action(${action}).`)
     }
 
-    /**
-     * @returns {Promise<any[]>}
-     */
-    async get(user, entity, action, context) {
-        const query = {
-            where: '',
-            params: []
+    async canViewPost(user, context) {
+        const post = context.post
+
+        // Users can always view their own posts.
+        if ( post.userId === user.id ) {
+            return true
         }
 
-        const publicRoleId = await this.getPublicRoleId()
-
-        if ( user ) {
-            query.where += '(permissions.user_id = $1 OR user_roles.user_id = $1 OR permissions.role_id = $2)'
-            query.params.push(user.id, publicRoleId)
-        } else {
-            query.where += 'permissions.role_id = $1'
-            query.params.push(publicRoleId)
+        // If the post is a Group post, then it depends on type of group:
+        // - Posts in Open groups are publicly visible.
+        // - Posts in Hidden or Private groups are visible to members of the group.
+        if ( post.groupId ) {
+            return await this.canViewGroupContent(user, context)
         }
 
-        if ( entity && entity !== '*' ) {
-            query.params.push(entity)
-            query.where += ` AND permissions.entity = $${query.params.length}`
+        // Otherwise, they can only view the posts if they are friends with the poster.
+        let relationship = context.userRelationship
+        if ( ! relationship ) {
+            relationship = await this.userRelationshipDAO.getRelationshipByUserAndRelation(user.id, post.userId)
         }
-        if ( action && action !== '*' ) {
-            query.params.push(action)
-            query.where += ` AND permissions.action = $${query.params.length}`
+        if ( relationship !== null && relationship.status === 'confirmed') {
+            return true
         }
 
-        this.addContextSQL(query, context)
-
-        const results = await this.permissionDAO.selectPermissions(query.where, query.params)
-        return results.list.map((id) => results.dictionary[id])
+        return false 
     }
 
-    async grant(permissions) {
-        await this.insertPermissions(permissions)
+    async canUpdatePost(user, context) {
+        if ( context.post.userId === user.id ) {
+            return true
+        }
+
+        return false
     }
+
+    async canDeletePost(user, context) {
+        // Users can always delete their own posts.
+        if ( context.post.userId === user.id ) {
+            return true
+        }
+
+        // If the post is in a group, then moderators and admins of the group
+        // can also delete posts.
+        if ( context.post.groupId ) {
+            return await this.canModerateGroup(user, { groupId: post.groupId })
+        }
+    }
+
+    async canViewGroup(user, context) {
+        let group = context.group
+        if ( ! group ) {
+            group = await this.groupDAO.getGroupById(post.groupId)
+        }
+
+        if ( group.type === 'open' || group.type == 'private') {
+            return true
+        }
+
+        if ( ! ('member' in context) ) {
+            member = await this.groupMemberDAO.getGroupMemberByGroupAndUser(group.id, user.id, true)
+        }
+
+        if ( member !== null && member.status === 'member') {
+            return true 
+        }
+        return false 
+    }
+
+    async canUpdateGroup(user, groupId) {
+        const member = await this.groupMemberDAO.getGroupMemberByGroupAndUser(groupId, user.id, true)
+        if ( member !== null && member.status === 'member' && member.role === 'admin') {
+            return true 
+        }
+        return false 
+
+    }
+
+    async canDeleteGroup(user, groupId) {
+        const member = await this.groupMemberDAO.getGroupMemberByGroupAndUser(groupId, user.id, true)
+        if ( member !== null && member.status === 'member' && member.role === 'admin') {
+            return true 
+        }
+        return false 
+    }
+
+    async canModerateGroup(user, groupId) {
+        const member = await this.groupMemberDAO.getGroupMemberByGroupAndUser(groupId, user.id, true)
+        if ( member !== null && member.status === 'member' && (member.role === 'moderator' || member.role === 'admin')) {
+            return true 
+        }
+        return false 
+    }
+
+    async canViewGroupContent(user, group) {
+        if ( group.type === 'open' ) {
+            return true
+        }
+
+        const member = await this.groupMemberDAO.getGroupMemberByGroupAndUser(post.groupId, user.id, true)
+        if ( member !== null && member.status === 'member') {
+            return true 
+        }
+        return false 
+    }
+
 }

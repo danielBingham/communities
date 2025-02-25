@@ -190,9 +190,8 @@ module.exports = class GroupController {
 
         const group = results.dictionary[groupId]
 
-        const groupMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(groupId, currentUser.id)
-
-        if ( ! group.isDiscoverable && groupMember === null ) {
+        const canViewGroup = await this.permissionService.can(currentUser, 'view', 'Group', { group: group })
+        if ( ! canViewGroup ) {
             throw new ControllerError(404, 'not-found',
                 `User(${currentUser.id}) attempting to view Group(${groupId}) without permission.`,
                 `Either that group doesn't exist or you don't have permission to see it.`)
@@ -208,7 +207,7 @@ module.exports = class GroupController {
     }
 
     async patchGroup(request, response) {
-        console.log(`patchGroup`)
+        
         const currentUser = request.session.user
 
         if ( ! currentUser ) {
@@ -218,7 +217,6 @@ module.exports = class GroupController {
         }
 
         const groupId = request.params.id
-
         const group = request.body
 
         if ( group.id !== groupId ) {
@@ -228,7 +226,6 @@ module.exports = class GroupController {
         }
 
         const existing = await this.groupDAO.getGroupById(groupId)
-
         if ( ! existing ) {
             throw new ControllerError(404, 'not-found',
                 `User(${currentUser.id}) attempting to PATCH a group that doesn't exist.`,
@@ -236,15 +233,15 @@ module.exports = class GroupController {
         }
 
 
-        const groupMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(groupId, currentUser.id)
-
-        if ( ! groupMember && existing.isDiscoverable !== true ) {
+        const canViewGroup = await this.permissionService.can(currentUser, 'view', 'Group', { group:  existing})
+        if ( ! canViewGroup ) {
             throw new ControllerError(404, 'not-found',
                 `User(${currentUser.id}) attempting to PATCH a group they don't have permission to view.`,
                 `Either that group doesn't exist or you don't have permission to see it.`)
         }
 
-        if ( groupMember.role !== 'admin') {
+        const canUpdateGroup = await this.permissionService.can(currentUser, 'update', 'Group', { group: existing })
+        if ( ! canUpdateGroup ) {
             throw new ControllerError(403, 'not-authorized',
                 `User(${currentUser.id}) attempting to PATCH a group they don't have permission to edit.`,
                 `You don't have permission to edit that group.`)
@@ -308,15 +305,15 @@ module.exports = class GroupController {
                 `Either that group doesn't exist or you don't have permission to see it.`)
         }
 
-        const groupMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(groupId, currentUser.id)
-
-        if ( ! groupMember && existing.isDiscoverable !== true ) {
+        const canViewGroup = await this.permissionService.can(currentUser, 'view', 'Group', { group:  existing})
+        if ( ! canViewGroup ) {
             throw new ControllerError(404, 'not-found',
                 `User(${currentUser.id}) attempting to DELETE a group they don't have permission to view.`,
                 `Either that group doesn't exist or you don't have permission to see it.`)
         }
 
-        if ( groupMember.role !== 'admin') {
+        const canDeleteGroup = await this.permissionService.can(currentUser, 'delete', 'Group', { group: existing })
+        if ( ! canDeleteGroup ) {
             throw new ControllerError(403, 'not-authorized',
                 `User(${currentUser.id}) attempting to DELETE a group they don't have permission to edit.`,
                 `You don't have permission to edit that group.`)
