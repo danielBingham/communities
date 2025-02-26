@@ -295,25 +295,17 @@ module.exports = class PostController {
         })
 
         const post = postResults.dictionary[postId]
-
         if ( ! post ) {
             throw new ControllerError(404, 'not-found',
                 `User(${currentUser.id}) attempting to access Post(${postId}) that doesn't exist.`,
                 `That post either doesn't exist or you don't have permission to access it.`)
         }
 
-        const friendResults = await this.core.database.query(`
-            SELECT
-                user_id, friend_id
-            FROM user_relationships
-                WHERE user_id = $1 OR friend_id = $1
-        `, [ post.userId ])
-
-        const isFriend = friendResults.rows.find((r) => r.user_id == currentUser.id || r.friend_id == currentUser.id)
-        if ( ! isFriend && currentUser.id != post.userId ) {
+        const canViewPost = await this.permissionService.can(currentUser, 'view', 'Post', { post: post })
+        if ( ! canViewPost ) {
             throw new ControllerError(404, 'not-found',
                 `User(${currentUser.id}) attempting to access Post(${postId}) without permission.`,
-                `That post either doesn't exist or you don't have permission to see it.`)
+                `That post either doesn't exist or you don't have permission to access it.`)
         }
 
         const relations = await this.getRelations(currentUser, postResults)
@@ -333,7 +325,22 @@ module.exports = class PostController {
                 `You must must be authenticated to edit a post.`)
         }
 
+        const postId = request.params.id
         const post = request.body
+
+        const existing = await this.postDAO.getPostById(postId)
+        if ( ! existing ) {
+            throw new ControllerError(404, 'not-found',
+                `User(${currentUser.id}) attempting to update a Post(${postId}) that doesn't exist.`,
+                `You can't update a post that doesn't exist.`)
+        }
+
+        const canUpdatePost = await this.permissionService.can(currentUser, 'update', 'Post', { post: existing})
+        if ( ! canUpdatePost ) {
+            throw new ControllerError(403, 'not-authorized',
+                `User(${currentUser.id}) attempting to update a Post(${postId}) without permission.`,
+                `You are not authorized to update that post.`)
+        }
 
         if ( post.content && post.content.length > 10000 ) {
             throw new ControllerError(400, 'invalid',
@@ -376,23 +383,13 @@ module.exports = class PostController {
                 `You must must be authenticated to edit a post.`)
         }
 
+        const existing = await this.postDAO.getPostById(postId)
 
-        const existingResults = await this.postDAO.selectPosts({
-            where: `posts.id = $1`,
-            params: [ postId ]
-        })
-
-        const existing = existingResults.dictionary[postId]
-
-        let currentMember = null 
-        if ( existing.groupId ) {
-            currentMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(existing.groupId, currentUser.id)
-        }
-
-        if ( existing.userId !== currentUser.id && ! (currentMember && (currentMember.role == 'admin' || currentMember.role == 'moderator')) ) {
+        const canDeletePost = await this.permissionService.can(currentUser, 'delete', 'Post', { post: existing })
+        if ( ! canDeletePost ) {
             throw new ControllerError(403, 'not-authorized',
                 `User(${currentUser.id}) attempting to delete Post(${postId}) of User(${existing.userId}).`,
-                `You may not delete another user's posts.`)
+                `You are not authorized to delete that post.`)
         }
 
         await this.postDAO.deletePost(existing)

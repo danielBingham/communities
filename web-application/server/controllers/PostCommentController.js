@@ -35,6 +35,7 @@ module.exports = class PostCommentController {
         this.postSubscriptionDAO = new PostSubscriptionDAO(core)
 
         this.notificationService = new NotificationService(core)
+        this.permissionService = new PermissionService(core)
     }
 
     async getRelations(currentUser, results, requestedRelations) {
