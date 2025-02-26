@@ -82,29 +82,16 @@ module.exports = class GroupMemberController {
             return query
         }
 
+        const canModerateGroup = await this.permissionService.can(currentUser, 'moderate', 'Group', { group: group, groupMember: member })
 
-
-
-
-        if ( group.type == 'open' ) {
+        if ( canModerateGroup ) {
             query.params.push(groupId)
-            query.where = 'group_members.group_id = $1'
-        } else if ( group.type == 'private' || group.type == 'hidden') {
-            if ( ! currentMember || currentMember.status !== 'member' ) {
-                query.page = -1
-                return query
-            } else if ( currentMember.role == 'admin' || currentMember.role == 'moderator') {
-                query.params.push(groupId)
-                query.where = `group_members.group_id = $1`
-            } else {
-                query.params.push(groupId)
-                query.params.push(currentUser.id)
-                query.where = `group_members.group_id = $1 AND (group_members.status = 'member' OR group_members.user_id = $2)`
-            }
+            query.where = `group_members.group_id = $${query.params.length}`
         } else {
-            throw new ControllerError(500, 'server-error',
-                `Group(${groupId}) doesn't have a known type.`,
-                `We encountered an error we couldn't recover from.  Please report as a bug.`)
+            query.params.push(groupId)
+            query.params.push(currentUser.id)
+            query.where = `group_members.group_id = $${query.params.length-1} 
+                AND (group_members.status = 'member' OR group_members.user_id = $${query.params.length})`
         }
 
         return query
@@ -192,15 +179,25 @@ module.exports = class GroupMemberController {
         }
 
         const userMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(groupId, currentUser.id) 
+
+
+        const canViewGroup = await this.permissionService.can(currentUser, 'view', 'Group', { group: group, groupMember: userMember })
+        const canViewGroupContent = await this.permissionService.can(currentUser, 'view', 'Group:content', { group: group, groupMember: userMember })
+        const canModerateGroup = await this.permissionService.can(currentUser, 'moderate', 'Group', { group: group, groupMember: userMember })
+
         const existing = await this.groupMemberDAO.getGroupMemberByGroupAndUser(groupId, member.userId)
 
         // If a member already exists, then bail out.
         if ( existing && existing.userId == member.userId ) {
-            if ( member.userId == currentUser.id ) {
+            if ( ! canViewGroup ) {
+                throw new ControllerError(404, 'not-found',
+                    `User(${currentUser.id}) attempting to add a member (already added) to a group without permission to view it.`,
+                    `Either that group doesn't exist or you don't have permission to see it.`)
+            } else if ( member.userId == currentUser.id ) {
                 throw new ControllerError(400, 'exists',
                     `User(${member.userId}) has already been added to Group(${member.groupId}) with status '${userMember.status}'.`,
                     `You've already been added with status '${userMember.status}'.`)
-            } else if ( userMember && (userMember.role == 'admin' || userMember.role == 'moderator')) {
+            } else if ( canModerateGroup ) {
                 throw new ControllerError(400, 'exists',
                     `User(${member.userId}) has already been added to Group(${member.groupId}) with status '${userMember.status}'.`,
                     `That user has already been added with status '${userMember.status}'.`)
@@ -209,6 +206,12 @@ module.exports = class GroupMemberController {
                     `User(${currentUser.id}) is not authorized to add members to Group(${groupId}).`,
                     `You aren't authorized to add members.`)
             }
+        }
+        
+        if ( ! canViewGroup ) { 
+            throw new ControllerError(404, 'not-found',
+                `User(${currentUser.id}) attempting to add a member to a Group(${groupId}) they can't view.`,
+                `Either that group doesn't exist or you don't have permission to see it.`)
         }
 
         // Check permissions by group type.
@@ -220,7 +223,7 @@ module.exports = class GroupMemberController {
                     `Either that group doesn't exist or you don't have permission to see it.`)
             } 
             // Only admins and moderators can invite.
-            else if ( userMember && userMember.role != 'admin' && userMember.role != 'moderator' ) {
+            else if ( ! canModerateGroup ) {
                 throw new ControllerError(403, 'not-authorized',
                     `User(${currentUser.id}) attempting to add user to Group(${groupId}) without permission.`,
                     `You do not have permission to invite members to this group.`)
@@ -228,7 +231,7 @@ module.exports = class GroupMemberController {
                     
         }
         else if ( group.type == 'private' ) {
-            if ( userMember && ! ( userMember.role == 'admin' || userMember.role == 'moderator') ) {
+            if ( userMember && ! canModerateGroup ) {
                 throw new ControllerError(403, 'not-authorized',
                     `User(${currentUser.id}) attempting to add user to Group(${groupId}) without permission.`,
                     `You do not have permission to invite members to this group.`)
@@ -239,7 +242,7 @@ module.exports = class GroupMemberController {
             }
         }
         else if ( group.type == 'open') {
-            if ( userMember && ! ( userMember.role == 'admin' || userMember.role == 'moderator') ) {
+            if ( userMember && ! canModerateGroup ) {
                 throw new ControllerError(403, 'not-authorized',
                     `User(${currentUser.id}) attempting to add user to Group(${groupId}) without permission.`,
                     `You do not have permission to invite members to this group.`)
@@ -326,7 +329,6 @@ module.exports = class GroupMemberController {
         const memberId = request.params.userId
 
         const existing = await this.groupDAO.getGroupById(groupId)
-        
         if ( existing === null ) {
             throw new ControllerError(404, 'not-found',
                 `User(${currentUser.id}) attempting to get member for Group(${groupId}), not found.`,
@@ -335,15 +337,24 @@ module.exports = class GroupMemberController {
 
         const userMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(groupId, currentUser.id)
 
-        if ( userMember === null && existing.type == 'hidden') {
+        const canViewGroup = await this.permissionService.can(currentUser, 'view', 'Group', { group: existing, groupMember: userMember})
+        if ( ! canViewGroup ) {
             throw new ControllerError(404, 'not-found',
                 `User(${currentUser.id}) attempting to get member for Group(${groupId}), they don't have permission.`,
                 `Either that group doesn't exist or you don't have permission to see it.`)
         }
 
-        const canViewFull = ( userMember.role == 'admin' 
-            || userMember.role == 'moderator' 
-            || (currentUser && currentUser.id == userMember.userId))
+        const canViewGroupContent = await this.permissionService.can(currentUser, 'view', 'Group:content', { group:existing, groupMember:userMember })
+        if ( ! canViewGroupContent ) {
+            throw new ControllerError(404, 'not-found',
+                `User(${currentUser.id}) attempting to get member for Group(${groupId}) without permission to view content.`,
+                `Either that member doesn't exist or you don't have permission to view it.`)
+        }
+
+
+        const canModerateGroup = await this.permissionService.can(currentUser, 'moderate', 'Group', { group: existing, groupMember: userMember })
+
+        const canViewFull = canModerateGroup || (currentUser && currentUser.id == userMember.userId)
 
         const results = await this.groupMemberDAO.selectGroupMembers({
             where: `group_members.group_id = $1 AND group_members.user_id = $2`,
@@ -389,9 +400,8 @@ module.exports = class GroupMemberController {
                 `The userId in the route and the member must match.`)
         }
 
-        const group = await this.groupDAO.getGroupById(groupId)
-
         // Target group must exist.
+        const group = await this.groupDAO.getGroupById(groupId)
         if ( ! group ) {
             throw new ControllerError(404, 'not-found',
                 `User(${currentUser.id}) attempting to edit a member to a group that doesn't exist.`,
@@ -399,7 +409,6 @@ module.exports = class GroupMemberController {
         }
 
         const existing = await this.groupMemberDAO.getGroupMemberByGroupAndUser(groupId, memberId)
-
         if ( ! existing ) {
             throw new ControllerError(404, 'not-found',
                 `User(${currentUser.id}) attempting to patch a non-existent GroupMember(${memberId}) of Group(${groupId}).`,
@@ -408,16 +417,14 @@ module.exports = class GroupMemberController {
 
         const userMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(groupId, currentUser.id) 
 
-        // CurrentUser must be a member of the group.
-        if ( ! userMember && group.type == 'hidden') {
+        const canViewGroup = await this.permissionService.can(currentUser, 'view', 'Group', { group: existing, groupMember: userMember })
+        if ( ! canViewGroup ) {
             throw new ControllerError(404, 'not-found',
                 `User(${currentUser.id}) attempting to edit a member to a Group(${groupId}) they can't view.`,
                 `Either that group doesn't exist or you don't have permission to see it.`)
-        } else if ( ! userMember && group.type != 'hidden') {
-            throw new ControllerError(403, 'not-authorized',
-                `User(${currentUser.id}) attempting to edit a member to a Group(${groupId}) they aren't a member of.`,
-                `You're not authorized to edit members of that group.`)
         }
+
+        const canAdminGroup = await this.permissionService.can(currentUser, 'admin', 'Group', { group: existing, groupMember: userMember })
 
         if ( userMember.userId == existing.userId && existing.status == 'pending-invited' && member.status == 'member') {
             // Pass them through, they're allowed to update themselves in this
@@ -425,7 +432,7 @@ module.exports = class GroupMemberController {
             // through burnout and this is what I got at the moment.
         } 
         // Current User must be an admin. 
-        else if ( userMember.role !== 'admin' ) {
+        else if ( ! canAdminGroup ) {
             throw new ControllerError(403, 'not-authorized',
                 `User(${currentUser.id}) attempting to edit a member of a Group(${groupId}) without permission.`,
                 `You're not authorized to edit members of that group.`)
@@ -479,9 +486,8 @@ module.exports = class GroupMemberController {
         const groupId = request.params.groupId
         const memberId = request.params.userId
 
-        const group = await this.groupDAO.getGroupById(groupId)
-
         // Target group must exist.
+        const group = await this.groupDAO.getGroupById(groupId)
         if ( ! group ) {
             throw new ControllerError(404, 'not-found',
                 `User(${currentUser.id}) attempting to delete a member to a group that doesn't exist.`,
@@ -489,7 +495,6 @@ module.exports = class GroupMemberController {
         }
 
         const existing = await this.groupMemberDAO.getGroupMemberByGroupAndUser(groupId, memberId)
-
         if ( ! existing ) {
             throw new ControllerError(404, 'not-found',
                 `User(${currentUser.id}) attempting to patch a non-existent GroupMember(${memberId}) of Group(${groupId}).`,
@@ -498,33 +503,33 @@ module.exports = class GroupMemberController {
 
         const userMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(groupId, currentUser.id) 
 
-        // CurrentUser must be a member of the group.
-        if ( ! userMember && group.type == 'hidden') {
+        const canViewGroup = await this.permissionService.can(currentUser, 'view', 'Group', { group: group, groupMember: userMember })
+        if ( ! canViewGroup ) {
             throw new ControllerError(404, 'not-found',
                 `User(${currentUser.id}) attempting to remove a member to a Group(${groupId}) they can't view.`,
                 `Either that group doesn't exist or you don't have permission to see it.`)
-        } else if ( ! userMember && group.type != 'hidden') {
-            throw new ControllerError(403, 'not-authorized',
-                `User(${currentUser.id}) attempting to remove a member to a Group(${groupId}) they aren't a member of.`,
-                `You're not authorized to remove members to that group.`)
         }
 
+        const canModerateGroup = await this.permissionService.can(currentUser, 'moderate', 'Group', { group: group, groupMember: userMember })
+        const canAdminGroup = await this.permissionService.can(currentUser, 'admin', 'Group', { group: group, groupMember: userMember })
+
         // Current User must the member being removed or be an admin or a moderator.
-        if ( (currentUser.id != userMember.userId) 
-            && (userMember.role !== 'admin' && userMember.role !== 'moderator' )) 
-        {
+        if ( existing.role === 'member' && ! ( (currentUser.id === existing.userId) || canModerateGroup) ) {
             throw new ControllerError(403, 'not-authorized',
                 `User(${currentUser.id}) attempting to remove a member to a Group(${groupId}) without permission.`,
                 `You're not authorized to remove members to that group.`)
         }
 
-        // If removing a admin or moderator, CurrentUser must be an admin.
-        if ( currentUser.id != userMember.userId 
-            && (( existing.role == 'admin' || existing.role == 'moderator') && userMember.role !== 'admin')) 
-        {
+        if ( existing.role === 'moderator' && ! ( (currentUser.id === existing.userId) || canAdminGroup) ) {
             throw new ControllerError(403, 'not-authorized',
-                `User(${currentUser.id}) attempting to remove an admin or moderator to Group(${groupId}) without permission.`,
-                `You're not authorized to remove admins or moderators to that group.`)
+                `User(${currentUser.id}) attempting to remove a member to a Group(${groupId}) without permission.`,
+                `You're not authorized to remove that member from that group.`)
+        }
+
+        if ( existing.role === 'admin' && currentUser.id !== existing.userId ) {
+            throw new ControllerError(403, 'not-authorized',
+                `User(${currentUser.id}) attempting to remove a member to a Group(${groupId}) without permission.`,
+                `You're not authorized to remove that member from that group.`)
         }
 
         await this.groupMemberDAO.deleteGroupMember(existing)
