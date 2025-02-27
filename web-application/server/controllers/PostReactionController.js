@@ -20,7 +20,7 @@
 
 const Uuid = require('uuid')
 
-const { PostDAO, PostReactionDAO } = require('@communities/backend')
+const { PostDAO, PostReactionDAO, PermissionService } = require('@communities/backend')
 const ControllerError = require('../errors/ControllerError')
 
 module.exports = class PostReactionController {
@@ -68,13 +68,11 @@ module.exports = class PostReactionController {
         }
 
         const postId = request.params.postId
-       
 
-        const results = await this.core.database.query(`
-            SELECT posts.activity FROM posts WHERE posts.id = $1
-        `, [ postId ])
+        const post = await this.postDAO.getPostById(postId)
 
-        if ( results.rows.length <= 0 ) {
+        const canViewPost = await this.permissionService.can(currentUser, 'view', 'Post', { post: post})
+        if ( ! canViewPost ) {
             throw new ControllerError(404, 'not-found',
                 `Post(${postId}) was not found by User(${currentUser.id}) attempting to react.`,
                 `That post either doesn't exist or you don't have permission to see it.`)
@@ -99,19 +97,19 @@ module.exports = class PostReactionController {
 
         await this.postReactionDAO.insertPostReactions(reaction)
 
-        let activity = parseInt(results.rows[0].activity)
+        let activity = parseInt(post.activity)
         if ( reaction.reaction == 'block' ) {
             activity -= 1
         } else {
             activity += 1
         }
 
-        const post = {
+        const postPatch = {
             id: postId,
             activity: activity
         }
 
-        await this.postDAO.updatePost(post)
+        await this.postDAO.updatePost(postPatch)
 
         const postReactionResult = await this.postReactionDAO.selectPostReactions({
             where: `post_reactions.id = $1`,
@@ -133,7 +131,9 @@ module.exports = class PostReactionController {
     }
 
     async getPostReaction(request, response) {
-
+        throw new ControllerError(503, 'not-implemented',
+            `GET /post/:id/reaction/:userId is not implemented yet.`,
+            `GET /post/:id/reaction/:userId is not implemented yet.`)
     }
 
     async patchPostReaction(request, response) {
@@ -146,22 +146,22 @@ module.exports = class PostReactionController {
         }
 
         const postId = request.params.postId
-
-        const existingPostResults = await this.core.database.query(`
-            SELECT posts.activity FROM posts WHERE posts.id = $1
-        `, [ postId ])
-
-        if ( existingPostResults.rows.length <= 0 ) {
+        const post = await this.postDAO.getPostById(postId)
+        if ( ! post ) {
             throw new ControllerError(404, 'not-found',
                 `Post(${postId}) was not found by User(${currentUser.id}) attempting to react.`,
                 `That post either doesn't exist or you don't have permission to see it.`)
         }
 
-        const existing = await this.core.database.query(`
-            SELECT user_id, reaction FROM post_reactions WHERE post_reactions.post_id = $1 AND post_reactions.user_id = $2
-        `, [ postId, currentUser.id])
+        const canViewPost = await this.permissionService.can(currentUser, 'view', 'Post', { post: post })
+        if ( ! canViewPost ) {
+            throw new ControllerError(404, 'not-found',
+                `Post(${postId}) was not found by User(${currentUser.id}) attempting to react.`,
+                `That post either doesn't exist or you don't have permission to see it.`)
+        }
 
-        if ( existing.rows.length <= 0 ) {
+        const existing = await this.postReactionDAO.getPostReactionByPostAndUser(postId, currentUser.id) 
+        if ( existing === null ) {
             throw new ControllerError(404, 'not-found',
                 `User(${currentUser.id}) attempted to patch reaction to Post(${postId}) but not existed.`,
                 `You can't patch a reaction that doesn't exist.  Try POST to create a reaction.`)
@@ -175,20 +175,20 @@ module.exports = class PostReactionController {
 
         await this.postReactionDAO.updatePostReaction(reaction)
 
-        let activity = parseInt(existingPostResults.rows[0].activity)
-        let existingReaction = existing.rows[0].reaction
+        let activity = parseInt(post.activity)
+        let existingReaction = existing.reaction
         if ( existingReaction != 'block' && reaction.reaction == 'block' ) {
             activity -= 2
         } else if ( existingReaction == 'block' && reaction.reaction != 'block') {
             activity += 2
         }
 
-        const post = {
+        const postPatch = {
             id: postId,
             activity: activity
         }
 
-        await this.postDAO.updatePost(post)
+        await this.postDAO.updatePost(postPatch)
 
         const postReactionResult = await this.postReactionDAO.selectPostReactions({
             where: `post_reactions.post_id= $1 AND post_reactions.user_id = $2`,
@@ -196,7 +196,6 @@ module.exports = class PostReactionController {
         })
 
         const entity = postReactionResult.dictionary[postReactionResult.list[0]]
-
         if ( ! entity ) {
             throw new ControllerError(500, 'server-error',
                 `PostReaction(${postId},${currentUser.id}) missing after update.`,
@@ -219,12 +218,15 @@ module.exports = class PostReactionController {
         }
 
         const postId = request.params.postId
+        const post = await this.postDAO.getPostById(postId)
+        if ( post === null ) {
+            throw new ControllerError(404, 'not-found',
+                `Post(${postId}) was not found by User(${currentUser.id}) attempting to react.`,
+                `That post either doesn't exist or you don't have permission to see it.`)
+        }
 
-        const existingPostResults = await this.core.database.query(`
-            SELECT posts.activity FROM posts WHERE posts.id = $1
-        `, [ postId ])
-
-        if ( existingPostResults.rows.length <= 0 ) {
+        const canViewPost = await this.permissionService.can(currentUser, 'view', 'Post', { post: post })
+        if ( ! canViewPost ) {
             throw new ControllerError(404, 'not-found',
                 `Post(${postId}) was not found by User(${currentUser.id}) attempting to react.`,
                 `That post either doesn't exist or you don't have permission to see it.`)
@@ -257,12 +259,12 @@ module.exports = class PostReactionController {
             activity -= 1
         }
 
-        const post = {
+        const postPatch = {
             id: postId,
             activity: activity
         }
 
-        await this.postDAO.updatePost(post)
+        await this.postDAO.updatePost(postPatch)
 
         const postResult = await this.postDAO.selectPosts({
             where: `posts.id = $1`,
