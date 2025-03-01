@@ -31,11 +31,16 @@ const PostComment = function({ postId, id }) {
     //
     // TODO Techdebt Arguably we could put this on the top level App page...
     useEffect(function() {
-        if ( document.location.hash && document.location.hash == `#comment-${id}` ) {
-            document.querySelector(document.location.hash).scrollIntoView({
+        console.log(document.location)
+        console.log(location)
+        console.log(id)
+        if ( location.hash && location.hash == `#comment-${id}` ) {
+            document.querySelector(location.hash).scrollIntoView({
                 block: 'center'
             })
             setHighlight(true)
+        } else {
+            setHighlight(false)
         }
     }, [ id, location ])
 

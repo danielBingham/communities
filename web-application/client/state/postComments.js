@@ -125,7 +125,7 @@ export const postCommentsSlice = createSlice({
  */
 export const getPostComments = function(postId, name, params) {
     return function(dispatch, getState) {
-        const endpoint = `/post/${encodeUriComponent(postId)}/comments${( params ? '?' + qs.stringify(params) : '')}`
+        const endpoint = `/post/${encodeURIComponent(postId)}/comments${( params ? '?' + qs.stringify(params) : '')}`
 
         return dispatch(makeTrackedRequest('GET', endpoint, null,
             function(response) {
@@ -203,7 +203,7 @@ export const getPostComment = function(postId, id) {
  */
 export const patchPostComment = function(comment) {
     return function(dispatch, getState) {
-        return dispatch(makeTrackedRequest('PATCH', `/post/${encodeUriComponent(comment.postId)}/comment/${encodeURIComponent(comment.id)}`, comment,
+        return dispatch(makeTrackedRequest('PATCH', `/post/${encodeURIComponent(comment.postId)}/comment/${encodeURIComponent(comment.id)}`, comment,
             function(response) {
                 dispatch(postCommentsSlice.actions.setPostCommentsInDictionary({ entity: response.entity}))
 

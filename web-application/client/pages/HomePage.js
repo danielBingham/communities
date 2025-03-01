@@ -1,4 +1,5 @@
 import React from 'react'
+import { useSelector } from 'react-redux'
 import { Outlet } from 'react-router-dom'
 
 import FeedMenu from '/components/feeds/menu/FeedMenu'
@@ -8,11 +9,14 @@ import './HomePage.css'
 
 const HomePage = function() {
 
+    const features = useSelector((state) => state.system.features)
+
+    const hasGroups = '19-private-groups' in features
 
     return (
         <Page id="home-page">
             <PageLeftGutter className="home-page__sidebar">
-                <FeedMenu />
+                { hasGroups && <FeedMenu /> }
             </PageLeftGutter>
             <PageBody className="content">
                 <div className="feed">

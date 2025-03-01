@@ -20,7 +20,12 @@
 
 const Uuid = require('uuid')
 
-const { PostDAO, PostReactionDAO, PermissionService } = require('@communities/backend')
+const { 
+    PostDAO, 
+    PostReactionDAO, 
+
+    PermissionService 
+} = require('@communities/backend')
 const ControllerError = require('../errors/ControllerError')
 
 module.exports = class PostReactionController {
@@ -30,6 +35,8 @@ module.exports = class PostReactionController {
 
         this.postDAO = new PostDAO(core)
         this.postReactionDAO = new PostReactionDAO(core)
+
+        this.permissionService = new PermissionService(core)
     }
 
     async getRelations(results, requestedRelations) {
@@ -250,7 +257,7 @@ module.exports = class PostReactionController {
 
         await this.postReactionDAO.deletePostReaction(reaction)
 
-        let activity = existingPostResults.rows[0].activity
+        let activity = parseInt(post.activity)
         let existingReaction = existing.dictionary[existing.list[0]].reaction
 
         if ( existingReaction == 'block')  {

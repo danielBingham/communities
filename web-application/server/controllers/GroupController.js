@@ -18,7 +18,13 @@
  *
  ******************************************************************************/
 
-const { GroupDAO, GroupMemberDAO, UserDAO, FileDAO }  = require('@communities/backend')
+const { 
+    PermissionService,
+    GroupDAO, 
+    GroupMemberDAO, 
+    UserDAO, 
+    FileDAO 
+}  = require('@communities/backend')
 const ControllerError = require('../errors/ControllerError')
 
 module.exports = class GroupController {
@@ -30,6 +36,7 @@ module.exports = class GroupController {
         this.groupMemberDAO = new GroupMemberDAO(core)
         this.userDAO = new UserDAO(core)
         this.fileDAO = new FileDAO(core)
+        this.permissionService = new PermissionService(core)
     }
 
     async getRelations(currentUser, results, requestedRelations) {

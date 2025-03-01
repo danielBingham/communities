@@ -60,15 +60,29 @@ module.exports = class AuthenticationController {
          * 
          * **********************************************************/
         if (request.session.user) {
-            const session = await this.auth.getSessionForUserId(request.session.user.id)
+            try { 
+                const session = await this.auth.getSessionForUserId(request.session.user.id)
 
-            request.session.user = session.user
-            request.session.file = session.file
+                request.session.user = session.user
+                request.session.file = session.file
+            } catch (error) {
+                if ( error.type == 'no-user' ) {
+                    request.session.destroy(function(error) {
+                        if (error) {
+                            console.error(error)
+                            response.status(500).json({error: 'server-error'})
+                        } else {
+                            response.status(200).json({
+                                session: null
+                            })
+                        }
+                    })
+                }
+            }
 
             return response.status(200).json({
                 session:  session
             })
-
         } else {
             return response.status(200).json({
                 session: null

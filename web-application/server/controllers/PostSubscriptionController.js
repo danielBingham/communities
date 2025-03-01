@@ -20,7 +20,13 @@
 
 const Uuid = require('uuid')
 
-const { PostDAO, PostSubscriptionDAO, UserRelationshipDAO } = require('@communities/backend')
+const {
+    PostDAO, 
+    PostSubscriptionDAO, 
+    UserRelationshipDAO,
+
+    PermissionService
+} = require('@communities/backend')
 const ControllerError = require('../errors/ControllerError')
 
 module.exports = class PostSubscriptionController {
@@ -32,6 +38,8 @@ module.exports = class PostSubscriptionController {
         this.postSubscriptionDAO = new PostSubscriptionDAO(core)
 
         this.userRelationshipDAO = new UserRelationshipDAO(core)
+
+        this.permissionService = new PermissionService(core)
     }
 
     async getRelations(results, requestedRelations) { 

@@ -85,24 +85,29 @@ module.exports = class PostController {
         const postFileResults = await this.fileDAO.selectFiles(`WHERE files.id = ANY($1::uuid[])`, [fileIds])
         const fileDictionary = postFileResults.reduce((dictionary, file) => { dictionary[file.id] = file; return dictionary }, {})
 
-        const groupIds = []
-        for (const postId of results.list) {
-            const post = results.dictionary[postId]
-            groupIds.push(post.groupId)
-        }
-        const groupResults = await this.groupDAO.selectGroups({
-            where: `groups.id = ANY($1::uuid[])`,
-            params: [groupIds]
-        })
-
-        return {
+        const relations = {
             users: userResults.dictionary,
             postComments: postCommentResults.dictionary,
             postReactions: postReactionResults.dictionary,
             postSubscriptions: postSubscriptionResults.dictionary,
             files: fileDictionary,
-            groups: groupResults.dictionary
         }
+
+        if ( this.core.features.has('19-private-groups') ) {
+            const groupIds = []
+            for (const postId of results.list) {
+                const post = results.dictionary[postId]
+                groupIds.push(post.groupId)
+            }
+            const groupResults = await this.groupDAO.selectGroups({
+                where: `groups.id = ANY($1::uuid[])`,
+                params: [groupIds]
+            })
+
+            relations.groups = groupResults.dictionary
+        }
+
+        return relations
     }
 
     async createQuery(request) {
@@ -127,18 +132,24 @@ module.exports = class PostController {
 
         const friendIds = friendResults.rows.map((r) => r.user_id == currentUser.id ? r.friend_id : r.user_id)
         friendIds.push(currentUser.id)
+        query.params.push(friendIds)
 
         // Posts in groups
-        const groupResults = await this.core.database.query(`
-            SELECT groups.id FROM groups LEFT OUTER JOIN group_members ON groups.id = group_members.group_id WHERE (group_members.user_id = $1 AND group_members.status = 'member') OR groups.type = 'open'
-        `, [currentUser.id])
+        if ( this.core.features.has(`19-private-groups`) ) {
+            const groupResults = await this.core.database.query(`
+                SELECT groups.id FROM groups LEFT OUTER JOIN group_members ON groups.id = group_members.group_id WHERE (group_members.user_id = $1 AND group_members.status = 'member') OR groups.type = 'open'
+            `, [currentUser.id])
 
-        const groupIds = groupResults.rows.map((r) => r.id)
+            const groupIds = groupResults.rows.map((r) => r.id)
+            query.params.push(groupIds)
+        }
 
-        // Permissions 
-        query.params.push(friendIds)
-        query.params.push(groupIds)
-        query.where += `((posts.user_id = ANY($${query.params.length - 1}::uuid[]) AND posts.type = 'feed') OR (posts.type = 'group' AND posts.group_id = ANY($${query.params.length}::uuid[])))`
+        // Permissions control statements.
+        if ( this.core.features.has(`19-private-groups`) ) {
+            query.where += `((posts.user_id = ANY($${query.params.length - 1}::uuid[]) AND posts.type = 'feed') OR (posts.type = 'group' AND posts.group_id = ANY($${query.params.length}::uuid[])))`
+        } else {
+            query.where += `posts.user_id = ANY($${query.params.length}::uuid[])`
+        }
 
         if ('userId' in request.query) {
             query.params.push(request.query.userId)

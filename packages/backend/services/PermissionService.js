@@ -105,7 +105,7 @@ module.exports = class PermissionService {
 
         // Otherwise, they can only view the posts if they are friends with the poster.
         if ( ! ( 'relationship' in context) ) {
-            context.relationship = await this.userRelationshipDAO.getRelationshipByUserAndRelation(user.id, context.post.userId)
+            context.relationship = await this.userRelationshipDAO.getUserRelationshipByUserAndRelation(user.id, context.post.userId)
         }
         if ( context.relationship !== null && context.relationship.status === 'confirmed') {
             return true
@@ -174,7 +174,7 @@ module.exports = class PermissionService {
             context.groupMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(context.group.id, user.id, true)
         }
 
-        if ( context.groupMember !== null && context.groupMember.status === 'member') {
+        if ( context.groupMember !== null ) {
             return true 
         }
 
@@ -222,7 +222,7 @@ module.exports = class PermissionService {
             context.groupMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(context.groupId, user.id, true)
         }
 
-        if ( context.groupMember !== null && context.member.status === 'member' && member.role === 'admin') {
+        if ( context.groupMember !== null && context.groupMember.status === 'member' && context.groupMember.role === 'admin') {
             return true 
         }
         return false 

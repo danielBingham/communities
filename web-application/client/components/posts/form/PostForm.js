@@ -118,7 +118,6 @@ const PostForm = function({ postId, groupId }) {
     useEffect(function() {
         if (patchRequest && patchRequest.state == 'fulfilled') {
             setDraft(null) 
-            navigate(`/${currentUser.username}/${patchRequest.response.body.entity.id}`)
         }
     }, [ patchRequest ])
 

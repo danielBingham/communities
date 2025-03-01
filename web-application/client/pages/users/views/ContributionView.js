@@ -23,7 +23,7 @@ const ContributionView = function() {
             <div className="contribution-grid">
                 <ContributionCard amount={5} explanation={"Cost of a cup of coffee."} />
                 <ContributionCard amount={10} explanation={"Sustainable contribution."} />
-                <ContributionCard amount={15} explanation={"Cost of an average streaming service."} />
+                <ContributionCard amount={15} explanation={"Cost of streaming service."} />
             </div>
            
             <div className="additional-contributions">
