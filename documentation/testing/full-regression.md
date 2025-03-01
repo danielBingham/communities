@@ -99,28 +99,57 @@
 
 ## Groups
 
+### Test 'open' Groups
+
 - [ ] As User1, create an "open" group named "Open Test Group"
     - [ ] As User1, create a post in "Open Test Group".
-- [ ] As User1, create a "private" group named "Private Test Group"
-    - [ ] As User1, create a post in "Private Test Group".
-- [ ] As User1, create a "hidden" group named "Hidden Test Group"
-    - [ ] As User1, create a post in "Hidden Test Group".
 
 - [ ] As User2, attempt to view "Open Test Group", confirm posts and members are visible.
     - [ ] As User2, attempt to view a specific post in "Open Test Group" by loading the direct link.  Confirm visible.
+
 - [ ] As User1, invite User2 to "Open Test Group"
     - [ ] As User2, reject the invite.
-    - [ ] As USer1, invite User2 to "Open Test Group"
+    - [ ] As User1, invite User2 to "Open Test Group"
     - [ ] As User2, accept the invite and join the group.
+    - [ ] As User2, post in the group.
+
+- [ ] As User1, promote User2 to "moderator".
+
+- [ ] As User2, invite User4 to "Open Test Group" using an email
+    - [ ] As User4, accept the email invite.
+    - [ ] As User4, accept the group invite.
+    - [ ] As User4, post in the group.
+    - [ ] As User4, leave the group.
+        - [ ] Confirm User4's, post remains.
+
+- [ ] As User1, invite User5 to "Open Test Group" using an email
+    - [ ] As User5, accept the email invite.
+    - [ ] As User5, accept the group invite.
+    - [ ] As User1, remove User5 from the group.
+
+- [ ] As User1, promote User2 to "admin"
+
+### Test 'private' Groups
+
+- [ ] As User1, create a "private" group named "Private Test Group"
+    - [ ] As User1, create a post in "Private Test Group".
 
 - [ ] As User2, attempt to view "Private Test Group", confirm posts and members are *not* visible.
     - [ ] As User2, attempt to view a specific post in "Private Test Group" by loading the direct link.  Confirm 404.
+
 - [ ] As User1, invite User2 to "Private Test Group"
     - [ ] As User2, reject the invite.
     - [ ] As User1, invite User2 to "Private Test Group".
     - [ ] As User2, accept the invite and join the group.
     - [ ] As User2, confirm posts and members are now visible.
         - [ ] As User2, attempt to view a specific post in "Private Test Group" by loading the direct link, confirm visible.
+
+### Test 'hidden' Groups
+
+- [ ] As User1, create a "hidden" group named "Hidden Test Group"
+    - [ ] As User1, create a post in "Hidden Test Group".
+
+
 
 - [ ] As User2, attempt to view "Hidden Test Group", confirm 404.
     - [ ] As user2, attempt to view a specific post in "Hidden Test Group" by loading the direct link, confirm 404.

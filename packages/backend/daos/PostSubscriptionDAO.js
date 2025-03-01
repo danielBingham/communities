@@ -191,4 +191,10 @@ module.exports = class PostSubscriptionDAO extends DAO {
             `, [ postSubscription.postId, postSubscription.userId])
         }
     }
+
+    async deletePostSubscriptions(postSubscriptionIds) {
+        await this.core.database.query(`
+            DELETE FROM post_subscriptions WHERE post_subscriptions.id = ANY($1::uuid[])
+        `, [ postSubscriptionIds ])
+    }
 }

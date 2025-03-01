@@ -534,6 +534,23 @@ module.exports = class GroupMemberController {
 
         await this.groupMemberDAO.deleteGroupMember(existing)
 
+        // If they lose permission to view the group's content by leaving the
+        // group, then remove any subscriptions they have to posts in the
+        // group.
+        const memberUser = await this.userDAO.getUserById(memberId)
+        const canViewGroupContent = await this.permissionService.can(memberUser, 'view', 'Group:content', { group: group })
+        if ( ! canViewGroupContent ) {
+            const subscriptionResults = await this.core.database.query(`
+                SELECT id FROM post_subscriptions
+                    LEFT OUTER JOIN posts ON post_subscriptions.post_id = posts.id
+                    WHERE posts.group_id = $1
+            `, [ group.id ])
+
+            const subscriptionIds = subscriptionResults.rows.map((r) => r.id)
+
+            await this.postSubscriptionDAO.deletePostSubscriptions(subscriptionIds)
+        }
+
         response.status(200).json({
             entity: existing,
             relations: {}
