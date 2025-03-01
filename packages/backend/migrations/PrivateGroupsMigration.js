@@ -41,7 +41,7 @@ module.exports = class PrivateGroupsMigration {
                 slug text,
                 about text,
 
-                file_id uuid REFERENCES files (id) DEFAULT NULL,
+                file_id uuid REFERENCES files (id) DEFAULT NULL ON DELETE SET NULL,
 
                 entrance_questions jsonb DEFAULT '{}'::jsonb,
 
@@ -89,9 +89,19 @@ module.exports = class PrivateGroupsMigration {
 
         this.logger.info(`Add 'group_id' field to 'posts' table...`)
         await this.database.query(`ALTER TABLE posts ADD COLUMN IF NOT EXISTS group_id uuid REFERENCES groups (id) DEFAULT NULL ON DELETE CASCADE`, [])
+
+        /***  Not really part of groups, fixing a bug in the post_versions table that prevents users from being deleted. ***/
+        this.logger.info(`Fixing the constraint on 'post_versions.file_id'...`)
+        await this.database.query(`ALTER TABLE post_versions DROP CONSTRAINT post_versions_file_id_fkey`, [])
+        await this.database.query(`ALTER TABLE post_versions ADD CONSTRAINT post_versions_file_id_fkey FOREIGN KEY (file_id) REFERENCES files (id) ON DELETE SET NULL`, [])
     }
 
     async initBack() {
+        /***  Not really part of groups, fixing a bug in the post_versions table that prevents users from being deleted. ***/
+        this.logger.info(`Undo the constraint fix on 'post_versions.file_id'...`)
+        await this.database.query(`ALTER TABLE post_versions DROP CONSTRAINT post_versions_file_id_fkey`, [])
+        await this.database.query(`ALTER TABLE post_versions ADD CONSTRAINT post_versions_file_id_fkey FOREIGN KEY (file_id) REFERENCES files (id)`, [])
+
         this.logger.info(`Removing 'group_id' column from 'posts' table...`)
         await this.database.query(`ALTER TABLE posts DROP COLUMN IF EXISTS group_id`, [])
 

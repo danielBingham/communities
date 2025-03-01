@@ -2,7 +2,7 @@ import React from 'react'
 import { Outlet } from 'react-router-dom'
 
 import FeedMenu from '/components/feeds/menu/FeedMenu'
-import GroupFeedMenu from '/components/groups/menu/GroupFeedMenu'
+import { Page, PageBody, PageLeftGutter, PageRightGutter } from '/components/generic/Page'
 
 import './HomePage.css'
 
@@ -10,25 +10,18 @@ const HomePage = function() {
 
 
     return (
-        <div id="home-page">
-            <div className="home-page__sidebar">
-                <menu className="home-page__menu">
-                    <li>
-                        <FeedMenu />
-                    </li>
-                    <li>
-                        <GroupFeedMenu />
-                    </li>
-                </menu>
-            </div>
-            <div className="content">
+        <Page id="home-page">
+            <PageLeftGutter className="home-page__sidebar">
+                <FeedMenu />
+            </PageLeftGutter>
+            <PageBody className="content">
                 <div className="feed">
                     <Outlet />
                 </div>
-            </div>
-            <div className="home-page_right-gutter">
-            </div>
-        </div>
+            </PageBody>
+            <PageRightGutter className="home-page_right-gutter">
+            </PageRightGutter>
+        </Page>
     )
 }
 

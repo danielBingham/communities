@@ -33,6 +33,7 @@ import GroupMembersView from '/pages/group/views/GroupMembersView'
 import GroupFeedView from '/pages/group/views/GroupFeedView'
 import GroupSettingsView from '/pages/group/views/GroupSettingsView'
 
+import { NavigationMenu, NavigationMenuItem } from '/components/generic/NavigationMenu'
 import { Page, PageLeftGutter, PageRightGutter, PageBody } from '/components/generic/Page'
 import Error404 from '/components/errors/Error404'
 import Spinner from '/components/Spinner'
@@ -83,11 +84,11 @@ const GroupPage = function() {
                 <div className="group-page__controls">
                     { currentMember && <GroupMembershipButton groupId={group.id} userId={currentMember.userId} /> }
                 </div>
-                { canView(group, currentMember) && <menu className="group-page__menu">
-                    <li><NavLink to={`/group/${group.slug}`} end><QueueListIconOutline className="outline" /><QueueListIconSolid className="solid" /><span className="nav-text"> Feed</span></NavLink></li>
-                    <li><NavLink to="members" end><UserGroupIconOutline className="outline" /><UserGroupIconSolid className="solid" /><span className="nav-text"> Members</span></NavLink></li>
-                    { canAdmin(group, currentMember) && <li><NavLink to="settings" end><Cog6ToothIconOutline className="outline" /><Cog6ToothIconSolid className="solid" /><span className="nav-text"> Settings</span></NavLink></li> }
-                </menu> }
+                { canView(group, currentMember) && <NavigationMenu className="group-page__menu">
+                    <NavigationMenuItem to={`/group/${group.slug}`} icon="QueueList" text="Feed" />
+                    <NavigationMenuItem to="members" icon="UserGroup" text="Members" />
+                    { canAdmin(group, currentMember) && <NavigationMenuItem to="settings" icon="Cog6Tooth" text="Settings" /> }
+                </NavigationMenu> }
                 <div className="details">
                     <div className="about"> { group.about }</div>
                 </div>

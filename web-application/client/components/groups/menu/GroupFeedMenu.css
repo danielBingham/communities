@@ -47,3 +47,14 @@
 .group-feed-menu menu li.view-more {
     text-align: center;
 }
+
+@media (width <= 1220px) {
+    .group-feed-menu menu.group-feed-menu__groups {
+        position: fixed;
+        left: -100px;
+        background-color: white;
+    }
+
+
+
+}

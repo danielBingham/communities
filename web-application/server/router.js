@@ -476,49 +476,6 @@ module.exports = function(core) {
     })
 
 
-    /******************************************************************************
-     *          Tag REST Routes
-     ******************************************************************************/
-
-    const TagController = require('./controllers/TagController')
-    const tagController = new TagController(core)
-
-    // Get a list of all tags.
-    router.get('/tags', function(request, response, next) {
-        tagController.getTags(request, response).catch(function(error) {
-            next(error)
-        })
-    })
-
-    // Create a new tag 
-    router.post('/tags', function(request, response, next) {
-        tagController.postTags(request, response).catch(function(error) {
-            next(error)
-        })
-    })
-
-    // Get the details of a single tag 
-    router.get('/tag/:id', function(request, response, next) {
-        tagController.getTag(request, response).catch(function(error) {
-            next(error)
-        })
-    })
-
-    // Edit an existing tag with partial data.
-    router.patch('/tag/:id', function(request, response, next) {
-        tagController.patchTag(request, response).catch(function(error) {
-            next(error)
-        })
-    })
-
-    // Delete an existing tag.
-    router.delete('/tag/:id', function(request, response, next) {
-        tagController.deleteTag(request, response).catch(function(error) {
-            next(error)
-        })
-    })
-
-
     /**************************************************************************
      *      API 404 
      *************************************************************************/

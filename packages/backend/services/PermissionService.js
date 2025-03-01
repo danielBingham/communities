@@ -77,14 +77,6 @@ module.exports = class PermissionService {
             if ( action === 'view' ) {
                 return await this.canViewGroupContent(user, context)
             }
-        } else if ( entity === 'User' ) {
-            if ( action === 'view' ) {
-                return true
-            } else if ( action === 'update' ) {
-                return user.id === context.user.id
-            } else if ( action === 'delete' ) {
-                return user.id === context.user.id
-            }
         }
 
         throw new ServiceError('unsupported', `Unsupported Entity(${entity}) or Action(${action}).`)
@@ -295,7 +287,7 @@ module.exports = class PermissionService {
             throw new ServiceError('missing-context', `'group' missing from context.`)
         }
 
-        if ( group.type === 'open' ) {
+        if ( context.group.type === 'open' ) {
             return true
         }
 

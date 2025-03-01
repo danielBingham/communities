@@ -72,7 +72,7 @@ const AuthenticationNavigation = function(props) {
                 <span className="logged-in-user">
                     <a href="" className="no-close" onClick={toggleMenu}>
                         <UserProfileImage userId={currentUser.id} />
-                        <span className="navigation-text">{ currentUser.name }</span>{ menuVisible ? <ChevronUpIcon className="arrow" /> : <ChevronDownIcon className="arrow" /> }</a></span>
+                        <span className="navigation-text">{ currentUser.name }</span></a></span>
                 <UserMenu visible={menuVisible} toggleMenu={toggleMenu} />
             </div>
         )

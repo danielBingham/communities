@@ -43,7 +43,6 @@ const Header = function(props) {
                         <a href="/">{ location.pathname == '/' ? <HomeIconSolid /> : <HomeIconOutline /> }<span className="nav-text">Home</span></a>
                         <Link to="/about">{ location.pathname.startsWith('/about') ? <InformationCircleIconSolid /> : <InformationCircleIconOutline /> }<span className="nav-text">About</span></Link>
                         { currentUser && <Link to="/friends">{ location.pathname.startsWith('/friends') ? <UsersIconSolid /> : <UsersIconOutline /> }<span className="nav-text">Friends</span></Link> }
-                        { currentUser && <Link to="/groups">{ location.pathname.startsWith('/groups') ? <UserGroupIconSolid /> : <UserGroupIconOutline />}<span className="nav-text">Groups</span></Link> }
                     </div>
                     { currentUser && <NotificationMenu /> }
                     <AuthenticationNavigation  />

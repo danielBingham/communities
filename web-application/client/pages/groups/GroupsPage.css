@@ -1,45 +1,3 @@
-#groups-page menu.groups-page__menu {
-    list-style-type: none;
-}
-
-#groups-page menu.groups-page__menu li {
-    font-size: 18px;
-}
-#groups-page menu.groups-page__menu a svg {
-    width: 22px;
-    margin-right: 5px;
-    margin-bottom: -5px;
-    color: var(--icon-color);
-}
-#groups-page menu.groups-page__menu a:link,
-#groups-page menu.groups-page__menu a:visited,
-#groups-page menu.groups-page__menu a:active {
-    display: block;
-    padding: 10px;
-    color: var(--primary-color-darkest);
-}
-#groups-page menu.groups-page__menu a:hover {
-    background-color: var(--primary-color-light);
-    border-radius: 10px;
-}
-#groups-page menu.groups-page__menu a.active  {
-    font-weight: bold;
-}
-
-#groups-page menu.groups-page__menu .outline { 
-    display: inline-block;
-}
-#groups-page menu.groups-page__menu .active .outline { 
-    display: none;
-}
-
-#groups-page menu.groups-page__menu .solid {
-    display: none;
-}
-#groups-page menu.groups-page__menu .active .solid{
-    display: inline-block;
-}
-
 
 @media (width >= 750px) {
     #groups-page .content {
@@ -50,18 +8,5 @@
     #groups-page .content {
         padding: 10px;
         box-sizing: border-box;
-    }
-
-    #groups-page menu.groups-page__menu {
-        text-align: center;
-    }
-
-    #groups-page menu.groups-page__menu li {
-        display: inline-block;
-    }
-    
-    #groups-page menu.groups-page__menu li .nav-text {
-        display: block;
-        font-size: 10px;
     }
 }

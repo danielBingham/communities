@@ -1,6 +1,7 @@
 .list {
     width: 100%;
     margin: 0 auto;
+    max-width: 800px;
 }
 
 .list .list-header {
@@ -35,6 +36,7 @@
 .list .list-row-content {}
 .list .list-grid-content {
     display: grid;
+    margin: 0 auto;
     grid-template-columns: repeat(auto-fit, 400px);
 }
 .list .list-no-content {

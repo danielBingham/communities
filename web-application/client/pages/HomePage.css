@@ -42,16 +42,16 @@
         margin: 0 auto;
     }
 
-    #home-page .menu {
+    #home-page .home-page__menu {
         text-align: center;
         margin: 0 auto;
     }
 
-    #home-page .menu li {
+    #home-page .home-page__menu li {
         display: inline-block;
     }
     
-    #home-page .menu li .nav-text {
+    #home-page .home-page__menu li .nav-text {
         display: block;
         font-size: 10px;
     }

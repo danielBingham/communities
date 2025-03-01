@@ -41,7 +41,7 @@ const GroupFeedMenu = function() {
     }
     return (
         <div className="group-feed-menu">
-            <a href="" onClick={(e) => { e.preventDefault(); setOpen( ! open)}} className="header">{ open ? <UserGroupIconOutline /> : <UserGroupIconSolid /> } Groups</a>
+            <a href="" onClick={(e) => { e.preventDefault(); setOpen( ! open)}} className="header">{ open ? <UserGroupIconOutline /> : <UserGroupIconSolid /> }<span className="nav-text">Groups</span></a>
             { open && <menu className="group-feed-menu__groups">
                 { groupViews }
                 <li className="view-more" >
