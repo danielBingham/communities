@@ -21,7 +21,7 @@ $ docker build -t comunities-sql database/initialization-scripts
 Run the Postgres docker container:
 
 ```
-$ docker run -d -p 5432:5432 --name comunities-sql 
+$ docker run -d -p 5432:5432 --name comunities-sql comunities-sql
 ```
 
 Once the redis and SQL containers are running, you'll need to NPM install the
