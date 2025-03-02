@@ -1,14 +1,79 @@
 # Running Locally
 
-NOTE: This documentation is out of date and wrong.  If you don't have access to
-Digital Ocean, you won't be able to run the local right now.  (In the push to
-an open beta with limited runway, we took on some tech debt.)  If you're
-interested in contributing, the first project would be getting the local
-running with out dependencies on cloud infrastructure again!
+After pulling the github repo, you can run the development server by first
+running the PostgreSQL docker container. To run comunities, you can either use
+nodemon and the react dev server or build a Docker container.
 
-After pulling the github repo, you can run the development server by first running the PostgreSQL docker
-container. To run comunitiesreview, you can either use nodemon and the react dev server or build a Docker
-container.
+## Running on Host with NPM
+
+From the root project directory, run a redis docker container:
+
+```
+$ docker run -d -p 6379:6379 --name comunities-redis redis:7.0.10
+```
+
+From the root project directory, build the postgres docker container:
+
+```
+$ docker build -t comunities-sql database/initialization-scripts 
+```
+
+Run the Postgres docker container:
+
+```
+$ docker run -d -p 5432:5432 --name comunities-sql 
+```
+
+Once the redis and SQL containers are running, you'll need to NPM install the
+web-application and the backend, and link the backend, before running.
+
+From the repo root:
+
+```
+$ (cd packages/backend && npm install && npm link)
+$ (cd web-application && npm install && npm link @communities/backend)
+```
+
+You'll need to copy your secrets into a `.env` file under `web-application`.
+Create `web-application/.env` and copy in the secrets:
+
+```
+HOST=https://localhost:3000/
+
+LOG_LEVEL=debug
+
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+DATABASE_USER=postgres
+DATABASE_PASSWORD=password
+
+REDIS_HOST=localhost
+REDIS_PORT=6379
+
+SESSION_SECRET=hot-dev
+
+S3_BUCKET_URL=[Your bucket URL here]
+S3_BUCKET=[Your bucket here]
+S3_ACCESS_ID=<SECRET>
+S3_ACCESS_KEY=<SECRET>
+
+POSTMARK_API_TOKEN=<SECRET>
+
+```
+
+Next confirm that the docker containers are running cleanly, then you can run
+the local from the repo root:
+
+```
+$ docker ps
+CONTAINER ID   IMAGE             COMMAND                  CREATED        STATUS         PORTS                                       NAMES
+2f805c5f8619   communities-sql   "docker-entrypoint.s…"   8 weeks ago    Up 3 minutes   0.0.0.0:5432->5432/tcp, :::5432->5432/tcp   communities-sql
+28958af88849   redis:7.0.10      "docker-entrypoint.s…"   2 months ago   Up 7 days      0.0.0.0:6379->6379/tcp, :::6379->6379/tcp   communities-redis
+
+$ npm run dev --prefix=web-application
+```
+
+## Running everything in Docker [UnTested]
 
 From the root project directory, run a redis docker container:
 
@@ -19,8 +84,7 @@ $ docker run -d -p 6379:6379 --name comunities-redis redis
 From the root project directory, build the postgres docker container:
 
 ```
-$ cd database
-$ docker build -t comunities-sql .
+$ docker build -t comunities-sql database/initialization-scripts 
 ```
 
 Navigate back to the root directory and run the Postgres docker container:
@@ -28,7 +92,7 @@ Navigate back to the root directory and run the Postgres docker container:
 ```
 $ cd ..
 $ docker network create comunities-network
-$ docker run -d -p 5432:5432 --name comunities-review-database-service --net comunities-network comunities-sql
+$ docker run -d -p 5432:5432 --name comunities-sql --net comunities-network comunities-sql
 ```
 
 Run `npm install` for the worker. From the root directory:
