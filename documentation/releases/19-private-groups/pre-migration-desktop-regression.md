@@ -8,10 +8,10 @@ sent an invitation email and may use it to register on the platform.
 - [x] From the administrator (Admin) account invite a new user (communities-test[issue#].user1).
     - [x] Accept the invite and register (Test[issue#].User1), referred to as User1
 
-- [ ] As User1, invite a new user (communities-test[issue#].user2).
-    - [ ] From the same browser session attempt to accept the invite.
-        - [ ] Expectation: Error.
-    - [ ] From a different browser session accept the invite and register (Test[Issue#].User2), referred to as User2.
+- [x] As User1, invite a new user (communities-test[issue#].user2).
+    - [x] From the same browser session attempt to accept the invite.
+        - [x] Expectation: Error.
+    - [x] From a different browser session accept the invite and register (Test[Issue#].User2), referred to as User2.
 
 - [ ] As User2, invite a new user (communities-test[isssue#].user3).
     - [ ] From a different browser session accept the invite and register (Test[Issue#].User3), referred to as User3.
