@@ -21,6 +21,7 @@
 const {
     LinkPreviewService,
     PermissionService,
+    NotificationService,
     PostDAO,
     PostCommentDAO,
     PostReactionDAO,
@@ -50,6 +51,7 @@ module.exports = class PostController {
 
         this.linkPreviewService = new LinkPreviewService(core)
         this.permissionService = new PermissionService(core)
+        this.notificationService = new NotificationService(core)
     }
 
     async getRelations(currentUser, results, requestedRelations) {
@@ -266,7 +268,30 @@ module.exports = class PostController {
                 `Your post was too long.  Please keep posts to 10,000 characters or under.`)
         }
 
+        // Process mentions if they exist
+        if (post.mentions && Array.isArray(post.mentions)) {
+            // Validate that all mentioned users exist
+            const mentionedUserIds = post.mentions.map(mention => mention.userId)
+            if (mentionedUserIds.length > 0) {
+                const userResults = await this.userDAO.selectUsers(`WHERE users.id = ANY($1::uuid[])`, [mentionedUserIds])
+                
+                // Filter out any mentions for users that don't exist
+                post.mentions = post.mentions.filter(mention => 
+                    userResults.dictionary[mention.userId] !== undefined
+                )
+            }
+        }
+
         await this.postDAO.insertPosts(post)
+
+        // Send notifications for mentions if there are any
+        if (post.mentions && post.mentions.length > 0) {
+            await this.notificationService.sendNotifications(
+                currentUser,
+                'User:mention:post',
+                { post }
+            )
+        }
 
         const results = await this.postDAO.selectPosts({
             where: `posts.id = $1`,
@@ -372,7 +397,30 @@ module.exports = class PostController {
                 `Your post was too long.  Please keep posts to 10,000 characters or under.`)
         }
 
+        // Process mentions if they exist
+        if (post.mentions && Array.isArray(post.mentions)) {
+            // Validate that all mentioned users exist
+            const mentionedUserIds = post.mentions.map(mention => mention.userId)
+            if (mentionedUserIds.length > 0) {
+                const userResults = await this.userDAO.selectUsers(`WHERE users.id = ANY($1::uuid[])`, [mentionedUserIds])
+                
+                // Filter out any mentions for users that don't exist
+                post.mentions = post.mentions.filter(mention => 
+                    userResults.dictionary[mention.userId] !== undefined
+                )
+            }
+        }
+
         await this.postDAO.updatePost(post)
+
+        // Send notifications for mentions if there are any
+        if (post.mentions && post.mentions.length > 0) {
+            await this.notificationService.sendNotifications(
+                currentUser,
+                'User:mention:post',
+                { post }
+            )
+        }
 
         const results = await this.postDAO.selectPosts({
             where: `posts.id = $1`,

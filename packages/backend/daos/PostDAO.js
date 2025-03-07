@@ -64,6 +64,15 @@ const SCHEMA = {
                 select: 'always',
                 key: 'content'
             },
+            'mentions': {
+                insert: 'allowed',
+                insertDefault: function() {
+                    return []
+                },
+                update: 'allowed',
+                select: 'always',
+                key: 'mentions'
+            },
             'created_date': {
                 insert: 'override',
                 insertOverride: 'now()',
@@ -125,6 +134,15 @@ const SCHEMA = {
                 update: 'allowed',
                 select: 'always',
                 key: 'content'
+            },
+            'mentions': {
+                insert: 'allowed',
+                insertDefault: function() {
+                    return []
+                },
+                update: 'allowed',
+                select: 'always',
+                key: 'mentions'
             },
             'created_date': {
                 insert: 'override',

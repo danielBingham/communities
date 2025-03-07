@@ -145,10 +145,38 @@ module.exports = class PostCommentController {
             id: Uuid.v4(),
             postId: postId,
             userId: currentUser.id,
-            content: request.body.content
+            content: request.body.content,
+            mentions: request.body.mentions || []
+        }
+
+        // Process mentions if they exist
+        if (comment.mentions && Array.isArray(comment.mentions)) {
+            // Validate that all mentioned users exist
+            const mentionedUserIds = comment.mentions.map(mention => mention.userId)
+            if (mentionedUserIds.length > 0) {
+                const userResults = await this.core.database.query(`
+                    SELECT id FROM users WHERE id = ANY($1::uuid[])
+                `, [mentionedUserIds])
+                
+                const validUserIds = userResults.rows.map(row => row.id)
+                
+                // Filter out any mentions for users that don't exist
+                comment.mentions = comment.mentions.filter(mention => 
+                    validUserIds.includes(mention.userId)
+                )
+            }
         }
 
         await this.postCommentDAO.insertPostComments(comment)
+
+        // Send notifications for mentions if there are any
+        if (comment.mentions && comment.mentions.length > 0) {
+            await this.notificationService.sendNotifications(
+                currentUser,
+                'User:mention:comment',
+                { comment, post }
+            )
+        }
 
         let activity = parseInt(post.activity)
         if ( reactionResults.rows.length <= 0 || reactionResults.rows[0].reaction != 'block') {
@@ -298,11 +326,39 @@ module.exports = class PostCommentController {
             id: commentId
         }
 
-        if ( 'content' in request.body) {
+        if ('content' in request.body) {
             comment.content = request.body.content
         }
 
+        if ('mentions' in request.body && Array.isArray(request.body.mentions)) {
+            comment.mentions = request.body.mentions
+
+            // Validate that all mentioned users exist
+            const mentionedUserIds = comment.mentions.map(mention => mention.userId)
+            if (mentionedUserIds.length > 0) {
+                const userResults = await this.core.database.query(`
+                    SELECT id FROM users WHERE id = ANY($1::uuid[])
+                `, [mentionedUserIds])
+                
+                const validUserIds = userResults.rows.map(row => row.id)
+                
+                // Filter out any mentions for users that don't exist
+                comment.mentions = comment.mentions.filter(mention => 
+                    validUserIds.includes(mention.userId)
+                )
+            }
+        }
+
         await this.postCommentDAO.updatePostComment(comment)
+
+        // Send notifications for mentions if there are any
+        if (comment.mentions && comment.mentions.length > 0) {
+            await this.notificationService.sendNotifications(
+                currentUser,
+                'User:mention:comment',
+                { comment, post: await this.postDAO.getPostById(postId) }
+            )
+        }
 
         const results = await this.postCommentDAO.selectPostComments({
             where: `post_comments.id = $1`,

@@ -41,6 +41,42 @@ module.exports = class NotificationService {
         this.emailService = new EmailService(core)
 
         this.notificationDefinitions = { 
+            'User:mention:post': {
+                email: {
+                    subject: Handlebars.compile('[Communities] {{{mentioner.name}}} mentioned you in a post'),
+                    body: Handlebars.compile(`
+Hi {{{mentioned.name}}},
+
+{{{mentioner.name}}} mentioned you in a post:
+
+{{{post.content}}}
+
+You can view the post here: {{{host}}}{{{mentioner.username}}}/{{{post.id}}}
+
+Cheers,
+The Communities Team`)
+                },
+                text: Handlebars.compile(`{{{mentioner.name}}} mentioned you in a post.`),
+                path: Handlebars.compile(`/{{{mentioner.username}}}/{{{post.id}}}`)
+            },
+            'User:mention:comment': {
+                email: {
+                    subject: Handlebars.compile('[Communities] {{{mentioner.name}}} mentioned you in a comment'),
+                    body: Handlebars.compile(`
+Hi {{{mentioned.name}}},
+
+{{{mentioner.name}}} mentioned you in a comment on a post by {{{postAuthor.name}}}:
+
+{{{comment.content}}}
+
+You can view the comment here: {{{host}}}{{{postAuthor.username}}}/{{{post.id}}}#comment-{{{comment.id}}}
+
+Cheers,
+The Communities Team`)
+                },
+                text: Handlebars.compile(`{{{mentioner.name}}} mentioned you in a comment.`),
+                path: Handlebars.compile(`/{{{postAuthor.username}}}/{{{post.id}}}#comment-{{{comment.id}}}`)
+            },
             'Post:comment:create': {
                 email: {
                     subject: Handlebars.compile('[Communities] {{{commentAuthor.name}}} commented on your post "{{{postIntro}}}..."'), 
@@ -214,6 +250,8 @@ The Communities Team`)
         }
 
         this.notificationMap = { 
+            'User:mention:post': this.sendPostMentionNotification.bind(this),
+            'User:mention:comment': this.sendCommentMentionNotification.bind(this),
             'Post:comment:create': this.sendNewCommentNotification.bind(this),
             'User:friend:create': this.sendFriendRequestNotification.bind(this),
             'User:friend:update': this.friendRequestAcceptedNotification.bind(this),
@@ -390,5 +428,93 @@ The Communities Team`)
             'Group:post:deleted',
             context
         )
+    }
+
+    /**
+     * Send notifications to users mentioned in a post
+     * 
+     * @param {Object} currentUser - The user who created the post
+     * @param {Object} context - Context object containing post and mentions data
+     */
+    async sendPostMentionNotification(currentUser, context) {
+        if (!context.post || !context.post.mentions || context.post.mentions.length === 0) {
+            return
+        }
+
+        // Get all mentioned users
+        const mentionedUserIds = context.post.mentions.map(mention => mention.userId)
+        const userResults = await this.userDAO.selectUsers(
+            `WHERE users.id = ANY($1::uuid[])`,
+            [mentionedUserIds]
+        )
+
+        // Send notification to each mentioned user
+        for (const mention of context.post.mentions) {
+            // Don't notify if the user mentioned themselves
+            if (mention.userId === currentUser.id) {
+                continue
+            }
+
+            const mentionedUser = userResults.dictionary[mention.userId]
+            if (mentionedUser) {
+                const notificationContext = {
+                    ...context,
+                    mentioner: currentUser,
+                    mentioned: mentionedUser
+                }
+
+                await this.createNotification(
+                    mention.userId,
+                    'User:mention:post',
+                    notificationContext
+                )
+            }
+        }
+    }
+
+    /**
+     * Send notifications to users mentioned in a comment
+     * 
+     * @param {Object} currentUser - The user who created the comment
+     * @param {Object} context - Context object containing comment, post, and mentions data
+     */
+    async sendCommentMentionNotification(currentUser, context) {
+        if (!context.comment || !context.comment.mentions || context.comment.mentions.length === 0) {
+            return
+        }
+
+        // Get all mentioned users
+        const mentionedUserIds = context.comment.mentions.map(mention => mention.userId)
+        const userResults = await this.userDAO.selectUsers(
+            `WHERE users.id = ANY($1::uuid[])`,
+            [mentionedUserIds]
+        )
+
+        // Get post author
+        const postAuthor = await this.userDAO.getUserById(context.post.userId)
+
+        // Send notification to each mentioned user
+        for (const mention of context.comment.mentions) {
+            // Don't notify if the user mentioned themselves
+            if (mention.userId === currentUser.id) {
+                continue
+            }
+
+            const mentionedUser = userResults.dictionary[mention.userId]
+            if (mentionedUser) {
+                const notificationContext = {
+                    ...context,
+                    mentioner: currentUser,
+                    mentioned: mentionedUser,
+                    postAuthor: postAuthor
+                }
+
+                await this.createNotification(
+                    mention.userId,
+                    'User:mention:comment',
+                    notificationContext
+                )
+            }
+        }
     }
 }

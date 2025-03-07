@@ -127,6 +127,13 @@ module.exports = function(core) {
         })
     })
 
+    // Search for users by name for @-mentions
+    router.get('/users/mention-search', function(request, response, next) {
+        userController.searchUsersForMention(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
     // Create a new user 
     router.post('/users', function(request, response, next) {
         userController.postUsers(request, response).catch(function(error) {
@@ -486,5 +493,3 @@ module.exports = function(core) {
 
     return router
 }
-
-
