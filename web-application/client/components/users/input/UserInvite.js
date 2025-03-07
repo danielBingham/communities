@@ -15,7 +15,7 @@ const UserInvite = function() {
 
     const [ submissionError, setSubmissionError ] = useState('')
 
-    const [request, makeRequest, haveRequest, resetRequest] = useRequest()
+    const [request, makeRequest, resetRequest] = useRequest()
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
     const invite = function(event) {

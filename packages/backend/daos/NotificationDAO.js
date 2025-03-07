@@ -98,8 +98,8 @@ module.exports = class NotificationsDAO {
     async updateNotification(notification) {
         if ( notification.isRead == false || notification.isRead == true ) {
             const results = await this.database.query(`
-                UPDATE notifications SET is_read = $1, updated_date = now() WHERE user_id = $2
-            `, [ notification.isRead, notification.userId ])
+                UPDATE notifications SET is_read = $1, updated_date = now() WHERE id = $2 
+            `, [ notification.isRead, notification.id])
 
             if ( results.rowCount <= 0 ) {
                 throw new DAOError('updated-failed', `Attempt to update notification failed.`)

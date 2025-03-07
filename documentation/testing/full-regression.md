@@ -54,6 +54,11 @@ rejecting friend requests.
      - [ ] As Admin, accept the friend request. Confirm request accepted.
      - [ ] As Admin, remove User2 as a friend.
 
+- [ ] As User2, send Admin a friend request.
+    - [ ] As Admin, confirm friend request visible.
+    - [ ] As User2, cancel the friend request. Confirm removed.
+    - [ ] As Admin, confirm removed.
+
 - [ ] With two browser windows open, one As Admin and one As User2, have User2
      and Admin send each other simultaneous friend requests.  Confirm relationship
      confirmed.
@@ -110,14 +115,28 @@ Cases covering making posts in all their forms and with all their attachments.
 
 ### Post Comments
 
-- [ ] As Admin, comment on User2's post.
+- [ ] As Admin, comment on User1's post.
+    - [ ] As Admin, edit comment.
+    - [ ] As Admin, delete comment.
+    - [ ] As Admin, comment on User1's post.
+- [ ] As User1, comment on User2's post.
+- [ ] As User2 comment on same User1 post that Admin did.
+    - [ ] As User2, edit comment.
+    - [ ] As User2, edit comment and cancel edit.
+    - [ ] As User2, delete comment.
+    - [ ] As User2, write comment and cancel before posting.
+    - [ ] As User2, comment on same User1 post.
+- [ ] As User2, comment on Admin's post.
 - [ ] As User2, click on comment notification from Admin's comment.
-- [ ] As User2, comment on each of user1's posts.
 
 ### Post Subscriptions
 
 - [ ] As User1, unsubscribe from a post.
+    - [ ] As User2, comment on the post User1 unsubscribed from. 
+    - [ ] As User1, confirm no email.
+- [ ] As User1, subscribe to the unsubscribed post.
     - [ ] As User2, comment on the post User1 unsubscribed from.
+    - [ ] As User1, confirm email.
  
 ### Profile Editing
 

@@ -31,9 +31,6 @@ const PostComment = function({ postId, id }) {
     //
     // TODO Techdebt Arguably we could put this on the top level App page...
     useEffect(function() {
-        console.log(document.location)
-        console.log(location)
-        console.log(id)
         if ( location.hash && location.hash == `#comment-${id}` ) {
             document.querySelector(location.hash).scrollIntoView({
                 block: 'center'

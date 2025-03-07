@@ -89,7 +89,7 @@ const ChangePasswordForm = function(props) {
 
     useEffect(function() {
         if ( authRequest && authRequest.state == 'fulfilled') {
-            if ( authRequest.status == 200 ) {
+            if ( authRequest.response.status == 200 ) {
                 const user = {
                     id: currentUser.id,
                     password: newPassword,
@@ -133,7 +133,7 @@ const ChangePasswordForm = function(props) {
     }
 
     let oldPasswordError = null
-    if ( authRequest && authRequest.state == 'fulfilled' && authRequest.status != 200) {
+    if ( authRequest && authRequest.state == 'fulfilled' && authRequest.response.status != 200) {
         oldPasswordError = ( 
             <div className="authentication-failure">
                 Authentication failed.  Make sure you typed your old password correctly.

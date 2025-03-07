@@ -17,6 +17,17 @@ const FindFriends = function() {
         setSearchParams(searchParams)
     }
 
+    const onChange = function(event) {
+        const value = event.target.value
+
+        if ( value === '' ) {
+            searchParams.delete('q')
+            setSearchParams(searchParams)
+        }
+
+        setSearch(value)
+    }
+
     useEffect(function() {
         const q = searchParams.get('q')
         if ( q ) {
@@ -31,7 +42,7 @@ const FindFriends = function() {
                     name="search"
                     type="text"
                     value={search}
-                    onChange={(e) => setSearch(e.target.value)}
+                    onChange={onChange}
                     onKeyUp={(e) => e.key == "Enter" && executeSearch()}
                     placeholder="Search for people..."
                 />

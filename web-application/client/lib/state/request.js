@@ -48,7 +48,6 @@ export const makeTrackedRequest = function(method, endpoint, body, onSuccess, on
             responseOk = response.ok
             return response.json()
         }).then(function(responseBody) {
-            console.log(responseOk)
             if ( responseOk ) {
                 if ( onSuccess ) {
                     try {

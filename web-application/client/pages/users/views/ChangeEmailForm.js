@@ -88,7 +88,7 @@ const ChangeEmailForm = function(props) {
 
     useEffect(function() {
         if ( authRequest && authRequest.state == 'fulfilled') {
-            if ( authRequest.status == 200 ) {
+            if ( authRequest.response.status === 200 ) {
                 const user = {
                     id: currentUser.id,
                     email: email,
@@ -124,7 +124,7 @@ const ChangeEmailForm = function(props) {
             </div>
         )
     }
-    if ( authRequest && authRequest.state == 'fulfilled' && authRequest.status !== 200 ) {
+    if ( authRequest && authRequest.state == 'fulfilled' && authRequest.response.status !== 200 ) {
         errors.push(
             <div key="auth-failed" className="auth-failed">
                 Authentication failed.  Please make sure you typed your password correctly.

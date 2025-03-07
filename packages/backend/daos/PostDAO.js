@@ -31,6 +31,13 @@ const SCHEMA = {
                 select: 'always',
                 key: 'id'
             },
+            'type': {
+                insert: 'required',
+                update: 'denied',
+                select: 'always',
+                key: 'type',
+                needsFeature: '19-private-groups'
+            },
             'user_id': {
                 insert: 'required',
                 update: 'denied',
@@ -42,6 +49,13 @@ const SCHEMA = {
                 update: 'allowed',
                 select: 'always',
                 key: 'fileId'
+            },
+            'group_id': {
+                insert: 'allowed',
+                update: 'denied',
+                select: 'always',
+                key: 'groupId',
+                needsFeature: '19-private-groups'
             },
             'link_preview_id': {
                 insert: 'allowed',
@@ -151,22 +165,6 @@ module.exports = class PostDAO extends DAO {
         super(core)
 
         this.core = core
-
-        if ( this.core.features.has(`19-private-groups`) ) {
-            SCHEMA['Post'].fields['type'] = {
-                insert: 'required',
-                update: 'denied',
-                select: 'always',
-                key: 'type'
-            }
-            
-            SCHEMA['Post'].fields['group_id'] = {
-                insert: 'allowed',
-                update: 'denied',
-                select: 'always',
-                key: 'groupId'
-            }
-        }
 
         this.entityMaps = SCHEMA
     }

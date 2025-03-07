@@ -94,6 +94,7 @@ module.exports = class AuthenticationService {
             [ credentials.email ]
         )
 
+
         // 1. Their email is attached to a user record in the database.
         if ( results.rows.length <= 0) {
             throw new ServiceError('no-user', `No users exist with email ${credentials.email}.`)

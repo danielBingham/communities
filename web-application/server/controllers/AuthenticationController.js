@@ -129,9 +129,7 @@ module.exports = class AuthenticationController {
 
             }
 
-            console.log(userId)
             const session = await this.auth.getSessionForUserId(userId)
-            console.log(session)
             request.session.user = session.user
             request.session.file = session.file
 

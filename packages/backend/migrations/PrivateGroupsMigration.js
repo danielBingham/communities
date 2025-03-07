@@ -41,7 +41,7 @@ module.exports = class PrivateGroupsMigration {
                 slug text,
                 about text,
 
-                file_id uuid REFERENCES files (id) DEFAULT NULL ON DELETE SET NULL,
+                file_id uuid REFERENCES files (id) ON DELETE SET NULL DEFAULT NULL,
 
                 entrance_questions jsonb DEFAULT '{}'::jsonb,
 
@@ -88,7 +88,7 @@ module.exports = class PrivateGroupsMigration {
         await this.database.query(`ALTER TABLE posts ADD COLUMN IF NOT EXISTS type post_type NOT NULL DEFAULT 'feed'`, [])
 
         this.logger.info(`Add 'group_id' field to 'posts' table...`)
-        await this.database.query(`ALTER TABLE posts ADD COLUMN IF NOT EXISTS group_id uuid REFERENCES groups (id) DEFAULT NULL ON DELETE CASCADE`, [])
+        await this.database.query(`ALTER TABLE posts ADD COLUMN IF NOT EXISTS group_id uuid REFERENCES groups (id) ON DELETE CASCADE DEFAULT NULL`, [])
 
         /***  Not really part of groups, fixing a bug in the post_versions table that prevents users from being deleted. ***/
         this.logger.info(`Fixing the constraint on 'post_versions.file_id'...`)
