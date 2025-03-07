@@ -216,6 +216,81 @@ module.exports = class UserController {
     }
 
     /**
+     * GET /users/mention-search
+     * 
+     * Search for users by name for @-mentions functionality.
+     * This endpoint is optimized for quick, partial name matching using trigram search.
+     * It returns a limited set of users that match the search query, prioritizing friends.
+     * 
+     * @param {Object} request Standard Express request object.
+     * @param {string} request.query.q The search query string.
+     * @param {Object} response Standard Express response object.
+     * 
+     * @returns {Promise} Resolves to void.
+     */
+    async searchUsersForMention(request, response) {
+        const currentUser = request.session.user
+
+        if (!currentUser) {
+            throw new ControllerError(401, 'not-authenticated',
+                `User must be authenticated to search for mentions.`,
+                `You must be authenticated to search for mentions.`)
+        }
+
+        const query = request.query.q || ''
+        
+        if (query.length < 1) {
+            return response.status(200).json({
+                dictionary: {},
+                list: [],
+                meta: {
+                    count: 0,
+                    page: 1,
+                    pageSize: 10,
+                    numberOfPages: 0
+                },
+                relations: {}
+            })
+        }
+
+        // First get the user's friends
+        const relationships = await this.userRelationshipsDAO.getUserRelationshipsForUser(currentUser.id)
+        const friendIds = relationships
+            ? relationships
+                .filter(r => r.status === 'confirmed')
+                .map(r => r.userId === currentUser.id ? r.friendId : r.userId)
+            : []
+
+        // Use a simpler query that doesn't rely on the is_friend column
+        const where = `
+            WHERE users.status = 'confirmed'
+            AND (
+                SIMILARITY(users.name, $1) > 0.1
+                OR users.name ILIKE $2
+                OR users.username ILIKE $2
+            )
+        `
+        const params = [query, `%${query}%`]
+        const order = `SIMILARITY(users.name, $1) DESC`
+        
+        // Get users matching the query
+        const results = await this.userDAO.selectCleanUsers(where, params, order, 1, 10)
+        
+        // Add metadata
+        results.meta = {
+            count: results.list.length,
+            page: 1,
+            pageSize: 10,
+            numberOfPages: 1
+        }
+        
+        // Add relations
+        results.relations = await this.getRelations(currentUser, results)
+
+        return response.status(200).json(results)
+    }
+
+    /**
      * POST /users
      *
      * Create a new `user`.
@@ -664,7 +739,7 @@ module.exports = class UserController {
                 throw new ControllerError(403, 'not-authorized',
                     `User(${user.id}) attempted to change their email with out reauthenticating.`)
             } else if (authentication == 'reset-password') {
-                throw new ControllerError(403, 'not-authorized'
+                throw new ControllerError(403, 'not-authorized',
                     `User(${user.id}) attempted to use a reset-password token to update email.`)
             }
 
@@ -770,4 +845,4 @@ module.exports = class UserController {
         })
     }
 
-} 
+}

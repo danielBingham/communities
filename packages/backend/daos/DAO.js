@@ -135,6 +135,9 @@ module.exports = class DAO {
                         params.push(meta.insertDefault()) 
                     } else if ( ! (meta.key in entity) ) {
                         params.push(null)
+                    } else if (field.endsWith('_jsonb') || field === 'mentions') {
+                        // For jsonb fields, ensure the data is properly stringified
+                        params.push(JSON.stringify(entity[meta.key]))
                     } else { 
                         params.push(entity[meta.key])
                     }
@@ -204,6 +207,10 @@ module.exports = class DAO {
 
             if ( meta.update == 'override' ) {
                 fields += ( fields == '' ? '' : ', ') + `${field} = ${meta.updateOverride}`
+            } else if (field.endsWith('_jsonb') || field === 'mentions') {
+                // For jsonb fields, ensure the data is properly stringified
+                params.push(entity[meta.key] !== null ? JSON.stringify(entity[meta.key]) : null)
+                fields += ( fields == '' ? '' : ', ') + `${field} = $${params.length}`
             } else {
                 params.push(( entity[meta.key] !== null ? entity[meta.key] : null ))
                 fields += ( fields == '' ? '' : ', ') + `${field} = $${params.length}`

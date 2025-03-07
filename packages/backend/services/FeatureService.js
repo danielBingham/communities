@@ -27,6 +27,7 @@ const RelationshipsOwnStateMigration = require('../migrations/RelationshipsOwnSt
 const CommentSubscriptionsMigration = require('../migrations/CommentSubscriptionsMigration')
 const FixActivityMigration = require('../migrations/FixActivityMigration')
 const PrivateGroupsMigration = require('../migrations/PrivateGroupsMigration')
+const MentionsMigration = require('../migrations/MentionsMigration')
 
 const ServiceError = require('../errors/ServiceError')
 const MigrationError = require('../errors/MigrationError')
@@ -92,6 +93,11 @@ module.exports = class FeatureService {
                 dependsOn: [],
                 conflictsWith: [],
                 migration: new PrivateGroupsMigration(core)
+            },
+            '12-mentions': {
+                dependsOn: [],
+                conflictsWith: [],
+                migration: new MentionsMigration(core)
             }
         }
     }

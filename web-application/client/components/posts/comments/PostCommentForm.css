@@ -1,3 +1,9 @@
+.post-comment-form .textarea-container {
+    position: relative;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
 .post-comment-form textarea {
     border-radius: 10px;
     padding: 10px;
@@ -6,10 +12,12 @@
     box-sizing: border-box;
     resize: none;
 }
+
 .post-comment-form .buttons {
     text-align: right;
     font-size: 12px;
 }
+
 .post-comment-form .error {
     text-align: center;
     color: var(--danger-color-main);
@@ -29,6 +37,7 @@ a.create-comment:active {
     color: var(--primary-color-dark);
     background-color: var(--primary-color-lightest);
 }
+
 a.create-comment:hover {
     color: var(--primary-color-darkest);
     background-color: white;

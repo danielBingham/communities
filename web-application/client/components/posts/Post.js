@@ -8,6 +8,7 @@ import { usePostDraft } from '/lib/hooks/usePostDraft'
 import { getPost } from '/state/posts'
 
 import Linkify from 'react-linkify'
+import TextWithMentions from '/components/mentions/TextWithMentions'
 
 import Spinner from '/components/Spinner'
 import DateTag from '/components/DateTag'
@@ -33,17 +34,17 @@ const Post = function({ id, expanded, showLoading }) {
     const group = useSelector((state) => post?.groupId && post.groupId in state.groups.dictionary ? state.groups.dictionary[post.groupId] : null)
 
     useEffect(function() {
-        if ( ! post ) {
+        if (!post) {
             makeRequest(getPost(id))
         }
-    }, [ id, post ])
+    }, [id, post])
 
     const [draft, setDraft] = usePostDraft(id)
-    if ( draft !== null) {
-        return <PostForm postId={id} groupId={ post && post.groupId} />
+    if (draft !== null) {
+        return <PostForm postId={id} groupId={post && post.groupId} />
     }
 
-    if ( (request !== null && request.state == 'failed' && ( ! post || ! user ))) {
+    if ((request !== null && request.state == 'failed' && (!post || !user))) {
         return (
             <div id={id} className="post">
                 <div className="post__error 404">
@@ -54,41 +55,51 @@ const Post = function({ id, expanded, showLoading }) {
         )
     }
 
-    if ( showLoading && (request && request.state == 'pending' )) {
-        return ( <div id={id} className="post"><Spinner /></div> )
+    if (showLoading && (request && request.state == 'pending')) {
+        return (<div id={id} className="post"><Spinner /></div>)
     }
 
-    if ( ! post ) {
+    if (!post) {
         return null
     }
 
     let postLink = `/${user.username}/${id}`
-    if ( post.groupId && group ) {
+    if (post.groupId && group) {
         postLink = `/group/${group.slug}/${id}`
     }
-
 
     return (
         <div id={post.id} className="post">
             <div className="post__header"> 
                 <div className="post__details">
-                    <UserTag id={post.userId} /> posted <Link to={postLink}><DateTag timestamp={post.createdDate} /></Link> { post.groupId &&<span>in <GroupTag id={post.groupId} /></span>}
+                    <UserTag id={post.userId} /> posted <Link to={postLink}><DateTag timestamp={post.createdDate} /></Link> {post.groupId && <span>in <GroupTag id={post.groupId} /></span>}
                 </div>
                 <div className="post__controls">
                     <PostDotsMenu postId={post.id} />
                 </div>
             </div>
-            { post.content && post.content.length > 0 && (post.content.length <= 1000 || showMore) && <div className="post__content">
-                <Linkify>{ post.content }</Linkify>
-                {/*{ post.content.length >= 1000 && showMore && <div className="show-more">
-                    <a href="" onClick={(e) => { e.preventDefault(); setShowMore(false) }}>Hide More.</a></div> */}
-            </div> } 
-            { post.content && post.content.length > 0 && post.content.length > 1000 && ! showMore && <div className="post__content">
-                { post.content.substring(0,1000) }...
-                <div className="post__show-more"><a href="" onClick={(e) => { e.preventDefault(); setShowMore(true) }}>Show More.</a></div>
-            </div> }
+            {post.content && post.content.length > 0 && (post.content.length <= 1000 || showMore) && (
+                <div className="post__content">
+                    <Linkify>
+                        <TextWithMentions text={post.content} mentions={post.mentions || []} />
+                    </Linkify>
+                </div>
+            )}
+            {post.content && post.content.length > 0 && post.content.length > 1000 && !showMore && (
+                <div className="post__content">
+                    <Linkify>
+                        <TextWithMentions 
+                            text={post.content.substring(0, 1000) + '...'} 
+                            mentions={post.mentions ? post.mentions.filter(m => m.position < 1000) : []} 
+                        />
+                    </Linkify>
+                    <div className="post__show-more">
+                        <a href="" onClick={(e) => { e.preventDefault(); setShowMore(true) }}>Show More.</a>
+                    </div>
+                </div>
+            )}
             <PostImage id={id} />
-            { post.linkPreviewId && <LinkPreview id={post.linkPreviewId} /> }
+            {post.linkPreviewId && <LinkPreview id={post.linkPreviewId} />}
             <PostReactions postId={id} />
             <PostComments postId={id} expanded={expanded} />
         </div>

@@ -54,6 +54,15 @@ module.exports = class PostCommentDAO extends DAO {
                         select: 'always',
                         key: 'content'
                     },
+                    'mentions': {
+                        insert: 'allowed',
+                        insertDefault: function() {
+                            return []
+                        },
+                        update: 'allowed',
+                        select: 'always',
+                        key: 'mentions'
+                    },
                     'created_date': {
                         insert: 'override',
                         insertOverride: 'now()',
@@ -91,6 +100,15 @@ module.exports = class PostCommentDAO extends DAO {
                         update: 'allowed',
                         select: 'always',
                         key: 'content'
+                    },
+                    'mentions': {
+                        insert: 'allowed',
+                        insertDefault: function() {
+                            return []
+                        },
+                        update: 'allowed',
+                        select: 'always',
+                        key: 'mentions'
                     },
                     'created_date': {
                         insert: 'override',

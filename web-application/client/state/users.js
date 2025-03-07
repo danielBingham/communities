@@ -149,6 +149,30 @@ export const postUsers = function(user) {
 }
 
 /**
+ * GET /users/mention-search
+ * 
+ * Search for users by name for @-mentions functionality.
+ * 
+ * @param {string} query - The search query string
+ * @returns {string} A uuid requestId that can be used to track this request
+ */
+export const searchUsersForMention = function(query) {
+    return function(dispatch, getState) {
+        return dispatch(makeTrackedRequest('GET', `/users/mention-search?q=${encodeURIComponent(query)}`, null,
+            function(response) {
+                dispatch(usersSlice.actions.setUsersInDictionary({ dictionary: response.dictionary }))
+                dispatch(usersSlice.actions.setUserQueryResults({ 
+                    name: `mention-search-${query}`, 
+                    meta: response.meta, 
+                    list: response.list 
+                }))
+                dispatch(setRelationsInState(response.relations))
+            }
+        ))
+    }
+}
+
+/**
  * GET /user/:id
  *
  * Get a single user.

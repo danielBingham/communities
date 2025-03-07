@@ -1,0 +1,19 @@
+.text-with-mentions {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.mention-link {
+  color: var(--primary-color);
+  font-weight: 500;
+  text-decoration: none;
+  background-color: rgba(var(--primary-color-rgb), 0.1);
+  padding: 0 4px;
+  border-radius: 3px;
+  transition: background-color 0.2s;
+}
+
+.mention-link:hover {
+  background-color: rgba(var(--primary-color-rgb), 0.2);
+  text-decoration: none;
+}
