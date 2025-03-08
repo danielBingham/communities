@@ -10,6 +10,8 @@ import logger from '/logger'
 import { useRequest } from '/lib/hooks/useRequest'
 import { usePostDraft } from '/lib/hooks/usePostDraft'
 
+import { useGroup } from '/lib/hooks/group/useGroup'
+
 import { deleteFile } from '/state/files'
 import { postPosts, patchPost, finishPostEdit } from '/state/posts'
 
@@ -41,6 +43,7 @@ const PostForm = function({ postId, groupId }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const post = useSelector((state) => postId && postId in state.posts.dictionary ? state.posts.dictionary[postId] : null)
+    const group = useGroup(groupId)
 
     const dispatch = useDispatch()
     const navigate = useNavigate()
@@ -111,7 +114,11 @@ const PostForm = function({ postId, groupId }) {
     useEffect(function() {
         if (postRequest && postRequest.state == 'fulfilled') {
             setDraft(null)
-            navigate(`/${currentUser.username}/${postRequest.response.body.entity.id}`)
+            if ( group ) {
+                navigate(`/${group.slug}/${postRequest.response.body.entity.id}`)
+            } else {
+                navigate(`/${currentUser.username}/${postRequest.response.body.entity.id}`)
+            }
         }
     }, [ postRequest ])
 

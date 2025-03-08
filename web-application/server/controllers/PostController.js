@@ -136,15 +136,15 @@ module.exports = class PostController {
 
         // Posts in groups
         if ( this.core.features.has(`19-private-groups`) ) {
-            const groupResults = await this.core.database.query(`
+            const visibleGroupResults = await this.core.database.query(`
                 SELECT groups.id FROM groups LEFT OUTER JOIN group_members ON groups.id = group_members.group_id WHERE (group_members.user_id = $1 AND group_members.status = 'member') OR groups.type = 'open'
             `, [currentUser.id])
 
-            const groupIds = groupResults.rows.map((r) => r.id)
-            query.params.push(groupIds)
+            const visibleGroupIds = visibleGroupResults.rows.map((r) => r.id)
+            query.params.push(visibleGroupIds)
         }
 
-        // Permissions control statements.
+        // Permissions control statements, this determines what is visible.
         if ( this.core.features.has(`19-private-groups`) ) {
             query.where += `((posts.user_id = ANY($${query.params.length - 1}::uuid[]) AND posts.type = 'feed') OR (posts.type = 'group' AND posts.group_id = ANY($${query.params.length}::uuid[])))`
         } else {
@@ -157,12 +157,14 @@ module.exports = class PostController {
             query.where += `${and}posts.user_id = $${query.params.length}`
         }
 
+        // If we're query for a particular group's posts, only grab that group.
         if ('groupId' in request.query) {
             query.params.push(request.query.groupId)
             const and = query.params.length > 1 ? ' AND ' : ''
             query.where += `${and}posts.group_id = $${query.params.length}`
-        }
+        } 
 
+        // ...if we have the slug then we have to do a little extra work.
         if ('groupSlug' in request.query) {
             const groupResult = await this.core.database.query(`SELECT id FROM groups WHERE slug = $1`, [request.query.groupSlug])
             if (groupResult.rows.length <= 0) {
@@ -196,6 +198,19 @@ module.exports = class PostController {
                 query.params.push(friendIds)
                 const and = query.params.length > 1 ? ' AND ' : ''
                 query.where += `${and} (posts.type = 'feed' AND posts.user_id = ANY($${query.params.length}::uuid[]))`
+            } else if (request.query.feed == 'everything') {
+                const groupMembershipResults = await this.core.database.query(
+                    `SELECT groups.id FROM groups LEFT OUTER JOIN group_members ON groups.id = group_members.group_id WHERE group_members.user_id = $1 AND group_members.status = 'member'`, 
+                    [ currentUser.id ]
+                )
+
+                const groupMemberships = groupMembershipResults.rows.map((r) => r.id)
+
+
+                query.params.push(friendIds)
+                query.params.push(groupMemberships)
+                const and = query.params.length > 1 ? ' AND ' : ''
+                query.where += `${and} ((posts.type = 'feed' and posts.user_id = ANY($${query.params.length-1}::uuid[])) OR (posts.type = 'group' AND posts.group_id = ANY($${query.params.length}::uuid[])))`
             }
         }
 

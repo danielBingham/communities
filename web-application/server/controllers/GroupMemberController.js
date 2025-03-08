@@ -532,6 +532,19 @@ module.exports = class GroupMemberController {
                 `You're not authorized to remove that member from that group.`)
         }
 
+        if ( existing.role === 'admin' ) {
+            // If this is the last admin, don't let them leave until they promote a new one.
+            const groupAdmins = await this.core.database.query(`
+                SELECT user_id FROM group_members WHERE group_id = $1 AND role = 'admin'
+            `, [ groupId ])
+
+            if ( groupAdmins.rows.length <= 1 ) {
+                throw new ControllerError(403, 'not-authorized',
+                    `User(${currentUser.id}) aattempting to remove the last admin from Group(${groupId}).`,
+                    `You cannot remove the last admin from a group.`)
+            }
+        }
+
         await this.groupMemberDAO.deleteGroupMember(existing)
 
         // If they lose permission to view the group's content by leaving the

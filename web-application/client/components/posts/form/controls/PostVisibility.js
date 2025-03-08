@@ -1,24 +1,14 @@
-import React, { useEffect } from 'react'
-import { useSelector } from 'react-redux'
+import React from 'react'
 
 import { UsersIcon, UserGroupIcon, GlobeAltIcon } from '@heroicons/react/24/solid'
 
-import { useRequest } from '/lib/hooks/useRequest'
-import { getGroup } from '/state/groups'
+import { useGroup } from '/lib/hooks/group/useGroup'
 
 import './PostVisibility.css'
 
 const PostVisibility = function({ groupId }) {
 
-    const [request, makeRequest] = useRequest()
-
-    const group = useSelector((state) => groupId && groupId in state.groups.dictionary ? state.groups.dictionary[groupId] : null)
-
-    useEffect(() => {
-        if ( groupId && ! group ) {
-            makeRequest(getGroup(groupId))
-        }
-    }, [ groupId, group ])
+    const group = useGroup(groupId) 
 
     return (
         <div className="post-visibility">

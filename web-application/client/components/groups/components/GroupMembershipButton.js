@@ -7,6 +7,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 
 import { postGroupMembers, patchGroupMember, deleteGroupMember } from '/state/groupMembers'
 
+import ErrorModal from '/components/errors/ErrorModal'
 import Button from '/components/generic/button/Button'
 
 import './GroupActionMenu.css'
@@ -152,11 +153,21 @@ const GroupMembershipButton = function({ groupId, userId }) {
         return null
     }
 
+    let errorView = null
+    if ( request && request.state == 'failed' ) {
+        if ( request.error && request.error.type == 'not-authorized' ) {
+            errorView = (
+                <ErrorModal>{ request.error.message }</ErrorModal>
+            )
+        }
+    }
+
     // The member we're showing is the current user and they aren't a member of
     // the group yet.
     if ( ! member && ! currentMember && currentUser.id == userId ) {
         return (
             <span> 
+                { errorView }
                 { group.type == 'open' && <Button type="primary" onClick={() => joinGroup()}><ArrowLeftEndOnRectangleIcon /> Join</Button> }
                 { group.type == 'private' && <Button type="primary" onClick={() => requestEntrance()}><ArrowLeftEndOnRectangleIcon /> Request</Button> }
             </span>
@@ -168,6 +179,7 @@ const GroupMembershipButton = function({ groupId, userId }) {
     if ( userId == currentUser.id && member ) {
         return (
             <span>
+                { errorView }
                 { member.status == 'pending-invited' && <Button type="primary" onClick={() => acceptInvite()}><ArrowLeftEndOnRectangleIcon /> Accept</Button> }
                 { member.status == 'pending-invited' && <Button type="secondary-warn" onClick={() => rejectInvite()}><ArrowLeftStartOnRectangleIcon /> Reject</Button> }
                 { member.status == 'pending-requested' && <Button type="secondary-warn" onClick={() => cancelRequest()}><ArrowLeftStartOnRectangleIcon /> Cancel</Button> }
@@ -181,6 +193,7 @@ const GroupMembershipButton = function({ groupId, userId }) {
     if ( currentUser.id != userId && member && canAdmin ) {
         return (
             <span>
+                { errorView }
                 { member.status == 'pending-invited' && <Button type="secondary-warn" onClick={() => cancelInvite()}><ArrowLeftStartOnRectangleIcon /> Cancel</Button> }
                 { member.status == 'pending-requested' && <Button type="primary" onClick={() => acceptRequest()}><ArrowLeftEndOnRectangleIcon /> Accept</Button> }
                 { member.status == 'pending-requested' && <Button type="secondary-warn" onClick={() => rejectRequest()}><ArrowLeftStartOnRectangleIcon /> Reject</Button> }

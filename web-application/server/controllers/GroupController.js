@@ -71,24 +71,29 @@ module.exports = class GroupController {
 
         const currentUser = request.session.user
 
-        // Restrict groups to only those that the user can view
-        const userGroupsResults = await this.core.database.query(`
-            SELECT group_id FROM group_members WHERE user_id = $1
-        `, [ currentUser.id])
+        // Restrict the query to only those groups the currentUser can see.
+        const visibleGroupIds = await this.permissionService.get(currentUser, 'view', 'Group')
+        query.params.push(visibleGroupIds)
+        query.where = `groups.id = ANY($${query.params.length}::uuid[])`
 
-        const groupIds = userGroupsResults.rows.map((r) => r.group_id)
+        // Get only the groups the currentUser is a member of with 'memberStatus'
+        if ( 'memberStatus' in request.query ) {
+            const membershipResults = await this.core.database.query(`
+                SELECT group_id FROM group_members WHERE user_id = $1 AND status = $2 
+            `, [ currentUser.id, request.query.memberStatus])
 
-        if ( ( 'userId' in request.query ) && request.query.userId == currentUser.id ) {
-            query.params.push(groupIds)
-            query.where += `groups.id = ANY($${query.params.length}::uuid[])`
-        } else {
-            query.params.push(groupIds)
-            query.where += `(groups.id = ANY($${query.params.length}::uuid[]) OR groups.type = 'open' OR groups.type = 'private')`
-        }
+            const memberships = membershipResults.rows.map((r) => r.group_id)
 
+            query.params.push(memberships)
+            const and = query.params.length > 1 ? ' AND ' : ''
+            query.where += `${and} groups.id = ANY($${query.params.length}::uuid[])`
+        } 
+
+        // Get a single group matching `group.slug`.
         if ( request.query.slug && request.query.slug.length > 0 ) {
             query.params.push(request.query.slug)
-            query.where += ` AND groups.slug = $${query.params.length}`
+            const and = query.params.length > 1 ? ' AND ' : ''
+            query.where += `${and} groups.slug = $${query.params.length}`
         }
 
         return query

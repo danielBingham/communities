@@ -40,6 +40,65 @@ module.exports = class PermissionService {
     }
 
     /**
+     * Get a list of `id` for `entity` that `user` can `action`.
+     */
+    async get(user, action, entity, context) {
+        if ( entity === 'Post' ) {
+            if ( action === 'view' ) {
+                const relationships = await this.userRelationshipDAO.getUserRelationshipsForUser(user.id)  
+                const friendIds = relationships.map((r) => r.userId === user.id ? r.relationId : r.userId)
+                const groupIds = await this.get(user, 'view', 'Group:content')
+
+                const results = await this.core.database.query(`
+                    SELECT posts.id FROM posts 
+                        WHERE posts.user_id = ANY($1::uuid[]) OR posts.group_id = ANY($2::uuid[[])
+                `, [ friendIds, groupIds ]) 
+
+                return results.rows.map((r) => r.id)
+            }
+        } else if ( entity === 'Group' ) {
+            if ( action === 'view' ) {
+                /**
+                 * Group permissions vary by type:
+                 *
+                 * Open -- Anyone can view the group and its details. (And its
+                 *      content, controlled by Group:content)
+                 * Private -- Anyone can view the group and its details.  (But
+                 *      not its content, controlled by Group:content)
+                 * Hidden -- Only those with a membership (accepted or invite)
+                 *      may view the group and its details. (Only those with an
+                 *      accepted membership can view its content, controlled by
+                 *      Group:content)
+                 */
+                const results = await this.core.database.query(`
+                    SELECT groups.id FROM groups
+                        LEFT OUTER JOIN group_members ON groups.id = group_members.group_id
+                    WHERE groups.type = 'open' 
+                        OR groups.type = 'private' 
+                        OR (groups.type = 'hidden' AND group_members.user_id = $1)
+                `, [ user.id ])
+
+                return results.rows.map((r) => r.id)
+            } 
+        } else if ( entity === 'Group:content' ) {
+            if ( action === 'view' ) {
+                const results = await this.core.database.query(`
+                    SELECT groups.id FROM groups
+                        LEFT OUTER JOIN group_members ON groups.id = group_members.group_id
+                    WHERE groups.type = 'open' 
+                        OR (groups.type = 'private' AND group_members.user_id = $1 AND group_members.status = 'member')
+                        OR (groups.type = 'hidden' AND group_members.user_id = $1 AND group_members.status = 'member')
+                `, [ user.id ])
+
+                return results.rows.map((r) => r.id)
+            }
+        }
+
+        throw new ServiceError('unimplemented', 
+            `Attempt to get entity '${entity}' or action '${action}' that hasn't been implemented yet.`)
+    }
+
+    /**
      * Can `user` perform `action` on `entity` identified by `context`.
      *
      * Will lazy load any missing context it needs, provided it has the minimal

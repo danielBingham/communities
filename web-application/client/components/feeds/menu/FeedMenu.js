@@ -68,7 +68,7 @@ const FeedMenu = function() {
 
     useEffect(() => {
         if ( currentUser ) {
-            makeGroupsRequest(getGroups('FeedMenu', { userId: currentUser.id }))
+            makeGroupsRequest(getGroups('FeedMenu', { memberStatus: 'member' }))
         }
 
     }, [ currentUser ])

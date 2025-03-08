@@ -30,9 +30,7 @@ const Feed = function({ type }) {
     const params = useMemo(() => {
         const params = {}
         if ( type == 'feed' ) {
-            if ( slug == 'friends' ) {
-                params.feed = 'friends'
-            }
+            params.feed = slug || 'everything'
         } else if ( type == 'group') {
             if ( group ) {
                 params.groupId = group.id 
