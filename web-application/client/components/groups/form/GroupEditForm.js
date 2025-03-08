@@ -95,7 +95,7 @@ const GroupEditForm = function({ groupId }) {
     let baseError = null
     let aboutError = aboutErrors.join(' ')
 
-    const inProgress = request && request.state == 'in-progress'
+    const inProgress = request && request.state == 'pending'
     return (
         <form onSubmit={onSubmit} className="group-edit-form">
             <div className="group-edit-form__errors">{ baseError }</div>

@@ -23,7 +23,7 @@ const ResetPasswordRequestPage = function(props) {
     }
 
     let content = ( <div className="error">If you see this, it's a bug.  Please report it!</div> )
-    let inProgress = request && request.state == 'in-progress'
+    let inProgress = request && request.state == 'pending'
 
     // If they've submitted the request.
     if ( request && request.state == 'fulfilled' ) {

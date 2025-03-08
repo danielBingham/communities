@@ -19,7 +19,7 @@ const InsertButton = function(props) {
         makeRequest(postFeatures({ name: feature.name }))
     }
 
-    if ( request && request.state == 'in-progress' ) {
+    if ( request && request.state == 'pending' ) {
         return ( <Spinner local={true} /> )
     }
 

@@ -112,7 +112,7 @@ const ChangePasswordForm = function(props) {
     // ======= Render ===============================================
 
     let submit = null
-    if ( ( request && request.state == 'in-progress') || (authRequest && authRequest.state == 'in-progress') ) {
+    if ( ( request && request.state == 'pending') || (authRequest && authRequest.state == 'pending') ) {
         submit = ( <Spinner /> )
     } else {
         submit = ( <input type="submit" name="submit" value="Change Password" /> )

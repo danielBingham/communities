@@ -137,7 +137,7 @@ const GroupForm = function() {
     let typeError = typeErrors.join(' ')
     let aboutError = aboutErrors.join(' ')
 
-    const inProgress = request && request.state == 'in-progress'
+    const inProgress = request && request.state == 'pending'
     return (
         <form onSubmit={onSubmit} className="group-form">
             <div className="group-form__instructions">What group would you like to create?</div>

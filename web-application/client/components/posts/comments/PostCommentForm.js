@@ -133,8 +133,9 @@ const PostCommentForm = function({ postId, commentId, setShowComments }) {
         errorView = ( <div className="error">Comments are limited to 5000 characters...</div> )
     }
 
-    const inProgress = (patchRequest && patchRequest.state == 'in-progress') || (postRequest && postRequest.state == 'in-progress')
+    const inProgress = (patchRequest && patchRequest.state == 'pending') || (postRequest && postRequest.state == 'pending')
     const draft = localStorage.getItem(getDraftKey())
+
     if ( ! commentId && ! showForm ) {
         return (
             <a href="" onClick={(e) => { e.preventDefault(); startComment() } } className="create-comment">Start a comment...</a>
@@ -148,7 +149,7 @@ const PostCommentForm = function({ postId, commentId, setShowComments }) {
                     placeholder="Write a comment..."
                 ></textarea>
                 { errorView }
-                { inProgress && <Spinner /> }
+                { inProgress && <div className="buttons"><Spinner /></div> }
                 { ! inProgress && <div className="buttons">
                     <Button type="secondary-warn" onClick={(e) => cancel()}>Cancel</Button>
                     <Button type="primary" onClick={(e) => submit()}>{ commentId ? 'Save Edit' : 'Comment' }</Button>

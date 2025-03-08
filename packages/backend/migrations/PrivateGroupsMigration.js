@@ -185,9 +185,9 @@ module.exports = class PrivateGroupsMigration {
         }
     }
 
-    async migrateForward() {}
+    async migrateForward() { }
 
-    async migrateBack() {}
+    async migrateBack() { }
 
     /**
      * Execute the migration for a set of targets.  Or for everyone if no

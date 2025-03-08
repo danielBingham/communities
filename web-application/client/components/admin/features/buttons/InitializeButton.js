@@ -25,7 +25,7 @@ const InitializeButton = function(props) {
         makeRequest(patchFeature({ name: feature.name, status: 'uninitialized' }))
     }
 
-    if ( request && request.state == 'in-progress' ) {
+    if ( request && request.state == 'pending' ) {
         return ( <Spinner local={true} /> )
     }
 

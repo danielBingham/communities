@@ -171,7 +171,7 @@ const ResetPasswordForm = function(props) {
     let passwordErrors = passwordValidationError.join(' ') 
     let passwordConfirmationErrors = passwordConfirmationValidationError.join(' ') 
 
-    const inProgress = request && request.state == 'in-progress'
+    const inProgress = request && request.state == 'pending'
 
     return (
         <div className="reset-password-form">

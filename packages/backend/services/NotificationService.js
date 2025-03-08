@@ -113,92 +113,92 @@ The Communities Team`)
             },
             'Group:member:create:invited': {
                 email: {
-                    subject: Handlebars.compile('[Communities] {{{inviter.name}}} invited you to join group "{{{group.name}}}"'),
+                    subject: Handlebars.compile('[Communities] {{{inviter.name}}} invited you to join group "{{{group.title}}}"'),
                     body: Handlebars.compile(`
 Hi {{{user.name}}},
 
-{{{inviter.name}}} invited you to join the {{{group.type}}} group, "{{{group.name}}}". 
+{{{inviter.name}}} invited you to join the {{{group.type}}} group, "{{{group.title}}}". 
 
 You can view and accept or reject the invitation here: {{{host}}}group/{{{group.slug}}}
 
 Cheers,
 The Communities Team`)
                 },
-                text: Handlebars.compile(`{{{inviter.name}}} invited you to join group "{{{group.name}}}"`),
+                text: Handlebars.compile(`{{{inviter.name}}} invited you to join group "{{{group.title}}}"`),
                 path: Handlebars.compile(`/group/{{{group.slug}}}`)
             },
             'Group:member:create:requested': {
                 email: {
-                    subject: Handlebars.compile('[Communities]  {{{user.name}}} asked to join group, "{{{group.name}}}"'),
+                    subject: Handlebars.compile('[Communities]  {{{user.name}}} asked to join group, "{{{group.title}}}"'),
                     body: Handlebars.compile(`
 Hi {{{moderator.name}}},
 
-{{{user.name}}} has asked to join the group, "{{{group.name}}}". 
+{{{user.name}}} has asked to join the group, "{{{group.title}}}". 
 
 You can view and accept or reject their request here: {{{host}}}group/{{{group.slug}}}/members
 
 Cheers,
 The Communities Team`)
                 },
-                text: Handlebars.compile(`{{{user.name}}} asked to join group "{{{group.name}}}"`),
+                text: Handlebars.compile(`{{{user.name}}} asked to join group "{{{group.title}}}"`),
                 path: Handlebars.compile(`/group/{{{group.slug}}}/members`)
 
             },
             'Group:member:update:request:accepted': {
                 email: {
-                    subject: Handlebars.compile('[Communities] Your request to join group, "{{{group.name}}}" has been accepted!'),
+                    subject: Handlebars.compile('[Communities] Your request to join group, "{{{group.title}}}" has been accepted!'),
                     body: Handlebars.compile(`
 Hi {{{user.name}}},
 
-Your request to join the group, "{{{group.name}}}" has been accepted.  You are now a mameber of "{{{group.name}}}". 
+Your request to join the group, "{{{group.title}}}" has been accepted.  You are now a mameber of "{{{group.title}}}". 
 
 You can view and participate in the group here: {{{host}}}group/{{{group.slug}}}
 
 Cheers,
 The Communities Team`)
                 },
-                text: Handlebars.compile(`Your request to join group "{{{group.name}}}" has been accepted.`),
+                text: Handlebars.compile(`Your request to join group "{{{group.title}}}" has been accepted.`),
                 path: Handlebars.compile(`/group/{{{group.slug}}}`)
             },
             'Group:member:update:promoted:moderator': {
                 email: {
-                    subject: Handlebars.compile('[Communities] You have been promoted to "moderator" of group, "{{{group.name}}}".'),
+                    subject: Handlebars.compile('[Communities] You have been promoted to "moderator" of group, "{{{group.title}}}".'),
                     body: Handlebars.compile(`
 Hi {{{user.name}}},
 
-{{{promoter.name}}} has promoted you to the role of "moderator" of group, "{{{group.name}}}". You can now moderate posts, invite users, and approve requests to join.
+{{{promoter.name}}} has promoted you to the role of "moderator" of group, "{{{group.title}}}". You can now moderate posts, invite users, and approve requests to join.
 
 You can view the group here: {{{host}}}group/{{{group.slug}}}
 
 Cheers,
 The Communities Team`)
                 },
-                text: Handlebars.compile(`You have been promoted to "moderator" of group "{{{group.name}}}".`),
+                text: Handlebars.compile(`You have been promoted to "moderator" of group "{{{group.title}}}".`),
                 path: Handlebars.compile(`/group/{{{group.slug}}}`)
             },
             'Group:member:update:promoted:admin': {
                 email: {
-                    subject: Handlebars.compile('[Communities] You have been promoted to "admin" of group, "{{{group.name}}}".'),
+                    subject: Handlebars.compile('[Communities] You have been promoted to "admin" of group, "{{{group.title}}}".'),
                     body: Handlebars.compile(`
 Hi {{{user.name}}},
 
-{{{promoter.name}}} has promoted you to the role of "admin" of group, "{{{group.name}}}". You can now administrate the group. 
+{{{promoter.name}}} has promoted you to the role of "admin" of group, "{{{group.title}}}". You can now administrate the group. 
 
 You can view the group here: {{{host}}}group/{{{group.slug}}}
 
 Cheers,
 The Communities Team`)
                 },
-                text: Handlebars.compile(`You have been promoted to "admin" of group "{{{group.name}}}".`),
+                text: Handlebars.compile(`You have been promoted to "admin" of group "{{{group.title}}}".`),
                 path: Handlebars.compile(`/group/{{{group.slug}}}`)
             },
             'Group:post:deleted': {
                 email: {
-                    subject: Handlebars.compile('[Communities] Your post, "{{{shortText}}}", was deleted from group, "{{{group.name}}}".'),
+                    subject: Handlebars.compile('[Communities] Your post, "{{{shortText}}}", was deleted from group, "{{{group.title}}}".'),
                     body: Handlebars.compile(`
 Hi {{{user.name}}},
 
-{{{moderator.name}}} deleted your post in group, "{{{group.name}}}".  The full text of the post was:
+{{{moderator.name}}} deleted your post in group, "{{{group.title}}}".  The full text of the post was:
 
 {{{post.content}}}
 
@@ -207,7 +207,7 @@ You can view the group here: {{{host}}}group/{{{group.slug}}}
 Cheers,
 The Communities Team`)
                 },
-                text: Handlebars.compile(`{{{moderator.name}}} deleted your post, "{{{shortText}}}" in group, "{{{group.name}}}".`),
+                text: Handlebars.compile(`{{{moderator.name}}} deleted your post, "{{{shortText}}}" in group, "{{{group.title}}}".`),
                 path: Handlebars.compile(`/group/{{{group.slug}}}`)
 
             }
@@ -255,10 +255,20 @@ The Communities Team`)
         `, [ userId ])
 
         const settings = results.rows[0].settings
+       
+        // Use the default values if `type` isn't in their settings.
+        let notificationSetting = {
+            web: true,
+            email: true,
+            push: true
+        }
+        if ( type in settings.notifications ) {
+            notificationSetting = settings.notifications[type]
+        }
 
         // Only create the web notification if the user has web notifications
         // turned on for that notification.
-        if ( settings.notifications[type].web ) {
+        if ( notificationSetting.web ) {
             const notification = {
                 userId: userId,
                 type: type,
@@ -270,7 +280,7 @@ The Communities Team`)
 
         // Only send the email if the user has emails turned on for that
         // notification.
-        if ( settings.notifications[type].email ) {
+        if ( notificationSetting.email ) {
             const email = results.rows[0].email
 
             await this.emailService.sendNotificationEmail(
