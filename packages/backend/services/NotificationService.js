@@ -20,9 +20,12 @@
 
 const Handlebars = require('handlebars')
 
+const GroupDAO = require('../daos/GroupDAO')
+const GroupMemberDAO = require('../daos/GroupMemberDAO')
 const NotificationDAO = require('../daos/NotificationDAO')
-const UserDAO = require('../daos/UserDAO')
 const PostSubscriptionDAO = require('../daos/PostSubscriptionDAO')
+const UserDAO = require('../daos/UserDAO')
+const UserRelationshipDAO = require('../daos/UserRelationshipDAO')
 
 const EmailService = require('./EmailService')
 
@@ -34,9 +37,12 @@ module.exports = class NotificationService {
     constructor(core) {
         this.core = core
 
+        this.groupDAO = new GroupDAO(core)
+        this.groupMemberDAO = new GroupMemberDAO(core)
         this.notificationDAO = new NotificationDAO(core)
-        this.userDAO = new UserDAO(core)
         this.postSubscriptionDAO = new PostSubscriptionDAO(core)
+        this.userDAO = new UserDAO(core)
+        this.userRelationshipDAO = new UserRelationshipDAO(core)
 
         this.emailService = new EmailService(core)
 

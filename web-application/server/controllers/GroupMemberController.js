@@ -354,7 +354,7 @@ module.exports = class GroupMemberController {
 
         const canModerateGroup = await this.permissionService.can(currentUser, 'moderate', 'Group', { group: existing, groupMember: userMember })
 
-        const canViewFull = canModerateGroup || (currentUser && currentUser.id == userMember.userId)
+        const canViewFull = canModerateGroup || (currentUser && userMember && currentUser.id == userMember.userId)
 
         const results = await this.groupMemberDAO.selectGroupMembers({
             where: `group_members.group_id = $1 AND group_members.user_id = $2`,

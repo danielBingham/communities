@@ -21,14 +21,16 @@
 const {
     LinkPreviewService,
     PermissionService,
+    NotificationService,
+
+    FileDAO,
+    GroupDAO,
+    GroupMemberDAO,
     PostDAO,
     PostCommentDAO,
     PostReactionDAO,
     PostSubscriptionDAO,
-    UserDAO,
-    FileDAO,
-    GroupDAO,
-    GroupMemberDAO 
+    UserDAO
 } = require('@communities/backend')
 
 const ControllerError = require('../errors/ControllerError')
@@ -39,16 +41,17 @@ module.exports = class PostController {
     constructor(core) {
         this.core = core
 
+        this.fileDAO = new FileDAO(core)
+        this.groupDAO = new GroupDAO(core)
+        this.groupMemberDAO = new GroupMemberDAO(core)
         this.postDAO = new PostDAO(core)
         this.postCommentDAO = new PostCommentDAO(core)
         this.postReactionDAO = new PostReactionDAO(core)
         this.postSubscriptionDAO = new PostSubscriptionDAO(core)
         this.userDAO = new UserDAO(core)
-        this.fileDAO = new FileDAO(core)
-        this.groupDAO = new GroupDAO(core)
-        this.groupMemberDAO = new GroupMemberDAO(core)
 
         this.linkPreviewService = new LinkPreviewService(core)
+        this.notificationService = new NotificationService(core)
         this.permissionService = new PermissionService(core)
     }
 

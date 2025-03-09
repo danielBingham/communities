@@ -116,13 +116,14 @@ Cases covering making posts in all their forms and with all their attachments.
     - [x] As User2, attempt to view a specific post in "Open Test Group" by loading the direct link.  Confirm visible.
 
 - [x] As User1, invite User2 to "Open Test Group"
-    - [ ] As User2, reject the invite.
-    - [ ] As User1, invite User2 to "Open Test Group"
-    - [ ] As User2, accept the invite and join the group.
-    - [ ] As User2, attempt to view a specific post by loading the direct link.  Confirm visible.
-    - [ ] As User2, post in the group.
+    - [x] As User2, reject the invite.
+    - [x] As User1, invite User2 to "Open Test Group"
+    - [x] As User2, accept the invite and join the group.
+    - [x] As User2, attempt to view a specific post by loading the direct link.  Confirm visible.
+    - [x] As User2, post in the group.
 
-- [ ] As User1, promote User2 to "moderator".
+- [x] As User1, promote User2 to "moderator".
+    - [ ] As User2, delete a post from the group.
 
 - [ ] As User2, invite User4 to "Open Test Group" using an email
     - [ ] As User4, accept the email invite.

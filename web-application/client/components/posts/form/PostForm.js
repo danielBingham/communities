@@ -43,7 +43,7 @@ const PostForm = function({ postId, groupId }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const post = useSelector((state) => postId && postId in state.posts.dictionary ? state.posts.dictionary[postId] : null)
-    const group = useGroup(groupId)
+    const [group, groupError] = useGroup(groupId)
 
     const dispatch = useDispatch()
     const navigate = useNavigate()
@@ -115,12 +115,13 @@ const PostForm = function({ postId, groupId }) {
         if (postRequest && postRequest.state == 'fulfilled') {
             setDraft(null)
             if ( group ) {
-                navigate(`/${group.slug}/${postRequest.response.body.entity.id}`)
+                console.log(group)
+                navigate(`/group/${group.slug}/${postRequest.response.body.entity.id}`)
             } else {
                 navigate(`/${currentUser.username}/${postRequest.response.body.entity.id}`)
             }
         }
-    }, [ postRequest ])
+    }, [ group, postRequest ])
 
     useEffect(function() {
         if (patchRequest && patchRequest.state == 'fulfilled') {
@@ -181,7 +182,7 @@ const PostForm = function({ postId, groupId }) {
             <textarea 
                 onChange={onContentChange} 
                 value={content}
-                placeholder="Write your post..."
+                placeholder={group ? `Write your post in ${group.title}...` : "Write your post..." }
             >
             </textarea>
             { errorView }
