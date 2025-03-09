@@ -151,27 +151,28 @@ Cases covering making posts in all their forms and with all their attachments.
 - [x] As User2, attempt to view "Private Test Group", confirm posts and members are *not* visible.
     - [x] As User2, attempt to view a specific post in "Private Test Group" by loading the direct link.  Confirm 404.
 
-- [ ] As User1, invite User2 to "Private Test Group"
-    - [ ] As User2, reject the invite.
-    - [ ] As User1, invite User2 to "Private Test Group".
-    - [ ] As User2, accept the invite and join the group.
+- [x] As User1, invite User2 to "Private Test Group"
+    - [x] As User2, reject the invite.
+    - [x] As User1, invite User2 to "Private Test Group".
+    - [x] As User2, accept the invite and join the group.
     - [ ] As User2, confirm posts and members are now visible.
-        - [ ] As User2, attempt to view a specific post in "Private Test Group" by loading the direct link, confirm visible.
-        - [ ] As User2, post in the group.
+        - [x] As User2, attempt to view a specific post in "Private Test Group" by loading the direct link, confirm visible.
+        - [x] As User2, post in the group.
 
-- As User1, promote User2 to "moderator".
+- [x] As User1, promote User2 to "moderator".
+    - [ ] As User2, delete a post from another user in group.
 
-- [ ] As User2, invite User4 to "Private Test Group" using an email
-    - [ ] As User4, accept the email invite.
-    - [ ] As User4, accept the group invite.
-    - [ ] As User4, attempt to view a specific post by loading the direct link.  Confirm visible.
-    - [ ] As User4, post in the group.
-    - [ ] As User4, leave the group.
-        - [ ] As User4, confirm post no longer visible.
-        - [ ] As User2, confirm User4's, post remains.
-        - [ ] As User2, comment on User4's post.  Confirm User4 is *not* still subscribed and *not* notified.
-    - [ ] As User2, invite User4 back into group. As User4, accept the invitation.
-        - [ ] As User2, remove User4 from group.  Confirm User4's post remains.
+- [x] As User2, invite User4 to "Private Test Group" using an email
+    - [x] As User4, accept the email invite.
+    - [x] As User4, accept the group invite.
+    - [x] As User4, attempt to view a specific post by loading the direct link.  Confirm visible.
+    - [x] As User4, post in the group.
+    - [x] As User4, leave the group.
+        - [x] As User4, confirm post no longer visible.
+        - [x] As User2, confirm User4's, post remains.
+        - [x] As User2, comment on User4's post.  Confirm User4 is *not* still subscribed and *not* notified.
+    - [x] As User2, invite User4 back into group. As User4, accept the invitation.
+        - [x] As User2, remove User4 from group.  Confirm User4's post remains.
 
 - [ ] As User1, promote User2 to "admin"
 

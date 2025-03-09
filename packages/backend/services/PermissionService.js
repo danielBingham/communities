@@ -150,16 +150,17 @@ module.exports = class PermissionService {
             throw new ServiceError('missing-context', `'post' missing from context.`) 
         }
 
-        // Users can always view their own posts.
-        if ( context.post.userId === user.id ) {
-            return true
-        }
-
         // If the post is a Group post, then it depends on type of group:
         // - Posts in Open groups are publicly visible.
         // - Posts in Hidden or Private groups are visible to members of the group.
         if ( context.post.groupId ) {
             return await this.canViewGroupContent(user, context)
+        }
+
+        // If the post isn't in a group, then users can view their own
+        // posts.
+        if ( context.post.userId === user.id ) {
+            return true
         }
 
         // Otherwise, they can only view the posts if they are friends with the poster.

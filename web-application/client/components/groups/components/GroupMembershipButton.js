@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
 
 import { ArrowLeftStartOnRectangleIcon, ArrowLeftEndOnRectangleIcon } from '@heroicons/react/24/solid'
@@ -8,12 +8,14 @@ import { useGroup, useGroupMember } from '/lib/hooks/group'
 
 import { postGroupMembers, patchGroupMember, deleteGroupMember } from '/state/groupMembers'
 
+import AreYouSure from '/components/AreYouSure'
 import ErrorModal from '/components/errors/ErrorModal'
 import Button from '/components/generic/button/Button'
 
 import './GroupActionMenu.css'
 
 const GroupMembershipButton = function({ groupId, userId }) {
+    const [ areYouSure, setAreYouSure ] = useState(false)
 
     const [request, makeRequest] = useRequest()
 
@@ -178,7 +180,13 @@ const GroupMembershipButton = function({ groupId, userId }) {
                 { member.status == 'pending-invited' && <Button type="primary" onClick={() => acceptInvite()}><ArrowLeftEndOnRectangleIcon /> Accept</Button> }
                 { member.status == 'pending-invited' && <Button type="secondary-warn" onClick={() => rejectInvite()}><ArrowLeftStartOnRectangleIcon /> Reject</Button> }
                 { member.status == 'pending-requested' && <Button type="secondary-warn" onClick={() => cancelRequest()}><ArrowLeftStartOnRectangleIcon /> Cancel</Button> }
-                { member.status == 'member' && <Button type="secondary-warn" onClick={() => leaveGroup()}><ArrowLeftStartOnRectangleIcon /> Leave</Button> }
+                { member.status == 'member' && <Button type="secondary-warn" onClick={() => setAreYouSure(true)}><ArrowLeftStartOnRectangleIcon /> Leave</Button> }
+                <AreYouSure 
+                    isVisible={areYouSure} 
+                    action="leave this group" 
+                    execute={() => { setAreYouSure(false); leaveGroup() }} 
+                    cancel={() => setAreYouSure(false)} 
+                /> 
             </span>
         )
     }

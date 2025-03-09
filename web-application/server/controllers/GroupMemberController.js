@@ -22,6 +22,7 @@ const {
     FileDAO,
     GroupDAO, 
     GroupMemberDAO, 
+    PostSubscriptionDAO,
     UserDAO,  
 
     NotificationService, 
@@ -35,10 +36,11 @@ module.exports = class GroupMemberController {
     constructor(core) {
         this.core = core
 
+        this.fileDAO = new FileDAO(core)
         this.groupDAO = new GroupDAO(core)
         this.groupMemberDAO = new GroupMemberDAO(core)
+        this.postSubscriptionDAO = new PostSubscriptionDAO(core)
         this.userDAO = new UserDAO(core)
-        this.fileDAO = new FileDAO(core)
 
         this.notificationService = new NotificationService(core)
         this.permissionService = new PermissionService(core)
@@ -554,7 +556,7 @@ module.exports = class GroupMemberController {
         const canViewGroupContent = await this.permissionService.can(memberUser, 'view', 'Group:content', { group: group })
         if ( ! canViewGroupContent ) {
             const subscriptionResults = await this.core.database.query(`
-                SELECT id FROM post_subscriptions
+                SELECT post_subscriptions.id FROM post_subscriptions
                     LEFT OUTER JOIN posts ON post_subscriptions.post_id = posts.id
                     WHERE posts.group_id = $1
             `, [ group.id ])
