@@ -370,21 +370,11 @@ module.exports = class UserController {
                 status: "confirmed"
             })
 
-            if ( user.groupId ) {
-                const member = {
-                    groupId: user.groupId,
-                    userId: createdUser.id,
-                    role: 'member',
-                    status: 'pending-invited'
-                }
-                await this.groupMemberDAO.insertGroupMembers(member)
-                delete user.groupId
-            }
-
             currentUser.invitations = currentUser.invitations-1
             response.status(201).json({
                 entity: currentUser,
-                relations: {
+                relations: { 
+                    users: createdUserResults.dictionary                    
                 }
             })
             return

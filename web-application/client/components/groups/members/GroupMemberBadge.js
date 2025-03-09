@@ -41,15 +41,18 @@ const GroupMemberBadge = function({ groupId, userId }) {
         return null 
     }
 
-    // TECHDEBT: The request will return a 404 not found in certain circumstances
-    // where someone has a userId (through a relationship gained through an
-    // invite, for example), but a user hasn't finished registering and
-    // confirmed yet.  In those circumstances, the FriendList will create a
-    // user badge with the ID, but the GET /user/:id endpoint will return 404
-    // because of the unconfirmed status.
-    //
-    // In that case, we'll just return null for now.
-    if ( user && userMember) {
+    // TECHDEBT In cases where the user has been invited, we'll have the
+    // GroupMember, but not the user, since unconfirmed users are not returned
+    // from the GET /user endpoint.  In that case, the user will be null and
+    // GET /user will 404.  So just don't display a null user.
+
+    // Re: user.name check.  In cases where we're inviting a user to a group
+    // via email, we need the user to be returned to the frontend in order to
+    // then hit the post /group/:id/members endpoint.  That endpoint will also
+    // return the user in relations, but the user object will be incomplete --
+    // it'll only have the email on it.  We don't want to render an incomplete
+    // user, so just skip any users missing a name.
+    if ( user && userMember && user.name !== null) {
         return (
             <div className="group-member-badge">
                 <GroupMemberDotsMenu groupId={groupId} userId={userId} />

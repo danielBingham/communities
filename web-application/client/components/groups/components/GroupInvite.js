@@ -94,6 +94,23 @@ const GroupInvite = function({ groupId }) {
         clearSuggestions()
     }
 
+    useEffect(() => {
+        if ( postUsersRequest && postUsersRequest.state === 'fulfilled' ) {
+            const userDictionary = postUsersRequest.response.body.relations.users
+            let invitedUser = null
+            for(const [id, user] of Object.entries(userDictionary)) {
+                if ( user.email === nameOrEmail ) {
+                    invitedUser = user
+                }
+            }
+            if ( invitedUser === null ) {
+                throw new Error('Failed to find invited user after invitation!')
+            }
+            makePostGroupMembersRequest(postGroupMembers({ groupId: groupId, userId: invitedUser.id}))
+            setNameOrEmail('')
+        }
+    }, [ postUsersRequest ])
+
     const userSuggestions = []
     if ( userQuery ) {
         for(const id of userQuery.list) {
@@ -103,6 +120,11 @@ const GroupInvite = function({ groupId }) {
     }
 
     const isPending = (postUsersRequest && postUsersRequest.state == 'pending') || (postGroupMembersRequest && postGroupMembersRequest.state == 'pending')
+
+    let result = null
+    if ( postGroupMembersRequest && postGroupMembersRequest.state === 'fulfilled' ) {
+        result = (<span>Invitation sent!</span>)
+    }
     return (
         <div className="group-invite">
             <div className="group-invite__invitations">Beta: You have {currentUser.invitations} invitations left.</div>
@@ -122,6 +144,7 @@ const GroupInvite = function({ groupId }) {
                 { isPending && <Spinner /> }
                 { ! isPending && <Button type="primary" onClick={invite}>Send Invite</Button> }
             </div>
+            <div className="result">{ result }</div>
         </div>
 
     )

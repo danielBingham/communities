@@ -123,7 +123,7 @@ Cases covering making posts in all their forms and with all their attachments.
     - [x] As User2, post in the group.
 
 - [x] As User1, promote User2 to "moderator".
-    - [ ] As User2, delete a post from the group.
+    - [x] As User2, delete a post from the group.
 
 - [ ] As User2, invite User4 to "Open Test Group" using an email
     - [ ] As User4, accept the email invite.
