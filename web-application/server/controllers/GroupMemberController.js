@@ -345,7 +345,7 @@ module.exports = class GroupMemberController {
         }
 
         const canViewGroupContent = await this.permissionService.can(currentUser, 'view', 'Group:content', { group:existing, groupMember:userMember })
-        if ( ! canViewGroupContent ) {
+        if ( ! canViewGroupContent && memberId !== currentUser.id ) {
             throw new ControllerError(404, 'not-found',
                 `User(${currentUser.id}) attempting to get member for Group(${groupId}) without permission to view content.`,
                 `Either that member doesn't exist or you don't have permission to view it.`)

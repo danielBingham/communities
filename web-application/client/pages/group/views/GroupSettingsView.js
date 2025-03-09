@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
+import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
 import { useRequest } from '/lib/hooks/useRequest'
-import { useGroup, useCurrentGroupMember } from '/lib/hooks/group'
+import { useGroup, useGroupMember } from '/lib/hooks/group'
 
 import { canAdmin } from '/lib/group'
 
@@ -20,8 +21,10 @@ const GroupSettingsView = function({ groupId }) {
 
     const [request, makeRequest] = useRequest()
 
+    const currentUser = useSelector((state) => state.authentication.currentUser)
+
     const [group, groupError] = useGroup(groupId) 
-    const [currentMember, currentMemberError] = useCurrentGroupMember(groupId)
+    const [currentMember, currentMemberError] = useGroupMember(groupId, currentUser?.id)
 
     const navigate = useNavigate()
     const deleteCurrentGroup = function() {
@@ -42,8 +45,8 @@ const GroupSettingsView = function({ groupId }) {
             </div>
             <h2>Danger Zone</h2>
             <div className="group-settings-view__delete-your-account">
-                <div className="group-settings-view__explanation">Delete your account. This will delete
-                all of your posts and images, as well as your profile. This cannot
+                <div className="group-settings-view__explanation">Delete this group. This will delete
+                all posts and images in the group. This cannot
                 be undone. Please be certain.</div>
                 <div className="group-settings-view__button-wrapper">
                     <Button type="primary-warn" onClick={(e) => setAreYouSure(true)}>Delete Group</Button>

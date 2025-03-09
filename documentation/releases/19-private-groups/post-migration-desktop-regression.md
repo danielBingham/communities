@@ -125,38 +125,31 @@ Cases covering making posts in all their forms and with all their attachments.
 - [x] As User1, promote User2 to "moderator".
     - [x] As User2, delete a post from the group.
 
-- [ ] As User2, invite User4 to "Open Test Group" using an email
-    - [ ] As User4, accept the email invite.
-    - [ ] As User4, accept the group invite.
-    - [ ] As User4, attempt to view a specific post by loading the direct link.  Confirm visible.
-    - [ ] As User4, post in the group.
-    - [ ] As User4, leave the group.
-        - [ ] Confirm User4's, post remains.
-        - [ ] As User2, comment on User4's post.  Confirm User4 still subscribed and notified.
+- [x] As User2, invite User4 to "Open Test Group" using an email
+    - [x] As User4, accept the email invite.
+    - [x] As User4, accept the group invite.
+    - [x] As User4, attempt to view a specific post by loading the direct link.  Confirm visible.
+    - [x] As User4, post in the group.
+    - [x] As User4, leave the group.
+        - [x] Confirm User4's, post remains.
+        - [x] As User2, comment on User4's post.  Confirm User4 still subscribed and notified.
+    - [x] As User2, invite User4 back into group. As User4, accept the invitation.
+        - [x] As User2, remove User4 from group.  Confirm User4's post remains.
 
-- [ ] As User1, invite User5 to "Open Test Group" using an email
-    - [ ] As User5, accept the email invite.
-    - [ ] As User5, accept the group invite.
-    - [ ] As User5, attempt to view a specific post by loading the direct link.  Confirm visible.
-    - [ ] As User5, make a post.
-    - [ ] As User1, remove User5 from the group.
-        - [ ] Confirm User5's post remains.
-        - [ ] As User1, comment on User5's post.  Confirm User5 still subscribed and notified.
+- [x] As User1, promote User2 to "admin"
 
-- [ ] As User1, promote User2 to "admin"
-
-- [ ] As User1, modify the group's profile in Settings.
-- [ ] As User2, modify the group's profile in Settings.
-- [ ] As User1, delete the group.
-    - [ ] Confirm all posts deleted.
+- [x] As User1, modify the group's profile in Settings.
+- [x] As User2, modify the group's profile in Settings.
+- [x] As User1, delete the group.
+    - [x] Confirm all posts deleted.
 
 #### Test 'private' Groups
 
-- [ ] As User1, create a "private" group named "Private Test Group"
-    - [ ] As User1, create a post in "Private Test Group".
+- [x] As User1, create a "private" group named "Private Test Group"
+    - [x] As User1, create a post in "Private Test Group".
 
-- [ ] As User2, attempt to view "Private Test Group", confirm posts and members are *not* visible.
-    - [ ] As User2, attempt to view a specific post in "Private Test Group" by loading the direct link.  Confirm 404.
+- [x] As User2, attempt to view "Private Test Group", confirm posts and members are *not* visible.
+    - [x] As User2, attempt to view a specific post in "Private Test Group" by loading the direct link.  Confirm 404.
 
 - [ ] As User1, invite User2 to "Private Test Group"
     - [ ] As User2, reject the invite.
@@ -177,16 +170,8 @@ Cases covering making posts in all their forms and with all their attachments.
         - [ ] As User4, confirm post no longer visible.
         - [ ] As User2, confirm User4's, post remains.
         - [ ] As User2, comment on User4's post.  Confirm User4 is *not* still subscribed and *not* notified.
-
-- [ ] As User1, invite User5 to "Private Test Group" using an email
-    - [ ] As User5, accept the email invite.
-    - [ ] As User5, accept the group invite.
-    - [ ] As User5, attempt to view a specific post by loading the direct link.  Confirm visible.
-    - [ ] As User5, make a post.
-    - [ ] As User1, remove User5 from the group.
-        - [ ] As User1, confirm User5's post remains.
-        - [ ] As User1, comment on User5's post.  Confirm User5 is *not* still subscribed and is *not* notified.
-        - [ ] As User5, confirm User5's post is no longer visible.
+    - [ ] As User2, invite User4 back into group. As User4, accept the invitation.
+        - [ ] As User2, remove User4 from group.  Confirm User4's post remains.
 
 - [ ] As User1, promote User2 to "admin"
 
@@ -224,18 +209,8 @@ Cases covering making posts in all their forms and with all their attachments.
         - [ ] As User4, confirm post is no longer visible.
         - [ ] As User2, confirm User4's, post remains.
         - [ ] As User2, comment on User4's post.  Confirm User4 is *not* still subscribed and *not* notified.
-
-- [ ] As User1, invite User5 to "Hidden Test Group" using an email
-    - [ ] As User5, accept the email invite.
-    - [ ] As User5, confirm the group is visible.
-    - [ ] As User5, accept the group invite.
-    - [ ] As User5, attempt to view a specific post by loading the direct link.  Confirm visible.
-    - [ ] As User5, make a post.
-    - [ ] As User1, remove User5 from the group.
-        - [ ] As User1, confirm User5's post remains.
-        - [ ] As User1, comment on User5's post.  Confirm User5 is *not* still subscribed and is *not* notified.
-        - [ ] As User5, confirm User5's post is no longer visible.
-        - [ ] As User5, confirm the group is no longer visible.
+    - [ ] As User2, invite User4 back into group. As User4, accept the invitation.
+        - [ ] As User2, remove User4 from group.  Confirm User4's post remains.
 
 - [ ] As User1, promote User2 to "admin"
 

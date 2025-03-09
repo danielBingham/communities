@@ -42,12 +42,14 @@ module.exports = class GroupController {
     async getRelations(currentUser, results, requestedRelations) {
         const relations = {}
         if ( requestedRelations && requestedRelations.includes("GroupMembers") ) {
-            const params = [ results.list ]
+            const groupsWithVisibleMembers = await this.permissionService.get(currentUser, 'view', 'Group:content')
+
+            const params = [ results.list, groupsWithVisibleMembers ]
             if ( currentUser ) {
                 params.push(currentUser.id)
             }
             const memberResults = await this.groupMemberDAO.selectGroupMembers({
-                where: `group_members.group_id = ANY($1::uuid[]) AND (group_members.status = 'member' ${ currentUser ? `OR group_members.user_id = $2` : ''})`,
+                where: `group_members.group_id = ANY($1::uuid[]) AND group_members.group_id = ANY($2::uuid[]) AND (group_members.status = 'member' ${ currentUser ? `OR group_members.user_id = $3` : ''})`,
                 params: params 
             })
 
@@ -78,9 +80,14 @@ module.exports = class GroupController {
 
         // Get only the groups the currentUser is a member of with 'memberStatus'
         if ( 'memberStatus' in request.query ) {
-            const membershipResults = await this.core.database.query(`
-                SELECT group_id FROM group_members WHERE user_id = $1 AND status = $2 
-            `, [ currentUser.id, request.query.memberStatus])
+
+            let membershipSQL = `SELECT group_id FROM group_members WHERE user_id = $1`
+            const membershipParams = [ currentUser.id ]
+            if ( request.query.memberStatus !== 'any' ) {
+                membershipSQL += ` AND status = $2`
+                membershipParams.push(request.query.memberStatus)
+            }
+            const membershipResults = await this.core.database.query(membershipSQL, membershipParams)
 
             const memberships = membershipResults.rows.map((r) => r.group_id)
 

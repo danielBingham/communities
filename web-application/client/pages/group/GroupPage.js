@@ -3,26 +3,14 @@ import { useSelector } from 'react-redux'
 import { useParams, NavLink, Routes, Route } from 'react-router-dom'
 
 import {
-    QueueListIcon as QueueListIconOutline,
-    UserGroupIcon as UserGroupIconOutline,
-    Cog6ToothIcon as Cog6ToothIconOutline,
     GlobeAltIcon,
     LockOpenIcon,
     LockClosedIcon
 } from '@heroicons/react/24/outline'
 
-import { 
-    QueueListIcon as QueueListIconSolid, 
-    UserGroupIcon as UserGroupIconSolid,
-    Cog6ToothIcon as Cog6ToothIconSolid
-} from '@heroicons/react/24/solid'
-
-import { useRequest } from '/lib/hooks/useRequest'
-import { useGroupFromSlug, useCurrentGroupMember } from '/lib/hooks/group'
+import { useGroupFromSlug, useGroupMember } from '/lib/hooks/group'
 
 import { canView, canModerate, canAdmin } from '/lib/group'
-
-import { getGroups } from '/state/groups'
 
 import PostPage from '/pages/posts/PostPage'
 
@@ -44,8 +32,10 @@ const GroupPage = function() {
 
     const { slug } = useParams()
 
-    const [group, groupError, request] = useGroupFromSlug(slug, [ 'GroupMembers' ])
-    const [currentMember, currentMemberError] = useCurrentGroupMember(group?.id)
+    const currentUser = useSelector((state) => state.authentication.currentUser)
+
+    const [group, groupError, request] = useGroupFromSlug(slug)
+    const [currentMember, currentMemberError] = useGroupMember(group?.id, currentUser?.id)
 
 
     if ( ! group && ( ! request || request.state == 'pending') )  {
@@ -82,7 +72,7 @@ const GroupPage = function() {
                     <div className="type">{ type }</div>
                 </div>
                 <div className="group-page__controls">
-                    { currentMember && <GroupMembershipButton groupId={group.id} userId={currentMember.userId} /> }
+                    <GroupMembershipButton groupId={group.id} userId={currentUser?.id} />
                 </div>
                 { canView(group, currentMember) && <NavigationMenu className="group-page__menu">
                     <NavigationMenuItem to={`/group/${group.slug}`} icon="QueueList" text="Feed" />

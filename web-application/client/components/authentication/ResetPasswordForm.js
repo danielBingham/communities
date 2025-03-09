@@ -7,6 +7,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 import { validateToken } from '/state/tokens'
 import { patchUser } from '/state/users'
 
+import Button from '/components/generic/button/Button'
 import Spinner from '/components/Spinner'
 import Input from '/components/generic/input/Input'
 

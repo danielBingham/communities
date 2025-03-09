@@ -40,6 +40,8 @@ const GroupInvite = function({ groupId }) {
     const invite = () => {
         if ( userId ) {
             makePostGroupMembersRequest(postGroupMembers({ groupId: groupId, userId: userId }))
+            setNameOrEmail('')
+            setUserId(null)
         } else if ( isEmail(nameOrEmail)) {
             makePostUsersRequest(postUsers({ email: nameOrEmail.trim(), groupId: groupId})) 
         }
@@ -117,13 +119,7 @@ const GroupInvite = function({ groupId }) {
     }
 
     const selectSuggestion = (index) => {
-        console.log(`Index: ${index}`)
-        console.log(`UserQuery: `)
-        console.log(userQuery)
-        console.log(userDictionary)
         const user = userDictionary[userQuery.list[index]]
-        console.log(user)
-
 
         setUserId(user.id)
         setNameOrEmail(user.name)
@@ -144,8 +140,23 @@ const GroupInvite = function({ groupId }) {
             }
             makePostGroupMembersRequest(postGroupMembers({ groupId: groupId, userId: invitedUser.id}))
             setNameOrEmail('')
+            setUserId(null)
         }
     }, [ postUsersRequest ])
+
+    const suggestionRef = useRef(null)
+    useEffect(function() {
+        const onBodyClick = function(event) {
+            if (suggestionRef.current && ! suggestionRef.current.contains(event.target) ) {
+                clearSuggestions()
+            } 
+        }
+        document.body.addEventListener('mousedown', onBodyClick)
+
+        return function cleanup() {
+            document.body.removeEventListener('mousedown', onBodyClick)
+        }
+    }, [ suggestionRef ])
 
 
     // Construct the suggestions list.
@@ -182,10 +193,11 @@ const GroupInvite = function({ groupId }) {
                         name="nameOrEmail"
                         value={nameOrEmail}
                         placeholder="Name or email of the person you want to invite..."
+                        autoComplete="off"
                         onChange={onChange}
                         onKeyDown={onKeyDown}
                     />
-                    { userSuggestions.length > 0 && <div className="group-invite__suggestions">
+                    { userSuggestions.length > 0 && <div className="group-invite__suggestions" ref={suggestionRef}>
                         { userSuggestions }
                     </div> }
                 </div>

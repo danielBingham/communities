@@ -253,11 +253,11 @@ module.exports = class PermissionService {
             throw new ServiceError('missing-context', `'group' missing from context.`)
         }
 
-        if ( ! ('groupMember' in context || context.groupMember === undefined) ) {
+        if ( ! ('groupMember' in context) || context.groupMember === undefined ) {
             context.groupMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(context.groupId, user.id, true)
         }
 
-        if ( context.member !== null && context.member.status === 'member' && context.member.role === 'admin') {
+        if ( context.groupMember !== null && context.groupMember.status === 'member' && context.groupMember.role === 'admin') {
             return true 
         }
         return false 

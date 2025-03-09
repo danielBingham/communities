@@ -10,7 +10,7 @@ const YourGroups = function() {
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
     const params = {
-        userId: currentUser.id
+        memberStatus: 'any'
     }
 
     return (
@@ -21,3 +21,4 @@ const YourGroups = function() {
 }
 
 export default YourGroups
+

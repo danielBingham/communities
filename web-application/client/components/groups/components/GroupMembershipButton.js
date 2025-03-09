@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux'
 import { ArrowLeftStartOnRectangleIcon, ArrowLeftEndOnRectangleIcon } from '@heroicons/react/24/solid'
 
 import { useRequest } from '/lib/hooks/useRequest'
+import { useGroup, useGroupMember } from '/lib/hooks/group'
 
 import { postGroupMembers, patchGroupMember, deleteGroupMember } from '/state/groupMembers'
 
@@ -17,16 +18,10 @@ const GroupMembershipButton = function({ groupId, userId }) {
     const [request, makeRequest] = useRequest()
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
-    const currentMember = useSelector((state) => groupId !== null 
-        && groupId in state.groupMembers.byGroupAndUser 
-        && currentUser && currentUser.id in state.groupMembers.byGroupAndUser[groupId] 
-            ? state.groupMembers.byGroupAndUser[groupId][currentUser.id] : null)
+    const [ group ] = useGroup(groupId)
 
-    const group = useSelector((state) => groupId !== null && groupId in state.groups.dictionary ? state.groups.dictionary[groupId] : null)
-    const member = useSelector((state) => groupId !== null 
-        && groupId in state.groupMembers.byGroupAndUser 
-        && userId && userId in state.groupMembers.byGroupAndUser[groupId] 
-            ? state.groupMembers.byGroupAndUser[groupId][userId] : null)
+    const [ currentMember ] = useGroupMember(groupId, currentUser?.id)
+    const [ member ]  = useGroupMember(groupId, userId)
 
     /* ==================== When currentUser is user... ======================= */
 
@@ -149,7 +144,7 @@ const GroupMembershipButton = function({ groupId, userId }) {
         makeRequest(deleteGroupMember(groupMember))
     }
 
-    if ( ! currentUser || ! currentMember || !member || ! group ) {
+    if ( ! currentUser || ! group ) {
         return null
     }
 

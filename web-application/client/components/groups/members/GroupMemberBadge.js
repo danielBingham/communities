@@ -55,10 +55,10 @@ const GroupMemberBadge = function({ groupId, userId }) {
     if ( user && userMember && user.name !== null) {
         return (
             <div className="group-member-badge">
-                <GroupMemberDotsMenu groupId={groupId} userId={userId} />
                 <div className="group-member-badge__grid">
                     <UserProfileImage userId={user.id} />
                     <div className="group-member-badge__details" >
+                        <GroupMemberDotsMenu groupId={groupId} userId={userId} />
                         <div className="group-member-badge__name"><Link to={ `/${user.username}` }>{user.name}</Link></div>
                         { userMember.role != 'member' && <div className="group-member-badge__role">{ userMember.role }</div> }
                         <div className="group-member-badge__about">{ user.about?.length > 100 ? user.about.substring(0,100).trim()+'...' : user.about }</div>
