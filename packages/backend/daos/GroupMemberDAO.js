@@ -151,6 +151,19 @@ module.exports = class GroupMemberDAO extends DAO {
         return entity 
     }
 
+    async getGroupMembers(groupId) {
+        const results = await this.selectGroupMembers({
+            where: 'group_members.group_id = $1',
+            params: [ groupId ]
+        })
+
+        if ( results.list.length <= 0 ) {
+            return []
+        }
+
+        return results.list.map((id) => results.dictionary[id])
+    }
+
     async selectGroupMembers(query) {
         let where = query.where ? `WHERE ${query.where}` : ''
         let params = query.params ? [ ...query.params ] : []

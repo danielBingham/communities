@@ -19,6 +19,10 @@ const GroupInvite = function({ groupId }) {
 
     const [userId, setUserId] = useState(null)
     const [nameOrEmail, setNameOrEmail] = useState( userId && userId in userDictionary ? userDictionary[userId].name : '')
+
+    // The index of the userQuery representing the currently highlighted
+    // suggested user.
+    const [highlightedSuggestion, setHighlightedSuggestion] = useState(0)
     
     const [getUsersRequest, makeGetUsersRequest] = useRequest()
     const [postUsersRequest, makePostUsersRequest] = useRequest()
@@ -61,7 +65,7 @@ const GroupInvite = function({ groupId }) {
         timeoutId.current = setTimeout(function() {
             if ( name.length > 0) {
                 clearSuggestions()
-                makeGetUsersRequest(getUsers('GroupInvite', { name: name, isFriend: true}))
+                makeGetUsersRequest(getUsers('GroupInvite', { name: name, isFriend: true, isNotGroupMember: groupId }))
             } 
         }, 250)
     }
@@ -75,9 +79,7 @@ const GroupInvite = function({ groupId }) {
         if ( value.length <= 0 ) {
             clearSuggestions()
             setUserId(null)
-        } else if ( userId && value !== userDictionary[userId].name ) {
-            setUserId(null)
-        }
+        } 
         
         if ( ! isEmail(value) ) {
             suggestUsers(value)
@@ -86,8 +88,42 @@ const GroupInvite = function({ groupId }) {
         }
     }
 
-    const selectSuggestion = (event, user) => {
-        event.preventDefault()
+    const onKeyDown = function(event) {
+        if ( event.key == 'Enter' ) {
+            event.preventDefault()
+            if ( userQuery !== null && userQuery.list.length > 0 ) {
+                selectSuggestion(highlightedSuggestion)
+            } else {
+                invite()
+            }
+        } else if ( event.key == 'ArrowDown' ) {
+            event.preventDefault()
+            if ( highlightedSuggestion + 1 < userQuery.list.length ) {
+                setHighlightedSuggestion(highlightedSuggestion+1)
+            } else {
+                setHighlightedSuggestion(userQuery.list.length-1)
+            }
+        } else if ( event.key == 'ArrowUp' ) {
+            event.preventDefault()
+            if ( highlightedSuggestion-1 <= 0 ) {
+                setHighlightedSuggestion(0)
+            } else {
+                setHighlightedSuggestion(highlightedSuggestion-1)
+            }
+        } else if ( event.key == 'Escape' ) {
+            event.preventDefault()
+            clearSuggestions()
+        }
+    }
+
+    const selectSuggestion = (index) => {
+        console.log(`Index: ${index}`)
+        console.log(`UserQuery: `)
+        console.log(userQuery)
+        console.log(userDictionary)
+        const user = userDictionary[userQuery.list[index]]
+        console.log(user)
+
 
         setUserId(user.id)
         setNameOrEmail(user.name)
@@ -111,11 +147,22 @@ const GroupInvite = function({ groupId }) {
         }
     }, [ postUsersRequest ])
 
+
+    // Construct the suggestions list.
     const userSuggestions = []
     if ( userQuery ) {
-        for(const id of userQuery.list) {
+        for(let index = 0;  index < userQuery.list.length; index++) {
+            const id = userQuery.list[index]
             const user = userDictionary[id]
-            userSuggestions.push(<a key={user.username} className="suggestion" onClick={(e) => selectSuggestion(e, user)}>{ user.name }</a>)
+            userSuggestions.push(
+                <a key={user.username} 
+                    id={user.id} 
+                    className={index === highlightedSuggestion ? "suggestion highlight" : "suggestion"} 
+                    onClick={(e) => { e.preventDefault(); selectSuggestion(index) }}
+                >
+                    { user.name }
+                </a>
+            )
         }
     }
 
@@ -136,6 +183,7 @@ const GroupInvite = function({ groupId }) {
                         value={nameOrEmail}
                         placeholder="Name or email of the person you want to invite..."
                         onChange={onChange}
+                        onKeyDown={onKeyDown}
                     />
                     { userSuggestions.length > 0 && <div className="group-invite__suggestions">
                         { userSuggestions }

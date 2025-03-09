@@ -37,6 +37,7 @@
     border: thin solid var(--main-border-color);
     padding: 10px;
     background-color: white;
+    z-index: 1000;
 }
 .group-invite .group-invite__suggestions a {
     display: block;
@@ -44,6 +45,10 @@
     padding: 5px;
 }
 .group-invite .group-invite__suggestions a:hover {
+    background-color: var(--primary-color-main);
+    color: white;
+}
+.group-invite .group-invite__suggestions a.highlight {
     background-color: var(--primary-color-main);
     color: white;
 }

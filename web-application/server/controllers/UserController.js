@@ -152,6 +152,26 @@ module.exports = class UserController {
             result.where += ` AND users.id = ANY($${result.params.length}::uuid[])`
         }
 
+        if ( 'isGroupMember' in query ) {
+            const groupId = query.isGroupMember
+
+            const members = await this.groupMemberDAO.getGroupMembers(groupId)
+            const memberUserIds = members.map((member) => member.userId)
+
+            result.params.push(memberUserIds)
+            result.where += ` AND users.id = ANY($${result.params.length}::uuid[])`
+        }
+
+        if ( 'isNotGroupMember' in query ) {
+            const groupId = query.isNotGroupMember
+
+            const members = await this.groupMemberDAO.getGroupMembers(groupId)
+            const memberUserIds = members.map((member) => member.userId)
+
+            result.params.push(memberUserIds)
+            result.where += ` AND users.id != ALL($${result.params.length}::uuid[])`
+        }
+
         if ( query.page && ! options.ignorePage ) {
             result.page = query.page
         } else if ( ! options.ignorePage ) {
