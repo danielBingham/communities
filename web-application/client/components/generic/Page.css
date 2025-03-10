@@ -23,6 +23,10 @@
     }
 }
 @media (width <= 1220px) {
+    .page {
+        margin: 50px auto;
+    }
+
     .page .page-body {
         box-sizing: border-box;
         margin: 0 auto;
