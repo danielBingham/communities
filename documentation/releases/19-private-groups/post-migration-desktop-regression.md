@@ -174,49 +174,50 @@ Cases covering making posts in all their forms and with all their attachments.
     - [x] As User2, invite User4 back into group. As User4, accept the invitation.
         - [x] As User2, remove User4 from group.  Confirm User4's post remains.
 
-- [ ] As User1, promote User2 to "admin"
+- [x] As User1, promote User2 to "admin"
 
-- [ ] As User1, modify the group's profile in Settings.
-- [ ] As User2, modify the group's profile in Settings.
-- [ ] As User1, delete the group.
-    - [ ] Confirm all posts deleted.
+- [x] As User1, modify the group's profile in Settings.
+- [x] As User2, modify the group's profile in Settings.
+- [x] As User1, delete the group.
+    - [x] Confirm all posts deleted.
 
 #### Test 'hidden' Groups
 
-- [ ] As User1, create a "hidden" group named "Hidden Test Group"
-    - [ ] As User1, create a post in "Hidden Test Group".
+- [x] As User1, create a "hidden" group named "Hidden Test Group"
+    - [x] As User1, create a post in "Hidden Test Group".
 
-- [ ] As User2, attempt to view "Hidden Test Group", confirm 404.
-    - [ ] As user2, attempt to view a specific post in "Hidden Test Group" by loading the direct link, confirm 404.
+- [x] As User2, attempt to view "Hidden Test Group", confirm 404.
+    - [x] As user2, attempt to view a specific post in "Hidden Test Group" by loading the direct link, confirm 404.
 
-- [ ] As User1, invite User2 to "Hidden Test Group"
-    - [ ] As User2, confirm "Hidden Test Group" is visible.
-    - [ ] As User2, reject the invite.
-    - [ ] As User2, confirm group is no longer visible.
-    - [ ] As User1, invite User2 to "Hidden Test Group".
-    - [ ] As User2, accept the invite and join the group.
-    - [ ] As User2, confirm posts and members are now visible.
-        - [ ] As User2, attempt to view a specific post in "Hidden Test Group" by loading the direct link, confirm visible.
-        - [ ] As User2, post in the group.
+- [x] As User1, invite User2 to "Hidden Test Group"
+    - [x] As User2, confirm "Hidden Test Group" is visible.
+    - [x] As User2, reject the invite.
+    - [x] As User2, confirm group is no longer visible.
+    - [x] As User1, invite User2 to "Hidden Test Group".
+    - [x] As User2, accept the invite and join the group.
+    - [x] As User2, confirm posts and members are now visible.
+        - [x] As User2, attempt to view a specific post in "Hidden Test Group" by loading the direct link, confirm visible.
+        - [x] As User2, post in the group.
 
-- [ ] As User2, invite User4 to "Hidden Test Group" using an email
-    - [ ] As User4, accept the email invite.
-    - [ ] As User4, confirm group is visible.
-    - [ ] As User4, accept the group invite.
-    - [ ] As User4, attempt to view a specific post by loading the direct link.  Confirm visible.
-    - [ ] As User4, post in the group.
-    - [ ] As User4, leave the group.
-        - [ ] As User4, confirm group is no longer visible.
-        - [ ] As User4, confirm post is no longer visible.
-        - [ ] As User2, confirm User4's, post remains.
-        - [ ] As User2, comment on User4's post.  Confirm User4 is *not* still subscribed and *not* notified.
-    - [ ] As User2, invite User4 back into group. As User4, accept the invitation.
-        - [ ] As User2, remove User4 from group.  Confirm User4's post remains.
+- [x] As User2, invite User4 to "Hidden Test Group" using an email
+    - [x] As User4, accept the email invite.
+    - [x] As User4, confirm group is visible.
+    - [x] As User4, accept the group invite.
+    - [x] As User4, attempt to view a specific post by loading the direct link.  Confirm visible.
+    - [x] As User4, post in the group.
+    - [x] As User4, leave the group.
+        - [x] As User4, confirm group is no longer visible.
+        - [x] As User4, confirm post is no longer visible.
+        - [x] As User2, confirm User4's, post remains.
+        - [x] As User2, comment on User4's post.  Confirm User4 is *not* still subscribed and *not* notified.
+    - [x] As User2, invite User4 back into group. As User4, accept the invitation.
+        - [x] As User2, remove User4 from group.  Confirm User4's post remains.
 
-- [ ] As User1, promote User2 to "admin"
+- [x] As User1, promote User2 to "admin"
+    - [x] As User2, delete a post.
 
-- [ ] As User1, modify the group's profile in Settings.
-- [ ] As User2, modify the group's profile in Settings.
-- [ ] As User1, delete the group.
-    - [ ] Confirm all posts deleted.
+- [x] As User1, modify the group's profile in Settings.
+- [x] As User2, modify the group's profile in Settings.
+- [x] As User1, delete the group.
+    - [x] Confirm all posts deleted.
 

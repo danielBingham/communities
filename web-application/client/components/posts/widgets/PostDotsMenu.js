@@ -1,6 +1,8 @@
 import React from 'react'
 import { useSelector } from 'react-redux'
 
+import { useGroupMember } from '/lib/hooks/group'
+
 import { EllipsisHorizontalIcon } from '@heroicons/react/24/solid'
 
 import { FloatingMenu, FloatingMenuBody, FloatingMenuTrigger, FloatingMenuItem } from '/components/generic/floating-menu/FloatingMenu'
@@ -16,7 +18,7 @@ const PostDotsMenu = function({ postId }) {
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const post = useSelector((state) => postId && postId in state.posts.dictionary ? state.posts.dictionary[postId] : null) 
 
-    const currentMember = useSelector((state) => post && currentUser && post.groupId && post.groupId in state.groupMembers.byGroupAndUser && currentUser.id in state.groupMembers.byGroupAndUser[post.groupId] ? state.groupMembers.byGroupAndUser[post.groupId][currentUser.id] : null)
+    const [currentMember] = useGroupMember(post?.groupId, currentUser?.id) 
 
     // Must have a user and a post to show dots menu.
     if ( ! currentUser || post === null ) {

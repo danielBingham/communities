@@ -131,17 +131,26 @@ const GroupForm = function() {
         }
     }, [ request ])
 
-    let baseError = null
+    let baseError = null 
     let titleError = titleErrors.join(' ')
     let slugError = slugErrors.join(' ')
     let typeError = typeErrors.join(' ')
     let aboutError = aboutErrors.join(' ')
 
     const inProgress = request && request.state == 'pending'
+
+    if ( request && request.state == 'failed' ) {
+        if ( request.error && request.error.type == 'invalid' ) {
+            baseError = request.error.message
+        } else if ( request.error && request.error.type == 'conflict' ) {
+            baseError = request.error.message
+            slugError += 'A group with this URL already exists.' 
+        }
+    }
+
     return (
         <form onSubmit={onSubmit} className="group-form">
             <div className="group-form__instructions">What group would you like to create?</div>
-            <div className="group-form__errors">{ baseError }</div>
             <div className="group-form__group-image">
                 <div>
                     { ! fileId && <UserCircleIcon className="placeholder" /> }
@@ -218,6 +227,7 @@ const GroupForm = function() {
                     </div>
                 </div>
             </div>
+            <div className="group-form__errors">{ baseError }</div>
             { inProgress && <Spinner /> }
             { ! inProgress && <div className="buttons">
                 <Button type="secondary-warn" onClick={(e) => cancel()}>Cancel</Button> 
