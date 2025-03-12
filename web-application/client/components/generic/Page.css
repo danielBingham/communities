@@ -9,7 +9,7 @@
         grid-template-columns: 400px auto 400px;
         width: 100%;
         max-width: 1600px;
-        margin: 50px auto;
+        margin: 0 auto;
     }
 }
 
@@ -19,12 +19,12 @@
         grid-template-columns: 400px auto;
         width: 100%;
         max-width: 1200px;
-        margin: 50px auto;
+        margin: 0 auto;
     }
 }
 @media (width <= 1220px) {
     .page {
-        margin: 50px auto;
+        margin: 0 auto;
     }
 
     .page .page-body {

@@ -7,6 +7,7 @@ import { patchAuthentication } from '/state/authentication'
 import { patchUser } from '/state/users'
 
 import Input from '/components/generic/input/Input'
+import Spinner from '/components/Spinner'
 
 import './ChangeEmailForm.css'
 

@@ -27,7 +27,7 @@ const NotificationSettingsSection = function({}) {
     const toggleNotificationSetting = function(notification) {
         const settings = JSON.parse(JSON.stringify(currentUser.settings)) 
 
-        if ( ! notification in settings.notification ) { 
+        if ( ! (notification in settings.notifications ) ) { 
             settings.notifications[notification] = {
                 web: true,
                 email: false,

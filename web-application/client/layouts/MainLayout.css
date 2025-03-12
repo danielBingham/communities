@@ -2,37 +2,43 @@
 @media (1600px <= width) {
     main {
         box-sizing: border-box;
-        margin: 0px auto;
+
+        margin: 65px auto; /** push us below the header **/
         min-width: 375px;
         width: 100%;
+        padding-top: 20px;
+        padding-bottom: 50px;
+
         color: var(--main-text-color);
         background-color: var(--main-background-color);
-        padding-top: 75px;
-        padding-bottom: 50px;
     }
 }
 
 @media (1220px < width < 1600px) {
     main {
         box-sizing: border-box;
-        margin: 0px auto;
+
+        margin: 65px auto; /** push us below the header **/
         min-width: 375px;
         width: 100%;
+        padding-top: 20px;
+        padding-bottom: 50px;
+
         color: var(--main-text-color);
         background-color: var(--main-background-color);
-        padding-top: 75px;
-        padding-bottom: 50px;
     }
 }
 @media (width <= 1220px) {
     main {
         box-sizing: border-box;
-        margin: 0px auto;
+
+        margin: 65px auto; /** push us below the header **/
         min-width: 375px;
         width: 100%;
+        padding-top: 10px;
+        padding-bottom: 50px;
+
         color: var(--main-text-color);
         background-color: var(--main-background-color);
-        padding-top: 20px;
-        padding-bottom: 50px;
     }
 }

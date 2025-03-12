@@ -115,7 +115,6 @@ const PostForm = function({ postId, groupId }) {
         if (postRequest && postRequest.state == 'fulfilled') {
             setDraft(null)
             if ( group ) {
-                console.log(group)
                 navigate(`/group/${group.slug}/${postRequest.response.body.entity.id}`)
             } else {
                 navigate(`/${currentUser.username}/${postRequest.response.body.entity.id}`)
