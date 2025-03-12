@@ -2,59 +2,37 @@ import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 
-import { getUser, cleanupRequest } from '/state/users'
+import { useRequest } from '/lib/hooks/useRequest'
+
+import { getUser } from '/state/users'
 
 import UserProfileImage from '/components/users/UserProfileImage'
-import Spinner from '/components/Spinner'
 import './UserTag.css'
 
 const UserTag = function(props) {
 
     // ======= Request Tracking =====================================
-    
-    const [ requestId, setRequestId ] = useState(null)
-    const request = useSelector(function(state) {
-        return state.users.requests[requestId]
-    })
+
+    const [request, makeRequest] = useRequest()
 
     // ======= Redux State ==========================================
     
-    const user = useSelector(function(state) {
-        if ( state.users.dictionary[props.id] ) {
-            return state.users.dictionary[props.id]
-        } else {
-            return null
-        }
-    })
+    const user = useSelector((state) => props.id in state.users.dictionary ? state.users.dictionary[props.id] : null) 
 
     // ======= Effect Handling ======================================
-    
-    const dispatch = useDispatch()
 
     useEffect(function() {
         if ( ! user ) {
-            setRequestId(dispatch(getUser(props.id)))
+            makeRequest(getUser(props.id))
         }
-    }, [])
-
-    // Cleanup our request.
-    useEffect(function() {
-        return function cleanup() {
-            if ( requestId ) {
-                dispatch(cleanupRequest({ requestId: requestId }))
-            }
-        }
-    }, [ requestId])
+    }, [ user ])
 
     // ======= Render ===============================================
 
-    if ( ! user ) {
-        return ( <Spinner local={true} /> )
-    }
-
     return (
         <span className="user-tag" >
-            <UserProfileImage userId={user.id} /> <Link to={`/${user.username}`}>{user.name}</Link>
+            { ! user && <span><UserProfileImage /> Anonymous</span> }
+            { user && <span><UserProfileImage userId={user.id} /> <Link to={`/${user.username}`}>{user.name}</Link></span> }
         </span> 
     )
 

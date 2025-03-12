@@ -20,7 +20,7 @@
 
 const MigrationError = require('../errors/MigrationError')
 
-module.exports = class RelationshipsOwnStateMigration {
+module.exports = class CommentSubscriptionsMigration {
 
     constructor(core) {
         this.database = core.database

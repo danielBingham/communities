@@ -1,7 +1,11 @@
 import React, {useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
-import { postPostComments, patchPostComment, deletePostComment, cleanupRequest, finishPostCommentEdit } from '/state/postComments'
+import logger from '/logger'
+
+import { useRequest } from '/lib/hooks/useRequest'
+
+import { postPostComments, patchPostComment, finishPostCommentEdit } from '/state/postComments'
 
 import Button from '/components/generic/button/Button'
 import Spinner from '/components/Spinner'
@@ -15,26 +19,17 @@ const PostCommentForm = function({ postId, commentId, setShowComments }) {
 
     const [ error, setError ] = useState('')
 
-    const [ requestId, setRequestId ] = useState(null)
-    const request = useSelector(function(state) {
-        if ( requestId in state.postComments.requests ) {
-            return state.postComments.requests[requestId]
-        } else {
-            return null
-        }
-    })
+    const [postRequest, makePostRequest] = useRequest()
+    const [patchRequest, makePatchRequest] = useRequest()
 
-    const currentUser = useSelector(function(state) {
-        return state.authentication.currentUser
-    })
+    const currentUser = useSelector((state) => state.authentication.currentUser)
 
-    const comment = useSelector(function(state) {
-        if ( commentId in state.postComments.dictionary ) {
-            return state.postComments.dictionary[commentId]
-        } else {
-            return null
-        }
-    })
+    if ( ! currentUser ) {
+        logger.error(new Error('Attempt to load PostCommentForm without logged in user.'))
+        return null
+    }
+
+    const comment = useSelector((state) => commentId && commentId in state.postComments.dictionary ? state.postComments.dictionary[commentId] : null) 
     
     const dispatch = useDispatch()
 
@@ -64,10 +59,10 @@ const PostCommentForm = function({ postId, commentId, setShowComments }) {
         }
 
         if ( ! commentId ) {
-            setRequestId(dispatch(postPostComments(newComment)))
+            makePostRequest(postPostComments(newComment))
         } else {
             newComment.id = commentId
-            setRequestId(dispatch(patchPostComment(newComment)))
+            makePatchRequest(patchPostComment(newComment))
         }
     }
 
@@ -112,53 +107,35 @@ const PostCommentForm = function({ postId, commentId, setShowComments }) {
     }, [ commentId ])
 
     useEffect(function() {
-        if ( ! request && (showForm || commentId )) {
+        if ( ! postRequest && ! patchRequest && (showForm || commentId )) {
             localStorage.setItem(getDraftKey(), JSON.stringify({ content: content }))
         }
-    }, [ commentId, content, request])
+    }, [ commentId, content, postRequest, patchRequest ])
 
     useEffect(function() {
-        if ( request && request.state == 'fulfilled') {
+        if ( (postRequest && postRequest.state == 'fulfilled') || (patchRequest && patchRequest.state == 'fulfilled')) {
             localStorage.removeItem(getDraftKey())
 
             setContent('')
             setError('')
 
-            setRequestId(null)
             setShowForm(false)
 
             if ( commentId ) {
                 dispatch(finishPostCommentEdit(commentId))
             }
         }
-    }, [ commentId, request ])
+    }, [ commentId, postRequest, patchRequest])
 
-    useEffect(function() {
-        return function cleanup() {
-            if ( requestId ) {
-                dispatch(cleanupRequest({ requestId: requestId }))
-            }
-        }
-    }, [ requestId ])
-
-    if ( ! currentUser ) {
-        return null
-    }
-
-    if ( request && request.state == 'pending' ) {
-        return (
-            <div className="post-comment-form">
-                <Spinner local={true} />
-            </div>
-        )
-    }
 
     let errorView = null
     if ( error == 'length' ) {
         errorView = ( <div className="error">Comments are limited to 5000 characters...</div> )
     }
 
+    const inProgress = (patchRequest && patchRequest.state == 'pending') || (postRequest && postRequest.state == 'pending')
     const draft = localStorage.getItem(getDraftKey())
+
     if ( ! commentId && ! showForm ) {
         return (
             <a href="" onClick={(e) => { e.preventDefault(); startComment() } } className="create-comment">Start a comment...</a>
@@ -172,10 +149,11 @@ const PostCommentForm = function({ postId, commentId, setShowComments }) {
                     placeholder="Write a comment..."
                 ></textarea>
                 { errorView }
-                <div className="buttons">
+                { inProgress && <div className="buttons"><Spinner /></div> }
+                { ! inProgress && <div className="buttons">
                     <Button type="secondary-warn" onClick={(e) => cancel()}>Cancel</Button>
                     <Button type="primary" onClick={(e) => submit()}>{ commentId ? 'Save Edit' : 'Comment' }</Button>
-                </div>
+                </div> }
             </div>
         )
     }

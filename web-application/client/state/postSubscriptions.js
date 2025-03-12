@@ -1,38 +1,22 @@
 import { createSlice } from '@reduxjs/toolkit'
+import * as qs from 'qs'
 
-import setRelationsInState from './helpers/relations'
+import { makeTrackedRequest } from '/lib/state/request'
+import setRelationsInState from '/lib/state/relations'
 
 import {
     setInDictionary,
     removeEntity,
-    makeQuery,
     setQueryResults,
     clearQuery,
     clearQueries
-} from './helpers/state'
-
-import { 
-    makeSearchParams,
-    makeTrackedRequest,
-    startRequestTracking, 
-    recordRequestFailure, 
-    recordRequestSuccess, 
-    cleanupRequest as cleanupTrackedRequest, 
-} from './helpers/requestTracker'
+} from '/lib/state'
 
 export const postSubscriptionsSlice = createSlice({
     name: 'postSubscriptions',
     initialState: {
         
         // ======== Standard State ============================================
-        
-        /**
-         * A dictionary of requests in progress or that we've made and completed,
-         * keyed with a uuid requestId.
-         *
-         * @type {object}
-         */
-        requests: {},
 
         /**
          * A dictionary of postSubscriptions we've retrieved from the backend, keyed by
@@ -67,7 +51,7 @@ export const postSubscriptionsSlice = createSlice({
     },
     reducers: {
         // ======== State Manipulation Helpers ================================
-        // @see ./helpers/state.js
+        // @see ./lib/state.js
 
         setPostSubscriptionsInDictionary: function(state, action) {
             setInDictionary(state, action)
@@ -87,17 +71,9 @@ export const postSubscriptionsSlice = createSlice({
             const entity = action.payload.entity
             delete state.byPostId[entity.postId]
         },
-        makePostSubscriptionQuery: makeQuery,
         setPostSubscriptionQueryResults: setQueryResults,
         clearPostSubscriptionQuery: clearQuery,
         clearPostSubscriptionQueries: clearQueries,
-
-        // ========== Request Tracking Methods =============
-
-        makeRequest: startRequestTracking, 
-        failRequest: recordRequestFailure, 
-        completeRequest: recordRequestSuccess,
-        cleanupRequest: cleanupTrackedRequest
     }
 })
 
@@ -117,13 +93,12 @@ export const postPostSubscriptions = function(subscription) {
     return function(dispatch, getState) {
         const endpoint = `/post/${encodeURIComponent(subscription.postId)}/subscriptions`
         const body = subscription
-        return makeTrackedRequest(dispatch, getState, postSubscriptionsSlice,
-            'POST', endpoint, body,
+        return dispatch(makeTrackedRequest('POST', endpoint, body,
             function(response) {
                 dispatch(postSubscriptionsSlice.actions.setPostSubscriptionsInDictionary({ entity: response.entity}))
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -141,13 +116,12 @@ export const postPostSubscriptions = function(subscription) {
  */
 export const getPostSubscription = function(postId) {
     return function(dispatch, getState) {
-        return makeTrackedRequest(dispatch, getState, postSubscriptionsSlice,
-            'GET', `/post/${encodeURIComponent(postId)}/subscription`,  null,
+        return dispatch(makeTrackedRequest('GET', `/post/${encodeURIComponent(postId)}/subscription`,  null,
             function(response) {
                 dispatch(postSubscriptionsSlice.actions.setPostSubscriptionsInDictionary({ entity: response.entity}))
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -165,21 +139,18 @@ export const getPostSubscription = function(postId) {
  */
 export const deletePostSubscription = function(postId) {
     return function(dispatch, getState) {
-        return makeTrackedRequest(dispatch, getState, postSubscriptionsSlice,
-            'DELETE', `/post/${encodeURIComponent(postId)}/subscription`, null,
+        return dispatch(makeTrackedRequest('DELETE', `/post/${encodeURIComponent(postId)}/subscription`, null,
             function(response) {
                 dispatch(postSubscriptionsSlice.actions.removePostSubscription({ entity: response.entity }))
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 } 
 
-
 export const { 
     setPostSubscriptionsInDictionary, removePostSubscription, 
-    makePostSubscriptionQuery, clearPostSubscriptionQuery, setPostSubscriptionQueryResults,
-    cleanupRequest 
+    clearPostSubscriptionQuery, setPostSubscriptionQueryResults,
 }  = postSubscriptionsSlice.actions
 
 export default postSubscriptionsSlice.reducer

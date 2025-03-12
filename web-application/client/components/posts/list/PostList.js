@@ -1,66 +1,100 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
+import { useSearchParams } from 'react-router-dom'
 
-import { startPostEdit } from '/state/posts'
+import { useRequest } from '/lib/hooks/useRequest'
+
+import { getPosts, clearPostQuery } from '/state/posts'
 
 import PaginationControls from '/components/PaginationControls'
-import PostForm from '/components/posts/form/PostForm'
 import Post from '/components/posts/Post'
 import Spinner from '/components/Spinner'
 
 import './PostList.css'
 
-const PostList = function({ queryName }) {
+const PostList = function({ name, params }) {
 
-    const query = useSelector(function(state) {
-        if ( queryName in state.posts.queries ) {
-            return state.posts.queries[queryName]
-        } else {
-            return null 
-        }
-    })
+    const [ searchParams, setSearchParams ] = useSearchParams()
 
-    const editing = useSelector(function(state) {
-        return state.posts.editing
-    })
+    const query = useSelector((state) => name && name in state.posts.queries ? state.posts.queries[name] : null) 
+
+    const [request, makeRequest] = useRequest()
+
+    const setSort = function(sortBy) {
+        searchParams.set('sort', sortBy)
+        setSearchParams(searchParams)
+    }
+
+    const getSort = function() {
+        let sort = searchParams.get('sort') 
+        if ( ! sort ) {
+            sort = 'newest'
+        } 
+        return sort
+    }
 
     const dispatch = useDispatch()
-
-    // If we refreshed and have posts in progress in local storage,
-    // then backfill those posts into redux.
     useEffect(function() {
-        if ( query !== null ) {
-            for(const postId of query.list) {
-                const draft = localStorage.getItem(`draft.${postId}`)
-                if ( draft && ! (postId in editing) ) {
-                    dispatch(startPostEdit(postId))
-                }
-            }
+        let queryParams = { ...params }
+
+        queryParams.sort = getSort() 
+
+        queryParams.page = searchParams.get('page') ? searchParams.get('page') : 1
+
+        makeRequest(getPosts(name, queryParams))
+    }, [ searchParams, params ])
+
+    useEffect(() => {
+        if ( ! query ) {
+            let queryParams = { ...params }
+
+            queryParams.sort = getSort() 
+
+            queryParams.page = searchParams.get('page') ? searchParams.get('page') : 1
+
+            makeRequest(getPosts(name, queryParams))
         }
-    }, [ query ])
+    }, [ searchParams, params, query ])
 
     if ( query === null ) {
         return (
             <div className="post-list">
-                <Spinner local={true} />
+                <Spinner />
             </div>
         )
     }
 
     const postViews = []
     for(const postId of query.list) {
-        const draft = localStorage.getItem(`draft.${postId}`)
-        if ( draft || postId in editing ) {
-            postViews.push(<PostForm key={postId} postId={postId} />)
-        } else {
-            postViews.push(<Post key={postId} id={postId} />)
-        }
+        postViews.push(<Post key={postId} id={postId} />)
     }
 
+    const sort = getSort()
     return (
         <div className="post-list">
-            { postViews }
-            <PaginationControls meta={query.meta} />
+            <div className="post-list__controls">
+                <div className="post-list__sort-menu">
+                    <span className="title">Sort By:</span>
+                    <a
+                        href=""
+                        className={`sort-option ${sort == 'newest' ? 'current' : ''}`} 
+                        onClick={(e) => {e.preventDefault(); setSort('newest')}}
+                    >
+                        New 
+                    </a>
+                    <a
+                        href=""
+                        className={`sort-option ${sort == 'active' ? 'current' : ''}`}
+                        onClick={(e) => {e.preventDefault(); setSort('active')}}
+                    >
+                        Active 
+                    </a>
+                </div>
+            </div>
+            <div className="post-list__posts">
+                { postViews }
+                <PaginationControls meta={query.meta} />
+            </div>
         </div>
     )
 

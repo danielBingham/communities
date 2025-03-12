@@ -1,0 +1,65 @@
+import React, { useState, useEffect } from 'react'
+import { useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
+
+import { useRequest } from '/lib/hooks/useRequest'
+import { useGroup, useGroupMember } from '/lib/hooks/group'
+
+import { canAdmin } from '/lib/group'
+
+import { deleteGroup } from '/state/groups'
+
+import GroupEditForm from '/components/groups/form/GroupEditForm'
+import Button from '/components/generic/button/Button'
+import AreYouSure from '/components/AreYouSure'
+
+import "./GroupSettingsView.css"
+
+const GroupSettingsView = function({ groupId }) {
+
+    const [ areYouSure, setAreYouSure ] = useState(false)
+
+    const [request, makeRequest] = useRequest()
+
+    const currentUser = useSelector((state) => state.authentication.currentUser)
+
+    const [group, groupError] = useGroup(groupId) 
+    const [currentMember, currentMemberError] = useGroupMember(groupId, currentUser?.id)
+
+    const navigate = useNavigate()
+    const deleteCurrentGroup = function() {
+        setAreYouSure(false)
+        makeRequest(deleteGroup(group))
+        navigate('/groups')
+    }
+
+    if ( ! canAdmin(group, currentMember) ) {
+        return (null)
+    }
+
+    return (
+        <div className="group-settings-view">
+            <h2>Edit Group Details</h2>
+            <div className="group-settings-view__edit">
+                <GroupEditForm groupId={groupId} /> 
+            </div>
+            <h2>Danger Zone</h2>
+            <div className="group-settings-view__delete-your-account">
+                <div className="group-settings-view__explanation">Delete this group. This will delete
+                all posts and images in the group. This cannot
+                be undone. Please be certain.</div>
+                <div className="group-settings-view__button-wrapper">
+                    <Button type="primary-warn" onClick={(e) => setAreYouSure(true)}>Delete Group</Button>
+                </div>
+                <AreYouSure 
+                    isVisible={areYouSure} 
+                    action="delete this group" 
+                    execute={deleteCurrentGroup} 
+                    cancel={() => setAreYouSure(false)} 
+                /> 
+            </div>
+        </div>
+    )
+}
+
+export default GroupSettingsView

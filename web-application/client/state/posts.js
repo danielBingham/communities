@@ -1,38 +1,22 @@
 import { createSlice } from '@reduxjs/toolkit'
+import * as qs from 'qs'
 
-import setRelationsInState from './helpers/relations'
+import { makeTrackedRequest } from '/lib/state/request'
+import setRelationsInState from '/lib/state/relations'
 
 import {
     setInDictionary,
     removeEntity,
-    makeQuery,
     setQueryResults,
     clearQuery,
     clearQueries
-} from './helpers/state'
-
-import { 
-    makeSearchParams,
-    makeTrackedRequest,
-    startRequestTracking, 
-    recordRequestFailure, 
-    recordRequestSuccess, 
-    cleanupRequest as cleanupTrackedRequest, 
-} from './helpers/requestTracker'
+} from '/lib/state'
 
 export const postsSlice = createSlice({
     name: 'posts',
     initialState: {
         
         // ======== Standard State ============================================
-        
-        /**
-         * A dictionary of requests in progress or that we've made and completed,
-         * keyed with a uuid requestId.
-         *
-         * @type {object}
-         */
-        requests: {},
 
         /**
          * A dictionary of posts we've retrieved from the backend, keyed by
@@ -73,7 +57,9 @@ export const postsSlice = createSlice({
          * }
          *   
          **/
-        editing: {}
+        editing: {},
+
+        drafts: {}
     },
     reducers: {
         // ======== State Manipulation Helpers ================================
@@ -81,7 +67,6 @@ export const postsSlice = createSlice({
 
         setPostsInDictionary: setInDictionary, 
         removePost: removeEntity,
-        makePostQuery: makeQuery,
         setPostQueryResults: setQueryResults,
         clearPostQuery: clearQuery,
         clearPostQueries: clearQueries,
@@ -100,12 +85,13 @@ export const postsSlice = createSlice({
             delete state.editing[postId]
         },
 
-        // ========== Request Tracking Methods =============
+        setDraft: function(state, action) {
+            state.drafts[action.payload.id] = action.payload.draft
+        },
 
-        makeRequest: startRequestTracking, 
-        failRequest: recordRequestFailure, 
-        completeRequest: recordRequestSuccess,
-        cleanupRequest: cleanupTrackedRequest
+        clearDraft: function(state, action) {
+            delete state.drafts[action.payload.id]
+        }
     }
 })
 
@@ -123,13 +109,8 @@ export const postsSlice = createSlice({
  */
 export const getPosts = function(name, params) {
     return function(dispatch, getState) {
-        const queryString = makeSearchParams(params)
-        const endpoint = '/posts' + ( params ? '?' + queryString.toString() : '')
-
-        dispatch(postsSlice.actions.makePostQuery({ name: name }))
-
-        return makeTrackedRequest(dispatch, getState, postsSlice,
-            'GET', endpoint, null,
+        const endpoint = `/posts${( params ? '?' + qs.stringify(params) : '')}`
+        return dispatch(makeTrackedRequest('GET', endpoint, null,
             function(response) {
                 dispatch(postsSlice.actions.setPostsInDictionary({ dictionary: response.dictionary}))
 
@@ -137,7 +118,7 @@ export const getPosts = function(name, params) {
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -157,14 +138,14 @@ export const postPosts = function(post) {
     return function(dispatch, getState) {
         const endpoint = '/posts'
         const body = post
-        return makeTrackedRequest(dispatch, getState, postsSlice,
-            'POST', endpoint, body,
+        return dispatch(makeTrackedRequest('POST', endpoint, body,
             function(response) {
                 dispatch(postsSlice.actions.setPostsInDictionary({ entity: response.entity}))
 
                 dispatch(setRelationsInState(response.relations))
+                dispatch(postsSlice.actions.clearPostQueries())
             }
-        )
+        ))
     }
 }
 
@@ -183,14 +164,13 @@ export const postPosts = function(post) {
  */
 export const getPost = function(id) {
     return function(dispatch, getState) {
-        return makeTrackedRequest(dispatch, getState, postsSlice,
-            'GET', `/post/${id}`, null,
+        return dispatch(makeTrackedRequest('GET', `/post/${encodeURIComponent(id)}`, null,
             function(response) {
                 dispatch(postsSlice.actions.setPostsInDictionary({ entity: response.entity}))
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -208,13 +188,12 @@ export const getPost = function(id) {
  */
 export const patchPost = function(post) {
     return function(dispatch, getState) {
-        return makeTrackedRequest(dispatch, getState, postsSlice,
-            'PATCH', `/post/${post.id}`, post,
+        return dispatch(makeTrackedRequest('PATCH', `/post/${encodeURIComponent(post.id)}`, post,
             function(response) {
                 dispatch(postsSlice.actions.setPostsInDictionary({ entity: response.entity}))
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -232,21 +211,21 @@ export const patchPost = function(post) {
  */
 export const deletePost = function(post) {
     return function(dispatch, getState) {
-        return makeTrackedRequest(dispatch, getState, postsSlice,
-            'DELETE', `/post/${post.id}`, null,
+        return dispatch(makeTrackedRequest('DELETE', `/post/${encodeURIComponent(post.id)}`, null,
             function(response) {
                 dispatch(postsSlice.actions.removePost({ entity: post}))
+                dispatch(postsSlice.actions.clearPostQueries())
             }
-        )
+        ))
     }
 } 
 
 
 export const { 
     setPostsInDictionary, removePost, 
-    makePostQuery, clearPostQuery, setPostQueryResults,
-    cleanupRequest,
-    startPostEdit, finishPostEdit
+    clearPostQuery, setPostQueryResults,
+    startPostEdit, finishPostEdit,
+    setDraft, clearDraft
 }  = postsSlice.actions
 
 export default postsSlice.reducer

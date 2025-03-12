@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  JournalHub -- Universal Scholarly Publishing 
+ *  Communities -- Non-profit, cooperative social media 
  *  Copyright (C) 2022 - 2024 Daniel Bingham 
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -17,13 +17,15 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import React, { useState, useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import React from 'react'
+import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
+
+import { useRequest } from '/lib/hooks/useRequest'
 
 import { FloatingMenuItem } from '/components/generic/floating-menu/FloatingMenu'
 
-import { patchNotification, cleanupRequest } from '/state/notifications'
+import { patchNotification } from '/state/notifications'
 
 import './NotificationMenuItem.css'
 
@@ -31,24 +33,14 @@ const NotificationMenu = function({ notificationId }) {
 
     // ============ Request Tracking ==========================================
 
-    const [ requestId, setRequestId ] = useState(null)
-    const request = useSelector(function(state) {
-        if ( requestId ) {
-            return state.notifications.dictionary[requestId]
-        } else {
-            return null
-        }
-    })
+    const [request, makeRequest] = useRequest()
 
     // ============ Redux State ===============================================
 
-    const notification = useSelector(function(state) {
-        return state.notifications.dictionary[notificationId]
-    })
+    const notification = useSelector((state) => notificationId && notificationId in state.notifications.dictionary ? state.notifications.dictionary[notificationId] : null)
 
     // ============ Helpers and Actions =======================================
 
-    const dispatch = useDispatch()
     const navigate = useNavigate()
 
     const notificationClicked = function(notification) {
@@ -56,22 +48,13 @@ const NotificationMenu = function({ notificationId }) {
             const patchedNotification = { ...notification }
             patchedNotification.isRead = true
 
-            setRequestId(dispatch(patchNotification(patchedNotification)))
+            makeRequest(patchNotification(patchedNotification))
         }
 
         navigate(notification.path)
     }
 
     // ============ Effect Handling ===========================================
-
-    useEffect(function() {
-        return function cleanup() {
-            if ( requestId ) {
-                dispatch(cleanupRequest({ requestId: requestId }))
-            }
-        }
-    }, [requestId])
-
 
     // ============ Render ====================================================
 

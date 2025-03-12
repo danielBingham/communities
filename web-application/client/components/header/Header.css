@@ -1,4 +1,5 @@
 header {
+    box-sizing: border-box;
     position: fixed;
     left: 0;
     right: 0;
@@ -12,6 +13,7 @@ header {
 }
 
 header .grid {
+    box-sizing: border-box;
     display: grid;
 }
 
@@ -68,16 +70,16 @@ header .mobile-menu {
     text-align: center;
 }
 
-@media (width >= 850px) {
+@media (1220px < width) {
     header .grid {
         grid-template-columns: 200px auto;
         padding: 0 25px;
     }
 }
-@media (width < 850px) {
+@media (width <= 1220px) {
     header .grid {
         grid-template-columns: 32px auto;
-        padding: 0 20px;
+        padding: 0 0 0 15px;
     }
     header .nav-text {
         display: none;

@@ -1,0 +1,25 @@
+.group-badge {
+    box-sizing: border-box;
+    width: 400px;
+    padding: 10px;
+}
+.group-badge__grid {
+    display: grid;
+    grid-template-columns: 120px auto;
+} 
+.group-badge .group-image {
+    width: 120px;
+    height: 120px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+}
+.group-badge__details {
+    padding: 10px;
+    align-items: center;
+}
+.group-badge__title {
+    font-size: 18px;
+}
+.group-badge__about {
+    font-size: 12px;
+}

@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react'
-import { Link, useParams, useSearchParams } from 'react-router-dom'
+import React, { useEffect } from 'react'
+import { useSelector } from 'react-redux'
 
-import { useDispatch, useSelector } from 'react-redux'
+import { useRequest } from '/lib/hooks/useRequest'
 
-import { getUser, cleanupRequest } from '/state/users'
+import { getUser } from '/state/users'
 
 import UserProfileImage from '/components/users/UserProfileImage'
 import FriendButton from '/components/friends/FriendButton'
 
-import Spinner from '/components/Spinner'
+import Error404 from '/components/errors/Error404'
 
 import './UserView.css'
 
@@ -16,69 +16,42 @@ const UserView = function(props) {
 
     // ======= Request Tracking =====================================
 
-    const [ requestId, setRequestId ] = useState(null)
-    const request = useSelector(function(state) {
-        if ( ! requestId) {
-            return null
-        } else {
-            return state.users.requests[requestId]
-        }
-    })
+    const [request, makeRequest] = useRequest()
 
     // ======= Redux State ==========================================
     
-    const user = useSelector(function(state) {
-        return state.users.dictionary[props.id]
-    })
-
-    const currentUser = useSelector(function(state) {
-        return state.authentication.currentUser
-    })
-
+    const user = useSelector((state) => state.users.dictionary[props.id])
 
     // ======= Effect Handling ======================================
 
-    const dispatch = useDispatch()
-
     useEffect(function() {
-        setRequestId(dispatch(getUser(props.id)))
-    }, [ ])
-
-
-    useEffect(function() {
-        return function cleanup() {
-            if ( requestId ) {
-                dispatch(cleanupRequest({ requestId: requestId }))
-            }
+        if ( ! user ) {
+            makeRequest(getUser(props.id))
         }
-    }, [ requestId ])
-
+    }, [ user ])
 
     // ======= Render ===============================================
 
-    if ( ! request ) {
-        return ( <Spinner /> )
-    } else if ( (request && request.state == 'pending')) {
-        return ( <Spinner /> )
+    if ( ! user && ! request ) {
+        return null 
+    } else if ( ! user && (request && request.state == 'pending')) {
+        return null 
     } else  if ( request && request.state == 'failed' ) {
-        return (
-            <article className="user-view">
-                <div className="error">
-                    Failed to request the user's data: { request.error }.  Please report a bug.
-                </div>
-            </article>
-        )
+        if ( request.error.type == 'not-found' ) {
+            return ( <Error404 /> )
+        } else {
+            return (
+                <article className="user-view">
+                    <div className="error">
+                        <p>We encountered an error while attempting to load the user. Please report a bug.</p>
+                        <p>Error type "{ request.error.type }" with message: { request.error.message }.</p>
+                    </div>
+                </article>
+            )
+        }
     } else if ( ! user && request && request.state == 'fulfilled' ) {
-        return (
-            <article className="user-view">
-                <div className="error">
-                    Failed to request the user's data: { request.error }.  Please report a bug.
-                </div>
-            </article>
-        )
+        return ( <Error404 /> )
     } 
-
-    const shouldRenderControls = ( currentUser && user && currentUser.id == user.id)
 
     return (
         <article id={ user.id } className='user-view'>

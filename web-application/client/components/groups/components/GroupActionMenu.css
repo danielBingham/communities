@@ -1,0 +1,17 @@
+.group-action-menu {
+    list-style-type: none;
+    margin: 0;
+    padding: 20px 0
+}
+
+@media(width < 750px) {
+    .group-action-menu {
+        padding: 0;
+    }
+    .group-action-menu .button {
+        font-size: 16px;
+    }
+    .text {
+        display: none;
+    }
+}

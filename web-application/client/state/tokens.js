@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 import * as qs from 'qs'
 
-import { makeTrackedRequest } from '/state/requests'
+import { makeTrackedRequest } from '/lib/state/request'
 
 import { setSession } from '/state/authentication'
 
@@ -44,7 +44,5 @@ export const createToken = function(params) {
         ))
     }
 }
-
-export const { cleanupRequest} = tokenSlice.actions
 
 export default tokenSlice.reducer

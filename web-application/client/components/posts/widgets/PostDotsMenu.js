@@ -1,6 +1,8 @@
 import React from 'react'
 import { useSelector } from 'react-redux'
 
+import { useGroupMember } from '/lib/hooks/group'
+
 import { EllipsisHorizontalIcon } from '@heroicons/react/24/solid'
 
 import { FloatingMenu, FloatingMenuBody, FloatingMenuTrigger, FloatingMenuItem } from '/components/generic/floating-menu/FloatingMenu'
@@ -14,20 +16,17 @@ import './PostDotsMenu.css'
 const PostDotsMenu = function({ postId }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
-    const post = useSelector(function(state) {
-        if ( postId in state.posts.dictionary ) {
-            return  state.posts.dictionary[postId]
-        } else {
-            return null
-        }
-    })
+    const post = useSelector((state) => postId && postId in state.posts.dictionary ? state.posts.dictionary[postId] : null) 
 
-    // User can only see the dots menu if this is their post.
+    const [currentMember] = useGroupMember(post?.groupId, currentUser?.id) 
+
+    // Must have a user and a post to show dots menu.
     if ( ! currentUser || post === null ) {
         return null
     }
 
     const isAuthor = currentUser && currentUser.id == post.userId
+    const isModerator = currentMember && (currentMember.role == 'admin' || currentMember.role == 'moderator')
 
     return (
         <FloatingMenu className="post-dots-menu" closeOnClick={true}>
@@ -35,7 +34,7 @@ const PostDotsMenu = function({ postId }) {
             <FloatingMenuBody>
                 { currentUser && <SubscribeToPost postId={postId} /> }
                 { isAuthor && <EditPost postId={postId} /> }
-                { isAuthor && <DeletePost postId={postId} /> }
+                { (isAuthor || isModerator) && <DeletePost postId={postId} /> }
             </FloatingMenuBody>
         </FloatingMenu>
     )

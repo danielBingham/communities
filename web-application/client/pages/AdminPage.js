@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, NavLink, Routes, Route } from 'react-router-dom'
 
-import { Page, PageBody } from '/components/generic/Page'
+import { Page, PageBody, PageLeftGutter, PageRightGutter } from '/components/generic/Page'
 
+import AdminDashboard from '/components/admin/dashboard/AdminDashboard'
 import FeatureFlags from '/components/admin/features/FeatureFlags'
 
 import './AdminPage.css'
@@ -32,9 +33,21 @@ const AdminPage = function(props) {
 
     return (
         <Page id="admin">
+            <PageLeftGutter>
+                <menu className="admin__menu">
+                    <li><NavLink to={``} end><span className="nav-text"> Dashboard</span></NavLink></li>
+                    <li><NavLink to="features" end><span className="nav-text"> Features</span></NavLink></li>
+                    <li><NavLink to="users" end><span className="nav-text"> Users</span></NavLink></li>
+                </menu> 
+            </PageLeftGutter>
             <PageBody>
-                <FeatureFlags />
+                <Routes>
+                    <Route path="features" element={<FeatureFlags />} />
+                    <Route index element={<AdminDashboard />} />
+                </Routes>
             </PageBody>
+            <PageRightGutter>
+            </PageRightGutter>
         </Page>
     )
 }

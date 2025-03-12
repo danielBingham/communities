@@ -1,9 +1,10 @@
-import React, { useState, useRef, useLayoutEffect, useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import React, { useState } from 'react'
+import { useSelector } from 'react-redux'
 
-import { postUsers, cleanupRequest } from '/state/users'
+import { useRequest } from '/lib/hooks/useRequest'
 
-import UserTag from '/components/users/UserTag'
+import { postUsers } from '/state/users'
+
 import Spinner from '/components/Spinner'
 import Button from '/components/generic/button/Button'
 
@@ -14,18 +15,8 @@ const UserInvite = function() {
 
     const [ submissionError, setSubmissionError ] = useState('')
 
-    const [ requestId, setRequestId ] = useState(null)
-    const request = useSelector(function(state) {
-        if ( requestId ) {
-            return state.users.requests[requestId]
-        } else {
-            return null
-        }
-    })
-
+    const [request, makeRequest, resetRequest] = useRequest()
     const currentUser = useSelector((state) => state.authentication.currentUser)
-
-    const dispatch = useDispatch()
 
     const invite = function(event) {
         event.preventDefault()
@@ -36,14 +27,15 @@ const UserInvite = function() {
             return
         }
 
-        if ( ! email.includes('@') ) {
-            setSubmissionError(`'${email} is not a valid email address. Please enter a valid email address.`)
+
+        const trimmedEmail = email.trim()
+        const emailTest = trimmedEmail.match(/^\S+@\S+$/)
+        if (emailTest === null ) {
+            setSubmissionError(`'"${trimmedEmail}" is not a valid email address. Please enter a valid email address.`)
             return 
         }
 
-        setRequestId(dispatch(postUsers({
-            email: email
-        })))
+        makeRequest(postUsers({ email: trimmedEmail}))
 
         setEmail('')
         setSubmissionError('')
@@ -52,32 +44,32 @@ const UserInvite = function() {
     const onKeyDown = function(event) {
         if ( event.key == 'Enter' ) {
             invite(event)
-        } 
-    }
-
-    useEffect(function() {
-        return function cleanup() {
-            if ( requestId ) {
-                dispatch(cleanupRequest({ requestId: requestId }))
-            }
+        } else if ( request ) {
+            resetRequest()
         }
-    }, [ requestId ])
+    }
 
     let requestError = null
     let successMessage = null
 
     if ( ! request || request.state != 'pending' ) {
         if ( request && request.state == 'failed' ) {
-            if ( request.errorMessage ) {
+            if ( request.error.message) {
                 requestError = (
                     <div className="error">
-                        { request.errorMessage }
+                        { request.error.message }
+                    </div>
+                )
+            } else if ( request.error && request.error.type ) {
+                requestError = (
+                    <div className="error">
+                        Something went wrong: { request.error.type }
                     </div>
                 )
             } else {
                 requestError = (
                     <div className="error">
-                        Something went wrong: { request.error }
+                        We encountered an unidentified server error.  Please report this as a bug!
                     </div>
                 )
             }

@@ -192,6 +192,78 @@ module.exports = function(core) {
     })
 
     /**************************************************************************
+     * Groups REST routes
+     * ************************************************************************/
+    const GroupController = require('./controllers/GroupController')
+    const groupController = new GroupController(core)
+
+    router.get('/groups', function(request, response, next) {
+        groupController.getGroups(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.post('/groups', function(request, response, next) {
+        groupController.postGroups(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.get('/group/:id', function(request, response, next) {
+        groupController.getGroup(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.patch('/group/:id', function(request, response, next) {
+        groupController.patchGroup(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.delete('/group/:id', function(request, response, next) {
+        groupController.deleteGroup(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    /**************************************************************************
+     * GroupMembers REST routes
+     **************************************************************************/
+    const GroupMemberController = require('./controllers/GroupMemberController')
+    const groupMemberController = new GroupMemberController(core)
+
+    router.get('/group/:groupId/members', function(request, response, next) {
+        groupMemberController.getGroupMembers(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.post('/group/:groupId/members', function(request, response, next) {
+        groupMemberController.postGroupMembers(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.get('/group/:groupId/member/:userId', function(request, response, next) {
+        groupMemberController.getGroupMember(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.patch('/group/:groupId/member/:userId', function(request, response, next) {
+        groupMemberController.patchGroupMember(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.delete('/group/:groupId/member/:userId', function(request, response, next) {
+        groupMemberController.deleteGroupMember(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    /**************************************************************************
      * Link Preview REST Routes
      **************************************************************************/
     const LinkPreviewController = require('./controllers/LinkPreviewController')
@@ -399,49 +471,6 @@ module.exports = function(core) {
 
     router.post('/tokens', function(request, response, next) {
         tokenController.postToken(request, response).catch(function(error) {
-            next(error)
-        })
-    })
-
-
-    /******************************************************************************
-     *          Tag REST Routes
-     ******************************************************************************/
-
-    const TagController = require('./controllers/TagController')
-    const tagController = new TagController(core)
-
-    // Get a list of all tags.
-    router.get('/tags', function(request, response, next) {
-        tagController.getTags(request, response).catch(function(error) {
-            next(error)
-        })
-    })
-
-    // Create a new tag 
-    router.post('/tags', function(request, response, next) {
-        tagController.postTags(request, response).catch(function(error) {
-            next(error)
-        })
-    })
-
-    // Get the details of a single tag 
-    router.get('/tag/:id', function(request, response, next) {
-        tagController.getTag(request, response).catch(function(error) {
-            next(error)
-        })
-    })
-
-    // Edit an existing tag with partial data.
-    router.patch('/tag/:id', function(request, response, next) {
-        tagController.patchTag(request, response).catch(function(error) {
-            next(error)
-        })
-    })
-
-    // Delete an existing tag.
-    router.delete('/tag/:id', function(request, response, next) {
-        tagController.deleteTag(request, response).catch(function(error) {
             next(error)
         })
     })

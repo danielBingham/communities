@@ -1,30 +1,19 @@
-import React, { useState, useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
-
-import Spinner from '/components/Spinner'
+import React from 'react'
+import { useSelector } from 'react-redux'
 
 import './PostImage.css'
 
 const PostImage = function({ id, className }) {
     
-    const post = useSelector(function(state) {
-        if ( id in state.posts.dictionary ) {
-            return state.posts.dictionary[id]
-        } else {
-            return null
-        }
-    })
-
+    const post = useSelector((state) => id && id in state.posts.dictionary ? state.posts.dictionary[id] : null) 
     const configuration = useSelector((state) => state.system.configuration)
 
-    if ( ! post ) {
-        throw new Error('Post must be rerieved to display profile image.')
+    if ( ! id || ! post ) {
+        console.error(new Error(`'props.id' and 'post' are both required for PostImage.`))
+        return null
     }
 
-    // ======= Effect Handling ======================================
-
-
-    let content = ( <Spinner local={true} /> )
+    let content = null 
     if ( post.fileId ) {
         content = (
             <img src={`${configuration.backend}/file/${post.fileId}`} />
@@ -32,7 +21,6 @@ const PostImage = function({ id, className }) {
     } else if ( ! post.fileId ) {
         return null
     }
-
 
     return (
         <>

@@ -31,6 +31,13 @@ const SCHEMA = {
                 select: 'always',
                 key: 'id'
             },
+            'type': {
+                insert: 'required',
+                update: 'denied',
+                select: 'always',
+                key: 'type',
+                needsFeature: '19-private-groups'
+            },
             'user_id': {
                 insert: 'required',
                 update: 'denied',
@@ -42,6 +49,13 @@ const SCHEMA = {
                 update: 'allowed',
                 select: 'always',
                 key: 'fileId'
+            },
+            'group_id': {
+                insert: 'allowed',
+                update: 'denied',
+                select: 'always',
+                key: 'groupId',
+                needsFeature: '19-private-groups'
             },
             'link_preview_id': {
                 insert: 'allowed',
@@ -96,39 +110,6 @@ const SCHEMA = {
                     return []
                 },
                 key: 'comments'
-            },
-            'post_tags': {
-                insert: 'denied',
-                update: 'denied',
-                select: 'override',
-                selectOverride: function(row) {
-                    return []
-                },
-                key: 'tags'
-            }
-        }
-    },
-    'PostTag': {
-        table: 'post_tags',
-        fields: {
-            'post_id': {
-                insert: 'required',
-                update: 'primary',
-                select: 'never',
-                key: 'postId'
-            },
-            'tag_id': {
-                insert: 'required',
-                update: 'primary',
-                select: 'always',
-                key: 'tagId'
-            },
-            'created_date': {
-                insert: 'override',
-                insertOverride: 'now()',
-                update: 'denied',
-                select: 'never',
-                key: 'createdDate'
             }
         }
     },
@@ -192,10 +173,6 @@ module.exports = class PostDAO extends DAO {
         return this.getSelectionString('Post')
     }
 
-    getPostTagSelectionString() {
-        return this.getSelectionString('PostTag')
-    }
-
     hydratePost(row) {
         return this.hydrate('Post', row)
     }
@@ -204,7 +181,6 @@ module.exports = class PostDAO extends DAO {
         const dictionary = {}
         const list = []
 
-        const postTagDictionary = {}
         const postReactionDictionary = {}
         const postCommentDictionary = {}
 
@@ -214,16 +190,6 @@ module.exports = class PostDAO extends DAO {
             if ( ! (row.Post_id in dictionary ) ) {
                 dictionary[row.Post_id] = this.hydratePost(row)
                 list.push(row.Post_id)
-            }
-
-            // Hydrate PostTags.
-            if ( row.PostTag_tagId !== null && ! ( row.Post_id in postTagDictionary)) {
-                postTagDictionary[row.Post_id] = {}
-            }
-
-            if ( row.PostTag_tagId !== null && ! (row.PostTag_tagId in postTagDictionary)) {
-                dictionary[row.Post_id].tags.push(row.PostTag_tagId)
-                postTagDictionary[row.Post_id][row.PostTag_tagId] = true
             }
 
             // Hydrate PostReactions.
@@ -276,13 +242,11 @@ module.exports = class PostDAO extends DAO {
         const sql = `
             SELECT
                 ${this.getPostSelectionString()},
-                ${this.getPostTagSelectionString()},
                 post_comments.id as "PostComment_id",
                 post_reactions.id as "PostReaction_id"
             FROM posts
                 LEFT OUTER JOIN post_reactions ON posts.id = post_reactions.post_id
                 LEFT OUTER JOIN post_comments ON posts.id = post_comments.post_id
-                LEFT OUTER JOIN post_tags ON posts.id = post_tags.post_id
             ${where}
             ORDER BY ${order}, post_comments.created_date ASC 
         `
@@ -340,10 +304,6 @@ module.exports = class PostDAO extends DAO {
         await this.insert('Post', posts)
     }
 
-    async insertPostTags(postTags) {
-        await this.insert('PostTag', postTags)
-    }
-
     async insertPostVersions(postVersions) {
         await this.insert('PostVersion', postVersions)
     }
@@ -360,12 +320,6 @@ module.exports = class PostDAO extends DAO {
         await this.core.database.query(`
             DELETE FROM posts WHERE posts.id = $1
         `, [ post.id])
-    }
-
-    async deletePostTag(postTag) {
-        await this.core.database.query(`
-            DELETE FROM post_tags WHERE post_tags.post_id = $1 AND post_tags.tag_id = $2
-        `, [ postTag.postId, postTag.tagId ])
     }
 
 }

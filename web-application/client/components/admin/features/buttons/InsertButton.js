@@ -1,42 +1,25 @@
-import React, { useState, useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import React from 'react'
+import { useSelector } from 'react-redux'
 
-import { postFeatures, cleanupRequest } from '/state/features'
+import { useRequest } from '/lib/hooks/useRequest'
+
+import { postFeatures } from '/state/features'
 
 import Spinner from '/components/Spinner'
 
 const InsertButton = function(props) {
 
-    const [requestId, setRequestId] = useState(null)
-    const request = useSelector(function(state) {
-        if ( requestId ) {
-            return state.features.requests[requestId]
-        } else {
-            return null
-        }
-    })
+    const [request, makeRequest] = useRequest()
 
-    const feature = useSelector(function(state) {
-        return state.features.dictionary[props.name]
-    })
-
-    const dispatch = useDispatch()
+    const feature = useSelector((state) => props.name && props.name in state.features.dictionary ? state.features.dictionary[props.name] : null)
 
     const initialize = function(event) {
         event.preventDefault()
 
-        setRequestId(dispatch(postFeatures({ name: feature.name })))
+        makeRequest(postFeatures({ name: feature.name }))
     }
 
-    useEffect(function() {
-        return function cleanup() {
-            if ( requestId ) {
-                dispatch(cleanupRequest({ requestId: requestId }))
-            }
-        }
-    }, [ requestId ])
-
-    if ( request && request.state == 'in-progress' ) {
+    if ( request && request.state == 'pending' ) {
         return ( <Spinner local={true} /> )
     }
 

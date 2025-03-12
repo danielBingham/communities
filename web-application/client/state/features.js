@@ -1,25 +1,10 @@
 import { createSlice } from '@reduxjs/toolkit'
 
-import { 
-    makeSearchParams,
-    makeTrackedRequest,
-    startRequestTracking, 
-    recordRequestFailure, 
-    recordRequestSuccess, 
-    cleanupRequest as cleanupTrackedRequest } from './helpers/requestTracker'
-
+import { makeTrackedRequest } from '/lib/state/request'
 
 export const featuresSlice = createSlice({
     name: 'features',
     initialState: {
-        /**
-         * A dictionary of RequestTracker objects created by
-         * `makeTrackedRequest`, keyed by uuid requestIds.
-         * 
-         * @type {object}
-         */
-        requests: {},
-
         /**
          * A dictionary of feature keyed by the feature's name.
          */
@@ -49,14 +34,7 @@ export const featuresSlice = createSlice({
          */
         setInDictionary: function(state, action) {
             state.dictionary[action.payload.name] = action.payload
-        },
-
-        // ========== Request Tracking Methods =============
-
-        makeRequest: startRequestTracking, 
-        failRequest: recordRequestFailure, 
-        completeRequest: recordRequestSuccess,
-        cleanupRequest: cleanupTrackedRequest
+        }
     }
 
 })
@@ -74,12 +52,11 @@ export const getFeatures = function() {
     return function(dispatch, getState) {
         const endpoint = '/features'
 
-        return makeTrackedRequest(dispatch, getState, featuresSlice,
-            'GET', endpoint, null,
+        return dispatch(makeTrackedRequest('GET', endpoint, null,
             function(responseBody) {
                 dispatch(featuresSlice.actions.setDictionary(responseBody))
             }
-        )
+        ))
     }
 }
 
@@ -98,12 +75,11 @@ export const postFeatures = function(feature) {
     return function(dispatch, getState) {
         const endpoint = '/features'
 
-        return makeTrackedRequest(dispatch, getState, featuresSlice,
-            'POST', endpoint, feature,
+        return dispatch(makeTrackedRequest('POST', endpoint, feature,
             function(responseBody) {
                 dispatch(featuresSlice.actions.setInDictionary(responseBody))
             }
-        )
+        ))
     }
 }
 
@@ -123,12 +99,11 @@ export const getFeature = function(name) {
     return function(dispatch, getState) {
         const endpoint = `/feature/${name}`
 
-        return makeTrackedRequest(dispatch, getState, featuresSlice,
-            'GET', endpoint, null,
+        return dispatch(makeTrackedRequest('GET', endpoint, null,
             function(responseBody) {
                 dispatch(featuresSlice.actions.setInDictionary(responseBody))
             }
-        )
+        ))
     }
 }
 
@@ -148,15 +123,12 @@ export const patchFeature = function(feature) {
     return function(dispatch, getState) {
         const endpoint = `/feature/${feature.name}`
 
-        return makeTrackedRequest(dispatch, getState, featuresSlice,
-            'PATCH', endpoint, feature,
-            function(responseBody) {
+        return dispatch(makeTrackedRequest('PATCH', endpoint, feature,
+        function(responseBody) {
                 dispatch(featuresSlice.actions.setInDictionary(responseBody))
             }
-        )
+        ))
     }
 }
-
-export const { cleanupRequest} = featuresSlice.actions
 
 export default featuresSlice.reducer

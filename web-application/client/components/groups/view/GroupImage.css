@@ -1,0 +1,14 @@
+.group-image {
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.group-image img {
+    max-width: 100%;
+    height: 100%;
+    border-radius: 10000px;
+}
+.group-image svg {
+    color: var(--main-icon-color);
+}

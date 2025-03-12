@@ -20,7 +20,7 @@
 
 const Uuid = require('uuid')
 
-const { NotificationService, PostDAO, UserRelationshipDAO, PostCommentDAO, PostSubscriptionDAO } = require('@communities/backend')
+const { NotificationService, PermissionService, PostDAO, UserRelationshipDAO, PostCommentDAO, PostSubscriptionDAO } = require('@communities/backend')
 
 const ControllerError = require('../errors/ControllerError')
 
@@ -35,6 +35,7 @@ module.exports = class PostCommentController {
         this.postSubscriptionDAO = new PostSubscriptionDAO(core)
 
         this.notificationService = new NotificationService(core)
+        this.permissionService = new PermissionService(core)
     }
 
     async getRelations(currentUser, results, requestedRelations) {
@@ -78,9 +79,9 @@ module.exports = class PostCommentController {
         }
 
         if ( post.userId !== currentUser.id) {
-            const relationship = await this.userRelationshipDAO.getUserRelationshipByUserAndRelation(currentUser.id, post.userId)
+            const canViewPost = await this.permissionService.can(currentUser, 'view', 'Post', { post: post })
 
-            if ( relationship === null ) {
+            if ( ! canViewPost ) {
                 throw new ControllerError(404, 'not-found',
                     `User(${currentUser.id}) attempted to post a comment on Post(${postId}) they don't have permission to view.`,
                     `Either that post doesn't exist or you don't have permission to view it.`)
@@ -98,7 +99,6 @@ module.exports = class PostCommentController {
         })
 
         const relations = await this.getRelations(currentUser, commentResults)
-
 
         response.status(200).json({
             dictionary: commentResults.dictionary,
@@ -127,23 +127,13 @@ module.exports = class PostCommentController {
         }
 
         if ( post.userId !== currentUser.id) {
-            const relationship = await this.userRelationshipDAO.getUserRelationshipByUserAndRelation(currentUser.id, post.userId)
+            const canViewPost = await this.permissionService.can(currentUser, 'view', 'Post', { post: post })
 
-            if ( relationship === null ) {
+            if ( ! canViewPost ) {
                 throw new ControllerError(404, 'not-found',
                     `User(${currentUser.id}) attempted to post a comment on Post(${postId}) they don't have permission to view.`,
                     `Either that post doesn't exist or you don't have permission to view it.`)
             }
-        }
-
-        const activityResults = await this.core.database.query(`
-            SELECT posts.activity FROM posts WHERE posts.id = $1
-        `, [ postId ])
-
-        if ( activityResults.rows.length <= 0 ) {
-            throw new ControllerError(404, 'not-found',
-                `Post(${postId}) was not found by User(${currentUser.id}) attempting to react.`,
-                `That post either doesn't exist or you don't have permission to see it.`)
         }
         
         const reactionResults = await this.core.database.query(`
@@ -160,7 +150,7 @@ module.exports = class PostCommentController {
 
         await this.postCommentDAO.insertPostComments(comment)
 
-        let activity = activityResults.rows[0].activity
+        let activity = parseInt(post.activity)
         if ( reactionResults.rows.length <= 0 || reactionResults.rows[0].reaction != 'block') {
             activity += 1
         } 
@@ -244,9 +234,9 @@ module.exports = class PostCommentController {
         }
 
         if ( post.userId !== currentUser.id) {
-            const relationship = await this.userRelationshipDAO.getUserRelationshipByUserAndRelation(currentUser.id, post.userId)
+            const canViewPost = await this.permissionService.can(currentUser, 'view', 'Post', { post: post })
 
-            if ( relationship === null ) {
+            if ( ! canViewPost ) {
                 throw new ControllerError(404, 'not-found',
                     `User(${currentUser.id}) attempted to post a comment on Post(${postId}) they don't have permission to view.`,
                     `Either that post doesn't exist or you don't have permission to view it.`)
@@ -337,7 +327,6 @@ module.exports = class PostCommentController {
             entity: entity,
             relations: await this.getRelations(currentUser, results)
         })
-
     }
 
     async deletePostComment(request, response) {

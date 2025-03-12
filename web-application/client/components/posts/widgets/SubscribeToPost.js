@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import React from 'react'
+import { useSelector } from 'react-redux'
 
 import { BellAlertIcon, BellSlashIcon } from '@heroicons/react/24/outline'
 
-import { postPostSubscriptions, deletePostSubscription, cleanupRequest } from '/state/postSubscriptions'
+import { useRequest } from '/lib/hooks/useRequest'
+
+import { postPostSubscriptions, deletePostSubscription } from '/state/postSubscriptions'
 
 import { FloatingMenuItem } from '/components/generic/floating-menu/FloatingMenu'
 
@@ -11,33 +13,23 @@ import './SubscribeToPost.css'
 
 const SubscribeToPost = function({ postId }) {
 
-    const [ requestId, setRequestId ] = useState(null)
-    const request = useSelector((state) => requestId in state.postSubscriptions.requests ? state.postSubscriptions.requests[requestId] : null)
+    const [subscribeRequest, makeSubscribeRequest] = useRequest()
+    const [unsubscribeRequest, makeUnsubscribeRequest] = useRequest()
 
-    const subscription = useSelector((state) => postId in state.postSubscriptions.byPostId ? state.postSubscriptions.byPostId[postId] : null)
+    const subscription = useSelector((state) => postId && postId in state.postSubscriptions.byPostId ? state.postSubscriptions.byPostId[postId] : null)
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
     if ( ! currentUser ) {
         return null
     }
 
-    const dispatch = useDispatch()
-
     const subscribe = function() {
-        setRequestId(dispatch(postPostSubscriptions({ postId: postId, userId: currentUser.id })))
+        makeSubscribeRequest(postPostSubscriptions({ postId: postId, userId: currentUser.id }))
     }
 
     const unsubscribe = function() {
-        setRequestId(dispatch(deletePostSubscription(postId)))
+        makeUnsubscribeRequest(deletePostSubscription(postId))
     }
-
-    useEffect(function() {
-        return function cleanup() {
-            if ( requestId ) {
-                dispatch(cleanupRequest({ requestId: requestId }))
-            }
-        }
-    }, [ requestId ])
 
     return (
         <>

@@ -39,7 +39,7 @@ export default class ErrorBoundary extends React.Component {
         // You can render any custom fallback UI
         if (this.state.hasError) {            
             return ( 
-                <div id="error-boundary" className="page">
+                <div id="error-boundary">
                     <h1>You found a Bug!</h1>
                     <p>
                         Something went wrong in a way that we couldn't

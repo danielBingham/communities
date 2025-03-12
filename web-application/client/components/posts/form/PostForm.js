@@ -3,87 +3,73 @@ import { useSelector, useDispatch} from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
 import { LinkIcon } from '@heroicons/react/24/outline'
-import { XCircleIcon } from '@heroicons/react/24/solid'
+import { XCircleIcon, UsersIcon } from '@heroicons/react/24/solid'
 
-import { deleteFile, cleanupRequest as cleanupFileRequest } from '/state/files'
-import { postPosts, patchPost, cleanupRequest, finishPostEdit } from '/state/posts'
+import logger from '/logger'
+
+import { useRequest } from '/lib/hooks/useRequest'
+import { usePostDraft } from '/lib/hooks/usePostDraft'
+
+import { useGroup } from '/lib/hooks/group/useGroup'
+
+import { deleteFile } from '/state/files'
+import { postPosts, patchPost, finishPostEdit } from '/state/posts'
 
 import FileUploadInput from '/components/files/FileUploadInput'
 import DraftImageFile from '/components/files/DraftImageFile'
 import LinkForm from '/components/posts/form/controls/LinkForm'
 import LinkPreview from '/components/links/view/LinkPreview'
 import Button from '/components/generic/button/Button'
+import PostVisibility from '/components/posts/form/controls/PostVisibility'
+
 
 import './PostForm.css'
 
-const PostForm = function({ postId }) {
+const PostForm = function({ postId, groupId }) {
 
-    const [content,setContent] = useState('')
-    const [fileId,setFileId] = useState(null)
-    const [linkPreviewId, setLinkPreviewId] = useState(null)
+    const [draft, setDraft] = usePostDraft(postId || null)
+
+    const [content,setContent] = useState( draft ? draft.content : '')
+    const [fileId,setFileId] = useState(draft ? draft.fileId : null)
+    const [linkPreviewId, setLinkPreviewId] = useState(draft ? draft.linkPreviewId : null)
 
     const [showLinkForm, setShowLinkForm] = useState(false)
 
     const [error,setError] = useState('')
 
-    const [requestId,setRequestId] = useState(null)
-    const request = useSelector(function(state) {
-        if ( requestId in state.posts.requests ) {
-            return state.posts.requests[requestId]
-        } else {
-            return null
-        }
-    })
+    const [postRequest, makePostRequest] = useRequest()
+    const [patchRequest, makePatchRequest] = useRequest()
+    const [deleteFileRequest, makeDeleteFileRequest] = useRequest()
 
-    const [deleteRequestId,setDeleteRequestId] = useState(null)
-    const deleteRequest = useSelector(function(state) {
-        if ( requestId in state.files.requests ) {
-            return state.files.requests[requestId]
-        } else {
-            return null
-        }
-    })
-
-
-    const currentUser = useSelector(function(state) {
-        return state.authentication.currentUser
-    })
-
-    const post = useSelector(function(state) {
-        if ( postId in state.posts.dictionary ) {
-            return state.posts.dictionary[postId]
-        } else {
-            return null
-        }
-    })
+    const currentUser = useSelector((state) => state.authentication.currentUser)
+    const post = useSelector((state) => postId && postId in state.posts.dictionary ? state.posts.dictionary[postId] : null)
+    const [group, groupError] = useGroup(groupId)
 
     const dispatch = useDispatch()
     const navigate = useNavigate()
 
-    const getDraftKey = function() {
-        if ( postId ) {
-            return `draft.${postId}`
-        } else {
-            return `draft`
-        }
-    }
-
     const submit = function() {
         const newPost = {
+            type: 'feed',
             userId: currentUser.id,
             fileId: fileId,
             linkPreviewId: linkPreviewId,
             content: content
         }
 
+        if ( groupId ) {
+            newPost.type = 'group'
+            newPost.groupId = groupId
+        }
+
         if ( ! postId ) {
-            setRequestId(dispatch(postPosts(newPost)))
+            makePostRequest(postPosts(newPost))
         } else { 
             newPost.id = postId
-            setRequestId(dispatch(patchPost(newPost)))
+            makePatchRequest(patchPost(newPost))
             
             if ( post.fileId !== fileId ) {
-                setDeleteRequestId(dispatch(deleteFile(post.fileId)))
+                makeDeleteFileRequest(deleteFile(post.fileId))
             }
 
             dispatch(finishPostEdit(postId))
@@ -91,7 +77,7 @@ const PostForm = function({ postId }) {
     }
 
     const cancel = function() {
-        localStorage.removeItem(getDraftKey())
+        setDraft(null) 
 
         setFileId(null)
         setLinkPreviewId(null)
@@ -99,7 +85,7 @@ const PostForm = function({ postId }) {
         setError('')
 
         if ( ! post || ( fileId !== null && post.fileId !== fileId )) {
-            setDeleteRequestId(dispatch(deleteFile(fileId)))
+            makeDeleteFileRequest(deleteFile(fileId))
         }
 
         if ( postId ) {
@@ -122,51 +108,25 @@ const PostForm = function({ postId }) {
     }
 
     useEffect(function() {
-        let draft = {
-            content: post ? post.content : '',
-            fileId: post ? post.fileId : null,
-            linkPreviewId: post ? post.linkPreviewId : null
-        }
-
-        const existingDraft = JSON.parse(localStorage.getItem(getDraftKey()))
-
-        if ( existingDraft ) {
-            draft = existingDraft
-        } else {
-            localStorage.setItem(getDraftKey(), JSON.stringify(draft))
-        }
-
-        setContent(draft.content)
-        setFileId(draft.fileId)
-        setLinkPreviewId(draft.linkPreviewId)
-    }, [ postId ])
-
-    useEffect(function() {
-        localStorage.setItem(getDraftKey(), JSON.stringify({ content: content, fileId: fileId, linkPreviewId: linkPreviewId }))
+        setDraft({ content: content, fileId: fileId, linkPreviewId: linkPreviewId })
     }, [ postId, content, fileId, linkPreviewId ])
 
     useEffect(function() {
-        if ( request && request.state == 'fulfilled') {
-            localStorage.removeItem(getDraftKey())
-            navigate(`/${currentUser.username}/${request.result.entity.id}`)
-        }
-    }, [ request ])
-    
-    useEffect(function() {
-        return function cleanup() {
-            if ( requestId ) {
-                dispatch(cleanupRequest({ requestId: requestId }))
+        if (postRequest && postRequest.state == 'fulfilled') {
+            setDraft(null)
+            if ( group ) {
+                navigate(`/group/${group.slug}/${postRequest.response.body.entity.id}`)
+            } else {
+                navigate(`/${currentUser.username}/${postRequest.response.body.entity.id}`)
             }
         }
-    }, [requestId])
+    }, [ group, postRequest ])
 
     useEffect(function() {
-        return function cleanup() {
-            if ( deleteRequestId ) {
-                dispatch(cleanupFileRequest({ requestId: deleteRequestId }))
-            }
+        if (patchRequest && patchRequest.state == 'fulfilled') {
+            setDraft(null) 
         }
-    }, [ deleteRequestId ])
+    }, [ patchRequest ])
 
     let errorView = null
     if ( error == 'overlength') {
@@ -221,19 +181,20 @@ const PostForm = function({ postId }) {
             <textarea 
                 onChange={onContentChange} 
                 value={content}
-                placeholder="Write your post..."
+                placeholder={group ? `Write your post in ${group.title}...` : "Write your post..." }
             >
             </textarea>
             { errorView }
             <div className="attachments">
                 { attachmentView }
             </div>
-            <div className="controls">
-                <div>{ attachmentControlsView }</div>
-                <div className="buttons">
-                    <Button type="secondary-warn" onClick={(e) => cancel()}>Cancel</Button>
-                    <Button type="primary" onClick={(e) => submit()}>Post</Button>
-                </div>
+            <div className="post-form__controls">
+                <div className="post-form__controls__attachments">{ attachmentControlsView }</div>
+                <div className="post-form__controls__visibility"><PostVisibility groupId={groupId} /></div>
+            </div>
+            <div className="buttons">
+                <Button type="secondary-warn" onClick={(e) => cancel()}>Cancel</Button>
+                <Button type="primary" onClick={(e) => submit()}>Post</Button>
             </div>
         </div>
     )

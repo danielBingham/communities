@@ -1,63 +1,12 @@
-#user-account-page .menu {
-    list-style-type: none;
-}
-#user-account-page .menu li {
-    padding: 10px;
-    font-size: 18px;
-}
-#user-account-page .menu li:hover {
-    background-color: var(--primary-color-light);
-    border-radius: 10px;
-}
-#user-account-page .menu svg {
-    width: 22px;
-    margin-right: 5px;
-    margin-bottom: -5px;
-    color: var(--icon-color);
-}
-#user-account-page .menu a:link,
-#user-account-page .menu a:visited,
-#user-account-page .menu a:active {
-    display: block;
-    padding: 10px;
-    color: var(--primary-color-darkest);
-}
-#user-account-page .menu .active a {
-    font-weight: bold;
-}
-
 @media (width >= 750px) {
-    #user-account-page {
-        display: grid;
-        grid-template-columns: 320px auto;
-        width: 100%;
-        max-width: 1400px;
-        margin: 50px auto;
-    }
-
     #user-account-page .content {
         padding: 0 30px;
     }
-
 }
 @media (width < 750px) {
     #user-account-page .content {
         padding: 0 30px;
         box-sizing: border-box;
         margin: 0 auto;
-    }
-
-    #user-account-page .menu {
-        text-align: center;
-        margin: 0 auto;
-    }
-
-    #user-account-page .menu li {
-        display: inline-block;
-    }
-    
-    #user-account-page .menu li .nav-text {
-        display: block;
-        font-size: 10px;
     }
 }

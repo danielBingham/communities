@@ -1,14 +1,15 @@
-import React, { useState, useEffect }  from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import React  from 'react'
+import { useSelector } from 'react-redux'
 
-import { patchUser, cleanupRequest } from '/state/users'
+import { useRequest } from '/lib/hooks/useRequest'
+
+import { patchUser } from '/state/users'
 
 import Toggle from '/components/generic/toggle/Toggle'
 
 const NotificationSettingsSection = function({}) {
 
-    const [requestId, setRequestId] = useState(null)
-    const request = useSelector((state) => requestId in state.users.requests ? state.users.requests[requestId] : null)
+    const [request, makeRequest] = useRequest()
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const features = useSelector((state) => state.system.features)
@@ -23,29 +24,28 @@ const NotificationSettingsSection = function({}) {
         return null
     }
 
-    const dispatch = useDispatch()
-
     const toggleNotificationSetting = function(notification) {
         const settings = JSON.parse(JSON.stringify(currentUser.settings)) 
 
-        settings.notifications[notification].email = ! settings.notifications[notification].email
+        if ( ! (notification in settings.notifications ) ) { 
+            settings.notifications[notification] = {
+                web: true,
+                email: false,
+                push: true
+            }
+        } else {
+            settings.notifications[notification].email = ! settings.notifications[notification].email
+        }
 
         const userPatch = {
             id: currentUser.id,
             settings: settings
         }
 
-        setRequestId(dispatch(patchUser(userPatch)))
+        makeRequest(patchUser(userPatch))
     }
-
-    useEffect(function() {
-        if ( requestId ) {
-            return function cleanup() {
-                dispatch(cleanupRequest({ requestId: requestId }))
-            }
-        }
-    }, [ requestId])
-    
+   
+    const notifications = currentUser.settings.notifications
     return (
         <div className="user-settings__notification-settings">
             <h2>Notification Settings</h2>
@@ -53,22 +53,22 @@ const NotificationSettingsSection = function({}) {
                 <Toggle 
                     label="Post Comment"
                     explanation="Recieve an email notification when someone comments on one of your posts."
-                    toggled={currentUser.settings.notifications['Post:comment:create'].email === true ? true : false} 
+                    toggled={ 'Post:comment:create' in notifications && notifications['Post:comment:create'].email === false ? false : true} 
                     onClick={(e) => toggleNotificationSetting('Post:comment:create')} />
                 <Toggle 
                     label="Subscribed Post Comment"
                     explanation="Recieve an email notification when someone comments on a post you are subscribed to."
-                    toggled={currentUser.settings.notifications['Post:comment:create:subscriber'].email === true ? true : false} 
+                    toggled={'Post:comment:create:subscriber' in notifications && notifications['Post:comment:create:subscriber'].email === false ? false : true} 
                     onClick={(e) => toggleNotificationSetting('Post:comment:create:subscriber')} />
                 <Toggle 
                     label="Friend Request Recieved"
                     explanation="Recieve an email notification when someone sends you a friend request."
-                    toggled={currentUser.settings.notifications['User:friend:create'].email === true ? true : false} 
+                    toggled={'User:friend:create' in notifications && notifications['User:friend:create'].email === false ? false : true} 
                     onClick={(e) => toggleNotificationSetting('User:friend:create')} />
                 <Toggle 
                     label="Friend Request Accepted"
                     explanation="Recieve an email notification when someone accepts your friend request."
-                    toggled={currentUser.settings.notifications['User:friend:update'].email === true ? true : false} 
+                    toggled={'User:friend:update' in notifications && notifications['User:friend:update'].email === false ? false : true} 
                     onClick={(e) => toggleNotificationSetting('User:friend:update')} />
             </div>
         </div>

@@ -1,25 +1,11 @@
 import { createSlice } from '@reduxjs/toolkit'
+import * as qs from 'qs'
 
-import { 
-    makeSearchParams,
-    makeTrackedRequest,
-    startRequestTracking, 
-    recordRequestFailure, 
-    recordRequestSuccess, 
-    cleanupRequest as cleanupTrackedRequest } from './helpers/requestTracker'
-
+import { makeTrackedRequest } from '/lib/state/request'
 
 export const jobsSlice = createSlice({
     name: 'jobs',
     initialState: {
-        /**
-         * A dictionary of RequestTracker objects created by
-         * `makeTrackedRequest`, keyed by uuid requestIds.
-         * 
-         * @type {object}
-         */
-        requests: {},
-
         /**
          * A dictionary of job keyed by the job's name.
          */
@@ -49,14 +35,7 @@ export const jobsSlice = createSlice({
          */
         setInDictionary: function(state, action) {
             state.dictionary[action.payload.name] = action.payload
-        },
-
-        // ========== Request Tracking Methods =============
-
-        makeRequest: startRequestTracking, 
-        failRequest: recordRequestFailure, 
-        completeRequest: recordRequestSuccess,
-        cleanupRequest: cleanupTrackedRequest
+        }
     }
 
 })
@@ -74,12 +53,11 @@ export const getJobs = function() {
     return function(dispatch, getState) {
         const endpoint = '/jobs'
 
-        return makeTrackedRequest(dispatch, getState, jobsSlice,
-            'GET', endpoint, null,
+        return dispatch(makeTrackedRequest('GET', endpoint, null,
             function(responseBody) {
                 dispatch(jobsSlice.actions.setDictionary(responseBody))
             }
-        )
+        ))
     }
 }
 
@@ -98,12 +76,11 @@ export const postJobs = function(name, data) {
     return function(dispatch, getState) {
         const endpoint = '/jobs'
 
-        return makeTrackedRequest(dispatch, getState, jobsSlice,
-            'POST', endpoint, { name: name, data: data },
+        return dispatch(makeTrackedRequest('POST', endpoint, { name: name, data: data },
             function(responseBody) {
                 dispatch(jobsSlice.actions.setInDictionary(responseBody))
             }
-        )
+        ))
     }
 }
 
@@ -121,17 +98,14 @@ export const postJobs = function(name, data) {
  */
 export const getJob = function(id) {
     return function(dispatch, getState) {
-        const endpoint = `/job/${id}`
+        const endpoint = `/job/${encodeUriComponent(id)}`
 
-        return makeTrackedRequest(dispatch, getState, jobsSlice,
-            'GET', endpoint, null,
+        return dispatch(makeTrackedRequest('GET', endpoint, null,
             function(responseBody) {
                 dispatch(jobsSlice.actions.setInDictionary(responseBody))
             }
-        )
+        ))
     }
 }
-
-export const { cleanupRequest} = jobsSlice.actions
 
 export default jobsSlice.reducer

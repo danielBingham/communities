@@ -1,0 +1,51 @@
+.group-edit-form { 
+    max-width: 700px;
+}
+.group-edit-form .group-edit-form__group-image {
+    display: block;
+    margin: 0 auto;
+    width: 160px;
+}
+.group-edit-form .group-edit-form__group-image svg.placeholder {
+    display: block;
+    width: 150px;
+    margin: 10px auto;
+    color: var(--main-border-color);
+}
+.group-edit-form .group-edit-form__group-image .draft-image-file {
+    display: block;
+    width: 150px;
+    margin: 10px auto;
+}
+.group-edit-form .group-edit-form__types {
+    text-align: left;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, 340px);
+    grid-template-rows: auto;
+    padding: 10px;
+    max-width: 680px;
+}
+.group-edit-form .group-edit-form__types .type-option {
+    padding: 5px;
+    width: 340px;
+}
+.group-edit-form .group-edit-form__types .type-option label {
+    display: inline-block;
+    font-size: 18px;
+    padding-left: 5px;
+    width: auto;
+}
+.group-edit-form .group-edit-form__types .type-option label svg {
+    width: 1em;
+    height: 1em;
+    margin-right: 0.2em;
+    margin-bottom: -0.2em;
+}
+.group-edit-form .group-edit-form__types .type-option .explanation {
+    padding: 2px;
+    font-size: 0.8em;
+    color: #333;
+}
+.group-edit-form .group-edit-form__controls {
+    text-align: center;
+}

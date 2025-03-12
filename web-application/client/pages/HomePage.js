@@ -1,82 +1,31 @@
-import React, { useState, useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import React from 'react'
+import { useSelector } from 'react-redux'
+import { Outlet } from 'react-router-dom'
 
-import { useAuthentication } from '/lib/hooks/useAuthentication'
-
-import { getPosts, cleanupRequest } from '/state/posts'
-
-import PostForm from '/components/posts/form/PostForm'
-import HomeFeed from '/components/feeds/HomeFeed'
-import WelcomeSplash from '/components/about/WelcomeSplash'
-
-import WelcomeNotice from '/components/notices/WelcomeNotice'
-
-import Spinner from '/components/Spinner'
+import FeedMenu from '/components/feeds/menu/FeedMenu'
+import { Page, PageBody, PageLeftGutter, PageRightGutter } from '/components/generic/Page'
 
 import './HomePage.css'
 
-const HomePage = function(props) {
-
-    const [requestId,setRequestId] = useState(null)
-    const request = useSelector(function(state) {
-        if ( requestId in state.posts.requests) {
-            return state.posts.requests[requestId]
-        } else {
-            return null
-        }
-    })
+const HomePage = function() {
 
     const features = useSelector((state) => state.system.features)
-    const currentUser = useSelector((state) => state.authentication.currentUser)
 
-    const postInProgressId = useSelector((state) => state.posts.inProgress)
-
-    const dispatch = useDispatch()
-
-    useEffect(function() {
-        if ( currentUser ) {
-            setRequestId(dispatch(getPosts('HomePage', { userId: currentUser.id, status: 'writing' })))
-        }
-    }, [ currentUser ])
-
-    useEffect(function() {
-        return function cleanup() {
-            if ( requestId ) {
-                dispatch(cleanupRequest({ requestId: requestId }))
-            }
-        }
-    }, [ requestId ])
-
-
-    let content = ( <Spinner /> )
-    if ( ! requestId || ! request || request.state !== 'fulfilled' ) {
-        content = ( <Spinner /> )
-    } else {
-        let welcomeNotice = null
-        if ( '3-notices' in features && currentUser && ! currentUser.notices?.welcomeNotice ) {
-            welcomeNotice = ( <WelcomeNotice /> )
-        }
-
-        content = (
-            <>
-            { welcomeNotice }
-            <div className="home-feeds">
-                <div className="content">
-                    <PostForm postId={postInProgressId} />
-                    <div className="feed">
-                        <HomeFeed /> 
-                    </div>
-                </div>
-            </div>
-            </>
-        )
-    }
-
+    const hasGroups = '19-private-groups' in features
 
     return (
-        <div id="home-page">
-            { content }
-        </div>
+        <Page id="home-page">
+            <PageLeftGutter className="home-page__sidebar">
+                { hasGroups && <FeedMenu /> }
+            </PageLeftGutter>
+            <PageBody className="content">
+                <div className="feed">
+                    <Outlet />
+                </div>
+            </PageBody>
+            <PageRightGutter className="home-page_right-gutter">
+            </PageRightGutter>
+        </Page>
     )
 }
 

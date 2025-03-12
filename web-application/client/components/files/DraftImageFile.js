@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
-import { getFile, deleteFile, cleanupRequest } from '/state/files'
+import { useRequest } from '/lib/hooks/useRequest'
+
+import { deleteFile } from '/state/files'
 import { XCircleIcon } from '@heroicons/react/24/solid'
 
 import "./DraftImageFile.css"
@@ -9,15 +11,8 @@ import "./DraftImageFile.css"
 const DraftImageFile = function({ fileId, setFileId, width, deleteOnRemove }) {
 
     // ============ Request Tracking ==========================================
-   
-    const [requestId, setRequestId] = useState(null)
-    const request = useSelector(function(state) {
-        if ( requestId in state.files.requests) {
-            return state.files.requests[requestId]
-        } else {
-            return null
-        }
-    })
+  
+    const [request, makeRequest] = useRequest()
 
     // ============ Redux State ===============================================
     
@@ -31,19 +26,11 @@ const DraftImageFile = function({ fileId, setFileId, width, deleteOnRemove }) {
         setFileId(null)
 
         if ( deleteOnRemove !== false ) {
-            setRequestId(dispatch(deleteFile(fileId)))
+            makeRequest(deleteFile(fileId))
         }
     }
 
     // =========== Effect Handling ============================================
-    
-    useEffect(function() {
-        return function cleanup() {
-            if ( requestId ) {
-                dispatch(cleanupRequest({ requestId: requestId }))
-            }
-        }
-    }, [ requestId ])
 
     // ============ Render ====================================================
     

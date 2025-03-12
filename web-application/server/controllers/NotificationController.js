@@ -40,15 +40,15 @@ module.exports = class NotificationController {
          *
          * 
          * ********************************************************************/
-        
+   
+        const currentUser = request.session.user
+
         // 1. User must be authenticated.
-        if ( ! request.session.user ) {
+        if ( ! currentUser ) {
             throw new ControllerError(401, 'not-authenticated', 'Must be authenticated to retrieve notifications!')
         }
 
-        const userId = request.session.user.id
-
-        const results = await this.notificationDAO.selectNotifications('WHERE notifications.user_id = $1', [ userId ])
+        const results = await this.notificationDAO.selectNotifications('WHERE notifications.user_id = $1', [ currentUser.id ])
 
         results.meta = {}
         results.relations = []
@@ -68,8 +68,9 @@ module.exports = class NotificationController {
          *
          *********************************************************************/
 
+        const currentUser = request.session.user
         // 1. User must be authenticated.
-        if ( ! request.session.user ) {
+        if ( ! currentUser ) {
             throw new ControllerError(401, 'not-authenticated', 'Must be authenticated to retrieve notifications!')
         }
 
@@ -80,10 +81,19 @@ module.exports = class NotificationController {
             notifications = request.body
         }
 
-        for( const notification of notifications ) {
+        const otherUser = notifications.find((n) => n.userId !== currentUser.id)
+        if ( otherUser !== undefined ) {
+            throw new ControllerError(403, 'not-authorized',
+                `User(${currentUser.id}) attempted to update notification for User(${otherUser.userId}). Denied.`,
+                `You may not update another user's notifications.`)
+        }
+
+        for(const notification of notifications) {
             const updateResult = await this.notificationDAO.updateNotification(notification)
             if ( ! updateResult ) {
-                throw new ControllerError(400, 'no-content', `Failed to update a batch of notifications because no content was provided.`)
+                throw new ControllerError(400, 'no-content', 
+                    `Failed to update a batch of notifications because no content was provided.`,
+                    `Failed to update.`)
             }
         }
 
@@ -104,10 +114,12 @@ module.exports = class NotificationController {
          * Permissions Checking and Input Validation
          *
          * 1. User must be authenticated.
+         * 2. Notification must belong to currentUser.
          *
          * 
          * ********************************************************************/
-        
+       
+        const currentUser = request.session.user
         // 1. User must be authenticated.
         if ( ! request.session.user ) {
             throw new ControllerError(401, 'not-authenticated', 'Must be authenticated to retrieve notifications!')
@@ -118,9 +130,17 @@ module.exports = class NotificationController {
 
         notification.id = id
 
+        if ( notification.userId !== currentUser.id ) {
+            throw new ControllerError(403, 'not-authorized',
+                `User(${currentUser.id}) attempted to update notification for User(${notification.userId}). Denied.`,
+                `You may not update another user's notifications.`)
+        }
+
         const updateResult = await this.notificationDAO.updateNotification(notification)
         if ( ! updateResult ) {
-            throw new ControllerError(400, 'no-content', `Failed to update a notification because no content was provided.`)
+            throw new ControllerError(400, 'no-content', 
+                `Failed to update a notification because no content was provided.`,
+                `Failed to update notification.`)
         }
 
         const results = await this.notificationDAO.selectNotifications('WHERE notifications.id = $1', [ id ] )

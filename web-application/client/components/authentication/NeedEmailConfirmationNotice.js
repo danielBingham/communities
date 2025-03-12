@@ -17,9 +17,7 @@ const NeedEmailConfirmationNotice = function(props) {
 
     // ======= Redux State ==========================================
     
-    const currentUser = useSelector(function(state) {
-        return state.authentication.currentUser
-    })
+    const currentUser = useSelector((state) => state.authentication.currentUser)
 
     // ======= Actions and Event Handling ===========================
     

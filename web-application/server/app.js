@@ -93,6 +93,24 @@ app.use(session({
     } 
 }))
 
+// Set the feature flags on each request, so that they are always up to date.
+// This means we can't use feature flags in Controller, Service, and DAO
+// constructors, since those are called at startup time.
+//
+// TECHDEBT This is pretty awkward, and it's worth considering if we want to
+// change something here. Should we be creating Controllers, Services, and DAOs
+// just in time so that we can use Feature Flags in constructors?
+//
+// Or is it better to retain this pattern? Does it save memory to use a single
+// instance created at startup?  Is it enough that we care?
+app.use(function(request, response, next) {
+    const featureService = new FeatureService(core)
+    featureService.getEnabledFeatures().then(function(features) {
+        core.features = new FeatureFlags(features)
+        next()
+    })
+})
+
 // Set the id the logger will use to identify the session.  We don't want to
 // use the actual session id, since that value is considered sensitive.  So
 // instead we'll just use a uuid.
@@ -108,17 +126,6 @@ app.use(function(request, response, next) {
         }
     }
     next()
-})
-
-// Setup FeatureFlags and make it available through the core.
-app.use(function(request, response, next) {
-    const featureService = new FeatureService(core)
-    featureService.getEnabledFeatures().then(function(features) {
-        core.features = new FeatureFlags(features)
-        next()
-    }).catch(function(error) {
-        next(error)
-    })
 })
 
 // Get the api router, pre-wired up to the controllers.
@@ -158,15 +165,9 @@ app.get('/config', function(request, response) {
         stripe: {
             portal: core.config.stripe.portal,
             links: core.config.stripe.links
-        }
+        },
+        features: core.features.features
     })
-})
-
-/**
- * A route to get the hash of enabled features.
- */
-app.get('/features', function(request, response) {
-    response.status(200).json(core.features.features)
 })
 
 /**
@@ -214,7 +215,7 @@ if ( core.config.environment == 'development' ) {
         core.logger.debug(`Index File Request with webpack-dev-middleware server side rendering.`)
         const { devMiddleware } = response.locals.webpack
         const { assetsByChunkName, outputPath } = devMiddleware.stats.toJson() 
-     
+
         const metadata = pageMetadataService.getRootWithDevAssets(assetsByChunkName)
         const parsedTemplate = serverSideRenderingService.renderIndexTemplate(metadata) 
         response.send(parsedTemplate)
@@ -266,6 +267,7 @@ app.use(function(error, request, response, next) {
         response.status(500).json({error: 'server-error'})
     }
 })
+
 
 module.exports = { 
     app: app,

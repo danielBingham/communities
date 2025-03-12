@@ -1,0 +1,19 @@
+
+@media (1600px <= width) {
+    .group-members-list__grid {
+        display: grid;
+        grid-template-columns: auto auto;
+    }
+}
+
+@media (1220px < width < 1600px) {
+    .group-members-list__grid {
+        display: grid;
+        grid-template-columns: auto auto;
+    }
+}
+@media (width <= 1220px) {
+    .group-members-list__grid {
+        display: block;
+    }
+}

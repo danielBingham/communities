@@ -1,38 +1,23 @@
 import { createSlice, current } from '@reduxjs/toolkit'
-import { v4 as uuidv4 } from 'uuid'
+import * as qs from 'qs'
 
-import setRelationsInState from './helpers/relations'
+import { makeTrackedRequest } from '/lib/state/request'
+
+import setRelationsInState from '/lib/state/relations'
 
 import {
     setInDictionary,
     removeEntity,
-    makeQuery,
     setQueryResults,
     clearQuery,
     clearQueries
-} from './helpers/state'
+} from '/lib/state'
 
-import { 
-    makeSearchParams,
-    makeTrackedRequest,
-    startRequestTracking, 
-    recordRequestFailure, 
-    recordRequestSuccess, 
-    cleanupRequest as cleanupTrackedRequest, 
-} from './helpers/requestTracker'
-
-import { setCurrentUser, setFriends } from '/state/authentication'
+import { setCurrentUser } from '/state/authentication'
 
 export const usersSlice = createSlice({
     name: 'users',
     initialState: {
-        /**
-         * A dictionary of requests in progress or that we've made and completed,
-         * keyed with a uuid requestId.
-         *
-         * @type {object}
-         */
-        requests: {},
 
         /**
          * A dictionary of users we've retrieved from the backend, keyed by
@@ -62,27 +47,35 @@ export const usersSlice = createSlice({
          *  ...
          * }
          */
-        queries: {}
+        queries: {},
+
+        byUsername: {}
     },
     reducers: {
 
 
         // ======== State Manipulation Helpers ================================
-        // @see ./helpers/state.js
+        // @see /lib/state.js
 
-        setUsersInDictionary: setInDictionary,
-        removeUser: removeEntity,
-        makeUserQuery: makeQuery,
+        setUsersInDictionary: (state, action) => {
+            setInDictionary(state, action)
+            
+            if ( 'dictionary' in action.payload) {
+                for(const [id, user] of Object.entries(action.payload.dictionary)) {
+                    state.byUsername[user.username] = user
+                }
+            } else if ( 'entity' in action.payload ) {
+                state.byUsername[action.payload.entity.username] = action.payload.entity
+            }
+        },
+        removeUser: (state, action) => {
+            removeEntity(state, action)
+
+            delete state.byUsername[action.payload.entity.username]
+        },
         setUserQueryResults: setQueryResults,
         clearUserQuery: clearQuery,
-        clearUserQueries: clearQueries,
-
-        // ========== Request Tracking Methods =============
-
-        makeRequest: startRequestTracking, 
-        failRequest: recordRequestFailure, 
-        completeRequest: recordRequestSuccess,
-        cleanupRequest: cleanupTrackedRequest
+        clearUserQueries: clearQueries
     }
 })
 
@@ -116,13 +109,8 @@ const updateCurrentUser = function(response) {
  */
 export const getUsers = function(name, params) {
     return function(dispatch, getState) {
-        const queryString = makeSearchParams(params)
-        const endpoint = '/users' + ( params ? '?' + queryString.toString() : '')
-
-        dispatch(usersSlice.actions.makeUserQuery({ name: name }))
-
-        return makeTrackedRequest(dispatch, getState, usersSlice,
-            'GET', endpoint, null,
+        const endpoint = `/users${( params ? '?' + qs.stringify(params) : '')}`
+        return dispatch(makeTrackedRequest('GET', endpoint, null,
             function(response) {
                 dispatch(usersSlice.actions.setUsersInDictionary({ dictionary: response.dictionary }))
 
@@ -130,7 +118,7 @@ export const getUsers = function(name, params) {
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -148,8 +136,7 @@ export const getUsers = function(name, params) {
  */
 export const postUsers = function(user) {
     return function(dispatch, getState) {
-        return makeTrackedRequest(dispatch, getState, usersSlice,
-            'POST', '/users', user,
+        return dispatch(makeTrackedRequest('POST', '/users', user,
             function(response) {
                 dispatch(usersSlice.actions.setUsersInDictionary({ entity: response.entity }))
 
@@ -157,7 +144,7 @@ export const postUsers = function(user) {
 
                 dispatch(updateCurrentUser(response))
             }
-        )
+        ))
     }
 }
 
@@ -175,8 +162,7 @@ export const postUsers = function(user) {
  */
 export const getUser = function(id) {
     return function(dispatch, getState) {
-        return makeTrackedRequest(dispatch, getState, usersSlice,
-            'GET', `/user/${id}`, null,
+        return dispatch(makeTrackedRequest('GET', `/user/${encodeURIComponent(id)}`, null,
             function(response) {
                 dispatch(usersSlice.actions.setUsersInDictionary({ entity: response.entity }))
 
@@ -184,7 +170,7 @@ export const getUser = function(id) {
 
                 dispatch(updateCurrentUser(response))
             }
-        )
+        ))
     }
 }
 
@@ -202,8 +188,7 @@ export const getUser = function(id) {
  */
 export const patchUser = function(user) {
     return function(dispatch, getState) {
-        return makeTrackedRequest(dispatch, getState, usersSlice,
-            'PATCH', `/user/${user.id}`, user,
+        return dispatch(makeTrackedRequest('PATCH', `/user/${encodeURIComponent(user.id)}`, user,
             function(response) {
                 dispatch(usersSlice.actions.setUsersInDictionary({ entity: response.entity }))
 
@@ -211,7 +196,7 @@ export const patchUser = function(user) {
 
                 dispatch(updateCurrentUser(response))
             }
-        )
+        ))
     }
 }
 
@@ -229,19 +214,17 @@ export const patchUser = function(user) {
  */
 export const deleteUser = function(user) {
     return function(dispatch, getState) {
-        return makeTrackedRequest(dispatch, getState, usersSlice,
-            'DELETE', `/user/${user.id}`, null,
+        return dispatch(makeTrackedRequest('DELETE', `/user/${encodeURIComponent(user.id)}`, null,
             function(response) {
                 dispatch(usersSlice.actions.removeUser({ entity: user }))
             }
-        )
+        ))
     }
 } 
 
 export const { 
     setUsersInDictionary, removeUser, 
-    makeUserQuery, setUserQueryResults, clearUserQuery,
-    cleanupRequest 
+    setUserQueryResults, clearUserQuery
 }  = usersSlice.actions
 
 export default usersSlice.reducer

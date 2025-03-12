@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import {  Link, useNavigate } from 'react-router-dom'
+import { useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 
 import { ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/solid'
 
 import Button from '/components/generic/button/Button'
 
 import UserProfileImage from '/components/users/UserProfileImage'
-import UserTag from '/components/users/UserTag'
 import UserMenu from './UserMenu'
 
 import './AuthenticationNavigation.css'
@@ -27,13 +26,10 @@ const AuthenticationNavigation = function(props) {
 
     // ======= Redux State ==========================================
 
-    const currentUser = useSelector(function(state) {
-        return state.authentication.currentUser
-    })
+    const currentUser = useSelector((state) => state.authentication.currentUser)
 
     // ======= Actions and Event Handling ===========================
 
-    const dispatch = useDispatch()
     const navigate = useNavigate()
 
     const toggleMenu = function(event) {
@@ -76,7 +72,7 @@ const AuthenticationNavigation = function(props) {
                 <span className="logged-in-user">
                     <a href="" className="no-close" onClick={toggleMenu}>
                         <UserProfileImage userId={currentUser.id} />
-                        <span className="navigation-text">{ currentUser.name }</span>{ menuVisible ? <ChevronUpIcon className="arrow" /> : <ChevronDownIcon className="arrow" /> }</a></span>
+                        <span className="navigation-text">{ currentUser.name }</span></a></span>
                 <UserMenu visible={menuVisible} toggleMenu={toggleMenu} />
             </div>
         )

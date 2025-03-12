@@ -4,9 +4,12 @@ import { useSearchParams } from 'react-router-dom'
 
 import { UserCircleIcon } from '@heroicons/react/24/outline'
 
-import {getUsers, clearUserQuery, cleanupRequest } from '/state/users'
+import { useRequest } from '/lib/hooks/useRequest'
+
+import {getUsers, clearUserQuery } from '/state/users'
 
 import UserBadge from '../UserBadge'
+import FriendButton from '/components/friends/FriendButton'
 
 import Spinner from '/components/Spinner'
 import { 
@@ -25,29 +28,13 @@ import './UserListView.css'
 const UserListView = function({ params }) {
     const [ searchParams, setSearchParams ] = useSearchParams()
    
-
     // ======= Request Tracking =====================================
 
-    const [ requestId, setRequestId ] = useState(null)
-    const request = useSelector(function(state) {
-        if ( requestId ) {
-            return state.users.requests[requestId]
-        } else {
-            return null
-        }
-    })
+    const [request, makeRequest] = useRequest()
 
     // ======= Redux State ==========================================
 
-    const userDictionary = useSelector((state) => state.users.dictionary)
-    const users = useSelector(function(state) {
-        if ( ! state.users.queries['UserList'] ) {
-            return []
-        } else {
-            return state.users.queries['UserList'].list
-        }
-    })
-
+    const users = useSelector((state) => 'UserList' in state.users.queries ? state.users.queries['UserList'].list : []) 
     const meta = useSelector(function(state) {
         if ( ! state.users.queries['UserList'] ) {
             return {
@@ -76,30 +63,23 @@ const UserListView = function({ params }) {
             queryParams.name = searchParams.get('q')
         }
 
-        setRequestId(dispatch(getUsers('UserList', queryParams)))
+        makeRequest(getUsers('UserList', queryParams))
         return function cleanup() {
             dispatch(clearUserQuery({ name: 'UserList'}))
         }
     }, [ searchParams, params ])
 
-    // Clean up our request.
-    useEffect(function() {
-        return function cleanup() {
-            if ( requestId ) {
-                dispatch(cleanupRequest({ requestId: requestId }))
-            }
-        }
-    }, [ requestId ])
-
     // ======= Render ===============================================
 
-    let content = ( <Spinner local={ true } /> )
+    let content = ( <Spinner /> )
     let noContent = null
 
     if ( users ) {
         const userBadges = []
         for( const userId of users) {
-            userBadges.push(<UserBadge key={userId} id={userId} />)
+            userBadges.push(<UserBadge key={userId} id={userId}>
+                <FriendButton userId={userId} />
+            </UserBadge>)
         }
         content = userBadges
     } else if (request && request.state == 'fulfilled') {

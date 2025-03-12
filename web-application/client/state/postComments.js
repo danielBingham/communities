@@ -1,38 +1,23 @@
 import { createSlice } from '@reduxjs/toolkit'
+import * as qs from 'qs'
 
-import setRelationsInState from './helpers/relations'
+import { makeTrackedRequest } from '/lib/state/request'
+
+import setRelationsInState from '/lib/state/relations'
 
 import {
     setInDictionary,
     removeEntity,
-    makeQuery,
     setQueryResults,
     clearQuery,
     clearQueries
-} from './helpers/state'
-
-import { 
-    makeSearchParams,
-    makeTrackedRequest,
-    startRequestTracking, 
-    recordRequestFailure, 
-    recordRequestSuccess, 
-    cleanupRequest as cleanupTrackedRequest, 
-} from './helpers/requestTracker'
+} from '/lib/state'
 
 export const postCommentsSlice = createSlice({
     name: 'postComments',
     initialState: {
         
         // ======== Standard State ============================================
-        
-        /**
-         * A dictionary of requests in progress or that we've made and completed,
-         * keyed with a uuid requestId.
-         *
-         * @type {object}
-         */
-        requests: {},
 
         /**
          * A dictionary of postComments we've retrieved from the backend, keyed by
@@ -110,7 +95,6 @@ export const postCommentsSlice = createSlice({
                 delete state.commentsByPost[entity.postId][entity.id]
             }
         },
-        makePostCommentQuery: makeQuery,
         setPostCommentQueryResults: setQueryResults,
         clearPostCommentQuery: clearQuery,
         clearPostCommentQueries: clearQueries,
@@ -123,14 +107,7 @@ export const postCommentsSlice = createSlice({
         finishPostCommentEdit: function(state, action) {
             const commentId = action.payload
             delete state.editing[commentId]
-        },
-
-        // ========== Request Tracking Methods =============
-
-        makeRequest: startRequestTracking, 
-        failRequest: recordRequestFailure, 
-        completeRequest: recordRequestSuccess,
-        cleanupRequest: cleanupTrackedRequest
+        }
     }
 })
 
@@ -148,14 +125,9 @@ export const postCommentsSlice = createSlice({
  */
 export const getPostComments = function(postId, name, params) {
     return function(dispatch, getState) {
+        const endpoint = `/post/${encodeURIComponent(postId)}/comments${( params ? '?' + qs.stringify(params) : '')}`
 
-        const queryString = makeSearchParams(params)
-        const endpoint = `/post/${postId}/comments` + ( params ? '?' + queryString.toString() : '')
-
-        dispatch(postCommentsSlice.actions.makePostCommentQuery({ name: name }))
-
-        return makeTrackedRequest(dispatch, getState, postCommentsSlice,
-            'GET', endpoint, null,
+        return dispatch(makeTrackedRequest('GET', endpoint, null,
             function(response) {
                 dispatch(postCommentsSlice.actions.setPostCommentsInDictionary({ dictionary: response.dictionary}))
 
@@ -163,7 +135,7 @@ export const getPostComments = function(postId, name, params) {
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -181,16 +153,14 @@ export const getPostComments = function(postId, name, params) {
  */
 export const postPostComments = function(comment) {
     return function(dispatch, getState) {
-        const endpoint = `/post/${comment.postId}/comments`
-        const body = comment 
-        return makeTrackedRequest(dispatch, getState, postCommentsSlice,
-            'POST', endpoint, body,
+        const endpoint = `/post/${encodeURIComponent(comment.postId)}/comments`
+        return dispatch(makeTrackedRequest('POST', endpoint, comment,
             function(response) {
                 dispatch(postCommentsSlice.actions.setPostCommentsInDictionary({ entity: response.entity}))
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -209,14 +179,13 @@ export const postPostComments = function(comment) {
  */
 export const getPostComment = function(postId, id) {
     return function(dispatch, getState) {
-        return makeTrackedRequest(dispatch, getState, postCommentsSlice,
-            'GET', `/post/${postId}/comment/${id}`, null,
+        return dispatch(makeTrackedRequest('GET', `/post/${encodeURIComponent(postId)}/comment/${encodeURIComponent(id)}`, null,
             function(response) {
                 dispatch(postCommentsSlice.actions.setPostCommentsInDictionary({ entity: response.entity}))
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -234,14 +203,13 @@ export const getPostComment = function(postId, id) {
  */
 export const patchPostComment = function(comment) {
     return function(dispatch, getState) {
-        return makeTrackedRequest(dispatch, getState, postCommentsSlice,
-            'PATCH', `/post/${comment.postId}/comment/${comment.id}`, comment,
+        return dispatch(makeTrackedRequest('PATCH', `/post/${encodeURIComponent(comment.postId)}/comment/${encodeURIComponent(comment.id)}`, comment,
             function(response) {
                 dispatch(postCommentsSlice.actions.setPostCommentsInDictionary({ entity: response.entity}))
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -259,22 +227,20 @@ export const patchPostComment = function(comment) {
  */
 export const deletePostComment = function(comment) {
     return function(dispatch, getState) {
-        return makeTrackedRequest(dispatch, getState, postCommentsSlice,
-            'DELETE', `/post/${comment.postId}/comment/${comment.id}`, null,
+        return dispatch(makeTrackedRequest('DELETE', `/post/${encodeURIComponent(comment.postId)}/comment/${encodeURIComponent(comment.id)}`, null,
             function(response) {
                 dispatch(postCommentsSlice.actions.removePostComment({ entity: comment}))
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 } 
 
 
 export const { 
     setPostCommentsInDictionary, removePostComment, 
-    makePostCommentQuery, clearPostCommentQuery, setPostCommentQueryResults,
-    cleanupRequest,
+    clearPostCommentQuery, setPostCommentQueryResults,
     startPostCommentEdit, finishPostCommentEdit
 }  = postCommentsSlice.actions
 

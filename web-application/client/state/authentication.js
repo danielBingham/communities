@@ -1,16 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { v4 as uuidv4 } from 'uuid'
 
-import logger from '../logger'
-import RequestError from '/errors/RequestError'
-
-import { 
-    makeSearchParams,
-    makeTrackedRequest,
-    startRequestTracking, 
-    recordRequestFailure, 
-    recordRequestSuccess, 
-    cleanupRequest as cleanupTrackedRequest } from './helpers/requestTracker'
+import { makeTrackedRequest } from '/lib/state/request'
 
 import { reset } from '/state/system'
 import { setUsersInDictionary } from '/state/users'
@@ -19,14 +9,6 @@ import { setFilesInDictionary } from '/state/files'
 export const authenticationSlice = createSlice({
     name: 'authentication',
     initialState: {
-        /**
-         * A dictionary of RequestTracker objects as returned by
-         * RequestTracker.getRequestTracker, keyed by uuid requestIds.
-         * 
-         * @type {object}
-         */
-        requests: {},
-
         /**
          * A `user` object representing the currentUser.
          *
@@ -38,14 +20,7 @@ export const authenticationSlice = createSlice({
 
         setCurrentUser: function(state, action) {
             state.currentUser = action.payload
-        },
-
-        // ========== Request Tracking Methods =============
-
-        makeRequest: startRequestTracking, 
-        failRequest: recordRequestFailure, 
-        completeRequest: recordRequestSuccess,
-        cleanupRequest: cleanupTrackedRequest
+        }
     }
 
 })
@@ -70,9 +45,7 @@ export const setSession = function(session) {
  */
 export const refreshAuthentication = function() {
     return function(dispatch, getState) {
-        const requestId = dispatch(getAuthentication(function() {
-            dispatch(authenticationSlice.actions.cleanupRequest({ requestId: requestId }))
-        }))
+        dispatch(getAuthentication())
     }
 }
 
@@ -86,27 +59,18 @@ export const refreshAuthentication = function() {
  *
  * @returns {string} A uuid requestId that can be used to track this request.
  */
-export const getAuthentication = function(onCompletion) {
+export const getAuthentication = function() {
     return function(dispatch, getState) {
         const endpoint = '/authentication'
-
-        // Don't need to bust the cache for authentication requests, because we
-        // override cleanupRequest to avoid caching them at all.
-        return makeTrackedRequest(dispatch, getState, authenticationSlice,
-            'GET', endpoint, null,
+        return dispatch(makeTrackedRequest('GET', endpoint, null,
             function(responseBody ) {
                 if ( responseBody && responseBody.session !== null) {
                     dispatch(setSession(responseBody.session))
                 } else {
                     dispatch(authenticationSlice.actions.setCurrentUser(null))
                 }
-
-                if ( onCompletion ) {
-                    onCompletion()
-                }
             }
-        )
-
+        ))
     }
 }
 
@@ -131,8 +95,7 @@ export const postAuthentication = function(email, password) {
             password: password
         }
 
-        return makeTrackedRequest(dispatch, getState, authenticationSlice,
-            'POST', endpoint, body,
+        return dispatch(makeTrackedRequest('POST', endpoint, body,
             function(responseBody) {
                 if ( responseBody && responseBody.session !== null) {
                     dispatch(setSession(responseBody.session))
@@ -140,7 +103,7 @@ export const postAuthentication = function(email, password) {
                     dispatch(authenticationSlice.actions.setCurrentUser(null))
                 }
             }
-        )
+        ))
     }
 }
 
@@ -165,12 +128,11 @@ export const patchAuthentication = function(email, password) {
             email: email,
             password: password
         }
-        return makeTrackedRequest(dispatch, getState, authenticationSlice,
-            'PATCH', endpoint, body, 
+        return dispatch(makeTrackedRequest('PATCH', endpoint, body, 
             function(responseBody) {
                 dispatch(setUsersInDictionary({ entity: responseBody.user }))  
             }
-        )
+        ))
     }
 }
 
@@ -189,8 +151,7 @@ export const deleteAuthentication = function() {
     return function(dispatch, getState) {
         const endpoint = '/authentication'
 
-        return makeTrackedRequest(dispatch, getState, authenticationSlice,
-            'DELETE', endpoint, null,
+        return dispatch(makeTrackedRequest('DELETE', endpoint, null,
             function(responseBody) {
                 dispatch(reset())
                 // As soon as we reset the redux store, we need to redirect to
@@ -198,10 +159,10 @@ export const deleteAuthentication = function() {
                 // cycles because that could have undefined impacts.
                 window.location.href = "/"
             }
-        )
+        ))
     }
 }
 
-export const { setCurrentUser, cleanupRequest} = authenticationSlice.actions
+export const { setCurrentUser } = authenticationSlice.actions
 
 export default authenticationSlice.reducer

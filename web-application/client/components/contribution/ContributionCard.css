@@ -1,4 +1,5 @@
 .contribution {
+    box-sizing: border-box;
     display: block;
     padding: 10px;
 }

@@ -97,6 +97,19 @@ module.exports = class PostReactionDAO extends DAO {
         return { dictionary: dictionary, list: list }
     }
 
+    async getPostReactionByPostAndUser(postId, userId) {
+        const results = await this.selectPostReactions({
+            where: `post_reactions.post_id = $1 AND post_reactions.user_id = $2`,
+            params: [ postId, userId ]
+        })
+
+        if ( results.list.length <= 0 ) {
+            return null
+        }
+
+        return results.dictionary[results.list[0]]
+    }
+
     async selectPostReactions(query) {
         let where = query.where ? `WHERE ${query.where}`: ''
         let params = query.params ? query.params : []

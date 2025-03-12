@@ -18,43 +18,25 @@
  *
  ******************************************************************************/
 import { createSlice } from '@reduxjs/toolkit'
-import { v4 as uuidv4 } from 'uuid'
+import * as qs from 'qs'
 
-import setRelationsInState from './helpers/relations'
+import { makeTrackedRequest } from '/lib/state/request'
+
+import setRelationsInState from '/lib/state/relations'
 
 import {
     setInDictionary,
     removeEntity,
-    makeQuery,
     setQueryResults,
     clearQuery,
     clearQueries
-} from './helpers/state'
-
-import { 
-    makeSearchParams,
-    makeTrackedRequest,
-    startRequestTracking, 
-    recordRequestFailure, 
-    recordRequestSuccess, 
-    cleanupRequest as cleanupTrackedRequest, 
-} from './helpers/requestTracker'
-
-const cacheTTL = 0  // Don't cache paper notifications.  We poll for them. 
+} from '/lib/state'
 
 export const notificationsSlice = createSlice({
     name: 'notifications',
     initialState: {
         
         // ======== Standard State ============================================
-
-        /**
-         * A dictionary of requests in progress or that we've made and completed,
-         * keyed with a uuid requestId.
-         *
-         * @type {object}
-         */
-        requests: {},
 
         /**
          * A dictionary of notifications we've retrieved from the backend, keyed by
@@ -94,7 +76,6 @@ export const notificationsSlice = createSlice({
 
         setNotificationsInDictionary: setInDictionary,
         removeNotification: removeEntity,
-        makeNotificationQuery: makeQuery,
         setNotificationQueryResults: setQueryResults,
         clearNotificationQuery: clearQuery,
         clearNotificationQueries: clearQueries,
@@ -105,15 +86,14 @@ export const notificationsSlice = createSlice({
             const name = action.payload.name
             const list = action.payload.list
 
-            state.queries[name].list = [ ...state.queries[name].list, ...list ]
-        },
-
-        // ========== Request Tracking Methods =============
-
-        makeRequest: startRequestTracking, 
-        failRequest: recordRequestFailure, 
-        completeRequest: recordRequestSuccess,
-        cleanupRequest: cleanupTrackedRequest
+            if ( name in state.queries ) {
+                state.queries[name].list = [ ...state.queries[name].list, ...list ]
+            } else {
+                state.queries[name] = {
+                    list: [ ...list ]
+                }
+            }
+        }
     }
 })
 
@@ -130,16 +110,9 @@ export const notificationsSlice = createSlice({
  */
 export const getNotifications = function(name, params) {
     return function(dispatch, getState) {
-        const queryString = makeSearchParams(params) 
-        const endpoint = `/notifications${( params ? '?' + queryString.toString() : '')}`
+        const endpoint = `/notifications${( params ? '?' + qs.stringify(params) : '')}`
 
-        const state = getState()
-        if ( ! state.notifications.queries[name] ) {
-            dispatch(notificationsSlice.actions.makeNotificationQuery({ name: name }))
-        }
-
-        return makeTrackedRequest(dispatch, getState, notificationsSlice,
-            'GET', endpoint, null,
+        return dispatch(makeTrackedRequest('GET', endpoint, null,
             function(response) {
                 if ( ! params?.since ) {
                     dispatch(notificationsSlice.actions.setNotificationsInDictionary({ dictionary: response.dictionary}))
@@ -155,7 +128,7 @@ export const getNotifications = function(name, params) {
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -173,14 +146,13 @@ export const getNotifications = function(name, params) {
  */
 export const patchNotifications = function(notifications) {
     return function(dispatch, getState) {
-        return makeTrackedRequest(dispatch, getState, notificationsSlice,
-            'PATCH', `/notifications`, notifications,
+        return dispatch(makeTrackedRequest('PATCH', `/notifications`, notifications,
             function(response) {
                 dispatch(notificationsSlice.actions.setNotificationsInDictionary({ dictionary: response.dictionary }))
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -198,21 +170,18 @@ export const patchNotifications = function(notifications) {
  */
 export const patchNotification = function(notification) {
     return function(dispatch, getState) {
-        return makeTrackedRequest(dispatch, getState, notificationsSlice,
-            'PATCH', `/notification/${notification.id}`, notification,
+        return dispatch(makeTrackedRequest('PATCH', `/notification/${encodeURIComponent(notification.id)}`, notification,
             function(response) {
                 dispatch(notificationsSlice.actions.setNotificationsInDictionary({ entity: response.entity }))
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
 export const {  
-    setNotificationsInDictionary, removeNotification,
-    makeNotificationQuery, setNotificationQueryResults, clearNotificationQuery,
-    cleanupRequest   
+    setNotificationsInDictionary 
 }  = notificationsSlice.actions
 
 export default notificationsSlice.reducer

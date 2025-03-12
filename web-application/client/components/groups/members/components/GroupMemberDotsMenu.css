@@ -1,0 +1,12 @@
+.group-member-dots-menu {
+    float: right;
+    margin: 5px 10px;
+}
+.group-member-dots-menu .menu-item {
+    padding: 5px 10px 5px 20px;
+}
+.floating-menu.group-member-dots-menu svg.dots {
+    width: 24px;
+    height: 24px;
+    margin-top: -8px;
+}

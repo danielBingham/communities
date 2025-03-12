@@ -1,11 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import {  useSearchParams } from 'react-router-dom'
+import { useSelector } from 'react-redux'
+import { useSearchParams } from 'react-router-dom'
+
+import logger from '/logger'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
 import { validateToken } from '/state/tokens'
-import { patchUser, cleanupRequest } from '/state/users'
+import { patchUser } from '/state/users'
 
 import Input from '/components/generic/input/Input'
 
@@ -34,30 +36,14 @@ const AcceptInvitationForm = function(props) {
 
     // ======= Request Tracking =====================================
 
-    const [ tokenRequest, makeTokenRequest ] = useRequest()
-
-    const [ requestId, setRequestId ] = useState(null)
-    const request = useSelector(function(state) {
-        if (requestId ) {
-            return state.users.requests[requestId]
-        } else {
-            return null
-        }
-    })
+    const [tokenRequest, makeTokenRequest] = useRequest()
+    const [request, makeRequest] = useRequest()
 
     // ======= Redux State ==========================================
 
-    const user = useSelector(function(state) {
-        if ( token in state.tokens.usersByToken ) {
-            return state.tokens.usersByToken[token]
-        } else {
-            return null
-        }
-    })
+    const user = useSelector((state) => token in state.tokens.usersByToken ? state.tokens.usersByToken[token] : null) 
 
     // ======= Actions and Event Handling ===========================
-    
-    const dispatch = useDispatch()
 
     /**
      * Perform validation on our state and return a boolean indicating whether
@@ -190,7 +176,7 @@ const AcceptInvitationForm = function(props) {
             token: token
         }
 
-        setRequestId(dispatch(patchUser(userPatch)))
+        makeRequest(patchUser(userPatch))
     }
 
     // ======= Effect Handling ======================================
@@ -214,14 +200,6 @@ const AcceptInvitationForm = function(props) {
             window.location.href = "/"
         } 
     }, [ request ])
-
-    useEffect(function() {
-        return function cleanup() {
-            if ( requestId ) {
-                dispatch(cleanupRequest({ requestId: requestId }))
-            }
-        }
-    }, [ requestId ])
 
     useEffect(function() {
         return function cleanup() {

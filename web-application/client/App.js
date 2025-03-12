@@ -2,16 +2,17 @@ import React, { useState, useEffect } from 'react'
 import {
     BrowserRouter as Router,
     Routes,
-    Route,
-    Link
+    Route
 } from 'react-router-dom'
 
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
+
+import { useRequest } from '/lib/hooks/useRequest'
 
 import logger from '/logger'
 
-import { getConfiguration, getFeatures, cleanupRequest as cleanupSystemRequest } from '/state/system'
-import { getAuthentication, cleanupRequest as cleanupAuthenticationRequest } from '/state/authentication'
+import { getConfiguration } from '/state/system'
+import { getAuthentication } from '/state/authentication'
 
 import MainLayout from '/layouts/MainLayout'
 import HeaderlessLayout from '/layouts/HeaderlessLayout'
@@ -22,7 +23,14 @@ import AuthenticatedLayout from '/layouts/AuthenticatedLayout'
 import AdminPage from '/pages/AdminPage'
 
 import HomePage from '/pages/HomePage'
-import AboutPage from '/pages/AboutPage'
+import Feed from '/components/feeds/Feed'
+
+import AboutPage from '/pages/about/AboutPage'
+import About from '/pages/about/views/About'
+import FrequentlyAskedQuestions from '/pages/about/views/FrequentlyAskedQuestions'
+import TermsOfService from '/pages/about/views/TermsOfService'
+import Privacy from '/pages/about/views/Privacy'
+import Contact from '/pages/about/views/Contact'
 
 import LoginPage from '/pages/authentication/LoginPage'
 import EmailConfirmationPage from '/pages/authentication/EmailConfirmationPage'
@@ -31,9 +39,25 @@ import ResetPasswordRequestPage from '/pages/authentication/ResetPasswordRequest
 import AcceptInvitationPage from '/pages/authentication/AcceptInvitationPage'
 
 import UserProfilePage from '/pages/users/UserProfilePage'
+
 import UserAccountPage from '/pages/users/UserAccountPage'
+import UserProfileEditForm from '/pages/users/views/UserProfileEditForm'
+import ChangePasswordForm from '/pages/users/views/ChangePasswordForm'
+import ChangeEmailForm from '/pages/users/views/ChangeEmailForm'
+import ContributionView from '/pages/users/views/ContributionView'
+import UserAccountSettingsView from '/pages/users/views/UserAccountSettingsView'
 
 import FriendsPage from '/pages/friends/FriendsPage'
+import YourFriendsList from '/pages/friends/views/YourFriendsList'
+import FriendRequestsList from '/pages/friends/views/FriendRequestsList'
+import FindFriends from '/pages/friends/views/FindFriends'
+
+import GroupsPage from '/pages/groups/GroupsPage'
+import YourGroups from '/pages/groups/views/YourGroups'
+import CreateGroup from '/pages/groups/views/CreateGroup'
+import FindGroups from '/pages/groups/views/FindGroups'
+
+import GroupPage from '/pages/group/GroupPage'
 
 import PostPage from '/pages/posts/PostPage'
 
@@ -51,50 +75,18 @@ const App = function(props) {
     const [ retries, setRetries ] = useState(0)
 
     // ======= Request Tracking =====================================
-  
-    const [configurationRequestId, setConfigurationRequestId] = useState(null)
-    const configurationRequest = useSelector(function(state) {
-        if ( ! configurationRequestId ) {
-            return null
-        } else {
-            return state.system.requests[configurationRequestId]
-        }
-    })
-
-    const [ featuresRequestId, setFeaturesRequestId] = useState(null)
-    const featuresRequest = useSelector(function(state) {
-        if ( featuresRequestId ) {
-            return state.system.requests[featuresRequestId]
-        } else {
-            return null
-        }
-    })
-
-    const [authenticationRequestId, setAuthenticationRequestId] = useState(null)
-    const authenticationRequest = useSelector(function(state) {
-        if ( ! authenticationRequestId ) {
-            return null
-        } else {
-            return state.authentication.requests[authenticationRequestId]
-        }
-    })
+ 
+    const [ configurationRequest, makeConfigurationRequest] = useRequest('configuration')
+    const [authenticationRequest, makeAuthenticationRequest] = useRequest('authentication')
 
     // ======= Redux State ==========================================
 
-    const currentUser = useSelector(function(state) {
-        return state.authentication.currentUser
-    })
-
-    const configuration = useSelector(function(state) {
-        return state.system.configuration
-    })
+    const configuration = useSelector((state) => state.system.configuration)
 
     // ======= Effect Handling ======================================
 
-    const dispatch = useDispatch()
-
     useEffect(function() {
-        setConfigurationRequestId(dispatch(getConfiguration()))
+        makeConfigurationRequest(getConfiguration())
     }, [])
 
     // Note to self: These are system slice requests.  They go through
@@ -104,59 +96,33 @@ const App = function(props) {
             if ( ! configuration.maintenance_mode ) {
                 // Logger is a singleton, this will effect all other imports.
                 logger.setLevel(configuration.log_level)
-                setFeaturesRequestId(dispatch(getFeatures()))
-                setAuthenticationRequestId(dispatch(getAuthentication()))
+                makeAuthenticationRequest(getAuthentication())
             }
         } else if ( configurationRequest && configurationRequest.state == 'failed') {
             if ( retries < 5 ) {
-                setConfigurationRequestId(dispatch(getConfiguration()))
+                makeConfigurationRequest(getConfiguration())
                 setRetries(retries+1)
             }
         }
     }, [ configurationRequest ])
-
-    useEffect(function() {
-        return function cleanup() {
-            if ( configurationRequestId ) {
-                dispatch(cleanupSystemRequest({ requestId: configurationRequestId }))
-            }
-        }
-    }, [ configurationRequestId ])
-
-    useEffect(function() {
-        return function cleanup() {
-            if ( authenticationRequestId ) {
-                dispatch(cleanupAuthenticationRequest({ requestId: authenticationRequestId }))
-            }
-        }
-    }, [ authenticationRequestId ])
-
-    useEffect(function() {
-        return function cleanup() {
-            if ( featuresRequestId ) {
-                dispatch(cleanupSystemRequest({ requestId: featuresRequestId }))
-            }
-        }
-    }, [ featuresRequestId ])
 
     // ======= Render ===============================================
 
    if ( configuration?.maintenance_mode ) {
         return (
             <div className="maintenance-mode">
-                <h1>Peer Review - Scheduled Maintenance</h1>
-                <p>Peer Review is currently undergoing scheduled maintenance.  Please check back later.</p>
+                <h1>Communities - Scheduled Maintenance</h1>
+                <p>Communities is currently undergoing scheduled maintenance.  Please check back later.</p>
             </div>
         )
    }
 
-    if ( ! configurationRequestId || ! authenticationRequestId || ! featuresRequestId) {
+    if ( ! configurationRequest || ! authenticationRequest ) {
         return (
             <Spinner />
         )
     } else if ( (configurationRequest && configurationRequest.state != 'fulfilled')
         || (authenticationRequest && authenticationRequest.state != 'fulfilled')
-        || (featuresRequest && featuresRequest.state != 'fulfilled')
     ) {
         if (configurationRequest && configurationRequest.state == 'failed' && retries < 5) {
             return (<div className="error">Attempt to retrieve configuration from the backend failed, retrying...</div>)
@@ -164,8 +130,6 @@ const App = function(props) {
             return (<div className="error">Failed to connect to the backend.  Try refreshing.</div>)
         } else if (authenticationRequest && authenticationRequest.state == 'failed' ) {
             return (<div className="error">Authentication request failed with error: {authenticationRequest.error}.</div>)
-        } else if ( featuresRequest && featuresRequest.state == 'failed' ) {
-            return (<div className="error">Attempt to retrieve feature list failed with error: { featuresRequest.error}</div> )
         }
 
         return (
@@ -200,30 +164,50 @@ const App = function(props) {
                         { /* ========== Authentication Controls =============== */ }
                         <Route path="/login" element={ <LoginPage /> } />
                         <Route path="/reset-password-request" element={ <ResetPasswordRequestPage /> } />
-                        <Route path="/about">
-                            <Route path=":pageTab" element={ <AboutPage /> } />
-                            <Route index element={ <AboutPage />} />
+                        <Route path="/about" element={ <AboutPage /> } >
+                            <Route path="faq" element={ <FrequentlyAskedQuestions /> } />
+                            <Route path="tos" element={ <TermsOfService /> } />
+                            <Route path="privacy" element={ <Privacy /> } />
+                            <Route path="contact" element={ <Contact /> } />
+                            <Route index element={ <About />} />
                         </Route>
 
                         <Route element={<AuthenticatedLayout />}>
 
-                            <Route path="/" element={ <HomePage /> } />
-
-                            <Route path="/friends">
-                                <Route path=":pageTab" element={ <FriendsPage />} />
-                                <Route index element={<FriendsPage />} />
+                            <Route path="/account" element={<UserAccountPage /> }>
+                                <Route path="profile" element={ <UserProfileEditForm />  } />
+                                <Route path="change-password" element={ <ChangePasswordForm /> } />
+                                <Route path="change-email" element={ <ChangeEmailForm /> } />
+                                <Route path="contribute" element={ <ContributionView /> } />
+                                <Route path="settings" element={ <UserAccountSettingsView /> } />
+                                <Route index element={ <UserProfileEditForm/> } />
                             </Route>
 
-                            <Route path="/account">
-                                <Route path=":pageTab" element={ <UserAccountPage /> } />
-                                <Route index element={ <UserAccountPage /> } />
+                            <Route path="/admin/*" element={ <AdminPage />} />
+
+                            <Route path="/friends" element={ <FriendsPage />}>
+                                <Route path="requests" element={ <FriendRequestsList />} />
+                                <Route path="find" element={ <FindFriends /> } />
+                                <Route index element={<YourFriendsList />} />
                             </Route>
 
-                            <Route path="/admin" element={ <AdminPage />} />
+                            <Route path="/groups" element={<GroupsPage />}>
+                                <Route path="create" element={ <CreateGroup />} />
+                                <Route path="find" element={ <FindGroups />} />
+                                <Route index element={<YourGroups />} />
+                            </Route> 
 
-                            <Route path="/:name">
+                            <Route path="/group/:slug/*" element={<GroupPage />} />
+
+                            <Route path="/" element={ <HomePage /> }> 
+                                <Route path="/f/:slug" element={ <Feed type="feed" /> } />
+                                <Route path="/g/:slug" element={ <Feed type="group" /> } />
+                                <Route index element={ <Feed type="feed" /> } />
+                            </Route>
+
+                            <Route path="/:slug" element={ <UserProfilePage /> }>
                                 <Route path=":postId" element={ <PostPage /> } />
-                                <Route index element={ <UserProfilePage /> } />
+                                <Route index element={ <Feed type="user" /> } />
                             </Route>
 
                         </Route>

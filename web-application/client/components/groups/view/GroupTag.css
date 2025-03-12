@@ -1,0 +1,14 @@
+.group-tag {
+    display: inline-block;
+}
+.group-tag .group-image {
+    width: 2em;
+    height: 2em;
+}
+.group-tag .group-image img {
+    height: 2em;
+}
+.group-tag .group-image svg {
+    width: 2em;
+    height: 2em;
+}

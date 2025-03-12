@@ -1,0 +1,29 @@
+.group-member-badge {
+    box-sizing: border-box;
+    width: 400px;
+    padding: 10px;
+}
+.group-member-badge__grid {
+    display: grid;
+    grid-template-columns: 120px auto;
+} 
+.group-member-badge .profile-image {
+    width: 120px;
+    height: 120px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+}
+.group-member-badge__details {
+    padding: 10px;
+    align-items: center;
+}
+.group-member-badge__role {
+    text-transform: capitalize;
+    padding: 5px 0;
+}
+.group-member-badge__name {
+    font-size: 18px;
+}
+.group-member-badge__about {
+    font-size: 12px;
+}

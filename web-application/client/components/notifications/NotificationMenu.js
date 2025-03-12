@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  JournalHub -- Universal Scholarly Publishing 
+ *  Communities -- Non-profit, cooperative social media 
  *  Copyright (C) 2022 - 2024 Daniel Bingham 
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -23,6 +23,8 @@ import { useNavigate } from 'react-router-dom'
 
 import { BellIcon } from '@heroicons/react/24/outline'
 
+import { useRequest } from '/lib/hooks/useRequest'
+
 import { 
     FloatingMenu,
     FloatingMenuHeader,
@@ -30,7 +32,7 @@ import {
     FloatingMenuBody
 } from '/components/generic/floating-menu/FloatingMenu'
 
-import { getNotifications, patchNotifications, cleanupRequest } from '/state/notifications'
+import { getNotifications, patchNotifications } from '/state/notifications'
 
 import NotificationMenuItem from './NotificationMenuItem'
 
@@ -40,60 +42,29 @@ const NotificationMenu = function({ }) {
 
     // ============ Request Tracking ==========================================
 
-    const [ requestId, setRequestId ] = useState(null)
-    const request = useSelector(function(state) {
-        if ( requestId ) {
-            return state.notifications.dictionary[requestId]
-        } else {
-            return null
-        }
-    })
-
-    const [ markReadRequestId, setMarkReadRequestId ] = useState(null)
-    const markReadRequest = useSelector(function(state) {
-        if ( markReadRequestId ) {
-            return state.notifications.dictionary[markReadRequestId]
-        } else {
-            return null
-        }
-    })
+    const [request, makeRequest] = useRequest()
+    const [markReadRequest, makeMarkReadRequest] = useRequest()
 
     // ============ Redux State ===============================================
 
-    const notifications = useSelector(function(state) {
-        if ( state.notifications.queries['NotificationMenu'] ) {
-            return state.notifications.queries['NotificationMenu'].list
-        }
-        return [] 
-    })
-
-    const unreadNotifications = useSelector(function(state) {
-        const unreadList = []
-        for(const id of notifications) {
-            if ( ! state.notifications.dictionary[id].isRead ) {
-                unreadList.push(state.notifications.dictionary[id])
-            }
-        }
-        return unreadList
-    })
+    const notifications = useSelector((state) => 'NotificationMenu' in state.notifications.queries ? state.notifications.queries['NotificationMenu'].list : []) 
+    const notificationDictionary = useSelector((state) => state.notifications.dictionary)
+    const unreadNotifications = notifications.filter((id) => ! notificationDictionary[id].isRead)
 
     // ============ Helpers and Actions =======================================
-
-    const dispatch = useDispatch()
-    const navigate = useNavigate()
 
     const markAllRead = function(event) {
         event.preventDefault()
         
         const notifications = []
-        for(const notification of unreadNotifications) {
+        for(const id of unreadNotifications) {
             notifications.push({
-                ...notification,
+                ...notificationDictionary[id],
                 isRead: true
             })
         }
 
-        setMarkReadRequestId(dispatch(patchNotifications(notifications)))  
+        makeMarkReadRequest(patchNotifications(notifications))  
     }
 
 
@@ -101,24 +72,8 @@ const NotificationMenu = function({ }) {
     // ============ Effect Handling ===========================================
 
     useEffect(function() {
-        setRequestId(dispatch(getNotifications('NotificationMenu')))
+        makeRequest(getNotifications('NotificationMenu'))
     }, [])
-
-    useEffect(function() {
-        return function cleanup() {
-            if ( requestId ) {
-                dispatch(cleanupRequest({ requestId: requestId }))
-            }
-        }
-    }, [requestId])
-
-    useEffect(function() {
-        return function cleanup() {
-            if ( markReadRequestId ) {
-                dispatch(cleanupRequest({ requestId: markReadRequestId }))
-            }
-        }
-    }, [ markReadRequestId ])
 
     // ============ Render ====================================================
 
@@ -135,7 +90,6 @@ const NotificationMenu = function({ }) {
             </div>
         )
     }
-
 
     const unread = unreadNotifications.length
     return (

@@ -1,0 +1,24 @@
+.group-settings-view {
+    box-sizing: content-box;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+}
+.group-settings-view__edit {
+    padding: 20px;
+    border: thin solid var(--primary-color-light);
+    border-radius: 10px;
+    background-color: white;
+}
+.group-settings-view__delete-your-account {
+    padding: 20px;
+    border: thin solid var(--danger-color-light);
+    background-color: var(--danger-color-lightest);
+    border-radius: 10px;
+}
+.group-settings-view__delete-your-account .group-settings-view__explanation {
+    padding: 10px;
+}
+.group-settings-view__delete-your-account .group-settings-view__button-wrapper {
+    text-align: center;
+}

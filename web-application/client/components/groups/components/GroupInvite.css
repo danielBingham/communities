@@ -1,0 +1,56 @@
+.group-invite {
+    text-align: center;
+    width: 100%;
+    max-width: 750px;
+    margin: 0 auto 20px auto;
+}
+.group-invite__invitations {
+    padding: 0 0 5px 0;
+    font-size: 12px;
+    font-style: italic;
+}
+.group-invite__input-wrapper {
+    display: flex;
+    position: relative;
+}
+.group-invite__suggestions-wrapper {
+    display: flex;
+    flex-grow: 1;
+    position: relative;
+    padding: 0;
+    margin: 0;
+}
+.group-invite .group-invite__input-wrapper input[type=text] {
+    display: inline-block;
+    font-size: 16px;
+    border-radius: 7px;
+    flex-grow: 1
+}
+.group-invite__success {
+    margin: 10px auto;
+}
+.group-invite .group-invite__suggestions {
+    position: absolute;
+    box-sizing: border-box;
+    top: 38px;
+    width: 100%;
+    border: thin solid var(--main-border-color);
+    padding: 10px;
+    background-color: white;
+    z-index: 1000;
+}
+.group-invite .group-invite__suggestions a {
+    display: block;
+    color: var(--primary-color-darkest);
+    padding: 5px;
+}
+.group-invite .group-invite__suggestions a:hover {
+    background-color: var(--primary-color-main);
+    color: white;
+}
+.group-invite .group-invite__suggestions a.highlight {
+    background-color: var(--primary-color-main);
+    color: white;
+}
+    
+

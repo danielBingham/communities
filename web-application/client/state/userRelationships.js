@@ -1,37 +1,21 @@
 import { createSlice, current } from '@reduxjs/toolkit'
-import { v4 as uuidv4 } from 'uuid'
+import * as qs from 'qs'
 
-import setRelationsInState from './helpers/relations'
+import { makeTrackedRequest } from '/lib/state/request'
+
+import setRelationsInState from '/lib/state/relations'
 
 import {
     setInDictionary,
     removeEntity,
-    makeQuery,
     setQueryResults,
     clearQuery,
     clearQueries
-} from './helpers/state'
-
-import { 
-    makeSearchParams,
-    makeTrackedRequest,
-    startRequestTracking, 
-    recordRequestFailure, 
-    recordRequestSuccess, 
-    cleanupRequest as cleanupTrackedRequest, 
-} from './helpers/requestTracker'
+} from '/lib/state'
 
 export const userRelationshipsSlice = createSlice({
     name: 'userRelationships',
     initialState: {
-        /**
-         * A dictionary of requests in progress or that we've made and completed,
-         * keyed with a uuid requestId.
-         *
-         * @type {object}
-         */
-        requests: {},
-
         /**
          * A dictionary of userRelationships we've retrieved from the backend, keyed by
          * user.id.
@@ -69,7 +53,7 @@ export const userRelationshipsSlice = createSlice({
 
 
         // ======== State Manipulation Helpers ================================
-        // @see ./helpers/state.js
+        // @see /lib/state.js
 
         setUserRelationshipsInDictionary: function(state, action) {
             setInDictionary(state, action)
@@ -119,17 +103,9 @@ export const userRelationshipsSlice = createSlice({
                 delete state.byUserId[entity.relationId][entity.userId]
             }
         },
-        makeUserRelationshipQuery: makeQuery,
         setUserRelationshipQueryResults: setQueryResults,
         clearUserRelationshipQuery: clearQuery,
-        clearUserRelationshipQueries: clearQueries,
-
-        // ========== Request Tracking Methods =============
-
-        makeRequest: startRequestTracking, 
-        failRequest: recordRequestFailure, 
-        completeRequest: recordRequestSuccess,
-        cleanupRequest: cleanupTrackedRequest 
+        clearUserRelationshipQueries: clearQueries
     }
 })
 
@@ -145,13 +121,8 @@ export const userRelationshipsSlice = createSlice({
  */
 export const getUserRelationships = function(name, userId, params) {
     return function(dispatch, getState) {
-        const queryString = makeSearchParams(params)
-        const endpoint = `/user/${encodeURIComponent(userId)}/relationships` + ( params ? '?' + queryString.toString() : '')
-
-        dispatch(userRelationshipsSlice.actions.makeUserRelationshipQuery({ name: name }))
-
-        return makeTrackedRequest(dispatch, getState, userRelationshipsSlice,
-            'GET', endpoint, null,
+        const endpoint = `/user/${encodeURIComponent(userId)}/relationships${( params ? '?' + qs.stringify(params) : '')}`
+        return dispatch(makeTrackedRequest('GET', endpoint, null,
             function(response) {
                 dispatch(userRelationshipsSlice.actions.setUserRelationshipsInDictionary({ dictionary: response.dictionary }))
 
@@ -159,7 +130,7 @@ export const getUserRelationships = function(name, userId, params) {
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -177,14 +148,13 @@ export const getUserRelationships = function(name, userId, params) {
  */
 export const postUserRelationships = function(relationship) {
     return function(dispatch, getState) {
-        return makeTrackedRequest(dispatch, getState, userRelationshipsSlice,
-            'POST', `/user/${encodeURIComponent(relationship.userId)}/relationships`, relationship,
+        return dispatch(makeTrackedRequest('POST', `/user/${encodeURIComponent(relationship.userId)}/relationships`, relationship,
             function(response) {
                 dispatch(userRelationshipsSlice.actions.setUserRelationshipsInDictionary({ entity: response.entity }))
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -203,14 +173,13 @@ export const postUserRelationships = function(relationship) {
  */
 export const getUserRelationship = function(userId, relationId) {
     return function(dispatch, getState) {
-        return makeTrackedRequest(dispatch, getState, userRelationshipsSlice,
-            'GET', `/user/${encodeURIComponent(userId)}/relationship/${encodeURIComponent(relationId)}`, null,
+        return dispatch(makeTrackedRequest('GET', `/user/${encodeURIComponent(userId)}/relationship/${encodeURIComponent(relationId)}`, null,
             function(response) {
                 dispatch(userRelationshipsSlice.actions.setUserRelationshipsInDictionary({ entity: response.entity }))
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 }
 
@@ -228,15 +197,14 @@ export const getUserRelationship = function(userId, relationId) {
  */
 export const patchUserRelationship = function(relationship) {
     return function(dispatch, getState) {
-        return makeTrackedRequest(dispatch, getState, userRelationshipsSlice,
-            'PATCH', `/user/${relationship.userId}/relationship/${relationship.relationId}`, relationship,
+        return dispatch(makeTrackedRequest('PATCH', `/user/${encodeURIComponent(relationship.userId)}/relationship/${encodeURIComponent(relationship.relationId)}`, relationship,
             function(response) {
                 dispatch(userRelationshipsSlice.actions.setUserRelationshipsInDictionary({ entity: response.entity }))
 
                 dispatch(setRelationsInState(response.relations))
 
             }
-        )
+        ))
     }
 }
 
@@ -254,22 +222,20 @@ export const patchUserRelationship = function(relationship) {
  */
 export const deleteUserRelationship = function(relationship) {
     return function(dispatch, getState) {
-        return makeTrackedRequest(dispatch, getState, userRelationshipsSlice,
-            'DELETE', `/user/${relationship.userId}/relationship/${relationship.relationId}`, null,
+        return dispatch(makeTrackedRequest('DELETE', `/user/${encodeURIComponent(relationship.userId)}/relationship/${encodeURIComponent(relationship.relationId)}`, null,
             function(response) {
                 dispatch(userRelationshipsSlice.actions.removeUserRelationship({ entity: response.entity }))
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )
+        ))
     }
 } 
 
 
 export const { 
     setUserRelationshipsInDictionary, removeUserRelationship, 
-    makeUserRelationshipQuery, setUserRelationshipQueryResults, clearUserRelationshipQuery,
-    cleanupRequest 
+    setUserRelationshipQueryResults, clearUserRelationshipQuery
 }  = userRelationshipsSlice.actions
 
 export default userRelationshipsSlice.reducer

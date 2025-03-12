@@ -1,0 +1,31 @@
+.faq {
+    box-sizing: border-box;
+    max-width: 800px;
+    min-width: 340px;
+    width: 100%;
+
+    padding: 0 20px;
+    font-size: 18px;
+    line-height: 1.7em;
+    margin: 0 auto;
+}
+.faq h1 {
+    text-align: center;
+}
+.faq section {
+    margin-bottom: 40px;
+}
+
+.faq .beta {
+    font-size: 14px;
+    font-style: italic;
+}
+
+.faq h2 a:link, .faq h2 a:active, .faq h2 a:visited {
+    color: #333;
+    text-decoration: none;
+}
+.faq h2 a:hover {
+    color: #666;
+    text-decoration: none;
+}

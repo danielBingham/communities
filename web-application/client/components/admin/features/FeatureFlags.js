@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import React, { useEffect } from 'react'
+import { useSelector } from 'react-redux'
 
-import { getFeatures, cleanupRequest as cleanupFeaturesRequest } from '/state/features'
+import { useRequest } from '/lib/hooks/useRequest'
+
+import { getFeatures } from '/state/features'
 
 import FeatureRow from '/components/admin/features/FeatureRow'
 
@@ -9,41 +11,19 @@ import './FeatureFlags.css'
 
 const FeatureFlags = function(props) {
     // ======= Request Tracking =====================================
-    
-    const [ featuresRequestId, setFeaturesRequestId] = useState(null)
-    const featuresRequest = useSelector(function(state) {
-        if ( featuresRequestId ) {
-            return state.features.requests[featuresRequestId]
-        } else {
-            return null
-        }
-    })
+
+    const [request, makeRequest] = useRequest()
 
     // ======= Redux State ==========================================
     
-    const currentUser = useSelector(function(state) {
-        return state.authentication.currentUser
-    })
-
-    const features = useSelector(function(state) {
-        return state.features.dictionary
-    })
+    const currentUser = useSelector((state) => state.authentication.currentUser)
+    const features = useSelector((state) => state.features.dictionary)
 
     // ======= Effect Handling ======================================
-   
-    const dispatch = useDispatch()
 
     useEffect(function() {
-        setFeaturesRequestId(dispatch(getFeatures()))
-    }, [ ])
-
-    useEffect(function() {
-        return function cleanup() {
-            if ( featuresRequestId ) {
-                dispatch(cleanupFeaturesRequest({ requestId: featuresRequestId }))
-            }
-        }
-    }, [ featuresRequestId ])
+        makeRequest(getFeatures())
+    }, [])
 
     // ======= Render ===============================================
    

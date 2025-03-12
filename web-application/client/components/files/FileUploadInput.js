@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
 
-import { DocumentTextIcon } from '@heroicons/react/24/outline'
-import { XCircleIcon, PhotoIcon } from '@heroicons/react/24/solid'
+import { useRequest } from '/lib/hooks/useRequest'
 
-import { uploadFile, deleteFile, cleanupRequest } from '/state/files'
+import {  PhotoIcon } from '@heroicons/react/24/solid'
+
+import { uploadFile } from '/state/files'
 
 import Spinner from '/components/Spinner'
 import Button from '/components/generic/button/Button'
@@ -23,19 +23,11 @@ const FileUploadInput = function(props) {
     const hiddenFileInput = useRef(null)
 
     // ============ Request Tracking ================================
-   
-    const [uploadRequestId, setUploadRequestId] = useState(null)
-    const uploadRequest = useSelector(function(state) {
-        if ( uploadRequestId) {
-            return state.files.requests[uploadRequestId]
-        } else {
-            return null
-        }
-    })
+
+    const [uploadRequest, makeUploadRequest] = useRequest()
 
     // ============ Actions and Event Handling ======================
     //
-    const dispatch = useDispatch()
     
     const onChange = function(event) {
         const uploadedFileData = event.target.files[0]
@@ -44,14 +36,14 @@ const FileUploadInput = function(props) {
             return
         }
 
-        setUploadRequestId(dispatch(uploadFile(uploadedFileData)))
+        makeUploadRequest(uploadFile(uploadedFileData))
     }
 
     // ============ Effect Handling ==================================
 
     useEffect(function() {
         if ( uploadRequest && uploadRequest.state == 'fulfilled') {
-            const uploadedFile = uploadRequest.result.entity
+            const uploadedFile = uploadRequest.response.body.entity
 
             props.setFileId(uploadedFile.id)
 
@@ -61,21 +53,11 @@ const FileUploadInput = function(props) {
         }
     }, [ uploadRequest ])
 
-    // Clean up our upload request.
-    useEffect(function() {
-        return function cleanup() {
-            if ( uploadRequestId) {
-                dispatch(cleanupRequest({ requestId: uploadRequestId}))
-            }
-        }
-    }, [ uploadRequestId])
-
     // ============ Render ==========================================
     //
     let content = null
     // Spinner while we wait for requests to process so that we can't start a new request on top of an existing one.
-    if ( ( uploadRequestId && ! uploadRequest) || (uploadRequest && uploadRequest.state == 'pending') ) 
-    {
+    if ( uploadRequest && uploadRequest.state == 'pending' ) {
         content = ( <Spinner local={true} /> )
 
     // Request failure - report an error.
