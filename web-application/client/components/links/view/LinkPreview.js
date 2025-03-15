@@ -32,26 +32,32 @@ const LinkPreview = function({ id }) {
         description = description.substring(0,300) + '...'
     }
 
+    // Handle youtube videos.
     const url = new URL(linkPreview.url)
     if ( url.host == 'www.youtube.com' || url.host == 'youtube.com' || url.host == 'youtu.be' ) {
         let videoId = ''
-        if ( url.host == 'youtu.be' ) {
+        if ( url.host === 'www.youtube.com' || url.host === 'youtube.com' ) {
+            let firstSegment = url.pathname.split('/')[1]
+            if ( firstSegment == 'watch' ) {
+                const searchParams = url.searchParams
+                videoId = searchParams.get("v")
+            }
+        } else if ( url.host == 'youtu.be' ) {
             videoId = url.pathname.split('/')[1]
-        } else {
-            const searchParams = url.searchParams
-            videoId = searchParams.get("v")
-        } 
+        }  
 
-        return ( 
-            <div className="link-preview">
-                <iframe
-                    src={`https://www.youtube.com/embed/${encodeURIComponent(videoId)}`}
-                    allow="encrypted-media"
-                    allowFullScreen
-                    title="youtube video"
-                />
-            </div>
-        )
+        if ( videoId !== '' ) {
+            return ( 
+                <div className="link-preview">
+                    <iframe
+                        src={`https://www.youtube.com/embed/${encodeURIComponent(videoId)}`}
+                        allow="encrypted-media"
+                        allowFullScreen
+                        title="youtube video"
+                    />
+                </div>
+            )
+        }
     }
 
     return (
