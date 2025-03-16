@@ -10,3 +10,28 @@
     margin-right: 5px;
 }
 
+@media (1600px <= width) {
+    .link-form .button-text {
+        display: inline-block;
+    }
+    .link-form .button svg {
+        display: none;
+    }
+}
+
+@media (700px < width < 1600px) {
+    .link-form .button-text {
+        display: inline-block;
+    }
+    .link-form .button svg {
+        display: none;
+    }
+}
+@media (width <= 700px) {
+    .link-form .button-text {
+        display: none;
+    }
+    .link-form .button svg {
+        display: inline-block;
+    }
+}
