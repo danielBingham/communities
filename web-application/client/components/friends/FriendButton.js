@@ -14,10 +14,6 @@ const FriendButton = function({ userId }) {
     const [request, makeRequest] = useRequest()
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
-    if ( ! currentUser || currentUser.id == userId) {
-        return null
-    }
-
     const relationshipId = useSelector((state) => userId && userId in state.userRelationships.byUserId ? state.userRelationships.byUserId[userId][currentUser.id] : null)
     const relationship = useSelector((state) => relationshipId !== null && relationshipId in state.userRelationships.dictionary ? state.userRelationships.dictionary[relationshipId] : null)
 
@@ -26,6 +22,10 @@ const FriendButton = function({ userId }) {
             makeRequest(getUserRelationship(currentUser.id, userId))
         }
     }, [currentUser, userId, relationship])
+
+    if ( ! currentUser || currentUser.id == userId) {
+        return null
+    }
 
     let content = null
     if ( ! relationship) {
