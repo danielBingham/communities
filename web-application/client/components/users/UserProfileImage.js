@@ -36,7 +36,7 @@ const UserProfileImage = function({ userId, className }) {
     let content = ( <UserCircleIcon /> ) 
     if ( user && user.fileId ) {
         content = (
-            <img src={`${configuration.backend}/file/${user.fileId}`} />
+            <img src={`${configuration.backend}/file/${user.fileId}?width=200`} />
         )
     } 
 

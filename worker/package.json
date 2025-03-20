@@ -1,9 +1,9 @@
 {
   "name": "@communities/worker",
-  "version": "0.3.10",
+  "version": "0.2.0",
   "private": true,
   "main": "index.js",
-  "repository": { },
+  "repository": {},
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   },
@@ -13,9 +13,11 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.294.0",
-    "@communities/backend": "^0.3.10",
+    "@communities/backend": "0.2.0",
     "bull": "^4.10.4",
-    "pg": "^8.7.3"
+    "mime": "^3.0.0",
+    "pg": "^8.7.3",
+    "sharp": "^0.33.5"
   },
   "devDependencies": {
     "dotenv": "^16.0.3"

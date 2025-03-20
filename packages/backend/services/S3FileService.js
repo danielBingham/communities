@@ -68,6 +68,16 @@ module.exports = class S3FileService {
         await this.removeFile(currentPath)
     }
 
+    async getFile(path) {
+        const params = {
+            Bucket: this.config.s3.bucket,
+            Key: path
+        }
+
+        const response = await this.s3Client.send(new GetObjectCommand(params))
+        return await response.Body.transformToByteArray()
+    }
+
     async getSignedUrl(path) {
         const params = {
             Bucket: this.config.s3.bucket,
@@ -77,6 +87,7 @@ module.exports = class S3FileService {
         const command = new GetObjectCommand(params)
         return getSignedUrl(this.s3Client, command, { expiresIn: 60*60*24 })
     }
+
 
     async removeFile(path) {
         const params = {

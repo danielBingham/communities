@@ -27,6 +27,8 @@ const ControllerError = require('../errors/ControllerError')
 module.exports = class FileController {
 
     constructor(core) {
+        this.core = core
+
         this.database = core.database
         this.logger = core.logger
         this.config = core.config
@@ -61,8 +63,10 @@ module.exports = class FileController {
          * 
          * ********************************************************************/
 
+        const currentUser = request.session.user 
+
         // 1. User must be logged in.
-        if ( ! request.session || ! request.session.user ) {
+        if ( ! currentUser ) {
             throw new ControllerError(403, 'not-authorized', `Must have a logged in user to upload a file.`)
         }
 
@@ -112,6 +116,9 @@ module.exports = class FileController {
         }
 
         this.fileService.removeLocalFile(currentPath)
+
+        await this.core.queue.add('resize-image', { session: { user: currentUser }, file: file })
+
         return response.status(200).json({
             entity: files[0],
             relations: {}
@@ -139,13 +146,20 @@ module.exports = class FileController {
         }
 
         const id = request.params.id
+        const width = request.query?.width
 
         const files = await this.fileDAO.selectFiles('WHERE files.id = $1', [ id ])
         if ( files.length <= 0) {
             throw new ControllerError(404, 'not-found', `Failed to find file ${id}.`)
         }
+        const file = files[0]
 
-        const path = files[0].filepath
+        let path = file.filepath
+        if (  width ) {
+            path = `files/${id}.${width}.${mime.getExtension(file.type)}`
+        }
+
+        console.log(path)
         const url = await this.fileService.getSignedUrl(path)
 
         response.redirect(302, url)
