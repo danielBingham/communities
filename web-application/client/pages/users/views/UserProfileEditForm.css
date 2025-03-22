@@ -10,17 +10,20 @@
 .user-profile-edit-form .profile-image {
     display: block;
     margin: 0 auto;
-    width: 160px;
+    width: 200px;
 }
 .user-profile-edit-form .profile-image .current-image svg {
     display: block;
-    width: 150px;
+    width: 200px;
     margin: 10px auto;
 }
 .user-profile-edit-form .profile-image .draft-image-file {
     display: block;
-    width: 150px;
+    width: 200px;
     margin: 10px auto;
+}
+.user-profile-edit-form .profile-image .draft-image-file img {
+    border-radius: 0; 
 }
 .user-profile-edit-form .submit {
     text-align: center;

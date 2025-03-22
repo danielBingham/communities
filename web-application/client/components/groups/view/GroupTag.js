@@ -31,7 +31,7 @@ const GroupTag = function({ id }) {
 
     return (
         <span className="group-tag" >
-            { group && <span><GroupImage groupId={group.id} /> <Link to={`/group/${group.slug}`}>{group.title}</Link></span> }
+            { group && <span><GroupImage groupId={group.id} width={30} /> <Link to={`/group/${group.slug}`}>{group.title}</Link></span> }
         </span> 
     )
 

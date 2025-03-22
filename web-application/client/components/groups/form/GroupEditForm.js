@@ -102,7 +102,7 @@ const GroupEditForm = function({ groupId }) {
             <div className="group-edit-form__group-image">
                 <div>
                     { ! fileId && <UserCircleIcon className="placeholder" /> }
-                    { fileId && <DraftImageFile fileId={fileId} setFileId={setFileId} width={150} deleteOnRemove={false} /> }
+                    { fileId && <DraftImageFile fileId={fileId} setFileId={setFileId} width={200} deleteOnRemove={false} /> }
                     { ! fileId && <FileUploadInput 
                         fileId={fileId}
                         setFileId={setFileId} 

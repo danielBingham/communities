@@ -5,7 +5,7 @@ import { UserCircleIcon } from '@heroicons/react/24/solid'
 
 import './UserProfileImage.css'
 
-const UserProfileImage = function({ userId, className }) {
+const UserProfileImage = function({ userId, className, width }) {
     
     // ======= Request Tracking =====================================
     

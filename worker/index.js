@@ -1,14 +1,27 @@
-
-const mime = require('mime')
-const sharp = require('sharp')
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media 
+ *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
 
 const { 
     Core, 
-    ServiceError, 
 
-    FileDAO,
-
-    S3FileService
+    ImageService
 } = require('@communities/backend')
 
 const config = require('./config')
@@ -21,30 +34,18 @@ core.queue.process('resize-image', async function(job, done) {
     core.logger.setId(`Image resize: ${job.id}`)
     core.logger.debug(`Beginning job 'resize-image' for user ${job.data.session.user.id}.`)
 
-    const fileDAO = new FileDAO(core)
-    const fileService = new S3FileService(core)
+    const imageService = new ImageService(core)
 
     try {
         job.progress({ step: 'initializing', stepDescription: `Initializing...`, progress: 0 })
 
-        const fileSizes = [ 30, 200, 325, 650]
-
-        const filepath = job.data.file.filepath
-        const fileContents = await fileService.getFile(filepath)
-       
+        const fileSizes = [ 30, 200, 325, 450, 650]
         let progress = 0
         for (const size of fileSizes) {
-            const resizedPath = `files/${job.data.file.id}.${size}.${mime.getExtension(job.data.file.type)}`
-
-            await sharp(fileContents)
-                .resize({ width: size })
-                .toFile(resizedPath)
-
-            await fileService.uploadFile(resizedPath, resizedPath)
-            fileService.removeLocalFile(resizedPath)
+            await imageService.resize(job.data.file, size)
 
             progress += 20
-            job.progress({ step: 'initializing', stepDescription: `Initializing...`, progress: progress })
+            job.progress({ step: 'resizing', stepDescription: `Resizing...`, progress: progress })
         }
 
         job.progress({ step: 'complete', stepDescription: `Complete!`, progress: 100 })

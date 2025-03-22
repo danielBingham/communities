@@ -89,21 +89,9 @@ export const uploadFile = function(file) {
     }
 }
 
-/**
- * GET /file/:id
- *
- * Get a single file.
- *
- * Makes the request asynchronously and returns a id that can be used to track
- * the request and retreive the results from the state slice.
- *
- * @param {int} id - The id of the file we want to retrieve.
- *
- * @returns {string} A uuid requestId that can be used to track this request.
- */
-export const getFile = function(id) {
+export const patchFile = function(fileId, crop) {
     return function(dispatch, getState) {
-        return dispatch(makeTrackedRequest('GET', `/file/${id}`, null,
+        return dispatch(makeTrackedRequest('PATCH', `/file/${fileId}`, { crop: crop },
             function(response) {
                 dispatch(filesSlice.actions.setFilesInDictionary({ entity: response.entity}))
 

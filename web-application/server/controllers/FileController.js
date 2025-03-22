@@ -33,6 +33,7 @@ module.exports = class FileController {
         this.logger = core.logger
         this.config = core.config
 
+        this.imageService = new backend.ImageService(core)
         this.fileService = new backend.S3FileService(core)
         this.fileDAO = new backend.FileDAO(core)
     }
@@ -119,7 +120,7 @@ module.exports = class FileController {
 
         await this.core.queue.add('resize-image', { session: { user: currentUser }, file: file })
 
-        return response.status(200).json({
+        response.status(200).json({
             entity: files[0],
             relations: {}
         })
@@ -157,9 +158,13 @@ module.exports = class FileController {
         let path = file.filepath
         if (  width ) {
             path = `files/${id}.${width}.${mime.getExtension(file.type)}`
+            const hasFile = await this.fileService.hasFile(path)
+            if ( ! hasFile ) {
+                this.core.logger.debug(`Missing width "${width}" for File(${id}).`)
+                path = file.filepath
+            }
         }
 
-        console.log(path)
         const url = await this.fileService.getSignedUrl(path)
 
         response.redirect(302, url)
@@ -181,8 +186,81 @@ module.exports = class FileController {
         })*/
     }
 
-    async getFileObject(request, response) {
+    async patchFile(request, response) {
+        /**********************************************************************
+         * Permissions Checking and Input Validation
+         *
+         * Permissions:
+         *
+         * 1. User must be logged in.
+         * 2. User must be owner of File(:id)
+         *
+         * Validation:
+         *
+         * 1. File(:id) must exist.
+         * 
+         * ********************************************************************/
+
+        const currentUser = request.session.user
+        const fileId = request.params.id
+        const filePatch = request.body
+
+        // Permissions: 1. User must be logged in.
+        if ( ! currentUser ) {
+            throw new ControllerError(403, 'not-authorized', 
+                `Must have a logged in user to patch a file.`,
+                `You must be authenticated to patch a file.`)
+        }
+
+        if ( ! fileId ) {
+            throw new ControllError(400, 'invalid',
+                `Missing File.id.`,
+                `You must include the file.id in the resource route.`)
+        }
+
+        const files = await this.fileDAO.selectFiles('WHERE files.id = $1', [ fileId ])
+
+        // Validation: 1. File(:id) must exist.
+        if ( files.length <= 0 ) {
+            throw new ControllerError(404, 'not-found', 
+                `File(${fileId}) not found!`,
+                `File(${fileId}) was not found.`)
+        } 
+
+        const file = files[0]
+
+        // Permissions: 2. User must be owner of File(:id)
+        if ( file.userId !== currentUser.id ) {
+            throw new ControllerError(403, 'not-authorized', 
+                `User(${currentUser.id}) attempting to PATCH File(${file.id}, which they don't own.`,
+                `You cannot PATCH someone else's file.`)
+        }
+
+        if ( ! ( 'crop' in filePatch) || filePatch.crop === undefined || filePatch.crop === null ) {
+            throw new ControllerError(400, 'invalid',
+                `Attempt to patch File(${fileId}) missing crop.`,
+                `Must include 'crop' object in order to PATCH a file.`)
+        }
+
+        const crop = filePatch.crop
+        if ( ! ('x' in crop) || ! ('y' in crop) || ! ('width' in crop) || ! ('height' in crop) ) {
+            throw new ControllerError(400, 'invalid',
+                `Missing element of 'crop' when PATCHing File(${fileId}).`,
+                `Missing crop data.`)
+        }
+
+        // TODO Validate the crop against the size of the image. 
+
+        await this.imageService.crop(file, crop)
+
+        await this.core.queue.add('resize-image', { session: { user: currentUser }, file: file })
+
+        response.status(200).json({
+            entity: file,
+            relations: {}
+        })
     }
+
 
     /**
      * DELETE /file/:id
@@ -203,7 +281,6 @@ module.exports = class FileController {
          *
          * 1. User must be logged in.
          * 2. User must be owner of File(:id)
-         * 3. File must not be in use by a published paper.
          *
          * Validation:
          *

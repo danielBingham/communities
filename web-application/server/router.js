@@ -102,8 +102,8 @@ module.exports = function(core) {
         })
     })
 
-    router.get('/file/:id/object', function(request, response, next) {
-        fileController.getFileObject(request, response).catch(function(error) {
+    router.patch('/file/:id', function(request, response, next) {
+        fileController.patchFile(request, response).catch(function(error) {
             next(error)
         })
     })

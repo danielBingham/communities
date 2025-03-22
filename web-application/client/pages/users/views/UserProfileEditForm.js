@@ -6,6 +6,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 import { UserCircleIcon } from '@heroicons/react/24/outline'
 
 import { patchUser } from '/state/users'
+import { patchFile } from '/state/files'
 
 import UserProfileImage from '/components/users/UserProfileImage'
 import DraftImageFile from '/components/files/DraftImageFile'
@@ -23,6 +24,15 @@ const UserProfileEditForm = function(props) {
     // ======= Render State =========================================
 
     const [fileId, setFileId] = useState(null)
+    const [crop, setCrop] = useState({
+        unit: 'px',
+        x: 0,
+        y: 0,
+        width: 200,
+        height: 200
+    })
+
+
     const [name, setName] = useState('')
     const [about, setAbout] = useState('')
 
@@ -32,6 +42,7 @@ const UserProfileEditForm = function(props) {
     // ======= Request Tracking =====================================
 
     const [ request, makeRequest ] = useRequest()
+    const [ fileRequest, makeFileRequest ] = useRequest()
 
     // ======= Redux State ==========================================
 
@@ -96,6 +107,7 @@ const UserProfileEditForm = function(props) {
             about: about
         }
 
+        makeFileRequest(patchFile(fileId, crop))
         makeRequest(patchUser(user))
     }
 
@@ -169,7 +181,16 @@ const UserProfileEditForm = function(props) {
                 <div className="profile-image">
                     <div>
                         { ! fileId && <UserCircleIcon /> }
-                        { fileId && <DraftImageFile fileId={fileId} setFileId={setFileId} width={150} deleteOnRemove={false} /> }
+                        { fileId && <DraftImageFile 
+                                        fileId={fileId} 
+                                        setFileId={setFileId} 
+                                        width={200} 
+                                        shouldCrop={true} 
+                                        crop={crop} 
+                                        setCrop={setCrop} 
+                                        cropAspect={1} 
+                                        deleteOnRemove={false} 
+                        /> }
                         { ! fileId && <FileUploadInput 
                             fileId={fileId}
                             setFileId={setFileId} 

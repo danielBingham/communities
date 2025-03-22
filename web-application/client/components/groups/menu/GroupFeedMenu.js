@@ -36,7 +36,7 @@ const GroupFeedMenu = function() {
         const group = groupDictionary[groupId]
 
         groupViews.push(<li key={group.slug}>
-            <GroupImage groupId={groupId} /> <NavLink to={`/g/${group.slug}`}>{ group.title }</NavLink> 
+            <GroupImage groupId={groupId} width={30} /> <NavLink to={`/g/${group.slug}`}>{ group.title }</NavLink> 
         </li>)
     }
     return (
