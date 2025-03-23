@@ -19,6 +19,7 @@
  ******************************************************************************/
 const mime = require('mime')
 const sharp = require('sharp')
+const { imageSize } = require('image-size')
 
 const S3FileService = require('./S3FileService')
 
@@ -48,6 +49,13 @@ module.exports = class ImageService {
     async crop(file, crop) {
         // Load the original file into memory.
         const fileContents = await this.fileService.getFile(file.filepath)
+        //const dimensions = imageSize(fileContents)
+        // TODO This doesn't currently handle mapping the crop to the correct
+        // size.  We're usually cropping images that are 200x200, but the
+        // original image could be any size.  The crop comes in raw pixels (0 -
+        // 200) and we need to scale it to the original image's size.  
+        //
+        // That's going to take more work.  So punting on cropping for now.
 
         // Keep the uncropped file by moving it to `files/id.orig.ext`
         const originalPath = `files/${file.id}.orig.${mime.getExtension(file.type)}`

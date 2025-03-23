@@ -24,14 +24,6 @@ const UserProfileEditForm = function(props) {
     // ======= Render State =========================================
 
     const [fileId, setFileId] = useState(null)
-    const [crop, setCrop] = useState({
-        unit: 'px',
-        x: 0,
-        y: 0,
-        width: 200,
-        height: 200
-    })
-
 
     const [name, setName] = useState('')
     const [about, setAbout] = useState('')
@@ -107,7 +99,6 @@ const UserProfileEditForm = function(props) {
             about: about
         }
 
-        makeFileRequest(patchFile(fileId, crop))
         makeRequest(patchUser(user))
     }
 
@@ -185,10 +176,6 @@ const UserProfileEditForm = function(props) {
                                         fileId={fileId} 
                                         setFileId={setFileId} 
                                         width={200} 
-                                        shouldCrop={true} 
-                                        crop={crop} 
-                                        setCrop={setCrop} 
-                                        cropAspect={1} 
                                         deleteOnRemove={false} 
                         /> }
                         { ! fileId && <FileUploadInput 
