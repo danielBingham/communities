@@ -7,7 +7,7 @@ import { UserGroupIcon } from '@heroicons/react/24/solid'
 
 import './GroupImage.css'
 
-const GroupImage = function({ groupId, className }) {
+const GroupImage = function({ groupId, className, width }) {
     
     // ======= Request Tracking =====================================
     
@@ -22,10 +22,11 @@ const GroupImage = function({ groupId, className }) {
 
     // ======= Render ===============================================
 
+    const renderWidth = width ? width : 200
     let content = ( <UserGroupIcon /> ) 
     if ( group && group.fileId ) {
         content = (
-            <img src={`${configuration.backend}/file/${group.fileId}`} />
+            <img src={`${configuration.backend}/file/${group.fileId}?width=${renderWidth}`} />
         )
     } 
 

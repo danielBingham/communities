@@ -20,13 +20,14 @@
 const fs = require('fs')
 
 const { S3 } = require('@aws-sdk/client-s3')
-const { PutObjectCommand, GetObjectCommand, DeleteObjectCommand, CopyObjectCommand } = require('@aws-sdk/client-s3')
+const { HeadObjectCommand, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, CopyObjectCommand } = require('@aws-sdk/client-s3')
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner')
 
 
 module.exports = class S3FileService {
 
     constructor(core) {
+        this.core = core
         this.config = core.config
 
         const s3Config = {
@@ -68,6 +69,38 @@ module.exports = class S3FileService {
         await this.removeFile(currentPath)
     }
 
+    async hasFile(path) {
+        const params = {
+            Bucket: this.config.s3.bucket,
+            Key: path
+        }
+
+        try {
+            const response = await this.s3Client.send(new HeadObjectCommand(params))
+            return response.$metadata.httpStatusCode === 200
+        } catch (error ) {
+            if ( error.$metadata?.httpStatusCode === 404 ) {
+                return false
+            } else if ( error.$metadata?.httpStatusCode === 403) {
+                this.core.logger.error('Got 403 from S3.  Likely bad permissions.')
+                this.core.logger.error(error)
+                return false
+            } else {
+                throw error
+            }
+        }
+    }
+
+    async getFile(path) {
+        const params = {
+            Bucket: this.config.s3.bucket,
+            Key: path
+        }
+
+        const response = await this.s3Client.send(new GetObjectCommand(params))
+        return await response.Body.transformToByteArray()
+    }
+
     async getSignedUrl(path) {
         const params = {
             Bucket: this.config.s3.bucket,
@@ -77,6 +110,7 @@ module.exports = class S3FileService {
         const command = new GetObjectCommand(params)
         return getSignedUrl(this.s3Client, command, { expiresIn: 60*60*24 })
     }
+
 
     async removeFile(path) {
         const params = {

@@ -27,6 +27,7 @@ const RelationshipsOwnStateMigration = require('../migrations/RelationshipsOwnSt
 const CommentSubscriptionsMigration = require('../migrations/CommentSubscriptionsMigration')
 const FixActivityMigration = require('../migrations/FixActivityMigration')
 const PrivateGroupsMigration = require('../migrations/PrivateGroupsMigration')
+const ImageResizeMigration = require('../migrations/ImageResizeMigration')
 
 const ServiceError = require('../errors/ServiceError')
 const MigrationError = require('../errors/MigrationError')
@@ -93,6 +94,11 @@ module.exports = class FeatureService {
                 dependsOn: [],
                 conflictsWith: [],
                 migration: new PrivateGroupsMigration(core)
+            },
+            '9-image-transcoding': {
+                dependsOn: [],
+                conflictsWith: [],
+                migration: new ImageResizeMigration(core)
             }
         }
     }

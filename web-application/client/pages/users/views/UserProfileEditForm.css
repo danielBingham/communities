@@ -7,20 +7,17 @@
     padding: 10px;
     align-items: center;
 }
-.user-profile-edit-form .profile-image {
+.user-profile-edit-form .user-profile-edit-form__profile-image {
     display: block;
     margin: 0 auto;
-    width: 160px;
+    width: 200px;
+    text-align: center;
 }
-.user-profile-edit-form .profile-image .current-image svg {
+svg.user-profile-edit-form__placeholder {
     display: block;
-    width: 150px;
+    width: 200px;
     margin: 10px auto;
-}
-.user-profile-edit-form .profile-image .draft-image-file {
-    display: block;
-    width: 150px;
-    margin: 10px auto;
+    color: var(--main-icon-color);
 }
 .user-profile-edit-form .submit {
     text-align: center;

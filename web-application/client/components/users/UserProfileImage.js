@@ -5,7 +5,7 @@ import { UserCircleIcon } from '@heroicons/react/24/solid'
 
 import './UserProfileImage.css'
 
-const UserProfileImage = function({ userId, className }) {
+const UserProfileImage = function({ userId, className, width }) {
     
     // ======= Request Tracking =====================================
     
@@ -36,7 +36,7 @@ const UserProfileImage = function({ userId, className }) {
     let content = ( <UserCircleIcon /> ) 
     if ( user && user.fileId ) {
         content = (
-            <img src={`${configuration.backend}/file/${user.fileId}`} />
+            <img src={`${configuration.backend}/file/${user.fileId}?width=200`} />
         )
     } 
 

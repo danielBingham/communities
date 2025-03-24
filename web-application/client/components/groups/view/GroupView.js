@@ -5,7 +5,6 @@ import { useRequest } from '/lib/hooks/useRequest'
 
 import { getGroup } from '/state/groups'
 
-import GroupImage from '/components/groups/view/GroupImage'
 import Error404 from '/components/errors/Error404'
 
 import './GroupView.css'

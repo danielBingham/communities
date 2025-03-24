@@ -16,7 +16,7 @@ const PostImage = function({ id, className }) {
     let content = null 
     if ( post.fileId ) {
         content = (
-            <img src={`${configuration.backend}/file/${post.fileId}`} />
+            <img src={`${configuration.backend}/file/${post.fileId}?width=650`} />
         )
     } else if ( ! post.fileId ) {
         return null

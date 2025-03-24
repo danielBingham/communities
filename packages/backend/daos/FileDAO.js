@@ -45,11 +45,10 @@ module.exports = class FilesDAO {
 
         for(const row of rows) {
             const file = this.hydrateFile(row)
-            if ( ! files[row.id] ) {
-                files[row.id] = file
+            if ( ! files[file.id] ) {
+                files[file.id] = file
                 list.push(file)
             }
-
         }
 
         return list 
@@ -71,7 +70,7 @@ module.exports = class FilesDAO {
                 FROM files 
                 ${where}
         `
-        
+
         const results = await this.database.query(sql, params)
 
         if ( results.rows.length <= 0 ) {

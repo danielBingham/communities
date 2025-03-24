@@ -158,7 +158,7 @@ const PostForm = function({ postId, groupId }) {
         attachmentView = (
             <div className="attachment">
                 <div className="attached">
-                    <DraftImageFile fileId={fileId} setFileId={setFileId} width={150} deleteOnRemove={ ! post || post.fileId != fileId } />
+                    <DraftImageFile fileId={fileId} setFileId={setFileId} width={650} deleteOnRemove={ ! post || post.fileId != fileId } />
                 </div>
             </div>
         )

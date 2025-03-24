@@ -25,10 +25,12 @@
     "bcrypt": "^5.1.0",
     "bull": "^4.10.4",
     "handlebars": "^4.7.7",
+    "image-size": "^2.0.1",
     "mime": "^3.0.0",
     "pg": "^8.11.1",
     "postmark": "^3.0.15",
-    "sanitize-filename": "^1.6.3"
+    "sanitize-filename": "^1.6.3",
+    "sharp": "^0.33.5"
   },
   "devDependencies": {
     "jest": "^29.4.3"
