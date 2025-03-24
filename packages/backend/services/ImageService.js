@@ -52,10 +52,6 @@ module.exports = class ImageService {
         // Load the original file into memory.
         const fileContents = await this.fileService.getFile(file.filepath)
         const dimensions = imageSize(fileContents)
-
-        // TODO Right now we assume the images we're cropping are displayed as
-        // 200px width images.  If we ever change that, we'll need to update
-        // this code.
         
         // The image will have been scaled equivalently in each dimension in
         // order to maintain the aspect ratio.  So we only need the ratio from

@@ -91,12 +91,11 @@ module.exports = class ImageResizeMigration {
         const fileDAO = new FileDAO(this.core)
 
         const files = await fileDAO.selectFiles()
-        const sizes = [ 30, 200, 325, 450, 650]
 
         this.logger.info(`Preparing to migrate ${files.length} files...`)
         for(const file of files) {
             this.logger.info(`Resizing file ${file.id}...`)
-            for(const size of sizes) {
+            for(const size of imageService.imageSizes) {
                 imageService.resize(file, size)
             }
         }
