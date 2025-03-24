@@ -21,11 +21,10 @@
 const MigrationError = require('../errors/MigrationError')
 
 const FileDAO = require('../daos/FileDAO')
-const ImageService = require('../services/ImageService')
 
 module.exports = class ImageResizeMigration {
 
-    constructor(core) {
+    constructor(core) { 
         this.core = core 
 
         this.database = core.database
@@ -87,17 +86,14 @@ module.exports = class ImageResizeMigration {
     }
 
     async migrateForward() { 
-        const imageService = new ImageService(this.core)
         const fileDAO = new FileDAO(this.core)
 
         const files = await fileDAO.selectFiles()
 
         this.logger.info(`Preparing to migrate ${files.length} files...`)
         for(const file of files) {
-            this.logger.info(`Resizing file ${file.id}...`)
-            for(const size of imageService.imageSizes) {
-                imageService.resize(file, size)
-            }
+            this.logger.info(`Queueing resize for file ${file.id}...`)
+            await this.core.queue.add('resize-image', { session: { user: { id: 'resize-migration' }}, file: file })
         }
     }
 
