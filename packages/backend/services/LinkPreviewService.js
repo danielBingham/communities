@@ -27,8 +27,14 @@ module.exports = class LinkPreviewService {
         this.core = core
     }
 
-    async getPreview(url) {
-        const response = await fetch(url)
+    async getPreview(url, userAgent) {
+        const response = await fetch(url, 
+        {
+            method: 'GET',
+            headers: {
+                'User-Agent': userAgent
+            }
+        })
 
         if ( ! response.ok) {
             throw new ServiceError('request-failed', `Attempt to retrieve a link preview failed with status: ${response.status}`)
