@@ -23,9 +23,13 @@ spec:
         container: web-application 
     spec:
       terminationGracePeriodSeconds: 70
+      volumes:
+        - name: workspace
+          emptyDir:
+            sizeLimit: 200M
       containers:
         - name: web-application-container
-          image: 843012963492.dkr.ecr.us-east-1.amazonaws.com/communities/web-application:0.2.1
+          image: 843012963492.dkr.ecr.us-east-1.amazonaws.com/communities/web-application:0.2.4
           ports:
             - containerPort: 3000
           resources:
@@ -47,6 +51,9 @@ spec:
               port: 3000
             failureThreshold: 1
             periodSeconds: 10
+          volumeMounts:
+            - mountPath: '/src/tmp'
+              name: workspace
           env:
             - name: DEBUG
               value: "communities:*"

@@ -2,9 +2,9 @@ FROM node:18.17.0
 
 WORKDIR /src
 
-COPY package.json .
-COPY .npmrc .
-RUN --mount=type=secret,id=CODEARTIFACT_AUTH_TOKEN CODEARTIFACT_AUTH_TOKEN=$(cat /run/secrets/CODEARTIFACT_AUTH_TOKEN) npm install
+COPY package.json package.json 
+COPY .npmrc .npmrc 
+RUN --mount=type=secret,id=CODEARTIFACT_AUTH_TOKEN CODEARTIFACT_AUTH_TOKEN=$(cat /run/secrets/CODEARTIFACT_AUTH_TOKEN) npm install 
 
 # Copy only the files and directories we need, one per command, from least
 # likely to change to most likely to change.  This maximizes layer caching in
@@ -15,8 +15,8 @@ RUN --mount=type=secret,id=CODEARTIFACT_AUTH_TOKEN CODEARTIFACT_AUTH_TOKEN=$(cat
 # TODO In the future, allow for the construction of development images that
 # include the tests, among other things, and can load code on a volume to allow
 # development to happen in a docker image.
-COPY babel.config.js .
-COPY webpack.config.js .
+COPY babel.config.js babel.config.js 
+COPY webpack.config.js webpack.config.js 
 COPY public public 
 COPY server server 
 COPY client client 
@@ -25,4 +25,4 @@ RUN npm run build
 
 EXPOSE 8080 
 
-ENTRYPOINT ["node", "./server/bin/www"]
+ENTRYPOINT [ "npm", "start" ]

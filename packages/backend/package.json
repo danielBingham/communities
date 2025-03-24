@@ -1,6 +1,6 @@
 {
   "name": "@communities/backend",
-  "version": "0.2.0",
+  "version": "0.2.3",
   "description": "The backend of Communities.",
   "author": "Daniel Bingham",
   "license": "GPL-3.0",
@@ -26,6 +26,7 @@
     "bull": "^4.10.4",
     "handlebars": "^4.7.7",
     "image-size": "^2.0.1",
+    "jsdom": "^26.0.0",
     "mime": "^3.0.0",
     "pg": "^8.11.1",
     "postmark": "^3.0.15",
