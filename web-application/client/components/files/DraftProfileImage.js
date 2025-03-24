@@ -39,7 +39,6 @@ const DraftProfileImage = function({ fileId, setFileId, width, crop, setCrop, de
         const img = event.target
         setImageWidth(img.clientWidth)
         setImageHeight(img.clientHeight)
-        console.log(`onLoad: ${img.clientWidth}, ${img.clientHeight}`)
     }
 
     // =========== Effect Handling ============================================
