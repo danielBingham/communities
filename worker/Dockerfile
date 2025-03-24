@@ -1,12 +1,10 @@
 FROM node:18.17.0
 
-ARG TOKEN
-
 WORKDIR /src
 
 COPY package.json .
 COPY .npmrc .
-RUN npm install
+RUN --mount=type=secret,id=CODEARTIFACT_AUTH_TOKEN CODEARTIFACT_AUTH_TOKEN=$(cat /run/secrets/CODEARTIFACT_AUTH_TOKEN) npm install
 
 # Copy only the files and directories we need, one per command, from least
 # likely to change to most likely to change.  This maximizes layer caching in

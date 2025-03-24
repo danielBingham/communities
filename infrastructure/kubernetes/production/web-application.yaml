@@ -25,7 +25,7 @@ spec:
       terminationGracePeriodSeconds: 70
       containers:
         - name: web-application-container
-          image: 843012963492.dkr.ecr.us-east-1.amazonaws.com/communities/web-application:0.1.1
+          image: 843012963492.dkr.ecr.us-east-1.amazonaws.com/communities/web-application:0.2.1
           ports:
             - containerPort: 3000
           resources:
