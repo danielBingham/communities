@@ -4,18 +4,13 @@
 .group-edit-form .group-edit-form__group-image {
     display: block;
     margin: 0 auto;
-    width: 160px;
+    width: 200px;
 }
 .group-edit-form .group-edit-form__group-image svg.placeholder {
     display: block;
-    width: 150px;
+    width: 200px;
     margin: 10px auto;
     color: var(--main-border-color);
-}
-.group-edit-form .group-edit-form__group-image .draft-image-file {
-    display: block;
-    width: 150px;
-    margin: 10px auto;
 }
 .group-edit-form .group-edit-form__types {
     text-align: left;

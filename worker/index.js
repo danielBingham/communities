@@ -39,9 +39,8 @@ core.queue.process('resize-image', async function(job, done) {
     try {
         job.progress({ step: 'initializing', stepDescription: `Initializing...`, progress: 0 })
 
-        const fileSizes = [ 30, 200, 325, 450, 650]
         let progress = 0
-        for (const size of fileSizes) {
+        for (const size of imageService.imageSizes) {
             await imageService.resize(job.data.file, size)
 
             progress += 20

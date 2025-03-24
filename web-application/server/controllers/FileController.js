@@ -212,8 +212,8 @@ module.exports = class FileController {
                 `You must be authenticated to patch a file.`)
         }
 
-        if ( ! fileId ) {
-            throw new ControllError(400, 'invalid',
+        if ( fileId === null || fileId === undefined || fileId === '' ) {
+            throw new ControllerError(400, 'invalid',
                 `Missing File.id.`,
                 `You must include the file.id in the resource route.`)
         }
@@ -248,8 +248,6 @@ module.exports = class FileController {
                 `Missing element of 'crop' when PATCHing File(${fileId}).`,
                 `Missing crop data.`)
         }
-
-        // TODO Validate the crop against the size of the image. 
 
         await this.imageService.crop(file, crop)
 

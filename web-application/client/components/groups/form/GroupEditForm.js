@@ -8,9 +8,10 @@ import { useRequest } from '/lib/hooks/useRequest'
 
 import { useGroup } from '/lib/hooks/group'
 
+import { patchFile } from '/state/files'
 import { patchGroup } from '/state/groups'
 
-import DraftImageFile from '/components/files/DraftImageFile'
+import DraftProfileImage from '/components/files/DraftProfileImage'
 import FileUploadInput from '/components/files/FileUploadInput'
 
 import Button from '/components/generic/button/Button'
@@ -26,10 +27,18 @@ const GroupEditForm = function({ groupId }) {
 
     const [ about, setAbout ] = useLocalStorage('group.draft.about', ( group?.about ? group.about : ''))
     const [ fileId, setFileId] = useLocalStorage('group.draft.fileId', ( group?.fileId ? group.fileId : null))
+    const [ crop, setCrop ] = useState({
+        unit: 'px',
+        x: 0,
+        y: 0,
+        width: 200,
+        height: 200
+    })
 
     const [ aboutErrors, setAboutErrors ] = useState([])
 
     const [request, makeRequest] = useRequest()
+    const [fileRequest, makeFileRequest] = useRequest()
 
     const validate = function(field) {
 
@@ -57,6 +66,9 @@ const GroupEditForm = function({ groupId }) {
             fileId: fileId
         }
 
+        if ( fileId !== null && fileId !== undefined ) {
+            makeFileRequest(patchFile(fileId, crop))
+        }
         makeRequest(patchGroup(groupPatch))
     }
 
@@ -95,14 +107,22 @@ const GroupEditForm = function({ groupId }) {
     let baseError = null
     let aboutError = aboutErrors.join(' ')
 
-    const inProgress = request && request.state == 'pending'
+    const inProgress = (request && request.state == 'pending') || (fileRequest && fileRequest.state == 'pending')
     return (
         <form onSubmit={onSubmit} className="group-edit-form">
             <div className="group-edit-form__errors">{ baseError }</div>
             <div className="group-edit-form__group-image">
                 <div>
                     { ! fileId && <UserCircleIcon className="placeholder" /> }
-                    { fileId && <DraftImageFile fileId={fileId} setFileId={setFileId} width={200} deleteOnRemove={false} /> }
+                    { fileId && <DraftProfileImage 
+                        fileId={fileId} 
+                        setFileId={setFileId} 
+                        width={200} 
+                        crop={crop} 
+                        setCrop={setCrop} 
+                        deleteOnRemove={false} 
+                        isCropped={fileRequest && fileRequest.state == 'fulfilled'}
+                    /> }
                     { ! fileId && <FileUploadInput 
                         fileId={fileId}
                         setFileId={setFileId} 

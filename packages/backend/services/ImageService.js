@@ -29,6 +29,8 @@ module.exports = class ImageService {
         this.core = core
 
         this.fileService = new S3FileService(core)
+
+        this.imageSizes = [ 30, 200, 325, 450, 650 ] 
     }
 
     async resize(file, size) {
@@ -49,17 +51,27 @@ module.exports = class ImageService {
     async crop(file, crop) {
         // Load the original file into memory.
         const fileContents = await this.fileService.getFile(file.filepath)
-        //const dimensions = imageSize(fileContents)
-        // TODO This doesn't currently handle mapping the crop to the correct
-        // size.  We're usually cropping images that are 200x200, but the
-        // original image could be any size.  The crop comes in raw pixels (0 -
-        // 200) and we need to scale it to the original image's size.  
-        //
-        // That's going to take more work.  So punting on cropping for now.
+        const dimensions = imageSize(fileContents)
+
+        // TODO Right now we assume the images we're cropping are displayed as
+        // 200px width images.  If we ever change that, we'll need to update
+        // this code.
+        
+        // The image will have been scaled equivalently in each dimension in
+        // order to maintain the aspect ratio.  So we only need the ratio from
+        // one dimension in order to unscale our crop.
+        const ratio = dimensions.width / crop.originalWidth 
+
+        const x = parseInt(crop.x * ratio)
+        const y = parseInt(crop.y * ratio)
+
+        const width = parseInt(crop.width * ratio)
+        const height = parseInt(crop.height * ratio)
 
         // Keep the uncropped file by moving it to `files/id.orig.ext`
         const originalPath = `files/${file.id}.orig.${mime.getExtension(file.type)}`
         await this.fileService.moveFile(file.filepath, originalPath)
+        await this.deleteImageSizes(file)
 
         // Crop the file and upload the cropped file to the original path.
         const filename = `${file.id}.${mime.getExtension(file.type)}`
@@ -67,10 +79,17 @@ module.exports = class ImageService {
         const targetPath = `files/${filename}`
 
         await sharp(fileContents)
-            .extract({ left: crop.x, top: crop.y, width: crop.width, height: crop.height })
+            .extract({ left: x, top: y, width: width, height: height })
             .toFile(tmpPath)
 
         await this.fileService.uploadFile(tmpPath, targetPath)
         this.fileService.removeLocalFile(tmpPath)
+    }
+
+    async deleteImageSizes(file) {
+        for(const size of this.imageSizes) {
+            const filepath = `files/${file.id}.${size}.${mime.getExtension(file.type)}`
+            this.fileService.removeFile(filepath)
+        }
     }
 }

@@ -9,7 +9,7 @@ import { patchUser } from '/state/users'
 import { patchFile } from '/state/files'
 
 import UserProfileImage from '/components/users/UserProfileImage'
-import DraftImageFile from '/components/files/DraftImageFile'
+import DraftProfileImage from '/components/files/DraftProfileImage'
 import FileUploadInput from '/components/files/FileUploadInput'
 
 import Input from '/components/generic/input/Input'
@@ -24,6 +24,13 @@ const UserProfileEditForm = function(props) {
     // ======= Render State =========================================
 
     const [fileId, setFileId] = useState(null)
+    const [crop, setCrop] = useState({
+        unit: 'px',
+        x: 0,
+        y: 0,
+        width: 200,
+        height: 200
+    })
 
     const [name, setName] = useState('')
     const [about, setAbout] = useState('')
@@ -99,6 +106,9 @@ const UserProfileEditForm = function(props) {
             about: about
         }
 
+        if ( fileId !== null && fileId !== undefined ) {
+            makeFileRequest(patchFile(fileId, crop))
+        }
         makeRequest(patchUser(user))
     }
 
@@ -144,10 +154,25 @@ const UserProfileEditForm = function(props) {
         }
     }, [])
 
+    useEffect(function() {
+        if ( fileRequest && fileRequest.state == 'fulfilled') {
+            // Reset the crop after we've finished cropping so that it isn't
+            // outside the image.
+            setCrop({
+                unit: 'px',
+                x: 0,
+                y: 0,
+                width: 200, 
+                height: 200
+            })
+        }
+
+    }, [ fileRequest ])
+
     // ======= Render ===============================================
    
     let result = null
-    if ( request && request.state == 'fulfilled' ) {
+    if ( fileRequest && fileRequest.state == 'fulfilled' && request && request.state == 'fulfilled' ) {
         result = (
             <div className="success">
                 Update successful.
@@ -159,24 +184,33 @@ const UserProfileEditForm = function(props) {
                 Request failed: { request.error.message }.
             </div>
         )
+    } else if ( fileRequest && fileRequest.state == 'failed' ) {
+        result = (
+            <div className="request-failure">
+                Request failed: { fileRequest.error.message }.
+            </div>
+        )
     }
 
     let submit = ( <><Button type="secondary-warn" onClick={(e) => cancel()}>Cancel</Button> <input type="submit" name="submit" value="Submit" /></> )
-    if ( request && request.state == 'pending') {
+    if ( (request && request.state == 'pending' ) || ( fileRequest && fileRequest.state == 'pending' )) {
         submit = ( <Spinner /> )
     }
 
     return (
         <div className='user-profile-edit-form'>
             <form onSubmit={onSubmit}>
-                <div className="profile-image">
+                <div className="user-profile-edit-form__profile-image">
                     <div>
-                        { ! fileId && <UserCircleIcon /> }
-                        { fileId && <DraftImageFile 
+                        { ! fileId && <UserCircleIcon className="user-profile-edit-form__placeholder" /> }
+                        { fileId && <DraftProfileImage
                                         fileId={fileId} 
                                         setFileId={setFileId} 
                                         width={200} 
+                                        crop={crop}
+                                        setCrop={setCrop}
                                         deleteOnRemove={false} 
+                                        isCropped={fileRequest && fileRequest.state == 'fulfilled'}
                         /> }
                         { ! fileId && <FileUploadInput 
                             fileId={fileId}

@@ -1,0 +1,10 @@
+.draft-profile-image__file-wrapper {
+    position: relative;
+    width: 200px;
+}
+.draft-profile-image__file-wrapper img {
+    width: 100%;
+}
+.draft-profile-image__buttons {
+    text-align: center;
+}
