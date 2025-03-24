@@ -18,7 +18,7 @@ const FriendButton = function({ userId }) {
     const relationship = useSelector((state) => relationshipId !== null && relationshipId in state.userRelationships.dictionary ? state.userRelationships.dictionary[relationshipId] : null)
 
     useEffect(function() {
-        if ( relationship === null ) {
+        if ( relationship === null && currentUser.id !== userId) {
             makeRequest(getUserRelationship(currentUser.id, userId))
         }
     }, [currentUser, userId, relationship])

@@ -92,13 +92,13 @@ const GroupEditForm = function({ groupId }) {
 
     const navigate = useNavigate()
     useEffect(() => {
-        if ( request && request.state == 'fulfilled') {
+        if ( (fileRequest && fileRequest.state == 'fulfilled') && (request && request.state == 'fulfilled')) {
             setAbout(null)
             setFileId(null)
    
             navigate(`/group/${request.response.body.entity.slug}`)
         }
-    }, [ request ])
+    }, [ request, fileRequest ])
 
     if ( ! group ) {
         return (<Spinner />)
