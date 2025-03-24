@@ -81,7 +81,7 @@ module.exports = class LinkPreviewController {
 
         const url = request.body.url
 
-        const linkPreview = await this.linkPreviewService.getPreview(url)
+        const linkPreview = await this.linkPreviewService.getPreview(url, request.get('User-Agent'))
         await this.linkPreviewDAO.insertLinkPreviews(linkPreview)
 
         const results = await this.linkPreviewDAO.selectLinkPreviews({

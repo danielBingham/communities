@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react'
 
+import { LinkIcon, XMarkIcon } from '@heroicons/react/24/solid'
+
 import { useRequest } from '/lib/hooks/useRequest'
 
 import { postLinkPreviews } from '/state/linkPreviews'
 
+import ErrorModal from '/components/errors/ErrorModal'
 import Button from '/components/generic/button/Button'
 import Spinner from '/components/Spinner'
 
@@ -33,17 +36,14 @@ const LinkForm = function({ setShowLinkForm, setLinkPreviewId }) {
         }
     }, [ request])
 
-    let errorView = null
-    if ( request && request.state == 'failed' ) {
-        errorView = (
-            <div className="error">Attempt to retrieve link preview failed.  We can't add that link as a post attachment, but you can add it to the post body.</div>
-        )
-    }
-
     const inProgress = request && request.state == 'pending'
+    const failed = request && request.state == 'failed'
     return (
         <div className="link-form">
-            { errorView }
+            { failed && <ErrorModal>
+                <p>Attempt to retrieve link preview failed.  We can't add that link as a post attachment, but you can add it to the post body.</p>
+                <p>Please report this as a bug by emailing <a href="mailto:contact@communities.social">contact@communities.social</a>.  Please include the url that failed.</p> 
+            </ErrorModal> }
             <input 
                 type="text" 
                 name="link" 
@@ -52,10 +52,10 @@ const LinkForm = function({ setShowLinkForm, setLinkPreviewId }) {
                 value={url}
             />
             { inProgress && <div className="link-form__buttons"><Spinner /></div> }
-            { ! inProgress && <div className="link-form__buttons">
-                <Button type="secondary-warn" onClick={(e) => close()}>Cancel</Button>
-                <Button type="primary" onClick={(e) => submit()}>Add Link</Button>
-            </div> }
+            { ! inProgress && <>
+                <Button type="secondary-warn" onClick={(e) => close()}><XMarkIcon /> <span className="button-text">Cancel</span></Button>
+                <Button type="primary" onClick={(e) => submit()}><LinkIcon /> <span className="button-text">Add Link</span></Button>
+            </> }
         </div>
     )
 
