@@ -17,6 +17,9 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
+
+import * as Sentry from "@sentry/react";
+
 export class Logger  {
     /**
      * Use NPM's logging levels.
@@ -80,15 +83,19 @@ export class Logger  {
             if ( level == Logger.levels.error) {
                 console.log(logPrefix + 'Error encountered.') 
                 console.error(message)
+                Sentry.captureException(message)
             } else {
                 console.log(logPrefix + 'Logging object.')
                 console.log(message)
+                Sentry.captureMessage(message)
             }
         } else {
             if ( level == Logger.levels.error) {
                 console.error(logPrefix + message)
+                Sentry.captureException(message)
             } else {
                 console.log(logPrefix + message)
+                Sentry.captureMessage(message)
             }
         }
     }
