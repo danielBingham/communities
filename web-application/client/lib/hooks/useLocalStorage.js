@@ -11,7 +11,7 @@ export const useLocalStorage = function(key, defaultValue) {
     const [ internalValue, setInternalValue] = useState(() => getLocalStorage(key, defaultValue))
 
     const setValue = (value) => {
-        if ( value === null ) {
+        if ( value === null || value === '' ) {
             setInternalValue(value)
             localStorage.removeItem(key)
         } else {

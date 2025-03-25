@@ -1,4 +1,4 @@
-.post-visibility {
+.post-visibility-control__current  {
     display: inline-block;
     padding: 5px 15px;
     margin: 5px;
@@ -8,18 +8,19 @@
     color: var(--primary-color-dark);
     background-color: var(--primary-color-light);
 }
-.post-visibility svg {
+.post-visibility-control svg {
     width: 1.2em;
     height: 1.2em;
     margin-bottom: -0.2em;
     margin-right: 5px;
 }
+
 @media (width >= 700px) {
 
 
 }
 @media (width < 700px) {
-    .post-visibility .text {
+    .post-visibility-control__current .text {
         display: none;
     }
 }

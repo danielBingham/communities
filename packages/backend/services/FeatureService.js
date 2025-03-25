@@ -28,6 +28,7 @@ const CommentSubscriptionsMigration = require('../migrations/CommentSubscription
 const FixActivityMigration = require('../migrations/FixActivityMigration')
 const PrivateGroupsMigration = require('../migrations/PrivateGroupsMigration')
 const ImageResizeMigration = require('../migrations/ImageResizeMigration')
+const PublicPostsMigration = require('../migrations/PublicPostsMigration')
 
 const ServiceError = require('../errors/ServiceError')
 const MigrationError = require('../errors/MigrationError')
@@ -99,6 +100,11 @@ module.exports = class FeatureService {
                 dependsOn: [],
                 conflictsWith: [],
                 migration: new ImageResizeMigration(core)
+            },
+            '17-public-posts': {
+                dependsOn:[],
+                conflictsWith: [],
+                migration: new PublicPostsMigration(core)
             }
         }
     }

@@ -38,6 +38,13 @@ const SCHEMA = {
                 key: 'type',
                 needsFeature: '19-private-groups'
             },
+            'visibility': {
+                insert: 'required',
+                update: 'allowed',
+                select: 'always',
+                key: 'visibility',
+                needsFeature: '17-public-posts'
+            },
             'user_id': {
                 insert: 'required',
                 update: 'denied',
