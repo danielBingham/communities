@@ -41,6 +41,7 @@ module.exports = class ImageService {
         const fileContents = await this.fileService.getFile(file.filepath)
 
         await sharp(fileContents)
+            .rotate()
             .resize({ width: size })
             .toFile(tmpPath)
 
@@ -75,6 +76,7 @@ module.exports = class ImageService {
         const targetPath = `files/${filename}`
 
         await sharp(fileContents)
+            .rotate()
             .extract({ left: x, top: y, width: width, height: height })
             .toFile(tmpPath)
 

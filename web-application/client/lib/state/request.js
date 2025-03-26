@@ -59,6 +59,8 @@ export const makeTrackedRequest = function(method, endpoint, body, onSuccess, on
                 }
             } else {
                 const requestError = { 
+                    endpoint: endpoint,
+                    method: method,
                     status: status, 
                     type: responseBody.error, 
                     message: responseBody.message, 
@@ -68,7 +70,7 @@ export const makeTrackedRequest = function(method, endpoint, body, onSuccess, on
                     try {
                         onFailure(responseBody)
                     } catch (error) {
-                        logger.error(requestError)
+                        logger.warn(requestError)
                         return Promise.reject(error)
                     }
                 } 

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 
 import { LinkIcon, XMarkIcon } from '@heroicons/react/24/solid'
 
+import logger from '/logger'
+
 import { useRequest } from '/lib/hooks/useRequest'
 
 import { postLinkPreviews } from '/state/linkPreviews'
@@ -38,11 +40,16 @@ const LinkForm = function({ setShowLinkForm, setLinkPreviewId }) {
 
     const inProgress = request && request.state == 'pending'
     const failed = request && request.state == 'failed'
+
+    if ( failed ) {
+        logger.error(new Error(`Failed to load LinkPreview for Url(${url}).`))
+    }
+
     return (
         <div className="link-form">
             { failed && <ErrorModal>
                 <p>Attempt to retrieve link preview failed.  We can't add that link as a post attachment, but you can add it to the post body.</p>
-                <p>Please report this as a bug by emailing <a href="mailto:contact@communities.social">contact@communities.social</a>.  Please include the url that failed.</p> 
+                <p>The bug has been recorded and we'll look into it.</p> 
             </ErrorModal> }
             <input 
                 type="text" 
