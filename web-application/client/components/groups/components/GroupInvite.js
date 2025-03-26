@@ -185,7 +185,6 @@ const GroupInvite = function({ groupId }) {
     }
     return (
         <div className="group-invite">
-            <div className="group-invite__invitations">Beta: You have {currentUser.invitations} invitations left.</div>
             <div className="group-invite__input-wrapper">
                 <div className="group-invite__suggestions-wrapper">
                     <input
