@@ -130,7 +130,6 @@ const PostForm = function({ postId, groupId }) {
         } else if ( group !== null && group.type === 'open' ) {
             defaultVisibility = 'public'
         }
-
         setVisibility(draft ? draft.visibility : defaultVisibility)
     }, [ postId, groupId ])
 

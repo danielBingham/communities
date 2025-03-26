@@ -22,14 +22,16 @@ const EditPost = function({ postId }) {
         let newDraft = {
             content: '',
             fileId: null,
-            linkPreviewId: null
+            linkPreviewId: null,
+            visibility: 'private'
         }
 
         if ( post ) {
             newDraft = {
                 content: post.content,
                 fileId: post.fileId,
-                linkPreviewId: post.linkPreviewId
+                linkPreviewId: post.linkPreviewId,
+                visibility: post.visibility
             }
         }
         setDraft(newDraft)
