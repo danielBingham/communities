@@ -154,7 +154,7 @@ CREATE INDEX users__file_id ON users (file_id);
  *
  ******************************************************************************/
 
- CREATE TABLE link_previews (
+CREATE TABLE link_previews (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     url text,
 
@@ -227,6 +227,8 @@ CREATE INDEX group_members__user_id ON group_members (user_id);
  *****************************************************************************/
 
 CREATE TYPE post_type as ENUM('feed', 'group', 'event');
+CREATE TYPE post_visibility as ENUM('public', 'private');
+
 CREATE TABLE posts (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id uuid REFERENCES users (id) ON DELETE CASCADE NOT NULL,
@@ -234,6 +236,7 @@ CREATE TABLE posts (
     file_id uuid REFERENCES files (id) DEFAULT NULL,
     link_preview_id uuid REFERENCES link_previews (id) DEFAULT NULL,
 
+    visibility post_visibility NOT NULL DEFAULT 'private',
     type post_type NOT NULL DEFAULT 'feed' ,
 
     group_id uuid REFERENCES groups (id) ON DELETE CASCADE DEFAULT NULL,

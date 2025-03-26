@@ -149,9 +149,9 @@ module.exports = class PostController {
 
         // Permissions control statements, this determines what is visible.
         if ( this.core.features.has(`19-private-groups`) ) {
-            query.where += `((posts.user_id = ANY($${query.params.length - 1}::uuid[]) AND posts.type = 'feed') OR (posts.type = 'group' AND posts.group_id = ANY($${query.params.length}::uuid[])))`
+            query.where += `((posts.user_id = ANY($${query.params.length - 1}::uuid[]) AND posts.type = 'feed') OR (posts.type = 'group' AND posts.group_id = ANY($${query.params.length}::uuid[])) OR posts.visibility = 'public')`
         } else {
-            query.where += `posts.user_id = ANY($${query.params.length}::uuid[])`
+            query.where += `(posts.user_id = ANY($${query.params.length}::uuid[]) OR posts.visibility = 'public')`
         }
 
         if ('userId' in request.query) {

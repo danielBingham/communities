@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate, Link } from 'react-router-dom'
 
+import { UsersIcon, UserGroupIcon, GlobeAltIcon } from '@heroicons/react/24/solid'
+
 import { useRequest } from '/lib/hooks/useRequest'
 import { usePostDraft } from '/lib/hooks/usePostDraft'
 
@@ -12,6 +14,7 @@ import Linkify from 'react-linkify'
 import Spinner from '/components/Spinner'
 import DateTag from '/components/DateTag'
 import UserTag from '/components/users/UserTag'
+import UserProfileImage from '/components/users/UserProfileImage'
 
 import LinkPreview from '/components/links/view/LinkPreview'
 import PostDotsMenu from '/components/posts/widgets/PostDotsMenu'
@@ -67,12 +70,35 @@ const Post = function({ id, expanded, showLoading }) {
         postLink = `/group/${group.slug}/${id}`
     }
 
+    let postVisibility = (<span className="post__post-visibility"><UsersIcon /> <span className="text">Friends</span></span>)
+    if ( group !== null ) {
+        if ( post.visibility === 'private' ) {
+            postVisibility = (
+                <span className="post__post-visibility">
+                    <span className="post__post-visibility"> <UserGroupIcon /> <span className="text">Group</span></span>
+                </span>
+            )
+        } else if ( post.visibility === 'public' ) {
+            postVisibility = (
+                <span className="post__post-visibility">
+                    <span className="post__post-visibility"> <GlobeAltIcon /> <span className="text">Public</span></span>
+                </span>
+            )
+        }
+    }
+
+    if (post.visibility == 'public' ) {
+        postVisibility = (<span className="post__post-visibility"> <GlobeAltIcon /> <span className="text">Public</span></span>)
+    }
+
 
     return (
         <div id={post.id} className="post">
             <div className="post__header"> 
+                <div className="post__poster-image"><UserProfileImage userId={post.userId} /></div>
                 <div className="post__details">
-                    <UserTag id={post.userId} /> posted <Link to={postLink}><DateTag timestamp={post.createdDate} /></Link> { post.groupId &&<span>in <GroupTag id={post.groupId} /></span>}
+                    <div><UserTag id={post.userId} hideProfile={true} /> { post.groupId &&<span>posted in <GroupTag id={post.groupId} hideProfile={true} /></span>}</div> 
+                    <div><span className="post__visibility">{ postVisibility }</span> &bull; <Link to={postLink}><DateTag timestamp={post.createdDate} /></Link> </div>
                 </div>
                 <div className="post__controls">
                     <PostDotsMenu postId={post.id} />

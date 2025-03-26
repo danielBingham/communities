@@ -9,7 +9,7 @@ import { getGroup } from '/state/groups'
 import GroupImage from '/components/groups/view/GroupImage'
 import './GroupTag.css'
 
-const GroupTag = function({ id }) {
+const GroupTag = function({ id, hideProfile }) {
 
     // ======= Request Tracking =====================================
 
@@ -31,7 +31,7 @@ const GroupTag = function({ id }) {
 
     return (
         <span className="group-tag" >
-            { group && <span><GroupImage groupId={group.id} width={30} /> <Link to={`/group/${group.slug}`}>{group.title}</Link></span> }
+            { group && <span>{ ! hideProfile && <GroupImage groupId={group.id} width={30} /> } <Link to={`/group/${group.slug}`}>{group.title}</Link></span> }
         </span> 
     )
 

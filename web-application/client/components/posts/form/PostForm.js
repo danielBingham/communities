@@ -10,7 +10,8 @@ import logger from '/logger'
 import { useRequest } from '/lib/hooks/useRequest'
 import { usePostDraft } from '/lib/hooks/usePostDraft'
 
-import { useGroup } from '/lib/hooks/group/useGroup'
+import { useGroup } from '/lib/hooks/group'
+import { usePost } from '/lib/hooks/post'
 
 import { deleteFile } from '/state/files'
 import { postPosts, patchPost, finishPostEdit } from '/state/posts'
@@ -20,18 +21,30 @@ import DraftImageFile from '/components/files/DraftImageFile'
 import LinkForm from '/components/posts/form/controls/LinkForm'
 import LinkPreview from '/components/links/view/LinkPreview'
 import Button from '/components/generic/button/Button'
-import PostVisibility from '/components/posts/form/controls/PostVisibility'
+import PostVisibilityControl from '/components/posts/form/controls/PostVisibilityControl'
 
 
 import './PostForm.css'
 
 const PostForm = function({ postId, groupId }) {
 
-    const [draft, setDraft] = usePostDraft(postId || null)
+    const [post] = usePost(postId) 
+    const [group] = useGroup(post !== null ? post.groupId : groupId)
+
+    const [draft, setDraft] = usePostDraft(postId, groupId)
 
     const [content,setContent] = useState( draft ? draft.content : '')
     const [fileId,setFileId] = useState(draft ? draft.fileId : null)
     const [linkPreviewId, setLinkPreviewId] = useState(draft ? draft.linkPreviewId : null)
+
+    let defaultVisibility = 'private'
+    if ( post !== null ) {
+        defaultVisibility = post.visibility
+    } else if ( group !== null && group.type === 'open' ) {
+        defaultVisibility = 'public'
+    }
+
+    const [visibility, setVisibility] = useState(draft ? draft.visibility : defaultVisibility)
 
     const [showLinkForm, setShowLinkForm] = useState(false)
 
@@ -42,8 +55,6 @@ const PostForm = function({ postId, groupId }) {
     const [deleteFileRequest, makeDeleteFileRequest] = useRequest()
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
-    const post = useSelector((state) => postId && postId in state.posts.dictionary ? state.posts.dictionary[postId] : null)
-    const [group, groupError] = useGroup(groupId)
 
     const dispatch = useDispatch()
     const navigate = useNavigate()
@@ -51,6 +62,7 @@ const PostForm = function({ postId, groupId }) {
     const submit = function() {
         const newPost = {
             type: 'feed',
+            visibility: visibility,
             userId: currentUser.id,
             fileId: fileId,
             linkPreviewId: linkPreviewId,
@@ -84,7 +96,7 @@ const PostForm = function({ postId, groupId }) {
         setContent('')
         setError('')
 
-        if ( ! post || ( fileId !== null && post.fileId !== fileId )) {
+        if ( post !== null || ( fileId !== null && post.fileId !== fileId )) {
             makeDeleteFileRequest(deleteFile(fileId))
         }
 
@@ -108,8 +120,22 @@ const PostForm = function({ postId, groupId }) {
     }
 
     useEffect(function() {
-        setDraft({ content: content, fileId: fileId, linkPreviewId: linkPreviewId })
-    }, [ postId, content, fileId, linkPreviewId ])
+        setContent(draft ? draft.content : '')
+        setFileId(draft ? draft.fileId : null)
+        setLinkPreviewId(draft ? draft.linkPreviewId : null)
+
+        let defaultVisibility = 'private'
+        if ( post !== null ) {
+            defaultVisibility = post.visibility
+        } else if ( group !== null && group.type === 'open' ) {
+            defaultVisibility = 'public'
+        }
+        setVisibility(draft ? draft.visibility : defaultVisibility)
+    }, [ postId, groupId ])
+
+    useEffect(function() {
+        setDraft({ content: content, fileId: fileId, linkPreviewId: linkPreviewId, visibility: visibility })
+    }, [ postId, content, fileId, linkPreviewId, visibility ])
 
     useEffect(function() {
         if (postRequest && postRequest.state == 'fulfilled') {
@@ -190,7 +216,10 @@ const PostForm = function({ postId, groupId }) {
             </div>
             <div className="post-form__controls">
                 <div className="post-form__controls__attachments">{ attachmentControlsView }</div>
-                <div className="post-form__controls__visibility"><PostVisibility groupId={groupId} /></div>
+                <div className="post-form__controls__visibility">
+                    <PostVisibilityControl 
+                        visibility={visibility} setVisibility={setVisibility} postId={postId} groupId={groupId} />
+                </div>
             </div>
             <div className="buttons">
                 <Button type="secondary-warn" onClick={(e) => cancel()}>Cancel</Button>

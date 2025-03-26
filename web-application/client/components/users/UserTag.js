@@ -31,8 +31,8 @@ const UserTag = function(props) {
 
     return (
         <span className="user-tag" >
-            { ! user && <span><UserProfileImage /> Anonymous</span> }
-            { user && <span><UserProfileImage userId={user.id} /> <Link to={`/${user.username}`}>{user.name}</Link></span> }
+            { ! user && <span>{ ! props.hideProfile && <UserProfileImage /> } Anonymous</span> }
+            { user && <span>{ ! props.hideProfile && <UserProfileImage userId={user.id} /> } <Link to={`/${user.username}`}>{user.name}</Link></span> }
         </span> 
     )
 

@@ -2,21 +2,24 @@ import { useSelector, useDispatch } from 'react-redux'
 
 import { setDraft as setPostDraft, clearDraft as clearPostDraft } from '/state/posts'
 
-export const usePostDraft = function(id) {
-    let postId = id ? id : 'new'
+export const usePostDraft = function(id, groupId) {
+    let postKey = id !== null && id !== undefined ? id : 'new'
+    if ( postKey === 'new' &&  groupId !== null && groupId !== undefined) {
+        postKey = `${postKey}_${groupId}`
+    }
 
-    const savedDraft = JSON.parse(localStorage.getItem(`post.draft[${postId}]`))
-    const draft = useSelector((state) => postId in state.posts.drafts ? state.posts.drafts[postId] : savedDraft)
+    const savedDraft = JSON.parse(localStorage.getItem(`post.draft[${postKey}]`))
+    const draft = useSelector((state) => postKey in state.posts.drafts ? state.posts.drafts[postKey] : savedDraft)
 
     const dispatch = useDispatch()
 
     const setDraft = function(newDraft) {
         if ( newDraft !== null ) {
-            dispatch(setPostDraft({ id: postId, draft: newDraft }))
-            localStorage.setItem(`post.draft[${postId}]`, JSON.stringify(newDraft))
+            dispatch(setPostDraft({ id: postKey, draft: newDraft }))
+            localStorage.setItem(`post.draft[${postKey}]`, JSON.stringify(newDraft))
         } else {
-            dispatch(clearPostDraft({ id: postId }))
-            localStorage.removeItem(`post.draft[${postId}]`)
+            dispatch(clearPostDraft({ id: postKey }))
+            localStorage.removeItem(`post.draft[${postKey}]`)
         }
     }
 

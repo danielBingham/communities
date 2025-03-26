@@ -10,5 +10,7 @@
     border-radius: 10000px;
 }
 .profile-image svg {
+    height: 100%;
+    max-width: 100%;
     color: var(--main-icon-color);
 }

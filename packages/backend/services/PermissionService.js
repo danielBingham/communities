@@ -45,13 +45,16 @@ module.exports = class PermissionService {
     async get(user, action, entity, context) {
         if ( entity === 'Post' ) {
             if ( action === 'view' ) {
+                // TODO This is not going to scale beyond a few tens of
+                // thousands of posts. So we'll need to come up with a better
+                // way  to handle this.
                 const relationships = await this.userRelationshipDAO.getUserRelationshipsForUser(user.id)  
                 const friendIds = relationships.map((r) => r.userId === user.id ? r.relationId : r.userId)
                 const groupIds = await this.get(user, 'view', 'Group:content')
 
                 const results = await this.core.database.query(`
                     SELECT posts.id FROM posts 
-                        WHERE posts.user_id = ANY($1::uuid[]) OR posts.group_id = ANY($2::uuid[[])
+                        WHERE posts.user_id = ANY($1::uuid[]) OR posts.group_id = ANY($2::uuid[[]) OR posts.visibility = 'public'
                 `, [ friendIds, groupIds ]) 
 
                 return results.rows.map((r) => r.id)
@@ -160,6 +163,8 @@ module.exports = class PermissionService {
         // If the post isn't in a group, then users can view their own
         // posts.
         if ( context.post.userId === user.id ) {
+            return true
+        } else if ( context.post.visibility === 'public' ) {
             return true
         }
 
