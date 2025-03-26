@@ -14,19 +14,20 @@ import { useGroup } from '/lib/hooks/group'
 import { usePost } from '/lib/hooks/post'
 
 import { deleteFile } from '/state/files'
-import { postPosts, patchPost, finishPostEdit } from '/state/posts'
+import { postPosts, patchPost, finishPostEdit, clearSharingPost } from '/state/posts'
 
 import FileUploadInput from '/components/files/FileUploadInput'
 import DraftImageFile from '/components/files/DraftImageFile'
 import LinkForm from '/components/posts/form/controls/LinkForm'
 import LinkPreview from '/components/links/view/LinkPreview'
+import SharedPost from '/components/posts/SharedPost'
 import Button from '/components/generic/button/Button'
 import PostVisibilityControl from '/components/posts/form/controls/PostVisibilityControl'
 
 
 import './PostForm.css'
 
-const PostForm = function({ postId, groupId }) {
+const PostForm = function({ postId, groupId, sharedPostId }) {
 
     const [post] = usePost(postId) 
     const [group] = useGroup(post !== null ? post.groupId : groupId)
@@ -66,6 +67,7 @@ const PostForm = function({ postId, groupId }) {
             userId: currentUser.id,
             fileId: fileId,
             linkPreviewId: linkPreviewId,
+            sharedPostId: post ? post.sharedPostId : sharedPostId,
             content: content
         }
 
@@ -96,12 +98,15 @@ const PostForm = function({ postId, groupId }) {
         setContent('')
         setError('')
 
-        if ( post !== null || ( fileId !== null && post.fileId !== fileId )) {
+        if ( fileId !== null && post?.fileId !== fileId ) {
             makeDeleteFileRequest(deleteFile(fileId))
         }
 
         if ( postId ) {
             dispatch(finishPostEdit(postId))
+        }
+        if ( sharedPostId ) {
+            dispatch(clearSharingPost())
         }
     }
 
@@ -140,6 +145,7 @@ const PostForm = function({ postId, groupId }) {
     useEffect(function() {
         if (postRequest && postRequest.state == 'fulfilled') {
             setDraft(null)
+            dispatch(clearSharingPost())
             if ( group ) {
                 navigate(`/group/${group.slug}/${postRequest.response.body.entity.id}`)
             } else {
@@ -163,7 +169,7 @@ const PostForm = function({ postId, groupId }) {
 
     let attachmentView = null
     let attachmentControlsView = null
-    if ( ! fileId && ! linkPreviewId && ! showLinkForm) {
+    if ( ! fileId && ! linkPreviewId && ! showLinkForm && ! (sharedPostId || post?.sharedPostId)) {
         attachmentControlsView = (
             <div className="attachment-controls">
                 <div className="image">
@@ -200,7 +206,16 @@ const PostForm = function({ postId, groupId }) {
             <LinkForm setLinkPreviewId={setLinkPreviewId} setShowLinkForm={setShowLinkForm} />
         )
 
+    } else if ( sharedPostId ) {
+        attachmentView = (
+            <SharedPost id={sharedPostId} />
+        )
+    } else if ( post && post.sharedPostId ) {
+        attachmentView = (
+            <SharedPost id={post.sharedPostId} />
+        )
     }
+
 
     return (
         <div className="post-form">
