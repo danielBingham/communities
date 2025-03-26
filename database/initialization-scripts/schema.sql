@@ -235,6 +235,7 @@ CREATE TABLE posts (
 
     file_id uuid REFERENCES files (id) DEFAULT NULL,
     link_preview_id uuid REFERENCES link_previews (id) DEFAULT NULL,
+    shared_post_id uuid REFERENCES posts (id) DEFAULT NULL,
 
     visibility post_visibility NOT NULL DEFAULT 'private',
     type post_type NOT NULL DEFAULT 'feed' ,

@@ -5,7 +5,7 @@ import { XCircleIcon } from '@heroicons/react/24/solid'
 
 import './Modal.css'
 
-const Modal = function({ isVisible, setIsVisible, className, children, noClose }) {
+const Modal = function({ isVisible, setIsVisible, className, children, noClose, hideX}) {
 
     const close = function(event) {
         event.preventDefault()
@@ -23,7 +23,7 @@ const Modal = function({ isVisible, setIsVisible, className, children, noClose }
             <div className={`modal-wrapper ${className ? className : ''}`} >
                 <div className="modal__overlay" onClick={overlayClicked}></div>
                 <div className="modal">
-                    { ! noClose && <a href="" onClick={close} className="modal__close"><XCircleIcon /></a> }
+                    { ! noClose && ! hideX && <a href="" onClick={close} className="modal__close"><XCircleIcon /></a> }
                     { children }
                 </div>
             </div>,

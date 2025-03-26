@@ -59,7 +59,12 @@ export const postsSlice = createSlice({
          **/
         editing: {},
 
-        drafts: {}
+        drafts: {},
+
+        /**
+         * The id of a post we are actively sharing.
+         */
+        sharingPost: null
     },
     reducers: {
         // ======== State Manipulation Helpers ================================
@@ -91,6 +96,14 @@ export const postsSlice = createSlice({
 
         clearDraft: function(state, action) {
             delete state.drafts[action.payload.id]
+        },
+
+        setSharingPost: function(state, action) {
+            state.sharingPost = action.payload
+        },
+
+        clearSharingPost: function(state, action) {
+            state.sharingPost = null
         }
     }
 })
@@ -225,7 +238,8 @@ export const {
     setPostsInDictionary, removePost, 
     clearPostQuery, setPostQueryResults,
     startPostEdit, finishPostEdit,
-    setDraft, clearDraft
+    setDraft, clearDraft,
+    setSharingPost, clearSharingPost
 }  = postsSlice.actions
 
 export default postsSlice.reducer

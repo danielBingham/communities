@@ -70,6 +70,13 @@ const SCHEMA = {
                 select: 'always',
                 key: 'linkPreviewId'
             },
+            'shared_post_id': {
+                insert: 'allowed',
+                update: 'denied',
+                selected: 'always',
+                key: 'sharedPostId',
+                needsFeature: '18-post-sharing'
+            },
             'activity': {
                 insert: 'allowed',
                 insertDefault: function() {

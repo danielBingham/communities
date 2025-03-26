@@ -29,6 +29,7 @@ const FixActivityMigration = require('../migrations/FixActivityMigration')
 const PrivateGroupsMigration = require('../migrations/PrivateGroupsMigration')
 const ImageResizeMigration = require('../migrations/ImageResizeMigration')
 const PublicPostsMigration = require('../migrations/PublicPostsMigration')
+const PostSharingMigration = require('../migrations/PostSharingMigration')
 
 const ServiceError = require('../errors/ServiceError')
 const MigrationError = require('../errors/MigrationError')
@@ -105,6 +106,11 @@ module.exports = class FeatureService {
                 dependsOn:[],
                 conflictsWith: [],
                 migration: new PublicPostsMigration(core)
+            },
+            '18-post-sharing': {
+                dependsOn: ['17-public-posts'],
+                conflictsWith: [],
+                migration: new PostSharingMigration(core)
             }
         }
     }

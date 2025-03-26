@@ -17,17 +17,13 @@ import UserTag from '/components/users/UserTag'
 import UserProfileImage from '/components/users/UserProfileImage'
 
 import LinkPreview from '/components/links/view/LinkPreview'
-import SharedPost from '/components/posts/SharedPost'
-import PostDotsMenu from '/components/posts/widgets/PostDotsMenu'
-import PostReactions from '/components/posts/widgets/PostReactions'
-import PostComments from '/components/posts/comments/PostComments'
 import PostImage from '/components/posts/PostImage'
 import GroupTag from '/components/groups/view/GroupTag'
 import PostForm from '/components/posts/form/PostForm'
 
-import './Post.css'
+import './SharedPost.css'
 
-const Post = function({ id, expanded, showLoading }) {
+const SharedPost = function({ id, expanded, showLoading }) {
     const [showMore, setShowMore] = useState(expanded) 
 
     const [request, makeRequest] = useRequest()
@@ -49,8 +45,8 @@ const Post = function({ id, expanded, showLoading }) {
 
     if ( (request !== null && request.state == 'failed' && ( ! post || ! user ))) {
         return (
-            <div id={id} className="post">
-                <div className="post__error 404">
+            <div id={id} className="shared-post">
+                <div className="shared-post__error 404">
                     <h1>404 Error</h1>
                     That post does not seem to exist.
                 </div>
@@ -59,7 +55,7 @@ const Post = function({ id, expanded, showLoading }) {
     }
 
     if ( showLoading && (request && request.state == 'pending' )) {
-        return ( <div id={id} className="post"><Spinner /></div> )
+        return ( <div id={id} className="shared-post"><Spinner /></div> )
     }
 
     if ( ! post ) {
@@ -71,55 +67,52 @@ const Post = function({ id, expanded, showLoading }) {
         postLink = `/group/${group.slug}/${id}`
     }
 
-    let postVisibility = (<span className="post__post-visibility"><UsersIcon /> <span className="text">Friends</span></span>)
+    let postVisibility = (<span className="shared-post__post-visibility"><UsersIcon /> <span className="text">Friends</span></span>)
     if ( group !== null ) {
         if ( post.visibility === 'private' ) {
             postVisibility = (
-                <span className="post__post-visibility">
-                    <span className="post__post-visibility"> <UserGroupIcon /> <span className="text">Group</span></span>
+                <span className="shared-post__post-visibility">
+                    <span className="shared-post__post-visibility"> <UserGroupIcon /> <span className="text">Group</span></span>
                 </span>
             )
         } else if ( post.visibility === 'public' ) {
             postVisibility = (
-                <span className="post__post-visibility">
-                    <span className="post__post-visibility"> <GlobeAltIcon /> <span className="text">Public</span></span>
+                <span className="shared-post__post-visibility">
+                    <span className="shared-post__post-visibility"> <GlobeAltIcon /> <span className="text">Public</span></span>
                 </span>
             )
         }
     }
 
     if (post.visibility == 'public' ) {
-        postVisibility = (<span className="post__post-visibility"> <GlobeAltIcon /> <span className="text">Public</span></span>)
+        postVisibility = (<span className="shared-post__post-visibility"> <GlobeAltIcon /> <span className="text">Public</span></span>)
     }
 
+
     return (
-        <div id={post.id} className="post">
-            <div className="post__header"> 
-                <div className="post__poster-image"><UserProfileImage userId={post.userId} /></div>
-                <div className="post__details">
+        <div id={post.id} className="shared-post">
+            <div className="shared-post__header"> 
+                <div className="shared-post__poster-image"><UserProfileImage userId={post.userId} /></div>
+                <div className="shared-post__details">
                     <div><UserTag id={post.userId} hideProfile={true} /> { post.groupId &&<span>posted in <GroupTag id={post.groupId} hideProfile={true} /></span>}</div> 
-                    <div><span className="post__visibility">{ postVisibility }</span> &bull; <Link to={postLink}><DateTag timestamp={post.createdDate} /></Link> </div>
+                    <div><span className="shared-post__visibility">{ postVisibility }</span> &bull; <Link to={postLink}><DateTag timestamp={post.createdDate} /></Link> </div>
                 </div>
-                <div className="post__controls">
-                    <PostDotsMenu postId={post.id} />
+                <div className="shared-post__controls">
                 </div>
             </div>
-            { post.content && post.content.length > 0 && (post.content.length <= 1000 || showMore) && <div className="post__content">
+            { post.content && post.content.length > 0 && (post.content.length <= 1000 || showMore) && <div className="shared-post__content">
                 <Linkify>{ post.content }</Linkify>
                 {/*{ post.content.length >= 1000 && showMore && <div className="show-more">
                     <a href="" onClick={(e) => { e.preventDefault(); setShowMore(false) }}>Hide More.</a></div> */}
             </div> } 
-            { post.content && post.content.length > 0 && post.content.length > 1000 && ! showMore && <div className="post__content">
+            { post.content && post.content.length > 0 && post.content.length > 1000 && ! showMore && <div className="shared-post__content">
                 { post.content.substring(0,1000) }...
-                <div className="post__show-more"><a href="" onClick={(e) => { e.preventDefault(); setShowMore(true) }}>Show More.</a></div>
+                <div className="shared-post__show-more"><a href="" onClick={(e) => { e.preventDefault(); setShowMore(true) }}>Show More.</a></div>
             </div> }
             <PostImage id={id} />
             { post.linkPreviewId && <LinkPreview id={post.linkPreviewId} /> }
-            { post.sharedPostId && <SharedPost id={post.sharedPostId} /> }
-            <PostReactions postId={id} />
-            <PostComments postId={id} expanded={expanded} />
         </div>
     )
 }
 
-export default Post
+export default SharedPost 

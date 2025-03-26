@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
+import { setSharingPost } from '/state/posts'
 import { postPostReaction, patchPostReaction, deletePostReaction } from '/state/postReactions'
 
 import { XCircleIcon, 
@@ -28,13 +29,11 @@ const PostReactions = function({ postId }) {
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const post = useSelector((state) => postId && postId in state.posts.dictionary ? state.posts.dictionary[postId] : null)
 
-    if ( ! post ) {
-        return null
-    }
-
     const postReactions = useSelector((state) => state.postReactions.dictionary)
     const userReactionId = post.reactions.find((rid) => rid in postReactions ? postReactions[rid].userId == currentUser?.id : false)
     const userReaction = userReactionId ? postReactions[userReactionId] : null
+
+    const dispatch = useDispatch()
 
     const react = function(reaction) {
         if ( request && request.state == 'pending' ) {
@@ -53,6 +52,18 @@ const PostReactions = function({ postId }) {
         } else {
             makeRequest(deletePostReaction({ postId: postId }))
         }
+    }
+
+    const sharePost = function() {
+        if ( post && post.sharedPostId ) {
+            dispatch(setSharingPost(post.sharedPostId))
+        } else {
+            dispatch(setSharingPost(postId))
+        }
+    }
+
+    if ( ! post ) {
+        return null
     }
 
     const reactionViews = []
@@ -109,9 +120,9 @@ const PostReactions = function({ postId }) {
                         onClick={(e) => { e.preventDefault(); react('dislike') }} 
                     ><HandThumbDownIcon /> Dislike</a>
                 </div>
-                {/*<div className="group share">
-                    <a href=""><ArrowPathRoundedSquareIcon /> Share</a>
-                </div>*/}
+                { (post.visibility === 'public' || post.sharedPostId) && <div className="group share">
+                    <a href="" onClick={(e) => { e.preventDefault(); sharePost() }} ><ArrowPathRoundedSquareIcon /> Share</a>
+                </div> }
                 <div className="group block">
                     { userReaction?.reaction != 'block' && <>
                         <a href=""
