@@ -1,18 +1,20 @@
 import React from 'react'
 import { useSelector } from 'react-redux'
-import { useLocation, Link } from 'react-router-dom'
+import { useLocation, NavLink} from 'react-router-dom'
 
 import { 
     HomeIcon as HomeIconOutline,
     UsersIcon as UsersIconOutline,
     InformationCircleIcon as InformationCircleIconOutline,
-    UserGroupIcon as UserGroupIconOutline
+    UserGroupIcon as UserGroupIconOutline,
+    QueueListIcon as QueueListIconOutline
 } from '@heroicons/react/24/outline'
 import { 
     HomeIcon as HomeIconSolid,
     UsersIcon as UsersIconSolid,
     InformationCircleIcon as InformationCircleIconSolid,
-    UserGroupIcon as UserGroupIconSolid
+    UserGroupIcon as UserGroupIconSolid,
+    QueueListIcon as QueueListIconSolid
 } from '@heroicons/react/24/solid'
 
 import CommunitiesLogo from '/components/header/CommunitiesLogo'
@@ -34,22 +36,41 @@ const Header = function(props) {
 
     // ======= Render ===============================================
 
-    return (
-        <header>
-            <div className="grid">
-                <CommunitiesLogo />
-                <div id="navigation">
-                    <div id="about-navigation" className="navigation-block">
-                        <a href="/">{ location.pathname == '/' ? <HomeIconSolid /> : <HomeIconOutline /> }<span className="nav-text">Home</span></a>
-                        <Link to="/about">{ location.pathname.startsWith('/about') ? <InformationCircleIconSolid /> : <InformationCircleIconOutline /> }<span className="nav-text">About</span></Link>
-                        { currentUser && <Link to="/friends">{ location.pathname.startsWith('/friends') ? <UsersIconSolid /> : <UsersIconOutline /> }<span className="nav-text">Friends</span></Link> }
+    const isFeedPage = location.pathname === '/' || location.pathname.startsWith('/f/') || location.pathname.startsWith('/g/')
+    if ( currentUser === null || currentUser === undefined ) {
+        return (
+            <header>
+                <div className="grid">
+                    <CommunitiesLogo />
+                    <div id="navigation">
+                        <div id="about-navigation" className="navigation-block">
+                            <Link to="/about">{ location.pathname.startsWith('/about') ? <InformationCircleIconSolid /> : <InformationCircleIconOutline /> }<span className="nav-text">About</span></Link>
+                        </div>
+                        <AuthenticationNavigation  />
                     </div>
-                    { currentUser && <NotificationMenu /> }
-                    <AuthenticationNavigation  />
                 </div>
-            </div>
-        </header>
-    )
+            </header>
+        )
+
+    } else {
+        return (
+            <header>
+                <div className="grid">
+                    <CommunitiesLogo />
+                    <div id="navigation">
+                        <div id="about-navigation" className="navigation-block">
+                            <a href="/">{ isFeedPage ? <QueueListIconSolid /> : <QueueListIconOutline /> } <span className="nav-text">Feeds</span></a>
+                            <NavLink to="/friends"><UsersIconSolid className="solid" /><UsersIconOutline className="outline" /> <span className="nav-text">Friends</span></NavLink> 
+                            <NavLink to="/groups"><UserGroupIconOutline className="outline" /><UserGroupIconSolid className="solid" /> <span className="nav-text">Groups</span></NavLink>
+                        </div>
+                        <NotificationMenu /> 
+                        <AuthenticationNavigation  />
+                    </div>
+                </div>
+            </header>
+        )
+
+    }
 
 
 }

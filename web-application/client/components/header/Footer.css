@@ -1,0 +1,51 @@
+footer .explanation {
+    line-height: 1.6em;
+    margin-bottom: 2em;
+}
+footer a:link, footer a:active, footer a:visited {
+    color: var(--header-text-color);
+    font-style: normal;
+}
+
+footer a:hover {
+    color: white;
+}
+
+@media (800px <= width) {
+    footer {
+        padding: 50px 0;
+        border-top: thin solid var(--header-border-color);
+        background-color: var(--header-background-color);
+        color: var(--header-text-color);
+        font-style: italic;
+    }
+    footer .wrapper {
+        margin: 0 auto;
+        max-width: 1200px;
+        width: 100%;
+        text-align: center; 
+
+        display: grid;
+        grid-template-columns: 400px auto auto;
+
+    }
+}
+
+@media (width < 800px) {
+    footer {
+        padding: 20px 10px;
+        border-top: thin solid var(--header-border-color);
+        background-color: var(--header-background-color);
+        color: var(--header-text-color);
+        font-style: italic;
+    }
+    footer .wrapper {
+        margin: 0 auto;
+        width: 100%;
+        text-align: center; 
+    }
+
+    footer .footer__block {
+        padding: 10px 0;
+    }
+}
