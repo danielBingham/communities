@@ -57,14 +57,14 @@ Hi {{{postAuthor.name}}},
 
 {{{comment.content}}}
 
-Read the comment in context here: {{{host}}}{{{postAuthor.username}}}/{{{post.id}}}#comment-{{{comment.id}}}.
+Read the comment in context here: {{{host}}}{{{link}}}
 
 Cheers,
 The Communities Team
                         `)
                 },
                 text: Handlebars.compile(`{{{commentAuthor.name}}} commented, "{{{commentIntro}}}...", on your post, "{{{postIntro}}}...".`),
-                path: Handlebars.compile(`/{{{postAuthor.username}}}/{{{post.id}}}#comment-{{{comment.id}}}`) 
+                path: Handlebars.compile(`/{{{link}}}`) 
             },
             'Post:comment:create:subscriber': {
                 email: {
@@ -76,14 +76,14 @@ Hi {{{subscriber.name}}},
 
 "{{{comment.content}}}"
 
-Read the comment in context here: {{{host}}}{{{postAuthor.username}}}/{{{post.id}}}#comment-{{{comment.id}}}.
+Read the comment in context here: {{{host}}}{{{link}}}
 
 Cheers,
 The Communities Team
                         `)
                 },
                 text: Handlebars.compile(`{{{commentAuthor.name}}} commented, "{{{commentIntro}}}...", on a post, "{{{postIntro}}}...", you subscribe to.`),
-                path: Handlebars.compile(`/{{{postAuthor.username}}}/{{{post.id}}}#comment-{{{comment.id}}}`) 
+                path: Handlebars.compile(`/{{{link}}}`) 
             },
             'User:friend:create': {
                 email: {
@@ -303,6 +303,13 @@ The Communities Team`)
 
         const postAuthor = await this.userDAO.getUserById(context.post.userId) 
         context.postAuthor = postAuthor
+
+        if ( context.post.groupId ) {
+            const group = await this.groupDAO.getGroupById(context.post.groupId)
+            context.link = `group/${group.slug}/${context.post.id}#comment-${context.comment.id}`
+        } else {
+            context.link = `${context.postAuthor.username}/${context.post.id}#comment-${context.comment.id}`
+        }
 
         const subscriptions = await this.postSubscriptionDAO.getSubscriptionsByPost(context.post.id)
         if ( subscriptions !== null ) {
