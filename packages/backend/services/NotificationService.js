@@ -216,6 +216,24 @@ The Communities Team`)
                 text: Handlebars.compile(`{{{moderator.name}}} deleted your post, "{{{shortText}}}" in group, "{{{group.title}}}".`),
                 path: Handlebars.compile(`/group/{{{group.slug}}}`)
 
+            },
+            'Group:post:comment:deleted': {
+                email: {
+                    subject: Handlebars.compile('[Communities] Your comment, "{{{shortText}}}", was deleted from a post in group, "{{{group.title}}}".'),
+                    body: Handlebars.compile(`
+Hi {{{user.name}}},
+
+{{{moderator.name}}} deleted your comment from a post in group, "{{{group.title}}}".  The full text of your comment was:
+
+{{{comment.content}}}
+
+You can view the post here: {{{host}}}group/{{{group.slug}}}/{{{post.id}}}
+
+Cheers,
+The Communities Team`)
+                },
+                text: Handlebars.compile(`{{{moderator.name}}} deleted your comment, "{{{shortText}}}" from a post in group, "{{{group.title}}}".`),
+                path: Handlebars.compile(`/group/{{{group.slug}}}/{{{post.id}}}`)
             }
         }
 
@@ -225,7 +243,8 @@ The Communities Team`)
             'User:friend:update': this.friendRequestAcceptedNotification.bind(this),
             'Group:member:create': this.sendGroupMemberCreatedNotification.bind(this),
             'Group:member:update': this.sendGroupMemberUpdatedNotification.bind(this),
-            'Group:post:deleted': this.sendGroupPostDeletedNotification.bind(this)
+            'Group:post:deleted': this.sendGroupPostDeletedNotification.bind(this),
+            'Group:post:comment:deleted': this.sendGroupPostCommentDeletedNotification.bind(this)
         }
     }
 
@@ -413,5 +432,18 @@ The Communities Team`)
             'Group:post:deleted',
             context
         )
+    }
+
+    async sendGroupPostCommentDeletedNotification(currentUser, context) {
+        context.user = await this.userDAO.getUserById(context.comment.userId)
+        context.group = await this.groupDAO.getGroupById(context.post.groupId)
+        context.shortText = context.comment.content.substring(0, 100) + '...'
+
+        await this.createNotification(
+            context.comment.userId,
+            'Group:post:comment:deleted',
+            context
+        )
+
     }
 }
