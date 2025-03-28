@@ -86,7 +86,6 @@ const UserInvite = function() {
 
     return (
         <div className="user-invite">
-            <div className="user-invite__invitations-available">You have { currentUser.invitations } invitations available.</div>
             <div className="user-invite__input-wrapper">
                 <input 
                     type="text" 

@@ -294,20 +294,78 @@ module.exports = class UserController {
                 `'${user.email}' is not a valid email.`)
         }
 
-        // If a user already exists with that email, send a 409 Conflict
-        // response.
-        //
-        const userExistsResults = await this.database.query(
-            'SELECT id, username, email FROM users WHERE email=$1 OR username=$2',
+        if ( user.email === currentUser.email ) {
+            throw new ControllerError(400, 'invalid',
+                `User attempting to invite themselves.`,
+                `You cannot invite yourself.  You've already joined!`)
+        }
+
+        const existingUserResults = await this.userDAO.selectUsers(
+            'WHERE users.email=$1 OR users.username=$2',
             [ user.email, user.username ]
         )
 
+        const userExists = existingUserResults.list.length > 0
+        const existingUser = existingUserResults.dictionary[existingUserResults.list[0]] 
+
         // 1. request.body.email must not already be attached to a user in the
         // database.
-        if (userExistsResults.rowCount > 0) {
+        if (userExists && ! currentUser ) {
             throw new ControllerError(403, 'not-authorized', 
                 `Attempting to create a User(${userExistsResults.rows[0].id}) that already exists!`,
                 `That person has already been invited.`)
+        } else if ( userExists && currentUser ) {
+            // If they are in an 'invited' state, meaning they've been invited,
+            // but haven't accepted yet, send them a new invitation.
+            if ( existingUser.status === 'invited' ) {
+                const token = this.tokenDAO.createToken('invitation')
+                token.userId = existingUser.id
+                token.creatorId = currentUser.id
+                token.id = await this.tokenDAO.insertToken(token)
+
+                await this.emailService.sendInvitation(currentUser, existingUser, token)
+            } 
+
+            // If we haven't already added them as a friend, send them a friend
+            // request.
+            let existingRelationship = await this.userRelationshipsDAO.getUserRelationshipByUserAndRelation(currentUser.id, existingUser.id)
+
+            if ( existingRelationship !== null && existingUser.status == 'confirmed' ) {
+                throw new ControllerError(400, 'exists',
+                    `Attempt to invite a user who already exists.`,
+                    `${existingUser.name} has already joined and you already sent them a friend request.`)
+            }
+
+            if ( ! existingRelationship ) {
+                await this.userRelationshipsDAO.insertUserRelationships({ 
+                    userId: currentUser.id,
+                    relationId: existingUser.id,
+                    status: "pending"
+                })
+                existingRelationship = await this.userRelationshipsDAO.getUserRelationshipByUserAndRelation(currentUser.id, existingUser.id)
+            } 
+
+            const relations = {}
+            if ( existingRelationship ) {
+                relations.userRelationships = { 
+                    [ existingRelationship.id ]: existingRelationship
+                }
+            }
+            const invitedUserResults = await this.userDAO.selectCleanUsers(`WHERE users.id = $1`, [ existingUser.id ])
+            
+            if ( ! (existingUser.id in invitedUserResults.dictionary)) {
+                throw new ControllerError(500, 'server-error',
+                    `We couldn't find User(${existingUser.id}) when query for clean User.`,
+                    `We couldn't find the User record after we invited them.  Please report this as a bug.`)
+            }
+
+            relations.users = invitedUserResults.dictionary
+
+            response.status(201).json({
+                entity: currentUser,
+                relations: relations 
+            })
+            return
         }
 
         // If we're creating a user with a password, then this is just a normal
@@ -321,13 +379,7 @@ module.exports = class UserController {
             user.password = this.auth.hashPassword(user.password)
             user.status = 'unconfirmed'
         } else if ( currentUser ) {
-            if ( currentUser.invitations >= 1 ) {
-                user.status = 'invited'
-            } else {
-                throw new ControllerError(403, 'not-authorized',
-                    `User(${currentUser.id}) attempting to invite a user without any invitations.`,
-                    `You are out of invitations for the time being. More invitations will be issued in the future.`)
-            }
+            user.status = 'invited'
         } else {
             throw new ControllerError(400, 'invalid',
                 `Users creating accounts must include a password!`,
@@ -375,13 +427,6 @@ module.exports = class UserController {
 
             await this.emailService.sendInvitation(currentUser, createdUser, token)
 
-            // Update the current user and decrement their invitations.
-            const userPatch = {
-                id: currentUser.id,
-                invitations: currentUser.invitations-1
-            }
-            await this.userDAO.updateUser(userPatch)
-
             // Since the user exists, go ahead and insert the friend
             // relationship.
             await this.userRelationshipsDAO.insertUserRelationships({ 
@@ -390,7 +435,6 @@ module.exports = class UserController {
                 status: "confirmed"
             })
 
-            currentUser.invitations = currentUser.invitations-1
             response.status(201).json({
                 entity: currentUser,
                 relations: { 
