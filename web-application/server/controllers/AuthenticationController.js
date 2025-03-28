@@ -184,7 +184,7 @@ module.exports = class AuthenticationController {
         try {
             const userId = await this.auth.authenticateUser(credentials)
 
-            const userResults = await this.userDAO.selectUsers('WHERE users.id = $1', [ userId ])
+            const userResults = await this.userDAO.selectUsers({ where: 'users.id = $1', params: [ userId ]}, 'all')
 
             if ( ! userResults.dictionary[userId] ) {
                 throw new ControllerError(500, 'server-error', `Failed to find User(${userId}) after authenticating them!`)

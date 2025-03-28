@@ -119,7 +119,7 @@ module.exports = class UserController {
         }
 
         const result = {
-            where: `WHERE users.status != 'invited'`,
+            where: `users.status != 'invited'`,
             params: [],
             page: 1,
             order: '',
@@ -178,11 +178,6 @@ module.exports = class UserController {
             result.page = 1
         }
 
-        // If we haven't added anything to the where clause, then clear it.
-        if ( result.where == 'WHERE') {
-            result.where = ''
-        }
-
         return result
 
     }
@@ -212,9 +207,9 @@ module.exports = class UserController {
          * 
          * **********************************************************/
 
-        const { where, params, order, page, emptyResult, requestedRelations } = await this.parseQuery(request.session.user, request.query)
+        const query = await this.parseQuery(request.session.user, request.query)
 
-        if ( emptyResult ) {
+        if ( query.emptyResult ) {
             return response.status(200).json({
                 meta: {
                     count: 0,
@@ -222,17 +217,21 @@ module.exports = class UserController {
                     pageSize: 1,
                     numberOfPages: 1
                 }, 
-                result: []
+                relations: {},
+                dictionary: {},
+                list: []
             })
         }
-        const meta = await this.userDAO.countUsers(where, params, page)
-        const results = await this.userDAO.selectCleanUsers(where, params, order, page)
+        const meta = await this.userDAO.countUsers(query)
+        const results = await this.userDAO.selectUsers(query)
+        const relations = await this.getRelations(request.session.user, results, query.requestedRelations) 
 
-        results.meta = meta
-
-        results.relations = await this.getRelations(request.session.user, results, requestedRelations) 
-
-        return response.status(200).json(results)
+        return response.status(200).json({ 
+            dictionary: results.dictionary,
+            list: results.list,
+            meta: meta,
+            relations: relations
+        })
     }
 
     /**
@@ -300,10 +299,10 @@ module.exports = class UserController {
                 `You cannot invite yourself.  You've already joined!`)
         }
 
-        const existingUserResults = await this.userDAO.selectUsers(
-            'WHERE users.email=$1 OR users.username=$2',
-            [ user.email, user.username ]
-        )
+        const existingUserResults = await this.userDAO.selectUsers({
+            where: 'users.email=$1 OR users.username=$2',
+            params: [ user.email, user.username ]
+        }, 'all')
 
         const userExists = existingUserResults.list.length > 0
         const existingUser = existingUserResults.dictionary[existingUserResults.list[0]] 
@@ -343,6 +342,15 @@ module.exports = class UserController {
                     status: "pending"
                 })
                 existingRelationship = await this.userRelationshipsDAO.getUserRelationshipByUserAndRelation(currentUser.id, existingUser.id)
+
+                await this.notificationService.sendNotifications(
+                    currentUser, 
+                    'User:friend:create',
+                    {
+                        userId: currentUser.id,
+                        relationId:existingUser.id 
+                    }
+                )
             } 
 
             const relations = {}
@@ -351,7 +359,7 @@ module.exports = class UserController {
                     [ existingRelationship.id ]: existingRelationship
                 }
             }
-            const invitedUserResults = await this.userDAO.selectCleanUsers(`WHERE users.id = $1`, [ existingUser.id ])
+            const invitedUserResults = await this.userDAO.selectUsers({ where: `users.id = $1`, params: [ existingUser.id ]}, [ 'email' ])
             
             if ( ! (existingUser.id in invitedUserResults.dictionary)) {
                 throw new ControllerError(500, 'server-error',
@@ -409,7 +417,7 @@ module.exports = class UserController {
             }
         }
 
-        const createdUserResults = await this.userDAO.selectUsers('WHERE users.id=$1', [user.id])
+        const createdUserResults = await this.userDAO.selectUsers({ where: 'users.id=$1', params: [user.id] }, [ 'email', 'status' ])
 
         if ( ! createdUserResults.dictionary[user.id] ) {
             throw new ControllerError(500, 'server-error', 
@@ -432,8 +440,17 @@ module.exports = class UserController {
             await this.userRelationshipsDAO.insertUserRelationships({ 
                 userId: currentUser.id,
                 relationId: createdUser.id,
-                status: "confirmed"
+                status: "pending"
             })
+
+            await this.notificationService.sendNotifications(
+                currentUser, 
+                'User:friend:create',
+                {
+                    userId: currentUser.id,
+                    relationId:createdUser.id 
+                }
+            )
 
             response.status(201).json({
                 entity: currentUser,
@@ -453,9 +470,9 @@ module.exports = class UserController {
 
         let results = null
         if ( currentUser && currentUser.id == user.id ) {
-            results = await this.userDAO.selectUsers(`WHERE users.id = $1`, [ user.id ])
+            results = await this.userDAO.selectUsers({ where: `users.id = $1`, params: [ user.id ]}, 'all')
         } else {
-            results = await this.userDAO.selectCleanUsers('WHERE users.id=$1', [ user.id ])
+            results = await this.userDAO.selectUsers({ where: 'users.id=$1', params: [ user.id ]})
         }
 
         if (! results.dictionary[user.id] ) {
@@ -494,9 +511,9 @@ module.exports = class UserController {
 
         let results = null
         if ( currentUser && currentUser.id == request.params.id ) {
-            results = await this.userDAO.selectUsers(`WHERE users.id = $1 AND users.status != 'invited'`, [ request.params.id ])
+            results = await this.userDAO.selectUsers({ where: `users.id = $1 AND users.status != 'invited'`, params: [ request.params.id ]}, 'all')
         } else {
-            results = await this.userDAO.selectCleanUsers(`WHERE users.id = $1 AND users.status != 'invited'`, [request.params.id])
+            results = await this.userDAO.selectUsers({ where: `users.id = $1 AND users.status != 'invited'`, params: [request.params.id]})
         }
 
         if ( ! results.dictionary[ request.params.id] ) {
@@ -581,7 +598,7 @@ module.exports = class UserController {
                 `User(${id}) attempted to update another User(${user.id}).`,
                 `You may not update a user other than yourself.`)
         }
-        const existingUsers = await this.userDAO.selectUsers(`WHERE users.id = $1`, [ id ] )
+        const existingUsers = await this.userDAO.selectUsers({ where: `users.id = $1`, params: [ id ]}, 'all')
 
         // 3. User(:id) must exist.
         // If they don't exist, something is really, really wrong -- since they
@@ -729,7 +746,7 @@ module.exports = class UserController {
                 user.status = 'confirmed'
             } else if ( user.email != existingUser.email ) {
                 // First we need to make sure the new email is not in use.
-                const existingEmailResults = await this.userDAO.selectUsers(`WHERE users.email = $1`, [ user.email ])
+                const existingEmailResults = await this.userDAO.selectUsers({ where: `users.email = $1`, params: [ user.email ]}, 'all')
 
                 if ( existingEmailResults.list.length > 0 ) {
                     throw new ControllerError(400, 'email-taken',
@@ -753,7 +770,7 @@ module.exports = class UserController {
         // Issue #132 - We're going to allow the user's email to be returned in this case,
         // because only authenticated users may call this endpoint and then
         // only on themselves.
-        const results = await this.userDAO.selectUsers('WHERE users.id=$1', [user.id])
+        const results = await this.userDAO.selectUsers({ where: 'users.id=$1', params: [user.id]}, 'all')
 
         if ( ! results.dictionary[user.id] ) {
             throw new ControllerError(500, 'server-error', `Failed to find user(${user.id}) after update!`)

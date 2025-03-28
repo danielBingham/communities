@@ -30,8 +30,10 @@ module.exports = class DAO {
         this.entityMaps = {}
     }
 
-    getSelectionString(entityName, shouldGetFull) {
+    getSelectionString(entityName, requestedFields) {
         let string = ''
+        const fields = requestedFields !== undefined && Array.isArray(requestedFields) ? requestedFields : []
+        const selectAll = requestedFields === 'all'
         for(const [field, meta] of Object.entries(this.entityMaps[entityName].fields)) {
             if ( meta.needsFeature && ! this.core.features.has(meta.needsFeature)) {
                 continue
@@ -41,7 +43,7 @@ module.exports = class DAO {
                 continue
             }
 
-            if ( ! shouldGetFull && meta.select == 'full' ) {
+            if ( meta.select == 'request' && ! fields.includes(field) && ! selectAll ) {
                 continue
             }
 
@@ -58,9 +60,9 @@ module.exports = class DAO {
         for(const [field, meta] of Object.entries(this.entityMaps[entityName].fields)) {
             if ( meta.needsFeature && ! this.core.features.has(meta.needsFeature) ){
                 entity[meta.key] = null
-            } else if ( meta.select == 'override' ) {
+            } else if ( meta.select === 'override' ) {
                 entity[meta.key] = meta.selectOverride()
-            } else if ( row[`${entityName}_${meta.key}`] == undefined ) {
+            } else if ( row[`${entityName}_${meta.key}`] === undefined ) {
                 entity[meta.key] = null
             } else {
                 entity[meta.key] = row[`${entityName}_${meta.key}`]

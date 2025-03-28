@@ -62,7 +62,7 @@ module.exports = class PostController {
 
             userIds.push(post.userId)
         }
-        const userResults = await this.userDAO.selectUsers(`WHERE users.id = ANY($1::uuid[])`, [userIds])
+        const userResults = await this.userDAO.selectUsers({ where: `users.id = ANY($1::uuid[])`, params: [userIds]})
 
         const postCommentResults = await this.postCommentDAO.selectPostComments({
             where: `post_comments.post_id = ANY($1::uuid[])`,
