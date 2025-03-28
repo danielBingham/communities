@@ -178,7 +178,7 @@ module.exports = class TokenController {
         // Validation: 2. request.body.type must be 'reset-password'
         if ( tokenParams.type == 'reset-password' ) {
             // Validation: 1. A User with request.body.email must exist.
-            const userResults = await this.userDAO.selectUsers('WHERE email=$1', [ tokenParams.email ])
+            const userResults = await this.userDAO.selectUsers({ where: 'email=$1', params: [ tokenParams.email ]}, 'all')
 
             if ( userResults.list.length <= 0) {
                 return response.status(200).json(null)
@@ -202,7 +202,7 @@ module.exports = class TokenController {
                     `You must be authenticated to do that.`)
             }
 
-            const userResults = await this.userDAO.selectUsers('WHERE email=$1', [ tokenParams.email ])
+            const userResults = await this.userDAO.selectUsers({ where: 'email=$1', params: [ tokenParams.email ]}, 'all')
 
             if ( userResults.list.length <= 0) {
                 return response.status(200).json(null)

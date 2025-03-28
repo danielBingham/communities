@@ -43,7 +43,7 @@ module.exports = class UserRelationshipController {
 
         const userIds = Object.keys(userIdDictionary)
 
-        const userResults = await this.userDAO.selectCleanUsers(`WHERE users.id = ANY($1::uuid[]) AND users.status = 'confirmed'`, [ userIds ])
+        const userResults = await this.userDAO.selectUsers({ where: `users.id = ANY($1::uuid[])`, params: [ userIds ]}, [ 'email' ])
 
         return {
             users: userResults.dictionary
@@ -60,7 +60,7 @@ module.exports = class UserRelationshipController {
         }
 
         // Only return those relationships where the user has confirmed.
-        const confirmedUserResults = await this.core.database.query(`
+/*        const confirmedUserResults = await this.core.database.query(`
             SELECT user_relationships.id FROM user_relationships
                 LEFT OUTER JOIN users ON user_relationships.user_id = users.id
                 LEFT OUTER JOIN users relation ON user_relationships.friend_id = relation.id
@@ -69,7 +69,10 @@ module.exports = class UserRelationshipController {
         `, [ userId ])
 
         query.params.push(confirmedUserResults.rows.map((r) => r.id))
-        query.where += `user_relationships.id = ANY($${query.params.length}::uuid[])`
+        query.where += `user_relationships.id = ANY($${query.params.length}::uuid[])`*/
+
+        query.params.push(userId)
+        query.where += `(user_relationships.user_id = $1 OR user_relationships.friend_id = $1)`
 
         if ( requestQuery.status ) {
             query.params.push(requestQuery.status)

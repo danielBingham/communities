@@ -333,7 +333,7 @@ The Communities Team`)
         const subscriptions = await this.postSubscriptionDAO.getSubscriptionsByPost(context.post.id)
         if ( subscriptions !== null ) {
             const subscriberIds = subscriptions.map((s) => s.userId)
-            const subscribers = await this.userDAO.selectUsers(`WHERE users.id = ANY($1::uuid[])`, [ subscriberIds])
+            const subscribers = await this.userDAO.selectUsers({ where: `users.id = ANY($1::uuid[])`, params: [ subscriberIds]})
 
             for(const subscription of subscriptions) {
                 if ( subscription.userId == context.commentAuthor.id ) {
@@ -351,10 +351,10 @@ The Communities Team`)
     }
 
     async sendFriendRequestNotification(currentUser, context) {
-        const userResults = await this.userDAO.selectUsers(
-            `WHERE users.id = ANY($1::uuid[])`,
-            [  [ context.userId, context.relationId ] ]
-        )
+        const userResults = await this.userDAO.selectUsers({
+            where: `users.id = ANY($1::uuid[])`,
+            params: [  [ context.userId, context.relationId ] ]
+        })
 
         context.friend = userResults.dictionary[context.relationId]
         context.requester = userResults.dictionary[context.userId]
@@ -363,10 +363,10 @@ The Communities Team`)
     }
 
     async friendRequestAcceptedNotification(currentUser, context) {
-        const userResults = await this.userDAO.selectUsers(
-            `WHERE users.id = ANY($1::uuid[])`,
-            [  [ context.userId, context.relationId ] ]
-        )
+        const userResults = await this.userDAO.selectUsers({
+            where: `users.id = ANY($1::uuid[])`,
+            params: [  [ context.userId, context.relationId ] ]
+        })
 
         context.friend = userResults.dictionary[context.relationId]
         context.requester = userResults.dictionary[context.userId]

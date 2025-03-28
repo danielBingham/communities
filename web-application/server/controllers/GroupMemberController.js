@@ -46,11 +46,41 @@ module.exports = class GroupMemberController {
         this.permissionService = new PermissionService(core)
     }
 
-    async getRelations(currentUser, results, requestedRelations) {
-        return { }
+    async getRelations(currentUser, results, requestedRelations, context) {
+        const memberUserIds = []
+        const pendingUserIds = []
+        for(const groupMemberId of results.list) {
+            const member = results.dictionary[groupMemberId]
+            if ( member.status === 'member' ) {
+                memberUserIds.push(member.userId)
+            } else {
+                pendingUserIds.push(member.userId)
+            }
+        }
+
+        let canModerateGroup = false
+        if ( context !== undefined && context !== null ) {
+            canModerateGroup = await this.permissionService.can(currentUser, 'moderate', 'Group', { group: context.group, groupMember: context.member })
+        }
+
+        let userDictionary = {}
+        if ( canModerateGroup ) {
+            const memberUsers = await this.userDAO.selectUsers({ where: `users.id = ANY($1::uuid[])`, params: [memberUserIds] })
+            const pendingUsers = await this.userDAO.selectUsers({where: `users.id = ANY($1::uuid[]) AND users.status != 'invited'`, params: [ pendingUserIds] })
+            const pendingInvitees = await this.userDAO.selectUsers({ where: `users.id = ANY($1::uuid[]) AND users.status = 'invited'`, params: [pendingUserIds] }, [ 'email' ])
+
+            userDictionary = { ...memberUsers.dictionary, ...pendingUsers.dictionary, ...pendingInvitees.dictionary }
+        } else {
+            const memberUsers = await this.userDAO.selectUsers({ where: `users.id = ANY($1::uuid[])`, params: [memberUserIds] })
+            userDictionary = memberUsers.dictionary
+        }
+
+        return { 
+            users: userDictionary 
+        }
     }
 
-    async createQuery(request) {
+    async createQuery(currentUser, urlQuery, context) {
         const query = {
             where: '',
             params: [],
@@ -59,38 +89,19 @@ module.exports = class GroupMemberController {
             full: false
         }
 
-        const currentUser = request.session.user
-        const groupId = request.params.groupId
+        const canModerateGroup = await this.permissionService.can(currentUser, 'moderate', 'Group', { group: context.group, groupMember: context.member })
 
-        const group = await this.groupDAO.getGroupById(groupId)
-        if ( ! group ) {
-            throw new ControllerError(404, 'not-found',
-                `No Group(${groupId}).`,
-                `That group either doesn't exist or you don't have permission to see it.`)
-        }
-
-        const member = await this.groupMemberDAO.getGroupMemberByGroupAndUser(group.id, currentUser.id, true)
-
-        const canViewGroup = await this.permissionService.can(currentUser, 'view', 'Group', { group: group, groupMember: member })
-        if ( ! canViewGroup ) {
-            throw new ControllerError(404, 'not-found',
-                `User(${currentUser.id}) does not have permission to view Group(${groupId}).`,
-                `That group either doesn't exist or you don't have permission to see it.`)
-        }
-
-        const canViewGroupContent = await this.permissionService.can(currentUser, 'view', 'Group:content', { group: group, groupMember: member })
-        if ( ! canViewGroupContent ) {
-            query.page = -1
-            return query
-        }
-
-        const canModerateGroup = await this.permissionService.can(currentUser, 'moderate', 'Group', { group: group, groupMember: member })
-
+        // If they are a moderator or admin, they can view all group members,
+        // including ones who are still pending.
         if ( canModerateGroup ) {
-            query.params.push(groupId)
+            query.params.push(context.group.id)
             query.where = `group_members.group_id = $${query.params.length}`
-        } else {
-            query.params.push(groupId)
+        } 
+
+        // Otherwise they can only view confirmed group members and their own
+        // membership (pending or not).
+        else {
+            query.params.push(context.group.id)
             query.params.push(currentUser.id)
             query.where = `group_members.group_id = $${query.params.length-1} 
                 AND (group_members.status = 'member' OR group_members.user_id = $${query.params.length})`
@@ -108,7 +119,32 @@ module.exports = class GroupMemberController {
                 `You must be authenticated to retrieve GroupMembers.`)
         }
 
-        const query = await this.createQuery(request)
+        const groupId = request.params.groupId
+
+        const group = await this.groupDAO.getGroupById(groupId)
+        if ( group === null ) {
+            throw new ControllerError(404, 'not-found',
+                `No Group(${groupId}).`,
+                `That group either doesn't exist or you don't have permission to see it.`)
+        }
+
+        const member = await this.groupMemberDAO.getGroupMemberByGroupAndUser(group.id, currentUser.id, true)
+
+        const canViewGroup = await this.permissionService.can(currentUser, 'view', 'Group', { group: group, groupMember: member })
+        if ( ! canViewGroup ) {
+            throw new ControllerError(404, 'not-found',
+                `User(${currentUser.id}) does not have permission to view Group(${groupId}).`,
+                `That group either doesn't exist or you don't have permission to see it.`)
+        }
+
+        const canViewGroupContent = await this.permissionService.can(currentUser, 'view', 'Group:content', { group: group, groupMember: member })
+        if ( ! canViewGroupContent ) {
+            throw new ControllerError(404, 'not-found',
+                `User(${currentUser.id}) does not have permission to view membership of Group(${groupId}).`,
+                `You don't have permission to view members of that group.`)
+        }
+
+        const query = await this.createQuery(currentUser, request.query, { group: group, member: member })
 
         // Empty response.
         if ( query.page == -1 ) {
@@ -125,11 +161,10 @@ module.exports = class GroupMemberController {
             })
             return
         }
-
         
         const results = await this.groupMemberDAO.selectGroupMembers(query)
         const meta = await this.groupMemberDAO.getGroupMemberPageMeta(query)
-        const relations = await this.getRelations(currentUser, results)
+        const relations = await this.getRelations(currentUser, results, [], { group: group, member: member })
 
         response.status(200).json({ 
             dictionary: results.dictionary,

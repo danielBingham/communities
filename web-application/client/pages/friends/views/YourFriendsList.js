@@ -12,7 +12,7 @@ const YourFriendsList = function() {
     return (
         <div className="your-friends-list">
             <UserInvite />
-            <FriendList userId={currentUser.id} />
+            <FriendList userId={currentUser.id} params={{ status: 'confirmed' }} />
         </div>
     )
 }

@@ -56,7 +56,7 @@ const SCHEMA = {
             'email': {
                 insert: 'required',
                 update: 'allowed',
-                select: 'full',
+                select: 'request',
                 key: 'email'
             },
             'password': {
@@ -68,13 +68,13 @@ const SCHEMA = {
             'status': {
                 insert: 'allowed',
                 update: 'allowed',
-                select: 'full',
+                select: 'request',
                 key: 'status'
             },
             'permissions': {
                 insert: 'denied',
                 update: 'denied',
-                select: 'full',
+                select: 'request',
                 key: 'permissions'
             },
             'settings': {
@@ -107,7 +107,7 @@ const SCHEMA = {
                     }
                 },
                 update: 'allowed',
-                select: 'full',
+                select: 'request',
                 key: 'settings'
             },
             'notices': {
@@ -117,7 +117,7 @@ const SCHEMA = {
                     return {}
                 },
                 update: 'allowed',
-                select: 'full',
+                select: 'request',
                 key: 'notices'
             },
             'about': {
@@ -129,7 +129,7 @@ const SCHEMA = {
             'location': {
                 insert: 'allowed',
                 update: 'allowed',
-                select: 'full',
+                select: 'request',
                 key: 'location'
             },
             'invitations': {
@@ -138,7 +138,7 @@ const SCHEMA = {
                     return 50
                 },
                 update: 'allowed',
-                select: 'full',
+                select: 'request',
                 key: 'invitations'
             },
             'created_date': {
@@ -170,12 +170,8 @@ module.exports = class UserDAO extends DAO {
         this.entityMaps = SCHEMA 
     }
 
-    getUserSelectionString() {
-        return this.getSelectionString('User', true)
-    }
-
-    getCleanUserSelectionString() {
-        return this.getSelectionString('User', false)
+    getUserSelectionString(fields) {
+        return this.getSelectionString('User', fields)
     }
 
     hydrateUser(row) {
@@ -207,8 +203,11 @@ module.exports = class UserDAO extends DAO {
         return { dictionary: dictionary, list: list } 
     }
 
-    async getUserById(id, clean) {
-        const results = await this.selectUsers('WHERE users.id = $1', [ id ], '', null, clean)
+    async getUserById(id, fields) {
+        const results = await this.selectUsers({
+            where: 'users.id = $1', 
+            params: [ id ], 
+        }, fields)
 
         if ( results.list.length <= 0 ) {
             return null
@@ -218,31 +217,20 @@ module.exports = class UserDAO extends DAO {
     }
 
     /**
-     * Get users with any sensitive data cleaned out of the record.  This
-     * method should be used any time we plan to return the users from the
-     * backend.
-     *
-     * @see this.selectUsers()
-     */
-    async selectCleanUsers(where, params, order, page) {
-        return await this.selectUsers(where, params, order, page, true)
-    }
-
-    /**
      * Retrieve user records from the database.
      *
      */
-    async selectUsers(whereStatement, parameters, orderStatement, page, clean) {
-        const params = parameters ? [ ...parameters ] : []
-        let where = whereStatement ? whereStatement : ''
-        let order = orderStatement ? orderStatement : 'users.created_date desc'
+    async selectUsers(query, fields) {
+        let where = query.where ? `WHERE ${query.where}` : ''
+        const params = query.params ? [ ...query.params ] : []
+        let order = query.order ? `${query.order}` : 'users.created_date desc'
 
         // We only want to include the paging terms if we actually want paging.
         // If we're making an internal call for another object, then we
         // probably don't want to have to deal with pagination.
         let paging = ''
-        if ( page ) {
-            page = page ? page : 1
+        if ( 'page' in query ) {
+            let page = query.page !== null && query.page !== undefined ? query.page : 1
             
             const offset = (page-1) * PAGE_SIZE
             let count = params.length 
@@ -258,7 +246,7 @@ module.exports = class UserDAO extends DAO {
 
         const sql = `
                 SELECT 
-                    ${ clean === true ? this.getCleanUserSelectionString(): this.getUserSelectionString()}
+                    ${this.getUserSelectionString(fields)}
                 FROM users
                 ${where} 
                 ORDER BY ${order} 
@@ -269,9 +257,9 @@ module.exports = class UserDAO extends DAO {
         return this.hydrateUsers(results.rows)
     }
 
-    async countUsers(where, params, page) {
-        params = params ? params : []
-        where = where ? where : ''
+    async countUsers(query) {
+        let where = query.where ? `WHERE ${query.where}` : ''
+        const params = query.params ? [ ...query.params ] : []
 
         const sql = `
                SELECT 
@@ -285,7 +273,7 @@ module.exports = class UserDAO extends DAO {
         if ( results.rows.length <= 0) {
             return {
                 count: 0,
-                page: page ? page : 1,
+                page: query.page ? query.page : 1,
                 pageSize: PAGE_SIZE,
                 numberOfPages: 1
             }
@@ -294,7 +282,7 @@ module.exports = class UserDAO extends DAO {
         const count = results.rows[0].count
         return {
             count: count,
-            page: page ? page : 1,
+            page: query.page ? query.page : 1,
             pageSize: PAGE_SIZE,
             numberOfPages: parseInt(count / PAGE_SIZE) + ( count % PAGE_SIZE > 0 ? 1 : 0) 
         }

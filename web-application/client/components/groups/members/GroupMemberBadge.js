@@ -52,14 +52,15 @@ const GroupMemberBadge = function({ groupId, userId }) {
     // return the user in relations, but the user object will be incomplete --
     // it'll only have the email on it.  We don't want to render an incomplete
     // user, so just skip any users missing a name.
-    if ( user && userMember && user.name !== null) {
+    if ( user && userMember) {
         return (
             <div className="group-member-badge">
                 <div className="group-member-badge__grid">
                     <UserProfileImage userId={user.id} />
                     <div className="group-member-badge__details" >
                         <GroupMemberDotsMenu groupId={groupId} userId={userId} />
-                        <div className="group-member-badge__name"><Link to={ `/${user.username}` }>{user.name}</Link></div>
+                        { user.name !== null && <div className="group-member-badge__name"><Link to={ `/${user.username}` }>{user.name}</Link></div> }
+                        { user.email !== null && user.name == null && <div className="group-member-badge__name">{ user.email }</div> }
                         { userMember.role != 'member' && <div className="group-member-badge__role">{ userMember.role }</div> }
                         <div className="group-member-badge__about">{ user.about?.length > 100 ? user.about.substring(0,100).trim()+'...' : user.about }</div>
                         <div className="group-member-badge__controls">
