@@ -70,6 +70,19 @@ header .mobile-menu {
     text-align: center;
 }
 
+header #navigation .outline {
+    display: inline-block;
+}
+header #navigation .active .outline {
+    display: none;
+}
+header #navigation .solid {
+    display: none;
+}
+header #navigation .active .solid {
+    display: inline-block;
+}
+
 @media (1220px < width) {
     header .grid {
         grid-template-columns: 200px auto;

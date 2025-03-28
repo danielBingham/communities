@@ -340,28 +340,31 @@ module.exports = class PostCommentController {
                 `You must be authenticated to delete a comment.`)
         }
 
-        const existing = await this.core.database.query(`
-            SELECT post_id, user_id FROM post_comments WHERE post_comments.id = $1
-        `, [ commentId ])
+        const post = await this.postDAO.getPostById(postId)
+        const comment = await this.postCommentDAO.getPostCommentById(commentId)
 
-        if ( existing.rows.length <= 0 ) {
+        if ( post === null || comment === null) {
             throw new ControllerError(404, 'not-found',
                 `Comment(${commentId}) on Post(${postId}) was not found by User(${currentUser.id}) attempting to delete.`,
                 `That comment either doesn't exist or you don't have permission to see it.`)
         }
+       
+        let canModerate = false
+        if ( post.groupId !== null ) {
+            canModerate = await this.permissionService.can(currentUser, 'moderate', 'Group', { groupId: post.groupId })
+        }
 
-        if ( existing.rows[0].user_id != currentUser.id) {
+        if ( comment.userId != currentUser.id && canModerate !== true) {
             throw new ControllerError(403, 'not-authorized',
                 `User(${currentUser.id}) attempted to delete Comment(${commentId}) without permission.`,
                 `You may only delete your own comments.`)
         }
 
-        if ( existing.rows[0].post_id != postId) {
+        if ( comment.postId !== post.id) {
             throw new ControllerError(400, 'invalid',
                 `User(${currentUser.id}) attempted to delete Comment(${commentId}) with wrong post.`,
                 `You provided the wrong postId in the route, please provide the correct one.`)
         }
-
 
         await this.postCommentDAO.deletePostComment({ id: commentId })
 
@@ -379,6 +382,18 @@ module.exports = class PostCommentController {
 
         const posts = {}
         posts[entity.id] = entity
+
+        if ( entity.groupId !== null && currentUser.id !== comment.userId ) {
+            await this.notificationService.sendNotifications(
+                currentUser, 
+                'Group:post:comment:deleted',
+                {
+                    post: entity,
+                    comment: comment,
+                    moderator: currentUser
+                }
+            )
+        }
 
         response.status(200).json({
             entity: entity,

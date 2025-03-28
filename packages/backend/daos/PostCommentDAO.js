@@ -134,6 +134,19 @@ module.exports = class PostCommentDAO extends DAO {
         return { dictionary: dictionary, list: list }
     }
 
+    async getPostCommentById(commentId) {
+        const results = await this.selectPostComments({
+            where: `post_comments.id = $1`,
+            params: [ commentId ]
+        })
+
+        if ( ! (commentId in results.dictionary) ) {
+            return null
+        } 
+
+        return results.dictionary[commentId]
+    }
+
     async selectPostComments(query) {
         let where = query.where ? `WHERE ${query.where}` : ''
         let params = query.params ? query.params : []

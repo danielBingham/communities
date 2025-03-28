@@ -70,6 +70,11 @@ const NotificationSettingsSection = function({}) {
                     explanation="Recieve an email notification when someone accepts your friend request."
                     toggled={'User:friend:update' in notifications && notifications['User:friend:update'].email === false ? false : true} 
                     onClick={(e) => toggleNotificationSetting('User:friend:update')} />
+                <Toggle 
+                    label="Group Invitations"
+                    explanation="Recieve an email notification when someone invites you to a group."
+                    toggled={ 'Group:member:create:invited' in notifications && notifications['Group:member:create:invited'].email === false ? false : true} 
+                    onClick={(e) => toggleNotificationSetting('Group:member:create:invited')} />
             </div>
         </div>
     )
