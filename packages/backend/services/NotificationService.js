@@ -99,7 +99,7 @@ Cheers,
 The Communities Team`)
                 },
                 text: Handlebars.compile(`{{{requester.name}}} sent you a friend request.`),
-                path: Handlebars.compile(`/friends/requests`)
+                path: Handlebars.compile(`/{{{requester.username}}}`)
             },
             'User:friend:update': {
                 email: {
