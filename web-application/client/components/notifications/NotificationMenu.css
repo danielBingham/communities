@@ -36,6 +36,9 @@
     position: relative;
     padding: 0 20px;
 }
+.notification-menu .notification-trigger a:hover {
+    filter: none;
+}
 .notification-menu .notification-trigger .unread-indicator {
     position: absolute;
     top: 2px;

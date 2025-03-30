@@ -64,10 +64,10 @@ const LinkPreview = function({ id }) {
         <div className="link-preview">
             <a target="_blank" href={linkPreview.url}>
                 <img src={linkPreview.imageUrl} />
-                <div className="details">
-                    <div className="site">{linkPreview.siteName}</div>
-                    <h2 className="title">{linkPreview.title}</h2>
-                    <div className="description">{description}</div>
+                <div className="link-preview__details">
+                    <div className="link-preview__site">{linkPreview.siteName}</div>
+                    <h2 className="link-preview__title">{linkPreview.title}</h2>
+                    <div className="link-preview__description">{description}</div>
                 </div>
             </a>
         </div>

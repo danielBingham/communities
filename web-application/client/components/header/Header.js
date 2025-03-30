@@ -1,6 +1,6 @@
 import React from 'react'
 import { useSelector } from 'react-redux'
-import { useLocation, NavLink} from 'react-router-dom'
+import { useLocation, NavLink, Link} from 'react-router-dom'
 
 import { 
     HomeIcon as HomeIconOutline,
@@ -44,7 +44,7 @@ const Header = function(props) {
                     <CommunitiesLogo />
                     <div id="navigation">
                         <div id="about-navigation" className="navigation-block">
-                            <Link to="/about">{ location.pathname.startsWith('/about') ? <InformationCircleIconSolid /> : <InformationCircleIconOutline /> }<span className="nav-text">About</span></Link>
+                            <Link className="nav-link" to="/about">{ location.pathname.startsWith('/about') ? <InformationCircleIconSolid /> : <InformationCircleIconOutline /> }<span className="nav-text">About</span></Link>
                         </div>
                         <AuthenticationNavigation  />
                     </div>
@@ -58,12 +58,14 @@ const Header = function(props) {
                 <div className="grid">
                     <CommunitiesLogo />
                     <div id="navigation">
-                        <div id="about-navigation" className="navigation-block">
-                            <a href="/">{ isFeedPage ? <QueueListIconSolid /> : <QueueListIconOutline /> } <span className="nav-text">Feeds</span></a>
-                            <NavLink to="/friends"><UsersIconSolid className="solid" /><UsersIconOutline className="outline" /> <span className="nav-text">Friends</span></NavLink> 
-                            <NavLink to="/groups"><UserGroupIconOutline className="outline" /><UserGroupIconSolid className="solid" /> <span className="nav-text">Groups</span></NavLink>
+                        <div id="primary" className="navigation-block">
+                            <a className="nav-link" href="/">{ isFeedPage ? <QueueListIconSolid /> : <QueueListIconOutline /> } <span className="nav-text">Feeds</span></a>
+                            <NavLink className="nav-link" to="/friends"><UsersIconSolid className="solid" /><UsersIconOutline className="outline" /> <span className="nav-text">Friends</span></NavLink> 
+                            <NavLink className="nav-link" to="/groups"><UserGroupIconOutline className="outline" /><UserGroupIconSolid className="solid" /> <span className="nav-text">Groups</span></NavLink>
                         </div>
-                        <NotificationMenu /> 
+                        <div id="notification" className="navigation-block">
+                            <NotificationMenu /> 
+                        </div>
                         <AuthenticationNavigation  />
                     </div>
                 </div>

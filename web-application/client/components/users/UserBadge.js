@@ -50,7 +50,7 @@ const UserBadge = function({ id, children }) {
                     <UserProfileImage userId={user.id} />
                     <div className="user-badge__details" >
                         { user.username !== null && <div className="user-badge__name"><Link to={ `/${user.username}` }>{user.name}</Link></div>}
-                        { user.username === null && user.email !== null && <div classname="user-badge__name">{ user.email }</div> }
+                        { user.username === null && user.email !== null && <div className="user-badge__name">{ user.email }</div> }
                         <div className="user-badge__about">{ user.about?.length > 100 ? user.about.substring(0,100).trim()+'...' : user.about }</div>
                         <div className="controls">
                             { children }

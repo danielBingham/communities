@@ -349,7 +349,8 @@ module.exports = class UserController {
                     {
                         userId: currentUser.id,
                         relationId:existingUser.id 
-                    }
+                    },
+                    { noEmail: existingUser.status === 'invited' }
                 )
             } 
 
@@ -449,7 +450,8 @@ module.exports = class UserController {
                 {
                     userId: currentUser.id,
                     relationId:createdUser.id 
-                }
+                },
+                { noEmail: true }
             )
 
             response.status(201).json({

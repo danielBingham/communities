@@ -248,8 +248,8 @@ The Communities Team`)
         }
     }
 
-    async sendNotifications(currentUser, type, context) {
-        return await this.notificationMap[type](currentUser, context)
+    async sendNotifications(currentUser, type, context, options) {
+        return await this.notificationMap[type](currentUser, context, options)
     }
 
     /**
@@ -266,7 +266,7 @@ The Communities Team`)
      * `notificationDefinitions` for definition.
      * 
      */
-    async createNotification(userId, type, context) {
+    async createNotification(userId, type, context, options) {
         const definition = this.notificationDefinitions[type]
         if ( ! definition ) {
             throw new ServiceError('missing-definition',
@@ -276,7 +276,7 @@ The Communities Team`)
         context.host = this.core.config.host
 
         const results = await this.core.database.query(`
-            SELECT email, settings FROM users WHERE id = $1
+            SELECT email, settings, status FROM users WHERE id = $1
         `, [ userId ])
 
         const settings = results.rows[0].settings
@@ -293,7 +293,7 @@ The Communities Team`)
 
         // Only create the web notification if the user has web notifications
         // turned on for that notification.
-        if ( notificationSetting.web ) {
+        if ( notificationSetting.web && options?.noWeb !== true) {
             const notification = {
                 userId: userId,
                 type: type,
@@ -304,8 +304,9 @@ The Communities Team`)
         }
 
         // Only send the email if the user has emails turned on for that
-        // notification.
-        if ( notificationSetting.email ) {
+        // notification.  Also, don't send notification emails to users that
+        // have been invited but haven't accepted the invitation yet.
+        if ( notificationSetting.email && options?.noEmail !== true && results.rows[0].status !== 'invited') {
             const email = results.rows[0].email
 
             await this.emailService.sendNotificationEmail(
@@ -316,7 +317,7 @@ The Communities Team`)
         }
     }
 
-    async sendNewCommentNotification(currentUser, context) {
+    async sendNewCommentNotification(currentUser, context, options) {
         context.postIntro = context.post.content.substring(0,20)
         context.commentIntro = context.comment.content.substring(0,20)
 
@@ -341,16 +342,16 @@ The Communities Team`)
                 }
 
                 if ( subscription.userId == postAuthor.id) {
-                    await this.createNotification(postAuthor.id, 'Post:comment:create', context) 
+                    await this.createNotification(postAuthor.id, 'Post:comment:create', context, options) 
                 } else {
                     const subscriberContext = { ...context, subscriber: subscribers.dictionary[subscription.userId] }
-                    await this.createNotification(subscription.userId, 'Post:comment:create:subscriber', subscriberContext)
+                    await this.createNotification(subscription.userId, 'Post:comment:create:subscriber', subscriberContext, options)
                 }
             }
         }
     }
 
-    async sendFriendRequestNotification(currentUser, context) {
+    async sendFriendRequestNotification(currentUser, context, options) {
         const userResults = await this.userDAO.selectUsers({
             where: `users.id = ANY($1::uuid[])`,
             params: [  [ context.userId, context.relationId ] ]
@@ -359,10 +360,10 @@ The Communities Team`)
         context.friend = userResults.dictionary[context.relationId]
         context.requester = userResults.dictionary[context.userId]
 
-        await this.createNotification(context.relationId, 'User:friend:create', context)
+        await this.createNotification(context.relationId, 'User:friend:create', context, options)
     }
 
-    async friendRequestAcceptedNotification(currentUser, context) {
+    async friendRequestAcceptedNotification(currentUser, context, options) {
         const userResults = await this.userDAO.selectUsers({
             where: `users.id = ANY($1::uuid[])`,
             params: [  [ context.userId, context.relationId ] ]
@@ -371,14 +372,14 @@ The Communities Team`)
         context.friend = userResults.dictionary[context.relationId]
         context.requester = userResults.dictionary[context.userId]
 
-        await this.createNotification(context.userId, 'User:friend:update', context)
+        await this.createNotification(context.userId, 'User:friend:update', context, options)
     }
 
-    async sendGroupMemberCreatedNotification(currentUser, context) {
+    async sendGroupMemberCreatedNotification(currentUser, context, options) {
         context.user = await this.userDAO.getUserById(context.member.userId)
         if ( context.member.status == 'pending-invited' ) {
             context.inviter = currentUser
-            await this.createNotification(context.user.id, 'Group:member:create:invited', context)
+            await this.createNotification(context.user.id, 'Group:member:create:invited', context, options)
         } else if ( context.member.status == 'pending-requested' ) {
             const moderatorResults = await this.groupMemberDAO.selectGroupMembers({
                 where: `(group_members.role = 'admin' OR group_members.role = 'moderator') AND group_members.group_id = $1`,
@@ -391,38 +392,42 @@ The Communities Team`)
                 await this.createNotification(
                     moderatorMember.userId, 
                     'Group:member:create:requested', 
-                    { ...context, moderator: moderatorMember }
+                    { ...context, moderator: moderatorMember },
+                    options
                 )
             }
         }
     }
 
-    async sendGroupMemberUpdatedNotification(currentUser, context) {
+    async sendGroupMemberUpdatedNotification(currentUser, context, options) {
         context.user = await this.userDAO.getUserById(context.member.userId)
         if ( context.previousStatus == 'pending-requested' && context.member.status == 'member' ) {
             await this.createNotification(
                 context.user.id,
                 'Group:member:update:request:accepted',
-                context  
+                context,
+                options
             )
         } else if ( context.previousRole == 'member' && context.member.role == 'moderator' ) {
             await this.createNotification(
                 context.user.id,
                 'Group:member:update:promoted:moderator',
-                { ...context, promoter: currentUser }
+                { ...context, promoter: currentUser },
+                options
             )
         } else if ( context.previousRole == 'moderator' && context.member.role == 'admin' ) {
             await this.createNotification(
                 context.user.id,
                 'Group:member:update:promoted:admin',
-                { ...context, promoter: currentUser }
+                { ...context, promoter: currentUser },
+                options
             )
 
         }
     }
 
 
-    async sendGroupPostDeletedNotification(currentUser, context) {
+    async sendGroupPostDeletedNotification(currentUser, context, options) {
         context.user = await this.userDAO.getUserById(context.post.userId)
         context.group = await this.groupDAO.getGroupById(context.post.groupId)
         context.shortText = context.post.content.substring(0, 100) + '...'
@@ -430,11 +435,12 @@ The Communities Team`)
         await this.createNotification(
             context.post.userId,
             'Group:post:deleted',
-            context
+            context,
+            options
         )
     }
 
-    async sendGroupPostCommentDeletedNotification(currentUser, context) {
+    async sendGroupPostCommentDeletedNotification(currentUser, context, options) {
         context.user = await this.userDAO.getUserById(context.comment.userId)
         context.group = await this.groupDAO.getGroupById(context.post.groupId)
         context.shortText = context.comment.content.substring(0, 100) + '...'
@@ -442,7 +448,8 @@ The Communities Team`)
         await this.createNotification(
             context.comment.userId,
             'Group:post:comment:deleted',
-            context
+            context,
+            options
         )
 
     }
