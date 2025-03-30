@@ -1,5 +1,5 @@
 .error-modal .modal {
-    border: thin solid var(--danger-color-light);
+    border: thin solid var(--danger-color-main);
     color: var(--danger-color-dark);
 }
 .error-modal svg.error-modal__warning { 
@@ -7,10 +7,10 @@
     margin: 10px 10px;
     width: 96px;
     height: 96px;
-    color: var(--danger-color-light);
+    color: var(--danger-color-main);
 }
 .error-modal .modal .modal__close svg {
-    color: var(--danger-color-light);
+    color: var(--danger-color-main);
 }
 .error-modal__wrapper {
     padding: 20px;

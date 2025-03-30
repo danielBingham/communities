@@ -23,6 +23,6 @@
 }
 .text-input .text-input-error {
     padding: 5px;
-    color: red;
+    color: var(--danger-color-main);
     text-align: center;
 }

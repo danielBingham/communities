@@ -664,12 +664,6 @@ module.exports = class UserController {
             // it as a patch.
             delete user.token
 
-            // Delete the token now that we're done with it.  We still
-            // have it in local and can use it later, but we don't want to
-            // leave it hanging if we hit a different error later.
-            //
-            // TODO Do we want to let the token hang?!
-            await this.tokenDAO.deleteToken(token)
         } 
 
         
@@ -763,6 +757,26 @@ module.exports = class UserController {
             }
         }
 
+        // They can only change their username if they are accepting an
+        // invitation.  So they need to be authenticated and authentication
+        // needs to be "invitation".
+        if ( user.username ) {
+            if ( authentication == "invitation" ) {
+                const existingUsernameResults = await this.userDAO.selectUsers({ where: `users.username = $1`, params: [ user.username ]}, 'all')
+                if ( existingUsernameResults.list.length > 0 ) {
+                    throw new ControllerError(400, 'username-taken',
+                        `User(${user.id}) attempted to change their username to one already in use.`,
+                        `That username is already in use by another user.`)
+                }
+
+                // Let it fall through.  We don't actually need to do anything here.
+            } else {
+                throw new ControllerError(400, 'invalid',
+                    `User(${user.id}) attempting to change their username.`,
+                    `You may not change your username once it has been selected.`)
+            }
+        }
+
         if ( existingUser.fileId && user.fileId !== undefined && existingUser.fileId != user.fileId ) {
             await this.fileDAO.deleteFile(existingUser.fileId)
         }
@@ -799,6 +813,10 @@ module.exports = class UserController {
             await this.emailService.sendEmailConfirmation(results.dictionary[user.id], token)
         }
 
+        if ( authentication === 'invitation' || authentication === 'reset-password' ) {
+            // Delete the token now that we're done with it.
+            await this.tokenDAO.deleteToken(token)
+        }
 
         const relations = await this.getRelations(request.session.user, results)
 

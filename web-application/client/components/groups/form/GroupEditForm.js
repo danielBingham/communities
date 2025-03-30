@@ -97,6 +97,11 @@ const GroupEditForm = function({ groupId }) {
             setFileId(null)
    
             navigate(`/group/${request.response.body.entity.slug}`)
+        } else if ( fileId === null && (request && request.state == 'fulfilled')) {
+            setAbout(null)
+            setFileId(null)
+   
+            navigate(`/group/${request.response.body.entity.slug}`)
         }
     }, [ request, fileRequest ])
 
