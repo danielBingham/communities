@@ -31,12 +31,11 @@ const PostForm = function({ postId, groupId, sharedPostId }) {
 
     const [post] = usePost(postId) 
     const [group] = useGroup(post !== null ? post.groupId : groupId)
-
     const [draft, setDraft] = usePostDraft(postId, groupId)
 
-    const [content,setContent] = useState( draft ? draft.content : '')
-    const [fileId,setFileId] = useState(draft ? draft.fileId : null)
-    const [linkPreviewId, setLinkPreviewId] = useState(draft ? draft.linkPreviewId : null)
+    const [content,setContent] = useState( draft && 'content' in draft ? draft.content : '')
+    const [fileId,setFileId] = useState(draft && 'fileId' in draft ? draft.fileId : null)
+    const [linkPreviewId, setLinkPreviewId] = useState(draft && 'linkPreviewId' in draft ? draft.linkPreviewId : null)
 
     let defaultVisibility = 'private'
     if ( post !== null ) {
@@ -45,7 +44,7 @@ const PostForm = function({ postId, groupId, sharedPostId }) {
         defaultVisibility = 'public'
     }
 
-    const [visibility, setVisibility] = useState(draft ? draft.visibility : defaultVisibility)
+    const [visibility, setVisibility] = useState(draft && 'visibility' in draft ? draft.visibility : defaultVisibility)
 
     const [showLinkForm, setShowLinkForm] = useState(false)
 

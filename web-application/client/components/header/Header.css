@@ -16,22 +16,22 @@ header .grid {
     box-sizing: border-box;
     display: grid;
 }
-
 header #navigation {
-    text-align: right;
+    display: flex;
+    align-items: center;
+    justify-content: right;
 
     font-size: 18px;
 }
 
-header .navigation-block {
-    display: inline-block;
+header #primary.navigation-block {
     margin-left: 7px;
-    padding: 21px 0;
 }
-header .navigation-block a:link, 
-header .navigation-block a:active, 
-header .navigation-block a:visited,
-header .navigation-block a:hover {
+
+header .navigation-block a.nav-link:link, 
+header .navigation-block a.nav-link:active, 
+header .navigation-block a.nav-link:visited,
+header .navigation-block a.nav-link:hover {
     padding: 5px;
     margin: 0 5px;
 }
@@ -94,8 +94,14 @@ header #navigation .active .solid {
         grid-template-columns: 32px auto;
         padding: 0 0 0 15px;
     }
+    header #navigation .navigation-block a.nav-link {
+        display: inline-block;
+        text-align: center;
+    }
     header .nav-text {
-        display: none;
+        display: block;
+        font-size: 10px;
+        line-height: 6px;
     }
     header .communities-logo .logo-text {
         display: none;

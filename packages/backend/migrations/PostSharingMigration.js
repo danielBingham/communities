@@ -30,7 +30,7 @@ module.exports = class PostSharingMigration {
 
     async initForward() {
         this.logger.info(`Add the 'shared_post_id' column to the 'posts' table...`)
-        await this.database.query(`ALTER TABLE posts ADD COLUMN shared_post_id uuid REFERENCES posts (id) DEFAULT NULL`, [])
+        await this.database.query(`ALTER TABLE posts ADD COLUMN shared_post_id uuid REFERENCES posts (id) ON DELETE SET NULL DEFAULT NULL`, [])
     }
 
     async initBack() {
