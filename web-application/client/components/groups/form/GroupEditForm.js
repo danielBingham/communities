@@ -79,20 +79,14 @@ const GroupEditForm = function({ groupId }) {
         navigate(`/group/${group.slug}`)
     }
 
-    const onTitleChange = function(event) {
-        const currentSlug = title.toLowerCase().replaceAll(/\s/g, '-')
-
-        if ( slug == currentSlug) {
-            const newSlug = event.target.value.toLowerCase().replaceAll(/\s/g, '-')
-            setSlug(newSlug)
-        }
-
-        setTitle(event.target.value)
-    }
-
     const navigate = useNavigate()
     useEffect(() => {
         if ( (fileRequest && fileRequest.state == 'fulfilled') && (request && request.state == 'fulfilled')) {
+            setAbout(null)
+            setFileId(null)
+   
+            navigate(`/group/${request.response.body.entity.slug}`)
+        } else if ( fileId === null && (request && request.state == 'fulfilled')) {
             setAbout(null)
             setFileId(null)
    

@@ -4,14 +4,14 @@
 .link-preview img {
     width: 100%;
 }
-.link-preview .site {
+.link-preview .link-preview__site {
     margin: 0;
     padding: 1em 20px 0 20px;
     color: var(--primary-color-dark);
     font-size: 12px;
     text-align: left;
 }
-.link-preview h2.title {
+.link-preview h2.link-preview__title {
     margin: 0;
     padding: 0.5em 20px 0 20px;
     color: var(--main-text-color);
@@ -19,7 +19,7 @@
     text-align: left;
     font-weight: 500;
 }
-.link-preview .description {
+.link-preview .link-preview__description {
     padding: 0.5em 20px 1em 20px;
     color: var(--primary-color-dark);
     text-align: left;

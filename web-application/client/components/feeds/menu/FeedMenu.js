@@ -104,13 +104,13 @@ const FeedMenu = function() {
                 <menu className="feed-menu__menu">
                     <li>
                         <div className="feed-menu__sub-menu">
-                            <a href="" onClick={(e) => { e.preventDefault(); setIsOpen('feeds')}} className="header">{ feedsIsOpen ? <QueueListIconOutline /> : <QueueListIconSolid /> } <span className="nav-text">Feeds</span></a>
+                            <a href="" onClick={(e) => { e.preventDefault(); setIsOpen('feeds')}} className="header">{ feedsIsOpen ? <QueueListIconOutline /> : <QueueListIconSolid /> } <span className="nav-text">Your Feeds</span></a>
                             { feedsIsOpen && feedsMenu }
                         </div>
                     </li>
                     <li>
                         <div className="feed-menu__sub-menu">
-                            <a href="" onClick={(e) => { e.preventDefault(); setIsOpen('groups')}} className="header">{ groupsIsOpen ? <UserGroupIconOutline /> : <UserGroupIconSolid /> }<span className="nav-text">Groups</span></a>
+                            <a href="" onClick={(e) => { e.preventDefault(); setIsOpen('groups')}} className="header">{ groupsIsOpen ? <UserGroupIconOutline /> : <UserGroupIconSolid /> }<span className="nav-text">Your Groups</span></a>
                             { groupsIsOpen && groupsMenu }
                         </div>
                     </li>
@@ -122,10 +122,10 @@ const FeedMenu = function() {
             <div className="feed-menu">
                 <menu className="feed-menu__menu">
                     <li>
-                        <a href="" onClick={(e) => { e.preventDefault(); setIsOpen('feeds')}} className="header">{ feedsIsOpen ? <QueueListIconOutline /> : <QueueListIconSolid /> } <span className="nav-text">Feeds</span></a>
+                        <a href="" onClick={(e) => { e.preventDefault(); setIsOpen('feeds')}} className="header">{ feedsIsOpen ? <QueueListIconOutline /> : <QueueListIconSolid /> } <span className="nav-text">Your Feeds</span></a>
                     </li>
                     <li>
-                        <a href="" onClick={(e) => { e.preventDefault(); setIsOpen('groups')}} className="header">{ groupsIsOpen ? <UserGroupIconOutline /> : <UserGroupIconSolid /> }<span className="nav-text">Groups</span></a>
+                        <a href="" onClick={(e) => { e.preventDefault(); setIsOpen('groups')}} className="header">{ groupsIsOpen ? <UserGroupIconOutline /> : <UserGroupIconSolid /> }<span className="nav-text">Your Groups</span></a>
                     </li>
                 </menu>
                 { (feedsIsOpen || groupsIsOpen) && <div className="feed-menu__sub-menu">

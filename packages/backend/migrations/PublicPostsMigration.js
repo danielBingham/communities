@@ -38,7 +38,7 @@ module.exports = class PublicPostsMigration {
 
     async initBack() {
         this.logger.info(`Remove the 'visibility' column from the 'posts' table...`)
-        await this.database.query(`ALTER TABLE posts DROP COLUMN IF EXISTS post_visibility`, [])
+        await this.database.query(`ALTER TABLE posts DROP COLUMN IF EXISTS visibility`, [])
 
         this.logger.info(`Drop the 'post_visibility' type...`)
         await this.database.query(`DROP TYPE IF EXISTS post_visibility`)
@@ -62,6 +62,7 @@ module.exports = class PublicPostsMigration {
             await this.initForward()
         } catch (error) {
             try {
+                this.logger.error(error)
                 this.logger.error(`Initialization failed.  Attempting rollback...`)
                 await this.initBack()
             } catch (rollbackError) {
@@ -81,6 +82,7 @@ module.exports = class PublicPostsMigration {
             await this.initBack()
         } catch (error) {
             try {
+                this.logger.error(error)
                 this.logger.error(`Uninitialization failed.  Attempting rollback...`)
                 await this.initForward()
             } catch (rollbackError) {
@@ -117,6 +119,7 @@ module.exports = class PublicPostsMigration {
             await this.migrateForward()
         } catch (error) {
             try {
+                this.logger.error(error)
                 this.logger.error(`Migration failed.  Attempting rollback...`)
                 await this.migrateBack()
             } catch (rollbackError) {

@@ -12,6 +12,11 @@
     text-align: center;
     padding: 20px;
 }
+.accept-invitation-form .base-error {
+    text-align: center;
+    color: var(--danger-color-main);
+    padding: 10px;
+}
 
 .accept-invitation-form .field-wrapper {
     padding: 10px;
