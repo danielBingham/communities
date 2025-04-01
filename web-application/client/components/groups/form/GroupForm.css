@@ -1,21 +1,19 @@
 .group-form { 
+    box-sizing: border-box;
     max-width: 700px;
+    margin: 0 auto;
 }
 .group-form .group-form__group-image {
     display: block;
     margin: 0 auto;
-    width: 160px;
+    width: 200px;
+    text-align: center;
 }
 .group-form .group-form__group-image svg.placeholder {
     display: block;
-    width: 150px;
+    width: 200px;
     margin: 10px auto;
     color: var(--main-border-color);
-}
-.group-form .group-form__group-image .draft-image-file {
-    display: block;
-    width: 150px;
-    margin: 10px auto;
 }
 .group-form .group-form__types {
     text-align: left;
@@ -45,5 +43,8 @@
     padding: 2px;
     font-size: 0.8em;
     color: #333;
+}
+.group-form .group-form__controls {
+    text-align: center;
 }
 

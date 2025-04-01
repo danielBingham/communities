@@ -6,9 +6,10 @@ import { GlobeAltIcon, LockOpenIcon, LockClosedIcon, UserCircleIcon } from '@her
 import { useLocalStorage } from '/lib/hooks/useLocalStorage'
 import { useRequest } from '/lib/hooks/useRequest'
 
+import { patchFile } from '/state/files'
 import { postGroups } from '/state/groups'
 
-import DraftImageFile from '/components/files/DraftImageFile'
+import DraftProfileImage from '/components/files/DraftProfileImage'
 import FileUploadInput from '/components/files/FileUploadInput'
 
 import Button from '/components/generic/button/Button'
@@ -25,6 +26,13 @@ const GroupForm = function() {
     const [ type, setType ] = useLocalStorage('group.draft.type', 'private')
     const [ about, setAbout ] = useLocalStorage('group.draft.about', '')
     const [ fileId, setFileId] = useLocalStorage('group.draft.fileId', null)
+    const [ crop, setCrop ] = useState({
+        unit: 'px',
+        x: 0,
+        y: 0,
+        width: 200,
+        height: 200
+    })
 
     const [ titleErrors, setTitleErrors ] = useState([]) 
     const [ slugErrors, setSlugErrors ] = useState([])
@@ -32,6 +40,7 @@ const GroupForm = function() {
     const [ aboutErrors, setAboutErrors ] = useState([])
 
     const [request, makeRequest] = useRequest()
+    const [fileRequest, makeFileRequest] = useRequest()
 
     const validate = function(field) {
 
@@ -94,6 +103,10 @@ const GroupForm = function() {
             fileId: fileId
         }
 
+        if ( fileId !== null && fileId !== undefined ) {
+            console.log(`Patching...`)
+            makeFileRequest(patchFile(fileId, crop))
+        }
         makeRequest(postGroups(group))
     }
 
@@ -129,7 +142,16 @@ const GroupForm = function() {
 
     const navigate = useNavigate()
     useEffect(() => {
-        if ( request && request.state == 'fulfilled') {
+        if ( (fileRequest && fileRequest.state == 'fulfilled') && (request && request.state == 'fulfilled')) {
+            console.log(`patch complete.`)
+            setTitle(null)
+            setType(null)
+            setSlug(null)
+            setAbout(null)
+            setFileId(null)
+   
+            navigate(`/group/${encodeURIComponent(request.response.body.entity.slug)}`)
+        } else if ( fileId === null && (request && request.state == 'fulfilled') ) {
             setTitle(null)
             setType(null)
             setSlug(null)
@@ -138,7 +160,7 @@ const GroupForm = function() {
    
             navigate(`/group/${encodeURIComponent(request.response.body.entity.slug)}`)
         }
-    }, [ request ])
+    }, [ request, fileRequest ])
 
     let baseError = null 
     let titleError = titleErrors.join(' ')
@@ -146,7 +168,7 @@ const GroupForm = function() {
     let typeError = typeErrors.join(' ')
     let aboutError = aboutErrors.join(' ')
 
-    const inProgress = request && request.state == 'pending'
+    const inProgress = (request && request.state == 'pending') || (fileRequest && fileRequest.state == 'pending')
 
     if ( request && request.state == 'failed' ) {
         if ( request.error && request.error.type == 'invalid' ) {
@@ -155,6 +177,8 @@ const GroupForm = function() {
             baseError = request.error.message
             slugError += 'A group with this URL already exists.' 
         }
+    } else if ( fileRequest && fileRequest.state == 'failed' ) {
+        baseError = fileRequest.error.message
     }
 
     return (
@@ -163,7 +187,15 @@ const GroupForm = function() {
             <div className="group-form__group-image">
                 <div>
                     { ! fileId && <UserCircleIcon className="placeholder" /> }
-                    { fileId && <DraftImageFile fileId={fileId} setFileId={setFileId} width={150} deleteOnRemove={false} /> }
+                    { fileId && <DraftProfileImage 
+                        fileId={fileId} 
+                        setFileId={setFileId} 
+                        width={200} 
+                        crop={crop} 
+                        setCrop={setCrop} 
+                        deleteOnRemove={false} 
+                        isCropped={fileRequest && fileRequest.state == 'fulfilled'}
+                    /> }
                     { ! fileId && <FileUploadInput 
                         fileId={fileId}
                         setFileId={setFileId} 
@@ -238,7 +270,7 @@ const GroupForm = function() {
             </div>
             <div className="group-form__errors">{ baseError }</div>
             { inProgress && <Spinner /> }
-            { ! inProgress && <div className="buttons">
+            { ! inProgress && <div className="group-form__controls">
                 <Button type="secondary-warn" onClick={(e) => cancel()}>Cancel</Button> 
                 <input type="submit" name="submit" value="Submit" />
             </div> }
