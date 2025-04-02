@@ -33,6 +33,7 @@
     "@heroicons/react": "^2.1.5",
     "@reduxjs/toolkit": "^1.8.1",
     "@sentry/react": "^9.9.0",
+    "@sentry/webpack-plugin": "^3.2.4",
     "bcrypt": "^5.0.1",
     "bull": "^4.10.4",
     "connect-pg-simple": "^7.0.0",
