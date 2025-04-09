@@ -1,0 +1,92 @@
+name: Release 
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        decription: 'A semantic version to use when tagging this release.'
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [ 18.x ]
+    steps:
+
+      - name: Checkout Repo 
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Configure AWS CLI
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: us-east-1 
+
+      # Test, Version, and Publish @communities/backend
+      #
+      - name: Install Backend Dependencies 
+        working-directory: ./packages/backend
+        run: |
+          export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
+          npm ci
+
+      - name: Run Backend Unit Tests
+        working-directory: ./packages/backend
+        run: |
+          npm run test
+
+      - name: Version the backend
+        working-directory: ./packages/backend
+        run: |
+          npm version ${{ github.event.inputs.version }} 
+
+      - name: Publish the new backend version to AWS CodeArtifact 
+        working-directory: ./packages/backend
+        run: |
+          export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
+          npm publish
+
+      # web-application.
+      #
+      - name: Install Worker NPM Modules
+        working-directory: ./worker
+        run: |
+          export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
+          npm ci
+
+      - name: Install the updated @communties/backend module 
+        run: |
+          export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
+          npm install @communities/backend@${{ github.event.inputs.version }}
+
+      - name: Version the Worker 
+        working-directory: ./worker
+        run: | 
+          npm version ${{ github.event.inputs.version }} 
+
+      # Test web-application.
+      #
+      - name: Install Web Application NPM Modules
+        working-directory: ./web-application
+        run: |
+          export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
+          npm ci
+
+      - name: Copy the backend package for testing
+        run: |
+          rm -r ./web-application/node_modules/@communities/backend
+          cp -r ./packages/backend ./web-application/node_modules/@communities/backend
+
+      - name: Run Web Application Unit Tests
+        working-directory: ./web-application
+        run: | 
+          npm run test
+
