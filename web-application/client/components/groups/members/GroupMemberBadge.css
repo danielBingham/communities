@@ -1,6 +1,6 @@
 .group-member-badge {
     box-sizing: border-box;
-    width: 400px;
+    max-width: 400px;
     padding: 10px;
 }
 .group-member-badge__grid {
