@@ -13,7 +13,12 @@ const ContributionCard = function({ amount, explanation }) {
     const links = useSelector((state) => state.system.configuration.stripe.links)
 
     const contribution = `$${amount}`
-    const encodedEmail = encodeURIComponent(currentUser.email)
+
+    let postFix = ''
+    if ( currentUser ) {
+        const encodedEmail = encodeURIComponent(currentUser.email)
+        postFix = `?prefilled_email=${encodedEmail}`
+    }
 
     return (
         <div className="contribution">
@@ -21,7 +26,7 @@ const ContributionCard = function({ amount, explanation }) {
                 <h2>Contribute { contribution } / month</h2>
                 <div className="explanation">{ explanation }</div>
                 <a 
-                    href={`${links[amount]}?prefilled_email=${encodedEmail}`} 
+                    href={`${links[amount]}${postFix}`} 
                     ref={ref} 
                     style={{ display: 'none' }}
                 >Contribute { contribution } / month</a>

@@ -20,7 +20,7 @@ const Roadmap = function({}) {
         frequent change based on feedback and new information.</strong>  It's
         not a promise or a commitment, it's a loose plan, subject to
         change.</p>
-            <h2>Copmleted</h2>
+            <h2>Completed</h2>
             <ul>
                 <li><strong>Posts</strong> -- The ability to share Posts of up to 10,000 characters with your friends with either a single attached link or a single attached image.</li>
                 <li><strong>Comments</strong> -- You can leave Comments of up to 5,000 characters on Posts.</li>
