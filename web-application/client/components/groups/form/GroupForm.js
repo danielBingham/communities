@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useRef, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { GlobeAltIcon, LockOpenIcon, LockClosedIcon, UserCircleIcon } from '@heroicons/react/24/outline'
@@ -6,7 +6,6 @@ import { GlobeAltIcon, LockOpenIcon, LockClosedIcon, UserCircleIcon } from '@her
 import { useLocalStorage } from '/lib/hooks/useLocalStorage'
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { patchFile } from '/state/files'
 import { postGroups } from '/state/groups'
 
 import DraftProfileImage from '/components/files/DraftProfileImage'
@@ -20,27 +19,21 @@ import Spinner from '/components/Spinner'
 import './GroupForm.css'
 
 const GroupForm = function() {
-
     const [ title, setTitle ] = useLocalStorage('group.draft.title', '')
     const [ slug, setSlug ] = useLocalStorage('group.draft.slug', '')
     const [ type, setType ] = useLocalStorage('group.draft.type', 'private')
     const [ about, setAbout ] = useLocalStorage('group.draft.about', '')
     const [ fileId, setFileId] = useLocalStorage('group.draft.fileId', null)
-    const [ crop, setCrop ] = useState({
-        unit: 'px',
-        x: 0,
-        y: 0,
-        width: 200,
-        height: 200
-    })
+    const [ fileState, setFileState] = useState(null)
 
     const [ titleErrors, setTitleErrors ] = useState([]) 
     const [ slugErrors, setSlugErrors ] = useState([])
     const [ typeErrors, setTypeErrors ] = useState([])
     const [ aboutErrors, setAboutErrors ] = useState([])
 
+
     const [request, makeRequest] = useRequest()
-    const [fileRequest, makeFileRequest] = useRequest()
+    const fileRef = useRef(null)
 
     const validate = function(field) {
 
@@ -88,6 +81,16 @@ const GroupForm = function() {
             && typeValidationErrors == 0
     }
 
+    const assembleGroup = function() {
+        return {
+            type: type,
+            title: title,
+            slug: slug,
+            about: about,
+            fileId: fileId
+        }
+    }
+
     const onSubmit = function(event) {
         event.preventDefault()
 
@@ -95,19 +98,14 @@ const GroupForm = function() {
             return
         }
 
-        const group = {
-            type: type,
-            title: title,
-            slug: slug,
-            about: about,
-            fileId: fileId
-        }
-
+        // If we have a file, we need to crop it first, and we don't want to
+        // send the primary Group request until the crop is successful (in case
+        // it errors).
         if ( fileId !== null && fileId !== undefined ) {
-            console.log(`Patching...`)
-            makeFileRequest(patchFile(fileId, crop))
+            fileRef.current?.submit()
+        } else {
+            makeRequest(postGroups(assembleGroup()))
         }
-        makeRequest(postGroups(group))
     }
 
     const cancel = function(event) {
@@ -142,8 +140,9 @@ const GroupForm = function() {
 
     const navigate = useNavigate()
     useEffect(() => {
-        if ( (fileRequest && fileRequest.state == 'fulfilled') && (request && request.state == 'fulfilled')) {
-            console.log(`patch complete.`)
+        if ( fileId !== null && fileState == 'fulfilled' && ! request ) {
+            makeRequest(postGroups(assembleGroup()))
+        } else if ( (fileState === 'fulfilled' ) && (request && request.state == 'fulfilled')) {
             setTitle(null)
             setType(null)
             setSlug(null)
@@ -160,7 +159,7 @@ const GroupForm = function() {
    
             navigate(`/group/${encodeURIComponent(request.response.body.entity.slug)}`)
         }
-    }, [ request, fileRequest ])
+    }, [ request, fileState, fileId])
 
     let baseError = null 
     let titleError = titleErrors.join(' ')
@@ -168,7 +167,7 @@ const GroupForm = function() {
     let typeError = typeErrors.join(' ')
     let aboutError = aboutErrors.join(' ')
 
-    const inProgress = (request && request.state == 'pending') || (fileRequest && fileRequest.state == 'pending')
+    const inProgress = (request && request.state == 'pending') || (fileId && fileState === 'pending') 
 
     if ( request && request.state == 'failed' ) {
         if ( request.error && request.error.type == 'invalid' ) {
@@ -177,9 +176,7 @@ const GroupForm = function() {
             baseError = request.error.message
             slugError += 'A group with this URL already exists.' 
         }
-    } else if ( fileRequest && fileRequest.state == 'failed' ) {
-        baseError = fileRequest.error.message
-    }
+    } 
 
     return (
         <form onSubmit={onSubmit} className="group-form">
@@ -188,13 +185,13 @@ const GroupForm = function() {
                 <div>
                     { ! fileId && <UserCircleIcon className="placeholder" /> }
                     { fileId && <DraftProfileImage 
+                        ref={fileRef}
                         fileId={fileId} 
                         setFileId={setFileId} 
+                        state={fileState}
+                        setState={setFileState}
                         width={200} 
-                        crop={crop} 
-                        setCrop={setCrop} 
                         deleteOnRemove={false} 
-                        isCropped={fileRequest && fileRequest.state == 'fulfilled'}
                     /> }
                     { ! fileId && <FileUploadInput 
                         fileId={fileId}

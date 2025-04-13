@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useLayoutEffect }  from 'react'
+import React, { useState, useEffect, useRef }  from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
@@ -6,7 +6,6 @@ import { useRequest } from '/lib/hooks/useRequest'
 import { UserCircleIcon } from '@heroicons/react/24/outline'
 
 import { patchUser } from '/state/users'
-import { patchFile } from '/state/files'
 
 import UserProfileImage from '/components/users/UserProfileImage'
 import DraftProfileImage from '/components/files/DraftProfileImage'
@@ -24,13 +23,7 @@ const UserProfileEditForm = function(props) {
     // ======= Render State =========================================
 
     const [fileId, setFileId] = useState(null)
-    const [crop, setCrop] = useState({
-        unit: 'px',
-        x: 0,
-        y: 0,
-        width: 200,
-        height: 200
-    })
+    const [fileState, setFileState] = useState(null)
 
     const [name, setName] = useState('')
     const [about, setAbout] = useState('')
@@ -38,10 +31,11 @@ const UserProfileEditForm = function(props) {
     const [nameError, setNameError] = useState(null)
     const [aboutError, setAboutError] = useState(null)
     
+    const fileRef = useRef(null)
+
     // ======= Request Tracking =====================================
 
     const [ request, makeRequest ] = useRequest()
-    const [ fileRequest, makeFileRequest ] = useRequest()
 
     // ======= Redux State ==========================================
 
@@ -92,6 +86,15 @@ const UserProfileEditForm = function(props) {
 
     }
 
+    const assembleUser = function() {
+        return {
+            id: currentUser.id,
+            fileId: fileId,
+            name: name,
+            about: about
+        }
+    }
+
     const onSubmit = function(event) {
         event.preventDefault()
 
@@ -99,17 +102,11 @@ const UserProfileEditForm = function(props) {
             return
         }
 
-        const user = { 
-            id: currentUser.id,
-            fileId: fileId,
-            name: name,
-            about: about
-        }
-
         if ( fileId !== null && fileId !== undefined ) {
-            makeFileRequest(patchFile(fileId, crop))
+            fileRef.current?.submit()
+        } else {
+            makeRequest(patchUser(assembleUser()))
         }
-        makeRequest(patchUser(user))
     }
 
     const cancel = function() {
@@ -155,24 +152,15 @@ const UserProfileEditForm = function(props) {
     }, [])
 
     useEffect(function() {
-        if ( fileRequest && fileRequest.state == 'fulfilled') {
-            // Reset the crop after we've finished cropping so that it isn't
-            // outside the image.
-            setCrop({
-                unit: 'px',
-                x: 0,
-                y: 0,
-                width: 200, 
-                height: 200
-            })
+        if ( fileId !== null && fileState == 'fulfilled' && ! request ) {
+            makeRequest(patchUser(assembleUser()))
         }
-
-    }, [ fileRequest ])
+    }, [ fileId, fileState ])
 
     // ======= Render ===============================================
    
     let result = null
-    if ( fileRequest && fileRequest.state == 'fulfilled' && request && request.state == 'fulfilled' ) {
+    if ( fileId && fileState == 'fulfilled' && request && request.state == 'fulfilled' ) {
         result = (
             <div className="success">
                 Update successful.
@@ -184,16 +172,16 @@ const UserProfileEditForm = function(props) {
                 Request failed: { request.error.message }.
             </div>
         )
-    } else if ( fileRequest && fileRequest.state == 'failed' ) {
+    } else if ( fileId && fileState == 'failed' ) {
         result = (
             <div className="request-failure">
-                Request failed: { fileRequest.error.message }.
+                Request failed. Failed to crop your profile image.
             </div>
         )
     }
 
     let submit = ( <><Button type="secondary-warn" onClick={(e) => cancel()}>Cancel</Button> <input type="submit" name="submit" value="Submit" /></> )
-    if ( (request && request.state == 'pending' ) || ( fileRequest && fileRequest.state == 'pending' )) {
+    if ( (request && request.state == 'pending' ) || ( fileId && fileState == 'pending' )) {
         submit = ( <Spinner /> )
     }
 
@@ -204,13 +192,13 @@ const UserProfileEditForm = function(props) {
                     <div>
                         { ! fileId && <UserCircleIcon className="user-profile-edit-form__placeholder" /> }
                         { fileId && <DraftProfileImage
+                                        ref={fileRef}
                                         fileId={fileId} 
                                         setFileId={setFileId} 
+                                        state={fileState}
+                                        setState={setFileState}
                                         width={200} 
-                                        crop={crop}
-                                        setCrop={setCrop}
                                         deleteOnRemove={false} 
-                                        isCropped={fileRequest && fileRequest.state == 'fulfilled'}
                         /> }
                         { ! fileId && <FileUploadInput 
                             fileId={fileId}

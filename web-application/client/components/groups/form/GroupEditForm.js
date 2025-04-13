@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useRef, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { GlobeAltIcon, LockOpenIcon, LockClosedIcon, UserCircleIcon } from '@heroicons/react/24/outline'
@@ -8,7 +8,6 @@ import { useRequest } from '/lib/hooks/useRequest'
 
 import { useGroup } from '/lib/hooks/group'
 
-import { patchFile } from '/state/files'
 import { patchGroup } from '/state/groups'
 
 import DraftProfileImage from '/components/files/DraftProfileImage'
@@ -27,18 +26,13 @@ const GroupEditForm = function({ groupId }) {
 
     const [ about, setAbout ] = useLocalStorage('group.draft.about', ( group?.about ? group.about : ''))
     const [ fileId, setFileId] = useLocalStorage('group.draft.fileId', ( group?.fileId ? group.fileId : null))
-    const [ crop, setCrop ] = useState({
-        unit: 'px',
-        x: 0,
-        y: 0,
-        width: 200,
-        height: 200
-    })
+    const [fileState, setFileState] = useState(null) 
 
     const [ aboutErrors, setAboutErrors ] = useState([])
 
     const [request, makeRequest] = useRequest()
-    const [fileRequest, makeFileRequest] = useRequest()
+
+    const fileRef = useRef(null)
 
     const validate = function(field) {
 
@@ -53,6 +47,14 @@ const GroupEditForm = function({ groupId }) {
         return  aboutValidationErrors == 0 
     }
 
+    const assembleGroup = function() {
+        return {
+            id: groupId,
+            about: about,
+            fileId: fileId
+        }
+    }
+
     const onSubmit = function(event) {
         event.preventDefault()
 
@@ -60,16 +62,11 @@ const GroupEditForm = function({ groupId }) {
             return
         }
 
-        const groupPatch = {
-            id: groupId,
-            about: about,
-            fileId: fileId
-        }
-
         if ( fileId !== null && fileId !== undefined ) {
-            makeFileRequest(patchFile(fileId, crop))
+            fileRef.current?.submit()
+        } else {
+            makeRequest(patchGroup(assembleGroup()))
         }
-        makeRequest(patchGroup(groupPatch))
     }
 
     const cancel = function(event) {
@@ -81,7 +78,9 @@ const GroupEditForm = function({ groupId }) {
 
     const navigate = useNavigate()
     useEffect(() => {
-        if ( (fileRequest && fileRequest.state == 'fulfilled') && (request && request.state == 'fulfilled')) {
+        if ( fileId !== null && fileState == 'fulfilled' && ! request ) {
+            makeRequest(patchGroup(assembleGroup()))
+        } else if ( (fileState == 'fulfilled') && (request && request.state == 'fulfilled')) {
             setAbout(null)
             setFileId(null)
    
@@ -92,7 +91,7 @@ const GroupEditForm = function({ groupId }) {
    
             navigate(`/group/${request.response.body.entity.slug}`)
         }
-    }, [ request, fileRequest ])
+    }, [ request, fileState, fileId ])
 
     if ( ! group ) {
         return (<Spinner />)
@@ -101,7 +100,7 @@ const GroupEditForm = function({ groupId }) {
     let baseError = null
     let aboutError = aboutErrors.join(' ')
 
-    const inProgress = (request && request.state == 'pending') || (fileRequest && fileRequest.state == 'pending')
+    const inProgress = (request && request.state == 'pending') || (fileId && fileState == 'pending')
     return (
         <form onSubmit={onSubmit} className="group-edit-form">
             <div className="group-edit-form__errors">{ baseError }</div>
@@ -109,13 +108,13 @@ const GroupEditForm = function({ groupId }) {
                 <div>
                     { ! fileId && <UserCircleIcon className="placeholder" /> }
                     { fileId && <DraftProfileImage 
+                        ref={fileRef}
                         fileId={fileId} 
                         setFileId={setFileId} 
+                        state={fileState}
+                        setState={setFileState}
                         width={200} 
-                        crop={crop} 
-                        setCrop={setCrop} 
                         deleteOnRemove={false} 
-                        isCropped={fileRequest && fileRequest.state == 'fulfilled'}
                     /> }
                     { ! fileId && <FileUploadInput 
                         fileId={fileId}
