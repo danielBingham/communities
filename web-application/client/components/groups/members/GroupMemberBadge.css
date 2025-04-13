@@ -1,11 +1,12 @@
 .group-member-badge {
     box-sizing: border-box;
-    width: 400px;
+    max-width: 400px;
     padding: 10px;
 }
 .group-member-badge__grid {
     display: grid;
     grid-template-columns: 120px auto;
+    overflow: hidden;
 } 
 .group-member-badge .profile-image {
     width: 120px;
@@ -23,6 +24,7 @@
 }
 .group-member-badge__name {
     font-size: 18px;
+    overflow-wrap: break-word;
 }
 .group-member-badge__about {
     font-size: 12px;

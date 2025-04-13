@@ -1,6 +1,6 @@
 .user-badge {
     box-sizing: border-box;
-    width: 400px;
+    max-width: 400px;
     padding: 10px;
 }
 .user-badge__grid {
@@ -16,9 +16,11 @@
 .user-badge__details {
     padding: 10px;
     align-items: center;
+    overflow: hidden;
 }
 .user-badge__name {
     font-size: 18px;
+    overflow-wrap: break-word;
 }
 .user-badge__about {
     font-size: 12px;
