@@ -30,7 +30,6 @@ import About from '/pages/about/views/About'
 import FrequentlyAskedQuestions from '/pages/about/views/FrequentlyAskedQuestions'
 import Roadmap from '/pages/about/views/Roadmap'
 import Contribute from '/pages/about/views/Contribute'
-import Documentation from '/pages/about/views/Documentation'
 import TermsOfService from '/pages/about/views/TermsOfService'
 import Privacy from '/pages/about/views/Privacy'
 import Contact from '/pages/about/views/Contact'
@@ -171,7 +170,6 @@ const App = function(props) {
                             <Route path="faq" element={ <FrequentlyAskedQuestions /> } />
                             <Route path="roadmap" element={ <Roadmap /> } />
                             <Route path="contribute" element={ <Contribute /> } />
-                            <Route path="documentation" element={ <Documentation /> } />
                             <Route path="tos" element={ <TermsOfService /> } />
                             <Route path="privacy" element={ <Privacy /> } />
                             <Route path="contact" element={ <Contact /> } />
