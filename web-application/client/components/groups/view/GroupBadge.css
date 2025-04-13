@@ -6,6 +6,7 @@
 .group-badge__grid {
     display: grid;
     grid-template-columns: 120px auto;
+    overflow: hidden;
 } 
 .group-badge .group-image {
     width: 120px;
@@ -19,6 +20,7 @@
 }
 .group-badge__title {
     font-size: 18px;
+    overflow-wrap: break-word;
 }
 .group-badge__about {
     font-size: 12px;
