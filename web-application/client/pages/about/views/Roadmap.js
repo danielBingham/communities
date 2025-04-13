@@ -34,7 +34,7 @@ const Roadmap = function({}) {
                 <li><strong>@mentions for Posts and Comments</strong> -- @mentions to allow users to directly reference and notify each other.</li>
                 <li><strong>Multi-factor Authentication</strong> -- Multi-factor authentication to protect user's accounts.</li>
                 <li><strong>Site Moderation Controls</strong> -- Moderation controls to allow site administrators and moderators to moderate the site.</li>
-                <li><strong>Community Moderation Controls</strong> -- Community moderation controls allowing you to moderation tags to post.  Also introduces demote thresholds to remove demoted posts from public feeds.</li> 
+                <li><strong>Community Moderation Controls</strong> -- Community moderation controls allowing users to add moderation tags to posts.  Also introduces demote thresholds to remove demoted posts from public feeds.</li> 
                 <li><strong>Location Based Feeds</strong> -- You can add your location and have feeds of public posts generated for your neighborhood, city, county, state/region, and nation.</li>
                 <li><strong>Events</strong> -- You can create events to gather with your communities in the real world.</li>
                 <li><strong>Post Image Galleries</strong> -- You can share galleries of images on Posts.</li>
