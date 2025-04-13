@@ -89,9 +89,9 @@ export const uploadFile = function(file) {
     }
 }
 
-export const patchFile = function(fileId, crop) {
+export const patchFile = function(fileId, patch) {
     return function(dispatch, getState) {
-        return dispatch(makeTrackedRequest('PATCH', `/file/${fileId}`, { crop: crop },
+        return dispatch(makeTrackedRequest('PATCH', `/file/${fileId}`, patch,
             function(response) {
                 dispatch(filesSlice.actions.setFilesInDictionary({ entity: response.entity}))
 

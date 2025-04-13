@@ -32,11 +32,10 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
           aws-region: us-east-1 
 
-      # Build and publish @communities/backend
-      - name: Install Backend NPM Modules
+      # Test, Version, and Publish @communities/backend
+      #
+      - name: Install Backend Dependencies 
         working-directory: ./packages/backend
-        env:
-          TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
           npm ci
@@ -144,4 +143,3 @@ jobs:
           git config --global user.email $EMAIL
           git tag ${{ github.event.inputs.version }}
           git push origin --tags
-          

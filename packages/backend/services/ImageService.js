@@ -22,6 +22,7 @@ const sharp = require('sharp')
 const { imageSize } = require('image-size')
 
 const S3FileService = require('./S3FileService')
+const ServiceError = require('../errors/ServiceError')
 
 module.exports = class ImageService {
 
@@ -49,7 +50,7 @@ module.exports = class ImageService {
         this.fileService.removeLocalFile(tmpPath)
     }
 
-    async crop(file, crop) {
+    async crop(file, crop, renderedDimensions) {
         // Load the original file into memory.
         const fileContents = await this.fileService.getFile(file.filepath)
         const dimensions = imageSize(fileContents)
@@ -57,13 +58,30 @@ module.exports = class ImageService {
         // The image will have been scaled equivalently in each dimension in
         // order to maintain the aspect ratio.  So we only need the ratio from
         // one dimension in order to unscale our crop.
-        const ratio = dimensions.width / crop.originalWidth 
+        const ratio = dimensions.width / renderedDimensions.width 
+
+        if ( ratio <= 0 ) {
+            throw new ServiceError('validation-error',
+                `Invalid ratio '${ratio}'.  Cannot crop.`)
+        }
 
         const x = parseInt(crop.x * ratio)
         const y = parseInt(crop.y * ratio)
+        if ( x === NaN || y === NaN ) {
+            throw new ServiceError('validation-error',
+                `X or Y of the crop is NaN after scaling.`)
+        }
 
-        const width = parseInt(crop.width * ratio)
-        const height = parseInt(crop.height * ratio)
+        let width = parseInt(crop.width * ratio)
+        let height = parseInt(crop.height * ratio)
+
+        if ( width <= 0 ) {
+            width = 1
+        }
+
+        if ( height <= 0 ) {
+            height = 1
+        }
 
         // Keep the uncropped file by moving it to `files/id.orig.ext`
         const originalPath = `files/${file.id}.orig.${mime.getExtension(file.type)}`
@@ -75,10 +93,18 @@ module.exports = class ImageService {
         const tmpPath = `tmp/${filename}`
         const targetPath = `files/${filename}`
 
-        await sharp(fileContents)
-            .rotate()
-            .extract({ left: x, top: y, width: width, height: height })
-            .toFile(tmpPath)
+        try { 
+            await sharp(fileContents)
+                .rotate()
+                .extract({ left: x, top: y, width: width, height: height })
+                .toFile(tmpPath)
+        } catch (error) {
+            this.core.logger.info(`Attempt to crop a file failed.`)
+            this.core.logger.info(file)
+            this.core.logger.info(dimensions)
+            this.core.logger.info(crop)
+            throw error 
+        }
 
         await this.fileService.uploadFile(tmpPath, targetPath)
         this.fileService.removeLocalFile(tmpPath)

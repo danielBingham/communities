@@ -242,14 +242,27 @@ module.exports = class FileController {
                 `Must include 'crop' object in order to PATCH a file.`)
         }
 
+        if ( ! ('dimensions' in filePatch) || filePatch.dimensions === undefined || filePatch.dimensions === null) {
+            throw new ControllerError(400, 'invalid',
+                `Attempt to patch File(${fileId}) missing original dimensions.`,
+                `Must include the original dimensions of the object in order to PATCH a file.`)
+        }
+
         const crop = filePatch.crop
         if ( ! ('x' in crop) || ! ('y' in crop) || ! ('width' in crop) || ! ('height' in crop) ) {
             throw new ControllerError(400, 'invalid',
                 `Missing element of 'crop' when PATCHing File(${fileId}).`,
-                `Missing crop data.`)
+                `Missing element of crop data. Need { x, y, width, height}.`)
         }
 
-        await this.imageService.crop(file, crop)
+        const dimensions = filePatch.dimensions
+        if ( ! ('width' in dimensions) || ! ('height' in dimensions) ) {
+            throw new ControllerError(400, 'invalid',
+                `Missing element of 'dimensions' when PATCHing FILE(${fileId}).`,
+                `Missing  element of dimension data. Need { width, height }.`)
+        }
+
+        await this.imageService.crop(file, crop, dimensions)
 
         await this.core.queue.add('resize-image', { session: { user: currentUser }, file: file })
 

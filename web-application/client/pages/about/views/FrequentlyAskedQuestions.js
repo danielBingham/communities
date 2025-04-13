@@ -23,14 +23,13 @@ const FrequentlyAskedQuestions = function({}) {
                     infrastructure costs and support a good living for those who
                     dedicate themselves to building and maintaining it full
                 time.</p> 
-                <p>Our intention is to build communal infrastructure. Ephasis on communal.</p>
             </section>
 
             <section>
                 <h2>How is it structured?</h2>
                 <p>Currently, it's the side project of a single 
                     engineer.</p>
-                <p> If we're able to raise enough funding to build a team, then it will be
+                <p> If we're able to raise enough funding to work on it full time and build a team, then it will be
                     structured as a multi-stakeholder cooperative.</p>
                 <p>A multi-stakeholder cooperative is one
                     governed democratically and collaboratively by its workers 
@@ -38,11 +37,24 @@ const FrequentlyAskedQuestions = function({}) {
             </section>
 
             <section>
+                <h2>How will it be governed?</h2>
+                <p>It will be governed democratically.</p>
+                <p>We're still working out the exact structure.  The current
+                thinking is that half the board will be elected by and from the
+            workers and the other half will be elected by and from the users.
+            With the Executive Director serving as board facilitator and tie
+                breaker.</p>
+                <p>Things like board size, board term, and how the elections
+                will be run are still being determined.</p>
+            </section>
+
+            <section>
                 <h2>How is it funded?</h2>
-                <p>By you: the people who use it.  We're asking everyone who uses the platform to
-                contribute to its upkeep. Think of it less as a
-                donation and more as a sliding scale subscription, where the scale
-                goes to zero if you need it to.</p>
+                <p>By you.  We're asking everyone who uses the platform to <a href="/about/contribute">contribute</a> to 
+                    its upkeep. Think of it less as a donation
+                    and more as a "pay what you can", sliding scale subscription. </p>
+                <p>The scale
+                    goes to zero if you need it to, but this will only work if enough people do their part and contribute.</p>
             </section>
 
             <section>
@@ -53,74 +65,34 @@ const FrequentlyAskedQuestions = function({}) {
                 <p> If you join now, you're getting in early, but you're also
                     agreeing to help us test - meaning you agree that things may
                 break on you and when it does you'll tell us about it!</p>
-                <p>Also, please be careful about what you post at this stage.  We'll do our best to keep your private posts private, but we can make no guarantees during the beta. Software development is hard, and it takes a lot of brains to make sure we don't mess up.  Right now we don't have enough brains to guarantee that with any reasonable certainty. So, during the beta, <strong>please understand that you use the platform at your own risk.</strong></p>
+                <p>Also, please be careful about what you post at this stage.
+                We'll do our best to keep your private posts private, but we
+                can make no guarantees during the beta. Software development is
+            hard, and it takes a lot of brains to make sure we don't mess up.
+                Right now we don't have enough brains to guarantee that with
+                    any reasonable certainty.</p>
+                <p>During the beta, <strong>please
+                    understand that you use the platform at your own
+                    risk.</strong></p>
+                <p>Once we're funded enough that we can build a team, we'll be
+                happy to make some legally enforceable guarantees about the
+            safety of your data.</p>
             </section>
 
             <section>
-                <h2>What can you do so far?</h2>
-                <p>Currently you can share text posts to your friends with attached
-                    links or images. Posts are currently limited to a single image,
-                    but we plan to introduce galleries soon. Your friends can
-                comment and react to those posts.</p>
-                <p>We use a two-way friend model rather than a one-way follower
-                    model. The goal is to foster social relationships, not
-                    parasocial.</p>
-                <p>There's an algorithmic feed with a very simple activity based
-                algorithm and a chronological feed that just shows posts in the
-                    order they were posted.  Both are easily accessible.</p>
-                <p>The algorithmic feed borrows from consensus decision making. The
-                "like" and "dislike" reactions both increase the post's activity
-                    score in the algorithm, as do comments. The "block" reaction
-                    decreases the post score in the algorithm, meaning it will drop
-                    in the algorithmic feed.</p>
-                <p>Block is intended to be used on posts
-                    deserving of moderation and censureship: misinformation,
-                    disinformation, spam, slop, hate, abuse, and violations of the
-                    paradox of tolerance.  In the future, we plan to implement
-                    block thresholds that will remove a post with a high-enough
-                    proportion of blocks from the feed entirely.</p>
-                <p>The idea behind this system is that it allows users to be the
-                first layer of moderation on the platform.  Then the moderation
-            team can be a second layer, moderating the moderators.  We'll build an
-            appeal system for blocked posts and posts that were found to not be
-            deserving of block will be unblocked.  If users are found to be
-            consistently abusing block to attempt to silence legitimate dissent or
-            marginalized people, then they'll lose the right to block.</p>
-            </section>
-
-            <section>
-                <h2>What hasn't been built yet?</h2>
-                <p> Building software is an experimental process. To do it well,
-                    you have build prototypes, put them in front of users, and
-                    watch to see if they work the way you think they will. That's
-                    the approach we'll take, though we'll use an opt-in approach
-                    for the experimental testing stage.</p>
-                <p>We have lots of ideas to try.</p>
-                <p>Public posts and post sharing are
-                    planned.</p>
-                <p>We want to introduce post tagging and the ability to
-                    build feeds around tags or sets of tags. The idea is that this
-                    would allow people to find and build communities of shared
-                    interest. </p>
-                <p>We also want to build features for building location
-                    feeds.  The idea is that you could add your location and we
-                    would then generate feeds of posts for your neighborhood, city,
-                    county, state/region, and country. You could opt in to your own
-                    posts being shown in those feeds.  The thought is that this
-                    would allow people to build communities of place.</p>
-                <p>We also have
-                    ideas around building events and event planning features to
-                    help people get off the screen and gather in the real world.
-                    And we'll keep brainstorming and seeking more ideas from
-                    users.</p>
-                <p>All of the brainstorming and experimenting will be guided by our
-                    ultimate goals:</p> 
+                <h2>How is it healthy social media?</h2>
+                <p>It means we're intentionally trying to build a tool for
+                building community, maintaining connections, and having healthy, 
+            productive dialogs.  We're <em>not</em> trying
+        to addict you so that we can sell your attention.</p>
+                <p>This has direct impacts on design decisions.  Among the choices we've already made:</p>
                 <ul>
-                    <li>Help people find each other, build 
-                        community, and organize.</li>
-                    <li>Foster an environment of accurate information and
-                        healthy dialog.</li>
+                    <li>We use traditional paging instead of infinite scroll.  This is to intentionally build in break points that might prompt you to put down the phone and walk away.</li>
+                    <li>We only notify you when there's something you might want to act on.  This means we don't notify you for reactions or shares to your posts.  We're trying to minimize the unnecessary dopamine hits.</li>
+                    <li>We use a friend model and not a follower model. The goal is to build real connections with people, not build audiences.</li>
+                    <li>We plan to build custom feeds to give you as much control as possible over your feeds, what you see and when.</li>
                 </ul>
+                <p>There's a lot more we can do once we have the time to really dig into the research.  We'll keep looking for ways to make this critical communication tool healthier, less distracting, and more useful.</p>
             </section>
         </article>
     )

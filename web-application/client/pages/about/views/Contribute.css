@@ -1,0 +1,19 @@
+.contribute-view {
+    width: 100%;
+    max-width: 800px;
+}
+.contribute-view .intro{
+    margin: 0 auto;
+    font-size: 20px;
+    line-height: 1.7em;
+}
+.contribute-view .contribution-grid {
+    display: grid;
+    margin: 50px auto 0 auto;
+    grid-template-columns: repeat(auto-fit, 260px);
+
+}
+.contribute-view .additional-contributions {
+    margin: 20px auto;
+    text-align: center;
+}
