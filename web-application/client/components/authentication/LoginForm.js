@@ -34,11 +34,6 @@ const LoginForm = function(props) {
    
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
-    if ( currentUser ) {
-        logger.error(new Error(`Attempting to show LoginForm while someone's already logged in.`))
-        return null
-    }
-
     // ======= Actions and Event Handling ===========================
 
     /**
@@ -67,6 +62,11 @@ const LoginForm = function(props) {
     // ======= Effect Handling ======================================
 
     // ====================== Render ==========================================
+    
+    if ( currentUser ) {
+        logger.error(new Error(`Attempting to show LoginForm while someone's already logged in.`))
+        return null
+    }
 
     let errorMessage = ''
     if ( request && request.state == 'failed') {

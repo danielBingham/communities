@@ -1,3 +1,7 @@
+const {
+    sentryWebpackPlugin
+} = require("@sentry/webpack-plugin");
+
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
@@ -29,10 +33,12 @@ module.exports = {
             }
         ]
     },
-    plugins: [
-        new HtmlWebpackPlugin({
-            template: 'server/views/index.html'
-        })
-    ],
-    devtool: 'source-map'
+    plugins: [new HtmlWebpackPlugin({
+        template: 'server/views/index.html'
+    }), sentryWebpackPlugin({
+        authToken: process.env.SENTRY_AUTH_TOKEN,
+        org: "communities",
+        project: "frontend"
+    })],
+    devtool: "source-map"
 };
