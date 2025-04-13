@@ -17,7 +17,7 @@ const WelcomeSplash = function() {
                     data.</p>
                 <p>We want to <strong>de-enshittify the internet.</strong></p>
                 <div className="beta">
-                    We're currently in invite-only beta.  If you have an invite, register through the link in your email.
+                    We're currently in invite-only beta.  If you have an invite, register through the link in your email. If you'd like to join the beta, you can email <a href="mailto:contact@communities.social">contact@communities.social</a> to request an invite.
                 </div>
             </div>
             <LoginForm /> 

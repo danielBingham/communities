@@ -5,6 +5,7 @@
 .welcome-splash .intro .beta {
     font-size: 16px;
     font-style: italic;
+    line-height: 1.4em;
 }
 
 @media (width >= 700px) {

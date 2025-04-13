@@ -22,6 +22,7 @@ const {
     LinkPreviewService,
     PermissionService,
     NotificationService,
+    ValidationService,
 
     FileDAO,
     GroupDAO,
@@ -53,6 +54,7 @@ module.exports = class PostController {
         this.linkPreviewService = new LinkPreviewService(core)
         this.notificationService = new NotificationService(core)
         this.permissionService = new PermissionService(core)
+        this.validationService = new ValidationService(core)
     }
 
     async getRelations(currentUser, results, requestedRelations) {
@@ -278,10 +280,12 @@ module.exports = class PostController {
 
         const post = request.body
 
-        if (post.content && post.content.length > 10000) {
+        const validationErrors = await this.validationService.validatePost(post)
+        if ( validationErrors.length > 0 ) {
+            const errorString = validationErrors.reduce((error, string) => string += `${error.message}\n`, '')
             throw new ControllerError(400, 'invalid',
-                `Post too long.`,
-                `Your post was too long.  Please keep posts to 10,000 characters or under.`)
+                `User submitted an invalid post.`,
+                errorString)
         }
 
         await this.postDAO.insertPosts(post)
@@ -384,10 +388,13 @@ module.exports = class PostController {
                 `You are not authorized to update that post.`)
         }
 
-        if (post.content && post.content.length > 10000) {
+        const validationErrors = await this.validationService.validatePost(post, existing)
+        if ( validationErrors.length > 0 ) {
+            const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
+            const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
             throw new ControllerError(400, 'invalid',
-                `Post too long.`,
-                `Your post was too long.  Please keep posts to 10,000 characters or under.`)
+                `User submitted an invalid post: ${logString}`,
+                errorString)
         }
 
         await this.postDAO.updatePost(post)
