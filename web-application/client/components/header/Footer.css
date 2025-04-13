@@ -8,7 +8,7 @@ footer a:link, footer a:active, footer a:visited {
 }
 
 footer a:hover {
-    color: white;
+    color: var(--header-text-highlight-color);
 }
 
 @media (800px <= width) {
