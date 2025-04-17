@@ -24,6 +24,8 @@ import SharedPost from '/components/posts/SharedPost'
 import Button from '/components/generic/button/Button'
 import PostVisibilityControl from '/components/posts/form/controls/PostVisibilityControl'
 
+import ErrorModal from '/components/errors/ErrorModal'
+
 
 import './PostForm.css'
 
@@ -163,6 +165,12 @@ const PostForm = function({ postId, groupId, sharedPostId }) {
     if ( error == 'overlength') {
         errorView = (
             <div className="error">Posts are limited to 10,000 characters...</div>
+        )
+    }
+
+    if ( postRequest && postRequest.state == 'failed' ) {
+        errorView = (
+            <ErrorModal><p>Something went wrong when creating your post:</p> <p>{ postRequest.error.message }</p></ErrorModal>
         )
     }
 

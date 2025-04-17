@@ -40,6 +40,7 @@
     height: 24px;
     opacity: 0.75;
     color: var(--primary-color-lightest);
+    filter: drop-shadow(0 0 0 rgba(0 0 0 / 0.75))
 }
 
 .post-form .post-form__controls {

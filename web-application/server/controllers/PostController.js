@@ -282,9 +282,10 @@ module.exports = class PostController {
 
         const validationErrors = await this.validationService.validatePost(post)
         if ( validationErrors.length > 0 ) {
-            const errorString = validationErrors.reduce((error, string) => string += `${error.message}\n`, '')
+            const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
+            const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
             throw new ControllerError(400, 'invalid',
-                `User submitted an invalid post.`,
+                `User submitted an invalid post: ${logString}`,
                 errorString)
         }
 
