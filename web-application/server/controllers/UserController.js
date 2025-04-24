@@ -453,15 +453,16 @@ module.exports = class UserController {
         // ================== Follow up =======================================
         // Send notifications, trigger events, and return the results.
 
-        const createdUserResults = await this.userDAO.selectUsers({ where: 'users.id=$1', params: [user.id] }, [ 'email', 'status' ])
+        // We don't have and `id` yet, but we definitely have an `email` when we get here.
+        const createdUserResults = await this.userDAO.selectUsers({ where: 'users.email = $1', params: [user.email] }, [ 'email', 'status' ])
 
-        if ( ! createdUserResults.dictionary[user.id] ) {
+        if ( ! createdUserResults.dictionary[createdUserResults.list[0]] ) {
             throw new ControllerError(500, 'server-error', 
-                `No user found after insertion. Looking for id ${user.id}.`,
+                `No user found after insertion. Looking for user with email: "${user.email}".`,
                 `We created the user, but couldn't find them after creation. Please report bug.`)
         }
 
-        const createdUser = createdUserResults.dictionary[user.id]
+        const createdUser = createdUserResults.dictionary[createdUserResults.list[0]]
 
         if ( type === 'invitation' ) {
             const token = this.tokenDAO.createToken('invitation')
@@ -497,6 +498,7 @@ module.exports = class UserController {
             })
             return
         } else if ( type === 'registration' ) {
+            // TODO Fix this.
             const token = this.tokenDAO.createToken('email-confirmation')
             token.userId = createdUser.id
             token.creatorId = createdUser.id
@@ -505,7 +507,7 @@ module.exports = class UserController {
             await this.emailService.sendEmailConfirmation(createdUser, token)
 
             let results = null
-            if ( currentUser && currentUser.id == user.id ) {
+            if ( currentUser && currentUser.id == createdUser.id ) {
                 results = await this.userDAO.selectUsers({ where: `users.id = $1`, params: [ user.id ]}, 'all')
             } else {
                 results = await this.userDAO.selectUsers({ where: 'users.id=$1', params: [ user.id ]})
