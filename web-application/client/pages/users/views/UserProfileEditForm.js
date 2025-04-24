@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef }  from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
+import { validateName, validateAbout } from '/lib/validation/user'
 
 import { UserCircleIcon } from '@heroicons/react/24/outline'
 
@@ -45,17 +46,13 @@ const UserProfileEditForm = function(props) {
 
     // ======= Actions and Event Handling ===========================
 
-    const dispatch = useDispatch()
-
     const isValid = function(field) {
         let error = false
 
         if ( ! field || field == 'name' ) {
-            if ( name.length <= 0 ) {
-                setNameError("Name is required!")
-                error = true
-            } else if ( name.length > 500 ) {
-                setNameError("Name is too long. Limit is 500 characters.")
+            const nameValidationErrors = validateName(name)
+            if ( nameValidationErrors.length > 0 ) {
+                setNameError(nameValidationErrors.join(' '))
                 error = true
             } else {
                 setNameError(null)
@@ -63,27 +60,27 @@ const UserProfileEditForm = function(props) {
         }
 
         if ( ! field || field == 'about' ) {
-            if ( about.length > 500 ) {
-                setAboutError('length')
+            const aboutValidationErrors = validateAbout(about)
+            if ( aboutValidationErrors.length > 0 ) {
+                setAboutError(aboutValidationErrors.join(' '))
                 error = true
             } else {
                 setAboutError(null)
             }
         }
 
-
         return ! error
     }
 
     const onAboutChange = function(event) {
         const newContent = event.target.value
-        if ( newContent.length > 250) {
-            setAboutError('About is too long.  Limit is 250 characters.')
+        const aboutValidationErrors = validateAbout(newContent)
+        if ( aboutValidationErrors.length > 0) {
+            setAboutError(aboutValidationErrors.join(' '))
         } else {
             setAboutError('')
             setAbout(newContent)
         }
-
     }
 
     const assembleUser = function() {

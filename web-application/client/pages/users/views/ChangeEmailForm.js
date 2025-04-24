@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
+import { validateEmail, validatePassword } from '/lib/validation/user'
 
 import { patchAuthentication } from '/state/authentication'
 import { patchUser } from '/state/users'
@@ -45,32 +46,29 @@ const ChangeEmailForm = function(props) {
      * false otherwise.
      */
     const isValid = function(field) {
-        let error = false 
+        const errors = []
 
         if ( ! field || field == 'email' ) {
-            if ( ! email || email.length == 0 ) {
-                setEmailError('Email required.')
-                error = true
-            } else if ( email.length > 512 ) {
-                setEmailError('Your email is too long.  Limit is 512 characters.')
-                error = true
-            } else if ( ! email.includes('@') ) {
+            const emailValidationErrors = validateEmail(email, true)
+            errors.push(...emailValidationErrors)
+            if ( emailValidationErrors.length > 0) {
                 setEmailError('Please enter a valid email.')
-                error = true
-            } else if ( emailError ) {
+            } else {
                 setEmailError(null)
             }
         }
 
         if ( ! field || field == 'password' ) {
-            if ( email && email.length > 0 && (! password || password.length <= 0) ) {
+            const passwordValidationErrors = validatePassword(password, true)
+            errors.push(...passwordValidationErrors)
+            if ( passwordValidationErrors.length > 0 ) {
                 setPasswordError('Your password is required to change your email.')
             } else {
                 setPasswordError(null)
             }
         }
 
-        return ! error
+        return errors.length === 0
     }
 
     const onSubmit = function(event) {

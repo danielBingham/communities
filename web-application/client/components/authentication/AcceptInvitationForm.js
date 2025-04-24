@@ -5,6 +5,7 @@ import { useSearchParams } from 'react-router-dom'
 import logger from '/logger'
 
 import { useRequest } from '/lib/hooks/useRequest'
+import { validateEmail, validateName, validateUsername, validatePassword } from '/lib/validation/user'
 
 import { validateToken } from '/state/tokens'
 import { patchUser } from '/state/users'
@@ -68,83 +69,27 @@ const AcceptInvitationForm = function(props) {
         }
 
         if ( ! field || field == 'name' ) {
-            const nameErrors = []
-
-            if ( ! name || name.length == 0 ) {
-                nameErrors.push('Name is required!')
-                error = true
-            } 
-
-            if ( name.length > 512 ) {
-                nameErrors.push('Name is too long. Limit is 512 characters.')
-                error = true
-            } 
-
+            const nameErrors = validateName(name, true) 
+            error = error || nameErrors.length > 0
             setNameValidationError(nameErrors)
         }
 
         if ( ! field || field == 'username' ) {
-            const usernameErrors = []
-
-            if ( ! username || username.length == 0 ) {
-                usernameErrors.push('Username is required!')
-                error = true
-            } 
-
-            if ( username.length > 512 ) {
-                usernameErrors.push('Username is too long. Limit is 512 characters.')
-                error = true
-            }         
-            
-            if ( username.match(/^[a-zA-Z0-9\.\-_]+$/) === null ) {
-                usernameErrors.push(`Username may only contain letters, numbers, '.', '-', or '_'.`)
-                error = true
-            }
-
+            const usernameErrors = validateUsername(username, true) 
+            error = error || usernameErrors.length > 0
             setUsernameValidationError(usernameErrors)
         }
 
         if ( ! field || field == 'email' ) {
-            const emailErrors = []
-
-            if ( ! email || email.length == 0 ) {
-                emailErrors.push('Email is required!')
-                error = true
-            } 
-
-            if ( email.length > 512 ) {
-                emailErrors.push('Email is too long.  Limit is 512 characters.')
-                error = true
-            } 
-
-            if ( ! email.includes('@') ) {
-                emailErrors.push('Please enter a valid email.')
-                error = true
-            } 
-
+            const emailErrors = validateEmail(email, true) 
+            error = error || emailErrors.length > 0
             setEmailValidationError(emailErrors)
         }
 
         if ( ! field || field == 'password' ) {
-            const passwordErrors = []
-
-            if ( ! password || password.length == 0 ) {
-                passwordErrors.push('Password is required!')
-                error = true
-            } 
-
-            if ( password.length < 16 ) {
-                passwordErrors.push('Your password is too short.  Please choose a password at least 16 characters in length.')
-                error = true
-            } 
-
-            if ( password.length > 256 ) {
-                passwordErrors.push('Your password is too long. Limit is 256 characters.')
-                error = true
-            } 
-
+            const passwordErrors = validatePassword(password, true) 
+            error = error || passwordErrors.length > 0
             setPasswordValidationError(passwordErrors)
-
         }
 
         if ( ! field || field =='confirmPassword' ) {

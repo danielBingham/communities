@@ -39,6 +39,7 @@ module.exports = class UserController {
         this.auth = new backend.AuthenticationService(core)
         this.emailService = new backend.EmailService(core)
         this.notificationService = new backend.NotificationService(core)
+        this.validationService = new backend.ValidationService(core)
 
         this.userDAO = new backend.UserDAO(core)
         this.userRelationshipsDAO = new backend.UserRelationshipDAO(core)
@@ -278,6 +279,11 @@ module.exports = class UserController {
 
         const currentUser = request.session.user
 
+
+        // ================= Initial Validation ===============================
+        // Do some basic initial validation before we determine what type of 
+        // POST is taking place.   
+
         if ( ! currentUser ) {
             throw new ControllerError(401, 'not-authenticated',
                 `Unauthenticated User attempting to create new User.`,
@@ -286,12 +292,6 @@ module.exports = class UserController {
         }
 
         user.email = user.email.toLowerCase().trim()
-
-        if ( ! user.email.includes('@') ) {
-            throw new ControllerError(400, 'invalid',
-                `Attempt to create a user with an invalid email: ${user.email}`,
-                `'${user.email}' is not a valid email.`)
-        }
 
         if ( user.email === currentUser.email ) {
             throw new ControllerError(400, 'invalid',
@@ -304,16 +304,57 @@ module.exports = class UserController {
             params: [ user.email, user.username ]
         }, 'all')
 
-        const userExists = existingUserResults.list.length > 0
         const existingUser = existingUserResults.dictionary[existingUserResults.list[0]] 
 
-        // 1. request.body.email must not already be attached to a user in the
-        // database.
-        if (userExists && ! currentUser ) {
-            throw new ControllerError(403, 'not-authorized', 
-                `Attempting to create a User(${userExistsResults.rows[0].id}) that already exists!`,
-                `That person has already been invited.`)
-        } else if ( userExists && currentUser ) {
+        // ================== Type Determination and Authentication ===========
+        // There are three types of POST requests, three circumstances where
+        // POST is appropriate to use:
+        //
+        // - invitation: We're inviting a user.
+        // - reinvitation: We're reinviting a user who's already been invited.
+        // - registration: We're registering.
+        //
+        // In the first two, a currentUser will exist in the session who is different
+        // from the user being invited.  In registration, the session should not have
+        // a user logged in.
+        let type = null
+        if ( currentUser && ! existingUser ) {
+            type = 'invitation'
+        } else if ( currentUser && existingUser) {
+            type = 'reinvitation'
+        } else if ( ! currentUser && ! existingUser ) {
+            type = 'registration'
+        } else if ( ! currentUser && existingUser ) {
+            throw new ControllerError(400, 'conflict',
+                `Attempt to re-register existing user.`,
+                `A user with that email is already registered.`)
+        } else {
+            this.core.logger.info(`We should not have been able to get here: `)
+            this.core.logger.info(currentUser)
+            this.core.logger.info(existingUser)
+            throw new ControllerError(500, 'server-error',
+                `Invalid POST type. We shouldn't be able to get here.`,
+                `We encountered a server error.  Please report this as a bug.`)
+        }
+
+        // ================== Validation ======================================
+        // Validate the `user` entity, based on the type, to ensure  we have a
+        // valid user.
+        
+        const validationErrors = await this.validationService.validateUser(user, existingUser, type)
+        if ( validationErrors.length > 0 ) {
+            const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
+            const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
+            throw new ControllerError(400, 'invalid',
+                `User submitted an invalid user: ${logString}`,
+                errorString)
+        }
+
+        // ================== Execute =========================================
+        // At this point we've validated the type and validated the user, so now
+        // we execute the appropriate action, based on the type.
+
+        if ( type === 'reinvitation' ) {
             // If they are in an 'invited' state, meaning they've been invited,
             // but haven't accepted yet, send them a new invitation.
             if ( existingUser.status === 'invited' ) {
@@ -331,7 +372,7 @@ module.exports = class UserController {
 
             if ( existingRelationship !== null && existingUser.status == 'confirmed' ) {
                 throw new ControllerError(400, 'exists',
-                    `Attempt to invite a user who already exists.`,
+                    `User already confirmed and friended.`,
                     `${existingUser.name} has already joined and you already sent them a friend request.`)
             }
 
@@ -377,22 +418,13 @@ module.exports = class UserController {
             return
         }
 
-        // If we're creating a user with a password, then this is just a normal
-        // unconfirmed user creation.  However, if we're creating a user
-        // without a password, then this is a user who is being invited.
-        //
-        // Corresponds to:
-        // Validation: 2. Invitation => no password needed
-        // Validation: 3. Registration => must include password
-        if ( user.password && ! currentUser ) {
-            user.password = this.auth.hashPassword(user.password)
-            user.status = 'unconfirmed'
-        } else if ( currentUser ) {
+        if ( type === 'invitation' ) {
             user.status = 'invited'
-        } else {
-            throw new ControllerError(400, 'invalid',
-                `Users creating accounts must include a password!`,
-                `You must include a password.`)
+        } else if ( type === 'registration' ) {
+            user.status = 'unconfirmed'
+
+            // By the time we get here, we've validated that the password exists.
+            user.password = this.auth.hashPassword(user.password)
         }
 
         try {
@@ -418,6 +450,9 @@ module.exports = class UserController {
             }
         }
 
+        // ================== Follow up =======================================
+        // Send notifications, trigger events, and return the results.
+
         const createdUserResults = await this.userDAO.selectUsers({ where: 'users.id=$1', params: [user.id] }, [ 'email', 'status' ])
 
         if ( ! createdUserResults.dictionary[user.id] ) {
@@ -428,7 +463,7 @@ module.exports = class UserController {
 
         const createdUser = createdUserResults.dictionary[user.id]
 
-        if ( currentUser ) {
+        if ( type === 'invitation' ) {
             const token = this.tokenDAO.createToken('invitation')
             token.userId = createdUser.id
             token.creatorId = currentUser.id
@@ -461,34 +496,38 @@ module.exports = class UserController {
                 }
             })
             return
-        } else {
+        } else if ( type === 'registration' ) {
             const token = this.tokenDAO.createToken('email-confirmation')
             token.userId = createdUser.id
             token.creatorId = createdUser.id
             token.id = await this.tokenDAO.insertToken(token)
 
             await this.emailService.sendEmailConfirmation(createdUser, token)
-        }
 
-        let results = null
-        if ( currentUser && currentUser.id == user.id ) {
-            results = await this.userDAO.selectUsers({ where: `users.id = $1`, params: [ user.id ]}, 'all')
+            let results = null
+            if ( currentUser && currentUser.id == user.id ) {
+                results = await this.userDAO.selectUsers({ where: `users.id = $1`, params: [ user.id ]}, 'all')
+            } else {
+                results = await this.userDAO.selectUsers({ where: 'users.id=$1', params: [ user.id ]})
+            }
+
+            if (! results.dictionary[user.id] ) {
+                throw new ControllerError(500, 'server-error', 
+                    `No user found after insertion. Looking for id ${user.id}.`,
+                    `We created the user, but couldn't find them after creation. Please report bug.`)
+            }
+
+            const relations = await this.getRelations(request.session.user, results)
+
+            return response.status(201).json({ 
+                entity: results.dictionary[user.id],
+                relations: relations
+            })
         } else {
-            results = await this.userDAO.selectUsers({ where: 'users.id=$1', params: [ user.id ]})
+            throw new ControllerError(500, 'server-error',
+                `Invalid POST /users type: ${type}.`,
+                `We encountered an error on the server we couldn't recover from.  Please report a bug.`)
         }
-
-        if (! results.dictionary[user.id] ) {
-            throw new ControllerError(500, 'server-error', 
-                `No user found after insertion. Looking for id ${user.id}.`,
-                `We created the user, but couldn't find them after creation. Please report bug.`)
-        }
-
-        const relations = await this.getRelations(request.session.user, results)
-
-        return response.status(201).json({ 
-            entity: results.dictionary[user.id],
-            relations: relations
-        })
     }
 
     /**
@@ -573,6 +612,12 @@ module.exports = class UserController {
 
         const currentUser = request.session.user
 
+        // ================= Initial Validation ===============================
+        // Do some basic initial validation before we determine what type of 
+        // PATCH is taking place. Ensure the user is authenticated or has
+        // a token.  Make sure the route and body match.  Make sure we're
+        // PATCHing a user that actually exists.  
+
         // 1. User must be logged in unless they are using  token.
         if ( ! currentUser && ! ( 'token' in user) ) {
             throw new ControllerError(401, 'not-authenticated', 
@@ -580,31 +625,16 @@ module.exports = class UserController {
                 `You must be authenticated to update a user.`)
         } 
 
-        // 2. User being patched must be the same as the logged in user.
-        // 2a. :id must equal request.session.user.id
-        //
-        // NOTE: If this requirement changes (to allow admins to patch users,
-        // for instance), then make sure to strip the email out of the returned
-        // user at the botton of this function.  Or at least, spend some time
-        // considering whether you need to.
-        if ( currentUser && currentUser.id != id) {
-            throw new ControllerError(403, 'not-authorized', 
-                `User(${request.session.user.id}) attempted to update another user(${id}).`,
-                `You may not update a user other than yourself.`)
-        }
-
-        // 2. User being patched must be the same as the logged in user.
         // 2b. :id must equal request.body.id
         if ( id != user.id ) {
             throw new ControllerError(403, 'not-authorized',
-                `User(${id}) attempted to update another User(${user.id}).`,
-                `You may not update a user other than yourself.`)
+                `Route User(${id}) does not match body User(${user.id}).`,
+                `Route and body must match.`)
         }
+
         const existingUsers = await this.userDAO.selectUsers({ where: `users.id = $1`, params: [ id ]}, 'all')
 
         // 3. User(:id) must exist.
-        // If they don't exist, something is really, really wrong -- since they
-        // are logged in and in the session!
         if ( ! existingUsers.dictionary[id] ) {
             throw new ControllerError(404, 'not-found',
                 `Attempt to update a User(${id}) that doesn't exist.`,
@@ -613,14 +643,30 @@ module.exports = class UserController {
 
         const existingUser = existingUsers.dictionary[id]
 
-        let authentication = null 
+        // ======== PATCH Type Determination and Authentication ===============
+        // There are a number of circumstances where the User can be PATCHed,
+        // with different requirements for the level of authentication and
+        // different restrictions for what can be updated.  We need to
+        // determine which one this is.
+        //
+        // Determine what type of patch is taking place:
+        // - password-reset: The user is reseting their own password using a
+        //      token.
+        // - invitation-acceptance: The user is accepting an invite using a
+        //      token.
+        // - edit: The user is editing their profile without authenticating.
+        // - authenticated-edit: The user has reauthenticated to in order to
+        //      edit sensitive parts of their profile.
+        // - admin-edit: An admin is editing the user in some way.
+
+        let type = null
         let token = null
 
-        // If the user has a token, then they are authenticated and any change
-        // they are making is valid. A reset password token allows change of
-        // password and an invitation token allows a change of everything.
+        // First, check their token authentication. This checks two types:
         //
-        // TODO Should we prevent changing email with only a reset password token?
+        // - password-reset
+        // - invitation-acceptance
+        //
         if ( user.token ) {
             try {
                 token = await this.tokenDAO.validateToken(user.token, [ 'reset-password', 'invitation' ])
@@ -644,32 +690,28 @@ module.exports = class UserController {
                     `Invalid token.`)
             }
 
-
-            // If this was an invitation token, and they aren't including
-            // an email, then go ahead and confirm the email in the database.
-            // 
-            // If they did include an email, we'll check it below.
-            if ( token.type == 'invitation' ) {
-                if ( ! ("email" in user)) { 
-                    user.status = 'confirmed'
-                }
-
+            // Set the type based on the token type.
+            if ( token.type === 'reset-password' ) {
+                type = 'password-reset'
+            } else if ( token.type === 'invitation' ) {
+                type = 'invitation-acceptance'
+            } else {
+                throw new ControllerError(400, 'invalid',
+                    `Attempt to PATCH with an invalid token type: ${token.type}.`,
+                    `Invalid token.`)
             }
-
-
-            // They've successfully authenticated with the token.
-            authentication = token.type 
 
             // Token was valid.  Clean it off the user object before we use
             // it as a patch.
             delete user.token
-
         } 
 
-        
-        // If they include the oldPassword, attempt to authenticate them with
-        // that.
-        else if ( user.oldPassword ) {
+        // Next check to see if they sent their password.  If they did and the
+        // authentication is successful, then this is:
+        //
+        // - authenticated-edit
+        //
+        else if ( user.oldPassword) {
             try {
                 const existingUserId = await this.auth.authenticateUser({ 
                     email: request.session.user.email, 
@@ -688,7 +730,7 @@ module.exports = class UserController {
 
 
                 // They've successfully authenticated with old password.
-                authentication = 'password' 
+                type = 'authenticated-edit'
             } catch (error ) {
                 if ( error instanceof backend.ServiceError ) {
                     if ( error.type == 'authentication-failed' || error.type == 'no-user' || error.type == 'no-user-password' ) {
@@ -710,70 +752,66 @@ module.exports = class UserController {
             }
         }
 
-        // 4. If a password is included, then they need to be authenticated.
+        // If the current user isn't the user being edited, but is an admin or
+        // superadmin, then this is an:
         //
-        // Any of the authentication methods are valid: oldPassword, invitation
-        // token, and reset-password token all allow changing the password.
-        if( user.password ) {
-            if ( authentication === null ) {
-                throw new ControllerError(403, 'not-authorized',
-                    `User(${user.id}) attempted to change their password with out reauthenticating.`)
-            }
+        // - admin-edit
+        //
+        else if ( currentUser.id !== existingUser.id 
+            && (currentUser.permissions === 'admin' || currentUser.permissions === 'superadmin')) 
+        {
+            type = 'admin-edit'
+        }
 
+        // Otherwise this is an:
+        //
+        // - edit
+        //
+        else {
+            type = 'edit'
+        }
+
+        // ================== Validation ======================================
+        // Now that we know what we're doing, we need to validate the PATCH
+        // that has been sent to us.
+
+        // 2. User being patched must be the same as the logged in user or the
+        // logged in user must be an admin.
+        if ( type !== 'admin-edit' && currentUser && currentUser.id != id) {
+            throw new ControllerError(403, 'not-authorized', 
+                `User(${request.session.user.id}) attempted to update another user(${id}).`,
+                `You may not update a user other than yourself.`)
+        }
+
+        // General user validation.
+        const validationErrors = await this.validationService.validateUser(user, existingUser, type)
+        if ( validationErrors.length > 0 ) {
+            const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
+            const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
+            throw new ControllerError(400, 'invalid',
+                `User submitted an invalid user: ${logString}`,
+                errorString)
+        }
+
+        // ================== Update ==========================================
+        // Execute the update, making any changes to the PATCH that we need to.
+
+        // If they included their password, hash it before we put it in the
+        // database.
+        if( user.password ) {
             user.password  = this.auth.hashPassword(user.password)
         }
 
-        // 5. If an email is included, then they need to be authenticated.
-        //
-        // Only invitation and oldPassword authentications are valid.
+        // If they included an email, determine whether we need to change their status.
         if ( user.email ) {
-            if ( authentication === null ) {
-                throw new ControllerError(403, 'not-authorized',
-                    `User(${user.id}) attempted to change their email with out reauthenticating.`)
-            } else if (authentication == 'reset-password') {
-                throw new ControllerError(403, 'not-authorized'
-                    `User(${user.id}) attempted to use a reset-password token to update email.`)
-            }
-
-
             // If this is an invitation and they aren't changing their email, then go 
             // ahead and confirm it since the token they are using came from their email.
-            if ( authentication == "invitation" && user.email == existingUser.email ) {
+            if ( type === 'invitation-acceptance' && user.email === existingUser.email ) {
                 user.status = 'confirmed'
             } else if ( user.email != existingUser.email ) {
-                // First we need to make sure the new email is not in use.
-                const existingEmailResults = await this.userDAO.selectUsers({ where: `users.email = $1`, params: [ user.email ]}, 'all')
-
-                if ( existingEmailResults.list.length > 0 ) {
-                    throw new ControllerError(400, 'email-taken',
-                        `User(${user.id}) attempted to change their email to one already in use.`,
-                        `That email is already in use by another user.`)
-                }
-
-
                 // Otherwise, if we're about to change their email, then the
                 // new email is unconfirmed. Make sure to update the status.
                 user.status = 'unconfirmed'
-            }
-        }
-
-        // They can only change their username if they are accepting an
-        // invitation.  So they need to be authenticated and authentication
-        // needs to be "invitation".
-        if ( user.username ) {
-            if ( authentication == "invitation" ) {
-                const existingUsernameResults = await this.userDAO.selectUsers({ where: `users.username = $1`, params: [ user.username ]}, 'all')
-                if ( existingUsernameResults.list.length > 0 ) {
-                    throw new ControllerError(400, 'username-taken',
-                        `User(${user.id}) attempted to change their username to one already in use.`,
-                        `That username is already in use by another user.`)
-                }
-
-                // Let it fall through.  We don't actually need to do anything here.
-            } else {
-                throw new ControllerError(400, 'invalid',
-                    `User(${user.id}) attempting to change their username.`,
-                    `You may not change your username once it has been selected.`)
             }
         }
 
@@ -783,14 +821,19 @@ module.exports = class UserController {
 
         await this.userDAO.updateUser(user)
 
+        // ================== Follow Up =======================================
+        // We've finished the update, now we need to do any follow up: sending
+        // notifications, cleaning up, setting tokens, etc.
+        
         // Issue #132 - We're going to allow the user's email to be returned in this case,
-        // because only authenticated users may call this endpoint and then
-        // only on themselves.
+        // because only authenticated users or admins may call this endpoint. 
         const results = await this.userDAO.selectUsers({ where: 'users.id=$1', params: [user.id]}, 'all')
 
         if ( ! results.dictionary[user.id] ) {
             throw new ControllerError(500, 'server-error', `Failed to find user(${user.id}) after update!`)
         }
+
+        const entity = results.dictionary[user.id]
 
         // If we get to this point, we know the user being updated is the same
         // as the user in the session or is a new user registering from an
@@ -801,19 +844,21 @@ module.exports = class UserController {
         //
         // TECHDEBT This isn't the cleanest flow, and it's probably going to
         // prove a bit brittle.
-        request.session.user = results.dictionary[user.id] 
+        if ( currentUser.id === entity.id ) {
+            request.session.user = entity 
+        }
 
         // If we've changed the email, then we need to send out a new
         // confirmation token.
-        if ( results.dictionary[user.id].email != existingUser.email ) {
+        if ( entity.email != existingUser.email ) {
             const token = this.tokenDAO.createToken('email-confirmation')
-            token.userId = results.dictionary[user.id].id
+            token.userId = entity.id
             token.id = await this.tokenDAO.insertToken(token)
 
-            await this.emailService.sendEmailConfirmation(results.dictionary[user.id], token)
+            await this.emailService.sendEmailConfirmation(entity, token)
         }
 
-        if ( authentication === 'invitation' || authentication === 'reset-password' ) {
+        if ( type === 'invitation-acceptance' || type === 'password-reset' ) {
             // Delete the token now that we're done with it.
             await this.tokenDAO.deleteToken(token)
         }
@@ -821,7 +866,7 @@ module.exports = class UserController {
         const relations = await this.getRelations(request.session.user, results)
 
         return response.status(200).json({ 
-            entity: results.dictionary[user.id],
+            entity: entity,
             relations: relations
         })
     }
