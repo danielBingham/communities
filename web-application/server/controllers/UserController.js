@@ -453,16 +453,16 @@ module.exports = class UserController {
         // ================== Follow up =======================================
         // Send notifications, trigger events, and return the results.
 
-        // We don't have and `id` yet, but we definitely have an `email` when we get here.
-        const createdUserResults = await this.userDAO.selectUsers({ where: 'users.email = $1', params: [user.email] }, [ 'email', 'status' ])
+        // The DAO will set id on the `user`.
+        const createdUserResults = await this.userDAO.selectUsers({ where: 'users.id = $1', params: [user.id] }, [ 'email', 'status' ])
 
-        if ( ! createdUserResults.dictionary[createdUserResults.list[0]] ) {
+        if ( ! createdUserResults.dictionary[user.id] ) {
             throw new ControllerError(500, 'server-error', 
                 `No user found after insertion. Looking for user with email: "${user.email}".`,
                 `We created the user, but couldn't find them after creation. Please report bug.`)
         }
 
-        const createdUser = createdUserResults.dictionary[createdUserResults.list[0]]
+        const createdUser = createdUserResults.dictionary[user.id]
 
         if ( type === 'invitation' ) {
             const token = this.tokenDAO.createToken('invitation')
@@ -498,7 +498,6 @@ module.exports = class UserController {
             })
             return
         } else if ( type === 'registration' ) {
-            // TODO Fix this.
             const token = this.tokenDAO.createToken('email-confirmation')
             token.userId = createdUser.id
             token.creatorId = createdUser.id
@@ -506,25 +505,24 @@ module.exports = class UserController {
 
             await this.emailService.sendEmailConfirmation(createdUser, token)
 
-            let results = null
-            if ( currentUser && currentUser.id == createdUser.id ) {
-                results = await this.userDAO.selectUsers({ where: `users.id = $1`, params: [ user.id ]}, 'all')
-            } else {
-                results = await this.userDAO.selectUsers({ where: 'users.id=$1', params: [ user.id ]})
-            }
+            let results = await this.userDAO.selectUsers({ where: `users.id = $1`, params: [ createdUser.id ]}, 'all')
 
-            if (! results.dictionary[user.id] ) {
+            if (! results.dictionary[createdUser.id] ) {
                 throw new ControllerError(500, 'server-error', 
-                    `No user found after insertion. Looking for id ${user.id}.`,
+                    `No user found after insertion. Looking for id ${createdUser.id}.`,
                     `We created the user, but couldn't find them after creation. Please report bug.`)
             }
 
+            // Log the user in.
+            request.session.user = createdUser
+
             const relations = await this.getRelations(request.session.user, results)
 
-            return response.status(201).json({ 
-                entity: results.dictionary[user.id],
+            response.status(201).json({ 
+                entity: results.dictionary[createdUser.id],
                 relations: relations
             })
+            return
         } else {
             throw new ControllerError(500, 'server-error',
                 `Invalid POST /users type: ${type}.`,

@@ -14,13 +14,13 @@
  *
  * @see packages/backend/daos/UserDAO.js -> hydrateUsers()
  */
-const usersUnclean = {
-    1: {
-        id: 1,
+const users = {
+    '5c44ce06-1687-4709-b67e-de76c05acb6a': {
+        id: '5c44ce06-1687-4709-b67e-de76c05acb6a',
         fileId: null,
-        name: 'James Watson',
-        username: 'james.watson',
-        email: 'jwatson@university.edu',
+        name: 'Valid User',
+        username: 'valid.user',
+        email: 'valid.user@mailinator.com',
         status: 'confirmed',
         permissions: 'user',
         settings: {},
@@ -31,52 +31,80 @@ const usersUnclean = {
         createdDate: 'TIMESTAMP',
         updatedDate: 'TIMESTAMP'
     },
-    2: {
-        id: 2,
-        fileId: null,
-        name: 'Francis Crick',
-        username: 'francis.crick',
-        email: 'fcrick@university.edu',
+    '2a7ae011-689c-4aa2-8f13-a53026d40964': {
+        id: '2a7ae011-689c-4aa2-8f13-a53026d40964',
+        fileId: 'f6cf86ab-98e5-4246-9310-41bc7c6c559a',
+        name: 'Another User',
+        username: 'another-user',
+        email: 'another-user@mailinator.com',
         status: 'confirmed',
         permissions: 'user',
-        settings: {},
+        settings: {
+            notifications: {
+                'Post:comment:create': {
+                    email: true,
+                    push: true,
+                    web: true
+                },
+                'Post:comment:create:subscriber': {
+                    email: true,
+                    push: true,
+                    web: true
+                },
+                'User:friend:create': {
+                    email: true,
+                    push: true,
+                    web: true
+                },
+                'User:friend:update': {
+                    email: true,
+                    push: true,
+                    web: true
+                }
+            }
+        },
         notices: {},
         about: '',
         location: '',
         invitations: 50,
         createdDate: 'TIMESTAMP',
         updatedDate: 'TIMESTAMP'
-    }
-}
-
-/**
- * Cleaned User Entities
- *
- * These are users that have been stripped of private data.
- *
- * @see packages/backend/daos/UserDAO.js -> hydrateUsers()
- */
-const usersCleaned = {
-    1: {
-        id: 1,
-        fileId: null,
-        name: 'James Watson',
-        username: 'james.watson',
-        about: '',
+    },
+    '469931f6-26f2-4e1c-b4a0-849aed14e977': {
+        id: '469931f6-26f2-4e1c-b4a0-849aed14e977',
+        fileId: '9fcb6b9a-55a0-44e4-9f88-50fd22874325',
+        name: 'Admin User',
+        username: 'admin.user-test',
+        email: 'admin-user@mailinator.com',
+        status: 'confirmed',
+        permissions: 'admin',
+        settings: {
+            notifications: {}
+        },
+        notices: {},
+        about: 'An admin with a bio.',
+        location: '',
+        invitations: 50,
         createdDate: 'TIMESTAMP',
         updatedDate: 'TIMESTAMP'
     },
-    2: {
-        id: 2,
+    '032563a3-1a0d-42f2-ad85-aef588b81ebe': {
+        id: '032563a3-1a0d-42f2-ad85-aef588b81ebe',
         fileId: null,
-        name: 'Francis Crick',
-        username: 'francis.crick',
-        about: '',
+        name: '',
+        username: '',
+        email: 'test@test.com',
+        status: 'invited',
+        permissions: 'user',
+        settings: {},
+        notices: {},
+        about: null,
+        location: '',
+        invitations: 50,
         createdDate: 'TIMESTAMP',
         updatedDate: 'TIMESTAMP'
     }
 }
-
 
 /**
  * Export the entities in the form of the `results` objects returned by our 
@@ -84,21 +112,10 @@ const usersCleaned = {
  */
 module.exports = {
     users: {
-        dictionary: usersCleaned,
-        list: Object.values(usersCleaned),
+        dictionary: users,
+        list: Object.values(users),
         meta: {
-            count: Object.keys(usersCleaned).length,
-            page: 1,
-            pageSize: 20,
-            numberOfPages: 1
-        },
-        relations: {}
-    },
-    usersUnclean: {
-        dictionary: usersUnclean,
-        list: Object.values(usersUnclean),
-        meta: {
-            count: Object.keys(usersUnclean).length,
+            count: Object.keys(users).length,
             page: 1,
             pageSize: 20,
             numberOfPages: 1

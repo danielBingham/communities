@@ -173,7 +173,7 @@ module.exports = class ValidationService {
 
         // These are fields the user is never allowed to set.
         const alwaysDisallowedFields = [
-            'id', 'status', 'permissions', 'invitations', 'createdDate', 'updatedDate'
+            'status', 'permissions', 'invitations', 'createdDate', 'updatedDate'
         ]
 
         for(const disallowedField of alwaysDisallowedFields ) {
@@ -257,6 +257,20 @@ module.exports = class ValidationService {
         // In this case they are editing.
         else {
 
+            if ( ! this.has(user, 'id') || user.id === null ) {
+                errors.push({
+                    type: `id:missing`,
+                    log: `id is required to edit a user.`,
+                    message: `id is required.`
+                })
+                return errors
+            }
+
+            if ( user.id !== existing.id ) {
+                throw new ServiceError('invalid-id',
+                    `Attempting to edit the worng user.`)
+            }
+
             if ( type === 'invitation-acceptance' ) {
 
                 // Some fields we don't allow the user to set on registration,
@@ -267,8 +281,8 @@ module.exports = class ValidationService {
                     if ( this.has(user, disallowedField) ) {
                         errors.push({
                             type: `${disallowedField}:not-allowed`,
-                            log: `${disallowedField} is not allowed when registering.`,
-                            message: `You may not set '${disallowedField}' when registering.`
+                            log: `${disallowedField} is not allowed when accepting an invitation.`,
+                            message: `You may not set '${disallowedField}' when accepting an invitation.`
                         })
                     }
                 }
@@ -281,8 +295,8 @@ module.exports = class ValidationService {
                     if ( ! this.has(user, requiredField) ) {
                         errors.push({
                             type: `${requiredField}:missing`,
-                            log: `${requiredField} is required to register.`,
-                            message: `${requiredField} is required to register.`
+                            log: `${requiredField} is required.`,
+                            message: `${requiredField} is required.`
                         })
                     }
                 }
@@ -303,7 +317,7 @@ module.exports = class ValidationService {
                     }
                 }
 
-                const requiredFields = [ 'password' ]
+                const requiredFields = [ 'id', 'password' ]
 
                 for(const requiredField of requiredFields) {
                     if ( ! this.has(user, requiredField) ) {
@@ -482,30 +496,58 @@ module.exports = class ValidationService {
         }
 
         if ( this.has(user, 'password') ) {
-            if ( user.password.length < 12 ) {
+            if ( user.password === null ) {
                 errors.push({
-                    type: 'password:too-short',
-                    log: `Password is too short.`,
-                    message: `Your password is too short.  Please choose a password at least 12 characters in length.`
+                    type: 'password:missing',
+                    log: `Password is set to null.`,
+                    message: `You cannot set your password to null.`
                 })
-            }
+            } else if ( typeof user.password !== 'string' ) {
+                errors.push({
+                    type: 'password:invalid-type',
+                    log: `Password is an invalid type: ${typeof user.password}`,
+                    message: `Password must be a string.`
+                })
+            } else {
+                if ( user.password.length < 12 ) {
+                    errors.push({
+                        type: 'password:too-short',
+                        log: `Password is too short.`,
+                        message: `Your password is too short.  Please choose a password at least 12 characters in length.`
+                    })
+                }
 
-            if ( user.password.length > 256 ) {
-                errors.push({
-                    type: 'password:too-long',
-                    log: `Password is too long.`,
-                    message: `Your password is too long.  Please choose a password less than 256 characters in length.`
-                })
+                if ( user.password.length > 256 ) {
+                    errors.push({
+                        type: 'password:too-long',
+                        log: `Password is too long.`,
+                        message: `Your password is too long.  Please choose a password less than 256 characters in length.`
+                    })
+                }
             }
         }
 
         if ( this.has(user, 'about') ) {
-            if ( user.about.length < 250 ) {
+            if ( user.about === null ) {
                 errors.push({
-                    type: 'about:too-long',
-                    log: `About is too long.`,
-                    message: `Your 'about' is too long.  Please limit it to 250 characters.`
+                    type: 'about:missing',
+                    log: `About is set to null.`,
+                    message: `You cannot set about to null.`
                 })
+            } else if ( typeof user.about !== 'string' ) {
+                errors.push({
+                    type: 'about:invalid-type',
+                    log: `About is an invalid type: ${typeof user.about}`,
+                    message: `Your 'about' must be a string.`
+                })
+            } else {
+                if ( user.about.length > 1024) {
+                    errors.push({
+                        type: 'about:too-long',
+                        log: `About is too long.`,
+                        message: `Your 'about' is too long.  Please limit it to 1024 characters.`
+                    })
+                }
             }
         }
 
