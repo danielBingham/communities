@@ -42,22 +42,56 @@ const users = [
     }
 ]
 
-const database = { 
-    users: {
-        1: [
-            { ...users[0] }
-        ],
-        2: [
-            { ...users[1] },
-        ],
-        3: [
-            { ...users[2] },
-        ]
+const groups = [
+    {
+        Group_id: 'aeb26ec5-3644-4b7a-805e-375551ec65b6',
+        Group_type: 'open',
+        Group_title: 'Test Open Group',
+        Group_slug: 'test-open-group',
+        Group_about: 'This is a test open group.',
+        Group_fileId: null,
+        Group_entranceQuestions: {},
+        Group_createdDate: 'TIMESTAMP',
+        Group_updatedDate: 'TIMESTAMP'
+    },
+    {
+        Group_id: '8661a1ef-6259-4d5a-a59f-4d75929a765f',
+        Group_type: 'private',
+        Group_title: 'Test Private Group',
+        Group_slug: 'test-private-group',
+        Group_about: 'This is a test private group.',
+        Group_fileId: null,
+        Group_entranceQuestions: {},
+        Group_createdDate: 'TIMESTAMP',
+        Group_updatedDate: 'TIMESTAMP'
+
+    },
+    {
+        Group_id: '4e66c241-ef21-4143-b7b4-c4fe81a34acd',
+        Group_type: 'hidden',
+        Group_title: 'Test Hidden Group',
+        Group_slug: 'test-hidden-group',
+        Group_about: 'This is a test hidden group.',
+        Group_fileId: null,
+        Group_entranceQuestions: {},
+        Group_createdDate: 'TIMESTAMP',
+        Group_updatedDate: 'TIMESTAMP'
     }
+]
+
+
+const database = { 
+    users: [
+        { ...users[0] },
+        { ...users[1] },
+        { ...users[2] }
+    ],
+    groups: [
+        { ...groups[0] },
+        { ...groups[1] },
+        { ...groups[2] },
+    ]
 }
 
-module.exports = {
-    database: database
-}
-
+module.exports = database 
 
