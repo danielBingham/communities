@@ -25,6 +25,9 @@ const UserRelationshipDAO = require('../daos/UserRelationshipDAO')
 
 const ServiceError = require('../errors/ServiceError')
 
+const contextHas = function(context, field) {
+    return field in context && context[field] !== undefined && context[field] !== null
+}
 
 /**
  * 
@@ -145,18 +148,34 @@ module.exports = class PermissionService {
     }
 
     async canViewPost(user, context) {
-        if ( ! ( 'post' in context) && 'postId' in context ) {
+        if ( ! contextHas(context, 'post') && contextHas(context, 'postId')) {
             context.post = await this.postDAO.getPostById(context.postId)
+        } else if ( contextHas(context, 'post') && contextHas(context, 'postId') ) { 
+            if ( context.post.id !== context.postId ) {
+                throw new ServiceError('invalid-context:post',
+                    `Post.id is not the same as postId.`)
+            }
         }
 
-        if ( ! ('post' in context) || context.post === null || context.post === undefined ) {
+        if ( ! contextHas(context, 'post') ) {
             throw new ServiceError('missing-context', `'post' missing from context.`) 
         }
 
-        // If the post is a Group post, then it depends on type of group:
+        // If the post is a Group post, then group permissions override post
+        // permissions. It depends on type of group:
+        //
         // - Posts in Open groups are publicly visible.
         // - Posts in Hidden or Private groups are visible to members of the group.
+        //
         if ( context.post.groupId ) {
+            if ( contextHas(context, 'group') && context.group.id !== context.post.groupId ) {
+                throw new ServiceError('invalid-context:group', 
+                    `Group in context does not match Post.groupId.`)
+            } else if ( contextHas(context, 'groupId') && context.groupId !== context.post.groupId ) {
+                throw new ServiceError('invalid-context:groupId', 
+                    `GroupId in context does not match Post.groupId.`)
+            }
+
             return await this.canViewGroupContent(user, context)
         }
 
@@ -169,10 +188,17 @@ module.exports = class PermissionService {
         }
 
         // Otherwise, they can only view the posts if they are friends with the poster.
-        if ( ! ( 'relationship' in context) ) {
-            context.relationship = await this.userRelationshipDAO.getUserRelationshipByUserAndRelation(user.id, context.post.userId)
+        if ( ! contextHas(context, 'userRelationship') ) {
+            context.userRelationship = await this.userRelationshipDAO.getUserRelationshipByUserAndRelation(user.id, context.post.userId)
         }
-        if ( context.relationship !== null && context.relationship.status === 'confirmed') {
+
+        if ( contextHas(context, 'userRelationship') && context.userRelationship.status === 'confirmed') {
+            if ((context.userRelationship.userId !== context.post.userId && context.userRelationship.relationId !== context.post.userId)
+                || (context.userRelationship.userId !== user.id && context.userRelationship.relationId !== user.id) )
+            {
+                throw new ServiceError('invalid-context:userRelationship',
+                    `UserRelationship is not a relationship between Post author and user.`)
+            }
             return true
         }
 
@@ -340,29 +366,55 @@ module.exports = class PermissionService {
     }
 
     async canViewGroupContent(user, context) {
-        if ( ! ('group' in context) ) {
-            if ( 'groupId' in context ) {
+        if ( ! contextHas(context, 'group') ) {
+            if ( contextHas(context, 'groupId') ) {
                 context.group = await this.groupDAO.getGroupById(context.groupId)
-            } else if ( 'post' in context ) {
+            }  else if ( contextHas(context, 'post') && context.post.groupId !== undefined && context.post.groupId !== null ) {
                 context.group = await this.groupDAO.getGroupById(context.post.groupId)
+            }
+        } 
+
+        // Context must match up.
+        else {
+            if ( contextHas(context, 'groupId') && context.group.id !== context.groupId ) {
+                throw new ServiceError('invalid-context:group', 
+                    `Group.id does not match groupId.`)
+            }
+            if ( contextHas(context, 'post') && context.group.id !== context.post.groupId ) {
+                throw new ServiceError('invalid-context:group',
+                    `Group.id does not match Post.groupId.`)
             }
         }
 
-        if ( ! ('group' in context) || context.group === null || context.group ===  undefined ) {
+        if ( ! contextHas(context, 'group') ) { 
             throw new ServiceError('missing-context', `'group' missing from context.`)
         }
 
+        // Anyone can view content of open group.
         if ( context.group.type === 'open' ) {
             return true
         }
 
-        if ( ! ('groupMember' in context) || context.groupMember === undefined ) {
+        if ( ! contextHas(context, 'groupMember') ) {
             context.groupMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(context.group.id, user.id, true)
+        } 
+        // Context must match up.
+        else {
+            if ( context.groupMember.groupId !== context.group.id ) {
+                throw new ServiceError('invalid-context:groupMember',
+                    `GroupMember provided is for the wrong Group.`)
+            }
+            if ( context.groupMember.userId !== user.id ) {
+                throw new ServiceError('invalid-context:groupMember',
+                    `GroupMember provided is for the wrong user.`)
+            }
         }
 
+        // Otherwise they must be a confirmed member of the group.
         if ( context.groupMember !== null && context.groupMember.status === 'member') {
             return true 
         }
+
         return false 
     }
 
