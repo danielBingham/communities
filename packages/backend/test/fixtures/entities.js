@@ -350,10 +350,54 @@ const groups = {
 }
 
 const groupMembers = {
-    // User One membership in Test Open Group
+    // User One 'member' membership in Test Open Group
     '138de5fc-a0a9-47eb-ac51-3c92f7780ad9': {
         id: '138de5fc-a0a9-47eb-ac51-3c92f7780ad9',
         groupId: 'aeb26ec5-3644-4b7a-805e-375551ec65b6',
+        userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
+        status: 'member',
+        entranceAnswers: {},
+        role: 'member',
+        createdDate: 'TIMESTAMP',
+        updatedDate: 'TIMESTAMP'
+    },
+    // User One 'member' membership in Test Private Group
+    '0e1555d1-bccd-465d-85bc-4e3dbd4d29db': {
+        id: '0e1555d1-bccd-465d-85bc-4e3dbd4d29db',
+        groupId: '8661a1ef-6259-4d5a-a59f-4d75929a765f',
+        userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
+        status: 'member',
+        entranceAnswers: {},
+        role: 'member',
+        createdDate: 'TIMESTAMP',
+        updatedDate: 'TIMESTAMP'
+    },
+    // User One 'moderator' membership in Test Private Group
+    '30d5291a-8df7-4c82-9508-ffa78a00217b': {
+        id: '30d5291a-8df7-4c82-9508-ffa78a00217b',
+        groupId: '8661a1ef-6259-4d5a-a59f-4d75929a765f',
+        userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
+        status: 'member',
+        entranceAnswers: {},
+        role: 'moderator',
+        createdDate: 'TIMESTAMP',
+        updatedDate: 'TIMESTAMP'
+    },
+    // User One 'admin' membership in Test Private Group
+    'a1c5361e-3e46-435b-bab4-0a74ddbd79e2': {
+        id: 'a1c5361e-3e46-435b-bab4-0a74ddbd79e2',
+        groupId: '8661a1ef-6259-4d5a-a59f-4d75929a765f',
+        userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
+        status: 'member',
+        entranceAnswers: {},
+        role: 'admin',
+        createdDate: 'TIMESTAMP',
+        updatedDate: 'TIMESTAMP'
+    },
+    // User One 'member' membership in Test Hidden Group
+    'eee01f25-8669-4119-bcf6-4cd3eb3c4f26': {
+        id: 'eee01f25-8669-4119-bcf6-4cd3eb3c4f26',
+        groupId: '4e66c241-ef21-4143-b7b4-c4fe81a34acd',
         userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
         status: 'member',
         entranceAnswers: {},

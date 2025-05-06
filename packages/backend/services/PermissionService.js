@@ -206,11 +206,19 @@ module.exports = class PermissionService {
     }
 
     async canUpdatePost(user, context) {
-        if ( ! ( 'post' in context) && 'postId' in context ) {
+        // If we don't have the post in context, attempt to load it.
+        if ( ! contextHas(context, 'post') && contextHas(context, 'postId')) {
             context.post = await this.postDAO.getPostById(context.postId)
         } 
+        // Context must match up.
+        else if ( contextHas(context, 'post') && contextHas(context, 'postId') ) {
+            if ( context.post.id !== context.postId ) {
+                throw new ServiceError('invalid-context:post',
+                    `Post.id does not match postId.`)
+            }
+        }
 
-        if ( ! ('post' in context) || context.post === null || context.post === undefined ) {
+        if ( ! contextHas(context, 'post')) {
             throw new ServiceError('missing-context', `'post' missing from context.`) 
         }
 
@@ -222,11 +230,18 @@ module.exports = class PermissionService {
     }
 
     async canDeletePost(user, context) {
-        if ( ! ( 'post' in context) && 'postId' in context ) {
+        if ( ! contextHas(context, 'post') && contextHas(context, 'postId')) {
             context.post = await this.postDAO.getPostById(context.postId)
         }
+        // Context must match up.
+        else if ( contextHas(context, 'post') && contextHas(context, 'postId') ) {
+            if ( context.post.id !== context.postId ) {
+                throw new ServiceError('invalid-context:post',
+                    `Post.id does not match postId.`)
+            }
+        }
 
-        if ( ! ('post' in context) || context.post === null || context.post === undefined ) {
+        if ( ! contextHas(context, 'post') ) {
             throw new ServiceError('missing-context', `'post' missing from context.`) 
         }
 
@@ -237,32 +252,61 @@ module.exports = class PermissionService {
 
         // If the post is in a group, then moderators and admins of the group
         // can also delete posts.
-        if ( context.post.groupId ) {
-            return await this.canModerateGroup(user, { groupId: context.post.groupId })
+        if ( 'groupId' in context.post && context.post.groupId !== undefined && context.post.groupId !== null) {
+            return await this.canModerateGroup(user, context)
         }
+
+        return false
     }
 
     async canViewGroup(user, context) {
-        if ( ! ('group' in context) ) {
-            if ( 'groupId' in context ) {
+        // Validate our context.
+        if ( contextHas(context, 'group') && contextHas(context, 'groupId') 
+            && context.group.id !== context.groupId ) 
+        {
+            throw new ServiceError('invalid-context:group',
+                `Group.id and groupId do not match.`)
+        }
+        if ( contextHas(context, 'group') && contextHas(context, 'post')
+            && context.group.id !== context.post.groupId ) 
+        {
+            throw new ServiceError('invalid-context:post',
+                `Group.id and Post.groupId do not match.`)
+
+        }
+        if ( contextHas(context, 'groupId') && contextHas(context, 'post')
+            && context.groupId !== context.post.groupId )
+        {
+            throw new ServiceError('invalid-context:post',
+                `Post.groupId and groupId do not match.`)
+        }
+
+        // Look up primary missing context.
+        if ( ! contextHas(context, 'group') ) {
+            if ( contextHas(context, 'groupId') ) {
                 context.group = await this.groupDAO.getGroupById(context.groupId)
-            } else if ( 'post' in context ) {
+            } else if ( contextHas(context, 'post') ) {
                 if ( 'groupId' in context.post && context.post.groupId !== null && context.post.groupId !== undefined ) {
                     context.group = await this.groupDAO.getGroupById(context.post.groupId)
                 }
             }
         }
 
-        if ( ! ('group' in context) || context.group === null || context.group ===  undefined ) {
-            throw new ServiceError('missing-context', `'group' missing from context.`)
+        if ( ! contextHas(context, 'group') ) { 
+            throw new ServiceError('missing-context:group', `'group' missing from context.`)
         }
 
         if ( context.group.type === 'open' || context.group.type == 'private') {
             return true
         }
 
-        if ( ! ('groupMember' in context) || context.groupMember === undefined ) {
+        if ( ! contextHas(context, 'groupMember')) {
             context.groupMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(context.group.id, user.id, true)
+        } 
+
+        if ( contextHas(context, 'groupMember') && context.groupMember.groupId !== context.group.id ) {
+            throw new ServiceError('invalid-context:groupMember',
+                `GroupMember.groupId and Group.id do not match.`)
         }
 
         if ( context.groupMember !== null ) {
@@ -320,25 +364,62 @@ module.exports = class PermissionService {
     }
 
     async canModerateGroup(user, context) {
-        if ( ! ('groupId' in context) ) {
-            if ( 'group' in context ) {
+        // Validate the context.
+        if ( contextHas(context, 'groupId') && contextHas(context, 'post') ) {
+            if ( context.groupId !== context.post.groupId ) {
+                throw new ServiceError(`invalid-context:post`,
+                    `Post.groupId does not match groupId.`)
+            }
+        }
+
+        if ( contextHas(context, 'groupId') && contextHas(context, 'group') ) {
+            if ( context.groupId !== context.group.id) {
+                throw new ServiceError('invalid-context:group',
+                    `Group.id does not match groupId.`)
+            }
+        }
+        if ( contextHas(context, 'group') && contextHas(context, 'post') ) {
+            if ( context.group.id !== context.post.groupId ) {
+                throw new ServiceError('invalid-context:group',
+                    `Post.groupId does not match Group.id.`)
+            }
+        }
+
+
+        // Retrieve the needed context.
+        //
+        // `groupId` overrides `group` overrides `post`
+        //
+        // But we should already have confirmed that these are all equivalent
+        // above.
+        if ( ! contextHas(context, 'groupId') ) {
+            if ( contextHas(context, 'group')) {
                 context.groupId = context.group.id
-            } else if ( 'post' in context ) {
+            } else if ( contextHas(context, 'post')) {
                 context.groupId = context.post.groupId
             }
         }
 
-        if ( ! ('groupId' in context) || context.groupId === null || context.groupId ===  undefined ) {
-            throw new ServiceError('missing-context', `'group' missing from context.`)
+        if ( ! contextHas(context, 'groupId')) {
+            throw new ServiceError('missing-context', `'groupId' missing from context.`)
         }
 
-        if ( ! ('groupMember' in context) || context.groupMember === undefined ) {
+        if ( ! contextHas(context, 'groupMember')) {
             context.groupMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(context.groupId, user.id, true)
+        } else {
+            if ( context.groupMember.groupId !== context.groupId ) {
+                throw new ServiceError('invalid-context:groupMember',
+                    `GroupMember.groupId does not match groupId.`)
+            }
         }
 
-        if ( context.groupMember !== null && context.groupMember.status === 'member' && (context.groupMember.role === 'moderator' || context.groupMember.role === 'admin')) {
+        if ( contextHas(context, 'groupMember') 
+            && context.groupMember.status === 'member' 
+            && (context.groupMember.role === 'moderator' || context.groupMember.role === 'admin')) 
+        {
             return true 
         }
+
         return false 
     }
 
@@ -366,6 +447,7 @@ module.exports = class PermissionService {
     }
 
     async canViewGroupContent(user, context) {
+        // If we don't have the group, then attempt to load it.
         if ( ! contextHas(context, 'group') ) {
             if ( contextHas(context, 'groupId') ) {
                 context.group = await this.groupDAO.getGroupById(context.groupId)
