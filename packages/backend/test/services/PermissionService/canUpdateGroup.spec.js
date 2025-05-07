@@ -7,7 +7,7 @@ const PermissionService = require('../../../services/PermissionService')
 const entities = require('../../fixtures/entities')
 const database = require('../../fixtures/database')
 
-describe('PermissionService.canUpateGroup()', function() {
+describe('PermissionService.canUpdateGroup()', function() {
 
     const core = {
         logger: new Logger(),
@@ -247,6 +247,7 @@ describe('PermissionService.canUpateGroup()', function() {
 
         const canUpdate = await service.canUpdateGroup(currentUser, context)
 
+        expect(group.type).toBe('open')
         expect(groupMember.userId).toBe(currentUser.id)
         expect(groupMember.groupId).toBe(group.id)
         expect(groupMember.role).toBe('admin')
@@ -272,6 +273,7 @@ describe('PermissionService.canUpateGroup()', function() {
 
         const canUpdate = await service.canUpdateGroup(currentUser, context)
 
+        expect(group.type).toBe('open')
         expect(groupMember.userId).toBe(currentUser.id)
         expect(groupMember.groupId).toBe(group.id)
         expect(groupMember.role).toBe('moderator')
@@ -297,6 +299,163 @@ describe('PermissionService.canUpateGroup()', function() {
 
         const canUpdate = await service.canUpdateGroup(currentUser, context)
 
+        expect(group.type).toBe('open')
+        expect(groupMember.userId).toBe(currentUser.id)
+        expect(groupMember.groupId).toBe(group.id)
+        expect(groupMember.role).toBe('member')
+        expect(canUpdate).toBe(false)
+    })
+
+    it("Should allow an admin to update a private group", async function() {
+        const service = new PermissionService(core)
+
+        // Test Private Group
+        const group = entities.groups.dictionary['8661a1ef-6259-4d5a-a59f-4d75929a765f']
+
+        // User One admin membership in Test Private Group
+        const groupMember = entities.groupMembers.dictionary['a1c5361e-3e46-435b-bab4-0a74ddbd79e2']
+
+        const context = {
+            group: group,
+            groupMember: groupMember
+        }
+
+        // User One 
+        const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
+
+        const canUpdate = await service.canUpdateGroup(currentUser, context)
+
+        expect(group.type).toBe('private')
+        expect(groupMember.userId).toBe(currentUser.id)
+        expect(groupMember.groupId).toBe(group.id)
+        expect(groupMember.role).toBe('admin')
+        expect(canUpdate).toBe(true)
+    })
+
+    it("Should not allow a moderator to update a private group", async function() {
+        const service = new PermissionService(core)
+
+        // Test Private Group
+        const group = entities.groups.dictionary['8661a1ef-6259-4d5a-a59f-4d75929a765f']
+
+        // User One moderator membership in Test Private Group
+        const groupMember = entities.groupMembers.dictionary['30d5291a-8df7-4c82-9508-ffa78a00217b']
+
+        const context = {
+            group: group,
+            groupMember: groupMember
+        }
+
+        // User One 
+        const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
+
+        const canUpdate = await service.canUpdateGroup(currentUser, context)
+
+        expect(group.type).toBe('private')
+        expect(groupMember.userId).toBe(currentUser.id)
+        expect(groupMember.groupId).toBe(group.id)
+        expect(groupMember.role).toBe('moderator')
+        expect(canUpdate).toBe(false)
+    })
+
+    it("Should not allow a member to update a private group", async function() {
+        const service = new PermissionService(core)
+
+        // Test Private Group
+        const group = entities.groups.dictionary['8661a1ef-6259-4d5a-a59f-4d75929a765f']
+
+        // User One membership in Test Private Group
+        const groupMember = entities.groupMembers.dictionary['0e1555d1-bccd-465d-85bc-4e3dbd4d29db']
+
+        const context = {
+            group: group,
+            groupMember: groupMember
+        }
+
+        // User One 
+        const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
+
+        const canUpdate = await service.canUpdateGroup(currentUser, context)
+
+        expect(group.type).toBe('private')
+        expect(groupMember.userId).toBe(currentUser.id)
+        expect(groupMember.groupId).toBe(group.id)
+        expect(groupMember.role).toBe('member')
+        expect(canUpdate).toBe(false)
+    })
+
+    it("Should allow an admin to update a hidden group", async function() {
+        const service = new PermissionService(core)
+
+        // Test Hidden Group
+        const group = entities.groups.dictionary['4e66c241-ef21-4143-b7b4-c4fe81a34acd']
+
+        // User One admin membership in Test Hidden Group
+        const groupMember = entities.groupMembers.dictionary['e0eebdfd-b9b7-4f78-8035-cffe34f195f8']
+
+        const context = {
+            group: group,
+            groupMember: groupMember
+        }
+
+        // User One 
+        const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
+
+        const canUpdate = await service.canUpdateGroup(currentUser, context)
+
+        expect(group.type).toBe('hidden')
+        expect(groupMember.userId).toBe(currentUser.id)
+        expect(groupMember.groupId).toBe(group.id)
+        expect(groupMember.role).toBe('admin')
+        expect(canUpdate).toBe(true)
+    })
+
+    it("Should not allow a moderator to update a hidden group", async function() {
+        const service = new PermissionService(core)
+
+        // Test Hidden Group
+        const group = entities.groups.dictionary['4e66c241-ef21-4143-b7b4-c4fe81a34acd']
+
+        // User One moderator membership in Test Hidden Group
+        const groupMember = entities.groupMembers.dictionary['664390e9-88d2-4114-8018-0b428dd47907']
+
+        const context = {
+            group: group,
+            groupMember: groupMember
+        }
+
+        // User One 
+        const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
+
+        const canUpdate = await service.canUpdateGroup(currentUser, context)
+
+        expect(group.type).toBe('hidden')
+        expect(groupMember.userId).toBe(currentUser.id)
+        expect(groupMember.groupId).toBe(group.id)
+        expect(groupMember.role).toBe('moderator')
+        expect(canUpdate).toBe(false)
+    })
+
+    it("Should not allow a member to update a hidden group", async function() {
+        const service = new PermissionService(core)
+
+        // Test Hidden Group
+        const group = entities.groups.dictionary['4e66c241-ef21-4143-b7b4-c4fe81a34acd']
+
+        // User One membership in Test Hidden Group
+        const groupMember = entities.groupMembers.dictionary['eee01f25-8669-4119-bcf6-4cd3eb3c4f26']
+
+        const context = {
+            group: group,
+            groupMember: groupMember
+        }
+
+        // User One 
+        const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
+
+        const canUpdate = await service.canUpdateGroup(currentUser, context)
+
+        expect(group.type).toBe('hidden')
         expect(groupMember.userId).toBe(currentUser.id)
         expect(groupMember.groupId).toBe(group.id)
         expect(groupMember.role).toBe('member')

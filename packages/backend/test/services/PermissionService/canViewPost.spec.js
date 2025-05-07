@@ -232,8 +232,10 @@ describe('PermissionService.canViewPost()', function() {
                 group: group,
             }
 
+            const groupMemberRow = database.groupMembers[5]
+
             core.database.query.mockReturnValue(undefined)
-                .mockReturnValueOnce({ rowCount: 1, rows: [ database.groupMembers[2] ]})
+                .mockReturnValueOnce({ rowCount: 1, rows: [ groupMemberRow  ]})
 
             const canView = await service.canViewPost(user, context)
 
@@ -241,6 +243,8 @@ describe('PermissionService.canViewPost()', function() {
             expect(group.title).toBe('Test Private Group')
             expect(group.type).toBe('private')
             expect(user.name).toBe('Admin User')
+            expect(groupMemberRow.GroupMember_groupId).toBe(group.id)
+            expect(groupMemberRow.GroupMember_userId).toBe(user.id)
             expect(canView).toBe(true)
         })
 
