@@ -361,6 +361,28 @@ const groupMembers = {
         createdDate: 'TIMESTAMP',
         updatedDate: 'TIMESTAMP'
     },
+    // User One 'admin' membership in Test Open Group
+    '7a42357c-9511-4c36-81db-97a492c7934c': {
+        id: '7a42357c-9511-4c36-81db-97a492c7934c',
+        groupId: 'aeb26ec5-3644-4b7a-805e-375551ec65b6',
+        userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
+        status: 'member',
+        entranceAnswers: {},
+        role: 'moderator',
+        createdDate: 'TIMESTAMP',
+        updatedDate: 'TIMESTAMP'
+    },
+    // User One 'admin' membership in Test Open Group
+    '684f7a9f-d415-48a3-be9b-2cd953da47f5': {
+        id: '684f7a9f-d415-48a3-be9b-2cd953da47f5',
+        groupId: 'aeb26ec5-3644-4b7a-805e-375551ec65b6',
+        userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
+        status: 'member',
+        entranceAnswers: {},
+        role: 'admin',
+        createdDate: 'TIMESTAMP',
+        updatedDate: 'TIMESTAMP'
+    },
     // User One 'member' membership in Test Private Group
     '0e1555d1-bccd-465d-85bc-4e3dbd4d29db': {
         id: '0e1555d1-bccd-465d-85bc-4e3dbd4d29db',

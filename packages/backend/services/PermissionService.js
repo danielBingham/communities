@@ -317,20 +317,49 @@ module.exports = class PermissionService {
     }
 
     async canUpdateGroup(user, context) {
-        if ( ! ('groupId' in context) ) {
-            if ( 'group' in context ) {
+        // Validate our context.
+        //
+        if ( contextHas(context, 'groupId') && contextHas(context, 'group')
+            && context.groupId !== context.group.id ) 
+        {
+            throw new ServiceError('invalid-context:group',
+                `Group.id does not equal groupId.`)
+        }
+
+        if ( contextHas(context, 'groupId') && contextHas(context, 'post')
+            && context.groupId !== context.post.groupId )
+        {
+            throw new ServiceError('invalid-context:post',
+                `Post.groupId does not equal groupId.`)
+        }
+
+        if ( contextHas(context, 'group') && contextHas(context, 'post')
+            && context.group.id !== context.post.groupId )
+        {
+            throw new ServiceError('invalid-context:post',
+                `Group.id does not equal post.groupId.`)
+        }
+
+        // Fill in any missing context.
+        if ( ! contextHas(context, 'groupId') ) {
+            if ( contextHas(context, 'group')) {
                 context.groupId = context.group.id
-            } else if ( 'post' in context ) {
+            } else if ( contextHas(context, 'post')) {
                 context.groupId = context.post.groupId
             }
         }
 
-        if ( ! ('groupId' in context) || context.groupId === null || context.groupId ===  undefined ) {
-            throw new ServiceError('missing-context', `'group' missing from context.`)
+        if ( ! contextHas(context, 'groupId')) {
+            throw new ServiceError('missing-context:groupId', `'groupId' missing from context.`)
         }
 
-        if ( ! ('groupMember' in context) || context.groupMember === undefined ) {
+        if ( ! contextHas(context, 'groupMember')) {
             context.groupMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(context.groupId, user.id, true)
+        }
+
+        if ( contextHas(context, 'groupMember') && context.groupMember.groupId !== context.groupId ) {
+            throw new ServiceError('invalid-context:groupMember',
+                `GroupMember.groupId does not equal groupId.`)
         }
 
         if ( context.groupMember !== null && context.groupMember.status === 'member' && context.groupMember.role === 'admin') {
