@@ -304,9 +304,15 @@ module.exports = class PermissionService {
             context.groupMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(context.group.id, user.id, true)
         } 
 
-        if ( contextHas(context, 'groupMember') && context.groupMember.groupId !== context.group.id ) {
-            throw new ServiceError('invalid-context:groupMember',
-                `GroupMember.groupId and Group.id do not match.`)
+        if ( contextHas(context, 'groupMember')) {
+            if ( context.groupMember.groupId !== context.group.id ) {
+                throw new ServiceError('invalid-context:groupMember',
+                    `GroupMember provided is for the wrong Group.`)
+            }
+            if ( context.groupMember.userId !== user.id ) {
+                throw new ServiceError('invalid-context:groupMember',
+                    `GroupMember provided is for the wrong user.`)
+            }
         }
 
         if ( context.groupMember !== null ) {
@@ -367,10 +373,16 @@ module.exports = class PermissionService {
 
         if ( ! contextHas(context, 'groupMember')) {
             context.groupMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(context.groupId, user.id, true)
-        } else {
+        } 
+
+        if ( contextHas(context, 'groupMember')) {
             if ( context.groupMember.groupId !== context.groupId ) {
                 throw new ServiceError('invalid-context:groupMember',
-                    `GroupMember.groupId does not match groupId.`)
+                    `GroupMember provided is for the wrong Group.`)
+            }
+            if ( context.groupMember.userId !== user.id ) {
+                throw new ServiceError('invalid-context:groupMember',
+                    `GroupMember provided is for the wrong user.`)
             }
         }
 
@@ -425,9 +437,15 @@ module.exports = class PermissionService {
             context.groupMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(context.groupId, user.id, true)
         }
 
-        if ( contextHas(context, 'groupMember') && context.groupMember.groupId !== context.groupId ) {
-            throw new ServiceError('invalid-context:groupMember',
-                `GroupMember.groupId does not equal groupId.`)
+        if ( contextHas(context, 'groupMember')) {
+            if ( context.groupMember.groupId !== context.groupId ) {
+                throw new ServiceError('invalid-context:groupMember',
+                    `GroupMember provided is for the wrong Group.`)
+            }
+            if ( context.groupMember.userId !== user.id ) {
+                throw new ServiceError('invalid-context:groupMember',
+                    `GroupMember provided is for the wrong user.`)
+            }
         }
 
         if ( context.groupMember !== null && context.groupMember.status === 'member' && context.groupMember.role === 'admin') {
@@ -437,6 +455,29 @@ module.exports = class PermissionService {
     }
 
     async canViewGroupContent(user, context) {
+        // Validate our context.
+        //
+        if ( contextHas(context, 'groupId') && contextHas(context, 'group')
+            && context.groupId !== context.group.id ) 
+        {
+            throw new ServiceError('invalid-context:group',
+                `Group.id does not equal groupId.`)
+        }
+
+        if ( contextHas(context, 'groupId') && contextHas(context, 'post')
+            && context.groupId !== context.post.groupId )
+        {
+            throw new ServiceError('invalid-context:post',
+                `Post.groupId does not equal groupId.`)
+        }
+
+        if ( contextHas(context, 'group') && contextHas(context, 'post')
+            && context.group.id !== context.post.groupId )
+        {
+            throw new ServiceError('invalid-context:post',
+                `Group.id does not equal post.groupId.`)
+        }
+
         // If we don't have the group, then attempt to load it.
         if ( ! contextHas(context, 'group') ) {
             if ( contextHas(context, 'groupId') ) {
@@ -445,18 +486,6 @@ module.exports = class PermissionService {
                 context.group = await this.groupDAO.getGroupById(context.post.groupId)
             }
         } 
-
-        // Context must match up.
-        else {
-            if ( contextHas(context, 'groupId') && context.group.id !== context.groupId ) {
-                throw new ServiceError('invalid-context:group', 
-                    `Group.id does not match groupId.`)
-            }
-            if ( contextHas(context, 'post') && context.group.id !== context.post.groupId ) {
-                throw new ServiceError('invalid-context:group',
-                    `Group.id does not match Post.groupId.`)
-            }
-        }
 
         if ( ! contextHas(context, 'group') ) { 
             throw new ServiceError('missing-context', `'group' missing from context.`)
@@ -470,8 +499,8 @@ module.exports = class PermissionService {
         if ( ! contextHas(context, 'groupMember') ) {
             context.groupMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(context.group.id, user.id, true)
         } 
-        // Context must match up.
-        else {
+        
+        if ( contextHas(context, 'groupMember')) {
             if ( context.groupMember.groupId !== context.group.id ) {
                 throw new ServiceError('invalid-context:groupMember',
                     `GroupMember provided is for the wrong Group.`)

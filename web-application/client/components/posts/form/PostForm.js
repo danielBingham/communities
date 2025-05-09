@@ -113,6 +113,11 @@ const PostForm = function({ postId, groupId, sharedPostId }) {
 
     const onFileChange = function(fileId) {
         setFileId(fileId)
+
+        // If we're setting fileId, unset linkPreviewId.
+        if ( fileId !== null && fileId !== undefined ) {
+            setLinkPreviewId(null)
+        }
     }
 
     const onContentChange = function(event) {
