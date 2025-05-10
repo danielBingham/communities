@@ -454,14 +454,14 @@ module.exports = class GroupMemberController {
 
         const userMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(groupId, currentUser.id) 
 
-        const canViewGroup = await this.permissionService.can(currentUser, 'view', 'Group', { group: existing, groupMember: userMember })
+        const canViewGroup = await this.permissionService.can(currentUser, 'view', 'Group', { group: group, groupMember: userMember})
         if ( ! canViewGroup ) {
             throw new ControllerError(404, 'not-found',
                 `User(${currentUser.id}) attempting to edit a member to a Group(${groupId}) they can't view.`,
                 `Either that group doesn't exist or you don't have permission to see it.`)
         }
 
-        const canAdminGroup = await this.permissionService.can(currentUser, 'admin', 'Group', { group: existing, groupMember: userMember })
+        const canAdminGroup = await this.permissionService.can(currentUser, 'admin', 'Group', { group: group, groupMember: userMember })
 
         if ( userMember.userId == existing.userId && existing.status == 'pending-invited' && member.status == 'member') {
             // Pass them through, they're allowed to update themselves in this

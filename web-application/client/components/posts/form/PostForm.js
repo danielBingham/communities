@@ -112,11 +112,34 @@ const PostForm = function({ postId, groupId, sharedPostId }) {
     }
 
     const onFileChange = function(fileId) {
+        if ( sharedPostId !== null && sharedPostId !== undefined ) {
+            setLinkPreviewId(null)
+            setFileId(null)
+            console.error('Cannot change the file when there is a shared Post.')
+            return
+        }
+
         setFileId(fileId)
 
         // If we're setting fileId, unset linkPreviewId.
         if ( fileId !== null && fileId !== undefined ) {
             setLinkPreviewId(null)
+        }
+    }
+
+    const setLink = function(linkPreviewId) {
+        if ( sharedPostId !== null && sharedPostId !== undefined ) {
+            setLinkPreviewId(null)
+            setFileId(null)
+            console.error('Cannot change the Link when there is a shared Post.')
+            return
+        }
+
+        setLinkPreviewId(linkPreviewId)
+
+        // If we're setting the LinkPreview, then unset the file. 
+        if ( linkPreviewId !== null && linkPreviewId !== undefined ) {
+            setFileId(null)
         }
     }
 
@@ -215,7 +238,7 @@ const PostForm = function({ postId, groupId, sharedPostId }) {
         )
     } else if ( showLinkForm ) {
         attachmentView = (
-            <LinkForm setLinkPreviewId={setLinkPreviewId} setShowLinkForm={setShowLinkForm} />
+            <LinkForm setLinkPreviewId={setLink} setShowLinkForm={setShowLinkForm} />
         )
 
     } else if ( sharedPostId ) {

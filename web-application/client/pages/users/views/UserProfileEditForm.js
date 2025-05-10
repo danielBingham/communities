@@ -36,7 +36,7 @@ const UserProfileEditForm = function(props) {
 
     // ======= Request Tracking =====================================
 
-    const [ request, makeRequest ] = useRequest()
+    const [ request, makeRequest, resetRequest ] = useRequest()
 
     // ======= Redux State ==========================================
 
@@ -149,10 +149,18 @@ const UserProfileEditForm = function(props) {
     }, [])
 
     useEffect(function() {
-        if ( fileId !== null && fileState == 'fulfilled' && ! request ) {
+        if ((fileId !== null && fileState === 'fulfilled') && ! request ) 
+        {
             makeRequest(patchUser(assembleUser()))
         }
     }, [ fileId, fileState ])
+
+    // Reset the request if a change has been made.
+    useEffect(function() {
+        if ( madeChange === true ) {
+            resetRequest()
+        }
+    }, [ madeChange ])
 
     // ======= Render ===============================================
    

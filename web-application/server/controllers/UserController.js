@@ -844,7 +844,9 @@ module.exports = class UserController {
         //
         // TECHDEBT This isn't the cleanest flow, and it's probably going to
         // prove a bit brittle.
-        if ( currentUser.id === entity.id ) {
+        if ( (currentUser && currentUser.id === entity.id )
+            || ( type === 'password-reset' || type === 'invitation-acceptance')) 
+        {
             request.session.user = entity 
         }
 
@@ -863,7 +865,7 @@ module.exports = class UserController {
             await this.tokenDAO.deleteToken(token)
         }
 
-        const relations = await this.getRelations(request.session.user, results)
+        const relations = await this.getRelations(currentUser, results)
 
         return response.status(200).json({ 
             entity: entity,

@@ -229,8 +229,19 @@ module.exports = class FileController {
 
         const file = files[0]
 
-        // Permissions: 2. User must be owner of File(:id)
-        if ( file.userId !== currentUser.id ) {
+        // TODO TECHDEBT We need a better way to do this.  Right now, Groups
+        // are the only objects where people who aren't the file's uploader can
+        // manipulate it.  But that's going to change.  Eventually events and
+        // organizations will also have this feature.
+        //
+        // When we implement events we need to note what type of file it is and
+        // possibly back link it to the entity using it.
+        const groupFileResults = await this.core.database.query(`
+            SELECT file_id FROM groups WHERE file_id = $1
+        `, [ file.id ])
+
+        // Permissions: 2. User must be owner of File(:id), unless file is group profile.
+        if ( file.userId !== currentUser.id && groupFileResults.rows.length <= 0 ) {
             throw new ControllerError(403, 'not-authorized', 
                 `User(${currentUser.id}) attempting to PATCH File(${file.id}, which they don't own.`,
                 `You cannot PATCH someone else's file.`)
