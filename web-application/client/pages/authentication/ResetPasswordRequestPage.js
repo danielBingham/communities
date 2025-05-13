@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 
 import { useRequest } from '/lib/hooks/useRequest'
+import { validateEmail } from '/lib/validation/user'
 
 import { createToken } from '/state/tokens'
 
@@ -13,11 +14,31 @@ import './ResetPasswordRequestPage.css'
 
 const ResetPasswordRequestPage = function(props) {
     const [ email, setEmail ] = useState('')
+    const [ emailErrors, setEmailErrors ] = useState([])
 
     const [ request, makeRequest ] = useRequest()
 
+    const isValid = function(field) {
+
+        const errors = []
+
+        if ( ! field || field === 'email' ) {
+            const emailValidationErrors = validateEmail(email)
+            errors.push(...emailValidationErrors)
+            setEmailErrors(emailValidationErrors)
+        } else {
+            setEmailErrors([])
+        }
+
+        return errors.length === 0
+    }
+
     function onSubmit(event) {
         event.preventDefault()
+
+        if ( ! isValid() ) {
+            return
+        }
 
         makeRequest(createToken({ type: 'reset-password', email: email }))
     }
@@ -59,7 +80,9 @@ const ResetPasswordRequestPage = function(props) {
                         back here and able to enter a new password.`}
                     value={email}
                     className="email"
+                    error={emailErrors.join(' ')}
                     onChange={(e) => setEmail(e.target.value) }
+                    onBlur={(e) => isValid('email') }
                 />
                 <div className="submit">
                     { inProgress && <Button type="primary" onClick={() => {}}><Spinner /></Button> }

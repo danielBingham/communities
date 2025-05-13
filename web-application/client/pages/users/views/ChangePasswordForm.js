@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
+import { validatePassword } from '/lib/validation/user'
 
 import { patchAuthentication } from '/state/authentication'
 import { patchUser } from '/state/users'
@@ -46,18 +47,13 @@ const ChangePasswordForm = function(props) {
      * false otherwise.
      */
     const isValid = function(field) {
-        let error = false 
+        let haveError = false 
 
         if ( ! field || field == 'newPassword' ) {
-            if ( ! newPassword || newPassword.length == 0 ) {
-                setNewPasswordError('no-password')
-                error = true
-            } else if ( newPassword.length < 16 ) {
-                setNewPasswordError('password-too-short')
-                error = true
-            } else if ( newPassword.length > 256 ) {
-                setNewPasswordError('password-too-long')
-                error = true
+            const newPasswordValidationErrors = validatePassword(newPassword)
+            if ( newPasswordValidationErrors.length > 0) {
+                setNewPasswordError(newPasswordValidationErrors.join(' '))
+                haveError = true
             } else {
                 setNewPasswordError(null)
             }
@@ -65,14 +61,14 @@ const ChangePasswordForm = function(props) {
 
         if ( ! field || field =='confirmNewPassword' ) {
             if (newPassword != confirmNewPassword) {
-                setNewPasswordConfirmationError('password-mismatch')
-                error = true 
+                setNewPasswordConfirmationError('Your passwords must match.')
+                haveError = true 
             } else {
                 setNewPasswordConfirmationError(null)
             }
         }
 
-        return ! error
+        return ! haveError 
     }
 
     const onSubmit = function(event) {
@@ -116,20 +112,6 @@ const ChangePasswordForm = function(props) {
         submit = ( <Spinner /> )
     } else {
         submit = ( <input type="submit" name="submit" value="Change Password" /> )
-    }
-
-    let newPasswordErrorView = null
-    if ( newPasswordError == 'no-password' ) {
-        newPasswordErrorView = (<div className="error">New password required to change your password.</div> )
-    } else if ( newPasswordError == 'pasword-too-short' ) {
-        newPasswordErrorView = (<div className="error">Your new password must be at least 16 characters long.</div>)
-    } else if ( newPasswordError == 'password-too-long' ) {
-        newPasswordErrorView = (<div className="error">Your new password is too long. Limit is 256 characters.</div>)
-    }
-
-    let confirmPasswordErrorView = null
-    if ( newPasswordConfirmationError && newPasswordConfirmationError == 'password-mismatch' ) {
-        confirmPasswordErrorView = (<div className="error">Your passwords must match!</div>)
     }
 
     let oldPasswordError = null

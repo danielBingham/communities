@@ -37,6 +37,7 @@ const Feed = function({ type }) {
             } 
         } else if ( type == 'user' ) {
             params.username = slug 
+            params.type = 'feed'
         }
         return params
     }, [ type, slug, group ])

@@ -26,3 +26,20 @@
     color: var(--danger-color-main);
     text-align: center;
 }
+.text-input .text-input__wrapper {
+    position: relative;
+}
+.text-input .text-input__show-password {
+    position: absolute;
+    right: 10px;
+    top: 4px;
+}
+.text-input .text-input__show-password svg {
+    width: 20px;
+    height: 20px;
+    color: var(--input-border-color);
+}
+.text-input input:focus + .text-input__show-password svg {
+    color: var(--primary-color-main);
+}
+

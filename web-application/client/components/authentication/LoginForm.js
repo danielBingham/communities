@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'
 import logger from '/logger'
 
 import { useRequest } from '/lib/hooks/useRequest'
+import { validateEmail, validatePassword } from '/lib/validation/user'
 
 import { postAuthentication } from '/state/authentication'
 
@@ -23,8 +24,10 @@ const LoginForm = function(props) {
 
     // ======= Render State =========================================
     const [email, setEmail] = useState('')
+    const [emailError, setEmailError] = useState(null)
     const [password, setPassword] = useState('')
-    const [error, setError] = useState(null)
+    const [passwordError, setPasswordError] = useState(null)
+
 
     // ======= Request Tracking =====================================
   
@@ -35,6 +38,32 @@ const LoginForm = function(props) {
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
     // ======= Actions and Event Handling ===========================
+    
+    const isValid = function(field) {
+        const errors = []
+
+        if ( ! field || field === 'email' ) {
+            const emailValidationErrors = validateEmail(email)
+            if ( emailValidationErrors.length > 0 ) {
+                setEmailError('Please enter a valid email.')
+            } else {
+                setEmailError(null)
+            }
+            errors.push(...emailValidationErrors)
+        }
+
+        if ( ! field || field === 'password' ) {
+            const passwordValidationErrors = validatePassword(password)
+            if ( passwordValidationErrors.length > 0 ) {
+                setPasswordError('Please enter a valid password.')
+            } else {
+                setPasswordError(null)
+            }
+            errors.push(...passwordValidationErrors)
+        }
+
+        return errors.length === 0
+    }
 
     /**
      * Handle the form's submission by attempting to authenticate the user.
@@ -46,15 +75,9 @@ const LoginForm = function(props) {
     const onSubmit = function(event) {
         event.preventDefault()
 
-        if ( ! email || email.length == 0 ) {
-            setError('no-email')
+        if ( ! isValid() ) {
             return
         }
-        
-        if ( ! password || password.length == 0 ) {
-            setError('no-password')
-            return
-        } 
 
         makeRequest(postAuthentication(email, password))
     }
@@ -64,8 +87,8 @@ const LoginForm = function(props) {
     // ====================== Render ==========================================
     
     if ( currentUser ) {
-        logger.error(new Error(`Attempting to show LoginForm while someone's already logged in.`))
-        return null
+        logger.warn(new Error(`Attempting to show LoginForm while someone's already logged in.`))
+        return (<div className="login-form"><Spinner /></div> ) 
     }
 
     let errorMessage = ''
@@ -83,11 +106,7 @@ const LoginForm = function(props) {
         } else {
             errorMessage = "Something went wrong on the backend. Since this is an authentication error, we can't share any details (security). Please report a bug and we'll try to figure out it out from server logs."
         }
-    } else if ( error == 'no-password' ) {
-        errorMessage = " A password is required to login. "
-    } else if ( error == 'no-email') {
-        errorMessage = "An email is required to login."
-    }
+    } 
 
     const errorView = ( <div className="error">{ errorMessage }</div> )
 
@@ -103,6 +122,8 @@ const LoginForm = function(props) {
                     /*explanation="Enter the email you used to register." */
                     value={email}
                     className="email"
+                    error={emailError}
+                    onBlur={(e) => isValid('email')}
                     onChange={ (event) => setEmail(event.target.value) } 
                 />
                 <Input
@@ -112,6 +133,8 @@ const LoginForm = function(props) {
                     /*explanation="Enter your password."*/
                     value={password}
                     className="password"
+                    error={passwordError}
+                    onBlur={(e) => isValid('password')}
                     onChange={ (event) => setPassword(event.target.value) } 
                 />
                 <div className="submit field-wrapper">

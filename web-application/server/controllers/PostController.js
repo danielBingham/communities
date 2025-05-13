@@ -198,6 +198,12 @@ module.exports = class PostController {
             query.where += `${and}posts.user_id = $${query.params.length}`
         }
 
+        if ( 'type' in request.query ) {
+            query.params.push(request.query.type)
+            const and = query.params.length > 1 ? ' AND ' : ''
+            query.where += `${and}posts.type = $${query.params.length}`
+        }
+
         if ('feed' in request.query) {
             if (request.query.feed == 'friends') {
                 query.params.push(friendIds)

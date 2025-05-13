@@ -24,7 +24,7 @@ const LoginPage = function(props) {
         <Page id="login-page">
             <PageLeftGutter></PageLeftGutter>
             <PageBody>
-                <LoginForm />
+                <LoginForm /> 
            </PageBody>
             <PageRightGutter></PageRightGutter>
         </Page>

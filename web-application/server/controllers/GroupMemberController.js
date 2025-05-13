@@ -454,20 +454,26 @@ module.exports = class GroupMemberController {
 
         const userMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(groupId, currentUser.id) 
 
-        const canViewGroup = await this.permissionService.can(currentUser, 'view', 'Group', { group: existing, groupMember: userMember })
+        const canViewGroup = await this.permissionService.can(currentUser, 'view', 'Group', { group: group, groupMember: userMember})
         if ( ! canViewGroup ) {
             throw new ControllerError(404, 'not-found',
                 `User(${currentUser.id}) attempting to edit a member to a Group(${groupId}) they can't view.`,
                 `Either that group doesn't exist or you don't have permission to see it.`)
         }
 
-        const canAdminGroup = await this.permissionService.can(currentUser, 'admin', 'Group', { group: existing, groupMember: userMember })
+        const canAdminGroup = await this.permissionService.can(currentUser, 'admin', 'Group', { group: group, groupMember: userMember })
+        const canModerateGroup = await this.permissionService.can(currentUser, 'moderate', 'Group', { group: group, groupMember: userMember })
 
+        // The user has been invited and they are attempting to accept the invitation.
         if ( userMember.userId == existing.userId && existing.status == 'pending-invited' && member.status == 'member') {
-            // Pass them through, they're allowed to update themselves in this
-            // case. TECHDEBT Yeah, this is hacky, but I'm trying to push
-            // through burnout and this is what I got at the moment.
+            // Pass them through. TECHDEBT Yeah, this is hacky, but I'm trying
+            // to push through burnout and this is what I got at the moment.
         } 
+        // The user has requested entry to a group and a moderator is attempting to accept.
+        else if ( canModerateGroup && existing.status == 'pending-requested' && member.status === 'member' ) {
+            // Pass them through.  Again, TECHDEBT this is hacky, but it's what
+            // we got at the moment.
+        }
         // Current User must be an admin. 
         else if ( ! canAdminGroup ) {
             throw new ControllerError(403, 'not-authorized',
