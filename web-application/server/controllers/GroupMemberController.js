@@ -67,7 +67,7 @@ module.exports = class GroupMemberController {
         if ( canModerateGroup ) {
             const memberUsers = await this.userDAO.selectUsers({ where: `users.id = ANY($1::uuid[])`, params: [memberUserIds] })
             const pendingUsers = await this.userDAO.selectUsers({where: `users.id = ANY($1::uuid[]) AND users.status != 'invited'`, params: [ pendingUserIds] })
-            const pendingInvitees = await this.userDAO.selectUsers({ where: `users.id = ANY($1::uuid[]) AND users.status = 'invited'`, params: [pendingUserIds] }, [ 'email' ])
+            const pendingInvitees = await this.userDAO.selectUsers({ where: `users.id = ANY($1::uuid[]) AND users.status = 'invited'`, params: [pendingUserIds], fields: [ 'email' ] })
 
             userDictionary = { ...memberUsers.dictionary, ...pendingUsers.dictionary, ...pendingInvitees.dictionary }
         } else {

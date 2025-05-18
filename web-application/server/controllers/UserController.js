@@ -124,6 +124,7 @@ module.exports = class UserController {
             params: [],
             page: 1,
             order: '',
+            fields: [],
             emptyResult: false,
             requestedRelations: query.relations ? query.relations : []
         }
@@ -171,6 +172,16 @@ module.exports = class UserController {
 
             result.params.push(memberUserIds)
             result.where += ` AND users.id != ALL($${result.params.length}::uuid[])`
+        }
+
+        if ( 'admin' in query && query.admin === 'true') {
+            if ( currentUser.permissions === 'admin' || currentUser.permissions === 'superadmin' ) {
+                result.fields = 'all'
+            } else {
+                throw new ControllerError(403, 'not-authorized',
+                    `User(${currentUser.id}) not authorized to admin.`,
+                    `You are not authorized to admin this platform.`)
+            }
         }
 
         if ( query.page && ! options.ignorePage ) {
@@ -301,8 +312,10 @@ module.exports = class UserController {
 
         const existingUserResults = await this.userDAO.selectUsers({
             where: 'users.email=$1 OR users.username=$2',
-            params: [ user.email, user.username ]
-        }, 'all')
+            params: [ user.email, user.username ],
+            fields: 'all'
+
+        })
 
         const existingUser = existingUserResults.dictionary[existingUserResults.list[0]] 
 
@@ -401,7 +414,7 @@ module.exports = class UserController {
                     [ existingRelationship.id ]: existingRelationship
                 }
             }
-            const invitedUserResults = await this.userDAO.selectUsers({ where: `users.id = $1`, params: [ existingUser.id ]}, [ 'email' ])
+            const invitedUserResults = await this.userDAO.selectUsers({ where: `users.id = $1`, params: [ existingUser.id ], fields: [ 'email' ] })
             
             if ( ! (existingUser.id in invitedUserResults.dictionary)) {
                 throw new ControllerError(500, 'server-error',
@@ -454,7 +467,7 @@ module.exports = class UserController {
         // Send notifications, trigger events, and return the results.
 
         // The DAO will set id on the `user`.
-        const createdUserResults = await this.userDAO.selectUsers({ where: 'users.id = $1', params: [user.id] }, [ 'email', 'status' ])
+        const createdUserResults = await this.userDAO.selectUsers({ where: 'users.id = $1', params: [user.id], fields: [ 'email', 'status' ] })
 
         if ( ! createdUserResults.dictionary[user.id] ) {
             throw new ControllerError(500, 'server-error', 
@@ -505,7 +518,7 @@ module.exports = class UserController {
 
             await this.emailService.sendEmailConfirmation(createdUser, token)
 
-            let results = await this.userDAO.selectUsers({ where: `users.id = $1`, params: [ createdUser.id ]}, 'all')
+            let results = await this.userDAO.selectUsers({ where: `users.id = $1`, params: [ createdUser.id ], fields: 'all' })
 
             if (! results.dictionary[createdUser.id] ) {
                 throw new ControllerError(500, 'server-error', 
@@ -552,7 +565,7 @@ module.exports = class UserController {
 
         let results = null
         if ( currentUser && currentUser.id == request.params.id ) {
-            results = await this.userDAO.selectUsers({ where: `users.id = $1 AND users.status != 'invited'`, params: [ request.params.id ]}, 'all')
+            results = await this.userDAO.selectUsers({ where: `users.id = $1 AND users.status != 'invited'`, params: [ request.params.id ], fields: 'all' })
         } else {
             results = await this.userDAO.selectUsers({ where: `users.id = $1 AND users.status != 'invited'`, params: [request.params.id]})
         }
@@ -632,7 +645,7 @@ module.exports = class UserController {
                 `Route and body must match.`)
         }
 
-        const existingUsers = await this.userDAO.selectUsers({ where: `users.id = $1`, params: [ id ]}, 'all')
+        const existingUsers = await this.userDAO.selectUsers({ where: `users.id = $1`, params: [ id ], fields: 'all' })
 
         // 3. User(:id) must exist.
         if ( ! existingUsers.dictionary[id] ) {
@@ -827,7 +840,7 @@ module.exports = class UserController {
         
         // Issue #132 - We're going to allow the user's email to be returned in this case,
         // because only authenticated users or admins may call this endpoint. 
-        const results = await this.userDAO.selectUsers({ where: 'users.id=$1', params: [user.id]}, 'all')
+        const results = await this.userDAO.selectUsers({ where: 'users.id=$1', params: [user.id], fields: 'all' })
 
         if ( ! results.dictionary[user.id] ) {
             throw new ControllerError(500, 'server-error', `Failed to find user(${user.id}) after update!`)

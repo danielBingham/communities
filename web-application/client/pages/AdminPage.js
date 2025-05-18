@@ -6,6 +6,7 @@ import { Page, PageBody, PageLeftGutter, PageRightGutter } from '/components/gen
 
 import AdminDashboard from '/components/admin/dashboard/AdminDashboard'
 import FeatureFlags from '/components/admin/features/FeatureFlags'
+import UserAdmin from '/components/admin/users/UserAdmin'
 
 import './AdminPage.css'
 
@@ -43,6 +44,7 @@ const AdminPage = function(props) {
             <PageBody>
                 <Routes>
                     <Route path="features" element={<FeatureFlags />} />
+                    <Route path="users" element={<UserAdmin />} />
                     <Route index element={<AdminDashboard />} />
                 </Routes>
             </PageBody>

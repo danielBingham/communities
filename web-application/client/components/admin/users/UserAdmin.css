@@ -1,0 +1,18 @@
+.user-admin {
+    display: grid;
+    grid-template-rows: auto;
+    width: 100%;
+}
+.user-admin .row {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    width: 100%;
+    padding: 10px;
+    text-align: center;
+}
+.user-admin .user:hover {
+    background-color: var(--primary-color-light);
+}
+.user-admin .header {
+    font-weight: bold;
+}
