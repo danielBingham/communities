@@ -40,13 +40,12 @@ const PostForm = function({ postId, groupId, sharedPostId }) {
     const [linkPreviewId, setLinkPreviewId] = useState(draft && 'linkPreviewId' in draft ? draft.linkPreviewId : null)
 
     let defaultVisibility = 'private'
-    if ( post !== null ) {
+    if ( post !== null && post.visibility !== null && post.visibility !== undefined ) {
         defaultVisibility = post.visibility
     } else if ( group !== null && group.type === 'open' ) {
         defaultVisibility = 'public'
     }
-
-    const [visibility, setVisibility] = useState(draft && 'visibility' in draft ? draft.visibility : defaultVisibility)
+    const [visibility, setVisibility] = useState(draft && 'visibility' in draft && draft.visibility !== null && draft.visibility !== undefined ? draft.visibility : defaultVisibility)
 
     const [showLinkForm, setShowLinkForm] = useState(false)
 
