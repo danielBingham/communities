@@ -77,6 +77,13 @@ const SCHEMA = {
                 select: 'request',
                 key: 'permissions'
             },
+            'site_role': {
+                insert: 'denied',
+                update: 'allowed',
+                select: 'request',
+                key: 'siteRole',
+                needsFeature: '62-admin-moderation-controls'
+            },
             'settings': {
                 needsFeature: '1-notification-settings',
                 insert: 'allowed',
