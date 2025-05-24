@@ -24,6 +24,7 @@ const UserAdmin = function({}) {
             const user = dictionary[userId]
             userRows.push(
                 <div className="row user">
+                    <span>{ user.id }</span>
                     <span>{ user.name }</span> 
                     <span>{ user.username }</span> 
                     <span>{ user.email }</span> 
@@ -38,6 +39,7 @@ const UserAdmin = function({}) {
     return (
         <div className="user-admin">
             <div className="row header">
+                <span>ID</span>
                 <span>Name</span> 
                 <span>Username</span> 
                 <span>Email</span>
