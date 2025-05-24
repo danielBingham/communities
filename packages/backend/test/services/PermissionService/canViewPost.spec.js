@@ -59,8 +59,9 @@ describe('PermissionService.canViewPost()', function() {
                 postId: '703955d2-77df-4635-8ab8-b9108fef217f'
             }
 
+            const postRows = database.posts['703955d2-77df-4635-8ab8-b9108fef217f'].rows
             core.database.query.mockReturnValue(undefined)
-                .mockReturnValueOnce({ rowCount: 1, rows: [ database.posts[0] ]})
+                .mockReturnValueOnce({ rowCount: postRows.length, rows: postRows })
 
             const canView = await service.canViewPost(user, context)
 
@@ -77,8 +78,9 @@ describe('PermissionService.canViewPost()', function() {
                 postId: 'e792718e-6730-438e-85f7-a5172af3d740'
             }
 
+            const postRows = database.posts['703955d2-77df-4635-8ab8-b9108fef217f'].rows
             core.database.query.mockReturnValue(undefined)
-                .mockReturnValueOnce({ rowCount: 1, rows: [ database.posts[0] ]})
+                .mockReturnValueOnce({ rowCount: postRows.length, rows: postRows })
 
             // Admin User
             const currentUser = entities['users'].dictionary['469931f6-26f2-4e1c-b4a0-849aed14e977']
@@ -123,8 +125,9 @@ describe('PermissionService.canViewPost()', function() {
                 post: post
             }
 
+            const groupRows = database.groups['aeb26ec5-3644-4b7a-805e-375551ec65b6'].rows
             core.database.query.mockReturnValue(undefined)
-                .mockReturnValueOnce({ rowCount: 1, rows: [ database.groups[0] ]})
+                .mockReturnValueOnce({ rowCount: groupRows.length, rows: groupRows })
 
             const canView = await service.canViewPost(user, context)
 
@@ -146,8 +149,9 @@ describe('PermissionService.canViewPost()', function() {
                 group: group,
             }
 
+            const postRows = database.posts['01f39e3e-e1f4-4ae2-bced-dcb9619ea3de'].rows
             core.database.query.mockReturnValue(undefined)
-                .mockReturnValueOnce({ rowCount: 1, rows: [ database.posts[0] ]})
+                .mockReturnValueOnce({ rowCount: postRows.length, rows: postRows })
 
             // User Two
             const currentUser = entities['users'].dictionary['2a7ae011-689c-4aa2-8f13-a53026d40964']
@@ -174,8 +178,9 @@ describe('PermissionService.canViewPost()', function() {
                 groupId: '8661a1ef-6259-4d5a-a59f-4d75929a765f'
             }
 
+            const postRows = database.posts['01f39e3e-e1f4-4ae2-bced-dcb9619ea3de'].rows
             core.database.query.mockReturnValue(undefined)
-                .mockReturnValueOnce({ rowCount: 1, rows: [ database.posts[0] ]})
+                .mockReturnValueOnce({ rowCount: postRows.length, rows: postRows })
 
             // User Two
             const currentUser = entities['users'].dictionary['2a7ae011-689c-4aa2-8f13-a53026d40964']
@@ -222,8 +227,7 @@ describe('PermissionService.canViewPost()', function() {
 
             // Private post to a Test Private Group by Admin User.
             const post = entities['posts'].dictionary['63b6fdfc-bdcc-4b55-90d8-eb8fcaba715d']
-            // Admin User.
-            const user = entities['users'].dictionary[post.userId]
+            
             // Test Private Group 
             const group = entities['groups'].dictionary[post.groupId]
 
@@ -232,19 +236,22 @@ describe('PermissionService.canViewPost()', function() {
                 group: group,
             }
 
-            const groupMemberRow = database.groupMembers[5]
-
+            // User One 'member' membership in Test Private Group
+            const groupMemberRows = database.groupMembers['0e1555d1-bccd-465d-85bc-4e3dbd4d29db'].rows
             core.database.query.mockReturnValue(undefined)
-                .mockReturnValueOnce({ rowCount: 1, rows: [ groupMemberRow  ]})
+                .mockReturnValueOnce({ rowCount: groupMemberRows.length, rows: groupMemberRows })
 
-            const canView = await service.canViewPost(user, context)
+            // User One
+            const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
+
+            const canView = await service.canViewPost(currentUser, context)
 
             expect(post.visibility).toBe('private')
             expect(group.title).toBe('Test Private Group')
             expect(group.type).toBe('private')
-            expect(user.name).toBe('Admin User')
-            expect(groupMemberRow.GroupMember_groupId).toBe(group.id)
-            expect(groupMemberRow.GroupMember_userId).toBe(user.id)
+            expect(currentUser.name).toBe('User One')
+            expect(groupMemberRows[0].GroupMember_groupId).toBe(group.id)
+            expect(groupMemberRows[0].GroupMember_userId).toBe(currentUser.id)
             expect(canView).toBe(true)
         })
 
@@ -344,8 +351,9 @@ describe('PermissionService.canViewPost()', function() {
                 post: post
             }
 
+            const userRelationshipRows = database.userRelationships['8fc429cc-aec4-4cc8-8394-f2aa3f7c125c'].rows
             core.database.query.mockReturnValue(undefined)
-                .mockReturnValueOnce({ rowCount: 1, rows: [ database.userRelationships[0] ]})
+                .mockReturnValueOnce({ rowCount: userRelationshipRows.length, rows: userRelationshipRows })
 
             // User One
             const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']

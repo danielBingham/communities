@@ -72,8 +72,9 @@ describe('PermissionService.canViewGroup()', function() {
                 groupMember: groupMember
             }
 
+            const groupRows = database.groups['8661a1ef-6259-4d5a-a59f-4d75929a765f'].rows
             core.database.query.mockReturnValue(undefined)
-                .mockReturnValueOnce({ rowCount: 1, rows: [ database.groups[1] ]})
+                .mockReturnValueOnce({ rowCount: groupRows.length, rows: groupRows})
 
             // User One 
             const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
@@ -97,18 +98,18 @@ describe('PermissionService.canViewGroup()', function() {
                 group: group
             }
 
-            const groupMemberRow = database.groupMembers[1]
+            const groupMemberRows = database.groupMembers['0e1555d1-bccd-465d-85bc-4e3dbd4d29db'].rows
             core.database.query.mockReturnValue(undefined)
-                .mockReturnValueOnce({ rowCount: 1, rows: [ groupMemberRow ]})
+                .mockReturnValueOnce({ rowCount: groupMemberRows, rows: groupMemberRows})
 
             // User One 
             const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
             const canView = await service.canViewGroup(currentUser, context)
 
-            expect(groupMemberRow.GroupMember_groupId).toBe(group.id)
-            expect(groupMemberRow.GroupMember_userId).toBe(currentUser.id)
-            expect(groupMemberRow.GroupMember_status).toBe('member')
+            expect(groupMemberRows[0].GroupMember_groupId).toBe(group.id)
+            expect(groupMemberRows[0].GroupMember_userId).toBe(currentUser.id)
+            expect(groupMemberRows[0].GroupMember_status).toBe('member')
             expect(canView).toBe(true)
         })
 

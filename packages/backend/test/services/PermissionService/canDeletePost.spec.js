@@ -60,8 +60,9 @@ describe('PermissionService.canDeletePost()', function() {
                 postId: '703955d2-77df-4635-8ab8-b9108fef217f'
             }
 
+            const postRows = database.posts['703955d2-77df-4635-8ab8-b9108fef217f'].rows
             core.database.query.mockReturnValue(undefined)
-                .mockReturnValueOnce({ rowCount: 1, rows: [ { ...database.posts[0] } ]})
+                .mockReturnValueOnce({ rowCount: postRows.length, rows: postRows })
            
             // Admin User
             const currentUser = entities['users'].dictionary['469931f6-26f2-4e1c-b4a0-849aed14e977']
@@ -107,8 +108,9 @@ describe('PermissionService.canDeletePost()', function() {
             }
 
             // User One moderator membership in Test Private Group
+            const groupMemberRows = database.groupMembers['30d5291a-8df7-4c82-9508-ffa78a00217b'].rows
             core.database.query.mockReturnValue(undefined)
-                .mockReturnValueOnce({ rowCount: 1, rows: [ { ...database.groupMembers[2] } ]})
+                .mockReturnValueOnce({ rowCount: groupMemberRows.length, rows: groupMemberRows })
 
             // User One 
             const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
