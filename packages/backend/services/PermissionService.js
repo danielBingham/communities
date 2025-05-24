@@ -142,6 +142,26 @@ module.exports = class PermissionService {
             if ( action === 'view' ) {
                 return await this.canViewGroupContent(user, context)
             }
+        } else if ( entity === 'Site' ) {
+            if ( action === 'moderate' ) {
+                if ( this.core.features.has('62-admin-moderation-controls') ) {
+                    return user.siteRole === 'moderator' || user.siteRole === 'admin' || user.siteRole === 'superadmin'
+                } else {
+                    return user.permissions === 'moderator' || user.permissions === 'admin' || user.permissions === 'superadmin'
+                }
+            } else if ( action === 'admin' ) {
+                if ( this.core.features.has('62-admin-moderation-controls') ) {
+                    return user.siteRole === 'admin' || user.siteRole === 'superadmin'
+                } else {
+                    return user.permissions === 'admin' || user.permissions === 'superadmin'
+                }
+            } else if ( action === 'sudo' ) {
+                if ( this.core.features.has('62-admin-moderation-controls') ) {
+                    return user.siteRole === 'superadmin'
+                } else {
+                    return user.permissions === 'superadmin'
+                }
+            }
         }
 
         throw new ServiceError('unsupported', `Unsupported Entity(${entity}) or Action(${action}).`)
