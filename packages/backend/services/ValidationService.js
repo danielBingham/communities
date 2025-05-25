@@ -997,8 +997,11 @@ module.exports = class ValidationService {
                         message: `postCommentId must be a valid uuid.`
                     })
                 } else {
-                    const postComment = await this.postCommentDAO.getPostCommentById(siteModeration.postCommentId)
-                    if ( postComment === null ) {
+                    const postCommentResults = await this.core.database.query(
+                        `SELECT id FROM post_comments WHERE id = $1`, 
+                        [ siteModeration.postCommentId ]
+                    )
+                    if ( postCommentResults.rows.length <= 0 || postCommentResults.rows[0].id !== siteModeration.postCommentId) {
                         errors.push({
                             type: 'postCommentId:not-found',
                             log: `PostComment not found for '${siteModeration.postCommentId}'.`,
