@@ -212,7 +212,6 @@ describe('ValidationService.validateSiteModeration()', function() {
 
                 const errors = await service.validateSiteModeration(currentUser, siteModeration, existing)
 
-                console.log(errors)
                 expect(errors.length).toBe(1)
                 expect(errors[0].type).toBe('userId:missing')
             })
@@ -237,8 +236,496 @@ describe('ValidationService.validateSiteModeration()', function() {
                 expect(errors.length).toBe(1)
                 expect(errors[0].type).toBe('userId:invalid-type')
             })
+
+            it("Should return an error when `userId` is not a valid uuid", async function() {
+                const service = new ValidationService(core)
+
+                // Moderator User
+                const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
+
+                const siteModeration = { 
+                    userId: 'test-string',
+                    status: 'flagged',
+                    postId: '703955d2-77df-4635-8ab8-b9108fef217f'
+                }
+
+                core.database.query.mockReturnValue(undefined)
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '703955d2-77df-4635-8ab8-b9108fef217f' }]})
+
+                const errors = await service.validateSiteModeration(currentUser, siteModeration, null)
+
+                expect(errors.length).toBe(1)
+                expect(errors[0].type).toBe('userId:invalid')
+            })
+
+            it("Should return an error when `userId` does not correspond to a user", async function() {
+                const service = new ValidationService(core)
+
+                // Moderator User
+                const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
+
+                const siteModeration = { 
+                    userId: 'f5e9e853-6803-4a74-98c3-23fb0933062f',
+                    status: 'flagged',
+                    postId: '703955d2-77df-4635-8ab8-b9108fef217f'
+                }
+
+                core.database.query.mockReturnValue(undefined)
+                    .mockReturnValueOnce({ rowCount: 0, rows: [] })
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '703955d2-77df-4635-8ab8-b9108fef217f' }]})
+
+                const errors = await service.validateSiteModeration(currentUser, siteModeration, null)
+
+                expect(errors.length).toBe(1)
+                expect(errors[0].type).toBe('userId:not-found')
+            })
+
+            it("Should pass a correct userId with a valid user", async function() {
+                const service = new ValidationService(core)
+
+                // Moderator User
+                const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
+
+                const siteModeration = { 
+                    userId: 'f5e9e853-6803-4a74-98c3-23fb0933062f',
+                    status: 'flagged',
+                    postId: '703955d2-77df-4635-8ab8-b9108fef217f'
+                }
+
+                core.database.query.mockReturnValue(undefined)
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'f5e9e853-6803-4a74-98c3-23fb0933062f' }] })
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '703955d2-77df-4635-8ab8-b9108fef217f' }] })
+
+                const errors = await service.validateSiteModeration(currentUser, siteModeration, null)
+
+                expect(errors.length).toBe(0)
+            })
         })
 
+        describe("validate status", function() {
+            it("Should return an error when `status` is `null`", async function() {
+                const service = new ValidationService(core)
+
+                // Moderator User
+                const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
+
+                const siteModeration = { 
+                    userId: 'f5e9e853-6803-4a74-98c3-23fb0933062f',
+                    status: null,
+                    postId: '703955d2-77df-4635-8ab8-b9108fef217f'
+                }
+
+                core.database.query.mockReturnValue(undefined)
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'f5e9e853-6803-4a74-98c3-23fb0933062f' }] })
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '703955d2-77df-4635-8ab8-b9108fef217f' }] })
+
+                const errors = await service.validateSiteModeration(currentUser, siteModeration, null)
+
+                expect(errors.length).toBe(1)
+                expect(errors[0].type).toBe('status:missing')
+            })
+
+            it("Should return an error when `status` is not a string", async function() {
+                const service = new ValidationService(core)
+
+                // Moderator User
+                const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
+
+                const siteModeration = { 
+                    userId: 'f5e9e853-6803-4a74-98c3-23fb0933062f',
+                    status: 10,
+                    postId: '703955d2-77df-4635-8ab8-b9108fef217f'
+                }
+
+                core.database.query.mockReturnValue(undefined)
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'f5e9e853-6803-4a74-98c3-23fb0933062f' }] })
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '703955d2-77df-4635-8ab8-b9108fef217f' }] })
+
+                const errors = await service.validateSiteModeration(currentUser, siteModeration, null)
+
+                expect(errors.length).toBe(1)
+                expect(errors[0].type).toBe('status:invalid-type')
+            })
+
+            it("Should return an error when `status` is not a valid status", async function() {
+                const service = new ValidationService(core)
+
+                // Moderator User
+                const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
+
+                const siteModeration = { 
+                    userId: 'f5e9e853-6803-4a74-98c3-23fb0933062f',
+                    status: 'rejected',
+                    postId: '703955d2-77df-4635-8ab8-b9108fef217f'
+                }
+
+                core.database.query.mockReturnValue(undefined)
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'f5e9e853-6803-4a74-98c3-23fb0933062f' }] })
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '703955d2-77df-4635-8ab8-b9108fef217f' }] })
+
+                const errors = await service.validateSiteModeration(currentUser, siteModeration, null)
+
+                expect(errors.length).toBe(1)
+                expect(errors[0].type).toBe('status:invalid')
+            })
+
+            it("Should pass a valid 'approved' status", async function() {
+                const service = new ValidationService(core)
+
+                // Moderator User
+                const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
+
+                const siteModeration = { 
+                    userId: 'f5e9e853-6803-4a74-98c3-23fb0933062f',
+                    status: 'approved',
+                    postId: '703955d2-77df-4635-8ab8-b9108fef217f'
+                }
+
+                core.database.query.mockReturnValue(undefined)
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'f5e9e853-6803-4a74-98c3-23fb0933062f' }] })
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '703955d2-77df-4635-8ab8-b9108fef217f' }] })
+
+                const errors = await service.validateSiteModeration(currentUser, siteModeration, null)
+
+                expect(errors.length).toBe(0)
+            })
+
+            it("Should pass a valid 'removed' status", async function() {
+                const service = new ValidationService(core)
+
+                // Moderator User
+                const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
+
+                const siteModeration = { 
+                    userId: 'f5e9e853-6803-4a74-98c3-23fb0933062f',
+                    status: 'removed',
+                    postId: '703955d2-77df-4635-8ab8-b9108fef217f'
+                }
+
+                core.database.query.mockReturnValue(undefined)
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'f5e9e853-6803-4a74-98c3-23fb0933062f' }] })
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '703955d2-77df-4635-8ab8-b9108fef217f' }] })
+
+                const errors = await service.validateSiteModeration(currentUser, siteModeration, null)
+
+                expect(errors.length).toBe(0)
+            })
+
+            it("Should pass a valid 'flagged' status", async function() {
+                const service = new ValidationService(core)
+
+                // Moderator User
+                const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
+
+                const siteModeration = { 
+                    userId: 'f5e9e853-6803-4a74-98c3-23fb0933062f',
+                    status: 'flagged',
+                    postId: '703955d2-77df-4635-8ab8-b9108fef217f'
+                }
+
+                core.database.query.mockReturnValue(undefined)
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'f5e9e853-6803-4a74-98c3-23fb0933062f' }] })
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '703955d2-77df-4635-8ab8-b9108fef217f' }] })
+
+                const errors = await service.validateSiteModeration(currentUser, siteModeration, null)
+
+                expect(errors.length).toBe(0)
+            })
+        })
+
+        describe('validate reason', function() {
+            it("Should return an error when `reason` is not a string", async function() {
+                const service = new ValidationService(core)
+
+                // Moderator User
+                const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
+
+                const siteModeration = { 
+                    userId: 'f5e9e853-6803-4a74-98c3-23fb0933062f',
+                    status: 'flagged',
+                    reason: 10,
+                    postId: '703955d2-77df-4635-8ab8-b9108fef217f'
+                }
+
+                core.database.query.mockReturnValue(undefined)
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'f5e9e853-6803-4a74-98c3-23fb0933062f' }] })
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '703955d2-77df-4635-8ab8-b9108fef217f' }] })
+
+                const errors = await service.validateSiteModeration(currentUser, siteModeration, null)
+
+                expect(errors.length).toBe(1)
+                expect(errors[0].type).toBe('reason:invalid-type')
+            })
+
+            it("Should pass whenh `reason` is `null`", async function() {
+                const service = new ValidationService(core)
+
+                // Moderator User
+                const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
+
+                const siteModeration = { 
+                    userId: 'f5e9e853-6803-4a74-98c3-23fb0933062f',
+                    status: 'flagged',
+                    reason: null,
+                    postId: '703955d2-77df-4635-8ab8-b9108fef217f'
+                }
+
+                core.database.query.mockReturnValue(undefined)
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'f5e9e853-6803-4a74-98c3-23fb0933062f' }] })
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '703955d2-77df-4635-8ab8-b9108fef217f' }] })
+
+                const errors = await service.validateSiteModeration(currentUser, siteModeration, null)
+
+                expect(errors.length).toBe(0)
+            })
+
+            it("Should pass when `reason` is a valid string", async function() {
+                const service = new ValidationService(core)
+
+                // Moderator User
+                const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
+
+                const siteModeration = { 
+                    userId: 'f5e9e853-6803-4a74-98c3-23fb0933062f',
+                    status: 'flagged',
+                    reason:  'Test reason!',
+                    postId: '703955d2-77df-4635-8ab8-b9108fef217f'
+                }
+
+                core.database.query.mockReturnValue(undefined)
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'f5e9e853-6803-4a74-98c3-23fb0933062f' }] })
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '703955d2-77df-4635-8ab8-b9108fef217f' }] })
+
+                const errors = await service.validateSiteModeration(currentUser, siteModeration, null)
+
+                expect(errors.length).toBe(0)
+            })
+        })
+
+        describe('validate postId', function() {
+            it("Should return an error when postId is not a string", async function() {
+                const service = new ValidationService(core)
+
+                // Moderator User
+                const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
+
+                const siteModeration = { 
+                    userId: 'f5e9e853-6803-4a74-98c3-23fb0933062f',
+                    status: 'flagged',
+                    postId: 10 
+                }
+
+                core.database.query.mockReturnValue(undefined)
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'f5e9e853-6803-4a74-98c3-23fb0933062f' }] })
+
+                const errors = await service.validateSiteModeration(currentUser, siteModeration, null)
+
+                expect(errors.length).toBe(1)
+                expect(errors[0].type).toBe('postId:invalid-type')
+            })
+
+            it("Should return an error when postId is not a valid uuid", async function() {
+                const service = new ValidationService(core)
+
+                // Moderator User
+                const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
+
+                const siteModeration = { 
+                    userId: 'f5e9e853-6803-4a74-98c3-23fb0933062f',
+                    status: 'flagged',
+                    postId:  'test-id' 
+                }
+
+                core.database.query.mockReturnValue(undefined)
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'f5e9e853-6803-4a74-98c3-23fb0933062f' }] })
+
+                const errors = await service.validateSiteModeration(currentUser, siteModeration, null)
+
+                expect(errors.length).toBe(1)
+                expect(errors[0].type).toBe('postId:invalid')
+            })
+
+            it("Should error when postId does not correspond to a post", async function() {
+                const service = new ValidationService(core)
+
+                // Moderator User
+                const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
+
+                const siteModeration = { 
+                    userId: 'f5e9e853-6803-4a74-98c3-23fb0933062f',
+                    status: 'flagged',
+                    postId:  '703955d2-77df-4635-8ab8-b9108fef217f' 
+                }
+
+                core.database.query.mockReturnValue(undefined)
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'f5e9e853-6803-4a74-98c3-23fb0933062f' }] })
+                    .mockReturnValueOnce({ rowCount: 0, rows: [] })
+
+                const errors = await service.validateSiteModeration(currentUser, siteModeration, null)
+
+                expect(errors.length).toBe(1)
+                expect(errors[0].type).toBe('postId:not-found')
+            })
+
+            it("Should error when postId and postCommentId are both set", async function() {
+                const service = new ValidationService(core)
+
+                // Moderator User
+                const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
+
+                const siteModeration = { 
+                    userId: 'f5e9e853-6803-4a74-98c3-23fb0933062f',
+                    status: 'flagged',
+                    postId:  '703955d2-77df-4635-8ab8-b9108fef217f',
+                    postCommentId: 'dea0084d-b034-4d74-a1c1-f0f17abd5f9e'
+                }
+
+                core.database.query.mockReturnValue(undefined)
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'f5e9e853-6803-4a74-98c3-23fb0933062f' }] })
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '703955d2-77df-4635-8ab8-b9108fef217f' }] })
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'dea0084d-b034-4d74-a1c1-f0f17abd5f9e' }] })
+
+                const errors = await service.validateSiteModeration(currentUser, siteModeration, null)
+
+                expect(errors.length).toBe(2)
+                expect(errors[0].type).toBe('postId:conflict')
+                expect(errors[1].type).toBe('postCommentId:conflict')
+            })
+
+            it("Should pass a valid postId", async function() {
+                const service = new ValidationService(core)
+
+                // Moderator User
+                const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
+
+                const siteModeration = { 
+                    userId: 'f5e9e853-6803-4a74-98c3-23fb0933062f',
+                    status: 'flagged',
+                    postId:  '703955d2-77df-4635-8ab8-b9108fef217f'
+                }
+
+                core.database.query.mockReturnValue(undefined)
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'f5e9e853-6803-4a74-98c3-23fb0933062f' }] })
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '703955d2-77df-4635-8ab8-b9108fef217f' }] })
+
+                const errors = await service.validateSiteModeration(currentUser, siteModeration, null)
+
+                expect(errors.length).toBe(0)
+            })
+        })
+
+        describe('validate postCommentId', function() {
+            it("Should error when postCommentId is not a string", async function() {
+                const service = new ValidationService(core)
+
+                // Moderator User
+                const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
+
+                const siteModeration = { 
+                    userId: 'f5e9e853-6803-4a74-98c3-23fb0933062f',
+                    status: 'flagged',
+                    postCommentId: 10 
+                }
+
+                core.database.query.mockReturnValue(undefined)
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'f5e9e853-6803-4a74-98c3-23fb0933062f' }] })
+
+                const errors = await service.validateSiteModeration(currentUser, siteModeration, null)
+
+                expect(errors.length).toBe(1)
+                expect(errors[0].type).toBe('postCommentId:invalid-type')
+            })
+
+            it("Should error when postCommentId is not a valid-uuid", async function() {
+                const service = new ValidationService(core)
+
+                // Moderator User
+                const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
+
+                const siteModeration = { 
+                    userId: 'f5e9e853-6803-4a74-98c3-23fb0933062f',
+                    status: 'flagged',
+                    postCommentId: 'test-id' 
+                }
+
+                core.database.query.mockReturnValue(undefined)
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'f5e9e853-6803-4a74-98c3-23fb0933062f' }] })
+
+                const errors = await service.validateSiteModeration(currentUser, siteModeration, null)
+
+                expect(errors.length).toBe(1)
+                expect(errors[0].type).toBe('postCommentId:invalid')
+            })
+
+            it("Should error when postCommentId does not correspond to a valid PostComment", async function() {
+                const service = new ValidationService(core)
+
+                // Moderator User
+                const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
+
+                const siteModeration = { 
+                    userId: 'f5e9e853-6803-4a74-98c3-23fb0933062f',
+                    status: 'flagged',
+                    postCommentId: 'dea0084d-b034-4d74-a1c1-f0f17abd5f9e' 
+                }
+
+                core.database.query.mockReturnValue(undefined)
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'f5e9e853-6803-4a74-98c3-23fb0933062f' }] })
+                    .mockReturnValueOnce({ rowCount: 0, rows: [] })
+
+                const errors = await service.validateSiteModeration(currentUser, siteModeration, null)
+
+                expect(errors.length).toBe(1)
+                expect(errors[0].type).toBe('postCommentId:not-found')
+            })
+
+            it("Should error when postId and postCommentId are both set", async function() {
+                const service = new ValidationService(core)
+
+                // Moderator User
+                const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
+
+                const siteModeration = { 
+                    userId: 'f5e9e853-6803-4a74-98c3-23fb0933062f',
+                    status: 'flagged',
+                    postId:  '703955d2-77df-4635-8ab8-b9108fef217f',
+                    postCommentId: 'dea0084d-b034-4d74-a1c1-f0f17abd5f9e'
+                }
+
+                core.database.query.mockReturnValue(undefined)
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'f5e9e853-6803-4a74-98c3-23fb0933062f' }] })
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '703955d2-77df-4635-8ab8-b9108fef217f' }] })
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'dea0084d-b034-4d74-a1c1-f0f17abd5f9e' }] })
+
+                const errors = await service.validateSiteModeration(currentUser, siteModeration, null)
+
+                expect(errors.length).toBe(2)
+                expect(errors[0].type).toBe('postId:conflict')
+                expect(errors[1].type).toBe('postCommentId:conflict')
+            })
+
+            it("Should pass a valid postCommentId", async function() {
+                const service = new ValidationService(core)
+
+                // Moderator User
+                const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
+
+                const siteModeration = { 
+                    userId: 'f5e9e853-6803-4a74-98c3-23fb0933062f',
+                    status: 'flagged',
+                    postCommentId: 'dea0084d-b034-4d74-a1c1-f0f17abd5f9e'
+                }
+
+                core.database.query.mockReturnValue(undefined)
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'f5e9e853-6803-4a74-98c3-23fb0933062f' }] })
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'dea0084d-b034-4d74-a1c1-f0f17abd5f9e' }] })
+
+                const errors = await service.validateSiteModeration(currentUser, siteModeration, null)
+
+                expect(errors.length).toBe(0)
+            })
+
+        })
     })
 
 })
