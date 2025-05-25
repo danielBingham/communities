@@ -72,20 +72,6 @@ module.exports = class ValidationService {
         // require or disallow. Check those next and return if any are set.
 
         if ( ! existing ) {
-            if ( this.core.features.has('62-admin-moderation-controls') ) {
-                const disallowedFields = [ 'status', 'moderationReason' ]
-
-                for(const disallowedField of disallowedFields ) {
-                    if ( this.has(post, disallowedField) ) {
-                        errors.push({
-                            type: `${disallowedField}:not-allowed`,
-                            log: `${disallowedField} is not allowed.`,
-                            message: `You may not set '${disallowedField}'.`
-                        })
-                    }
-                }
-            }
-
             const requiredFields = [ 'type', 'userId', 'visibility']
 
 
