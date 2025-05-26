@@ -475,6 +475,41 @@ module.exports = function(core) {
         })
     })
 
+    /**************************************************************************
+     *      Moderation REST Routes
+     * ************************************************************************/
+    const SiteModerationController = require('./controllers/admin/SiteModerationController')
+    const siteModerationController = new SiteModerationController(core)
+
+    router.get('/admin/moderations', function(request, response, next) {
+        siteModerationController.getSiteModerations(request, response).catch(function(error){
+            next(error)
+        })
+    })
+
+    router.post('/admin/moderations', function(request, response, next) {
+        siteModerationController.postSiteModerations(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.get('/admin/moderation/:id', function(request, response, next) {
+        siteModerationController.getSiteModeration(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.patch('/admin/moderation/:id', function(request, response, next) {
+        siteModerationController.patchSiteModeration(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.delete('/admin/moderation/:id', function(request, response, next) {
+        siteModerationController.deleteSiteModeration(request, response).catch(function(error) {
+            next(error)
+        })
+    })
 
     /**************************************************************************
      *      API 404 
