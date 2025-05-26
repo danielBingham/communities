@@ -1,11 +1,11 @@
-const Logger = require('../../../logger')
-const FeatureFlags = require('../../../features')
+const Logger = require('../../../../logger')
+const FeatureFlags = require('../../../../features')
 
-const ServiceError = require('../../../errors/ServiceError')
-const PermissionService = require('../../../services/PermissionService')
+const ServiceError = require('../../../../errors/ServiceError')
+const PermissionService = require('../../../../services/PermissionService')
 
-const entities = require('../../fixtures/entities')
-const database = require('../../fixtures/database')
+const entities = require('../../../fixtures/entities')
+const database = require('../../../fixtures/database')
 
 describe('PermissionService.canViewPost()', function() {
 
