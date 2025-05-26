@@ -2,11 +2,14 @@ import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, NavLink, Routes, Route } from 'react-router-dom'
 
+import { useFeature } from '/lib/hooks/feature/useFeature'
+
 import { Page, PageBody, PageLeftGutter, PageRightGutter } from '/components/generic/Page'
 
 import AdminDashboard from '/components/admin/dashboard/AdminDashboard'
 import FeatureFlags from '/components/admin/features/FeatureFlags'
 import UserAdmin from '/components/admin/users/UserAdmin'
+import AdminModerationView from '/pages/admin/AdminModerationView'
 
 import './AdminPage.css'
 
@@ -18,6 +21,8 @@ const AdminPage = function(props) {
     const currentUser = useSelector(function(state) {
         return state.authentication.currentUser
     })
+
+    const hasAdminModerationControls = useFeature('62-admin-moderation-controls')
 
     // ======= Effect Handling ======================================
    
@@ -37,6 +42,7 @@ const AdminPage = function(props) {
             <PageLeftGutter>
                 <menu className="admin__menu">
                     <li><NavLink to={``} end><span className="nav-text"> Dashboard</span></NavLink></li>
+                    { hasAdminModerationControls && <li><NavLink to="moderation" end><span className="nav-text"> Moderation</span></NavLink></li> }
                     <li><NavLink to="features" end><span className="nav-text"> Features</span></NavLink></li>
                     <li><NavLink to="users" end><span className="nav-text"> Users</span></NavLink></li>
                 </menu> 
@@ -45,6 +51,7 @@ const AdminPage = function(props) {
                 <Routes>
                     <Route path="features" element={<FeatureFlags />} />
                     <Route path="users" element={<UserAdmin />} />
+                    <Route path="moderation" element={<AdminModerationView />} />
                     <Route index element={<AdminDashboard />} />
                 </Routes>
             </PageBody>

@@ -1,14 +1,17 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 
-import { FlagIcon } from '@heroicons/react/24/outline'
+import { FlagIcon as FlagIconOutline } from '@heroicons/react/24/outline'
+import { FlagIcon as FlagIconSolid } from '@heroicons/react/24/solid'
 
 import { useRequest } from '/lib/hooks/useRequest'
+import { useFeature } from '/lib/hooks/feature/useFeature'
 
-import { postSiteModeration } from '/state/admin/siteModeration'
+import { postSiteModerations } from '/state/admin/siteModeration'
 
 import { FloatingMenuItem } from '/components/generic/floating-menu/FloatingMenu'
 
+import ErrorModal from '/components/errors/ErrorModal'
 import AreYouSure from '/components/AreYouSure'
 
 import './FlagPost.css'
@@ -18,21 +21,62 @@ const FlagPost = function({ postId } ) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
+    const moderation = useSelector((state) => postId && postId in state.siteModeration.byPostId ? state.siteModeration.byPostId[postId] : null)
+
+    const hasAdminModerationControls = useFeature('62-admin-moderation-controls')
+
     const [request, makeRequest] = useRequest()
 
     const executeFlag = function() {
-        setAreYouSure(false)
-        makeRequest(postSiteModeration({ userId: currentUser.id, status: 'flagged', postId: postId }))
+        makeRequest(postSiteModerations({ userId: currentUser.id, status: 'flagged', postId: postId }))
+    }
+
+    useEffect(() => {
+        if ( request && request.state === 'fulfilled' ) {
+            setAreYouSure(false)
+        } 
+    }, [ areYouSure, request])
+
+    if ( ! hasAdminModerationControls ) {
+        return null
     }
 
     if ( ! currentUser ) {
         return null
     }
 
+    if ( request && request.state === 'failed' ) {
+        if ( request.error.type == 'server-error' ) {
+            return (
+                <ErrorModal>
+                    <p>Something went wrong on the backend while trying to flag the post.  This is a bug, please report it.</p>
+                </ErrorModal>
+            )
+        } else {
+            console.log(request)
+            return (
+                <ErrorModal>
+                    <p>Something went wrong on while trying to flag the post.  This is probably a bug, please report it.</p>
+                </ErrorModal>
+            )
+        }
+    }
+
+    if ( moderation !== null ) {
+        return (
+            <FloatingMenuItem disabled={true} className="flag-post flag-post__flagged"><FlagIconSolid /> flagged</FloatingMenuItem>
+        )
+    }
+
     return (
         <>
-            <FloatingMenuItem onClick={(e) => setAreYouSure(true)} className="flag-post"><FlagIcon /> flag</FloatingMenuItem>
-            <AreYouSure className="flag-post" isVisible={areYouSure} execute={executeFlag} cancel={() => setAreYouSure(false)}> 
+            <FloatingMenuItem onClick={(e) => setAreYouSure(true)} className="flag-post"><FlagIconOutline /> flag</FloatingMenuItem>
+            <AreYouSure className="flag-post" 
+                isVisible={areYouSure} 
+                isPending={request && request.state === 'pending'} 
+                execute={executeFlag} 
+                cancel={() => setAreYouSure(false)}
+            > 
                 <p><strong>Are you sure you want to flag this post?</strong></p>
                 <div className="flag-post__explanation">
                     <p>

@@ -73,15 +73,7 @@ const SCHEMA = {
                 update: 'denied',
                 select: 'always',
                 key: 'createdDate'
-            },
-            'updated_date': {
-                insert: 'override',
-                insertOverride: 'now()',
-                update: 'override',
-                updateOverride: 'now()',
-                select: 'always',
-                key: 'updatedDate'
-            },
+            }
         }
     }
 }

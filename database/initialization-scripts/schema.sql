@@ -364,7 +364,7 @@ CREATE TABLE site_moderation_events (
     site_moderation_id uuid REFERENCES site_moderation (id) ON DELETE SET NULL,
     user_id uuid REFERENCES users (id) ON DELETE SET NULL,
 
-    status site_moderation_state NOT NULL,
+    status site_moderation_status NOT NULL,
     reason text,
 
     post_id uuid REFERENCES posts(id) DEFAULT NULL ON DELETE CASCADE,

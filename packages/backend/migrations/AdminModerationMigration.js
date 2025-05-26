@@ -41,8 +41,8 @@ module.exports = class AdminModerationMigration {
                 status site_moderation_status NOT NULL DEFAULT 'flagged',
                 reason text,
 
-                post_id uuid REFERENCES posts (id) DEFAULT NULL ON DELETE CASCADE,
-                post_comment_id uuid REFERENCES post_comments (id) DEFAULT NULL ON DELETE CASCADE
+                post_id uuid REFERENCES posts (id) ON DELETE CASCADE DEFAULT NULL,
+                post_comment_id uuid REFERENCES post_comments (id) ON DELETE CASCADE DEFAULT NULL,
 
                 created_date timestamptz, 
                 updated_date timestamptz
@@ -58,11 +58,11 @@ module.exports = class AdminModerationMigration {
                 site_moderation_id uuid REFERENCES site_moderation (id) ON DELETE SET NULL,
                 user_id uuid REFERENCES users (id) ON DELETE SET NULL,
 
-                status site_moderation_state NOT NULL,
+                status site_moderation_status NOT NULL,
                 reason text,
 
-                post_id uuid REFERENCES posts(id) DEFAULT NULL ON DELETE CASCADE,
-                post_comment_id uuid REFERENCES post_comments(id) DEFAULT NULL ON DELETE CASCADE,
+                post_id uuid REFERENCES posts(id) ON DELETE CASCADE DEFAULT NULL,
+                post_comment_id uuid REFERENCES post_comments(id) ON DELETE CASCADE DEFAULT NULL,
 
                 created_date timestamptz
             )`, [])
@@ -88,6 +88,8 @@ module.exports = class AdminModerationMigration {
         await this.database.query(`DROP INDEX IF EXISTS site_moderation_events__post_id`, [])
         await this.database.query(`DROP INDEX IF EXISTS site_moderation_events__post_comment_id`, [])
         await this.database.query(`DROP TABLE IF EXISTS site_moderation_events`, [])
+
+        await this.database.query(`DROP TYPE IF EXISTS site_moderation_status`, [])
     }
 
 
@@ -142,7 +144,7 @@ module.exports = class AdminModerationMigration {
     }
 
     async migrateForward() { 
-        await this.database.query(`UPDATE users SET site_role = permissions`, [])
+        await this.database.query(`UPDATE users SET site_role = cast(cast(permissions as text) as user_site_role)`, [])
     }
 
     async migrateBack() { }

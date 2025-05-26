@@ -47,15 +47,44 @@ export const siteModerationsSlice = createSlice({
          *  ...
          * }
          */
-        queries: {}
+        queries: {},
 
+        byPostId: {},
+        byPostCommentId: {}
     },
     reducers: {
         // ======== State Manipulation Helpers ================================
         // @see ./helpers/state.js
 
-        setSiteModerationsInDictionary: setInDictionary,
-        removeSiteModeration: removeEntity,
+        setSiteModerationsInDictionary: function(state, action) {
+            setInDictionary(state, action)
+
+            if ( 'dictionary' in action.payload ) {
+                for(const [id, entity] of Object.entries(action.payload.dictionary)) {
+                    if ( entity.postId !== null ) {
+                        state.byPostId[entity.postId] = entity
+                    } else if ( entity.postCommentId !== null ) {
+                        state.byPostCommentId[entity.postCommentId] = entity
+                    }
+                }
+            } else if ( 'entity' in action.payload ) {
+                const entity = action.payload.entity
+                if ( entity.postId !== null ) {
+                    state.byPostId[entity.postId] = entity
+                } else if ( entity.postCommentId !== null ) {
+                    state.byPostCommentId[entity.postCommentId] = entity
+                }
+            }
+        },
+        removeSiteModeration: function(state, action) {
+            removeEntity(state, action)
+            
+            if ( action.payload.entity.postId !== null ) {
+                delete state.byPostId[action.payload.entity.postId]
+            } else if( action.payload.entity.postCommentId !== null ) {
+                delete state.byPostCommentId[action.payload.entity.postCommentId]
+            }
+        },
         setSiteModerationQueryResults: setQueryResults,
         clearSiteModerationQuery: clearQuery,
         clearSiteModerationQueries: clearQueries
@@ -111,7 +140,9 @@ export const postSiteModerations = function(siteModeration) {
 
                 dispatch(setRelationsInState(response.relations))
             }
-        ))
+        )).catch(function(error) {
+            throw error
+        })
     }
 }
 
@@ -164,7 +195,7 @@ export const patchSiteModeration = function(siteModeration) {
 }
 
 export const { 
-    clearSiteModerationQuery
+    setSiteModerationsInDictionary, clearSiteModerationQuery
 }  = siteModerationsSlice.actions
 
 export default siteModerationsSlice.reducer

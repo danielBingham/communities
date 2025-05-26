@@ -19,6 +19,7 @@
  ******************************************************************************/
 
 const { 
+    ValidationService,
     PermissionService,
     SiteModerationDAO, 
     SiteModerationEventDAO
@@ -33,6 +34,7 @@ module.exports = class SiteModerationController {
         this.siteModerationDAO = new SiteModerationDAO(core)
         this.siteModerationEventDAO = new SiteModerationEventDAO(core)
 
+        this.validationService = new ValidationService(core)
         this.permissionService = new PermissionService(core)
     }
 
@@ -47,6 +49,25 @@ module.exports = class SiteModerationController {
             page: 1,
             order: 'site_moderation.created_date ASC',
             relations: []
+        }
+
+        if ( 'status' in request.query && request.query.status !== undefined && request.query.status !== null ) {
+            const and = query.params.length > 0 ? ' AND ' : ''
+            query.params.push(request.query.status)
+            query.where += `${and} site_moderation.status = $${query.params.length}`
+        }
+
+        if ( 'postId' in request.query && request.query.postId !== undefined && request.query.postId !== null ) {
+            const and = query.params.length > 0 ? ' AND ' : ''
+            query.params.push(request.query.postId)
+            query.where +=  `${and} site_moderation.post_id = $${query.params.length}`
+
+        }
+
+        if ( 'postCommentId' in request.query && request.query.postCommentId !== undefined && request.query.postCommentId !== null ) {
+            const and = query.params.length > 0 ? ' AND ' : ''
+            query.params.push(request.query.postCommentId)
+            query.where += `${and} site_moderation.post_comment_id = $${query.params.length}`
         }
 
         if ( 'relations' in request.query && Array.isArray(request.query.relations)) {
@@ -120,7 +141,7 @@ module.exports = class SiteModerationController {
                 `A SiteModeration already exists for that entity.  Please PATCH instead.`)
         }
 
-        const validationErrors = await this.validationService.validateModeration(currentUser, moderation, existing)
+        const validationErrors = await this.validationService.validateSiteModeration(currentUser, moderation, existing)
         if ( validationErrors.length > 0 ) {
             const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
             const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
@@ -145,7 +166,7 @@ module.exports = class SiteModerationController {
         const entity = entityResults.dictionary[entityResults.list[0]]
 
         // Insert the event to track the moderation history.
-        await this.siteModerationEventDAO.insertSiteModerationEvents(this.siteModerationDAO.createEventFromSiteModeration(entity))
+        await this.siteModerationEventDAO.insertSiteModerationEvents(this.siteModerationEventDAO.createEventFromSiteModeration(entity))
 
         const relations = await this.getRelations(currentUser, entityResults)
 
@@ -219,7 +240,7 @@ module.exports = class SiteModerationController {
                 `You don't have permission to edit that SiteModeration.`)
         }
 
-        const validationErrors = await this.validationService.validateModeration(currentUser, moderation, existing)
+        const validationErrors = await this.validationService.validateSiteModeration(currentUser, siteModeration, existing)
         if ( validationErrors.length > 0 ) {
             const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
             const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
@@ -231,7 +252,7 @@ module.exports = class SiteModerationController {
         await this.siteModerationDAO.updateSiteModeration(siteModeration)
 
         const results = await this.siteModerationDAO.selectSiteModerations({
-            where: `siteModerations.id = $1`,
+            where: `site_moderation.id = $1`,
             params: [ siteModerationId ]
         })
 
@@ -243,7 +264,7 @@ module.exports = class SiteModerationController {
         }
 
         // Insert the event to track the moderation history.
-        await this.siteModerationEventDAO.insertSiteModerationEvents(this.siteModerationDAO.createEventFromSiteModeration(entity))
+        await this.siteModerationEventDAO.insertSiteModerationEvents(this.siteModerationEventDAO.createEventFromSiteModeration(entity))
 
         const relations = this.getRelations(currentUser, results)
 

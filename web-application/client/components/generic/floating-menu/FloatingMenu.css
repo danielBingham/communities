@@ -77,9 +77,7 @@
     white-space: nowrap;
     padding-left: 20px;
 }
-.floating-menu .menu-body a.menu-item:link {
-    color: var(--main-text-color);
-}
+.floating-menu .menu-body a.menu-item:link, 
 .floating-menu .menu-body a.menu-item:visited {
     color: var(--main-text-color);
 }
@@ -93,3 +91,11 @@
 .floating-menu .menu-body .menu-item a:hover {
     color: white;
 }
+
+.floating-menu .menu-body .menu-item.menu-item__disabled {
+    display: block;
+    white-space: nowrap;
+    padding-left: 20px;
+    color: var(--danger-color-light);
+}
+

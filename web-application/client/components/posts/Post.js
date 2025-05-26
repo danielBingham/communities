@@ -24,6 +24,7 @@ import PostComments from '/components/posts/comments/PostComments'
 import PostImage from '/components/posts/PostImage'
 import GroupTag from '/components/groups/view/GroupTag'
 import PostForm from '/components/posts/form/PostForm'
+import PostModeration from '/components/posts/widgets/PostModeration'
 
 import './Post.css'
 
@@ -99,6 +100,9 @@ const Post = function({ id, expanded, showLoading }) {
                 <div className="post__details">
                     <div><UserTag id={post.userId} hideProfile={true} /> { post.groupId &&<span>posted in <GroupTag id={post.groupId} hideProfile={true} /></span>}</div> 
                     <div><span className="post__visibility">{ postVisibility }</span> &bull; <Link to={postLink}><DateTag timestamp={post.createdDate} /></Link> </div>
+                </div>
+                <div className="post__moderation">
+                    <PostModeration postId={post.id} />
                 </div>
                 <div className="post__controls">
                     <PostDotsMenu postId={post.id} />

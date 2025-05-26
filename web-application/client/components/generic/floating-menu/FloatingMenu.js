@@ -173,7 +173,7 @@ export const FloatingMenuHeader = function({ title, children }) {
  *
  * @param {object} props    The standard React props object - empty.
  */
-export const FloatingMenuItem = function(props) {
+export const FloatingMenuItem = function({ className, disabled, children, onClick }) {
 
     // ======= Render State =========================================
 
@@ -186,27 +186,42 @@ export const FloatingMenuItem = function(props) {
     // ======= Redux State ==========================================
 
     // ======= Actions and Event Handling ===========================
-    const onClick = function(event) {
+    const onClickInternal = function(event) {
+        if ( disabled === true ) {
+            return
+        }
+        
         if ( closeOnClick === true) {
             toggleMenu(); 
         }
 
-        if ( props.onClick ) {
-            props.onClick(event); 
+        if ( onClick ) {
+            onClick(event); 
         }
     }
 
     // ======= Effect Handling ======================================
 
     // ======= Render ===============================================
-  
+ 
+    let classNameInternal = `menu-item ${ className ? className : ''}`    
+    if ( disabled === true ) {
+        classNameInternal = `menu-item menu-item__disabled ${ className ? className : ''}`
+    } 
+
+    if ( disabled === true ) {
+        return (
+            <span className={classNameInternal}>{ children }</span>
+        )
+    } 
+    
     return (
         <a
             href=""
-            className={ props.className ? `menu-item ${props.className}` : "menu-item"} 
-            onClick={(e) => { e.preventDefault(); onClick(e); }}
+            className={classNameInternal}
+            onClick={(e) => { e.preventDefault(); onClickInternal(e); }}
         >
-            { props.children }
+            { children }
         </a>
     )
 

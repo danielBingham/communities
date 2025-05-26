@@ -170,23 +170,23 @@ module.exports = class SiteModerationDAO extends DAO {
             `
         }
 
-        const results = await this.core.database.query(`
+        const result = await this.core.database.query(`
             SELECT
                 ${this.getSiteModerationSelectionString()}
             FROM site_moderation
             ${where}
             ORDER BY ${order}
             ${paging}
-        `, [ params ])
+        `, params)
 
-        if ( results.rows.length <= 0 ) {
+        if ( result.rows.length <= 0 ) {
             return {
                 dictionary: {},
                 list: []
             }
         }
 
-        return this.hydrateSiteModerations(rows)
+        return this.hydrateSiteModerations(result.rows)
     }
 
     async getSiteModerationPageMeta(query) {
