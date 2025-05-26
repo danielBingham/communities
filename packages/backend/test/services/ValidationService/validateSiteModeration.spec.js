@@ -724,8 +724,6 @@ describe('ValidationService.validateSiteModeration()', function() {
 
                 expect(errors.length).toBe(0)
             })
-
         })
     })
-
 })

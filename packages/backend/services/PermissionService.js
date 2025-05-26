@@ -144,23 +144,11 @@ module.exports = class PermissionService {
             }
         } else if ( entity === 'Site' ) {
             if ( action === 'moderate' ) {
-                if ( this.core.features.has('62-admin-moderation-controls') ) {
-                    return user.siteRole === 'moderator' || user.siteRole === 'admin' || user.siteRole === 'superadmin'
-                } else {
-                    return user.permissions === 'moderator' || user.permissions === 'admin' || user.permissions === 'superadmin'
-                }
+                return await this.canModerateSite(user, context)
             } else if ( action === 'admin' ) {
-                if ( this.core.features.has('62-admin-moderation-controls') ) {
-                    return user.siteRole === 'admin' || user.siteRole === 'superadmin'
-                } else {
-                    return user.permissions === 'admin' || user.permissions === 'superadmin'
-                }
+                return await this.canAdminSite(user, context)
             } else if ( action === 'sudo' ) {
-                if ( this.core.features.has('62-admin-moderation-controls') ) {
-                    return user.siteRole === 'superadmin'
-                } else {
-                    return user.permissions === 'superadmin'
-                }
+                return this.canSudoSite(user, context)
             }
         }
 
@@ -537,6 +525,30 @@ module.exports = class PermissionService {
         }
 
         return false 
+    }
+
+    async canModerateSite(user, context) {
+        if ( this.core.features.has('62-admin-moderation-controls') ) {
+            return user.siteRole === 'moderator' || user.siteRole === 'admin' || user.siteRole === 'superadmin'
+        } else {
+            return user.permissions === 'moderator' || user.permissions === 'admin' || user.permissions === 'superadmin'
+        }
+    }
+
+    async canAdminSite(user, context) {
+        if ( this.core.features.has('62-admin-moderation-controls') ) {
+            return user.siteRole === 'admin' || user.siteRole === 'superadmin'
+        } else {
+            return user.permissions === 'admin' || user.permissions === 'superadmin'
+        }
+    }
+
+    async canSudoSite(user, context) {
+        if ( this.core.features.has('62-admin-moderation-controls') ) {
+            return user.siteRole === 'superadmin'
+        } else {
+            return user.permissions === 'superadmin'
+        }
     }
 
 }

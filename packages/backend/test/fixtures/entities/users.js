@@ -14,6 +14,7 @@
  * @see packages/backend/daos/UserDAO.js -> hydrateUsers()
  */
 const users = {
+    // User One
     '5c44ce06-1687-4709-b67e-de76c05acb6a': {
         id: '5c44ce06-1687-4709-b67e-de76c05acb6a',
         fileId: null,
@@ -31,6 +32,7 @@ const users = {
         createdDate: 'TIMESTAMP',
         updatedDate: 'TIMESTAMP'
     },
+    // User Two
     '2a7ae011-689c-4aa2-8f13-a53026d40964': {
         id: '2a7ae011-689c-4aa2-8f13-a53026d40964',
         fileId: 'f6cf86ab-98e5-4246-9310-41bc7c6c559a',
@@ -71,6 +73,7 @@ const users = {
         createdDate: 'TIMESTAMP',
         updatedDate: 'TIMESTAMP'
     },
+    // User Three
     'cd33814b-2381-4b55-b108-3395b8866792': {
         id: 'cd33814b-2381-4b55-b108-3395b8866792',
         fileId: 'f6cf86ab-98e5-4246-9310-41bc7c6c559a',
@@ -101,6 +104,7 @@ const users = {
         createdDate: 'TIMESTAMP',
         updatedDate: 'TIMESTAMP'
     },
+    // Moderator User
     'f5e9e853-6803-4a74-98c3-23fb0933062f': {
         id: 'f5e9e853-6803-4a74-98c3-23fb0933062f',
         fileId: '9fcb6b9a-55a0-44e4-9f88-50fd22874325',
@@ -120,6 +124,7 @@ const users = {
         createdDate: 'TIMESTAMP',
         updatedDate: 'TIMESTAMP'
     },
+    // Admin User
     '4b660bba-3e58-493f-86e1-ec3c651acc40': {
         id: '4b660bba-3e58-493f-86e1-ec3c651acc40',
         fileId: '9fcb6b9a-55a0-44e4-9f88-50fd22874325',
@@ -139,6 +144,7 @@ const users = {
         createdDate: 'TIMESTAMP',
         updatedDate: 'TIMESTAMP'
     },
+    // Super Admin User
     '469931f6-26f2-4e1c-b4a0-849aed14e977': {
         id: '469931f6-26f2-4e1c-b4a0-849aed14e977',
         fileId: '9fcb6b9a-55a0-44e4-9f88-50fd22874325',
@@ -158,6 +164,7 @@ const users = {
         createdDate: 'TIMESTAMP',
         updatedDate: 'TIMESTAMP'
     },
+    // status: invited
     '032563a3-1a0d-42f2-ad85-aef588b81ebe': {
         id: '032563a3-1a0d-42f2-ad85-aef588b81ebe',
         fileId: null,
