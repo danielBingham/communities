@@ -23,7 +23,7 @@ const {
     SiteModerationDAO, 
     SiteModerationEventDAO
 }  = require('@communities/backend')
-const ControllerError = require('../errors/ControllerError')
+const ControllerError = require('../../errors/ControllerError')
 
 module.exports = class SiteModerationController {
 
