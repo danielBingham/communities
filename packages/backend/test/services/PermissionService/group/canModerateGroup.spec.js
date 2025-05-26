@@ -1,13 +1,13 @@
-const Logger = require('../../../logger')
-const FeatureFlags = require('../../../features')
+const Logger = require('../../../../logger')
+const FeatureFlags = require('../../../../features')
 
-const ServiceError = require('../../../errors/ServiceError')
-const PermissionService = require('../../../services/PermissionService')
+const ServiceError = require('../../../../errors/ServiceError')
+const PermissionService = require('../../../../services/PermissionService')
 
-const entities = require('../../fixtures/entities')
-const database = require('../../fixtures/database')
+const entities = require('../../../fixtures/entities')
+const database = require('../../../fixtures/database')
 
-describe('PermissionService.canAdminGroup()', function() {
+describe('PermissionService.canModerateGroup()', function() {
 
     const core = {
         logger: new Logger(),
@@ -53,12 +53,12 @@ describe('PermissionService.canAdminGroup()', function() {
             // User One 
             const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-            const canAdmin = await service.canAdminGroup(currentUser, context)
+            const canModerate = await service.canModerateGroup(currentUser, context)
 
             expect(group.id).toBe(groupMember.groupId)
             expect(currentUser.id).toBe(groupMember.userId)
             expect(groupMember.role).toBe('admin')
-            expect(canAdmin).toBe(true)
+            expect(canModerate).toBe(true)
         })
 
         it("Should look up Group when not in context", async function() {
@@ -72,21 +72,19 @@ describe('PermissionService.canAdminGroup()', function() {
                 groupMember: groupMember
             }
 
+            const groupRows = database.groups['8661a1ef-6259-4d5a-a59f-4d75929a765f'].rows
             core.database.query.mockReturnValue(undefined)
-                .mockReturnValueOnce({ 
-                    rowCount: database.groups['8661a1ef-6259-4d5a-a59f-4d75929a765f'].rows.length, 
-                    rows: database.groups['8661a1ef-6259-4d5a-a59f-4d75929a765f'].rows 
-                })
+                .mockReturnValueOnce({ rowCount: groupRows.length, rows: groupRows })
 
             // User One 
             const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-            const canAdmin = await service.canAdminGroup(currentUser, context)
+            const canModerate = await service.canModerateGroup(currentUser, context)
 
             expect(context.groupId).toBe(groupMember.groupId)
             expect(currentUser.id).toBe(groupMember.userId)
             expect(groupMember.role).toBe('admin')
-            expect(canAdmin).toBe(true)
+            expect(canModerate).toBe(true)
         })
 
         it("Should look up GroupMember when not in context", async function() {
@@ -102,17 +100,17 @@ describe('PermissionService.canAdminGroup()', function() {
 
             const groupMemberRows = database.groupMembers['a1c5361e-3e46-435b-bab4-0a74ddbd79e2'].rows
             core.database.query.mockReturnValue(undefined)
-                .mockReturnValueOnce({ rowCount: groupMemberRows.length, rows: groupMemberRows })
+                .mockReturnValueOnce({ rowCount: groupMemberRows, rows: groupMemberRows})
 
             // User One 
             const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-            const canAdmin = await service.canAdminGroup(currentUser, context)
+            const canModerate = await service.canModerateGroup(currentUser, context)
 
             expect(groupMemberRows[0].GroupMember_groupId).toBe(group.id)
             expect(groupMemberRows[0].GroupMember_userId).toBe(currentUser.id)
             expect(groupMemberRows[0].GroupMember_role).toBe('admin')
-            expect(canAdmin).toBe(true)
+            expect(canModerate).toBe(true)
         })
 
         it("Should throw an error if group and groupId do not match", async function() {
@@ -134,7 +132,7 @@ describe('PermissionService.canAdminGroup()', function() {
             const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
             try {
-                const canAdmin = await service.canAdminGroup(currentUser, context)
+                const canModerate = await service.canModerateGroup(currentUser, context)
             } catch (error) {
                 expect(error).toBeInstanceOf(ServiceError)
                 expect(error.type).toBe('invalid-context:group')
@@ -165,7 +163,7 @@ describe('PermissionService.canAdminGroup()', function() {
             const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
             try {
-                const canAdmin = await service.canAdminGroup(currentUser, context)
+                const canModerate = await service.canModerateGroup(currentUser, context)
             } catch (error) {
                 expect(error).toBeInstanceOf(ServiceError)
                 expect(error.type).toBe('invalid-context:post')
@@ -194,7 +192,7 @@ describe('PermissionService.canAdminGroup()', function() {
             const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
             try {
-                const canAdmin = await service.canAdminGroup(currentUser, context)
+                const canModerate = await service.canModerateGroup(currentUser, context)
             } catch (error) {
                 expect(error).toBeInstanceOf(ServiceError)
                 expect(error.type).toBe('invalid-context:post')
@@ -221,7 +219,7 @@ describe('PermissionService.canAdminGroup()', function() {
             const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
             try {
-                const canAdmin = await service.canAdminGroup(currentUser, context)
+                const canModerate = await service.canModerateGroup(currentUser, context)
             } catch (error) {
                 expect(error).toBeInstanceOf(ServiceError)
                 expect(error.type).toBe('invalid-context:groupMember')
@@ -231,7 +229,7 @@ describe('PermissionService.canAdminGroup()', function() {
         })
     })
 
-    it("Should allow an admin to admin an open group", async function() {
+    it("Should allow an admin to moderate an open group", async function() {
         const service = new PermissionService(core)
 
         // Test Open Group
@@ -248,16 +246,16 @@ describe('PermissionService.canAdminGroup()', function() {
         // User One 
         const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-        const canAdmin = await service.canAdminGroup(currentUser, context)
+        const canModerate = await service.canModerateGroup(currentUser, context)
 
         expect(group.type).toBe('open')
         expect(groupMember.userId).toBe(currentUser.id)
         expect(groupMember.groupId).toBe(group.id)
         expect(groupMember.role).toBe('admin')
-        expect(canAdmin).toBe(true)
+        expect(canModerate).toBe(true)
     })
 
-    it("Should not allow a moderator to admin an open group", async function() {
+    it("Should allow a moderator to moderate an open group", async function() {
         const service = new PermissionService(core)
 
         // Test Open Group
@@ -274,16 +272,16 @@ describe('PermissionService.canAdminGroup()', function() {
         // User One 
         const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-        const canAdmin = await service.canAdminGroup(currentUser, context)
+        const canModerate = await service.canModerateGroup(currentUser, context)
 
         expect(group.type).toBe('open')
         expect(groupMember.userId).toBe(currentUser.id)
         expect(groupMember.groupId).toBe(group.id)
         expect(groupMember.role).toBe('moderator')
-        expect(canAdmin).toBe(false)
+        expect(canModerate).toBe(true)
     })
 
-    it("Should not allow a member to admin an open group", async function() {
+    it("Should not allow a member to moderate an open group", async function() {
         const service = new PermissionService(core)
 
         // Test Open Group
@@ -300,16 +298,16 @@ describe('PermissionService.canAdminGroup()', function() {
         // User One 
         const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-        const canAdmin = await service.canAdminGroup(currentUser, context)
+        const canModerate = await service.canModerateGroup(currentUser, context)
 
         expect(group.type).toBe('open')
         expect(groupMember.userId).toBe(currentUser.id)
         expect(groupMember.groupId).toBe(group.id)
         expect(groupMember.role).toBe('member')
-        expect(canAdmin).toBe(false)
+        expect(canModerate).toBe(false)
     })
 
-    it("Should allow an admin to admin a private group", async function() {
+    it("Should allow an admin to moderate a private group", async function() {
         const service = new PermissionService(core)
 
         // Test Private Group
@@ -326,16 +324,16 @@ describe('PermissionService.canAdminGroup()', function() {
         // User One 
         const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-        const canAdmin = await service.canAdminGroup(currentUser, context)
+        const canModerate = await service.canModerateGroup(currentUser, context)
 
         expect(group.type).toBe('private')
         expect(groupMember.userId).toBe(currentUser.id)
         expect(groupMember.groupId).toBe(group.id)
         expect(groupMember.role).toBe('admin')
-        expect(canAdmin).toBe(true)
+        expect(canModerate).toBe(true)
     })
 
-    it("Should not allow a moderator to admin a private group", async function() {
+    it("Should allow a moderator to moderate a private group", async function() {
         const service = new PermissionService(core)
 
         // Test Private Group
@@ -352,16 +350,16 @@ describe('PermissionService.canAdminGroup()', function() {
         // User One 
         const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-        const canAdmin = await service.canAdminGroup(currentUser, context)
+        const canModerate = await service.canModerateGroup(currentUser, context)
 
         expect(group.type).toBe('private')
         expect(groupMember.userId).toBe(currentUser.id)
         expect(groupMember.groupId).toBe(group.id)
         expect(groupMember.role).toBe('moderator')
-        expect(canAdmin).toBe(false)
+        expect(canModerate).toBe(true)
     })
 
-    it("Should not allow a member to admin a private group", async function() {
+    it("Should not allow a member to moderate a private group", async function() {
         const service = new PermissionService(core)
 
         // Test Private Group
@@ -378,16 +376,16 @@ describe('PermissionService.canAdminGroup()', function() {
         // User One 
         const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-        const canAdmin = await service.canAdminGroup(currentUser, context)
+        const canModerate = await service.canModerateGroup(currentUser, context)
 
         expect(group.type).toBe('private')
         expect(groupMember.userId).toBe(currentUser.id)
         expect(groupMember.groupId).toBe(group.id)
         expect(groupMember.role).toBe('member')
-        expect(canAdmin).toBe(false)
+        expect(canModerate).toBe(false)
     })
 
-    it("Should allow an admin to admin a hidden group", async function() {
+    it("Should allow an admin to moderate a hidden group", async function() {
         const service = new PermissionService(core)
 
         // Test Hidden Group
@@ -404,16 +402,16 @@ describe('PermissionService.canAdminGroup()', function() {
         // User One 
         const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-        const canAdmin = await service.canAdminGroup(currentUser, context)
+        const canModerate = await service.canModerateGroup(currentUser, context)
 
         expect(group.type).toBe('hidden')
         expect(groupMember.userId).toBe(currentUser.id)
         expect(groupMember.groupId).toBe(group.id)
         expect(groupMember.role).toBe('admin')
-        expect(canAdmin).toBe(true)
+        expect(canModerate).toBe(true)
     })
 
-    it("Should not allow a moderator to admin a hidden group", async function() {
+    it("Should allow a moderator to moderate a hidden group", async function() {
         const service = new PermissionService(core)
 
         // Test Hidden Group
@@ -430,16 +428,16 @@ describe('PermissionService.canAdminGroup()', function() {
         // User One 
         const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-        const canAdmin = await service.canAdminGroup(currentUser, context)
+        const canModerate = await service.canModerateGroup(currentUser, context)
 
         expect(group.type).toBe('hidden')
         expect(groupMember.userId).toBe(currentUser.id)
         expect(groupMember.groupId).toBe(group.id)
         expect(groupMember.role).toBe('moderator')
-        expect(canAdmin).toBe(false)
+        expect(canModerate).toBe(true)
     })
 
-    it("Should not allow a member to admin a hidden group", async function() {
+    it("Should not allow a member to moderate a hidden group", async function() {
         const service = new PermissionService(core)
 
         // Test Hidden Group
@@ -456,13 +454,13 @@ describe('PermissionService.canAdminGroup()', function() {
         // User One 
         const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-        const canAdmin = await service.canAdminGroup(currentUser, context)
+        const canModerate = await service.canModerateGroup(currentUser, context)
 
         expect(group.type).toBe('hidden')
         expect(groupMember.userId).toBe(currentUser.id)
         expect(groupMember.groupId).toBe(group.id)
         expect(groupMember.role).toBe('member')
-        expect(canAdmin).toBe(false)
+        expect(canModerate).toBe(false)
     })
 
 })
