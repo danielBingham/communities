@@ -21,6 +21,7 @@
 const { 
     PermissionService,
     SiteModerationDAO, 
+    SiteModerationEventDAO
 }  = require('@communities/backend')
 const ControllerError = require('../errors/ControllerError')
 
@@ -30,6 +31,8 @@ module.exports = class SiteModerationController {
         this.core = core
 
         this.siteModerationDAO = new SiteModerationDAO(core)
+        this.siteModerationEventDAO = new SiteModerationEventDAO(core)
+
         this.permissionService = new PermissionService(core)
     }
 
@@ -141,6 +144,9 @@ module.exports = class SiteModerationController {
 
         const entity = entityResults.dictionary[entityResults.list[0]]
 
+        // Insert the event to track the moderation history.
+        await this.siteModerationEventDAO.insertSiteModerationEvents(this.siteModerationDAO.createEventFromSiteModeration(entity))
+
         const relations = await this.getRelations(currentUser, entityResults)
 
         response.status(201).json({
@@ -235,6 +241,9 @@ module.exports = class SiteModerationController {
                 `Failed to find SiteModeration(${siteModerationId}) after update.`,
                 `We hit an error in the server we were unable to recover from.  Please report as a bug!`)
         }
+
+        // Insert the event to track the moderation history.
+        await this.siteModerationEventDAO.insertSiteModerationEvents(this.siteModerationDAO.createEventFromSiteModeration(entity))
 
         const relations = this.getRelations(currentUser, results)
 

@@ -51,6 +51,27 @@ module.exports = class AdminModerationMigration {
         await this.database.query(`CREATE INDEX IF NOT EXISTS site_moderation__user_id ON site_moderation (user_id)`, [])
         await this.database.query(`CREATE INDEX IF NOT EXISTS site_moderation__post_id ON site_moderation (post_id)`, [])
         await this.database.query(`CREATE INDEX IF NOT EXISTS site_moderation__post_comment_id ON site_moderation (post_comment_id)`, [])
+
+        await this.database.query(`
+            CREATE TABLE IF NOT EXISTS site_moderation_events (
+                id uuid PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
+                site_moderation_id uuid REFERENCES site_moderation (id) ON DELETE SET NULL,
+                user_id uuid REFERENCES users (id) ON DELETE SET NULL,
+
+                status site_moderation_state NOT NULL,
+                reason text,
+
+                post_id uuid REFERENCES posts(id) DEFAULT NULL ON DELETE CASCADE,
+                post_comment_id uuid REFERENCES post_comments(id) DEFAULT NULL ON DELETE CASCADE,
+
+                created_date timestamptz
+            )`, [])
+
+        await this.database.query(`CREATE INDEX IF NOT EXISTS site_moderation_events__site_moderation_id ON site_moderation_events (site_moderation_id)`, [])
+        await this.database.query(`CREATE INDEX IF NOT EXISTS site_moderation_events__user_id ON site_moderation_events (user_id)`, [])
+        await this.database.query(`CREATE INDEX IF NOT EXISTS site_moderation_events__post_id ON site_moderation_events (post_id)`, [])
+        await this.database.query(`CREATE INDEX IF NOT EXISTS site_moderation_events__post_comment_id ON site_moderation_events (post_comment_id)`, [])
+
     }
 
     async initBack() { 
@@ -61,6 +82,12 @@ module.exports = class AdminModerationMigration {
         await this.database.query(`DROP INDEX IF EXISTS site_moderation__post_id`, [])
         await this.database.query(`DROP INDEX IF EXISTS site_moeration__user_id`, [])
         await this.database.query(`DROP TABLE IF EXISTS site_moderation`, [])
+
+        await this.database.query(`DROP INDEX IF EXISTS site_moderation_events__site_moderation_id`, [])
+        await this.database.query(`DROP INDEX IF EXISTS site_moderation_events__user_id`, [])
+        await this.database.query(`DROP INDEX IF EXISTS site_moderation_events__post_id`, [])
+        await this.database.query(`DROP INDEX IF EXISTS site_moderation_events__post_comment_id`, [])
+        await this.database.query(`DROP TABLE IF EXISTS site_moderation_events`, [])
     }
 
 
