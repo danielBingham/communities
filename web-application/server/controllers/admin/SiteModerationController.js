@@ -91,14 +91,14 @@ module.exports = class SiteModerationController {
                 `You must must be authenticated to create a post.`)
         }
 
+        const moderation = request.body
+
         const canModerateSite = await this.permissionService.can(currentUser, 'moderate', 'Site')
-        if ( ! canModerateSite ) {
+        if ( moderation.status !== 'flagged' && ! canModerateSite ) {
             throw new ControllerError(403, 'not-authorized',
                 `User(${currentUser.id}) attempting to moderate site without permissions.`,
                 `You do not have permission to moderate Communities.`)
         }
-
-        const moderation = request.body
 
         let existing = null
         if ( moderation.postId ) {
@@ -154,43 +154,34 @@ module.exports = class SiteModerationController {
 
         if ( ! currentUser ) {
             throw new ControllerError(401, 'not-authenticated',
-                `User must be authenticated to retrieve posts.`,
-                `You must be authenticated to retrieve posts.`)
+                `User must be authenticated to retrieve SiteModeration.`,
+                `You must be authenticated to retrieve SiteModeration.`)
         }
 
-        const groupId = request.params.id
+        const siteModerationId = request.params.id
 
         const results = await this.siteModerationDAO.selectSiteModerations({
-            where: `groups.id = $1`,
-            params: [groupId]
+            where: `siteModerations.id = $1`,
+            params: [siteModerationId]
         })
 
-        if ( results.list.length <= 0 || ! (groupId in results.dictionary)) {
+        if ( results.list.length <= 0 || ! (siteModerationId in results.dictionary)) {
             throw new ControllerError(404, 'not-found',
-                `SiteModeration(${groupId}) not found for User(${currentUser.id}).`,
-                `Either that group doesn't exist or you don't have permission to see it.`)
+                `SiteModeration(${siteModerationId}) not found for User(${currentUser.id}).`,
+                `Either that siteModeration doesn't exist or you don't have permission to see it.`)
         }
 
-        const group = results.dictionary[groupId]
-
-        const canViewSiteModeration = await this.permissionService.can(currentUser, 'view', 'SiteModeration', { group: group })
-        if ( ! canViewSiteModeration ) {
-            throw new ControllerError(404, 'not-found',
-                `User(${currentUser.id}) attempting to view SiteModeration(${groupId}) without permission.`,
-                `Either that group doesn't exist or you don't have permission to see it.`)
-        }
-       
+        const siteModeration = results.dictionary[siteModerationId]
        
         const relations = await this.getRelations(currentUser, results)
 
         response.status(200).json({
-            entity: group,
+            entity: siteModeration,
             relations: relations
         })
     }
 
     async patchSiteModeration(request, response) {
-        
         const currentUser = request.session.user
 
         if ( ! currentUser ) {
@@ -199,65 +190,49 @@ module.exports = class SiteModerationController {
                 `You must must be authenticated to edit a post.`)
         }
 
-        const groupId = request.params.id
-        const group = request.body
+        const siteModerationId = request.params.id
+        const siteModeration = request.body
 
-        if ( group.id !== groupId ) {
+        if ( siteModeration.id !== siteModerationId ) {
             throw new ControllerError(400, 'invalid', 
-                `User(${currentUser.id}) submitted a group patch with the wrong id.`,
-                `You used a different groupId in your patch and your route.  Ids must match.`)
+                `User(${currentUser.id}) submitted a SiteModeration patch with the wrong id.`,
+                `You used a different SiteModeration.id in your patch and your route.  Ids must match.`)
         }
 
-        const existing = await this.siteModerationDAO.getSiteModerationById(groupId)
+        const existing = await this.siteModerationDAO.getSiteModerationById(siteModerationId)
         if ( ! existing ) {
             throw new ControllerError(404, 'not-found',
-                `User(${currentUser.id}) attempting to PATCH a group that doesn't exist.`,
-                `Either that group doesn't exist or you don't have permission to see it.`)
+                `User(${currentUser.id}) attempting to PATCH a SiteModeration that doesn't exist.`,
+                `Either that SiteModeration doesn't exist or you don't have permission to see it.`)
         }
 
-
-        const canViewSiteModeration = await this.permissionService.can(currentUser, 'view', 'SiteModeration', { group:  existing})
-        if ( ! canViewSiteModeration ) {
-            throw new ControllerError(404, 'not-found',
-                `User(${currentUser.id}) attempting to PATCH a group they don't have permission to view.`,
-                `Either that group doesn't exist or you don't have permission to see it.`)
-        }
-
-        const canUpdateSiteModeration = await this.permissionService.can(currentUser, 'update', 'SiteModeration', { group: existing })
-        if ( ! canUpdateSiteModeration ) {
+        const canModerate = await this.permissionService.can(currentUser, 'moderate', 'Site', {})
+        if ( ! canModerate ) {
             throw new ControllerError(403, 'not-authorized',
-                `User(${currentUser.id}) attempting to PATCH a group they don't have permission to edit.`,
-                `You don't have permission to edit that group.`)
+                `User(${currentUser.id}) attempting to PATCH a SiteModeration they don't have permission to edit.`,
+                `You don't have permission to edit that SiteModeration.`)
         }
 
-        if ( 'slug' in group ) {
-            group.slug = group.slug.toLower()
-            if ( ! group.slug.match(/[a-z0-9\.\-_]/) ) {
-                throw new ControllerError(400, 'invalid',
-                    `User(${currentUser.id}) submitted a group with invalid slug '${group.slug}'.`,
-                    `The URL you submitted is invalid. Only characters, numbers, '.', '-', and '_' are allowed.`)
-            }
-
-            const existingSlug = await this.siteModerationDAO.getSiteModerationBySlug(group.slug)
-
-            if ( existingSlug !== null ) {
-                throw new ControllerError(400, 'invalid',
-                    `User(${currentUser.id}) submitted a group with a slug that's already in use.`,
-                    `A group with that URL already exists.`)
-            }
+        const validationErrors = await this.validationService.validateModeration(currentUser, moderation, existing)
+        if ( validationErrors.length > 0 ) {
+            const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
+            const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
+            throw new ControllerError(400, 'invalid',
+                `User(${currentUser.id}) submitted an invalid moderation: ${logString}`,
+                errorString)
         }
 
-        await this.siteModerationDAO.updateSiteModeration(group)
+        await this.siteModerationDAO.updateSiteModeration(siteModeration)
 
         const results = await this.siteModerationDAO.selectSiteModerations({
-            where: `groups.id = $1`,
-            params: [ groupId ]
+            where: `siteModerations.id = $1`,
+            params: [ siteModerationId ]
         })
 
-        const entity = results.dictionary[groupId]
+        const entity = results.dictionary[siteModerationId]
         if ( ! entity ) {
             throw new ControllerError(500, 'server-error',
-                `Failed to find SiteModeration(${groupId}) after update.`,
+                `Failed to find SiteModeration(${siteModerationId}) after update.`,
                 `We hit an error in the server we were unable to recover from.  Please report as a bug!`)
         }
 
@@ -270,44 +245,8 @@ module.exports = class SiteModerationController {
     }
 
     async deleteSiteModeration(request, response) {
-        const currentUser = request.session.user
-
-        if ( ! currentUser ) {
-            throw new ControllerError(401, 'not-authenticated',
-                `User must be authenticated to edit a post.`,
-                `You must must be authenticated to edit a post.`)
-        }
-
-        const groupId = request.params.id
-        
-        const existing = await this.siteModerationDAO.getSiteModerationById(groupId)
-
-        if ( ! existing ) {
-            throw new ControllerError(404, 'not-found',
-                `User(${currentUser.id}) attempting to DELETE a group that doesn't exist.`,
-                `Either that group doesn't exist or you don't have permission to see it.`)
-        }
-
-        const canViewSiteModeration = await this.permissionService.can(currentUser, 'view', 'SiteModeration', { group:  existing})
-        if ( ! canViewSiteModeration ) {
-            throw new ControllerError(404, 'not-found',
-                `User(${currentUser.id}) attempting to DELETE a group they don't have permission to view.`,
-                `Either that group doesn't exist or you don't have permission to see it.`)
-        }
-
-        const canDeleteSiteModeration = await this.permissionService.can(currentUser, 'delete', 'SiteModeration', { group: existing })
-        if ( ! canDeleteSiteModeration ) {
-            throw new ControllerError(403, 'not-authorized',
-                `User(${currentUser.id}) attempting to DELETE a group they don't have permission to edit.`,
-                `You don't have permission to edit that group.`)
-        }
-
-        await this.siteModerationDAO.deleteSiteModeration(existing)
-
-        response.status(200).json({
-            entity: existing,
-            relations: {}
-        })
-
+        throw new ControllerError(501, 'not-implemented',
+            `DELETE not implemented for entity SiteModeration.`,
+            `You cannot DELETE a SiteModeration.`)
     }
 }
