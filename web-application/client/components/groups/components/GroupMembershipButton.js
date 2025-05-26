@@ -181,12 +181,9 @@ const GroupMembershipButton = function({ groupId, userId }) {
                 { member.status == 'pending-invited' && <Button type="secondary-warn" onClick={() => rejectInvite()}><ArrowLeftStartOnRectangleIcon /> Reject</Button> }
                 { member.status == 'pending-requested' && <Button type="secondary-warn" onClick={() => cancelRequest()}><ArrowLeftStartOnRectangleIcon /> Cancel</Button> }
                 { member.status == 'member' && <Button type="secondary-warn" onClick={() => setAreYouSure(true)}><ArrowLeftStartOnRectangleIcon /> Leave</Button> }
-                <AreYouSure 
-                    isVisible={areYouSure} 
-                    action="leave this group" 
-                    execute={() => { setAreYouSure(false); leaveGroup() }} 
-                    cancel={() => setAreYouSure(false)} 
-                /> 
+                <AreYouSure isVisible={areYouSure} execute={() => { setAreYouSure(false); leaveGroup() }} cancel={() => setAreYouSure(false)} > 
+                    <p>Are you sure you want to leave this group?</p>
+                </AreYouSure>
             </span>
         )
     }

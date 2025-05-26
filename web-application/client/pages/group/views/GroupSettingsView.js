@@ -51,12 +51,9 @@ const GroupSettingsView = function({ groupId }) {
                 <div className="group-settings-view__button-wrapper">
                     <Button type="primary-warn" onClick={(e) => setAreYouSure(true)}>Delete Group</Button>
                 </div>
-                <AreYouSure 
-                    isVisible={areYouSure} 
-                    action="delete this group" 
-                    execute={deleteCurrentGroup} 
-                    cancel={() => setAreYouSure(false)} 
-                /> 
+                <AreYouSure isVisible={areYouSure} execute={deleteCurrentGroup} cancel={() => setAreYouSure(false)}> 
+                    <p>Are you sure you want to delete this group?</p>
+                </AreYouSure>
             </div>
         </div>
     )

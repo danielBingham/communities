@@ -60,12 +60,9 @@ const UserAccountSettingsView = function() {
                     <div className="user-settings__button-wrapper">
                         <Button type="primary-warn" onClick={(e) => setAreYouSure(true)}>Delete My Account</Button>
                     </div>
-                    <AreYouSure 
-                        isVisible={areYouSure} 
-                        action="delete your account" 
-                        execute={deleteCurrentUser} 
-                        cancel={() => setAreYouSure(false)} 
-                    /> 
+                    <AreYouSure isVisible={areYouSure} execute={deleteCurrentUser} cancel={() => setAreYouSure(false)} > 
+                        <p>Are you sure you want to delete your account?</p>
+                    </AreYouSure>
                 </div>
             </div>
         </div>
