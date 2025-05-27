@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 
 import { FlagIcon as FlagIconOutline } from '@heroicons/react/24/outline'
-import { FlagIcon as FlagIconSolid } from '@heroicons/react/24/solid'
+import { CheckCircleIcon, XCircleIcon, FlagIcon as FlagIconSolid } from '@heroicons/react/24/solid'
 
 import { useRequest } from '/lib/hooks/useRequest'
 import { useFeature } from '/lib/hooks/feature/useFeature'
@@ -63,9 +63,20 @@ const FlagPost = function({ postId } ) {
     }
 
     if ( moderation !== null ) {
-        return (
-            <FloatingMenuItem disabled={true} className="flag-post flag-post__flagged"><FlagIconSolid /> flagged</FloatingMenuItem>
-        )
+        if ( moderation.status === 'flagged' ) {
+            return (
+                <FloatingMenuItem disabled={true} className="flag-post flag-post__flagged"><FlagIconSolid /> flagged</FloatingMenuItem>
+            )
+        } else if ( moderation.status === 'approved' ) {
+            return (
+                <FloatingMenuItem disabled={true} className="flag-post flag-post__approved"><CheckCircleIcon /> approved</FloatingMenuItem>
+            )
+        } else if ( moderation.status === 'rejected' ) {
+            return (
+                <FloatingMenuItem disabled={true} className="flag-post flag-post__rejected"><XCircleIcon /> removed</FloatingMenuItem>
+            )
+        }
+
     }
 
     return (

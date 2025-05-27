@@ -1,6 +1,6 @@
 .feature-row {
     display: grid;
-    grid-template-columns: 200px 200px auto;
+    grid-template-columns: 1fr 1fr 1fr;
 }
 .feature-row .name{
     grid-column: 1 / 2;

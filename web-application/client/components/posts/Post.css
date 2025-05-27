@@ -36,6 +36,11 @@
     white-space: pre-line;
     word-wrap: break-word;
 }
+.post .post__content .post__moderated {
+    text-align: center;
+    font-size: 14px;
+    font-family: monospace;
+}
 .post .post__show-more {
     padding: 10px;
     text-align: center;

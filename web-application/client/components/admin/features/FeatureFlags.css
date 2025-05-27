@@ -3,8 +3,9 @@
 }
 .feature-flags .feature-rows-header {
     display: grid;
-    grid-template-columns: 200px 200px auto;
+    grid-template-columns: 1fr 1fr 1fr;
     font-weight: bold;
+    border-bottom: thin solid var(--main-border-color);
 }
 .feature-flags .feature-rows-header .feature-name {
     grid-column: 1 / 2;

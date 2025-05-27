@@ -355,7 +355,7 @@ describe('ValidationService.validateSiteModeration()', function() {
 
                 const siteModeration = { 
                     userId: 'f5e9e853-6803-4a74-98c3-23fb0933062f',
-                    status: 'rejected',
+                    status: 'removed',
                     postId: '703955d2-77df-4635-8ab8-b9108fef217f'
                 }
 
@@ -390,7 +390,7 @@ describe('ValidationService.validateSiteModeration()', function() {
                 expect(errors.length).toBe(0)
             })
 
-            it("Should pass a valid 'removed' status", async function() {
+            it("Should pass a valid 'rejected' status", async function() {
                 const service = new ValidationService(core)
 
                 // Moderator User
@@ -398,7 +398,7 @@ describe('ValidationService.validateSiteModeration()', function() {
 
                 const siteModeration = { 
                     userId: 'f5e9e853-6803-4a74-98c3-23fb0933062f',
-                    status: 'removed',
+                    status: 'rejected',
                     postId: '703955d2-77df-4635-8ab8-b9108fef217f'
                 }
 

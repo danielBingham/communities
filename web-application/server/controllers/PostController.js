@@ -297,7 +297,7 @@ module.exports = class PostController {
 
         const post = request.body
 
-        const validationErrors = await this.validationService.validatePost(post)
+        const validationErrors = await this.validationService.validatePost(currentUser, post)
         if ( validationErrors.length > 0 ) {
             const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
             const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
@@ -406,7 +406,7 @@ module.exports = class PostController {
                 `You are not authorized to update that post.`)
         }
 
-        const validationErrors = await this.validationService.validatePost(post, existing)
+        const validationErrors = await this.validationService.validatePost(currentUser, post, existing)
         if ( validationErrors.length > 0 ) {
             const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
             const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')

@@ -1,21 +1,30 @@
 import React, { useEffect } from 'react'
 import { useSelector } from 'react-redux'
+import { useSearchParams } from 'react-router-dom'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
 import { getSiteModerations } from '/state/admin/siteModeration'
 
 import Post from '/components/posts/Post'
+import PaginationControls from '/components/PaginationControls'
+
+import './AdminModerationView.css'
 
 const AdminModerationView = function({}) {
+    const [ searchParams, setSearchParams ] = useSearchParams()
 
     const [ request, makeRequest ] = useRequest()
 
     const query = useSelector((state) => 'AdminModerationView' in state.siteModeration.queries ? state.siteModeration.queries['AdminModerationView']: null)
     const dictionary = useSelector((state) => state.siteModeration.dictionary)
 
+
     useEffect(function() {
-        makeRequest(getSiteModerations('AdminModerationView', { status: 'flagged' }))
+        let page = searchParams.get('page')
+        page = page || 1
+
+        makeRequest(getSiteModerations('AdminModerationView', { status: 'flagged', page: page }))
     }, [])
 
     const moderationViews = []
@@ -38,8 +47,9 @@ const AdminModerationView = function({}) {
 
     return (
         <div className="admin-moderation-view">
-            <div className="admin-moderation-header">{ query?.meta.count } items to moderate</div>
+            <div className="admin-moderation-view__header">{ query?.meta.count } items to moderate</div>
             { moderationViews }
+            <PaginationControls meta={query?.meta} />
         </div>
     )
 }

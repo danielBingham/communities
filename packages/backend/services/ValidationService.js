@@ -922,12 +922,12 @@ module.exports = class ValidationService {
                     message: `'${typeof siteModeration.status}' is not a valid type for status.`
                 })
             } else {
-                const validStatuses = [ 'flagged', 'approved', 'removed' ]
+                const validStatuses = [ 'flagged', 'approved', 'rejected' ]
                 if ( ! validStatuses.includes(siteModeration.status) ) {
                     errors.push({
                         type: 'status:invalid',
                         log: `'${siteModeration.status}' is not a valid status.`,
-                        message: `'${siteModeration.status}' is not a valid status.  Status may be 'flagged', 'approved', or 'removed'.`
+                        message: `'${siteModeration.status}' is not a valid status.  Status may be 'flagged', 'approved', or 'rejected'.`
                     })
                 }
             }

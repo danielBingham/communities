@@ -96,6 +96,6 @@
     display: block;
     white-space: nowrap;
     padding-left: 20px;
-    color: var(--danger-color-light);
+    color: var(--primary-color-light);
 }
 
