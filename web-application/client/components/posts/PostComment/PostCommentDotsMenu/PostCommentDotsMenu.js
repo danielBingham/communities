@@ -1,16 +1,16 @@
 import React from 'react'
 import { useSelector } from 'react-redux'
 
-import { canModerate } from '/lib/group'
+import { canModerate as canModerateGroup } from '/lib/group'
+import { canModerate as canModerateSite } from '/lib/site'
 import { usePost } from '/lib/hooks/post'
 import { useGroup, useGroupMember } from '/lib/hooks/group'
 
 import { EllipsisHorizontalIcon } from '@heroicons/react/24/solid'
 
-import { FloatingMenu, FloatingMenuBody, FloatingMenuTrigger, FloatingMenuItem } from '/components/generic/floating-menu/FloatingMenu'
+import { FloatingMenu, FloatingMenuBody, FloatingMenuTrigger } from '/components/generic/floating-menu/FloatingMenu'
 
-import EditPostComment from '/components/posts/comments/widgets/controls/EditPostComment'
-import DeletePostComment from '/components/posts/comments/widgets/controls/DeletePostComment'
+import { EditPostComment, DeletePostComment } from '/components/posts/comments/PostCommentDotsMenu'
 
 import './PostCommentDotsMenu.css'
 
@@ -30,13 +30,13 @@ const PostCommentDotsMenu = function({ postId, id }) {
     const [currentMember] = useGroupMember(post?.groupId, currentUser?.id)
 
 
-
-    // User can only see the dots menu if this is their comment.
+    // Only logged in users can see the dots menu.
     if ( ! currentUser || comment === null ) {
         return null
     }
 
-    if ( currentUser.id !== comment.userId && ! canModerate(group, currentMember)) {
+    // Users, Group moderators, and SiteAdmins can view the dots menu.
+    if ( currentUser.id !== comment.userId && ! canModerateGroup(group, currentMember) && ! canModerateSite(currentUser) ) {
         return null
     }
 

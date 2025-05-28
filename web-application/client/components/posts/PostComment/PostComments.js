@@ -3,8 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 
 import { startPostCommentEdit } from '/state/postComments'
 
-import PostCommentForm from '/components/posts/comments/PostCommentForm'
-import PostComment from '/components/posts/comments/PostComment'
+import PostComment, { PostCommentForm } from '/components/posts/PostComment'
 
 import './PostComments.css'
 

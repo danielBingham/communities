@@ -7,7 +7,7 @@ import Linkify from 'react-linkify'
 import DateTag from '/components/DateTag'
 import UserTag from '/components/users/UserTag'
 
-import PostCommentDotsMenu from '/components/posts/comments/widgets/PostCommentDotsMenu'
+import PostCommentDotsMenu from '/components/posts/PostComment/PostCommentDotsMenu'
 
 import './PostComment.css'
 
