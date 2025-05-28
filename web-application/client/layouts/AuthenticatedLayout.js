@@ -6,7 +6,7 @@ import { useAuthentication } from '/lib/hooks/useAuthentication'
 
 import WelcomeSplash from '/pages/authentication/WelcomeSplash'
 import WelcomeNotice from '/components/notices/WelcomeNotice'
-import PostShareModal from '/components/posts/form/PostShareModal'
+import { PostShareModal } from '/components/posts/Post/PostReactions'
 
 const AuthenticatedLayout = function() {
 

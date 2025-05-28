@@ -7,10 +7,10 @@ import { EllipsisHorizontalIcon } from '@heroicons/react/24/solid'
 
 import { FloatingMenu, FloatingMenuBody, FloatingMenuTrigger, FloatingMenuItem } from '/components/generic/floating-menu/FloatingMenu'
 
-import SubscribeToPost from '/components/posts/widgets/SubscribeToPost'
-import EditPost from '/components/posts/widgets/EditPost'
-import DeletePost from '/components/posts/widgets/DeletePost'
-import FlagPost from '/components/posts/widgets/FlagPost'
+import SubscribeToPost from './SubscribeToPost/SubscribeToPost'
+import EditPost from './EditPost/EditPost'
+import DeletePost from './DeletePost/DeletePost'
+import FlagPost from './FlagPost/FlagPost'
 
 import './PostDotsMenu.css'
 

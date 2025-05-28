@@ -17,9 +17,9 @@ import UserTag from '/components/users/UserTag'
 import UserProfileImage from '/components/users/UserProfileImage'
 
 import LinkPreview from '/components/links/view/LinkPreview'
-import PostImage from '/components/posts/PostImage'
+import { PostImage } from '/components/posts/Post'
 import GroupTag from '/components/groups/view/GroupTag'
-import PostForm from '/components/posts/form/PostForm'
+import PostForm from '/components/posts/PostForm'
 
 import './SharedPost.css'
 

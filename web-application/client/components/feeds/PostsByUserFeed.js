@@ -5,7 +5,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 
 import { getPosts } from '/state/posts'
 
-import PostList from '/components/posts/list/PostList'
+import PostList from '/components/posts/PostList'
 
 import './PostsByUserFeed.css'
 

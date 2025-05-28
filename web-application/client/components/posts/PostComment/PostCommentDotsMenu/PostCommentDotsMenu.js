@@ -10,7 +10,7 @@ import { EllipsisHorizontalIcon } from '@heroicons/react/24/solid'
 
 import { FloatingMenu, FloatingMenuBody, FloatingMenuTrigger } from '/components/generic/floating-menu/FloatingMenu'
 
-import { EditPostComment, DeletePostComment } from '/components/posts/comments/PostCommentDotsMenu'
+import { EditPostComment, DeletePostComment } from '/components/posts/PostComment/PostCommentDotsMenu'
 
 import './PostCommentDotsMenu.css'
 

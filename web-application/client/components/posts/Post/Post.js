@@ -17,14 +17,15 @@ import UserTag from '/components/users/UserTag'
 import UserProfileImage from '/components/users/UserProfileImage'
 
 import LinkPreview from '/components/links/view/LinkPreview'
-import SharedPost from '/components/posts/SharedPost'
-import PostDotsMenu from '/components/posts/widgets/PostDotsMenu'
-import PostReactions from '/components/posts/widgets/PostReactions'
-import PostComments from '/components/posts/comments/PostComments'
-import PostImage from '/components/posts/PostImage'
 import GroupTag from '/components/groups/view/GroupTag'
-import PostForm from '/components/posts/form/PostForm'
-import PostModeration from '/components/posts/widgets/PostModeration'
+import PostForm from '/components/posts/PostForm'
+
+import PostDotsMenu from './PostDotsMenu'
+import PostModeration from './PostModeration'
+import SharedPost from './SharedPost'
+import PostImage from './PostImage'
+import PostReactions from './PostReactions'
+import PostComments from './PostComments'
 
 import './Post.css'
 

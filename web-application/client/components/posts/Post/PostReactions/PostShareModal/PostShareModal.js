@@ -5,7 +5,7 @@ import { clearSharingPost } from '/state/posts'
 
 import Modal from '/components/generic/modal/Modal'
 
-import PostForm from '/components/posts/form/PostForm'
+import PostForm from '/components/posts/PostForm'
 
 import './PostShareModal.css'
 

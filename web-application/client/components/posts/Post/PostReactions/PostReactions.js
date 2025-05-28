@@ -13,7 +13,7 @@ import { XCircleIcon,
 } from '@heroicons/react/16/solid'
 
 import UserTag from '/components/users/UserTag'
-import BlockConfirmation from '/components/posts/widgets/BlockConfirmation'
+import BlockConfirmation from './BlockConfirmation'
 
 import Modal from '/components/generic/modal/Modal'
 

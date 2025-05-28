@@ -18,11 +18,13 @@ import { postPosts, patchPost, finishPostEdit, clearSharingPost } from '/state/p
 
 import FileUploadInput from '/components/files/FileUploadInput'
 import DraftImageFile from '/components/files/DraftImageFile'
-import LinkForm from '/components/posts/form/controls/LinkForm'
 import LinkPreview from '/components/links/view/LinkPreview'
-import SharedPost from '/components/posts/SharedPost'
 import Button from '/components/generic/button/Button'
-import PostVisibilityControl from '/components/posts/form/controls/PostVisibilityControl'
+
+import LinkForm from './LinkForm/LinkForm'
+import PostVisibilityControl from './PostVisibilityControl/PostVisibilityControl'
+
+import { SharedPost } from '/components/posts/Post'
 
 import ErrorModal from '/components/errors/ErrorModal'
 
