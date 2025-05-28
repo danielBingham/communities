@@ -23,6 +23,7 @@ const Handlebars = require('handlebars')
 const GroupDAO = require('../daos/GroupDAO')
 const GroupMemberDAO = require('../daos/GroupMemberDAO')
 const NotificationDAO = require('../daos/NotificationDAO')
+const PostDAO = require('../daos/PostDAO')
 const PostSubscriptionDAO = require('../daos/PostSubscriptionDAO')
 const UserDAO = require('../daos/UserDAO')
 const UserRelationshipDAO = require('../daos/UserRelationshipDAO')
@@ -40,6 +41,7 @@ module.exports = class NotificationService {
         this.groupDAO = new GroupDAO(core)
         this.groupMemberDAO = new GroupMemberDAO(core)
         this.notificationDAO = new NotificationDAO(core)
+        this.postDAO = new PostDAO(core)
         this.postSubscriptionDAO = new PostSubscriptionDAO(core)
         this.userDAO = new UserDAO(core)
         this.userRelationshipDAO = new UserRelationshipDAO(core)
@@ -83,6 +85,30 @@ The Communities Team
                         `)
                 },
                 text: Handlebars.compile(`{{{commentAuthor.name}}} commented, "{{{commentIntro}}}...", on a post, "{{{postIntro}}}...", you subscribe to.`),
+                path: Handlebars.compile(`/{{{link}}}`) 
+            },
+            'Post:moderation:rejected': {
+                email: {
+                    subject: Handlebars.compile('[Communities] Your post, "{{{postIntro}}}...", was removed by Communities moderators. '), 
+                    body: Handlebars.compile(`
+Hi {{{postAuthor.name}}},
+
+Your post, "{{{postIntro}}}...", was removed by Communities moderators for
+violating our terms of service.   
+
+{{{ moderation.reason }}}
+
+The original text of the post was:
+
+"{{{ post.content }}}"
+
+Please reread our terms and site moderation policies, as multiple violations
+can result in a ban.
+
+The Communities Team
+                        `)
+                },
+                text: Handlebars.compile(`Communities moderators removed your post, "{{{postIntro}}}..."`),
                 path: Handlebars.compile(`/{{{link}}}`) 
             },
             'User:friend:create': {
@@ -239,6 +265,7 @@ The Communities Team`)
 
         this.notificationMap = { 
             'Post:comment:create': this.sendNewCommentNotification.bind(this),
+            'Post:moderation:rejected': this.sendPostModerationNotification.bind(this),
             'User:friend:create': this.sendFriendRequestNotification.bind(this),
             'User:friend:update': this.friendRequestAcceptedNotification.bind(this),
             'Group:member:create': this.sendGroupMemberCreatedNotification.bind(this),
@@ -349,6 +376,28 @@ The Communities Team`)
                 }
             }
         }
+    }
+
+    async sendPostModerationNotification(currentUser, context, options) {
+        if( ! ('postId' in context.moderation) || context.moderation.postId === undefined || context.moderation.postId === null ) {
+            throw new ServiceError('missing-context',
+                `Moderation notification missing postId.`)
+        }
+
+        context.post = await this.postDAO.getPostById(context.moderation.postId)
+        context.postIntro = context.post.content.substring(0,20)
+
+        const postAuthor = await this.userDAO.getUserById(context.post.userId) 
+        context.postAuthor = postAuthor
+
+        if ( context.post.groupId ) {
+            const group = await this.groupDAO.getGroupById(context.post.groupId)
+            context.link = `group/${group.slug}/${context.post.id}`
+        } else {
+            context.link = `${context.postAuthor.username}/${context.post.id}`
+        }
+
+        await this.createNotification(postAuthor.id, 'Post:moderation:rejected', context, options) 
     }
 
     async sendFriendRequestNotification(currentUser, context, options) {

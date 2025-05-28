@@ -21,6 +21,7 @@
 const { 
     ValidationService,
     PermissionService,
+    NotificationService,
     SiteModerationDAO, 
     SiteModerationEventDAO
 }  = require('@communities/backend')
@@ -34,8 +35,9 @@ module.exports = class SiteModerationController {
         this.siteModerationDAO = new SiteModerationDAO(core)
         this.siteModerationEventDAO = new SiteModerationEventDAO(core)
 
-        this.validationService = new ValidationService(core)
+        this.notificationService = new NotificationService(core)
         this.permissionService = new PermissionService(core)
+        this.validationService = new ValidationService(core)
     }
 
     async getRelations(currentUser, results, requestedRelations) {
@@ -261,6 +263,18 @@ module.exports = class SiteModerationController {
             throw new ControllerError(500, 'server-error',
                 `Failed to find SiteModeration(${siteModerationId}) after update.`,
                 `We hit an error in the server we were unable to recover from.  Please report as a bug!`)
+        }
+
+        if ( entity.status === 'rejected' ) {
+            if ( entity.postId !== undefined && entity.postId !== null ) {
+                await this.notificationService.sendNotifications(
+                    currentUser,
+                    'Post:moderation:rejected',
+                    {
+                        moderation: entity
+                    }
+                )
+            }
         }
 
         // Insert the event to track the moderation history.
