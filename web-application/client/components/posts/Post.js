@@ -24,6 +24,7 @@ import PostComments from '/components/posts/comments/PostComments'
 import PostImage from '/components/posts/PostImage'
 import GroupTag from '/components/groups/view/GroupTag'
 import PostForm from '/components/posts/form/PostForm'
+import PostModeration from '/components/posts/widgets/PostModeration'
 
 import './Post.css'
 
@@ -35,6 +36,7 @@ const Post = function({ id, expanded, showLoading }) {
     const post = useSelector((state) => id && id in state.posts.dictionary ? state.posts.dictionary[id] : null) 
     const user = useSelector((state) => post?.userId && post.userId in state.users.dictionary ? state.users.dictionary[post.userId] : null) 
     const group = useSelector((state) => post?.groupId && post.groupId in state.groups.dictionary ? state.groups.dictionary[post.groupId] : null)
+    const moderation = useSelector((state) => id && id in state.siteModeration.byPostId ? state.siteModeration.byPostId[id] : null)
 
     useEffect(function() {
         if ( ! post ) {
@@ -92,6 +94,34 @@ const Post = function({ id, expanded, showLoading }) {
         postVisibility = (<span className="post__post-visibility"> <GlobeAltIcon /> <span className="text">Public</span></span>)
     }
 
+    if ( moderation !== null && moderation.status === 'rejected' ) {
+        return (
+            <div id={post.id} className="post">
+                <div className="post__header"> 
+                    <div className="post__poster-image"><UserProfileImage userId={post.userId} /></div>
+                    <div className="post__details">
+                        <div><UserTag id={post.userId} hideProfile={true} /> { post.groupId &&<span>posted in <GroupTag id={post.groupId} hideProfile={true} /></span>}</div> 
+                        <div><span className="post__visibility">{ postVisibility }</span> &bull; <Link to={postLink}><DateTag timestamp={post.createdDate} /></Link> </div>
+                    </div>
+                    <div className="post__moderation">
+                        <PostModeration postId={post.id} />
+                    </div>
+                    <div className="post__controls">
+                    </div>
+                </div>
+                <div className="post__content">
+                    <div className="post__moderated">
+                        <p>Post removed by a moderator.</p>
+
+                        { moderation.reason !== null && moderation.reason.length > 0 && 
+                            <p>{ moderation.reason }</p> 
+                        }
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
     return (
         <div id={post.id} className="post">
             <div className="post__header"> 
@@ -99,6 +129,9 @@ const Post = function({ id, expanded, showLoading }) {
                 <div className="post__details">
                     <div><UserTag id={post.userId} hideProfile={true} /> { post.groupId &&<span>posted in <GroupTag id={post.groupId} hideProfile={true} /></span>}</div> 
                     <div><span className="post__visibility">{ postVisibility }</span> &bull; <Link to={postLink}><DateTag timestamp={post.createdDate} /></Link> </div>
+                </div>
+                <div className="post__moderation">
+                    <PostModeration postId={post.id} />
                 </div>
                 <div className="post__controls">
                     <PostDotsMenu postId={post.id} />

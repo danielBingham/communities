@@ -1,0 +1,17 @@
+.flag-post svg {
+    width: 18px;
+    height: 18px;
+    margin-bottom: -4px;
+}
+.flag-post.are-you-sure {
+    max-width: 600px;
+}
+.flag-post.are-you-sure .flag-post__explanation {
+    text-align: left;
+}
+.flag-post.flag-post__flagged, .flag-post.flag-post__rejected {
+    color: var(--danger-color-light) !important;
+}
+.flag-post.flag-post__approved {
+    color: var(--success-color-light) !important;
+}

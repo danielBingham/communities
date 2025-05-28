@@ -4,6 +4,7 @@ import { setPostsInDictionary } from '/state/posts'
 import { setPostCommentsInDictionary } from '/state/postComments'
 import { setPostReactionsInDictionary } from '/state/postReactions'
 import { setPostSubscriptionsInDictionary } from '/state/postSubscriptions'
+import { setSiteModerationsInDictionary } from '/state/admin/siteModeration'
 import { setUsersInDictionary } from '/state/users'
 import { setUserRelationshipsInDictionary } from '/state/userRelationships'
 
@@ -30,6 +31,9 @@ const setRelationsInState = function(relations) {
                 else if ( relation == 'postSubscriptions' ) {
                     dispatch(setPostSubscriptionsInDictionary({ dictionary: dictionary }))
                 } 
+                else if ( relation === 'siteModerations' ) {
+                    dispatch(setSiteModerationsInDictionary({ dictionary: dictionary }))
+                }
                 else if ( relation == 'users' ) {
                     dispatch(setUsersInDictionary({ dictionary: dictionary }))
                 } 

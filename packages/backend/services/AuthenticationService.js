@@ -58,7 +58,7 @@ module.exports = class AuthenticationService {
      *
      */
     async getSessionForUserId(id ) {
-        const results = await this.userDAO.selectUsers({ where: 'users.id=$1', params: [id]}, 'all')
+        const results = await this.userDAO.selectUsers({ where: 'users.id=$1', params: [id], fields: 'all' })
         if ( results.list.length <= 0) {
             throw new ServiceError('no-user', 'Failed to get full record for authenticated user!')
         } 

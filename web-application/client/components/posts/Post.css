@@ -6,7 +6,7 @@
     font-size: 14px;
     padding: 10px;
     display: grid;
-    grid-template-columns: 40px auto 24px;
+    grid-template-columns: 40px auto 48px 24px;
 }
 .post .post__header .post__poster-image .profile-image {
     width: 100%;
@@ -20,6 +20,7 @@
     padding-top: 3px;
     padding-right: 10px;
 }
+
 .post .post__post-visibility {
     font-size: 12px;
 }
@@ -34,6 +35,11 @@
     padding: 0 10px 15px 10px;
     white-space: pre-line;
     word-wrap: break-word;
+}
+.post .post__content .post__moderated {
+    text-align: center;
+    font-size: 14px;
+    font-family: monospace;
 }
 .post .post__show-more {
     padding: 10px;

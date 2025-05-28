@@ -25,6 +25,8 @@ const ServiceError = require('../errors/ServiceError')
 const GroupDAO = require('../daos/GroupDAO')
 const PostDAO = require('../daos/PostDAO')
 
+const { isModerator } = require('../lib/admin')
+
 module.exports = class ValidationService {
     constructor(core) {
         this.core = core
@@ -37,8 +39,13 @@ module.exports = class ValidationService {
         return field in entity && entity[field] !== undefined 
     }
 
-    async validatePost(post, existing) {
+    async validatePost(currentUser, post, existing) {
         const errors = []
+
+        if ( existing !== undefined && existing !== null && existing.id !== post.id ) {
+            throw new ServiceError('post-mismatch', 
+                `Existing Post(${existing.id}) does not match Post(${post.id}).`)
+        }
 
         // ================== Always Disallowed ===============================
         // There are some fields the user is never allowed to set.  Check those 
@@ -65,8 +72,8 @@ module.exports = class ValidationService {
         // require or disallow. Check those next and return if any are set.
 
         if ( ! existing ) {
+            const requiredFields = [ 'type', 'userId', 'visibility']
 
-            const requiredFields = [ 'type', 'userId', 'visibility' ]
 
             for(const requiredField of requiredFields) {
                 if ( ! this.has(post, requiredField) || post[requiredField] === null ) {
@@ -102,48 +109,6 @@ module.exports = class ValidationService {
             return errors
         }
 
-        // ================== Type Checks =====================================
-        // Different types of posts have different constraints.  Group posts need
-        // to have their visibility match the group type.
-
-        // The visibility of posts in groups must match the visibility of the group.
-        if ( this.has(post, 'type') && post.type === 'group' ) {
-            if ( ! this.has(post, 'groupId') || post.groupId === null ) {
-                errors.push({
-                    type: 'groupId:missing',
-                    log: 'Attempt to make a Group post without a groupId.',
-                    message: `You can't post to a Group without including a groupId.`
-                })
-            } else {
-                const group = await this.groupDAO.getGroupById(post.groupId)
-
-                if ( group === null ) {
-                    errors.push({
-                        type: 'groupId:not-found',
-                        log: `Attempt to post to a Group(${post.groupId}) that doesn't exist.`,
-                        message: `You can't post to a group that doesn't exist.`
-                    })
-                } else {
-                    if ( group.type === 'open' && post.visibility === 'private' ) {
-                        errors.push({
-                            type: 'visibility:invalid',
-                            log: `Attempt to make a private Post to an Open Group.`,
-                            message: `You can't make a private Post to an Open Group.`
-                        })
-                    }
-
-                    if ( (group.type === 'private' || group.type === 'hidden') 
-                        && post.visibility === 'public' ) 
-                    {
-                        errors.push({
-                            type: 'visibility:invalid',
-                            log: `Attempt to make a public Post to a private or hidden Group.`,
-                            message: `You can't make a public Post to a private or hidden Group.`
-                        })
-                    }
-                }
-            }
-        }
 
         // ================== General Validity Checks =========================
         // Now check each field's validity.
@@ -368,6 +333,49 @@ module.exports = class ValidationService {
                         log: `Post too long.`,
                         message: `Your post was too long.  Please keep posts to 10,000 characters or less.`
                     })
+                }
+            }
+        }
+
+        // ================== Type Checks =====================================
+        // Different types of posts have different constraints.  Group posts need
+        // to have their visibility match the group type.
+
+        // The visibility of posts in groups must match the visibility of the group.
+        if ( this.has(post, 'type') && post.type === 'group' ) {
+            if ( ! this.has(post, 'groupId') || post.groupId === null ) {
+                errors.push({
+                    type: 'groupId:missing',
+                    log: 'Attempt to make a Group post without a groupId.',
+                    message: `You can't post to a Group without including a groupId.`
+                })
+            } else {
+                const group = await this.groupDAO.getGroupById(post.groupId)
+
+                if ( group === null ) {
+                    errors.push({
+                        type: 'groupId:not-found',
+                        log: `Attempt to post to a Group(${post.groupId}) that doesn't exist.`,
+                        message: `You can't post to a group that doesn't exist.`
+                    })
+                } else {
+                    if ( group.type === 'open' && post.visibility === 'private' ) {
+                        errors.push({
+                            type: 'visibility:invalid',
+                            log: `Attempt to make a private Post to an Open Group.`,
+                            message: `You can't make a private Post to an Open Group.`
+                        })
+                    }
+
+                    if ( (group.type === 'private' || group.type === 'hidden') 
+                        && post.visibility === 'public' ) 
+                    {
+                        errors.push({
+                            type: 'visibility:invalid',
+                            log: `Attempt to make a public Post to a private or hidden Group.`,
+                            message: `You can't make a public Post to a private or hidden Group.`
+                        })
+                    }
                 }
             }
         }
@@ -770,6 +778,245 @@ module.exports = class ValidationService {
                     log: `The 'fileId' must be a valid UUID.`,
                     message: `The 'fileId' you have for your profile picture must be either 'null' or a valid UUID.`
                 })
+            }
+        }
+
+        return errors
+    }
+
+    async validateSiteModeration(currentUser, siteModeration, existing) {
+        const errors = []
+
+        // ================== Validate Field Presence =========================
+        // Before we validate the content of the fields, we're going to validate
+        // whether they can be set or changed at all.
+
+        // These are fields the user is never allowed to set.
+        const alwaysDisallowedFields = [
+            'createdDate', 'updatedDate'
+        ]
+
+        for(const disallowedField of alwaysDisallowedFields ) {
+            if ( this.has(siteModeration, disallowedField) ) {
+                errors.push({
+                    type: `${disallowedField}:not-allowed`,
+                    log: `${disallowedField} is not allowed.`,
+                    message: `You may not set '${disallowedField}'.`
+                })
+            }
+        }
+
+        // If we have invalid fields set, then we don't need to go any further.
+        if ( errors.length > 0 ) {
+            return errors
+        }
+
+        // We're creating a moderation.
+        if ( existing === null || existing === undefined ) {
+            const requiredFields = [
+                'userId', 'status'
+            ]
+
+            for(const requiredField of requiredFields) {
+                if ( ! this.has(siteModeration, requiredField) || siteModeration[requiredField] === null ) {
+                    errors.push({
+                        type: `${requiredField}:missing`,
+                        log: `${requiredField} is required.`,
+                        message: `${requiredField} is required.`
+                    })
+                }
+            }
+
+            if ( ( ! this.has(siteModeration, 'postId') ||  siteModeration.postId === null )
+                && ( ! this.has(siteModeration, 'postCommentId') || siteModeration.postCommentId === null ))
+            {
+                errors.push({
+                    type: `entityId:missing`,
+                    log: `SiteModeration missing ID of moderated entity.`,
+                    message: `ID of the entity being moderated is required.  Please include either 'postId' or 'postCommentId'.`
+                })
+            }
+
+        } 
+        // We're editing a moderation.
+        else {
+            if ( ( ! this.has(siteModeration, 'postId') ||  siteModeration.postId === null )
+                && ( ! this.has(siteModeration, 'postCommentId') || siteModeration.postCommentId === null ))
+            {
+                errors.push({
+                    type: `entityId:missing`,
+                    log: `SiteModeration missing ID of moderated entity.`,
+                    message: `ID of the entity being moderated is required.  Please include either 'postId' or 'postCommentId'.`
+                })
+            }
+
+            if ( this.has(siteModeration, 'id') && siteModeration.id !== existing.id ) {
+                throw new ServiceError('entity-mismatch',
+                    `ValidationService provided with the wrong 'existing' entity.`)
+            }
+
+            if ( this.has(siteModeration, 'postId') && siteModeration.postId !== existing.postId ) {
+                errors.push({
+                    type: `postId:not-allowed`,
+                    log: `User(${currentUser.id}) attempting to change the SiteModeration.postId.`,
+                    message: `You cannot edit SiteModeration.postId.`
+                })
+            }
+
+            if ( this.has(siteModeration, 'postCommentId') && siteModeration.postCommentId !== existing.postCommentId ) {
+                errors.push({
+                    type: `postCommentId:not-allowed`,
+                    log: `User(${currentUser.id}) attempting to change SiteModeration.postCommentId.`,
+                    message: `You cannot edit SiteModeration.postId.`
+                })
+            }
+        }
+
+        // If we have invalid fields set, then we don't need to go any further.
+        if ( errors.length > 0 ) {
+            return errors
+        }
+
+        if ( this.has(siteModeration, 'userId') ) {
+            if ( siteModeration.userId === null ) {
+                errors.push({
+                    type: 'userId:missing',
+                    log: `User(${currentUser.id}) submitted SiteModeration missing userId.`,
+                    message: `You cannot set userId to null.`
+                })
+            } else if ( typeof siteModeration.userId !== 'string' ) {
+                errors.push({
+                    type: 'userId:invalid-type',
+                    log: `User(${currentUser.id}) submitted SiteModeration with invalid type '${typeof siteModeration.userId}'.`,
+                    message: `${typeof siteModeration.userId} is invalid for userId.`
+                })
+            } else if ( ! uuid.validate(siteModeration.userId) ) {
+                errors.push({
+                    type: 'userId:invalid',
+                    log: `User(${currentUser.id}) submitted SiteModeration with invalid uuid.`,
+                    message: `userId must be a valid uuid.`
+                })
+            } else {
+                const results = await this.core.database.query(`SELECT id FROM users WHERE users.id = $1`, [ siteModeration.userId])
+                if ( results.rows.length <= 0 || results.rows[0].id !== siteModeration.userId) {
+                    errors.push({
+                        type: 'userId:not-found',
+                        log: `User(${currentUser.id}) submitted SiteModeration with invalid userId.`,
+                        message: `We couldn't find a user for that userId.`
+                    })
+                }
+            }
+        }
+
+        if ( this.has(siteModeration, 'status') ) {
+            if ( siteModeration.status === null ) {
+                errors.push({
+                    type: 'status:missing',
+                    log: `SiteModeration.status cannot be null.`,
+                    message: `You cannot set 'status' to null.`
+                })
+            } else if ( typeof siteModeration.status !== 'string' ) {
+                errors.push({
+                    type: 'status:invalid-type',
+                    log: `${typeof siteModeration.status} is not a valid type for status.`,
+                    message: `'${typeof siteModeration.status}' is not a valid type for status.`
+                })
+            } else {
+                const validStatuses = [ 'flagged', 'approved', 'rejected' ]
+                if ( ! validStatuses.includes(siteModeration.status) ) {
+                    errors.push({
+                        type: 'status:invalid',
+                        log: `'${siteModeration.status}' is not a valid status.`,
+                        message: `'${siteModeration.status}' is not a valid status.  Status may be 'flagged', 'approved', or 'rejected'.`
+                    })
+                }
+            }
+        }
+
+        if ( this.has(siteModeration, 'reason') ) {
+            // `reason` may be null.
+            if ( siteModeration.reason !== null ) {
+                if ( typeof siteModeration.reason !== 'string' ) {
+                    errors.push({
+                        type: 'reason:invalid-type',
+                        log: `'${typeof siteModeration.reason}' is not a valid type for 'reason'.`,
+                        message: `'${typeof siteModeration.reason}' is not a valid type for 'reason'.`
+                    })
+                }
+            } 
+        }
+
+        if ( this.has(siteModeration, 'postId') ) {
+            // `postId` may be null.
+            if ( siteModeration.postId !== null ) {
+                if ( typeof siteModeration.postId !== 'string' ) {
+                    errors.push({
+                        type: 'postId:invalid-type',
+                        log: `'${typeof siteModeration.postId}' is an invalid type for 'postId'.`,
+                        message: `'${typeof siteModeration.postId}' is an invalid type for 'postId'.`
+                    })
+                } else if ( ! uuid.validate(siteModeration.postId) ) {
+                    errors.push({
+                        type: 'postId:invalid',
+                        log: `'${siteModeration.postId}' is not a valid uuid.`,
+                        message: `postId must be a valid uuid.`
+                    })
+                } else {
+                    const results = await this.core.database.query(`SELECT id FROM posts WHERE id = $1`, [ siteModeration.postId ]) 
+                    if ( results.rows.length <= 0 || results.rows[0].id !== siteModeration.postId) {
+                        errors.push({
+                            type: 'postId:not-found',
+                            log: `Post not found for '${siteModeration.postId}'.`,
+                            message: `Post not found for '${siteModeration.postId}'.`
+                        })
+                    }
+
+                    if ( this.has(siteModeration, 'postCommentId') && siteModeration.postCommentId !== null ) {
+                        errors.push({
+                            type: 'postId:conflict',
+                            log: `Only one of 'postId' and 'postCommentId' may be set.`,
+                            message: `Only one of 'postId' and 'postCommentId' may be set.`
+                        })
+                    }
+                }
+            }
+        }
+
+        if ( this.has(siteModeration, 'postCommentId' ) ) {
+            if ( siteModeration.postCommentId !== null ) {
+                if ( typeof siteModeration.postCommentId !== 'string' ) {
+                    errors.push({
+                        type: 'postCommentId:invalid-type',
+                        log: `'${typeof siteModeration.postCommentId}' is an invalid type for 'postCommentId'.`,
+                        message: `'${typeof siteModeration.postCommentId}' is an invalid type for 'postCommentId'.`
+                    })
+                } else if ( ! uuid.validate(siteModeration.postCommentId) ) {
+                    errors.push({
+                        type: 'postCommentId:invalid',
+                        log: `'${siteModeration.postCommentId}' is not a valid uuid.`,
+                        message: `postCommentId must be a valid uuid.`
+                    })
+                } else {
+                    const postCommentResults = await this.core.database.query(
+                        `SELECT id FROM post_comments WHERE id = $1`, 
+                        [ siteModeration.postCommentId ]
+                    )
+                    if ( postCommentResults.rows.length <= 0 || postCommentResults.rows[0].id !== siteModeration.postCommentId) {
+                        errors.push({
+                            type: 'postCommentId:not-found',
+                            log: `PostComment not found for '${siteModeration.postCommentId}'.`,
+                            message: `PostComment not found for '${siteModeration.postCommentId}'.`
+                        })
+                    }
+
+                    if ( this.has(siteModeration, 'postId') && siteModeration.postId !== null ) {
+                        errors.push({
+                            type: 'postCommentId:conflict',
+                            log: `Only one of 'postCommentId' and 'postId' may be set.`,
+                            message: `Only one of 'postCommentId' and 'postId' may be set.`
+                        })
+                    }
+                }
             }
         }
 

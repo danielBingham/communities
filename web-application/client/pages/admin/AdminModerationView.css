@@ -1,0 +1,9 @@
+.admin-moderation-view {
+    max-width: 800px;
+    margin: 0 auto;
+}
+.admin-moderation-view__header {
+    padding: 10px;
+    border-bottom: thin solid var(--main-border-color);
+    text-align: right;
+}

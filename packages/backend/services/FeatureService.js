@@ -30,6 +30,7 @@ const PrivateGroupsMigration = require('../migrations/PrivateGroupsMigration')
 const ImageResizeMigration = require('../migrations/ImageResizeMigration')
 const PublicPostsMigration = require('../migrations/PublicPostsMigration')
 const PostSharingMigration = require('../migrations/PostSharingMigration')
+const AdminModerationMigration = require('../migrations/AdminModerationMigration')
 
 const ServiceError = require('../errors/ServiceError')
 const MigrationError = require('../errors/MigrationError')
@@ -111,6 +112,11 @@ module.exports = class FeatureService {
                 dependsOn: ['17-public-posts'],
                 conflictsWith: [],
                 migration: new PostSharingMigration(core)
+            },
+            '62-admin-moderation-controls': {
+                dependsOn: ['18-post-sharing'],
+                conflictsWith: [],
+                migration: new AdminModerationMigration(core)
             }
         }
     }

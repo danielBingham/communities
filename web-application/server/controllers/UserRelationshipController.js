@@ -43,7 +43,7 @@ module.exports = class UserRelationshipController {
 
         const userIds = Object.keys(userIdDictionary)
 
-        const userResults = await this.userDAO.selectUsers({ where: `users.id = ANY($1::uuid[])`, params: [ userIds ]}, [ 'email' ])
+        const userResults = await this.userDAO.selectUsers({ where: `users.id = ANY($1::uuid[])`, params: [ userIds ], fields: [ 'email' ] })
 
         return {
             users: userResults.dictionary

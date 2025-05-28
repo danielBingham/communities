@@ -1,11 +1,11 @@
-const Logger = require('../../../logger')
-const FeatureFlags = require('../../../features')
+const Logger = require('../../../../logger')
+const FeatureFlags = require('../../../../features')
 
-const ServiceError = require('../../../errors/ServiceError')
-const PermissionService = require('../../../services/PermissionService')
+const ServiceError = require('../../../../errors/ServiceError')
+const PermissionService = require('../../../../services/PermissionService')
 
-const entities = require('../../fixtures/entities')
-const database = require('../../fixtures/database')
+const entities = require('../../../fixtures/entities')
+const database = require('../../../fixtures/database')
 
 describe('PermissionService.canUpdatePost()', function() {
 
@@ -60,8 +60,9 @@ describe('PermissionService.canUpdatePost()', function() {
                 postId: '703955d2-77df-4635-8ab8-b9108fef217f'
             }
 
+            const postRows = database.posts['703955d2-77df-4635-8ab8-b9108fef217f'].rows
             core.database.query.mockReturnValue(undefined)
-                .mockReturnValueOnce({ rowCount: 1, rows: [ { ...database.posts[0] } ]})
+                .mockReturnValueOnce({ rowCount: postRows.length, rows: postRows })
            
             // Admin User
             const currentUser = entities['users'].dictionary['469931f6-26f2-4e1c-b4a0-849aed14e977']

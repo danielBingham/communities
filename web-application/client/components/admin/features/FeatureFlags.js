@@ -36,9 +36,6 @@ const FeatureFlags = function(props) {
 
     return (
         <div className="feature-flags">
-            <div className="header">
-                <h2>Feature Flags and Migrations</h2>
-            </div>
             <div className="feature-rows-header">
                 <span className="feature-name">Feature Name</span>
                 <span className="feature-status">Feature Status</span>

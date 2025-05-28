@@ -10,6 +10,7 @@ import { FloatingMenu, FloatingMenuBody, FloatingMenuTrigger, FloatingMenuItem }
 import SubscribeToPost from '/components/posts/widgets/SubscribeToPost'
 import EditPost from '/components/posts/widgets/EditPost'
 import DeletePost from '/components/posts/widgets/DeletePost'
+import FlagPost from '/components/posts/widgets/FlagPost'
 
 import './PostDotsMenu.css'
 
@@ -33,6 +34,7 @@ const PostDotsMenu = function({ postId }) {
             <FloatingMenuTrigger showArrow={false}><EllipsisHorizontalIcon className="dots" /></FloatingMenuTrigger>
             <FloatingMenuBody>
                 { currentUser && <SubscribeToPost postId={postId} /> }
+                { currentUser && <FlagPost postId={postId} /> }
                 { isAuthor && <EditPost postId={postId} /> }
                 { (isAuthor || isModerator) && <DeletePost postId={postId} /> }
             </FloatingMenuBody>

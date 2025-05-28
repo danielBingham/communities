@@ -77,6 +77,13 @@ const SCHEMA = {
                 select: 'request',
                 key: 'permissions'
             },
+            'site_role': {
+                insert: 'denied',
+                update: 'allowed',
+                select: 'request',
+                key: 'siteRole',
+                needsFeature: '62-admin-moderation-controls'
+            },
             'settings': {
                 needsFeature: '1-notification-settings',
                 insert: 'allowed',
@@ -207,7 +214,8 @@ module.exports = class UserDAO extends DAO {
         const results = await this.selectUsers({
             where: 'users.id = $1', 
             params: [ id ], 
-        }, fields)
+            fields: fields
+        })
 
         if ( results.list.length <= 0 ) {
             return null
@@ -220,10 +228,11 @@ module.exports = class UserDAO extends DAO {
      * Retrieve user records from the database.
      *
      */
-    async selectUsers(query, fields) {
+    async selectUsers(query) {
         let where = query.where ? `WHERE ${query.where}` : ''
         const params = query.params ? [ ...query.params ] : []
         let order = query.order ? `${query.order}` : 'users.created_date desc'
+        const fields = query.fields ? query.fields : []
 
         // We only want to include the paging terms if we actually want paging.
         // If we're making an internal call for another object, then we

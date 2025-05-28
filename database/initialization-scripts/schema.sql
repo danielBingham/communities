@@ -38,6 +38,8 @@ CREATE TABLE features (
 
 CREATE TYPE user_status AS ENUM('invited', 'unconfirmed', 'confirmed');
 CREATE TYPE user_permissions AS ENUM('user', 'moderator', 'admin', 'superadmin');
+CREATE TYPE user_site_role AS ENUM('user', 'moderator', 'admin', 'superadmin');
+
 CREATE TABLE users (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 
@@ -49,6 +51,7 @@ CREATE TABLE users (
 
     status user_status DEFAULT 'unconfirmed',
     permissions user_permissions DEFAULT 'user',
+    site_role user_site_role DEFAULT 'user',
 
     about text DEFAULT NULL,
 
@@ -334,6 +337,45 @@ CREATE TABLE post_subscriptions (
 CREATE INDEX post_subscriptions__user_id ON post_subscriptions (user_id);
 CREATE INDEX post_subscriptions__post_id ON post_subscriptions (post_id);
 
+/******************************************************************************
+ * Site administration
+ ******************************************************************************/
+
+CREATE TYPE site_moderation_status AS ENUM('flagged', 'approved', 'rejected');
+CREATE TABLE site_moderation (
+    id uuid PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
+    user_id uuid REFERENCES users (id) ON DELETE SET NULL,
+
+    status site_moderation_status NOT NULL DEFAULT 'flagged',
+    reason text,
+
+    post_id uuid REFERENCES posts (id) DEFAULT NULL ON DELETE CASCADE,
+    post_comment_id uuid REFERENCES post_comments (id) DEFAULT NULL ON DELETE CASCADE
+
+    created_date timestamptz, 
+    updated_date timestamptz
+);
+CREATE INDEX site_moderation__user_id ON site_moderation (user_id);
+CREATE INDEX site_moderation__post_id ON site_moderation (post_id);
+CREATE INDEX site_moderation__post_comment_id ON site_moderation (post_comment_id);
+
+CREATE TABLE site_moderation_events (
+    id uuid PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
+    site_moderation_id uuid REFERENCES site_moderation (id) ON DELETE SET NULL,
+    user_id uuid REFERENCES users (id) ON DELETE SET NULL,
+
+    status site_moderation_status NOT NULL,
+    reason text,
+
+    post_id uuid REFERENCES posts(id) DEFAULT NULL ON DELETE CASCADE,
+    post_comment_id uuid REFERENCES post_comments(id) DEFAULT NULL ON DELETE CASCADE,
+
+    created_date timestamptz
+);
+CREATE INDEX site_moderation_events__site_moderation_id ON site_moderation_events (site_moderation_id);
+CREATE INDEX site_moderation_events__user_id ON site_moderation_events (user_id);
+CREATE INDEX site_moderation_events__post_id ON site_moderation_events (post_id);
+CREATE INDEX site_moderation_events__post_comment_id ON site_moderation_events (post_comment_id);
 
 /******************************************************************************
  * Permissions
@@ -383,4 +425,5 @@ CREATE INDEX permissions__user_id ON permissions (user_id);
 CREATE INDEX permissions__role_id ON permissions (role_id);
 
 CREATE INDEX permissions__post_id ON permissions (post_id);
+
 

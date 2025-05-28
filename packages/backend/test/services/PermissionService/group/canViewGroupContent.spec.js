@@ -1,11 +1,11 @@
-const Logger = require('../../../logger')
-const FeatureFlags = require('../../../features')
+const Logger = require('../../../../logger')
+const FeatureFlags = require('../../../../features')
 
-const ServiceError = require('../../../errors/ServiceError')
-const PermissionService = require('../../../services/PermissionService')
+const ServiceError = require('../../../../errors/ServiceError')
+const PermissionService = require('../../../../services/PermissionService')
 
-const entities = require('../../fixtures/entities')
-const database = require('../../fixtures/database')
+const entities = require('../../../fixtures/entities')
+const database = require('../../../fixtures/database')
 
 describe('PermissionService.canViewGroupContent()', function() {
 
@@ -72,8 +72,9 @@ describe('PermissionService.canViewGroupContent()', function() {
                 groupMember: groupMember
             }
 
+            const groupRows = database.groups['8661a1ef-6259-4d5a-a59f-4d75929a765f'].rows
             core.database.query.mockReturnValue(undefined)
-                .mockReturnValueOnce({ rowCount: 1, rows: [ database.groups[1] ]})
+                .mockReturnValueOnce({ rowCount: groupRows, rows: groupRows})
 
             // User One 
             const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
@@ -97,18 +98,18 @@ describe('PermissionService.canViewGroupContent()', function() {
                 group: group
             }
 
-            const groupMemberRow = database.groupMembers[3]
+            const groupMemberRows = database.groupMembers['a1c5361e-3e46-435b-bab4-0a74ddbd79e2'].rows
             core.database.query.mockReturnValue(undefined)
-                .mockReturnValueOnce({ rowCount: 1, rows: [ groupMemberRow ]})
+                .mockReturnValueOnce({ rowCount: groupMemberRows.length, rows: groupMemberRows })
 
             // User One 
             const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
             const canView = await service.canViewGroupContent(currentUser, context)
 
-            expect(groupMemberRow.GroupMember_groupId).toBe(group.id)
-            expect(groupMemberRow.GroupMember_userId).toBe(currentUser.id)
-            expect(groupMemberRow.GroupMember_role).toBe('admin')
+            expect(groupMemberRows[0].GroupMember_groupId).toBe(group.id)
+            expect(groupMemberRows[0].GroupMember_userId).toBe(currentUser.id)
+            expect(groupMemberRows[0].GroupMember_role).toBe('admin')
             expect(canView).toBe(true)
         })
 

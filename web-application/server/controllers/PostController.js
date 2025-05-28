@@ -31,6 +31,7 @@ const {
     PostCommentDAO,
     PostReactionDAO,
     PostSubscriptionDAO,
+    SiteModerationDAO,
     UserDAO
 } = require('@communities/backend')
 
@@ -49,6 +50,7 @@ module.exports = class PostController {
         this.postCommentDAO = new PostCommentDAO(core)
         this.postReactionDAO = new PostReactionDAO(core)
         this.postSubscriptionDAO = new PostSubscriptionDAO(core)
+        this.siteModerationDAO = new SiteModerationDAO(core)
         this.userDAO = new UserDAO(core)
 
         this.linkPreviewService = new LinkPreviewService(core)
@@ -110,6 +112,15 @@ module.exports = class PostController {
             })
 
             relations.groups = groupResults.dictionary
+        }
+
+        if ( this.core.features.has('62-admin-moderation-controls') ) {
+            const siteModerationResults = await this.siteModerationDAO.selectSiteModerations({
+                where: `site_moderation.post_id = ANY($1::uuid[])`,
+                params: [ results.list ]
+            })
+
+            relations.siteModerations = siteModerationResults.dictionary
         }
 
         return relations
@@ -286,7 +297,7 @@ module.exports = class PostController {
 
         const post = request.body
 
-        const validationErrors = await this.validationService.validatePost(post)
+        const validationErrors = await this.validationService.validatePost(currentUser, post)
         if ( validationErrors.length > 0 ) {
             const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
             const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
@@ -395,7 +406,7 @@ module.exports = class PostController {
                 `You are not authorized to update that post.`)
         }
 
-        const validationErrors = await this.validationService.validatePost(post, existing)
+        const validationErrors = await this.validationService.validatePost(currentUser, post, existing)
         if ( validationErrors.length > 0 ) {
             const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
             const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
