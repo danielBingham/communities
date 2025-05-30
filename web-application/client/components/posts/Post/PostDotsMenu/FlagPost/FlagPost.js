@@ -53,7 +53,6 @@ const FlagPost = function({ postId } ) {
                 </ErrorModal>
             )
         } else {
-            console.log(request)
             return (
                 <ErrorModal>
                     <p>Something went wrong on while trying to flag the post.  This is probably a bug, please report it.</p>

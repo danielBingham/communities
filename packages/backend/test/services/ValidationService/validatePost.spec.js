@@ -179,7 +179,6 @@ describe('ValidationService.validatePost()', function() {
 
             const errors = await service.validatePost(null, post, null)
 
-            console.log(errors)
             expect(errors.length).toBe(1)
             expect(errors[0].type).toBe('groupId:not-found')
 

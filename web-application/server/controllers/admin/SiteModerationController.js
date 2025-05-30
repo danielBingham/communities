@@ -135,10 +135,6 @@ module.exports = class SiteModerationController {
                 `SiteModeration(${existing.id}) already exists.`,
                 `A SiteModeration already exists for that entity.  Please PATCH instead.`)
         }
-        console.log(`Moderation: `)
-        console.log(moderation)
-        console.log(`Existing: `)
-        console.log(existing)
 
         const validationErrors = await this.validationService.validateSiteModeration(currentUser, moderation, existing)
         if ( validationErrors.length > 0 ) {

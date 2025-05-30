@@ -12,7 +12,6 @@ export const usePostComment = function(postId, postCommentId) {
 
     useEffect(() => {
         if ( postId && postCommentId && ! postComment ) {
-            console.log(`Retrieving comment for ${postId} and ${postCommentId}`)
             makeRequest(getPostComment(postId, postCommentId))
         }
     }, [ postId, postCommentId, postComment ])

@@ -20,7 +20,6 @@ export const useSiteModerationForPostComment = function(postId, postCommentId) {
 
     useEffect(() => {
         if ( postId && postCommentId && ! moderation) {
-            console.log(`Getting moderation for ${postId} and ${postCommentId}.`)
             makeRequest(getSiteModerations('useSiteModerationForPostComment', { postId: postId, postCommentId: postCommentId }))
         }
     }, [ postId, postCommentId, moderation])

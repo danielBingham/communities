@@ -24,7 +24,6 @@ const FlagPostComment = function({ postId, id } ) {
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
     const [moderation] = useSiteModerationForPostComment(postId, id)
-    console.log(moderation)
 
     const hasAdminModerationControls = useFeature('62-admin-moderation-controls')
 
@@ -37,8 +36,6 @@ const FlagPostComment = function({ postId, id } ) {
             postId: postId, 
             postCommentId: id 
         }
-        console.log(`Moderation: `)
-        console.log(newModeration)
         makeRequest(postSiteModerations(newModeration))
     }
 
