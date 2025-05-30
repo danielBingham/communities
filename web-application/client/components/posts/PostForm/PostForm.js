@@ -24,7 +24,7 @@ import Button from '/components/generic/button/Button'
 import LinkForm from './LinkForm/LinkForm'
 import PostVisibilityControl from './PostVisibilityControl/PostVisibilityControl'
 
-import { SharedPost } from '/components/posts/Post'
+import Post from '/components/posts/Post'
 
 import ErrorModal from '/components/errors/ErrorModal'
 
@@ -244,11 +244,11 @@ const PostForm = function({ postId, groupId, sharedPostId }) {
 
     } else if ( sharedPostId ) {
         attachmentView = (
-            <SharedPost id={sharedPostId} />
+            <Post id={sharedPostId} shared={true} />
         )
     } else if ( post && post.sharedPostId ) {
         attachmentView = (
-            <SharedPost id={post.sharedPostId} />
+            <Post id={post.sharedPostId} shared={true} />
         )
     }
 
