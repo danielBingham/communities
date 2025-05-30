@@ -169,7 +169,7 @@ module.exports = class PermissionService {
             throw new ServiceError('missing-context', `'post' missing from context.`) 
         }
 
-        // Site moderates can always view posts.
+        // Site moderators can always view posts.
         const canModerateSite = await this.canModerateSite(user)
         if ( canModerateSite ) {
             return true
