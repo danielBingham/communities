@@ -1,0 +1,17 @@
+.post-comment-moderation {
+    text-align: right;
+}
+.post-comment-moderation svg {
+    width: 20px;
+    height: 20px;
+    margin-bottom: -3px;
+}
+.post-comment-moderation__approve svg {
+    color: var(--success-color-main);
+}
+.post-comment-moderation__remove svg {
+    color: var(--danger-color-main);
+}
+.post-comment-moderation__flagged svg {
+    color: var(--danger-color-main);
+}

@@ -6,6 +6,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 
 import { getSiteModerations } from '/state/admin/siteModeration'
 
+import PostCommentAwaitingAdminModeration from '/components/admin/moderation/PostCommentAwaitingAdminModeration'
 import Post from '/components/posts/Post'
 import PaginationControls from '/components/PaginationControls'
 
@@ -35,12 +36,14 @@ const AdminModerationView = function({}) {
                 continue
             }
 
-            if ( 'postId' in moderation && moderation.postId !== undefined && moderation.postId !== null ) {
+            if ( moderation.postId !== null && moderation.postCommentId === null) {
                 moderationViews.push(
-                    <div key={moderation.postId} className="moderation">
-                        <Post key={moderation.postId} id={moderation.postId} />
+                    <div key={moderation.id} className="moderation__post">
+                        <Post id={moderation.postId} />
                     </div>
                 )
+            } else if ( moderation.postId !== null && moderation.postCommentId !== null ) {
+                moderationViews.push(<PostCommentAwaitingAdminModeration id={moderation.id} />)
             }
         }
     }

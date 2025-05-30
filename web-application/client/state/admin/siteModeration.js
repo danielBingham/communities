@@ -59,21 +59,28 @@ export const siteModerationsSlice = createSlice({
         setSiteModerationsInDictionary: function(state, action) {
             setInDictionary(state, action)
 
+            // Add the entity to the byPostId and byPostCommentId indexes.
+            const addEntityToIndexes = function(entity) {
+                // When only postId is set, the moderation references a Post.
+                if ( entity.postId !== null && entity.postCommentId === null ) {
+                    state.byPostId[entity.postId] = entity
+                } 
+                // When both postId and postCommentId are set, it references a PostComment. 
+                else if ( entity.postId !== null && entity.postCommentId !== null ) {
+                    if ( ! (entity.postId in state.byPostCommentId) ) {
+                        state.byPostCommentId[entity.postId] = {}
+                    }
+                    state.byPostCommentId[entity.postId][entity.postCommentId] = entity
+                }
+            }
+
             if ( 'dictionary' in action.payload ) {
                 for(const [id, entity] of Object.entries(action.payload.dictionary)) {
-                    if ( entity.postId !== null ) {
-                        state.byPostId[entity.postId] = entity
-                    } else if ( entity.postCommentId !== null ) {
-                        state.byPostCommentId[entity.postCommentId] = entity
-                    }
+                    addEntityToIndexes(entity)
                 }
             } else if ( 'entity' in action.payload ) {
                 const entity = action.payload.entity
-                if ( entity.postId !== null ) {
-                    state.byPostId[entity.postId] = entity
-                } else if ( entity.postCommentId !== null ) {
-                    state.byPostCommentId[entity.postCommentId] = entity
-                }
+                addEntityToIndexes(entity)
             }
         },
         removeSiteModeration: function(state, action) {
@@ -82,7 +89,9 @@ export const siteModerationsSlice = createSlice({
             if ( action.payload.entity.postId !== null ) {
                 delete state.byPostId[action.payload.entity.postId]
             } else if( action.payload.entity.postCommentId !== null ) {
-                delete state.byPostCommentId[action.payload.entity.postCommentId]
+                if ( action.payload.entity.postId in state.byPostCommentId ) {
+                    delete state.byPostCommentId[action.payload.entity.postId][action.payload.entity.postCommentId]
+                }
             }
         },
         setSiteModerationQueryResults: setQueryResults,

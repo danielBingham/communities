@@ -360,9 +360,21 @@ module.exports = function(core) {
      **************************************************************************/
     const PostCommentController = require('./controllers/PostCommentController')
     const postCommentController = new PostCommentController(core)
+
+    router.get('/post/:postId/comments', function(request, response, next) {
+        postCommentController.getPostComments(request, response).catch(function(error) {
+            next(error)
+        })
+    })
     
     router.post('/post/:postId/comments', function(request, response, next) {
         postCommentController.postPostComments(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.get('/post/:postId/comment/:id', function(request, response, next) {
+        postCommentController.getPostComment(request, response).catch(function(error) {
             next(error)
         })
     })

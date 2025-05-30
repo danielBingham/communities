@@ -4,27 +4,22 @@ import { useLocation } from 'react-router-dom'
 
 import Linkify from 'react-linkify'
 
+import { usePostComment } from '/lib/hooks/PostComment'
+import { useSiteModerationForPostComment } from '/lib/hooks/SiteModeration'
+
 import DateTag from '/components/DateTag'
 import UserTag from '/components/users/UserTag'
 
-import PostCommentDotsMenu from '/components/posts/PostComment/PostCommentDotsMenu'
+import PostCommentDotsMenu from './PostCommentDotsMenu'
+import PostCommentModeration from './PostCommentModeration'
 
 import './PostComment.css'
 
 const PostComment = function({ postId, id }) {
     const [highlight, setHighlight] = useState(false)
 
-    const comment = useSelector(function(state) {
-        if ( id in state.postComments.dictionary ) {
-            return state.postComments.dictionary[id]
-        } else {
-            return null
-        }
-    })
-
-    if ( comment == null ) {
-        return null
-    }
+    const [comment] = usePostComment(postId, id)
+    const [moderation] = useSiteModerationForPostComment(postId, id)
 
     const location = useLocation()
     // This is necessary to enable linking to anchors in the page.
@@ -41,10 +36,46 @@ const PostComment = function({ postId, id }) {
         }
     }, [ id, location ])
 
+    if ( comment == null ) {
+        return null
+    }
+
+    if ( moderation !== null && moderation.status === 'rejected' ) {
+        return (
+            <div id={`comment-${comment.id}`} key={comment.id} className={`post-comment ${ highlight ? 'highlight' : ''}`}>
+                <div className="post-comment__header">
+                    <div>
+                        <UserTag id={comment.userId} /> commented <a href={`#comment-${comment.id}`}><DateTag timestamp={comment.createdDate} /></a>
+                    </div>
+                    <div>
+                        <PostCommentModeration postId={postId} postCommentId={id} />
+                    </div>
+                    <div className="post-comment__controls">
+                    </div>
+                </div>
+                <div className="post-comment__content">
+                    <div className="post-comment__moderated">
+                        <p>Comment removed by moderator.</p>
+
+                        { moderation.reason !== null && moderation.reason.length > 0 && 
+                            <p>{ moderation.reason }</p> 
+                        }
+
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
     return (
         <div id={`comment-${comment.id}`} key={comment.id} className={`post-comment ${ highlight ? 'highlight' : ''}`}>
             <div className="post-comment__header">
-                <div><UserTag id={comment.userId} /> commented <a href={`#comment-${comment.id}`}><DateTag timestamp={comment.createdDate} /></a></div>
+                <div>
+                    <UserTag id={comment.userId} /> commented <a href={`#comment-${comment.id}`}><DateTag timestamp={comment.createdDate} /></a>
+                </div>
+                <div>
+                    <PostCommentModeration postId={postId} postCommentId={id} />
+                </div>
                 <div className="post-comment__controls">
                     <PostCommentDotsMenu postId={postId} id={id} />
                 </div>

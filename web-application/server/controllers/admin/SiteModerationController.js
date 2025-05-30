@@ -88,13 +88,6 @@ module.exports = class SiteModerationController {
                 `You must be authenticated to retrieve posts.`)
         }
 
-        const canModerateSite = await this.permissionService.can(currentUser, 'moderate', 'Site')
-        if ( ! canModerateSite ) {
-            throw new ControllerError(403, 'not-authorized',
-                `User(${currentUser.id}) attempting to moderate site without permissions.`,
-                `You do not have permission to moderate Communities.`)
-        }
-
         const query = await this.createQuery(request)
         const results = await this.siteModerationDAO.selectSiteModerations(query)
         const meta = await this.siteModerationDAO.getSiteModerationPageMeta(query)
@@ -127,7 +120,7 @@ module.exports = class SiteModerationController {
         }
 
         let existing = null
-        if ( moderation.postId ) {
+        if ( moderation.postId && ! moderation.postCommentId) {
             existing = await this.siteModerationDAO.getSiteModerationByPostId(moderation.postId)
         } else if ( moderation.postCommentId ) {
             existing = await this.siteModerationDAO.getSiteModerationByPostCommentId(moderation.postCommentId)
@@ -142,6 +135,10 @@ module.exports = class SiteModerationController {
                 `SiteModeration(${existing.id}) already exists.`,
                 `A SiteModeration already exists for that entity.  Please PATCH instead.`)
         }
+        console.log(`Moderation: `)
+        console.log(moderation)
+        console.log(`Existing: `)
+        console.log(existing)
 
         const validationErrors = await this.validationService.validateSiteModeration(currentUser, moderation, existing)
         if ( validationErrors.length > 0 ) {
@@ -266,10 +263,18 @@ module.exports = class SiteModerationController {
         }
 
         if ( entity.status === 'rejected' ) {
-            if ( entity.postId !== undefined && entity.postId !== null ) {
+            if ( entity.postId !== null && entity.postCommentId === null) {
                 await this.notificationService.sendNotifications(
                     currentUser,
                     'Post:moderation:rejected',
+                    {
+                        moderation: entity
+                    }
+                )
+            } else if ( entity.postId !== null && entity.postCommentId !== null ) {
+                await this.notificationService.sendNotifications(
+                    currentUser,
+                    'Post:comment:moderation:rejected',
                     {
                         moderation: entity
                     }

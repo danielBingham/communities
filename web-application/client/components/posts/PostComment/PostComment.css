@@ -21,7 +21,7 @@
 }
 .post-comment .post-comment__header {
     display: grid;
-    grid-template-columns: 5fr 1fr;
+    grid-template-columns: auto 48px 24px;
     padding: 10px;
     font-size: 14px;
 }
@@ -32,4 +32,9 @@
 .post-comment .post-comment__content {
     padding: 0 10px 15px 10px;
     white-space: pre-line;
+}
+.post-comment .post-comment__content .post-comment__moderated {
+    text-align: center;
+    font-size: 14px;
+    font-family: monospace;
 }

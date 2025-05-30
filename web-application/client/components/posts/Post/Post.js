@@ -112,7 +112,7 @@ const Post = function({ id, expanded, showLoading }) {
                 </div>
                 <div className="post__content">
                     <div className="post__moderated">
-                        <p>Post removed by a moderator.</p>
+                        <p>Post removed by moderator.</p>
 
                         { moderation.reason !== null && moderation.reason.length > 0 && 
                             <p>{ moderation.reason }</p> 

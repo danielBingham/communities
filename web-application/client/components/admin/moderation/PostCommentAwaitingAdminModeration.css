@@ -1,0 +1,14 @@
+.post-comment-awaiting-admin-moderation {
+    box-sizing: border-box;
+    border: thin solid var(--main-border-color);
+    background-color: white;
+    border-radius: 7px;
+    padding: 10px;
+    width: 650px;
+    margin: 20px auto;
+    box-shadow: 0px 0px 5px -3px rgba(0, 0, 0, 0.25);
+}
+.post-comment-awaiting-admin-moderation__context {
+    text-align: center;
+    padding: 5px;
+}

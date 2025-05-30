@@ -24,6 +24,7 @@ const GroupDAO = require('../daos/GroupDAO')
 const GroupMemberDAO = require('../daos/GroupMemberDAO')
 const NotificationDAO = require('../daos/NotificationDAO')
 const PostDAO = require('../daos/PostDAO')
+const PostCommentDAO = require('../daos/PostCommentDAO')
 const PostSubscriptionDAO = require('../daos/PostSubscriptionDAO')
 const UserDAO = require('../daos/UserDAO')
 const UserRelationshipDAO = require('../daos/UserRelationshipDAO')
@@ -42,6 +43,7 @@ module.exports = class NotificationService {
         this.groupMemberDAO = new GroupMemberDAO(core)
         this.notificationDAO = new NotificationDAO(core)
         this.postDAO = new PostDAO(core)
+        this.postCommentDAO = new PostCommentDAO(core)
         this.postSubscriptionDAO = new PostSubscriptionDAO(core)
         this.userDAO = new UserDAO(core)
         this.userRelationshipDAO = new UserRelationshipDAO(core)
@@ -85,6 +87,30 @@ The Communities Team
                         `)
                 },
                 text: Handlebars.compile(`{{{commentAuthor.name}}} commented, "{{{commentIntro}}}...", on a post, "{{{postIntro}}}...", you subscribe to.`),
+                path: Handlebars.compile(`/{{{link}}}`) 
+            },
+            'Post:comment:moderation:rejected': {
+                email: {
+                    subject: Handlebars.compile('[Communities] Your comment, "{{{commentIntro}}}...", was removed by Communities moderators. '), 
+                    body: Handlebars.compile(`
+Hi {{{commentAuthor.name}}},
+
+Your comment, "{{{commentIntro}}}...", was removed by Communities moderators for
+violating our terms of service.   
+
+{{{ moderation.reason }}}
+
+The original text of the comment was:
+
+"{{{ comment.content }}}"
+
+Please reread our terms and site moderation policies, as multiple violations
+can result in a ban.
+
+The Communities Team
+                        `)
+                },
+                text: Handlebars.compile(`Communities moderators removed your comment, "{{{ commentIntro }}}..."`),
                 path: Handlebars.compile(`/{{{link}}}`) 
             },
             'Post:moderation:rejected': {
@@ -265,6 +291,7 @@ The Communities Team`)
 
         this.notificationMap = { 
             'Post:comment:create': this.sendNewCommentNotification.bind(this),
+            'Post:comment:moderation:rejected': this.sendPostCommentModerationNotification.bind(this),
             'Post:moderation:rejected': this.sendPostModerationNotification.bind(this),
             'User:friend:create': this.sendFriendRequestNotification.bind(this),
             'User:friend:update': this.friendRequestAcceptedNotification.bind(this),
@@ -376,6 +403,41 @@ The Communities Team`)
                 }
             }
         }
+    }
+
+    async sendPostCommentModerationNotification(currentUser, context, options) {
+        if( ! ('postId' in context.moderation) 
+            || context.moderation.postId === undefined 
+            || context.moderation.postId === null 
+        ) {
+            throw new ServiceError('missing-context',
+                `Moderation notification missing postId.`)
+        }
+
+        if ( ! ('postCommentId' in context.moderation) 
+            || context.moderation.postCommentId === undefined 
+            || context.moderation.postCommentId === null 
+        ) {
+            throw new ServiceError('missing-context',
+                `Moderation notification missing postCommentId.`)
+        }
+
+        context.comment = await this.postCommentDAO.getPostCommentById(context.moderation.postCommentId)
+        context.commentIntro = context.comment.content.substring(0,20)
+
+        context.commentAuthor = await this.userDAO.getUserById(context.comment.userId) 
+
+        context.post = await this.postDAO.getPostById(context.comment.postId)
+        context.postAuthor = await this.userDAO.getUserById(context.post.userId)
+
+        if ( context.post.groupId ) {
+            const group = await this.groupDAO.getGroupById(context.post.groupId)
+            context.link = `group/${group.slug}/${context.post.id}#comment-${context.comment.id}`
+        } else {
+            context.link = `${context.postAuthor.username}/${context.post.id}#comment-${context.comment.id}`
+        }
+
+        await this.createNotification(context.comment.userId, 'Post:comment:moderation:rejected', context, options) 
     }
 
     async sendPostModerationNotification(currentUser, context, options) {

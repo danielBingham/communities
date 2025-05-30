@@ -20,7 +20,17 @@
 
 const Uuid = require('uuid')
 
-const { NotificationService, PermissionService, PostDAO, UserRelationshipDAO, PostCommentDAO, PostSubscriptionDAO } = require('@communities/backend')
+const { 
+    NotificationService, 
+    PermissionService, 
+
+    PostDAO, 
+    UserRelationshipDAO, 
+    PostCommentDAO, 
+    PostSubscriptionDAO,
+    SiteModerationDAO
+
+} = require('@communities/backend')
 
 const ControllerError = require('../errors/ControllerError')
 
@@ -33,12 +43,16 @@ module.exports = class PostCommentController {
         this.postCommentDAO = new PostCommentDAO(core)
         this.userRelationshipDAO = new UserRelationshipDAO(core)
         this.postSubscriptionDAO = new PostSubscriptionDAO(core)
+        this.siteModerationDAO = new SiteModerationDAO(core)
 
         this.notificationService = new NotificationService(core)
         this.permissionService = new PermissionService(core)
     }
 
     async getRelations(currentUser, results, requestedRelations) {
+        const relations = {}
+
+        // -------- Post ------------------------------------------------------
         const postIds = []
         for(const commentId of results.list) {
             postIds.push(results.dictionary[commentId].postId)
@@ -48,16 +62,25 @@ module.exports = class PostCommentController {
             where: 'posts.id = ANY($1::uuid[])',
             params: [ postIds ]
         })
+        relations.posts = postResults.dictionary
 
+        // -------- PostSubscription ------------------------------------------
         const postSubscriptionResults = await this.postSubscriptionDAO.selectPostSubscriptions({
             where: 'post_subscriptions.user_id = $1 AND post_subscriptions.post_id = ANY($2::uuid[])',
             params: [ currentUser.id, postIds ]
         })
+        relations.postSubscriptions = postSubscriptionResults.dictionary
 
-        return {
-            posts: postResults.dictionary,
-            postSubscriptions: postSubscriptionResults.dictionary
+        // -------- SiteModeration --------------------------------------------
+        if ( this.core.features.has('62-admin-moderation-controls') ) {
+            const siteModerationResults = await this.siteModerationDAO.selectSiteModerations({
+                where: `site_moderation.post_comment_id = ANY($1::uuid[])`,
+                params: [ results.list ]
+            })
+            relations.siteModerations = siteModerationResults.dictionary
         }
+
+        return relations
     }
 
     async getPostComments(request, response) {
