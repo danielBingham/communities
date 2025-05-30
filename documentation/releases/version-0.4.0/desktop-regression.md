@@ -1,28 +1,10 @@
-# Full Regression Test
-
-This document contains a checklist of test cases to be run during a full
-regression of the platform. To run a full regression, run through the full
-checklist on Desktop and then again on Mobile.
-
-Create a directory under `releases/` named for the feature, eg.
-`19-private-groups` and place the checklist below in the `index.md` file. Copy
-the [Regression](#regression) section to a file with an appropriate name, eg.
-`pre-migration-desktop-regression.md` and work through it.
-
-- [ ] Run a full regression pre-migration to confirm feature flag works (if
-    applicable).
-    - [ ] On a Desktop browser, run through [Regression](#regression)
-    - [ ] On a Mobile browser, run through [Regression](#regression)
-- [ ] Run a full regression post-migration (if applicable) to confirm feature
-    works.
-    - [ ] On a Desktop browser, run through [Regression](#regression)
-    - [ ] On a Mobile browser, run through [Regression](#regression)
+# Desktop Regression
 
 ## Migrations
-- [ ] As Administrator, run any migrations associated with this release.
-- [ ] As Administrator, create content associated with those migrations. Confirm content creates.
-- [ ] As Administrator, rollback the migrations. Confirm migrations rollback cleanly.
-- [ ] As Administrator, run migrations forward again.
+- [x] As Administrator, run any migrations associated with this release.
+- [x] As Administrator, create content associated with those migrations. Confirm content creates.
+- [x] As Administrator, rollback the migrations. Confirm migrations rollback cleanly.
+- [x] As Administrator, run migrations forward again.
 
 ## Regression
 
@@ -31,42 +13,42 @@ the [Regression](#regression) section to a file with an appropriate name, eg.
 Cases covering the User Invitation and Registration flow, in which a user is
 sent an invitation email and may use it to register on the platform.
 
-- [ ] From the administrator (Admin) account invite a new user (communities-issue#.user1).
-    - [ ] As Admin, Confirm invitation is visible on the "Friend Requests" page.
-    - [ ] As User1, Accept the invite and register (Issue#.User1), referred to as User1
-    - [ ] As User1, accept the friend request and view Admin's profile page.
+- [x] From the administrator (Admin) account invite a new user (communities-issue#.user1).
+    - [x] As Admin, Confirm invitation is visible on the "Friend Requests" page.
+    - [x] As User1, Accept the invite and register (Issue#.User1), referred to as User1
+    - [x] As User1, accept the friend request and view Admin's profile page.
 
-- [ ] As User1, invite a new user (communities-issue#.user2).
-    - [ ] As User1, confirm invitation is visible on the "Friend Requests" page.
-    - [ ] As User1, from the same browser session attempt to accept the invite.
-        - [ ] Expectation: Error.
-    - [ ] As Admin, confirm the invitation is *not* visible on the "Friend Requests" page.
-    - [ ] From a different browser session accept the invite and register (Issue#.User2), referred to as User2.
-    - [ ] As User2, accept the friend request and view User1's profile page.
+- [x] As User1, invite a new user (communities-issue#.user2).
+    - [x] As User1, confirm invitation is visible on the "Friend Requests" page.
+    - [x] As User1, from the same browser session attempt to accept the invite.
+        - [x] Expectation: Error.
+    - [x] As Admin, confirm the invitation is *not* visible on the "Friend Requests" page.
+    - [x] From a different browser session accept the invite and register (Issue#.User2), referred to as User2.
+    - [x] As User2, accept the friend request and view User1's profile page.
 
-- [ ] As User2, invite a new user (communities-isssue#.user3).
-    - [ ] As User2, confirm the invitation is visible on the "Friend Requests" page.
-    - [ ] From a different browser session accept the invite and register (Issue#.User3), referred to as User3.
-    - [ ] As User3, accept the Friend Request and view User2's profile page.
+- [x] As User2, invite a new user (communities-isssue#.user3).
+    - [x] As User2, confirm the invitation is visible on the "Friend Requests" page.
+    - [x] From a different browser session accept the invite and register (Issue#.User3), referred to as User3.
+    - [x] As User3, accept the Friend Request and view User2's profile page.
 
 ### Friend Requests
 
 Cases covering sending friend requests, accepting friend requests, and
 rejecting friend requests.
 
-- [ ] As User2, send Admin a friend request.
-    - [ ] As admin, reject the friend request.  Confirm its removed.
+- [x] As User2, send Admin a friend request.
+    - [x] As admin, reject the friend request.  Confirm its removed.
 
-- [ ] As User2, send Admin a friend request.
-     - [ ] As Admin, accept the friend request. Confirm request accepted.
-     - [ ] As Admin, remove User2 as a friend.
+- [x] As User2, send Admin a friend request.
+     - [x] As Admin, accept the friend request. Confirm request accepted.
+     - [x] As Admin, remove User2 as a friend.
 
-- [ ] As User2, send Admin a friend request.
-    - [ ] As Admin, confirm friend request visible.
-    - [ ] As User2, cancel the friend request. Confirm removed.
-    - [ ] As Admin, confirm removed.
+- [x] As User2, send Admin a friend request.
+    - [x] As Admin, confirm friend request visible.
+    - [x] As User2, cancel the friend request. Confirm removed.
+    - [x] As Admin, confirm removed.
 
-- [ ] With two browser windows open, one As Admin and one As User2, have User2
+- [x] With two browser windows open, one As Admin and one As User2, have User2
      and Admin send each other simultaneous friend requests.  Confirm relationship
      confirmed.
 
@@ -75,37 +57,37 @@ rejecting friend requests.
 Cases covering the authentication system, logging in, logging out, reset
 password flow, etc.
 
-- [ ] As User1, log out.
-- [ ] As User1, attempt to log in with the wrong password. Confirm login fails.
-- [ ] As User1, log in with the right password.  Confirm login succeeds.
+- [x] As User1, log out.
+- [x] As User1, attempt to log in with the wrong password. Confirm login fails.
+- [x] As User1, log in with the right password.  Confirm login succeeds.
 
-- [ ] As User2, attempt to login with the wrong password.  Confirm login fails.
-- [ ] As User2, attempt to login with the right password. Confirm login succeeds.
+- [x] As User2, attempt to login with the wrong password.  Confirm login fails.
+- [x] As User2, attempt to login with the right password. Confirm login succeeds.
 
-- [ ] As User2, log out and request a password reset. Change User2's password.
-- [ ] As User2, log out and attempt to login with old password.  Confirm login fails.
-- [ ] As User2, attempt to login with new password.  Confirm login succeeds.
+- [x] As User2, log out and request a password reset. Change User2's password.
+- [x] As User2, log out and attempt to login with old password.  Confirm login fails.
+- [x] As User2, attempt to login with new password.  Confirm login succeeds.
 
 ### User Searching
 
 Cases covering searching for users.
 
-- [ ] As User2, on the Find Friends page, search for "Admin", confirm list filtered.
+- [x] As User2, on the Find Friends page, search for "Admin", confirm list filtered.
 
 ### Posting
 
 Cases covering making posts in all their forms and with all their attachments.
 
-- [ ] As User1, make a private post with just text.
-- [ ] As User1, make a private post with just an image.
-- [ ] As User1, make a post with just a link.
-- [ ] As User1, make a post with text and an image.
-- [ ] As User1, make a post with text and a link.
+- [x] As User1, make a private post with just text.
+- [x] As User1, make a private post with just an image.
+- [x] As User1, make a post with just a link.
+- [x] As User1, make a post with text and an image.
+- [x] As User1, make a post with text and a link.
 
-- [ ] As User1, write a post draft with a link.
-    - [ ] Navigate away from the home feed and back to feed.  Confirm draft remains. 
-    - [ ] Close the Communities browser window. Reopen and reload.  Confirm draft remains.
-    - [ ] Log out.  Log back in. Confirm draft is gone.
+- [x] As User1, write a post draft with a link.
+    - [x] Navigate away from the home feed and back to feed.  Confirm draft remains. 
+    - [x] Close the Communities browser window. Reopen and reload.  Confirm draft remains.
+    - [x] Log out.  Log back in. Confirm draft is gone.
 
 ### Reactions
 
