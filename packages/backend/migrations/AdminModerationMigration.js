@@ -78,16 +78,16 @@ module.exports = class AdminModerationMigration {
         await this.database.query(`ALTER TABLE users DROP COLUMN IF EXISTS site_role`, [])
         await this.database.query(`DROP TYPE user_site_role`, [])
 
-        await this.database.query(`DROP INDEX IF EXISTS site_moderation__post_comment_id`, [])
-        await this.database.query(`DROP INDEX IF EXISTS site_moderation__post_id`, [])
-        await this.database.query(`DROP INDEX IF EXISTS site_moeration__user_id`, [])
-        await this.database.query(`DROP TABLE IF EXISTS site_moderation`, [])
-
         await this.database.query(`DROP INDEX IF EXISTS site_moderation_events__site_moderation_id`, [])
         await this.database.query(`DROP INDEX IF EXISTS site_moderation_events__user_id`, [])
         await this.database.query(`DROP INDEX IF EXISTS site_moderation_events__post_id`, [])
         await this.database.query(`DROP INDEX IF EXISTS site_moderation_events__post_comment_id`, [])
         await this.database.query(`DROP TABLE IF EXISTS site_moderation_events`, [])
+
+        await this.database.query(`DROP INDEX IF EXISTS site_moderation__post_comment_id`, [])
+        await this.database.query(`DROP INDEX IF EXISTS site_moderation__post_id`, [])
+        await this.database.query(`DROP INDEX IF EXISTS site_moeration__user_id`, [])
+        await this.database.query(`DROP TABLE IF EXISTS site_moderation`, [])
 
         await this.database.query(`DROP TYPE IF EXISTS site_moderation_status`, [])
     }
