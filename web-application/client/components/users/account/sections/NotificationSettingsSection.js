@@ -66,6 +66,11 @@ const NotificationSettingsSection = function({}) {
                     toggled={'Post:moderation:rejected' in notifications && notifications['Post:moderation:rejected'].email === false ? false : true} 
                     onClick={(e) => toggleNotificationSetting('Post:moderation:rejected')} />
                 <Toggle 
+                    label="Moderated Comment"
+                    explanation="Recieve an email notification when one of your comments is moderated."
+                    toggled={'Post:comment:moderation:rejected' in notifications && notifications['Post:comment:moderation:rejected'].email === false ? false : true} 
+                    onClick={(e) => toggleNotificationSetting('Post:comment:moderation:rejected')} />
+                <Toggle 
                     label="Friend Request Recieved"
                     explanation="Recieve an email notification when someone sends you a friend request."
                     toggled={'User:friend:create' in notifications && notifications['User:friend:create'].email === false ? false : true} 

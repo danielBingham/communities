@@ -970,14 +970,6 @@ module.exports = class ValidationService {
                             message: `Post not found for '${siteModeration.postId}'.`
                         })
                     }
-
-                    if ( this.has(siteModeration, 'postCommentId') && siteModeration.postCommentId !== null ) {
-                        errors.push({
-                            type: 'postId:conflict',
-                            log: `Only one of 'postId' and 'postCommentId' may be set.`,
-                            message: `Only one of 'postId' and 'postCommentId' may be set.`
-                        })
-                    }
                 }
             }
         }
@@ -1006,14 +998,6 @@ module.exports = class ValidationService {
                             type: 'postCommentId:not-found',
                             log: `PostComment not found for '${siteModeration.postCommentId}'.`,
                             message: `PostComment not found for '${siteModeration.postCommentId}'.`
-                        })
-                    }
-
-                    if ( this.has(siteModeration, 'postId') && siteModeration.postId !== null ) {
-                        errors.push({
-                            type: 'postCommentId:conflict',
-                            log: `Only one of 'postCommentId' and 'postId' may be set.`,
-                            message: `Only one of 'postCommentId' and 'postId' may be set.`
                         })
                     }
                 }

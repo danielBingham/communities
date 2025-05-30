@@ -7,8 +7,8 @@ import { useRequest } from '/lib/hooks/useRequest'
 import { getGroups } from '/state/groups'
 import { getUsers } from '/state/users'
 
-import PostList from '/components/posts/list/PostList'
-import PostForm from '/components/posts/form/PostForm'
+import PostList from '/components/posts/PostList'
+import PostForm from '/components/posts/PostForm'
 
 import Spinner from '/components/Spinner'
 

@@ -1,0 +1,17 @@
+.flag-post-comment svg {
+    width: 18px;
+    height: 18px;
+    margin-bottom: -4px;
+}
+.flag-post-comment.are-you-sure {
+    max-width: 600px;
+}
+.flag-post-comment.are-you-sure .flag-post-comment__explanation {
+    text-align: left;
+}
+.flag-post-comment.flag-post-comment__flagged, .flag-post-comment.flag-post-comment__rejected {
+    color: var(--danger-color-light) !important;
+}
+.flag-post-comment.flag-post-comment__approved {
+    color: var(--success-color-light) !important;
+}

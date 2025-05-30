@@ -567,31 +567,6 @@ describe('ValidationService.validateSiteModeration()', function() {
                 expect(errors[0].type).toBe('postId:not-found')
             })
 
-            it("Should error when postId and postCommentId are both set", async function() {
-                const service = new ValidationService(core)
-
-                // Moderator User
-                const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
-
-                const siteModeration = { 
-                    userId: 'f5e9e853-6803-4a74-98c3-23fb0933062f',
-                    status: 'flagged',
-                    postId:  '703955d2-77df-4635-8ab8-b9108fef217f',
-                    postCommentId: 'dea0084d-b034-4d74-a1c1-f0f17abd5f9e'
-                }
-
-                core.database.query.mockReturnValue(undefined)
-                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'f5e9e853-6803-4a74-98c3-23fb0933062f' }] })
-                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '703955d2-77df-4635-8ab8-b9108fef217f' }] })
-                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'dea0084d-b034-4d74-a1c1-f0f17abd5f9e' }] })
-
-                const errors = await service.validateSiteModeration(currentUser, siteModeration, null)
-
-                expect(errors.length).toBe(2)
-                expect(errors[0].type).toBe('postId:conflict')
-                expect(errors[1].type).toBe('postCommentId:conflict')
-            })
-
             it("Should pass a valid postId", async function() {
                 const service = new ValidationService(core)
 
@@ -677,31 +652,6 @@ describe('ValidationService.validateSiteModeration()', function() {
 
                 expect(errors.length).toBe(1)
                 expect(errors[0].type).toBe('postCommentId:not-found')
-            })
-
-            it("Should error when postId and postCommentId are both set", async function() {
-                const service = new ValidationService(core)
-
-                // Moderator User
-                const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
-
-                const siteModeration = { 
-                    userId: 'f5e9e853-6803-4a74-98c3-23fb0933062f',
-                    status: 'flagged',
-                    postId:  '703955d2-77df-4635-8ab8-b9108fef217f',
-                    postCommentId: 'dea0084d-b034-4d74-a1c1-f0f17abd5f9e'
-                }
-
-                core.database.query.mockReturnValue(undefined)
-                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'f5e9e853-6803-4a74-98c3-23fb0933062f' }] })
-                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '703955d2-77df-4635-8ab8-b9108fef217f' }] })
-                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'dea0084d-b034-4d74-a1c1-f0f17abd5f9e' }] })
-
-                const errors = await service.validateSiteModeration(currentUser, siteModeration, null)
-
-                expect(errors.length).toBe(2)
-                expect(errors[0].type).toBe('postId:conflict')
-                expect(errors[1].type).toBe('postCommentId:conflict')
             })
 
             it("Should pass a valid postCommentId", async function() {

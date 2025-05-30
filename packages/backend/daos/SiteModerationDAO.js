@@ -160,7 +160,7 @@ module.exports = class SiteModerationDAO extends DAO {
         let order = query.order ? `${query.order}` : `site_moderation.created_date ASC`
 
         let paging = ''
-        if ( page > 0 ) {
+        if ( 'page' in query && query.page !== undefined && query.page !== null) {
             const limit = query.perPage ? query.perPage : PAGE_SIZE 
             const offset = limit * (page-1) 
 
@@ -170,14 +170,16 @@ module.exports = class SiteModerationDAO extends DAO {
             `
         }
 
-        const result = await this.core.database.query(`
+        const sql = `
             SELECT
                 ${this.getSiteModerationSelectionString()}
             FROM site_moderation
             ${where}
             ORDER BY ${order}
             ${paging}
-        `, params)
+        `
+
+        const result = await this.core.database.query(sql, params)
 
         if ( result.rows.length <= 0 ) {
             return {

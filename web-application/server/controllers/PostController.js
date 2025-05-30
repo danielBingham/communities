@@ -116,8 +116,8 @@ module.exports = class PostController {
 
         if ( this.core.features.has('62-admin-moderation-controls') ) {
             const siteModerationResults = await this.siteModerationDAO.selectSiteModerations({
-                where: `site_moderation.post_id = ANY($1::uuid[])`,
-                params: [ results.list ]
+                where: `site_moderation.post_id = ANY($1::uuid[]) OR site_moderation.post_comment_id = ANY($2::uuid[])`,
+                params: [ results.list, postCommentResults.list ]
             })
 
             relations.siteModerations = siteModerationResults.dictionary

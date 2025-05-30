@@ -169,6 +169,12 @@ module.exports = class PermissionService {
             throw new ServiceError('missing-context', `'post' missing from context.`) 
         }
 
+        // Site moderates can always view posts.
+        const canModerateSite = await this.canModerateSite(user)
+        if ( canModerateSite ) {
+            return true
+        }
+
         // If the post is a Group post, then group permissions override post
         // permissions. It depends on type of group:
         //
