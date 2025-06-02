@@ -444,7 +444,7 @@ The Communities Team`)
 
         // Don't send notifications to user's who have lost the right to view
         // the post they commented on.
-        const canViewPost = await this.permissionService.can(context.comment, 'view', 'Post', { post: context.post, group: group })
+        const canViewPost = await this.permissionService.can(context.commentAuthor, 'view', 'Post', { post: context.post, group: group })
         if ( ! canViewPost ) {
             return
         }
