@@ -60,15 +60,20 @@ module.exports = class ImageService {
         // use the ratio from one dimension for both of them, but there are
         // rounding errors that can cause issues in large images.  So we need
         // the ratio from each dimension and to use it accordingly.
-        const widthratio = dimensions.width / parseInt(renderedDimensions.width)
-        const heightRatio = dimensions.height / parseInt(renderedDimensions.height)
-
-        if ( ratio <= 0 ) {
+        const widthRatio = dimensions.width / parseInt(renderedDimensions.width)
+        if ( widthRatio <= 0 ) {
             throw new ServiceError('validation-error',
-                `Invalid ratio '${ratio}'.  Cannot crop.`)
+                `Invalid widthRatio '${widthRatio}'.  Cannot crop.`)
         }
 
-        const x = Math.floor(parseInt(crop.x) * ratio)
+        const heightRatio = dimensions.height / parseInt(renderedDimensions.height)
+        if ( heightRatio <= 0 ) {
+            throw new ServiceError('validation-error',
+                `Invalid heightRatio '${heightRatio}'.  Cannot crop.`)
+        }
+
+
+        const x = Math.floor(parseInt(crop.x) * widthRatio)
         const y = Math.floor(parseInt(crop.y) * heightRatio)
         if ( x === NaN || y === NaN ) {
             throw new ServiceError('validation-error',
@@ -85,7 +90,7 @@ module.exports = class ImageService {
             y = 0
         }
 
-        let width = Math.floor(parseInt(crop.width) * ratio)
+        let width = Math.floor(parseInt(crop.width) * widthRatio)
         let height = Math.floor(parseInt(crop.height) * heightRatio )
 
         if ( width <= 0 ) {
@@ -116,7 +121,7 @@ module.exports = class ImageService {
             this.core.logger.info(file)
             this.core.logger.info(dimensions)
             this.core.logger.info(crop)
-            this.core.logger.info(`Ratio: ${ratio}, x: ${x}, y: ${y}, width: ${width}, height: ${height}`)
+            this.core.logger.info(`widthRatio: ${widthRatio}, heightRatio: ${heightRatio}, x: ${x}, y: ${y}, width: ${width}, height: ${height}`)
             throw error 
         }
 
