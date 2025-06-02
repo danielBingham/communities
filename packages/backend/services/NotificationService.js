@@ -30,6 +30,7 @@ const UserDAO = require('../daos/UserDAO')
 const UserRelationshipDAO = require('../daos/UserRelationshipDAO')
 
 const EmailService = require('./EmailService')
+const PermissionService = require('./PermissionService')
 
 const ServiceError = require('../errors/ServiceError')
 
@@ -49,6 +50,7 @@ module.exports = class NotificationService {
         this.userRelationshipDAO = new UserRelationshipDAO(core)
 
         this.emailService = new EmailService(core)
+        this.permissionService = new PermissionService(core)
 
         this.notificationDefinitions = { 
             'Post:comment:create': {
@@ -422,6 +424,8 @@ The Communities Team`)
                 `Moderation notification missing postCommentId.`)
         }
 
+
+
         context.comment = await this.postCommentDAO.getPostCommentById(context.moderation.postCommentId)
         context.commentIntro = context.comment.content.substring(0,20)
 
@@ -430,11 +434,19 @@ The Communities Team`)
         context.post = await this.postDAO.getPostById(context.comment.postId)
         context.postAuthor = await this.userDAO.getUserById(context.post.userId)
 
+        let group = null
         if ( context.post.groupId ) {
-            const group = await this.groupDAO.getGroupById(context.post.groupId)
+            group = await this.groupDAO.getGroupById(context.post.groupId)
             context.link = `group/${group.slug}/${context.post.id}#comment-${context.comment.id}`
         } else {
             context.link = `${context.postAuthor.username}/${context.post.id}#comment-${context.comment.id}`
+        }
+
+        // Don't send notifications to user's who have lost the right to view
+        // the post they commented on.
+        const canViewPost = await this.permissionService.can(context.comment, 'view', 'Post', { post: context.post, group: group })
+        if ( ! canViewPost ) {
+            return
         }
 
         await this.createNotification(context.comment.userId, 'Post:comment:moderation:rejected', context, options) 
@@ -449,17 +461,24 @@ The Communities Team`)
         context.post = await this.postDAO.getPostById(context.moderation.postId)
         context.postIntro = context.post.content.substring(0,20)
 
-        const postAuthor = await this.userDAO.getUserById(context.post.userId) 
-        context.postAuthor = postAuthor
+        context.postAuthor = await this.userDAO.getUserById(context.post.userId) 
 
+        let group = null
         if ( context.post.groupId ) {
-            const group = await this.groupDAO.getGroupById(context.post.groupId)
+            group = await this.groupDAO.getGroupById(context.post.groupId)
             context.link = `group/${group.slug}/${context.post.id}`
         } else {
             context.link = `${context.postAuthor.username}/${context.post.id}`
         }
 
-        await this.createNotification(postAuthor.id, 'Post:moderation:rejected', context, options) 
+        // Don't send notifications to users who have lost the right to view
+        // their post.
+        const canViewPost = await this.permissionService.can(context.postAuthor, 'view', 'Post', { post: context.post, group: group })
+        if ( ! canViewPost ) {
+            return
+        }
+
+        await this.createNotification(context.postAuthor.id, 'Post:moderation:rejected', context, options) 
     }
 
     async sendFriendRequestNotification(currentUser, context, options) {
