@@ -30,63 +30,63 @@ const SCHEMA = {
         table: 'users',
         fields: {
             'id': {
-                insert: 'primary',
-                update: 'primary',
-                select: 'always',
+                insert: DAO.INSERT.PRIMARY,
+                update: DAO.UPDATE.PRIMARY,
+                select: DAO.SELECT.ALWAYS,
                 key: 'id'
             },
             'file_id': {
-                insert: 'allowed',
-                update: 'allowed',
-                select: 'always',
+                insert: DAO.INSERT.ALLOW,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.ALWAYS,
                 key: 'fileId'
             },
             'name': {
-                insert: 'allowed',
-                update: 'allowed',
-                select: 'always',
+                insert: DAO.INSERT.ALLOW,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.ALWAYS,
                 key: 'name',
             },
             'username': {
-                insert: 'allowed',
-                update: 'allowed',
-                select: 'always',
+                insert: DAO.INSERT.ALLOW,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.ALWAYS,
                 key: 'username'
             },
             'email': {
-                insert: 'required',
-                update: 'allowed',
-                select: 'request',
+                insert: DAO.INSERT.REQUIRE,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.REQUEST,
                 key: 'email'
             },
             'password': {
-                insert: 'allowed',
-                update: 'allowed',
-                select: 'never',
+                insert: DAO.INSERT.ALLOW,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.NEVER,
                 key: 'password'
             },
             'status': {
-                insert: 'allowed',
-                update: 'allowed',
-                select: 'request',
+                insert: DAO.INSERT.ALLOW,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.REQUEST,
                 key: 'status'
             },
             'permissions': {
-                insert: 'denied',
-                update: 'denied',
-                select: 'request',
+                insert: DAO.INSERT.DENY,
+                update: DAO.UPDATE.DENY,
+                select: DAO.SELECT.REQUEST,
                 key: 'permissions'
             },
             'site_role': {
-                insert: 'denied',
-                update: 'allowed',
-                select: 'request',
+                insert: DAO.INSERT.DENY,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.REQUEST,
                 key: 'siteRole',
                 needsFeature: '62-admin-moderation-controls'
             },
             'settings': {
                 needsFeature: '1-notification-settings',
-                insert: 'allowed',
+                insert: DAO.INSERT.ALLOW,
                 insertDefault: function() {
                     return {
                         notifications: {
@@ -113,54 +113,54 @@ const SCHEMA = {
                         }
                     }
                 },
-                update: 'allowed',
-                select: 'request',
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.REQUEST,
                 key: 'settings'
             },
             'notices': {
                 needsFeature: '3-notices',
-                insert: 'allowed',
+                insert: DAO.INSERT.ALLOW,
                 insertDefault: function() {
                     return {}
                 },
-                update: 'allowed',
-                select: 'request',
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.REQUEST,
                 key: 'notices'
             },
             'about': {
-                insert: 'allowed',
-                update: 'allowed',
-                select: 'always',
+                insert: DAO.INSERT.ALLOW,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.ALWAYS,
                 key: 'about'
             },
             'location': {
-                insert: 'allowed',
-                update: 'allowed',
-                select: 'request',
+                insert: DAO.INSERT.ALLOW,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.REQUEST,
                 key: 'location'
             },
             'invitations': {
-                insert: 'allowed',
+                insert: DAO.INSERT.ALLOW,
                 insertDefault: function() {
                     return 50
                 },
-                update: 'allowed',
-                select: 'request',
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.REQUEST,
                 key: 'invitations'
             },
             'created_date': {
-                insert: 'override',
+                insert: DAO.INSERT.OVERRIDE,
                 insertOverride: 'now()',
-                update: 'denied',
-                select: 'always',
+                update: DAO.UPDATE.DENY,
+                select: DAO.SELECT.ALWAYS,
                 key: 'createdDate'
             },
             'updated_date': {
-                insert: 'override',
+                insert: DAO.INSERT.OVERRIDE,
                 insertOverride: 'now()',
-                update: 'override',
+                update: DAO.UPDATE.OVERRIDE,
                 updateOverride: 'now()',
-                select: 'always',
+                select: DAO.SELECT.ALWAYS,
                 key: 'updatedDate'
             }
         }

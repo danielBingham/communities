@@ -23,6 +23,29 @@ const Uuid = require('uuid')
 const DAOError = require('../errors/DAOError')
 
 module.exports = class DAO {
+    // Valid settings for the `insert` property of a field.
+    static INSERT = {
+        PRIMARY: 'primary', // This field is a primary key.
+        REQUIRE: 'required', // This field is required on insert.
+        DENY: 'denied', // This field may not be inserted.
+        ALLOW: 'allowed', // This field may optionally be inserted.
+        OVERRIDE: 'override' // Override this field when inserting using `insertOverride`.
+    }
+    // Valid settings for the `update` property of a field.
+    static UPDATE = {
+        PRIMARY: 'primary', // This field is a primary key.
+        REQUIRE: 'required', // This field is required when updating.
+        DENY: 'denied', // This field may not be updated.
+        ALLOW: 'allowed', // This field may optionally be updated.
+        OVERRIDE: 'override' // Override this field when updating using `updateOverride`.
+    }
+    // Valid settings for the `select` property of a field.
+    static SELECT = {
+        ALWAYS: 'always', // Always select this field.
+        REQUEST: 'request', // Only select this field when requested.
+        NEVER: 'never', // Never select this field.  It is never read from the database.
+        OVERRIDE: 'override' // Override this field when selecting.
+    }
 
     constructor(core) {
         this.core = core
@@ -39,11 +62,11 @@ module.exports = class DAO {
                 continue
             }
 
-            if ( meta.select == 'never' || meta.select == 'override' ) {
+            if ( meta.select == DAO.SELECT.NEVER || meta.select == DAO.SELECT.OVERRIDE ) {
                 continue
             }
 
-            if ( meta.select == 'request' && ! fields.includes(field) && ! selectAll ) {
+            if ( meta.select == DAO.SELECT.REQUEST && ! fields.includes(field) && ! selectAll ) {
                 continue
             }
 
@@ -60,7 +83,7 @@ module.exports = class DAO {
         for(const [field, meta] of Object.entries(this.entityMaps[entityName].fields)) {
             if ( meta.needsFeature && ! this.core.features.has(meta.needsFeature) ){
                 entity[meta.key] = null
-            } else if ( meta.select === 'override' ) {
+            } else if ( meta.select === DAO.SELECT.OVERRIDE ) {
                 entity[meta.key] = meta.selectOverride()
             } else if ( row[`${entityName}_${meta.key}`] === undefined ) {
                 entity[meta.key] = null

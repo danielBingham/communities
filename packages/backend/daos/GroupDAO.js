@@ -26,61 +26,61 @@ const SCHEMA = {
         table: 'groups',
         fields: {
             'id': {
-                insert: 'primary',
-                update: 'primary',
-                select: 'always',
+                insert: DAO.INSERT.PRIMARY,
+                update: DAO.UPDATE.PRIMARY,
+                select: DAO.SELECT.ALWAYS,
                 key: 'id'
             },
             'type': {
-                insert: 'required',
-                update: 'allowed',
-                select: 'always',
+                insert: DAO.INSERT.REQUIRE,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.ALWAYS,
                 key: 'type'
             },
             'title': {
-                insert: 'required',
-                update: 'allowed',
-                select: 'always',
+                insert: DAO.INSERT.REQUIRE,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.ALWAYS,
                 key: 'title'
             },
             'slug': {
-                insert: 'required',
-                update: 'allowed',
-                select: 'always',
+                insert: DAO.INSERT.REQUIRE,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.ALWAYS,
                 key: 'slug'
             },
             'about': {
-                insert: 'alowed',
-                update: 'allowed',
-                select: 'always',
+                insert: DAO.INSERT.ALLOW,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.ALWAYS,
                 key: 'about'
             },
             'file_id': {
-                insert: 'allowed',
-                update: 'allowed',
-                select: 'always',
+                insert: DAO.INSERT.ALLOW,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.ALWAYS,
                 key: 'fileId'
             },
             'entrance_questions': {
-                insert: 'allowed',
+                insert: DAO.INSERT.ALLOW,
                 insertDefault: () => {},
-                update: 'allowed',
-                select: 'always',
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.ALWAYS,
                 key: 'entranceQuestions'
             },
             'created_date': {
-                insert: 'override',
+                insert: DAO.INSERT.OVERRIDE,
                 insertOverride: 'now()',
-                update: 'denied',
-                select: 'always',
+                update: DAO.UPDATE.DENY,
+                select: DAO.SELECT.ALWAYS,
                 key: 'createdDate'
             },
             'updated_date': {
-                insert: 'override',
+                insert: DAO.INSERT.OVERRIDE,
                 insertOverride: 'now()',
-                update: 'override',
+                update: DAO.UPDATE.OVERRIDE,
                 updateOverride: 'now()',
-                select: 'always',
+                select: DAO.SELECT.ALWAYS,
                 key: 'updatedDate'
             }
         }

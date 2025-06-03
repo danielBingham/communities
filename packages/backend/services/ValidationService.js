@@ -20,6 +20,8 @@
 
 const uuid = require('uuid')
 
+const { util, validation } = require('@communities/shared')
+
 const ServiceError = require('../errors/ServiceError')
 
 const GroupDAO = require('../daos/GroupDAO')
@@ -392,7 +394,7 @@ module.exports = class ValidationService {
 
         // These are fields the user is never allowed to set.
         const alwaysDisallowedFields = [
-            'status', 'permissions', 'invitations', 'createdDate', 'updatedDate'
+            'permissions', 'invitations', 'createdDate', 'updatedDate'
         ]
 
         for(const disallowedField of alwaysDisallowedFields ) {
@@ -416,7 +418,7 @@ module.exports = class ValidationService {
             // The user is being invited.  Only email is required or allowed.
             if ( type === 'invitation' || type === 'reinvitation' ) {
                 const disallowedFields = [
-                    'fileId', 'name', 'username', 'password', 'settings', 'notices', 'about', 'location'
+                    'fileId', 'name', 'username', 'password', 'settings', 'notices', 'about', 'location', 'status'
                 ]
 
                 for(const disallowedField of disallowedFields ) {
@@ -441,7 +443,7 @@ module.exports = class ValidationService {
             else if ( type === 'registration' ) {
                 // Some fields we don't allow the user to set on registration,
                 // though they may be allowed to edit them later.
-                const disallowedFields = [ 'settings', 'notices' ]
+                const disallowedFields = [ 'settings', 'notices', 'status' ]
 
                 for(const disallowedField of disallowedFields ) {
                     if ( this.has(user, disallowedField) ) {
@@ -494,7 +496,7 @@ module.exports = class ValidationService {
 
                 // Some fields we don't allow the user to set on registration,
                 // though they may be allowed to edit them later.
-                const disallowedFields = [ 'settings', 'notices' ]
+                const disallowedFields = [ 'settings', 'notices', 'status' ]
 
                 for(const disallowedField of disallowedFields ) {
                     if ( this.has(user, disallowedField) ) {
@@ -524,7 +526,7 @@ module.exports = class ValidationService {
 
                 // If we're reseting our password, the only field we're allowed
                 // to change is the password field.
-                const disallowedFields = [ 'settings', 'notices', 'email', 'name', 'username' ]
+                const disallowedFields = [ 'settings', 'notices', 'email', 'name', 'username', 'status' ]
 
                 for(const disallowedField of disallowedFields ) {
                     if ( this.has(user, disallowedField) ) {
@@ -549,7 +551,23 @@ module.exports = class ValidationService {
                 }
 
 
-            } else if ( type === 'authenticated-edit' || type === 'admin-edit' ) {
+            } else if ( type === 'authenticated-edit' ) {
+                // With password authentication, they are allowed to change any
+                // of the editable fields and not required to change any of
+                // them.  `username` is not editable and can only be set at
+                // user creation.
+                const disallowedFields = [ 'username', 'status' ]
+
+                for(const disallowedField of disallowedFields ) {
+                    if ( this.has(user, disallowedField) ) {
+                        errors.push({
+                            type: `${disallowedField}:not-allowed`,
+                            log: `Editting ${disallowedField} is not allowed.`,
+                            message: `You may not edit '${disallowedField}'.`
+                        })
+                    }
+                }
+            } else if ( type === 'admin-edit' ) {
                 // With password authentication, they are allowed to change any
                 // of the editable fields and not required to change any of
                 // them.  `username` is not editable and can only be set at
@@ -565,9 +583,10 @@ module.exports = class ValidationService {
                         })
                     }
                 }
+
             } else if ( type === 'edit' ) {
                 // With out authentication they are only barred from chaning username, email, or password.
-                const disallowedFields = [ 'email', 'password', 'username' ]
+                const disallowedFields = [ 'email', 'password', 'username', 'status' ]
 
                 for(const disallowedField of disallowedFields ) {
                     if ( this.has(user, disallowedField) ) {
@@ -778,6 +797,38 @@ module.exports = class ValidationService {
                     log: `The 'fileId' must be a valid UUID.`,
                     message: `The 'fileId' you have for your profile picture must be either 'null' or a valid UUID.`
                 })
+            }
+        }
+
+        if ( this.has(user, 'status') ) {
+            if ( user.status === null ) {
+                errors.push({
+                    type: `status:null`,
+                    log: `Status cannot be null.`,
+                    message: `Status cannot be null.`
+                })
+            } else if ( typeof user.status !== 'string' ) {
+                errors.push({
+                    type: `status:invalid-type`,
+                    log: `${typeof user.status} is an invalid type for status.`,
+                    message: `${typeof user.status} is an invalid type for status.`
+                })
+            } else {
+                if ( user.status !== 'banned' && user.status !== 'confirmed' ) {
+                    errors.push({
+                        type: `status:invalid`,
+                        log: `'${user.status}' is not a valid status.`,
+                        message: `Status may only be updated to one of 'banned' or 'confirmed'.`
+                    })
+                }
+
+                if ( existing.status !== 'banned' && existing.status !== 'confirmed' ) {
+                    errors.push({
+                        type: `status:not-authorized`,
+                        log: `User attempting to update status for unconfirmed user.`,
+                        message: `You may only update status to ban confirmed users or unban previously banned users.`
+                    })
+                }
             }
         }
 
@@ -1003,6 +1054,111 @@ module.exports = class ValidationService {
                 }
             }
         }
+
+        return errors
+    }
+
+    async validateBlocklist(currentUser, blocklist, existing) {
+        const errors = []
+
+        // ================== Validate Field Presence =========================
+        // Before we validate the content of the fields, we're going to validate
+        // whether they can be set or changed at all.
+
+        // These are fields the user is never allowed to set.
+        const alwaysDisallowedFields = [
+            'createdDate', 'updatedDate'
+        ]
+
+        for(const disallowedField of alwaysDisallowedFields ) {
+            if ( util.objectHas(blocklist, disallowedField) ) {
+                errors.push({
+                    type: `${disallowedField}:not-allowed`,
+                    log: `${disallowedField} is not allowed.`,
+                    message: `You may not set '${disallowedField}'.`
+                })
+            }
+        }
+
+        // If we have invalid fields set, then we don't need to go any further.
+        if ( errors.length > 0 ) {
+            return errors
+        }
+
+        // We're creating a blocklist.
+        if ( existing === null || existing === undefined ) {
+            const requiredFields = [
+                'userId', 'domain'
+            ]
+
+            for(const requiredField of requiredFields) {
+                if ( ! util.objectHas(blocklist, requiredField) || blocklist[requiredField] === null ) {
+                    errors.push({
+                        type: `${requiredField}:missing`,
+                        log: `${requiredField} is required.`,
+                        message: `${requiredField} is required.`
+                    })
+                }
+            }
+        } 
+        // We're editing a blocklist.
+        else {
+            if ( util.objectHas(blocklist, 'id') && blocklist.id !== existing.id ) {
+                throw new ServiceError('entity-mismatch',
+                    `Wrong 'existing' entity.`)
+            }
+
+            const disallowedFields = [
+                'userId', 'domain'
+            ]
+
+            for(const disallowedField of disallowedFields) {
+                if ( util.objectHas(blocklist, disallowedField) || blocklist[disallowedField] !== existing[disallowedField]) {
+                    errors.push({
+                        type: `${disallowedField}:not-allowed`,
+                        log: `${disallowedField} may not be updated.`,
+                        message: `${disallowedField} may not be updated.`
+                    })
+                }
+            }
+        }
+
+        // If we have invalid fields set, then we don't need to go any further.
+        if ( errors.length > 0 ) {
+            return errors
+        }
+
+        // Do basic validation the fields.
+        const validationErrors = validation.entities.Blocklist.validate(blocklist)
+        if ( validationErrors.all.length > 0 ) {
+            errors.push(...validationErrors.all)
+        }
+
+        // If we have invalid fields set, then we don't need to go any further.
+        if ( errors.length > 0 ) {
+            return errors
+        }
+
+        // Do backend specific validation.
+        
+        if ( util.objectHas(blocklist, 'userId') ) {
+            const userResults = await this.core.database.query(`SELECT id FROM users WHERE id = $1`, [ blocklist.userId ])
+            if ( userResults.rows.length <= 0 ) {
+                errors.push({
+                    type: `userId:not-found`,
+                    log: `No user found for userId '${blocklist.userId}'.`,
+                    message: `No user found for userId.`
+                })
+            }
+
+            if ( currentUser.id !== blocklist.userId ) {
+                errors.push({
+                    type: `userId:not-authorized`,
+                    log: `User may not create a blocklist for another user.`,
+                    message: `You may not create a blocklist for another user.`
+                })
+            }
+        } 
 
         return errors
     }

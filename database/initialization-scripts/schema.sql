@@ -32,11 +32,12 @@ CREATE TABLE features (
     updated_date timestamptz
 );
 
+
 /******************************************************************************
  * Users 
  *****************************************************************************/
 
-CREATE TYPE user_status AS ENUM('invited', 'unconfirmed', 'confirmed');
+CREATE TYPE user_status AS ENUM('invited', 'unconfirmed', 'confirmed', 'banned');
 CREATE TYPE user_permissions AS ENUM('user', 'moderator', 'admin', 'superadmin');
 CREATE TYPE user_site_role AS ENUM('user', 'moderator', 'admin', 'superadmin');
 
@@ -108,6 +109,20 @@ CREATE TABLE notifications (
 );
 CREATE INDEX notifications__user_id ON notifications (user_id);
 
+/******************************************************************************
+ * Email Domain Blocklist
+ ******************************************************************************/
+
+CREATE TABLE blocklist (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id uuid REFERENCES users(id) ON DELETE SET NULL DEFAULT NULL, 
+    domain text NOT NULL,
+    notes text DEFAULT '',
+    created_date timestamptz,
+    updated_date timestamptz
+);
+CREATE INDEX blocklist__user_id ON blocklist (user_id);
+CREATE INDEX blocklist__domain ON blocklist (domain);
 
 /******************************************************************************
  * Tokens

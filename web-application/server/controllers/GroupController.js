@@ -348,6 +348,5 @@ module.exports = class GroupController {
             entity: existing,
             relations: {}
         })
-
     }
 }

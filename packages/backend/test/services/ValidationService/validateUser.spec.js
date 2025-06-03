@@ -38,7 +38,6 @@ describe('ValidationService.validateUser()', function() {
         const service = new ValidationService(core)
 
         const user = {
-            status: 'set',
             permissions: 'set',
             invitations: 10,
             createdDate: 'set',
@@ -47,14 +46,13 @@ describe('ValidationService.validateUser()', function() {
 
         const errors = await service.validateUser(user, null, null)
 
-        expect(errors.length).toBe(5)
+        expect(errors.length).toBe(4)
     })
 
     it('Should treat an invalid field set to `null` as set', async function() {
         const service = new ValidationService(core)
 
         const user = {
-            status: null,
             permissions: null,
             invitations: null,
             createdDate: null,
@@ -63,21 +61,20 @@ describe('ValidationService.validateUser()', function() {
 
         const errors = await service.validateUser(user, null, null)
 
-        expect(errors.length).toBe(5)
+        expect(errors.length).toBe(4)
     })
 
     it('Should error on any combination of set invalid fields', async function() {
         const service = new ValidationService(core)
 
         const user = {
-            status: null,
             invitations: 10,
             updatedDate: null
         }
 
         const errors = await service.validateUser(user, null, null)
 
-        expect(errors.length).toBe(3)
+        expect(errors.length).toBe(2)
     })
 
     describe('an invitation', function() {
@@ -92,12 +89,13 @@ describe('ValidationService.validateUser()', function() {
                 settings: {},
                 notices: {},
                 about: 'set',
-                location: 'set'
+                location: 'set',
+                status: 'set'
             }
 
             const errors = await service.validateUser(user, null, 'invitation')
 
-            expect(errors.length).toBe(8)
+            expect(errors.length).toBe(9)
 
         })
 
@@ -142,12 +140,13 @@ describe('ValidationService.validateUser()', function() {
                 settings: {},
                 notices: {},
                 about: 'set',
-                location: 'set'
+                location: 'set',
+                status: 'set'
             }
 
             const errors = await service.validateUser(user, null, 'reinvitation')
 
-            expect(errors.length).toBe(8)
+            expect(errors.length).toBe(9)
 
         })
 
@@ -176,17 +175,17 @@ describe('ValidationService.validateUser()', function() {
             const errors = await service.validateUser(user, null, 'reinvitation')
 
             expect(errors.length).toBe(0)
-
         })
     })
 
     describe('a registration', function() {
-        it('Should not let you set `settings` or `notices`', async function() {
+        it('Should not let you set `settings`, `notices`, or `status`', async function() {
             const service = new ValidationService(core)
 
             const user = {
                 settings: {},
                 notices: {},
+                status: 'confirmed',
                 email: 'test@test.com',
                 name: 'Valid Name',
                 username: 'valid.username',
@@ -196,15 +195,16 @@ describe('ValidationService.validateUser()', function() {
 
             const errors = await service.validateUser(user, null, 'registration')
 
-            expect(errors.length).toBe(2)
+            expect(errors.length).toBe(3)
         })
 
-        it('Should treat `null` as set for `settings` or `notices`', async function() {
+        it('Should treat `null` as set for `settings`, `status`, or `notices`', async function() {
             const service = new ValidationService(core)
 
             const user = {
                 settings: null,
                 notices: null,
+                status: null,
                 email: 'test@test.com',
                 name: 'Valid Name',
                 username: 'Valid Username',
@@ -213,7 +213,7 @@ describe('ValidationService.validateUser()', function() {
 
             const errors = await service.validateUser(user, null, 'registration')
 
-            expect(errors.length).toBe(2)
+            expect(errors.length).toBe(3)
         })
 
         it('Should not let you set email, name, username, or password to `null`', async function() {
@@ -252,7 +252,7 @@ describe('ValidationService.validateUser()', function() {
     })
 
     describe('an invitation acceptance', function() {
-        it('Should not let you set `settings` or `notices`', async function() {
+        it('Should not let you set `settings`, `status`, or `notices`', async function() {
             const service = new ValidationService(core)
 
             const user = {
@@ -262,7 +262,8 @@ describe('ValidationService.validateUser()', function() {
                 email: 'test@test.com',
                 name: 'Valid Name',
                 username: 'valid.username',
-                password: 'PasswordPassword'
+                password: 'PasswordPassword',
+                status: 'confirmed'
 
             }
 
@@ -270,10 +271,10 @@ describe('ValidationService.validateUser()', function() {
 
             const errors = await service.validateUser(user, existing, 'invitation-acceptance')
 
-            expect(errors.length).toBe(2)
+            expect(errors.length).toBe(3)
         })
 
-        it('Should treat `null` as set for `settings` or `notices`', async function() {
+        it('Should treat `null` as set for `settings`, `status`, or `notices`', async function() {
             const service = new ValidationService(core)
 
             const user = {
@@ -283,14 +284,15 @@ describe('ValidationService.validateUser()', function() {
                 email: 'test@test.com',
                 name: 'Valid Name',
                 username: 'Valid Username',
-                password: 'PasswordPassword'
+                password: 'PasswordPassword',
+                status: null
             }
 
             const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe'] 
 
             const errors = await service.validateUser(user, existing, 'invitation-acceptance')
 
-            expect(errors.length).toBe(2)
+            expect(errors.length).toBe(3)
         })
 
         it('Should require `email`, `name`, `username`, and `password`', async function() {
@@ -350,7 +352,7 @@ describe('ValidationService.validateUser()', function() {
     })
 
     describe('a password reset', function() {
-        it('Should not let you set `settings`, `notices`, `email`, `name`, or `username`', async function() {
+        it('Should not let you set `settings`, `notices`, `email`, `name`, `status`, or `username`', async function() {
             const service = new ValidationService(core)
 
             const user = {
@@ -360,7 +362,8 @@ describe('ValidationService.validateUser()', function() {
                 name: 'Valid User',
                 username: 'valid.user',
                 email: 'valid.user@mailinator.com',
-                password: 'PasswordPassword'
+                password: 'PasswordPassword',
+                status: 'confirmed'
 
             }
 
@@ -368,10 +371,10 @@ describe('ValidationService.validateUser()', function() {
 
             const errors = await service.validateUser(user, existing, 'password-reset')
 
-            expect(errors.length).toBe(5)
+            expect(errors.length).toBe(6)
         })
 
-        it('Should treat `null` as set for `settings`, `notices`, `email`, `name`, or `username`', async function() {
+        it('Should treat `null` as set for `settings`, `notices`, `email`, `name`, `status`, or `username`', async function() {
             const service = new ValidationService(core)
 
             const user = {
@@ -381,14 +384,15 @@ describe('ValidationService.validateUser()', function() {
                 name: null,
                 username: null,
                 email: null,
-                password: 'PasswordPassword'
+                password: 'PasswordPassword',
+                status: null
             }
 
             const existing = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
             const errors = await service.validateUser(user, existing, 'password-reset')
 
-            expect(errors.length).toBe(5)
+            expect(errors.length).toBe(6)
         })
 
         it('Should pass a valid user with a password', async function() {
@@ -408,36 +412,36 @@ describe('ValidationService.validateUser()', function() {
     })
 
     describe('an authenticated edit', function() {
-        it('Should not let you set `username`', async function() {
+        it('Should not let you set `username` or `status`', async function() {
             const service = new ValidationService(core)
 
             const user = {
                 id: '032563a3-1a0d-42f2-ad85-aef588b81ebe',
-                username: 'valid.username'
+                username: 'valid.username',
+                status: 'confirmed'
             }
 
             const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe'] 
 
             const errors = await service.validateUser(user, existing, 'authenticated-edit')
 
-            expect(errors.length).toBe(1)
-            expect(errors[0].type).toBe('username:not-allowed')
+            expect(errors.length).toBe(2)
         })
 
-        it('Should treat `null` as set for `username`', async function() {
+        it('Should treat `null` as set for `username` and `status`', async function() {
             const service = new ValidationService(core)
 
             const user = {
                 id: '032563a3-1a0d-42f2-ad85-aef588b81ebe',
-                username: 'valid.username'
+                username: 'valid.username',
+                status: 'confirmed'
             }
 
             const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe'] 
 
             const errors = await service.validateUser(user, existing, 'authenticated-edit')
 
-            expect(errors.length).toBe(1)
-            expect(errors[0].type).toBe('username:not-allowed')
+            expect(errors.length).toBe(2)
         })
 
         it('Should allow you to set email', async function() {
@@ -496,7 +500,6 @@ describe('ValidationService.validateUser()', function() {
 
             expect(errors.length).toBe(0)
         })
-
     })
 
     describe('an admin edit', function() {
@@ -510,7 +513,7 @@ describe('ValidationService.validateUser()', function() {
 
             const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe'] 
 
-            const errors = await service.validateUser(user, existing, 'authenticated-edit')
+            const errors = await service.validateUser(user, existing, 'admin-edit')
 
             expect(errors.length).toBe(1)
             expect(errors[0].type).toBe('username:not-allowed')
@@ -526,7 +529,7 @@ describe('ValidationService.validateUser()', function() {
 
             const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe'] 
 
-            const errors = await service.validateUser(user, existing, 'authenticated-edit')
+            const errors = await service.validateUser(user, existing, 'admin-edit')
 
             expect(errors.length).toBe(1)
             expect(errors[0].type).toBe('username:not-allowed')
@@ -545,7 +548,7 @@ describe('ValidationService.validateUser()', function() {
             core.database.query.mockReturnValue(undefined)
                 .mockReturnValueOnce({ rowCount: 0, rows: []})
 
-            const errors = await service.validateUser(user, existing, 'authenticated-edit')
+            const errors = await service.validateUser(user, existing, 'admin-edit')
 
             expect(errors.length).toBe(0)
         })
@@ -560,7 +563,38 @@ describe('ValidationService.validateUser()', function() {
 
             const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe'] 
 
-            const errors = await service.validateUser(user, existing, 'authenticated-edit')
+            const errors = await service.validateUser(user, existing, 'admin-edit')
+
+            expect(errors.length).toBe(0)
+        })
+
+        it('Should allow you to set status to banned for confirmed users', async function() {
+            const service = new ValidationService(core)
+
+            const user = {
+                id: '5c44ce06-1687-4709-b67e-de76c05acb6a',
+                status: 'banned'
+            }
+
+            const existing = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a'] 
+
+            const errors = await service.validateUser(user, existing, 'admin-edit')
+
+            expect(errors.length).toBe(0)
+        })
+
+        it('Should allow you to set status to confirmed for banned users', async function() {
+            const service = new ValidationService(core)
+
+            const user = {
+                id: '5c44ce06-1687-4709-b67e-de76c05acb6a',
+                status: 'confirmed'
+            }
+
+            const existing = { ...entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a'] }
+            existing.status = 'banned'
+
+            const errors = await service.validateUser(user, existing, 'admin-edit')
 
             expect(errors.length).toBe(0)
         })
@@ -584,45 +618,47 @@ describe('ValidationService.validateUser()', function() {
             core.database.query.mockReturnValue(undefined)
                 .mockReturnValueOnce({ rowCount: 0, rows: []})
 
-            const errors = await service.validateUser(user, existing, 'authenticated-edit')
+            const errors = await service.validateUser(user, existing, 'admin-edit')
 
             expect(errors.length).toBe(0)
         })
     })
 
     describe('an edit', function() {
-        it('Should not let you set `username`, `email`, or `password`', async function() {
+        it('Should not let you set `username`, `email`, `status`, or `password`', async function() {
             const service = new ValidationService(core)
 
             const user = {
                 id: '032563a3-1a0d-42f2-ad85-aef588b81ebe',
                 username: 'valid.username',
                 email: 'valid@email.com',
-                password: 'passwordpassword'
+                password: 'passwordpassword',
+                status: 'confirmed'
             }
 
             const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe'] 
 
             const errors = await service.validateUser(user, existing, 'edit')
 
-            expect(errors.length).toBe(3)
+            expect(errors.length).toBe(4)
         })
 
-        it('Should treat `null` as set for `username`, `email`, or `password`', async function() {
+        it('Should treat `null` as set for `username`, `email`, `status`, or `password`', async function() {
             const service = new ValidationService(core)
 
             const user = {
                 id: '032563a3-1a0d-42f2-ad85-aef588b81ebe',
                 username: 'valid.username',
                 email: 'valid@email.com',
-                password: 'passwordpassword'
+                password: 'passwordpassword',
+                status: 'status'
             }
 
             const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe'] 
 
             const errors = await service.validateUser(user, existing, 'edit')
 
-            expect(errors.length).toBe(3)
+            expect(errors.length).toBe(4)
         })
 
         it('Should allow you to set any valid fields', async function() {
@@ -1165,6 +1201,72 @@ describe('ValidationService.validateUser()', function() {
 
             expect(errors.length).toBe(0)
 
+        })
+    })
+
+    describe('for status',  function() {
+        it('Should return an error when status is not a string', async function() {
+            const service = new ValidationService(core)
+
+            const user = {
+                id: '5c44ce06-1687-4709-b67e-de76c05acb6a',
+                status: 10 
+            }
+
+            const existing = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a'] 
+
+            const errors = await service.validateUser(user, existing, 'admin-edit')
+
+            expect(errors.length).toBe(1)
+            expect(errors[0].type).toBe('status:invalid-type')
+        })
+
+        it("Should return an error when status is not 'banned' or 'confirmed'", async function() {
+            const service = new ValidationService(core)
+
+            const user = {
+                id: '5c44ce06-1687-4709-b67e-de76c05acb6a',
+                status: 'unconfirmed' 
+            }
+
+            const existing = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a'] 
+
+            const errors = await service.validateUser(user, existing, 'admin-edit')
+
+            expect(errors.length).toBe(1)
+            expect(errors[0].type).toBe('status:invalid')
+        })
+
+        it("Should return an error when existing.status is not 'banned' or 'confirmed'", async function() {
+            const service = new ValidationService(core)
+
+            const user = {
+                id: '5c44ce06-1687-4709-b67e-de76c05acb6a',
+                status: 'confirmed' 
+            }
+
+            const existing = { ...entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']  }
+            existing.status = 'unconfirmed'
+
+            const errors = await service.validateUser(user, existing, 'admin-edit')
+
+            expect(errors.length).toBe(1)
+            expect(errors[0].type).toBe('status:not-authorized')
+        })
+
+        it("Should pass a valid status", async function() {
+            const service = new ValidationService(core)
+
+            const user = {
+                id: '5c44ce06-1687-4709-b67e-de76c05acb6a',
+                status: 'banned' 
+            }
+
+            const existing = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a'] 
+
+            const errors = await service.validateUser(user, existing, 'admin-edit')
+
+            expect(errors.length).toBe(0)
         })
     })
 })
