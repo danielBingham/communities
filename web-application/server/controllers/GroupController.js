@@ -73,10 +73,14 @@ module.exports = class GroupController {
 
         const currentUser = request.session.user
 
-        // Restrict the query to only those groups the currentUser can see.
-        const visibleGroupIds = await this.permissionService.get(currentUser, 'view', 'Group')
-        query.params.push(visibleGroupIds)
-        query.where = `groups.id = ANY($${query.params.length}::uuid[])`
+        // Site moderators can always view all groups.
+        const canModerateSite = await this.permissionService.can(currentUser, 'moderate', 'Site')
+        if ( ! canModerateSite ) {
+            // Restrict the query to only those groups the currentUser can see.
+            const visibleGroupIds = await this.permissionService.get(currentUser, 'view', 'Group')
+            query.params.push(visibleGroupIds)
+            query.where = `groups.id = ANY($${query.params.length}::uuid[])`
+        }
 
         // Get only the groups the currentUser is a member of with 'memberStatus'
         if ( 'memberStatus' in request.query ) {

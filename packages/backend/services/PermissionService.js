@@ -310,6 +310,12 @@ module.exports = class PermissionService {
             throw new ServiceError('missing-context:group', `'group' missing from context.`)
         }
 
+        // Site moderators can always view groups.
+        const canModerateSite = await this.canModerateSite(user)
+        if ( canModerateSite ) {
+            return true
+        }
+
         if ( context.group.type === 'open' || context.group.type == 'private') {
             return true
         }
@@ -503,6 +509,12 @@ module.exports = class PermissionService {
 
         if ( ! contextHas(context, 'group') ) { 
             throw new ServiceError('missing-context', `'group' missing from context.`)
+        }
+
+        // Site moderators can always view group content.
+        const canModerateSite = await this.canModerateSite(user)
+        if ( canModerateSite ) {
+            return true
         }
 
         // Anyone can view content of open group.

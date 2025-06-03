@@ -9,8 +9,7 @@ import {
 } from '@heroicons/react/24/outline'
 
 import { useGroupFromSlug, useGroupMember } from '/lib/hooks/group'
-
-import { canView, canModerate, canAdmin } from '/lib/group'
+import { GroupPermissions, useGroupPermission } from '/lib/hooks/permission'
 
 import PostPage from '/pages/posts/PostPage'
 
@@ -34,9 +33,9 @@ const GroupPage = function() {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
-    const [group, groupError, request] = useGroupFromSlug(slug)
-    const [currentMember, currentMemberError] = useGroupMember(group?.id, currentUser?.id)
-
+    const [group, error, request] = useGroupFromSlug(slug)
+    const canViewGroup = useGroupPermission(currentUser, GroupPermissions.VIEW, group?.id)
+    const canAdminGroup = useGroupPermission(currentUser, GroupPermissions.ADMIN, group?.id)
 
     if ( ! group && ( ! request || request.state == 'pending') )  {
         return (
@@ -74,10 +73,10 @@ const GroupPage = function() {
                 <div className="group-page__controls">
                     <GroupMembershipButton groupId={group.id} userId={currentUser?.id} />
                 </div>
-                { canView(group, currentMember) && <NavigationMenu className="group-page__menu">
+                { canViewGroup && <NavigationMenu className="group-page__menu">
                     <NavigationMenuItem to={`/group/${group.slug}`} icon="QueueList" text="Feed" />
                     <NavigationMenuItem to="members" icon="UserGroup" text="Members" />
-                    { canAdmin(group, currentMember) && <NavigationMenuItem to="settings" icon="Cog6Tooth" text="Settings" /> }
+                    { canAdminGroup && <NavigationMenuItem to="settings" icon="Cog6Tooth" text="Settings" /> }
                 </NavigationMenu> }
                 <div className="details">
                     <div className="about"> { group.about }</div>
@@ -97,7 +96,6 @@ const GroupPage = function() {
             </PageRightGutter>
         </Page>
     )
-
 }
 
 export default GroupPage
