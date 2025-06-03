@@ -3,9 +3,8 @@ import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
 import { useRequest } from '/lib/hooks/useRequest'
-import { useGroup, useGroupMember } from '/lib/hooks/group'
-
-import { canAdmin } from '/lib/group'
+import { useGroup } from '/lib/hooks/group'
+import { GroupPermissions, useGroupPermission } from '/lib/hooks/permission'
 
 import { deleteGroup } from '/state/groups'
 
@@ -23,8 +22,8 @@ const GroupSettingsView = function({ groupId }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
-    const [group, groupError] = useGroup(groupId) 
-    const [currentMember, currentMemberError] = useGroupMember(groupId, currentUser?.id)
+    const [group] = useGroup(groupId) 
+    const canAdminGroup = useGroupPermission(currentUser, GroupPermissions.ADMIN, groupId)
 
     const navigate = useNavigate()
     const deleteCurrentGroup = function() {
@@ -33,8 +32,8 @@ const GroupSettingsView = function({ groupId }) {
         navigate('/groups')
     }
 
-    if ( ! canAdmin(group, currentMember) ) {
-        return (null)
+    if ( ! canAdminGroup ) {
+        return null
     }
 
     return (

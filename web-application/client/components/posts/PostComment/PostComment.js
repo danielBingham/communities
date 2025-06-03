@@ -6,6 +6,7 @@ import Linkify from 'react-linkify'
 
 import { usePostComment } from '/lib/hooks/PostComment'
 import { useSiteModerationForPostComment } from '/lib/hooks/SiteModeration'
+import { useFeature } from '/lib/hooks/feature'
 
 import DateTag from '/components/DateTag'
 import UserTag from '/components/users/UserTag'
@@ -20,6 +21,7 @@ const PostComment = function({ postId, id }) {
 
     const [comment] = usePostComment(postId, id)
     const [moderation] = useSiteModerationForPostComment(postId, id)
+    const hasAdminModeration = useFeature('62-admin-moderation-controls')
 
     const location = useLocation()
     // This is necessary to enable linking to anchors in the page.
@@ -74,7 +76,7 @@ const PostComment = function({ postId, id }) {
                     <UserTag id={comment.userId} /> commented <a href={`#comment-${comment.id}`}><DateTag timestamp={comment.createdDate} /></a>
                 </div>
                 <div>
-                    <PostCommentModeration postId={postId} postCommentId={id} />
+                    { hasAdminModeration && <PostCommentModeration postId={postId} postCommentId={id} /> }
                 </div>
                 <div className="post-comment__controls">
                     <PostCommentDotsMenu postId={postId} id={id} />

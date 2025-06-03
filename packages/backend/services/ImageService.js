@@ -56,24 +56,42 @@ module.exports = class ImageService {
         const dimensions = imageSize(fileContents)
         
         // The image will have been scaled equivalently in each dimension in
-        // order to maintain the aspect ratio.  So we only need the ratio from
-        // one dimension in order to unscale our crop.
-        const ratio = dimensions.width / renderedDimensions.width 
-
-        if ( ratio <= 0 ) {
+        // order to maintain the aspect ratio. In theory, we should be able to
+        // use the ratio from one dimension for both of them, but there are
+        // rounding errors that can cause issues in large images.  So we need
+        // the ratio from each dimension and to use it accordingly.
+        const widthRatio = dimensions.width / parseInt(renderedDimensions.width)
+        if ( widthRatio <= 0 ) {
             throw new ServiceError('validation-error',
-                `Invalid ratio '${ratio}'.  Cannot crop.`)
+                `Invalid widthRatio '${widthRatio}'.  Cannot crop.`)
         }
 
-        const x = parseInt(crop.x * ratio)
-        const y = parseInt(crop.y * ratio)
+        const heightRatio = dimensions.height / parseInt(renderedDimensions.height)
+        if ( heightRatio <= 0 ) {
+            throw new ServiceError('validation-error',
+                `Invalid heightRatio '${heightRatio}'.  Cannot crop.`)
+        }
+
+
+        const x = Math.floor(parseInt(crop.x) * widthRatio)
+        const y = Math.floor(parseInt(crop.y) * heightRatio)
         if ( x === NaN || y === NaN ) {
             throw new ServiceError('validation-error',
                 `X or Y of the crop is NaN after scaling.`)
         }
 
-        let width = parseInt(crop.width * ratio)
-        let height = parseInt(crop.height * ratio)
+        // The Crop can come back less than zero, probably due to rounding
+        // issues.  Zero it out when that happens.
+        if ( x < 0 ) {
+            x = 0
+        }
+
+        if ( y < 0 ) {
+            y = 0
+        }
+
+        let width = Math.floor(parseInt(crop.width) * widthRatio)
+        let height = Math.floor(parseInt(crop.height) * heightRatio )
 
         if ( width <= 0 ) {
             width = 1
@@ -103,6 +121,7 @@ module.exports = class ImageService {
             this.core.logger.info(file)
             this.core.logger.info(dimensions)
             this.core.logger.info(crop)
+            this.core.logger.info(`widthRatio: ${widthRatio}, heightRatio: ${heightRatio}, x: ${x}, y: ${y}, width: ${width}, height: ${height}`)
             throw error 
         }
 

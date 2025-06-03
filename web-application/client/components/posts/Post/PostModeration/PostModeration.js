@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux'
 
 import { CheckCircleIcon, XCircleIcon, FlagIcon } from '@heroicons/react/20/solid'
 
-import { canModerate } from '/lib/site'
+import { SitePermissions, useSitePermission } from '/lib/hooks/permission'
 import { useRequest } from '/lib/hooks/useRequest'
 
 import { patchSiteModeration } from '/state/admin/siteModeration'
@@ -24,6 +24,7 @@ const PostModeration = function({ postId }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const moderation = useSelector((state) => postId && postId in state.siteModeration.byPostId ? state.siteModeration.byPostId[postId] : null)
+    const canModerateSite = useSitePermission(currentUser, SitePermissions.MODERATE)
 
     const [request, makeRequest] = useRequest()
 
@@ -74,7 +75,7 @@ const PostModeration = function({ postId }) {
         action = "Reject"
     }
 
-    if ( canModerate(currentUser) ) {
+    if ( canModerateSite ) {
         return (
             <div className="post-moderation">
                 <a href="" onClick={(e) => { e.preventDefault(); setStatus('approved'); setShowReason(true) }} className="post-moderation__approve"><CheckCircleIcon /></a>

@@ -138,7 +138,7 @@ module.exports = class PostController {
 
         // ========== Post Visibility ===================== 
 
-        // Posts by friends
+        // Posts by friends, we'll use this later.
         const friendResults = await this.core.database.query(`
             SELECT
                 user_id, friend_id
@@ -148,35 +148,40 @@ module.exports = class PostController {
 
         const friendIds = friendResults.rows.map((r) => r.user_id == currentUser.id ? r.friend_id : r.user_id)
         friendIds.push(currentUser.id)
-        query.params.push(friendIds)
 
-        // Posts in groups
-        if ( this.core.features.has(`19-private-groups`) ) {
-            const visibleGroupResults = await this.core.database.query(`
-                SELECT groups.id FROM groups LEFT OUTER JOIN group_members ON groups.id = group_members.group_id WHERE (group_members.user_id = $1 AND group_members.status = 'member') OR groups.type = 'open'
-            `, [currentUser.id])
+        const canModerateSite = await this.permissionService.can(currentUser, 'moderate', 'Site')
+        // Moderators can view anything, everyone else is restricted.
+        if ( ! canModerateSite ) {
+            query.params.push(friendIds)
 
-            const visibleGroupIds = visibleGroupResults.rows.map((r) => r.id)
-            query.params.push(visibleGroupIds)
-        }
+            // Posts in groups
+            if ( this.core.features.has(`19-private-groups`) ) {
+                const visibleGroupResults = await this.core.database.query(`
+                    SELECT groups.id FROM groups LEFT OUTER JOIN group_members ON groups.id = group_members.group_id WHERE (group_members.user_id = $1 AND group_members.status = 'member') OR groups.type = 'open'
+                `, [currentUser.id])
 
-        // Permissions control statements, this determines what is visible.
-        if ( this.core.features.has(`19-private-groups`) ) {
-            query.where += `((posts.user_id = ANY($${query.params.length - 1}::uuid[]) AND posts.type = 'feed') OR (posts.type = 'group' AND posts.group_id = ANY($${query.params.length}::uuid[])) OR posts.visibility = 'public')`
-        } else {
-            query.where += `(posts.user_id = ANY($${query.params.length}::uuid[]) OR posts.visibility = 'public')`
+                const visibleGroupIds = visibleGroupResults.rows.map((r) => r.id)
+                query.params.push(visibleGroupIds)
+            }
+
+            // Permissions control statements, this determines what is visible.
+            if ( this.core.features.has(`19-private-groups`) ) {
+                query.where += `((posts.user_id = ANY($${query.params.length - 1}::uuid[]) AND posts.type = 'feed') OR (posts.type = 'group' AND posts.group_id = ANY($${query.params.length}::uuid[])) OR posts.visibility = 'public')`
+            } else {
+                query.where += `(posts.user_id = ANY($${query.params.length}::uuid[]) OR posts.visibility = 'public')`
+            }
         }
 
         if ('userId' in request.query) {
+            const and = query.params.length > 0 ? ' AND ' : ''
             query.params.push(request.query.userId)
-            const and = query.params.length > 1 ? ' AND ' : ''
             query.where += `${and}posts.user_id = $${query.params.length}`
         }
 
         // If we're query for a particular group's posts, only grab that group.
         if ('groupId' in request.query) {
+            const and = query.params.length > 0 ? ' AND ' : ''
             query.params.push(request.query.groupId)
-            const and = query.params.length > 1 ? ' AND ' : ''
             query.where += `${and}posts.group_id = $${query.params.length}`
         } 
 
@@ -190,8 +195,8 @@ module.exports = class PostController {
 
             const groupId = groupResult.rows[0].id
 
+            const and = query.params.length > 0 ? ' AND ' : ''
             query.params.push(groupId)
-            const and = query.params.length > 1 ? ' AND ' : ''
             query.where += `${and}posts.group_id = $${query.params.length}`
         }
 
@@ -204,21 +209,21 @@ module.exports = class PostController {
 
             const userId = userResult.rows[0].id
 
+            const and = query.params.length > 0 ? ' AND ' : ''
             query.params.push(userId)
-            const and = query.params.length > 1 ? ' AND ' : ''
             query.where += `${and}posts.user_id = $${query.params.length}`
         }
 
         if ( 'type' in request.query ) {
+            const and = query.params.length > 0 ? ' AND ' : ''
             query.params.push(request.query.type)
-            const and = query.params.length > 1 ? ' AND ' : ''
             query.where += `${and}posts.type = $${query.params.length}`
         }
 
         if ('feed' in request.query) {
             if (request.query.feed == 'friends') {
+                const and = query.params.length > 0 ? ' AND ' : ''
                 query.params.push(friendIds)
-                const and = query.params.length > 1 ? ' AND ' : ''
                 query.where += `${and} (posts.type = 'feed' AND posts.user_id = ANY($${query.params.length}::uuid[]))`
             } else if (request.query.feed == 'everything') {
                 const groupMembershipResults = await this.core.database.query(
@@ -228,10 +233,10 @@ module.exports = class PostController {
 
                 const groupMemberships = groupMembershipResults.rows.map((r) => r.id)
 
+                const and = query.params.length > 0 ? ' AND ' : ''
 
                 query.params.push(friendIds)
                 query.params.push(groupMemberships)
-                const and = query.params.length > 1 ? ' AND ' : ''
                 query.where += `${and} ((posts.type = 'feed' and posts.user_id = ANY($${query.params.length-1}::uuid[])) OR (posts.type = 'group' AND posts.group_id = ANY($${query.params.length}::uuid[])))`
             }
         }
@@ -277,6 +282,7 @@ module.exports = class PostController {
             return
         }
 
+        console.log(query)
         const results = await this.postDAO.selectPosts(query)
 
         results.meta = await this.postDAO.getPostPageMeta(query)

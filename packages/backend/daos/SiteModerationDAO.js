@@ -129,7 +129,7 @@ module.exports = class SiteModerationDAO extends DAO {
 
     async getSiteModerationByPostId(postId) {
         const results = await this.selectSiteModerations({
-            where: `site_moderation.post_id = $1`,
+            where: `site_moderation.post_id = $1 AND site_moderation.post_comment_id IS NULL`,
             params: [ postId ]
         })
 

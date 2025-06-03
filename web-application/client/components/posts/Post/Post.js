@@ -6,6 +6,7 @@ import { UsersIcon, UserGroupIcon, GlobeAltIcon } from '@heroicons/react/24/soli
 
 import { useRequest } from '/lib/hooks/useRequest'
 import { usePostDraft } from '/lib/hooks/usePostDraft'
+import { useFeature } from '/lib/hooks/feature'
 
 import { getPost } from '/state/posts'
 
@@ -22,14 +23,13 @@ import PostForm from '/components/posts/PostForm'
 
 import PostDotsMenu from './PostDotsMenu'
 import PostModeration from './PostModeration'
-import SharedPost from './SharedPost'
 import PostImage from './PostImage'
 import PostReactions from './PostReactions'
 import PostComments from './PostComments'
 
 import './Post.css'
 
-const Post = function({ id, expanded, showLoading }) {
+const Post = function({ id, expanded, showLoading, shared }) {
     const [showMore, setShowMore] = useState(expanded) 
 
     const [request, makeRequest] = useRequest()
@@ -37,7 +37,9 @@ const Post = function({ id, expanded, showLoading }) {
     const post = useSelector((state) => id && id in state.posts.dictionary ? state.posts.dictionary[id] : null) 
     const user = useSelector((state) => post?.userId && post.userId in state.users.dictionary ? state.users.dictionary[post.userId] : null) 
     const group = useSelector((state) => post?.groupId && post.groupId in state.groups.dictionary ? state.groups.dictionary[post.groupId] : null)
-    const moderation = useSelector((state) => id && id in state.siteModeration.byPostId ? state.siteModeration.byPostId[id] : null)
+
+    const hasAdminModeration = useFeature('62-admin-moderation-controls')
+    const moderation = useSelector((state) => hasAdminModeration && id && id in state.siteModeration.byPostId ? state.siteModeration.byPostId[id] : null)
 
     useEffect(function() {
         if ( ! post ) {
@@ -97,7 +99,7 @@ const Post = function({ id, expanded, showLoading }) {
 
     if ( moderation !== null && moderation.status === 'rejected' ) {
         return (
-            <div id={post.id} className="post">
+            <div id={post.id} className={`post ${shared ? 'shared' : '' }`}>
                 <div className="post__header"> 
                     <div className="post__poster-image"><UserProfileImage userId={post.userId} /></div>
                     <div className="post__details">
@@ -124,7 +126,7 @@ const Post = function({ id, expanded, showLoading }) {
     }
 
     return (
-        <div id={post.id} className="post">
+        <div id={post.id} className={`post ${ shared ? 'shared' : ''}`}>
             <div className="post__header"> 
                 <div className="post__poster-image"><UserProfileImage userId={post.userId} /></div>
                 <div className="post__details">
@@ -132,10 +134,10 @@ const Post = function({ id, expanded, showLoading }) {
                     <div><span className="post__visibility">{ postVisibility }</span> &bull; <Link to={postLink}><DateTag timestamp={post.createdDate} /></Link> </div>
                 </div>
                 <div className="post__moderation">
-                    <PostModeration postId={post.id} />
+                    { hasAdminModeration && ! shared && <PostModeration postId={post.id} /> }
                 </div>
                 <div className="post__controls">
-                    <PostDotsMenu postId={post.id} />
+                    { ! shared && <PostDotsMenu postId={post.id} /> }
                 </div>
             </div>
             { post.content && post.content.length > 0 && (post.content.length <= 1000 || showMore) && <div className="post__content">
@@ -149,9 +151,9 @@ const Post = function({ id, expanded, showLoading }) {
             </div> }
             <PostImage id={id} />
             { post.linkPreviewId && <LinkPreview id={post.linkPreviewId} /> }
-            { post.sharedPostId && <SharedPost id={post.sharedPostId} /> }
-            <PostReactions postId={id} />
-            <PostComments postId={id} expanded={expanded} />
+            { post.sharedPostId && <Post id={post.sharedPostId} shared={true} /> }
+            { ! shared && <PostReactions postId={id} /> }
+            { ! shared && <PostComments postId={id} expanded={expanded} /> }
         </div>
     )
 }
