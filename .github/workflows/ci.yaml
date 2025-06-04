@@ -55,7 +55,7 @@ jobs:
       - name: Copy the Shared package for testing
         run: |
           rm -r ./packages/backend/node_modules/@communities/shared
-          cp -r ./packages/shared ./backend/node_modules/@communities/shared
+          cp -r ./packages/shared ./packages/backend/node_modules/@communities/shared
 
       - name: Run Backend Unit Tests
         working-directory: ./packages/backend
