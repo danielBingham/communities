@@ -524,6 +524,42 @@ module.exports = function(core) {
     })
 
     /**************************************************************************
+     * Blocklist REST Routes
+     **************************************************************************/
+    const BlocklistController = require('./controllers/admin/BlocklistController')
+    const blocklistController = new BlocklistController(core)
+
+    router.get('/admin/blocklists', function(request, response, next) {
+        blocklistController.getBlocklists(request, response).catch(function(error){
+            next(error)
+        })
+    })
+
+    router.post('/admin/blocklists', function(request, response, next) {
+        blocklistController.postBlocklists(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.get('/admin/blocklist/:id', function(request, response, next) {
+        blocklistController.getBlocklist(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.patch('/admin/blocklist/:id', function(request, response, next) {
+        blocklistController.patchBlocklist(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.delete('/admin/blocklist/:id', function(request, response, next) {
+        blocklistController.deleteBlocklist(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    /**************************************************************************
      *      API 404 
      *************************************************************************/
 

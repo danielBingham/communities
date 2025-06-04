@@ -126,9 +126,8 @@ const validate = function(blocklist) {
 }
 
 module.exports = {
-    validateUserId: validateUserId,
     validateDomain: validateDomain,
     validateNotes: validateNotes,
+    validateUserId: validateUserId,
     validate: validate
 }
-

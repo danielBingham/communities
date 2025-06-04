@@ -23,7 +23,6 @@ const {
     PermissionService,
     NotificationService,
     BlocklistDAO, 
-    BlocklistEventDAO
 }  = require('@communities/backend')
 const ControllerError = require('../../errors/ControllerError')
 
@@ -33,7 +32,6 @@ module.exports = class BlocklistController {
         this.core = core
 
         this.blocklistDAO = new BlocklistDAO(core)
-        this.blocklistEventDAO = new BlocklistEventDAO(core)
 
         this.notificationService = new NotificationService(core)
         this.permissionService = new PermissionService(core)

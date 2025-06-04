@@ -1,4 +1,7 @@
+const Blocklist  = require('./entities/Blocklist')
+const types = require('./types')
+
 module.exports = {
-    entities: require('./entities'),
-    types: require('./types')
+    Blocklist: Blocklist,
+    types: types 
 }

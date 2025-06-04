@@ -1,9 +1,9 @@
-const { validation } = require('../../../')
+const { validation }  = require('../../../')
 
 describe('validateUserId', function() {
     it('Should return an error when userId is null', function() {
         const userId = null
-        const errors = validation.entities.Blocklist.validateUserId(userId)
+        const errors = validation.Blocklist.validateUserId(userId)
 
         expect(errors.length).toBe(1)
         expect(errors[0].type).toBe('userId:null')
@@ -11,7 +11,7 @@ describe('validateUserId', function() {
 
     it('Should return an error when userId is not a string', function() {
         const userId = 5
-        const errors = validation.entities.Blocklist.validateUserId(userId)
+        const errors = validation.Blocklist.validateUserId(userId)
 
         expect(errors.length).toBe(1)
         expect(errors[0].type).toBe('userId:invalid-type')
@@ -19,7 +19,7 @@ describe('validateUserId', function() {
 
     it('Should return an error when userId is not a valid uuid', function() {
         const userId = 'test-id'
-        const errors = validation.entities.Blocklist.validateUserId(userId)
+        const errors = validation.Blocklist.validateUserId(userId)
 
         expect(errors.length).toBe(1)
         expect(errors[0].type).toBe('userId:invalid')
@@ -27,7 +27,7 @@ describe('validateUserId', function() {
 
     it('Should pass a valid UUID', function() {
         const userId = 'd209158e-5c58-44e1-ab00-12b45aad065f'
-        const errors = validation.entities.Blocklist.validateUserId(userId)
+        const errors = validation.Blocklist.validateUserId(userId)
 
         expect(errors.length).toBe(0)
     })
@@ -36,7 +36,7 @@ describe('validateUserId', function() {
 describe('validateDomain', function() {
     it('Should return an error when domain is null', function() {
         const domain = null
-        const errors = validation.entities.Blocklist.validateDomain(domain)
+        const errors = validation.Blocklist.validateDomain(domain)
 
         expect(errors.length).toBe(1)
         expect(errors[0].type).toBe('domain:null')
@@ -44,7 +44,7 @@ describe('validateDomain', function() {
 
     it('Should return an error when domain is not a string', function() {
         const domain = 10
-        const errors = validation.entities.Blocklist.validateDomain(domain)
+        const errors = validation.Blocklist.validateDomain(domain)
 
         expect(errors.length).toBe(1)
         expect(errors[0].type).toBe('domain:invalid-type')
@@ -52,7 +52,7 @@ describe('validateDomain', function() {
 
     it('Should return an error when domain is too long', function() {
         const domain = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
-        const errors = validation.entities.Blocklist.validateDomain(domain)
+        const errors = validation.Blocklist.validateDomain(domain)
 
         expect(errors.length).toBe(1)
         expect(errors[0].type).toBe('domain:too-long')
@@ -60,7 +60,7 @@ describe('validateDomain', function() {
 
     it('Should pass a valid domain', function() {
         const domain = 'example.com'
-        const errors = validation.entities.Blocklist.validateDomain(domain)
+        const errors = validation.Blocklist.validateDomain(domain)
 
         expect(errors.length).toBe(0)
     })
@@ -69,7 +69,7 @@ describe('validateDomain', function() {
 describe('validateNotes', function() {
     it('Should return an error when notes is null', function() {
         const notes = null
-        const errors = validation.entities.Blocklist.validateNotes(notes)
+        const errors = validation.Blocklist.validateNotes(notes)
 
         expect(errors.length).toBe(1)
         expect(errors[0].type).toBe('notes:null')
@@ -77,7 +77,7 @@ describe('validateNotes', function() {
 
     it('Should return an error when notes is not a string', function() {
         const notes = 10
-        const errors = validation.entities.Blocklist.validateNotes(notes)
+        const errors = validation.Blocklist.validateNotes(notes)
 
         expect(errors.length).toBe(1)
         expect(errors[0].type).toBe('notes:invalid-type')
@@ -95,7 +95,7 @@ describe('validateNotes', function() {
 
             Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.
         `
-        const errors = validation.entities.Blocklist.validateNotes(notes)
+        const errors = validation.Blocklist.validateNotes(notes)
 
         expect(notes.length).toBeGreaterThan(2048)
         expect(errors.length).toBe(1)
@@ -104,7 +104,7 @@ describe('validateNotes', function() {
 
     it('Should pass a valid notes field', function() {
         const notes = 'mailinator.com is for testing purposes only.'
-        const errors = validation.entities.Blocklist.validateNotes(notes)
+        const errors = validation.Blocklist.validateNotes(notes)
 
         expect(errors.length).toBe(0)
     })
@@ -117,7 +117,7 @@ describe('validate', function() {
             domain: null,
             notes: null
         }
-        const errors = validation.entities.Blocklist.validate(blocklist)
+        const errors = validation.Blocklist.validate(blocklist)
 
         expect(errors.all.length).toBe(3)
         expect(errors.userId.length).toBe(1)
@@ -132,7 +132,7 @@ describe('validate', function() {
             notes: 'Do not allow test domains.'
         }
 
-        const errors = validation.entities.Blocklist.validate(blocklist)
+        const errors = validation.Blocklist.validate(blocklist)
 
         expect(errors.all.length).toBe(0)
     })

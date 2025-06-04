@@ -8,6 +8,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 import { getUsers } from '/state/users'
 
 import PaginationControls from '/components/PaginationControls'
+import { Table, TableHeader, TableCell } from '/components/ui/Table'
 
 import UserAdminTableRow from './UserAdminTableRow'
 
@@ -36,11 +37,20 @@ const UserAdminTable = function() {
     }
 
     return (
-        <div className="user-admin-table">
-            <UserAdminTableRow header={true} />
+        <Table className="user-admin-table">
+            <TableHeader className="user-admin-table__header">
+                <TableCell>ID</TableCell>
+                <TableCell>Name</TableCell> 
+                <TableCell>Username</TableCell> 
+                <TableCell>Email</TableCell>
+                <TableCell>Status</TableCell>
+                <TableCell>Role</TableCell>
+                <TableCell>Joined</TableCell>
+                <TableCell></TableCell>
+            </TableHeader>
             { userRows }
             <PaginationControls meta={query?.meta} />
-        </div>
+        </Table>
     )
 
 }

@@ -4,13 +4,14 @@ import { useRequest } from '/lib/hooks/useRequest'
 
 import { patchUser } from '/state/users'
 
+import { TableRow, TableCell } from '/components/ui/Table'
 import ErrorModal from '/components/errors/ErrorModal'
 import DateTag from '/components/DateTag'
 import { DotsMenu, DotsMenuItem } from '/components/ui/DotsMenu'
 
 import './UserAdminTableRow.css'
 
-const UserAdminTableRow = function({ user, header }) {
+const UserAdminTableRow = function({ user }) {
 
     const [request, makeRequest] = useRequest()
 
@@ -30,39 +31,24 @@ const UserAdminTableRow = function({ user, header }) {
         )
     }
 
-    if ( header ) {
-        return (
-            <div className="user-admin-table-row user-admin-table-row__header">
-                <span>ID</span>
-                <span>Name</span> 
-                <span>Username</span> 
-                <span>Email</span>
-                <span>Status</span>
-                <span>Role</span>
-                <span>Joined</span>
-                <span></span>
-            </div>
-        )
-    } else {
-        return (
-            <div className="user-admin-table-row user-admin-table-row__user">
-                <span>{ user.id }</span>
-                <span>{ user.name }</span> 
-                <span>{ user.username }</span> 
-                <span>{ user.email }</span> 
-                <span>{ user.status }</span> 
-                <span>{ user.permissions }</span>
-                <span><DateTag timestamp={user.createdDate} /></span>
-                <span>
-                    <DotsMenu>
-                        { user.status !== 'banned' && <DotsMenuItem onClick={() => { changeUserStatus('banned')}}>Ban</DotsMenuItem> }
-                        { user.status === 'banned' && <DotsMenuItem onClick={() => { changeUserStatus('confirmed')}}>Unban</DotsMenuItem> }
-                    </DotsMenu>
-                    { error } 
-                </span>
-            </div>
-        )
-    }
+    return (
+        <TableRow className="user-admin-table__row">
+            <TableCell>{ user.id }</TableCell>
+            <TableCell>{ user.name }</TableCell> 
+            <TableCell>{ user.username }</TableCell> 
+            <TableCell>{ user.email }</TableCell> 
+            <TableCell>{ user.status }</TableCell> 
+            <TableCell>{ user.permissions }</TableCell>
+            <TableCell><DateTag timestamp={user.createdDate} /></TableCell>
+            <TableCell>
+                <DotsMenu>
+                    { user.status !== 'banned' && <DotsMenuItem onClick={() => { changeUserStatus('banned')}}>Ban</DotsMenuItem> }
+                    { user.status === 'banned' && <DotsMenuItem onClick={() => { changeUserStatus('confirmed')}}>Unban</DotsMenuItem> }
+                </DotsMenu>
+                { error } 
+            </TableCell>
+        </TableRow>
+    )
 }
 
 export default UserAdminTableRow

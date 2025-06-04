@@ -1,4 +1,4 @@
-const uuid  = require('uuid')
+const uuid = require('uuid')
 
 const validateUUID = function(name, value) {
     const errors = []

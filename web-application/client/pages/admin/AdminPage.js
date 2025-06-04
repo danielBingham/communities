@@ -10,6 +10,7 @@ import AdminDashboard from '/components/admin/dashboard/AdminDashboard'
 import FeatureFlags from '/components/admin/features/FeatureFlags'
 import UserAdminView from '/pages/admin/views/UserAdminView'
 import AdminModerationView from '/pages/admin/views/AdminModerationView'
+import BlocklistView from '/pages/admin/views/BlocklistView'
 
 import './AdminPage.css'
 
@@ -43,6 +44,7 @@ const AdminPage = function(props) {
                 <menu className="admin__menu">
                     <li><NavLink to={``} end><span className="nav-text"> Dashboard</span></NavLink></li>
                     { hasAdminModerationControls && <li><NavLink to="moderation" end><span className="nav-text"> Moderation</span></NavLink></li> }
+                    <li><NavLink to="blocklist" end><span className="nav-text">Blocklist</span></NavLink></li>
                     <li><NavLink to="features" end><span className="nav-text"> Features</span></NavLink></li>
                     <li><NavLink to="users" end><span className="nav-text"> Users</span></NavLink></li>
                 </menu> 
@@ -52,6 +54,7 @@ const AdminPage = function(props) {
                     <Route path="features" element={<FeatureFlags />} />
                     <Route path="users" element={<UserAdminView />} />
                     <Route path="moderation" element={<AdminModerationView />} />
+                    <Route path="blocklist" element={<BlocklistView />} />
                     <Route index element={<AdminDashboard />} />
                 </Routes>
             </PageBody>
