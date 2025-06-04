@@ -39,7 +39,7 @@ jobs:
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
           npm ci
 
-      - name: Run Backend Unit Tests
+      - name: Run Shared Unit Tests
         working-directory: ./packages/shared
         run: |
           npm run test
