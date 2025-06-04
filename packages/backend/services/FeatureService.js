@@ -31,6 +31,7 @@ const ImageResizeMigration = require('../migrations/ImageResizeMigration')
 const PublicPostsMigration = require('../migrations/PublicPostsMigration')
 const PostSharingMigration = require('../migrations/PostSharingMigration')
 const AdminModerationMigration = require('../migrations/AdminModerationMigration')
+const SiteAdminsCanBanUsersMigration = require('../migrations/SiteAdminsCanBanUsersMigration')
 
 const ServiceError = require('../errors/ServiceError')
 const MigrationError = require('../errors/MigrationError')
@@ -117,6 +118,11 @@ module.exports = class FeatureService {
                 dependsOn: ['18-post-sharing'],
                 conflictsWith: [],
                 migration: new AdminModerationMigration(core)
+            },
+            '87-site-admins-can-ban-users': {
+                dependsOn: ['62-admin-moderation-controls'],
+                conflictsWith: [],
+                migration: new SiteAdminsCanBanUsersMigration(core)
             }
         }
     }

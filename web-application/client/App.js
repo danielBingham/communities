@@ -20,7 +20,7 @@ import AuthenticatedLayout from '/layouts/AuthenticatedLayout'
 
 // Admin page for managing features.  Must be logged in and an admin to load it
 // here.
-import AdminPage from '/pages/AdminPage'
+import AdminPage from '/pages/admin/AdminPage'
 
 import HomePage from '/pages/HomePage'
 import Feed from '/components/feeds/Feed'

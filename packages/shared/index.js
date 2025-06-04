@@ -1,4 +1,7 @@
+const util = require('./util')
+const validation = require('./validation')
+
 module.exports = {
-    util: require('./util'),
-    validation: require('./validation')
+    util: util,
+    validation: validation
 }

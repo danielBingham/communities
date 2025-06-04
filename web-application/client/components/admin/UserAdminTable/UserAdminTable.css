@@ -1,0 +1,5 @@
+.user-admin-table {
+    display: grid;
+    grid-template-rows: auto;
+    width: 100%;
+}

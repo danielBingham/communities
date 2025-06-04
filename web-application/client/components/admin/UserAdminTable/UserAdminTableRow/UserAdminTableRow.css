@@ -1,0 +1,14 @@
+.user-admin-table-row {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    width: 100%;
+    padding: 10px;
+    text-align: center;
+}
+.user-admin-table-row__user:hover {
+    background-color: var(--primary-color-light);
+}
+.user-admin-table-row__header {
+    font-weight: bold;
+    border-bottom: thin solid var(--main-border-color);
+}

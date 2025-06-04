@@ -8,8 +8,8 @@ import { Page, PageBody, PageLeftGutter, PageRightGutter } from '/components/gen
 
 import AdminDashboard from '/components/admin/dashboard/AdminDashboard'
 import FeatureFlags from '/components/admin/features/FeatureFlags'
-import UserAdmin from '/components/admin/users/UserAdmin'
-import AdminModerationView from '/pages/admin/AdminModerationView'
+import UserAdminView from '/pages/admin/views/UserAdminView'
+import AdminModerationView from '/pages/admin/views/AdminModerationView'
 
 import './AdminPage.css'
 
@@ -50,7 +50,7 @@ const AdminPage = function(props) {
             <PageBody>
                 <Routes>
                     <Route path="features" element={<FeatureFlags />} />
-                    <Route path="users" element={<UserAdmin />} />
+                    <Route path="users" element={<UserAdminView />} />
                     <Route path="moderation" element={<AdminModerationView />} />
                     <Route index element={<AdminDashboard />} />
                 </Routes>

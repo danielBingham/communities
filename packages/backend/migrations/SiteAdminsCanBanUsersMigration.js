@@ -29,7 +29,7 @@ module.exports = class SiteAdminsCanBanUsersMigration {
     }
 
     async initForward() { 
-        await this.database.query(`ALTER TABLE user_status ADD VALUE IF NOT EXISTS 'banned' AFTER 'confirmed'`, [])
+        await this.database.query(`ALTER TYPE user_status ADD VALUE IF NOT EXISTS 'banned' AFTER 'confirmed'`, [])
 
         await this.database.query(`
             CREATE TABLE IF NOT EXISTS blocklist (
