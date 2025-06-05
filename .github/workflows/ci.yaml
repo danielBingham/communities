@@ -31,6 +31,19 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
           aws-region: us-east-1 
 
+      # Test @communities/shared
+      #
+      - name: Install Shared Dependencies 
+        working-directory: ./packages/shared
+        run: |
+          export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
+          npm ci
+
+      - name: Run Shared Unit Tests
+        working-directory: ./packages/shared
+        run: |
+          npm run test
+
       # Test @communities/backend
       #
       - name: Install Backend Dependencies 
@@ -38,6 +51,11 @@ jobs:
         run: |
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
           npm ci
+
+      - name: Copy the Shared package for testing
+        run: |
+          rm -r ./packages/backend/node_modules/@communities/shared
+          cp -r ./packages/shared ./packages/backend/node_modules/@communities/shared
 
       - name: Run Backend Unit Tests
         working-directory: ./packages/backend

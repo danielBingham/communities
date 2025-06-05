@@ -1,0 +1,19 @@
+.table {
+    width: 100%;
+}
+.table .table-row, 
+.table .table-header {
+    text-align: center;
+}
+.table .table-row:hover {
+    background-color: var(--primary-color-light);
+}
+.table .table-header {
+    font-weight: bold;
+    border-bottom: thin solid var(--main-border-color);
+}
+.table .table-cell {
+    margin: 0;
+    padding: 3px 0;
+    border: none;
+}

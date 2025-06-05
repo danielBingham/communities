@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit'
 import { combineReducers } from 'redux'
 
 import authenticationReducer from './authentication'
+import blocklistsReducer from './admin/blocklists'
 import featuresReducer from './features'
 import filesReducer from './files'
 import groupsReducer from './groups'
@@ -22,6 +23,7 @@ import userRelationshipsReducer from './userRelationships'
 
 const reducers = combineReducers({
     authentication: authenticationReducer,
+    blocklists: blocklistsReducer,
     features: featuresReducer,
     files: filesReducer,
     groups: groupsReducer,

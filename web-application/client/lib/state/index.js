@@ -14,11 +14,25 @@ export const setInDictionary = function(state, action) {
         console.log(action)
         throw new Error(`Invalid payload sent to ${action.type}.`)
     }
+
+    // Taint the queries so that they'll be requeried.
+    for ( const [key,query] of Object.entries(state.queries)) {
+        state.queries[key].taint = true
+    }
 }
 
 export const removeEntity = function(state, action) {
     const entity = action.payload.entity
+    const clearQueries = action.payload.clearQueries
+
     delete state.dictionary[entity.id]
+
+    if (clearQueries === true ) {
+        // Taint the queries so that they'll be requeried.
+        for ( const [key,query] of Object.entries(state.queries)) {
+            state.queries[key].taint = true
+        }
+    }
 }
 
 export const makeQuery = function(state, action) {
@@ -53,11 +67,9 @@ export const setQueryResults = function(state, action) {
 
 export const clearQuery = function(state, action) {
     const name = action.payload.name
-
-    // If we have a name, clear that query.  Otherwise, clear them all.
     if ( name in state.queries ) {
         delete state.queries[name]
-    } 
+    }
 }
 
 export const clearQueries = function(state, action) {

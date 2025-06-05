@@ -17,6 +17,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
+exports.BlocklistDAO = require('./daos/BlocklistDAO')
 exports.FeatureDAO = require('./daos/FeatureDAO') 
 exports.FileDAO = require('./daos/FileDAO')
 exports.GroupDAO = require('./daos/GroupDAO')

@@ -5,27 +5,33 @@ import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/solid'
 
 import './Input.css'
 
-const Input = function({ name, type, label, explanation, className, value, onChange, onBlur, onFocus, error }) {
+const Input = function({ name, type, label, explanation, className, value, onChange, onKeyDown, onBlur, onFocus, error }) {
     const [isPasswordVisible, setIsPasswordVisible] = useState(false)
 
     const inputRef = useRef(null)
 
     const onChangeInternal = function(event) {
-        if ( onChange ) {
+        if ( onChange && typeof onChange === "function") {
             onChange(event)
         }
 
     }
 
     const onBlurInternal = function(event) {
-        if ( onBlur ) {
+        if ( onBlur && typeof onBlur === "function") {
             onBlur(event)
         }
     }
 
     const onFocusInternal = function(event) {
-        if ( onFocus ) {
+        if ( onFocus && typeof onFocus === "function" ) {
             onFocus(event)
+        }
+    }
+
+    const onKeyDownInternal = function(event) {
+        if ( onKeyDown && typeof onKeyDown === "function" ) {
+            onKeyDown(event)
         }
     }
 
@@ -67,6 +73,7 @@ const Input = function({ name, type, label, explanation, className, value, onCha
                     type={internalType} 
                     name={name} 
                     value={value} 
+                    onKeyDown={onKeyDownInternal}
                     onChange={onChangeInternal} 
                     onBlur={onBlurInternal} 
                     onFocus={onFocusInternal} 

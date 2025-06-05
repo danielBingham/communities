@@ -71,7 +71,7 @@ export class Logger  {
 
     }
 
-    log(level, message) {
+    log(level, message, object) {
         // We don't need to log anything. 
         if ( level > this.level ) {
             return
@@ -79,6 +79,7 @@ export class Logger  {
 
         const now = new Date()
         let logPrefix = `${now.toISOString()} ${Logger.levelDescriptions[level]} :: `
+
         if ( typeof message === 'object' ) {
             if ( level == Logger.levels.error) {
                 console.log(logPrefix + 'Error encountered.') 
@@ -90,49 +91,61 @@ export class Logger  {
                 Sentry.captureMessage(message)
             }
         } else {
-            if ( level == Logger.levels.error) {
-                console.error(logPrefix + message)
-                Sentry.captureException(message)
+            if ( object !== undefined && object !== null ) {
+                if ( level == Logger.levels.error) {
+                    console.error(logPrefix + message)
+                    console.error(object)
+                    Sentry.captureException(`${message}: ${JSON.stringify(object)}`)
+                } else {
+                    console.log(logPrefix + message)
+                    console.log(object)
+                    Sentry.captureMessage(`${message}: ${JSON.stringify(object)}`)
+                }
+
             } else {
-                console.log(logPrefix + message)
-                Sentry.captureMessage(message)
+                if ( level == Logger.levels.error) {
+                    console.error(logPrefix + message)
+                    Sentry.captureException(message)
+                } else {
+                    console.log(logPrefix + message)
+                    Sentry.captureMessage(message)
+                }
             }
         }
     }
 
-    error(message) {
-        this.log(Logger.levels.error, message)    
+    error(message, object) {
+        this.log(Logger.levels.error, message, object)    
     }
 
-    warn(message) {
+    warn(message, object) {
         if ( message instanceof Error ) {
             const content = `Warning: ${message.message}`
-            this.log(Logger.levels.warn, content)
+            this.log(Logger.levels.warn, content, object)
         } else {
-            this.log(Logger.levels.warn, message)
+            this.log(Logger.levels.warn, message, object)
         }
     }
 
-    info(message) {
-        this.log(Logger.levels.info, message)
+    info(message, object) {
+        this.log(Logger.levels.info, message, object)
     }
 
-    http(message) {
-        this.log(Logger.levels.http, message)
+    http(message, object) {
+        this.log(Logger.levels.http, message, object)
     }
 
-    verbose(message) {
-        this.log(Logger.levels.verbose, message)
+    verbose(message, object) {
+        this.log(Logger.levels.verbose, message, object)
     }
 
-    debug(message) {
-        this.log(Logger.levels.debug, message)
+    debug(message, object) {
+        this.log(Logger.levels.debug, message, object)
     }
 
-    silly(message) {
-        this.log(Logger.levels.silly, message)
+    silly(message, object) {
+        this.log(Logger.levels.silly, message, object)
     }
-
 }
 
 const logger = new Logger('info')

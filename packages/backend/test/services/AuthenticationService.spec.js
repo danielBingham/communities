@@ -66,7 +66,7 @@ describe('AuthenticationService', function() {
             const hash = auth.hashPassword(credentials.password)
 
             core.database.query.mockReturnValue(undefined)
-                .mockReturnValueOnce({ rowCount: 1, rows: [ { id: 1, password: hash } ]})
+                .mockReturnValueOnce({ rowCount: 1, rows: [ { id: 1, password: hash, status: 'confirmed' } ]})
 
             const userId = await auth.authenticateUser(credentials)
 
@@ -80,7 +80,7 @@ describe('AuthenticationService', function() {
             const hash = auth.hashPassword('passwordpassword')
 
             core.database.query.mockReturnValue(undefined)
-                .mockReturnValueOnce({ rowCount: 1, rows: [ { id: 1, password: hash } ]})
+                .mockReturnValueOnce({ rowCount: 1, rows: [ { id: 1, password: hash, status: 'confirmed' } ]})
 
 
             try {
@@ -88,6 +88,26 @@ describe('AuthenticationService', function() {
             } catch (error) {
                 expect(error).toBeInstanceOf(ServiceError)
                 expect(error.type).toBe('authentication-failed')
+            }
+
+            expect.hasAssertions()
+        })
+
+        it('Should throw a ServiceError when the user has been banned', async function() {
+            const auth = new AuthenticationService(core)
+
+            const credentials = { email: 'jwatson@university.edu', password: 'PasswordPassword' }
+            const hash = auth.hashPassword('PasswordPassword')
+
+            core.database.query.mockReturnValue(undefined)
+                .mockReturnValueOnce({ rowCount: 1, rows: [ { id: 1, password: hash, status: 'banned' } ]})
+
+
+            try {
+                const userId = await auth.authenticateUser(credentials) 
+            } catch (error) {
+                expect(error).toBeInstanceOf(ServiceError)
+                expect(error.type).toBe('banned')
             }
 
             expect.hasAssertions()
@@ -119,7 +139,7 @@ describe('AuthenticationService', function() {
             const hash = auth.hashPassword('PasswordPassword')
 
             core.database.query.mockReturnValue(undefined)
-                .mockReturnValueOnce({ rowCount: 1, rows: [ { id: 1, password: hash } ]})
+                .mockReturnValueOnce({ rowCount: 1, rows: [ { id: 1, password: hash, status: 'confirmed' } ]})
 
             try {
                 const userId = await auth.authenticateUser(credentials) 
@@ -137,7 +157,7 @@ describe('AuthenticationService', function() {
             const credentials = { email: 'jwatson@university.edu', password: 'PasswordPassword' }
 
             core.database.query.mockReturnValue(undefined)
-                .mockReturnValueOnce({ rowCount: 1, rows: [ { id: 1, password: null } ]})
+                .mockReturnValueOnce({ rowCount: 1, rows: [ { id: 1, password: null, status: 'invited' } ]})
 
             try {
                 const userId = await auth.authenticateUser(credentials) 

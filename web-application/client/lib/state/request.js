@@ -54,7 +54,16 @@ export const makeTrackedRequest = function(method, endpoint, body, onSuccess, on
                         onSuccess(responseBody)
                         return { status: status, body: responseBody }
                     } catch (error) {
-                        return Promise.reject(error)
+                        logger.error(`Error handling request success: `, error)
+                        const requestError = {
+                            endpoint: endpoint,
+                            method: method,
+                            status: status,
+                            type: 'frontend-error',
+                            message: `Failed to process response: ${error.message}.`,
+                            data: responseBody
+                        }
+                        return Promise.reject(requestError)
                     }
                 }
             } else {
@@ -66,12 +75,13 @@ export const makeTrackedRequest = function(method, endpoint, body, onSuccess, on
                     message: responseBody.message, 
                     data: responseBody.data 
                 }
+                logger.error(`Request failed: `, requestError)
                 if ( onFailure ) {
                     try {
                         onFailure(responseBody)
                     } catch (error) {
-                        logger.warn(requestError)
-                        return Promise.reject(error)
+                        logger.error(`Error handling request failure: `, error)
+                        return Promise.reject(requestError)
                     }
                 } 
                 return Promise.reject(requestError)

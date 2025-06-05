@@ -13,7 +13,7 @@ export const usePost = function(postId) {
     const [request, makeRequest] = useRequest()
 
     useEffect(() => {
-        if ( postId && ! post ) {
+        if ( postId && ! post && request === null ) {
             makeRequest(getPost(postId))
         }
     }, [ postId, post ])
