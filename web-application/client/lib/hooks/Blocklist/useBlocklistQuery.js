@@ -15,7 +15,7 @@ export const useBlocklistQuery = function(queryParameters) {
 
     const query = useSelector((state) => key in state.blocklists.queries ? state.blocklists.queries[key] : null)
 
-    const [ request, makeRequest ] = useRequest()
+    const [ request, makeRequest, resetRequest ] = useRequest()
 
     const dispatch = useDispatch()
 
@@ -27,6 +27,7 @@ export const useBlocklistQuery = function(queryParameters) {
         return () => {
             if ( request !== null && request.state === 'fulfilled' ) {
                 dispatch(cleanupBlocklistQuery(key)) 
+                resetRequest()
             }
         }
     }, [ key, query, request ])

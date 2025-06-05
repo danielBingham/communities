@@ -5,6 +5,7 @@ import { useBlocklistQuery } from '/lib/hooks/Blocklist'
 import RequestError from '/components/errors/RequestError'
 import { Table, TableHeader, TableCell } from '/components/ui/Table'
 import PaginationControls from '/components/PaginationControls'
+import Spinner from '/components/Spinner'
 
 import BlocklistTableRow from './BlocklistTableRow'
 
@@ -16,6 +17,15 @@ const BlocklistTable = function() {
         for(const id of query.list) {
             blocklistViews.push(<BlocklistTableRow key={id} id={id} />)
         }
+    }
+
+    const isPending = request && request.state === 'pending'
+    if ( isPending ) {
+        return (
+            <div className="blocklist-table">
+                <Spinner />
+            </div>
+        )
     }
 
     return (

@@ -120,7 +120,7 @@ module.exports = class UserController {
         }
 
         const result = {
-            where: `users.status != 'invited'`,
+            where: ``,
             params: [],
             page: 1,
             order: '',
@@ -131,47 +131,53 @@ module.exports = class UserController {
 
 
         if ( 'name' in query && query.name.length > 0) {
+            const and = result.params.length > 0 ? ' AND ' : ''
             result.params.push(query.name)
-            result.where += ` AND SIMILARITY(users.name, $${result.params.length}) > 0`
+            result.where += `${and} SIMILARITY(users.name, $${result.params.length}) > 0`
             result.order = `SIMILARITY(users.name, $${result.params.length}) desc`
         }
 
         if ( 'username' in query && query.username.length > 0 ) {
+            const and = result.params.length > 0 ? ' AND ' : ''
             result.params.push(query.username)
-            result.where += ` AND users.username = $${result.params.length}`
+            result.where += `${and} users.username = $${result.params.length}`
         }
 
         if ( 'ids' in query && query.ids.length > 0 ) {
+            const and = result.params.length > 0 ? ' AND ' : ''
             result.params.push(query.ids)
-            result.where += ` AND users.id = ANY($${result.params.length}::uuid[])`
+            result.where += `${and} users.id = ANY($${result.params.length}::uuid[])`
         }
 
         if ( 'isFriend' in query && query.isFriend ) {
+            const and = result.params.length > 0 ? ' AND ' : ''
             const relationships = await this.userRelationshipsDAO.getUserRelationshipsForUser(currentUser.id)
             const friendIds = relationships.map((r) => r.userId == currentUser.id ? r.relationId : r.userId)
 
             result.params.push(friendIds)
-            result.where += ` AND users.id = ANY($${result.params.length}::uuid[])`
+            result.where += `${and} users.id = ANY($${result.params.length}::uuid[])`
         }
 
         if ( 'isGroupMember' in query ) {
+            const and = result.params.length > 0 ? ' AND ' : ''
             const groupId = query.isGroupMember
 
             const members = await this.groupMemberDAO.getGroupMembers(groupId)
             const memberUserIds = members.map((member) => member.userId)
 
             result.params.push(memberUserIds)
-            result.where += ` AND users.id = ANY($${result.params.length}::uuid[])`
+            result.where += `${and} users.id = ANY($${result.params.length}::uuid[])`
         }
 
         if ( 'isNotGroupMember' in query ) {
+            const and = result.params.length > 0 ? ' AND ' : ''
             const groupId = query.isNotGroupMember
 
             const members = await this.groupMemberDAO.getGroupMembers(groupId)
             const memberUserIds = members.map((member) => member.userId)
 
             result.params.push(memberUserIds)
-            result.where += ` AND users.id != ALL($${result.params.length}::uuid[])`
+            result.where += `${and} users.id != ALL($${result.params.length}::uuid[])`
         }
 
         if ( 'admin' in query && query.admin === 'true') {
@@ -182,6 +188,9 @@ module.exports = class UserController {
                     `User(${currentUser.id}) not authorized to admin.`,
                     `You are not authorized to admin this platform.`)
             }
+        } else {
+            const and = result.params.length > 0 ? ' AND ' : ''
+            result.where += `${and} users.status != 'banned' AND users.status != 'invited'`
         }
 
         if ( query.page && ! options.ignorePage ) {
@@ -318,6 +327,24 @@ module.exports = class UserController {
         })
 
         const existingUser = existingUserResults.dictionary[existingUserResults.list[0]] 
+        if ( existingUser && existingUser.status === 'banned' ) {
+            throw new ControllerError(403, 'not-authorized',
+                `Attempt to re-register or re-invite banned user.`,
+                `That user has been banned.`)
+        }
+
+        // Check the email's domain in the domain blocklist.
+        const domain = user.email.substring(user.email.indexOf('@')+1)
+
+        const blocklistResults = await this.core.database.query(`
+            SELECT id FROM blocklist WHERE domain = $1
+        `, [ domain ])
+
+        if ( blocklistResults.rows.length > 0 ) {
+            throw new ControllerError(403, 'not-authorized',
+                `Attempt to invite or register a user from blocked domain '${domain}'.`,
+                `Users are not allowed to register using emails from '${domain}'.`)
+        }
 
         // ================== Type Determination and Authentication ===========
         // There are three types of POST requests, three circumstances where
@@ -863,6 +890,14 @@ module.exports = class UserController {
             request.session.user = entity 
         }
 
+        // If the user's status has been set to 'banned', then we need to
+        // destroy their sessions and log them out.
+        if ( entity.status === 'banned' ) {
+            await this.core.database.query(`
+                DELETE FROM session WHERE sess->'user'->>'id' = $1
+            `, [ entity.id ])
+        }
+
         // If we've changed the email, then we need to send out a new
         // confirmation token.
         if ( entity.email != existingUser.email ) {
@@ -906,6 +941,12 @@ module.exports = class UserController {
             throw new ControllerError(403, 'not-authorized',
                 `User(${currentUser.id}) attempting to delete User(${userId}) without permission.`,
                 `You may not delete another user, only yourself.`)
+        }
+
+        if ( currentUser.status === 'banned' ) {
+            throw new ControllerError(403, 'not-authorized',
+                `User(${currentUser.id}) attempting to delete themselves, but they are banned.`,
+                `You are banned, you may not delete yourself.`)
         }
 
 

@@ -8,7 +8,7 @@ import { getBlocklist, removeBlocklist } from '/state/admin/blocklists'
 export const useBlocklist = function(id) {
     const blocklist = useSelector((state) => id in state.blocklists.dictionary ? state.blocklists.dictionary[id] : null)
 
-    const [ request, makeRequest ] = useRequest()
+    const [ request, makeRequest, resetRequest ] = useRequest()
 
     const dispatch = useDispatch()
 
@@ -20,6 +20,7 @@ export const useBlocklist = function(id) {
         return () => {
             if ( request !== null && request.state === 'fulfilled' ) {
                 dispatch(removeBlocklist(blocklist)) 
+                resetRequest()
             }
         }
     }, [ id, blocklist, request ])

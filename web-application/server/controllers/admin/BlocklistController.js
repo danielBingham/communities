@@ -97,6 +97,9 @@ module.exports = class BlocklistController {
         }
 
         const blocklist = request.body
+        if ( blocklist.domain !== undefined && blocklist.domain !== null && typeof blocklist.domain === 'string' ) {
+            blocklist.domain = blocklist.domain.toLowerCase()
+        }
 
         const canAdminSite = await this.permissionService.can(currentUser, 'admin', 'Site')
         if ( ! canAdminSite ) {

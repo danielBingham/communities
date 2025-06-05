@@ -9,6 +9,7 @@ import { getUsers } from '/state/users'
 
 import PaginationControls from '/components/PaginationControls'
 import { Table, TableHeader, TableCell } from '/components/ui/Table'
+import RequestError from '/components/errors/RequestError'
 
 import UserAdminTableRow from './UserAdminTableRow'
 
@@ -52,6 +53,7 @@ const UserAdminTable = function() {
                 { userRows }
             </Table>
             <PaginationControls meta={query?.meta} />
+            <RequestError message="Getting Users" request={request} />
         </>
     )
 

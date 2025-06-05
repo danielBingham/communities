@@ -63,8 +63,24 @@ module.exports = class AuthenticationController {
             try { 
                 const session = await this.auth.getSessionForUserId(request.session.user.id)
 
+                if ( session.user && session.user.status === 'banned' ) {
+                    // If they are banned, destroy the session.
+                    request.session.destroy(function(error) {
+                        if (error) {
+                            console.error(error)
+                            response.status(500).json({error: 'server-error'})
+                        } else {
+                            response.status(200).json({
+                                session: null
+                            })
+                        }
+                    })
+                    return
+                }
+
                 request.session.user = session.user
                 request.session.file = session.file
+
 
                 response.status(200).json({
                     session:  session
@@ -144,6 +160,8 @@ module.exports = class AuthenticationController {
                     throw new ControllerError(403, 'authentication-failed', error.message)
                 } else if ( error.type == 'no-user-password' ) {
                     throw new ControllerError(403, 'authentication-failed', error.message)
+                } else if ( error.type === 'banned' ) {
+                    throw new ControllerError(403, 'authentication-failed', error.message)
                 } else if ( error.type == 'no-credential-password' ) {
                     throw new ControllerError(400, 'password-required', error.message)
                 } else if ( error.type == 'authentication-failed' ) {
@@ -200,6 +218,8 @@ module.exports = class AuthenticationController {
                 } else if ( error.type == 'multiple-users') {
                     throw new ControllerError(403, 'authentication-failed', error.message)
                 } else if ( error.type == 'no-user-password' ) {
+                    throw new ControllerError(403, 'authentication-failed', error.message)
+                } else if ( error.type === 'banned' ) {
                     throw new ControllerError(403, 'authentication-failed', error.message)
                 } else if ( error.type == 'no-credential-password' ) {
                     throw new ControllerError(400, 'password-required', error.message)

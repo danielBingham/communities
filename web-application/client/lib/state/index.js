@@ -14,6 +14,11 @@ export const setInDictionary = function(state, action) {
         console.log(action)
         throw new Error(`Invalid payload sent to ${action.type}.`)
     }
+
+    // Taint the queries so that they'll be requeried.
+    for ( const [key,query] of Object.entries(state.queries)) {
+        state.queries[key].taint = true
+    }
 }
 
 export const removeEntity = function(state, action) {
@@ -22,10 +27,10 @@ export const removeEntity = function(state, action) {
 
     delete state.dictionary[entity.id]
 
-    // Clean this entity out of all queries.
     if (clearQueries === true ) {
-        for(const [key,query] of Object.entries(state.queries)) {
-            state.queries[key].list = state.queries[key].list.filter((id) => id !== entity.id)
+        // Taint the queries so that they'll be requeried.
+        for ( const [key,query] of Object.entries(state.queries)) {
+            state.queries[key].taint = true
         }
     }
 }

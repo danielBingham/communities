@@ -90,7 +90,7 @@ module.exports = class AuthenticationService {
          * 
          * **********************************************************/
         const results = await this.database.query(
-            'select id, password from users where email = $1',
+            'select id, password, status from users where email = $1',
             [ credentials.email ]
         )
 
@@ -105,8 +105,11 @@ module.exports = class AuthenticationService {
             throw new ServiceError('multiple-users', `Multiple users found for email ${credentials.email}.`)
         }
 
-        // 3. They have a password set. (If they don't, they authenticated with
-        // ORCID iD and cannot authenticate with this endpoint.)
+        if ( results.rows[0].status === 'banned' ) {
+            throw new ServiceError('banned', `The user for email ${credentials.email} has been banned.`)
+        }
+
+        // 3. They have a password set. 
         if ( ! results.rows[0].password || results.rows[0].password.trim().length <= 0) {
             throw new ServiceError('no-user-password', `User(${credentials.email}) doesn't have a password set.`)
         }

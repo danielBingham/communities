@@ -1139,7 +1139,6 @@ module.exports = class ValidationService {
             return errors
         }
 
-        // Do backend specific validation.
         
         if ( util.objectHas(blocklist, 'userId') ) {
             const userResults = await this.core.database.query(`SELECT id FROM users WHERE id = $1`, [ blocklist.userId ])
@@ -1159,6 +1158,18 @@ module.exports = class ValidationService {
                 })
             }
         } 
+
+        // Do backend specific validation.
+        if ( util.objectHas(blocklist, 'domain') ) {
+            const domainResults = await this.core.database.query(`SELECT id FROM blocklist WHERE domain = $1`, [ blocklist.domain])
+            if ( domainResults.rows.length > 0 ) {
+                errors.push({
+                    type: `domain:conflict`,
+                    log: `${blocklist.domain} is already in the blocklist.`,
+                    message: `${blocklist.domain} is already in the blocklist.`
+                })
+            }
+        }
 
         return errors
     }

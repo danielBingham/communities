@@ -282,7 +282,6 @@ module.exports = class PostController {
             return
         }
 
-        console.log(query)
         const results = await this.postDAO.selectPosts(query)
 
         results.meta = await this.postDAO.getPostPageMeta(query)

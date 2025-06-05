@@ -58,6 +58,7 @@ const BlocklistForm = function({ onComplete, onCancel }) {
     }
 
     const onSubmit = function(event) {
+        event.preventDefault()
 
         if ( ! validate() ) {
             return
@@ -70,6 +71,12 @@ const BlocklistForm = function({ onComplete, onCancel }) {
         }
 
         makeRequest(postBlocklists(blocklist))
+    }
+
+    const onKeyDown = function(event) {
+        if ( event.key === 'Enter' ) {
+            onSubmit(event)
+        }
     }
 
     useEffect(() => {
@@ -110,8 +117,9 @@ const BlocklistForm = function({ onComplete, onCancel }) {
                 explanation="Domain you want to ban signups from."
                 value={domain}
                 className="domain"
+                onKeyDown={onKeyDown}
                 onBlur={ (event) => validate('domain') }
-                onChange={ (event) => setDomain(event.target.value) } 
+                onChange={ (event) => setDomain(event.target.value.toLowerCase()) } 
                 error={domainError}
             />
             <TextBox

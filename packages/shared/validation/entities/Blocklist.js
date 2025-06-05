@@ -100,7 +100,6 @@ const validate = function(blocklist) {
         // TODO We could probably solve this with a parameter, but I want to
         // see what this looks like on the frontend before trying that.
         if ( ! objectHas(blocklist, field) ) {
-            console.log(`blocklist missing ${field}`)
             continue
         }
 
