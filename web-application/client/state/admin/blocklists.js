@@ -62,14 +62,43 @@ export const blocklistsSlice = createSlice({
     }
 })
 
+
+/**
+ * Cleanup a query and all entities that are only in use by that query.
+ * Entities in use by other queries will be left.
+ *
+ * @param {string} key The name of the query we want to cleanup.
+ *
+ * @return {void} 
+ */
 export const cleanupBlocklistQuery = function(key) {
     return function(dispatch, getState) {
         const blocklists = getState().blocklists
 
+
         if ( key in blocklists.queries ) {
             const query = blocklists.queries[key]
 
+            // Search the other queries to determine whether this entity is in
+            // use by another query.
+            const queryIsUsing = (id) => {
+                for(const [searchKey, value] of Object.entries(blocklists.queries)) {
+                    if ( searchKey === key ) {
+                        continue
+                    }
+
+                    if ( blocklists.queries[searchKey].list.find((e) => id === e) !== undefined) {
+                        return true
+                    }
+                }
+                return false
+            }
+
             for(const id of query.list) {
+                if ( queryIsUsing(id) ) {
+                    continue
+                }
+
                 const entity = id in blocklists.dictionary ? blocklists.dictionary[id] : null
                 if ( entity !== null ) {
                     dispatch(blocklistsSlice.actions.removeBlocklist({ entity: entity }))
@@ -183,6 +212,25 @@ export const patchBlocklist = function(blocklist) {
         ))
     }
 }
+
+/**
+ * DELETE /blocklist/:id
+ *
+ * Delete a blocklist. 
+ *
+ * @param {object} blocklist - A populated blocklist object.
+ *
+ * @returns {string} A uuid requestId that can be used to track this request.
+ */
+export const deleteBlocklist = function(blocklist) {
+    return function(dispatch, getState) {
+        return dispatch(makeTrackedRequest('DELETE', `/admin/blocklist/${encodeURIComponent(blocklist.id)}`, null,
+            function(response) {
+                dispatch(blocklistsSlice.actions.removeBlocklist({ entity: blocklist, clearQueries: true }))
+            }
+        ))
+    }
+} 
 
 export const { 
     setBlocklistsInDictionary, removeBlocklist 

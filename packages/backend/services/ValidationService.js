@@ -1129,7 +1129,7 @@ module.exports = class ValidationService {
         }
 
         // Do basic validation the fields.
-        const validationErrors = validation.entities.Blocklist.validate(blocklist)
+        const validationErrors = validation.Blocklist.validate(blocklist)
         if ( validationErrors.all.length > 0 ) {
             errors.push(...validationErrors.all)
         }

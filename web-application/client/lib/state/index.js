@@ -18,7 +18,16 @@ export const setInDictionary = function(state, action) {
 
 export const removeEntity = function(state, action) {
     const entity = action.payload.entity
+    const clearQueries = action.payload.clearQueries
+
     delete state.dictionary[entity.id]
+
+    // Clean this entity out of all queries.
+    if (clearQueries === true ) {
+        for(const [key,query] of Object.entries(state.queries)) {
+            state.queries[key].list = state.queries[key].list.filter((id) => id !== entity.id)
+        }
+    }
 }
 
 export const makeQuery = function(state, action) {

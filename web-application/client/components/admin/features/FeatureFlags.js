@@ -5,6 +5,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 
 import { getFeatures } from '/state/features'
 
+import { Table, TableHeader, TableCell } from '/components/ui/Table'
 import FeatureRow from '/components/admin/features/FeatureRow'
 
 import './FeatureFlags.css'
@@ -36,12 +37,14 @@ const FeatureFlags = function(props) {
 
     return (
         <div className="feature-flags">
-            <div className="feature-rows-header">
-                <span className="feature-name">Feature Name</span>
-                <span className="feature-status">Feature Status</span>
-                <span className="feature-controls">Migration Controls</span>
-            </div>
-            {rows}
+            <Table>
+                <TableHeader className="feature-rows-header">
+                    <TableCell>Feature Name</TableCell>
+                    <TableCell>Feature Status</TableCell>
+                    <TableCell>Migration Controls</TableCell>
+                </TableHeader>
+                {rows}
+            </Table>
         </div>
     )
 

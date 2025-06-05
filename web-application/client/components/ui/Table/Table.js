@@ -33,7 +33,9 @@ export const Table = function({ className, children }) {
 
     return (
         <table className={`table ${className ? className : ''}`}>
-            { children }
+            <tbody>
+                { children }
+            </tbody>
         </table>
     )
 }

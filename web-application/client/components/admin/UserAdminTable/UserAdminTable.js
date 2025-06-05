@@ -37,20 +37,22 @@ const UserAdminTable = function() {
     }
 
     return (
-        <Table className="user-admin-table">
-            <TableHeader className="user-admin-table__header">
-                <TableCell>ID</TableCell>
-                <TableCell>Name</TableCell> 
-                <TableCell>Username</TableCell> 
-                <TableCell>Email</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Role</TableCell>
-                <TableCell>Joined</TableCell>
-                <TableCell></TableCell>
-            </TableHeader>
-            { userRows }
+        <>
+            <Table className="user-admin-table">
+                <TableHeader className="user-admin-table__header">
+                    <TableCell>ID</TableCell>
+                    <TableCell>Name</TableCell> 
+                    <TableCell>Username</TableCell> 
+                    <TableCell>Email</TableCell>
+                    <TableCell>Status</TableCell>
+                    <TableCell>Role</TableCell>
+                    <TableCell>Joined</TableCell>
+                    <TableCell></TableCell>
+                </TableHeader>
+                { userRows }
+            </Table>
             <PaginationControls meta={query?.meta} />
-        </Table>
+        </>
     )
 
 }

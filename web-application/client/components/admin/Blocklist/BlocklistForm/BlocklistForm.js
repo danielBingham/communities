@@ -7,11 +7,13 @@ import { useRequest } from '/lib/hooks/useRequest'
 
 import { postBlocklists } from '/state/admin/blocklists'
 
+import Button from '/components/generic/button/Button'
 import Input from '/components/generic/input/Input'
 import TextBox from '/components/generic/text-box/TextBox'
 import ErrorModal from '/components/errors/ErrorModal'
+import Spinner from '/components/Spinner'
 
-const BlocklistForm = function(onComplete) {
+const BlocklistForm = function({ onComplete, onCancel }) {
     const [domain, setDomain] = useState('')
     const [domainError, setDomainError] = useState(null)
 
@@ -49,6 +51,10 @@ const BlocklistForm = function(onComplete) {
         setDomainError(null)
         setNotes('')
         setNotesError(null)
+
+        if ( onCancel && typeof onCancel === 'function' ) {
+            onCancel()
+        }
     }
 
     const onSubmit = function(event) {
@@ -68,7 +74,9 @@ const BlocklistForm = function(onComplete) {
 
     useEffect(() => {
         if ( request && request.state === 'fulfilled' ) {
-            onComplete()
+            if ( onComplete && typeof onComplete === 'function' ) {
+                onComplete()
+            }
         }
     }, [ request ])
 

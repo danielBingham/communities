@@ -23,10 +23,6 @@ export function useRequest() {
                 setRequest(newRequest)
             })
             .catch((error) => {
-                if ( error?.status && error.status >= 500 ) {
-                    logger.error(error)
-                }
-
                 const newRequest = { ...request }
                 newRequest.state = 'failed'
                 newRequest.response = {

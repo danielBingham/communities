@@ -12,7 +12,7 @@ const AddDomainButton = function() {
         <>
             <Button type="primary" onClick={() => setShowModal(true)} >Add Domain</Button>
             <Modal isVisible={showModal} className="add-blocklist-modal">
-                <BlocklistForm onComplete={() => setShowModal(false)}/>
+                <BlocklistForm onComplete={() => setShowModal(false)} onCancel={() => setShowModal(false)}/>
             </Modal>
         </>
     )

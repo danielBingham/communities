@@ -2,23 +2,6 @@
     text-align: center;
 }
 .feature-flags .feature-rows-header {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
     font-weight: bold;
     border-bottom: thin solid var(--main-border-color);
-}
-.feature-flags .feature-rows-header .feature-name {
-    grid-column: 1 / 2;
-    padding: 10px;
-    text-align: center;
-}
-.feature-flags .feature-rows-header .feature-status {
-    grid-column: 2 / 3;
-    padding: 10px;
-    text-align: center;
-}
-.feature-flags .feature-rows-header .feature-controls {
-    grid-column: 3 / 4;
-    padding: 10px;
-    text-align: center;
 }

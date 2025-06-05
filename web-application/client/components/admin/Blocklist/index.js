@@ -1,3 +1,5 @@
 export { default } from './Blocklist'
 export { default as BlocklistForm } from './BlocklistForm'
 export { default as AddDomain } from './AddDomain'
+export { default as BlocklistTable } from './BlocklistTable'
+export { default as BlocklistDotsMenu } from './BlocklistDotsMenu'

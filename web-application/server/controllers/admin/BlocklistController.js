@@ -156,7 +156,7 @@ module.exports = class BlocklistController {
         const blocklistId = request.params.id
 
         const results = await this.blocklistDAO.selectBlocklists({
-            where: `blocklists.id = $1`,
+            where: `blocklist.id = $1`,
             params: [blocklistId]
         })
 
