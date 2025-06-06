@@ -50,6 +50,14 @@ describe('validateDomain', function() {
         expect(errors[0].type).toBe('domain:invalid-type')
     })
 
+    it('Should return an error when domain is an empty string', function() {
+        const domain = '' 
+        const errors = validation.Blocklist.validateDomain(domain)
+
+        expect(errors.length).toBe(1)
+        expect(errors[0].type).toBe('domain:required')
+    })
+
     it('Should return an error when domain is too long', function() {
         const domain = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
         const errors = validation.Blocklist.validateDomain(domain)

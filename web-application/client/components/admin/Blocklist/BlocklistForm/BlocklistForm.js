@@ -32,6 +32,8 @@ const BlocklistForm = function({ onComplete, onCancel }) {
             if ( domainValidationErrors.length > 0) {
                 setDomainError(domainValidationErrors.reduce((string, error) => `${string} ${error.message}`, ''))
                 errors.push(...domainValidationErrors)
+            } else {
+                setDomainError(null)
             }
         }
 
@@ -40,6 +42,8 @@ const BlocklistForm = function({ onComplete, onCancel }) {
             if ( notesValidationErrors.length > 0 ) {
                 setNotesError(notesValidationErrors.reduce((string, error) => `${string} ${error.message}`, ''))
                 errors.push(...notesValidationErrors)
+            } else {
+                setNotesError(null)
             }
         }
 

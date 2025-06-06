@@ -36,6 +36,14 @@ const validateDomain = function(domain) {
             message: `'${typeof domain}' is not a valid type for domain.`
         })
     } else {
+        if ( domain.length < 1 ) {
+            errors.push({
+                type: 'domain:required',
+                log: `Domain name is required.`,
+                message: `Domain name is required.`
+            })
+        }
+
         if ( domain.length > 255 ) {
             errors.push({
                 type: `domain:too-long`,

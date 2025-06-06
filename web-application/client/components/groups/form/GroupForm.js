@@ -28,10 +28,10 @@ const GroupForm = function() {
     const [ fileId, setFileId] = useLocalStorage('group.draft.fileId', null)
     const [ fileState, setFileState] = useState(null)
 
-    const [ titleErrors, setTitleErrors ] = useState([]) 
-    const [ slugErrors, setSlugErrors ] = useState([])
-    const [ typeErrors, setTypeErrors ] = useState([])
-    const [ aboutErrors, setAboutErrors ] = useState([])
+    const [ titleErrors, setTitleErrors ] = useState(null) 
+    const [ slugErrors, setSlugErrors ] = useState(null)
+    const [ typeErrors, setTypeErrors ] = useState(null)
+    const [ aboutErrors, setAboutErrors ] = useState(null)
 
 
     const [request, makeRequest] = useRequest()
@@ -44,14 +44,18 @@ const GroupForm = function() {
             titleValidationErrors = shared.validation.Group.validateTitle(title)
             if ( titleValidationErrors.length > 0 ) {
                 setTitleErrors(titleValidationErrors.reduce((string, error) => `${string} ${error.message}`, ''))
+            } else {
+                setTitleErrors(null)
             }
-        }
+        } 
 
         let slugValidationErrors = []
         if ( ! field || field == 'slug' ) {
             slugValidationErrors = shared.validation.Group.validateSlug(slug)
             if ( slugValidationErrors.length > 0 ) {
                 setSlugErrors(slugValidationErrors.reduce((string, error) => `${string} ${error.message}`, ''))
+            } else {
+                setSlugErrors(null)
             }
         }
 
@@ -60,6 +64,8 @@ const GroupForm = function() {
             aboutValidationErrors = shared.validation.Group.validateAbout(about)
             if ( aboutValidationErrors.length > 0 ) {
                 setAboutErrors(aboutValidationErrors.reduce((string, error) => `${string} ${error.message}`, ''))
+            } else {
+                setAboutErrors(null)
             }
         }
 
@@ -68,6 +74,8 @@ const GroupForm = function() {
             typeValidationErrors = shared.validation.Group.validateType(type)
             if ( typeValidationErrors.length > 0 ) {
                 setTypeErrors(typeValidationErrors.reduce((string, error) => `${string} ${error.message}`, ''))
+            } else {
+                setTypeErrors(null)
             }
         }
 
@@ -158,10 +166,6 @@ const GroupForm = function() {
     }, [ request, fileState, fileId])
 
     let baseError = null 
-    let titleError = titleErrors.join(' ')
-    let slugError = slugErrors.join(' ')
-    let typeError = typeErrors.join(' ')
-    let aboutError = aboutErrors.join(' ')
 
     const inProgress = (request && request.state == 'pending') || (fileId && fileState === 'pending') 
 
@@ -170,7 +174,7 @@ const GroupForm = function() {
             baseError = request.error.message
         } else if ( request.error && request.error.type == 'conflict' ) {
             baseError = request.error.message
-            slugError += 'A group with this URL already exists.' 
+            slugErrors += 'A group with this URL already exists.' 
         }
     } 
 
@@ -204,7 +208,7 @@ const GroupForm = function() {
                 className="title"
                 onBlur={ (event) => validate('title') }
                 onChange={onTitleChange} 
-                error={titleError}
+                error={titleErrors}
             />
 
             <Input
@@ -215,7 +219,7 @@ const GroupForm = function() {
                 className="slug"
                 onBlur={ (event) => validate('slug') }
                 onChange={ (event) => setSlug(event.target.value) } 
-                error={slugError}
+                error={slugErrors}
             />
             <TextBox
                 name="about"
@@ -224,10 +228,10 @@ const GroupForm = function() {
                 explanation={`Enter a description of this group.  This should include a description of the group's purpose, it's rules, and what sort of content is appropriate for this group.`}
                 value={about}
                 onChange={(event) => setAbout(event.target.value)}
-                error={aboutError}
+                error={aboutErrors}
             />
             <div className="group-form__type">
-                <div className="group-form__type-errors">{ typeError }</div>
+                <div className="group-form__type-errors">{ typeErrors }</div>
                 <div className="group-form__types">
                     <div className="type-option">
                         <input 
