@@ -127,7 +127,9 @@ module.exports = class PermissionService {
                 return await this.canDeletePost(user, context)
             }
         } else if ( entity === 'Group' ) {
-            if ( action === 'view' ) {
+            if ( action === 'create' ) {
+                return await this.canCreateGroup(user, context)
+            } else if ( action === 'view' ) {
                 return await this.canViewGroup(user, context)
             } else if ( action === 'update' ) {
                 return await this.canUpdateGroup(user, context)
@@ -271,6 +273,10 @@ module.exports = class PermissionService {
         }
 
         return false
+    }
+
+    async canCreateGroup(user, context) {
+        return true
     }
 
     async canViewGroup(user, context) {

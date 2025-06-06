@@ -15,34 +15,11 @@
     margin: 10px auto;
     color: var(--main-border-color);
 }
-.group-form .group-form__types {
-    text-align: left;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, 340px);
-    grid-template-rows: auto;
-    padding: 10px;
-    max-width: 680px;
-}
-.group-form .group-form__types .type-option {
-    padding: 5px;
-    width: 340px;
-}
-.group-form .group-form__types .type-option label {
-    display: inline-block;
-    font-size: 18px;
-    padding-left: 5px;
-    width: auto;
-}
-.group-form .group-form__types .type-option label svg {
+.group-form .group-form__type svg {
     width: 1em;
     height: 1em;
     margin-right: 0.2em;
     margin-bottom: -0.2em;
-}
-.group-form .group-form__types .type-option .explanation {
-    padding: 2px;
-    font-size: 0.8em;
-    color: #333;
 }
 .group-form .group-form__controls {
     text-align: center;

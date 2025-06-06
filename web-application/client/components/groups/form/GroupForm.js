@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 
 import { GlobeAltIcon, LockOpenIcon, LockClosedIcon, UserCircleIcon } from '@heroicons/react/24/outline'
 
+import * as shared from '@communities/shared'
+
 import { useLocalStorage } from '/lib/hooks/useLocalStorage'
 import { useRequest } from '/lib/hooks/useRequest'
 
@@ -15,6 +17,8 @@ import Button from '/components/generic/button/Button'
 import Input from '/components/generic/input/Input'
 import TextBox from '/components/generic/text-box/TextBox'
 import Spinner from '/components/Spinner'
+import { Radio, RadioOption } from '/components/ui/Radio'
+import RequestError from '/components/errors/RequestError'
 
 import './GroupForm.css'
 
@@ -26,10 +30,10 @@ const GroupForm = function() {
     const [ fileId, setFileId] = useLocalStorage('group.draft.fileId', null)
     const [ fileState, setFileState] = useState(null)
 
-    const [ titleErrors, setTitleErrors ] = useState([]) 
-    const [ slugErrors, setSlugErrors ] = useState([])
-    const [ typeErrors, setTypeErrors ] = useState([])
-    const [ aboutErrors, setAboutErrors ] = useState([])
+    const [ titleErrors, setTitleErrors ] = useState(null) 
+    const [ slugErrors, setSlugErrors ] = useState(null)
+    const [ typeErrors, setTypeErrors ] = useState(null)
+    const [ aboutErrors, setAboutErrors ] = useState(null)
 
 
     const [request, makeRequest] = useRequest()
@@ -39,46 +43,48 @@ const GroupForm = function() {
 
         let titleValidationErrors = []
         if ( ! field || field == 'title' ) {
-            if ( title.length <= 0 ) {
-                titleValidationErrors.push('Title is required.')
-            } else if ( title.length >= 1024) {
-                titleValidationErrors.push('Title must be less than 1024 characters.')
+            titleValidationErrors = shared.validation.Group.validateTitle(title)
+            if ( titleValidationErrors.length > 0 ) {
+                setTitleErrors(titleValidationErrors.reduce((string, error) => `${string} ${error.message}`, ''))
+            } else {
+                setTitleErrors(null)
             }
-            setTitleErrors(titleValidationErrors)
-        }
+        } 
 
         let slugValidationErrors = []
         if ( ! field || field == 'slug' ) {
-            if ( slug.length <= 0 ) {
-                slugValidationErrors.push('URL is required.')
-            } else if ( slug.length >= 1024) {
-                slugValidationErrors.push('URL must be less than 1024 characters.')
-            } else if ( slug.match(/^[a-zA-Z0-9\.\-_]+$/) === null ) {
-                slugValidationErrors.push(`URL may only contain letters, numbers, '.', '-', or '_'.`)
+            slugValidationErrors = shared.validation.Group.validateSlug(slug)
+            if ( slugValidationErrors.length > 0 ) {
+                setSlugErrors(slugValidationErrors.reduce((string, error) => `${string} ${error.message}`, ''))
+            } else {
+                setSlugErrors(null)
             }
-            setSlugErrors(slugValidationErrors)
         }
 
         let aboutValidationErrors = []
         if ( ! field || field == 'about' ) {
-            if ( about.length >= 10000) {
-                aboutValidationErrors.push('About must be less than 10,000 characters.')
+            aboutValidationErrors = shared.validation.Group.validateAbout(about)
+            if ( aboutValidationErrors.length > 0 ) {
+                setAboutErrors(aboutValidationErrors.reduce((string, error) => `${string} ${error.message}`, ''))
+            } else {
+                setAboutErrors(null)
             }
-            setAboutErrors(aboutValidationErrors)
         }
 
         let typeValidationErrors = []
         if ( ! field || field == 'type' ) {
-            if ( type !== 'open' && type !== 'private' && type !== 'hidden' ) {
-                typeValidationErrors.push(`Type must be one of 'open', 'private', or 'hidden'.`)
+            typeValidationErrors = shared.validation.Group.validateType(type)
+            if ( typeValidationErrors.length > 0 ) {
+                setTypeErrors(typeValidationErrors.reduce((string, error) => `${string} ${error.message}`, ''))
+            } else {
+                setTypeErrors(null)
             }
-            setTypeErrors(typeValidationErrors)
         }
 
-        return titleValidationErrors.length == 0 
-            && slugValidationErrors.length == 0 
-            && aboutValidationErrors == 0 
-            && typeValidationErrors == 0
+        return titleValidationErrors.length === 0 
+            && slugValidationErrors.length === 0 
+            && aboutValidationErrors.length === 0 
+            && typeValidationErrors.length === 0
     }
 
     const assembleGroup = function() {
@@ -162,25 +168,10 @@ const GroupForm = function() {
     }, [ request, fileState, fileId])
 
     let baseError = null 
-    let titleError = titleErrors.join(' ')
-    let slugError = slugErrors.join(' ')
-    let typeError = typeErrors.join(' ')
-    let aboutError = aboutErrors.join(' ')
 
     const inProgress = (request && request.state == 'pending') || (fileId && fileState === 'pending') 
-
-    if ( request && request.state == 'failed' ) {
-        if ( request.error && request.error.type == 'invalid' ) {
-            baseError = request.error.message
-        } else if ( request.error && request.error.type == 'conflict' ) {
-            baseError = request.error.message
-            slugError += 'A group with this URL already exists.' 
-        }
-    } 
-
     return (
         <form onSubmit={onSubmit} className="group-form">
-            <div className="group-form__instructions">What group would you like to create?</div>
             <div className="group-form__group-image">
                 <div>
                     { ! fileId && <UserCircleIcon className="placeholder" /> }
@@ -208,7 +199,7 @@ const GroupForm = function() {
                 className="title"
                 onBlur={ (event) => validate('title') }
                 onChange={onTitleChange} 
-                error={titleError}
+                error={titleErrors}
             />
 
             <Input
@@ -219,7 +210,7 @@ const GroupForm = function() {
                 className="slug"
                 onBlur={ (event) => validate('slug') }
                 onChange={ (event) => setSlug(event.target.value) } 
-                error={slugError}
+                error={slugErrors}
             />
             <TextBox
                 name="about"
@@ -228,49 +219,47 @@ const GroupForm = function() {
                 explanation={`Enter a description of this group.  This should include a description of the group's purpose, it's rules, and what sort of content is appropriate for this group.`}
                 value={about}
                 onChange={(event) => setAbout(event.target.value)}
-                error={aboutError}
+                error={aboutErrors}
             />
-            <div className="group-form__type">
-                <div className="group-form__type-errors">{ typeError }</div>
-                <div className="group-form__types">
-                    <div className="type-option">
-                        <input 
-                            type="radio" 
-                            name="type" 
-                            checked={ type == 'open' }
-                            onChange={(e) => setType('open')}
-                            value="open" />
-                        <label htmlFor="open" onClick={(e) => setType('open')}><GlobeAltIcon/>Open</label>
-                        <div className="explanation">An open group.  Anyone may add themselves and all posts in the group are public.</div>
-                    </div>
-                    <div className="type-option">
-                        <input 
-                            type="radio" 
-                            name="type" 
-                            checked={ type == 'private' }
-                            onChange={(e) => setType('private')}
-                            value="private" />
-                        <label htmlFor="private" onClick={(e) => setType('private')}><LockOpenIcon/>Private</label>
-                        <div className="explanation">A private group. Anyone can see that the group exists, its title and description.  People may request to be added or may be invited by admins and moderators. Posts are only visible to approved group members.</div>
-                    </div>
-                    <div className="type-option">
-                        <input 
-                            type="radio" 
-                            name="type" 
-                            checked={ type == 'hidden' }
-                            onChange={(e) => setType('hidden')}
-                            value="hidden" />
-                        <label htmlFor="hidden" onClick={(e) => setType('hidden')}><LockClosedIcon/> Hidden</label>
-                        <div className="explanation">A hidden group.  Only members and invitees can even see that it exists.  All posts are private and visible to members only.  New members must be invited by admins and moderators.</div>
-                    </div>
-                </div>
-            </div>
+            <Radio 
+                className="group-form__type" 
+                name="type"
+                title="Visibility" 
+                explanation="Who is this group visible to?"
+                error={typeErrors} 
+            >
+                <RadioOption
+                    name="type"
+                    label="Open"
+                    value="open"
+                    current={type}
+                    explanation="Anyone may add themselves and all posts in the group are public."
+                    onClick={(e) => setType('open')}
+                />
+                <RadioOption
+                    name="type"
+                    label="Private"
+                    value="private"
+                    current={type}
+                    explanation="Anyone can see that the group exists, its title and description.  People may request to be added or may be invited by admins and moderators. Posts are only visible to approved group members."
+                    onClick={(e) => setType('private')}
+                    />
+                <RadioOption
+                    name="type"
+                    label="Hidden"
+                    value="hidden"
+                    current={type}
+                    explanation="Only members and invitees can even see that it exists.  All posts are private and visible to members only.  New members must be invited by admins and moderators."
+                    onClick={(e) => setType('hidden')}
+                />
+            </Radio>
             <div className="group-form__errors">{ baseError }</div>
             { inProgress && <Spinner /> }
             { ! inProgress && <div className="group-form__controls">
                 <Button type="secondary-warn" onClick={(e) => cancel()}>Cancel</Button> 
                 <input type="submit" name="submit" value="Submit" />
             </div> }
+            <RequestError request={request} message={"Create Group"} />
         </form>
     )
 

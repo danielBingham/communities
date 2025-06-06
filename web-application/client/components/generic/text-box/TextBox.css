@@ -16,7 +16,6 @@
 }
 .text-box textarea {
     box-sizing: border-box;
-    max-width: 650px;
     width: 100%;
     height: 200px;
     border: thin solid var(--input-border-color);
@@ -25,4 +24,15 @@
     padding: 5px;
     text-align: center;
     color: red;
+}
+
+@media ( width < 700px ) {
+    .text-box label {
+        text-align: center;
+        padding: 5px;
+    }
+    .text-box .text-box_explanation {
+        text-align: center;
+        padding: 5px;
+    }
 }

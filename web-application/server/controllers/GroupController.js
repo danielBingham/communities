@@ -19,12 +19,14 @@
  ******************************************************************************/
 
 const { 
-    PermissionService,
     GroupDAO, 
     GroupMemberDAO, 
     UserDAO, 
-    FileDAO 
+    FileDAO,
+    PermissionService,
+    ValidationService
 }  = require('@communities/backend')
+const { validation } = require('@communities/shared')
 const ControllerError = require('../errors/ControllerError')
 
 module.exports = class GroupController {
@@ -36,7 +38,9 @@ module.exports = class GroupController {
         this.groupMemberDAO = new GroupMemberDAO(core)
         this.userDAO = new UserDAO(core)
         this.fileDAO = new FileDAO(core)
+
         this.permissionService = new PermissionService(core)
+        this.validationService = new ValidationService(core)
     }
 
     async getRelations(currentUser, results, requestedRelations) {
@@ -141,21 +145,37 @@ module.exports = class GroupController {
                 `You must must be authenticated to create a post.`)
         }
 
+        const canCreateGroup = await this.permissionService.can(currentUser, 'create', 'Group')
+        if ( ! canCreateGroup ) {
+            throw new ControllerError(403, 'not-authorized',
+                `User(${currentUser.id}) attempting to create a group without permission.`,
+                `You are not authorized to create a new Group.`)
+        }
+
         const group = request.body
 
         group.slug = group.slug.toLowerCase()
-        if ( ! group.slug.match(/[a-z0-9-_\.]/) ) {
+        const slugErrors = validation.Group.validateSlug(group.slug)
+        if ( slugErrors.length > 0 ) {
             throw new ControllerError(400, 'invalid',
                 `User(${currentUser}) submitted a Group with an invalid slug.`,
                 `The URL of the group may only contain letters, numbers, '-', '_', and '.'.`)
         }
 
         const existing = await this.groupDAO.getGroupBySlug(group.slug)
-
         if ( existing !== null ) {
             throw new ControllerError(400, 'conflict',
                 `User(${currentUser}) attempting to create a group with a slug conflict.`,
                 `A group with that URL already exists.  Please choose a different one.`)
+        }
+
+        const validationErrors = await this.validationService.validateGroup(currentUser, group)
+        if ( validationErrors.length > 0 ) {
+            const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
+            const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
+            throw new ControllerError(400, 'invalid',
+                `User submitted an invalid group: ${logString}`,
+                errorString)
         }
 
         await this.groupDAO.insertGroups(group)
@@ -230,7 +250,6 @@ module.exports = class GroupController {
     }
 
     async patchGroup(request, response) {
-        
         const currentUser = request.session.user
 
         if ( ! currentUser ) {
@@ -255,7 +274,6 @@ module.exports = class GroupController {
                 `Either that group doesn't exist or you don't have permission to see it.`)
         }
 
-
         const canViewGroup = await this.permissionService.can(currentUser, 'view', 'Group', { group:  existing})
         if ( ! canViewGroup ) {
             throw new ControllerError(404, 'not-found',
@@ -270,21 +288,13 @@ module.exports = class GroupController {
                 `You don't have permission to edit that group.`)
         }
 
-        if ( 'slug' in group ) {
-            group.slug = group.slug.toLower()
-            if ( ! group.slug.match(/[a-z0-9\.\-_]/) ) {
-                throw new ControllerError(400, 'invalid',
-                    `User(${currentUser.id}) submitted a group with invalid slug '${group.slug}'.`,
-                    `The URL you submitted is invalid. Only characters, numbers, '.', '-', and '_' are allowed.`)
-            }
-
-            const existingSlug = await this.groupDAO.getGroupBySlug(group.slug)
-
-            if ( existingSlug !== null ) {
-                throw new ControllerError(400, 'invalid',
-                    `User(${currentUser.id}) submitted a group with a slug that's already in use.`,
-                    `A group with that URL already exists.`)
-            }
+        const validationErrors = await this.validationService.validateGroup(currentUser, group)
+        if ( validationErrors.length > 0 ) {
+            const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
+            const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
+            throw new ControllerError(400, 'invalid',
+                `User submitted an invalid group: ${logString}`,
+                errorString)
         }
 
         await this.groupDAO.updateGroup(group)
@@ -319,9 +329,16 @@ module.exports = class GroupController {
         }
 
         const groupId = request.params.id
+        const validationErrors = validation.types.validateUUID(groupId)
+        if ( validationErrors.length > 0 ) {
+            const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
+            const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
+            throw new ControllerError(400, 'invalid',
+                `User attempted to delete a Group with an invalid UUID: ${logString}`,
+                errorString)
+        }
         
         const existing = await this.groupDAO.getGroupById(groupId)
-
         if ( ! existing ) {
             throw new ControllerError(404, 'not-found',
                 `User(${currentUser.id}) attempting to DELETE a group that doesn't exist.`,
