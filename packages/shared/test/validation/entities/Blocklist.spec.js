@@ -14,7 +14,7 @@ describe('validateUserId', function() {
         const errors = validation.Blocklist.validateUserId(userId)
 
         expect(errors.length).toBe(1)
-        expect(errors[0].type).toBe('userId:invalid-type')
+        expect(errors[0].type).toBe('userId:invalid')
     })
 
     it('Should return an error when userId is not a valid uuid', function() {
