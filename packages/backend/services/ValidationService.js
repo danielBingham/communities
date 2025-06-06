@@ -96,7 +96,7 @@ module.exports = class ValidationService {
             ]
 
             for(const disallowedField of disallowedFields) {
-                if ( util.objectHas(blocklist, disallowedField) || blocklist[disallowedField] !== existing[disallowedField]) {
+                if ( util.objectHas(blocklist, disallowedField) && blocklist[disallowedField] !== existing[disallowedField]) {
                     errors.push({
                         type: `${disallowedField}:not-allowed`,
                         log: `${disallowedField} may not be updated.`,
@@ -212,7 +212,7 @@ module.exports = class ValidationService {
             ]
 
             for(const disallowedField of disallowedFields) {
-                if ( util.objectHas(group, disallowedField) || group[disallowedField] !== existing[disallowedField]) {
+                if ( util.objectHas(group, disallowedField) && group[disallowedField] !== existing[disallowedField]) {
                     errors.push({
                         type: `${disallowedField}:not-allowed`,
                         log: `${disallowedField} may not be updated.`,
@@ -271,7 +271,7 @@ module.exports = class ValidationService {
         ]
 
         for(const disallowedField of alwaysDisallowedFields ) {
-            if ( util.objectHas(group, disallowedField) ) {
+            if ( util.objectHas(groupMember, disallowedField) ) {
                 errors.push({
                     type: `${disallowedField}:not-allowed`,
                     log: `${disallowedField} is not allowed.`,
@@ -288,11 +288,12 @@ module.exports = class ValidationService {
         // We're creating a GroupMember.
         if ( existing === null || existing === undefined ) {
             const requiredFields = [
-                'type', 'title', 'slug'
+                'userId', 'groupId', 'status' 
+                
             ]
 
             for(const requiredField of requiredFields) {
-                if ( ! util.objectHas(group, requiredField) || group[requiredField] === null ) {
+                if ( ! util.objectHas(groupMember, requiredField) || groupMember[requiredField] === null ) {
                     errors.push({
                         type: `${requiredField}:missing`,
                         log: `${requiredField} is required.`,
@@ -303,7 +304,7 @@ module.exports = class ValidationService {
         } 
         // We're editing a GroupMember.
         else {
-            if ( util.objectHas(group, 'id') && group.id !== existing.id ) {
+            if ( util.objectHas(groupMember, 'id') && groupMember.id !== existing.id ) {
                 throw new ServiceError('entity-mismatch',
                     `Wrong 'existing' entity.`)
             }
@@ -313,7 +314,7 @@ module.exports = class ValidationService {
             ]
 
             for(const disallowedField of disallowedFields) {
-                if ( util.objectHas(group, disallowedField) || group[disallowedField] !== existing[disallowedField]) {
+                if ( util.objectHas(groupMember, disallowedField) && groupMember[disallowedField] !== existing[disallowedField]) {
                     errors.push({
                         type: `${disallowedField}:not-allowed`,
                         log: `${disallowedField} may not be updated.`,
@@ -329,7 +330,7 @@ module.exports = class ValidationService {
         }
 
         // Do basic validation the fields.
-        const validationErrors = validation.GroupMember.validate(group)
+        const validationErrors = validation.GroupMember.validate(groupMember)
         if ( validationErrors.all.length > 0 ) {
             errors.push(...validationErrors.all)
         }
@@ -339,6 +340,35 @@ module.exports = class ValidationService {
             return errors
         }
 
+        if ( util.objectHas(groupMember, 'userId' ) ) {
+            const userResults = await this.core.database.query(`
+                SELECT id FROM users WHERE id = $1
+            `, [ groupMember.userId ])
+
+            if ( userResults.rows.length <= 0 || userResults.rows[0].id !== groupMember.userId) {
+                errors.push({
+                    type: `userId:not-found`,
+                    log: `User(${groupMember.userId}) not found.`,
+                    message: `User not found for that userId.`
+                })
+            }
+        }
+
+        if ( util.objectHas(groupMember, 'groupId') ) {
+            const groupResults = await this.core.database.query(`
+                SELECT id FROM groups WHERE id = $1
+            `, [ groupMember.groupId ])
+
+            if ( groupResults.rows.length <= 0 || groupResults.rows[0].id !== groupMember.groupId) {
+                errors.push({
+                    type: `groupId:not-found`,
+                    log: `Group(${groupMember.groupId}) not found.`,
+                    message: `Group not found for that groupId.`
+                })
+            }
+        }
+
+        return errors
     }
     
     async validatePost(currentUser, post, existing) {
