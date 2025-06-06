@@ -25,6 +25,7 @@ const {
     UserDAO, 
     FileDAO 
 }  = require('@communities/backend')
+const { validation } = require('@communities/shared')
 const ControllerError = require('../errors/ControllerError')
 
 module.exports = class GroupController {
@@ -144,7 +145,8 @@ module.exports = class GroupController {
         const group = request.body
 
         group.slug = group.slug.toLowerCase()
-        if ( ! group.slug.match(/[a-z0-9-_\.]/) ) {
+        const slugErrors = validation.Group.validateSlug(group.slug)
+        if ( slugErrors.length > 0 ) {
             throw new ControllerError(400, 'invalid',
                 `User(${currentUser}) submitted a Group with an invalid slug.`,
                 `The URL of the group may only contain letters, numbers, '-', '_', and '.'.`)

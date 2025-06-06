@@ -41,6 +41,223 @@ module.exports = class ValidationService {
         return field in entity && entity[field] !== undefined 
     }
 
+    async validateBlocklist(currentUser, blocklist, existing) {
+        const errors = []
+
+        // ================== Validate Field Presence =========================
+        // Before we validate the content of the fields, we're going to validate
+        // whether they can be set or changed at all.
+
+        // These are fields the user is never allowed to set.
+        const alwaysDisallowedFields = [
+            'createdDate', 'updatedDate'
+        ]
+
+        for(const disallowedField of alwaysDisallowedFields ) {
+            if ( util.objectHas(blocklist, disallowedField) ) {
+                errors.push({
+                    type: `${disallowedField}:not-allowed`,
+                    log: `${disallowedField} is not allowed.`,
+                    message: `You may not set '${disallowedField}'.`
+                })
+            }
+        }
+
+        // If we have invalid fields set, then we don't need to go any further.
+        if ( errors.length > 0 ) {
+            return errors
+        }
+
+        // We're creating a blocklist.
+        if ( existing === null || existing === undefined ) {
+            const requiredFields = [
+                'userId', 'domain'
+            ]
+
+            for(const requiredField of requiredFields) {
+                if ( ! util.objectHas(blocklist, requiredField) || blocklist[requiredField] === null ) {
+                    errors.push({
+                        type: `${requiredField}:missing`,
+                        log: `${requiredField} is required.`,
+                        message: `${requiredField} is required.`
+                    })
+                }
+            }
+        } 
+        // We're editing a blocklist.
+        else {
+            if ( util.objectHas(blocklist, 'id') && blocklist.id !== existing.id ) {
+                throw new ServiceError('entity-mismatch',
+                    `Wrong 'existing' entity.`)
+            }
+
+            const disallowedFields = [
+                'userId', 'domain'
+            ]
+
+            for(const disallowedField of disallowedFields) {
+                if ( util.objectHas(blocklist, disallowedField) || blocklist[disallowedField] !== existing[disallowedField]) {
+                    errors.push({
+                        type: `${disallowedField}:not-allowed`,
+                        log: `${disallowedField} may not be updated.`,
+                        message: `${disallowedField} may not be updated.`
+                    })
+                }
+            }
+        }
+
+        // If we have invalid fields set, then we don't need to go any further.
+        if ( errors.length > 0 ) {
+            return errors
+        }
+
+        // Do basic validation the fields.
+        const validationErrors = validation.Blocklist.validate(blocklist)
+        if ( validationErrors.all.length > 0 ) {
+            errors.push(...validationErrors.all)
+        }
+
+        // If we have invalid fields set, then we don't need to go any further.
+        if ( errors.length > 0 ) {
+            return errors
+        }
+
+        
+        if ( util.objectHas(blocklist, 'userId') ) {
+            const userResults = await this.core.database.query(`SELECT id FROM users WHERE id = $1`, [ blocklist.userId ])
+            if ( userResults.rows.length <= 0 ) {
+                errors.push({
+                    type: `userId:not-found`,
+                    log: `No user found for userId '${blocklist.userId}'.`,
+                    message: `No user found for userId.`
+                })
+            }
+
+            if ( currentUser.id !== blocklist.userId ) {
+                errors.push({
+                    type: `userId:not-authorized`,
+                    log: `User may not create a blocklist for another user.`,
+                    message: `You may not create a blocklist for another user.`
+                })
+            }
+        } 
+
+        // Do backend specific validation.
+        if ( util.objectHas(blocklist, 'domain') ) {
+            const domainResults = await this.core.database.query(`SELECT id FROM blocklist WHERE domain = $1`, [ blocklist.domain])
+            if ( domainResults.rows.length > 0 ) {
+                errors.push({
+                    type: `domain:conflict`,
+                    log: `${blocklist.domain} is already in the blocklist.`,
+                    message: `${blocklist.domain} is already in the blocklist.`
+                })
+            }
+        }
+
+        return errors
+    }
+
+    async validateGroup(currentUser, group, existing) {
+        const errors = []
+
+        // ================== Validate Field Presence =========================
+        // Before we validate the content of the fields, we're going to validate
+        // whether they can be set or changed at all.
+
+        // These are fields the user is never allowed to set.
+        const alwaysDisallowedFields = [
+            'createdDate', 'updatedDate', 'entranceQuestions'
+        ]
+
+        for(const disallowedField of alwaysDisallowedFields ) {
+            if ( util.objectHas(group, disallowedField) ) {
+                errors.push({
+                    type: `${disallowedField}:not-allowed`,
+                    log: `${disallowedField} is not allowed.`,
+                    message: `You may not set '${disallowedField}'.`
+                })
+            }
+        }
+
+        // If we have invalid fields set, then we don't need to go any further.
+        if ( errors.length > 0 ) {
+            return errors
+        }
+
+        // We're creating a Group.
+        if ( existing === null || existing === undefined ) {
+            const requiredFields = [
+                'type', 'title', 'slug'
+            ]
+
+            for(const requiredField of requiredFields) {
+                if ( ! util.objectHas(group, requiredField) || group[requiredField] === null ) {
+                    errors.push({
+                        type: `${requiredField}:missing`,
+                        log: `${requiredField} is required.`,
+                        message: `${requiredField} is required.`
+                    })
+                }
+            }
+        } 
+        // We're editing a Group.
+        else {
+            if ( util.objectHas(group, 'id') && group.id !== existing.id ) {
+                throw new ServiceError('entity-mismatch',
+                    `Wrong 'existing' entity.`)
+            }
+
+            const disallowedFields = [
+                'type', 'title', 'slug'
+            ]
+
+            for(const disallowedField of disallowedFields) {
+                if ( util.objectHas(group, disallowedField) || group[disallowedField] !== existing[disallowedField]) {
+                    errors.push({
+                        type: `${disallowedField}:not-allowed`,
+                        log: `${disallowedField} may not be updated.`,
+                        message: `${disallowedField} may not be updated.`
+                    })
+                }
+            }
+        }
+
+        // If we have invalid fields set, then we don't need to go any further.
+        if ( errors.length > 0 ) {
+            return errors
+        }
+
+        // Do basic validation the fields.
+        const validationErrors = validation.Group.validate(group)
+        if ( validationErrors.all.length > 0 ) {
+            errors.push(...validationErrors.all)
+        }
+
+        // If we have invalid fields set, then we don't need to go any further.
+        if ( errors.length > 0 ) {
+            return errors
+        }
+
+        if ( util.objectHas(group, 'fileId') ) {
+            // fileId may be null.
+            if ( group.fileId !== null ) {
+                const fileResults = await this.core.database.query(`
+                    SELECT id FROM files WHERE id = $1
+                `, [ group.fileId ])
+
+                if ( fileResults.rows.length <= 0 ) {
+                    errors.push({
+                        type: 'fileId:not-found',
+                        log: `Did not file File(${group.fileId}).`,
+                        message: `Unable to find a File for that fileId.`
+                    })
+                }
+            }
+        }
+
+        return errors
+    }
+    
     async validatePost(currentUser, post, existing) {
         const errors = []
 
@@ -1058,119 +1275,5 @@ module.exports = class ValidationService {
         return errors
     }
 
-    async validateBlocklist(currentUser, blocklist, existing) {
-        const errors = []
 
-        // ================== Validate Field Presence =========================
-        // Before we validate the content of the fields, we're going to validate
-        // whether they can be set or changed at all.
-
-        // These are fields the user is never allowed to set.
-        const alwaysDisallowedFields = [
-            'createdDate', 'updatedDate'
-        ]
-
-        for(const disallowedField of alwaysDisallowedFields ) {
-            if ( util.objectHas(blocklist, disallowedField) ) {
-                errors.push({
-                    type: `${disallowedField}:not-allowed`,
-                    log: `${disallowedField} is not allowed.`,
-                    message: `You may not set '${disallowedField}'.`
-                })
-            }
-        }
-
-        // If we have invalid fields set, then we don't need to go any further.
-        if ( errors.length > 0 ) {
-            return errors
-        }
-
-        // We're creating a blocklist.
-        if ( existing === null || existing === undefined ) {
-            const requiredFields = [
-                'userId', 'domain'
-            ]
-
-            for(const requiredField of requiredFields) {
-                if ( ! util.objectHas(blocklist, requiredField) || blocklist[requiredField] === null ) {
-                    errors.push({
-                        type: `${requiredField}:missing`,
-                        log: `${requiredField} is required.`,
-                        message: `${requiredField} is required.`
-                    })
-                }
-            }
-        } 
-        // We're editing a blocklist.
-        else {
-            if ( util.objectHas(blocklist, 'id') && blocklist.id !== existing.id ) {
-                throw new ServiceError('entity-mismatch',
-                    `Wrong 'existing' entity.`)
-            }
-
-            const disallowedFields = [
-                'userId', 'domain'
-            ]
-
-            for(const disallowedField of disallowedFields) {
-                if ( util.objectHas(blocklist, disallowedField) || blocklist[disallowedField] !== existing[disallowedField]) {
-                    errors.push({
-                        type: `${disallowedField}:not-allowed`,
-                        log: `${disallowedField} may not be updated.`,
-                        message: `${disallowedField} may not be updated.`
-                    })
-                }
-            }
-        }
-
-        // If we have invalid fields set, then we don't need to go any further.
-        if ( errors.length > 0 ) {
-            return errors
-        }
-
-        // Do basic validation the fields.
-        const validationErrors = validation.Blocklist.validate(blocklist)
-        if ( validationErrors.all.length > 0 ) {
-            errors.push(...validationErrors.all)
-        }
-
-        // If we have invalid fields set, then we don't need to go any further.
-        if ( errors.length > 0 ) {
-            return errors
-        }
-
-        
-        if ( util.objectHas(blocklist, 'userId') ) {
-            const userResults = await this.core.database.query(`SELECT id FROM users WHERE id = $1`, [ blocklist.userId ])
-            if ( userResults.rows.length <= 0 ) {
-                errors.push({
-                    type: `userId:not-found`,
-                    log: `No user found for userId '${blocklist.userId}'.`,
-                    message: `No user found for userId.`
-                })
-            }
-
-            if ( currentUser.id !== blocklist.userId ) {
-                errors.push({
-                    type: `userId:not-authorized`,
-                    log: `User may not create a blocklist for another user.`,
-                    message: `You may not create a blocklist for another user.`
-                })
-            }
-        } 
-
-        // Do backend specific validation.
-        if ( util.objectHas(blocklist, 'domain') ) {
-            const domainResults = await this.core.database.query(`SELECT id FROM blocklist WHERE domain = $1`, [ blocklist.domain])
-            if ( domainResults.rows.length > 0 ) {
-                errors.push({
-                    type: `domain:conflict`,
-                    log: `${blocklist.domain} is already in the blocklist.`,
-                    message: `${blocklist.domain} is already in the blocklist.`
-                })
-            }
-        }
-
-        return errors
-    }
 }
