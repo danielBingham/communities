@@ -1,6 +1,5 @@
 .text-input {
     padding: 10px 0;
-    max-width: 650px;
 }
 .text-input label {
     display: block;
@@ -19,7 +18,6 @@
     padding: 5px;
     border: thin solid var(--input-border-color);
     width: 100%;
-    max-width: 650px;
 }
 .text-input .text-input-error {
     padding: 5px;
@@ -43,3 +41,13 @@
     color: var(--primary-color-main);
 }
 
+@media ( width < 700px ) {
+    .text-input label {
+        text-align: center;
+        padding: 5px;
+    }
+    .text-input .text-input-explanation {
+        text-align: center;
+        padding: 5px;
+    }
+}

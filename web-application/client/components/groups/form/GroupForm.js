@@ -17,6 +17,8 @@ import Button from '/components/generic/button/Button'
 import Input from '/components/generic/input/Input'
 import TextBox from '/components/generic/text-box/TextBox'
 import Spinner from '/components/Spinner'
+import { Radio, RadioOption } from '/components/ui/Radio'
+import RequestError from '/components/errors/RequestError'
 
 import './GroupForm.css'
 
@@ -168,19 +170,8 @@ const GroupForm = function() {
     let baseError = null 
 
     const inProgress = (request && request.state == 'pending') || (fileId && fileState === 'pending') 
-
-    if ( request && request.state == 'failed' ) {
-        if ( request.error && request.error.type == 'invalid' ) {
-            baseError = request.error.message
-        } else if ( request.error && request.error.type == 'conflict' ) {
-            baseError = request.error.message
-            slugErrors += 'A group with this URL already exists.' 
-        }
-    } 
-
     return (
         <form onSubmit={onSubmit} className="group-form">
-            <div className="group-form__instructions">What group would you like to create?</div>
             <div className="group-form__group-image">
                 <div>
                     { ! fileId && <UserCircleIcon className="placeholder" /> }
@@ -230,47 +221,45 @@ const GroupForm = function() {
                 onChange={(event) => setAbout(event.target.value)}
                 error={aboutErrors}
             />
-            <div className="group-form__type">
-                <div className="group-form__type-errors">{ typeErrors }</div>
-                <div className="group-form__types">
-                    <div className="type-option">
-                        <input 
-                            type="radio" 
-                            name="type" 
-                            checked={ type == 'open' }
-                            onChange={(e) => setType('open')}
-                            value="open" />
-                        <label htmlFor="open" onClick={(e) => setType('open')}><GlobeAltIcon/>Open</label>
-                        <div className="explanation">An open group.  Anyone may add themselves and all posts in the group are public.</div>
-                    </div>
-                    <div className="type-option">
-                        <input 
-                            type="radio" 
-                            name="type" 
-                            checked={ type == 'private' }
-                            onChange={(e) => setType('private')}
-                            value="private" />
-                        <label htmlFor="private" onClick={(e) => setType('private')}><LockOpenIcon/>Private</label>
-                        <div className="explanation">A private group. Anyone can see that the group exists, its title and description.  People may request to be added or may be invited by admins and moderators. Posts are only visible to approved group members.</div>
-                    </div>
-                    <div className="type-option">
-                        <input 
-                            type="radio" 
-                            name="type" 
-                            checked={ type == 'hidden' }
-                            onChange={(e) => setType('hidden')}
-                            value="hidden" />
-                        <label htmlFor="hidden" onClick={(e) => setType('hidden')}><LockClosedIcon/> Hidden</label>
-                        <div className="explanation">A hidden group.  Only members and invitees can even see that it exists.  All posts are private and visible to members only.  New members must be invited by admins and moderators.</div>
-                    </div>
-                </div>
-            </div>
+            <Radio 
+                className="group-form__type" 
+                name="type"
+                title="Visibility" 
+                explanation="Who is this group visible to?"
+                error={typeErrors} 
+            >
+                <RadioOption
+                    name="type"
+                    label="Open"
+                    value="open"
+                    current={type}
+                    explanation="Anyone may add themselves and all posts in the group are public."
+                    onClick={(e) => setType('open')}
+                />
+                <RadioOption
+                    name="type"
+                    label="Private"
+                    value="private"
+                    current={type}
+                    explanation="Anyone can see that the group exists, its title and description.  People may request to be added or may be invited by admins and moderators. Posts are only visible to approved group members."
+                    onClick={(e) => setType('private')}
+                    />
+                <RadioOption
+                    name="type"
+                    label="Hidden"
+                    value="hidden"
+                    current={type}
+                    explanation="Only members and invitees can even see that it exists.  All posts are private and visible to members only.  New members must be invited by admins and moderators."
+                    onClick={(e) => setType('hidden')}
+                />
+            </Radio>
             <div className="group-form__errors">{ baseError }</div>
             { inProgress && <Spinner /> }
             { ! inProgress && <div className="group-form__controls">
                 <Button type="secondary-warn" onClick={(e) => cancel()}>Cancel</Button> 
                 <input type="submit" name="submit" value="Submit" />
             </div> }
+            <RequestError request={request} message={"Create Group"} />
         </form>
     )
 

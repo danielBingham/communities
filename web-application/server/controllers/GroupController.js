@@ -19,11 +19,12 @@
  ******************************************************************************/
 
 const { 
-    PermissionService,
     GroupDAO, 
     GroupMemberDAO, 
     UserDAO, 
-    FileDAO 
+    FileDAO,
+    PermissionService,
+    ValidationService
 }  = require('@communities/backend')
 const { validation } = require('@communities/shared')
 const ControllerError = require('../errors/ControllerError')
@@ -37,7 +38,9 @@ module.exports = class GroupController {
         this.groupMemberDAO = new GroupMemberDAO(core)
         this.userDAO = new UserDAO(core)
         this.fileDAO = new FileDAO(core)
+
         this.permissionService = new PermissionService(core)
+        this.validationService = new ValidationService(core)
     }
 
     async getRelations(currentUser, results, requestedRelations) {
