@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 
 import { GlobeAltIcon, LockOpenIcon, LockClosedIcon, UserCircleIcon } from '@heroicons/react/24/outline'
 
+import * as shared from '@communities/shared'
+
 import { useLocalStorage } from '/lib/hooks/useLocalStorage'
 import { useRequest } from '/lib/hooks/useRequest'
 
@@ -39,46 +41,40 @@ const GroupForm = function() {
 
         let titleValidationErrors = []
         if ( ! field || field == 'title' ) {
-            if ( title.length <= 0 ) {
-                titleValidationErrors.push('Title is required.')
-            } else if ( title.length >= 1024) {
-                titleValidationErrors.push('Title must be less than 1024 characters.')
+            titleValidationErrors = shared.validation.Group.validateTitle(title)
+            if ( titleValidationErrors.length > 0 ) {
+                setTitleErrors(titleValidationErrors.reduce((string, error) => `${string} ${error.message}`, ''))
             }
-            setTitleErrors(titleValidationErrors)
         }
 
         let slugValidationErrors = []
         if ( ! field || field == 'slug' ) {
-            if ( slug.length <= 0 ) {
-                slugValidationErrors.push('URL is required.')
-            } else if ( slug.length >= 1024) {
-                slugValidationErrors.push('URL must be less than 1024 characters.')
-            } else if ( slug.match(/^[a-zA-Z0-9\.\-_]+$/) === null ) {
-                slugValidationErrors.push(`URL may only contain letters, numbers, '.', '-', or '_'.`)
+            slugValidationErrors = shared.validation.Group.validateSlug(slug)
+            if ( slugValidationErrors.length > 0 ) {
+                setSlugErrors(slugValidationErrors.reduce((string, error) => `${string} ${error.message}`, ''))
             }
-            setSlugErrors(slugValidationErrors)
         }
 
         let aboutValidationErrors = []
         if ( ! field || field == 'about' ) {
-            if ( about.length >= 10000) {
-                aboutValidationErrors.push('About must be less than 10,000 characters.')
+            aboutValidationErrors = shared.validation.Group.validateAbout(about)
+            if ( aboutValidationErrors.length > 0 ) {
+                setAboutErrors(aboutValidationErrors.reduce((string, error) => `${string} ${error.message}`, ''))
             }
-            setAboutErrors(aboutValidationErrors)
         }
 
         let typeValidationErrors = []
         if ( ! field || field == 'type' ) {
-            if ( type !== 'open' && type !== 'private' && type !== 'hidden' ) {
-                typeValidationErrors.push(`Type must be one of 'open', 'private', or 'hidden'.`)
+            typeValidationErrors = shared.validation.Group.validateType(type)
+            if ( typeValidationErrors.length > 0 ) {
+                setTypeErrors(typeValidationErrors.reduce((string, error) => `${string} ${error.message}`, ''))
             }
-            setTypeErrors(typeValidationErrors)
         }
 
-        return titleValidationErrors.length == 0 
-            && slugValidationErrors.length == 0 
-            && aboutValidationErrors == 0 
-            && typeValidationErrors == 0
+        return titleValidationErrors.length === 0 
+            && slugValidationErrors.length === 0 
+            && aboutValidationErrors.length === 0 
+            && typeValidationErrors.length === 0
     }
 
     const assembleGroup = function() {

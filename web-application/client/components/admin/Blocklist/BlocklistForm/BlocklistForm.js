@@ -30,7 +30,7 @@ const BlocklistForm = function({ onComplete, onCancel }) {
         if ( ! field || field === 'domain' ) {
             const domainValidationErrors = shared.validation.Blocklist.validateDomain(domain)
             if ( domainValidationErrors.length > 0) {
-                setDomainError(domainValidationErrors.reduce((result, error) => result += ' ' + error.message, ''))
+                setDomainError(domainValidationErrors.reduce((string, error) => `${string} ${error.message}`, ''))
                 errors.push(...domainValidationErrors)
             }
         }
@@ -38,7 +38,7 @@ const BlocklistForm = function({ onComplete, onCancel }) {
         if ( ! field || field === 'notes' ) {
             const notesValidationErrors = shared.validation.Blocklist.validateNotes(notes)
             if ( notesValidationErrors.length > 0 ) {
-                setNotesError(notesValidationErrors.reduce((result, error) => result += ' ' + error.message, ''))
+                setNotesError(notesValidationErrors.reduce((string, error) => `${string} ${error.message}`, ''))
                 errors.push(...notesValidationErrors)
             }
         }
