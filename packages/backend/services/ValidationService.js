@@ -354,20 +354,94 @@ module.exports = class ValidationService {
             }
         }
 
+        let group = null
         if ( util.objectHas(groupMember, 'groupId') ) {
-            const groupResults = await this.core.database.query(`
-                SELECT id FROM groups WHERE id = $1
-            `, [ groupMember.groupId ])
+            group = await this.groupDAO.getGroupById(groupMember.groupId)
 
-            if ( groupResults.rows.length <= 0 || groupResults.rows[0].id !== groupMember.groupId) {
+            if ( group === null ) {
                 errors.push({
                     type: `groupId:not-found`,
                     log: `Group(${groupMember.groupId}) not found.`,
                     message: `Group not found for that groupId.`
                 })
-            }
+            } 
         }
 
+        if ( errors.length > 0 ) {
+            return errors
+        }
+
+        // Validate the changes.  Only certain combinations of fields are
+        // allowed.
+
+        // When creating a new member.
+        if ( existing === null || existing === undefined ) {
+            // NOTE: We know we have groupId and therefor group because groupId is required when creating.
+            const userMember = await this.groupMemberDAO.getGroupMemberForGroupAndUser(group.id, currentUser.id)
+            const canModerateGroup = await this.permissionService.can(currentUser, 'moderate', 'Group', { group: group, userMember: userMember })
+            if ( group.type === 'open' ) {
+                // Non members can add themselves in which case role is 'member' and status is 'member'.
+                if ( userMember === null ) {
+                    if ( groupMember.role !== 'member' ) {
+                        errors.push({
+                            type: `role:invalid`,
+                            log: `User(${currentUser.id}) attempted to create GroupMember with role '${groupMember.role}'.`,
+                            message: `You may not add yourself with role '${groupMember.role}'.`
+                        })
+                    }
+
+                    if ( groupMember.status !== 'member' ) {
+                        errors.push({
+                            type: `status:invalid`,
+                            log: `User attempting to add themselves to a Group with a invalid status '${groupMember.status}'.`,
+                            message: `You may only add yourself to an open group, you may not invite yourself.`
+                        })
+                    }
+                }
+                
+                // Moderators can invite users in which case role is 'member' and status is 'pending-invited'.
+                else if ( canModerateGroup ) {
+                    if ( groupMember.role !== 'member' ) {
+                        errors.push({
+                            type: `role:invalid`,
+                            log: `Attempt to add a user to a Group with invalid role '${groupMember.role}'.`,
+                            message: `You may only invite members to a group.`
+                        })
+                    }
+
+                    if ( groupMember.status !== 'pending-invited' ) {
+                        errors.push({
+                            type: `status:invalid`,
+                            log: `Attempt to add a user to a Group with invalid status '${groupMember.status}'.`,
+                            message: `You may only invite members to a group.`
+                        })
+                    }
+                }
+
+                // Otherwise, it's an existing user who doesn't have moderator permissions.
+                else {
+                    // We shouldn't ever get here.  We should do permissions checks first.
+                    throw new ServiceError('invalid-permissions',
+                        `Non-moderator member attempting to create a new member.`)
+                }
+            } else if ( group.type === 'private' ) {
+                // Non-members can request access in which case role is 'member' and status is 'pending-requested'.
+                if ( userMember === null ) {
+
+                }
+
+                // Moderators can invite users in which case role is 'member' and status is 'pending-invited'.
+                else if ( canModerateGroup ) {
+
+                }
+
+            } else if ( group.type === 'hidden' ) {
+
+            } 
+        } else {
+
+        }
+        
         return errors
     }
     

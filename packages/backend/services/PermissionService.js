@@ -23,11 +23,11 @@ const GroupMemberDAO = require('../daos/GroupMemberDAO')
 const PostDAO = require('../daos/PostDAO')
 const UserRelationshipDAO = require('../daos/UserRelationshipDAO')
 
+const GroupMemberPermissions = require('./permission/GroupMemberPermissions')
+const { contextHas } = require('./permission/permissionUtils')
+
 const ServiceError = require('../errors/ServiceError')
 
-const contextHas = function(context, field) {
-    return field in context && context[field] !== undefined && context[field] !== null
-}
 
 /**
  * 
@@ -40,7 +40,10 @@ module.exports = class PermissionService {
         this.groupDAO = new GroupDAO(core)
         this.groupMemberDAO = new GroupMemberDAO(core)
         this.userRelationshipDAO = new UserRelationshipDAO(core)
+
+        this.groupMember = new GroupMemberPermissions(core, this)
     }
+
 
     /**
      * Get a list of `id` for `entity` that `user` can `action`.
@@ -143,6 +146,16 @@ module.exports = class PermissionService {
         } else if ( entity === 'Group:content' ) {
             if ( action === 'view' ) {
                 return await this.canViewGroupContent(user, context)
+            }
+        } else if ( entity === 'GroupMember' ) {
+            if ( action === 'view' ) {
+                return await this.groupMember.canViewGroupMember(user, context)
+            } else if ( action === 'create' ) {
+                return await this.groupMember.canCreateGroupMember(user, context)
+            } else if ( action === 'update' ) {
+                return await this.groupMember.canUpdateGroupMember(user, context)
+            } else if ( action === 'delete' ) {
+                return await this.groupMember.canDeleteGroupMember(user, context)
             }
         } else if ( entity === 'Site' ) {
             if ( action === 'moderate' ) {
@@ -550,6 +563,7 @@ module.exports = class PermissionService {
 
         return false 
     }
+
 
     async canModerateSite(user, context) {
         if ( this.core.features.has('62-admin-moderation-controls') ) {
