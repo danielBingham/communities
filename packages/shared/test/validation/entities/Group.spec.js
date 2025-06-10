@@ -1,81 +1,95 @@
 const { validation }  = require('../../../')
 
 describe('validateType', () => {
-    it('Should return an error when type is null', () => {
-        const type = null
-        const errors = validation.Group.validateType(type)
+    it('Should return an error when null', () => {
+        const value = null
+        const errors = validation.Group.validateType(value)
 
         expect(errors.length).toBe(1)
         expect(errors[0].type).toBe('type:null')
     })
 
-    it('Should return an error when type is not a string', () => {
-        const type = 5
-        const errors = validation.Group.validateType(type)
+    it('Should return an error when not a string', () => {
+        const value = 5
+        const errors = validation.Group.validateType(value)
 
         expect(errors.length).toBe(1)
         expect(errors[0].type).toBe('type:invalid-type')
     })
 
-    it('Should return an error when type is not a valid group_type', () => {
-        const type = 'public'
-        const errors = validation.Group.validateType(type)
+    it('Should return an error when not a valid value', () => {
+        const value = 'public'
+        const errors = validation.Group.validateType(value)
 
         expect(errors.length).toBe(1)
         expect(errors[0].type).toBe('type:invalid')
     })
 
-    it('Should pass a valid group_type', () => {
-        const type = 'open'
-        const errors = validation.Group.validateType(type)
+    it('Should pass when undefined', () => {
+        const value = undefined
+        const errors = validation.Group.validateType(value)
+
+        expect(errors.length).toBe(0)
+    })
+
+    it('Should pass a valid value', () => {
+        const value = 'open'
+        const errors = validation.Group.validateType(value)
 
         expect(errors.length).toBe(0)
     })
 })
 
 describe('validateTitle', () => {
-    it('Should return an error when title is null', () => {
-        const title = null
-        const errors = validation.Group.validateTitle(title)
+    it('Should return an error when null', () => {
+        const value = null
+        const errors = validation.Group.validateTitle(value)
 
         expect(errors.length).toBe(1)
         expect(errors[0].type).toBe('title:null')
     })
 
-    it('Should return an error when title is not a string', () => {
-        const title = 5
-        const errors = validation.Group.validateTitle(title)
+    it('Should return an error when not a string', () => {
+        const value = 5
+        const errors = validation.Group.validateTitle(value)
 
         expect(errors.length).toBe(1)
         expect(errors[0].type).toBe('title:invalid-type')
     })
 
-    it('Should return an error when title is an empty string', () => {
-        const title = ''
-        const errors = validation.Group.validateTitle(title)
+    it('Should return an error when an empty string', () => {
+        const value = ''
+        const errors = validation.Group.validateTitle(value)
 
         expect(errors.length).toBe(1)
         expect(errors[0].type).toBe('title:required')
     })
 
-    it('Should return an error when title is longer than 512 characters', () => {
-        const title = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
-        const errors = validation.Group.validateTitle(title)
+    it('Should return an error when longer than 512 characters', () => {
+        const value = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+        const errors = validation.Group.validateTitle(value)
 
         expect(errors.length).toBe(1)
         expect(errors[0].type).toBe('title:too-long')
     })
 
+    it('Should pass when undefined', () => {
+        const value = undefined
+        const errors = validation.Group.validateTitle(value)
+
+        expect(errors.length).toBe(0)
+    })
+
     it('Should pass a valid title', () => {
-        const title = 'Communities Feedback and Discussion'
-        const errors = validation.Group.validateTitle(title)
+        const value = 'Communities Feedback and Discussion'
+        const errors = validation.Group.validateTitle(value)
 
         expect(errors.length).toBe(0)
     })
 })
 
 describe('validateSlug', () => {
-    it('Should return an error when slug is null', () => {
+    it('Should return an error when null', () => {
         const slug = null
         const errors = validation.Group.validateSlug(slug)
 
@@ -83,7 +97,7 @@ describe('validateSlug', () => {
         expect(errors[0].type).toBe('slug:null')
     })
 
-    it('Should return an error when slug is not a string', () => {
+    it('Should return an error when not a string', () => {
         const slug = 5
         const errors = validation.Group.validateSlug(slug)
 
@@ -91,7 +105,7 @@ describe('validateSlug', () => {
         expect(errors[0].type).toBe('slug:invalid-type')
     })
 
-    it('Should return an error when slug is an empty string', () => {
+    it('Should return an error when an empty string', () => {
         const slug = ''
         const errors = validation.Group.validateSlug(slug)
 
@@ -99,7 +113,7 @@ describe('validateSlug', () => {
         expect(errors[0].type).toBe('slug:required')
     })
 
-    it('Should return an error when slug is longer than 512 characters', () => {
+    it('Should return an error when longer than 512 characters', () => {
         const slug = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
         const errors = validation.Group.validateSlug(slug)
 
@@ -115,6 +129,13 @@ describe('validateSlug', () => {
         expect(errors[0].type).toBe('slug:invalid')
     })
 
+    it('Should pass when undefined', () => {
+        const slug = undefined
+        const errors = validation.Group.validateSlug(slug)
+
+        expect(errors.length).toBe(0)
+    })
+
     it('Should pass a valid slug', () => {
         const slug = 'communities-feedback-and-discussion'
         const errors = validation.Group.validateSlug(slug)
@@ -124,7 +145,7 @@ describe('validateSlug', () => {
 })
 
 describe('validateAbout', () => {
-    it('Should return an error when about is null', () => {
+    it('Should return an error when null', () => {
         const about = null
         const errors = validation.Group.validateAbout(about)
 
@@ -132,7 +153,7 @@ describe('validateAbout', () => {
         expect(errors[0].type).toBe('about:null')
     })
 
-    it('Should return an error when about is not a string', () => {
+    it('Should return an error when not a string', () => {
         const about = 5
         const errors = validation.Group.validateAbout(about)
 
@@ -140,7 +161,7 @@ describe('validateAbout', () => {
         expect(errors[0].type).toBe('about:invalid-type')
     })
 
-    it('Should return an error when about is longer than 10,000 characters', () => {
+    it('Should return an error when longer than 10,000 characters', () => {
         const about = `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
         aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
         aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
@@ -158,6 +179,12 @@ describe('validateAbout', () => {
         expect(errors[0].type).toBe('about:too-long')
     })
 
+    it('Should pass when undefined', () => {
+        const about = undefined
+        const errors = validation.Group.validateAbout(about)
+
+        expect(errors.length).toBe(0)
+    })
 
     it('Should pass a valid about', () => {
         const about = 'This is a group for feedback on and discussion of the Communities platform.'

@@ -329,7 +329,8 @@ module.exports = class GroupController {
         }
 
         const groupId = request.params.id
-        const validationErrors = validation.types.validateUUID(groupId)
+        const validator = new validation.types.UUIDValidator('groupId', groupId)
+        const validationErrors = validator.isRequired().mustNotBeNull().mustBeUUID().getErrors()
         if ( validationErrors.length > 0 ) {
             const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
             const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
