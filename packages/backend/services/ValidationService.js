@@ -511,8 +511,12 @@ module.exports = class ValidationService {
             } 
         } else {
             // ============== Editing an existing member. =====================
+            const group = await this.groupDAO.getGroupById(existing.groupId)
+            const userMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(group.id, currentUser.id)
            
-            const canModerateGroup = await this.permissionService.can(currentUser, 'moderate', 'Group', { groupId: existing.groupId})
+            const canModerateGroup = await this.permissionService.can(currentUser, 'moderate', 'Group', { group: group, groupMember: userMember })
+            const canAdminGroup = await this.permissionService.can(currentUser, 'admin', 'Group', { group: group, groupMember: userMember })
+            
             // ============== Validate Status changes. ========================
             if ( existing.status === 'pending-invited' ) {
                 if ( groupMember.status !== 'pending-invited') {
@@ -564,7 +568,6 @@ module.exports = class ValidationService {
                     `Invalid unhandled status '${existing.status}' on existing GroupMember.`)
             }
 
-            const canAdminGroup = await this.permissionService.can(currentUser, 'admin', 'Group', { groupId: existing.groupId })
             // ============== Validate Role changes. ========================== 
             if ( existing.role === 'member' ) {
                 if ( groupMember.role !== 'member') {
