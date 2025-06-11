@@ -41,41 +41,21 @@ module.exports = class GroupMemberPermissions {
     }
 
     async ensureContext(user, context, required) {
-        // ======== Context Validation and Retrieval ==========================
-        //
-        if ( contextHas(context, 'groupId') && contextHas(context, 'group')
-            && context.groupId !== context.group.id ) 
-        {
-            throw new ServiceError('invalid-context:group',
-                `Group.id does not equal groupId.`)
-        }
-
-        if ( contextHas(context, 'groupId') && contextHas(context, 'userMember')
-            && context.groupId !== context.userMember.groupId )
-        {
-            throw new ServiceError('invalid-context:userMember',
-                `GroupMember.groupId does not equal groupId.`)
-        }
-
-        if ( contextHas(context, 'group') && contextHas(context, 'userMember')
-            && context.group.id !== context.userMember.groupId )
-        {
-            throw new ServiceError('invalid-context:userMember',
-                `Group.id does not equal GroupMember.groupId.`)
-        }
-
         // If we don't have the group, then attempt to load it.
-        if ( ! contextHas(context, 'group') ) {
+        if ( required.includes('group') && ! contextHas(context, 'group') ) {
+            // Load it from the groupId first.
             if ( contextHas(context, 'groupId') ) {
                 context.group = await this.groupDAO.getGroupById(context.groupId)
-            }  else if ( contextHas(context, 'userMember') && context.userMember.groupId !== undefined && context.userMember.groupId !== null ) {
+            }  
+            // Otherwise attempt to use the userMember.
+            else if ( contextHas(context, 'userMember') && context.userMember.groupId !== undefined && context.userMember.groupId !== null ) {
                 context.group = await this.groupDAO.getGroupById(context.userMember.groupId)
             }
-        } 
 
-        if ( ! contextHas(context, 'group') ) { 
-            throw new ServiceError('missing-context', `'group' missing from context.`)
-        }
+            if ( ! contextHas(context, 'group') ) { 
+                throw new ServiceError('missing-context', `'group' missing from context.`)
+            }
+        } 
 
         // If we don't have the user's groupMember then load it.
         if ( required.includes('userMember') && ! contextHas(context, 'userMember') ) {
@@ -88,25 +68,36 @@ module.exports = class GroupMemberPermissions {
 
         if ( required.includes('groupMember') && ! contextHas(context, 'groupMember' ) ) {
             throw new ServiceError('missing-context', `'groupMember' missing from context.`)
-        } else {
-            if ( context.groupMember.groupId !== context.group.id ) {
-                throw new ServiceError('invalid-context:groupMember',
-                    `GroupMember.groupId does not equal Group.id.`)
+        } 
+
+        // ===== Ensure all elements of Group context match. ======
+        
+        let groupId = null
+        if ( contextHas(context, 'groupId') ) {
+            groupId = context.groupId
+        }
+
+        if ( contextHas(context, 'group') ) {
+            if ( groupId === null ) {
+                groupId = context.group.id
+            } else if ( context.group.id !== groupId ) {
+                throw new ServiceError('context-mismatch', `Context includes elements from different Groups.`)
             }
         }
 
-        if ( required.includes('existingMember') && ! contextHas(context, 'existingMember') ) {
-            if ( contextHas(context, 'groupMember') ) {
-                if ( context.groupMember.id ) {
-                    context.existingMember = await this.groupMemberDAO.getGroupMemberById(context.groupMember.id)
-                } else {
-                    context.existingMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(context.groupMember.groupId, context.groupMember.userId)
-                }
-            } 
+        if ( contextHas(context, 'userMember') ) {
+            if ( groupId === null ) {
+                groupId = context.userMember.groupId
+            } else if ( context.userMember.groupId !== groupId ) {
+                throw new ServiceError('context-mismatch', `Context includes elements from different Groups.`)
+            }
+        }
 
-            if ( ! contextHas(context, 'existingMember') ) {
-                throw new ServiceError('missing-context',
-                    `'existingMember' missing from context.`)
+        if ( contextHas(context, 'groupMember') ) {
+            if ( groupId === null ) {
+                groupId = context.groupMember.groupId
+            } else if ( context.groupMember.groupId !== groupId )  {
+                throw new ServiceError('context-mismatch', `Context includes elements from different Groups.`)
             }
         }
     }
@@ -116,77 +107,61 @@ module.exports = class GroupMemberPermissions {
     }
 
     async canCreateGroupMember(user, context) {
-        await this.ensureContext(user, context)
+        await this.ensureContext(user, context, [ 'group', 'groupMember', 'userMember' ])
         
         const canModerateGroup = await this.permissionService.can(user, 'moderate', 'Group', context)
 
         // For open groups
         if ( context.group.type === 'open' ) {
-            // Non members can add themselves
-            if ( ! context.userMember ) {
-                if ( context.groupMember.role === 'member' && context.groupMember.status === 'member' ) {
-                    return true
-                }
-            }
-            // Moderators can invite 
-            if ( canModerateGroup ) {
-                if ( context.groupMember.role === 'member' && context.groupMember.status === 'pending-invited' ) {
-                    return true
-                }
-            }
+            return canModerateGroup || (context.userMember === null && context.groupMember.userId === user.id)
         }
         // For private groups
         if ( context.group.type === 'private' ) {
-            // Non members can request access
-            if ( ! context.userMember ) {
-                if ( context.groupMember.role === 'member' && context.groupMember.status === 'pending-requested' ) {
-                    return true
-                }
-            }
-            // Moderators can invite
-            if ( canModerateGroup ) {
-                if ( context.groupMember.role === 'member' && context.groupMember.status === 'pending-invited' ) {
-                    return true
-                }
-            }
+            return canModerateGroup || (context.userMember === null && context.groupMember.userId === user.id)
         }
         // For Hidden groups
         if ( context.group.type === 'hidden' ) {
-            // Moderators can invite
-            if ( canModerateGroup ) {
-                if ( context.groupMember.role === 'member' && context.groupMember.status === 'pending-invited' ) {
-                    return true
-                }
-            }
+            return canModerateGroup
         }
 
         return false
     }
 
     async canUpdateGroupMember(user, context) {
-        await this.ensureContext(user, context)
+        await this.ensureContext(user, context, [ 'groupMember' ])
         
         const canAdminGroup = await this.permissionService.can(user, 'admin', 'Group', context)
 
         // Admins can promote members to moderator or admin
         if ( canAdminGroup ) {
-            if ( context.existingMember.role === 'member' 
-                && (context.groupMember.role === 'moderator' || context.groupMember.role === 'admin')) 
-            {
-                return true
-            }
+            return true
+        }
 
-            if ( context.existingMember.role === 'moderator'
-                && (context.groupMember.role === 'member' || context.groupMember.role === 'admin')) 
-            {
-                return true
-            }
+        // Users can update their own GroupMember in certain circumstances.
+        if ( user.id === context.groupMember.userId ) {
+            return true
         }
 
         return false
     }
 
-    async canDeleteGroupMember(user, context) {}
+    async canDeleteGroupMember(user, context) {
+        await this.ensureContext(user, context, [ 'groupMember' ])
+
+        const canModerateGroup = await this.permissionService.can(user, 'moderate', 'Group', context)
+
+        // Moderators can remove users from a group.
+        if ( canModerateGroup ) {
+            return true
+        }
+
+        // Users can update their own GroupMember in certain circumstances.
+        if ( user.id === context.groupMember.userId ) {
+            return true
+        }
+
+        return false
+    }
 
 
 }

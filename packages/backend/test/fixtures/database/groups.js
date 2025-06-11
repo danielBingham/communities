@@ -1,4 +1,5 @@
 const groups = {
+    // type: open
     'aeb26ec5-3644-4b7a-805e-375551ec65b6': {
         rows: [
             {
@@ -14,6 +15,7 @@ const groups = {
             }
         ]
     },
+    // type: private
     '8661a1ef-6259-4d5a-a59f-4d75929a765f': {
         rows: [
             {
@@ -29,6 +31,7 @@ const groups = {
             }
         ]
     },
+    // type: hidden
     '4e66c241-ef21-4143-b7b4-c4fe81a34acd': {
         rows: [
             {
@@ -62,7 +65,7 @@ const groupMembers = {
             }
         ]
     },
-    // User One 'admin' membership in Test Open Group
+    // User One 'moderator' membership in Test Open Group
     '7a42357c-9511-4c36-81db-97a492c7934c': {
         rows: [
             {

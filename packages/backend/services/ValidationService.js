@@ -25,16 +25,20 @@ const { util, validation } = require('@communities/shared')
 const ServiceError = require('../errors/ServiceError')
 
 const GroupDAO = require('../daos/GroupDAO')
+const GroupMemberDAO = require('../daos/GroupMemberDAO')
 const PostDAO = require('../daos/PostDAO')
 
-const { isModerator } = require('../lib/admin')
+const PermissionService = require('./PermissionService')
 
 module.exports = class ValidationService {
     constructor(core) {
         this.core = core
 
         this.groupDAO = new GroupDAO(core)
+        this.groupMemberDAO = new GroupMemberDAO(core)
         this.postDAO = new PostDAO(core)
+
+        this.permissionService = new PermissionService(core)
     }
 
     has(entity, field) {
@@ -354,11 +358,12 @@ module.exports = class ValidationService {
             }
         }
 
-        let group = null
         if ( util.objectHas(groupMember, 'groupId') ) {
-            group = await this.groupDAO.getGroupById(groupMember.groupId)
+            const groupResults = await this.core.database.query(`
+                SELECT id FROM groups WHERE id = $1
+            `, [ groupMember.groupId ])
 
-            if ( group === null ) {
+            if ( groupResults.rows.length <= 0 || groupResults.rows[0].id !== groupMember.groupId ) {
                 errors.push({
                     type: `groupId:not-found`,
                     log: `Group(${groupMember.groupId}) not found.`,
@@ -373,15 +378,16 @@ module.exports = class ValidationService {
 
         // Validate the changes.  Only certain combinations of fields are
         // allowed.
-
-        // When creating a new member.
         if ( existing === null || existing === undefined ) {
-            // NOTE: We know we have groupId and therefor group because groupId is required when creating.
-            const userMember = await this.groupMemberDAO.getGroupMemberForGroupAndUser(group.id, currentUser.id)
-            const canModerateGroup = await this.permissionService.can(currentUser, 'moderate', 'Group', { group: group, userMember: userMember })
+            // ============== Creating a new member. ==========================
+
+            const group = await this.groupDAO.getGroupById(groupMember.groupId)
+            const userMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(group.id, currentUser.id)
+            const canModerateGroup = await this.permissionService.can(currentUser, 'moderate', 'Group', { group: group, groupMember: userMember })
             if ( group.type === 'open' ) {
-                // Non members can add themselves in which case role is 'member' and status is 'member'.
                 if ( userMember === null ) {
+                    // Non members can add themselves in which case role is 'member' and status is 'member'.
+
                     if ( groupMember.role !== 'member' ) {
                         errors.push({
                             type: `role:invalid`,
@@ -397,10 +403,17 @@ module.exports = class ValidationService {
                             message: `You may only add yourself to an open group, you may not invite yourself.`
                         })
                     }
-                }
-                
-                // Moderators can invite users in which case role is 'member' and status is 'pending-invited'.
-                else if ( canModerateGroup ) {
+
+                    if ( groupMember.userId !== currentUser.id ) {
+                        errors.push({
+                            type: `userId:invalid`,
+                            log: `Non-member user attempting to add User(${groupMember.userId}) to Open Group(${groupMember.groupId}).`,
+                            message: `You may only add yourself to an open Group.`
+                        })
+                    }
+                } else if ( canModerateGroup ) {
+                    // Moderators can invite users in which case role is 'member' and status is 'pending-invited'.
+                    
                     if ( groupMember.role !== 'member' ) {
                         errors.push({
                             type: `role:invalid`,
@@ -416,30 +429,193 @@ module.exports = class ValidationService {
                             message: `You may only invite members to a group.`
                         })
                     }
-                }
-
-                // Otherwise, it's an existing user who doesn't have moderator permissions.
-                else {
+                } else {
+                    // Otherwise, it's an existing user who doesn't have moderator permissions.
                     // We shouldn't ever get here.  We should do permissions checks first.
                     throw new ServiceError('invalid-permissions',
                         `Non-moderator member attempting to create a new member.`)
                 }
             } else if ( group.type === 'private' ) {
-                // Non-members can request access in which case role is 'member' and status is 'pending-requested'.
                 if ( userMember === null ) {
+                    // Non-members can request access in which case role is 'member' and status is 'pending-requested'.
 
-                }
+                    if ( groupMember.role !== 'member' ) {
+                        errors.push({
+                            type: `role:invalid`,
+                            log: `User attempting to add themselves to a group with invalid role '${groupMember.role}'.`,
+                            message: `You my not add yourself with role '${groupMember.role}'.`
+                        })
+                    } 
 
-                // Moderators can invite users in which case role is 'member' and status is 'pending-invited'.
-                else if ( canModerateGroup ) {
+                    if ( groupMember.status !== 'pending-requested' ) {
+                        errors.push({
+                            type: `status:invalid`,
+                            log: `User attempting to add themselves to a group with invalid status '${groupMember.status}'.`,
+                            message: `You may not add yourself with status '${groupMember.status}'.`
+                        })
+                    }
 
+                    if ( groupMember.userId !== currentUser.id ) {
+                        errors.push({
+                            type: `userId:invalid`,
+                            log: `Non-member user attempting to add User(${groupMember.userId}) to Group(${groupMember.groupId}).`,
+                            message: `You may only request access to a private Group for yourself.`
+                        })
+                    }
+                } else if ( canModerateGroup ) {
+                    // Moderators can invite users in which case role is 'member' and status is 'pending-invited'.
+                    
+                    if ( groupMember.role !== 'member' ) {
+                        errors.push({
+                            type: `role:invalid`,
+                            log: `Moderator attempting to add a member with invalid role '${groupMember.role}'.`,
+                            message: `You may not add a member with role '${groupMember.role}'.`
+                        })
+                    }
+
+                    if ( groupMember.status !== 'pending-invited' ) {
+                        errors.push({
+                            type: `status:invalid`,
+                            log: `Moderator attempting to add a member with invalid status '${groupMember.status}'.`,
+                            message: `You may not add a member with status '${groupMember.status}'.`
+                        })
+                    }
+                } else {
+                    // We shouldn't be able to get here.
+                    throw new ServiceError('invalid-permissions',
+                        `Non-moderator member attempting to create a new member in a private Group.`)
                 }
 
             } else if ( group.type === 'hidden' ) {
+                if ( canModerateGroup ) {
+                    if ( groupMember.role !== 'member' ) {
+                        errors.push({
+                            type: `role:invalid`,
+                            log: `Moderator attempting to add a member with invalid role '${groupMember.role}'.`,
+                            message: `You may not add a member with role '${groupMember.role}'.`
+                        })
+                    }
 
+                    if ( groupMember.status !== 'pending-invited' ) {
+                        errors.push({
+                            type: `status:invalid`,
+                            log: `Moderator attempting to add a member with invalid status '${groupMember.status}'.`,
+                            message: `You may not add a member with status '${groupMember.status}'.`
+                        })
+                    }
+                } else {
+                    // We shouldn't be able to get here.
+                    throw new ServiceError('invalid-permissions',
+                        `Non-moderator member attempting to create a new member in a hidden Group.`)
+                }
             } 
         } else {
+            // ============== Editing an existing member. =====================
+           
+            const canModerateGroup = await this.permissionService.can(currentUser, 'moderate', 'Group', { groupId: existing.groupId})
+            // ============== Validate Status changes. ========================
+            if ( existing.status === 'pending-invited' ) {
+                if ( groupMember.status !== 'pending-invited') {
+                    if ( groupMember.status !== 'member' ) {
+                        errors.push({
+                            type: `status:invalid`,
+                            log: `Invited users may only change their status to 'member'.`,
+                            message: `Invited users may only change their status to 'member'.`
+                        })
+                    }
 
+                    if ( currentUser.id !== groupMember.userId ) {
+                        errors.push({
+                            type: `status:invalid`,
+                            log: `Only invited users may change their status.`,
+                            message: `You may not change another user's status.`
+                        })
+                    }
+                }
+            } else if ( existing.status === 'pending-requested' ) {
+                if ( groupMember.status !== 'pending-requested') {
+                    if ( groupMember.status !== 'member' ) {
+                        errors.push({
+                            type: `status:invalid`,
+                            log: `May only change status of requesting users to 'member'.`,
+                            message: `You may only change the status of requesting users to 'member'.  Delete the member to remove them.`
+                        })
+                    }
+
+                    if ( ! canModerateGroup ) {
+                        errors.push({
+                            type: `status:not-authorized`,
+                            log: `Only moderators may accepted requested access to a Group.`,
+                            message: `Only Group moderators may accept a user's request for access.`
+                        })
+                    }
+                }
+            } else if ( existing.status === 'member' ) {
+                if ( groupMember.status !== 'member') {
+                    errors.push({
+                        type: 'status:invalid',
+                        log: `Cannot change the status of a confirmed member.`,
+                        message: `You cannot change the status of a confirmed member.`
+                    })
+                }
+            } else {
+                // If we add a new status and forget to handle it, we want to be yelled at.
+                throw new ServiceError('invalid-status',
+                    `Invalid unhandled status '${existing.status}' on existing GroupMember.`)
+            }
+
+            const canAdminGroup = await this.permissionService.can(currentUser, 'admin', 'Group', { groupId: existing.groupId })
+            // ============== Validate Role changes. ========================== 
+            if ( existing.role === 'member' ) {
+                if ( groupMember.role !== 'member') {
+                    if ( groupMember.role !== 'moderator' && groupMember.role !== 'admin' ) {
+                        errors.push({
+                            type: `role:invalid`,
+                            log: `Member roles may only be changed to 'moderator' or 'admin.`,
+                            message: `You may only change a 'member' to a 'moderator' or an 'admin'.`
+                        })
+                    }
+
+                    if ( ! canAdminGroup ) {
+                        errors.push({
+                            type: `role:not-authorized`,
+                            log: `User not authorized to update a GroupMember's role.`,
+                            message: `You are not authorized to update a GroupMember's role.`
+                        })
+                    }
+                }
+            } else if ( existing.role === 'moderator' ) {
+                if ( groupMember.role !== 'moderator') {
+                    if ( groupMember.role !== 'member' && groupMember.role !== 'admin' ) {
+                        errors.push({
+                            type: `role:invalid`,
+                            log: `Moderators may only be demoted to 'member' or promoted to 'admin'.`,
+                            message: `Moderators may only be demoted to 'member' or promoted to 'admin'.`
+                        })
+                    }
+
+                    if ( ! canAdminGroup ) {
+                        errors.push({
+                            type: `role:not-authorized`,
+                            log: `User not authorized to update a GroupMember's role.`,
+                            message: `You are not authorized to update a GroupMember's role.`
+                        })
+                    }
+                }
+            } else if ( existing.role === 'admin' ) {
+                if ( groupMember.role !== 'admin') {
+                    errors.push({
+                        type: `role:not-authorized`,
+                        log: `User not authorized to change an admin's role.`,
+                        message: `You are not authorized to change an admin's role.`
+                    })
+                }
+            } else {
+                // If we add a new role and forget to handle it here, we want to be yelled at.
+                // We shouldn't be able to get here.
+                throw new ServiceError('invalid-role',
+                    `Invalid unhandled role '${existing.role}' on existing GroupMember.`)
+            }
         }
         
         return errors

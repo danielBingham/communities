@@ -39,7 +39,7 @@ const GroupInvite = function({ groupId }) {
 
     const invite = () => {
         if ( userId ) {
-            makePostGroupMembersRequest(postGroupMembers({ groupId: groupId, userId: userId }))
+            makePostGroupMembersRequest(postGroupMembers({ groupId: groupId, userId: userId, status: 'pending-invited', role: 'member' }))
             setNameOrEmail('')
             setUserId(null)
         } else if ( isEmail(nameOrEmail)) {
@@ -138,7 +138,7 @@ const GroupInvite = function({ groupId }) {
             if ( invitedUser === null ) {
                 throw new Error('Failed to find invited user after invitation!')
             }
-            makePostGroupMembersRequest(postGroupMembers({ groupId: groupId, userId: invitedUser.id}))
+            makePostGroupMembersRequest(postGroupMembers({ groupId: groupId, userId: invitedUser.id, status: 'pending-invited', role: 'member'}))
             setNameOrEmail('')
             setUserId(null)
         }
