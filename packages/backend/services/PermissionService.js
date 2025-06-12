@@ -25,6 +25,7 @@ const UserRelationshipDAO = require('../daos/UserRelationshipDAO')
 
 const GroupMemberPermissions = require('./permission/GroupMemberPermissions')
 const GroupPermissions = require('./permission/GroupPermissions')
+const PostCommentPermissions = require('./permission/PostCommentPermissions')
 const { contextHas } = require('./permission/permissionUtils')
 
 const ServiceError = require('../errors/ServiceError')
@@ -44,6 +45,7 @@ module.exports = class PermissionService {
 
         this.groupMember = new GroupMemberPermissions(core, this)
         this.group = new GroupPermissions(core, this)
+        this.postComment = new PostCommentPermissions(core, this)
     }
 
 
@@ -158,6 +160,16 @@ module.exports = class PermissionService {
                 return await this.groupMember.canUpdateGroupMember(user, context)
             } else if ( action === 'delete' ) {
                 return await this.groupMember.canDeleteGroupMember(user, context)
+            }
+        } else if ( entity === 'PostComment' ) {
+            if ( action === 'view' ) {
+                return await this.postComment.canViewPostComment(user, context)
+            } else if ( action === 'create' ) {
+                return await this.postComment.canCreatePostComment(user, context)
+            } else if ( action === 'update' ) {
+                return await this.postComment.canUpdatePostComment(user, context)
+            } else if ( action === 'delete' ) {
+                return await this.postComment.canDeletePostComment(user, context)
             }
         } else if ( entity === 'Site' ) {
             if ( action === 'moderate' ) {
