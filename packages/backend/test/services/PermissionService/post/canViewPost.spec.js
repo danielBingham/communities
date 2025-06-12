@@ -205,7 +205,7 @@ describe('PermissionService.canViewPost()', function() {
             // Test Private Group.
             const group = entities['groups'].dictionary[post.groupId]
             // User Two's membership in Test Private Group.
-            const groupMember = entities['groupMembers'].dictionary['70f2c9ee-e614-4bb0-bed0-83b42d1b37cd']
+            const groupMember = entities['groupMembers'].dictionary['bb64caa2-a6a6-43be-a11d-349b6e68f5a8']
 
             const context = {
                 post: post, 
@@ -265,7 +265,7 @@ describe('PermissionService.canViewPost()', function() {
             // Test Private Group.
             const group = entities['groups'].dictionary[post.groupId]
             // User Two's membership in Test Private Group.
-            const groupMember = entities['groupMembers'].dictionary['79104b92-46c7-4e01-88f0-b9f261ecaf78']
+            const groupMember = entities['groupMembers'].dictionary['d0fa5e53-4306-4b0d-91cb-22df17a46104']
 
             const context = {
                 post: post, 
@@ -296,7 +296,7 @@ describe('PermissionService.canViewPost()', function() {
             // Test Private Group.
             const group = entities['groups'].dictionary[post.groupId]
             // User Two's membership in Test Private Group.
-            const groupMember = entities['groupMembers'].dictionary['70f2c9ee-e614-4bb0-bed0-83b42d1b37cd']
+            const groupMember = entities['groupMembers'].dictionary['bb64caa2-a6a6-43be-a11d-349b6e68f5a8']
 
             const context = {
                 post: post, 
@@ -594,7 +594,7 @@ describe('PermissionService.canViewPost()', function() {
             // Test Private Group.
             const group = entities['groups'].dictionary[post.groupId]
             // User Two's membership in Test Private Group.
-            const groupMember = entities['groupMembers'].dictionary['70f2c9ee-e614-4bb0-bed0-83b42d1b37cd']
+            const groupMember = entities['groupMembers'].dictionary['bb64caa2-a6a6-43be-a11d-349b6e68f5a8']
 
             const context = {
                 post: post, 
@@ -622,7 +622,7 @@ describe('PermissionService.canViewPost()', function() {
             // Test Private Group.
             const group = entities['groups'].dictionary[post.groupId]
             // User Two's membership in Test Hidden Group.
-            const groupMember = entities['groupMembers'].dictionary['79104b92-46c7-4e01-88f0-b9f261ecaf78']
+            const groupMember = entities['groupMembers'].dictionary['d0fa5e53-4306-4b0d-91cb-22df17a46104']
 
             const context = {
                 post: post, 
@@ -703,7 +703,7 @@ describe('PermissionService.canViewPost()', function() {
             // Test Private Group.
             const group = entities['groups'].dictionary[post.groupId]
             // User Two's membership in Test Private Group.
-            const groupMember = { ...entities['groupMembers'].dictionary['70f2c9ee-e614-4bb0-bed0-83b42d1b37cd'] }
+            const groupMember = { ...entities['groupMembers'].dictionary['bb64caa2-a6a6-43be-a11d-349b6e68f5a8'] }
             groupMember.status = 'pending-invited'
 
             const context = {
@@ -732,7 +732,7 @@ describe('PermissionService.canViewPost()', function() {
             // Test Private Group.
             const group = entities['groups'].dictionary[post.groupId]
             // User Two's membership in Test Hidden Group.
-            const groupMember = { ...entities['groupMembers'].dictionary['79104b92-46c7-4e01-88f0-b9f261ecaf78'] }
+            const groupMember = { ...entities['groupMembers'].dictionary['d0fa5e53-4306-4b0d-91cb-22df17a46104'] }
             groupMember.status = 'pending-invited'
 
             const context = {
@@ -761,7 +761,7 @@ describe('PermissionService.canViewPost()', function() {
             // Test Private Group.
             const group = entities['groups'].dictionary[post.groupId]
             // User Two's membership in Test Private Group.
-            const groupMember = { ...entities['groupMembers'].dictionary['70f2c9ee-e614-4bb0-bed0-83b42d1b37cd'] }
+            const groupMember = { ...entities['groupMembers'].dictionary['bb64caa2-a6a6-43be-a11d-349b6e68f5a8'] }
             groupMember.status = 'pending-requested'
 
             const context = {
@@ -790,7 +790,7 @@ describe('PermissionService.canViewPost()', function() {
             // Test Private Group.
             const group = entities['groups'].dictionary[post.groupId]
             // User Two's membership in Test Hidden Group.
-            const groupMember = { ...entities['groupMembers'].dictionary['79104b92-46c7-4e01-88f0-b9f261ecaf78'] }
+            const groupMember = { ...entities['groupMembers'].dictionary['d0fa5e53-4306-4b0d-91cb-22df17a46104'] }
             groupMember.status = 'pending-requested'
 
             const context = {
