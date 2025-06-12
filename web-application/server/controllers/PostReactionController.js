@@ -40,6 +40,8 @@ module.exports = class PostReactionController {
     }
 
     async getRelations(results, requestedRelations) {
+        // Need to send the posts up as a relation, because they will have been
+        // updated.
         const postIds = []
         for(const reactionId of results.list) {
             const reaction = results.dictionary[reactionId]
@@ -57,11 +59,12 @@ module.exports = class PostReactionController {
         }
     }
 
-    async createQuery(request) {
-
-    }
+    async createQuery(request) { }
 
     async getPostReactions(request, response) {
+        throw new ControllerError(503, 'not-implemented',
+            `GET /post/:id/reactions is not implemented yet.`,
+            `GET /post/:id/reactions is not implemented yet.`)
 
     }
 
@@ -77,11 +80,16 @@ module.exports = class PostReactionController {
         const postId = request.params.postId
 
         const post = await this.postDAO.getPostById(postId)
-
-        const canViewPost = await this.permissionService.can(currentUser, 'view', 'Post', { post: post})
-        if ( ! canViewPost ) {
+        if ( post === null ) {
             throw new ControllerError(404, 'not-found',
                 `Post(${postId}) was not found by User(${currentUser.id}) attempting to react.`,
+                `That post either doesn't exist or you don't have permission to see it.`)
+        }
+
+        const canViewPost = await this.permissionService.can(currentUser, 'view', 'Post', { post: post})
+        if ( canViewPost !== true ) {
+            throw new ControllerError(404, 'not-found',
+                `User attempting to react to Post(${postId}) without authorization to view.`,
                 `That post either doesn't exist or you don't have permission to see it.`)
         }
 
@@ -100,6 +108,15 @@ module.exports = class PostReactionController {
             postId: postId,
             userId: currentUser.id,
             reaction: request.body.reaction
+        }
+
+        const validationErrors = await this.validationService.validatePostReaction(currentUser, reaction)
+        if ( validationErrors.length > 0 ) {
+            const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
+            const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
+            throw new ControllerError(400, 'invalid',
+                `User submitted an invalid PostReaction: ${logString}`,
+                errorString)
         }
 
         await this.postReactionDAO.insertPostReactions(reaction)
@@ -154,16 +171,16 @@ module.exports = class PostReactionController {
 
         const postId = request.params.postId
         const post = await this.postDAO.getPostById(postId)
-        if ( ! post ) {
+        if ( post === null ) {
             throw new ControllerError(404, 'not-found',
                 `Post(${postId}) was not found by User(${currentUser.id}) attempting to react.`,
                 `That post either doesn't exist or you don't have permission to see it.`)
         }
 
         const canViewPost = await this.permissionService.can(currentUser, 'view', 'Post', { post: post })
-        if ( ! canViewPost ) {
+        if ( canViewPost !== true ) {
             throw new ControllerError(404, 'not-found',
-                `Post(${postId}) was not found by User(${currentUser.id}) attempting to react.`,
+                `User attempting to react to Post(${postId}) without authorization to view.`,
                 `That post either doesn't exist or you don't have permission to see it.`)
         }
 
@@ -175,9 +192,19 @@ module.exports = class PostReactionController {
         }
 
         const reaction = {
+            id: existing.id,
             postId: postId,
             userId: currentUser.id,
             reaction: request.body.reaction
+        }
+
+        const validationErrors = await this.validationService.validatePostReaction(currentUser, reaction)
+        if ( validationErrors.length > 0 ) {
+            const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
+            const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
+            throw new ControllerError(400, 'invalid',
+                `User submitted an invalid PostReaction: ${logString}`,
+                errorString)
         }
 
         await this.postReactionDAO.updatePostReaction(reaction)

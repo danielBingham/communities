@@ -1054,6 +1054,92 @@ module.exports = class ValidationService {
         return errors
     }
 
+    async validatePostReaction(currentUser, postReaction, existing) {
+        const errors = []
+
+        if ( existing !== undefined && existing !== null && existing.id !== postReaction.id ) {
+            throw new ServiceError('entity-mismatch', 
+                `Existing PostComment(${existing.id}) does not match PostReaction(${postReaction.id}).`)
+        }
+
+        // ================== Always Disallowed ===============================
+        // There are some fields the user is never allowed to set.  Check those 
+        // fields first and return if any of them are set.
+
+        const alwaysDisallowedFields = [ 'createdDate', 'updatedDate' ]
+
+        for(const disallowedField of alwaysDisallowedFields ) {
+            if ( this.has(postReaction, disallowedField) ) {
+                errors.push({
+                    type: `${disallowedField}:not-allowed`,
+                    log: `${disallowedField} is not allowed.`,
+                    message: `You may not set '${disallowedField}'.`
+                })
+            }
+        }
+
+        if ( errors.length > 0 ) {
+            return errors
+        }
+
+        // ================== Situational Checks ==============================
+        // Initial creation and updating each have different sets of fields they
+        // require or disallow. Check those next and return if any are set.
+
+        // Creating a new reaction.
+        if ( ! existing ) {
+            const requiredFields = [ 'userId', 'postId', 'reaction' ]
+            for(const requiredField of requiredFields) {
+                if ( ! this.has(postReaction, requiredField) || postReaction[requiredField] === null ) {
+                    errors.push({
+                        type: `${requiredField}:missing`,
+                        log: `${requiredField} is required.`,
+                        message: `${requiredField} is required.`
+                    })
+                }
+            }
+        } 
+
+        // We're editing a reaction.
+        else {
+            const disallowedFields = [ 'userId', 'postId' ]
+            for(const disallowedField of disallowedFields ) {
+                if ( this.has(postReaction, disallowedField) 
+                    && postReaction[disallowedField] !== existing[disallowedField] ) 
+                {
+                    errors.push({
+                        type: `${disallowedField}:not-allowed`,
+                        log: `Updating ${disallowedField} is not allowed.`,
+                        message: `You may not update '${disallowedField}'.`
+                    })
+                }
+            }
+
+            const requiredFields = [ 'reaction' ]
+            for(const requiredField of requiredFields) {
+                if ( ! this.has(postReaction, requiredField) || postReaction[requiredField] === null ) {
+                    errors.push({
+                        type: `${requiredField}:missing`,
+                        log: `${requiredField} is required.`,
+                        message: `${requiredField} is required.`
+                    })
+                }
+            }
+        }
+
+        if ( errors.length > 0 ) {
+            return errors
+        }
+
+        // Do basic validation the fields.
+        const validationErrors = validation.PostReaction.validate(postReaction)
+        if ( validationErrors.all.length > 0 ) {
+            errors.push(...validationErrors.all)
+        }
+
+        return errors
+    }
+
     async validateUser(user, existing, type) {
         const errors = []
 
