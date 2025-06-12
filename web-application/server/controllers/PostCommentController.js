@@ -171,6 +171,15 @@ module.exports = class PostCommentController {
             content: request.body.content
         }
 
+        const validationErrors = await this.validationService.validatePostComment(currentUser, comment)
+        if ( validationErrors.length > 0 ) {
+            const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
+            const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
+            throw new ControllerError(400, 'invalid',
+                `User submitted an invalid PostComment: ${logString}`,
+                errorString)
+        }
+
         await this.postCommentDAO.insertPostComments(comment)
 
         let activity = parseInt(post.activity)
@@ -195,7 +204,7 @@ module.exports = class PostCommentController {
         if ( ! entity ) {
             throw new ControllerError(500, 'server-error',
                 `PostComment(${comment.id}) missing after update.`,
-                `Postcomment(${comment.id}) missing after being updated.  Please report as a bug.`)
+                `PostComment(${comment.id}) missing after being updated.  Please report as a bug.`)
         }
     
         // Subscribe the user if they aren't already subscribed.
@@ -288,11 +297,18 @@ module.exports = class PostCommentController {
         const currentUser = request.session.user
         const postId = request.params.postId
         const commentId = request.params.id
+        const comment = request.body
  
         if ( ! currentUser ) {
             throw new ControllerError(401, 'not-authenticated',
                 `User must be authenticated to post a comment.`,
                 `You must be authenticated to post a comment.`)
+        }
+
+        if ( commentId !== comment.id ) {
+            throw new ControllerError(400, `invalid`,
+                `Invalid request: resource id and body id must match.`,
+                `The PostComment.id in the resource path and the request body must match.`)
         }
 
         const existing = await this.core.database.query(`
@@ -317,12 +333,13 @@ module.exports = class PostCommentController {
                 `You provided the wrong postId in the route, please provide the correct one.`)
         }
 
-        const comment = {
-            id: commentId
-        }
-
-        if ( 'content' in request.body) {
-            comment.content = request.body.content
+        const validationErrors = await this.validationService.validatePostComment(currentUser, comment)
+        if ( validationErrors.length > 0 ) {
+            const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
+            const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
+            throw new ControllerError(400, 'invalid',
+                `User submitted an invalid PostComment: ${logString}`,
+                errorString)
         }
 
         await this.postCommentDAO.updatePostComment(comment)

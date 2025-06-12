@@ -75,7 +75,7 @@ module.exports = class StringValidator {
             return this
         }
 
-        if ( this.value.length > length ) 
+        if ( this.value.length >= length ) 
         {
             this.errors.push({
                 type: `${this.name}:too-long`,
@@ -91,7 +91,7 @@ module.exports = class StringValidator {
             return this
         }
 
-        if ( this.value.length < length ) 
+        if ( this.value.length <= length ) 
         {
             this.errors.push({
                 type: `${this.name}:too-short`,
