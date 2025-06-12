@@ -383,7 +383,7 @@ module.exports = class ValidationService {
 
             const group = await this.groupDAO.getGroupById(groupMember.groupId)
             const userMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(group.id, currentUser.id)
-            const canModerateGroup = await this.permissionService.can(currentUser, 'moderate', 'Group', { group: group, groupMember: userMember })
+            const canModerateGroup = await this.permissionService.can(currentUser, 'moderate', 'Group', { group: group, userMember: userMember })
             if ( group.type === 'open' ) {
                 if ( userMember === null ) {
                     // Non members can add themselves in which case role is 'member' and status is 'member'.
@@ -514,8 +514,8 @@ module.exports = class ValidationService {
             const group = await this.groupDAO.getGroupById(existing.groupId)
             const userMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(group.id, currentUser.id)
            
-            const canModerateGroup = await this.permissionService.can(currentUser, 'moderate', 'Group', { group: group, groupMember: userMember })
-            const canAdminGroup = await this.permissionService.can(currentUser, 'admin', 'Group', { group: group, groupMember: userMember })
+            const canModerateGroup = await this.permissionService.can(currentUser, 'moderate', 'Group', { group: group, userMember: userMember })
+            const canAdminGroup = await this.permissionService.can(currentUser, 'admin', 'Group', { group: group, userMember: userMember })
             
             // ============== Validate Status changes. ========================
             if ( existing.status === 'pending-invited' ) {

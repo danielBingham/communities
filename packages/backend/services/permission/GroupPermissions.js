@@ -27,7 +27,7 @@ const { util } = require('@communities/shared')
 
 const ServiceError = require('../../errors/ServiceError')
 
-module.exports = class GroupMemberPermissions {
+module.exports = class GroupPermissions {
 
     constructor(core, permissionService) {
         this.core 
@@ -42,7 +42,7 @@ module.exports = class GroupMemberPermissions {
 
     async ensureContext(user, context, required, optional) {
         // If we don't have the group, then attempt to load it.
-        if ( (required?.includes('group') || optional?.includes('group')) 
+        if ( (required.includes('group') || optional.includes('group')) 
             && (! util.objectHas(context, 'group') || context.group === null)) 
         {
             // If group is in context and set to null, then we don't want to
@@ -58,15 +58,21 @@ module.exports = class GroupMemberPermissions {
                 {
                     context.group = await this.groupDAO.getGroupById(context.userMember.groupId)
                 }
+                // Finally, check the post.
+                else if ( util.objectHas(context, 'post') && context.post !== null
+                    && util.objectHas(context.post, 'groupId') && context.post.groupId !== null)
+                {
+                    context.group = await this.groupDAO.getGroupById(context.post.groupId)
+                }
             }
 
-            if ( required?.includes('group') && (! util.objectHas(context, 'group') || context.group === null) ) { 
+            if ( required.includes('group') && (! util.objectHas(context, 'group') || context.group === null) ) { 
                 throw new ServiceError('missing-context', `'group' missing from context.`)
             }
         } 
 
         // If we don't have the user's groupMember then load it.
-        if ( (required?.includes('userMember') || optional?.includes('userMember')) 
+        if ( (required.includes('userMember') || optional.includes('userMember')) 
             && (! util.objectHas(context, 'userMember') || context.userMember === null) ) 
         {
             // If userMember is in context and set to null, then we don't want
@@ -75,12 +81,12 @@ module.exports = class GroupMemberPermissions {
                 context.userMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(context.group.id, user.id, true)
             }
 
-            if ( required?.includes('userMember') && (! util.objectHas(context, 'userMember') || context.userMember === null) ) {
+            if ( required.includes('userMember') && (! util.objectHas(context, 'userMember') || context.userMember === null) ) {
                 throw new ServiceError('missing-context', `'userMember' missing from context.`)
             }
         } 
 
-        if ( required?.includes('groupMember') && (! util.objectHas(context, 'groupMember' ) || context.groupMember === null) ) {
+        if ( required.includes('groupMember') && (! util.objectHas(context, 'groupMember' ) || context.groupMember === null) ) {
             throw new ServiceError('missing-context', `'groupMember' missing from context.`)
         } 
 
@@ -114,68 +120,92 @@ module.exports = class GroupMemberPermissions {
                 throw new ServiceError('context-mismatch', `Context includes elements from different Groups.`)
             }
         }
+
+        if ( util.objectHas(context, 'post') && context.post !== null ) {
+            if ( groupId === null ) {
+                groupId = context.post.groupId
+            } else if ( context.post.groupId !== groupId ) {
+                throw new ServiceError('context-mismatch', `Context includes elements from different Groups.`)
+            }
+        }
     }
 
-    async canViewGroupMember(user, context) {
-        return await this.permissionService.can(user, 'view', 'Group:content', context)
+    async canCreateGroup(user, context) {
+        return true
     }
 
-    async canCreateGroupMember(user, context) {
-        await this.ensureContext(user, context, [ 'group', 'groupMember' ], [ 'userMember' ])
-        
-        const canModerateGroup = await this.permissionService.can(user, 'moderate', 'Group', context)
+    async canViewGroup(user, context) {
+        await this.ensureContext(user, context, [ 'group' ], [ 'userMember' ])
 
-        // For open groups
+        // Site moderators can always view groups.
+        const canModerateSite = await this.permissionService.can(user, 'moderate', 'Site') 
+        if ( canModerateSite ) {
+            return true
+        }
+
+        if ( context.group.type === 'open' || context.group.type == 'private') {
+            return true
+        }
+
+        if ( context.userMember !== null ) {
+            return true 
+        }
+
+        return false 
+    }
+
+    async canUpdateGroup(user, context) {
+        return await this.canAdminGroup(user, context)
+    }
+
+    async canDeleteGroup(user, context) {
+        return await this.canAdminGroup(user, context)
+    }
+
+    async canModerateGroup(user, context) {
+        // TECHDEBT We don't actually need the `group` here and it's extra queries.  We just need the groupId, but 
+        // I don't want to go down the rabbithole of pulling that off of all the context right now.
+        await this.ensureContext(user, context, [ 'group' ], [ 'userMember' ])
+
+        if ( context.userMember !== null 
+            && context.userMember.status === 'member' 
+            && (context.userMember.role === 'moderator' || context.userMember.role === 'admin')) 
+        {
+            return true 
+        }
+
+        return false 
+    }
+
+    async canAdminGroup(user, context) {
+        await this.ensureContext(user, context, [ 'group'], [ 'userMember' ])
+
+        if ( context.userMember !== null && context.userMember.status === 'member' && context.userMember.role === 'admin') {
+            return true 
+        }
+        return false 
+    }
+
+    async canViewGroupContent(user, context) {
+        await this.ensureContext(user, context, [ 'group' ], [ 'userMember' ])
+
+        // Site moderators can always view group content.
+        const canModerateSite = await this.permissionService.can(user, 'moderate', 'Site')
+        if ( canModerateSite ) {
+            return true
+        }
+
+        // Anyone can view content of open group.
         if ( context.group.type === 'open' ) {
-            return canModerateGroup || (context.userMember === null && context.groupMember.userId === user.id)
-        }
-        // For private groups
-        if ( context.group.type === 'private' ) {
-            return canModerateGroup || (context.userMember === null && context.groupMember.userId === user.id)
-        }
-        // For Hidden groups
-        if ( context.group.type === 'hidden' ) {
-            return canModerateGroup
+            return true
         }
 
-        return false
+        // Otherwise they must be a confirmed member of the group.
+        if ( context.userMember !== null && context.userMember.status === 'member') {
+            return true 
+        }
+
+        return false 
     }
-
-    async canUpdateGroupMember(user, context) {
-        await this.ensureContext(user, context, [ 'groupMember' ])
-        
-        const canAdminGroup = await this.permissionService.can(user, 'admin', 'Group', context)
-
-        // Admins can promote members to moderator or admin
-        if ( canAdminGroup ) {
-            return true
-        }
-
-        // Users can update their own GroupMember in certain circumstances.
-        if ( user.id === context.groupMember.userId ) {
-            return true
-        }
-
-        return false
-    }
-
-    async canDeleteGroupMember(user, context) {
-        await this.ensureContext(user, context, [ 'groupMember' ])
-
-        const canModerateGroup = await this.permissionService.can(user, 'moderate', 'Group', context)
-
-        // Moderators can remove users from a group.
-        if ( canModerateGroup ) {
-            return true
-        }
-
-        // Users can delete their own GroupMember
-        if ( user.id === context.groupMember.userId ) {
-            return true
-        }
-
-        return false
-    }
-
 
 }

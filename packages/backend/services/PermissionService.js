@@ -24,6 +24,7 @@ const PostDAO = require('../daos/PostDAO')
 const UserRelationshipDAO = require('../daos/UserRelationshipDAO')
 
 const GroupMemberPermissions = require('./permission/GroupMemberPermissions')
+const GroupPermissions = require('./permission/GroupPermissions')
 const { contextHas } = require('./permission/permissionUtils')
 
 const ServiceError = require('../errors/ServiceError')
@@ -42,6 +43,7 @@ module.exports = class PermissionService {
         this.userRelationshipDAO = new UserRelationshipDAO(core)
 
         this.groupMember = new GroupMemberPermissions(core, this)
+        this.group = new GroupPermissions(core, this)
     }
 
 
@@ -131,21 +133,21 @@ module.exports = class PermissionService {
             }
         } else if ( entity === 'Group' ) {
             if ( action === 'create' ) {
-                return await this.canCreateGroup(user, context)
+                return await this.group.canCreateGroup(user, context)
             } else if ( action === 'view' ) {
-                return await this.canViewGroup(user, context)
+                return await this.group.canViewGroup(user, context)
             } else if ( action === 'update' ) {
-                return await this.canUpdateGroup(user, context)
+                return await this.group.canUpdateGroup(user, context)
             } else if ( action === 'delete' ) {
-                return await this.canDeleteGroup(user, context)
+                return await this.group.canDeleteGroup(user, context)
             } else if ( action === 'moderate' ) {
-                return await this.canModerateGroup(user, context)
+                return await this.group.canModerateGroup(user, context)
             } else if ( action === 'admin' ) {
-                return await this.canAdminGroup(user, context)
+                return await this.group.canAdminGroup(user, context)
             }
         } else if ( entity === 'Group:content' ) {
             if ( action === 'view' ) {
-                return await this.canViewGroupContent(user, context)
+                return await this.group.canViewGroupContent(user, context)
             }
         } else if ( entity === 'GroupMember' ) {
             if ( action === 'view' ) {
@@ -205,7 +207,7 @@ module.exports = class PermissionService {
                     `GroupId in context does not match Post.groupId.`)
             }
 
-            return await this.canViewGroupContent(user, context)
+            return await this.can(user, 'view', 'Group:content', context)
         }
 
         // If the post isn't in a group, then users can view their own
@@ -282,288 +284,11 @@ module.exports = class PermissionService {
         // If the post is in a group, then moderators and admins of the group
         // can also delete posts.
         if ( 'groupId' in context.post && context.post.groupId !== undefined && context.post.groupId !== null) {
-            return await this.canModerateGroup(user, context)
+            return await this.can(user, 'moderate', 'Group', context)
         }
 
         return false
     }
-
-    async canCreateGroup(user, context) {
-        return true
-    }
-
-    async canViewGroup(user, context) {
-        // Validate our context.
-        if ( contextHas(context, 'group') && contextHas(context, 'groupId') 
-            && context.group.id !== context.groupId ) 
-        {
-            throw new ServiceError('invalid-context:group',
-                `Group.id and groupId do not match.`)
-        }
-        if ( contextHas(context, 'group') && contextHas(context, 'post')
-            && context.group.id !== context.post.groupId ) 
-        {
-            throw new ServiceError('invalid-context:post',
-                `Group.id and Post.groupId do not match.`)
-
-        }
-        if ( contextHas(context, 'groupId') && contextHas(context, 'post')
-            && context.groupId !== context.post.groupId )
-        {
-            throw new ServiceError('invalid-context:post',
-                `Post.groupId and groupId do not match.`)
-        }
-
-        // Look up primary missing context.
-        if ( ! contextHas(context, 'group') ) {
-            if ( contextHas(context, 'groupId') ) {
-                context.group = await this.groupDAO.getGroupById(context.groupId)
-            } else if ( contextHas(context, 'post') ) {
-                if ( 'groupId' in context.post && context.post.groupId !== null && context.post.groupId !== undefined ) {
-                    context.group = await this.groupDAO.getGroupById(context.post.groupId)
-                }
-            }
-        }
-
-        if ( ! contextHas(context, 'group') ) { 
-            throw new ServiceError('missing-context:group', `'group' missing from context.`)
-        }
-
-        // Site moderators can always view groups.
-        const canModerateSite = await this.canModerateSite(user)
-        if ( canModerateSite ) {
-            return true
-        }
-
-        if ( context.group.type === 'open' || context.group.type == 'private') {
-            return true
-        }
-
-        if ( ! contextHas(context, 'groupMember')) {
-            context.groupMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(context.group.id, user.id, true)
-        } 
-
-        if ( contextHas(context, 'groupMember')) {
-            if ( context.groupMember.groupId !== context.group.id ) {
-                throw new ServiceError('invalid-context:groupMember',
-                    `GroupMember provided is for the wrong Group.`)
-            }
-            if ( context.groupMember.userId !== user.id ) {
-                throw new ServiceError('invalid-context:groupMember',
-                    `GroupMember provided is for the wrong user.`)
-            }
-        }
-
-        if ( context.groupMember !== null ) {
-            return true 
-        }
-
-        return false 
-    }
-
-    async canUpdateGroup(user, context) {
-        return await this.canAdminGroup(user, context)
-    }
-
-    async canDeleteGroup(user, context) {
-        return await this.canAdminGroup(user, context)
-    }
-
-    async canModerateGroup(user, context) {
-        // Validate the context.
-        if ( contextHas(context, 'groupId') && contextHas(context, 'post') ) {
-            if ( context.groupId !== context.post.groupId ) {
-                throw new ServiceError(`invalid-context:post`,
-                    `Post.groupId does not match groupId.`)
-            }
-        }
-
-        if ( contextHas(context, 'groupId') && contextHas(context, 'group') ) {
-            if ( context.groupId !== context.group.id) {
-                throw new ServiceError('invalid-context:group',
-                    `Group.id does not match groupId.`)
-            }
-        }
-        if ( contextHas(context, 'group') && contextHas(context, 'post') ) {
-            if ( context.group.id !== context.post.groupId ) {
-                throw new ServiceError('invalid-context:post',
-                    `Post.groupId does not match Group.id.`)
-            }
-        }
-
-
-        // Retrieve the needed context.
-        //
-        // `groupId` overrides `group` overrides `post`
-        //
-        // But we should already have confirmed that these are all equivalent
-        // above.
-        if ( ! contextHas(context, 'groupId') ) {
-            if ( contextHas(context, 'group')) {
-                context.groupId = context.group.id
-            } else if ( contextHas(context, 'post')) {
-                context.groupId = context.post.groupId
-            }
-        }
-
-        if ( ! contextHas(context, 'groupId')) {
-            throw new ServiceError('missing-context', `'groupId' missing from context.`)
-        }
-
-        if ( ! contextHas(context, 'groupMember')) {
-            context.groupMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(context.groupId, user.id, true)
-        } 
-
-        if ( contextHas(context, 'groupMember')) {
-            if ( context.groupMember.groupId !== context.groupId ) {
-                throw new ServiceError('invalid-context:groupMember',
-                    `GroupMember provided is for the wrong Group.`)
-            }
-            if ( context.groupMember.userId !== user.id ) {
-                throw new ServiceError('invalid-context:groupMember',
-                    `GroupMember provided is for the wrong user.`)
-            }
-        }
-
-        if ( contextHas(context, 'groupMember') 
-            && context.groupMember.status === 'member' 
-            && (context.groupMember.role === 'moderator' || context.groupMember.role === 'admin')) 
-        {
-            return true 
-        }
-
-        return false 
-    }
-
-    async canAdminGroup(user, context) {
-        // Validate our context.
-        //
-        if ( contextHas(context, 'groupId') && contextHas(context, 'group')
-            && context.groupId !== context.group.id ) 
-        {
-            throw new ServiceError('invalid-context:group',
-                `Group.id does not equal groupId.`)
-        }
-
-        if ( contextHas(context, 'groupId') && contextHas(context, 'post')
-            && context.groupId !== context.post.groupId )
-        {
-            throw new ServiceError('invalid-context:post',
-                `Post.groupId does not equal groupId.`)
-        }
-
-        if ( contextHas(context, 'group') && contextHas(context, 'post')
-            && context.group.id !== context.post.groupId )
-        {
-            throw new ServiceError('invalid-context:post',
-                `Group.id does not equal post.groupId.`)
-        }
-
-        // Fill in any missing context.
-        if ( ! contextHas(context, 'groupId') ) {
-            if ( contextHas(context, 'group')) {
-                context.groupId = context.group.id
-            } else if ( contextHas(context, 'post')) {
-                context.groupId = context.post.groupId
-            }
-        }
-
-        if ( ! contextHas(context, 'groupId')) {
-            throw new ServiceError('missing-context:groupId', `'groupId' missing from context.`)
-        }
-
-        if ( ! contextHas(context, 'groupMember')) {
-            context.groupMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(context.groupId, user.id, true)
-        }
-
-        if ( contextHas(context, 'groupMember')) {
-            if ( context.groupMember.groupId !== context.groupId ) {
-                throw new ServiceError('invalid-context:groupMember',
-                    `GroupMember provided is for the wrong Group.`)
-            }
-            if ( context.groupMember.userId !== user.id ) {
-                throw new ServiceError('invalid-context:groupMember',
-                    `GroupMember provided is for the wrong user.`)
-            }
-        }
-
-        if ( context.groupMember !== null && context.groupMember.status === 'member' && context.groupMember.role === 'admin') {
-            return true 
-        }
-        return false 
-    }
-
-    async canViewGroupContent(user, context) {
-        // Validate our context.
-        //
-        if ( contextHas(context, 'groupId') && contextHas(context, 'group')
-            && context.groupId !== context.group.id ) 
-        {
-            throw new ServiceError('invalid-context:group',
-                `Group.id does not equal groupId.`)
-        }
-
-        if ( contextHas(context, 'groupId') && contextHas(context, 'post')
-            && context.groupId !== context.post.groupId )
-        {
-            throw new ServiceError('invalid-context:post',
-                `Post.groupId does not equal groupId.`)
-        }
-
-        if ( contextHas(context, 'group') && contextHas(context, 'post')
-            && context.group.id !== context.post.groupId )
-        {
-            throw new ServiceError('invalid-context:post',
-                `Group.id does not equal post.groupId.`)
-        }
-
-        // If we don't have the group, then attempt to load it.
-        if ( ! contextHas(context, 'group') ) {
-            if ( contextHas(context, 'groupId') ) {
-                context.group = await this.groupDAO.getGroupById(context.groupId)
-            }  else if ( contextHas(context, 'post') && context.post.groupId !== undefined && context.post.groupId !== null ) {
-                context.group = await this.groupDAO.getGroupById(context.post.groupId)
-            }
-        } 
-
-        if ( ! contextHas(context, 'group') ) { 
-            throw new ServiceError('missing-context', `'group' missing from context.`)
-        }
-
-        // Site moderators can always view group content.
-        const canModerateSite = await this.canModerateSite(user)
-        if ( canModerateSite ) {
-            return true
-        }
-
-        // Anyone can view content of open group.
-        if ( context.group.type === 'open' ) {
-            return true
-        }
-
-        if ( ! contextHas(context, 'groupMember') ) {
-            context.groupMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(context.group.id, user.id, true)
-        } 
-        
-        if ( contextHas(context, 'groupMember')) {
-            if ( context.groupMember.groupId !== context.group.id ) {
-                throw new ServiceError('invalid-context:groupMember',
-                    `GroupMember provided is for the wrong Group.`)
-            }
-            if ( context.groupMember.userId !== user.id ) {
-                throw new ServiceError('invalid-context:groupMember',
-                    `GroupMember provided is for the wrong user.`)
-            }
-        }
-
-        // Otherwise they must be a confirmed member of the group.
-        if ( context.groupMember !== null && context.groupMember.status === 'member') {
-            return true 
-        }
-
-        return false 
-    }
-
 
     async canModerateSite(user, context) {
         if ( this.core.features.has('62-admin-moderation-controls') ) {
