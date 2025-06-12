@@ -94,21 +94,17 @@ module.exports = class PostCommentController {
         }
 
         const post = await this.postDAO.getPostById(postId)
-
-        if ( ! post ) {
+        if ( post === null ) {
             throw new ControllerError(404, 'not-found',
                 `User(${currentUser.id}) attempted to post a comment on Post(${postId}) that doesn't exist.`,
                 `Either that post doesn't exist or you don't have permission to view it.`)
         }
 
-        if ( post.userId !== currentUser.id) {
-            const canViewPost = await this.permissionService.can(currentUser, 'view', 'Post', { post: post })
-
-            if ( ! canViewPost ) {
-                throw new ControllerError(404, 'not-found',
-                    `User(${currentUser.id}) attempted to post a comment on Post(${postId}) they don't have permission to view.`,
-                    `Either that post doesn't exist or you don't have permission to view it.`)
-            }
+        const canViewPost = await this.permissionService.can(currentUser, 'view', 'Post', { post: post })
+        if ( canViewPost !== true ) {
+            throw new ControllerError(404, 'not-found',
+                `User(${currentUser.id}) attempted to post a comment on Post(${postId}) they don't have permission to view.`,
+                `Either that post doesn't exist or you don't have permission to view it.`)
         }
 
         const commentResults = await this.postCommentDAO.selectPostComments({
@@ -142,21 +138,24 @@ module.exports = class PostCommentController {
         }
 
         const post = await this.postDAO.getPostById(postId)
-
-        if ( ! post ) {
+        if ( post === null ) {
             throw new ControllerError(404, 'not-found',
                 `User(${currentUser.id}) attempted to post a comment on Post(${postId}) that doesn't exist.`,
                 `Either that post doesn't exist or you don't have permission to view it.`)
         }
 
-        if ( post.userId !== currentUser.id) {
-            const canViewPost = await this.permissionService.can(currentUser, 'view', 'Post', { post: post })
+        const canViewPost = await this.permissionService.can(currentUser, 'view', 'Post', { post: post })
+        if ( canViewPost !== true) {
+            throw new ControllerError(404, 'not-found',
+                `User(${currentUser.id}) attempted to post a comment on Post(${postId}) they don't have permission to view.`,
+                `Either that post doesn't exist or you don't have permission to view it.`)
+        }
 
-            if ( ! canViewPost ) {
-                throw new ControllerError(404, 'not-found',
-                    `User(${currentUser.id}) attempted to post a comment on Post(${postId}) they don't have permission to view.`,
-                    `Either that post doesn't exist or you don't have permission to view it.`)
-            }
+        const canCreatePostComment = await this.permissionService.can(currentUser, 'create', 'PostComment', { post: post })
+        if ( canCreatePostComment !== true) {
+            throw new ControllerError(403, 'not-authorized',
+                `User not authorized to create a PostComment on Post(${postId}).`,
+                `You are not authorized to create a PostComment on that Post.`)
         }
         
         const reactionResults = await this.core.database.query(`
@@ -200,7 +199,6 @@ module.exports = class PostCommentController {
         })
 
         const entity = results.dictionary[comment.id]
-
         if ( ! entity ) {
             throw new ControllerError(500, 'server-error',
                 `PostComment(${comment.id}) missing after update.`,
@@ -258,21 +256,24 @@ module.exports = class PostCommentController {
         }
 
         const post = await this.postDAO.getPostById(postId)
-
-        if ( ! post ) {
+        if ( post === null ) {
             throw new ControllerError(404, 'not-found',
                 `User(${currentUser.id}) attempted to post a comment on Post(${postId}) that doesn't exist.`,
                 `Either that post doesn't exist or you don't have permission to view it.`)
         }
 
-        if ( post.userId !== currentUser.id) {
-            const canViewPost = await this.permissionService.can(currentUser, 'view', 'Post', { post: post })
+        const canViewPost = await this.permissionService.can(currentUser, 'view', 'Post', { post: post })
+        if ( canViewPost !== true ) {
+            throw new ControllerError(404, 'not-found',
+                `User(${currentUser.id}) attempted to post a comment on Post(${postId}) they don't have permission to view.`,
+                `Either that post doesn't exist or you don't have permission to view it.`)
+        }
 
-            if ( ! canViewPost ) {
-                throw new ControllerError(404, 'not-found',
-                    `User(${currentUser.id}) attempted to post a comment on Post(${postId}) they don't have permission to view.`,
-                    `Either that post doesn't exist or you don't have permission to view it.`)
-            }
+        const canViewPostComment = await this.permissionService.can(currentUser, 'view', 'PostComment', { post: post, postCommentId: id})
+        if ( canViewPostComment !== true ) {
+            throw new ControllerError(404, 'not-found',
+                `User attempting to view PostComment(${id}) without authorization.`,
+                `Either that PostComment doesn't exist or you don't have permission to view it.`)
         }
 
         const results = await this.postCommentDAO.selectPostComments({
@@ -305,32 +306,38 @@ module.exports = class PostCommentController {
                 `You must be authenticated to post a comment.`)
         }
 
+        const canViewPost = await this.permissionService.can(currentUser, 'view', 'Post', { postId: postId })
+        if ( canViewPost !== true ) {
+            throw new ControllerError(404, 'not-found',
+                `User(${currentUser.id}) attempted to post a comment on Post(${postId}) they don't have permission to view.`,
+                `Either that post doesn't exist or you don't have permission to view it.`)
+        }
+
         if ( commentId !== comment.id ) {
             throw new ControllerError(400, `invalid`,
                 `Invalid request: resource id and body id must match.`,
                 `The PostComment.id in the resource path and the request body must match.`)
         }
 
-        const existing = await this.core.database.query(`
-            SELECT post_id, user_id FROM post_comments WHERE post_comments.id = $1
-        `, [ commentId ])
-
-        if ( existing.rows.length <= 0 ) {
+        const existing = await this.postCommentDAO.getPostCommentById(commentId)
+        if ( existing === null ) {
             throw new ControllerError(404, 'not-found',
                 `Comment(${commentId}) on Post(${postId}) was not found by User(${currentUser.id}) attempting to edit.`,
                 `That comment either doesn't exist or you don't have permission to see it.`)
         }
 
-        if ( existing.rows[0].user_id != currentUser.id) {
-            throw new ControllerError(403, 'not-authorized',
-                `User(${currentUser.id}) attempted to edit Comment(${commentId}) without permission.`,
-                `You may only edit your own comments.`)
-        }
-
-        if ( existing.rows[0].post_id != postId) {
+        if ( existing.postId != postId) {
             throw new ControllerError(400, 'invalid',
                 `User(${currentUser.id}) attempted to edit Comment(${commentId}) with wrong post.`,
                 `You provided the wrong postId in the route, please provide the correct one.`)
+        }
+
+
+        const canUpdatePostComment = await this.permissionService.can(currentUser, 'update', 'PostComment', { postCommentId: commentId })
+        if ( canUpdatePostComment !== true ) {
+            throw new ControllerError(403, 'not-authorized',
+                `User attempting to update PostComment(${commentId}) without authorization.`,
+                `You are not authorized to update that PostComment.`)
         }
 
         const validationErrors = await this.validationService.validatePostComment(currentUser, comment)
@@ -380,30 +387,31 @@ module.exports = class PostCommentController {
                 `You must be authenticated to delete a comment.`)
         }
 
-        const post = await this.postDAO.getPostById(postId)
         const comment = await this.postCommentDAO.getPostCommentById(commentId)
-
-        if ( post === null || comment === null) {
+        if (comment === null) {
             throw new ControllerError(404, 'not-found',
-                `Comment(${commentId}) on Post(${postId}) was not found by User(${currentUser.id}) attempting to delete.`,
+                `Comment(${commentId}) or Post(${postId}) was not found by User(${currentUser.id}) attempting to delete.`,
                 `That comment either doesn't exist or you don't have permission to see it.`)
         }
-       
-        let canModerate = false
-        if ( post.groupId !== null ) {
-            canModerate = await this.permissionService.can(currentUser, 'moderate', 'Group', { groupId: post.groupId })
-        }
 
-        if ( comment.userId != currentUser.id && canModerate !== true) {
-            throw new ControllerError(403, 'not-authorized',
-                `User(${currentUser.id}) attempted to delete Comment(${commentId}) without permission.`,
-                `You may only delete your own comments.`)
+        const canViewPost = await this.permissionService.can(currentUser, 'view', 'Post', { postId: comment.postId})
+        if ( canViewPost !== true ) {
+            throw new ControllerError(404, 'not-found',
+                `User(${currentUser.id}) attempted to post a comment on Post(${postId}) they don't have permission to view.`,
+                `Either that post doesn't exist or you don't have permission to view it.`)
         }
 
         if ( comment.postId !== post.id) {
             throw new ControllerError(400, 'invalid',
                 `User(${currentUser.id}) attempted to delete Comment(${commentId}) with wrong post.`,
                 `You provided the wrong postId in the route, please provide the correct one.`)
+        }
+
+        const canDeletePostComment = await this.permissionService.can(currentUser, 'delete', 'PostComment', { postComment: comment })
+        if ( canDeletePostComment !== true ) {
+            throw new ControllerError(403, 'not-authorized',
+                `User attempting to delete PostComment(${commentId}) without authorization.`,
+                `You are not authorized to delete that PostComment.`)
         }
 
         await this.postCommentDAO.deletePostComment({ id: commentId })
