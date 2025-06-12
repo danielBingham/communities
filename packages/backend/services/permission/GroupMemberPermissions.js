@@ -163,13 +163,19 @@ module.exports = class GroupMemberPermissions {
         await this.ensureContext(user, context, [ 'groupMember' ])
 
         const canModerateGroup = await this.permissionService.can(user, 'moderate', 'Group', context)
+        const canAdminGroup = await this.permissionService.can(user, 'admin', 'Group', context)
 
-        // Moderators can remove users from a group.
-        if ( canModerateGroup ) {
+        // Moderators can delete members.
+        if ( context.groupMember.role === 'member' && canModerateGroup ) {
+            return true
+        } 
+
+        // Admins can delete moderators.
+        if ( context.groupMember.role === 'moderator' && canAdminGroup) {
             return true
         }
 
-        // Users can delete their own GroupMember
+        // Members can delete their own GroupMember
         if ( user.id === context.groupMember.userId ) {
             return true
         }

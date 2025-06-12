@@ -89,6 +89,58 @@ describe("GroupMemberPermissions.canDeleteGroupMember()", function() {
             expect(userMember.role).toBe('moderator')
         })
 
+        it("Should not allow moderators to delete moderators", async function() {
+            const permissionService = new PermissionService(core)
+            const groupMemberPermissions = new GroupMemberPermissions(core, permissionService)
+
+            const currentUser = entities.users.dictionary['2a7ae011-689c-4aa2-8f13-a53026d40964']
+
+            const group = entities.groups.dictionary['aeb26ec5-3644-4b7a-805e-375551ec65b6']
+            const userMember = entities.groupMembers.dictionary['bb88818d-6426-4e5a-b79a-688a700fef11']
+
+            const groupMember = {
+                userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
+                groupId: 'aeb26ec5-3644-4b7a-805e-375551ec65b6',
+                status: 'member',
+                role: 'moderator'
+            }
+
+            const canDeleteGroupMember = await groupMemberPermissions.canDeleteGroupMember(currentUser, 
+                { group: group, groupMember: groupMember, userMember: userMember })
+
+            expect(canDeleteGroupMember).toBe(false)
+            expect(groupMember.groupId).toBe(group.id)
+            expect(userMember.userId).toBe(currentUser.id)
+            expect(groupMember.userId).not.toBe(currentUser.id)
+            expect(userMember.role).toBe('moderator')
+        })
+
+        it("Should allow admins to delete moderators", async function() {
+            const permissionService = new PermissionService(core)
+            const groupMemberPermissions = new GroupMemberPermissions(core, permissionService)
+
+            const currentUser = entities.users.dictionary['2a7ae011-689c-4aa2-8f13-a53026d40964']
+
+            const group = entities.groups.dictionary['aeb26ec5-3644-4b7a-805e-375551ec65b6']
+            const userMember = entities.groupMembers.dictionary['fef5f5a1-b500-4694-a5ca-c7ebea359295']
+
+            const groupMember = {
+                userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
+                groupId: 'aeb26ec5-3644-4b7a-805e-375551ec65b6',
+                status: 'member',
+                role: 'moderator'
+            }
+
+            const canDeleteGroupMember = await groupMemberPermissions.canDeleteGroupMember(currentUser, 
+                { group: group, groupMember: groupMember, userMember: userMember })
+
+            expect(canDeleteGroupMember).toBe(true)
+            expect(groupMember.groupId).toBe(group.id)
+            expect(userMember.userId).toBe(currentUser.id)
+            expect(groupMember.userId).not.toBe(currentUser.id)
+            expect(userMember.role).toBe('admin')
+        })
+
         it("Should not allow non-moderators to delete members for other users", async function() {
             const permissionService = new PermissionService(core)
             const groupMemberPermissions = new GroupMemberPermissions(core, permissionService)
