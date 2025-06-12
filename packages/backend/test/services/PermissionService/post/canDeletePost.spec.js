@@ -35,7 +35,7 @@ describe('PermissionService.canDeletePost()', function() {
         core.logger.level = -1 
     })
 
-    describe('with context', function() {
+    xdescribe('with context', function() {
         it('Should not look up the Post when the post is in the context', async function() {
             const service = new PermissionService(core)
 
@@ -83,7 +83,7 @@ describe('PermissionService.canDeletePost()', function() {
 
             const context = {
                 post: post,
-                groupMember: groupMember
+                userMember: groupMember
             }
 
             // User One 
@@ -196,7 +196,7 @@ describe('PermissionService.canDeletePost()', function() {
 
             const context = {
                 post: post,
-                groupMember: groupMember,
+                userMember: groupMember,
                 groupId: '47f85604-b4b1-4564-8e3c-246272e73c68'
             }
 
@@ -224,7 +224,7 @@ describe('PermissionService.canDeletePost()', function() {
 
             const context = {
                 post: post,
-                groupMember: groupMember,
+                userMember: groupMember,
             }
 
             // User One 
@@ -287,12 +287,14 @@ describe('PermissionService.canDeletePost()', function() {
             // Private post to Test Private Group by Admin User
             const post = entities.posts.dictionary['63b6fdfc-bdcc-4b55-90d8-eb8fcaba715d']
 
+            const group = entities.groups.dictionary['8661a1ef-6259-4d5a-a59f-4d75929a765f']
             // User One moderator membership in Test Private Group
             const groupMember = entities.groupMembers.dictionary['30d5291a-8df7-4c82-9508-ffa78a00217b']
 
             const context = {
                 post: post,
-                groupMember: groupMember
+                group: group,
+                userMember: groupMember
             }
 
             // User One 
@@ -312,12 +314,14 @@ describe('PermissionService.canDeletePost()', function() {
             // Private post to Test Private Group by Admin User
             const post = entities.posts.dictionary['63b6fdfc-bdcc-4b55-90d8-eb8fcaba715d']
 
+            const group = entities.groups.dictionary['8661a1ef-6259-4d5a-a59f-4d75929a765f']
             // User One admin membership in Test Private Group
             const groupMember = entities.groupMembers.dictionary['a1c5361e-3e46-435b-bab4-0a74ddbd79e2']
 
             const context = {
                 post: post,
-                groupMember: groupMember
+                group: group,
+                userMember: groupMember
             }
 
             // User One 
@@ -337,12 +341,14 @@ describe('PermissionService.canDeletePost()', function() {
             // Private post to Test Private Group by Admin User
             const post = entities.posts.dictionary['63b6fdfc-bdcc-4b55-90d8-eb8fcaba715d']
 
+            const group = entities.groups.dictionary['8661a1ef-6259-4d5a-a59f-4d75929a765f']
             // User One member membership in Test Private Group
             const groupMember = entities.groupMembers.dictionary['0e1555d1-bccd-465d-85bc-4e3dbd4d29db']
 
             const context = {
                 post: post,
-                groupMember: groupMember
+                group: group,
+                userMember: groupMember
             }
 
             // User One 

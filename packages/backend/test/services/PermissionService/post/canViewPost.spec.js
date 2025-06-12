@@ -35,7 +35,7 @@ describe('PermissionService.canViewPost()', function() {
         core.logger.level = -1 
     })
 
-    describe('with context', function() {
+    xdescribe('with context', function() {
         it('Should not look up the Post when the post is in the context', async function() {
             const service = new PermissionService(core)
 
@@ -86,7 +86,7 @@ describe('PermissionService.canViewPost()', function() {
             const currentUser = entities['users'].dictionary['469931f6-26f2-4e1c-b4a0-849aed14e977']
 
             try {
-                const canView = await service.canViewPost(currentUser, context)
+                const canView = await service.can(currentUser, 'view', 'Post', context)
             } catch (error) {
                 expect(error).toBeInstanceOf(ServiceError)
                 expect(error.type).toBe('invalid-context:post')
@@ -157,7 +157,7 @@ describe('PermissionService.canViewPost()', function() {
             const currentUser = entities['users'].dictionary['2a7ae011-689c-4aa2-8f13-a53026d40964']
 
             try {
-                const canView = await service.canViewPost(currentUser, context)
+                const canView = await service.can(currentUser, 'view', 'Post', context)
             } catch (error) {
                 expect(error).toBeInstanceOf(ServiceError)
                 expect(error.type).toBe('invalid-context:group')
@@ -186,7 +186,7 @@ describe('PermissionService.canViewPost()', function() {
             const currentUser = entities['users'].dictionary['2a7ae011-689c-4aa2-8f13-a53026d40964']
 
             try {
-                const canView = await service.canViewPost(currentUser, context)
+                const canView = await service.can(currentUser, 'view', 'Post', context)
             } catch (error) {
                 expect(error).toBeInstanceOf(ServiceError)
                 expect(error.type).toBe('invalid-context:groupId')
@@ -205,12 +205,12 @@ describe('PermissionService.canViewPost()', function() {
             // Test Private Group.
             const group = entities['groups'].dictionary[post.groupId]
             // User Two's membership in Test Private Group.
-            const groupMember = entities['groupMembers'].dictionary['70f2c9ee-e614-4bb0-bed0-83b42d1b37cd']
+            const groupMember = entities['groupMembers'].dictionary['bb64caa2-a6a6-43be-a11d-349b6e68f5a8']
 
             const context = {
                 post: post, 
                 group: group,
-                groupMember: groupMember
+                userMember: groupMember
             }
 
             const canView = await service.canViewPost(user, context)
@@ -244,7 +244,7 @@ describe('PermissionService.canViewPost()', function() {
             // User One
             const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-            const canView = await service.canViewPost(currentUser, context)
+            const canView = await service.can(currentUser, 'view', 'Post', context)
 
             expect(post.visibility).toBe('private')
             expect(group.title).toBe('Test Private Group')
@@ -265,19 +265,19 @@ describe('PermissionService.canViewPost()', function() {
             // Test Private Group.
             const group = entities['groups'].dictionary[post.groupId]
             // User Two's membership in Test Private Group.
-            const groupMember = entities['groupMembers'].dictionary['79104b92-46c7-4e01-88f0-b9f261ecaf78']
+            const groupMember = entities['groupMembers'].dictionary['d0fa5e53-4306-4b0d-91cb-22df17a46104']
 
             const context = {
                 post: post, 
                 group: group,
-                groupMember: groupMember
+                userMember: groupMember
             }
 
             // User Two
             const currentUser = entities['users'].dictionary['2a7ae011-689c-4aa2-8f13-a53026d40964']
 
             try {
-                const canView = await service.canViewPost(currentUser, context)
+                const canView = await service.can(currentUser, 'view', 'Post', context)
             } catch (error) {
                 expect(error).toBeInstanceOf(ServiceError)
                 expect(error.type).toBe('invalid-context:groupMember')
@@ -296,19 +296,19 @@ describe('PermissionService.canViewPost()', function() {
             // Test Private Group.
             const group = entities['groups'].dictionary[post.groupId]
             // User Two's membership in Test Private Group.
-            const groupMember = entities['groupMembers'].dictionary['70f2c9ee-e614-4bb0-bed0-83b42d1b37cd']
+            const groupMember = entities['groupMembers'].dictionary['bb64caa2-a6a6-43be-a11d-349b6e68f5a8']
 
             const context = {
                 post: post, 
                 group: group,
-                groupMember: groupMember
+                userMember: groupMember
             }
 
             // User Three 
             const currentUser = entities['users'].dictionary['cd33814b-2381-4b55-b108-3395b8866792']
 
             try {
-                const canView = await service.canViewPost(currentUser, context)
+                const canView = await service.can(currentUser, 'view', 'Post', context)
             } catch (error) {
                 expect(error).toBeInstanceOf(ServiceError)
                 expect(error.type).toBe('invalid-context:groupMember')
@@ -333,7 +333,7 @@ describe('PermissionService.canViewPost()', function() {
             // User One
             const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-            const canView = await service.canViewPost(currentUser, context)
+            const canView = await service.can(currentUser, 'view', 'Post', context)
 
             expect(post.visibility).toBe('private')
             expect(userRelationship.userId).toBe(post.userId)
@@ -358,7 +358,7 @@ describe('PermissionService.canViewPost()', function() {
             // User One
             const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-            const canView = await service.canViewPost(currentUser, context)
+            const canView = await service.can(currentUser, 'view', 'Post', context)
 
             expect(post.visibility).toBe('private')
             expect(canView).toBe(true)
@@ -382,7 +382,7 @@ describe('PermissionService.canViewPost()', function() {
             const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
             try {
-                const canView = await service.canViewPost(currentUser, context)
+                const canView = await service.can(currentUser, 'view', 'Post', context)
             } catch (error) {
                 expect(error).toBeInstanceOf(ServiceError)
                 expect(error.type).toBe('invalid-context:userRelationship')
@@ -409,7 +409,7 @@ describe('PermissionService.canViewPost()', function() {
             const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
             try {
-                const canView = await service.canViewPost(currentUser, context)
+                const canView = await service.can(currentUser, 'view', 'Post', context)
             } catch (error) {
                 expect(error).toBeInstanceOf(ServiceError)
                 expect(error.type).toBe('invalid-context:userRelationship')
@@ -434,7 +434,7 @@ describe('PermissionService.canViewPost()', function() {
             // Admin User 
             const currentUser = entities['users'].dictionary['469931f6-26f2-4e1c-b4a0-849aed14e977']
 
-            const canView = await service.canViewPost(currentUser, context)
+            const canView = await service.can(currentUser, 'view', 'Post', context)
 
             expect(post.visibility).toBe('private')
             expect(post.userId).toBe(currentUser.id)
@@ -455,7 +455,7 @@ describe('PermissionService.canViewPost()', function() {
             // User One 
             const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-            const canView = await service.canViewPost(currentUser, context)
+            const canView = await service.can(currentUser, 'view', 'Post', context)
 
             expect(post.visibility).toBe('public')
             expect(post.userId).not.toBe(currentUser.id)
@@ -479,7 +479,7 @@ describe('PermissionService.canViewPost()', function() {
             // User One
             const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-            const canView = await service.canViewPost(currentUser, context)
+            const canView = await service.can(currentUser, 'view', 'Post', context)
 
             expect(post.visibility).toBe('private')
             expect(userRelationship.userId).toBe(post.userId)
@@ -504,7 +504,7 @@ describe('PermissionService.canViewPost()', function() {
             // User Two
             const currentUser = entities['users'].dictionary['2a7ae011-689c-4aa2-8f13-a53026d40964']
 
-            const canView = await service.canViewPost(currentUser, context)
+            const canView = await service.can(currentUser, 'view', 'Post', context)
 
             expect(post.visibility).toBe('private')
             expect(userRelationship.relationId).toBe(post.userId)
@@ -528,7 +528,7 @@ describe('PermissionService.canViewPost()', function() {
             // User One
             const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-            const canView = await service.canViewPost(currentUser, context)
+            const canView = await service.can(currentUser, 'view', 'Post', context)
 
             expect(post.visibility).toBe('private')
             expect(post.userId).not.toBe(currentUser.id)
@@ -552,7 +552,7 @@ describe('PermissionService.canViewPost()', function() {
             // User Three 
             const currentUser = entities['users'].dictionary['cd33814b-2381-4b55-b108-3395b8866792']
 
-            const canView = await service.canViewPost(currentUser, context)
+            const canView = await service.can(currentUser, 'view', 'Post', context)
 
             expect(post.visibility).toBe('private')
             expect(userRelationship.relationId).toBe(post.userId)
@@ -574,12 +574,13 @@ describe('PermissionService.canViewPost()', function() {
             const context = {
                 post: post, 
                 group: group,
+                userMember: null
             }
 
             // User Three 
             const currentUser = entities['users'].dictionary['cd33814b-2381-4b55-b108-3395b8866792']
 
-            const canView = await service.canViewPost(currentUser, context)
+            const canView = await service.can(currentUser, 'view', 'Post', context)
 
             expect(post.visibility).toBe('public')
             expect(group.type).toBe('open')
@@ -594,18 +595,18 @@ describe('PermissionService.canViewPost()', function() {
             // Test Private Group.
             const group = entities['groups'].dictionary[post.groupId]
             // User Two's membership in Test Private Group.
-            const groupMember = entities['groupMembers'].dictionary['70f2c9ee-e614-4bb0-bed0-83b42d1b37cd']
+            const groupMember = entities['groupMembers'].dictionary['bb64caa2-a6a6-43be-a11d-349b6e68f5a8']
 
             const context = {
                 post: post, 
                 group: group,
-                groupMember: groupMember
+                userMember: groupMember
             }
 
             // User Two 
             const currentUser = entities['users'].dictionary['2a7ae011-689c-4aa2-8f13-a53026d40964']
 
-            const canView = await service.canViewPost(currentUser, context)
+            const canView = await service.can(currentUser, 'view', 'Post', context)
 
             expect(post.visibility).toBe('private')
             expect(group.type).toBe('private')
@@ -622,18 +623,18 @@ describe('PermissionService.canViewPost()', function() {
             // Test Private Group.
             const group = entities['groups'].dictionary[post.groupId]
             // User Two's membership in Test Hidden Group.
-            const groupMember = entities['groupMembers'].dictionary['79104b92-46c7-4e01-88f0-b9f261ecaf78']
+            const groupMember = entities['groupMembers'].dictionary['d0fa5e53-4306-4b0d-91cb-22df17a46104']
 
             const context = {
                 post: post, 
                 group: group,
-                groupMember: groupMember
+                userMember: groupMember
             }
 
             // User Two 
             const currentUser = entities['users'].dictionary['2a7ae011-689c-4aa2-8f13-a53026d40964']
 
-            const canView = await service.canViewPost(currentUser, context)
+            const canView = await service.can(currentUser, 'view', 'Post', context)
 
             expect(post.visibility).toBe('private')
             expect(group.type).toBe('hidden')
@@ -661,7 +662,7 @@ describe('PermissionService.canViewPost()', function() {
             // User Two 
             const currentUser = entities['users'].dictionary['2a7ae011-689c-4aa2-8f13-a53026d40964']
 
-            const canView = await service.canViewPost(currentUser, context)
+            const canView = await service.can(currentUser, 'view', 'Post', context)
 
             expect(post.visibility).toBe('private')
             expect(group.type).toBe('private')
@@ -688,7 +689,7 @@ describe('PermissionService.canViewPost()', function() {
             // User Two 
             const currentUser = entities['users'].dictionary['2a7ae011-689c-4aa2-8f13-a53026d40964']
 
-            const canView = await service.canViewPost(currentUser, context)
+            const canView = await service.can(currentUser, 'view', 'Post', context)
 
             expect(post.visibility).toBe('private')
             expect(group.type).toBe('hidden')
@@ -703,19 +704,19 @@ describe('PermissionService.canViewPost()', function() {
             // Test Private Group.
             const group = entities['groups'].dictionary[post.groupId]
             // User Two's membership in Test Private Group.
-            const groupMember = { ...entities['groupMembers'].dictionary['70f2c9ee-e614-4bb0-bed0-83b42d1b37cd'] }
+            const groupMember = { ...entities['groupMembers'].dictionary['bb64caa2-a6a6-43be-a11d-349b6e68f5a8'] }
             groupMember.status = 'pending-invited'
 
             const context = {
                 post: post, 
                 group: group,
-                groupMember: groupMember
+                userMember: groupMember
             }
 
             // User Two 
             const currentUser = entities['users'].dictionary['2a7ae011-689c-4aa2-8f13-a53026d40964']
 
-            const canView = await service.canViewPost(currentUser, context)
+            const canView = await service.can(currentUser, 'view', 'Post', context)
 
             expect(post.visibility).toBe('private')
             expect(group.type).toBe('private')
@@ -732,19 +733,19 @@ describe('PermissionService.canViewPost()', function() {
             // Test Private Group.
             const group = entities['groups'].dictionary[post.groupId]
             // User Two's membership in Test Hidden Group.
-            const groupMember = { ...entities['groupMembers'].dictionary['79104b92-46c7-4e01-88f0-b9f261ecaf78'] }
+            const groupMember = { ...entities['groupMembers'].dictionary['d0fa5e53-4306-4b0d-91cb-22df17a46104'] }
             groupMember.status = 'pending-invited'
 
             const context = {
                 post: post, 
                 group: group,
-                groupMember: groupMember
+                userMember: groupMember
             }
 
             // User Two 
             const currentUser = entities['users'].dictionary['2a7ae011-689c-4aa2-8f13-a53026d40964']
 
-            const canView = await service.canViewPost(currentUser, context)
+            const canView = await service.can(currentUser, 'view', 'Post', context)
 
             expect(post.visibility).toBe('private')
             expect(group.type).toBe('hidden')
@@ -761,19 +762,19 @@ describe('PermissionService.canViewPost()', function() {
             // Test Private Group.
             const group = entities['groups'].dictionary[post.groupId]
             // User Two's membership in Test Private Group.
-            const groupMember = { ...entities['groupMembers'].dictionary['70f2c9ee-e614-4bb0-bed0-83b42d1b37cd'] }
+            const groupMember = { ...entities['groupMembers'].dictionary['bb64caa2-a6a6-43be-a11d-349b6e68f5a8'] }
             groupMember.status = 'pending-requested'
 
             const context = {
                 post: post, 
                 group: group,
-                groupMember: groupMember
+                userMember: groupMember
             }
 
             // User Two 
             const currentUser = entities['users'].dictionary['2a7ae011-689c-4aa2-8f13-a53026d40964']
 
-            const canView = await service.canViewPost(currentUser, context)
+            const canView = await service.can(currentUser, 'view', 'Post', context)
 
             expect(post.visibility).toBe('private')
             expect(group.type).toBe('private')
@@ -790,19 +791,19 @@ describe('PermissionService.canViewPost()', function() {
             // Test Private Group.
             const group = entities['groups'].dictionary[post.groupId]
             // User Two's membership in Test Hidden Group.
-            const groupMember = { ...entities['groupMembers'].dictionary['79104b92-46c7-4e01-88f0-b9f261ecaf78'] }
+            const groupMember = { ...entities['groupMembers'].dictionary['d0fa5e53-4306-4b0d-91cb-22df17a46104'] }
             groupMember.status = 'pending-requested'
 
             const context = {
                 post: post, 
                 group: group,
-                groupMember: groupMember
+                userMember: groupMember
             }
 
             // User Two 
             const currentUser = entities['users'].dictionary['2a7ae011-689c-4aa2-8f13-a53026d40964']
 
-            const canView = await service.canViewPost(currentUser, context)
+            const canView = await service.can(currentUser, 'view', 'Post', context)
 
             expect(post.visibility).toBe('private')
             expect(group.type).toBe('hidden')

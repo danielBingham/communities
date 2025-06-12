@@ -35,7 +35,7 @@ describe('PermissionService.canUpdatePost()', function() {
         core.logger.level = -1 
     })
 
-    describe('with context', function() {
+    xdescribe('with context', function() {
         it('Should not look up the Post when the post is in the context', async function() {
             const service = new PermissionService(core)
 

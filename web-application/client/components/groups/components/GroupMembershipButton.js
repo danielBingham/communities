@@ -35,7 +35,8 @@ const GroupMembershipButton = function({ groupId, userId }) {
         const groupMember = {
             groupId: groupId,
             userId: userId,
-            status: 'member'
+            status: 'member',
+            role: 'member'
         }
         makeRequest(postGroupMembers(groupMember))
     }
@@ -48,7 +49,9 @@ const GroupMembershipButton = function({ groupId, userId }) {
         const groupMember = {
             groupId: groupId,
             userId: userId,
-            status: 'pending-requesteded'
+            status: 'pending-requested',
+            role: 'member'
+
         }
         makeRequest(postGroupMembers(groupMember))
     }
