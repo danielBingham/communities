@@ -27,6 +27,7 @@ const GroupMemberPermissions = require('./permission/GroupMemberPermissions')
 const GroupPermissions = require('./permission/GroupPermissions')
 const PostCommentPermissions = require('./permission/PostCommentPermissions')
 const PostReactionPermissions = require('./permission/PostReactionPermissions')
+const UserRelationshipPermissions = require('./permission/UserRelationshipPermissions')
 const { contextHas } = require('./permission/permissionUtils')
 
 const ServiceError = require('../errors/ServiceError')
@@ -48,6 +49,7 @@ module.exports = class PermissionService {
         this.group = new GroupPermissions(core, this)
         this.postComment = new PostCommentPermissions(core, this)
         this.postReaction = new PostReactionPermissions(core, this)
+        this.userRelationship = new UserRelationshipPermissions(core, this)
     }
 
 
@@ -182,6 +184,16 @@ module.exports = class PermissionService {
                 return await this.postReaction.canUpdatePostReaction(user, context)
             } else if ( action === 'delete' ) {
                 return await this.postReaction.canDeletePostReaction(user, context)
+            }
+        } else if ( entity === 'UserRelationship' ) {
+            if ( action === 'view' ) {
+                return await this.userRelationship.canViewUserRelationship(user, context)
+            } else if ( action === 'create' ) {
+                return await this.userRelationship.canCreateUserRelationship(user, context)
+            } else if ( action === 'update' ) {
+                return await this.userRelationship.canUpdateUserRelationship(user, context)
+            } else if ( action === 'delete' ) {
+                return await this.userRelationship.canDeleteUserRelationship(user, context)
             }
         } else if ( entity === 'Site' ) {
             if ( action === 'moderate' ) {

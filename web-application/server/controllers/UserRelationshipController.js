@@ -18,7 +18,13 @@
  *
  ******************************************************************************/
 
-const { UserRelationshipDAO, UserDAO, NotificationService } = require('@communities/backend')
+const { 
+    UserRelationshipDAO, 
+    UserDAO, 
+
+    NotificationService,
+    PermissionService
+} = require('@communities/backend')
 
 const ControllerError = require('../errors/ControllerError')
 
@@ -31,6 +37,7 @@ module.exports = class UserRelationshipController {
         this.userDAO = new UserDAO(core)
 
         this.notificationService = new NotificationService(core)
+        this.permissionService = new PermissionService(core)
     }
 
     async getRelations(currentUser, userId, results, requestedRelations) { 
@@ -139,10 +146,12 @@ module.exports = class UserRelationshipController {
         const userId = request.params.userId
         const relationId = request.body.relationId
 
-        if ( currentUser.id !== userId ) {
+        const canCreateUserRelationship = await this.permissionService.can(currentUser, 'create', 'UserRelationship', 
+            { userId: userId, relationId: relationId })
+        if ( canCreateUserRelationship !== true ) {
             throw new ControllerError(403, 'not-authorized',
-                `User(${currentUser.id}) attempting to submit friend request on behalf of User(${userId}). Denied.`,
-                `You may not submit a friend request for another user.`)
+                `User attempting to create a friend request on behalf of User(${userId}) without authorization.`,
+                `You are not authorized to create friend requests for that User.`)
         }
 
         const existingResults = await this.userRelationshipDAO.selectUserRelationships({
@@ -275,10 +284,11 @@ module.exports = class UserRelationshipController {
         const userId = request.params.userId
         const relationId = request.params.relationId
 
-        if ( currentUser.id !== userId && currentUser.id !== relationId) {
-            throw new ControllerError(403, 'not-authorized',
-                `User(${currentUser.id}) attempting to query relationships for User(${userId}) and User(${relationId}). Denied.`,
-                `You may not query relationships you are not part of.`)
+        const canViewUserRelationship = await this.permissionService.can(currentUser, 'view', 'UserRelationship', { userId: userId, relationId: relationId })
+        if ( canViewUserRelationship !== true ) {
+            throw new ControllerError(404, 'not-found',
+                `User attempting to view relationship for User(${userId}) and User(${relationId}) without authorization.`,
+                `Either that UserRelationship doesn't exist or you don't have permission to view it.`)
         }
 
         const results = await this.userRelationshipDAO.selectUserRelationships({
@@ -321,6 +331,13 @@ module.exports = class UserRelationshipController {
 
         const userId = request.params.userId
         const relationId = request.params.relationId
+
+        const canUpdateUserRelationship = await this.permissionService.can(currentUser, 'update', 'UserRelationship', { userId: userId, relationId: relationId })
+        if ( canUpdateUserRelationship !== true ) {
+            throw new ControllerError(403, 'not-authorized',
+                `User attempting to update UserRelationship(${userId}, ${relationId}) without authorization.`,
+                `You are not authorized to update that UserRelationship.`)
+        }
 
         const existing = await this.userRelationshipDAO.getUserRelationshipByUserAndRelation(userId, relationId)
         if ( existing === null) {
@@ -389,10 +406,12 @@ module.exports = class UserRelationshipController {
         const userId = request.params.userId
         const relationId = request.params.relationId
 
-        if ( currentUser.id !== userId && currentUser.id !== relationId ) {
+        const canDeleteUserRelationship = await this.permissionService.can(currentUser, 'delete', 'UserRelationship', 
+            { userId: userId, relationId: relationId})
+        if ( canDeleteUserRelationship !== true ) {
             throw new ControllerError(403, 'not-authorized',
                 `User(${currentUser.id}) attempting to delete relationship for User(${userId}) and User(${relationId}). Denied.`,
-                `You may not delete other user's friends.`)
+                `You are not authorized to delete that UserRelationship.`)
         }
 
         const existingResults = await this.userRelationshipDAO.selectUserRelationships({

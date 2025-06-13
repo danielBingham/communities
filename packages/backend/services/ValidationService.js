@@ -1680,6 +1680,14 @@ module.exports = class ValidationService {
 
         // We're creating a friend request.
         if ( ! existing ) {
+            if ( currentUser.id !== userRelationship.userId ) {
+                errors.push({
+                    type: `userId:invalid`,
+                    log: `User attempting to create a relationship request for themselves.`,
+                    message: `UserRelationship.userId must be the creator of the relationship, the one who initiated the friend request.`
+                })
+            }
+
             if ( userRelationship.status !== 'pending' ) {
                 errors.push({
                     type: `status:invalid`,
