@@ -3,6 +3,7 @@ const Group = require('./entities/Group')
 const GroupMember = require('./entities/GroupMember')
 const PostComment = require('./entities/PostComment')
 const PostReaction = require('./entities/PostReaction')
+const PostSubscription = require('./entities/PostSubscription')
 const UserRelationship = require('./entities/UserRelationship')
 const types = require('./types')
 
@@ -12,6 +13,7 @@ module.exports = {
     GroupMember: GroupMember,
     PostComment: PostComment,
     PostReaction: PostReaction,
+    PostSubscription: PostSubscription,
     UserRelationship: UserRelationship,
     types: types 
 }
