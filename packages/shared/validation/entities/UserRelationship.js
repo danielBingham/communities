@@ -10,8 +10,8 @@ const validateUserId = function(userId) {
     return errors
 }
 
-const validatePostId = function(postId) {
-    const validator = new UUIDValidator('postId', postId)
+const validateRelationId = function(relationId) {
+    const validator = new UUIDValidator('relationId', relationId)
     const errors = validator
         .mustNotBeNull()
         .mustBeUUID()
@@ -19,37 +19,37 @@ const validatePostId = function(postId) {
     return errors
 }
 
-const validateReaction = function(reaction) {
-    const validator = new StringValidator('reaction', reaction)
+const validateStatus = function(status) {
+    const validator = new StringValidator('status', status)
     const errors = validator
         .mustNotBeNull()
         .mustBeString()
-        .mustBeOneOf([ 'like', 'dislike', 'block' ])
+        .mustBeOneOf([ 'pending', 'confirmed' ])
         .getErrors()
     return errors
 }
 
 /**
- * Validate a user-created PostReaction entity.
+ * Validate a user-created UserRelationship entity.
  *
- * @param {PostReaction} postReaction The PostReaction entity to validate.
+ * @param {UserRelationship} userRelationship The UserRelationship entity to validate.
  *
  * @return {ValidationErrors{}} Returns an object with an array of validation
  * errors for each field.
  */
-const validate = function(postReaction) {
+const validate = function(userRelationship) {
     let validators = {
         userId: validateUserId,
-        postId: validatePostId,
-        reaction: validateReaction
+        relationId: validateRelationId,
+        status: validateStatus
     }
 
-    return validateEntity(postReaction, validators)
+    return validateEntity(userRelationship, validators)
 }
 
 module.exports = {
     validateUserId: validateUserId,
-    validatePostId: validatePostId,
-    validateReaction: validateReaction,
+    validateRelationId: validateRelationId,
+    validateStatus: validateStatus,
     validate: validate
 }

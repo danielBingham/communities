@@ -1590,6 +1590,135 @@ module.exports = class ValidationService {
         return errors
     }
 
+    async validateUserRelationship(currentUser, userRelationship, existing) {
+        const errors = []
+
+        if ( existing !== undefined && existing !== null && existing.id !== userRelationship.id ) {
+            throw new ServiceError('entity-mismatch', 
+                `Existing UserRelationship(${existing.id}) does not match UserRelationship(${userRelationship.id}).`)
+        }
+
+        // ================== Always Disallowed ===============================
+        // There are some fields the user is never allowed to set.  Check those 
+        // fields first and return if any of them are set.
+
+        const alwaysDisallowedFields = [ 'createdDate', 'updatedDate' ]
+
+        for(const disallowedField of alwaysDisallowedFields ) {
+            if ( this.has(userRelationship, disallowedField) ) {
+                errors.push({
+                    type: `${disallowedField}:not-allowed`,
+                    log: `${disallowedField} is not allowed.`,
+                    message: `You may not set '${disallowedField}'.`
+                })
+            }
+        }
+
+        if ( errors.length > 0 ) {
+            return errors
+        }
+
+        // ================== Situational Checks ==============================
+        // Initial creation and updating each have different sets of fields they
+        // require or disallow. Check those next and return if any are set.
+
+        // Creating a new relationship.
+        if ( ! existing ) {
+            const requiredFields = [ 'userId', 'relationId', 'status' ]
+            for(const requiredField of requiredFields) {
+                if ( ! this.has(userRelationship, requiredField) || userRelationship[requiredField] === null ) {
+                    errors.push({
+                        type: `${requiredField}:missing`,
+                        log: `${requiredField} is required.`,
+                        message: `${requiredField} is required.`
+                    })
+                }
+            }
+        } 
+
+        // We're editing a relationship.
+        else {
+            const disallowedFields = [ 'userId', 'relationId' ]
+            for(const disallowedField of disallowedFields ) {
+                if ( this.has(userRelationship, disallowedField) 
+                    && userRelationship[disallowedField] !== existing[disallowedField] ) 
+                {
+                    errors.push({
+                        type: `${disallowedField}:not-allowed`,
+                        log: `Updating ${disallowedField} is not allowed.`,
+                        message: `You may not update '${disallowedField}'.`
+                    })
+                }
+            }
+
+            const requiredFields = [ 'status' ]
+            for(const requiredField of requiredFields) {
+                if ( ! this.has(userRelationship, requiredField) || userRelationship[requiredField] === null ) {
+                    errors.push({
+                        type: `${requiredField}:missing`,
+                        log: `${requiredField} is required.`,
+                        message: `${requiredField} is required.`
+                    })
+                }
+            }
+
+        }
+
+        if ( errors.length > 0 ) {
+            return errors
+        }
+
+        // Do basic validation the fields.
+        const validationErrors = validation.UserRelationship.validate(userRelationship)
+        if ( validationErrors.all.length > 0 ) {
+            errors.push(...validationErrors.all)
+        }
+
+        if ( errors.length > 0 ) {
+            return errors
+        }
+
+        // We're creating a friend request.
+        if ( ! existing ) {
+            if ( userRelationship.status !== 'pending' ) {
+                errors.push({
+                    type: `status:invalid`,
+                    log: `User attempting to create a confirmed relationship to User(${userRelationship.relationId}).`,
+                    message: `You may only create a 'pending' relationship, which is a friend request.`
+                })
+            }
+        } 
+        // We're editing a friend request.
+        else if ( existing ) {
+            if ( currentUser.id !== existing.relationId ) {
+                errors.push({
+                    type: `relationId:invalid`,
+                    log: `User attempting to accept friend request on behalf of User(${existing.relationId}).`,
+                    message: `You may not accept a friend request for another user.`
+                })
+            }
+
+            if ( existing.status != 'pending' ) {
+                errors.push({
+                    type: `status:invalid`,
+                    log: `User attempting to confirm a relationship with User(${existing.userId}) that is in status: ${existing.status}.`,
+                    message: `You can only confirm a pending relationship.`
+                })
+            }
+
+            if ( userRelationship.status !== 'confirmed' ) {
+                errors.push({
+                    type: `status:invalid`,
+                    log: `User provided the wrong status when confirming a friend request.`,
+                    message: `You may only provide 'confirmed' as status to PATCH.  If you want to reject the request, use DELETE.`
+                })
+            }
+        }
+
+        return errors
+
+    }
+
     async validateSiteModeration(currentUser, siteModeration, existing) {
         const errors = []
 

@@ -211,7 +211,7 @@ module.exports = class PostReactionController {
             reaction: request.body.reaction
         }
 
-        const validationErrors = await this.validationService.validatePostReaction(currentUser, reaction)
+        const validationErrors = await this.validationService.validatePostReaction(currentUser, reaction, existing)
         if ( validationErrors.length > 0 ) {
             const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
             const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')

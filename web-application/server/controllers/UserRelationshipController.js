@@ -162,6 +162,15 @@ module.exports = class UserRelationshipController {
                 status: 'confirmed'
             }
 
+            const validationErrors = await this.validationService.validateUserRelationship(currentUser, userRelationship, existing)
+            if ( validationErrors.length > 0 ) {
+                const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
+                const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
+                throw new ControllerError(400, 'invalid',
+                    `User submitted an invalid UserRelationship: ${logString}`,
+                    errorString)
+            }
+
             await this.userRelationshipDAO.updateUserRelationship(userRelationship)
 
             const results = await this.userRelationshipDAO.selectUserRelationships({
@@ -207,6 +216,15 @@ module.exports = class UserRelationshipController {
                 userId: userId,
                 relationId: relationId,
                 status: 'pending'
+            }
+
+            const validationErrors = await this.validationService.validateUserRelationship(currentUser, userRelationship)
+            if ( validationErrors.length > 0 ) {
+                const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
+                const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
+                throw new ControllerError(400, 'invalid',
+                    `User submitted an invalid UserRelationship: ${logString}`,
+                    errorString)
             }
 
             await this.userRelationshipDAO.insertUserRelationships(userRelationship)
@@ -304,35 +322,11 @@ module.exports = class UserRelationshipController {
         const userId = request.params.userId
         const relationId = request.params.relationId
 
-        if ( currentUser.id !== relationId ) {
-            throw new ControllerError(403, 'not-authorized',
-                `User(${currentUser.id}) attempting to accept friend request on behalf of User(${relationId}). Denied.`,
-                `You may not accept a friend request for another user.`)
-        }
-
-        if ( request.body.status !== 'confirmed' ) {
-            throw new ControllerError(400, 'invalid',
-                `User(${currentUser.id}) provided wrong status when confirming friend request.`,
-                `You may only provide 'confirmed' as status to PATCH.  If you want to reject the request, use DELETE.`)
-        }
-
-        const existingResults = await this.userRelationshipDAO.selectUserRelationships({
-            where: `(user_id = $1 AND friend_id = $2)`,
-            params: [ userId, relationId]
-        })
-
-        if ( existingResults.list.length <= 0 ) {
+        const existing = await this.userRelationshipDAO.getUserRelationshipByUserAndRelation(userId, relationId)
+        if ( existing === null) {
             throw new ControllerError(404, 'not-found',
                 `No relationship exists between User(${userId}) and User(${relationId}).`,
                 `No relationship exists between those users.  Please create a relationship first using POST.`)
-        }
-
-        const existing = existingResults.dictionary[existingResults.list[0]]
-
-        if ( existing.status != 'pending' ) {
-            throw new ControllerError(400, 'invalid',
-                `User(${relationId}) attempting to confirm a relationship with User(${userId}) that is in status: ${existing.status}.`,
-                `You can only confirm a pending relationship.`)
         }
 
         const userRelationship = {
@@ -340,6 +334,15 @@ module.exports = class UserRelationshipController {
             userId: userId,
             relationId: relationId,
             status: request.body.status 
+        }
+
+        const validationErrors = await this.validationService.validateUserRelationship(currentUser, userRelationship, existing)
+        if ( validationErrors.length > 0 ) {
+            const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
+            const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
+            throw new ControllerError(400, 'invalid',
+                `User submitted an invalid UserRelationship: ${logString}`,
+                errorString)
         }
 
         await this.userRelationshipDAO.updateUserRelationship(userRelationship)
