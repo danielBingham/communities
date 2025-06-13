@@ -102,6 +102,23 @@ describe('ValidationService.validateUserRelationship()', function() {
             expect(errors[0].type).toBe('status:invalid')
         })
 
+        it("Should return an error when currentUser.id is not UserRelationship.userId", async function() {
+            const service = new ValidationService(core)
+
+            const userRelationship = { 
+                userId: `62c7606b-5b1a-461a-99de-104743bd0342`,
+                relationId: `f5e9e853-6803-4a74-98c3-23fb0933062f`,
+                status: 'pending'
+            }
+
+            const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
+
+            const errors = await service.validateUserRelationship(currentUser, userRelationship, null)
+
+            expect(errors.length).toBe(1)
+            expect(errors[0].type).toBe(`userId:invalid`)
+        })
+
         it("Should pass a valid 'pending' relationship", async function() {
             const service = new ValidationService(core)
 
