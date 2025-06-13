@@ -65,7 +65,6 @@ module.exports = class PostReactionController {
         throw new ControllerError(503, 'not-implemented',
             `GET /post/:id/reactions is not implemented yet.`,
             `GET /post/:id/reactions is not implemented yet.`)
-
     }
 
     async postPostReactions(request, response) {
@@ -91,6 +90,13 @@ module.exports = class PostReactionController {
             throw new ControllerError(404, 'not-found',
                 `User attempting to react to Post(${postId}) without authorization to view.`,
                 `That post either doesn't exist or you don't have permission to see it.`)
+        }
+
+        const canCreatePostReaction = await this.permissionService.can(currentUser, 'create', 'PostReaction', { post: post })
+        if ( canCreatePostReaction !== true ) {
+            throw new ControllerError(403, 'not-authorized',
+                `User attempting to react to Post(${postId}) without authorization.`,
+                `You're not authorized to react to that post.`)
         }
 
         const existing = await this.core.database.query(`
@@ -191,6 +197,13 @@ module.exports = class PostReactionController {
                 `You can't patch a reaction that doesn't exist.  Try POST to create a reaction.`)
         }
 
+        const canUpdatePostReaction = await this.permissionService.can(currentUser, 'update', 'PostReaction', { postReaction: existing })
+        if ( canUpdatePostReaction !== true ) {
+            throw new ControllerError(403, 'not-authorized',
+                `User attempting to update a PostReaction without authorization.`,
+                `You are not authorized to update that PostReaction.`)
+        }
+
         const reaction = {
             id: existing.id,
             postId: postId,
@@ -266,15 +279,18 @@ module.exports = class PostReactionController {
                 `That post either doesn't exist or you don't have permission to see it.`)
         }
 
-        const existing = await this.postReactionDAO.selectPostReactions({
-            where: `post_reactions.post_id = $1 AND post_reactions.user_id = $2`,
-            params: [ postId, currentUser.id]
-        })
-
-        if ( existing.list.length <= 0 ) {
+        const existing = await this.postReactionDAO.getPostReactionByPostAndUser(postId, currentUser.id)
+        if ( existing === null) {
             throw new ControllerError(404, 'not-found',
                 `User(${currentUser.id}) attempted to delete reaction to Post(${postId}) but no reaction found.`,
                 `You can't delete a reaction that doesn't exist.`)
+        }
+
+        const canDeletePostReaction = await this.permissionService.can(currentUser, 'delete', 'PostReaction', { postReaction: existing})
+        if ( canDeletePostReaction !== true ) {
+            throw new ControllerError(403, 'not-authorized',
+                `User attempting to delete PostReaction(${existing.id}) on Post(${postId}) without authorization.`,
+                `You are not authorized to delete that PostReaction.`)
         }
 
         const reaction = {
