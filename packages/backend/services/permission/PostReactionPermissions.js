@@ -44,7 +44,11 @@ module.exports = class GroupMemberPermissions {
             && ( ! util.objectHas(context, 'postReaction') || context.postReaction === null))
         {
             if ( context.postReaction !== null ) {
-                if ( util.objectHas(context, 'postReactionId') && context.postReactionId !== null ) {
+                if ( util.objectHas(context, 'postId') && context.postId !== null 
+                    && util.objectHas(context, 'userId') && context.userId !== null)
+                {
+                    context.postReaction = await this.postReactionDAO.getPostReactionByPostAndUser(context.postId, context.userId)
+                } else if ( util.objectHas(context, 'postReactionId') && context.postReactionId !== null ) {
                     context.postReaction = await this.postReactionDAO.getPostReactionById(context.postReactionId)
                 } else {
                     context.postReaction = null
