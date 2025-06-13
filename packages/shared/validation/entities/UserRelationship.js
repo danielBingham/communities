@@ -40,7 +40,7 @@ const validateStatus = function(status) {
 const validate = function(userRelationship) {
     let validators = {
         userId: validateUserId,
-        postId: validatePostId,
+        relationId: validateRelationId,
         status: validateStatus
     }
 
