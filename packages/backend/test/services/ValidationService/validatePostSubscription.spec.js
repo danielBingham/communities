@@ -7,7 +7,7 @@ const ValidationService = require('../../../services/ValidationService')
 const entities = require('../../fixtures/entities')
 const database = require('../../fixtures/database')
 
-describe('ValidationService.validatePostReaction()', function() {
+describe('ValidationService.validatePostSubscription()', function() {
     const core = {
         logger: new Logger(),
         config: {
@@ -37,15 +37,14 @@ describe('ValidationService.validatePostReaction()', function() {
     it('Should return one error for each disallowed field included (createdDate, updatedDate)', async function() {
         const service = new ValidationService(core)
 
-        const postReaction = { 
+        const postSubscription = { 
             postId: '43aa8308-787b-4da7-b81a-984f07f6bc62',
             userId: 'cf2b089e-f315-475d-a07d-ab8859437a0e',
-            reaction: 'like',
             createdDate: 'TIMESTAMP',
             updatedDate: 'TIMESTAMP',
         }
 
-        const errors = await service.validatePostReaction(null, postReaction, null)
+        const errors = await service.validatePostSubscription(null, postSubscription, null)
 
         expect(errors.length).toBe(2)
     })
@@ -53,15 +52,14 @@ describe('ValidationService.validatePostReaction()', function() {
     it('Should treat `null` as set for disallowed fields', async function() {
         const service = new ValidationService(core)
 
-        const postReaction = { 
+        const postSubscription = { 
             postId: '43aa8308-787b-4da7-b81a-984f07f6bc62',
             userId: 'cf2b089e-f315-475d-a07d-ab8859437a0e',
-            reaction: 'like',
             createdDate: null,
             updatedDate: null,
         }
 
-        const errors = await service.validatePostReaction(null, postReaction, null)
+        const errors = await service.validatePostSubscription(null, postSubscription, null)
 
         expect(errors.length).toBe(2)
     })
@@ -70,35 +68,34 @@ describe('ValidationService.validatePostReaction()', function() {
         it('Should return errors if any required fields are missing', async function() { 
             const service = new ValidationService(core)
 
-            const postReaction = { 
-                userId: `c3638724-b30b-4c67-b117-d6c5f5735081`,
-                postId: `62c7606b-5b1a-461a-99de-104743bd0342`
+            const postSubscription = { 
+                userId: `c3638724-b30b-4c67-b117-d6c5f5735081`
             }
 
-            const errors = await service.validatePostReaction(null, postReaction, null)
+            const errors = await service.validatePostSubscription(null, postSubscription, null)
 
             expect(errors.length).toBe(1)
-            expect(errors[0].type).toBe('reaction:required')
+            expect(errors[0].type).toBe('postId:required')
         })
 
-        it('Should return one error for each required field (userId, postId, reaction) missing', async function() {
+        it('Should return one error for each required field (userId, postId ) missing', async function() {
             const service = new ValidationService(core)
 
-            const postReaction = { }
+            const postSubscription = { }
 
-            const errors = await service.validatePostReaction(null, postReaction, null)
+            const errors = await service.validatePostSubscription(null, postSubscription, null)
 
-            expect(errors.length).toBe(3)
+            expect(errors.length).toBe(2)
         })
     })
 
     describe('when editing', function() {
-        it('Should throw an error when postReaction.id does not match existing.id', async function() {
+        it('Should throw an error when postSubscription.id does not match existing.id', async function() {
             const service = new ValidationService(core)
 
             const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
 
-            const postReaction = { 
+            const postSubscription = { 
                 id: 'f5e9e853-6803-4a74-98c3-23fb0933062f',
             }
 
@@ -107,7 +104,7 @@ describe('ValidationService.validatePostReaction()', function() {
             }
 
             try {
-                const errors = await service.validatePostReaction(currentUser, postReaction, existing)
+                const errors = await service.validatePostSubscription(currentUser, postSubscription, existing)
             } catch (error) {
                 expect(error).toBeInstanceOf(ServiceError)
                 expect(error.type).toBe('entity-mismatch')
@@ -119,76 +116,48 @@ describe('ValidationService.validatePostReaction()', function() {
         it('Should return one error for each disallowed field included (postId, userId) that does not match existing', async function() {
             const service = new ValidationService(core)
 
-            const postReaction = { 
+            const postSubscription = { 
                 id: 'd3d5d52e-8c9b-427e-9823-9b9c5af77a6a',
                 userId: `f5e9e853-6803-4a74-98c3-23fb0933062f`,
-                postId: `62c7606b-5b1a-461a-99de-104743bd0342`,
-                reaction: 'like'
+                postId: `62c7606b-5b1a-461a-99de-104743bd0342`
             }
 
-            // Moderator User
             const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
 
             const existing = {
                 id: 'd3d5d52e-8c9b-427e-9823-9b9c5af77a6a',
                 userId: `9cdeea92-817a-487a-bbae-e02d83b1eeee`,
-                postId: `7cad43d6-bd5b-402a-a849-b172bd1c5711`,
-                reaction: 'like'
+                postId: `7cad43d6-bd5b-402a-a849-b172bd1c5711`
             }
 
-            const errors = await service.validatePostReaction(currentUser, postReaction, existing)
+            const errors = await service.validatePostSubscription(currentUser, postSubscription, existing)
+
+            expect(errors.length).toBe(2)
+        })
+    })
+
+    describe('validate PostSubscription fields', function() {
+        it('Should return errors for invalid fields', async function() {
+            const service = new ValidationService(core)
+
+            const postSubscription = { 
+                userId: 'test',
+                postId: 'test'
+            }
+
+            const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
+
+            const errors = await service.validatePostSubscription(currentUser, postSubscription, null)
 
             expect(errors.length).toBe(2)
         })
 
-        it('Should return one error for each required field missing (reaction)', async function() {
+        it('Should pass a valid postSubscription', async function() {
             const service = new ValidationService(core)
 
-            const postReaction = { 
-                id: 'd3d5d52e-8c9b-427e-9823-9b9c5af77a6a',
+            const postSubscription = { 
                 userId: `f5e9e853-6803-4a74-98c3-23fb0933062f`,
-                postId: `62c7606b-5b1a-461a-99de-104743bd0342`,
-            }
-
-            const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
-
-            const existing = {
-                id: 'd3d5d52e-8c9b-427e-9823-9b9c5af77a6a',
-                userId: `f5e9e853-6803-4a74-98c3-23fb0933062f`,
-                postId: `62c7606b-5b1a-461a-99de-104743bd0342`,
-            }
-
-            const errors = await service.validatePostReaction(currentUser, postReaction, existing)
-
-            expect(errors.length).toBe(1)
-            expect(errors[0].type).toBe('reaction:required')
-        })
-    })
-
-    describe('validate PostReaction fields', function() {
-        it('Should return errors for invalid fields', async function() {
-            const service = new ValidationService(core)
-
-            const postReaction = { 
-                userId: 'test',
-                postId: 'test',
-                reaction: 10
-            }
-
-            const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
-
-            const errors = await service.validatePostReaction(currentUser, postReaction, null)
-
-            expect(errors.length).toBe(3)
-        })
-
-        it('Should pass a valid postReaction', async function() {
-            const service = new ValidationService(core)
-
-            const postReaction = { 
-                userId: `f5e9e853-6803-4a74-98c3-23fb0933062f`,
-                postId: `62c7606b-5b1a-461a-99de-104743bd0342`,
-                reaction: 'like'
+                postId: `62c7606b-5b1a-461a-99de-104743bd0342`
             }
 
             core.database.query.mockReturnValue(undefined)
@@ -197,7 +166,7 @@ describe('ValidationService.validatePostReaction()', function() {
 
             const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
 
-            const errors = await service.validatePostReaction(currentUser, postReaction, null)
+            const errors = await service.validatePostSubscription(currentUser, postSubscription, null)
 
             expect(errors.length).toBe(0)
         })

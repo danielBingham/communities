@@ -1,5 +1,5 @@
-const { UUIDValidator, StringValidator, DateValidator } = require('../types')
-const { validateEntity, cleanEntity } = require('../validate')
+const { UUIDValidator, DateValidator } = require('../types')
+const { validateEntity } = require('../validate')
 
 const validateId = function(id, existing) {
     const validator = new UUIDValidator('id', id, existing)
@@ -32,18 +32,6 @@ const validatePostId = function(postId, existing) {
     return errors
 }
 
-const validateReaction = function(reaction, existing) {
-    const validator = new StringValidator('reaction', reaction, existing)
-    const errors = validator
-        .isRequiredToCreate()
-        .isRequiredToUpdate()
-        .mustNotBeNull()
-        .mustBeString()
-        .mustBeOneOf([ 'like', 'dislike', 'block' ])
-        .getErrors()
-    return errors
-}
-
 const validateCreatedDate = function(createdDate, existing) {
     const validator = new DateValidator('createdDate', createdDate, existing)
     const errors = validator
@@ -60,44 +48,41 @@ const validateUpdatedDate = function(updatedDate, existing) {
     return errors
 }
 
-const clean = function(reaction) {
+const clean = function(postSubscription) {
     const cleaners = {
         id: null,
         userId: null,
         postId: null,
-        reaction: null,
         createdDate: null,
         updatedDate: null
     }
-    return cleanEntity(reaction, cleaners)
+    return cleanEntity(postSubscription, cleaners)
 }
 
 /**
- * Validate a user-created PostReaction entity.
+ * Validate a user-created PostSubscription entity.
  *
- * @param {PostReaction} postReaction The PostReaction entity to validate.
+ * @param {PostSubscription} postSubscription The PostSubscription entity to validate.
  *
  * @return {ValidationErrors{}} Returns an object with an array of validation
  * errors for each field.
  */
-const validate = function(postReaction, existing) {
+const validate = function(postSubscription, existing) {
     let validators = {
         id: validateId,
         userId: validateUserId,
         postId: validatePostId,
-        reaction: validateReaction,
         createdDate: validateCreatedDate,
         updatedDate: validateUpdatedDate
     }
 
-    return validateEntity(postReaction, validators, existing)
+    return validateEntity(postSubscription, validators, existing)
 }
 
 module.exports = {
     validateId: validateId,
     validateUserId: validateUserId,
     validatePostId: validatePostId,
-    validateReaction: validateReaction,
     validateCreatedDate: validateCreatedDate,
     validateUpdatedDate: validateUpdatedDate,
     clean: clean,

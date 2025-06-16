@@ -1,42 +1,14 @@
-module.exports = class StringValidator {
 
-    constructor(name, value) {
-        this.name = name
-        this.value = value
+const BaseValidator = require('./BaseValidator')
 
-        this.errors = []
+module.exports = class StringValidator extends BaseValidator {
+
+    constructor(name, value, existing) {
+        super(name, value, existing)
     }
 
     shortCircuit() {
-        return this.value === undefined
-            || this.value === null
-            || typeof this.value !== "string"
-    }
-
-    getErrors() {
-        return this.errors
-    }
-
-    isRequired() {
-        if ( this.value === undefined ) {
-            this.errors.push({
-                type: `${this.name}:required`,
-                log: `${this.name} is required.`,
-                message: `${this.name} is requried.`
-            })
-        }
-        return this
-    }
-
-    mustNotBeNull() {
-        if ( this.value === null ) {
-            this.errors.push({
-                type: `${this.name}:null`,
-                log: `${this.name} may not be null.`,
-                message: `${this.name} may not be null.`
-            })
-        }
-        return this
+        return super.shortCircuit() || typeof this.value !== "string"
     }
 
     mustBeString() {

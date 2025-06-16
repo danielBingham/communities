@@ -1,43 +1,11 @@
 const uuid = require('uuid')
 
-module.exports = class UUIDValidator {
+const BaseValidator = require('./BaseValidator')
 
-    constructor(name, value) {
-        this.name = name
-        this.value = value
+module.exports = class UUIDValidator extends BaseValidator {
 
-        this.errors = []
-    }
-
-    shortCircuit() {
-        return this.value === undefined
-            || this.value === null
-    }
-
-    getErrors() {
-        return this.errors
-    }
-
-    isRequired() {
-        if ( this.value === undefined ) {
-            this.errors.push({
-                type: `${this.name}:required`,
-                log: `${this.name} is required.`,
-                message: `${this.name} is requried.`
-            })
-        }
-        return this
-    }
-
-    mustNotBeNull() {
-        if ( this.value === null ) {
-            this.errors.push({
-                type: `${this.name}:null`,
-                log: `${this.name} may not be null.`,
-                message: `${this.name} may not be null.`
-            })
-        }
-        return this
+    constructor(name, value, existing) {
+        super(name, value, existing)
     }
 
     mustBeUUID() {

@@ -55,7 +55,6 @@ module.exports = class PostSubscriptionController {
     }
 
     async postPostSubscriptions(request, response) {
-
         const currentUser = request.session.user
         if ( ! currentUser ) {
             throw new ControllerError(401, 'not-authenticated',
@@ -64,6 +63,19 @@ module.exports = class PostSubscriptionController {
         }
 
         const postId = request.params.postId
+        const subscription = {
+            postId: postId,
+            userId: currentUser.id
+        }
+
+        const validationErrors = await this.validationService.validatePostReaction(currentUser, subscription)
+        if ( validationErrors.length > 0 ) {
+            const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
+            const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
+            throw new ControllerError(400, 'invalid',
+                `User submitted an invalid PostSubscription: ${logString}`,
+                errorString)
+        }
 
         const existing = await this.postSubscriptionDAO.getPostSubscriptionByPostAndUser(postId, currentUser.id)
         if ( existing !== null ) {
@@ -85,11 +97,6 @@ module.exports = class PostSubscriptionController {
             throw new ControllerError(404, 'not-found',
                 `User attempted to subscribe to a post that they don't have permission to view.`,
                 `That post does not exist or you don't have access to view it.`)
-        }
-
-        const subscription = {
-            postId: postId,
-            userId: currentUser.id
         }
 
         await this.postSubscriptionDAO.insertPostSubscriptions(subscription)
@@ -125,7 +132,6 @@ module.exports = class PostSubscriptionController {
         }
 
         const postId = request.params.postId
-
 
         // We're just checking your own subscription, so we don't need to do
         // much permission checking.
