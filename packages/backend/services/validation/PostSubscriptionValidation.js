@@ -44,7 +44,37 @@ module.exports = class PostSubscriptionValidation {
             errors.push(...validationErrors.all)
         }
 
-        // TODO Check userId and postId for existence
+        if ( errors.length > 0 ) {
+            return errors
+        }
+
+        if ( util.objectHas(postSubscription, 'userId' ) && postSubscription.userId !== null) {
+            const userResults = await this.core.database.query(`
+                SELECT id FROM users WHERE id = $1
+            `, [ postSubscription.userId ])
+
+            if ( userResults.rows.length <= 0 || userResults.rows[0].id !== postSubscription.userId) {
+                errors.push({
+                    type: `userId:not-found`,
+                    log: `User(${postSubscription.userId}) not found.`,
+                    message: `User not found for that userId.`
+                })
+            }
+        }
+
+        if ( util.objectHas(postSubscription, 'postId' ) && postSubscription.postId !== null) {
+            const postResults = await this.core.database.query(`
+                SELECT id FROM posts WHERE id = $1
+            `, [ postSubscription.postId ])
+
+            if ( postResults.rows.length <= 0 || postResults.rows[0].id !== postSubscription.postId) {
+                errors.push({
+                    type: `postId:not-found`,
+                    log: `User(${postSubscription.postId}) not found.`,
+                    message: `User not found for that postId.`
+                })
+            }
+        }
 
         return errors
     }

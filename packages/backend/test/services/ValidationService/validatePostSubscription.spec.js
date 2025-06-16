@@ -160,6 +160,10 @@ describe('ValidationService.validatePostSubscription()', function() {
                 postId: `62c7606b-5b1a-461a-99de-104743bd0342`
             }
 
+            core.database.query.mockReturnValue(undefined)
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'f5e9e853-6803-4a74-98c3-23fb0933062f' }] })
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '62c7606b-5b1a-461a-99de-104743bd0342' }] })
+
             const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
 
             const errors = await service.validatePostSubscription(currentUser, postSubscription, null)
