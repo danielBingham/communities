@@ -38,6 +38,8 @@ describe('ValidationService.validateBlocklist()', function() {
         const service = new ValidationService(core)
 
         const blocklist = { 
+            userId: '277f2a56-d7a4-4f9c-9a40-db3a498f59f1',
+            domain: 'example.com',
             createdDate: 'TIMESTAMP',
             updatedDate: 'TIMESTAMP'
         }
@@ -51,6 +53,8 @@ describe('ValidationService.validateBlocklist()', function() {
         const service = new ValidationService(core)
 
         const blocklist = { 
+            userId: '277f2a56-d7a4-4f9c-9a40-db3a498f59f1',
+            domain: 'example.com',
             createdDate: null,
             updatedDate: null
         }
@@ -71,7 +75,7 @@ describe('ValidationService.validateBlocklist()', function() {
             const errors = await service.validateBlocklist(null, blocklist, null)
 
             expect(errors.length).toBe(1)
-            expect(errors[0].type).toBe('userId:missing')
+            expect(errors[0].type).toBe('userId:required')
         })
 
         it('Should return one error for each required field (userId, domain) missing', async function() {

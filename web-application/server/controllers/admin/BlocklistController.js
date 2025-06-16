@@ -24,6 +24,9 @@ const {
     NotificationService,
     BlocklistDAO, 
 }  = require('@communities/backend')
+
+const { validation } = require('@communities/shared')
+
 const ControllerError = require('../../errors/ControllerError')
 
 module.exports = class BlocklistController {
@@ -96,17 +99,14 @@ module.exports = class BlocklistController {
                 `You must must be authenticated to create a post.`)
         }
 
-        const blocklist = request.body
-        if ( blocklist.domain !== undefined && blocklist.domain !== null && typeof blocklist.domain === 'string' ) {
-            blocklist.domain = blocklist.domain.toLowerCase()
-        }
-
         const canAdminSite = await this.permissionService.can(currentUser, 'admin', 'Site')
         if ( ! canAdminSite ) {
             throw new ControllerError(403, 'not-authorized',
                 `User(${currentUser.id}) attempting to administrate site without permissions.`,
                 `You do not have permission to administrate Communities.`)
         }
+
+        const blocklist = validation.Blocklist.clean(request.body)
 
         const validationErrors = await this.validationService.validateBlocklist(currentUser, blocklist, null)
         if ( validationErrors.length > 0 ) {
@@ -196,7 +196,7 @@ module.exports = class BlocklistController {
         }
 
         const blocklistId = request.params.id
-        const blocklist = request.body
+        const blocklist = validation.Blocklist.clean(request.body)
 
         if ( blocklist.id !== blocklistId ) {
             throw new ControllerError(400, 'invalid', 
@@ -210,7 +210,6 @@ module.exports = class BlocklistController {
                 `User(${currentUser.id}) attempting to PATCH a Blocklist that doesn't exist.`,
                 `Either that Blocklist doesn't exist or you don't have permission to see it.`)
         }
-
 
         const validationErrors = await this.validationService.validateBlocklist(currentUser, blocklist, existing)
         if ( validationErrors.length > 0 ) {
