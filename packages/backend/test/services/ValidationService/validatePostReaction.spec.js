@@ -38,6 +38,9 @@ describe('ValidationService.validatePostReaction()', function() {
         const service = new ValidationService(core)
 
         const postReaction = { 
+            postId: '43aa8308-787b-4da7-b81a-984f07f6bc62',
+            userId: 'cf2b089e-f315-475d-a07d-ab8859437a0e',
+            reaction: 'like',
             createdDate: 'TIMESTAMP',
             updatedDate: 'TIMESTAMP',
         }
@@ -51,6 +54,9 @@ describe('ValidationService.validatePostReaction()', function() {
         const service = new ValidationService(core)
 
         const postReaction = { 
+            postId: '43aa8308-787b-4da7-b81a-984f07f6bc62',
+            userId: 'cf2b089e-f315-475d-a07d-ab8859437a0e',
+            reaction: 'like',
             createdDate: null,
             updatedDate: null,
         }
@@ -72,7 +78,7 @@ describe('ValidationService.validatePostReaction()', function() {
             const errors = await service.validatePostReaction(null, postReaction, null)
 
             expect(errors.length).toBe(1)
-            expect(errors[0].type).toBe('reaction:missing')
+            expect(errors[0].type).toBe('reaction:required')
         })
 
         it('Should return one error for each required field (userId, postId, reaction) missing', async function() {
@@ -155,7 +161,7 @@ describe('ValidationService.validatePostReaction()', function() {
             const errors = await service.validatePostReaction(currentUser, postReaction, existing)
 
             expect(errors.length).toBe(1)
-            expect(errors[0].type).toBe('reaction:missing')
+            expect(errors[0].type).toBe('reaction:required')
         })
     })
 

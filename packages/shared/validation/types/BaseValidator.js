@@ -26,7 +26,6 @@ module.exports = class BaseValidator {
             })
         }
         return this
-
     }
 
     isRequiredToUpdate() {

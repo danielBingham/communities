@@ -1,8 +1,8 @@
-const { UUIDValidator, StringValidator } = require('../types')
-const { validateEntity } = require('../validate')
+const { UUIDValidator, StringValidator, DateValidator } = require('../types')
+const { validateEntity, cleanEntity } = require('../validate')
 
-const validateUserId = function(userId) {
-    const validator = new UUIDValidator('userId', userId)
+const validateId = function(id, existing) {
+    const validator = new UUIDValidator('id', id, existing)
     const errors = validator
         .mustNotBeNull()
         .mustBeUUID()
@@ -10,23 +10,66 @@ const validateUserId = function(userId) {
     return errors
 }
 
-const validatePostId = function(postId) {
-    const validator = new UUIDValidator('postId', postId)
+const validateUserId = function(userId, existing) {
+    const validator = new UUIDValidator('userId', userId, existing)
     const errors = validator
+        .isRequiredToCreate()
+        .mustNotBeUpdated()
         .mustNotBeNull()
         .mustBeUUID()
         .getErrors()
     return errors
 }
 
-const validateReaction = function(reaction) {
-    const validator = new StringValidator('reaction', reaction)
+const validatePostId = function(postId, existing) {
+    const validator = new UUIDValidator('postId', postId, existing)
     const errors = validator
+        .isRequiredToCreate()
+        .mustNotBeUpdated()
+        .mustNotBeNull()
+        .mustBeUUID()
+        .getErrors()
+    return errors
+}
+
+const validateReaction = function(reaction, existing) {
+    const validator = new StringValidator('reaction', reaction, existing)
+    const errors = validator
+        .isRequiredToCreate()
+        .isRequiredToUpdate()
         .mustNotBeNull()
         .mustBeString()
         .mustBeOneOf([ 'like', 'dislike', 'block' ])
         .getErrors()
     return errors
+}
+
+const validateCreatedDate = function(createdDate, existing) {
+    const validator = new DateValidator('createdDate', createdDate, existing)
+    const errors = validator
+        .mustNotBeSet()
+        .getErrors()
+    return errors
+}
+
+const validateUpdatedDate = function(updatedDate, existing) {
+    const validator = new DateValidator('updatedDate', updatedDate, existing)
+    const errors = validator
+        .mustNotBeSet()
+        .getErrors()
+    return errors
+}
+
+const clean = function(reaction) {
+    const cleaners = {
+        id: null,
+        userId: null,
+        postId: null,
+        reaction: null,
+        createdDate: null,
+        updatedDate: null
+    }
+    return cleanEntity(reaction, cleaners)
 }
 
 /**
@@ -37,19 +80,26 @@ const validateReaction = function(reaction) {
  * @return {ValidationErrors{}} Returns an object with an array of validation
  * errors for each field.
  */
-const validate = function(postReaction) {
+const validate = function(postReaction, existing) {
     let validators = {
+        id: validateId,
         userId: validateUserId,
         postId: validatePostId,
-        reaction: validateReaction
+        reaction: validateReaction,
+        createdDate: validateCreatedDate,
+        updatedDate: validateUpdatedDate
     }
 
-    return validateEntity(postReaction, validators)
+    return validateEntity(postReaction, validators, existing)
 }
 
 module.exports = {
+    validateId: validateId,
     validateUserId: validateUserId,
     validatePostId: validatePostId,
     validateReaction: validateReaction,
+    validateCreatedDate: validateCreatedDate,
+    validateUpdatedDate: validateUpdatedDate,
+    clean: clean,
     validate: validate
 }
