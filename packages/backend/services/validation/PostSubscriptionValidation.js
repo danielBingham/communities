@@ -70,7 +70,7 @@ module.exports = class PostSubscriptionValidation {
             if ( postResults.rows.length <= 0 || postResults.rows[0].id !== postSubscription.postId) {
                 errors.push({
                     type: `postId:not-found`,
-                    log: `User(${postSubscription.postId}) not found.`,
+                    log: `Post(${postSubscription.postId}) not found.`,
                     message: `User not found for that postId.`
                 })
             }

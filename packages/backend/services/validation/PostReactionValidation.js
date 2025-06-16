@@ -44,7 +44,37 @@ module.exports = class PostReactionValidation {
             errors.push(...validationErrors.all)
         }
 
-        // TODO Check userId and postId for existence
+        if ( errors.length > 0 ) {
+            return errors
+        }
+
+        if ( util.objectHas(postReaction, 'userId' ) && postReaction.userId !== null) {
+            const userResults = await this.core.database.query(`
+                SELECT id FROM users WHERE id = $1
+            `, [ postReaction.userId ])
+
+            if ( userResults.rows.length <= 0 || userResults.rows[0].id !== postReaction.userId) {
+                errors.push({
+                    type: `userId:not-found`,
+                    log: `User(${postReaction.userId}) not found.`,
+                    message: `User not found for that userId.`
+                })
+            }
+        }
+
+        if ( util.objectHas(postReaction, 'postId' ) && postReaction.postId !== null) {
+            const postResults = await this.core.database.query(`
+                SELECT id FROM posts WHERE id = $1
+            `, [ postReaction.postId ])
+
+            if ( postResults.rows.length <= 0 || postResults.rows[0].id !== postReaction.postId) {
+                errors.push({
+                    type: `postId:not-found`,
+                    log: `Post(${postReaction.postId}) not found.`,
+                    message: `User not found for that postId.`
+                })
+            }
+        }
 
         return errors
     }
