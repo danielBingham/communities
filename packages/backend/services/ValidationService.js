@@ -35,6 +35,7 @@ const GroupValidation = require('./validation/GroupValidation')
 const GroupMemberValidation = require('./validation/GroupMemberValidation')
 const PostCommentValidation = require('./validation/PostCommentValidation')
 const PostReactionValidation = require('./validation/PostReactionValidation')
+const PostSubscriptionValidation = require('./validation/PostSubscriptionValidation')
 
 module.exports = class ValidationService {
     constructor(core) {
@@ -51,6 +52,7 @@ module.exports = class ValidationService {
         this.groupMember = new GroupMemberValidation(core, this)
         this.postComment = new PostCommentValidation(core, this)
         this.postReaction = new PostReactionValidation(core, this)
+        this.postSubscription = new PostSubscriptionValidation(core, this)
     }
 
     has(entity, field) {
@@ -422,7 +424,7 @@ module.exports = class ValidationService {
     }
 
     async validatePostSubscription(currentUser, postSubscription, existing) {
-
+        return await this.postSubscription.validatePostSubscription(currentUser, postSubscription, existing)
     }
 
     async validateUser(user, existing, type) {

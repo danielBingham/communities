@@ -222,6 +222,23 @@ describe('validate', function() {
         expect(errors.updatedDate.length).toBe(1)
     })
 
+    it('Should return errors for an invalid edit', function() {
+        const postSubscription = {
+            userId: 'd209158e-5c58-44e1-ab00-12b45aad065f',
+            postId: 'ead6e86a-2dd8-48d3-82d0-80b770b74c67'
+        }
+
+        const existing = {
+            userId: 'c6cf7503-eef3-4535-8270-853c9d160ede',
+            postId: '6cb083da-ee16-4d4a-be1f-7580f7c9dd5f'
+        }
+
+        const errors = validation.PostSubscription.validate(postSubscription, existing)
+
+        expect(errors.all.length).toBe(2)
+
+    })
+
     it('Should pass a valid postSubscription', function() {
         const postSubscription = {
             userId: 'd209158e-5c58-44e1-ab00-12b45aad065f',
