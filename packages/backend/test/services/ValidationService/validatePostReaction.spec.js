@@ -156,6 +156,7 @@ describe('ValidationService.validatePostReaction()', function() {
                 id: 'd3d5d52e-8c9b-427e-9823-9b9c5af77a6a',
                 userId: `f5e9e853-6803-4a74-98c3-23fb0933062f`,
                 postId: `62c7606b-5b1a-461a-99de-104743bd0342`,
+                reaction: 'like'
             }
 
             const errors = await service.validatePostReaction(currentUser, postReaction, existing)

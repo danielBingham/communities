@@ -17,8 +17,9 @@ const validateEntity = function(entity, validators, existing) {
         all: []
     }
 
-    const action = existing !== undefined ? BaseValidator.ACTIONS.UPDATE : BaseValidator.ACTIONS.CREATE
+    const action = existing !== undefined && existing !== null ? BaseValidator.ACTIONS.UPDATE : BaseValidator.ACTIONS.CREATE
 
+    console.log(action)
     for(const [property, validator] of Object.entries(validators)) {
         errors[property] = validator(entity[property], existing ? existing[property] : undefined, action)
         if ( errors[property].length > 0 ) {
