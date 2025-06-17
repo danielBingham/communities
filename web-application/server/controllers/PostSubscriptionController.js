@@ -27,6 +27,9 @@ const {
 
     PermissionService
 } = require('@communities/backend')
+
+const { cleaning, validation } = require('@communities/shared')
+
 const ControllerError = require('../errors/ControllerError')
 
 module.exports = class PostSubscriptionController {
@@ -62,27 +65,14 @@ module.exports = class PostSubscriptionController {
                 `You must be authenticated to subscribe to a post.`)
         }
 
-        const postId = request.params.postId
-        const subscription = {
-            postId: postId,
-            userId: currentUser.id
-        }
-
-        const validationErrors = await this.validationService.validatePostReaction(currentUser, subscription)
-        if ( validationErrors.length > 0 ) {
+        const postId = cleaning.PostSubscription.cleanPostId(request.params.postId)
+        const postIdValidationErrors = validation.PostSubscription.validatePostId(postId)
+        if ( postIdValidationErrors.length > 0 ) {
             const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
             const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
             throw new ControllerError(400, 'invalid',
-                `User submitted an invalid PostSubscription: ${logString}`,
+                `Invalid postId used used for PostSubscription.postPostSubscriptions: ${logString}`,
                 errorString)
-        }
-
-        const existing = await this.postSubscriptionDAO.getPostSubscriptionByPostAndUser(postId, currentUser.id)
-        if ( existing !== null ) {
-            throw new ControllerError(400, 'exists',
-                `User(${currentUser.id}) attempted to subscribe from a post they are already subscribed to.`,
-                `You are already subscribed to that post.`)
-
         }
 
         const post = await this.postDAO.getPostById(postId)
@@ -93,10 +83,39 @@ module.exports = class PostSubscriptionController {
         }
 
         const canViewPost = await this.permissionService.can(currentUser, 'view', 'Post', { post: post })
-        if ( ! canViewPost ) {
+        if ( canViewPost !== true ) {
             throw new ControllerError(404, 'not-found',
                 `User attempted to subscribe to a post that they don't have permission to view.`,
                 `That post does not exist or you don't have access to view it.`)
+        }
+
+        const canCreatePostSubscription = await this.permissionService.can(currentUser, 'create', 'PostSubscription')
+        if ( canCreatePostSubscription !== true ) {
+            throw new ControllerError(403, 'not-authorized',
+                `User attempted to create a PostSubscription without authorization.`,
+                `You are not authorized to subscribe to that post.`)
+        }
+
+        const existing = await this.postSubscriptionDAO.getPostSubscriptionByPostAndUser(postId, currentUser.id)
+        if ( existing !== null ) {
+            throw new ControllerError(400, 'exists',
+                `User(${currentUser.id}) attempted to subscribe from a post they are already subscribed to.`,
+                `You are already subscribed to that post.`)
+
+        }
+
+        const subscription = {
+            postId: postId,
+            userId: currentUser.id
+        }
+
+        const validationErrors = await this.validationService.validatePostSubscription(currentUser, subscription)
+        if ( validationErrors.length > 0 ) {
+            const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
+            const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
+            throw new ControllerError(400, 'invalid',
+                `User submitted an invalid PostSubscription: ${logString}`,
+                errorString)
         }
 
         await this.postSubscriptionDAO.insertPostSubscriptions(subscription)
@@ -123,7 +142,6 @@ module.exports = class PostSubscriptionController {
     }
 
     async getPostSubscription(request, response) { 
-
         const currentUser = request.session.user
         if ( ! currentUser ) {
             throw new ControllerError(401, 'not-authenticated',
@@ -131,38 +149,45 @@ module.exports = class PostSubscriptionController {
                 `You must be authenticated to subscribe to a post.`)
         }
 
-        const postId = request.params.postId
+        const postId = cleaning.PostSubscription.cleanPostId(request.params.postId)
+        const postIdValidationErrors = validation.PostSubscription.validatePostId(postId)
+        if ( postIdValidationErrors.length > 0 ) {
+            const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
+            const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
+            throw new ControllerError(400, 'invalid',
+                `Invalid postId used used for PostSubscription.getPostSubscriptions: ${logString}`,
+                errorString)
+        }
 
-        // We're just checking your own subscription, so we don't need to do
-        // much permission checking.
+        const canViewPost = await this.permissionService.can(currentUser, 'view', 'Post', { postId: postId })
+        if ( canViewPost !== true ) {
+
+            // If they've lost the ability to view the post, then unsubscribe them.
+            await this.postSubscriptionDAO.deletePostSubscription({ userId: currentUser.id, postId: postId })
+
+            throw new ControllerError(404, 'not-found',
+                `User(${currentUser.id}) attempted to retrieve a subscription that doesn't exist.`,
+                `That post either doesn't exist or you don't have permission to view it.`)
+        }
+
         const entityResults = await this.postSubscriptionDAO.selectPostSubscriptions({
             where: 'post_subscriptions.user_id = $1 AND post_subscriptions.post_id = $2',
             params: [ currentUser.id, postId ]
         })
 
         if ( entityResults.list.length <= 0 ) {
-            if ( ! canViewPost ) {
-                throw new ControllerError(404, 'not-found',
-                    `User(${currentUser.id}) attempted to retrieve a subscription that doesn't exist.`,
-                    `That post either doesn't exist or you don't have permission to view it.`)
-
-            } else {
-                throw new ControllerError(404, 'not-found',
-                    `User(${currentUser.id}) attempted to retrieve a subscription that doesn't exist.`,
-                    `You are not subscribed to that post.`)
-            }
+            throw new ControllerError(404, 'not-found',
+                `User(${currentUser.id}) attempted to retrieve a subscription that doesn't exist.`,
+                `Either that PostSubscription doesn't exist or you don't have permission to view it.`)
         }
 
         const entity = entityResults.dictionary[entityResults.list[0]]
 
-        // If they've lost the ability to view the post, then unsubscribe them.
-        const canViewPost = await this.permissionService.can(currentUser, 'view', 'Post', { post: post })
-        if ( ! canViewPost ) {
-            await this.postSubscriptionDAO.deletePostSubscription(entity)
-
-            throw new ControllerError(404, 'not-found',
-                `User(${currentUser.id}) attempted to retrieve a subscription that doesn't exist.`,
-                `That post either doesn't exist or you don't have permission to view it.`)
+        const canViewPostSubscription = await this.permissionService.can(currentUser, 'view', 'PostSubscription', { postSubscription: entity })
+        if ( canViewPostSubscription !== true ) {
+            throw new ControllerError(404, 'not-found', 
+                `User attempting to view PostSubscription without authorization.`,
+                `Either that PostSubscription doesn't exist or you don't have permission to view it.`)
         }
 
         const relations = await this.getRelations(entityResults)
@@ -180,7 +205,6 @@ module.exports = class PostSubscriptionController {
     }
 
     async deletePostSubscription(request, response) {
-
         const currentUser = request.session.user
         if ( ! currentUser ) {
             throw new ControllerError(401, 'not-authenticated',
@@ -188,7 +212,15 @@ module.exports = class PostSubscriptionController {
                 `You must be authenticated to unsubscribe from a post.`)
         }
 
-        const postId = request.params.postId
+        const postId = cleaning.PostSubscription.cleanPostId(request.params.postId)
+        const postIdValidationErrors = validation.PostSubscription.validatePostId(postId)
+        if ( postIdValidationErrors.length > 0 ) {
+            const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
+            const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
+            throw new ControllerError(400, 'invalid',
+                `Invalid postId used used for PostSubscription.deletePostSubscriptions: ${logString}`,
+                errorString)
+        }
 
         const post = await this.postDAO.getPostById(postId)
         if ( post === null ) { 
@@ -197,24 +229,39 @@ module.exports = class PostSubscriptionController {
                 `That post does not exist or you don't have access to view it.`)
         }
 
+        const canViewPost = await this.permissionService.can(currentUser, 'view', 'Post', { post: post })
+        if ( canViewPost !== true ) {
+
+            // If they've lost the ability to view the post, then unsubscribe them.
+            await this.postSubscriptionDAO.deletePostSubscription({ userId: currentUser.id, postId: postId })
+
+            throw new ControllerError(404, 'not-found',
+                `User(${currentUser.id}) attempted to retrieve a subscription that doesn't exist.`,
+                `That post either doesn't exist or you don't have permission to view it.`)
+        }
+
         const existing = await this.postSubscriptionDAO.getPostSubscriptionByPostAndUser(postId, currentUser.id)
         if ( existing === null ) {
             throw new ControllerError(404, 'not-found',
                 `User(${currentUser.id}) attempted to unsubscribe from a post that doesn't exist.`,
                 `That post does not exist or you don't have access to view it.`)
+        }
 
+        const canViewPostSubscription = await this.permissionService.can(currentUser, 'view', 'PostSubscription', { postSubscription: existing})
+        if ( canViewPostSubscription !== true ) {
+            throw new ControllerError(404, 'not-found', 
+                `User attempting to view PostSubscription without authorization.`,
+                `Either that PostSubscription doesn't exist or you don't have permission to view it.`)
+        }
+
+        const canDeletePostSubscription = await this.permissionService.can(currentUser, 'delete', 'PostSubscription', { postSubscription: existing})
+        if ( canDeletePostSubscription !== true ) {
+            throw new ControllerError(403, 'not-authorized',
+                `User attempting to unsubscribe without authorization.`,
+                `You are not authorized to unsubscribe from that post.`)
         }
 
         await this.postSubscriptionDAO.deletePostSubscription(existing)
-
-        // If they've lost the ability to view the post, then unsubscribe them,
-        // but don't let them know the post exists.
-        const canViewPost = await this.permissionService.can(currentUser, 'view', 'Post', { post: post })
-        if ( ! canViewPost ) {
-            throw new ControllerError(404, 'not-found',
-                `User(${currentUser.id}) attempted to retrieve a subscription that doesn't exist.`,
-                `That post either doesn't exist or you don't have permission to view it.`)
-        }
 
         response.status(201).json({
             entity: existing,
