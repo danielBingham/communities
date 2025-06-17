@@ -1,5 +1,5 @@
-const { UUIDValidator, StringValidator, DateValidator } = require('../types')
-const { validateEntity, cleanEntity } = require('../validate')
+const { UUIDValidator, DateValidator, StringValidator } = require('../types')
+const { validateEntity } = require('../validate')
 
 const validateId = function(id, existing, action) {
     const validator = new UUIDValidator('id', id, existing, action)
@@ -21,25 +21,36 @@ const validateUserId = function(userId, existing, action) {
     return errors
 }
 
-const validatePostId = function(postId, existing, action) {
-    const validator = new UUIDValidator('postId', postId, existing, action)
+const validateCreatorId = function(creatorId, existing, action) {
+    const validator = new UUIDValidator('creatorId', creatorId, existing, action)
     const errors = validator
-        .isRequiredToCreate()
         .mustNotBeUpdated()
-        .mustNotBeNull()
         .mustBeUUID()
         .getErrors()
     return errors
 }
 
-const validateReaction = function(reaction, existing, action) {
-    const validator = new StringValidator('reaction', reaction, existing, action)
+const validateToken = function(token, existing, action) {
+    const validator = new StringValidator('token', token, existing, action)
     const errors = validator
         .isRequiredToCreate()
-        .isRequiredToUpdate()
+        .mustNotBeUpdated()
         .mustNotBeNull()
         .mustBeString()
-        .mustBeOneOf([ 'like', 'dislike', 'block' ])
+        .mustNotBeEmpty()
+        .getErrors()
+    return errors
+}
+
+const validateType = function(type, existing, action) {
+    const validator = new StringValidator('type', type, existing, action)
+    const errors = validator
+        .isRequiredToCreate()
+        .mustNotBeUpdated()
+        .mustNotBeNull()
+        .mustBeString()
+        .mustNotBeEmpty()
+        .mustBeOneOf([ 'email-confirmation', 'reset-password', 'invitation'])
         .getErrors()
     return errors
 }
@@ -60,44 +71,47 @@ const validateUpdatedDate = function(updatedDate, existing, action) {
     return errors
 }
 
-const clean = function(reaction) {
+const clean = function(token) {
     const cleaners = {
         id: null,
         userId: null,
-        postId: null,
-        reaction: null,
+        creatorId: null,
+        token: null,
+        type: null,
         createdDate: null,
         updatedDate: null
     }
-    return cleanEntity(reaction, cleaners)
+    return cleanEntity(token, cleaners)
 }
 
 /**
- * Validate a user-created PostReaction entity.
+ * Validate a user-created Token entity.
  *
- * @param {PostReaction} postReaction The PostReaction entity to validate.
+ * @param {Token} token The Token entity to validate.
  *
  * @return {ValidationErrors{}} Returns an object with an array of validation
  * errors for each field.
  */
-const validate = function(postReaction, existing) {
+const validate = function(token, existing) {
     let validators = {
         id: validateId,
         userId: validateUserId,
-        postId: validatePostId,
-        reaction: validateReaction,
+        creatorId: validateCreatorId,
+        token: validateToken,
+        type: validateType,
         createdDate: validateCreatedDate,
         updatedDate: validateUpdatedDate
     }
 
-    return validateEntity(postReaction, validators, existing)
+    return validateEntity(token, validators, existing)
 }
 
 module.exports = {
     validateId: validateId,
     validateUserId: validateUserId,
-    validatePostId: validatePostId,
-    validateReaction: validateReaction,
+    validateCreatorId: validateCreatorId,
+    validateToken: validateToken,
+    validateType: validateType,
     validateCreatedDate: validateCreatedDate,
     validateUpdatedDate: validateUpdatedDate,
     clean: clean,

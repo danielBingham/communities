@@ -1,11 +1,17 @@
 module.exports = class BaseValidator {
 
-    constructor(name, value, existing) {
+    constructor(name, value, existing, action) {
         this.name = name
         this.value = value
         this.existing = existing
+        this.action = action 
 
         this.errors = []
+    }
+
+    static ACTIONS = {
+        CREATE: 'create',
+        UPDATE: 'update'
     }
 
     shortCircuit() {
@@ -18,7 +24,7 @@ module.exports = class BaseValidator {
     }
 
     isRequiredToCreate() {
-        if ( this.value === undefined && this.existing === undefined ) {
+        if ( this.action === BaseValidator.ACTIONS.CREATE && this.value === undefined) {
             this.errors.push({
                 type: `${this.name}:required`,
                 log: `${this.name} is required.`,
@@ -29,7 +35,7 @@ module.exports = class BaseValidator {
     }
 
     isRequiredToUpdate() {
-        if ( this.value === undefined && this.existing !== undefined ) {
+        if ( this.action === BaseValidator.ACTIONS.UPDATE && this.value === undefined ) {
             this.errors.push({
                 type: `${this.name}:required`,
                 log: `${this.name} is required.`,
@@ -40,7 +46,7 @@ module.exports = class BaseValidator {
     }
 
     mustNotBeUpdated() {
-        if ( this.value !== undefined && this.existing !== undefined && this.value !== this.existing ) {
+        if ( this.action === BaseValidator.ACTIONS.UPDATE && this.value !== undefined  && this.value !== this.existing ) {
             this.errors.push({
                 type: `${this.name}:not-allowed`,
                 log: `${this.name} may not be updated.`,

@@ -18,6 +18,7 @@
  *
  ******************************************************************************/
 const backend = require('@communities/backend')
+const { validation } = require('@communities/shared')
 
 const ControllerError = require('../errors/ControllerError')
 
@@ -64,21 +65,35 @@ module.exports = class TokenController {
          * 4. Token(:token) must have type equal to request.query.type 
          * 
          * **********************************************************/
-
         const currentUser = request.session.user
 
-
         // 1. :token must be included.
-        if ( ! request.params.token) {
+        if ( ! ('token' in request.params) || request.params.token === undefined || request.params.token === null ) {
             throw new ControllerError(400, 'no-token',
                 `Attempt to redeem a token with no token!`,
                 `You must provide a token in order to redeem it.`)
         }
 
         // 2. request.query.type must be included
-        if ( ! request.query.type ) {
+        if ( ! ( 'type' in request.query) || request.query.type === undefined || request.query.type === null ) {
             throw new ControllerError(403, 'not-authorized',
                 `User failed to specify a type when attempting to redeem a token.`,
+                `Your token is invalid.`)
+        }
+        
+        const tokenErrors = validation.Token.validateToken(request.params.token)
+        if ( tokenErrors.length > 0 ) {
+            const logString = tokenErrors.reduce((string, error) => `${string}\n${error.log}`, '')
+            throw new ControllerError(403, 'not-authorized',
+                `Invalid token: ${ logString }`,
+                `Your token is invalid.`)
+        }
+
+        const typeErrors = validation.Token.validateType(request.query.type)
+        if ( typeErrors.length > 0 ) { 
+            const logString = typeErrors.reduce((string, error) => `${string}\n${error.log}`, '')
+            throw new ControllerError(403, 'not-authorized',
+                `Invalid token: ${ logString }`,
                 `Your token is invalid.`)
         }
 
@@ -96,6 +111,12 @@ module.exports = class TokenController {
             } else {
                 throw error
             }
+        }
+
+        if ( token === null ) {
+            throw new ControllerError(403, 'not-authorized',
+                `Invalid token not found.`,
+                `Your token is invalid.`)
         }
 
         if ( currentUser && token.userId !== currentUser.id ) {
@@ -174,6 +195,22 @@ module.exports = class TokenController {
          * 
          * **********************************************************/
         const tokenParams  = request.body
+
+        const typeErrors = validation.Token.validateType(tokenParams.type)
+        if ( typeErrors.length > 0 ) { 
+            const logString = typeErrors.reduce((string, error) => `${string}\n${error.log}`, '')
+            throw new ControllerError(400, 'invalid',
+                `Invalid token request: ${ logString }`,
+                `Your token request is invalid.`)
+        }
+
+        const emailErrors = validation.User.validateEmail(tokenParams.email)
+        if ( emailErrors.length > 0 ) { 
+            const logString = emailErrors.reduce((string, error) => `${string}\n${error.log}`, '')
+            throw new ControllerError(400, 'invalid',
+                `Invalid token request: ${ logString }`,
+                `Your token request is invalid.`)
+        }
 
         // Validation: 2. request.body.type must be 'reset-password'
         if ( tokenParams.type == 'reset-password' ) {

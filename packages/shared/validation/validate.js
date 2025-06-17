@@ -1,4 +1,4 @@
-const { objectHas } = require('../util')
+const BaseValidator = require('./types/BaseValidator')
 
 const cleanEntity = function(entity, cleaners) {
     const cleanedEntity = {}
@@ -17,8 +17,11 @@ const validateEntity = function(entity, validators, existing) {
         all: []
     }
 
+    const action = existing !== undefined && existing !== null ? BaseValidator.ACTIONS.UPDATE : BaseValidator.ACTIONS.CREATE
+
+    console.log(action)
     for(const [property, validator] of Object.entries(validators)) {
-        errors[property] = validator(entity[property], existing ? existing[property] : undefined)
+        errors[property] = validator(entity[property], existing ? existing[property] : undefined, action)
         if ( errors[property].length > 0 ) {
             errors.all.push(...errors[property])
         }
