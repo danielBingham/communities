@@ -19,6 +19,7 @@
  ******************************************************************************/
 
 const { LinkPreviewDAO, LinkPreviewService } = require('@communities/backend')
+const { cleaning, validation } = require('@communities/shared')
 
 module.exports = class LinkPreviewController {
     constructor(core) {
@@ -79,14 +80,28 @@ module.exports = class LinkPreviewController {
                 `You must be authenticated to create link previews.`)
         }
 
-        const url = request.body.url
+        const url = cleaning.LinkPreview.cleanUrl(request.body.url)
 
-        const linkPreview = await this.linkPreviewService.getPreview(url, request.get('User-Agent'))
-        await this.linkPreviewDAO.insertLinkPreviews(linkPreview)
+        const existing = await this.linkPreviewDAO.getLinkPreviewByUrl(url)
+        // TODO Refectch existing LinkPreviews every so often (every hour? day?)
+        if ( existing === null ) {
+            // If we haven't fetched this LinkPreview, then fetch and validate it. 
+            const linkPreview = cleaning.LinkPreview.clean(await this.linkPreviewService.getPreview(url, request.get('User-Agent')))
+
+            const validationErrors = await this.validationService.validateLinkPreview(currentUser, linkPreview)
+            if ( validationErrors.length > 0 ) {
+                const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
+                throw new ControllerError(500, 'server-error',
+                    `LinkPreview failed to validate: ${logString}`,
+                    `We were not able to successfully fetch a preview for that link.`)
+            }
+
+            await this.linkPreviewDAO.insertLinkPreviews(linkPreview)
+        }
 
         const results = await this.linkPreviewDAO.selectLinkPreviews({
             where: `link_previews.url = $1`,
-            params: [ linkPreview.url ]
+            params: [ url ]
         })
 
         if ( results.list.length < 0 ) {
@@ -113,7 +128,7 @@ module.exports = class LinkPreviewController {
                 `You must be authenticated to create link previews.`)
         }
 
-        const id = request.params.id
+        const id = cleaning.LinkPreview.cleanId(request.params.id)
 
         const results = await this.linkPreviewDAO.selectLinkPreviews({
             where: `link_previews.id = $1`,
@@ -135,7 +150,7 @@ module.exports = class LinkPreviewController {
     }
 
     async patchLinkPreview(request, response) {
-        throw new ControllerError(405, 'not-implemented',
+        throw new ControllerError(501, 'not-implemented',
             `PATCH LinkPreview is not yet implemented.`,
             `PATCH LinkPreview is not yet implemented.`)
     }
