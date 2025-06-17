@@ -48,6 +48,7 @@ module.exports = class PostSubscriptionValidation {
             return errors
         }
 
+        // Validate relations.
         if ( util.objectHas(postSubscription, 'userId' ) && postSubscription.userId !== null) {
             const userResults = await this.core.database.query(`
                 SELECT id FROM users WHERE id = $1
@@ -72,6 +73,23 @@ module.exports = class PostSubscriptionValidation {
                     type: `postId:not-found`,
                     log: `Post(${postSubscription.postId}) not found.`,
                     message: `Post not found for that postId.`
+                })
+            }
+        }
+
+        if ( errors.length > 0 ) {
+            return errors
+        }
+
+        // Authorization validation.
+        if ( util.objectHas(postSubscription, 'userId') && postSubscription.userId !== null ) {
+
+            // Users may only subscribe themselves.
+            if ( postSubscription.userId !== currentUser.id ) {
+                errors.push({
+                    type: `userId:not-authorized`,
+                    log: `User attempting to create PostSubscription for User(${postSubscription.userId}).`,
+                    message: `You are not allowed to create a PostSubscription for another user.`
                 })
             }
         }

@@ -19,14 +19,14 @@
  ******************************************************************************/
 
 const PostDAO = require('../../daos/PostDAO')
-const PostReactionDAO = require('../../daos/PostReactionDAO')
+const PostSubscriptionDAO = require('../../daos/PostSubscriptionDAO')
 const UserRelationshipDAO = require('../../daos/UserRelationshipDAO')
 
 const { util } = require('@communities/shared')
 
 const ServiceError = require('../../errors/ServiceError')
 
-module.exports = class PostReactionPermissions {
+module.exports = class PostSubscriptionPermissions {
 
     constructor(core, permissionService) {
         this.core 
@@ -34,29 +34,29 @@ module.exports = class PostReactionPermissions {
         this.permissionService = permissionService 
 
         this.postDAO = new PostDAO(core)
-        this.postReactionDAO = new PostReactionDAO(core)
+        this.postSubscriptionDAO = new PostSubscriptionDAO(core)
         this.userRelationshipDAO = new UserRelationshipDAO(core)
     }
 
     async ensureContext(user, context, required, optional) {
-        // PostReaction is the root context, so we need to check and retrieve it first.
-        if ( (required?.includes('postReaction') || optional?.includes('postReaction'))
-            && ( ! util.objectHas(context, 'postReaction') || context.postReaction === null))
+        // PostSubscription is the root context, so we need to check and retrieve it first.
+        if ( (required?.includes('postSubscription') || optional?.includes('postSubscription'))
+            && ( ! util.objectHas(context, 'postSubscription') || context.postSubscription === null))
         {
-            if ( context.postReaction !== null ) {
+            if ( context.postSubscription !== null ) {
                 if ( util.objectHas(context, 'postId') && context.postId !== null 
                     && util.objectHas(context, 'userId') && context.userId !== null)
                 {
-                    context.postReaction = await this.postReactionDAO.getPostReactionByPostAndUser(context.postId, context.userId)
-                } else if ( util.objectHas(context, 'postReactionId') && context.postReactionId !== null ) {
-                    context.postReaction = await this.postReactionDAO.getPostReactionById(context.postReactionId)
+                    context.postSubscription = await this.postSubscriptionDAO.getPostSubscriptionByPostAndUser(context.postId, context.userId)
+                } else if ( util.objectHas(context, 'postSubscriptionId') && context.postSubscriptionId !== null ) {
+                    context.postSubscription = await this.postSubscriptionDAO.getPostSubscriptionById(context.postSubscriptionId)
                 } else {
-                    context.postReaction = null
+                    context.postSubscription = null
                 }
             }
 
-            if ( required?.includes('postReaction') && context.postReaction === null ) {
-                throw new ServiceError('missing-context', `'postReaction' missing from context.`)
+            if ( required?.includes('postSubscription') && context.postSubscription === null ) {
+                throw new ServiceError('missing-context', `'postSubscription' missing from context.`)
             }
         }
 
@@ -66,10 +66,10 @@ module.exports = class PostReactionPermissions {
             if ( context.post !== null ) {
                 if ( util.objectHas(context, 'postId') && context.postId !== null) {
                     context.post = await this.postDAO.getPostById(context.postId)
-                } else if ( util.objectHas(context, 'postReaction') && context.postReaction !== null
-                    && util.objectHas(context.postReaction, 'postId') && context.postReaction.postId !== null )
+                } else if ( util.objectHas(context, 'postSubscription') && context.postSubscription !== null
+                    && util.objectHas(context.postSubscription, 'postId') && context.postSubscription.postId !== null )
                 {
-                    context.post = await this.postDAO.getPostById(context.postReaction.postId)
+                    context.post = await this.postDAO.getPostById(context.postSubscription.postId)
                 } else {
                     // We weren't able to retrieve the post.  Set it to null to
                     // trigger the missing context error.
@@ -87,10 +87,10 @@ module.exports = class PostReactionPermissions {
             postId = context.postId
         }
 
-        if ( util.objectHas(context, 'postReaction') && context.postReaction !== null ) {
+        if ( util.objectHas(context, 'postSubscription') && context.postSubscription !== null ) {
             if ( postId === null ) {
-                postId = context.postReaction.postId
-            } else if (postId !== context.postReaction.postId ) {
+                postId = context.postSubscription.postId
+            } else if (postId !== context.postSubscription.postId ) {
                 throw new ServiceError('context-mismatch', `Context includes elements from different Posts.`)
             }
         }
@@ -104,34 +104,39 @@ module.exports = class PostReactionPermissions {
         }
     }
 
-    async canViewPostReaction(user, context) {
-        // We're not going to test post visibility, but if you can see the
-        // post, you can view a reaction (for now).
-        return true
-    }
-
-    async canCreatePostReaction(user, context) {
-        // We're not going to test post visibility, but if you can see the
-        // post, you can create a reaction (for now).
-        return true
-    }
-
-    async canUpdatePostReaction(user, context) {
-        await this.ensureContext(user, context, [ 'postReaction' ])
-
-        // Users may only update their own reactions.
-        if ( context.postReaction.userId === user.id ) {
+    async canViewPostSubscription(user, context) {
+        await this.ensureContext(user, context, [ 'postSubscription' ])
+        
+        // We're not going to test post visibility.
+        if ( context.postSubscription.userId === user.id ) {
             return true
         }
 
         return false
     }
 
-    async canDeletePostReaction(user, context) {
-        await this.ensureContext(user, context, [ 'postReaction' ])
+    async canCreatePostSubscription(user, context) {
+        // We're not going to test post visibility, but if you can see the
+        // post, you can create a subscription (for now).
+        return true
+    }
 
-        // Users may only delete their own reactions.
-        if ( context.postReaction.userId === user.id ) {
+    async canUpdatePostSubscription(user, context) {
+        await this.ensureContext(user, context, [ 'postSubscription' ])
+
+        // Users may only update their own subscriptions.
+        if ( context.postSubscription.userId === user.id ) {
+            return true
+        }
+
+        return false
+    }
+
+    async canDeletePostSubscription(user, context) {
+        await this.ensureContext(user, context, [ 'postSubscription' ])
+
+        // Users may only delete their own subscriptions.
+        if ( context.postSubscription.userId === user.id ) {
             return true
         }
 

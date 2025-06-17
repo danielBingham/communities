@@ -152,6 +152,27 @@ describe('ValidationService.validatePostSubscription()', function() {
             expect(errors.length).toBe(2)
         })
 
+        it('Should return an error when user attempts to create a subscription for another user', async function() {
+            const service = new ValidationService(core)
+
+            const postSubscription = { 
+                userId: `342f9d6d-3fed-46ed-be6b-db25ebd8d4e0`,
+                postId: `62c7606b-5b1a-461a-99de-104743bd0342`
+            }
+
+            core.database.query.mockReturnValue(undefined)
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '342f9d6d-3fed-46ed-be6b-db25ebd8d4e0' }] })
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '62c7606b-5b1a-461a-99de-104743bd0342' }] })
+
+            const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
+
+            const errors = await service.validatePostSubscription(currentUser, postSubscription, null)
+
+            expect(errors.length).toBe(1)
+            expect(errors[0].type).toBe('userId:not-authorized')
+
+        })
+
         it('Should pass a valid postSubscription', async function() {
             const service = new ValidationService(core)
 
