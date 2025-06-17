@@ -343,7 +343,7 @@ The Communities Team`)
             email: true,
             push: true
         }
-        if ( type in settings.notifications ) {
+        if ('notifications' in settings && settings.notifications !== undefined && type in settings.notifications ) {
             notificationSetting = settings.notifications[type]
         }
 

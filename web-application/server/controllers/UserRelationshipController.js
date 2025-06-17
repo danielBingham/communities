@@ -23,7 +23,8 @@ const {
     UserDAO, 
 
     NotificationService,
-    PermissionService
+    PermissionService,
+    ValidationService
 } = require('@communities/backend')
 
 const ControllerError = require('../errors/ControllerError')
@@ -38,6 +39,7 @@ module.exports = class UserRelationshipController {
 
         this.notificationService = new NotificationService(core)
         this.permissionService = new PermissionService(core)
+        this.validationService = new ValidationService(core)
     }
 
     async getRelations(currentUser, userId, results, requestedRelations) { 

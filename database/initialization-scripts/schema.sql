@@ -32,6 +32,23 @@ CREATE TABLE features (
     updated_date timestamptz
 );
 
+/**
+ * Insert those features that have already been migrated in the schema.
+ */
+INSERT INTO features (name, status, created_date, updated_date)
+    VALUES ('1-notification-settings', 'enabled', now(), now()),
+        ('3-notices', 'enabled', now(), now()),
+        ('5-relationships-own-state', 'enabled', now(), now()),
+        ('13-comment-subscriptions-migration', 'enabled', now(), now()),
+        ('fix-post-activity', 'enabled', now(), now()),
+        ('19-private-groups', 'enabled', now(), now()),
+        ('9-image-transcoding', 'enabled', now(), now()),
+        ('17-public-posts', 'enabled', now(), now()),
+        ('18-post-sharing', 'enabled', now(), now()),
+        ('62-admin-moderation-controls', 'enabled', now(), now()),
+        ('87-site-admins-can-ban-users', 'enabled', now(), now());
+
+
 
 /******************************************************************************
  * Users 
@@ -364,8 +381,8 @@ CREATE TABLE site_moderation (
     status site_moderation_status NOT NULL DEFAULT 'flagged',
     reason text,
 
-    post_id uuid REFERENCES posts (id) DEFAULT NULL ON DELETE CASCADE,
-    post_comment_id uuid REFERENCES post_comments (id) DEFAULT NULL ON DELETE CASCADE
+    post_id uuid REFERENCES posts (id) ON DELETE CASCADE DEFAULT NULL ,
+    post_comment_id uuid REFERENCES post_comments (id) ON DELETE CASCADE DEFAULT NULL, 
 
     created_date timestamptz, 
     updated_date timestamptz
@@ -382,8 +399,8 @@ CREATE TABLE site_moderation_events (
     status site_moderation_status NOT NULL,
     reason text,
 
-    post_id uuid REFERENCES posts(id) DEFAULT NULL ON DELETE CASCADE,
-    post_comment_id uuid REFERENCES post_comments(id) DEFAULT NULL ON DELETE CASCADE,
+    post_id uuid REFERENCES posts(id) ON DELETE CASCADE DEFAULT NULL,
+    post_comment_id uuid REFERENCES post_comments(id) ON DELETE CASCADE DEFAULT NULL,
 
     created_date timestamptz
 );

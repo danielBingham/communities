@@ -16,9 +16,8 @@
 @media (1220px < width < 1600px) {
     .page {
         display: grid;
-        grid-template-columns: 400px auto;
+        grid-template-columns: 1fr 800px 1fr;
         width: 100%;
-        max-width: 1200px;
         margin: 0 auto;
     }
 }

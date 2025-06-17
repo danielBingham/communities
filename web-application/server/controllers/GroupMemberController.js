@@ -368,6 +368,11 @@ module.exports = class GroupMemberController {
                 `You can't PATCH a GroupMember that doesn't exist.`)
         }
 
+        console.log(`Member: `)
+        console.log(member)
+        console.log(`Existing: `)
+        console.log(existing)
+
         const currentMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(groupId, currentUser.id) 
 
         const canViewGroup = await this.permissionService.can(currentUser, 'view', 'Group', { group: group, userMember: currentMember})

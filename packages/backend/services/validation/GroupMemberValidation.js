@@ -294,106 +294,111 @@ module.exports = class GroupMemberValidation {
             const canAdminGroup = await this.permissionService.can(currentUser, 'admin', 'Group', { group: group, userMember: userMember })
             
             // ============== Validate Status changes. ========================
-            if ( existing.status === 'pending-invited' ) {
-                if ( groupMember.status !== 'pending-invited') {
-                    if ( groupMember.status !== 'member' ) {
-                        errors.push({
-                            type: `status:invalid`,
-                            log: `Invited users may only change their status to 'member'.`,
-                            message: `Invited users may only change their status to 'member'.`
-                        })
-                    }
+            if ( util.objectHas(groupMember, 'status') ) { 
+                if ( existing.status === 'pending-invited' ) {
+                    if ( groupMember.status !== 'pending-invited') {
+                        if ( groupMember.status !== 'member' ) {
+                            errors.push({
+                                type: `status:invalid`,
+                                log: `Invited users may only change their status to 'member'.`,
+                                message: `Invited users may only change their status to 'member'.`
+                            })
+                        }
 
-                    if ( currentUser.id !== groupMember.userId ) {
-                        errors.push({
-                            type: `status:invalid`,
-                            log: `Only invited users may change their status.`,
-                            message: `You may not change another user's status.`
-                        })
+                        if ( currentUser.id !== groupMember.userId ) {
+                            errors.push({
+                                type: `status:invalid`,
+                                log: `Only invited users may change their status.`,
+                                message: `You may not change another user's status.`
+                            })
+                        }
                     }
-                }
-            } else if ( existing.status === 'pending-requested' ) {
-                if ( groupMember.status !== 'pending-requested') {
-                    if ( groupMember.status !== 'member' ) {
-                        errors.push({
-                            type: `status:invalid`,
-                            log: `May only change status of requesting users to 'member'.`,
-                            message: `You may only change the status of requesting users to 'member'.  Delete the member to remove them.`
-                        })
-                    }
+                } else if ( existing.status === 'pending-requested' ) {
+                    if ( groupMember.status !== 'pending-requested') {
+                        if ( groupMember.status !== 'member' ) {
+                            errors.push({
+                                type: `status:invalid`,
+                                log: `May only change status of requesting users to 'member'.`,
+                                message: `You may only change the status of requesting users to 'member'.  Delete the member to remove them.`
+                            })
+                        }
 
-                    if ( ! canModerateGroup ) {
+                        if ( ! canModerateGroup ) {
+                            errors.push({
+                                type: `status:not-authorized`,
+                                log: `Only moderators may accepted requested access to a Group.`,
+                                message: `Only Group moderators may accept a user's request for access.`
+                            })
+                        }
+                    }
+                } else if ( existing.status === 'member' ) {
+                    if ( groupMember.status !== 'member') {
                         errors.push({
-                            type: `status:not-authorized`,
-                            log: `Only moderators may accepted requested access to a Group.`,
-                            message: `Only Group moderators may accept a user's request for access.`
+                            type: 'status:invalid',
+                            log: `Cannot change the status of a confirmed member.`,
+                            message: `You cannot change the status of a confirmed member.`
                         })
                     }
+                } else {
+                    // If we add a new status and forget to handle it, we want to be yelled at.
+                    throw new ServiceError('invalid-status',
+                        `Invalid unhandled status '${existing.status}' on existing GroupMember.`)
                 }
-            } else if ( existing.status === 'member' ) {
-                if ( groupMember.status !== 'member') {
-                    errors.push({
-                        type: 'status:invalid',
-                        log: `Cannot change the status of a confirmed member.`,
-                        message: `You cannot change the status of a confirmed member.`
-                    })
-                }
-            } else {
-                // If we add a new status and forget to handle it, we want to be yelled at.
-                throw new ServiceError('invalid-status',
-                    `Invalid unhandled status '${existing.status}' on existing GroupMember.`)
             }
 
             // ============== Validate Role changes. ========================== 
-            if ( existing.role === 'member' ) {
-                if ( groupMember.role !== 'member') {
-                    if ( groupMember.role !== 'moderator' && groupMember.role !== 'admin' ) {
-                        errors.push({
-                            type: `role:invalid`,
-                            log: `Member roles may only be changed to 'moderator' or 'admin.`,
-                            message: `You may only change a 'member' to a 'moderator' or an 'admin'.`
-                        })
-                    }
+         
+            if (  util.objectHas(groupMember, 'role') ) {
+                if ( existing.role === 'member' ) {
+                    if ( groupMember.role !== 'member') {
+                        if ( groupMember.role !== 'moderator' && groupMember.role !== 'admin' ) {
+                            errors.push({
+                                type: `role:invalid`,
+                                log: `Member roles may only be changed to 'moderator' or 'admin.`,
+                                message: `You may only change a 'member' to a 'moderator' or an 'admin'.`
+                            })
+                        }
 
-                    if ( ! canAdminGroup ) {
+                        if ( ! canAdminGroup ) {
+                            errors.push({
+                                type: `role:not-authorized`,
+                                log: `User not authorized to update a GroupMember's role.`,
+                                message: `You are not authorized to update a GroupMember's role.`
+                            })
+                        }
+                    }
+                } else if ( existing.role === 'moderator' ) {
+                    if ( groupMember.role !== 'moderator') {
+                        if ( groupMember.role !== 'member' && groupMember.role !== 'admin' ) {
+                            errors.push({
+                                type: `role:invalid`,
+                                log: `Moderators may only be demoted to 'member' or promoted to 'admin'.`,
+                                message: `Moderators may only be demoted to 'member' or promoted to 'admin'.`
+                            })
+                        }
+
+                        if ( ! canAdminGroup ) {
+                            errors.push({
+                                type: `role:not-authorized`,
+                                log: `User not authorized to update a GroupMember's role.`,
+                                message: `You are not authorized to update a GroupMember's role.`
+                            })
+                        }
+                    }
+                } else if ( existing.role === 'admin' ) {
+                    if ( groupMember.role !== 'admin') {
                         errors.push({
                             type: `role:not-authorized`,
-                            log: `User not authorized to update a GroupMember's role.`,
-                            message: `You are not authorized to update a GroupMember's role.`
+                            log: `User not authorized to change an admin's role.`,
+                            message: `You are not authorized to change an admin's role.`
                         })
                     }
+                } else {
+                    // If we add a new role and forget to handle it here, we want to be yelled at.
+                    // We shouldn't be able to get here.
+                    throw new ServiceError('invalid-role',
+                        `Invalid unhandled role '${existing.role}' on existing GroupMember.`)
                 }
-            } else if ( existing.role === 'moderator' ) {
-                if ( groupMember.role !== 'moderator') {
-                    if ( groupMember.role !== 'member' && groupMember.role !== 'admin' ) {
-                        errors.push({
-                            type: `role:invalid`,
-                            log: `Moderators may only be demoted to 'member' or promoted to 'admin'.`,
-                            message: `Moderators may only be demoted to 'member' or promoted to 'admin'.`
-                        })
-                    }
-
-                    if ( ! canAdminGroup ) {
-                        errors.push({
-                            type: `role:not-authorized`,
-                            log: `User not authorized to update a GroupMember's role.`,
-                            message: `You are not authorized to update a GroupMember's role.`
-                        })
-                    }
-                }
-            } else if ( existing.role === 'admin' ) {
-                if ( groupMember.role !== 'admin') {
-                    errors.push({
-                        type: `role:not-authorized`,
-                        log: `User not authorized to change an admin's role.`,
-                        message: `You are not authorized to change an admin's role.`
-                    })
-                }
-            } else {
-                // If we add a new role and forget to handle it here, we want to be yelled at.
-                // We shouldn't be able to get here.
-                throw new ServiceError('invalid-role',
-                    `Invalid unhandled role '${existing.role}' on existing GroupMember.`)
             }
         }
         
