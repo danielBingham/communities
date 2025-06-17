@@ -116,6 +116,19 @@ module.exports = class LinkPreviewDAO extends DAO {
         return { dictionary: dictionary, list: list }
     }
 
+    async getLinkPreviewByUrl(url) {
+        const results = await this.selectLinkPreviews({
+            where: 'link_previews.url = $1', 
+            params: [ url ]
+        })
+
+        if ( results.rows.length <= 0 || results.rows[0].url !== url ) {
+            return null
+        }
+
+        return results.dictionary[results.list[0]]
+    }
+
     async selectLinkPreviews(query) {
         let where = query.where ? `WHERE ${query.where}` : ''
         let params = query.params ? [ ...query.params ] : []

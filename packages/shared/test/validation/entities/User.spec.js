@@ -540,7 +540,6 @@ describe('validate', function() {
         }
 
         const errors = validation.User.validate(user, existing)
-        console.log(errors)
 
         expect(errors.all.length).toBe(1)
     })

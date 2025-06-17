@@ -60,18 +60,6 @@ const validateUpdatedDate = function(updatedDate, existing, action) {
     return errors
 }
 
-const clean = function(reaction) {
-    const cleaners = {
-        id: null,
-        userId: null,
-        postId: null,
-        reaction: null,
-        createdDate: null,
-        updatedDate: null
-    }
-    return cleanEntity(reaction, cleaners)
-}
-
 /**
  * Validate a user-created PostReaction entity.
  *
@@ -100,6 +88,5 @@ module.exports = {
     validateReaction: validateReaction,
     validateCreatedDate: validateCreatedDate,
     validateUpdatedDate: validateUpdatedDate,
-    clean: clean,
     validate: validate
 }

@@ -110,30 +110,6 @@ const validateUpdatedDate = function(updatedDate, existing, action) {
     return errors
 }
 
-const clean = function(token) {
-    const cleaners = {
-        id: null,
-        name: function(name) {
-            return name.trim()
-        },
-        username: function(username) {
-            return username.trim()
-        },
-        email: function(email) {
-            return email.toLowerCase().trim()
-        },
-        password: function(password) {
-            return password.trim()
-        },
-        status: null,
-        siteRole: null,
-        about: null,
-        createdDate: null,
-        updatedDate: null 
-    }
-    return cleanEntity(token, cleaners)
-}
-
 /**
  * Validate a user-created UserRelationship entity.
  *
@@ -170,6 +146,5 @@ module.exports = {
     validateAbout: validateAbout,
     validateCreatedDate: validateCreatedDate,
     validateUpdatedDate: validateUpdatedDate,
-    clean: clean,
     validate: validate
 }
