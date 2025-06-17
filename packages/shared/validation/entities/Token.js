@@ -1,8 +1,8 @@
 const { UUIDValidator, DateValidator, StringValidator } = require('../types')
 const { validateEntity } = require('../validate')
 
-const validateId = function(id, existing) {
-    const validator = new UUIDValidator('id', id, existing)
+const validateId = function(id, existing, action) {
+    const validator = new UUIDValidator('id', id, existing, action)
     const errors = validator
         .mustNotBeNull()
         .mustBeUUID()
@@ -10,19 +10,8 @@ const validateId = function(id, existing) {
     return errors
 }
 
-const validateUserId = function(userId, existing) {
-    const validator = new UUIDValidator('userId', userId, existing)
-    const errors = validator
-        .isRequiredToCreate()
-        .mustNotBeUpdated()
-        .mustNotBeNull()
-        .mustBeUUID()
-        .getErrors()
-    return errors
-}
-
-const validateCreatorId = function(creatorId, existing) {
-    const validator = new UUIDValidator('creatorId', creatorId, existing)
+const validateUserId = function(userId, existing, action) {
+    const validator = new UUIDValidator('userId', userId, existing, action)
     const errors = validator
         .isRequiredToCreate()
         .mustNotBeUpdated()
@@ -32,8 +21,17 @@ const validateCreatorId = function(creatorId, existing) {
     return errors
 }
 
-const validateToken = function(token, existing) {
-    const validator = new StringValidator('token', token, existing)
+const validateCreatorId = function(creatorId, existing, action) {
+    const validator = new UUIDValidator('creatorId', creatorId, existing, action)
+    const errors = validator
+        .mustNotBeUpdated()
+        .mustBeUUID()
+        .getErrors()
+    return errors
+}
+
+const validateToken = function(token, existing, action) {
+    const validator = new StringValidator('token', token, existing, action)
     const errors = validator
         .isRequiredToCreate()
         .mustNotBeUpdated()
@@ -44,8 +42,8 @@ const validateToken = function(token, existing) {
     return errors
 }
 
-const validateType = function(type, existing) {
-    const validator = new StringValidator('type', type, existing)
+const validateType = function(type, existing, action) {
+    const validator = new StringValidator('type', type, existing, action)
     const errors = validator
         .isRequiredToCreate()
         .mustNotBeUpdated()
@@ -57,16 +55,16 @@ const validateType = function(type, existing) {
     return errors
 }
 
-const validateCreatedDate = function(createdDate, existing) {
-    const validator = new DateValidator('createdDate', createdDate, existing)
+const validateCreatedDate = function(createdDate, existing, action) {
+    const validator = new DateValidator('createdDate', createdDate, existing, action)
     const errors = validator
         .mustNotBeSet()
         .getErrors()
     return errors
 }
 
-const validateUpdatedDate = function(updatedDate, existing) {
-    const validator = new DateValidator('updatedDate', updatedDate, existing)
+const validateUpdatedDate = function(updatedDate, existing, action) {
+    const validator = new DateValidator('updatedDate', updatedDate, existing, action)
     const errors = validator
         .mustNotBeSet()
         .getErrors()

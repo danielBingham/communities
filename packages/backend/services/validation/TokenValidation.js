@@ -22,7 +22,7 @@ const { util, validation } = require('@communities/shared')
 
 const ServiceError = require('../../errors/ServiceError')
 
-module.exports = class PostReactionValidation {
+module.exports = class TokenValidation {
 
     constructor(core, validationService) {
         this.core = core
@@ -30,16 +30,16 @@ module.exports = class PostReactionValidation {
     }
 
 
-    async validatePostReaction(currentUser, postReaction, existing) {
+    async validateToken(currentUser, token, existing) {
         const errors = []
 
-        if ( existing !== undefined && existing !== null && existing.id !== postReaction.id ) {
+        if ( existing !== undefined && existing !== null && existing.id !== token.id ) {
             throw new ServiceError('entity-mismatch', 
-                `Existing PostComment(${existing.id}) does not match PostReaction(${postReaction.id}).`)
+                `Existing PostComment(${existing.id}) does not match Token(${token.id}).`)
         }
 
         // Do basic validation the fields.
-        const validationErrors = validation.PostReaction.validate(postReaction, existing)
+        const validationErrors = validation.Token.validate(token, existing)
         if ( validationErrors.all.length > 0 ) {
             errors.push(...validationErrors.all)
         }
@@ -48,30 +48,30 @@ module.exports = class PostReactionValidation {
             return errors
         }
 
-        if ( util.objectHas(postReaction, 'userId' ) && postReaction.userId !== null) {
+        if ( util.objectHas(token, 'userId' ) && token.userId !== null) {
             const userResults = await this.core.database.query(`
                 SELECT id FROM users WHERE id = $1
-            `, [ postReaction.userId ])
+            `, [ token.userId ])
 
-            if ( userResults.rows.length <= 0 || userResults.rows[0].id !== postReaction.userId) {
+            if ( userResults.rows.length <= 0 || userResults.rows[0].id !== token.userId) {
                 errors.push({
                     type: `userId:not-found`,
-                    log: `User(${postReaction.userId}) not found.`,
+                    log: `User(${token.userId}) not found.`,
                     message: `User not found for that userId.`
                 })
             }
         }
 
-        if ( util.objectHas(postReaction, 'postId' ) && postReaction.postId !== null) {
-            const postResults = await this.core.database.query(`
-                SELECT id FROM posts WHERE id = $1
-            `, [ postReaction.postId ])
+        if ( util.objectHas(token, 'creatorId' ) && token.creatorId !== null) {
+            const creatorResults = await this.core.database.query(`
+                SELECT id FROM users WHERE id = $1
+            `, [ token.creatorId ])
 
-            if ( postResults.rows.length <= 0 || postResults.rows[0].id !== postReaction.postId) {
+            if ( creatorResults.rows.length <= 0 || creatorResults.rows[0].id !== token.creatorId) {
                 errors.push({
-                    type: `postId:not-found`,
-                    log: `Post(${postReaction.postId}) not found.`,
-                    message: `Post not found for that postId.`
+                    type: `creatorId:not-found`,
+                    log: `User(${token.creatorId}) not found.`,
+                    message: `User not found for that creatorId.`
                 })
             }
         }

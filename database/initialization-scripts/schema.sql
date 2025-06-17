@@ -58,7 +58,7 @@ CREATE TABLE users (
 
     location geography(POINT),
 
-    invitations int DEFAULT 50,
+    invitations int DEFAULT 50, /* Deprecated */
 
     settings jsonb DEFAULT '{}'::jsonb,
     notices jsonb DEFAULT '{}'::jsonb,

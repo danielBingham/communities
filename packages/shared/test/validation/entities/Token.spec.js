@@ -35,18 +35,18 @@ describe('validateId', function() {
 })
 
 describe('validateCreatorId', function() {
-    it('Should return an error when creatorId is undefined and existing is undefined', function() {
+    it('Should not return an error when creatorId is undefined while creating', function() {
         const creatorId = undefined
-        const errors = validation.Token.validateCreatorId(creatorId)
+        const existing = undefined
+        const errors = validation.Token.validateCreatorId(creatorId, existing, 'create')
 
-        expect(errors.length).toBe(1)
-        expect(errors[0].type).toBe('creatorId:required')
+        expect(errors.length).toBe(0)
     })
 
     it('Should return an error when creatorId is being updated', function() {
         const creatorId = 'd209158e-5c58-44e1-ab00-12b45aad065f'
         const existing = '840b8db4-a91e-44e2-a7a3-6922e7e98290'
-        const errors = validation.Token.validateCreatorId(creatorId, existing)
+        const errors = validation.Token.validateCreatorId(creatorId, existing, 'update')
 
         expect(errors.length).toBe(1)
         expect(errors[0].type).toBe('creatorId:not-allowed')
@@ -55,17 +55,16 @@ describe('validateCreatorId', function() {
     it('Should pass when creatorId is not being updated', function() {
         const creatorId = 'd209158e-5c58-44e1-ab00-12b45aad065f'
         const existing = 'd209158e-5c58-44e1-ab00-12b45aad065f'
-        const errors = validation.Token.validateCreatorId(creatorId, existing)
+        const errors = validation.Token.validateCreatorId(creatorId, existing, 'update')
 
         expect(errors.length).toBe(0)
     })
 
-    it('Should return an error when null', function() {
+    it('Should not return an error when null', function() {
         const value = null
         const errors = validation.Token.validateCreatorId(value)
 
-        expect(errors.length).toBe(1)
-        expect(errors[0].type).toBe('creatorId:null')
+        expect(errors.length).toBe(0)
     })
 
     it('Should return an error when not a string', function() {
@@ -94,9 +93,10 @@ describe('validateCreatorId', function() {
 
 
 describe('validateUserId', function() {
-    it('Should return an error when userId is undefined and existing is undefined', function() {
+    it('Should return an error when userId is undefined while creating', function() {
         const userId = undefined
-        const errors = validation.Token.validateUserId(userId)
+        const existing = undefined
+        const errors = validation.Token.validateUserId(userId, existing, 'create')
 
         expect(errors.length).toBe(1)
         expect(errors[0].type).toBe('userId:required')
@@ -105,7 +105,7 @@ describe('validateUserId', function() {
     it('Should return an error when userId is being updated', function() {
         const userId = 'd209158e-5c58-44e1-ab00-12b45aad065f'
         const existing = '840b8db4-a91e-44e2-a7a3-6922e7e98290'
-        const errors = validation.Token.validateUserId(userId, existing)
+        const errors = validation.Token.validateUserId(userId, existing, 'update')
 
         expect(errors.length).toBe(1)
         expect(errors[0].type).toBe('userId:not-allowed')
@@ -114,7 +114,7 @@ describe('validateUserId', function() {
     it('Should pass when userId is not being updated', function() {
         const userId = 'd209158e-5c58-44e1-ab00-12b45aad065f'
         const existing = 'd209158e-5c58-44e1-ab00-12b45aad065f'
-        const errors = validation.Token.validateUserId(userId, existing)
+        const errors = validation.Token.validateUserId(userId, existing, 'update')
 
         expect(errors.length).toBe(0)
     })
@@ -152,9 +152,10 @@ describe('validateUserId', function() {
 })
 
 describe('validateToken', function() {
-    it('Should return an error when token is undefined and existing is undefined', function() {
+    it('Should return an error when token is undefined while creating', function() {
         const token = undefined
-        const errors = validation.Token.validateToken(token)
+        const existing = undefined
+        const errors = validation.Token.validateToken(token, existing, 'create')
 
         expect(errors.length).toBe(1)
         expect(errors[0].type).toBe('token:required')
@@ -163,7 +164,7 @@ describe('validateToken', function() {
     it('Should return an error when token is being updated', function() {
         const value = '9b6e5b6d3f0301e4ec7528403148d046737a18af2ea9cf5702792d626c850b71'
         const existing = '6ddf7d7579f22bcd8acd045ef29097f26b7f50a564af51d2b16aee18c7d2f8dc'
-        const errors = validation.Token.validateToken(value, existing)
+        const errors = validation.Token.validateToken(value, existing, 'update')
 
         expect(errors.length).toBe(1)
         expect(errors[0].type).toBe('token:not-allowed')
@@ -173,7 +174,7 @@ describe('validateToken', function() {
         const value = '9b6e5b6d3f0301e4ec7528403148d046737a18af2ea9cf5702792d626c850b71'
         const existing = '9b6e5b6d3f0301e4ec7528403148d046737a18af2ea9cf5702792d626c850b71'
 
-        const errors = validation.Token.validateToken(value, existing)
+        const errors = validation.Token.validateToken(value, existing, 'update')
 
         expect(errors.length).toBe(0)
     })
@@ -204,9 +205,10 @@ describe('validateToken', function() {
 })
 
 describe('validateType', function() {
-    it('Should return an error when type is undefined and existing is undefined', function() {
+    it('Should return an error when type is undefined while creating', function() {
         const type = undefined
-        const errors = validation.Token.validateType(type)
+        const existing = undefined
+        const errors = validation.Token.validateType(type, existing, 'create')
 
         expect(errors.length).toBe(1)
         expect(errors[0].type).toBe('type:required')
@@ -215,7 +217,7 @@ describe('validateType', function() {
     it('Should return an error when type is being updated', function() {
         const value = 'email-confirmation'
         const existing = 'invitation'
-        const errors = validation.Token.validateType(value, existing)
+        const errors = validation.Token.validateType(value, existing, 'update')
 
         expect(errors.length).toBe(1)
         expect(errors[0].type).toBe('type:not-allowed')
@@ -225,7 +227,7 @@ describe('validateType', function() {
         const value = 'email-confirmation'
         const existing = 'email-confirmation'
 
-        const errors = validation.Token.validateType(value, existing)
+        const errors = validation.Token.validateType(value, existing, 'update')
 
         expect(errors.length).toBe(0)
     })
@@ -290,7 +292,7 @@ describe('validateCreatedDate', function() {
     it('Should return an error when createdDate is being updated', function() {
         const createdDate = 'July 4th, 2005'
         const existing = 'July 5th, 2005'
-        const errors = validation.Token.validateCreatedDate(createdDate, existing)
+        const errors = validation.Token.validateCreatedDate(createdDate, existing, 'update')
 
         expect(errors.length).toBe(1)
         expect(errors[0].type).toBe('createdDate:not-allowed')
@@ -316,7 +318,7 @@ describe('validateUpdatedDate', function() {
     it('Should return an error when updatedDate is being updated', function() {
         const updatedDate = 'July 4th, 2005'
         const existing = 'July 5th, 2005'
-        const errors = validation.Token.validateUpdatedDate(updatedDate, existing)
+        const errors = validation.Token.validateUpdatedDate(updatedDate, existing, 'update')
 
         expect(errors.length).toBe(1)
         expect(errors[0].type).toBe('updatedDate:not-allowed')
@@ -328,7 +330,7 @@ describe('validate', function() {
         const token = {
             id: null,
             userId: null,
-            creatorId: null,
+            creatorId: 'test',
             token: null,
             type: 'validation',
             createdDate: 'July 4th',

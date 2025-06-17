@@ -3,8 +3,8 @@ const BaseValidator = require('./BaseValidator')
 
 module.exports = class StringValidator extends BaseValidator {
 
-    constructor(name, value, existing) {
-        super(name, value, existing)
+    constructor(name, value, existing, isUpdate) {
+        super(name, value, existing, isUpdate)
     }
 
     shortCircuit() {
@@ -72,7 +72,6 @@ module.exports = class StringValidator extends BaseValidator {
             })
         }
         return this
-
     }
 
     mustMatch(regex, message) {

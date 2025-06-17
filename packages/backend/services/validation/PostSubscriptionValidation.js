@@ -71,7 +71,7 @@ module.exports = class PostSubscriptionValidation {
                 errors.push({
                     type: `postId:not-found`,
                     log: `Post(${postSubscription.postId}) not found.`,
-                    message: `User not found for that postId.`
+                    message: `Post not found for that postId.`
                 })
             }
         }

@@ -35,9 +35,10 @@ describe('validateId', function() {
 })
 
 describe('validatePostId', function() {
-    it('Should return an error when postId is undefined and existing is undefined', function() {
+    it('Should return an error when postId is undefined while creating', function() {
         const postId = undefined
-        const errors = validation.PostSubscription.validatePostId(postId)
+        const existing = undefined 
+        const errors = validation.PostSubscription.validatePostId(postId, existing, 'create')
 
         expect(errors.length).toBe(1)
         expect(errors[0].type).toBe('postId:required')
@@ -46,7 +47,7 @@ describe('validatePostId', function() {
     it('Should return an error when postId is being updated', function() {
         const postId = 'd209158e-5c58-44e1-ab00-12b45aad065f'
         const existing = '840b8db4-a91e-44e2-a7a3-6922e7e98290'
-        const errors = validation.PostSubscription.validatePostId(postId, existing)
+        const errors = validation.PostSubscription.validatePostId(postId, existing, 'update')
 
         expect(errors.length).toBe(1)
         expect(errors[0].type).toBe('postId:not-allowed')
@@ -55,7 +56,7 @@ describe('validatePostId', function() {
     it('Should pass when postId is not being updated', function() {
         const postId = 'd209158e-5c58-44e1-ab00-12b45aad065f'
         const existing = 'd209158e-5c58-44e1-ab00-12b45aad065f'
-        const errors = validation.PostSubscription.validatePostId(postId, existing)
+        const errors = validation.PostSubscription.validatePostId(postId, existing, 'update')
 
         expect(errors.length).toBe(0)
     })
@@ -94,9 +95,10 @@ describe('validatePostId', function() {
 
 
 describe('validateUserId', function() {
-    it('Should return an error when userId is undefined and existing is undefined', function() {
+    it('Should return an error when userId is undefined while creating', function() {
         const userId = undefined
-        const errors = validation.PostSubscription.validateUserId(userId)
+        const existing = undefined
+        const errors = validation.PostSubscription.validateUserId(userId, existing, 'create')
 
         expect(errors.length).toBe(1)
         expect(errors[0].type).toBe('userId:required')
@@ -105,7 +107,7 @@ describe('validateUserId', function() {
     it('Should return an error when userId is being updated', function() {
         const userId = 'd209158e-5c58-44e1-ab00-12b45aad065f'
         const existing = '840b8db4-a91e-44e2-a7a3-6922e7e98290'
-        const errors = validation.PostSubscription.validateUserId(userId, existing)
+        const errors = validation.PostSubscription.validateUserId(userId, existing, 'update')
 
         expect(errors.length).toBe(1)
         expect(errors[0].type).toBe('userId:not-allowed')
@@ -114,7 +116,7 @@ describe('validateUserId', function() {
     it('Should pass when userId is not being updated', function() {
         const userId = 'd209158e-5c58-44e1-ab00-12b45aad065f'
         const existing = 'd209158e-5c58-44e1-ab00-12b45aad065f'
-        const errors = validation.PostSubscription.validateUserId(userId, existing)
+        const errors = validation.PostSubscription.validateUserId(userId, existing, 'update')
 
         expect(errors.length).toBe(0)
     })
@@ -170,7 +172,7 @@ describe('validateCreatedDate', function() {
     it('Should return an error when createdDate is being updated', function() {
         const createdDate = 'July 4th, 2005'
         const existing = 'July 5th, 2005'
-        const errors = validation.PostSubscription.validateCreatedDate(createdDate, existing)
+        const errors = validation.PostSubscription.validateCreatedDate(createdDate, existing, 'update')
 
         expect(errors.length).toBe(1)
         expect(errors[0].type).toBe('createdDate:not-allowed')
@@ -196,7 +198,7 @@ describe('validateUpdatedDate', function() {
     it('Should return an error when updatedDate is being updated', function() {
         const updatedDate = 'July 4th, 2005'
         const existing = 'July 5th, 2005'
-        const errors = validation.PostSubscription.validateUpdatedDate(updatedDate, existing)
+        const errors = validation.PostSubscription.validateUpdatedDate(updatedDate, existing, 'update')
 
         expect(errors.length).toBe(1)
         expect(errors[0].type).toBe('updatedDate:not-allowed')
