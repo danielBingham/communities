@@ -1,12 +1,12 @@
-const BaseValidator = require('./BaseValidator')
+const StringValidator = require('./StringValidator')
 
-module.exports = class UrlValidator extends BaseValidator {
-    constructor(name, value, existing, isUpdate) {
-        super(name, value, existing, isUpdate)
+module.exports = class UrlValidator extends StringValidator {
+    constructor(name, value, existing, action) {
+        super(name, value, existing, action)
     }
 
     mustBeURL() {
-        if ( this.shortCircuit() ) {
+        if ( this.shortCircuit() || this.value === '') {
             return this
         }
 

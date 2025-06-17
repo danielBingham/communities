@@ -13,7 +13,7 @@ const validateId = function(id, existing, action) {
 const validateUrl = function(url, existing, action) {
     const validator = new UrlValidator('url', url, existing, action)
     const errors = validator
-        .isRequriedToCreate()
+        .isRequiredToCreate()
         .mustNotBeUpdated()
         .mustNotBeNull()
         .mustNotBeEmpty()
