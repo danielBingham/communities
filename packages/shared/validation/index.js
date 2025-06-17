@@ -1,6 +1,7 @@
 const Blocklist  = require('./entities/Blocklist')
 const Group = require('./entities/Group')
 const GroupMember = require('./entities/GroupMember')
+const LinkPreview = require('./entities/LinkPreview')
 const PostComment = require('./entities/PostComment')
 const PostReaction = require('./entities/PostReaction')
 const PostSubscription = require('./entities/PostSubscription')
@@ -13,6 +14,7 @@ module.exports = {
     Blocklist: Blocklist,
     Group: Group,
     GroupMember: GroupMember,
+    LinkPreview: LinkPreview,
     PostComment: PostComment,
     PostReaction: PostReaction,
     PostSubscription: PostSubscription,

@@ -60,23 +60,6 @@ const validateUpdatedDate = function(updatedDate, existing, action) {
     return errors
 }
 
-const clean = function(blocklist) {
-    const cleaners = {
-        id: null,
-        userId: null,
-        domain: function(domain) {
-            if ( domain !== undefined && domain !== null && typeof domain === 'string' ) {
-                return domain.toLowerCase()
-            }
-            return domain
-        },
-        notes: null,
-        createdDate: null,
-        updatedDate: null
-    }
-    return cleanEntity(blocklist, cleaners)
-}
-
 /**
  * Validate a user-created Blocklist entity.
  *
@@ -105,6 +88,5 @@ module.exports = {
     validateUserId: validateUserId,
     validateCreatedDate: validateCreatedDate,
     validateUpdatedDate: validateUpdatedDate,
-    clean: clean,
     validate: validate
 }

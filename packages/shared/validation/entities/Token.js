@@ -71,19 +71,6 @@ const validateUpdatedDate = function(updatedDate, existing, action) {
     return errors
 }
 
-const clean = function(token) {
-    const cleaners = {
-        id: null,
-        userId: null,
-        creatorId: null,
-        token: null,
-        type: null,
-        createdDate: null,
-        updatedDate: null
-    }
-    return cleanEntity(token, cleaners)
-}
-
 /**
  * Validate a user-created Token entity.
  *
@@ -114,6 +101,5 @@ module.exports = {
     validateType: validateType,
     validateCreatedDate: validateCreatedDate,
     validateUpdatedDate: validateUpdatedDate,
-    clean: clean,
     validate: validate
 }

@@ -1,17 +1,5 @@
 const BaseValidator = require('./types/BaseValidator')
 
-const cleanEntity = function(entity, cleaners) {
-    const cleanedEntity = {}
-    for( const [property, cleaner] of Object.entries(cleaners)) {
-        if ( cleaner !== null && typeof cleaner === 'function' ) {
-            cleanedEntity[property] = cleaner(entity[property])
-        } else {
-            cleanedEntity[property] = entity[property]
-        }
-    }
-    return cleanedEntity
-}
-
 const validateEntity = function(entity, validators, existing) {
     const errors = {
         all: []
@@ -31,6 +19,5 @@ const validateEntity = function(entity, validators, existing) {
 }
 
 module.exports = {
-    cleanEntity: cleanEntity,
     validateEntity: validateEntity
 }

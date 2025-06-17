@@ -48,17 +48,6 @@ const validateUpdatedDate = function(updatedDate, existing, action) {
     return errors
 }
 
-const clean = function(postSubscription) {
-    const cleaners = {
-        id: null,
-        userId: null,
-        postId: null,
-        createdDate: null,
-        updatedDate: null
-    }
-    return cleanEntity(postSubscription, cleaners)
-}
-
 /**
  * Validate a user-created PostSubscription entity.
  *
@@ -85,6 +74,5 @@ module.exports = {
     validatePostId: validatePostId,
     validateCreatedDate: validateCreatedDate,
     validateUpdatedDate: validateUpdatedDate,
-    clean: clean,
     validate: validate
 }
