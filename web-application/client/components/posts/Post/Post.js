@@ -27,6 +27,8 @@ import PostImage from './PostImage'
 import PostReactions from './PostReactions'
 import PostComments from './PostComments'
 
+import TextWithMentions from '/components/posts/TextWithMentions'
+
 import './Post.css'
 
 const Post = function({ id, expanded, showLoading, shared }) {
@@ -141,7 +143,7 @@ const Post = function({ id, expanded, showLoading, shared }) {
                 </div>
             </div>
             { post.content && post.content.length > 0 && (post.content.length <= 1000 || showMore) && <div className="post__content">
-                <Linkify>{ post.content }</Linkify>
+                <Linkify><TextWithMentions text={ post.content } /></Linkify>
                 {/*{ post.content.length >= 1000 && showMore && <div className="show-more">
                     <a href="" onClick={(e) => { e.preventDefault(); setShowMore(false) }}>Hide More.</a></div> */}
             </div> } 

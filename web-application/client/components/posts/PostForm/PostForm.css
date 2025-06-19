@@ -4,7 +4,7 @@
     margin: 0 auto;
 }
 
-.post-form textarea {
+.post-form .text-area-with-mentions textarea {
     width: 100%;
     height: 200px;
     box-sizing: border-box;
