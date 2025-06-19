@@ -137,7 +137,7 @@ const BlocklistForm = function({ onComplete, onCancel }) {
             />
             { inProgress && <Spinner /> }
             { ! inProgress && <div className="blocklist-form__controls">
-                <Button type="secondary-warn" onClick={(e) => cancel()}>Cancel</Button> 
+                <Button onClick={(e) => cancel()}>Cancel</Button> 
                 <input type="submit" name="submit" value="Submit" />
             </div> }
             { baseErrors }

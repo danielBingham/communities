@@ -14,6 +14,8 @@ import UserTag from '/components/users/UserTag'
 import PostCommentDotsMenu from './PostCommentDotsMenu'
 import PostCommentModeration from './PostCommentModeration'
 
+import TextWithMentions from '/components/posts/TextWithMentions'
+
 import './PostComment.css'
 
 const PostComment = function({ postId, id }) {
@@ -83,7 +85,7 @@ const PostComment = function({ postId, id }) {
                 </div>
             </div>
             <div className="post-comment__content">
-                <Linkify>{ comment.content }</Linkify>
+                <Linkify><TextWithMentions text={ comment.content } /></Linkify>
             </div>
         </div>
     )

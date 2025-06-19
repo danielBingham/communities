@@ -27,6 +27,8 @@ import PostImage from './PostImage'
 import PostReactions from './PostReactions'
 import PostComments from './PostComments'
 
+import TextWithMentions from '/components/posts/TextWithMentions'
+
 import './Post.css'
 
 const Post = function({ id, expanded, showLoading, shared }) {
@@ -128,7 +130,7 @@ const Post = function({ id, expanded, showLoading, shared }) {
     return (
         <div id={post.id} className={`post ${ shared ? 'shared' : ''}`}>
             <div className="post__header"> 
-                <div className="post__poster-image"><UserProfileImage userId={post.userId} /></div>
+                <div className="post__poster-image"><div><UserProfileImage userId={post.userId} /></div></div>
                 <div className="post__details">
                     <div><UserTag id={post.userId} hideProfile={true} /> { post.groupId &&<span>posted in <GroupTag id={post.groupId} hideProfile={true} /></span>}</div> 
                     <div><span className="post__visibility">{ postVisibility }</span> &bull; <Link to={postLink}><DateTag timestamp={post.createdDate} /></Link> </div>
@@ -141,7 +143,7 @@ const Post = function({ id, expanded, showLoading, shared }) {
                 </div>
             </div>
             { post.content && post.content.length > 0 && (post.content.length <= 1000 || showMore) && <div className="post__content">
-                <Linkify>{ post.content }</Linkify>
+                <Linkify><TextWithMentions text={ post.content } /></Linkify>
                 {/*{ post.content.length >= 1000 && showMore && <div className="show-more">
                     <a href="" onClick={(e) => { e.preventDefault(); setShowMore(false) }}>Hide More.</a></div> */}
             </div> } 

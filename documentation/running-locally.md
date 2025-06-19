@@ -1,7 +1,7 @@
 # Running Locally
 
 After pulling the github repo, you can run the development server by first
-running the PostgreSQL docker container. To run comunities, you can either use
+running the PostgreSQL docker container. To run communities, you can either use
 nodemon and the react dev server or build a Docker container.
 
 ## Running on Host with NPM
@@ -9,19 +9,19 @@ nodemon and the react dev server or build a Docker container.
 From the root project directory, run a redis docker container:
 
 ```
-$ docker run -d -p 6379:6379 --name comunities-redis redis:7.0.10
+$ docker run -d -p 6379:6379 --name communities-redis redis:7.0.10
 ```
 
 From the root project directory, build the postgres docker container:
 
 ```
-$ docker build -t comunities-sql database/initialization-scripts 
+$ docker build -t communities-sql database/initialization-scripts 
 ```
 
 Run the Postgres docker container:
 
 ```
-$ docker run -d -p 5432:5432 --name comunities-sql comunities-sql
+$ docker run -d -p 5432:5432 --name communities-sql communities-sql
 ```
 
 Once the redis and SQL containers are running, you'll need to NPM install the
@@ -78,21 +78,21 @@ $ npm run dev --prefix=web-application
 From the root project directory, run a redis docker container:
 
 ```
-$ docker run -d -p 6379:6379 --name comunities-redis redis
+$ docker run -d -p 6379:6379 --name communities-redis redis
 ```
 
 From the root project directory, build the postgres docker container:
 
 ```
-$ docker build -t comunities-sql database/initialization-scripts 
+$ docker build -t communities-sql database/initialization-scripts 
 ```
 
 Navigate back to the root directory and run the Postgres docker container:
 
 ```
 $ cd ..
-$ docker network create comunities-network
-$ docker run -d -p 5432:5432 --name comunities-sql --net comunities-network comunities-sql
+$ docker network create communities-network
+$ docker run -d -p 5432:5432 --name communities-sql --net communities-network communities-sql
 ```
 
 Run `npm install` for the worker. From the root directory:
@@ -129,15 +129,15 @@ server and build the app docker container.
 From the root project directory:
 
 ```
-$ docker build -t comunities .
-$ docker run -d -p 8080:8080 --name comunities --net comunities-network comunities 
+$ docker build -t communities .
+$ docker run -d -p 8080:8080 --name communities --net communities-network communities 
 ```
 
 When you're done, make sure to clean up the two docker containers:
 
 ```
-$ docker stop comunities
-$ docker stop comunities-sql
-$ docker rm comunities
-$ docker rm comunities-sql
+$ docker stop communities
+$ docker stop communities-sql
+$ docker rm communities
+$ docker rm communities-sql
 ```

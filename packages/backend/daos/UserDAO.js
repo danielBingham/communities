@@ -89,28 +89,7 @@ const SCHEMA = {
                 insert: DAO.INSERT.ALLOW,
                 insertDefault: function() {
                     return {
-                        notifications: {
-                            'Post:comment:create': {
-                                email: true,
-                                push: true,
-                                web: true
-                            },
-                            'Post:comment:create:subscriber': {
-                                email: true,
-                                push: true,
-                                web: true
-                            },
-                            'User:friend:create': {
-                                email: true,
-                                push: true,
-                                web: true
-                            },
-                            'User:friend:update': {
-                                email: true,
-                                push: true,
-                                web: true
-                            }
-                        }
+                        notifications: {}
                     }
                 },
                 update: DAO.UPDATE.ALLOW,

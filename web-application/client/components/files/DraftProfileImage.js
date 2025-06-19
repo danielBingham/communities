@@ -134,7 +134,7 @@ const DraftProfileImage = forwardRef(function({
             { error }
             { content }
             <div className="draft-profile-image__buttons">
-                <Button type="primary-warn" onClick={(e) => { e.preventDefault(); remove() }}>Remove Image</Button>
+                <Button onClick={(e) => { e.preventDefault(); remove() }}>Remove Image</Button>
             </div>
         </div>
     )

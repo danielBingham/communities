@@ -30,7 +30,7 @@ const BlockConfirmation = function({ isVisible, cancel, execute  }) {
                         <p><em>Demotes are not currently anonymous.  We're seeking feedback on this point.</em></p>
                     </div>
                     <div className="buttons">
-                        <Button type="secondary" onClick={(e) => cancel() }>Cancel</Button> 
+                        <Button onClick={(e) => cancel() }>Cancel</Button> 
                         <Button type="primary-warn" onClick={execute}>Yes</Button>
                     </div>
                 </div>

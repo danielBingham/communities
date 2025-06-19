@@ -20,6 +20,8 @@
 
 const Handlebars = require('handlebars')
 
+const { lib } = require('@communities/shared')
+
 const GroupDAO = require('../daos/GroupDAO')
 const GroupMemberDAO = require('../daos/GroupMemberDAO')
 const NotificationDAO = require('../daos/NotificationDAO')
@@ -91,6 +93,25 @@ The Communities Team
                 text: Handlebars.compile(`{{{commentAuthor.name}}} commented, "{{{commentIntro}}}...", on a post, "{{{postIntro}}}...", you subscribe to.`),
                 path: Handlebars.compile(`/{{{link}}}`) 
             },
+            'Post:comment:create:mention': {
+                email: {
+                    subject: Handlebars.compile('[Communities] {{{commentAuthor.name}}} mentioned you in their comment, "{{{commentIntro}}}", on a post by {{{postAuthor.name}}}, "{{{postIntro}}}..."'), 
+                    body: Handlebars.compile(`
+Hi {{{mention.name}}},
+
+{{{commentAuthor.name}}} mentioned you in their comment on a post by {{{postAuthor.name}}}, "{{{postIntro}}}...":
+
+"{{{comment.content}}}"
+
+Read the comment in context here: {{{host}}}{{{link}}}
+
+Cheers,
+The Communities Team
+                        `)
+                },
+                text: Handlebars.compile(`{{{commentAuthor.name}}} mentioned you in their comment, "{{{commentIntro}}}...", on a post by {{{postAuthor.name}}}, "{{{postIntro}}}...".`),
+                path: Handlebars.compile(`/{{{link}}}`) 
+            },
             'Post:comment:moderation:rejected': {
                 email: {
                     subject: Handlebars.compile('[Communities] Your comment, "{{{commentIntro}}}...", was removed by Communities moderators. '), 
@@ -114,6 +135,24 @@ The Communities Team
                 },
                 text: Handlebars.compile(`Communities moderators removed your comment, "{{{ commentIntro }}}..."`),
                 path: Handlebars.compile(`/{{{link}}}`) 
+            },
+            'Post:mention': {
+                email: {
+                    subject: Handlebars.compile('[Communities] {{{postAuthor.name}}} mentioned you in their post "{{{postIntro}}}..."'), 
+                    body: Handlebars.compile(`
+Hi {{{mentioned.name}}},
+
+{{{postAuthor.name}}} mentioned you in their post "{{{postIntro}}}...".
+
+Read the full post here: {{{host}}}{{{link}}}
+
+Cheers,
+The Communities Team
+                        `)
+                },
+                text: Handlebars.compile(`{{{postAuthor.name}}} mentioned you in their post, "{{{postIntro}}}...".`),
+                path: Handlebars.compile(`/{{{link}}}`) 
+
             },
             'Post:moderation:rejected': {
                 email: {
@@ -293,7 +332,9 @@ The Communities Team`)
 
         this.notificationMap = { 
             'Post:comment:create': this.sendNewCommentNotification.bind(this),
+            'Post:comment:create:mention': this.sendPostCommentCreateMentionNotification.bind(this),
             'Post:comment:moderation:rejected': this.sendPostCommentModerationNotification.bind(this),
+            'Post:mention': this.sendPostMentionNotification.bind(this),
             'Post:moderation:rejected': this.sendPostModerationNotification.bind(this),
             'User:friend:create': this.sendFriendRequestNotification.bind(this),
             'User:friend:update': this.friendRequestAcceptedNotification.bind(this),
@@ -343,7 +384,7 @@ The Communities Team`)
             email: true,
             push: true
         }
-        if ( type in settings.notifications ) {
+        if ('notifications' in settings && settings.notifications !== undefined && type in settings.notifications ) {
             notificationSetting = settings.notifications[type]
         }
 
@@ -404,6 +445,75 @@ The Communities Team`)
                     await this.createNotification(subscription.userId, 'Post:comment:create:subscriber', subscriberContext, options)
                 }
             }
+        }
+    }
+
+    async sendPostCommentCreateMentionNotification(currentUser, context, options) {
+        const mentionedUsernames = lib.mentions.parseMentions(context.comment.content)
+
+        // No mentions to notify
+        if ( mentionedUsernames.length <= 0 ) {
+            return
+        }
+
+        context.commentIntro = context.comment.content.substring(0,20)
+        context.postIntro = context.post.content.substring(0,20)
+        context.postAuthor = await this.userDAO.getUserById(context.post.userId) 
+
+        if ( context.post.groupId ) {
+            const group = await this.groupDAO.getGroupById(context.post.groupId)
+            context.link = `group/${group.slug}/${context.post.id}#comment-${context.comment.id}`
+        } else {
+            context.link = `${context.postAuthor.username}/${context.post.id}#comment-${context.comment.id}`
+        }
+
+        const userResults = await this.userDAO.selectUsers({
+            where: `users.username = ANY($1::text[])`,
+            params: [ mentionedUsernames ]
+        })
+
+        // None of the mentions referred to real users.
+        if ( userResults.list.length <= 0 ) {
+            return
+        }
+
+        for(const userId of userResults.list ) {
+            const mentionContext = { ...context, mentioned: userResults.dictionary[userId] }
+            await this.createNotification(userId, 'Post:comment:create:mention', mentionContext, options)
+        }
+    }
+
+    async sendPostMentionNotification(currentUser, context, options) {
+        const mentionedUsernames = lib.mentions.parseMentions(context.post.content)
+
+        // No mentions to notify
+        if ( mentionedUsernames.length <= 0 ) {
+            return
+        }
+
+        context.postIntro = context.post.content.substring(0,20)
+        context.postAuthor = await this.userDAO.getUserById(context.post.userId) 
+
+        if ( context.post.groupId ) {
+            const group = await this.groupDAO.getGroupById(context.post.groupId)
+            context.link = `group/${group.slug}/${context.post.id}`
+        } else {
+            context.link = `${context.postAuthor.username}/${context.post.id}`
+        }
+
+        const userResults = await this.userDAO.selectUsers({
+            where: `users.username = ANY($1::text[])`,
+            params: [ mentionedUsernames ]
+        })
+
+        // None of the mentions referred to real users.
+        if ( userResults.list.length <= 0 ) {
+            return
+        }
+
+        for(const userId of userResults.list ) {
+            const mentionContext = { ...context, mentioned: userResults.dictionary[userId] }
+            await this.createNotification(userId, 'Post:mention', mentionContext, options)
         }
     }
 

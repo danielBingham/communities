@@ -35,6 +35,8 @@ const {
     UserDAO
 } = require('@communities/backend')
 
+const { lib } = require('@communities/shared')
+
 const ControllerError = require('../errors/ControllerError')
 
 
@@ -325,6 +327,15 @@ module.exports = class PostController {
                 `Post(${post.id}) missing after creation.`,
                 `Post(${post.id}) missing after being created.  Please report as a bug.`)
         }
+
+        // Notify any mentioned users
+        await this.notificationService.sendNotifications(
+            currentUser,
+            'Post:mention',
+            {
+                post: entity
+            }
+        )
 
         const postVersion = {
             postId: entity.id,

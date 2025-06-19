@@ -92,7 +92,7 @@ const PostCommentModeration = function({ postId, postCommentId }) {
                         value={reason}
                         onChange={(e) => { setReason(e.target.value)}}
                     />
-                    <Button type="secondary-warn" onClick={() => setShowReason(false)}>Cancel</Button>
+                    <Button  onClick={() => setShowReason(false)}>Cancel</Button>
                     <Button type="primary" onClick={() => moderate()}>{ request && request.state === 'pending' ? <Spinner /> :  action }</Button>
                 </Modal>
                 { error }

@@ -113,6 +113,7 @@ const GroupInvite = function({ groupId }) {
                 setHighlightedSuggestion(highlightedSuggestion-1)
             }
         } else if ( event.key == 'Escape' ) {
+            console.log(`Huh?`)
             event.preventDefault()
             clearSuggestions()
         }

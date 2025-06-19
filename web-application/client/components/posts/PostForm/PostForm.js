@@ -21,6 +21,8 @@ import DraftImageFile from '/components/files/DraftImageFile'
 import LinkPreview from '/components/links/view/LinkPreview'
 import Button from '/components/generic/button/Button'
 
+import TextAreaWithMentions from '/components/posts/TextAreaWithMentions'
+
 import LinkForm from './LinkForm/LinkForm'
 import PostVisibilityControl from './PostVisibilityControl/PostVisibilityControl'
 
@@ -144,8 +146,7 @@ const PostForm = function({ postId, groupId, sharedPostId }) {
         }
     }
 
-    const onContentChange = function(event) {
-        const newContent = event.target.value
+    const onContentChange = function(newContent) {
         if ( newContent.length > 10000 ) {
             setError('overlength')
         } else {
@@ -255,12 +256,13 @@ const PostForm = function({ postId, groupId, sharedPostId }) {
 
     return (
         <div className="post-form">
-            <textarea 
-                onChange={onContentChange} 
+            <TextAreaWithMentions
                 value={content}
+                setValue={onContentChange}
                 placeholder={group ? `Write your post in ${group.title}...` : "Write your post..." }
-            >
-            </textarea>
+                groupId={groupId}
+            />
+
             { errorView }
             <div className="attachments">
                 { attachmentView }
@@ -273,7 +275,7 @@ const PostForm = function({ postId, groupId, sharedPostId }) {
                 </div>
             </div>
             <div className="buttons">
-                <Button type="secondary-warn" onClick={(e) => cancel()}>Cancel</Button>
+                <Button onClick={(e) => cancel()}>Cancel</Button>
                 <Button type="primary" onClick={(e) => submit()}>Post</Button>
             </div>
         </div>

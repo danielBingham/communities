@@ -135,7 +135,7 @@ const GroupEditForm = function({ groupId }) {
             <div className="group-edit-form__controls">
                 { inProgress && <Spinner /> }
                 { ! inProgress && <div className="buttons">
-                    <Button type="secondary-warn" onClick={(e) => cancel()}>Cancel</Button> 
+                    <Button onClick={(e) => cancel()}>Cancel</Button> 
                     <input type="submit" name="submit" value="Submit" />
                 </div> }
             </div>

@@ -34,7 +34,7 @@ const FeedMenu = function() {
             setGroupsIsOpen(! groupsIsOpen)
         }
 
-        if ( width < 1220 ) {
+        if ( width <= 1220 ) {
             if ( menu === 'feeds' ) {
                 setGroupsIsOpen(false)
             } else if ( menu === 'groups' ) {
@@ -44,7 +44,7 @@ const FeedMenu = function() {
     }
 
     const closeMenus = () => {
-        if ( width < 1220 ) {
+        if ( width <= 1220 ) {
             setFeedsIsOpen(false)
             setGroupsIsOpen(false)
         }
@@ -61,7 +61,7 @@ const FeedMenu = function() {
     }, [])
 
     useEffect(() => {
-        if ( feedsIsOpen && groupsIsOpen && width < 1220 ) {
+        if ( feedsIsOpen && groupsIsOpen && width <= 1220 ) {
             closeMenus()
         }
     }, [ width ])
@@ -98,7 +98,7 @@ const FeedMenu = function() {
         </menu>
     )
 
-    if ( width >= 1220 ) {
+    if ( width > 1220 ) {
         return (
             <div className="feed-menu">
                 <menu className="feed-menu__menu">

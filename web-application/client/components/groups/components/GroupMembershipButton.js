@@ -181,9 +181,9 @@ const GroupMembershipButton = function({ groupId, userId }) {
             <span>
                 { errorView }
                 { member.status == 'pending-invited' && <Button type="primary" onClick={() => acceptInvite()}><ArrowLeftEndOnRectangleIcon /> Accept</Button> }
-                { member.status == 'pending-invited' && <Button type="secondary-warn" onClick={() => rejectInvite()}><ArrowLeftStartOnRectangleIcon /> Reject</Button> }
-                { member.status == 'pending-requested' && <Button type="secondary-warn" onClick={() => cancelRequest()}><ArrowLeftStartOnRectangleIcon /> Cancel</Button> }
-                { member.status == 'member' && <Button type="secondary-warn" onClick={() => setAreYouSure(true)}><ArrowLeftStartOnRectangleIcon /> Leave</Button> }
+                { member.status == 'pending-invited' && <Button onClick={() => rejectInvite()}><ArrowLeftStartOnRectangleIcon /> Reject</Button> }
+                { member.status == 'pending-requested' && <Button onClick={() => cancelRequest()}><ArrowLeftStartOnRectangleIcon /> Cancel</Button> }
+                { member.status == 'member' && <Button onClick={() => setAreYouSure(true)}><ArrowLeftStartOnRectangleIcon /> Leave</Button> }
                 <AreYouSure isVisible={areYouSure} execute={() => { setAreYouSure(false); leaveGroup() }} cancel={() => setAreYouSure(false)} > 
                     <p>Are you sure you want to leave this group?</p>
                 </AreYouSure>
@@ -197,10 +197,10 @@ const GroupMembershipButton = function({ groupId, userId }) {
         return (
             <span>
                 { errorView }
-                { member.status == 'pending-invited' && <Button type="secondary-warn" onClick={() => cancelInvite()}><ArrowLeftStartOnRectangleIcon /> Cancel</Button> }
+                { member.status == 'pending-invited' && <Button  onClick={() => cancelInvite()}><ArrowLeftStartOnRectangleIcon /> Cancel</Button> }
                 { member.status == 'pending-requested' && <Button type="primary" onClick={() => acceptRequest()}><ArrowLeftEndOnRectangleIcon /> Accept</Button> }
-                { member.status == 'pending-requested' && <Button type="secondary-warn" onClick={() => rejectRequest()}><ArrowLeftStartOnRectangleIcon /> Reject</Button> }
-                { member.status == 'member' && <Button type="secondary-warn" onClick={() => removeMember()}><ArrowLeftStartOnRectangleIcon /> Remove</Button> }
+                { member.status == 'pending-requested' && <Button  onClick={() => rejectRequest()}><ArrowLeftStartOnRectangleIcon /> Reject</Button> }
+                { member.status == 'member' && <Button  onClick={() => removeMember()}><ArrowLeftStartOnRectangleIcon /> Remove</Button> }
             </span>
         )
     } else {
