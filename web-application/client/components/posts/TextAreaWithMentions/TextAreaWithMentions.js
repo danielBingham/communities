@@ -13,7 +13,7 @@ import { DropdownMenu, DropdownMenuBody, DropdownMenuItem } from '/components/ui
 
 import './TextAreaWithMentions.css'
 
-const TextAreaWithMentions = function({ value, setValue, placeholder, className }) {
+const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeholder, className }) {
     const [ menuTop, setMenuTop ] = useState(0)
     const [ menuLeft, setMenuLeft ] = useState(0)
 
@@ -45,6 +45,7 @@ const TextAreaWithMentions = function({ value, setValue, placeholder, className 
         setAreMentioning(false)
         setCurrentMention('')
         clearSuggestions()
+        setHighlightedSuggestion(0)
         
         if ( timeoutId.current ) {
             clearTimeout(timeoutId.current)
@@ -64,7 +65,14 @@ const TextAreaWithMentions = function({ value, setValue, placeholder, className 
         timeoutId.current = setTimeout(function() {
             if ( name.length > 0) {
                 clearSuggestions()
-                makeRequest(getUsers('TextAreaWithMentions', { name: name }))
+                const params = { mention: name }
+                if ( postId ) {
+                    params.postId = postId
+                }
+                if ( groupId ) {
+                    params.groupId = groupId
+                }
+                makeRequest(getUsers('TextAreaWithMentions', params))
             } 
         }, 250)
     }
@@ -134,7 +142,7 @@ const TextAreaWithMentions = function({ value, setValue, placeholder, className 
                 setMenuLeft(caretPosition.left)
             }
 
-            suggestUsers(lastMention)
+            suggestUsers(lastMention.substring(1))
         }
 
         if ( typeof setValue === 'function' ) {

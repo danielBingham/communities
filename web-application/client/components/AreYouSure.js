@@ -13,7 +13,7 @@ const AreYouSure = function({ isVisible, isPending, cancel, execute, className, 
                 <div className="modal-overlay" onClick={(e) => cancel()}></div>
                 <div className={className ? `are-you-sure ${className}` : 'are-you-sure'}>
                     <div className="are-you-sure__question">{ children }</div>
-                    <Button type="secondary" onClick={(e) => cancel() }>Cancel</Button> <Button type="primary-warn" onClick={execute}>{ isPending === true ? <Spinner /> : 'Yes' }</Button>
+                    <Button onClick={(e) => cancel() }>Cancel</Button> <Button type="primary-warn" onClick={execute}>{ isPending === true ? <Spinner /> : 'Yes' }</Button>
                 </div>
             </div>,
             document.body

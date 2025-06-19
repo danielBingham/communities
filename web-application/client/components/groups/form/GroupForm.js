@@ -256,7 +256,7 @@ const GroupForm = function() {
             <div className="group-form__errors">{ baseError }</div>
             { inProgress && <Spinner /> }
             { ! inProgress && <div className="group-form__controls">
-                <Button type="secondary-warn" onClick={(e) => cancel()}>Cancel</Button> 
+                <Button onClick={(e) => cancel()}>Cancel</Button> 
                 <input type="submit" name="submit" value="Submit" />
             </div> }
             <RequestError request={request} message={"Create Group"} />

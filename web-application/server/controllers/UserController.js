@@ -40,12 +40,14 @@ module.exports = class UserController {
         this.emailService = new backend.EmailService(core)
         this.notificationService = new backend.NotificationService(core)
         this.validationService = new backend.ValidationService(core)
+        this.permissionService = new backend.PermissionService(core)
 
         this.userDAO = new backend.UserDAO(core)
         this.userRelationshipsDAO = new backend.UserRelationshipDAO(core)
         this.groupMemberDAO = new backend.GroupMemberDAO(core)
         this.tokenDAO = new backend.TokenDAO(core)
         this.fileDAO = new backend.FileDAO(core)
+        this.postDAO = new backend.PostDAO(core)
     }
 
     async getRelations(currentUser, results, requestedRelations) {
@@ -141,6 +143,93 @@ module.exports = class UserController {
             const and = result.params.length > 0 ? ' AND ' : ''
             result.params.push(query.username)
             result.where += `${and} users.username = $${result.params.length}`
+        }
+
+        if ( 'mention' in query && query.mention.length > 0 ) {
+            const and = result.params.length > 0 ? ' AND ' : ''
+            result.params.push(query.mention)
+            result.where += `${and} SIMILARITY(users.name, $${result.params.length}) > 0`
+            result.order = `SIMILARITY(users.name, $${result.params.length}) desc`
+
+            if ( 'postId' in query && 'groupId' in query) {
+                // If they are commenting on a group post, limit the search to
+                // their friends, people who've interacted with the post, and
+                // group members.
+                let postUserIds = []
+                const post = await this.postDAO.getPostById(query.postId)
+                const canViewPost = await this.permissionService.can(currentUser, 'view', 'Post', { post: post })
+                if ( canViewPost === true ) {
+                    const postResults = await this.core.database.query(`
+                        SELECT user_id FROM post_comments WHERE post_id = $1
+                    `, [ query.postId ])
+                    postUserIds = postResults.rows.map((row) => row.user_id)
+                    postUserIds.push(post.userId)
+                }
+
+                let memberUserIds = []
+                const canViewGroup = await this.permissionService.can(currentUser, 'view', 'Group', { groupId: query.groupId})
+                if ( canViewGroup === true ) {
+                    const groupMembers = await this.groupMemberDAO.getGroupMembers(query.groupId)
+                    memberUserIds = groupMembers.map((member) => member.userId)
+                }
+
+                const relationships = await this.userRelationshipsDAO.getUserRelationshipsForUser(currentUser.id)
+                const friendIds = relationships.map((r) => r.userId == currentUser.id ? r.relationId : r.userId)
+
+                const userIds = [ ...postUserIds, ...memberUserIds, ...friendIds ]
+
+                const and = result.params.length > 0 ? ' AND ' : ''
+                result.params.push(userIds)
+                result.where += `${and} users.id = ANY($${result.params.length}::uuid[])`
+            } else if ( 'postId' in query ) {
+                // If they are commenting in a post, limit the search to their
+                // friends and people who've interacted with the post.
+                let postUserIds = [] 
+                const post = await this.postDAO.getPostById(query.postId)
+                const canViewPost = await this.permissionService.can(currentUser, 'view', 'Post', { post: post })
+                if ( canViewPost === true ) {
+                    const postResults = await this.core.database.query(`
+                        SELECT user_id FROM post_comments WHERE post_id = $1
+                    `, [ query.postId ])
+                    postUserIds = postResults.rows.map((row) => row.user_id)
+                    postUserIds.push(post.userId)
+                }
+
+                const relationships = await this.userRelationshipsDAO.getUserRelationshipsForUser(currentUser.id)
+                const friendIds = relationships.map((r) => r.userId == currentUser.id ? r.relationId : r.userId)
+
+                const userIds = [ ...postUserIds, ...friendIds ]
+                
+                const and = result.params.length > 0 ? ' AND ' : ''
+                result.params.push(userIds)
+                result.where += `${and} users.id = ANY($${result.params.length}::uuid[])`
+            } else if ( 'groupId' in query ) {
+                // If they are posting in a group, limit the search to group
+                // members and their friends.
+                let memberUserIds = [] 
+                const canViewGroup = await this.permissionService.can(currentUser, 'view', 'Group', { groupId: query.groupId})
+                if ( canViewGroup === true ) {
+                    const groupMembers = await this.groupMemberDAO.getGroupMembers(query.groupId)
+                    memberUserIds = groupMembers.map((member) => member.userId)
+                }
+
+                const relationships = await this.userRelationshipsDAO.getUserRelationshipsForUser(currentUser.id)
+                const friendIds = relationships.map((r) => r.userId == currentUser.id ? r.relationId : r.userId)
+
+                const userIds = [ ...friendIds, ...memberUserIds ]
+
+                const and = result.params.length > 0 ? ' AND ' : ''
+                result.params.push(userIds)
+                result.where += `${and} users.id = ANY($${result.params.length}::uuid[])`
+            } else {
+                // Limit the search to their friends.
+                const relationships = await this.userRelationshipsDAO.getUserRelationshipsForUser(currentUser.id)
+                const friendIds = relationships.map((r) => r.userId == currentUser.id ? r.relationId : r.userId)
+
+                const and = result.params.length > 0 ? ' AND ' : ''
+                result.params.push(friendIds)
+                result.where += `${and} users.id = ANY($${result.params.length}::uuid[])`
+            }
         }
 
         if ( 'ids' in query && query.ids.length > 0 ) {

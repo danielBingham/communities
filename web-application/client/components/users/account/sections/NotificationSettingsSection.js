@@ -27,6 +27,10 @@ const NotificationSettingsSection = function({}) {
     const toggleNotificationSetting = function(notification) {
         const settings = JSON.parse(JSON.stringify(currentUser.settings)) 
 
+        if ( ! ("notifications" in settings) ) {
+            settings.notifications = {}
+        }
+
         if ( ! (notification in settings.notifications ) ) { 
             settings.notifications[notification] = {
                 web: true,
@@ -45,11 +49,16 @@ const NotificationSettingsSection = function({}) {
         makeRequest(patchUser(userPatch))
     }
    
-    const notifications = currentUser.settings.notifications
+    const notifications = currentUser.settings.notifications ? currentUser.settings.notifications : {}
     return (
         <div className="user-settings__notification-settings">
             <h2>Notification Settings</h2>
             <div className="user-settings__notification-settings__section">
+                <Toggle 
+                    label="Post Mention"
+                    explanation="Recieve an email notification when someone mentions you in a post."
+                    toggled={'Post:mention' in notifications && notifications['Post:mention'].email === false ? false : true} 
+                    onClick={(e) => toggleNotificationSetting('Post:mention')} />
                 <Toggle 
                     label="Post Comment"
                     explanation="Recieve an email notification when someone comments on one of your posts."
@@ -60,6 +69,11 @@ const NotificationSettingsSection = function({}) {
                     explanation="Recieve an email notification when someone comments on a post you are subscribed to."
                     toggled={'Post:comment:create:subscriber' in notifications && notifications['Post:comment:create:subscriber'].email === false ? false : true} 
                     onClick={(e) => toggleNotificationSetting('Post:comment:create:subscriber')} />
+                <Toggle 
+                    label="Post Comment Mention"
+                    explanation="Recieve an email notification when someone mentions you in a comment on a post."
+                    toggled={ 'Post:comment:create:mention' in notifications && notifications['Post:comment:create:mention'].email === false ? false : true} 
+                    onClick={(e) => toggleNotificationSetting('Post:comment:create:mention')} />
                 <Toggle 
                     label="Moderated Post"
                     explanation="Recieve an email notification when one of your posts is moderated."

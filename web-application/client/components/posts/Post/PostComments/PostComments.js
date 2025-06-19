@@ -63,7 +63,7 @@ const PostComments = function({ postId, expanded }) {
         for (const commentId of post.comments ) {
             const draftEdit = localStorage.getItem(`commentDraft.${postId}.${commentId}`)
             if ( draftEdit || (commentId in editing) ) {
-                commentViews.push(<PostCommentForm key={commentId} postId={postId} commentId={commentId} setShowComments={setShowComments} />)
+                commentViews.push(<PostCommentForm key={commentId} postId={postId} commentId={commentId} groupId={ post.groupId } setShowComments={setShowComments} />)
             } else {
                 commentViews.push(<PostComment key={commentId} postId={postId} id={commentId} />)
             }
@@ -76,7 +76,7 @@ const PostComments = function({ postId, expanded }) {
             { showComments && post.comments.length > 0 && <div className="show-comments">
                 <a href="" onClick={(e) => { e.preventDefault(); setShowComments(false)}}>Hide { post.comments.length } comments.</a>
             </div> }
-            <PostCommentForm postId={postId} setShowComments={setShowComments} /> 
+            <PostCommentForm postId={postId} groupId={ post?.groupId } setShowComments={setShowComments} /> 
         </div>
     )
 }

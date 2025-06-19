@@ -185,7 +185,7 @@ const UserProfileEditForm = function(props) {
         )
     }
 
-    let submit = ( <><Button type="secondary-warn" onClick={(e) => cancel()}>Cancel</Button> <input type="submit" name="submit" value="Submit" /></> )
+    let submit = ( <><Button onClick={(e) => cancel()}>Cancel</Button> <input type="submit" name="submit" value="Submit" /></> )
     if ( (request && request.state == 'pending' ) || ( fileId && fileState == 'pending' )) {
         submit = ( <Spinner /> )
     }

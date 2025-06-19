@@ -260,6 +260,7 @@ const PostForm = function({ postId, groupId, sharedPostId }) {
                 value={content}
                 setValue={onContentChange}
                 placeholder={group ? `Write your post in ${group.title}...` : "Write your post..." }
+                groupId={groupId}
             />
 
             { errorView }
@@ -274,7 +275,7 @@ const PostForm = function({ postId, groupId, sharedPostId }) {
                 </div>
             </div>
             <div className="buttons">
-                <Button type="secondary-warn" onClick={(e) => cancel()}>Cancel</Button>
+                <Button onClick={(e) => cancel()}>Cancel</Button>
                 <Button type="primary" onClick={(e) => submit()}>Post</Button>
             </div>
         </div>

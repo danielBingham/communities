@@ -35,7 +35,7 @@ const RemoveFriendButton = function({ userId, type }) {
     }
 
     return (
-        <Button type="secondary-warn" onClick={() => removeFriend()}>{ text }</Button>
+        <Button onClick={() => removeFriend()}>{ text }</Button>
     )
 
 }

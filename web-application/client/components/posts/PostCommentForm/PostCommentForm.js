@@ -14,7 +14,7 @@ import TextAreaWithMentions from '/components/posts/TextAreaWithMentions'
 
 import './PostCommentForm.css'
 
-const PostCommentForm = function({ postId, commentId, setShowComments }) {
+const PostCommentForm = function({ postId, groupId, commentId, setShowComments }) {
     const [showForm, setShowForm ] = useState(false)
 
     const [ content, setContent ] = useState('')
@@ -148,11 +148,13 @@ const PostCommentForm = function({ postId, commentId, setShowComments }) {
                     value={content}
                     setValue={onChange}
                     placeholder="Write a comment..."
+                    postId={postId}
+                    groupId={groupId}
                 />
                 { errorView }
                 { inProgress && <div className="buttons"><Spinner /></div> }
                 { ! inProgress && <div className="buttons">
-                    <Button type="secondary-warn" onClick={(e) => cancel()}>Cancel</Button>
+                    <Button onClick={(e) => cancel()}>Cancel</Button>
                     <Button type="primary" onClick={(e) => submit()}>{ commentId ? 'Save Edit' : 'Comment' }</Button>
                 </div> }
             </div>
