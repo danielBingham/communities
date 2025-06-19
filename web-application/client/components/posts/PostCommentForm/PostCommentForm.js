@@ -10,6 +10,8 @@ import { postPostComments, patchPostComment, finishPostCommentEdit } from '/stat
 import Button from '/components/generic/button/Button'
 import Spinner from '/components/Spinner'
 
+import TextAreaWithMentions from '/components/posts/TextAreaWithMentions'
+
 import './PostCommentForm.css'
 
 const PostCommentForm = function({ postId, commentId, setShowComments }) {
@@ -78,8 +80,7 @@ const PostCommentForm = function({ postId, commentId, setShowComments }) {
         }
     }
 
-    const onChange = function(event) {
-        const newContent = event.target.value
+    const onChange = function(newContent) {
         if ( newContent.length > 5000) {
             setError('length')
         } else {
@@ -143,11 +144,11 @@ const PostCommentForm = function({ postId, commentId, setShowComments }) {
     } else {
         return (
             <div className="post-comment-form">
-                <textarea
-                    onChange={onChange} 
+                <TextAreaWithMentions
                     value={content}
+                    setValue={onChange}
                     placeholder="Write a comment..."
-                ></textarea>
+                />
                 { errorView }
                 { inProgress && <div className="buttons"><Spinner /></div> }
                 { ! inProgress && <div className="buttons">

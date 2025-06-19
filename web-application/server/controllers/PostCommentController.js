@@ -23,6 +23,7 @@ const Uuid = require('uuid')
 const { 
     NotificationService, 
     PermissionService, 
+    ValidationService,
 
     PostDAO, 
     UserRelationshipDAO, 
@@ -47,6 +48,7 @@ module.exports = class PostCommentController {
 
         this.notificationService = new NotificationService(core)
         this.permissionService = new PermissionService(core)
+        this.validationService = new ValidationService(core)
     }
 
     async getRelations(currentUser, results, requestedRelations) {
@@ -235,6 +237,16 @@ module.exports = class PostCommentController {
                 post: relations.posts[postId],
                 commentAuthor: currentUser,
                 comment: entity
+            }
+        )
+
+        await this.notificationService.sendNotifications(
+            currentUser,
+            'Post:comment:create:mention',
+            {
+                post: relations.posts[postId],
+                commentAuthor: currentUser,
+                comment:entity
             }
         )
 

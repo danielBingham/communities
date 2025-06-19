@@ -101,7 +101,7 @@ const TextAreaWithMentions = function({ value, setValue, placeholder, className 
         const user = userDictionary[query.list[index]]
 
         const indexOfLastMention = value.lastIndexOf('@')
-        const newValue = value.substring(0, indexOfLastMention) + `@${user.username}`
+        const newValue = value.substring(0, indexOfLastMention) + `@${user.username} `
         setValue(newValue)
 
         clearMention()

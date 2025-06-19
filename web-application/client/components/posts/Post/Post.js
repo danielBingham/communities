@@ -130,7 +130,7 @@ const Post = function({ id, expanded, showLoading, shared }) {
     return (
         <div id={post.id} className={`post ${ shared ? 'shared' : ''}`}>
             <div className="post__header"> 
-                <div className="post__poster-image"><UserProfileImage userId={post.userId} /></div>
+                <div className="post__poster-image"><div><UserProfileImage userId={post.userId} /></div></div>
                 <div className="post__details">
                     <div><UserTag id={post.userId} hideProfile={true} /> { post.groupId &&<span>posted in <GroupTag id={post.groupId} hideProfile={true} /></span>}</div> 
                     <div><span className="post__visibility">{ postVisibility }</span> &bull; <Link to={postLink}><DateTag timestamp={post.createdDate} /></Link> </div>

@@ -1,5 +1,6 @@
 import React from 'react'
 import {  useSelector } from 'react-redux'
+import { Link } from 'react-router-dom'
 
 import { UserCircleIcon } from '@heroicons/react/24/solid'
 
@@ -36,7 +37,7 @@ const UserProfileImage = function({ userId, className, width }) {
     let content = ( <UserCircleIcon /> ) 
     if ( user && user.fileId ) {
         content = (
-            <img src={`${configuration.backend}/file/${user.fileId}?width=200`} />
+            <Link to={`/${user.username}`}><img src={`${configuration.backend}/file/${user.fileId}?width=200`} /></Link>
         )
     } 
 

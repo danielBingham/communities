@@ -256,12 +256,6 @@ const PostForm = function({ postId, groupId, sharedPostId }) {
 
     return (
         <div className="post-form">
-            {/*   <textarea 
-                onChange={onContentChange} 
-                value={content}
-                placeholder={group ? `Write your post in ${group.title}...` : "Write your post..." }
-            >
-            </textarea> */}
             <TextAreaWithMentions
                 value={content}
                 setValue={onContentChange}
