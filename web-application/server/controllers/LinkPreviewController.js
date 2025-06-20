@@ -18,7 +18,7 @@
  *
  ******************************************************************************/
 
-const { LinkPreviewDAO, LinkPreviewService } = require('@communities/backend')
+const { LinkPreviewDAO, LinkPreviewService, ValidationService, PermissionService } = require('@communities/backend')
 const { cleaning, validation } = require('@communities/shared')
 
 module.exports = class LinkPreviewController {
@@ -28,6 +28,9 @@ module.exports = class LinkPreviewController {
         this.linkPreviewDAO = new LinkPreviewDAO(core)
 
         this.linkPreviewService = new LinkPreviewService(core)
+
+        this.validationService = new ValidationService(core)
+        this.permissionService = new PermissionService(core)
     }
 
     async getRelations(results, relations) {}

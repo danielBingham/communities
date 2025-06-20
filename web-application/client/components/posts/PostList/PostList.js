@@ -10,6 +10,9 @@ import PaginationControls from '/components/PaginationControls'
 import Post from '/components/posts/Post'
 import Spinner from '/components/Spinner'
 
+import PostListSortControl from './PostListSortControl'
+import PostListSinceControl from './PostListSinceControl'
+
 import './PostList.css'
 
 const PostList = function({ name, params }) {
@@ -20,11 +23,6 @@ const PostList = function({ name, params }) {
 
     const [request, makeRequest] = useRequest()
 
-    const setSort = function(sortBy) {
-        searchParams.set('sort', sortBy)
-        setSearchParams(searchParams)
-    }
-
     const getSort = function() {
         let sort = searchParams.get('sort') 
         if ( ! sort ) {
@@ -33,11 +31,20 @@ const PostList = function({ name, params }) {
         return sort
     }
 
-    const dispatch = useDispatch()
+    const getSince = function() {
+        let since = searchParams.get('since')
+        console.log(`Since: '${since}'`)
+        if ( ! since ) {
+            since = 'always'
+        }
+        return since
+    }
+
     useEffect(function() {
         let queryParams = { ...params }
 
         queryParams.sort = getSort() 
+        queryParams.since = getSince()
 
         queryParams.page = searchParams.get('page') ? searchParams.get('page') : 1
 
@@ -49,6 +56,7 @@ const PostList = function({ name, params }) {
             let queryParams = { ...params }
 
             queryParams.sort = getSort() 
+            queryParams.since = getSince()
 
             queryParams.page = searchParams.get('page') ? searchParams.get('page') : 1
 
@@ -59,12 +67,19 @@ const PostList = function({ name, params }) {
     if ( query === null ) {
         return (
             <div className="post-list">
-                <Spinner />
+                <div className="post-list__header">
+                    <div className="post-list__header__explanation"></div>
+                    <div className="post-list__header__controls"><PostListSinceControl /> <PostListSortControl /></div>
+                </div>
+                <div className="post-list__posts">
+                    <Spinner />
+                </div>
             </div>
         )
-    }
+    } 
+    
 
-    const postViews = []
+    let postViews = []
     for(const postId of query.list) {
         postViews.push(<Post key={postId} id={postId} />)
     }
@@ -72,24 +87,9 @@ const PostList = function({ name, params }) {
     const sort = getSort()
     return (
         <div className="post-list">
-            <div className="post-list__controls">
-                <div className="post-list__sort-menu">
-                    <span className="title">Sort By:</span>
-                    <a
-                        href=""
-                        className={`sort-option ${sort == 'newest' ? 'current' : ''}`} 
-                        onClick={(e) => {e.preventDefault(); setSort('newest')}}
-                    >
-                        New 
-                    </a>
-                    <a
-                        href=""
-                        className={`sort-option ${sort == 'active' ? 'current' : ''}`}
-                        onClick={(e) => {e.preventDefault(); setSort('active')}}
-                    >
-                        Active 
-                    </a>
-                </div>
+            <div className="post-list__header">
+                <div className="post-list__header__explanation">Showing { (query.meta.page-1) * query.meta.pageSize + 1 } to { query.meta.count < query.meta.page * query.meta.pageSize ? query.meta.count : query.meta.page * query.meta.pageSize } of { query.meta.count } Posts</div>
+                <div className="post-list__header__controls"><PostListSinceControl /> <PostListSortControl /></div>
             </div>
             <div className="post-list__posts">
                 { postViews }

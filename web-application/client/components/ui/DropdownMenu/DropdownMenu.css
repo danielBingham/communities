@@ -8,11 +8,6 @@
     font-size: 14px;
     cursor: pointer;
 }
-.dropdown-menu .dropdown-menu__trigger svg {
-    display: inline-block;
-    width: 14px;
-    margin-bottom: -3px;
-}
 .dropdown-menu .dropdown-menu__trigger a:link {
     color: var(--main-text-color);
 }
@@ -26,7 +21,7 @@
 
 .dropdown-menu .dropdown-menu__body {
     position: absolute;
-    top: 2em;
+    top: 2.6em;
     right: 0;
     text-align: left;
     background-color: white; 
@@ -59,7 +54,7 @@
 .dropdown-menu .dropdown-menu__body .dropdown-menu__item {
     display: block;
     white-space: nowrap;
-    padding-left: 20px;
+    padding: 5px 20px;
 }
 .dropdown-menu .dropdown-menu__body a.dropdown-menu__item:link, 
 .dropdown-menu .dropdown-menu__body a.dropdown-menu__item:visited {

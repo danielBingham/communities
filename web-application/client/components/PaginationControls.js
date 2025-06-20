@@ -26,6 +26,10 @@ const PaginationControls = function(props) {
         }
     }
 
+    if ( meta.count <= meta.pageSize) {
+        return null 
+    }
+
     const page = searchParams.get(`${ ( props.prefix ? `${props.prefix}-` : '' )}page`) ? parseInt(searchParams.get(`${ ( props.prefix ? `${props.prefix}-` : '' )}page`)) : 1
 
     const firstPage = 1
@@ -46,19 +50,11 @@ const PaginationControls = function(props) {
 
     return (
         <div className="page-controls">
-            <a className="control" 
-                onClick={(e) => {e.preventDefault(); goToPage(firstPage)}} 
-                href={`?${firstPageParams.toString()}`} >first</a>
-            <a className="control" 
-                onClick={(e) => {e.preventDefault(); goToPage(prevPage)}} 
-                href={`?${prevPageParams.toString()}`} >prev</a>
-            <span className="control">Page {page} of {meta.numberOfPages}</span>
-            <a className="control" 
-                onClick={(e) => {e.preventDefault(); goToPage(nextPage)}} 
-                href={`?${nextPageParams.toString()}`} >next</a>
-            <a className="control" 
-                onClick={(e) => {e.preventDefault(); goToPage(lastPage)}} 
-                href={`?${lastPageParams.toString()}`} >last</a>
+            <div><Button onClick={(e) => {e.preventDefault(); goToPage(firstPage)}}>First</Button></div>
+            <div><Button onClick={(e) => {e.preventDefault(); goToPage(prevPage)}}>Previous</Button></div>
+            <div><span className="control">Page { page } of { meta.numberOfPages }</span></div>
+            <div><Button onClick={(e) => {e.preventDefault(); goToPage(nextPage)}}>Next</Button></div>
+            <div><Button onClick={(e) => {e.preventDefault(); goToPage(lastPage)}}>Last</Button></div>
         </div>
     )
 

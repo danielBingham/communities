@@ -20,6 +20,9 @@
     height: 200px;
     border: thin solid var(--input-border-color);
 }
+.text-box textarea:focus {
+    outline-color: var(--input-highlight-color) !important;
+}
 .text-box .text-box_error {
     padding: 5px;
     text-align: center;

@@ -122,7 +122,7 @@ module.exports = class LinkPreviewDAO extends DAO {
             params: [ url ]
         })
 
-        if ( results.rows.length <= 0 || results.rows[0].url !== url ) {
+        if ( results.list.length <= 0 || results.dictionary[results.list[0]].url !== url ) {
             return null
         }
 

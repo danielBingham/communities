@@ -106,8 +106,6 @@ export const DropdownMenuBody = function(props) {
     const visible = useContext(VisibleContext)
     const toggleMenu = useContext(ToggleMenuContext)
 
-    console.log(visible)
-
     // ======= Request Tracking =====================================
 
     // ======= Redux State ==========================================

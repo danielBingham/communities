@@ -1,17 +1,27 @@
 import React from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 
 import { Page } from '/components/generic/Page'
 
 import Post from '/components/posts/Post'
 
-const PostPage = function() {
-    const { slug, postId } = useParams()
+import './PostPage.css'
 
+import Button from '/components/generic/button/Button'
+
+const PostPage = function({ group }) {
+    const { slug, postId } = useParams()
+    const navigate = useNavigate()
+
+    let backlink = `/${slug}`
+    if ( group === true ) {
+        backlink = `/group/${slug}`
+    }
     return (
-        <Page id={`post-${postId}`}>
+        <div id={`post-${postId}`}>
+            <div className="post-page__header"><Button onClick={(e) => navigate(backlink)}>Back to { group === true ? 'Group' : 'Profile' }</Button></div>
             <Post id={postId} expanded={true} /> 
-        </Page>
+        </div>
     )
 }
 

@@ -1,9 +1,16 @@
 .page-controls {
-    padding: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr auto 1fr 1fr;
+    justify-items: center;
+    align-items: center;
+
+    max-width: 500px;
+    margin: 20px auto;
+
     text-align: center;
     font-size: 16px;
 }
 .page-controls .control {
     display: inline-block;
-    margin: 0 5px;
+    padding: 0 7px;
 }

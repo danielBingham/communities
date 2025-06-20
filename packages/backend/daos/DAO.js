@@ -217,7 +217,7 @@ module.exports = class DAO {
             if ( ! ( meta.key in entity ) && meta.update == 'required' ) {
                 throw new DAOError('missing-field',
                     `Required '${meta.key}' not found in ${entityName}.`)
-            } else if ( ! (meta.key in entity) ) {
+            } else if ( ! (meta.key in entity) && meta.key !== 'updatedDate' ) {
                 continue
             }
 
@@ -245,6 +245,7 @@ module.exports = class DAO {
                 SET ${fields}
             WHERE ${where}`
 
+        console.log(sql)
         await this.core.database.query(sql, params)
     }
 }
