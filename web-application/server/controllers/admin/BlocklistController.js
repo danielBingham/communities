@@ -69,7 +69,6 @@ module.exports = class BlocklistController {
                 `User must be authenticated to retrieve posts.`,
                 `You must be authenticated to retrieve posts.`)
         }
-        console.log(currentUser)
 
         const canAdminSite = await this.permissionService.can(currentUser, 'admin', 'Site')
         if ( ! canAdminSite ) {

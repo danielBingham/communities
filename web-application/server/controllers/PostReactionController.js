@@ -24,7 +24,8 @@ const {
     PostDAO, 
     PostReactionDAO, 
 
-    PermissionService 
+    PermissionService,
+    ValidationService
 } = require('@communities/backend')
 const ControllerError = require('../errors/ControllerError')
 
@@ -37,6 +38,7 @@ module.exports = class PostReactionController {
         this.postReactionDAO = new PostReactionDAO(core)
 
         this.permissionService = new PermissionService(core)
+        this.validationService = new ValidationService(core)
     }
 
     async getRelations(results, requestedRelations) {
@@ -301,7 +303,7 @@ module.exports = class PostReactionController {
         await this.postReactionDAO.deletePostReaction(reaction)
 
         let activity = parseInt(post.activity)
-        let existingReaction = existing.dictionary[existing.list[0]].reaction
+        let existingReaction = existing.reaction
 
         if ( existingReaction == 'block')  {
             activity += 1

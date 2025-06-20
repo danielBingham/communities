@@ -1,0 +1,26 @@
+.post-list-sort-control__button  {
+    display: inline-block;
+    padding: 5px 15px;
+    margin: 5px;
+    border-radius: 5px;
+
+    border: thin solid var(--primary-color-light);
+    color: var(--primary-color-dark);
+    background-color: var(--primary-color-light);
+}
+.post-list-sort-control__button svg {
+    width: 1.2em;
+    height: 1.2em;
+    margin-bottom: -0.3em;
+    margin-right: 5px;
+}
+
+@media (width >= 700px) {
+
+
+}
+@media (width < 700px) {
+    .post-list-sort-control__button .text {
+        display: none;
+    }
+}

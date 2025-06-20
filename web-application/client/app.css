@@ -154,9 +154,6 @@ input[type="text"], input[type="password"], textarea {
     font-size: 16px;
     color: var(--main-text-color);
 }
-input:focus, textarea:focus, select:focus {
-    outline-color: var(--input-highlight-color) !important;
-}
 input::placeholder, textarea::placeholder {
     font-family: Roboto, Arial, sans-serif; 
     font-size: 14px;

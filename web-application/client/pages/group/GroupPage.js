@@ -87,7 +87,7 @@ const GroupPage = function() {
                     <Routes>
                         <Route path="members" element={ <GroupMembersView groupId={group.id} /> } />
                         <Route path="settings" element={<GroupSettingsView groupId={group.id} /> } />
-                        <Route path=":postId" element={ <PostPage /> } />
+                        <Route path=":postId" element={ <PostPage group={true} /> } />
                         <Route index element={<GroupFeedView groupId={group.id} />} />
                     </Routes> 
                 </div>

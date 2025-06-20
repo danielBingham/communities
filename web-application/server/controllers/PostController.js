@@ -133,7 +133,7 @@ module.exports = class PostController {
             where: '',
             params: [],
             page: 1,
-            order: '( posts.activity/POWER(CEILING((EXTRACT(EPOCH from now()) - EXTRACT(EPOCH from posts.created_date))/(60*60)), 2)) DESC'
+            order: 'posts.created_date DESC'
         }
 
         const currentUser = request.session.user
@@ -243,12 +243,31 @@ module.exports = class PostController {
             }
         }
 
+        if ( 'since' in request.query ) {
+            const since = request.query.since
+            if ( since === 'day' ) {
+                const and = query.params.length > 0 ? ' AND ' : ''
+                query.where += `${and} posts.created_date > current_timestamp - interval '1 day'`
+            } else if ( since === 'week' ) {
+                const and = query.params.length > 0 ? ' AND ' : ''
+                query.where += `${and} posts.created_date > current_timestamp - interval '7 days'`
+            } else if ( since === 'month' ) {
+                const and = query.params.length > 0 ? ' AND ' : ''
+                query.where += `${and} posts.created_date > current_timestamp - interval '30 days'` 
+            } 
+        }
+
         if ('sort' in request.query) {
             const sort = request.query.sort
-            if (sort == 'newest') {
+            if (sort === 'newest') {
                 query.order = 'posts.created_date DESC'
+            } else if ( sort === 'active' ) {
+                query.order = 'posts.activity DESC'
+            } else if ( sort === 'recent' ) {
+                query.order = 'posts.updated_date DESC'
             }
         }
+
 
         if ('page' in request.query) {
             query.page = request.query.page
