@@ -7,9 +7,18 @@
     width: 100%;
     margin: 10px auto;
     box-shadow: none;
+    border-radius: 7px;
 }
 .post.shared img {
     border-radius: 0 0 7px 7px;
+}
+.post.shared .link-preview {
+    border-bottom-right-radius: 7px;
+    border-bottom-left-radius: 7px;
+}
+.post.shared .link-preview__details {
+    border-bottom-right-radius: 7px;
+    border-bottom-left-radius: 7px;
 }
 .post .post__header {
     font-size: 14px;

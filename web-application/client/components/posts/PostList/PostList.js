@@ -67,12 +67,19 @@ const PostList = function({ name, params }) {
     if ( query === null ) {
         return (
             <div className="post-list">
-                <Spinner />
+                <div className="post-list__header">
+                    <div className="post-list__header__explanation"></div>
+                    <div className="post-list__header__controls"><PostListSinceControl /> <PostListSortControl /></div>
+                </div>
+                <div className="post-list__posts">
+                    <Spinner />
+                </div>
             </div>
         )
-    }
+    } 
+    
 
-    const postViews = []
+    let postViews = []
     for(const postId of query.list) {
         postViews.push(<Post key={postId} id={postId} />)
     }

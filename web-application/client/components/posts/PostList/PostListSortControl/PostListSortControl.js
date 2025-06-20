@@ -17,7 +17,7 @@ const PostListSortControl = function() {
 
     const sortTitleMap = {
         'newest': 'Newest',
-        'active': 'Most Active',
+        'active': 'Most Activity',
         'recent': 'Recent Activity'
     }
 
@@ -27,7 +27,7 @@ const PostListSortControl = function() {
             <DropdownMenuTrigger><span className="post-list-sort-control__button"><BarsArrowUpIcon /><span className="text"> { sortTitleMap[sort]}</span></span></DropdownMenuTrigger>
             <DropdownMenuBody>
                 <DropdownMenuItem onClick={() => setSort('newest')}>Newest</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSort('active')}>Most Active</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSort('active')}>Most Activity</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setSort('recent')}>Recent Activity</DropdownMenuItem>
             </DropdownMenuBody>
         </DropdownMenu>
