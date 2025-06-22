@@ -3,9 +3,10 @@ import * as qs from 'qs'
 
 import { makeTrackedRequest } from '/lib/state/request'
 
-import setRelationsInState from '/lib/state/relations'
+import { setRelationsInState } from '/lib/state/relations'
 
 import {
+    isQueryUsing,
     setInDictionary,
     removeEntity,
     setQueryResults,
@@ -73,33 +74,16 @@ export const blocklistsSlice = createSlice({
  */
 export const cleanupBlocklistQuery = function(key) {
     return function(dispatch, getState) {
-        const blocklists = getState().blocklists
+        const state = getState().blocklists
 
-
-        if ( key in blocklists.queries ) {
-            const query = blocklists.queries[key]
-
-            // Search the other queries to determine whether this entity is in
-            // use by another query.
-            const queryIsUsing = (id) => {
-                for(const [searchKey, value] of Object.entries(blocklists.queries)) {
-                    if ( searchKey === key ) {
-                        continue
-                    }
-
-                    if ( blocklists.queries[searchKey].list.find((e) => id === e) !== undefined) {
-                        return true
-                    }
-                }
-                return false
-            }
-
+        if ( key in state.queries ) {
+            const query = state.queries[key]
             for(const id of query.list) {
-                if ( queryIsUsing(id) ) {
+                if ( isQueryUsing(state.queries, id, key) ) {
                     continue
                 }
 
-                const entity = id in blocklists.dictionary ? blocklists.dictionary[id] : null
+                const entity = id in state.dictionary ? state.dictionary[id] : null
                 if ( entity !== null ) {
                     dispatch(blocklistsSlice.actions.removeBlocklist({ entity: entity }))
                 }

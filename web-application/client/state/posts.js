@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit'
 import * as qs from 'qs'
 
 import { makeTrackedRequest } from '/lib/state/request'
-import setRelationsInState from '/lib/state/relations'
+import { setRelationsInState } from '/lib/state/relations'
 
 import {
     setInDictionary,
@@ -107,6 +107,36 @@ export const postsSlice = createSlice({
         }
     }
 })
+
+/**
+ * Cleanup a query and all entities that are only in use by that query.
+ * Entities in use by other queries will be left.
+ *
+ * @param {string} key The name of the query we want to cleanup.
+ *
+ * @return {void} 
+ */
+export const cleanupPostQuery = function(key) {
+    return function(dispatch, getState) {
+        const state = getState().posts
+
+        if ( key in state.queries ) {
+            const query = state.queries[key]
+            for(const id of query.list) {
+                if ( isQueryUsing(state.queries, id, key) ) {
+                    continue
+                }
+
+                const entity = id in state.dictionary ? state.dictionary[id] : null
+                if ( entity !== null ) {
+                    dispatch(postsSlice.actions.removePost({ entity: entity }))
+                }
+            }
+
+            dispatch(postsSlice.actions.clearPostQuery({ name: key }))
+        }
+    }
+}
 
 
 /**

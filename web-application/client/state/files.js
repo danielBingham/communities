@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 
-import setRelationsInState from '/lib/state/relations'
+import { setRelationsInState }  from '/lib/state/relations'
 
 import {
     setInDictionary,

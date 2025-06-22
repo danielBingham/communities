@@ -6,7 +6,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 import { getUser } from '/state/users'
 
 export const useUser = function(id) {
-    const user = useSelector((state) => id && id in state.users.dictionary ? state.users.dictionary[id] : null)
+    const user = useSelector((state) => id && id in state.User.dictionary ? state.User.dictionary[id] : null)
 
     const [request, makeRequest] = useRequest()
 

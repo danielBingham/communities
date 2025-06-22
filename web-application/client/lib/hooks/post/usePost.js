@@ -1,28 +1,29 @@
-import { useState, useEffect } from 'react'
-import { useSelector } from 'react-redux'
+import { useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { getPost } from '/state/posts'
+import { getPost, removePost } from '/state/posts'
 
 export const usePost = function(postId) {
-    const [error, setError] = useState(null)
-
     const post = useSelector((state) => postId && postId in state.posts.dictionary ? state.posts.dictionary[postId] : null)
 
-    const [request, makeRequest] = useRequest()
+    const [request, makeRequest, resetRequest] = useRequest()
 
+    const dispatch = useDispatch()
     useEffect(() => {
-        if ( postId && ! post && request === null ) {
+        if ( postId && post === null && request === null ) {
             makeRequest(getPost(postId))
         }
-    }, [ postId, post ])
 
-    useEffect(() => {
-        if ( request && request.state == 'failed' ) {
-            setError(request.error)
+        return () => {
+            console.log(request)
+            if ( post !== null && request !== null && request.state === 'fulfilled' ) {
+                dispatch(removePost({ entity: post }))
+                resetRequest()
+            }
         }
-    }, [ request ])
+    }, [ postId, post, request ])
 
-    return [post, error, request]
+    return [post, request]
 }

@@ -4,6 +4,19 @@
  * state manipulation methods.
  ******************************************************************************/
 
+export const queryIsUsing = function(queries, id, ignore) {
+    for(const [key, query] of Object.entries(queries)) {
+        if ( ignore === key ) {
+            continue
+        }
+
+        if ( query.list.includes(id) ) {
+            return true
+        }
+    }
+    return false
+}
+
 export const setInDictionary = function(state, action) {
     if ( 'dictionary' in action.payload) {
         state.dictionary = { ...state.dictionary, ...action.payload.dictionary }
@@ -24,6 +37,14 @@ export const setInDictionary = function(state, action) {
 export const removeEntity = function(state, action) {
     const entity = action.payload.entity
     const clearQueries = action.payload.clearQueries
+    const ignoreQuery = action.payload.ignoreQuery
+
+    // Don't remove an entity that is in use by a query unless that query is
+    // currently being cleaned up OR unless we need to taint all the queries
+    // and re-query because an entity has been deleted.
+    if ( clearQueries !== true && queryIsUsing(state.queries, entity.id, ignoreQuery) ) {
+        return
+    }
 
     delete state.dictionary[entity.id]
 
@@ -32,7 +53,7 @@ export const removeEntity = function(state, action) {
         for ( const [key,query] of Object.entries(state.queries)) {
             state.queries[key].taint = true
         }
-    }
+    } 
 }
 
 export const makeQuery = function(state, action) {

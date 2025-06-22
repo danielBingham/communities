@@ -17,7 +17,7 @@ import postSubscriptionsReducer from './postSubscriptions'
 import tokensReducer from './tokens'
 import siteModerationReducer from './admin/siteModeration'
 import systemReducer from './system'
-import usersReducer from './users'
+import UserReducer from './User/slice'
 import userRelationshipsReducer from './userRelationships'
 
 
@@ -36,7 +36,7 @@ const reducers = combineReducers({
     postReactions: postReactionsReducer,
     postSubscriptions: postSubscriptionsReducer,
     tokens: tokensReducer,
-    users: usersReducer,
+    User: UserReducer,
     userRelationships: userRelationshipsReducer,
     siteModeration: siteModerationReducer,
     system: systemReducer

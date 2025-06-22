@@ -1,48 +1,68 @@
-import { setFilesInDictionary } from '/state/files'
-import { setGroupMembersInDictionary } from '/state/groupMembers'
-import { setPostsInDictionary } from '/state/posts'
-import { setPostCommentsInDictionary } from '/state/postComments'
-import { setPostReactionsInDictionary } from '/state/postReactions'
-import { setPostSubscriptionsInDictionary } from '/state/postSubscriptions'
-import { setSiteModerationsInDictionary } from '/state/admin/siteModeration'
-import { setUsersInDictionary } from '/state/users'
-import { setUserRelationshipsInDictionary } from '/state/userRelationships'
+import { setFilesInDictionary, removeFile } from '/state/files'
+import { setGroupMembersInDictionary, removeGroupMember } from '/state/groupMembers'
+import { setPostsInDictionary, removePost } from '/state/posts'
+import { setPostCommentsInDictionary, removePostComment } from '/state/postComments'
+import { setPostReactionsInDictionary, removePostReaction } from '/state/postReactions'
+import { setPostSubscriptionsInDictionary, removePostSubscription } from '/state/postSubscriptions'
+import { setSiteModerationsInDictionary, removeSiteModeration } from '/state/admin/siteModeration'
+import { setUsersInDictionary, removeUser } from '/state/users'
+import { setUserRelationshipsInDictionary, removeUserRelationship } from '/state/userRelationships'
 
+console.log(`importing: `)
+console.log(setUsersInDictionary)
 
-const setRelationsInState = function(relations) {
+const entityMap = {
+    files: {
+        set: setFilesInDictionary, remove: removeFile
+    },
+    groupMembers: {
+        set: setGroupMembersInDictionary, remove: removeGroupMember
+    },
+    posts: {
+        set: setPostsInDictionary, remove: removePost
+    },
+    postComments: {
+        set: setPostCommentsInDictionary, remove: removePostComment
+    },
+    postReactions: {
+        set: setPostReactionsInDictionary, remove: removePostReaction
+    },
+    postSubscriptions: {
+        set: setPostSubscriptionsInDictionary, remove: removePostSubscription
+    },
+    siteModerations: {
+        set: setSiteModerationsInDictionary, remove: removeSiteModeration
+    },
+    users: {
+        set: setUsersInDictionary, remove: removeUser
+    },
+    userRelationships: {
+        set: setUserRelationshipsInDictionary, remove: removeUserRelationship
+    }
+}
+
+export const setRelationsInState = function(relations) {
     return function(dispatch, getState) {
-        if ( relations ) {
+
+        console.log(`EntityMap: `)
+        console.log(entityMap)
+        if ( relations !== undefined && relations !== null ) {
             for(const [relation, dictionary] of Object.entries(relations)) {
-                if ( relation == 'files' ) {
-                    dispatch(setFilesInDictionary({ dictionary: dictionary }))
-                } 
-                else if ( relation == 'groupMembers' ) {
-                    dispatch(setGroupMembersInDictionary({ dictionary: dictionary }))
-                }
-                else if ( relation == 'posts' ) {
-                    dispatch(setPostsInDictionary({ dictionary: dictionary }))
-                } 
-                else if ( relation == 'postComments' ) {
-                    dispatch(setPostCommentsInDictionary({ dictionary: dictionary }))
-                } 
-                else if ( relation == 'postReactions' ) { 
-                    dispatch(setPostReactionsInDictionary({ dictionary: dictionary }))
-                } 
-                else if ( relation == 'postSubscriptions' ) {
-                    dispatch(setPostSubscriptionsInDictionary({ dictionary: dictionary }))
-                } 
-                else if ( relation === 'siteModerations' ) {
-                    dispatch(setSiteModerationsInDictionary({ dictionary: dictionary }))
-                }
-                else if ( relation == 'users' ) {
-                    dispatch(setUsersInDictionary({ dictionary: dictionary }))
-                } 
-                else if ( relation == 'userRelationships' ) {
-                    dispatch(setUserRelationshipsInDictionary({ dictionary: dictionary }))
-                }
+                console.log(`Setting relation: '${relation}'`)
+                console.log(entityMap[relation])
+                console.log(entityMap)
+                dispatch(entityMap[relation].set({ dictionary: dictionary }))
             }
         }
     }
 }
 
-export default setRelationsInState
+export const cleanupRelations = function(relations) {
+    if ( relations !== undefined && relations !== null ) {
+        for(const [relation, dictionary] of Object.entries(relations)) {
+            for(const [id, entity] of Object.entries(dictionary)) {
+                dispatch(entityMap[relation].remove({ entity: entity }))
+            }
+        }
+    }
+}

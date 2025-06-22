@@ -4,11 +4,9 @@ import { useNavigate, Link } from 'react-router-dom'
 
 import { UsersIcon, UserGroupIcon, GlobeAltIcon } from '@heroicons/react/24/solid'
 
-import { useRequest } from '/lib/hooks/useRequest'
 import { usePostDraft } from '/lib/hooks/usePostDraft'
 import { useFeature } from '/lib/hooks/feature'
-
-import { getPost } from '/state/posts'
+import { usePost } from '/lib/hooks/Post'
 
 import Linkify from 'react-linkify'
 
@@ -34,20 +32,12 @@ import './Post.css'
 const Post = function({ id, expanded, showLoading, shared }) {
     const [showMore, setShowMore] = useState(expanded) 
 
-    const [request, makeRequest] = useRequest()
-
-    const post = useSelector((state) => id && id in state.posts.dictionary ? state.posts.dictionary[id] : null) 
+    const [post, request] = usePost(id)
     const user = useSelector((state) => post?.userId && post.userId in state.users.dictionary ? state.users.dictionary[post.userId] : null) 
     const group = useSelector((state) => post?.groupId && post.groupId in state.groups.dictionary ? state.groups.dictionary[post.groupId] : null)
 
     const hasAdminModeration = useFeature('62-admin-moderation-controls')
     const moderation = useSelector((state) => hasAdminModeration && id && id in state.siteModeration.byPostId ? state.siteModeration.byPostId[id] : null)
-
-    useEffect(function() {
-        if ( ! post ) {
-            makeRequest(getPost(id))
-        }
-    }, [ id, post ])
 
     const [draft, setDraft] = usePostDraft(id)
     if ( draft !== null) {

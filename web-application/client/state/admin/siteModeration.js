@@ -3,7 +3,7 @@ import * as qs from 'qs'
 
 import { makeTrackedRequest } from '/lib/state/request'
 
-import setRelationsInState from '/lib/state/relations'
+import { setRelationsInState } from '/lib/state/relations'
 
 import {
     setInDictionary,
@@ -204,7 +204,7 @@ export const patchSiteModeration = function(siteModeration) {
 }
 
 export const { 
-    setSiteModerationsInDictionary, clearSiteModerationQuery
+    setSiteModerationsInDictionary, removeSiteModeration, clearSiteModerationQuery
 }  = siteModerationsSlice.actions
 
 export default siteModerationsSlice.reducer

@@ -13,13 +13,13 @@ export const useBlocklist = function(id) {
     const dispatch = useDispatch()
 
     useEffect(() => {
-        if ( blocklist === null && request === null ) {
+        if ( id && blocklist === null && request === null ) {
             makeRequest(getBlocklist(id)) 
         }
 
         return () => {
             if ( request !== null && request.state === 'fulfilled' ) {
-                dispatch(removeBlocklist(blocklist)) 
+                dispatch(removeBlocklist({ entity: blocklist })) 
                 resetRequest()
             }
         }

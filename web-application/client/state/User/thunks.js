@@ -1,83 +1,12 @@
-import { createSlice, current } from '@reduxjs/toolkit'
 import * as qs from 'qs'
 
 import { makeTrackedRequest } from '/lib/state/request'
 
 import { setRelationsInState } from '/lib/state/relations'
 
-import {
-    setInDictionary,
-    removeEntity,
-    setQueryResults,
-    clearQuery,
-    clearQueries
-} from '/lib/state'
-
 import { setCurrentUser } from '/state/authentication'
 
-export const usersSlice = createSlice({
-    name: 'users',
-    initialState: {
-
-        /**
-         * A dictionary of users we've retrieved from the backend, keyed by
-         * user.id.
-         *
-         * @type {object}
-         */
-        dictionary: {},
-
-        /**
-         *
-         * An object containing queries made to query supporting endpoints.
-         *
-         * In this case: GET /users 
-         *
-         * Structure:
-         * {
-         *  queryName: {
-         *      meta: {
-         *          page: <int>,
-         *          count: <int>,
-         *          pageSize: <int>,
-         *          numberOfPages: <int>
-         *      },
-         *      list: [] 
-         *  },
-         *  ...
-         * }
-         */
-        queries: {},
-
-        byUsername: {}
-    },
-    reducers: {
-
-
-        // ======== State Manipulation Helpers ================================
-        // @see /lib/state.js
-
-        setUsersInDictionary: (state, action) => {
-            setInDictionary(state, action)
-            
-            if ( 'dictionary' in action.payload) {
-                for(const [id, user] of Object.entries(action.payload.dictionary)) {
-                    state.byUsername[user.username] = user
-                }
-            } else if ( 'entity' in action.payload ) {
-                state.byUsername[action.payload.entity.username] = action.payload.entity
-            }
-        },
-        removeUser: (state, action) => {
-            removeEntity(state, action)
-
-            delete state.byUsername[action.payload.entity.username]
-        },
-        setUserQueryResults: setQueryResults,
-        clearUserQuery: clearQuery,
-        clearUserQueries: clearQueries
-    }
-})
+import { setUsersInDictionary, removeUser, setUserQueryResults, clearUserQuery } from './slice'
 
 const updateCurrentUser = function(response) {
     return function(dispatch, getState) {
@@ -112,9 +41,9 @@ export const getUsers = function(name, params) {
         const endpoint = `/users${( params ? '?' + qs.stringify(params) : '')}`
         return dispatch(makeTrackedRequest('GET', endpoint, null,
             function(response) {
-                dispatch(usersSlice.actions.setUsersInDictionary({ dictionary: response.dictionary }))
+                dispatch(setUsersInDictionary({ dictionary: response.dictionary }))
 
-                dispatch(usersSlice.actions.setUserQueryResults({ name: name, meta: response.meta, list: response.list }))
+                dispatch(setUserQueryResults({ name: name, meta: response.meta, list: response.list }))
 
                 dispatch(setRelationsInState(response.relations))
             }
@@ -138,7 +67,7 @@ export const postUsers = function(user) {
     return function(dispatch, getState) {
         return dispatch(makeTrackedRequest('POST', '/users', user,
             function(response) {
-                dispatch(usersSlice.actions.setUsersInDictionary({ entity: response.entity }))
+                dispatch(setUsersInDictionary({ entity: response.entity }))
 
                 dispatch(setRelationsInState(response.relations))
 
@@ -164,7 +93,7 @@ export const getUser = function(id) {
     return function(dispatch, getState) {
         return dispatch(makeTrackedRequest('GET', `/user/${encodeURIComponent(id)}`, null,
             function(response) {
-                dispatch(usersSlice.actions.setUsersInDictionary({ entity: response.entity }))
+                dispatch(setUsersInDictionary({ entity: response.entity }))
 
                 dispatch(setRelationsInState(response.relations))
 
@@ -190,7 +119,7 @@ export const patchUser = function(user) {
     return function(dispatch, getState) {
         return dispatch(makeTrackedRequest('PATCH', `/user/${encodeURIComponent(user.id)}`, user,
             function(response) {
-                dispatch(usersSlice.actions.setUsersInDictionary({ entity: response.entity }))
+                dispatch(setUsersInDictionary({ entity: response.entity }))
 
                 dispatch(setRelationsInState(response.relations))
 
@@ -216,20 +145,8 @@ export const deleteUser = function(user) {
     return function(dispatch, getState) {
         return dispatch(makeTrackedRequest('DELETE', `/user/${encodeURIComponent(user.id)}`, null,
             function(response) {
-                dispatch(usersSlice.actions.removeUser({ entity: user }))
+                dispatch(removeUser({ entity: user }))
             }
         ))
     }
 } 
-console.log(`UsersSlice.actions: `)
-console.log(usersSlice.actions)
-
-export const { 
-    setUsersInDictionary, removeUser, 
-    setUserQueryResults, clearUserQuery
-}  = usersSlice.actions
-
-console.log(`Exporting: `)
-console.log(setUsersInDictionary)
-
-export default usersSlice.reducer
