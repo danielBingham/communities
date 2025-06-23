@@ -7,7 +7,7 @@ import { setLinkPreviewsInDictionary, removeLinkPreview } from '/state/LinkPrevi
 import { setPostsInDictionary, removePost } from '/state/Post/slice'
 import { setPostCommentsInDictionary, removePostComment } from '/state/PostComment/slice'
 import { setPostReactionsInDictionary, removePostReaction } from '/state/PostReaction/slice'
-import { setPostSubscriptionsInDictionary, removePostSubscription } from '/state/postSubscriptions'
+import { setPostSubscriptionsInDictionary, removePostSubscription } from '/state/PostSubscription/slice'
 import { setSiteModerationsInDictionary, removeSiteModeration } from '/state/admin/siteModeration'
 import { setUsersInDictionary, removeUser } from '/state/User/slice'
 import { setUserRelationshipsInDictionary, removeUserRelationship } from '/state/userRelationships'
