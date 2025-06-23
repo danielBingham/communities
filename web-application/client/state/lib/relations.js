@@ -6,7 +6,7 @@ import { setGroupMembersInDictionary, removeGroupMember } from '/state/GroupMemb
 import { setLinkPreviewsInDictionary, removeLinkPreview } from '/state/LinkPreview/slice'
 import { setPostsInDictionary, removePost } from '/state/Post/slice'
 import { setPostCommentsInDictionary, removePostComment } from '/state/PostComment/slice'
-import { setPostReactionsInDictionary, removePostReaction } from '/state/postReactions'
+import { setPostReactionsInDictionary, removePostReaction } from '/state/PostReaction/slice'
 import { setPostSubscriptionsInDictionary, removePostSubscription } from '/state/postSubscriptions'
 import { setSiteModerationsInDictionary, removeSiteModeration } from '/state/admin/siteModeration'
 import { setUsersInDictionary, removeUser } from '/state/User/slice'

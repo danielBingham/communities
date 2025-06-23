@@ -12,7 +12,7 @@ import notificationsReducer from './notifications'
 import LinkPreviewReducer from './LinkPreview'
 import PostReducer from './Post'
 import PostCommentReducer from './PostComment'
-import postReactionsReducer from './postReactions'
+import PostReactionReducer from './PostReaction'
 import postSubscriptionsReducer from './postSubscriptions'
 import tokensReducer from './tokens'
 import siteModerationReducer from './admin/siteModeration'
@@ -33,7 +33,7 @@ const reducers = combineReducers({
     LinkPreview: LinkPreviewReducer,
     Post: PostReducer,
     PostComment: PostCommentReducer,
-    postReactions: postReactionsReducer,
+    PostReaction: PostReactionReducer,
     postSubscriptions: postSubscriptionsReducer,
     tokens: tokensReducer,
     User: UserReducer,
