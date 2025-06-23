@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { patchUser } from '/state/users'
+import { patchUser } from '/state/User'
 
 import Button from '/components/generic/button/Button'
 import Modal from '/components/generic/modal/Modal'

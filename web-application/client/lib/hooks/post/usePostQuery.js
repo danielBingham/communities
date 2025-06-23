@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { getPosts, cleanupPostQuery } from '/state/admin/posts'
+import { getPosts, cleanupPostQuery } from '/state/Post'
 
 export const usePostQuery = function(queryParameters) {
     const params = queryParameters ? queryParameters : {}
@@ -13,7 +13,7 @@ export const usePostQuery = function(queryParameters) {
     // same.  We'll probably want a solution for this at some point.
     const key = JSON.stringify(params)
 
-    const query = useSelector((state) => key in state.posts.queries ? state.posts.queries[key] : null)
+    const query = useSelector((state) => key in state.Post.queries ? state.Post.queries[key] : null)
 
     const [ request, makeRequest, resetRequest ] = useRequest()
 
@@ -25,7 +25,6 @@ export const usePostQuery = function(queryParameters) {
         }
 
         return () => {
-            console.log(request)
             if ( request !== null && request.state === 'fulfilled' ) {
                 dispatch(cleanupPostQuery(key)) 
                 resetRequest()

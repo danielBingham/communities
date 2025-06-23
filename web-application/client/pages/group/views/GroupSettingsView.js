@@ -6,7 +6,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 import { useGroup } from '/lib/hooks/group'
 import { GroupPermissions, useGroupPermission } from '/lib/hooks/permission'
 
-import { deleteGroup } from '/state/groups'
+import { deleteGroup } from '/state/Group'
 
 import GroupEditForm from '/components/groups/form/GroupEditForm'
 import Button from '/components/generic/button/Button'

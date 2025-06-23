@@ -59,7 +59,7 @@ const Header = function(props) {
                     <CommunitiesLogo />
                     <div id="navigation">
                         <div id="primary" className="navigation-block">
-                            <a className="nav-link" href="/">{ isFeedPage ? <QueueListIconSolid /> : <QueueListIconOutline /> } <span className="nav-text">Feeds</span></a>
+                            <NavLink className="nav-link" to="/"><QueueListIconSolid className="solid" /><QueueListIconOutline className="outline" /> <span className="nav-text">Feeds</span></NavLink>
                             <NavLink className="nav-link" to="/friends"><UsersIconSolid className="solid" /><UsersIconOutline className="outline" /> <span className="nav-text">Friends</span></NavLink> 
                             <NavLink className="nav-link" to="/groups"><UserGroupIconOutline className="outline" /><UserGroupIconSolid className="solid" /> <span className="nav-text">Groups</span></NavLink>
                         </div>

@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { deleteUser } from '/state/users'
+import { deleteUser } from '/state/User'
 import { reset } from '/state/system'
 
 import AreYouSure from '/components/AreYouSure'

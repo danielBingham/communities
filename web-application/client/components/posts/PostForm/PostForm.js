@@ -13,8 +13,8 @@ import { usePostDraft } from '/lib/hooks/usePostDraft'
 import { useGroup } from '/lib/hooks/group'
 import { usePost } from '/lib/hooks/post'
 
-import { deleteFile } from '/state/files'
-import { postPosts, patchPost, finishPostEdit, clearSharingPost } from '/state/posts'
+import { deleteFile } from '/state/File'
+import { postPosts, patchPost, finishPostEdit, clearSharingPost } from '/state/Post'
 
 import FileUploadInput from '/components/files/FileUploadInput'
 import DraftImageFile from '/components/files/DraftImageFile'

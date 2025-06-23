@@ -5,7 +5,7 @@ import { useSearchParams } from 'react-router-dom'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { getUsers } from '/state/users'
+import { getUsers } from '/state/User'
 
 import PaginationControls from '/components/PaginationControls'
 import { Table, TableHeader, TableCell } from '/components/ui/Table'
@@ -19,8 +19,8 @@ const UserAdminTable = function() {
 
     const [ searchParams, setSearchParams ] = useSearchParams()
 
-    const dictionary = useSelector((state) => state.users.dictionary)
-    const query = useSelector((state) => 'UserAdmin' in state.users.queries ? state.users.queries['UserAdmin'] : null)
+    const dictionary = useSelector((state) => state.User.dictionary)
+    const query = useSelector((state) => 'UserAdmin' in state.User.queries ? state.User.queries['UserAdmin'] : null)
     const [request, makeRequest] = useRequest()
 
     useEffect(function() {

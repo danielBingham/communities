@@ -4,7 +4,7 @@ import { TrashIcon } from '@heroicons/react/24/outline'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { deletePost } from '/state/posts'
+import { deletePost } from '/state/Post'
 
 import { FloatingMenuItem } from '/components/generic/floating-menu/FloatingMenu'
 

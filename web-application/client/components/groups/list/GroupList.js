@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { getGroups } from '/state/groups'
+import { getGroups } from '/state/Group'
 
 import GroupBadge from '/components/groups/view/GroupBadge'
 
@@ -13,7 +13,7 @@ import Spinner from '/components/Spinner'
 
 const GroupList = function({ name, params }) {
 
-    const query = useSelector((state) => name in state.groups.queries ? state.groups.queries[name] : null)
+    const query = useSelector((state) => name in state.Group.queries ? state.Group.queries[name] : null)
 
     const [request, makeRequest] = useRequest()
 

@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { setSharingPost } from '/state/posts'
+import { setSharingPost } from '/state/Post'
 import { postPostReaction, patchPostReaction, deletePostReaction } from '/state/postReactions'
 
 import { XCircleIcon, 
@@ -27,7 +27,7 @@ const PostReactions = function({ postId }) {
     const [request, makeRequest] = useRequest()
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
-    const post = useSelector((state) => postId && postId in state.posts.dictionary ? state.posts.dictionary[postId] : null)
+    const post = useSelector((state) => postId && postId in state.Post.dictionary ? state.Post.dictionary[postId] : null)
 
     const postReactions = useSelector((state) => state.postReactions.dictionary)
     const userReactionId = post.reactions.find((rid) => rid in postReactions ? postReactions[rid].userId == currentUser?.id : false)

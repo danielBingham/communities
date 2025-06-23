@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { patchUser } from '/state/users'
+import { patchUser } from '/state/User'
 
 import Toggle from '/components/generic/toggle/Toggle'
 

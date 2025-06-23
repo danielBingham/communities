@@ -8,7 +8,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 
 import { useGroup } from '/lib/hooks/group'
 
-import { patchGroup } from '/state/groups'
+import { patchGroup } from '/state/Group'
 
 import DraftProfileImage from '/components/files/DraftProfileImage'
 import FileUploadInput from '/components/files/FileUploadInput'

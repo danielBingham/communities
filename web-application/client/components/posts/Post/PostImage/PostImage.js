@@ -5,7 +5,7 @@ import './PostImage.css'
 
 const PostImage = function({ id, className }) {
     
-    const post = useSelector((state) => id && id in state.posts.dictionary ? state.posts.dictionary[id] : null) 
+    const post = useSelector((state) => id && id in state.Post.dictionary ? state.Post.dictionary[id] : null) 
     const configuration = useSelector((state) => state.system.configuration)
 
     if ( ! id || ! post ) {

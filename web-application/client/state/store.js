@@ -4,20 +4,20 @@ import { combineReducers } from 'redux'
 import authenticationReducer from './authentication'
 import blocklistsReducer from './admin/blocklists'
 import featuresReducer from './features'
-import filesReducer from './files'
-import groupsReducer from './groups'
-import groupMembersReducer from './groupMembers'
+import FileReducer from './File'
+import GroupReducer from './Group'
+import GroupMemberReducer from './GroupMember'
 import jobsReducer from './jobs'
 import notificationsReducer from './notifications'
-import linkPreviewsReducer from './linkPreviews'
-import postsReducer from './posts'
-import postCommentsReducer from './postComments'
+import LinkPreviewReducer from './LinkPreview'
+import PostReducer from './Post'
+import PostCommentReducer from './PostComment'
 import postReactionsReducer from './postReactions'
 import postSubscriptionsReducer from './postSubscriptions'
 import tokensReducer from './tokens'
 import siteModerationReducer from './admin/siteModeration'
 import systemReducer from './system'
-import UserReducer from './User/slice'
+import UserReducer from './User'
 import userRelationshipsReducer from './userRelationships'
 
 
@@ -25,14 +25,14 @@ const reducers = combineReducers({
     authentication: authenticationReducer,
     blocklists: blocklistsReducer,
     features: featuresReducer,
-    files: filesReducer,
-    groups: groupsReducer,
-    groupMembers: groupMembersReducer,
+    File: FileReducer,
+    Group: GroupReducer,
+    GroupMember: GroupMemberReducer,
     jobs: jobsReducer,
     notifications: notificationsReducer,
-    linkPreviews: linkPreviewsReducer,
-    posts: postsReducer,
-    postComments: postCommentsReducer,
+    LinkPreview: LinkPreviewReducer,
+    Post: PostReducer,
+    PostComment: PostCommentReducer,
     postReactions: postReactionsReducer,
     postSubscriptions: postSubscriptionsReducer,
     tokens: tokensReducer,

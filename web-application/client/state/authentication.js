@@ -3,8 +3,8 @@ import { createSlice } from '@reduxjs/toolkit'
 import { makeTrackedRequest } from '/lib/state/request'
 
 import { reset } from '/state/system'
-import { setUsersInDictionary } from '/state/users'
-import { setFilesInDictionary } from '/state/files'
+import { setUsersInDictionary } from '/state/User'
+import { setFilesInDictionary } from '/state/File'
 
 export const authenticationSlice = createSlice({
     name: 'authentication',

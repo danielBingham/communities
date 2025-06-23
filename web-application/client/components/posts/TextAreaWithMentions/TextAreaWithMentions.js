@@ -7,7 +7,7 @@ import getCaretCoordinates from 'textarea-caret'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { getUsers, clearUserQuery } from '/state/users'
+import { getUsers, clearUserQuery } from '/state/User'
 
 import { DropdownMenu, DropdownMenuBody, DropdownMenuItem } from '/components/ui/DropdownMenu'
 
@@ -24,8 +24,8 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
     const [currentMention, setCurrentMention] = useState('')
     const [areMentioning, setAreMentioning] = useState(false)
 
-    const userDictionary = useSelector((state) => state.users.dictionary)
-    const query = useSelector((state) => 'TextAreaWithMentions' in state.users.queries ? state.users.queries['TextAreaWithMentions'] : null)
+    const userDictionary = useSelector((state) => state.User.dictionary)
+    const query = useSelector((state) => 'TextAreaWithMentions' in state.User.queries ? state.User.queries['TextAreaWithMentions'] : null)
 
     const [ request, makeRequest, resetRequest ] = useRequest()
 

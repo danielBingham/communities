@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { getUser } from '/state/users'
+import { getUser } from '/state/User'
 
 import UserProfileImage from '/components/users/UserProfileImage'
 import GroupMembershipButton from '/components/groups/components/GroupMembershipButton'
@@ -21,10 +21,10 @@ const GroupMemberBadge = function({ groupId, userId }) {
     // ======= Redux State ==========================================
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
-    const currentMember = useSelector((state) => currentUser && groupId in state.groupMembers.byGroupAndUser && currentUser.id in state.groupMembers.byGroupAndUser[groupId] ? state.groupMembers.byGroupAndUser[groupId][userId] : null)
+    const currentMember = useSelector((state) => currentUser && groupId in state.GroupMember.byGroupAndUser && currentUser.id in state.GroupMember.byGroupAndUser[groupId] ? state.GroupMember.byGroupAndUser[groupId][userId] : null)
     
-    const user = useSelector((state) => userId in state.users.dictionary ? state.users.dictionary[userId] : null)
-    const userMember = useSelector((state) => groupId in state.groupMembers.byGroupAndUser && userId in state.groupMembers.byGroupAndUser[groupId] ? state.groupMembers.byGroupAndUser[groupId][userId] : null)
+    const user = useSelector((state) => userId in state.User.dictionary ? state.User.dictionary[userId] : null)
+    const userMember = useSelector((state) => groupId in state.GroupMember.byGroupAndUser && userId in state.GroupMember.byGroupAndUser[groupId] ? state.GroupMember.byGroupAndUser[groupId][userId] : null)
 
     // ======= Effect Handling ======================================
     

@@ -3,10 +3,10 @@ import { useSelector } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { getPostComment } from '/state/postComments'
+import { getPostComment } from '/state/PostComment'
 
 export const usePostComment = function(postId, postCommentId) {
-    const postComment = useSelector((state) => postCommentId && postCommentId in state.postComments.dictionary ? state.postComments.dictionary[postCommentId] : null)
+    const postComment = useSelector((state) => postCommentId && postCommentId in state.PostComment.dictionary ? state.PostComment.dictionary[postCommentId] : null)
 
     const [request, makeRequest] = useRequest()
 

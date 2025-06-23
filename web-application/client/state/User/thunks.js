@@ -1,8 +1,8 @@
 import * as qs from 'qs'
 
-import { makeTrackedRequest } from '/lib/state/request'
-
-import { setRelationsInState } from '/lib/state/relations'
+import { makeRequest } from '/state/lib/makeRequest'
+import { setRelationsInState } from '/state/lib/relations'
+import { queryIsUsing } from '/state/lib/queryIsUsing'
 
 import { setCurrentUser } from '/state/authentication'
 
@@ -26,6 +26,36 @@ const updateCurrentUser = function(response) {
 }
 
 /**
+ * Cleanup a query and all entities that are only in use by that query.
+ * Entities in use by other queries will be left.
+ *
+ * @param {string} key The name of the query we want to cleanup.
+ *
+ * @return {void} 
+ */
+export const cleanupUserQuery = function(key) {
+    return function(dispatch, getState) {
+        const state = getState().User
+
+        if ( key in state.queries ) {
+            const query = state.queries[key]
+            for(const id of query.list) {
+                if ( queryIsUsing(state.queries, id, key) ) {
+                    continue
+                }
+
+                const entity = id in state.dictionary ? state.dictionary[id] : null
+                if ( entity !== null ) {
+                    dispatch(removeUser({ entity: entity }))
+                }
+            }
+
+            dispatch(clearUserQuery({ name: key }))
+        }
+    }
+}
+
+/**
  * GET /users?...
  *
  * Get all users in the database. Queryable.  Populates state.dictionary and
@@ -39,7 +69,7 @@ const updateCurrentUser = function(response) {
 export const getUsers = function(name, params) {
     return function(dispatch, getState) {
         const endpoint = `/users${( params ? '?' + qs.stringify(params) : '')}`
-        return dispatch(makeTrackedRequest('GET', endpoint, null,
+        return dispatch(makeRequest('GET', endpoint, null,
             function(response) {
                 dispatch(setUsersInDictionary({ dictionary: response.dictionary }))
 
@@ -65,7 +95,7 @@ export const getUsers = function(name, params) {
  */
 export const postUsers = function(user) {
     return function(dispatch, getState) {
-        return dispatch(makeTrackedRequest('POST', '/users', user,
+        return dispatch(makeRequest('POST', '/users', user,
             function(response) {
                 dispatch(setUsersInDictionary({ entity: response.entity }))
 
@@ -91,7 +121,7 @@ export const postUsers = function(user) {
  */
 export const getUser = function(id) {
     return function(dispatch, getState) {
-        return dispatch(makeTrackedRequest('GET', `/user/${encodeURIComponent(id)}`, null,
+        return dispatch(makeRequest('GET', `/user/${encodeURIComponent(id)}`, null,
             function(response) {
                 dispatch(setUsersInDictionary({ entity: response.entity }))
 
@@ -117,7 +147,7 @@ export const getUser = function(id) {
  */
 export const patchUser = function(user) {
     return function(dispatch, getState) {
-        return dispatch(makeTrackedRequest('PATCH', `/user/${encodeURIComponent(user.id)}`, user,
+        return dispatch(makeRequest('PATCH', `/user/${encodeURIComponent(user.id)}`, user,
             function(response) {
                 dispatch(setUsersInDictionary({ entity: response.entity }))
 
@@ -143,7 +173,7 @@ export const patchUser = function(user) {
  */
 export const deleteUser = function(user) {
     return function(dispatch, getState) {
-        return dispatch(makeTrackedRequest('DELETE', `/user/${encodeURIComponent(user.id)}`, null,
+        return dispatch(makeRequest('DELETE', `/user/${encodeURIComponent(user.id)}`, null,
             function(response) {
                 dispatch(removeUser({ entity: user }))
             }

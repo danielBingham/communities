@@ -3,10 +3,10 @@ import { useSelector, useDispatch } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { getUsers, clearUserQuery } from '/state/users'
+import { getUsers, clearUserQuery } from '/state/User'
 
 export const useUserByUsername = function(username) {
-    const user = useSelector((state) => username in state.users.byUsername ? state.users.byUsername[username] : null)
+    const user = useSelector((state) => username in state.User.byUsername ? state.User.byUsername[username] : null)
 
     const [request, makeRequest, resetRequest] = useRequest()
 

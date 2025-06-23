@@ -5,7 +5,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 import { validateEmail, validatePassword } from '/lib/validation/user'
 
 import { patchAuthentication } from '/state/authentication'
-import { patchUser } from '/state/users'
+import { patchUser } from '/state/User'
 
 import Input from '/components/generic/input/Input'
 import Spinner from '/components/Spinner'

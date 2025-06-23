@@ -5,7 +5,7 @@ import { EllipsisHorizontalIcon } from '@heroicons/react/24/solid'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { patchGroupMember } from '/state/groupMembers'
+import { patchGroupMember } from '/state/GroupMember'
 
 import { FloatingMenu, FloatingMenuBody, FloatingMenuTrigger, FloatingMenuItem } from '/components/generic/floating-menu/FloatingMenu'
 
@@ -17,10 +17,9 @@ const GroupMemberDotsMenu = function({ groupId, userId }) {
     const [request, makeRequest] = useRequest()
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
-    const currentMember = useSelector((state) => currentUser && groupId in state.groupMembers.byGroupAndUser && currentUser.id in state.groupMembers.byGroupAndUser[groupId] ? state.groupMembers.byGroupAndUser[groupId][currentUser.id] : null)
+    const currentMember = useSelector((state) => currentUser && groupId in state.GroupMember.byGroupAndUser && currentUser.id in state.GroupMember.byGroupAndUser[groupId] ? state.GroupMember.byGroupAndUser[groupId][currentUser.id] : null)
     
-    const user = useSelector((state) => userId in state.users.dictionary ? state.users.dictionary[userId] : null)
-    const userMember = useSelector((state) => groupId in state.groupMembers.byGroupAndUser && userId in state.groupMembers.byGroupAndUser[groupId] ? state.groupMembers.byGroupAndUser[groupId][userId] : null)
+    const userMember = useSelector((state) => groupId in state.GroupMember.byGroupAndUser && userId in state.GroupMember.byGroupAndUser[groupId] ? state.GroupMember.byGroupAndUser[groupId][userId] : null)
 
 
     const promote = (role) => {

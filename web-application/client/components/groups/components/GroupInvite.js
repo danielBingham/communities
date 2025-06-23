@@ -3,8 +3,8 @@ import { useSelector, useDispatch } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { getUsers, postUsers, clearUserQuery } from '/state/users'
-import { postGroupMembers } from '/state/groupMembers'
+import { getUsers, postUsers, clearUserQuery } from '/state/User'
+import { postGroupMembers } from '/state/GroupMember'
 
 import Button from '/components/generic/button/Button'
 import Spinner from '/components/Spinner'
@@ -14,8 +14,8 @@ import './GroupInvite.css'
 const GroupInvite = function({ groupId }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
-    const userDictionary = useSelector((state) => state.users.dictionary)
-    const userQuery = useSelector((state) => 'GroupInvite' in state.users.queries ? state.users.queries['GroupInvite'] : null)
+    const userDictionary = useSelector((state) => state.User.dictionary)
+    const userQuery = useSelector((state) => 'GroupInvite' in state.User.queries ? state.User.queries['GroupInvite'] : null)
 
     const [userId, setUserId] = useState(null)
     const [nameOrEmail, setNameOrEmail] = useState( userId && userId in userDictionary ? userDictionary[userId].name : '')

@@ -6,7 +6,7 @@ import { ArrowLeftStartOnRectangleIcon, ArrowLeftEndOnRectangleIcon } from '@her
 import { useRequest } from '/lib/hooks/useRequest'
 import { useGroup, useGroupMember } from '/lib/hooks/group'
 
-import { postGroupMembers, patchGroupMember, deleteGroupMember } from '/state/groupMembers'
+import { postGroupMembers, patchGroupMember, deleteGroupMember } from '/state/GroupMember'
 
 import AreYouSure from '/components/AreYouSure'
 import ErrorModal from '/components/errors/ErrorModal'

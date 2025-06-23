@@ -1,22 +1,29 @@
-import { setFilesInDictionary, removeFile } from '/state/files'
-import { setGroupMembersInDictionary, removeGroupMember } from '/state/groupMembers'
-import { setPostsInDictionary, removePost } from '/state/posts'
-import { setPostCommentsInDictionary, removePostComment } from '/state/postComments'
+import logger from '/logger'
+
+import { setFilesInDictionary, removeFile } from '/state/File/slice'
+import { setGroupsInDictionary, removeGroup } from '/state/Group/slice'
+import { setGroupMembersInDictionary, removeGroupMember } from '/state/GroupMember/slice'
+import { setLinkPreviewsInDictionary, removeLinkPreview } from '/state/LinkPreview/slice'
+import { setPostsInDictionary, removePost } from '/state/Post/slice'
+import { setPostCommentsInDictionary, removePostComment } from '/state/PostComment/slice'
 import { setPostReactionsInDictionary, removePostReaction } from '/state/postReactions'
 import { setPostSubscriptionsInDictionary, removePostSubscription } from '/state/postSubscriptions'
 import { setSiteModerationsInDictionary, removeSiteModeration } from '/state/admin/siteModeration'
-import { setUsersInDictionary, removeUser } from '/state/users'
+import { setUsersInDictionary, removeUser } from '/state/User/slice'
 import { setUserRelationshipsInDictionary, removeUserRelationship } from '/state/userRelationships'
-
-console.log(`importing: `)
-console.log(setUsersInDictionary)
 
 const entityMap = {
     files: {
         set: setFilesInDictionary, remove: removeFile
     },
+    groups: {
+        set: setGroupsInDictionary, remove: removeGroup
+    },
     groupMembers: {
         set: setGroupMembersInDictionary, remove: removeGroupMember
+    },
+    linkPreviews: {
+        set: setLinkPreviewsInDictionary, remove: removeLinkPreview
     },
     posts: {
         set: setPostsInDictionary, remove: removePost
@@ -43,13 +50,13 @@ const entityMap = {
 
 export const setRelationsInState = function(relations) {
     return function(dispatch, getState) {
-
-        console.log(`EntityMap: `)
-        console.log(entityMap)
         if ( relations !== undefined && relations !== null ) {
             for(const [relation, dictionary] of Object.entries(relations)) {
-                console.log(`Setting relation: '${relation}'`)
-                console.log(entityMap[relation])
+                if ( ! ( relation in entityMap ) ) {
+                    logger.warn(`Entity '${relation}' is missing from the 'entityMap'.`)
+                    continue
+                }
+
                 console.log(entityMap)
                 dispatch(entityMap[relation].set({ dictionary: dictionary }))
             }

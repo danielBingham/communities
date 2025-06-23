@@ -2,8 +2,9 @@ import React, { useEffect } from 'react'
 import { useSelector } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
+import { useUser } from '/lib/hooks/User'
 
-import { getUser } from '/state/users'
+import { getUser } from '/state/User'
 
 import UserProfileImage from '/components/users/UserProfileImage'
 import FriendButton from '/components/friends/FriendButton'
@@ -13,22 +14,9 @@ import Error404 from '/components/errors/Error404'
 import './UserView.css'
 
 const UserView = function(props) {
-
-    // ======= Request Tracking =====================================
-
-    const [request, makeRequest] = useRequest()
-
-    // ======= Redux State ==========================================
     
-    const user = useSelector((state) => state.users.dictionary[props.id])
+    const [user, request] = useUser(props.id)
 
-    // ======= Effect Handling ======================================
-
-    useEffect(function() {
-        if ( ! user ) {
-            makeRequest(getUser(props.id))
-        }
-    }, [ user ])
 
     // ======= Render ===============================================
 

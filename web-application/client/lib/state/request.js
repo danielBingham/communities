@@ -75,7 +75,11 @@ export const makeTrackedRequest = function(method, endpoint, body, onSuccess, on
                     message: responseBody.message, 
                     data: responseBody.data 
                 }
-                logger.error(`Request failed: `, requestError)
+                if ( status >= 500 ) {
+                    logger.error(`Request failed: `, requestError)
+                } else {
+                    logger.warn(`Request returned ${status}: `, requestError)
+                }
                 if ( onFailure ) {
                     try {
                         onFailure(responseBody)

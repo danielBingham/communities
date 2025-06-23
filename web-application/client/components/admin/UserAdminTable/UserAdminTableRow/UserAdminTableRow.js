@@ -2,7 +2,7 @@ import React from 'react'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { patchUser } from '/state/users'
+import { patchUser } from '/state/User'
 
 import { TableRow, TableCell } from '/components/ui/Table'
 import ErrorModal from '/components/errors/ErrorModal'

@@ -5,7 +5,7 @@ import logger from '/logger'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { getLinkPreview } from '/state/linkPreviews'
+import { getLinkPreview } from '/state/LinkPreview'
 
 import './LinkPreview.css'
 
@@ -13,7 +13,7 @@ const LinkPreview = function({ id }) {
 
     const [request, makeRequest] = useRequest()
 
-    const linkPreview = useSelector((state) => id && id in state.linkPreviews.dictionary ? state.linkPreviews.dictionary[id] : null) 
+    const linkPreview = useSelector((state) => id && id in state.LinkPreview.dictionary ? state.LinkPreview.dictionary[id] : null) 
 
     useEffect(function() {
         if ( id ) {

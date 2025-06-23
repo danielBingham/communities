@@ -1,10 +1,7 @@
-import React, { useState, useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import React from 'react'
 import { useParams, Outlet } from 'react-router-dom'
 
-import { useRequest } from '/lib/hooks/useRequest'
-
-import { getUsers } from '/state/users'
+import { useUserByUsername } from '/lib/hooks/User'
 
 import Error404 from '/components/errors/Error404'
 import Spinner from '/components/Spinner'
@@ -17,23 +14,8 @@ import './UserProfilePage.css'
 
 const UserProfilePage = function(props) {
     const { slug } = useParams()
-
-    // ======= Request Tracking =====================================
-
-    const [ request, makeRequest ] = useRequest()
-
-    // ======= Redux State ==========================================
   
-    const id = useSelector((state) => 'UserProfilePage' in state.users.queries ? state.users.queries['UserProfilePage'].list[0] : null)
-    const user = useSelector((state) => id !== null && id in state.users.dictionary ? state.users.dictionary[id] : null)
-
-    // ================= User Action Handling  ================================
-
-    // ======= Effect Handling ======================================
-
-    useEffect(function() {
-        makeRequest(getUsers('UserProfilePage', { username: slug }))
-    }, [ slug ])
+    const [user, request] = useUserByUsername(slug)
 
     // ======= Render ===============================================
 
@@ -56,7 +38,7 @@ const UserProfilePage = function(props) {
     return (
         <Page id="user-profile-page">
             <PageLeftGutter>
-                <UserView id={id} />
+                <UserView id={user.id} />
             </PageLeftGutter>
             <PageBody className='main'>
                 <Outlet /> 

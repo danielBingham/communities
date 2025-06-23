@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { getUser } from '/state/users'
+import { getUser } from '/state/User'
 
 export const useUser = function(id) {
     const user = useSelector((state) => id && id in state.User.dictionary ? state.User.dictionary[id] : null)

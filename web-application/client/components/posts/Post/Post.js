@@ -7,6 +7,7 @@ import { UsersIcon, UserGroupIcon, GlobeAltIcon } from '@heroicons/react/24/soli
 import { usePostDraft } from '/lib/hooks/usePostDraft'
 import { useFeature } from '/lib/hooks/feature'
 import { usePost } from '/lib/hooks/Post'
+import { useUser } from '/lib/hooks/User'
 
 import Linkify from 'react-linkify'
 
@@ -33,8 +34,8 @@ const Post = function({ id, expanded, showLoading, shared }) {
     const [showMore, setShowMore] = useState(expanded) 
 
     const [post, request] = usePost(id)
-    const user = useSelector((state) => post?.userId && post.userId in state.users.dictionary ? state.users.dictionary[post.userId] : null) 
-    const group = useSelector((state) => post?.groupId && post.groupId in state.groups.dictionary ? state.groups.dictionary[post.groupId] : null)
+    const [user, userRequest] = useUser(post?.userId)
+    const group = useSelector((state) => post?.groupId && post.groupId in state.Group.dictionary ? state.Group.dictionary[post.groupId] : null)
 
     const hasAdminModeration = useFeature('62-admin-moderation-controls')
     const moderation = useSelector((state) => hasAdminModeration && id && id in state.siteModeration.byPostId ? state.siteModeration.byPostId[id] : null)

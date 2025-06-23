@@ -5,12 +5,12 @@ import logger from '/logger'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { getGroup } from '/state/groups'
+import { getGroup } from '/state/Group'
 
 export const useGroup = function(groupId) {
     const [error, setError] = useState(null)
 
-    const group = useSelector((state) => groupId && groupId in state.groups.dictionary ? state.groups.dictionary[groupId] : null)
+    const group = useSelector((state) => groupId && groupId in state.Group.dictionary ? state.Group.dictionary[groupId] : null)
 
     const [request, makeRequest] = useRequest()
 

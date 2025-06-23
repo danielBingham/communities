@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { postUsers } from '/state/users'
+import { postUsers } from '/state/User'
 
 import Spinner from '/components/Spinner'
 import Button from '/components/generic/button/Button'

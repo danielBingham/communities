@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { deleteFile } from '/state/files'
+import { deleteFile } from '/state/File'
 import { XCircleIcon } from '@heroicons/react/24/solid'
 
 

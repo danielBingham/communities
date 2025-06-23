@@ -1,9 +1,4 @@
-import React, { useEffect } from 'react'
-import { useSearchParams } from 'react-router-dom'
-
-import { useRequest } from '/lib/hooks/useRequest'
-
-import { getPosts } from '/state/posts'
+import React  from 'react'
 
 import PostList from '/components/posts/PostList'
 

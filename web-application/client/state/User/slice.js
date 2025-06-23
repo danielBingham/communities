@@ -5,7 +5,7 @@ import {
     setQueryResults,
     clearQuery,
     clearQueries
-} from '/lib/state'
+} from '/state/lib/slice'
 
 export const UserSlice = createSlice({
     name: 'User',

@@ -3,10 +3,10 @@ import { useSelector, useDispatch } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { getPost, removePost } from '/state/posts'
+import { getPost, removePost } from '/state/Post'
 
 export const usePost = function(postId) {
-    const post = useSelector((state) => postId && postId in state.posts.dictionary ? state.posts.dictionary[postId] : null)
+    const post = useSelector((state) => postId && postId in state.Post.dictionary ? state.Post.dictionary[postId] : null)
 
     const [request, makeRequest, resetRequest] = useRequest()
 
@@ -17,7 +17,6 @@ export const usePost = function(postId) {
         }
 
         return () => {
-            console.log(request)
             if ( post !== null && request !== null && request.state === 'fulfilled' ) {
                 dispatch(removePost({ entity: post }))
                 resetRequest()
