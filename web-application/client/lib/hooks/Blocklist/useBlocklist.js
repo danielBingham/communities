@@ -3,10 +3,10 @@ import { useDispatch, useSelector } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { getBlocklist, removeBlocklist } from '/state/admin/blocklists'
+import { getBlocklist, removeBlocklist } from '/state/Blocklist'
 
 export const useBlocklist = function(id) {
-    const blocklist = useSelector((state) => id in state.blocklists.dictionary ? state.blocklists.dictionary[id] : null)
+    const blocklist = useSelector((state) => id in state.Blocklist.dictionary ? state.Blocklist.dictionary[id] : null)
 
     const [ request, makeRequest, resetRequest ] = useRequest()
 

@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { getBlocklists, cleanupBlocklistQuery } from '/state/admin/blocklists'
+import { getBlocklists, cleanupBlocklistQuery } from '/state/Blocklist'
 
 export const useBlocklistQuery = function(queryParameters) {
     const params = queryParameters ? queryParameters : {}
@@ -13,7 +13,7 @@ export const useBlocklistQuery = function(queryParameters) {
     // same.  We'll probably want a solution for this at some point.
     const key = JSON.stringify(params)
 
-    const query = useSelector((state) => key in state.blocklists.queries ? state.blocklists.queries[key] : null)
+    const query = useSelector((state) => key in state.Blocklist.queries ? state.Blocklist.queries[key] : null)
 
     const [ request, makeRequest, resetRequest ] = useRequest()
 

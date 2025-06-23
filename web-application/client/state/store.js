@@ -2,7 +2,7 @@ import { configureStore } from '@reduxjs/toolkit'
 import { combineReducers } from 'redux'
 
 import authenticationReducer from './authentication'
-import blocklistsReducer from './admin/blocklists'
+import BlocklistReducer from './Blocklist'
 import featuresReducer from './features'
 import FileReducer from './File'
 import GroupReducer from './Group'
@@ -15,7 +15,7 @@ import PostCommentReducer from './PostComment'
 import PostReactionReducer from './PostReaction'
 import PostSubscriptionReducer from './PostSubscription'
 import tokensReducer from './tokens'
-import SiteModerationReducer from './admin/SiteModeration'
+import SiteModerationReducer from './SiteModeration'
 import systemReducer from './system'
 import UserReducer from './User'
 import UserRelationshipReducer from './UserRelationship'
@@ -23,7 +23,7 @@ import UserRelationshipReducer from './UserRelationship'
 
 const reducers = combineReducers({
     authentication: authenticationReducer,
-    blocklists: blocklistsReducer,
+    Blocklist: BlocklistReducer,
     features: featuresReducer,
     File: FileReducer,
     Group: GroupReducer,

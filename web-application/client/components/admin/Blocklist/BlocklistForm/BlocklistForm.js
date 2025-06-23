@@ -5,7 +5,7 @@ import * as shared from '@communities/shared'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { postBlocklists } from '/state/admin/blocklists'
+import { postBlocklists } from '/state/Blocklist'
 
 import Button from '/components/generic/button/Button'
 import Input from '/components/generic/input/Input'

@@ -1,68 +1,14 @@
-import { createSlice } from '@reduxjs/toolkit'
 import * as qs from 'qs'
 
-import { makeTrackedRequest } from '/lib/state/request'
-
-import { setRelationsInState } from '/lib/state/relations'
+import { makeRequest } from '/state/lib/makeRequest'
+import { setRelationsInState } from '/state/lib/relations'
 import { queryIsUsing } from '/state/lib/queryIsUsing'
 
 import {
-    setInDictionary,
-    removeEntity,
-    setQueryResults,
-    clearQuery,
-    clearQueries
-} from '/lib/state'
-
-export const blocklistsSlice = createSlice({
-    name: 'blocklists',
-    initialState: {
-        
-        // ======== Standard State ============================================
-
-        /**
-         * A dictionary of blocklists we've retrieved from the backend, keyed by
-         * post.id.
-         *
-         * @type {object}
-         */
-        dictionary: {},
-
-        /**
-         *
-         * An object containing queries made to query supporting endpoints.
-         *
-         * In the case of Blocklist: /admin/blocklists
-         *
-         * Structure:
-         * {
-         *  queryName: {
-         *      meta: {
-         *          page: <int>,
-         *          count: <int>,
-         *          pageSize: <int>,
-         *          numberOfPages: <int>
-         *      },
-         *      list: [] 
-         *  },
-         *  ...
-         * }
-         */
-        queries: {},
-
-    },
-    reducers: {
-        // ======== State Manipulation Helpers ================================
-        // @see ./helpers/state.js
-
-        setBlocklistsInDictionary: setInDictionary,
-        removeBlocklist: removeEntity,
-        setBlocklistQueryResults: setQueryResults,
-        clearBlocklistQuery: clearQuery,
-        clearBlocklistQueries: clearQueries
-    }
-})
-
+    setBlocklistsInDictionary, removeBlocklist ,
+    setBlocklistQueryResults, clearBlocklistQuery,
+    clearBlocklistQueries
+} from './slice'
 
 /**
  * Cleanup a query and all entities that are only in use by that query.
@@ -74,7 +20,7 @@ export const blocklistsSlice = createSlice({
  */
 export const cleanupBlocklistQuery = function(key) {
     return function(dispatch, getState) {
-        const state = getState().blocklists
+        const state = getState().Blocklist
 
         if ( key in state.queries ) {
             const query = state.queries[key]
@@ -85,11 +31,11 @@ export const cleanupBlocklistQuery = function(key) {
 
                 const entity = id in state.dictionary ? state.dictionary[id] : null
                 if ( entity !== null ) {
-                    dispatch(blocklistsSlice.actions.removeBlocklist({ entity: entity }))
+                    dispatch(removeBlocklist({ entity: entity }))
                 }
             }
 
-            dispatch(blocklistsSlice.actions.clearBlocklistQuery({ name: key }))
+            dispatch(clearBlocklistQuery({ name: key }))
         }
     }
 }
@@ -109,11 +55,11 @@ export const getBlocklists = function(name, params) {
     return function(dispatch, getState) {
         const endpoint = `/admin/blocklists${( params ? '?' + qs.stringify(params) : '')}`
 
-        return dispatch(makeTrackedRequest('GET', endpoint, null,
+        return dispatch(makeRequest('GET', endpoint, null,
             function(response) {
-                dispatch(blocklistsSlice.actions.setBlocklistsInDictionary({ dictionary: response.dictionary}))
+                dispatch(setBlocklistsInDictionary({ dictionary: response.dictionary}))
 
-                dispatch(blocklistsSlice.actions.setBlocklistQueryResults({ name: name, meta: response.meta, list: response.list }))
+                dispatch(setBlocklistQueryResults({ name: name, meta: response.meta, list: response.list }))
 
                 dispatch(setRelationsInState(response.relations))
             }
@@ -137,9 +83,9 @@ export const postBlocklists = function(blocklist) {
     return function(dispatch, getState) {
         const endpoint = `/admin/blocklists`
         const body = blocklist 
-        return dispatch(makeTrackedRequest('POST', endpoint, body,
+        return dispatch(makeRequest('POST', endpoint, body,
             function(response) {
-                dispatch(blocklistsSlice.actions.setBlocklistsInDictionary({ entity: response.entity}))
+                dispatch(setBlocklistsInDictionary({ entity: response.entity}))
 
                 dispatch(setRelationsInState(response.relations))
             }
@@ -163,9 +109,9 @@ export const postBlocklists = function(blocklist) {
  */
 export const getBlocklist = function(id) {
     return function(dispatch, getState) {
-        return dispatch(makeTrackedRequest('GET', `/admin/blocklist/${encodeURIComponent(id)}`, null,
+        return dispatch(makeRequest('GET', `/admin/blocklist/${encodeURIComponent(id)}`, null,
             function(response) {
-                dispatch(blocklistsSlice.actions.setBlocklistsInDictionary({ entity: response.entity}))
+                dispatch(setBlocklistsInDictionary({ entity: response.entity}))
 
                 dispatch(setRelationsInState(response.relations))
             }
@@ -187,9 +133,9 @@ export const getBlocklist = function(id) {
  */
 export const patchBlocklist = function(blocklist) {
     return function(dispatch, getState) {
-        return dispatch(makeTrackedRequest('PATCH', `/admin/blocklist/${encodeURIComponent(blocklist.id)}`, blocklist,
+        return dispatch(makeRequest('PATCH', `/admin/blocklist/${encodeURIComponent(blocklist.id)}`, blocklist,
             function(response) {
-                dispatch(blocklistsSlice.actions.setBlocklistsInDictionary({ entity: response.entity}))
+                dispatch(setBlocklistsInDictionary({ entity: response.entity}))
 
                 dispatch(setRelationsInState(response.relations))
             }
@@ -208,16 +154,10 @@ export const patchBlocklist = function(blocklist) {
  */
 export const deleteBlocklist = function(blocklist) {
     return function(dispatch, getState) {
-        return dispatch(makeTrackedRequest('DELETE', `/admin/blocklist/${encodeURIComponent(blocklist.id)}`, null,
+        return dispatch(makeRequest('DELETE', `/admin/blocklist/${encodeURIComponent(blocklist.id)}`, null,
             function(response) {
-                dispatch(blocklistsSlice.actions.removeBlocklist({ entity: blocklist, clearQueries: true }))
+                dispatch(removeBlocklist({ entity: blocklist, clearQueries: true }))
             }
         ))
     }
-} 
-
-export const { 
-    setBlocklistsInDictionary, removeBlocklist 
-}  = blocklistsSlice.actions
-
-export default blocklistsSlice.reducer
+}
