@@ -5,6 +5,7 @@ import { useSearchParams } from 'react-router-dom'
 import { useRequest } from '/lib/hooks/useRequest'
 
 import { getUsers, cleanupUserQuery } from '/state/User'
+import { cleanupRelations } from '/state/lib'
 
 export const useUserQuery = function(queryParameters) {
     const params = queryParameters ? queryParameters : {}
@@ -35,6 +36,7 @@ export const useUserQuery = function(queryParameters) {
         return () => {
             if ( request !== null && request.state === 'fulfilled' ) {
                 dispatch(cleanupUserQuery(key)) 
+                dispatch(cleanupRelations(request.response.body.relations))
                 resetRequest()
             }
         }

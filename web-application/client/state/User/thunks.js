@@ -46,7 +46,7 @@ export const cleanupUserQuery = function(key) {
 
                 const entity = id in state.dictionary ? state.dictionary[id] : null
                 if ( entity !== null ) {
-                    dispatch(removeUser({ entity: entity }))
+                    dispatch(removeUser({ entity: entity, ignoreQuery: key }))
                 }
             }
 
