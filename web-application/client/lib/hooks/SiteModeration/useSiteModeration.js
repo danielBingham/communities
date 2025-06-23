@@ -3,10 +3,10 @@ import { useSelector } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { getSiteModeration } from '/state/admin/siteModeration'
+import { getSiteModeration } from '/state/SiteModeration'
 
 export const useSiteModeration = function(id) {
-    const moderation = useSelector((state) => id && id in state.siteModeration.dictionary ? state.siteModeration.dictionary[id] : null)
+    const moderation = useSelector((state) => id && id in state.SiteModeration.dictionary ? state.SiteModeration.dictionary[id] : null)
 
     const [request, makeRequest] = useRequest()
 

@@ -3,14 +3,14 @@ import { useSelector } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { getSiteModerations } from '/state/admin/siteModeration'
+import { getSiteModerations } from '/state/SiteModeration'
 
 export const useSiteModerationForPost = function(postId) {
     const moderation = useSelector(function(state) {
-        if ( ! postId || ! (postId in state.siteModeration.byPostId) ) {
+        if ( ! postId || ! (postId in state.SiteModeration.byPostId) ) {
             return null
         }
-        return state.siteModeration.byPostId[postId]
+        return state.SiteModeration.byPostId[postId]
     })
 
     const [request, makeRequest] = useRequest()

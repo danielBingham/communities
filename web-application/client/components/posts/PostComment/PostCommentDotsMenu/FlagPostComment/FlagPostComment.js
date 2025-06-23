@@ -9,7 +9,7 @@ import { useFeature } from '/lib/hooks/feature/useFeature'
 
 import { useSiteModerationForPostComment } from '/lib/hooks/SiteModeration'
 
-import { postSiteModerations } from '/state/admin/siteModeration'
+import { postSiteModerations } from '/state/SiteModeration'
 
 import { FloatingMenuItem } from '/components/generic/floating-menu/FloatingMenu'
 

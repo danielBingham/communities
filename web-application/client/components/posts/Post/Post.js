@@ -38,7 +38,7 @@ const Post = function({ id, expanded, showLoading, shared }) {
     const group = useSelector((state) => post?.groupId && post.groupId in state.Group.dictionary ? state.Group.dictionary[post.groupId] : null)
 
     const hasAdminModeration = useFeature('62-admin-moderation-controls')
-    const moderation = useSelector((state) => hasAdminModeration && id && id in state.siteModeration.byPostId ? state.siteModeration.byPostId[id] : null)
+    const moderation = useSelector((state) => hasAdminModeration && id && id in state.SiteModeration.byPostId ? state.SiteModeration.byPostId[id] : null)
 
     const [draft, setDraft] = usePostDraft(id)
     if ( draft !== null) {

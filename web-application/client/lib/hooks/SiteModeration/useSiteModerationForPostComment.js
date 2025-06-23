@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux'
 import { useRequest } from '/lib/hooks/useRequest'
 import { useFeature } from '/lib/hooks/feature'
 
-import { getSiteModerations } from '/state/admin/siteModeration'
+import { getSiteModerations } from '/state/SiteModeration'
 
 export const useSiteModerationForPostComment = function(postId, postCommentId) {
     const hasAdminModeration = useFeature('62-admin-moderation-controls')
@@ -12,13 +12,13 @@ export const useSiteModerationForPostComment = function(postId, postCommentId) {
         if ( ! hasAdminModeration ) {
             return null
         }
-        if ( ! postId || ! (postId in state.siteModeration.byPostCommentId) ) {
+        if ( ! postId || ! (postId in state.SiteModeration.byPostCommentId) ) {
             return null
         }
-        if ( ! postCommentId || !( postCommentId in state.siteModeration.byPostCommentId[postId])) {
+        if ( ! postCommentId || !( postCommentId in state.SiteModeration.byPostCommentId[postId])) {
             return null
         }
-        return state.siteModeration.byPostCommentId[postId][postCommentId]
+        return state.SiteModeration.byPostCommentId[postId][postCommentId]
     })
 
     const [request, makeRequest] = useRequest()
