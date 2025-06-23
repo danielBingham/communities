@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 
-import { makeTrackedRequest } from '/lib/state/request'
+import { makeRequest } from '/state/lib/makeRequest'
 
 import { reset } from '/state/system'
 import { setUsersInDictionary } from '/state/User'
@@ -62,7 +62,7 @@ export const refreshAuthentication = function() {
 export const getAuthentication = function() {
     return function(dispatch, getState) {
         const endpoint = '/authentication'
-        return dispatch(makeTrackedRequest('GET', endpoint, null,
+        return dispatch(makeRequest('GET', endpoint, null,
             function(responseBody ) {
                 if ( responseBody && responseBody.session !== null) {
                     dispatch(setSession(responseBody.session))
@@ -95,7 +95,7 @@ export const postAuthentication = function(email, password) {
             password: password
         }
 
-        return dispatch(makeTrackedRequest('POST', endpoint, body,
+        return dispatch(makeRequest('POST', endpoint, body,
             function(responseBody) {
                 if ( responseBody && responseBody.session !== null) {
                     dispatch(setSession(responseBody.session))
@@ -128,7 +128,7 @@ export const patchAuthentication = function(email, password) {
             email: email,
             password: password
         }
-        return dispatch(makeTrackedRequest('PATCH', endpoint, body, 
+        return dispatch(makeRequest('PATCH', endpoint, body, 
             function(responseBody) {
                 dispatch(setUsersInDictionary({ entity: responseBody.user }))  
             }
@@ -151,7 +151,7 @@ export const deleteAuthentication = function() {
     return function(dispatch, getState) {
         const endpoint = '/authentication'
 
-        return dispatch(makeTrackedRequest('DELETE', endpoint, null,
+        return dispatch(makeRequest('DELETE', endpoint, null,
             function(responseBody) {
                 dispatch(reset())
                 // As soon as we reset the redux store, we need to redirect to

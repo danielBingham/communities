@@ -46,9 +46,6 @@ export const PostSubscriptionSlice = createSlice({
 
     },
     reducers: {
-        // ======== State Manipulation Helpers ================================
-        // @see ./lib/state.js
-
         setPostSubscriptionsInDictionary: function(state, action) {
             setInDictionary(state, action)
 

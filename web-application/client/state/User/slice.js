@@ -44,11 +44,6 @@ export const UserSlice = createSlice({
         byUsername: {}
     },
     reducers: {
-
-
-        // ======== State Manipulation Helpers ================================
-        // @see /lib/state.js
-
         setUsersInDictionary: (state, action) => {
             setInDictionary(state, action)
             

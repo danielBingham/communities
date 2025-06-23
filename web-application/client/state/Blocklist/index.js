@@ -1,7 +1,7 @@
 export { 
     default,
     setBlocklistsInDictionary, removeBlocklist ,
-    setBlocklistQueryResult, clearBlocklistQuery,
+    setBlocklistQueryResults, clearBlocklistQuery,
     clearBlocklistQueries
 } from './slice'
 export { cleanupBlocklistQuery, getBlocklists, postBlocklists, getBlocklist, patchBlocklist, deleteBlocklist } from './thunks'

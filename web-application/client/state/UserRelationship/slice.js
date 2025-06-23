@@ -44,11 +44,6 @@ export const UserRelationshipSlice = createSlice({
         
     },
     reducers: {
-
-
-        // ======== State Manipulation Helpers ================================
-        // @see /lib/state.js
-
         setUserRelationshipsInDictionary: function(state, action) {
             setInDictionary(state, action)
 

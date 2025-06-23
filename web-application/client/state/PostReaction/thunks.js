@@ -1,5 +1,5 @@
 import { makeRequest } from '/state/lib/makeRequest'
-import { setRelationsInState } from '/lib/state/relations'
+import { setRelationsInState } from '/state/lib/relations'
 
 import { 
     setPostReactionsInDictionary, removePostReaction, 
