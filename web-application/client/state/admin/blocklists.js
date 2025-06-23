@@ -4,9 +4,9 @@ import * as qs from 'qs'
 import { makeTrackedRequest } from '/lib/state/request'
 
 import { setRelationsInState } from '/lib/state/relations'
+import { queryIsUsing } from '/state/lib/queryIsUsing'
 
 import {
-    isQueryUsing,
     setInDictionary,
     removeEntity,
     setQueryResults,
@@ -79,7 +79,7 @@ export const cleanupBlocklistQuery = function(key) {
         if ( key in state.queries ) {
             const query = state.queries[key]
             for(const id of query.list) {
-                if ( isQueryUsing(state.queries, id, key) ) {
+                if ( queryIsUsing(state.queries, id, key) ) {
                     continue
                 }
 
