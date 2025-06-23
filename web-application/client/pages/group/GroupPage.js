@@ -8,7 +8,7 @@ import {
     LockClosedIcon
 } from '@heroicons/react/24/outline'
 
-import { useGroupFromSlug, useGroupMember } from '/lib/hooks/group'
+import { useGroupFromSlug } from '/lib/hooks/Group'
 import { GroupPermissions, useGroupPermission } from '/lib/hooks/permission'
 
 import PostPage from '/pages/posts/PostPage'

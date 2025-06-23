@@ -8,6 +8,7 @@ import { usePostDraft } from '/lib/hooks/usePostDraft'
 import { useFeature } from '/lib/hooks/feature'
 import { usePost } from '/lib/hooks/Post'
 import { useUser } from '/lib/hooks/User'
+import { useGroup } from '/lib/hooks/Group'
 
 import Linkify from 'react-linkify'
 
@@ -35,7 +36,7 @@ const Post = function({ id, expanded, showLoading, shared }) {
 
     const [post, request] = usePost(id)
     const [user, userRequest] = useUser(post?.userId)
-    const group = useSelector((state) => post?.groupId && post.groupId in state.Group.dictionary ? state.Group.dictionary[post.groupId] : null)
+    const [group, groupRequest] = useGroup(post?.groupId) 
 
     const hasAdminModeration = useFeature('62-admin-moderation-controls')
     const moderation = useSelector((state) => hasAdminModeration && id && id in state.SiteModeration.byPostId ? state.SiteModeration.byPostId[id] : null)
@@ -56,11 +57,11 @@ const Post = function({ id, expanded, showLoading, shared }) {
         )
     }
 
-    if ( showLoading && (request && request.state == 'pending' )) {
+    if ( showLoading && ((request && request.state == 'pending' ) || (userRequest && userRequest.state === 'pending') || (groupRequest && groupRequest.state === 'pending'))) {
         return ( <div id={id} className="post"><Spinner /></div> )
     }
 
-    if ( ! post ) {
+    if ( ! post || (post?.userId && ! user) || (post?.groupId && ! group) ) {
         return null
     }
 

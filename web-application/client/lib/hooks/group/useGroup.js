@@ -1,30 +1,20 @@
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { useSelector } from 'react-redux'
-
-import logger from '/logger'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
 import { getGroup } from '/state/Group'
 
 export const useGroup = function(groupId) {
-    const [error, setError] = useState(null)
-
     const group = useSelector((state) => groupId && groupId in state.Group.dictionary ? state.Group.dictionary[groupId] : null)
 
-    const [request, makeRequest] = useRequest()
+    const [request, makeRequest ] = useRequest()
 
     useEffect(() => {
-        if ( groupId !== undefined && groupId !== null && group === null ) {
+        if ( groupId  && group === null && request === null ) {
             makeRequest(getGroup(groupId))
         }
-    }, [ groupId, group ])
+    }, [ groupId, group, request ])
 
-    useEffect(() => {
-        if ( request && request.state == 'failed' ) {
-            setError(request.error)
-        }
-    }, [ request ])
-
-    return [group, error, request]
+    return [group, request]
 }

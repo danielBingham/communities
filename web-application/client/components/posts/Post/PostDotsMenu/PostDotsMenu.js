@@ -1,7 +1,7 @@
 import React from 'react'
 import { useSelector } from 'react-redux'
 
-import { useGroupMember } from '/lib/hooks/group'
+import { useGroupMember } from '/lib/hooks/GroupMember'
 import { useFeature } from '/lib/hooks/feature'
 
 import { EllipsisHorizontalIcon } from '@heroicons/react/24/solid'

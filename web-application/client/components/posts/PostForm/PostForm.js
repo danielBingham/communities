@@ -10,7 +10,7 @@ import logger from '/logger'
 import { useRequest } from '/lib/hooks/useRequest'
 import { usePostDraft } from '/lib/hooks/usePostDraft'
 
-import { useGroup } from '/lib/hooks/group'
+import { useGroup } from '/lib/hooks/Group'
 import { usePost } from '/lib/hooks/Post'
 
 import { deleteFile } from '/state/File'

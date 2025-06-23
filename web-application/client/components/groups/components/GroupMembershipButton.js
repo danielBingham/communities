@@ -4,7 +4,8 @@ import { useSelector } from 'react-redux'
 import { ArrowLeftStartOnRectangleIcon, ArrowLeftEndOnRectangleIcon } from '@heroicons/react/24/solid'
 
 import { useRequest } from '/lib/hooks/useRequest'
-import { useGroup, useGroupMember } from '/lib/hooks/group'
+import { useGroup } from '/lib/hooks/Group'
+import { useGroupMember } from '/lib/hooks/GroupMember'
 
 import { postGroupMembers, patchGroupMember, deleteGroupMember } from '/state/GroupMember'
 

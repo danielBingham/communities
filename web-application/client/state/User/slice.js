@@ -7,10 +7,7 @@ import {
     clearQueries
 } from '/state/lib/slice'
 
-export const UserSlice = createSlice({
-    name: 'User',
-    initialState: {
-
+const initialState = {
         /**
          * A dictionary of users we've retrieved from the backend, keyed by
          * user.id.
@@ -42,7 +39,12 @@ export const UserSlice = createSlice({
         queries: {},
 
         byUsername: {}
-    },
+
+}
+
+export const UserSlice = createSlice({
+    name: 'User',
+    initialState: initialState,
     reducers: {
         setUsersInDictionary: (state, action) => {
             setInDictionary(state, action)
@@ -62,7 +64,11 @@ export const UserSlice = createSlice({
         },
         setUserQueryResults: setQueryResults,
         clearUserQuery: clearQuery,
-        clearUserQueries: clearQueries
+        clearUserQueries: clearQueries,
+        resetUserSlice: function() {
+            return initialState
+        }
+
     }
 })
 
@@ -70,7 +76,7 @@ export const UserSlice = createSlice({
 export const { 
     setUsersInDictionary, removeUser, 
     setUserQueryResults, clearUserQuery,
-    clearUserQueries 
+    clearUserQueries, resetUserSlice
 }  = UserSlice.actions
 
 export default UserSlice.reducer

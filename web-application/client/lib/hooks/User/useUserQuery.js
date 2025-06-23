@@ -4,8 +4,7 @@ import { useSearchParams } from 'react-router-dom'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { getUsers, cleanupUserQuery } from '/state/User'
-import { cleanupRelations } from '/state/lib'
+import { getUsers, clearUserQuery } from '/state/User'
 
 export const useUserQuery = function(queryParameters) {
     const params = queryParameters ? queryParameters : {}
@@ -27,16 +26,14 @@ export const useUserQuery = function(queryParameters) {
     const [ request, makeRequest, resetRequest ] = useRequest()
 
     const dispatch = useDispatch()
-
     useEffect(() => {
         if ( query === null && request === null ) {
             makeRequest(getUsers(key, params)) 
         }
 
         return () => {
-            if ( request !== null && request.state === 'fulfilled' ) {
-                dispatch(cleanupUserQuery(key)) 
-                dispatch(cleanupRelations(request.response.body.relations))
+            if ( query !== null && request !== null && request.state === 'fulfilled' ) {
+                dispatch(clearUserQuery({ name: key }))
                 resetRequest()
             }
         }

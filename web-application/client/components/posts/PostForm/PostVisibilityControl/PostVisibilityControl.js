@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 
 import { UsersIcon, UserGroupIcon, GlobeAltIcon } from '@heroicons/react/24/solid'
 
-import { useGroup } from '/lib/hooks/group'
+import { useGroup } from '/lib/hooks/Group'
 import { usePost } from '/lib/hooks/Post'
 
 import { DropdownMenu, DropdownMenuBody, DropdownMenuTrigger, DropdownMenuItem } from '/components/ui/DropdownMenu'

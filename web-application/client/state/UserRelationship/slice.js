@@ -7,42 +7,44 @@ import {
     clearQueries
 } from '/state/lib/slice'
 
+const initialState = {
+    /**
+     * A dictionary of userRelationships we've retrieved from the backend, keyed by
+     * user.id.
+     *
+     * @type {object}
+     */
+    dictionary: {},
+
+    /**
+     *
+     * An object containing queries made to query supporting endpoints.
+     *
+     * In this case: GET /userRelationships 
+     *
+     * Structure:
+     * {
+     *  queryName: {
+     *      meta: {
+     *          page: <int>,
+     *          count: <int>,
+     *          pageSize: <int>,
+     *          numberOfPages: <int>
+     *      },
+     *      list: [] 
+     *  },
+     *  ...
+     * }
+     */
+    queries: {},
+
+    byUserId: {}
+}
+        
+
 export const UserRelationshipSlice = createSlice({
     name: 'UserRelationship',
-    initialState: {
-        /**
-         * A dictionary of userRelationships we've retrieved from the backend, keyed by
-         * user.id.
-         *
-         * @type {object}
-         */
-        dictionary: {},
-
-        /**
-         *
-         * An object containing queries made to query supporting endpoints.
-         *
-         * In this case: GET /userRelationships 
-         *
-         * Structure:
-         * {
-         *  queryName: {
-         *      meta: {
-         *          page: <int>,
-         *          count: <int>,
-         *          pageSize: <int>,
-         *          numberOfPages: <int>
-         *      },
-         *      list: [] 
-         *  },
-         *  ...
-         * }
-         */
-        queries: {},
-
-        byUserId: {}
-        
-    },
+    initialState: initialState,
     reducers: {
         setUserRelationshipsInDictionary: function(state, action) {
             setInDictionary(state, action)
@@ -94,14 +96,17 @@ export const UserRelationshipSlice = createSlice({
         },
         setUserRelationshipQueryResults: setQueryResults,
         clearUserRelationshipQuery: clearQuery,
-        clearUserRelationshipQueries: clearQueries
+        clearUserRelationshipQueries: clearQueries,
+        resetUserRelationshipSlice: function() { 
+            return initialState
+        }
     }
 })
 
 export const { 
     setUserRelationshipsInDictionary, removeUserRelationship, 
     setUserRelationshipQueryResults, clearUserRelationshipQuery,
-    clearUserRelationshipQueries
+    clearUserRelationshipQueries, resetUserRelationshipSlice
 }  = UserRelationshipSlice.actions
 
 export default UserRelationshipSlice.reducer

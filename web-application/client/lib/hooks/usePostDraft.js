@@ -4,7 +4,7 @@ import * as uuid from 'uuid'
 
 import { setDraft as setPostDraft, clearDraft as clearPostDraft } from '/state/Post'
 
-import { useGroup } from '/lib/hooks/group'
+import { useGroup } from '/lib/hooks/Group'
 
 const has = function(draft, field) {
     return field in draft && draft[field] !== undefined

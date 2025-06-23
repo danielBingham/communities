@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
 import { useRequest } from '/lib/hooks/useRequest'
-import { useGroup } from '/lib/hooks/group'
+import { useGroup } from '/lib/hooks/Group'
 import { GroupPermissions, useGroupPermission } from '/lib/hooks/permission'
 
 import { deleteGroup } from '/state/Group'

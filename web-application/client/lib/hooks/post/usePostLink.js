@@ -1,5 +1,5 @@
 import { usePost } from './usePost'
-import { useGroup } from '/lib/hooks/group'
+import { useGroup } from '/lib/hooks/Group'
 import { useUser } from '/lib/hooks/User'
 
 

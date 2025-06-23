@@ -38,7 +38,7 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
      * Clear the suggestions list.
      */
     const clearSuggestions = function() {
-        dispatch(clearUserQuery({ name: 'TextAreaWithMentions'}))
+        dispatch(clearUserQuery({ name: 'TextAreaWithMentions' }))
     }
 
     const clearMention = function() {
@@ -149,15 +149,6 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
             setValue(text) 
         }
     }
-
-    useEffect(function() {
-        return () => {
-            if ( request !== null && request.state === 'fulfilled' ) {
-                dispatch(clearUserQuery('TextAreaWithMentions'))
-                resetRequest()
-            }
-        }
-    }, [ request, query ])
 
     // Construct the suggestions list.
     const userSuggestions = []

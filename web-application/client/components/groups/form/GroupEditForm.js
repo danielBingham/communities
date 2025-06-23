@@ -6,7 +6,7 @@ import { GlobeAltIcon, LockOpenIcon, LockClosedIcon, UserCircleIcon } from '@her
 import { useLocalStorage } from '/lib/hooks/useLocalStorage'
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { useGroup } from '/lib/hooks/group'
+import { useGroup } from '/lib/hooks/Group'
 
 import { patchGroup } from '/state/Group'
 
@@ -22,7 +22,7 @@ import './GroupEditForm.css'
 
 const GroupEditForm = function({ groupId }) {
 
-    const [group, groupError] = useGroup(groupId)
+    const [group] = useGroup(groupId)
 
     const [ about, setAbout ] = useLocalStorage('group.draft.about', ( group?.about ? group.about : ''))
     const [ fileId, setFileId] = useLocalStorage('group.draft.fileId', ( group?.fileId ? group.fileId : null))

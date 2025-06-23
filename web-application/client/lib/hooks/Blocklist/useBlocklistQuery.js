@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { getBlocklists, cleanupBlocklistQuery } from '/state/Blocklist'
+import { getBlocklists, clearBlocklistQuery } from '/state/Blocklist'
 
 export const useBlocklistQuery = function(queryParameters) {
     const params = queryParameters ? queryParameters : {}
@@ -26,7 +26,7 @@ export const useBlocklistQuery = function(queryParameters) {
 
         return () => {
             if ( request !== null && request.state === 'fulfilled' ) {
-                dispatch(cleanupBlocklistQuery(key)) 
+                dispatch(clearBlocklistQuery({ name: key })) 
                 resetRequest()
             }
         }

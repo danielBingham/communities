@@ -2,6 +2,7 @@ import * as qs from 'qs'
 
 import { makeRequest } from '/state/lib/makeRequest'
 import { setRelationsInState } from '/state/lib/relations'
+import { queryIsUsing } from '/state/lib/queryIsUsing'
 
 import { setPostsInDictionary, removePost, setPostQueryResults, clearPostQuery, clearPostQueries } from './slice'
 
@@ -15,18 +16,18 @@ import { setPostsInDictionary, removePost, setPostQueryResults, clearPostQuery, 
  */
 export const cleanupPostQuery = function(key) {
     return function(dispatch, getState) {
-        const state = getState().posts
+        const state = getState().Post
 
         if ( key in state.queries ) {
             const query = state.queries[key]
             for(const id of query.list) {
-                if ( isQueryUsing(state.queries, id, key) ) {
+                if ( queryIsUsing(state.queries, id, key) ) {
                     continue
                 }
 
                 const entity = id in state.dictionary ? state.dictionary[id] : null
                 if ( entity !== null ) {
-                    dispatch(removePost({ entity: entity }))
+                    dispatch(removePost({ entity: entity, ignoreQuery: key }))
                 }
             }
 
