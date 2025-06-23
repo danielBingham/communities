@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { postUserRelationships } from '/state/userRelationships'
+import { postUserRelationships } from '/state/UserRelationship'
 
 import Button from '/components/generic/button/Button'
 

@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { deleteUserRelationship } from '/state/userRelationships'
+import { deleteUserRelationship } from '/state/UserRelationship'
 
 import Button from '/components/generic/button/Button'
 

@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { getUserRelationship } from '/state/userRelationships'
+import { getUserRelationship } from '/state/UserRelationship'
 
 import AddFriendButton from '/components/friends/controls/AddFriendButton'
 import AcceptFriendButton from '/components/friends/controls/AcceptFriendButton'
@@ -14,8 +14,8 @@ const FriendButton = function({ userId }) {
     const [request, makeRequest] = useRequest()
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
-    const relationshipId = useSelector((state) => userId && userId in state.userRelationships.byUserId ? state.userRelationships.byUserId[userId][currentUser.id] : null)
-    const relationship = useSelector((state) => relationshipId !== null && relationshipId in state.userRelationships.dictionary ? state.userRelationships.dictionary[relationshipId] : null)
+    const relationshipId = useSelector((state) => userId && userId in state.UserRelationship.byUserId ? state.UserRelationship.byUserId[userId][currentUser.id] : null)
+    const relationship = useSelector((state) => relationshipId !== null && relationshipId in state.UserRelationship.dictionary ? state.UserRelationship.dictionary[relationshipId] : null)
 
     useEffect(function() {
         if ( relationship === null && currentUser.id !== userId) {

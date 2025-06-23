@@ -10,7 +10,7 @@ import { setPostReactionsInDictionary, removePostReaction } from '/state/PostRea
 import { setPostSubscriptionsInDictionary, removePostSubscription } from '/state/PostSubscription/slice'
 import { setSiteModerationsInDictionary, removeSiteModeration } from '/state/admin/siteModeration'
 import { setUsersInDictionary, removeUser } from '/state/User/slice'
-import { setUserRelationshipsInDictionary, removeUserRelationship } from '/state/userRelationships'
+import { setUserRelationshipsInDictionary, removeUserRelationship } from '/state/UserRelationship/slice'
 
 const entityMap = {
     files: {
@@ -50,6 +50,7 @@ const entityMap = {
 
 export const setRelationsInState = function(relations) {
     return function(dispatch, getState) {
+        console.log(entityMap)
         if ( relations !== undefined && relations !== null ) {
             for(const [relation, dictionary] of Object.entries(relations)) {
                 if ( ! ( relation in entityMap ) ) {
@@ -57,7 +58,6 @@ export const setRelationsInState = function(relations) {
                     continue
                 }
 
-                console.log(entityMap)
                 dispatch(entityMap[relation].set({ dictionary: dictionary }))
             }
         }

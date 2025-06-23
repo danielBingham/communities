@@ -10,7 +10,7 @@ import { setPostReactionsInDictionary, removePostReaction } from '/state/PostRea
 import { setPostSubscriptionsInDictionary, removePostSubscription } from '/state/PostSubscription/slice'
 import { setSiteModerationsInDictionary, removeSiteModeration } from '/state/admin/siteModeration'
 import { setUsersInDictionary, removeUser } from '/state/User/slice'
-import { setUserRelationshipsInDictionary, removeUserRelationship } from '/state/userRelationships'
+import { setUserRelationshipsInDictionary, removeUserRelationship } from '/state/UserRelationship/slice'
 
 const entityMap = {
     files: {

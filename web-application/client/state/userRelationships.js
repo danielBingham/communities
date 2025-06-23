@@ -1,4 +1,4 @@
-import { createSlice, current } from '@reduxjs/toolkit'
+import { createSlice } from '@reduxjs/toolkit'
 import * as qs from 'qs'
 
 import { makeTrackedRequest } from '/lib/state/request'

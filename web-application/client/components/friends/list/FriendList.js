@@ -4,7 +4,7 @@ import { useSearchParams } from 'react-router-dom'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import {getUserRelationships, clearUserRelationshipQuery } from '/state/userRelationships'
+import {getUserRelationships, clearUserRelationshipQuery } from '/state/UserRelationship'
 
 import UserBadge from '/components/users/UserBadge'
 import FriendButton from '/components/friends/FriendButton'
@@ -32,11 +32,11 @@ const FriendList = function({ userId, params }) {
 
     // ======= Redux State ==========================================
 
-    const relationshipDictionary = useSelector((state) => state.userRelationships.dictionary)
-    const relationships = useSelector((state) => 'FriendList' in state.userRelationships.queries ? state.userRelationships.queries['FriendList'].list : [])
+    const relationshipDictionary = useSelector((state) => state.UserRelationship.dictionary)
+    const relationships = useSelector((state) => 'FriendList' in state.UserRelationship.queries ? state.UserRelationship.queries['FriendList'].list : [])
 
     const meta = useSelector(function(state) {
-        if ( ! state.userRelationships.queries['FriendList'] ) {
+        if ( ! state.UserRelationship.queries['FriendList'] ) {
             return {
                 count: 0,
                 page: 1,
@@ -44,7 +44,7 @@ const FriendList = function({ userId, params }) {
                 numberOfPages: 1
             }
         }
-        return state.userRelationships.queries['FriendList'].meta
+        return state.UserRelationship.queries['FriendList'].meta
     })
 
     // ======= Effect Handling ======================================
