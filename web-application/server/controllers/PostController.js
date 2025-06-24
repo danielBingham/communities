@@ -262,9 +262,9 @@ module.exports = class PostController {
             if (sort === 'newest') {
                 query.order = 'posts.created_date DESC'
             } else if ( sort === 'active' ) {
-                query.order = 'posts.activity DESC'
+                query.order = 'posts.activity DESC, posts.updated_date DESC, posts.created_date DESC'
             } else if ( sort === 'recent' ) {
-                query.order = 'posts.updated_date DESC'
+                query.order = 'posts.updated_date DESC, posts.created_date DESC'
             }
         }
 
