@@ -8,7 +8,7 @@ import * as shared from '@communities/shared'
 import { useLocalStorage } from '/lib/hooks/useLocalStorage'
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { postGroups } from '/state/groups'
+import { postGroups } from '/state/Group'
 
 import DraftProfileImage from '/components/files/DraftProfileImage'
 import FileUploadInput from '/components/files/FileUploadInput'

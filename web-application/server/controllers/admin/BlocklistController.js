@@ -25,7 +25,7 @@ const {
     BlocklistDAO, 
 }  = require('@communities/backend')
 
-const { validation } = require('@communities/shared')
+const { validation, cleaning } = require('@communities/shared')
 
 const ControllerError = require('../../errors/ControllerError')
 
@@ -106,7 +106,7 @@ module.exports = class BlocklistController {
                 `You do not have permission to administrate Communities.`)
         }
 
-        const blocklist = validation.Blocklist.clean(request.body)
+        const blocklist = request.body
 
         const validationErrors = await this.validationService.validateBlocklist(currentUser, blocklist, null)
         if ( validationErrors.length > 0 ) {

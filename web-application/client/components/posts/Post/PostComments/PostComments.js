@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
-import { startPostCommentEdit } from '/state/postComments'
+import { startPostCommentEdit } from '/state/PostComment'
 
 import PostComment from '/components/posts/PostComment'
 import PostCommentForm from '/components/posts/PostCommentForm'
@@ -12,15 +12,15 @@ const PostComments = function({ postId, expanded }) {
     const [showComments, setShowComments] = useState(false)
 
     const post = useSelector(function(state) {
-        if ( postId in state.posts.dictionary ) {
-            return state.posts.dictionary[postId]
+        if ( postId in state.Post.dictionary ) {
+            return state.Post.dictionary[postId]
         } else {
             return null
         }
     })
 
     const editing = useSelector(function(state) {
-        return state.postComments.editing
+        return state.PostComment.editing
     })
 
     const dispatch = useDispatch()

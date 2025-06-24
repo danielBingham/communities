@@ -4,8 +4,7 @@ import { useParams } from 'react-router-dom'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { getGroups } from '/state/groups'
-import { getUsers } from '/state/users'
+import { getGroups } from '/state/Group'
 
 import PostList from '/components/posts/PostList'
 import PostForm from '/components/posts/PostForm'
@@ -19,7 +18,7 @@ const Feed = function({ type }) {
 
     const [request, makeRequest] = useRequest()
 
-    const group = useSelector((state) => type == 'group' && slug in state.groups.bySlug ? state.groups.bySlug[slug] : null)
+    const group = useSelector((state) => type == 'group' && slug in state.Group.bySlug ? state.Group.bySlug[slug] : null)
 
     useEffect(() => {
         if ( type == 'group' && ! group) {

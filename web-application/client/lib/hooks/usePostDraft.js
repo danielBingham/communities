@@ -2,9 +2,9 @@ import { useSelector, useDispatch } from 'react-redux'
 
 import * as uuid from 'uuid'
 
-import { setDraft as setPostDraft, clearDraft as clearPostDraft } from '/state/posts'
+import { setDraft as setPostDraft, clearDraft as clearPostDraft } from '/state/Post'
 
-import { useGroup } from '/lib/hooks/group'
+import { useGroup } from '/lib/hooks/Group'
 
 const has = function(draft, field) {
     return field in draft && draft[field] !== undefined
@@ -83,7 +83,7 @@ export const usePostDraft = function(id, groupId) {
     // in local storage due to code updates.
     let savedDraft = JSON.parse(localStorage.getItem(`post.draft[${postKey}]`))
     const draft = validateAndCorrectDraft(
-        useSelector((state) => postKey in state.posts.drafts ? state.posts.drafts[postKey] : savedDraft), group
+        useSelector((state) => postKey in state.Post.drafts ? state.Post.drafts[postKey] : savedDraft), group
     )
 
     const dispatch = useDispatch()

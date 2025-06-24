@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { getGroup } from '/state/groups'
+import { getGroup } from '/state/Group'
 
 import GroupImage from '/components/groups/view/GroupImage'
 import './GroupTag.css'
@@ -17,7 +17,7 @@ const GroupTag = function({ id, hideProfile }) {
 
     // ======= Redux State ==========================================
     
-    const group = useSelector((state) => id in state.groups.dictionary ? state.groups.dictionary[id] : null) 
+    const group = useSelector((state) => id in state.Group.dictionary ? state.Group.dictionary[id] : null) 
 
     // ======= Effect Handling ======================================
 

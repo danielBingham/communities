@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { postPosts } from '/state/posts'
+import { postPosts } from '/state/Post'
 
 import UserProfileImage from '/components/users/UserProfileImage'
 
@@ -14,7 +14,7 @@ const CreatePostButton = function() {
     const [request, makeRequest] = useRequest()
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
-    const postInProgress = useSelector((state) => state.posts.inProgress)
+    const postInProgress = useSelector((state) => state.Post.inProgress)
 
     // Must have a currentUser and no postInProgress to show the button.
     if ( ! currentUser || postInProgress ) {

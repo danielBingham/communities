@@ -20,9 +20,8 @@
 import { createSlice } from '@reduxjs/toolkit'
 import * as qs from 'qs'
 
-import { makeTrackedRequest } from '/lib/state/request'
-
-import setRelationsInState from '/lib/state/relations'
+import { makeRequest } from '/state/lib/makeRequest'
+import { setRelationsInState } from '/state/lib/relations'
 
 import {
     setInDictionary,
@@ -30,7 +29,7 @@ import {
     setQueryResults,
     clearQuery,
     clearQueries
-} from '/lib/state'
+} from '/state/lib/slice'
 
 export const notificationsSlice = createSlice({
     name: 'notifications',
@@ -112,7 +111,7 @@ export const getNotifications = function(name, params) {
     return function(dispatch, getState) {
         const endpoint = `/notifications${( params ? '?' + qs.stringify(params) : '')}`
 
-        return dispatch(makeTrackedRequest('GET', endpoint, null,
+        return dispatch(makeRequest('GET', endpoint, null,
             function(response) {
                 if ( ! params?.since ) {
                     dispatch(notificationsSlice.actions.setNotificationsInDictionary({ dictionary: response.dictionary}))
@@ -146,7 +145,7 @@ export const getNotifications = function(name, params) {
  */
 export const patchNotifications = function(notifications) {
     return function(dispatch, getState) {
-        return dispatch(makeTrackedRequest('PATCH', `/notifications`, notifications,
+        return dispatch(makeRequest('PATCH', `/notifications`, notifications,
             function(response) {
                 dispatch(notificationsSlice.actions.setNotificationsInDictionary({ dictionary: response.dictionary }))
 
@@ -170,7 +169,7 @@ export const patchNotifications = function(notifications) {
  */
 export const patchNotification = function(notification) {
     return function(dispatch, getState) {
-        return dispatch(makeTrackedRequest('PATCH', `/notification/${encodeURIComponent(notification.id)}`, notification,
+        return dispatch(makeRequest('PATCH', `/notification/${encodeURIComponent(notification.id)}`, notification,
             function(response) {
                 dispatch(notificationsSlice.actions.setNotificationsInDictionary({ entity: response.entity }))
 

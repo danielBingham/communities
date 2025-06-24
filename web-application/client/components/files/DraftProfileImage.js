@@ -5,7 +5,7 @@ import { ReactCrop } from 'react-image-crop'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import {  patchFile, deleteFile } from '/state/files'
+import {  patchFile, deleteFile } from '/state/File'
 
 import ErrorModal from '/components/errors/ErrorModal'
 import Button from '/components/generic/button/Button'

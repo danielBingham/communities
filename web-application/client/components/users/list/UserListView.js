@@ -1,12 +1,5 @@
-import React, { useState, useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { useSearchParams } from 'react-router-dom'
-
-import { UserCircleIcon } from '@heroicons/react/24/outline'
-
-import { useRequest } from '/lib/hooks/useRequest'
-
-import {getUsers, clearUserQuery } from '/state/users'
+import React from 'react'
+import { useUserQuery } from '/lib/hooks/User'
 
 import UserBadge from '../UserBadge'
 import FriendButton from '/components/friends/FriendButton'
@@ -26,57 +19,16 @@ import PaginationControls from '/components/PaginationControls'
 import './UserListView.css'
 
 const UserListView = function({ params }) {
-    const [ searchParams, setSearchParams ] = useSearchParams()
-   
-    // ======= Request Tracking =====================================
-
-    const [request, makeRequest] = useRequest()
-
-    // ======= Redux State ==========================================
-
-    const users = useSelector((state) => 'UserList' in state.users.queries ? state.users.queries['UserList'].list : []) 
-    const meta = useSelector(function(state) {
-        if ( ! state.users.queries['UserList'] ) {
-            return {
-                count: 0,
-                page: 1,
-                pageSize: 1,
-                numberOfPages: 1
-            }
-        }
-        return state.users.queries['UserList'].meta
-    })
-
-    // ======= Effect Handling ======================================
-
-    const dispatch = useDispatch()
-
-    useEffect(function() {
-        const queryParams = { ...params }
-
-        queryParams.page = searchParams.get('page')
-        if ( ! queryParams.page ) {
-            queryParams.page = 1
-        }
-
-        if ( searchParams.get('q') ) {
-            queryParams.name = searchParams.get('q')
-        }
-
-        makeRequest(getUsers('UserList', queryParams))
-        return function cleanup() {
-            dispatch(clearUserQuery({ name: 'UserList'}))
-        }
-    }, [ searchParams, params ])
+    const [query, request] = useUserQuery(params)
 
     // ======= Render ===============================================
 
     let content = ( <Spinner /> )
     let noContent = null
 
-    if ( users ) {
+    if ( query !== null ) {
         const userBadges = []
-        for( const userId of users) {
+        for( const userId of query.list) {
             userBadges.push(<UserBadge key={userId} id={userId}>
                 <FriendButton userId={userId} />
             </UserBadge>)
@@ -93,7 +45,7 @@ const UserListView = function({ params }) {
                 <ListGridContent>
                     { content } 
                 </ListGridContent>
-                <PaginationControls meta={meta} /> 
+                <PaginationControls meta={query?.meta} /> 
             </List>
         </div>
     )

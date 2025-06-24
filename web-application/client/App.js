@@ -61,7 +61,7 @@ import FindGroups from '/pages/groups/views/FindGroups'
 
 import GroupPage from '/pages/group/GroupPage'
 
-import PostPage from '/pages/posts/PostPage'
+import PostView from '/pages/posts/views/PostView'
 
 import ErrorBoundary from '/errors/ErrorBoundary'
 import Spinner from '/components/Spinner'
@@ -210,7 +210,7 @@ const App = function(props) {
                             </Route>
 
                             <Route path="/:slug" element={ <UserProfilePage /> }>
-                                <Route path=":postId" element={ <PostPage /> } />
+                                <Route path=":postId" element={ <PostView /> } />
                                 <Route index element={ <Feed type="user" /> } />
                             </Route>
 

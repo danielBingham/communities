@@ -3,32 +3,16 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 
 import { useRequest } from '/lib/hooks/useRequest'
+import { useUser } from '/lib/hooks/User'
 
-import { getUser } from '/state/users'
 
 import UserProfileImage from '/components/users/UserProfileImage'
 import FriendButton from '/components/friends/FriendButton'
 import './UserBadge.css'
 
 const UserBadge = function({ id, children }) {
-    
-    // ======= Request Tracking =====================================
-   
-    const [request, makeRequest] = useRequest()
 
-    // ======= Redux State ==========================================
-    
-    const user = useSelector((state) => id in state.users.dictionary ? state.users.dictionary[id] : null)
-
-    // ======= Effect Handling ======================================
-    
-    const dispatch = useDispatch()
-
-    useEffect(function() {
-        if ( ! user ) {
-            makeRequest(getUser(id))
-        }
-    }, [ user ])
+    const [user, request] = useUser(id)
 
     // ======= Render ===============================================
     if( ! user && ( ! request || request.status == 'pending' )) {

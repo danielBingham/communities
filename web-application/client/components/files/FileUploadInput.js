@@ -4,7 +4,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 
 import {  PhotoIcon } from '@heroicons/react/24/solid'
 
-import { uploadFile } from '/state/files'
+import { uploadFile } from '/state/File'
 
 import Spinner from '/components/Spinner'
 import Button from '/components/generic/button/Button'

@@ -1,4 +1,5 @@
-import { useGroup, useGroupMember } from '/lib/hooks/group'
+import { useGroup } from '/lib/hooks/Group'
+import { useGroupMember } from '/lib/hooks/GroupMember'
 import { SitePermissions, useSitePermission } from './useSitePermission'
 
 /**

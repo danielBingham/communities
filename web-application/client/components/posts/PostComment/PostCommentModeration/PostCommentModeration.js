@@ -8,7 +8,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 
 import { useSiteModerationForPostComment } from '/lib/hooks/SiteModeration'
 
-import { patchSiteModeration } from '/state/admin/siteModeration'
+import { patchSiteModeration } from '/state/SiteModeration'
 
 import TextBox from '/components/generic/text-box/TextBox'
 import Button from '/components/generic/button/Button'

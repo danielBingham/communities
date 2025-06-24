@@ -3,10 +3,10 @@ import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
 import { useRequest } from '/lib/hooks/useRequest'
-import { useGroup } from '/lib/hooks/group'
+import { useGroup } from '/lib/hooks/Group'
 import { GroupPermissions, useGroupPermission } from '/lib/hooks/permission'
 
-import { deleteGroup } from '/state/groups'
+import { deleteGroup } from '/state/Group'
 
 import GroupEditForm from '/components/groups/form/GroupEditForm'
 import Button from '/components/generic/button/Button'

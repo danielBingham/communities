@@ -4,11 +4,11 @@ import { useNavigate, Link } from 'react-router-dom'
 
 import { UsersIcon, UserGroupIcon, GlobeAltIcon } from '@heroicons/react/24/solid'
 
-import { useRequest } from '/lib/hooks/useRequest'
 import { usePostDraft } from '/lib/hooks/usePostDraft'
 import { useFeature } from '/lib/hooks/feature'
-
-import { getPost } from '/state/posts'
+import { usePost } from '/lib/hooks/Post'
+import { useUser } from '/lib/hooks/User'
+import { useGroup } from '/lib/hooks/Group'
 
 import Linkify from 'react-linkify'
 
@@ -34,20 +34,12 @@ import './Post.css'
 const Post = function({ id, expanded, showLoading, shared }) {
     const [showMore, setShowMore] = useState(expanded) 
 
-    const [request, makeRequest] = useRequest()
-
-    const post = useSelector((state) => id && id in state.posts.dictionary ? state.posts.dictionary[id] : null) 
-    const user = useSelector((state) => post?.userId && post.userId in state.users.dictionary ? state.users.dictionary[post.userId] : null) 
-    const group = useSelector((state) => post?.groupId && post.groupId in state.groups.dictionary ? state.groups.dictionary[post.groupId] : null)
+    const [post, request] = usePost(id)
+    const [user, userRequest] = useUser(post?.userId)
+    const [group, groupRequest] = useGroup(post?.groupId) 
 
     const hasAdminModeration = useFeature('62-admin-moderation-controls')
-    const moderation = useSelector((state) => hasAdminModeration && id && id in state.siteModeration.byPostId ? state.siteModeration.byPostId[id] : null)
-
-    useEffect(function() {
-        if ( ! post ) {
-            makeRequest(getPost(id))
-        }
-    }, [ id, post ])
+    const moderation = useSelector((state) => hasAdminModeration && id && id in state.SiteModeration.byPostId ? state.SiteModeration.byPostId[id] : null)
 
     const [draft, setDraft] = usePostDraft(id)
     if ( draft !== null) {
@@ -65,11 +57,11 @@ const Post = function({ id, expanded, showLoading, shared }) {
         )
     }
 
-    if ( showLoading && (request && request.state == 'pending' )) {
+    if ( showLoading && ((request && request.state == 'pending' ) || (userRequest && userRequest.state === 'pending') || (groupRequest && groupRequest.state === 'pending'))) {
         return ( <div id={id} className="post"><Spinner /></div> )
     }
 
-    if ( ! post ) {
+    if ( ! post || (post?.userId && ! user) || (post?.groupId && ! group) ) {
         return null
     }
 

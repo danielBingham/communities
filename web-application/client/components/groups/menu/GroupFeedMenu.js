@@ -8,7 +8,7 @@ import { UserGroupIcon as UserGroupIconSolid} from '@heroicons/react/24/solid'
 import { useRequest } from '/lib/hooks/useRequest'
 import { useLocalStorage } from '/lib/hooks/useLocalStorage'
 
-import { getGroups } from '/state/groups'
+import { getGroups } from '/state/Group'
 
 import GroupImage from '/components/groups/view/GroupImage'
 
@@ -20,8 +20,8 @@ const GroupFeedMenu = function() {
 
     const [request, makeRequest] = useRequest()
 
-    const groupDictionary = useSelector((state) => state.groups.dictionary)
-    const groups = useSelector((state) => 'GroupFeedMenu' in state.groups.queries ? state.groups.queries['GroupFeedMenu'].list : [])
+    const groupDictionary = useSelector((state) => state.Group.dictionary)
+    const groups = useSelector((state) => 'GroupFeedMenu' in state.Group.queries ? state.Group.queries['GroupFeedMenu'].list : [])
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
     useEffect(() => {

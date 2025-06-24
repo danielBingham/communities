@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 
-import { makeTrackedRequest } from '/lib/state/request'
+import { makeRequest } from '/state/lib/makeRequest'
 
 /***
  * System slice convers data essential for the system to function and that must
@@ -39,7 +39,7 @@ const systemSlice = createSlice({
  */
 export const getConfiguration = function() {
     return function(dispatch, getState) {
-        return dispatch(makeTrackedRequest('GET', '/config', null,
+        return dispatch(makeRequest('GET', '/config', null,
             function(config) {
                 dispatch(systemSlice.actions.setFeatures(config.features))
                 delete config.features

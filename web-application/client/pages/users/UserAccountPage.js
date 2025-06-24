@@ -1,11 +1,22 @@
-import React from 'react'
+import React, { useEffect } from 'react'
+import { useDispatch } from 'react-redux'
 import { Outlet } from 'react-router-dom'
+
+import { resetEntities } from '/state/lib'
 
 import { NavigationMenu, NavigationMenuItem } from '/components/generic/NavigationMenu'
 import { Page, PageBody, PageLeftGutter, PageRightGutter } from '/components/generic/Page'
 import './UserAccountPage.css'
 
 const UserAccountPage = function(props) {
+
+    const dispatch = useDispatch()
+    useEffect(() => {
+        return () => {
+            dispatch(resetEntities())
+        }
+    }, [])
+
     return (
         <Page id="user-account-page">
             <PageLeftGutter>

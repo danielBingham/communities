@@ -2,43 +2,43 @@ import { configureStore } from '@reduxjs/toolkit'
 import { combineReducers } from 'redux'
 
 import authenticationReducer from './authentication'
-import blocklistsReducer from './admin/blocklists'
+import BlocklistReducer from './Blocklist'
 import featuresReducer from './features'
-import filesReducer from './files'
-import groupsReducer from './groups'
-import groupMembersReducer from './groupMembers'
+import FileReducer from './File'
+import GroupReducer from './Group'
+import GroupMemberReducer from './GroupMember'
 import jobsReducer from './jobs'
 import notificationsReducer from './notifications'
-import linkPreviewsReducer from './linkPreviews'
-import postsReducer from './posts'
-import postCommentsReducer from './postComments'
-import postReactionsReducer from './postReactions'
-import postSubscriptionsReducer from './postSubscriptions'
+import LinkPreviewReducer from './LinkPreview'
+import PostReducer from './Post'
+import PostCommentReducer from './PostComment'
+import PostReactionReducer from './PostReaction'
+import PostSubscriptionReducer from './PostSubscription'
 import tokensReducer from './tokens'
-import siteModerationReducer from './admin/siteModeration'
+import SiteModerationReducer from './SiteModeration'
 import systemReducer from './system'
-import usersReducer from './users'
-import userRelationshipsReducer from './userRelationships'
+import UserReducer from './User'
+import UserRelationshipReducer from './UserRelationship'
 
 
 const reducers = combineReducers({
     authentication: authenticationReducer,
-    blocklists: blocklistsReducer,
+    Blocklist: BlocklistReducer,
     features: featuresReducer,
-    files: filesReducer,
-    groups: groupsReducer,
-    groupMembers: groupMembersReducer,
+    File: FileReducer,
+    Group: GroupReducer,
+    GroupMember: GroupMemberReducer,
     jobs: jobsReducer,
     notifications: notificationsReducer,
-    linkPreviews: linkPreviewsReducer,
-    posts: postsReducer,
-    postComments: postCommentsReducer,
-    postReactions: postReactionsReducer,
-    postSubscriptions: postSubscriptionsReducer,
+    LinkPreview: LinkPreviewReducer,
+    Post: PostReducer,
+    PostComment: PostCommentReducer,
+    PostReaction: PostReactionReducer,
+    PostSubscription: PostSubscriptionReducer,
     tokens: tokensReducer,
-    users: usersReducer,
-    userRelationships: userRelationshipsReducer,
-    siteModeration: siteModerationReducer,
+    User: UserReducer,
+    UserRelationship: UserRelationshipReducer,
+    SiteModeration: SiteModerationReducer,
     system: systemReducer
 })
 

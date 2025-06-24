@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
-import { clearSharingPost } from '/state/posts'
+import { clearSharingPost } from '/state/Post'
 
 import Modal from '/components/generic/modal/Modal'
 
@@ -10,7 +10,7 @@ import PostForm from '/components/posts/PostForm'
 import './PostShareModal.css'
 
 const PostShareModal = function() {
-    const sharedPostId = useSelector((state) => state.posts.sharingPost)
+    const sharedPostId = useSelector((state) => state.Post.sharingPost)
 
     const dispatch = useDispatch()
 

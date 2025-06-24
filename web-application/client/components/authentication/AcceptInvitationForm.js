@@ -8,7 +8,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 import { validateEmail, validateName, validateUsername, validatePassword } from '/lib/validation/user'
 
 import { validateToken } from '/state/tokens'
-import { patchUser } from '/state/users'
+import { patchUser } from '/state/User'
 
 import Input from '/components/generic/input/Input'
 

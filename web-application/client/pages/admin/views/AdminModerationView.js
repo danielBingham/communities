@@ -4,7 +4,7 @@ import { useSearchParams } from 'react-router-dom'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { getSiteModerations } from '/state/admin/siteModeration'
+import { getSiteModerations } from '/state/SiteModeration'
 
 import PostCommentAwaitingAdminModeration from '/components/admin/moderation/PostCommentAwaitingAdminModeration'
 import Post from '/components/posts/Post'
@@ -17,8 +17,8 @@ const AdminModerationView = function({}) {
 
     const [ request, makeRequest ] = useRequest()
 
-    const query = useSelector((state) => 'AdminModerationView' in state.siteModeration.queries ? state.siteModeration.queries['AdminModerationView']: null)
-    const dictionary = useSelector((state) => state.siteModeration.dictionary)
+    const query = useSelector((state) => 'AdminModerationView' in state.SiteModeration.queries ? state.SiteModeration.queries['AdminModerationView']: null)
+    const dictionary = useSelector((state) => state.SiteModeration.dictionary)
 
 
     useEffect(function() {

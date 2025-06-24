@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { getGroup } from '/state/groups'
+import { getGroup } from '/state/Group'
 
 import Error404 from '/components/errors/Error404'
 
@@ -17,7 +17,7 @@ const GroupView = function({ id }) {
 
     // ======= Redux State ==========================================
     
-    const group = useSelector((state) => state.groups.dictionary[id])
+    const group = useSelector((state) => state.Group.dictionary[id])
 
     // ======= Effect Handling ======================================
 

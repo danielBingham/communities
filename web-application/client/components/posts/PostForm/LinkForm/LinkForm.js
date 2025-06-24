@@ -6,7 +6,7 @@ import logger from '/logger'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { postLinkPreviews } from '/state/linkPreviews'
+import { postLinkPreviews } from '/state/LinkPreview'
 
 import ErrorModal from '/components/errors/ErrorModal'
 import Button from '/components/generic/button/Button'

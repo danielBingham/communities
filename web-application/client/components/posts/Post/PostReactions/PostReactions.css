@@ -74,11 +74,11 @@
 .post .reactions .reactions__controls .group.block a:visited,
 .post .reactions .reactions__controls .group.block a:active,
 .post .reactions .reactions__controls .group.block svg {
-    color: var(--danger-color-main);
+    color: var(--primary-color-dark);
 }
 .post .reactions .reactions__controls .group.block a:hover,
 .post .reactions .reactions__controls .group.block a:hover svg {
-    color: var(--danger-color-main-highlight);
+    color: var(--danger-color-main);
 }
 
 .post .reactions .reactions__controls .group a.reacted:link,
@@ -97,10 +97,10 @@
 .post .reactions .reactions__controls .group.block a.reacted:visited,
 .post .reactions .reactions__controls .group.block a.reacted:active,
 .post .reactions .reactions__controls .group.block a.reacted svg {
-    color: var(--secondary-color-main);
+    color: var(--danger-color-main);
 }
 
 .post .reactions .reactions__controls .group.block a.reacted:hover,
 .post .reactions .reactions__controls .group.block a.reacted:hover svg {
-    color: var(--secondary-color-main-highlight);
+    color: var(--danger-color-main-highlight);
 }

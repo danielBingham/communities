@@ -15,17 +15,9 @@ import BlocklistView from '/pages/admin/views/BlocklistView'
 import './AdminPage.css'
 
 const AdminPage = function(props) {
-
-
-    // ======= Redux State ==========================================
     
-    const currentUser = useSelector(function(state) {
-        return state.authentication.currentUser
-    })
-
+    const currentUser = useSelector((state) => state.authentication.currentUser)
     const hasAdminModerationControls = useFeature('62-admin-moderation-controls')
-
-    // ======= Effect Handling ======================================
    
     const navigate = useNavigate()
 
@@ -35,6 +27,13 @@ const AdminPage = function(props) {
             navigate("/")
         }
     }, [ currentUser ])
+
+    const dispatch = useDispatch()
+    useEffect(() => {
+        return () => {
+            dispatch(resetEntities())
+        }
+    }, [])
 
     // ======= Render ===============================================
 

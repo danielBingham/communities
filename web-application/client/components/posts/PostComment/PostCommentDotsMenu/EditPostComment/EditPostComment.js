@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux'
 
 import { PencilIcon } from '@heroicons/react/24/outline'
 
-import { startPostCommentEdit } from '/state/postComments'
+import { startPostCommentEdit } from '/state/PostComment'
 
 import { FloatingMenuItem } from '/components/generic/floating-menu/FloatingMenu'
 

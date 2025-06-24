@@ -17,11 +17,10 @@ const BlockConfirmation = function({ isVisible, cancel, execute  }) {
                         should only be used on posts deserving of censorship.</p>
                         <p>Posts appropriate for demotion are:</p>
                         <ul>
-                            <li>Misinformation / Disinformation / Blatant propaganda</li>
-                            <li>Spam / AI Slop</li>
-                            <li>Abuse (Psychological, Emotional, or Threats of Physical)</li>
+                            <li>Misinformation, Disinformation, or Blatant propaganda</li>
+                            <li>Spam or AI Slop</li>
+                            <li>Psychological, Emotional, or Threats of Physical Abuse</li>
                             <li>Hate</li>
-                            <li>Fascism / Nazism</li>
                         </ul>
                         <p>If this post doesn't fit into one of the above
                             categories, then it is not appropriate to demote it.

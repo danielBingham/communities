@@ -2,6 +2,17 @@
   to {transform: rotate(360deg);}
 }
 
+.spinner-container { 
+  display: grid;
+  width: 100%;
+  height: 100%;
+  margin: 50px auto;
+  grid-template-columns: auto;
+  grid-template-rows: auto;
+  align-items: center;
+  justify-items: center;
+}
+
 .spinner-wrapper {
     display: inline-block;
     text-align: center;

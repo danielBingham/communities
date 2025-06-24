@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 
-import { makeTrackedRequest } from '/lib/state/request'
+import { makeRequest } from '/state/lib/makeRequest'
 
 export const featuresSlice = createSlice({
     name: 'features',
@@ -52,7 +52,7 @@ export const getFeatures = function() {
     return function(dispatch, getState) {
         const endpoint = '/features'
 
-        return dispatch(makeTrackedRequest('GET', endpoint, null,
+        return dispatch(makeRequest('GET', endpoint, null,
             function(responseBody) {
                 dispatch(featuresSlice.actions.setDictionary(responseBody))
             }
@@ -75,7 +75,7 @@ export const postFeatures = function(feature) {
     return function(dispatch, getState) {
         const endpoint = '/features'
 
-        return dispatch(makeTrackedRequest('POST', endpoint, feature,
+        return dispatch(makeRequest('POST', endpoint, feature,
             function(responseBody) {
                 dispatch(featuresSlice.actions.setInDictionary(responseBody))
             }
@@ -99,7 +99,7 @@ export const getFeature = function(name) {
     return function(dispatch, getState) {
         const endpoint = `/feature/${name}`
 
-        return dispatch(makeTrackedRequest('GET', endpoint, null,
+        return dispatch(makeRequest('GET', endpoint, null,
             function(responseBody) {
                 dispatch(featuresSlice.actions.setInDictionary(responseBody))
             }
@@ -123,7 +123,7 @@ export const patchFeature = function(feature) {
     return function(dispatch, getState) {
         const endpoint = `/feature/${feature.name}`
 
-        return dispatch(makeTrackedRequest('PATCH', endpoint, feature,
+        return dispatch(makeRequest('PATCH', endpoint, feature,
         function(responseBody) {
                 dispatch(featuresSlice.actions.setInDictionary(responseBody))
             }

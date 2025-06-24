@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { getGroupMembers, clearGroupMemberQuery } from '/state/groupMembers'
+import { getGroupMembers, clearGroupMemberQuery } from '/state/GroupMember'
 
 import GroupMemberBadge from '/components/groups/members/GroupMemberBadge'
 import GroupMembershipButton from '/components/groups/components/GroupMembershipButton'
@@ -18,8 +18,8 @@ const GroupMembersList = function({ groupId, params }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
-    const dictionary = useSelector((state) => state.groupMembers.dictionary)
-    const queries = useSelector((state) => state.groupMembers.queries)
+    const dictionary = useSelector((state) => state.GroupMember.dictionary)
+    const queries = useSelector((state) => state.GroupMember.queries)
 
     useEffect(() => {
         if ( ! ('GroupMembersList' in queries)) {

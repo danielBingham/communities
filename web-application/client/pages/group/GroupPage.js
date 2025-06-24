@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import { useParams, NavLink, Routes, Route } from 'react-router-dom'
 
 import {
@@ -8,10 +8,12 @@ import {
     LockClosedIcon
 } from '@heroicons/react/24/outline'
 
-import { useGroupFromSlug, useGroupMember } from '/lib/hooks/group'
+import { resetEntities } from '/state/lib'
+
+import { useGroupFromSlug } from '/lib/hooks/Group'
 import { GroupPermissions, useGroupPermission } from '/lib/hooks/permission'
 
-import PostPage from '/pages/posts/PostPage'
+import PostView from '/pages/posts/views/PostView'
 
 import GroupMembershipButton from '/components/groups/components/GroupMembershipButton'
 import GroupImage from '/components/groups/view/GroupImage'
@@ -36,6 +38,13 @@ const GroupPage = function() {
     const [group, error, request] = useGroupFromSlug(slug)
     const canViewGroup = useGroupPermission(currentUser, GroupPermissions.VIEW, group?.id)
     const canAdminGroup = useGroupPermission(currentUser, GroupPermissions.ADMIN, group?.id)
+
+    const dispatch = useDispatch()
+    useEffect(() => {
+        return () => {
+            dispatch(resetEntities())
+        }
+    }, [])
 
     if ( ! group && ( ! request || request.state == 'pending') )  {
         return (
@@ -87,7 +96,7 @@ const GroupPage = function() {
                     <Routes>
                         <Route path="members" element={ <GroupMembersView groupId={group.id} /> } />
                         <Route path="settings" element={<GroupSettingsView groupId={group.id} /> } />
-                        <Route path=":postId" element={ <PostPage group={true} /> } />
+                        <Route path=":postId" element={ <PostView group={true} /> } />
                         <Route index element={<GroupFeedView groupId={group.id} />} />
                     </Routes> 
                 </div>

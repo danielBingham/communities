@@ -5,7 +5,7 @@ import { BellAlertIcon, BellSlashIcon } from '@heroicons/react/24/outline'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { postPostSubscriptions, deletePostSubscription } from '/state/postSubscriptions'
+import { postPostSubscriptions, deletePostSubscription } from '/state/PostSubscription'
 
 import { FloatingMenuItem } from '/components/generic/floating-menu/FloatingMenu'
 
@@ -16,7 +16,7 @@ const SubscribeToPost = function({ postId }) {
     const [subscribeRequest, makeSubscribeRequest] = useRequest()
     const [unsubscribeRequest, makeUnsubscribeRequest] = useRequest()
 
-    const subscription = useSelector((state) => postId && postId in state.postSubscriptions.byPostId ? state.postSubscriptions.byPostId[postId] : null)
+    const subscription = useSelector((state) => postId && postId in state.PostSubscription.byPostId ? state.PostSubscription.byPostId[postId] : null)
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
     if ( ! currentUser ) {

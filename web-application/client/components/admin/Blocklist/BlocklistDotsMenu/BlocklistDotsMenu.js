@@ -3,7 +3,7 @@ import React from 'react'
 import { useBlocklist } from '/lib/hooks/Blocklist'
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { deleteBlocklist } from '/state/admin/blocklists'
+import { deleteBlocklist } from '/state/Blocklist'
 
 import { DotsMenu, DotsMenuItem } from '/components/ui/DotsMenu'
 

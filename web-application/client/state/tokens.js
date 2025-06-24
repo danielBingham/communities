@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 import * as qs from 'qs'
 
-import { makeTrackedRequest } from '/lib/state/request'
+import { makeRequest } from '/state/lib/makeRequest'
 
 import { setSession } from '/state/authentication'
 
@@ -23,7 +23,7 @@ export const validateToken = function(token, type) {
         const queryString = qs.stringify({type: type}) 
         const endpoint = `/token/${token}?${queryString}`
 
-        return dispatch(makeTrackedRequest('GET', endpoint, null,
+        return dispatch(makeRequest('GET', endpoint, null,
             function(responseBody) {
                 if ( responseBody.session ) {
                     dispatch(tokenSlice.actions.setUserForToken({ token: token, user: responseBody.session.user }))
@@ -39,7 +39,7 @@ export const validateToken = function(token, type) {
 export const createToken = function(params) {
     return function(dispatch, getState) {
         const endpoint = `/tokens`
-        return dispatch(makeTrackedRequest('POST', endpoint, params,
+        return dispatch(makeRequest('POST', endpoint, params,
             function(responseBody) { }
         ))
     }

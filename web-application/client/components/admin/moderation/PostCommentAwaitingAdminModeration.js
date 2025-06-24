@@ -1,7 +1,7 @@
 import React from 'react'
 
 import { useSiteModeration } from '/lib/hooks/SiteModeration'
-import { usePost, usePostLink } from '/lib/hooks/post'
+import { usePost, usePostLink } from '/lib/hooks/Post'
 
 import PostComment from '/components/posts/PostComment'
 

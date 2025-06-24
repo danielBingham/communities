@@ -6,7 +6,7 @@ import { validateName, validateAbout } from '/lib/validation/user'
 
 import { UserCircleIcon } from '@heroicons/react/24/outline'
 
-import { patchUser } from '/state/users'
+import { patchUser } from '/state/User'
 
 import UserProfileImage from '/components/users/UserProfileImage'
 import DraftProfileImage from '/components/files/DraftProfileImage'

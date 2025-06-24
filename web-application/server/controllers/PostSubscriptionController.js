@@ -25,7 +25,8 @@ const {
     PostSubscriptionDAO, 
     UserRelationshipDAO,
 
-    PermissionService
+    PermissionService,
+    ValidationService
 } = require('@communities/backend')
 
 const { cleaning, validation } = require('@communities/shared')
@@ -43,6 +44,7 @@ module.exports = class PostSubscriptionController {
         this.userRelationshipDAO = new UserRelationshipDAO(core)
 
         this.permissionService = new PermissionService(core)
+        this.validationService = new ValidationService(core)
     }
 
     async getRelations(results, requestedRelations) { 

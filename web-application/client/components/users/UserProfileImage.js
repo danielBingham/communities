@@ -20,8 +20,8 @@ const UserProfileImage = function({ userId, className, noLink, width }) {
 
         if ( state.authentication.currentUser && userId == state.authentication.currentUser.id ) {
             return state.authentication.currentUser
-        } else if ( userId in state.users.dictionary ) {
-            return state.users.dictionary[userId]
+        } else if ( userId in state.User.dictionary ) {
+            return state.User.dictionary[userId]
         } else {
             return null
         }

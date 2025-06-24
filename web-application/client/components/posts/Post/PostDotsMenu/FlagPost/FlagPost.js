@@ -7,7 +7,7 @@ import { CheckCircleIcon, XCircleIcon, FlagIcon as FlagIconSolid } from '@heroic
 import { useRequest } from '/lib/hooks/useRequest'
 import { useFeature } from '/lib/hooks/feature/useFeature'
 
-import { postSiteModerations } from '/state/admin/siteModeration'
+import { postSiteModerations } from '/state/SiteModeration'
 
 import { FloatingMenuItem } from '/components/generic/floating-menu/FloatingMenu'
 
@@ -21,7 +21,7 @@ const FlagPost = function({ postId } ) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
-    const moderation = useSelector((state) => postId && postId in state.siteModeration.byPostId ? state.siteModeration.byPostId[postId] : null)
+    const moderation = useSelector((state) => postId && postId in state.SiteModeration.byPostId ? state.SiteModeration.byPostId[postId] : null)
 
     const hasAdminModerationControls = useFeature('62-admin-moderation-controls')
 

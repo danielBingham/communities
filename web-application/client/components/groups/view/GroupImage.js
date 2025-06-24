@@ -14,7 +14,7 @@ const GroupImage = function({ groupId, className, width }) {
 
     // ======= Redux State ==========================================
     
-    const group = useSelector((state) => groupId && groupId in state.groups.dictionary ? state.groups.dictionary[groupId] : null)
+    const group = useSelector((state) => groupId && groupId in state.Group.dictionary ? state.Group.dictionary[groupId] : null)
     const configuration = useSelector((state) => state.system.configuration)
 
     // ======= Effect Handling ======================================

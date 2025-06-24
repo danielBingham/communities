@@ -1,7 +1,7 @@
 import React from 'react'
 import { useSelector } from 'react-redux'
 
-import { useGroupMember } from '/lib/hooks/group'
+import { useGroupMember } from '/lib/hooks/GroupMember'
 import { useFeature } from '/lib/hooks/feature'
 
 import { EllipsisHorizontalIcon } from '@heroicons/react/24/solid'
@@ -18,7 +18,7 @@ import './PostDotsMenu.css'
 const PostDotsMenu = function({ postId }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
-    const post = useSelector((state) => postId && postId in state.posts.dictionary ? state.posts.dictionary[postId] : null) 
+    const post = useSelector((state) => postId && postId in state.Post.dictionary ? state.Post.dictionary[postId] : null) 
     const hasAdminModeration = useFeature('62-admin-moderation-controls')
 
     const [currentMember] = useGroupMember(post?.groupId, currentUser?.id) 

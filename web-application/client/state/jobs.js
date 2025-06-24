@@ -1,7 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
-import * as qs from 'qs'
 
-import { makeTrackedRequest } from '/lib/state/request'
+import { makeRequest } from '/state/lib/makeRequest'
 
 export const jobsSlice = createSlice({
     name: 'jobs',
@@ -53,7 +52,7 @@ export const getJobs = function() {
     return function(dispatch, getState) {
         const endpoint = '/jobs'
 
-        return dispatch(makeTrackedRequest('GET', endpoint, null,
+        return dispatch(makeRequest('GET', endpoint, null,
             function(responseBody) {
                 dispatch(jobsSlice.actions.setDictionary(responseBody))
             }
@@ -76,7 +75,7 @@ export const postJobs = function(name, data) {
     return function(dispatch, getState) {
         const endpoint = '/jobs'
 
-        return dispatch(makeTrackedRequest('POST', endpoint, { name: name, data: data },
+        return dispatch(makeRequest('POST', endpoint, { name: name, data: data },
             function(responseBody) {
                 dispatch(jobsSlice.actions.setInDictionary(responseBody))
             }
@@ -100,7 +99,7 @@ export const getJob = function(id) {
     return function(dispatch, getState) {
         const endpoint = `/job/${encodeUriComponent(id)}`
 
-        return dispatch(makeTrackedRequest('GET', endpoint, null,
+        return dispatch(makeRequest('GET', endpoint, null,
             function(responseBody) {
                 dispatch(jobsSlice.actions.setInDictionary(responseBody))
             }

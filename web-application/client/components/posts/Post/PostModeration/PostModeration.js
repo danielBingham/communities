@@ -6,7 +6,7 @@ import { CheckCircleIcon, XCircleIcon, FlagIcon } from '@heroicons/react/20/soli
 import { SitePermissions, useSitePermission } from '/lib/hooks/permission'
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { patchSiteModeration } from '/state/admin/siteModeration'
+import { patchSiteModeration } from '/state/SiteModeration'
 
 import TextBox from '/components/generic/text-box/TextBox'
 import Button from '/components/generic/button/Button'
@@ -23,7 +23,7 @@ const PostModeration = function({ postId }) {
     const [status, setStatus] = useState('flagged')
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
-    const moderation = useSelector((state) => postId && postId in state.siteModeration.byPostId ? state.siteModeration.byPostId[postId] : null)
+    const moderation = useSelector((state) => postId && postId in state.SiteModeration.byPostId ? state.SiteModeration.byPostId[postId] : null)
     const canModerateSite = useSitePermission(currentUser, SitePermissions.MODERATE)
 
     const [request, makeRequest] = useRequest()

@@ -25,3 +25,9 @@
 .group-badge__about {
     font-size: 12px;
 }
+
+@media ( width < 400px ) {
+    .group-badge {
+        max-width: 360px;
+    }
+}

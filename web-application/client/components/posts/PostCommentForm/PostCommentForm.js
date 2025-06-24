@@ -5,7 +5,7 @@ import logger from '/logger'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { postPostComments, patchPostComment, finishPostCommentEdit } from '/state/postComments'
+import { postPostComments, patchPostComment, finishPostCommentEdit } from '/state/PostComment'
 
 import Button from '/components/generic/button/Button'
 import Spinner from '/components/Spinner'
@@ -31,7 +31,7 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
         return null
     }
 
-    const comment = useSelector((state) => commentId && commentId in state.postComments.dictionary ? state.postComments.dictionary[commentId] : null) 
+    const comment = useSelector((state) => commentId && commentId in state.PostComment.dictionary ? state.PostComment.dictionary[commentId] : null) 
     
     const dispatch = useDispatch()
 

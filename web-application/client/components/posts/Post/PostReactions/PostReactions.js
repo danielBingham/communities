@@ -3,14 +3,16 @@ import { useSelector, useDispatch } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { setSharingPost } from '/state/posts'
-import { postPostReaction, patchPostReaction, deletePostReaction } from '/state/postReactions'
+import { setSharingPost } from '/state/Post'
+import { postPostReaction, patchPostReaction, deletePostReaction } from '/state/PostReaction'
 
-import { XCircleIcon, 
+import { 
+    NoSymbolIcon, 
     HandThumbUpIcon, 
     HandThumbDownIcon,
     ArrowPathRoundedSquareIcon
 } from '@heroicons/react/16/solid'
+
 
 import UserTag from '/components/users/UserTag'
 import BlockConfirmation from './BlockConfirmation'
@@ -27,9 +29,9 @@ const PostReactions = function({ postId }) {
     const [request, makeRequest] = useRequest()
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
-    const post = useSelector((state) => postId && postId in state.posts.dictionary ? state.posts.dictionary[postId] : null)
+    const post = useSelector((state) => postId && postId in state.Post.dictionary ? state.Post.dictionary[postId] : null)
 
-    const postReactions = useSelector((state) => state.postReactions.dictionary)
+    const postReactions = useSelector((state) => state.PostReaction.dictionary)
     const userReactionId = post.reactions.find((rid) => rid in postReactions ? postReactions[rid].userId == currentUser?.id : false)
     const userReaction = userReactionId ? postReactions[userReactionId] : null
 
@@ -90,7 +92,7 @@ const PostReactions = function({ postId }) {
             )
         } else if ( reaction.reaction == 'block' ) {
             reactionViews.push(
-                <div key={reaction.userId}><XCircleIcon className="reaction block" /><UserTag id={reaction.userId} /></div>
+                <div key={reaction.userId}><NoSymbolIcon className="reaction block" /><UserTag id={reaction.userId} /></div>
             )
         }
     }
@@ -105,7 +107,7 @@ const PostReactions = function({ postId }) {
             { reactionViews.length > 0 && <div className="reactions__view">
                 <a href="" onClick={(e) => { e.preventDefault(); setShowReactions(true)}}>{ 'like' in reactionCounts && <span><HandThumbUpIcon /> {reactionCounts['like']}</span> }
                 { 'dislike' in reactionCounts && <span><HandThumbDownIcon /> {reactionCounts['dislike']}</span> }
-                    { 'block' in reactionCounts && <span className="block"><XCircleIcon /> {reactionCounts['block']}</span>}</a>
+                    { 'block' in reactionCounts && <span className="block"><NoSymbolIcon/> {reactionCounts['block']}</span>}</a>
             </div> }
             <div className="reactions__controls">
                 <div className="group positive">
@@ -128,7 +130,7 @@ const PostReactions = function({ postId }) {
                         <a href=""
                             className={`${ userReaction?.reaction == 'block' ? 'reacted' : ''} block`}
                             onClick={(e) => { e.preventDefault(); setBlockConfirmation(true) }} 
-                        ><XCircleIcon /> Demote</a>
+                        ><NoSymbolIcon/> Demote</a>
                         <BlockConfirmation
                             isVisible={blockConfirmation} 
                             execute={() => { setBlockConfirmation(false); react('block') }} 
@@ -139,7 +141,7 @@ const PostReactions = function({ postId }) {
                         <a href=""
                             className={`${ userReaction?.reaction == 'block' ? 'reacted' : ''} block`}
                             onClick={(e) => { e.preventDefault(); react('block') }} 
-                        ><XCircleIcon /> Demote</a>}
+                        ><NoSymbolIcon/> Demote</a>}
                 </div>
             </div>
         </div>
