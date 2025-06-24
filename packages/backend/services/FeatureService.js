@@ -32,6 +32,7 @@ const PublicPostsMigration = require('../migrations/PublicPostsMigration')
 const PostSharingMigration = require('../migrations/PostSharingMigration')
 const AdminModerationMigration = require('../migrations/AdminModerationMigration')
 const SiteAdminsCanBanUsersMigration = require('../migrations/SiteAdminsCanBanUsersMigration')
+const GroupModerationMigration = require('./migrations/GroupModerationMigration')
 
 const ServiceError = require('../errors/ServiceError')
 const MigrationError = require('../errors/MigrationError')
@@ -123,6 +124,11 @@ module.exports = class FeatureService {
                 dependsOn: ['62-admin-moderation-controls'],
                 conflictsWith: [],
                 migration: new SiteAdminsCanBanUsersMigration(core)
+            },
+            '89-improved-moderation-for-group-posts': {
+                dependsOn: [ '62-admin-moderation-controls' ],
+                conflictsWith: [],
+                migration: new GroupModerationMigration(core)
             }
         }
     }

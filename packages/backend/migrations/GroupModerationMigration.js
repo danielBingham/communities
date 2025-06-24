@@ -70,9 +70,15 @@ module.exports = class GroupModerationMigration extends BaseMigration {
         await this.database.query(`CREATE INDEX IF NOT EXISTS group_moderation_events__user_id ON group_moderation_events (user_id)`, [])
         await this.database.query(`CREATE INDEX IF NOT EXISTS group_moderation_events__post_id ON group_moderation_events (post_id)`, [])
         await this.database.query(`CREATE INDEX IF NOT EXISTS group_moderation_events__post_comment_id ON group_moderation_events (post_comment_id)`, [])
+
+        await this.database.query(`ALTER TABLE posts ADD COLUMN IF NOT EXISTS group_moderation_id uuid REFERENCES group_moderation (id) ON DELETE SET NULL DEFAULT NULL`, [])
+        await this.database.query(`ALTER TABLE posts ADD COLUMN IF NOT EXISTS site_moderation_id uuid REFERENCES site_moderation (id) ON DELETE SET NULL DEFAULT NULL`, [])
     }
 
     async initBack() { 
+        await this.databse.query(`ALTER TABLE posts DROP COLUMN IF EXISTS group_moderation_id`, [])
+        await this.database.query(`ALTER TABLE posts DROP COLUMN IF EXISTS site_moderation_id`, [])
+
         await this.database.query(`DROP INDEX IF EXISTS group_moderation_events__post_comment_id`, [])
         await this.database.query(`DROP INDEX IF EXISTS group_moderation_events__post_id`, [])
         await this.database.query(`DROP INDEX IF EXISTS group_moderation_events__user_id`, [])

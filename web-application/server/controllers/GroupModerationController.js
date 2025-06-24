@@ -23,7 +23,8 @@ const {
     PermissionService,
     NotificationService,
     GroupModerationDAO, 
-    GroupModerationEventDAO
+    GroupModerationEventDAO,
+    PostDAO
 }  = require('@communities/backend')
 
 const { cleaning, validation } = require('@communities/shared')
@@ -38,6 +39,7 @@ module.exports = class GroupModerationController extends BaseController {
 
         this.groupModerationDAO = new GroupModerationDAO(core)
         this.groupModerationEventDAO = new GroupModerationEventDAO(core)
+        this.postDAO = new PostDAO(core)
 
         this.notificationService = new NotificationService(core)
         this.permissionService = new PermissionService(core)
@@ -101,6 +103,24 @@ module.exports = class GroupModerationController extends BaseController {
             return
         }
 
+        const canViewGroup = await this.permissionService.can(currentUser, 'view', 'Group', { groupId: groupId })
+        if ( canViewGroup !== true ) {
+            return this.sendUserErrors(response, 404, {
+                type: 'not-found',
+                log: `GroupModeration(${id}) queried by User without authorization to view Group.`,
+                message: `That doesn't exist or you don't have permission to see it.`
+            })
+        }
+
+        const canViewGroupContent = await this.permissionService.can(currentUser, 'view', 'Group:content', { groupId: groupId })
+        if ( canViewGroupContent !== true ) {
+            return this.sendUserErrors(response, 404, {
+                type: 'not-found',
+                log: `GroupModeration(${id}) queried by User without authorization.`,
+                message: `That doesn't exist or you don't have permission to see it.`
+            })
+        }
+
         const canModerateGroup = await this.permissionService.can(currentUser, 'moderate', 'Group', { groupId: groupId })
         if ( canModerateGroup !== true ) {
             this.sendUserErrors(response, 403, {
@@ -138,6 +158,24 @@ module.exports = class GroupModerationController extends BaseController {
         const groupIdValidationErrors = validation.GroupModeration.validateGroupId(groupId)
         if ( groupIdValidationErrors.length > 0 ) {
             return this.sendUserErrors(response, 400, groupValidationErrors)
+        }
+
+        const canViewGroup = await this.permissionService.can(currentUser, 'view', 'Group', { groupId: groupId })
+        if ( canViewGroup !== true ) {
+            return this.sendUserErrors(response, 404, {
+                type: 'not-found',
+                log: `GroupModeration(${id}) queried by User without authorization to view Group.`,
+                message: `That doesn't exist or you don't have permission to see it.`
+            })
+        }
+
+        const canViewGroupContent = await this.permissionService.can(currentUser, 'view', 'Group:content', { groupId: groupId })
+        if ( canViewGroupContent !== true ) {
+            return this.sendUserErrors(response, 404, {
+                type: 'not-found',
+                log: `GroupModeration(${id}) queried by User without authorization.`,
+                message: `That doesn't exist or you don't have permission to see it.`
+            })
         }
 
         const groupModeration = cleaning.GroupModeration.clean(request.body)
@@ -190,6 +228,16 @@ module.exports = class GroupModerationController extends BaseController {
 
         // Insert the event to track the moderation history.
         await this.groupModerationEventDAO.insertGroupModerationEvents(this.groupModerationEventDAO.createEventFromGroupModeration(entity))
+
+        if ( entity.postId ) {
+            const postUpdate = {
+                id: entity.postId,
+                groupModerationId: entity.id
+            }
+            await this.postDAO.update(postUpdate)
+        } else if ( entity.postCommentId ) {
+
+        }
 
         const relations = await this.getRelations(currentUser, entityResults)
 

@@ -31,6 +31,19 @@ const SCHEMA = {
                 select: 'always',
                 key: 'id'
             },
+            'user_id': {
+                insert: 'required',
+                update: 'denied',
+                select: 'always',
+                key: 'userId'
+            },
+            'group_id': {
+                insert: 'allowed',
+                update: 'denied',
+                select: 'always',
+                key: 'groupId',
+                needsFeature: '19-private-groups'
+            },
             'type': {
                 insert: 'required',
                 update: 'denied',
@@ -45,24 +58,11 @@ const SCHEMA = {
                 key: 'visibility',
                 needsFeature: '17-public-posts'
             },
-            'user_id': {
-                insert: 'required',
-                update: 'denied',
-                select: 'always',
-                key: 'userId'
-            },
             'file_id': {
                 insert: 'allowed',
                 update: 'allowed',
                 select: 'always',
                 key: 'fileId'
-            },
-            'group_id': {
-                insert: 'allowed',
-                update: 'denied',
-                select: 'always',
-                key: 'groupId',
-                needsFeature: '19-private-groups'
             },
             'link_preview_id': {
                 insert: 'allowed',
@@ -76,6 +76,20 @@ const SCHEMA = {
                 selected: 'always',
                 key: 'sharedPostId',
                 needsFeature: '18-post-sharing'
+            },
+            'site_moderation_id': {
+                insert: 'allowed',
+                update: 'denied',
+                selected: 'always',
+                key: 'siteModerationId',
+                needsFeature: '89-improved-moderation-for-group-posts'
+            },
+            'group_moderation_id': {
+                insert: 'allowed',
+                update: 'denied',
+                selected: 'always',
+                key: 'groupModerationId',
+                needsFeature: '89-improved-moderation-for-group-posts'
             },
             'activity': {
                 insert: 'allowed',
