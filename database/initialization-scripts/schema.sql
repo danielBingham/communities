@@ -371,6 +371,45 @@ CREATE INDEX post_subscriptions__user_id ON post_subscriptions (user_id);
 CREATE INDEX post_subscriptions__post_id ON post_subscriptions (post_id);
 
 /******************************************************************************
+ * Group Moderation
+ ******************************************************************************/
+CREATE TYPE group_moderation_status AS ENUM('flagged', 'approved', 'rejected');
+CREATE TABLE group_moderation (
+    id uuid PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
+    user_id uuid REFERENCES users (id) ON DELETE SET NULL,
+
+    status group_moderation_status NOT NULL DEFAULT 'flagged',
+    reason text,
+
+    post_id uuid REFERENCES posts (id) ON DELETE CASCADE DEFAULT NULL ,
+    post_comment_id uuid REFERENCES post_comments (id) ON DELETE CASCADE DEFAULT NULL, 
+
+    created_date timestamptz, 
+    updated_date timestamptz
+);
+CREATE INDEX group_moderation__user_id ON group_moderation (user_id);
+CREATE INDEX group_moderation__post_id ON group_moderation (post_id);
+CREATE INDEX group_moderation__post_comment_id ON group_moderation (post_comment_id);
+
+CREATE TABLE group_moderation_events (
+    id uuid PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
+    group_moderation_id uuid REFERENCES group_moderation (id) ON DELETE SET NULL,
+    user_id uuid REFERENCES users (id) ON DELETE SET NULL,
+
+    status group_moderation_status NOT NULL,
+    reason text,
+
+    post_id uuid REFERENCES posts(id) ON DELETE CASCADE DEFAULT NULL,
+    post_comment_id uuid REFERENCES post_comments(id) ON DELETE CASCADE DEFAULT NULL,
+
+    created_date timestamptz
+);
+CREATE INDEX group_moderation_events__group_moderation_id ON group_moderation_events (group_moderation_id);
+CREATE INDEX group_moderation_events__user_id ON group_moderation_events (user_id);
+CREATE INDEX group_moderation_events__post_id ON group_moderation_events (post_id);
+CREATE INDEX group_moderation_events__post_comment_id ON group_moderation_events (post_comment_id);
+
+/******************************************************************************
  * Site administration
  ******************************************************************************/
 

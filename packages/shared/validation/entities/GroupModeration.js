@@ -21,25 +21,42 @@ const validateUserId = function(userId, existing, action) {
     return errors
 }
 
-const validateDomain = function(domain, existing, action) {
-    const validator = new StringValidator('domain', domain, existing, action)
+const validateStatus = function(value, existing, action) {
+    const validator = new StringValidator('status', value, existing, action)
     const errors = validator
         .isRequiredToCreate()
-        .mustNotBeUpdated()
         .mustNotBeNull()
         .mustBeString()
         .mustNotBeEmpty()
-        .mustBeShorterThan(255)
+        .mustBeOneOf(['flagged', 'approved', 'rejected'])
         .getErrors()
     return errors
 }
 
-const validateNotes = function(notes, existing, action) {
-    const validator = new StringValidator('notes', notes, existing, action)
+const validateReason = function(value, existing, action) {
+    const validator = new StringValidator('reason', value, existing, action)
     const errors = validator
         .mustNotBeNull()
         .mustBeString()
-        .mustBeShorterThan(2048)
+        .mustBeShorterThan(5000)
+        .getErrors()
+    return errors
+}
+
+const validatePostId = function(value, existing, action) {
+    const validator = new UUIDValidator('postId', value, existing, action)
+    const errors = validator
+        .mustNotBeUpdated()
+        .mustBeUUID()
+        .getErrors()
+    return errors
+}
+
+const validatePostCommentId = function(value, existing, action) {
+    const validator = new UUIDValidator('postCommentId', value, existing, action)
+    const errors = validator
+        .mustNotBeUpdated()
+        .mustBeUUID()
         .getErrors()
     return errors
 }
@@ -61,31 +78,35 @@ const validateUpdatedDate = function(updatedDate, existing, action) {
 }
 
 /**
- * Validate a user-created Blocklist entity.
+ * Validate a user-created GroupModeration entity.
  *
- * @param {Blocklist} blocklist The Blocklist entity to validate.
+ * @param {GroupModeration} groupModeration The GroupModeration entity to validate.
  *
  * @return {ValidationErrors{}} Returns an object with an array of validation
  * errors for each field.
  */
-const validate = function(blocklist, existing) {
+const validate = function(groupModeration, existing) {
     const validators = {
         id: validateId,
         userId: validateUserId,
-        domain: validateDomain,
-        notes: validateNotes,
+        status: validateStatus,
+        reason: validateReason,
+        postId: validatePostId,
+        postCommentId: validatePostCommentId,
         createdDate: validateCreatedDate,
         updatedDate: validateUpdatedDate
     }
 
-    return validateEntity(blocklist, validators, existing)
+    return validateEntity(groupModeration, validators, existing)
 }
 
 module.exports = {
     validateId: validateId,
-    validateDomain: validateDomain,
-    validateNotes: validateNotes,
     validateUserId: validateUserId,
+    validateStatus: validateStatus,
+    validateReason: validateReason,
+    validatePostId: validatePostId,
+    validatePostCommentId: validatePostCommentId,
     validateCreatedDate: validateCreatedDate,
     validateUpdatedDate: validateUpdatedDate,
     validate: validate
