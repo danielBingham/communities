@@ -25,3 +25,9 @@
 .user-badge__about {
     font-size: 12px;
 }
+
+@media ( width < 400px ) {
+    .user-badge {
+        max-width: 360px;
+    }
+}
