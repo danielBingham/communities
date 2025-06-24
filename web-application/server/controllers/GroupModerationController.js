@@ -24,7 +24,8 @@ const {
     NotificationService,
     GroupModerationDAO, 
     GroupModerationEventDAO,
-    PostDAO
+    PostDAO,
+    PostCommentDAO
 }  = require('@communities/backend')
 
 const { cleaning, validation } = require('@communities/shared')
@@ -40,6 +41,7 @@ module.exports = class GroupModerationController extends BaseController {
         this.groupModerationDAO = new GroupModerationDAO(core)
         this.groupModerationEventDAO = new GroupModerationEventDAO(core)
         this.postDAO = new PostDAO(core)
+        this.postCommentDAO = new PostCommentDAO(core)
 
         this.notificationService = new NotificationService(core)
         this.permissionService = new PermissionService(core)
@@ -236,7 +238,11 @@ module.exports = class GroupModerationController extends BaseController {
             }
             await this.postDAO.update(postUpdate)
         } else if ( entity.postCommentId ) {
-
+            const postCommentUpdate = {
+                id: entity.postCommentId,
+                groupModerationId: entity.id
+            }
+            await this.postCommentDAO.update(postCommentUpdate)
         }
 
         const relations = await this.getRelations(currentUser, entityResults)

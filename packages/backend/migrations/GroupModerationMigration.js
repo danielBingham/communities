@@ -73,9 +73,15 @@ module.exports = class GroupModerationMigration extends BaseMigration {
 
         await this.database.query(`ALTER TABLE posts ADD COLUMN IF NOT EXISTS group_moderation_id uuid REFERENCES group_moderation (id) ON DELETE SET NULL DEFAULT NULL`, [])
         await this.database.query(`ALTER TABLE posts ADD COLUMN IF NOT EXISTS site_moderation_id uuid REFERENCES site_moderation (id) ON DELETE SET NULL DEFAULT NULL`, [])
+
+        await this.database.query(`ALTER TABLE post_comments ADD COLUMN IF NOT EXISTS group_moderation_id uuid REFERENCES group_moderation (id) ON DELETE SET NULL DEFAULT NULL`, [])
+        await this.database.query(`ALTER TABLE post_comments ADD COLUMN IF NOT EXISTS site_moderation_id uuid REFERENCES site_moderation (id) ON DELETE SET NULL DEFAULT NULL`, [])
     }
 
     async initBack() { 
+        await this.database.query(`ALTER TABLE post_comments DROP COLUMN IF EXISTS group_moderation_id`, [])
+        await this.database.query(`ALTER TABLE post_comments DROP COLUMN IF EXISTS site_moderation_id`, [])
+
         await this.databse.query(`ALTER TABLE posts DROP COLUMN IF EXISTS group_moderation_id`, [])
         await this.database.query(`ALTER TABLE posts DROP COLUMN IF EXISTS site_moderation_id`, [])
 

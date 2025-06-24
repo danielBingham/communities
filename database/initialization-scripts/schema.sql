@@ -346,6 +346,9 @@ CREATE TABLE post_comments (
 
     content text,
 
+    site_moderation_id uuid DEFAULT NULL, /* REFERENCES site_moderation (id) ON DELETE SET NULL -- defined below*/
+    group_moderation_id uuid DEFAULT NULL, /* REFERENCES group_moderation (id) ON DELETE SET NULL -- defined below */
+
     created_date timestamptz,
     updated_date timestamptz
 );
@@ -416,6 +419,7 @@ CREATE INDEX group_moderation_events__post_id ON group_moderation_events (post_i
 CREATE INDEX group_moderation_events__post_comment_id ON group_moderation_events (post_comment_id);
 
 ALTER TABLE posts ADD CONSTRAINT posts_group_moderation_id_fkey FOREIGN KEY (group_moderation_id) REFERENCES group_moderation (id) ON DELETE SET NULL;
+ALTER TABLE post_comments ADD CONSTRAINT post_comments_group_moderation_id_fkey FOREIGN KEY (group_moderation_id) REFERENCES group_moderation (id) ON DELETE SET NULL;
 
 /******************************************************************************
  * Site administration
@@ -458,6 +462,7 @@ CREATE INDEX site_moderation_events__post_id ON site_moderation_events (post_id)
 CREATE INDEX site_moderation_events__post_comment_id ON site_moderation_events (post_comment_id);
 
 ALTER TABLE posts ADD CONSTRAINT posts_site_moderation_id_fkey FOREIGN KEY (site_moderation_id) REFERENCES site_moderation (id) ON DELETE SET NULL;
+ALTER TABLE post_comments ADD CONSTRAINT post_comments_site_moderation_id_fkey FOREIGN KEY (site_moderation_id) REFERENCES site_moderation (id) ON DELETE SET NULL;
 
 /******************************************************************************
  * Permissions
