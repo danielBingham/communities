@@ -37,6 +37,12 @@ const SCHEMA = {
                 select: 'always',
                 key: 'userId'
             },
+            'group_id': {
+                insert: 'require',
+                update: 'allow',
+                select: 'always',
+                key: 'groupId'
+            },
             'status': {
                 insert: 'require',
                 update: 'allow',

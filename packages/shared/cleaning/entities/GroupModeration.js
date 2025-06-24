@@ -6,6 +6,7 @@ const clean = function(groupModeration) {
     const cleaners = {
         id: uuidCleaner,
         userId: uuidCleaner,
+        groupId: uuidCleaner,
         status: stringCleaner,
         reason: stringCleaner,
         postId: uuidCleaner,
@@ -19,6 +20,7 @@ const clean = function(groupModeration) {
 module.exports = {
     cleanId: uuidCleaner,
     cleanUserId: uuidCleaner,
+    cleanGroupId: uuidCleaner,
     cleanStatus: stringCleaner,
     cleanReason: stringCleaner,
     cleanPostId: uuidCleaner,

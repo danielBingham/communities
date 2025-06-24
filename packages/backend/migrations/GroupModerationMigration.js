@@ -33,6 +33,7 @@ module.exports = class GroupModerationMigration extends BaseMigration {
             CREATE TABLE IF NOT EXISTS group_moderation (
                 id uuid PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
                 user_id uuid REFERENCES users (id) ON DELETE SET NULL,
+                group_id uuid REFERENCES groups (id) ON DELETE CASCADE NOT NULL,
 
                 status group_moderation_status NOT NULL DEFAULT 'flagged',
                 reason text,
@@ -54,6 +55,7 @@ module.exports = class GroupModerationMigration extends BaseMigration {
                 id uuid PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
                 group_moderation_id uuid REFERENCES group_moderation (id) ON DELETE SET NULL,
                 user_id uuid REFERENCES users (id) ON DELETE SET NULL,
+                group_id uuid REFERENCES groups (id) ON DELETE CASCADE NOT NULL,
 
                 status group_moderation_status NOT NULL,
                 reason text,

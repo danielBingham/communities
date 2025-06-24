@@ -21,6 +21,17 @@ const validateUserId = function(userId, existing, action) {
     return errors
 }
 
+const validateGroupId = function(groupId, existing, action) {
+    const validator = new UUIDValidator('groupId', groupId, existing, action)
+    const errors = validator
+        .isRequiredToCreate()
+        .mustNotBeUpdated()
+        .mustNotBeNull()
+        .mustBeUUID()
+        .getErrors()
+    return errors
+}
+
 const validateStatus = function(value, existing, action) {
     const validator = new StringValidator('status', value, existing, action)
     const errors = validator
@@ -89,6 +100,7 @@ const validate = function(groupModeration, existing) {
     const validators = {
         id: validateId,
         userId: validateUserId,
+        groupId: validateGroupId,
         status: validateStatus,
         reason: validateReason,
         postId: validatePostId,
@@ -103,6 +115,7 @@ const validate = function(groupModeration, existing) {
 module.exports = {
     validateId: validateId,
     validateUserId: validateUserId,
+    validateGroupId: validateGroupId,
     validateStatus: validateStatus,
     validateReason: validateReason,
     validatePostId: validatePostId,

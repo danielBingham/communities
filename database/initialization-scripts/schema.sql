@@ -377,6 +377,7 @@ CREATE TYPE group_moderation_status AS ENUM('flagged', 'approved', 'rejected');
 CREATE TABLE group_moderation (
     id uuid PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
     user_id uuid REFERENCES users (id) ON DELETE SET NULL,
+    group_id uuid REFERENCES groups (id) ON DELETE CASCADE NOT NULL,
 
     status group_moderation_status NOT NULL DEFAULT 'flagged',
     reason text,
@@ -395,6 +396,7 @@ CREATE TABLE group_moderation_events (
     id uuid PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
     group_moderation_id uuid REFERENCES group_moderation (id) ON DELETE SET NULL,
     user_id uuid REFERENCES users (id) ON DELETE SET NULL,
+    group_id uuid REFERENCES groups (id) ON DELETE CASCADE NOT NULL,
 
     status group_moderation_status NOT NULL,
     reason text,

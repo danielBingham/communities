@@ -93,6 +93,66 @@ describe('validateUserId', function() {
     })
 })
 
+describe('validateGroupId', function() {
+    it('Should return an error when groupId is undefined while creating', function() {
+        const groupId = undefined
+        const existing = undefined 
+
+        const errors = validation.GroupModeration.validateGroupId(groupId, existing, 'create')
+
+        expect(errors.length).toBe(1)
+        expect(errors[0].type).toBe('groupId:required')
+    })
+
+    it('Should return an error when groupId is being updated', function() {
+        const groupId = 'd209158e-5c58-44e1-ab00-12b45aad065f'
+        const existing = '840b8db4-a91e-44e2-a7a3-6922e7e98290'
+        const errors = validation.GroupModeration.validateGroupId(groupId, existing, 'update')
+
+        expect(errors.length).toBe(1)
+        expect(errors[0].type).toBe('groupId:not-allowed')
+    })
+
+    it('Should pass when groupId is not being updated', function() {
+        const groupId = 'd209158e-5c58-44e1-ab00-12b45aad065f'
+        const existing = 'd209158e-5c58-44e1-ab00-12b45aad065f'
+        const errors = validation.GroupModeration.validateGroupId(groupId, existing, 'update')
+
+        expect(errors.length).toBe(0)
+    })
+
+    it('Should return an error when groupId is null', function() {
+        const groupId = null
+        const errors = validation.GroupModeration.validateGroupId(groupId)
+
+        expect(errors.length).toBe(1)
+        expect(errors[0].type).toBe('groupId:null')
+    })
+
+    it('Should return an error when groupId is not a string', function() {
+        const groupId = 5
+        const errors = validation.GroupModeration.validateGroupId(groupId)
+
+        expect(errors.length).toBe(1)
+        expect(errors[0].type).toBe('groupId:invalid')
+    })
+
+    it('Should return an error when groupId is not a valid uuid', function() {
+        const groupId = 'test-id'
+        const errors = validation.GroupModeration.validateGroupId(groupId)
+
+        expect(errors.length).toBe(1)
+        expect(errors[0].type).toBe('groupId:invalid')
+    })
+
+    it('Should pass a valid UUID', function() {
+        const groupId = 'd209158e-5c58-44e1-ab00-12b45aad065f'
+        const errors = validation.GroupModeration.validateGroupId(groupId)
+
+        expect(errors.length).toBe(0)
+    })
+})
+
 describe('validateStatus', function() {
     it('Should return an error when status is undefined while creating', function() {
         const value = undefined
@@ -357,6 +417,7 @@ describe('validate', function() {
     it('Should return errors for an invalid groupModeration', function() {
         const groupModeration = {
             userId: null,
+            groupId: null,
             status: 'removed',
             reason: 25,
             postId: 'test',
@@ -364,8 +425,9 @@ describe('validate', function() {
         }
         const errors = validation.GroupModeration.validate(groupModeration)
 
-        expect(errors.all.length).toBe(5)
+        expect(errors.all.length).toBe(6)
         expect(errors.userId.length).toBe(1)
+        expect(errors.groupId.length).toBe(1)
         expect(errors.status.length).toBe(1)
         expect(errors.reason.length).toBe(1)
         expect(errors.postId.length).toBe(1)
@@ -375,6 +437,7 @@ describe('validate', function() {
     it('Should pass a valid groupModeration', function() {
         const groupModeration = {
             userId: '4c73dbae-3d03-43cd-b03d-5be4953b832b',
+            groupId: '43ef7ae1-81a2-4217-94e0-18be156670d5',
             status: 'flagged',
             reason: 'A test reason',
             postId: 'ff6234c5-f49d-4774-b738-3251fe16fb66',
