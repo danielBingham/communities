@@ -1,15 +1,13 @@
 import React from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 
-import { Page } from '/components/generic/Page'
-
 import Post from '/components/posts/Post'
 
-import './PostPage.css'
+import './PostView.css'
 
 import Button from '/components/generic/button/Button'
 
-const PostPage = function({ group }) {
+const PostView = function({ group }) {
     const { slug, postId } = useParams()
     const navigate = useNavigate()
 
@@ -25,4 +23,4 @@ const PostPage = function({ group }) {
     )
 }
 
-export default PostPage
+export default PostView

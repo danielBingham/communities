@@ -8,12 +8,7 @@ import {
     clearQueries
 } from '/state/lib/slice'
 
-export const SiteModerationSlice = createSlice({
-    name: 'SiteModeration',
-    initialState: {
-        
-        // ======== Standard State ============================================
-
+const initialState = {
         /**
          * A dictionary of siteModerations we've retrieved from the backend, keyed by
          * post.id.
@@ -46,7 +41,11 @@ export const SiteModerationSlice = createSlice({
 
         byPostId: {},
         byPostCommentId: {}
-    },
+}
+
+export const SiteModerationSlice = createSlice({
+    name: 'SiteModeration',
+    initialState: initialState,
     reducers: {
         // ======== State Manipulation Helpers ================================
         // @see ./helpers/state.js
@@ -91,14 +90,17 @@ export const SiteModerationSlice = createSlice({
         },
         setSiteModerationQueryResults: setQueryResults,
         clearSiteModerationQuery: clearQuery,
-        clearSiteModerationQueries: clearQueries
+        clearSiteModerationQueries: clearQueries,
+        resetSiteModerationSlice: function() {
+            return initialState
+        }
     }
 })
 
 export const { 
     setSiteModerationsInDictionary, removeSiteModeration, 
     setSiteModerationQueryResults, clearSiteModerationQuery,
-    clearSiteModerationQueries
+    clearSiteModerationQueries, resetSiteModerationSlice
 }  = SiteModerationSlice.actions
 
 export default SiteModerationSlice.reducer

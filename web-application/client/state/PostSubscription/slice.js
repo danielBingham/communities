@@ -8,43 +8,41 @@ import {
     clearQueries
 } from '/state/lib/slice'
 
+const initialState = {
+    /**
+     * A dictionary of PostSubscriptions we've retrieved from the backend, keyed by
+     * postSubscription.id.
+     *
+     * @type {object}
+     */
+    dictionary: {},
+
+    /**
+     *
+     * An object containing queries made to query supporting endpoints.
+     *
+     * Structure:
+     * {
+     *  queryName: {
+     *      meta: {
+     *          page: <int>,
+     *          count: <int>,
+     *          pageSize: <int>,
+     *          numberOfPages: <int>
+     *      },
+     *      list: [] 
+     *  },
+     *  ...
+     * }
+     */
+    queries: {},
+
+    byPostId: {}
+}
+
 export const PostSubscriptionSlice = createSlice({
     name: 'PostSubscription',
-    initialState: {
-        
-        // ======== Standard State ============================================
-
-        /**
-         * A dictionary of PostSubscriptions we've retrieved from the backend, keyed by
-         * postSubscription.id.
-         *
-         * @type {object}
-         */
-        dictionary: {},
-
-        /**
-         *
-         * An object containing queries made to query supporting endpoints.
-         *
-         * Structure:
-         * {
-         *  queryName: {
-         *      meta: {
-         *          page: <int>,
-         *          count: <int>,
-         *          pageSize: <int>,
-         *          numberOfPages: <int>
-         *      },
-         *      list: [] 
-         *  },
-         *  ...
-         * }
-         */
-        queries: {},
-
-        byPostId: {}
-
-    },
+    initialState: initialState,
     reducers: {
         setPostSubscriptionsInDictionary: function(state, action) {
             setInDictionary(state, action)
@@ -67,13 +65,14 @@ export const PostSubscriptionSlice = createSlice({
         setPostSubscriptionQueryResults: setQueryResults,
         clearPostSubscriptionQuery: clearQuery,
         clearPostSubscriptionQueries: clearQueries,
+        resetPostSubscriptionSlice: () => initialState
     }
 })
 
 export const { 
     setPostSubscriptionsInDictionary, removePostSubscription, 
     clearPostSubscriptionQuery, setPostSubscriptionQueryResults,
-    clearPostSubscriptionQueries
+    clearPostSubscriptionQueries, resetPostSubscriptionSlice
 } = PostSubscriptionSlice.actions
 
 export default PostSubscriptionSlice.reducer

@@ -5,6 +5,7 @@ export {
     clearPostQuery, 
     setPostQueryResults, 
     clearPostQueries, 
+    resetPostSlice,
     startPostEdit,
     finishPostEdit,
     setDraft,

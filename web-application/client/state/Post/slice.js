@@ -8,66 +8,63 @@ import {
     clearQueries
 } from '/state/lib/slice'
 
+const initialState = {
+    /**
+     * A dictionary of Post we've retrieved from the backend, keyed by
+     * post.id.
+     *
+     * @type {object}
+     */
+    dictionary: {},
+
+    /**
+     *
+     * An object containing queries made to query supporting endpoints.
+     *
+     * Structure:
+     * {
+     *  queryName: {
+     *      meta: {
+     *          page: <int>,
+     *          count: <int>,
+     *          pageSize: <int>,
+     *          numberOfPages: <int>
+     *      },
+     *      list: [] 
+     *  },
+     *  ...
+     * }
+     */
+    queries: {},
+
+    /**
+     * Posts which are currently being edited.
+     *
+     * {
+     *   [ postId ]: boolean
+     * }
+     *   
+     **/
+    editing: {},
+
+    drafts: {},
+
+    /**
+     * The id of a post we are actively sharing.
+     */
+    sharingPost: null
+}
+
 export const PostSlice = createSlice({
     name: 'Post',
-    initialState: {
-        
-        // ======== Standard State ============================================
-
-        /**
-         * A dictionary of Post we've retrieved from the backend, keyed by
-         * post.id.
-         *
-         * @type {object}
-         */
-        dictionary: {},
-
-        /**
-         *
-         * An object containing queries made to query supporting endpoints.
-         *
-         * Structure:
-         * {
-         *  queryName: {
-         *      meta: {
-         *          page: <int>,
-         *          count: <int>,
-         *          pageSize: <int>,
-         *          numberOfPages: <int>
-         *      },
-         *      list: [] 
-         *  },
-         *  ...
-         * }
-         */
-        queries: {},
-
-        /**
-         * Posts which are currently being edited.
-         *
-         * {
-         *   [ postId ]: boolean
-         * }
-         *   
-         **/
-        editing: {},
-
-        drafts: {},
-
-        /**
-         * The id of a post we are actively sharing.
-         */
-        sharingPost: null
-    },
+    initialState: initialState,
     reducers: {
-        // ======== State Manipulation Helpers ================================
-        // @see ./helpers/state.js
-
         setPostsInDictionary: setInDictionary, 
         removePost: removeEntity,
         setPostQueryResults: setQueryResults,
         clearPostQuery: clearQuery,
         clearPostQueries: clearQueries,
+        resetPostSlice: () => initialState,
 
         clearInProgress: function(state, action) {
             state.inProgress = null
@@ -104,7 +101,7 @@ export const PostSlice = createSlice({
 export const { 
     setPostsInDictionary, removePost, 
     clearPostQuery, setPostQueryResults,
-    clearPostQueries,
+    clearPostQueries, resetPostSlice,
     startPostEdit, finishPostEdit,
     setDraft, clearDraft,
     setSharingPost, clearSharingPost

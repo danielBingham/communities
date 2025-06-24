@@ -8,55 +8,51 @@ import {
     clearQueries
 } from '/state/lib/slice'
 
+const initialState = {
+    /**
+     * A dictionary of PostComment we've retrieved from the backend, keyed by
+     * postComment.id.
+     *
+     * @type {object}
+     */
+    dictionary: {},
+
+    /**
+     *
+     * An object containing queries made to query supporting endpoints.
+     *
+     * Structure:
+     * {
+     *  queryName: {
+     *      meta: {
+     *          page: <int>,
+     *          count: <int>,
+     *          pageSize: <int>,
+     *          numberOfPages: <int>
+     *      },
+     *      list: [] 
+     *  },
+     *  ...
+     * }
+     */
+    queries: {},
+
+    // Specific state
+    commentsByPost: {},
+
+    // Which comments are currently being edited?
+    //
+    // { 
+    //  [id]: boolean
+    // }
+    editing: {}
+
+}
+
 export const PostCommentSlice = createSlice({
     name: 'PostComment',
-    initialState: {
-        
-        // ======== Standard State ============================================
-
-        /**
-         * A dictionary of PostComment we've retrieved from the backend, keyed by
-         * postComment.id.
-         *
-         * @type {object}
-         */
-        dictionary: {},
-
-        /**
-         *
-         * An object containing queries made to query supporting endpoints.
-         *
-         * Structure:
-         * {
-         *  queryName: {
-         *      meta: {
-         *          page: <int>,
-         *          count: <int>,
-         *          pageSize: <int>,
-         *          numberOfPages: <int>
-         *      },
-         *      list: [] 
-         *  },
-         *  ...
-         * }
-         */
-        queries: {},
-
-        // Specific state
-        commentsByPost: {},
-
-        // Which comments are currently being edited?
-        //
-        // { 
-        //  [id]: boolean
-        // }
-        editing: {}
-
-    },
+    initialState: initialState,
     reducers: {
-        // ======== State Manipulation Helpers ================================
-        // @see ./helpers/state.js
-
         setPostCommentsInDictionary: function(state, action) {
             setInDictionary(state, action)
 
@@ -90,6 +86,7 @@ export const PostCommentSlice = createSlice({
         setPostCommentQueryResults: setQueryResults,
         clearPostCommentQuery: clearQuery,
         clearPostCommentQueries: clearQueries,
+        resetPostCommentSlice: () => initialState,
 
         startPostCommentEdit: function(state, action) {
             const commentId = action.payload
@@ -106,7 +103,7 @@ export const PostCommentSlice = createSlice({
 export const { 
     setPostCommentsInDictionary, removePostComment, 
     clearPostCommentQuery, setPostCommentQueryResults,
-    clearPostCommentQueries,
+    clearPostCommentQueries, resetPostCommentSlice,
     startPostCommentEdit, finishPostCommentEdit
 }  = PostCommentSlice.actions
 

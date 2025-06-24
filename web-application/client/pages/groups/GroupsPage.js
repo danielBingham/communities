@@ -1,5 +1,8 @@
-import React from 'react'
+import React, { useEffect } from 'react'
+import { useDispatch } from 'react-redux'
 import { Outlet, useNavigate } from 'react-router-dom'
+
+import { resetEntities } from '/state/lib'
 
 import { NavigationMenu, NavigationMenuItem, NavigationMenuButton } from '/components/generic/NavigationMenu'
 import { Page, PageBody, PageLeftGutter, PageRightGutter } from '/components/generic/Page'
@@ -9,6 +12,13 @@ import './GroupsPage.css'
 const GroupsPage = function() {
 
     const navigate = useNavigate()
+
+    const dispatch = useDispatch()
+    useEffect(() => {
+        return () => {
+            dispatch(resetEntities())
+        }
+    }, [])
 
     return (
         <Page id="groups-page">

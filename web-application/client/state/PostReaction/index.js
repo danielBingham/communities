@@ -2,6 +2,6 @@ export {
     default,
     setPostReactionsInDictionary, removePostReaction, 
     clearPostReactionQuery, setPostReactionQueryResults,
-    clearPostReactionQueries
+    clearPostReactionQueries, resetPostReactionSlice
 } from './slice'
 export { postPostReaction, patchPostReaction, deletePostReaction } from './thunks'

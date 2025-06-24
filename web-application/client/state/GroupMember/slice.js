@@ -8,50 +8,46 @@ import {
     clearQueries
 } from '/state/lib/slice'
 
+const initialState = {
+    /**
+     * A dictionary of groupMembers we've retrieved from the backend, keyed by
+     * group.id.
+     *
+     * @type {object}
+     */
+    dictionary: {},
+
+    /**
+     *
+     * An object containing queries made to query supporting endpoints.
+     *
+     * In the case of groupMembers: /groupMembers, /group/:id/children, and
+     * /group/:id/parents
+     *
+     * Structure:
+     * {
+     *  queryName: {
+     *      meta: {
+     *          page: <int>,
+     *          count: <int>,
+     *          pageSize: <int>,
+     *          numberOfPages: <int>
+     *      },
+     *      list: [] 
+     *  },
+     *  ...
+     * }
+     */
+    queries: {},
+
+    byGroupAndUser: {}
+
+}
+
 export const GroupMemberSlice = createSlice({
     name: 'GroupMember',
-    initialState: {
-        
-        // ======== Standard State ============================================
-
-        /**
-         * A dictionary of groupMembers we've retrieved from the backend, keyed by
-         * group.id.
-         *
-         * @type {object}
-         */
-        dictionary: {},
-
-        /**
-         *
-         * An object containing queries made to query supporting endpoints.
-         *
-         * In the case of groupMembers: /groupMembers, /group/:id/children, and
-         * /group/:id/parents
-         *
-         * Structure:
-         * {
-         *  queryName: {
-         *      meta: {
-         *          page: <int>,
-         *          count: <int>,
-         *          pageSize: <int>,
-         *          numberOfPages: <int>
-         *      },
-         *      list: [] 
-         *  },
-         *  ...
-         * }
-         */
-        queries: {},
-
-        byGroupAndUser: {}
-
-    },
+    initialState: initialState,
     reducers: {
-        // ======== State Manipulation Helpers ================================
-        // @see ./helpers/state.js
-
         setGroupMembersInDictionary: (state, action) => {
             setInDictionary(state, action)
 
@@ -77,14 +73,15 @@ export const GroupMemberSlice = createSlice({
         },
         setGroupMemberQueryResults: setQueryResults,
         clearGroupMemberQuery: clearQuery,
-        clearGroupMemberQueries: clearQueries
+        clearGroupMemberQueries: clearQueries,
+        resetGroupMemberSlice: () => initialState
     }
 })
 
 export const { 
     setGroupMembersInDictionary, removeGroupMember, 
     clearGroupMemberQuery, setGroupMemberQueryResults,
-    clearGroupMemberQueries
+    clearGroupMemberQueries, resetGroupMemberSlice
 }  = GroupMemberSlice.actions
 
 export default GroupMemberSlice.reducer

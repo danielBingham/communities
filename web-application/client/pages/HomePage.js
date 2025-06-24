@@ -1,6 +1,8 @@
-import React from 'react'
-import { useSelector } from 'react-redux'
+import React, { useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 import { Outlet } from 'react-router-dom'
+
+import { resetEntities } from '/state/lib'
 
 import FeedMenu from '/components/feeds/menu/FeedMenu'
 import { Page, PageBody, PageLeftGutter, PageRightGutter } from '/components/generic/Page'
@@ -12,6 +14,13 @@ const HomePage = function() {
     const features = useSelector((state) => state.system.features)
 
     const hasGroups = '19-private-groups' in features
+
+    const dispatch = useDispatch()
+    useEffect(() => {
+        return () => {
+            dispatch(resetEntities())
+        }
+    }, [])
 
     return (
         <Page id="home-page">

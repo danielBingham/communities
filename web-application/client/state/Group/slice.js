@@ -8,49 +8,45 @@ import {
     clearQueries
 } from '/state/lib/slice'
 
+const initialState = {
+    /**
+     * A dictionary of groups we've retrieved from the backend, keyed by
+     * group.id.
+     *
+     * @type {object}
+     */
+    dictionary: {},
+
+    /**
+     *
+     * An object containing queries made to query supporting endpoints.
+     *
+     * In the case of groups: /groups, /group/:id/children, and
+     * /group/:id/parents
+     *
+     * Structure:
+     * {
+     *  queryName: {
+     *      meta: {
+     *          page: <int>,
+     *          count: <int>,
+     *          pageSize: <int>,
+     *          numberOfPages: <int>
+     *      },
+     *      list: [] 
+     *  },
+     *  ...
+     * }
+     */
+    queries: {},
+
+    bySlug: {}
+}
+
 export const GroupSlice = createSlice({
     name: 'Group',
-    initialState: {
-        
-        // ======== Standard State ============================================
-
-        /**
-         * A dictionary of groups we've retrieved from the backend, keyed by
-         * group.id.
-         *
-         * @type {object}
-         */
-        dictionary: {},
-
-        /**
-         *
-         * An object containing queries made to query supporting endpoints.
-         *
-         * In the case of groups: /groups, /group/:id/children, and
-         * /group/:id/parents
-         *
-         * Structure:
-         * {
-         *  queryName: {
-         *      meta: {
-         *          page: <int>,
-         *          count: <int>,
-         *          pageSize: <int>,
-         *          numberOfPages: <int>
-         *      },
-         *      list: [] 
-         *  },
-         *  ...
-         * }
-         */
-        queries: {},
-
-        bySlug: {}
-    },
+    initialState: initialState,
     reducers: {
-        // ======== State Manipulation Helpers ================================
-        // @see ./helpers/state.js
-
         setGroupsInDictionary: (state, action) => {
             setInDictionary(state, action)
 
@@ -69,14 +65,15 @@ export const GroupSlice = createSlice({
         },
         setGroupQueryResults: setQueryResults,
         clearGroupQuery: clearQuery,
-        clearGroupQueries: clearQueries
+        clearGroupQueries: clearQueries,
+        resetGroupSlice: () => initialState
     }
 })
 
 export const { 
     setGroupsInDictionary, removeGroup, 
     clearGroupQuery, setGroupQueryResults,
-    clearGroupQueries
+    clearGroupQueries, resetGroupSlice
 }  = GroupSlice.actions
 
 export default GroupSlice.reducer
