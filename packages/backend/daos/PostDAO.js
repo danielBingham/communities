@@ -240,8 +240,7 @@ module.exports = class PostDAO extends DAO {
         let where = query.where ? `WHERE ${query.where}` : ''
         let params = query.params ? [ ...query.params ] : []
         let page = query.page 
-        let order = query.order ? `${query.order}` : 
-            `(posts.activity/((EXTRACT(EPOCH from now()) - EXTRACT(EPOCH from posts.created_date))/(60*60))) DESC`
+        let order = query.order ? `${query.order}` : `posts.created_date DESC`
 
         if ( page ) {
             const postIds = await this.getPostPage(query)
