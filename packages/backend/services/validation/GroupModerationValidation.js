@@ -18,6 +18,7 @@
  *
  ******************************************************************************/
 
+const PermissionService = require ('../PermissionService')
 const { util, validation } = require('@communities/shared')
 
 const ServiceError = require('../../errors/ServiceError')
@@ -27,6 +28,7 @@ module.exports = class GroupModerationValidation {
     constructor(core, validationService) {
         this.core = core
         this.validationService = validationService
+        this.permissionService = new PermissionService(core)
     }
 
     async validateGroupModeration(currentUser, groupModeration, existing) {
@@ -95,6 +97,20 @@ module.exports = class GroupModerationValidation {
                     type: `userId:not-found`,
                     log: `User(${groupModeration.userId}) not found.`,
                     message: `User not found for that userId.`
+                })
+            }
+        }
+
+        if ( util.objectHas(groupModeration, 'groupId') && groupModeration.groupId !== null ) {
+            const groupResults = await this.core.database.query(`
+                SELECT id FROM groups WHERE id = $1
+            `, [ groupModeration.groupId ])
+
+            if ( groupResults.rows.length <= 0 || groupResults.rows[0].id !== groupModeration.groupId ) {
+                errors.push({
+                    type: `groupId:not-found`,
+                    log: `Group(${groupModeration.groupId}) not found.`,
+                    message: `Group not found for that groupId.`
                 })
             }
         }
