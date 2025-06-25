@@ -31,7 +31,7 @@ const {
 const { cleaning, validation } = require('@communities/shared')
 
 const BaseController = require('./BaseController')
-const ControllerError = require('../../errors/ControllerError')
+const ControllerError = require('../errors/ControllerError')
 
 module.exports = class GroupModerationController extends BaseController {
 

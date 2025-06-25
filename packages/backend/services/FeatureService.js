@@ -32,7 +32,7 @@ const PublicPostsMigration = require('../migrations/PublicPostsMigration')
 const PostSharingMigration = require('../migrations/PostSharingMigration')
 const AdminModerationMigration = require('../migrations/AdminModerationMigration')
 const SiteAdminsCanBanUsersMigration = require('../migrations/SiteAdminsCanBanUsersMigration')
-const GroupModerationMigration = require('./migrations/GroupModerationMigration')
+const GroupModerationMigration = require('../migrations/GroupModerationMigration')
 
 const ServiceError = require('../errors/ServiceError')
 const MigrationError = require('../errors/MigrationError')
