@@ -231,18 +231,18 @@ module.exports = class GroupModerationController extends BaseController {
         // Insert the event to track the moderation history.
         await this.groupModerationEventDAO.insertGroupModerationEvents(this.groupModerationEventDAO.createEventFromGroupModeration(entity))
 
-        if ( entity.postId ) {
+        if ( entity.postId && entity.postCommentId === null) {
             const postUpdate = {
                 id: entity.postId,
                 groupModerationId: entity.id
             }
-            await this.postDAO.update(postUpdate)
+            await this.postDAO.updatePost(postUpdate)
         } else if ( entity.postCommentId ) {
             const postCommentUpdate = {
                 id: entity.postCommentId,
                 groupModerationId: entity.id
             }
-            await this.postCommentDAO.update(postCommentUpdate)
+            await this.postCommentDAO.updatePostComment(postCommentUpdate)
         }
 
         const relations = await this.getRelations(currentUser, entityResults)
@@ -337,7 +337,7 @@ module.exports = class GroupModerationController extends BaseController {
         const groupId = cleaning.GroupModeration.cleanGroupId(request.params.groupId)
         const groupIdValidationErrors = validation.GroupModeration.validateGroupId(groupId)
         if ( groupIdValidationErrors.length > 0 ) {
-            return this.sendUserErrors(response, 400, groupValidationErrors)
+            return this.sendUserErrors(response, 400, groupIdValidationErrors)
         }
 
         const canViewGroup = await this.permissionService.can(currentUser, 'view', 'Group', { groupId: groupId })

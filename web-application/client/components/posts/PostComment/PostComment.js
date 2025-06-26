@@ -4,9 +4,10 @@ import { useLocation } from 'react-router-dom'
 
 import Linkify from 'react-linkify'
 
-import { usePostComment } from '/lib/hooks/PostComment'
-import { useSiteModerationForPostComment } from '/lib/hooks/SiteModeration'
 import { useFeature } from '/lib/hooks/feature'
+import { usePostComment } from '/lib/hooks/PostComment'
+import { useSiteModeration } from '/lib/hooks/SiteModeration'
+import { useGroupModeration } from '/lib/hooks/GroupModeration'
 
 import DateTag from '/components/DateTag'
 import UserTag from '/components/users/UserTag'
@@ -21,8 +22,9 @@ import './PostComment.css'
 const PostComment = function({ postId, id }) {
     const [highlight, setHighlight] = useState(false)
 
-    const [comment] = usePostComment(postId, id)
-    const [moderation] = useSiteModerationForPostComment(postId, id)
+    const [comment, request] = usePostComment(postId, id)
+    const [siteModeration, siteModerationRequest] = useSiteModeration(comment?.siteModerationId)
+    const [groupModeration, groupModerationRequest] = useGroupModeration(comment?.groupModerationId)
     const hasAdminModeration = useFeature('62-admin-moderation-controls')
 
     const location = useLocation()
@@ -40,11 +42,15 @@ const PostComment = function({ postId, id }) {
         }
     }, [ id, location ])
 
-    if ( comment == null ) {
+    if ( comment == null 
+        || ( comment.siteModerationId !== null && siteModeration === null)
+        || ( comment.groupModerationId !== null && groupModeration === null)
+        ) 
+    {
         return null
     }
 
-    if ( moderation !== null && moderation.status === 'rejected' ) {
+    if ( siteModeration !== null && siteModeration.status === 'rejected' ) {
         return (
             <div id={`comment-${comment.id}`} key={comment.id} className={`post-comment ${ highlight ? 'highlight' : ''}`}>
                 <div className="post-comment__header">
@@ -61,8 +67,8 @@ const PostComment = function({ postId, id }) {
                     <div className="post-comment__moderated">
                         <p>Comment removed by moderator.</p>
 
-                        { moderation.reason !== null && moderation.reason.length > 0 && 
-                            <p>{ moderation.reason }</p> 
+                        { siteModeration.reason !== null && siteModeration.reason.length > 0 && 
+                            <p>{ siteModeration.reason }</p> 
                         }
 
                     </div>

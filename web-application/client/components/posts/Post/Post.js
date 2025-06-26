@@ -4,11 +4,13 @@ import { useNavigate, Link } from 'react-router-dom'
 
 import { UsersIcon, UserGroupIcon, GlobeAltIcon } from '@heroicons/react/24/solid'
 
-import { usePostDraft } from '/lib/hooks/usePostDraft'
 import { useFeature } from '/lib/hooks/feature'
+import { usePostDraft } from '/lib/hooks/usePostDraft'
 import { usePost } from '/lib/hooks/Post'
 import { useUser } from '/lib/hooks/User'
 import { useGroup } from '/lib/hooks/Group'
+import { useSiteModeration } from '/lib/hooks/SiteModeration'
+import { useGroupModeration } from '/lib/hooks/GroupModeration'
 
 import Linkify from 'react-linkify'
 
@@ -34,12 +36,13 @@ import './Post.css'
 const Post = function({ id, expanded, showLoading, shared }) {
     const [showMore, setShowMore] = useState(expanded) 
 
+    const hasAdminModeration = useFeature('62-admin-moderation-controls')
+
     const [post, request] = usePost(id)
     const [user, userRequest] = useUser(post?.userId)
     const [group, groupRequest] = useGroup(post?.groupId) 
-
-    const hasAdminModeration = useFeature('62-admin-moderation-controls')
-    const moderation = useSelector((state) => hasAdminModeration && id && id in state.SiteModeration.byPostId ? state.SiteModeration.byPostId[id] : null)
+    const [groupModeration, groupModerationRequest] = useGroupModeration(post?.groupModerationId)
+    const [siteModeration, siteModerationRequest] = useSiteModeration(post?.siteModerationId)
 
     const [draft, setDraft] = usePostDraft(id)
     if ( draft !== null) {
@@ -57,13 +60,39 @@ const Post = function({ id, expanded, showLoading, shared }) {
         )
     }
 
-    if ( showLoading && ((request && request.state == 'pending' ) || (userRequest && userRequest.state === 'pending') || (groupRequest && groupRequest.state === 'pending'))) {
+    // ------------------------------------------------------------------------
+    // Show a spinner if any of the components are still loading and
+    // `showLoading === true`
+    // ------------------------------------------------------------------------
+    
+    if ( showLoading 
+        && (
+            (request && request.state == 'pending' ) 
+            || (userRequest && userRequest.state === 'pending') 
+            || (groupRequest && groupRequest.state === 'pending')
+            || (groupModerationRequest && groupModerationRequest.state === 'pending')
+            || (siteModerationRequest && siteModerationRequest.state === 'pending')
+        ) ) 
+    {
         return ( <div id={id} className="post"><Spinner /></div> )
     }
 
-    if ( ! post || (post?.userId && ! user) || (post?.groupId && ! group) ) {
+    // ------------------------------------------------------------------------
+    // Make sure we have all the components before we show the post.
+    // ------------------------------------------------------------------------
+   
+    if ( ! post 
+        || (post?.userId && ! user) 
+        || (post?.groupId && ! group)
+        || (post?.siteModerationId && ! siteModeration)
+        || (post?.groupModerationId && ! groupModeration)) 
+    {
         return null
     }
+
+    // ------------------------------------------------------------------------
+    // Render
+    // ------------------------------------------------------------------------
 
     let postLink = `/${user.username}/${id}`
     if ( post.groupId && group ) {
@@ -91,7 +120,9 @@ const Post = function({ id, expanded, showLoading, shared }) {
         postVisibility = (<span className="post__post-visibility"> <GlobeAltIcon /> <span className="text">Public</span></span>)
     }
 
-    if ( moderation !== null && moderation.status === 'rejected' ) {
+    if ( (siteModeration !== null && siteModeration.status === 'rejected') 
+        || (groupModeration !== null && groupModeration.status === 'rejected') ) 
+    {
         return (
             <div id={post.id} className={`post ${shared ? 'shared' : '' }`}>
                 <div className="post__header"> 
@@ -100,24 +131,30 @@ const Post = function({ id, expanded, showLoading, shared }) {
                         <div><UserTag id={post.userId} hideProfile={true} /> { post.groupId &&<span>posted in <GroupTag id={post.groupId} hideProfile={true} /></span>}</div> 
                         <div><span className="post__visibility">{ postVisibility }</span> &bull; <Link to={postLink}><DateTag timestamp={post.createdDate} /></Link> </div>
                     </div>
-                    <div className="post__moderation">
+                    <div></div>
+                    <div className="post__siteModeration">
                         <PostModeration postId={post.id} />
-                    </div>
-                    <div className="post__controls">
                     </div>
                 </div>
                 <div className="post__content">
                     <div className="post__moderated">
-                        <p>Post removed by moderator.</p>
-
-                        { moderation.reason !== null && moderation.reason.length > 0 && 
-                            <p>{ moderation.reason }</p> 
+                        { siteModeration && (siteModeration.reason !== null && siteModeration.reason.length > 0) && 
+                            <p>Post removed by a Site moderator with explanation: { siteModeration.reason }</p> 
+                        }
+                        { siteModeration && (siteModeration.reason === null || siteModeration.reason.length <= 0) &&
+                            <p>Post removed by a Site moderator.</p>
+                        }
+                        { groupModeration && groupModeration.reason !== null && groupModeration.reason.length > 0 && 
+                            <p>Post removed by a Group moderator with explanation: { groupModeration.reason }</p> 
+                        }
+                        { groupModeration && (groupModeration.reason === null || groupModeration.reason.length <= 0) &&
+                            <p>Post removed by a Group moderator.</p>
                         }
                     </div>
                 </div>
             </div>
         )
-    }
+    } 
 
     return (
         <div id={post.id} className={`post ${ shared ? 'shared' : ''}`}>

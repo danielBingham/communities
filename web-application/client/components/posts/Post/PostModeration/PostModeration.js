@@ -3,10 +3,14 @@ import { useSelector } from 'react-redux'
 
 import { CheckCircleIcon, XCircleIcon, FlagIcon } from '@heroicons/react/20/solid'
 
-import { SitePermissions, useSitePermission } from '/lib/hooks/permission'
+import { SitePermissions, useSitePermission, GroupPermissions, useGroupPermission } from '/lib/hooks/permission'
 import { useRequest } from '/lib/hooks/useRequest'
+import { usePost } from '/lib/hooks/Post'
+import { useSiteModeration } from '/lib/hooks/SiteModeration'
+import { useGroupModeration } from '/lib/hooks/GroupModeration'
 
 import { patchSiteModeration } from '/state/SiteModeration'
+import { patchGroupModeration } from '/state/GroupModeration'
 
 import TextBox from '/components/generic/text-box/TextBox'
 import Button from '/components/generic/button/Button'
@@ -22,28 +26,50 @@ const PostModeration = function({ postId }) {
     const [reason, setReason] = useState('')
     const [status, setStatus] = useState('flagged')
 
+    const [post, postRequest] = usePost(postId)
+
     const currentUser = useSelector((state) => state.authentication.currentUser)
-    const moderation = useSelector((state) => postId && postId in state.SiteModeration.byPostId ? state.SiteModeration.byPostId[postId] : null)
+    const [siteModeration, siteModerationRequest] = useSiteModeration(post?.siteModerationId) 
     const canModerateSite = useSitePermission(currentUser, SitePermissions.MODERATE)
 
+    const [groupModeration, groupModerationRequest] = useGroupModeration(post?.groupModerationId)
+    const canModerateGroup = useGroupPermission(currentUser, GroupPermissions.MODERATE, post?.groupId)
+
+    console.log(`SiteModeration:`)
+    console.log(siteModeration)
+    console.log(`GroupModeration: `)
+    console.log(groupModeration)
     const [request, makeRequest] = useRequest()
 
     const moderate = function() {
-        const patch = {
-            id: moderation.id,
-            userId: currentUser.id,
-            status: status,
-            reason: reason,
-            postId: postId 
+        if ( siteModeration !== null ) {
+            const patch = {
+                id: siteModeration.id,
+                userId: currentUser.id,
+                status: status,
+                reason: reason,
+                postId: postId 
+            }
+            makeRequest(patchSiteModeration(patch))
+        } else if ( groupModeration !== null ) {
+            const patch = {
+                id: groupModeration.id,
+                userId: currentUser.id,
+                status: status,
+                reason: reason,
+                postId: postId,
+                groupId: post.groupId
+            }
+            makeRequest(patchGroupModeration(patch))
         }
-        makeRequest(patchSiteModeration(patch))
     }
+
 
     if ( ! currentUser ) {
         return null
     }
 
-    if ( moderation === null ) {
+    if ( siteModeration === null && groupModeration === null ) {
         return null
     }
 
@@ -56,16 +82,24 @@ const PostModeration = function({ postId }) {
         )
     }
 
-    if ( moderation.status !== 'flagged' ) {
-        if ( moderation.status === 'rejected' ) {
-            return (
-                <div className="post-moderation">
-                    <span className="post-moderation__remove"><XCircleIcon /></span>
-                </div>
-            )
-        } else {
-            return null
-        }
+    if ( siteModeration && siteModeration.status === 'rejected' ) {
+        return (
+            <div className="post-moderation">
+                <span className="post-moderation__remove"><XCircleIcon /></span>
+            </div>
+        )
+    } else if ( siteModeration && siteModeration.status !== 'flagged' ) {
+        return null
+    }
+
+    if ( groupModeration && groupModeration.status === 'rejected' ) {
+        return (
+            <div className="post-moderation">
+                <span className="post-moderation__remove"><XCircleIcon /></span>
+            </div>
+        )
+    } else if ( groupModeration && groupModeration.status !== 'flagged' ) {
+        return null
     }
 
     let action = "Moderate"
@@ -75,7 +109,7 @@ const PostModeration = function({ postId }) {
         action = "Reject"
     }
 
-    if ( canModerateSite ) {
+    if ( (canModerateSite && siteModeration !== null) || (canModerateGroup && groupModeration !== null)) {
         return (
             <div className="post-moderation">
                 <a href="" onClick={(e) => { e.preventDefault(); setStatus('approved'); setShowReason(true) }} className="post-moderation__approve"><CheckCircleIcon /></a>

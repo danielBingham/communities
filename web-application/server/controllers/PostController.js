@@ -27,6 +27,7 @@ const {
     FileDAO,
     GroupDAO,
     GroupMemberDAO,
+    GroupModerationDAO,
     PostDAO,
     PostCommentDAO,
     PostReactionDAO,
@@ -48,6 +49,7 @@ module.exports = class PostController {
         this.fileDAO = new FileDAO(core)
         this.groupDAO = new GroupDAO(core)
         this.groupMemberDAO = new GroupMemberDAO(core)
+        this.groupModerationDAO = new GroupModerationDAO(core)
         this.postDAO = new PostDAO(core)
         this.postCommentDAO = new PostCommentDAO(core)
         this.postReactionDAO = new PostReactionDAO(core)
@@ -123,6 +125,15 @@ module.exports = class PostController {
             })
 
             relations.siteModerations = siteModerationResults.dictionary
+        }
+
+        if ( this.core.features.has('89-improved-moderation-for-group-posts') ) {
+            const groupModerationResults = await this.groupModerationDAO.selectGroupModerations({
+                where: `group_moderation.post_id = ANY($1::uuid[]) OR group_moderation.post_comment_id = ANY($2::uuid[])`, 
+                params: [ results.list, postCommentResults.list ]
+            })
+
+            relations.groupModerations = groupModerationResults.dictionary
         }
 
         return relations

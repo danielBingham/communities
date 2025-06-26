@@ -26,9 +26,8 @@ export const GroupPermissions = {
 export const useGroupPermission = function(currentUser, action, groupId) {
     const [group] = useGroup(groupId)
     const [currentMember] = useGroupMember(groupId, currentUser.id)
-    const canModerateSite = useSitePermission(currentUser, SitePermissions.MODERATE)
 
-    if ( action === GroupPermissions.VIEW && (canModerateSite || canViewGroup(group, currentMember)) ) {
+    if ( action === GroupPermissions.VIEW && canViewGroup(group, currentMember) ) {
         return true 
     } else if ( action === GroupPermissions.MODERATE && canModerateGroup(group, currentMember) ) {
         return true 

@@ -79,14 +79,14 @@ const SCHEMA = {
             },
             'site_moderation_id': {
                 insert: 'allowed',
-                update: 'denied',
+                update: 'allowed',
                 selected: 'always',
                 key: 'siteModerationId',
                 needsFeature: '89-improved-moderation-for-group-posts'
             },
             'group_moderation_id': {
                 insert: 'allowed',
-                update: 'denied',
+                update: 'allowed',
                 selected: 'always',
                 key: 'groupModerationId',
                 needsFeature: '89-improved-moderation-for-group-posts'
