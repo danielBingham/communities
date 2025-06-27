@@ -251,10 +251,11 @@ app.use(function(error, request, response, next) {
         }
 
         if ( error instanceof ControllerError) {
-            response.status(error.status).json({ 
-                error: error.type, 
-                message: error.publicMessage,
-                data: error.data
+            response.status(error.status).json({
+                error: {
+                    type: error.type, 
+                    message: error.publicMessage
+                }
             })
             return 
         } else { 

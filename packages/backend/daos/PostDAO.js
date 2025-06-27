@@ -274,10 +274,12 @@ module.exports = class PostDAO extends DAO {
             FROM posts
                 LEFT OUTER JOIN post_reactions ON posts.id = post_reactions.post_id
                 LEFT OUTER JOIN post_comments ON posts.id = post_comments.post_id
+                LEFT OUTER JOIN site_moderation ON posts.site_moderation_id = site_moderation.id
+                LEFT OUTER JOIN group_moderation ON posts.group_moderation_id = group_moderation.id
             ${where}
             ORDER BY ${order}, post_comments.created_date ASC 
         `
-
+        
         const results = await this.core.database.query(sql, params)
 
         if ( results.rows.length <= 0 ) {
@@ -293,10 +295,12 @@ module.exports = class PostDAO extends DAO {
         let page = query.page ? query.page : 1
 
         const results = await this.core.database.query(`
-                SELECT 
-                    COUNT(*)
-                FROM posts
-                ${where}
+            SELECT 
+                COUNT(*)
+            FROM posts
+                LEFT OUTER JOIN site_moderation on posts.site_moderation_id = site_moderation.id
+                LEFT OUTER JOIN group_moderation on posts.group_moderation_id = group_moderation.id
+            ${where}
         `, params)
 
         const count = results.rows.length <= 0 ? 0 : results.rows[0].count
@@ -318,6 +322,8 @@ module.exports = class PostDAO extends DAO {
             SELECT 
                 posts.id
             FROM posts
+                LEFT OUTER JOIN site_moderation on posts.site_moderation_id = site_moderation.id
+                LEFT OUTER JOIN group_moderation on posts.group_moderation_id = group_moderation.id
             ${where}
             ${order}
             LIMIT ${PAGE_SIZE}

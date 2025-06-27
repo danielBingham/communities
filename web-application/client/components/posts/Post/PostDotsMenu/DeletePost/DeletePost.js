@@ -22,7 +22,7 @@ const DeletePost = function({ postId } ) {
 
     return (
         <>
-            <FloatingMenuItem onClick={(e) => setAreYouSure(true)} className="delete"><TrashIcon /> delete</FloatingMenuItem>
+            <FloatingMenuItem onClick={(e) => setAreYouSure(true)} className="delete"><TrashIcon /> Delete</FloatingMenuItem>
             <AreYouSure isVisible={areYouSure} execute={executeDelete} cancel={() => setAreYouSure(false)} > 
                 <p>Are you sure you want to delete this post?</p>
             </AreYouSure>

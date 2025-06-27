@@ -6,8 +6,6 @@ import { useRequest } from '/lib/hooks/useRequest'
 import { getGroupMember } from '/state/GroupMember'
 
 export const useGroupMember = function(groupId, userId) {
-    const [error, setError] = useState(null)
-
     const currentMember = useSelector((state) => groupId && userId
         && groupId in state.GroupMember.byGroupAndUser 
         && userId in state.GroupMember.byGroupAndUser[groupId] 
@@ -21,12 +19,5 @@ export const useGroupMember = function(groupId, userId) {
         }
     }, [ groupId, userId, currentMember])
 
-    useEffect(() => {
-        if ( request && request.state == 'failed' ) {
-            setError(request.error)
-        }
-    }, [ request ])
-
-    return [ currentMember, error, request ]
-
+    return [ currentMember, request ]
 }

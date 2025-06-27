@@ -14,7 +14,6 @@ const validateUserId = function(userId, existing, action) {
     const validator = new UUIDValidator('userId', userId, existing, action)
     const errors = validator
         .isRequiredToCreate()
-        .mustNotBeUpdated()
         .mustNotBeNull()
         .mustBeUUID()
         .getErrors()

@@ -49,7 +49,20 @@ module.exports = class GroupModerationController extends BaseController {
     }
 
     async getRelations(currentUser, results, requestedRelations) {
-        return {} 
+        const postResults = await this.postDAO.selectPosts({
+            where: `posts.group_moderation_id = ANY($1::uuid[])`,
+            params: [ results.list ]
+        })
+
+        const postCommentResults = await this.postCommentDAO.selectPostComments({
+            where: `post_comments.group_moderation_id = ANY($1::uuid[])`,
+            params: [ results.list ]
+        })
+
+        return {
+            posts: postResults.dictionary,
+            postComments: postCommentResults.dictionary
+        } 
     }
 
     async createQuery(request) {
@@ -101,7 +114,7 @@ module.exports = class GroupModerationController extends BaseController {
         const groupId = cleaning.GroupModeration.cleanGroupId(request.params.groupId)
         const groupIdValidationErrors = validation.GroupModeration.validateGroupId(groupId)
         if ( groupIdValidationErrors.length > 0 ) {
-            this.sendUserErrors(response, 400, groupValidationErrors)
+            this.sendUserErrors(response, 400, groupIdValidationErrors)
             return
         }
 
@@ -159,7 +172,7 @@ module.exports = class GroupModerationController extends BaseController {
         const groupId = cleaning.GroupModeration.cleanGroupId(request.params.groupId)
         const groupIdValidationErrors = validation.GroupModeration.validateGroupId(groupId)
         if ( groupIdValidationErrors.length > 0 ) {
-            return this.sendUserErrors(response, 400, groupValidationErrors)
+            return this.sendUserErrors(response, 400, groupIdValidationErrors)
         }
 
         const canViewGroup = await this.permissionService.can(currentUser, 'view', 'Group', { groupId: groupId })
@@ -266,7 +279,7 @@ module.exports = class GroupModerationController extends BaseController {
         const groupId = cleaning.GroupModeration.cleanGroupId(request.params.groupId)
         const groupIdValidationErrors = validation.GroupModeration.validateGroupId(groupId)
         if ( groupIdValidationErrors.length > 0 ) {
-            return this.sendUserErrors(response, 400, groupValidationErrors)
+            return this.sendUserErrors(response, 400, groupIdValidationErrors)
         }
 
         const canViewGroup = await this.permissionService.can(currentUser, 'view', 'Group', { groupId: groupId })

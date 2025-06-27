@@ -27,22 +27,44 @@ module.exports = class BaseController {
         if ( status < 400 || status > 499 ) {
             throw new Error(`'sendUserError' should only be used for user errors (400 - 499).`)
         }
-        
-        if ( ! Array.isArray(errors) ) {
-            errors = [ errors ]
-        }
 
-        const returnedErrors = []
-        for(const error of errors ) {
-            this.core.logger.warn(error.log)
-            returnedErrors.push({
-                type: error.type,
-                message: error.message
+        if ( Array.isArray(errors) ) {
+            const returnedErrors = []
+            for(const error of errors ) {
+                this.core.logger.warn(error.log)
+                returnedErrors.push({
+                    type: error.type,
+                    message: error.message
+                })
+            }
+
+            let type = 'invalid'
+            if ( status === 401 ) {
+                type = 'not-authenticated'
+            } else if ( status === 403 ) {
+                type = 'not-authorized'
+            } else if ( status === 409 ) {
+                type = 'conflict'
+            }
+
+            response.status(status).json({
+                error: {
+                    type: type,
+                    all: returnedErrors
+                }
+            })
+        } else {
+            this.core.logger.warn(errors.log)
+
+            // The log message is not intended to be shown to the user, so
+            // construct a new error to return without it.
+            const returnedError = {
+                type: errors.type,
+                message: errors.message
+            }
+            response.status(status).json({
+                error: returnedError
             })
         }
-
-        response.status(status).json({
-            errors: returnedErrors
-        })
     }
 }

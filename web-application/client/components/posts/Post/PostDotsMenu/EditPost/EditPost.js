@@ -31,7 +31,7 @@ const EditPost = function({ postId }) {
     }
 
     return (
-        <FloatingMenuItem onClick={() => startEdit()} className="edit"><PencilIcon /> edit</FloatingMenuItem> 
+        <FloatingMenuItem onClick={() => startEdit()} className="edit"><PencilIcon /> Edit</FloatingMenuItem> 
     )
 
 }

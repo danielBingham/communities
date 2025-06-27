@@ -138,16 +138,16 @@ const Post = function({ id, expanded, showLoading, shared }) {
                 </div>
                 <div className="post__content">
                     <div className="post__moderated">
-                        { siteModeration && (siteModeration.reason !== null && siteModeration.reason.length > 0) && 
+                        { siteModeration && siteModeration.status === 'rejected' && (siteModeration.reason !== null && siteModeration.reason.length > 0) && 
                             <p>Post removed by a Site moderator with explanation: { siteModeration.reason }</p> 
                         }
-                        { siteModeration && (siteModeration.reason === null || siteModeration.reason.length <= 0) &&
+                        { siteModeration && siteModeration.status === 'rejected' && (siteModeration.reason === null || siteModeration.reason.length <= 0) &&
                             <p>Post removed by a Site moderator.</p>
                         }
-                        { groupModeration && groupModeration.reason !== null && groupModeration.reason.length > 0 && 
+                        { groupModeration && groupModeration.status === 'rejected' && groupModeration.reason !== null && groupModeration.reason.length > 0 && 
                             <p>Post removed by a Group moderator with explanation: { groupModeration.reason }</p> 
                         }
-                        { groupModeration && (groupModeration.reason === null || groupModeration.reason.length <= 0) &&
+                        { groupModeration && groupModeration.status === 'rejected' && (groupModeration.reason === null || groupModeration.reason.length <= 0) &&
                             <p>Post removed by a Group moderator.</p>
                         }
                     </div>

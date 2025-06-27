@@ -44,13 +44,12 @@ describe('validateUserId', function() {
         expect(errors[0].type).toBe('userId:required')
     })
 
-    it('Should return an error when userId is being updated', function() {
+    it('Should pass when userId is being updated', function() {
         const userId = 'd209158e-5c58-44e1-ab00-12b45aad065f'
         const existing = '840b8db4-a91e-44e2-a7a3-6922e7e98290'
         const errors = validation.GroupModeration.validateUserId(userId, existing, 'update')
 
-        expect(errors.length).toBe(1)
-        expect(errors[0].type).toBe('userId:not-allowed')
+        expect(errors.length).toBe(0)
     })
 
     it('Should pass when userId is not being updated', function() {

@@ -185,6 +185,12 @@ module.exports = class PostController {
             }
         }
 
+        const and = query.params.length > 0 ? ' AND ' : ''
+        query.params.push(currentUser.id)
+        query.where += `${and} (group_moderation.status IS NULL OR group_moderation.status != 'rejected' OR posts.user_id = $${query.params.length}) 
+            AND (site_moderation.status IS NULL OR site_moderation.status != 'rejected' OR posts.user_id = $${query.params.length})`
+
+
         if ('userId' in request.query) {
             const and = query.params.length > 0 ? ' AND ' : ''
             query.params.push(request.query.userId)
