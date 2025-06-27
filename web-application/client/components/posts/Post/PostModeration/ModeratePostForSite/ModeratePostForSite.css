@@ -1,3 +1,7 @@
 .moderate-post-for-site__flag svg {
     color: var(--danger-color-main);
 }
+.moderate-post-for-site__rejected svg {
+    color: var(--danger-color-main);
+}
+

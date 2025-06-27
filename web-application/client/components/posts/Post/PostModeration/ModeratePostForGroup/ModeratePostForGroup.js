@@ -7,6 +7,7 @@ import { GroupPermissions, useGroupPermission } from '/lib/hooks/permission'
 
 import { usePost } from '/lib/hooks/Post'
 import { useGroupModeration } from '/lib/hooks/GroupModeration'
+import { useSiteModeration } from '/lib/hooks/SiteModeration'
 
 import ModatePostForGroupModal from './ModeratePostForGroupModal'
 
@@ -22,15 +23,19 @@ const ModeratePostForGroup = function({ postId }) {
     const [groupModeration, groupModerationRequest] = useGroupModeration(post?.groupModerationId)
     const canModerateGroup = useGroupPermission(currentUser, GroupPermissions.MODERATE, post?.groupId)
 
+    const [siteModeration, siteModerationRequest] = useSiteModeration(post?.siteModerationId) 
+
     if ( groupModeration === null) {
+        return null
+    }
+
+    if ( siteModeration !== null && siteModeration.status === 'rejected' ) {
         return null
     }
 
     if (groupModeration.status === 'rejected' ) {
         return (
-            <div className="moderate-post-for-group">
-                <span className="moderate_post_for_group__removed"><XCircleIcon /></span>
-            </div>
+            <span title="Removed from Group" className="moderate-post-for-group__rejected"><XCircleIcon /></span>
         )
     } else if ( groupModeration.status === 'approved' ) {
         return null

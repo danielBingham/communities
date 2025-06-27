@@ -131,10 +131,10 @@ const Post = function({ id, expanded, showLoading, shared }) {
                         <div><UserTag id={post.userId} hideProfile={true} /> { post.groupId &&<span>posted in <GroupTag id={post.groupId} hideProfile={true} /></span>}</div> 
                         <div><span className="post__visibility">{ postVisibility }</span> &bull; <Link to={postLink}><DateTag timestamp={post.createdDate} /></Link> </div>
                     </div>
-                    <div></div>
                     <div className="post__siteModeration">
                         <PostModeration postId={post.id} />
                     </div>
+                    <div></div>
                 </div>
                 <div className="post__content">
                     <div className="post__moderated">
