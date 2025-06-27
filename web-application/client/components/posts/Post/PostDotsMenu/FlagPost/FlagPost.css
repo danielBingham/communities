@@ -15,3 +15,6 @@
 .flag-post.flag-post__approved {
     color: var(--success-color-light) !important;
 }
+.flag-post__choose .flag-post__choose__explanation {
+    text-align: left;
+}

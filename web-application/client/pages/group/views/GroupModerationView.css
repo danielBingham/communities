@@ -1,0 +1,35 @@
+.group-moderation-view {
+    padding: 0;
+    margin: 50px auto;
+}
+
+.group-moderation-view__empty-wrapper {
+    display: grid;
+    grid-template-columns: auto;
+    grid-template-rows: auto;
+    width: 100%;
+    height: 100%;
+    justify-items: center;
+    align-items: center;
+}
+
+.group-moderation-view__list {
+    padding: 0;
+    margin: 0 auto;
+    max-width: 700px;
+}
+.group-moderation-view .group-moderation-view__header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    max-width: 650px;
+    margin: 20px auto 20px auto;
+}
+.group-moderation-view .group-moderation-view__header__controls {
+    text-align: right;
+}
+.group-moderation-view .group-moderation-view__header__explanation {
+    align-self: center;
+    text-align: left;
+    padding-left: 7px;
+}

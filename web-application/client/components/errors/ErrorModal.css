@@ -1,6 +1,7 @@
 .error-modal .modal {
     border: thin solid var(--danger-color-main);
     color: var(--danger-color-dark);
+    z-index: 2000;
 }
 .error-modal svg.error-modal__warning { 
     float: left;

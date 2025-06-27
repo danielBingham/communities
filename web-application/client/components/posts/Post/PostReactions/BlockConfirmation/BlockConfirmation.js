@@ -30,7 +30,7 @@ const BlockConfirmation = function({ isVisible, cancel, execute  }) {
                     </div>
                     <div className="buttons">
                         <Button onClick={(e) => cancel() }>Cancel</Button> 
-                        <Button type="primary-warn" onClick={execute}>Yes</Button>
+                        <Button type="warn" onClick={execute}>Yes</Button>
                     </div>
                 </div>
             </div>,

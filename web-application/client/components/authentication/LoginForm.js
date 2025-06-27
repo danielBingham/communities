@@ -111,6 +111,15 @@ const LoginForm = function(props) {
     const errorView = ( <div className="error">{ errorMessage }</div> )
 
     const isLoading = request && request.state == 'pending'
+    if ( isLoading ) {
+        return (
+            <div className="login-form">
+                <h2>Login</h2>
+                <Spinner />
+            </div>
+        )
+    }
+
     return (
         <div className='login-form'>
             <h2>Login</h2>
@@ -138,8 +147,7 @@ const LoginForm = function(props) {
                     onChange={ (event) => setPassword(event.target.value) } 
                 />
                 <div className="submit field-wrapper">
-                    { isLoading && <Button type="primary" onClick={() => {}}><Spinner local={true} /></Button> }
-                    { ! isLoading && <input type="submit" name="login" value="Login" /> }
+                    <input type="submit" name="login" value="Login" />
                 </div>
             </form>
             <div className="inner-wrapper">

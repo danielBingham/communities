@@ -11,6 +11,7 @@ import {
 import { resetEntities } from '/state/lib'
 
 import { useGroupFromSlug } from '/lib/hooks/Group'
+import { useGroupMember } from '/lib/hooks/GroupMember'
 import { GroupPermissions, useGroupPermission } from '/lib/hooks/permission'
 
 import PostView from '/pages/posts/views/PostView'
@@ -20,6 +21,7 @@ import GroupImage from '/components/groups/view/GroupImage'
 
 import GroupMembersView from '/pages/group/views/GroupMembersView'
 import GroupFeedView from '/pages/group/views/GroupFeedView'
+import GroupModerationView from '/pages/group/views/GroupModerationView'
 import GroupSettingsView from '/pages/group/views/GroupSettingsView'
 
 import { NavigationMenu, NavigationMenuItem } from '/components/generic/NavigationMenu'
@@ -36,7 +38,10 @@ const GroupPage = function() {
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
     const [group, error, request] = useGroupFromSlug(slug)
+    const [currentMember, memberRequest ] = useGroupMember(group?.id, currentUser?.id)
+
     const canViewGroup = useGroupPermission(currentUser, GroupPermissions.VIEW, group?.id)
+    const canModerateGroup = useGroupPermission(currentUser, GroupPermissions.MODERATE, group?.id)
     const canAdminGroup = useGroupPermission(currentUser, GroupPermissions.ADMIN, group?.id)
 
     const dispatch = useDispatch()
@@ -46,7 +51,10 @@ const GroupPage = function() {
         }
     }, [])
 
-    if ( ! group && ( ! request || request.state == 'pending') )  {
+    if ( ! group 
+        || ( ! request || request.state == 'pending') 
+        || ( ! memberRequest || memberRequest.state === 'pending') )  
+    {
         return (
             <div id="group-page">
                 <Spinner />
@@ -85,6 +93,7 @@ const GroupPage = function() {
                 { canViewGroup && <NavigationMenu className="group-page__menu">
                     <NavigationMenuItem to={`/group/${group.slug}`} icon="QueueList" text="Feed" />
                     <NavigationMenuItem to="members" icon="UserGroup" text="Members" />
+                    { canModerateGroup && <NavigationMenuItem to="moderation" icon="Flag" text="Moderation" /> }
                     { canAdminGroup && <NavigationMenuItem to="settings" icon="Cog6Tooth" text="Settings" /> }
                 </NavigationMenu> }
                 <div className="details">
@@ -95,6 +104,7 @@ const GroupPage = function() {
                 <div className="group-page__main">
                     <Routes>
                         <Route path="members" element={ <GroupMembersView groupId={group.id} /> } />
+                        <Route path="moderation" element={ <GroupModerationView groupId={group.id} /> } />
                         <Route path="settings" element={<GroupSettingsView groupId={group.id} /> } />
                         <Route path=":postId" element={ <PostView group={true} /> } />
                         <Route index element={<GroupFeedView groupId={group.id} />} />

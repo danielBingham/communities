@@ -1,5 +1,5 @@
 const { StringValidator, UUIDValidator, DateValidator } = require('../types')
-const { validateEntity, cleanEntity } = require('../validate')
+const { validateEntity } = require('../validate')
 
 const validateId = function(id, existing, action) {
     const validator = new UUIDValidator('id', id, existing, action)

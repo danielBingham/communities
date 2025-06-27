@@ -31,6 +31,19 @@ const SCHEMA = {
                 select: 'always',
                 key: 'id'
             },
+            'user_id': {
+                insert: 'required',
+                update: 'denied',
+                select: 'always',
+                key: 'userId'
+            },
+            'group_id': {
+                insert: 'allowed',
+                update: 'denied',
+                select: 'always',
+                key: 'groupId',
+                needsFeature: '19-private-groups'
+            },
             'type': {
                 insert: 'required',
                 update: 'denied',
@@ -45,24 +58,11 @@ const SCHEMA = {
                 key: 'visibility',
                 needsFeature: '17-public-posts'
             },
-            'user_id': {
-                insert: 'required',
-                update: 'denied',
-                select: 'always',
-                key: 'userId'
-            },
             'file_id': {
                 insert: 'allowed',
                 update: 'allowed',
                 select: 'always',
                 key: 'fileId'
-            },
-            'group_id': {
-                insert: 'allowed',
-                update: 'denied',
-                select: 'always',
-                key: 'groupId',
-                needsFeature: '19-private-groups'
             },
             'link_preview_id': {
                 insert: 'allowed',
@@ -76,6 +76,20 @@ const SCHEMA = {
                 selected: 'always',
                 key: 'sharedPostId',
                 needsFeature: '18-post-sharing'
+            },
+            'site_moderation_id': {
+                insert: 'allowed',
+                update: 'allowed',
+                selected: 'always',
+                key: 'siteModerationId',
+                needsFeature: '89-improved-moderation-for-group-posts'
+            },
+            'group_moderation_id': {
+                insert: 'allowed',
+                update: 'allowed',
+                selected: 'always',
+                key: 'groupModerationId',
+                needsFeature: '89-improved-moderation-for-group-posts'
             },
             'activity': {
                 insert: 'allowed',
@@ -260,10 +274,12 @@ module.exports = class PostDAO extends DAO {
             FROM posts
                 LEFT OUTER JOIN post_reactions ON posts.id = post_reactions.post_id
                 LEFT OUTER JOIN post_comments ON posts.id = post_comments.post_id
+                LEFT OUTER JOIN site_moderation ON posts.site_moderation_id = site_moderation.id
+                LEFT OUTER JOIN group_moderation ON posts.group_moderation_id = group_moderation.id
             ${where}
             ORDER BY ${order}, post_comments.created_date ASC 
         `
-
+        
         const results = await this.core.database.query(sql, params)
 
         if ( results.rows.length <= 0 ) {
@@ -279,10 +295,12 @@ module.exports = class PostDAO extends DAO {
         let page = query.page ? query.page : 1
 
         const results = await this.core.database.query(`
-                SELECT 
-                    COUNT(*)
-                FROM posts
-                ${where}
+            SELECT 
+                COUNT(*)
+            FROM posts
+                LEFT OUTER JOIN site_moderation on posts.site_moderation_id = site_moderation.id
+                LEFT OUTER JOIN group_moderation on posts.group_moderation_id = group_moderation.id
+            ${where}
         `, params)
 
         const count = results.rows.length <= 0 ? 0 : results.rows[0].count
@@ -304,6 +322,8 @@ module.exports = class PostDAO extends DAO {
             SELECT 
                 posts.id
             FROM posts
+                LEFT OUTER JOIN site_moderation on posts.site_moderation_id = site_moderation.id
+                LEFT OUTER JOIN group_moderation on posts.group_moderation_id = group_moderation.id
             ${where}
             ${order}
             LIMIT ${PAGE_SIZE}

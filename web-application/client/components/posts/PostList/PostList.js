@@ -37,7 +37,7 @@ const PostList = function({ name, params }) {
         explanation = `Showing 0 posts`
     } else {
         const pageStart = ( query.meta.page-1) * query.meta.pageSize + 1
-        const pageEnd = query.meta.count - (query.meta.page-1) * query.meta.pageSize > query.meta.pageSize ? ( query.meta.page * query.meta.pageSize ) : query.meta.count - (query.meta.page-1) * query.meta.pageSize
+        const pageEnd = query.meta.count - (query.meta.page-1) * query.meta.pageSize > query.meta.pageSize ? ( query.meta.page * query.meta.pageSize ) : query.meta.count 
 
         explanation = `Showing ${pageStart} to ${pageEnd} of ${query.meta.count} Posts`
     }

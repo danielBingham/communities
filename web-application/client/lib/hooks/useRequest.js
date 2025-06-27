@@ -10,28 +10,28 @@ export function useRequest() {
     const makeRequest = function(reduxThunk) {
         const request = {
             state: 'pending',
+            request: null,
             response: null, 
             error: null,
         }
         setRequest(request)
 
         dispatch(reduxThunk)
-            .then((response) => {
-                const newRequest = { ...request }
-                newRequest.state = 'fulfilled'
-                newRequest.response = response 
+            .then((result) => {
+                const newRequest = { 
+                    state: 'fulfilled',
+                    request: result.request,
+                    response: result.response,
+                    error: null
+                }
                 setRequest(newRequest)
             })
-            .catch((error) => {
-                const newRequest = { ...request }
-                newRequest.state = 'failed'
-                newRequest.response = {
-                    status: 'status' in error ? error.status : 500
-                }
-                newRequest.error = {
-                    type: error.type ? error.type : 'unknown',
-                    message: error.message ? error.message : '',
-                    data: error.data ? error.data : {}
+            .catch((result) => {
+                const newRequest = { 
+                    state: 'failed',
+                    request: result.request,
+                    response: result.response,
+                    error: result.error
                 }
                 setRequest(newRequest)
             })

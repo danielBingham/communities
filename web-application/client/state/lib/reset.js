@@ -2,6 +2,7 @@ import { resetBlocklistSlice } from '/state/Blocklist'
 import { resetFileSlice } from '/state/File'
 import { resetGroupSlice } from '/state/Group'
 import { resetGroupMemberSlice } from '/state/GroupMember'
+import { resetGroupModerationSlice } from '/state/GroupModeration'
 import { resetLinkPreviewSlice } from '/state/LinkPreview'
 import { resetPostSlice } from '/state/Post'
 import { resetPostCommentSlice } from '/state/PostComment'
@@ -17,6 +18,7 @@ export const resetEntities = function() {
         dispatch(resetFileSlice())
         dispatch(resetGroupSlice())
         dispatch(resetGroupMemberSlice())
+        dispatch(resetGroupModerationSlice())
         dispatch(resetLinkPreviewSlice())
         dispatch(resetPostSlice())
         dispatch(resetPostCommentSlice())

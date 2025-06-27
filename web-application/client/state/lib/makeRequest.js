@@ -48,47 +48,66 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
             responseOk = response.ok
             return response.json()
         }).then(function(responseBody) {
+            const result = {
+                request: {
+                    endpoint: endpoint,
+                    method: method
+                },
+                response: {
+                    status:  status,
+                    body: responseBody
+                },
+                error: null
+            }
+
             if ( responseOk ) {
                 if ( onSuccess ) {
                     try {
                         onSuccess(responseBody)
-                        return { status: status, body: responseBody }
+                        return result 
                     } catch (error) {
                         logger.error(`Error handling request success: `, error)
-                        const requestError = {
-                            endpoint: endpoint,
-                            method: method,
-                            status: status,
+                        result.error = {
                             type: 'frontend-error',
-                            message: `Failed to process response: ${error.message}.`,
-                            data: responseBody
+                            message: `Failed to process response: ${error.message}.`
                         }
-                        return Promise.reject(requestError)
+                        return Promise.reject(result)
                     }
                 }
             } else {
-                const requestError = { 
-                    endpoint: endpoint,
-                    method: method,
-                    status: status, 
-                    type: responseBody.error, 
-                    message: responseBody.message, 
-                    data: responseBody.data 
+                if ( 'error' in responseBody ) {
+                    result.error = {
+                        type: responseBody.error.type
+                    }
+                    
+                    if ( 'all' in responseBody.error && Array.isArray(responseBody.error.all) ) {
+                        result.error.all = responseBody.error.all
+                    } else {
+                        result.error.message = responseBody.error.message
+                        result.error.all = [{
+                            type: responseBody.error.type,
+                            message: responseBody.error.message
+                        }]
+                    }
+                }  else {
+                    result.error = {
+                        type: 'unknown'
+                    }
                 }
+
                 if ( status >= 500 ) {
-                    logger.error(`Request failed: `, requestError)
+                    logger.error(`Request failed: `, result)
                 } else {
-                    logger.warn(`Request returned ${status}: `, requestError)
+                    logger.warn(`Request returned ${status}: `, result)
                 }
                 if ( onFailure ) {
                     try {
                         onFailure(responseBody)
                     } catch (error) {
                         logger.error(`Error handling request failure: `, error)
-                        return Promise.reject(requestError)
                     }
                 } 
-                return Promise.reject(requestError)
+                return Promise.reject(result)
             }
         })
     }

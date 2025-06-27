@@ -36,16 +36,13 @@ button.button:disabled {
     border: thin solid var(--primary-color-main);
     color: white;
 }
-.button.secondary {
-    border: thin solid var(--primary-color-main);
-    color: var(--primary-color-main) !important;
+.button.success {
+    background-color: var(--success-color-main);
+    border: thin solid var(--success-color-main);
+    color: white;
 }
-.button.primary-warn {
+.button.warn {
     background-color: var(--danger-color-main);
     border: thin solid var(--danger-color-main);
     color: white;
-}
-.button.secondary-warn {
-    border: thin solid var(--danger-color-main);
-    color: var(--danger-color-main) !important;
 }

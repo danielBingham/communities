@@ -17,9 +17,12 @@ export const setInDictionary = function(state, action) {
         throw new Error(`Invalid payload sent to ${action.type}.`)
     }
 
-    // Taint the queries so that they'll be requeried.
-    for ( const [key,query] of Object.entries(state.queries)) {
-        state.queries[key].taint = true
+    const clearQueries = action.payload.clearQueries
+    if ( clearQueries === true ) {
+        // Taint the queries so that they'll be requeried.
+        for ( const [key,query] of Object.entries(state.queries)) {
+            state.queries[key].taint = true
+        }
     }
 }
 

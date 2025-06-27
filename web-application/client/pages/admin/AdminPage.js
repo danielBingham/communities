@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, NavLink, Routes, Route } from 'react-router-dom'
 
 import { useFeature } from '/lib/hooks/feature/useFeature'
+import { resetEntities } from '/state/lib'
 
 import { Page, PageBody, PageLeftGutter, PageRightGutter } from '/components/generic/Page'
 

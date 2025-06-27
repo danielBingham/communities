@@ -33,6 +33,7 @@ const PermissionService = require('./PermissionService')
 const BlocklistValidation = require('./validation/BlocklistValidation')
 const GroupValidation = require('./validation/GroupValidation')
 const GroupMemberValidation = require('./validation/GroupMemberValidation')
+const GroupModerationValidation = require('./validation/GroupModerationValidation')
 const LinkPreviewValidation = require('./validation/LinkPreviewValidation')
 const PostCommentValidation = require('./validation/PostCommentValidation')
 const PostReactionValidation = require('./validation/PostReactionValidation')
@@ -51,6 +52,7 @@ module.exports = class ValidationService {
         this.blocklist = new BlocklistValidation(core, this)
         this.group = new GroupValidation(core, this)
         this.groupMember = new GroupMemberValidation(core, this)
+        this.groupModeration = new GroupModerationValidation(core, this)
         this.linkPreview = new LinkPreviewValidation(core, this)
         this.postComment = new PostCommentValidation(core, this)
         this.postReaction = new PostReactionValidation(core, this)
@@ -71,6 +73,10 @@ module.exports = class ValidationService {
 
     async validateGroupMember(currentUser, groupMember, existing) {
         return await this.groupMember.validateGroupMember(currentUser, groupMember, existing)
+    }
+
+    async validateGroupModeration(currentUser, groupModeration, existing) {
+        return await this.groupModeration.validateGroupModeration(currentUser, groupModeration, existing)
     }
     
     async validateLinkPreview(currentUser, linkPreview, existing) {

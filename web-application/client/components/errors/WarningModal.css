@@ -1,0 +1,26 @@
+.warning-modal .modal {
+    border: thin solid var(--secondary-color-main);
+    color: var(--secondary-color-dark);
+    z-index: 2000;
+}
+.warning-modal svg.warning-modal__warning { 
+    float: left;
+    margin: 10px 10px;
+    width: 96px;
+    height: 96px;
+    color: var(--secondary-color-main);
+}
+.warning-modal .modal .modal__close svg {
+    color: var(--secondary-color-main);
+}
+.warning-modal__wrapper {
+    padding: 20px;
+}
+.warning-modal .warning-modal__wrapper a:link,
+.warning-modal .warning-modal__wrapper a:visited,
+.warning-modal .warning-modal__wrapper a:active {
+    color: var(--secondary-color-main);
+}
+.warning-modal .warning-modal__wrapper a:hover {
+    color: var(--secondary-color-main-highlight);
+}

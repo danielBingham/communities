@@ -7,7 +7,6 @@ describe('tokenizeMentions()', function() {
         const expected = [ `This is a test `, `@johndoe`, ` and we'll just have to see if it works. `, `@jane.doe`, ` `, `@bob_smith`, '' ]
 
         const result = lib.mentions.tokenizeMentions(testString)
-        console.log(result)
 
         expect(result).toStrictEqual(expected)
     })

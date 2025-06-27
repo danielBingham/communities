@@ -12,6 +12,7 @@ import SubscribeToPost from './SubscribeToPost/SubscribeToPost'
 import EditPost from './EditPost/EditPost'
 import DeletePost from './DeletePost/DeletePost'
 import FlagPost from './FlagPost/FlagPost'
+import FlagPostForGroup from './FlagPostForGroup/FlagPostForGroup'
 
 import './PostDotsMenu.css'
 
@@ -20,6 +21,7 @@ const PostDotsMenu = function({ postId }) {
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const post = useSelector((state) => postId && postId in state.Post.dictionary ? state.Post.dictionary[postId] : null) 
     const hasAdminModeration = useFeature('62-admin-moderation-controls')
+    const hasGroupModeration = useFeature('89-improved-moderation-for-group-posts')
 
     const [currentMember] = useGroupMember(post?.groupId, currentUser?.id) 
 
@@ -37,6 +39,7 @@ const PostDotsMenu = function({ postId }) {
             <FloatingMenuBody>
                 { currentUser && <SubscribeToPost postId={postId} /> }
                 { hasAdminModeration && currentUser && <FlagPost postId={postId} /> }
+                { hasGroupModeration && currentUser && post.groupId && <FlagPostForGroup postId={postId} /> }
                 { isAuthor && <EditPost postId={postId} /> }
                 { (isAuthor || isModerator) && <DeletePost postId={postId} /> }
             </FloatingMenuBody>

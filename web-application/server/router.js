@@ -264,6 +264,42 @@ module.exports = function(core) {
     })
 
     /**************************************************************************
+     * GroupModeration REST routes
+     **************************************************************************/
+    const GroupModerationController = require('./controllers/GroupModerationController')
+    const groupModerationController = new GroupModerationController(core)
+
+    router.get('/group/:groupId/moderations', function(request, response, next) {
+        groupModerationController.getGroupModerations(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.post('/group/:groupId/moderations', function(request, response, next) {
+        groupModerationController.postGroupModerations(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.get('/group/:groupId/moderation/:id', function(request, response, next) {
+        groupModerationController.getGroupModeration(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.patch('/group/:groupId/moderation/:id', function(request, response, next) {
+        groupModerationController.patchGroupModeration(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.delete('/group/:groupId/moderation/:id', function(request, response, next) {
+        groupModerationController.deleteGroupModeration(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    /**************************************************************************
      * Link Preview REST Routes
      **************************************************************************/
     const LinkPreviewController = require('./controllers/LinkPreviewController')

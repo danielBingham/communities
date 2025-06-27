@@ -269,14 +269,18 @@ CREATE TABLE posts (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id uuid REFERENCES users (id) ON DELETE CASCADE NOT NULL,
 
+    group_id uuid REFERENCES groups (id) ON DELETE CASCADE DEFAULT NULL,
+
+    type post_type NOT NULL DEFAULT 'feed' ,
+    visibility post_visibility NOT NULL DEFAULT 'private',
+
     file_id uuid REFERENCES files (id) DEFAULT NULL,
     link_preview_id uuid REFERENCES link_previews (id) DEFAULT NULL,
     shared_post_id uuid REFERENCES posts (id) DEFAULT NULL,
 
-    visibility post_visibility NOT NULL DEFAULT 'private',
-    type post_type NOT NULL DEFAULT 'feed' ,
 
-    group_id uuid REFERENCES groups (id) ON DELETE CASCADE DEFAULT NULL,
+    site_moderation_id uuid DEFAULT NULL, /* REFERENCES site_moderation (id) ON DELETE SET NULL -- defined below*/
+    group_moderation_id uuid DEFAULT NULL, /* REFERENCES group_moderation (id) ON DELETE SET NULL -- defined below */
 
     activity bigint DEFAULT 1,
     content text,
@@ -342,6 +346,9 @@ CREATE TABLE post_comments (
 
     content text,
 
+    site_moderation_id uuid DEFAULT NULL, /* REFERENCES site_moderation (id) ON DELETE SET NULL -- defined below*/
+    group_moderation_id uuid DEFAULT NULL, /* REFERENCES group_moderation (id) ON DELETE SET NULL -- defined below */
+
     created_date timestamptz,
     updated_date timestamptz
 );
@@ -369,6 +376,50 @@ CREATE TABLE post_subscriptions (
 );
 CREATE INDEX post_subscriptions__user_id ON post_subscriptions (user_id);
 CREATE INDEX post_subscriptions__post_id ON post_subscriptions (post_id);
+
+/******************************************************************************
+ * Group Moderation
+ ******************************************************************************/
+CREATE TYPE group_moderation_status AS ENUM('flagged', 'approved', 'rejected');
+CREATE TABLE group_moderation (
+    id uuid PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
+    user_id uuid REFERENCES users (id) ON DELETE SET NULL,
+    group_id uuid REFERENCES groups (id) ON DELETE CASCADE NOT NULL,
+
+    status group_moderation_status NOT NULL DEFAULT 'flagged',
+    reason text,
+
+    post_id uuid REFERENCES posts (id) ON DELETE CASCADE DEFAULT NULL ,
+    post_comment_id uuid REFERENCES post_comments (id) ON DELETE CASCADE DEFAULT NULL, 
+
+    created_date timestamptz, 
+    updated_date timestamptz
+);
+CREATE INDEX group_moderation__user_id ON group_moderation (user_id);
+CREATE INDEX group_moderation__post_id ON group_moderation (post_id);
+CREATE INDEX group_moderation__post_comment_id ON group_moderation (post_comment_id);
+
+CREATE TABLE group_moderation_events (
+    id uuid PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
+    group_moderation_id uuid REFERENCES group_moderation (id) ON DELETE SET NULL,
+    user_id uuid REFERENCES users (id) ON DELETE SET NULL,
+    group_id uuid REFERENCES groups (id) ON DELETE CASCADE NOT NULL,
+
+    status group_moderation_status NOT NULL,
+    reason text,
+
+    post_id uuid REFERENCES posts(id) ON DELETE CASCADE DEFAULT NULL,
+    post_comment_id uuid REFERENCES post_comments(id) ON DELETE CASCADE DEFAULT NULL,
+
+    created_date timestamptz
+);
+CREATE INDEX group_moderation_events__group_moderation_id ON group_moderation_events (group_moderation_id);
+CREATE INDEX group_moderation_events__user_id ON group_moderation_events (user_id);
+CREATE INDEX group_moderation_events__post_id ON group_moderation_events (post_id);
+CREATE INDEX group_moderation_events__post_comment_id ON group_moderation_events (post_comment_id);
+
+ALTER TABLE posts ADD CONSTRAINT posts_group_moderation_id_fkey FOREIGN KEY (group_moderation_id) REFERENCES group_moderation (id) ON DELETE SET NULL;
+ALTER TABLE post_comments ADD CONSTRAINT post_comments_group_moderation_id_fkey FOREIGN KEY (group_moderation_id) REFERENCES group_moderation (id) ON DELETE SET NULL;
 
 /******************************************************************************
  * Site administration
@@ -409,6 +460,9 @@ CREATE INDEX site_moderation_events__site_moderation_id ON site_moderation_event
 CREATE INDEX site_moderation_events__user_id ON site_moderation_events (user_id);
 CREATE INDEX site_moderation_events__post_id ON site_moderation_events (post_id);
 CREATE INDEX site_moderation_events__post_comment_id ON site_moderation_events (post_comment_id);
+
+ALTER TABLE posts ADD CONSTRAINT posts_site_moderation_id_fkey FOREIGN KEY (site_moderation_id) REFERENCES site_moderation (id) ON DELETE SET NULL;
+ALTER TABLE post_comments ADD CONSTRAINT post_comments_site_moderation_id_fkey FOREIGN KEY (site_moderation_id) REFERENCES site_moderation (id) ON DELETE SET NULL;
 
 /******************************************************************************
  * Permissions

@@ -413,7 +413,7 @@ module.exports = class PostCommentController {
                 `Either that post doesn't exist or you don't have permission to view it.`)
         }
 
-        if ( comment.postId !== post.id) {
+        if ( comment.postId !== postId) {
             throw new ControllerError(400, 'invalid',
                 `User(${currentUser.id}) attempted to delete Comment(${commentId}) with wrong post.`,
                 `You provided the wrong postId in the route, please provide the correct one.`)
