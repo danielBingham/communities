@@ -22,7 +22,7 @@ const ModeratePostForSiteModal = function({ postId, isVisible, setIsVisible }) {
     const [siteModeration, siteModerationRequest] = useSiteModeration(post?.siteModerationId)
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
-    const canModerateSite = useSitePermission(currentUser, SitePermissions.MODERATE, post?.siteId)
+    const canModerateSite = useSitePermission(currentUser, SitePermissions.MODERATE)
 
     const [request, makeRequest] = useRequest()
 

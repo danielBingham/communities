@@ -5,6 +5,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 import { GroupPermissions, useGroupPermission } from '/lib/hooks/permission'
 
 import { usePost } from '/lib/hooks/Post'
+import { usePostComment } from '/lib/hooks/PostComment'
 import { useGroupModeration } from '/lib/hooks/GroupModeration'
 
 import { patchGroupModeration } from '/state/GroupModeration'
@@ -15,11 +16,13 @@ import Spinner from '/components/Spinner'
 import Modal from '/components/generic/modal/Modal'
 import ErrorModal from '/components/errors/ErrorModal'
 
-const ModeratePostForGroupModal = function({ postId, isVisible, setIsVisible }) {
+const ModerateForGroupModal = function({ postId, postCommentId, isVisible, setIsVisible }) {
     const [reason, setReason] = useState('')
    
     const [post, postRequest] = usePost(postId)
-    const [groupModeration, groupModerationRequest] = useGroupModeration(post?.groupModerationId)
+    const [comment, commentRequest ] = usePostComment(postId, postCommentId)
+
+    const [groupModeration, groupModerationRequest] = useGroupModeration(postCommentId ? comment?.groupModerationId : post?.groupModerationId)
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const canModerateGroup = useGroupPermission(currentUser, GroupPermissions.MODERATE, post?.groupId)
@@ -44,7 +47,7 @@ const ModeratePostForGroupModal = function({ postId, isVisible, setIsVisible }) 
 
     if ( request && request.state === 'pending' ) {
         return (
-            <div className="moderate-post-for-group">
+            <div className="moderate-for-group">
                 <Spinner />
             </div>
         )
@@ -62,8 +65,8 @@ const ModeratePostForGroupModal = function({ postId, isVisible, setIsVisible }) 
 
     return (
         <Modal isVisible={isVisible} setIsVisible={setIsVisible}>
-            <div className="moderate-post-for-group">
-                <h2>Moderate Post for Group</h2>
+            <div className="moderate-for-group">
+                <h2>Moderate for Group</h2>
                 <TextBox
                     name="reason"
                     className="reason"
@@ -80,4 +83,4 @@ const ModeratePostForGroupModal = function({ postId, isVisible, setIsVisible }) 
     )
 }
 
-export default ModeratePostForGroupModal
+export default ModerateForGroupModal

@@ -111,7 +111,6 @@ const FlagPost = function({ postId } ) {
                 <FloatingMenuItem disabled={true} className="flag-post flag-post__rejected"><XCircleIcon /> Removed</FloatingMenuItem>
             )
         }
-
     }
 
     return (

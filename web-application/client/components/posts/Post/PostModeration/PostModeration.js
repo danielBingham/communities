@@ -2,7 +2,7 @@ import React from 'react'
 import { useSelector } from 'react-redux'
 
 import ModeratePostForSite from './ModeratePostForSite'
-import ModeratePostForGroup from './ModeratePostForGroup'
+import ModerateForGroup from '/components/groups/moderation/ModerateForGroup'
 
 import './PostModeration.css'
 
@@ -15,7 +15,7 @@ const PostModeration = function({ postId }) {
 
     return (
         <div className="post-moderation">
-            <ModeratePostForGroup postId={postId} /> 
+            <ModerateForGroup postId={postId} /> 
             <ModeratePostForSite postId={postId} /> 
         </div>
     )

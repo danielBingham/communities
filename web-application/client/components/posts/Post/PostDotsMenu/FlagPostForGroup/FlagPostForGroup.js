@@ -18,7 +18,7 @@ import ErrorModal from '/components/errors/ErrorModal'
 import WarningModal from '/components/errors/WarningModal'
 import AreYouSure from '/components/AreYouSure'
 
-import { ModeratePostForGroupModal } from '/components/posts/Post/PostModeration'
+import { ModerateForGroupModal } from '/components/groups/moderation/ModerateForGroup'
 
 import './FlagPostForGroup.css'
 
@@ -95,7 +95,7 @@ const FlagPostForGroup = function({ postId } ) {
                 return (
                     <>
                         <FloatingMenuItem onClick={(e) => setShowModal(true)} className="flag-post-for-group flag-post-for-group__moderate"><FlagIconSolid /> Moderate for Group</FloatingMenuItem>
-                        <ModeratePostForGroupModal postId={postId} isVisible={showModal} setIsVisible={setShowModal} />
+                        <ModerateForGroupModal postId={postId} isVisible={showModal} setIsVisible={setShowModal} />
                     </>
 
                 )
