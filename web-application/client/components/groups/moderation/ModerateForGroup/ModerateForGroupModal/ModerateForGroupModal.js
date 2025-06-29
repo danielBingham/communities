@@ -30,15 +30,20 @@ const ModerateForGroupModal = function({ postId, postCommentId, isVisible, setIs
     const [request, makeRequest] = useRequest()
 
     const moderate = function(status) {
-            const patch = {
-                id: groupModeration.id,
-                userId: currentUser.id,
-                status: status,
-                reason: reason,
-                postId: postId,
-                groupId: post.groupId
-            }
-            makeRequest(patchGroupModeration(patch))
+        const patch = {
+            id: groupModeration.id,
+            userId: currentUser.id,
+            status: status,
+            reason: reason,
+            postId: postId,
+            groupId: post.groupId
+        }
+
+        if ( postCommentId !== undefined ) {
+            patch.postCommentId = postCommentId
+        }
+
+        makeRequest(patchGroupModeration(patch))
     }
 
     if ( canModerateGroup !== true ) {

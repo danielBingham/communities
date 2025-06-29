@@ -5,6 +5,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 import { SitePermissions, useSitePermission } from '/lib/hooks/permission'
 
 import { usePost } from '/lib/hooks/Post'
+import { usePostComment } from '/lib/hooks/PostComment'
 import { useSiteModeration } from '/lib/hooks/SiteModeration'
 
 import { patchSiteModeration } from '/state/SiteModeration'
@@ -15,13 +16,16 @@ import Spinner from '/components/Spinner'
 import Modal from '/components/generic/modal/Modal'
 import ErrorModal from '/components/errors/ErrorModal'
 
-const ModeratePostForSiteModal = function({ postId, isVisible, setIsVisible }) {
+const ModerateForSiteModal = function({ postId, postCommentId, isVisible, setIsVisible }) {
+    console.log(`## ModerateForSiteModal(${postId}, ${postCommentId})`)
     const [reason, setReason] = useState('')
    
     const [post, postRequest] = usePost(postId)
-    const [siteModeration, siteModerationRequest] = useSiteModeration(post?.siteModerationId)
+    const [comment, commentRequest] = usePostComment(postId, postCommentId)
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
+
+    const [siteModeration, siteModerationRequest] = useSiteModeration(comment ? comment?.siteModerationId : post?.siteModerationId)
     const canModerateSite = useSitePermission(currentUser, SitePermissions.MODERATE)
 
     const [request, makeRequest] = useRequest()
@@ -34,6 +38,9 @@ const ModeratePostForSiteModal = function({ postId, isVisible, setIsVisible }) {
                 reason: reason,
                 postId: postId
             }
+            if ( postCommentId ) {
+                patch.postCommentId = postCommentId
+            }
             makeRequest(patchSiteModeration(patch))
     }
 
@@ -44,26 +51,28 @@ const ModeratePostForSiteModal = function({ postId, isVisible, setIsVisible }) {
     if ( request && request.state === 'pending' ) {
         return (
             <Modal isVisible={isVisible} setIsVisible={setIsVisible}>
-                <div className="moderate-post-for-site">
+                <div className="moderate-for-site">
                     <Spinner />
                 </div>
             </Modal>
         )
     }
 
+    const target = postCommentId ? 'Comment' : 'Post'
+
     let error = null
     if ( request && request.state === 'failed' ) {
         error = (
             <ErrorModal>
-                Attempt to moderate post failed on the backend.  Please report as a bug!
+                Attempt to moderate { target } failed on the backend.  Please report as a bug!
             </ErrorModal>
         )
     }
 
     return (
         <Modal isVisible={isVisible} setIsVisible={setIsVisible}>
-            <div className="moderate-post-for-site">
-                <h2>Moderate Post for Site</h2>
+            <div className="moderate-for-site">
+                <h2>Moderate { target } for Site</h2>
                 <TextBox
                     name="reason"
                     className="reason"
@@ -80,4 +89,4 @@ const ModeratePostForSiteModal = function({ postId, isVisible, setIsVisible }) {
     )
 }
 
-export default ModeratePostForSiteModal
+export default ModerateForSiteModal

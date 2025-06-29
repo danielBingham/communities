@@ -18,6 +18,8 @@ import ErrorModal from '/components/errors/ErrorModal'
 import WarningModal from '/components/errors/WarningModal'
 import AreYouSure from '/components/AreYouSure'
 
+import { ModerateForSiteModal } from '/components/admin/moderation'
+
 import './FlagPostComment.css'
 
 const FlagPostComment = function({ postId, id } ) {
@@ -97,7 +99,7 @@ const FlagPostComment = function({ postId, id } ) {
                 return (
                     <>
                         <FloatingMenuItem className="flag-post-comment flag-post-comment__moderate" onClick={(e)=>setShowModal(true)}><FlagIconSolid /> Moderate for Site</FloatingMenuItem>
-                        <ModeratePostForSiteModal postId={postId} isVisible={showModal} setIsVisible={setShowModal} />
+                        <ModerateForSiteModal postId={postId} postCommentId={id} isVisible={showModal} setIsVisible={setShowModal} />
                     </>
 
                 )

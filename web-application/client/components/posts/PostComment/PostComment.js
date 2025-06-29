@@ -50,7 +50,9 @@ const PostComment = function({ postId, id }) {
         return null
     }
 
-    if ( siteModeration !== null && siteModeration.status === 'rejected' ) {
+    if ( (siteModeration !== null && siteModeration.status === 'rejected') 
+        || (groupModeration !== null && groupModeration.status === 'rejected') ) 
+    {
         return (
             <div id={`comment-${comment.id}`} key={comment.id} className={`post-comment ${ highlight ? 'highlight' : ''}`}>
                 <div className="post-comment__header">
@@ -65,10 +67,17 @@ const PostComment = function({ postId, id }) {
                 </div>
                 <div className="post-comment__content">
                     <div className="post-comment__moderated">
-                        <p>Comment removed by moderator.</p>
-
-                        { siteModeration.reason !== null && siteModeration.reason.length > 0 && 
-                            <p>{ siteModeration.reason }</p> 
+                        { siteModeration && siteModeration.status === 'rejected' && (siteModeration.reason !== null && siteModeration.reason.length > 0) && 
+                            <p>Comment removed by a Site moderator with explanation: { siteModeration.reason }</p> 
+                        }
+                        { siteModeration && siteModeration.status === 'rejected' && (siteModeration.reason === null || siteModeration.reason.length <= 0) &&
+                            <p>Comment removed by a Site moderator.</p>
+                        }
+                        { groupModeration && groupModeration.status === 'rejected' && groupModeration.reason !== null && groupModeration.reason.length > 0 && 
+                            <p>Comment removed by a Group moderator with explanation: { groupModeration.reason }</p> 
+                        }
+                        { groupModeration && groupModeration.status === 'rejected' && (groupModeration.reason === null || groupModeration.reason.length <= 0) &&
+                            <p>Comment removed by a Group moderator.</p>
                         }
 
                     </div>
