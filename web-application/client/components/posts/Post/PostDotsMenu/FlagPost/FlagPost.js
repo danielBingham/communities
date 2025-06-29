@@ -18,7 +18,7 @@ import ErrorModal from '/components/errors/ErrorModal'
 import WarningModal from '/components/errors/WarningModal'
 import AreYouSure from '/components/AreYouSure'
 
-import { ModeratePostForSiteModal } from '/components/posts/Post/PostModeration'
+import { ModerateForSiteModal } from '/components/admin/moderation'
 
 import './FlagPost.css'
 
@@ -93,7 +93,7 @@ const FlagPost = function({ postId } ) {
                 return (
                     <>
                         <FloatingMenuItem className="flag-post flag-post__moderate" onClick={(e)=>setShowModal(true)}><FlagIconSolid /> Moderate for Site</FloatingMenuItem>
-                        <ModeratePostForSiteModal postId={postId} isVisible={showModal} setIsVisible={setShowModal} />
+                        <ModerateForSiteModal postId={postId} isVisible={showModal} setIsVisible={setShowModal} />
                     </>
 
                 )
@@ -111,7 +111,6 @@ const FlagPost = function({ postId } ) {
                 <FloatingMenuItem disabled={true} className="flag-post flag-post__rejected"><XCircleIcon /> Removed</FloatingMenuItem>
             )
         }
-
     }
 
     return (

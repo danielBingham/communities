@@ -10,6 +10,7 @@ import { FloatingMenu, FloatingMenuBody, FloatingMenuTrigger } from '/components
 import EditPostComment from './EditPostComment'
 import DeletePostComment from './DeletePostComment'
 import FlagPostComment from './FlagPostComment'
+import FlagPostCommentForGroup from './FlagPostCommentForGroup'
 
 import './PostCommentDotsMenu.css'
 
@@ -29,6 +30,7 @@ const PostCommentDotsMenu = function({ postId, id }) {
             <FloatingMenuTrigger showArrow={false}><EllipsisHorizontalIcon className="dots" /></FloatingMenuTrigger>
             <FloatingMenuBody>
                 <FlagPostComment postId={postId} id={id} />
+                <FlagPostCommentForGroup postId={postId} postCommentId={id} />
                 { currentUser.id === comment.userId && <EditPostComment postId={postId} id={id} /> }
                 { currentUser.id === comment.userId && <DeletePostComment postId={postId} id={id} /> }
             </FloatingMenuBody>

@@ -49,23 +49,6 @@ module.exports = class GroupModerationValidation {
             return errors
         }
 
-        // May not set both `postId` and `postCommentId`
-        if ( util.objectHas(groupModeration, 'postId') && groupModeration.postId !== null 
-            && util.objectHas(groupModeration, 'postCommentId') && groupModeration.postCommentId !== null ) 
-        {
-            errors.push({
-                type: `postId:conflict`,
-                log: `GroupModeration.postId and GroupModeration.postCommentId conflict.`,
-                message: `You may not set both postId and postCommentId.`
-            })
-
-            errors.push({
-                type: `postCommentId:conflict`,
-                log: `GroupModeration.postId and GroupModeration.postCommentId conflict.`,
-                message: `You may not set both postId and postCommentId.`
-            })
-        }
-
         if ( (! util.objectHas(groupModeration, 'postId') || groupModeration.postId === null )
             && ( ! util.objectHas(groupModeration, 'postCommentId') || groupModeration.postCommentId === null))
         {

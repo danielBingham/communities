@@ -65,14 +65,36 @@ module.exports = class GroupModerationController extends BaseController {
         } 
     }
 
-    async createQuery(request) {
+    async createQuery(groupId, request) {
         const query = {
-            where: '',
-            params: [],
+            where: 'group_moderation.group_id = $1',
+            params: [ groupId ],
             page: 1,
             order: 'group_moderation.created_date ASC',
             relations: []
         }
+
+        const ignorePostResults = await this.core.database.query(`
+            SELECT group_moderation.id 
+                FROM group_moderation
+                    JOIN site_moderation ON group_moderation.post_id = site_moderation.post_id
+                WHERE group_moderation.group_id = $1 AND site_moderation.status = 'rejected' AND site_moderation.post_comment_id IS NULL
+        `, [ groupId ])
+
+        const ignoreCommentResults = await this.core.database.query(`
+            SELECT group_moderation.id
+                FROM group_moderation
+                    JOIN site_moderation ON group_moderation.post_comment_id = site_moderation.post_comment_id
+                WHERE group_moderation.group_id = $1 AND site_moderation.status = 'rejected'
+        `, [ groupId ])
+
+        const ignorePostIds = ignorePostResults.rows.map((r) => r.id)
+        const ignoreCommentIds = ignoreCommentResults.rows.map((r) => r.id)
+        const ignoreIds = [ ...new Set([ ...ignorePostIds, ...ignoreCommentIds ])]
+
+        const and = query.params.length > 0 ? ' AND ' : ''
+        query.params.push(ignoreIds)
+        query.where += `${and} group_moderation.id != ALL($${query.params.length}::uuid[])`
 
         if ( 'status' in request.query && request.query.status !== undefined && request.query.status !== null ) {
             const and = query.params.length > 0 ? ' AND ' : ''
@@ -97,6 +119,7 @@ module.exports = class GroupModerationController extends BaseController {
             query.relations = [ ...request.query.relations]
         }
 
+        console.log(query)
         return query
     }
 
@@ -146,7 +169,7 @@ module.exports = class GroupModerationController extends BaseController {
             return
         }
 
-        const query = await this.createQuery(request)
+        const query = await this.createQuery(groupId, request)
         const results = await this.groupModerationDAO.selectGroupModerations(query)
         const meta = await this.groupModerationDAO.getGroupModerationPageMeta(query)
         const relations = await this.getRelations(currentUser, results, query.relations)

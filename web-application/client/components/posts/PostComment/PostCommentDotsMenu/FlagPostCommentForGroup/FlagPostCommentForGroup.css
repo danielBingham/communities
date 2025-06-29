@@ -1,0 +1,20 @@
+.flag-post-comment-for-group svg {
+    width: 18px;
+    height: 18px;
+    margin-bottom: -4px;
+}
+.flag-post-comment-for-group.are-you-sure {
+    max-width: 600px;
+}
+.flag-post-comment-for-group.are-you-sure .flag-post-comment-for-group__explanation {
+    text-align: left;
+}
+.flag-post-comment-for-group.flag-post-comment-for-group__flagged, .flag-post-comment-for-group.flag-post-comment-for-group__rejected {
+    color: var(--danger-color-light) !important;
+}
+.flag-post-comment-for-group.flag-post-comment-for-group__approved {
+    color: var(--success-color-light) !important;
+}
+.flag-post-comment-for-group__choose .flag-post-comment-for-group__choose__explanation {
+    text-align: left;
+}

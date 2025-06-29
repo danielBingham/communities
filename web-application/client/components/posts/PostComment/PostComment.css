@@ -34,7 +34,5 @@
     white-space: pre-line;
 }
 .post-comment .post-comment__content .post-comment__moderated {
-    text-align: center;
     font-size: 14px;
-    font-family: monospace;
 }
