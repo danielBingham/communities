@@ -8,6 +8,7 @@ import { useGroupPermission, GroupPermissions } from '/lib/hooks/permission'
 import { getGroupModerations } from '/state/GroupModeration'
 
 import Post from '/components/posts/Post'
+import PostCommentAwaitingGroupModeration from '/components/groups/moderation/PostCommentAwaitingGroupModeration'
 import PaginationControls from '/components/PaginationControls'
 import Error404 from '/components/errors/Error404'
 
@@ -63,7 +64,7 @@ const GroupModerationView = function({ groupId }) {
                     </div>
                 )
             } else if ( moderation.postId !== null && moderation.postCommentId !== null ) {
-
+                moderationViews.push(<PostCommentAwaitingGroupModeration id={moderation.id} />)
             }
         }
     }
@@ -75,7 +76,7 @@ const GroupModerationView = function({ groupId }) {
         const pageStart = ( query.meta.page-1) * query.meta.pageSize + 1
         const pageEnd = query.meta.count - (query.meta.page-1) * query.meta.pageSize > query.meta.pageSize ? ( query.meta.page * query.meta.pageSize ) : query.meta.count 
 
-        explanation = `Showing ${pageStart} to ${pageEnd} of ${query.meta.count} Posts`
+        explanation = `Showing ${pageStart} to ${pageEnd} of ${query.meta.count} Requests for Moderation`
     }
 
     return (
