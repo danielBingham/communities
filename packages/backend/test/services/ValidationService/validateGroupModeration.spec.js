@@ -152,7 +152,7 @@ describe('ValidationService.validateGroupModeration()', function() {
 
             const errors = await service.validateGroupModeration(currentUser, groupModeration, existing)
 
-            expect(errors.length).toBe(4)
+            expect(errors.length).toBe(3)
         })
     })
 
@@ -199,7 +199,7 @@ describe('ValidationService.validateGroupModeration()', function() {
             expect(errors[1].type).toBe('postCommentId:required')
         })
 
-        it('Should return an error when both postId and postCommentId are present', async function() {
+        it('Should pass when both postId and postCommentId are present', async function() {
             const service = new ValidationService(core)
 
             const groupModeration = { 
@@ -211,14 +211,17 @@ describe('ValidationService.validateGroupModeration()', function() {
                 postCommentId: 'a2d49442-4068-481d-b0be-c98b3c20d788'
             }
 
-            // Moderator User
             const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
+
+            core.database.query.mockReturnValue(undefined)
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '4c73dbae-3d03-43cd-b03d-5be4953b832b' } ]})
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'dc0cf03c-d1d5-4722-bdaf-cffa509c981a' } ]})
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '7ea98d1e-dd4a-4abb-977c-1cf483356180' } ]})
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'a2d49442-4068-481d-b0be-c98b3c20d788' } ]})
 
             const errors = await service.validateGroupModeration(currentUser, groupModeration, null)
 
-            expect(errors.length).toBe(2)
-            expect(errors[0].type).toBe('postId:conflict')
-            expect(errors[1].type).toBe('postCommentId:conflict')
+            expect(errors.length).toBe(0)
         })
 
         it('Should return an error when userId is not found in the database', async function() {

@@ -49,23 +49,6 @@ module.exports = class GroupModerationValidation {
             return errors
         }
 
-        // May not set both `postId` and `postCommentId`
-        if ( util.objectHas(groupModeration, 'postId') && groupModeration.postId !== null 
-            && util.objectHas(groupModeration, 'postCommentId') && groupModeration.postCommentId !== null ) 
-        {
-            errors.push({
-                type: `postId:conflict`,
-                log: `GroupModeration.postId and GroupModeration.postCommentId conflict.`,
-                message: `You may not set both postId and postCommentId.`
-            })
-
-            errors.push({
-                type: `postCommentId:conflict`,
-                log: `GroupModeration.postId and GroupModeration.postCommentId conflict.`,
-                message: `You may not set both postId and postCommentId.`
-            })
-        }
-
         if ( (! util.objectHas(groupModeration, 'postId') || groupModeration.postId === null )
             && ( ! util.objectHas(groupModeration, 'postCommentId') || groupModeration.postCommentId === null))
         {
@@ -145,13 +128,15 @@ module.exports = class GroupModerationValidation {
 
         // Authorization Validation
         if( util.objectHas(groupModeration, 'status') && groupModeration.status !== null ) {
-            const canModerateGroup = await this.permissionService.can(currentUser, 'moderate', 'Group', { groupId: groupModeration.groupId })
-            if ( groupModeration.status !== 'flagged' && canModerateGroup !== true ) {
-                errors.push({
-                    type: 'status:not-authorized',
-                    log: `User attempting to moderate Group(${groupModeration.groupId}) without authorization.`,
-                    message: `You do not have permission to moderate Communities.`
-                })
+            if ( groupModeration.status !== 'flagged' ) {
+                const canModerateGroup = await this.permissionService.can(currentUser, 'moderate', 'Group', { groupId: groupModeration.groupId })
+                if ( canModerateGroup !== true ) {
+                    errors.push({
+                        type: 'status:not-authorized',
+                        log: `User attempting to moderate Group(${groupModeration.groupId}) without authorization.`,
+                        message: `You do not have permission to moderate Communities.`
+                    })
+                }
             }
         }
 
