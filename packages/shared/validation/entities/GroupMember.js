@@ -24,7 +24,7 @@ const validateStatus = function(status) {
     const errors = validator
         .mustNotBeNull()
         .mustBeString()
-        .mustBeOneOf([ 'pending-invited', 'pending-requested', 'member' ])
+        .mustBeOneOf([ 'pending-invited', 'pending-requested', 'member', 'banned' ])
         .getErrors()
     return errors
 }

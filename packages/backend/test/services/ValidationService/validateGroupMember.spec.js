@@ -1038,72 +1038,739 @@ describe('ValidationService.validateGroupMember()', function() {
         })
 
         describe("for a GroupMember with status 'member'", function() {
-            it("Should not allow the member to change their status", async function() {
-                const service = new ValidationService(core)
+            describe("and role 'member'", function() {
+                it("Should not allow the member to change their status", async function() {
+                    const service = new ValidationService(core)
 
-                const groupMember = { 
-                    id: '138de5fc-a0a9-47eb-ac51-3c92f7780ad9',
-                    userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
-                    groupId: 'aeb26ec5-3644-4b7a-805e-375551ec65b6',
-                    status: 'pending-invited',
-                    role: 'member'
-                }
+                    const groupMember = { 
+                        id: '138de5fc-a0a9-47eb-ac51-3c92f7780ad9',
+                        userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
+                        groupId: 'aeb26ec5-3644-4b7a-805e-375551ec65b6',
+                        status: 'pending-invited',
+                        role: 'member'
+                    }
 
-                const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
-                const existing = { ...entities.groupMembers.dictionary['138de5fc-a0a9-47eb-ac51-3c92f7780ad9'] }
-                existing.status = 'member'
+                    const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
+                    const existing = { ...entities.groupMembers.dictionary['138de5fc-a0a9-47eb-ac51-3c92f7780ad9'] }
+                    existing.status = 'member'
 
-                const groupRows = database.groups['aeb26ec5-3644-4b7a-805e-375551ec65b6'].rows
-                const groupMemberRows = database.groupMembers['138de5fc-a0a9-47eb-ac51-3c92f7780ad9'].rows
-                core.database.query.mockReturnValue(undefined)
-                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '5c44ce06-1687-4709-b67e-de76c05acb6a' }]}) // Check user existence
-                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'aeb26ec5-3644-4b7a-805e-375551ec65b6' }]}) // Check group existence.
-                    .mockReturnValueOnce({ rowCount: 1, rows: groupRows }) // getGroupById
-                    .mockReturnValueOnce({ rowCount: 1, rows: groupMemberRows }) // getGroupMemberByGroupAndUser(group, currentUser)
+                    const groupRows = database.groups['aeb26ec5-3644-4b7a-805e-375551ec65b6'].rows
+                    const groupMemberRows = database.groupMembers['138de5fc-a0a9-47eb-ac51-3c92f7780ad9'].rows
+                    core.database.query.mockReturnValue(undefined)
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '5c44ce06-1687-4709-b67e-de76c05acb6a' }]}) // Check user existence
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'aeb26ec5-3644-4b7a-805e-375551ec65b6' }]}) // Check group existence.
+                        .mockReturnValueOnce({ rowCount: 1, rows: groupRows }) // getGroupById
+                        .mockReturnValueOnce({ rowCount: 1, rows: groupMemberRows }) // getGroupMemberByGroupAndUser(group, currentUser)
 
-                const errors = await service.validateGroupMember(currentUser, groupMember, existing)
+                    const errors = await service.validateGroupMember(currentUser, groupMember, existing)
 
-                expect(errors.length).toBe(1)
-                expect(errors[0].type).toBe('status:invalid')
-                expect(groupRows[0].Group_id).toBe(groupMember.groupId)
-                expect(groupMemberRows[0].GroupMember_groupId).toBe(groupMember.groupId)
-                expect(groupMemberRows[0].GroupMember_userId).toBe(currentUser.id)
-                expect(groupMemberRows[0].GroupMember_role).not.toBe('moderator')
-                expect(currentUser.id).toBe(groupMember.userId)
+                    expect(errors.length).toBe(1)
+                    expect(errors[0].type).toBe('status:invalid')
+                    expect(groupRows[0].Group_id).toBe(groupMember.groupId)
+                    expect(groupMemberRows[0].GroupMember_groupId).toBe(groupMember.groupId)
+                    expect(groupMemberRows[0].GroupMember_userId).toBe(currentUser.id)
+                    expect(groupMemberRows[0].GroupMember_role).not.toBe('moderator')
+                    expect(currentUser.id).toBe(groupMember.userId)
+                })
+
+                it("Should not allow a moderator to change their status to 'pending-requested'", async function() {
+                    const service = new ValidationService(core)
+
+                    const groupMember = { 
+                        id: '138de5fc-a0a9-47eb-ac51-3c92f7780ad9',
+                        userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
+                        groupId: 'aeb26ec5-3644-4b7a-805e-375551ec65b6',
+                        status: 'pending-requested',
+                        role: 'member'
+                    }
+
+                    const currentUser = entities.users.dictionary['2a7ae011-689c-4aa2-8f13-a53026d40964']
+                    const existing = { ...entities.groupMembers.dictionary['138de5fc-a0a9-47eb-ac51-3c92f7780ad9'] }
+                    existing.status = 'member'
+
+                    const groupRows = database.groups['aeb26ec5-3644-4b7a-805e-375551ec65b6'].rows
+                    const groupMemberRows = database.groupMembers['bb88818d-6426-4e5a-b79a-688a700fef11'].rows
+                    core.database.query.mockReturnValue(undefined)
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '5c44ce06-1687-4709-b67e-de76c05acb6a' }]}) // Check user existence
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'aeb26ec5-3644-4b7a-805e-375551ec65b6' }]}) // Check group existence.
+                        .mockReturnValueOnce({ rowCount: 1, rows: groupRows }) // getGroupById
+                        .mockReturnValueOnce({ rowCount: 1, rows: groupMemberRows }) // getGroupMemberByGroupAndUser(group, currentUser)
+
+                    const errors = await service.validateGroupMember(currentUser, groupMember, existing)
+
+                    expect(errors.length).toBe(1)
+                    expect(errors[0].type).toBe('status:invalid')
+                    expect(groupRows[0].Group_id).toBe(groupMember.groupId)
+                    expect(groupMemberRows[0].GroupMember_groupId).toBe(groupMember.groupId)
+                    expect(groupMemberRows[0].GroupMember_userId).toBe(currentUser.id)
+                    expect(groupMemberRows[0].GroupMember_role).toBe('moderator')
+                    expect(currentUser.id).not.toBe(groupMember.userId)
+                })
+
+                it("Should not allow an admin to change their status to 'pending-requested'", async function() {
+                    const service = new ValidationService(core)
+
+                    const groupMember = { 
+                        id: '138de5fc-a0a9-47eb-ac51-3c92f7780ad9',
+                        userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
+                        groupId: 'aeb26ec5-3644-4b7a-805e-375551ec65b6',
+                        status: 'pending-requested',
+                        role: 'member'
+                    }
+
+                    const currentUser = entities.users.dictionary['2a7ae011-689c-4aa2-8f13-a53026d40964']
+                    const existing = { ...entities.groupMembers.dictionary['138de5fc-a0a9-47eb-ac51-3c92f7780ad9'] }
+                    existing.status = 'member'
+
+                    const groupRows = database.groups['aeb26ec5-3644-4b7a-805e-375551ec65b6'].rows
+                    const currentMemberRows = database.groupMembers['fef5f5a1-b500-4694-a5ca-c7ebea359295'].rows
+                    core.database.query.mockReturnValue(undefined)
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '5c44ce06-1687-4709-b67e-de76c05acb6a' }]}) // Check user existence
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'aeb26ec5-3644-4b7a-805e-375551ec65b6' }]}) // Check group existence.
+                        .mockReturnValueOnce({ rowCount: 1, rows: groupRows }) // getGroupById
+                        .mockReturnValueOnce({ rowCount: 1, rows: currentMemberRows }) // getGroupMemberByGroupAndUser(group, currentUser)
+
+                    const errors = await service.validateGroupMember(currentUser, groupMember, existing)
+
+                    expect(errors.length).toBe(1)
+                    expect(errors[0].type).toBe('status:invalid')
+                    expect(groupRows[0].Group_id).toBe(groupMember.groupId)
+                    expect(currentMemberRows[0].GroupMember_groupId).toBe(groupMember.groupId)
+                    expect(currentMemberRows[0].GroupMember_userId).toBe(currentUser.id)
+                    expect(currentMemberRows[0].GroupMember_role).toBe('admin')
+                    expect(currentUser.id).not.toBe(groupMember.userId)
+                })
+
+                it("Should not allow a moderator to change their status to 'pending-invited'", async function() {
+                    const service = new ValidationService(core)
+
+                    const groupMember = { 
+                        id: '138de5fc-a0a9-47eb-ac51-3c92f7780ad9',
+                        userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
+                        groupId: 'aeb26ec5-3644-4b7a-805e-375551ec65b6',
+                        status: 'pending-invited',
+                        role: 'member'
+                    }
+
+                    const currentUser = entities.users.dictionary['2a7ae011-689c-4aa2-8f13-a53026d40964']
+                    const existing = { ...entities.groupMembers.dictionary['138de5fc-a0a9-47eb-ac51-3c92f7780ad9'] }
+                    existing.status = 'member'
+
+                    const groupRows = database.groups['aeb26ec5-3644-4b7a-805e-375551ec65b6'].rows
+                    const groupMemberRows = database.groupMembers['bb88818d-6426-4e5a-b79a-688a700fef11'].rows
+                    core.database.query.mockReturnValue(undefined)
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '5c44ce06-1687-4709-b67e-de76c05acb6a' }]}) // Check user existence
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'aeb26ec5-3644-4b7a-805e-375551ec65b6' }]}) // Check group existence.
+                        .mockReturnValueOnce({ rowCount: 1, rows: groupRows }) // getGroupById
+                        .mockReturnValueOnce({ rowCount: 1, rows: groupMemberRows }) // getGroupMemberByGroupAndUser(group, currentUser)
+
+                    const errors = await service.validateGroupMember(currentUser, groupMember, existing)
+
+                    expect(errors.length).toBe(1)
+                    expect(errors[0].type).toBe('status:invalid')
+                    expect(groupRows[0].Group_id).toBe(groupMember.groupId)
+                    expect(groupMemberRows[0].GroupMember_groupId).toBe(groupMember.groupId)
+                    expect(groupMemberRows[0].GroupMember_userId).toBe(currentUser.id)
+                    expect(groupMemberRows[0].GroupMember_role).toBe('moderator')
+                    expect(currentUser.id).not.toBe(groupMember.userId)
+                })
+
+                it("Should not allow an admin to change their status to 'pending-invited'", async function() {
+                    const service = new ValidationService(core)
+
+                    const groupMember = { 
+                        id: '138de5fc-a0a9-47eb-ac51-3c92f7780ad9',
+                        userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
+                        groupId: 'aeb26ec5-3644-4b7a-805e-375551ec65b6',
+                        status: 'pending-invited',
+                        role: 'member'
+                    }
+
+                    const currentUser = entities.users.dictionary['2a7ae011-689c-4aa2-8f13-a53026d40964']
+                    const existing = { ...entities.groupMembers.dictionary['138de5fc-a0a9-47eb-ac51-3c92f7780ad9'] }
+                    existing.status = 'member'
+
+                    const groupRows = database.groups['aeb26ec5-3644-4b7a-805e-375551ec65b6'].rows
+                    const currentMemberRows = database.groupMembers['fef5f5a1-b500-4694-a5ca-c7ebea359295'].rows
+                    core.database.query.mockReturnValue(undefined)
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '5c44ce06-1687-4709-b67e-de76c05acb6a' }]}) // Check user existence
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'aeb26ec5-3644-4b7a-805e-375551ec65b6' }]}) // Check group existence.
+                        .mockReturnValueOnce({ rowCount: 1, rows: groupRows }) // getGroupById
+                        .mockReturnValueOnce({ rowCount: 1, rows: currentMemberRows }) // getGroupMemberByGroupAndUser(group, currentUser)
+
+                    const errors = await service.validateGroupMember(currentUser, groupMember, existing)
+
+                    expect(errors.length).toBe(1)
+                    expect(errors[0].type).toBe('status:invalid')
+                    expect(groupRows[0].Group_id).toBe(groupMember.groupId)
+                    expect(currentMemberRows[0].GroupMember_groupId).toBe(groupMember.groupId)
+                    expect(currentMemberRows[0].GroupMember_userId).toBe(currentUser.id)
+                    expect(currentMemberRows[0].GroupMember_role).toBe('admin')
+                    expect(currentUser.id).not.toBe(groupMember.userId)
+                })
+
+                it("Should allow a moderator to change their status to 'banned'", async function() {
+                    const service = new ValidationService(core)
+
+                    const groupMember = { 
+                        id: '138de5fc-a0a9-47eb-ac51-3c92f7780ad9',
+                        userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
+                        groupId: 'aeb26ec5-3644-4b7a-805e-375551ec65b6',
+                        status: 'banned',
+                        role: 'member'
+                    }
+
+                    const currentUser = entities.users.dictionary['2a7ae011-689c-4aa2-8f13-a53026d40964']
+                    const existing = { ...entities.groupMembers.dictionary['138de5fc-a0a9-47eb-ac51-3c92f7780ad9'] }
+                    existing.status = 'member'
+
+                    const groupRows = database.groups['aeb26ec5-3644-4b7a-805e-375551ec65b6'].rows
+                    const groupMemberRows = database.groupMembers['bb88818d-6426-4e5a-b79a-688a700fef11'].rows
+                    core.database.query.mockReturnValue(undefined)
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '5c44ce06-1687-4709-b67e-de76c05acb6a' }]}) // Check user existence
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'aeb26ec5-3644-4b7a-805e-375551ec65b6' }]}) // Check group existence.
+                        .mockReturnValueOnce({ rowCount: 1, rows: groupRows }) // getGroupById
+                        .mockReturnValueOnce({ rowCount: 1, rows: groupMemberRows }) // getGroupMemberByGroupAndUser(group, currentUser)
+
+                    const errors = await service.validateGroupMember(currentUser, groupMember, existing)
+
+                    expect(errors.length).toBe(0)
+                    expect(groupRows[0].Group_id).toBe(groupMember.groupId)
+                    expect(groupMemberRows[0].GroupMember_groupId).toBe(groupMember.groupId)
+                    expect(groupMemberRows[0].GroupMember_userId).toBe(currentUser.id)
+                    expect(groupMemberRows[0].GroupMember_role).toBe('moderator')
+                    expect(currentUser.id).not.toBe(groupMember.userId)
+
+                })
+
+                it("Should allow an admin to change their status to 'banned'", async function() {
+                    const service = new ValidationService(core)
+
+                    const groupMember = { 
+                        id: '138de5fc-a0a9-47eb-ac51-3c92f7780ad9',
+                        userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
+                        groupId: 'aeb26ec5-3644-4b7a-805e-375551ec65b6',
+                        status: 'banned',
+                        role: 'member'
+                    }
+
+                    const currentUser = entities.users.dictionary['2a7ae011-689c-4aa2-8f13-a53026d40964']
+                    const existing = { ...entities.groupMembers.dictionary['138de5fc-a0a9-47eb-ac51-3c92f7780ad9'] }
+                    existing.status = 'member'
+
+                    const groupRows = database.groups['aeb26ec5-3644-4b7a-805e-375551ec65b6'].rows
+                    const currentMemberRows = database.groupMembers['fef5f5a1-b500-4694-a5ca-c7ebea359295'].rows
+                    core.database.query.mockReturnValue(undefined)
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '5c44ce06-1687-4709-b67e-de76c05acb6a' }]}) // Check user existence
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'aeb26ec5-3644-4b7a-805e-375551ec65b6' }]}) // Check group existence.
+                        .mockReturnValueOnce({ rowCount: 1, rows: groupRows }) // getGroupById
+                        .mockReturnValueOnce({ rowCount: 1, rows: currentMemberRows }) // getGroupMemberByGroupAndUser(group, currentUser)
+
+                    const errors = await service.validateGroupMember(currentUser, groupMember, existing)
+
+                    expect(errors.length).toBe(0)
+                    expect(groupRows[0].Group_id).toBe(groupMember.groupId)
+                    expect(currentMemberRows[0].GroupMember_groupId).toBe(groupMember.groupId)
+                    expect(currentMemberRows[0].GroupMember_userId).toBe(currentUser.id)
+                    expect(currentMemberRows[0].GroupMember_role).toBe('admin')
+                    expect(currentUser.id).not.toBe(groupMember.userId)
+
+                })
             })
 
-            it("Should not allow a moderator to change their status to 'member'", async function() {
-                const service = new ValidationService(core)
+            describe("and role 'moderator'", function() {
+                it("Should not allow the member to change their status", async function() {
+                    const service = new ValidationService(core)
 
-                const groupMember = { 
-                    id: '138de5fc-a0a9-47eb-ac51-3c92f7780ad9',
-                    userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
-                    groupId: 'aeb26ec5-3644-4b7a-805e-375551ec65b6',
-                    status: 'pending-requested',
-                    role: 'member'
-                }
+                    const groupMember = { 
+                        id: '138de5fc-a0a9-47eb-ac51-3c92f7780ad9',
+                        userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
+                        groupId: 'aeb26ec5-3644-4b7a-805e-375551ec65b6',
+                        status: 'pending-invited',
+                        role: 'moderator'
+                    }
 
-                const currentUser = entities.users.dictionary['2a7ae011-689c-4aa2-8f13-a53026d40964']
-                const existing = { ...entities.groupMembers.dictionary['138de5fc-a0a9-47eb-ac51-3c92f7780ad9'] }
-                existing.status = 'member'
+                    const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
+                    const existing = { ...entities.groupMembers.dictionary['138de5fc-a0a9-47eb-ac51-3c92f7780ad9'] }
+                    existing.status = 'member'
+                    existing.role = 'moderator'
 
-                const groupRows = database.groups['aeb26ec5-3644-4b7a-805e-375551ec65b6'].rows
-                const groupMemberRows = database.groupMembers['bb88818d-6426-4e5a-b79a-688a700fef11'].rows
-                core.database.query.mockReturnValue(undefined)
-                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '5c44ce06-1687-4709-b67e-de76c05acb6a' }]}) // Check user existence
-                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'aeb26ec5-3644-4b7a-805e-375551ec65b6' }]}) // Check group existence.
-                    .mockReturnValueOnce({ rowCount: 1, rows: groupRows }) // getGroupById
-                    .mockReturnValueOnce({ rowCount: 1, rows: groupMemberRows }) // getGroupMemberByGroupAndUser(group, currentUser)
+                    const groupRows = database.groups['aeb26ec5-3644-4b7a-805e-375551ec65b6'].rows
+                    const groupMemberRows = database.groupMembers['138de5fc-a0a9-47eb-ac51-3c92f7780ad9'].rows
+                    core.database.query.mockReturnValue(undefined)
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '5c44ce06-1687-4709-b67e-de76c05acb6a' }]}) // Check user existence
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'aeb26ec5-3644-4b7a-805e-375551ec65b6' }]}) // Check group existence.
+                        .mockReturnValueOnce({ rowCount: 1, rows: groupRows }) // getGroupById
+                        .mockReturnValueOnce({ rowCount: 1, rows: groupMemberRows }) // getGroupMemberByGroupAndUser(group, currentUser)
 
-                const errors = await service.validateGroupMember(currentUser, groupMember, existing)
+                    const errors = await service.validateGroupMember(currentUser, groupMember, existing)
 
-                expect(errors.length).toBe(1)
-                expect(errors[0].type).toBe('status:invalid')
-                expect(groupRows[0].Group_id).toBe(groupMember.groupId)
-                expect(groupMemberRows[0].GroupMember_groupId).toBe(groupMember.groupId)
-                expect(groupMemberRows[0].GroupMember_userId).toBe(currentUser.id)
-                expect(groupMemberRows[0].GroupMember_role).toBe('moderator')
-                expect(currentUser.id).not.toBe(groupMember.userId)
+                    expect(errors.length).toBe(1)
+                    expect(errors[0].type).toBe('status:invalid')
+                    expect(groupRows[0].Group_id).toBe(groupMember.groupId)
+                    expect(groupMemberRows[0].GroupMember_groupId).toBe(groupMember.groupId)
+                    expect(groupMemberRows[0].GroupMember_userId).toBe(currentUser.id)
+                    expect(groupMemberRows[0].GroupMember_role).not.toBe('moderator')
+                    expect(currentUser.id).toBe(groupMember.userId)
+                })
+
+                it("Should not allow a moderator to change their status to 'pending-requested'", async function() {
+                    const service = new ValidationService(core)
+
+                    const groupMember = { 
+                        id: '138de5fc-a0a9-47eb-ac51-3c92f7780ad9',
+                        userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
+                        groupId: 'aeb26ec5-3644-4b7a-805e-375551ec65b6',
+                        status: 'pending-requested',
+                        role: 'moderator'
+                    }
+
+                    const currentUser = entities.users.dictionary['2a7ae011-689c-4aa2-8f13-a53026d40964']
+                    const existing = { ...entities.groupMembers.dictionary['138de5fc-a0a9-47eb-ac51-3c92f7780ad9'] }
+                    existing.status = 'member'
+                    existing.role = 'moderator'
+
+                    const groupRows = database.groups['aeb26ec5-3644-4b7a-805e-375551ec65b6'].rows
+                    const groupMemberRows = database.groupMembers['bb88818d-6426-4e5a-b79a-688a700fef11'].rows
+                    core.database.query.mockReturnValue(undefined)
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '5c44ce06-1687-4709-b67e-de76c05acb6a' }]}) // Check user existence
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'aeb26ec5-3644-4b7a-805e-375551ec65b6' }]}) // Check group existence.
+                        .mockReturnValueOnce({ rowCount: 1, rows: groupRows }) // getGroupById
+                        .mockReturnValueOnce({ rowCount: 1, rows: groupMemberRows }) // getGroupMemberByGroupAndUser(group, currentUser)
+
+                    const errors = await service.validateGroupMember(currentUser, groupMember, existing)
+
+                    expect(errors.length).toBe(1)
+                    expect(errors[0].type).toBe('status:invalid')
+                    expect(groupRows[0].Group_id).toBe(groupMember.groupId)
+                    expect(groupMemberRows[0].GroupMember_groupId).toBe(groupMember.groupId)
+                    expect(groupMemberRows[0].GroupMember_userId).toBe(currentUser.id)
+                    expect(groupMemberRows[0].GroupMember_role).toBe('moderator')
+                    expect(currentUser.id).not.toBe(groupMember.userId)
+                })
+
+                it("Should not allow an admin to change their status to 'pending-requested'", async function() {
+                    const service = new ValidationService(core)
+
+                    const groupMember = { 
+                        id: '138de5fc-a0a9-47eb-ac51-3c92f7780ad9',
+                        userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
+                        groupId: 'aeb26ec5-3644-4b7a-805e-375551ec65b6',
+                        status: 'pending-requested',
+                        role: 'moderator'
+                    }
+
+                    const currentUser = entities.users.dictionary['2a7ae011-689c-4aa2-8f13-a53026d40964']
+                    const existing = { ...entities.groupMembers.dictionary['138de5fc-a0a9-47eb-ac51-3c92f7780ad9'] }
+                    existing.status = 'member'
+                    existing.role = 'moderator'
+
+                    const groupRows = database.groups['aeb26ec5-3644-4b7a-805e-375551ec65b6'].rows
+                    const currentMemberRows = database.groupMembers['fef5f5a1-b500-4694-a5ca-c7ebea359295'].rows
+                    core.database.query.mockReturnValue(undefined)
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '5c44ce06-1687-4709-b67e-de76c05acb6a' }]}) // Check user existence
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'aeb26ec5-3644-4b7a-805e-375551ec65b6' }]}) // Check group existence.
+                        .mockReturnValueOnce({ rowCount: 1, rows: groupRows }) // getGroupById
+                        .mockReturnValueOnce({ rowCount: 1, rows: currentMemberRows }) // getGroupMemberByGroupAndUser(group, currentUser)
+
+                    const errors = await service.validateGroupMember(currentUser, groupMember, existing)
+
+                    expect(errors.length).toBe(1)
+                    expect(errors[0].type).toBe('status:invalid')
+                    expect(groupRows[0].Group_id).toBe(groupMember.groupId)
+                    expect(currentMemberRows[0].GroupMember_groupId).toBe(groupMember.groupId)
+                    expect(currentMemberRows[0].GroupMember_userId).toBe(currentUser.id)
+                    expect(currentMemberRows[0].GroupMember_role).toBe('admin')
+                    expect(currentUser.id).not.toBe(groupMember.userId)
+                })
+
+                it("Should not allow a moderator to change their status to 'pending-invited'", async function() {
+                    const service = new ValidationService(core)
+
+                    const groupMember = { 
+                        id: '138de5fc-a0a9-47eb-ac51-3c92f7780ad9',
+                        userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
+                        groupId: 'aeb26ec5-3644-4b7a-805e-375551ec65b6',
+                        status: 'pending-invited',
+                        role: 'moderator'
+                    }
+
+                    const currentUser = entities.users.dictionary['2a7ae011-689c-4aa2-8f13-a53026d40964']
+                    const existing = { ...entities.groupMembers.dictionary['138de5fc-a0a9-47eb-ac51-3c92f7780ad9'] }
+                    existing.status = 'member'
+                    existing.role = 'moderator'
+
+                    const groupRows = database.groups['aeb26ec5-3644-4b7a-805e-375551ec65b6'].rows
+                    const groupMemberRows = database.groupMembers['bb88818d-6426-4e5a-b79a-688a700fef11'].rows
+                    core.database.query.mockReturnValue(undefined)
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '5c44ce06-1687-4709-b67e-de76c05acb6a' }]}) // Check user existence
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'aeb26ec5-3644-4b7a-805e-375551ec65b6' }]}) // Check group existence.
+                        .mockReturnValueOnce({ rowCount: 1, rows: groupRows }) // getGroupById
+                        .mockReturnValueOnce({ rowCount: 1, rows: groupMemberRows }) // getGroupMemberByGroupAndUser(group, currentUser)
+
+                    const errors = await service.validateGroupMember(currentUser, groupMember, existing)
+
+                    expect(errors.length).toBe(1)
+                    expect(errors[0].type).toBe('status:invalid')
+                    expect(groupRows[0].Group_id).toBe(groupMember.groupId)
+                    expect(groupMemberRows[0].GroupMember_groupId).toBe(groupMember.groupId)
+                    expect(groupMemberRows[0].GroupMember_userId).toBe(currentUser.id)
+                    expect(groupMemberRows[0].GroupMember_role).toBe('moderator')
+                    expect(currentUser.id).not.toBe(groupMember.userId)
+                })
+
+                it("Should not allow an admin to change their status to 'pending-invited'", async function() {
+                    const service = new ValidationService(core)
+
+                    const groupMember = { 
+                        id: '138de5fc-a0a9-47eb-ac51-3c92f7780ad9',
+                        userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
+                        groupId: 'aeb26ec5-3644-4b7a-805e-375551ec65b6',
+                        status: 'pending-invited',
+                        role: 'moderator'
+                    }
+
+                    const currentUser = entities.users.dictionary['2a7ae011-689c-4aa2-8f13-a53026d40964']
+                    const existing = { ...entities.groupMembers.dictionary['138de5fc-a0a9-47eb-ac51-3c92f7780ad9'] }
+                    existing.status = 'member'
+                    existing.role = 'moderator'
+
+                    const groupRows = database.groups['aeb26ec5-3644-4b7a-805e-375551ec65b6'].rows
+                    const currentMemberRows = database.groupMembers['fef5f5a1-b500-4694-a5ca-c7ebea359295'].rows
+                    core.database.query.mockReturnValue(undefined)
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '5c44ce06-1687-4709-b67e-de76c05acb6a' }]}) // Check user existence
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'aeb26ec5-3644-4b7a-805e-375551ec65b6' }]}) // Check group existence.
+                        .mockReturnValueOnce({ rowCount: 1, rows: groupRows }) // getGroupById
+                        .mockReturnValueOnce({ rowCount: 1, rows: currentMemberRows }) // getGroupMemberByGroupAndUser(group, currentUser)
+
+                    const errors = await service.validateGroupMember(currentUser, groupMember, existing)
+
+                    expect(errors.length).toBe(1)
+                    expect(errors[0].type).toBe('status:invalid')
+                    expect(groupRows[0].Group_id).toBe(groupMember.groupId)
+                    expect(currentMemberRows[0].GroupMember_groupId).toBe(groupMember.groupId)
+                    expect(currentMemberRows[0].GroupMember_userId).toBe(currentUser.id)
+                    expect(currentMemberRows[0].GroupMember_role).toBe('admin')
+                    expect(currentUser.id).not.toBe(groupMember.userId)
+                })
+
+                it("Should not allow a moderator to change their status to 'banned'", async function() {
+                    const service = new ValidationService(core)
+
+                    const groupMember = { 
+                        id: '138de5fc-a0a9-47eb-ac51-3c92f7780ad9',
+                        userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
+                        groupId: 'aeb26ec5-3644-4b7a-805e-375551ec65b6',
+                        status: 'banned',
+                        role: 'moderator'
+                    }
+
+                    const currentUser = entities.users.dictionary['2a7ae011-689c-4aa2-8f13-a53026d40964']
+                    const existing = { ...entities.groupMembers.dictionary['138de5fc-a0a9-47eb-ac51-3c92f7780ad9'] }
+                    existing.status = 'member'
+                    existing.role = 'moderator'
+
+                    const groupRows = database.groups['aeb26ec5-3644-4b7a-805e-375551ec65b6'].rows
+                    const groupMemberRows = database.groupMembers['bb88818d-6426-4e5a-b79a-688a700fef11'].rows
+                    core.database.query.mockReturnValue(undefined)
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '5c44ce06-1687-4709-b67e-de76c05acb6a' }]}) // Check user existence
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'aeb26ec5-3644-4b7a-805e-375551ec65b6' }]}) // Check group existence.
+                        .mockReturnValueOnce({ rowCount: 1, rows: groupRows }) // getGroupById
+                        .mockReturnValueOnce({ rowCount: 1, rows: groupMemberRows }) // getGroupMemberByGroupAndUser(group, currentUser)
+
+                    const errors = await service.validateGroupMember(currentUser, groupMember, existing)
+
+                    expect(errors.length).toBe(1)
+                    expect(errors[0].type).toBe('status:not-authorized')
+                    expect(groupRows[0].Group_id).toBe(groupMember.groupId)
+                    expect(groupMemberRows[0].GroupMember_groupId).toBe(groupMember.groupId)
+                    expect(groupMemberRows[0].GroupMember_userId).toBe(currentUser.id)
+                    expect(groupMemberRows[0].GroupMember_role).toBe('moderator')
+                    expect(currentUser.id).not.toBe(groupMember.userId)
+                })
+
+                it("Should not allow an admin to change their status to 'banned'", async function() {
+                    const service = new ValidationService(core)
+
+                    const groupMember = { 
+                        id: '138de5fc-a0a9-47eb-ac51-3c92f7780ad9',
+                        userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
+                        groupId: 'aeb26ec5-3644-4b7a-805e-375551ec65b6',
+                        status: 'banned',
+                        role: 'moderator'
+                    }
+
+                    const currentUser = entities.users.dictionary['2a7ae011-689c-4aa2-8f13-a53026d40964']
+                    const existing = { ...entities.groupMembers.dictionary['138de5fc-a0a9-47eb-ac51-3c92f7780ad9'] }
+                    existing.status = 'member'
+                    existing.role = 'moderator'
+
+                    const groupRows = database.groups['aeb26ec5-3644-4b7a-805e-375551ec65b6'].rows
+                    const currentMemberRows = database.groupMembers['fef5f5a1-b500-4694-a5ca-c7ebea359295'].rows
+                    core.database.query.mockReturnValue(undefined)
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '5c44ce06-1687-4709-b67e-de76c05acb6a' }]}) // Check user existence
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'aeb26ec5-3644-4b7a-805e-375551ec65b6' }]}) // Check group existence.
+                        .mockReturnValueOnce({ rowCount: 1, rows: groupRows }) // getGroupById
+                        .mockReturnValueOnce({ rowCount: 1, rows: currentMemberRows }) // getGroupMemberByGroupAndUser(group, currentUser)
+
+                    const errors = await service.validateGroupMember(currentUser, groupMember, existing)
+
+                    expect(errors.length).toBe(1)
+                    expect(errors[0].type).toBe('status:not-authorized')
+                    expect(groupRows[0].Group_id).toBe(groupMember.groupId)
+                    expect(currentMemberRows[0].GroupMember_groupId).toBe(groupMember.groupId)
+                    expect(currentMemberRows[0].GroupMember_userId).toBe(currentUser.id)
+                    expect(currentMemberRows[0].GroupMember_role).toBe('admin')
+                    expect(currentUser.id).not.toBe(groupMember.userId)
+                })
+            })
+
+            describe("and role 'admin'", function() {
+                it("Should not allow the member to change their status", async function() {
+                    const service = new ValidationService(core)
+
+                    const groupMember = { 
+                        id: '138de5fc-a0a9-47eb-ac51-3c92f7780ad9',
+                        userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
+                        groupId: 'aeb26ec5-3644-4b7a-805e-375551ec65b6',
+                        status: 'pending-invited',
+                        role: 'admin'
+                    }
+
+                    const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
+                    const existing = { ...entities.groupMembers.dictionary['138de5fc-a0a9-47eb-ac51-3c92f7780ad9'] }
+                    existing.status = 'member'
+                    existing.role = 'admin'
+
+                    const groupRows = database.groups['aeb26ec5-3644-4b7a-805e-375551ec65b6'].rows
+                    const groupMemberRows = database.groupMembers['138de5fc-a0a9-47eb-ac51-3c92f7780ad9'].rows
+                    core.database.query.mockReturnValue(undefined)
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '5c44ce06-1687-4709-b67e-de76c05acb6a' }]}) // Check user existence
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'aeb26ec5-3644-4b7a-805e-375551ec65b6' }]}) // Check group existence.
+                        .mockReturnValueOnce({ rowCount: 1, rows: groupRows }) // getGroupById
+                        .mockReturnValueOnce({ rowCount: 1, rows: groupMemberRows }) // getGroupMemberByGroupAndUser(group, currentUser)
+
+                    const errors = await service.validateGroupMember(currentUser, groupMember, existing)
+
+                    expect(errors.length).toBe(1)
+                    expect(errors[0].type).toBe('status:invalid')
+                    expect(groupRows[0].Group_id).toBe(groupMember.groupId)
+                    expect(groupMemberRows[0].GroupMember_groupId).toBe(groupMember.groupId)
+                    expect(groupMemberRows[0].GroupMember_userId).toBe(currentUser.id)
+                    expect(groupMemberRows[0].GroupMember_role).not.toBe('moderator')
+                    expect(currentUser.id).toBe(groupMember.userId)
+                })
+
+                it("Should not allow a moderator to change their status to 'pending-requested'", async function() {
+                    const service = new ValidationService(core)
+
+                    const groupMember = { 
+                        id: '138de5fc-a0a9-47eb-ac51-3c92f7780ad9',
+                        userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
+                        groupId: 'aeb26ec5-3644-4b7a-805e-375551ec65b6',
+                        status: 'pending-requested',
+                        role: 'admin'
+                    }
+
+                    const currentUser = entities.users.dictionary['2a7ae011-689c-4aa2-8f13-a53026d40964']
+                    const existing = { ...entities.groupMembers.dictionary['138de5fc-a0a9-47eb-ac51-3c92f7780ad9'] }
+                    existing.status = 'member'
+                    existing.role = 'admin'
+
+                    const groupRows = database.groups['aeb26ec5-3644-4b7a-805e-375551ec65b6'].rows
+                    const groupMemberRows = database.groupMembers['bb88818d-6426-4e5a-b79a-688a700fef11'].rows
+                    core.database.query.mockReturnValue(undefined)
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '5c44ce06-1687-4709-b67e-de76c05acb6a' }]}) // Check user existence
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'aeb26ec5-3644-4b7a-805e-375551ec65b6' }]}) // Check group existence.
+                        .mockReturnValueOnce({ rowCount: 1, rows: groupRows }) // getGroupById
+                        .mockReturnValueOnce({ rowCount: 1, rows: groupMemberRows }) // getGroupMemberByGroupAndUser(group, currentUser)
+
+                    const errors = await service.validateGroupMember(currentUser, groupMember, existing)
+
+                    expect(errors.length).toBe(1)
+                    expect(errors[0].type).toBe('status:invalid')
+                    expect(groupRows[0].Group_id).toBe(groupMember.groupId)
+                    expect(groupMemberRows[0].GroupMember_groupId).toBe(groupMember.groupId)
+                    expect(groupMemberRows[0].GroupMember_userId).toBe(currentUser.id)
+                    expect(groupMemberRows[0].GroupMember_role).toBe('moderator')
+                    expect(currentUser.id).not.toBe(groupMember.userId)
+                })
+
+                it("Should not allow an admin to change their status to 'pending-requested'", async function() {
+                    const service = new ValidationService(core)
+
+                    const groupMember = { 
+                        id: '138de5fc-a0a9-47eb-ac51-3c92f7780ad9',
+                        userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
+                        groupId: 'aeb26ec5-3644-4b7a-805e-375551ec65b6',
+                        status: 'pending-requested',
+                        role: 'admin'
+                    }
+
+                    const currentUser = entities.users.dictionary['2a7ae011-689c-4aa2-8f13-a53026d40964']
+                    const existing = { ...entities.groupMembers.dictionary['138de5fc-a0a9-47eb-ac51-3c92f7780ad9'] }
+                    existing.status = 'member'
+                    existing.role = 'admin'
+
+                    const groupRows = database.groups['aeb26ec5-3644-4b7a-805e-375551ec65b6'].rows
+                    const currentMemberRows = database.groupMembers['fef5f5a1-b500-4694-a5ca-c7ebea359295'].rows
+                    core.database.query.mockReturnValue(undefined)
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '5c44ce06-1687-4709-b67e-de76c05acb6a' }]}) // Check user existence
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'aeb26ec5-3644-4b7a-805e-375551ec65b6' }]}) // Check group existence.
+                        .mockReturnValueOnce({ rowCount: 1, rows: groupRows }) // getGroupById
+                        .mockReturnValueOnce({ rowCount: 1, rows: currentMemberRows }) // getGroupMemberByGroupAndUser(group, currentUser)
+
+                    const errors = await service.validateGroupMember(currentUser, groupMember, existing)
+
+                    expect(errors.length).toBe(1)
+                    expect(errors[0].type).toBe('status:invalid')
+                    expect(groupRows[0].Group_id).toBe(groupMember.groupId)
+                    expect(currentMemberRows[0].GroupMember_groupId).toBe(groupMember.groupId)
+                    expect(currentMemberRows[0].GroupMember_userId).toBe(currentUser.id)
+                    expect(currentMemberRows[0].GroupMember_role).toBe('admin')
+                    expect(currentUser.id).not.toBe(groupMember.userId)
+                })
+
+                it("Should not allow a moderator to change their status to 'pending-invited'", async function() {
+                    const service = new ValidationService(core)
+
+                    const groupMember = { 
+                        id: '138de5fc-a0a9-47eb-ac51-3c92f7780ad9',
+                        userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
+                        groupId: 'aeb26ec5-3644-4b7a-805e-375551ec65b6',
+                        status: 'pending-invited',
+                        role: 'admin'
+                    }
+
+                    const currentUser = entities.users.dictionary['2a7ae011-689c-4aa2-8f13-a53026d40964']
+                    const existing = { ...entities.groupMembers.dictionary['138de5fc-a0a9-47eb-ac51-3c92f7780ad9'] }
+                    existing.status = 'member'
+                    existing.role = 'admin'
+
+                    const groupRows = database.groups['aeb26ec5-3644-4b7a-805e-375551ec65b6'].rows
+                    const groupMemberRows = database.groupMembers['bb88818d-6426-4e5a-b79a-688a700fef11'].rows
+                    core.database.query.mockReturnValue(undefined)
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '5c44ce06-1687-4709-b67e-de76c05acb6a' }]}) // Check user existence
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'aeb26ec5-3644-4b7a-805e-375551ec65b6' }]}) // Check group existence.
+                        .mockReturnValueOnce({ rowCount: 1, rows: groupRows }) // getGroupById
+                        .mockReturnValueOnce({ rowCount: 1, rows: groupMemberRows }) // getGroupMemberByGroupAndUser(group, currentUser)
+
+                    const errors = await service.validateGroupMember(currentUser, groupMember, existing)
+
+                    expect(errors.length).toBe(1)
+                    expect(errors[0].type).toBe('status:invalid')
+                    expect(groupRows[0].Group_id).toBe(groupMember.groupId)
+                    expect(groupMemberRows[0].GroupMember_groupId).toBe(groupMember.groupId)
+                    expect(groupMemberRows[0].GroupMember_userId).toBe(currentUser.id)
+                    expect(groupMemberRows[0].GroupMember_role).toBe('moderator')
+                    expect(currentUser.id).not.toBe(groupMember.userId)
+                })
+
+                it("Should not allow an admin to change their status to 'pending-invited'", async function() {
+                    const service = new ValidationService(core)
+
+                    const groupMember = { 
+                        id: '138de5fc-a0a9-47eb-ac51-3c92f7780ad9',
+                        userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
+                        groupId: 'aeb26ec5-3644-4b7a-805e-375551ec65b6',
+                        status: 'pending-invited',
+                        role: 'admin'
+                    }
+
+                    const currentUser = entities.users.dictionary['2a7ae011-689c-4aa2-8f13-a53026d40964']
+                    const existing = { ...entities.groupMembers.dictionary['138de5fc-a0a9-47eb-ac51-3c92f7780ad9'] }
+                    existing.status = 'member'
+                    existing.role = 'admin'
+
+                    const groupRows = database.groups['aeb26ec5-3644-4b7a-805e-375551ec65b6'].rows
+                    const currentMemberRows = database.groupMembers['fef5f5a1-b500-4694-a5ca-c7ebea359295'].rows
+                    core.database.query.mockReturnValue(undefined)
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '5c44ce06-1687-4709-b67e-de76c05acb6a' }]}) // Check user existence
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'aeb26ec5-3644-4b7a-805e-375551ec65b6' }]}) // Check group existence.
+                        .mockReturnValueOnce({ rowCount: 1, rows: groupRows }) // getGroupById
+                        .mockReturnValueOnce({ rowCount: 1, rows: currentMemberRows }) // getGroupMemberByGroupAndUser(group, currentUser)
+
+                    const errors = await service.validateGroupMember(currentUser, groupMember, existing)
+
+                    expect(errors.length).toBe(1)
+                    expect(errors[0].type).toBe('status:invalid')
+                    expect(groupRows[0].Group_id).toBe(groupMember.groupId)
+                    expect(currentMemberRows[0].GroupMember_groupId).toBe(groupMember.groupId)
+                    expect(currentMemberRows[0].GroupMember_userId).toBe(currentUser.id)
+                    expect(currentMemberRows[0].GroupMember_role).toBe('admin')
+                    expect(currentUser.id).not.toBe(groupMember.userId)
+                })
+
+                it("Should not allow a moderator to change their status to 'banned'", async function() {
+                    const service = new ValidationService(core)
+
+                    const groupMember = { 
+                        id: '138de5fc-a0a9-47eb-ac51-3c92f7780ad9',
+                        userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
+                        groupId: 'aeb26ec5-3644-4b7a-805e-375551ec65b6',
+                        status: 'banned',
+                        role: 'admin'
+                    }
+
+                    const currentUser = entities.users.dictionary['2a7ae011-689c-4aa2-8f13-a53026d40964']
+                    const existing = { ...entities.groupMembers.dictionary['138de5fc-a0a9-47eb-ac51-3c92f7780ad9'] }
+                    existing.status = 'member'
+                    existing.role = 'admin'
+
+                    const groupRows = database.groups['aeb26ec5-3644-4b7a-805e-375551ec65b6'].rows
+                    const groupMemberRows = database.groupMembers['bb88818d-6426-4e5a-b79a-688a700fef11'].rows
+                    core.database.query.mockReturnValue(undefined)
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '5c44ce06-1687-4709-b67e-de76c05acb6a' }]}) // Check user existence
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'aeb26ec5-3644-4b7a-805e-375551ec65b6' }]}) // Check group existence.
+                        .mockReturnValueOnce({ rowCount: 1, rows: groupRows }) // getGroupById
+                        .mockReturnValueOnce({ rowCount: 1, rows: groupMemberRows }) // getGroupMemberByGroupAndUser(group, currentUser)
+
+                    const errors = await service.validateGroupMember(currentUser, groupMember, existing)
+
+                    expect(errors.length).toBe(1)
+                    expect(errors[0].type).toBe('status:not-authorized')
+                    expect(groupRows[0].Group_id).toBe(groupMember.groupId)
+                    expect(groupMemberRows[0].GroupMember_groupId).toBe(groupMember.groupId)
+                    expect(groupMemberRows[0].GroupMember_userId).toBe(currentUser.id)
+                    expect(groupMemberRows[0].GroupMember_role).toBe('moderator')
+                    expect(currentUser.id).not.toBe(groupMember.userId)
+                })
+
+                it("Should not allow an admin to change their status to 'banned'", async function() {
+                    const service = new ValidationService(core)
+
+                    const groupMember = { 
+                        id: '138de5fc-a0a9-47eb-ac51-3c92f7780ad9',
+                        userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
+                        groupId: 'aeb26ec5-3644-4b7a-805e-375551ec65b6',
+                        status: 'banned',
+                        role: 'admin'
+                    }
+
+                    const currentUser = entities.users.dictionary['2a7ae011-689c-4aa2-8f13-a53026d40964']
+                    const existing = { ...entities.groupMembers.dictionary['138de5fc-a0a9-47eb-ac51-3c92f7780ad9'] }
+                    existing.status = 'member'
+                    existing.role = 'admin'
+
+                    const groupRows = database.groups['aeb26ec5-3644-4b7a-805e-375551ec65b6'].rows
+                    const currentMemberRows = database.groupMembers['fef5f5a1-b500-4694-a5ca-c7ebea359295'].rows
+                    core.database.query.mockReturnValue(undefined)
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '5c44ce06-1687-4709-b67e-de76c05acb6a' }]}) // Check user existence
+                        .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'aeb26ec5-3644-4b7a-805e-375551ec65b6' }]}) // Check group existence.
+                        .mockReturnValueOnce({ rowCount: 1, rows: groupRows }) // getGroupById
+                        .mockReturnValueOnce({ rowCount: 1, rows: currentMemberRows }) // getGroupMemberByGroupAndUser(group, currentUser)
+
+                    const errors = await service.validateGroupMember(currentUser, groupMember, existing)
+
+                    expect(errors.length).toBe(1)
+                    expect(errors[0].type).toBe('status:not-authorized')
+                    expect(groupRows[0].Group_id).toBe(groupMember.groupId)
+                    expect(currentMemberRows[0].GroupMember_groupId).toBe(groupMember.groupId)
+                    expect(currentMemberRows[0].GroupMember_userId).toBe(currentUser.id)
+                    expect(currentMemberRows[0].GroupMember_role).toBe('admin')
+                    expect(currentUser.id).not.toBe(groupMember.userId)
+                })
+
             })
         })
 

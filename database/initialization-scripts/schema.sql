@@ -241,7 +241,7 @@ CREATE TABLE groups (
 );
 CREATE INDEX groups__file_id ON groups (file_id);
 
-CREATE TYPE group_member_status AS ENUM('pending-invited', 'pending-requested', 'member');
+CREATE TYPE group_member_status AS ENUM('pending-invited', 'pending-requested', 'member', 'banned');
 CREATE TYPE group_member_role AS ENUM('admin', 'moderator', 'member'); 
 CREATE TABLE group_members (
     id uuid primary key DEFAULT gen_random_uuid(),

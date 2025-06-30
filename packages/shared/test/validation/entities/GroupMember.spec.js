@@ -112,6 +112,13 @@ describe('validateStatus', function() {
 
         expect(errors.length).toBe(0)
     })
+
+    it("Should pass when 'banned'", function() {
+        const value = 'banned'
+        const errors = validation.GroupMember.validateStatus(value)
+
+        expect(errors.length).toBe(0)
+    })
 })
 
 describe('validateRole', function() {
