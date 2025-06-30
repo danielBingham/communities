@@ -35,4 +35,7 @@
 }
 .post-comment .post-comment__content .post-comment__moderated {
     font-size: 14px;
+    padding: 7px;
+    border-radius: 7px;
+    background-color: var(--danger-color-lightest);
 }

@@ -17,7 +17,6 @@ import Modal from '/components/generic/modal/Modal'
 import ErrorModal from '/components/errors/ErrorModal'
 
 const ModerateForSiteModal = function({ postId, postCommentId, isVisible, setIsVisible }) {
-    console.log(`## ModerateForSiteModal(${postId}, ${postCommentId})`)
     const [reason, setReason] = useState('')
    
     const [post, postRequest] = usePost(postId)

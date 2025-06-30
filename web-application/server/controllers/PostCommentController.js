@@ -159,11 +159,6 @@ module.exports = class PostCommentController {
                 `User not authorized to create a PostComment on Post(${postId}).`,
                 `You are not authorized to create a PostComment on that Post.`)
         }
-        
-        const reactionResults = await this.core.database.query(`
-            SELECT reaction FROM post_reactions WHERE post_reactions.post_id = $1 AND post_reactions.user_id = $2
-        `, [ postId, currentUser.id])
-
 
         const comment = {
             id: Uuid.v4(),
@@ -182,6 +177,10 @@ module.exports = class PostCommentController {
         }
 
         await this.postCommentDAO.insertPostComments(comment)
+
+        const reactionResults = await this.core.database.query(`
+            SELECT reaction FROM post_reactions WHERE post_reactions.post_id = $1 AND post_reactions.user_id = $2
+        `, [ postId, currentUser.id])
 
         let activity = parseInt(post.activity)
         if ( reactionResults.rows.length <= 0 || reactionResults.rows[0].reaction != 'block') {
@@ -428,6 +427,9 @@ module.exports = class PostCommentController {
 
         await this.postCommentDAO.deletePostComment({ id: commentId })
 
+
+        await this.postDAO.updatePost(postPatch)
+
         const postResult = await this.postDAO.selectPosts({ where: `posts.id = $1`,
             params: [ postId ]
         })
@@ -438,6 +440,20 @@ module.exports = class PostCommentController {
             throw new ControllerError(500, 'server-error',
                 `Post(${postId}) missing after update.`,
                 `Post missing after being updated.  Please report as a bug.`)
+        }
+
+        const reactionResults = await this.core.database.query(`
+            SELECT reaction FROM post_reactions WHERE post_reactions.post_id = $1 AND post_reactions.user_id = $2
+        `, [ postId, currentUser.id])
+
+        let activity = parseInt(entity.activity)
+        if ( reactionResults.rows.length <= 0 || reactionResults.rows[0].reaction != 'block') {
+            activity -= 1
+        } 
+
+        const postPatch = {
+            id: postId,
+            activity: activity
         }
 
         const posts = {}

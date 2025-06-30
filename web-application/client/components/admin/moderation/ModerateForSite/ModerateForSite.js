@@ -28,11 +28,7 @@ const ModerateForSite = function({ postId, postCommentId }) {
         return null
     }
 
-    if (siteModeration.status === 'rejected' ) {
-        return (
-            <span title="Removed from Site" className="moderate-for-site__rejected"><XCircleIcon /></span>
-        )
-    } else if ( siteModeration.status === 'approved' ) {
+    if ( siteModeration.status === 'approved' || siteModeration.status === 'rejected' ) {
         return null
     }
 

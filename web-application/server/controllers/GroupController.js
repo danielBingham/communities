@@ -111,6 +111,12 @@ module.exports = class GroupController {
             query.where += `${and} groups.slug = $${query.params.length}`
         }
 
+        console.log(`Page: `)
+        console.log(request.query.page)
+        if ( 'page' in request.query && parseInt(request.query.page) > 0 ) {
+            query.page = parseInt(request.query.page)
+        }
+
         return query
     }
 

@@ -8,7 +8,7 @@ const FindGroups = function() {
 
     return (
         <div className="find-groups">
-            <GroupList name="find-groups" />
+            <GroupList />
         </div>
     )
 }

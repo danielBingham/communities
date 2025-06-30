@@ -37,11 +37,7 @@ const ModerateForGroup = function({ postId, postCommentId }) {
         return null
     }
 
-    if (groupModeration.status === 'rejected' ) {
-        return (
-            <span title="Removed from Group" className="moderate-for-group__rejected"><XCircleIcon /></span>
-        )
-    } else if ( groupModeration.status === 'approved' ) {
+    if ( groupModeration.status === 'approved' || groupModeration.status === 'rejected') {
         return null
     }
    

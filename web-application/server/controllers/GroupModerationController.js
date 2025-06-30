@@ -119,7 +119,6 @@ module.exports = class GroupModerationController extends BaseController {
             query.relations = [ ...request.query.relations]
         }
 
-        console.log(query)
         return query
     }
 

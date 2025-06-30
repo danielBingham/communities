@@ -15,7 +15,7 @@ const YourGroups = function() {
 
     return (
         <div className="your-groups">
-            <GroupList name="YourGroups" params={ params } />
+            <GroupList params={ params } />
         </div>
     )
 }
