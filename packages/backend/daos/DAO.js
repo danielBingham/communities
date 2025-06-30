@@ -245,7 +245,6 @@ module.exports = class DAO {
                 SET ${fields}
             WHERE ${where}`
 
-        console.log(sql)
         await this.core.database.query(sql, params)
     }
 }

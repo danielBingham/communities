@@ -7,6 +7,7 @@ import featuresReducer from './features'
 import FileReducer from './File'
 import GroupReducer from './Group'
 import GroupMemberReducer from './GroupMember'
+import GroupModerationReducer from './GroupModeration'
 import jobsReducer from './jobs'
 import notificationsReducer from './notifications'
 import LinkPreviewReducer from './LinkPreview'
@@ -28,6 +29,7 @@ const reducers = combineReducers({
     File: FileReducer,
     Group: GroupReducer,
     GroupMember: GroupMemberReducer,
+    GroupModeration: GroupModerationReducer,
     jobs: jobsReducer,
     notifications: notificationsReducer,
     LinkPreview: LinkPreviewReducer,

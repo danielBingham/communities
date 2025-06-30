@@ -22,6 +22,9 @@ const {
     ValidationService,
     PermissionService,
     NotificationService,
+
+    PostDAO,
+    PostCommentDAO,
     SiteModerationDAO, 
     SiteModerationEventDAO
 }  = require('@communities/backend')
@@ -32,6 +35,8 @@ module.exports = class SiteModerationController {
     constructor(core) {
         this.core = core
 
+        this.postDAO = new PostDAO(core)
+        this.postCommentDAO = new PostCommentDAO(core)
         this.siteModerationDAO = new SiteModerationDAO(core)
         this.siteModerationEventDAO = new SiteModerationEventDAO(core)
 
@@ -41,7 +46,21 @@ module.exports = class SiteModerationController {
     }
 
     async getRelations(currentUser, results, requestedRelations) {
-        return {} 
+
+        const postResults = await this.postDAO.selectPosts({
+            where: `posts.site_moderation_id = ANY($1::uuid[])`,
+            params: [ results.list ]
+        })
+
+        const postCommentResults = await this.postCommentDAO.selectPostComments({
+            where: `post_comments.site_moderation_id = ANY($1::uuid[])`,
+            params: [ results.list ]
+        })
+
+        return {
+            posts: postResults.dictionary,
+            postComments: postCommentResults.dictionary
+        } 
     }
 
     async createQuery(request) {
@@ -163,6 +182,20 @@ module.exports = class SiteModerationController {
         // Insert the event to track the moderation history.
         await this.siteModerationEventDAO.insertSiteModerationEvents(this.siteModerationEventDAO.createEventFromSiteModeration(entity))
 
+        if ( entity.postId && entity.postCommentId === null ) {
+            const postUpdate = {
+                id: entity.postId,
+                siteModerationId: entity.id
+            }
+            await this.postDAO.updatePost(postUpdate)
+        } else if ( entity.postCommentId ) {
+            const postCommentUpdate = {
+                id: entity.postCommentId,
+                siteModerationId: entity.id
+            }
+            await this.postCommentDAO.updatePostComment(postCommentUpdate)
+        }
+
         const relations = await this.getRelations(currentUser, entityResults)
 
         response.status(201).json({
@@ -281,7 +314,7 @@ module.exports = class SiteModerationController {
         // Insert the event to track the moderation history.
         await this.siteModerationEventDAO.insertSiteModerationEvents(this.siteModerationEventDAO.createEventFromSiteModeration(entity))
 
-        const relations = this.getRelations(currentUser, results)
+        const relations = await this.getRelations(currentUser, results)
 
         response.status(201).json({
             entity: entity,

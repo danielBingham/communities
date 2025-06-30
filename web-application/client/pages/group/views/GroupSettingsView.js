@@ -48,7 +48,7 @@ const GroupSettingsView = function({ groupId }) {
                 all posts and images in the group. This cannot
                 be undone. Please be certain.</div>
                 <div className="group-settings-view__button-wrapper">
-                    <Button type="primary-warn" onClick={(e) => setAreYouSure(true)}>Delete Group</Button>
+                    <Button type="warn" onClick={(e) => setAreYouSure(true)}>Delete Group</Button>
                 </div>
                 <AreYouSure isVisible={areYouSure} execute={deleteCurrentGroup} cancel={() => setAreYouSure(false)}> 
                     <p>Are you sure you want to delete this group?</p>

@@ -3,6 +3,7 @@ import logger from '/logger'
 import { setFilesInDictionary, removeFile } from '/state/File/slice'
 import { setGroupsInDictionary, removeGroup } from '/state/Group'
 import { setGroupMembersInDictionary, removeGroupMember } from '/state/GroupMember/slice'
+import { setGroupModerationsInDictionary, removeGroupModeration } from '/state/GroupModeration/slice'
 import { setLinkPreviewsInDictionary, removeLinkPreview } from '/state/LinkPreview/slice'
 import { setPostsInDictionary, removePost } from '/state/Post/slice'
 import { setPostCommentsInDictionary, removePostComment } from '/state/PostComment/slice'
@@ -16,6 +17,7 @@ const entityMap = {
     files: { set: setFilesInDictionary, remove: removeFile },
     groups: { set: setGroupsInDictionary, remove: removeGroup },
     groupMembers: { set: setGroupMembersInDictionary, remove: removeGroupMember },
+    groupModerations: { set: setGroupModerationsInDictionary, remove: removeGroupModeration },
     linkPreviews: { set: setLinkPreviewsInDictionary, remove: removeLinkPreview },
     posts: { set: setPostsInDictionary, remove: removePost },
     postComments: { set: setPostCommentsInDictionary, remove: removePostComment },

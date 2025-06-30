@@ -27,6 +27,7 @@ const {
     FileDAO,
     GroupDAO,
     GroupMemberDAO,
+    GroupModerationDAO,
     PostDAO,
     PostCommentDAO,
     PostReactionDAO,
@@ -48,6 +49,7 @@ module.exports = class PostController {
         this.fileDAO = new FileDAO(core)
         this.groupDAO = new GroupDAO(core)
         this.groupMemberDAO = new GroupMemberDAO(core)
+        this.groupModerationDAO = new GroupModerationDAO(core)
         this.postDAO = new PostDAO(core)
         this.postCommentDAO = new PostCommentDAO(core)
         this.postReactionDAO = new PostReactionDAO(core)
@@ -125,6 +127,15 @@ module.exports = class PostController {
             relations.siteModerations = siteModerationResults.dictionary
         }
 
+        if ( this.core.features.has('89-improved-moderation-for-group-posts') ) {
+            const groupModerationResults = await this.groupModerationDAO.selectGroupModerations({
+                where: `group_moderation.post_id = ANY($1::uuid[]) OR group_moderation.post_comment_id = ANY($2::uuid[])`, 
+                params: [ results.list, postCommentResults.list ]
+            })
+
+            relations.groupModerations = groupModerationResults.dictionary
+        }
+
         return relations
     }
 
@@ -173,6 +184,12 @@ module.exports = class PostController {
                 query.where += `(posts.user_id = ANY($${query.params.length}::uuid[]) OR posts.visibility = 'public')`
             }
         }
+
+        const and = query.params.length > 0 ? ' AND ' : ''
+        query.params.push(currentUser.id)
+        query.where += `${and} (group_moderation.status IS NULL OR group_moderation.status != 'rejected' OR posts.user_id = $${query.params.length}) 
+            AND (site_moderation.status IS NULL OR site_moderation.status != 'rejected' OR posts.user_id = $${query.params.length})`
+
 
         if ('userId' in request.query) {
             const and = query.params.length > 0 ? ' AND ' : ''
@@ -262,9 +279,9 @@ module.exports = class PostController {
             if (sort === 'newest') {
                 query.order = 'posts.created_date DESC'
             } else if ( sort === 'active' ) {
-                query.order = 'posts.activity DESC'
+                query.order = 'posts.activity DESC, posts.updated_date DESC, posts.created_date DESC'
             } else if ( sort === 'recent' ) {
-                query.order = 'posts.updated_date DESC'
+                query.order = 'posts.updated_date DESC, posts.created_date DESC'
             }
         }
 
