@@ -128,13 +128,15 @@ module.exports = class GroupModerationValidation {
 
         // Authorization Validation
         if( util.objectHas(groupModeration, 'status') && groupModeration.status !== null ) {
-            const canModerateGroup = await this.permissionService.can(currentUser, 'moderate', 'Group', { groupId: groupModeration.groupId })
-            if ( groupModeration.status !== 'flagged' && canModerateGroup !== true ) {
-                errors.push({
-                    type: 'status:not-authorized',
-                    log: `User attempting to moderate Group(${groupModeration.groupId}) without authorization.`,
-                    message: `You do not have permission to moderate Communities.`
-                })
+            if ( groupModeration.status !== 'flagged' ) {
+                const canModerateGroup = await this.permissionService.can(currentUser, 'moderate', 'Group', { groupId: groupModeration.groupId })
+                if ( canModerateGroup !== true ) {
+                    errors.push({
+                        type: 'status:not-authorized',
+                        log: `User attempting to moderate Group(${groupModeration.groupId}) without authorization.`,
+                        message: `You do not have permission to moderate Communities.`
+                    })
+                }
             }
         }
 
