@@ -33,7 +33,9 @@ module.exports = class LinkPreviewController {
         this.permissionService = new PermissionService(core)
     }
 
-    async getRelations(results, relations) {}
+    async getRelations(results, relations) {
+        return {}
+    }
 
     async createQuery(request) {
         const query = {
@@ -83,13 +85,22 @@ module.exports = class LinkPreviewController {
                 `You must be authenticated to create link previews.`)
         }
 
-        const url = cleaning.LinkPreview.cleanUrl(request.body.url)
+        let url = cleaning.LinkPreview.cleanUrl(request.body.url)
 
         const existing = await this.linkPreviewDAO.getLinkPreviewByUrl(url)
         // TODO Refectch existing LinkPreviews every so often (every hour? day?)
         if ( existing === null ) {
             // If we haven't fetched this LinkPreview, then fetch and validate it. 
             const linkPreview = cleaning.LinkPreview.clean(await this.linkPreviewService.getPreview(url, request.get('User-Agent')))
+
+            // TODO Find a better way to handle cases where the canonical URL
+            // is different from the requested URL.  In this particular case,
+            // the canonical URL strips off the query string, meaning the link
+            // loses informationabout the location in the page the user meant
+            // to link.
+            if ( linkPreview.url !== url ) {
+                url = linkPreview.url
+            }
 
             const validationErrors = await this.validationService.validateLinkPreview(currentUser, linkPreview)
             if ( validationErrors.length > 0 ) {
@@ -107,7 +118,7 @@ module.exports = class LinkPreviewController {
             params: [ url ]
         })
 
-        if ( results.list.length < 0 ) {
+        if ( results.list.length <= 0 ) {
             throw new ControllerError(500, 'server-error',
                 `LinkPreview for ${url} missing after insert.`,
                 `We created a LinkPreview for ${url} but couldn't find it after it was created. 
@@ -115,10 +126,11 @@ module.exports = class LinkPreviewController {
         }
 
         const entity = results.dictionary[results.list[0]]
+        const relations = this.getRelations(results)
 
         response.status(200).json({
             entity: entity,
-            relations: await this.getRelations(results)
+            relations: relations 
         })
     }
 

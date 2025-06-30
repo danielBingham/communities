@@ -216,7 +216,7 @@ module.exports = class SiteModerationController {
         const siteModerationId = request.params.id
 
         const results = await this.siteModerationDAO.selectSiteModerations({
-            where: `siteModerations.id = $1`,
+            where: `site_moderation.id = $1`,
             params: [siteModerationId]
         })
 

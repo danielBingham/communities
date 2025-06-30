@@ -34,7 +34,8 @@
     white-space: pre-line;
 }
 .post-comment .post-comment__content .post-comment__moderated {
-    text-align: center;
     font-size: 14px;
-    font-family: monospace;
+    padding: 7px;
+    border-radius: 7px;
+    background-color: var(--danger-color-lightest);
 }

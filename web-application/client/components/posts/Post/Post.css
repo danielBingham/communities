@@ -56,6 +56,9 @@
 }
 .post .post__content .post__moderated {
     font-size: 14px;
+    padding: 7px;
+    border-radius: 7px;
+    background-color: var(--danger-color-lightest);
 }
 .post .post__show-more {
     padding: 10px;

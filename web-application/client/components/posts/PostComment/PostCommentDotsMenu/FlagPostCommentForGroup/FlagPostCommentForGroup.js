@@ -7,6 +7,7 @@ import { CheckCircleIcon, XCircleIcon, FlagIcon as FlagIconSolid } from '@heroic
 import { useRequest } from '/lib/hooks/useRequest'
 import { useFeature } from '/lib/hooks/feature/useFeature'
 import { usePost } from '/lib/hooks/Post'
+import { usePostComment } from '/lib/hooks/PostComment'
 import { useGroupModeration } from '/lib/hooks/GroupModeration'
 import { useGroupPermission, GroupPermissions } from '/lib/hooks/permission'
 
@@ -20,16 +21,17 @@ import AreYouSure from '/components/AreYouSure'
 
 import { ModerateForGroupModal } from '/components/groups/moderation/ModerateForGroup'
 
-import './FlagPostForGroup.css'
+import './FlagPostCommentForGroup.css'
 
-const FlagPostForGroup = function({ postId } ) {
+const FlagPostCommentForGroup = function({ postId, postCommentId} ) {
     const [ areYouSureGroup, setAreYouSureGroup ] = useState(false)
     const [ showModal, setShowModal ] = useState(false)
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const [post, postRequest] = usePost(postId)
+    const [comment, commentRequest] = usePostComment(postId, postCommentId)
 
-    const [groupModeration, groupModerationRequest] = useGroupModeration(post?.groupModerationId)
+    const [groupModeration, groupModerationRequest] = useGroupModeration(comment?.groupModerationId)
 
     const canModerateGroup = useGroupPermission(currentUser, GroupPermissions.MODERATE, post?.groupId)
 
@@ -38,7 +40,7 @@ const FlagPostForGroup = function({ postId } ) {
     const [request, makeRequest] = useRequest()
 
     const flagForGroup = function() {
-        makeRequest(postGroupModerations({ userId: currentUser.id, status: 'flagged', postId: postId, groupId: post.groupId }))
+        makeRequest(postGroupModerations({ userId: currentUser.id, status: 'flagged', postId: postId, postCommentId: postCommentId, groupId: post.groupId }))
     }
 
     useEffect(() => {
@@ -56,6 +58,10 @@ const FlagPostForGroup = function({ postId } ) {
         return null
     }
 
+    if ( ! post || ! comment ) {
+        return null
+    }
+
     if ( ! post?.groupId ) {
         return null
     }
@@ -63,7 +69,7 @@ const FlagPostForGroup = function({ postId } ) {
     // Users aren't going to flag their own posts. Or if they do, they are
     // almost certainly acting maliciously to gum up the works. Don't let
     // them flag their own posts.
-    if ( currentUser.id === post.userId ) {
+    if ( currentUser.id === comment.userId ) {
         return null
     }
 
@@ -94,39 +100,39 @@ const FlagPostForGroup = function({ postId } ) {
             if ( canModerateGroup === true ) {
                 return (
                     <>
-                        <FloatingMenuItem onClick={(e) => setShowModal(true)} className="flag-post-for-group flag-post-for-group__moderate"><FlagIconSolid /> Moderate for Group</FloatingMenuItem>
-                        <ModerateForGroupModal postId={postId} isVisible={showModal} setIsVisible={setShowModal} />
+                        <FloatingMenuItem onClick={(e) => setShowModal(true)} className="flag-post-comment-for-group flag-post-comment-for-group__moderate"><FlagIconSolid /> Moderate for Group</FloatingMenuItem>
+                        <ModerateForGroupModal postId={postId} postCommentId={postCommentId} isVisible={showModal} setIsVisible={setShowModal} />
                     </>
 
                 )
             } else {
                 return (
-                    <FloatingMenuItem disabled={true} className="flag-post-for-group flag-post-for-group__flagged"><FlagIconSolid /> Flagged</FloatingMenuItem>
+                    <FloatingMenuItem disabled={true} className="flag-post-comment-for-group flag-post-comment-for-group__flagged"><FlagIconSolid /> Flagged</FloatingMenuItem>
                 )
             }
         } else if ( groupModeration.status === 'approved' ) {
             return (
-                <FloatingMenuItem disabled={true} className="flag-post-for-group flag-post-for-group__approved"><CheckCircleIcon /> Approved</FloatingMenuItem>
+                <FloatingMenuItem disabled={true} className="flag-post-comment-for-group flag-post-comment-for-group__approved"><CheckCircleIcon /> Approved</FloatingMenuItem>
             )
         } else if ( groupModeration.status === 'rejected' ) {
             return (
-                <FloatingMenuItem disabled={true} className="flag-post-for-group flag-post-for-group__rejected"><XCircleIcon /> Removed</FloatingMenuItem>
+                <FloatingMenuItem disabled={true} className="flag-post-comment-for-group flag-post-comment-for-group__rejected"><XCircleIcon /> Removed</FloatingMenuItem>
             )
         }
     }
 
     return (
         <>
-            <FloatingMenuItem onClick={(e) => setAreYouSureGroup(true)} className="flag-post-for-group"><FlagIconOutline /> Flag for Group Moderators</FloatingMenuItem>
+            <FloatingMenuItem onClick={(e) => setAreYouSureGroup(true)} className="flag-post-comment-for-group"><FlagIconOutline /> Flag for Group Moderators</FloatingMenuItem>
 
-            <AreYouSure className="flag-post-for-group"
+            <AreYouSure className="flag-post-comment-for-group"
                 isVisible={areYouSureGroup}
                 isPending={request && request.state === 'pending'}
                 execute={flagForGroup}
                 cancel={() => setAreYouSureGroup(false)}
             >
                 <p><strong>Are you sure you want to flag this post for Group moderators?</strong></p>
-                <div className="flag-post-for-group__explanation">
+                <div className="flag-post-comment-for-group__explanation">
                     <p>
                         Flagging is intended for content that needs to be
                         urgently removed from the Group.
@@ -146,4 +152,4 @@ const FlagPostForGroup = function({ postId } ) {
     )
 }
 
-export default FlagPostForGroup 
+export default FlagPostCommentForGroup 

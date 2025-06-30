@@ -1,6 +1,6 @@
-.moderate-post-for-group__flag svg {
+.moderate-for-group__flag svg {
     color: var(--secondary-color-main);
 }
-.moderate-post-for-group__rejected svg {
+.moderate-for-group__rejected svg {
     color: var(--secondary-color-main);
 }

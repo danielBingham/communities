@@ -6,24 +6,28 @@ import { XCircleIcon, FlagIcon } from '@heroicons/react/20/solid'
 import { GroupPermissions, useGroupPermission } from '/lib/hooks/permission'
 
 import { usePost } from '/lib/hooks/Post'
+import { usePostComment } from '/lib/hooks/PostComment'
 import { useGroupModeration } from '/lib/hooks/GroupModeration'
 import { useSiteModeration } from '/lib/hooks/SiteModeration'
 
-import ModatePostForGroupModal from './ModeratePostForGroupModal'
+import ModerateForGroupModal from './ModerateForGroupModal'
 
-import './ModeratePostForGroup.css'
+import './ModerateForGroup.css'
 
-const ModeratePostForGroup = function({ postId }) {
+const ModerateForGroup = function({ postId, postCommentId }) {
     const [showModal, setShowModal] = useState(false)
    
     const [post, postRequest] = usePost(postId)
+    const [comment, commentRequest ] = usePostComment(postId, postCommentId)
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
-    const [groupModeration, groupModerationRequest] = useGroupModeration(post?.groupModerationId)
+    const [groupModeration, groupModerationRequest] = useGroupModeration(postCommentId ? comment?.groupModerationId : post?.groupModerationId)
     const canModerateGroup = useGroupPermission(currentUser, GroupPermissions.MODERATE, post?.groupId)
 
     const [siteModeration, siteModerationRequest] = useSiteModeration(post?.siteModerationId) 
+
+    const target = postCommentId ? 'Comment' : 'Post'
 
     if ( groupModeration === null) {
         return null
@@ -33,28 +37,24 @@ const ModeratePostForGroup = function({ postId }) {
         return null
     }
 
-    if (groupModeration.status === 'rejected' ) {
-        return (
-            <span title="Removed from Group" className="moderate-post-for-group__rejected"><XCircleIcon /></span>
-        )
-    } else if ( groupModeration.status === 'approved' ) {
+    if ( groupModeration.status === 'approved' || groupModeration.status === 'rejected') {
         return null
     }
    
     // If we get here, status === 'flagged'
     if ( canModerateGroup !== true ) {
         return (
-            <span className="moderate-post-for-group__flag" title="Group Post Moderation"><FlagIcon /></span>
+            <span className="moderate-for-group__flag" title={`Group ${target} Moderation`}><FlagIcon /></span>
         )
     } else {
         return (
             <>
-                <a href="" className="moderate-post-for-group__flag" title="Moderate Post for Group" onClick={(e) => { e.preventDefault(); setShowModal(true) }}><FlagIcon /></a>
-                <ModatePostForGroupModal postId={postId} isVisible={showModal} setIsVisible={setShowModal} />
+                <a href="" className="moderate-for-group__flag" title={`Moderate ${target} for Group`} onClick={(e) => { e.preventDefault(); setShowModal(true) }}><FlagIcon /></a>
+                <ModerateForGroupModal postId={postId} postCommentId={postCommentId} isVisible={showModal} setIsVisible={setShowModal} />
             </>
         )
     }
 
 } 
 
-export default ModeratePostForGroup
+export default ModerateForGroup
