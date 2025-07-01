@@ -7,9 +7,9 @@
 import { queryIsUsing } from './queryIsUsing'
 
 export const setInDictionary = function(state, action) {
-    if ( 'dictionary' in action.payload) {
+    if ( 'dictionary' in action.payload && action.payload.dictionary !== undefined) {
         state.dictionary = { ...state.dictionary, ...action.payload.dictionary }
-    } else if( 'entity' in action.payload) {
+    } else if( 'entity' in action.payload && action.payload.entity !== undefined) {
         const entity = action.payload.entity
         state.dictionary[entity.id] = entity 
     } else {

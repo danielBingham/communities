@@ -46,7 +46,9 @@ INSERT INTO features (name, status, created_date, updated_date)
         ('17-public-posts', 'enabled', now(), now()),
         ('18-post-sharing', 'enabled', now(), now()),
         ('62-admin-moderation-controls', 'enabled', now(), now()),
-        ('87-site-admins-can-ban-users', 'enabled', now(), now());
+        ('87-site-admins-can-ban-users', 'enabled', now(), now()),
+        ('89-improved-moderation-for-group-posts', 'enabled', now(), now()),
+        ('80-group-moderators-can-ban-users', 'enabled', now(), now());
 
 
 
@@ -241,7 +243,7 @@ CREATE TABLE groups (
 );
 CREATE INDEX groups__file_id ON groups (file_id);
 
-CREATE TYPE group_member_status AS ENUM('pending-invited', 'pending-requested', 'member');
+CREATE TYPE group_member_status AS ENUM('pending-invited', 'pending-requested', 'member', 'banned');
 CREATE TYPE group_member_role AS ENUM('admin', 'moderator', 'member'); 
 CREATE TABLE group_members (
     id uuid primary key DEFAULT gen_random_uuid(),

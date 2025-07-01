@@ -77,6 +77,7 @@ module.exports = class PermissionService {
             }
         } else if ( entity === 'Group' ) {
             if ( action === 'view' ) {
+                console.log(`Getting visible group ids.`)
                 /**
                  * Group permissions vary by type:
                  *
@@ -91,10 +92,10 @@ module.exports = class PermissionService {
                  */
                 const results = await this.core.database.query(`
                     SELECT groups.id FROM groups
-                        LEFT OUTER JOIN group_members ON groups.id = group_members.group_id
-                    WHERE groups.type = 'open' 
-                        OR groups.type = 'private' 
-                        OR (groups.type = 'hidden' AND group_members.user_id = $1)
+                        LEFT OUTER JOIN group_members ON groups.id = group_members.group_id AND group_members.user_id = $1
+                    WHERE (groups.type = 'open' AND (group_members.user_id IS NULL OR group_members.status != 'banned'))
+                            OR (groups.type = 'private' AND (group_members.user_id IS NULL OR group_members.status != 'banned'))
+                            OR (groups.type = 'hidden' AND group_members.user_id = $1 AND group_members.status != 'banned')
                 `, [ user.id ])
 
                 return results.rows.map((r) => r.id)

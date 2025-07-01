@@ -3,12 +3,13 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 
 import { useRequest } from '/lib/hooks/useRequest'
+import { useGroupMember } from '/lib/hooks/GroupMember'
 
 import { getUser } from '/state/User'
 
 import UserProfileImage from '/components/users/UserProfileImage'
 import GroupMembershipButton from '/components/groups/components/GroupMembershipButton'
-import GroupMemberDotsMenu from '/components/groups/members/components/GroupMemberDotsMenu'
+import GroupMemberDotsMenu from './GroupMemberDotsMenu'
 
 import './GroupMemberBadge.css'
 
@@ -21,10 +22,11 @@ const GroupMemberBadge = function({ groupId, userId }) {
     // ======= Redux State ==========================================
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
-    const currentMember = useSelector((state) => currentUser && groupId in state.GroupMember.byGroupAndUser && currentUser.id in state.GroupMember.byGroupAndUser[groupId] ? state.GroupMember.byGroupAndUser[groupId][userId] : null)
+    const [currentMember, currentMemberRequest] = useGroupMember(groupId, currentUser.id)
+
     
     const user = useSelector((state) => userId in state.User.dictionary ? state.User.dictionary[userId] : null)
-    const userMember = useSelector((state) => groupId in state.GroupMember.byGroupAndUser && userId in state.GroupMember.byGroupAndUser[groupId] ? state.GroupMember.byGroupAndUser[groupId][userId] : null)
+    const [ userMember, userMemberRequest] = useGroupMember(groupId, userId)
 
     // ======= Effect Handling ======================================
     
@@ -62,9 +64,9 @@ const GroupMemberBadge = function({ groupId, userId }) {
                         { user.name !== null && <div className="group-member-badge__name"><Link to={ `/${user.username}` }>{user.name}</Link></div> }
                         { user.email !== null && user.name == null && <div className="group-member-badge__name">{ user.email }</div> }
                         { userMember.role != 'member' && <div className="group-member-badge__role">{ userMember.role }</div> }
+                        { userMember.status === 'banned' && <div className="group-member-badge__status">Banned</div> }
                         <div className="group-member-badge__about">{ user.about?.length > 100 ? user.about.substring(0,100).trim()+'...' : user.about }</div>
                         <div className="group-member-badge__controls">
-                            <GroupMembershipButton groupId={groupId} userId={userMember.userId} />
                         </div>
                     </div> 
                 </div>

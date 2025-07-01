@@ -89,6 +89,32 @@ describe("GroupMemberPermissions.canUpdateGroupMember()", function() {
             expect(userMember.role).toBe('admin')
         })
 
+        it("Should allow moderators to update members", async function() {
+            const permissionService = new PermissionService(core)
+            const groupMemberPermissions = new GroupMemberPermissions(core, permissionService)
+
+            const currentUser = entities.users.dictionary['2a7ae011-689c-4aa2-8f13-a53026d40964']
+
+            const group = entities.groups.dictionary['aeb26ec5-3644-4b7a-805e-375551ec65b6']
+            const userMember = entities.groupMembers.dictionary['bb88818d-6426-4e5a-b79a-688a700fef11']
+
+            const groupMember = {
+                userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
+                groupId: 'aeb26ec5-3644-4b7a-805e-375551ec65b6',
+                status: 'member',
+                role: 'member'
+            }
+
+            const canUpdateGroupMember = await groupMemberPermissions.canUpdateGroupMember(currentUser, 
+                { group: group, groupMember: groupMember, userMember: userMember })
+
+            expect(canUpdateGroupMember).toBe(true)
+            expect(groupMember.groupId).toBe(group.id)
+            expect(userMember.userId).toBe(currentUser.id)
+            expect(groupMember.userId).not.toBe(currentUser.id)
+            expect(userMember.role).toBe('moderator')
+        })
+
         it("Should not allow non-moderators to update members for other users", async function() {
             const permissionService = new PermissionService(core)
             const groupMemberPermissions = new GroupMemberPermissions(core, permissionService)
@@ -113,7 +139,6 @@ describe("GroupMemberPermissions.canUpdateGroupMember()", function() {
             expect(currentUser.id).toBe(userMember.userId)
             expect(groupMember.userId).not.toBe(currentUser.id)
             expect(userMember.role).toBe('member')
-
         })
     })
 
@@ -172,7 +197,7 @@ describe("GroupMemberPermissions.canUpdateGroupMember()", function() {
             expect(userMember.role).toBe('admin')
         })
 
-        it("Should not allow moderators to update members for other users", async function() {
+        it("Should allow moderators to update members for other users", async function() {
             const permissionService = new PermissionService(core)
             const groupMemberPermissions = new GroupMemberPermissions(core, permissionService)
 
@@ -191,7 +216,7 @@ describe("GroupMemberPermissions.canUpdateGroupMember()", function() {
             const canUpdateGroupMember = await groupMemberPermissions.canUpdateGroupMember(currentUser, 
                 { group: group, groupMember: groupMember, userMember: userMember })
 
-            expect(canUpdateGroupMember).toBe(false)
+            expect(canUpdateGroupMember).toBe(true)
             expect(groupMember.groupId).toBe(group.id)
             expect(userMember.groupId).toBe(group.id)
             expect(currentUser.id).toBe(userMember.userId)
@@ -281,7 +306,7 @@ describe("GroupMemberPermissions.canUpdateGroupMember()", function() {
             expect(userMember.role).toBe('admin')
         })
 
-        it("Should not allow moderators to update members", async function() {
+        it("Should allow moderators to update members", async function() {
             const permissionService = new PermissionService(core)
             const groupMemberPermissions = new GroupMemberPermissions(core, permissionService)
 
@@ -300,7 +325,7 @@ describe("GroupMemberPermissions.canUpdateGroupMember()", function() {
             const canUpdateGroupMember = await groupMemberPermissions.canUpdateGroupMember(currentUser, 
                 { group: group, groupMember: groupMember, userMember: userMember })
 
-            expect(canUpdateGroupMember).toBe(false)
+            expect(canUpdateGroupMember).toBe(true)
             expect(groupMember.groupId).toBe(group.id)
             expect(userMember.groupId).toBe(group.id)
             expect(userMember.userId).toBe(currentUser.id)

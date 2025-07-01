@@ -12,10 +12,7 @@ import './GroupActionMenu.css'
 const GroupActionMenu = function({ groupId }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
-    const currentMember = useSelector((state) => groupId !== null 
-        && groupId in state.GroupMember.byGroupAndUser 
-        && currentUser && currentUser.id in state.GroupMember.byGroupAndUser[groupId] 
-            ? state.GroupMember.byGroupAndUser[groupId][currentUser.id] : null)
+    const [currentMember, currentMemberRequest] = useGroupMember(groupId, currentUser.id)
 
     const navigate = useNavigate()
 

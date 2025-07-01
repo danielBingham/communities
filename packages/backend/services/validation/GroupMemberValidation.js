@@ -187,7 +187,7 @@ module.exports = class GroupMemberValidation {
                             message: `You may only add yourself to an open Group.`
                         })
                     }
-                } else if ( canModerateGroup ) {
+                } else if ( canModerateGroup === true ) {
                     // Moderators can invite users in which case role is 'member' and status is 'pending-invited'.
                     
                     if ( groupMember.role !== 'member' ) {
@@ -238,7 +238,7 @@ module.exports = class GroupMemberValidation {
                             message: `You may only request access to a private Group for yourself.`
                         })
                     }
-                } else if ( canModerateGroup ) {
+                } else if ( canModerateGroup === true ) {
                     // Moderators can invite users in which case role is 'member' and status is 'pending-invited'.
                     
                     if ( groupMember.role !== 'member' ) {
@@ -263,7 +263,7 @@ module.exports = class GroupMemberValidation {
                 }
 
             } else if ( group.type === 'hidden' ) {
-                if ( canModerateGroup ) {
+                if ( canModerateGroup === true ) {
                     if ( groupMember.role !== 'member' ) {
                         errors.push({
                             type: `role:invalid`,
@@ -323,7 +323,7 @@ module.exports = class GroupMemberValidation {
                             })
                         }
 
-                        if ( ! canModerateGroup ) {
+                        if ( canModerateGroup !== true ) {
                             errors.push({
                                 type: `status:not-authorized`,
                                 log: `Only moderators may accepted requested access to a Group.`,
@@ -332,11 +332,39 @@ module.exports = class GroupMemberValidation {
                         }
                     }
                 } else if ( existing.status === 'member' ) {
-                    if ( groupMember.status !== 'member') {
+                    if ( canModerateGroup !== true && groupMember.status !== 'member') {
                         errors.push({
                             type: 'status:invalid',
                             log: `Cannot change the status of a confirmed member.`,
                             message: `You cannot change the status of a confirmed member.`
+                        })
+                    } else if ( canModerateGroup === true && groupMember.status !== 'member' ) {
+                        if ( groupMember.status !== 'banned' ) {
+                            errors.push({
+                                type: 'status:invalid',
+                                log: `Cannot change the status of a confirmed member expect to ban them.`,
+                                message: `You cannot change the status of a confirmed member except to ban them.`
+                            })
+                        } else if ( groupMember.status === 'banned' && existing.role !== 'member' ) {
+                            errors.push({
+                                type: 'status:not-authorized',
+                                log: `Attempt to ban GroupMember with role '${existing.role}'.  Not authorized.`,
+                                message: `You not authorized to ban moderators or admins.`
+                            })
+                        }
+                    }
+                } else if ( existing.status === 'banned' ) {
+                    if ( canModerateGroup !== true ) {
+                        errors.push({
+                            type: 'status:not-authorized',
+                            log: `Non-moderators may not change the status of a banned member.`,
+                            message: `You are not authorized to change members status.`
+                        })
+                    } else if ( canModerateGroup === true && groupMember.status !== 'member' ) {
+                        errors.push({
+                            type: 'status:invalid',
+                            log: `Invalid status '${groupMember.status}'.`,
+                            message: `Invalid status '${groupMember.status}'.`
                         })
                     }
                 } else {
@@ -359,7 +387,7 @@ module.exports = class GroupMemberValidation {
                             })
                         }
 
-                        if ( ! canAdminGroup ) {
+                        if ( canAdminGroup !== true ) {
                             errors.push({
                                 type: `role:not-authorized`,
                                 log: `User not authorized to update a GroupMember's role.`,
@@ -377,7 +405,7 @@ module.exports = class GroupMemberValidation {
                             })
                         }
 
-                        if ( ! canAdminGroup ) {
+                        if ( canAdminGroup !== true ) {
                             errors.push({
                                 type: `role:not-authorized`,
                                 log: `User not authorized to update a GroupMember's role.`,

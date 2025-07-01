@@ -59,6 +59,7 @@
     padding: 7px;
     border-radius: 7px;
     background-color: var(--danger-color-lightest);
+    border: thin solid var(--danger-color-light);
 }
 .post .post__show-more {
     padding: 10px;

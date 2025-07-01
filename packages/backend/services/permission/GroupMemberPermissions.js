@@ -144,10 +144,11 @@ module.exports = class GroupMemberPermissions {
     async canUpdateGroupMember(user, context) {
         await this.ensureContext(user, context, [ 'groupMember' ])
         
-        const canAdminGroup = await this.permissionService.can(user, 'admin', 'Group', context)
+        const canModerateGroup = await this.permissionService.can(user, 'moderate', 'Group', context)
 
         // Admins can promote members to moderator or admin
-        if ( canAdminGroup ) {
+        // Moderators can ban members
+        if ( canModerateGroup === true) {
             return true
         }
 

@@ -238,6 +238,7 @@ if ( core.config.environment == 'development' ) {
 
 // error handler
 app.use(function(error, request, response, next) {
+    console.error(error)
     try {
         // Log the error.
         if ( error instanceof ControllerError ) {
@@ -259,13 +260,23 @@ app.use(function(error, request, response, next) {
             })
             return 
         } else { 
-            response.status(500).json({ error: 'server-error' })
+            response.status(500).json({ 
+                error: {
+                    type: 'server-error',
+                    message: `Something went wrong on the backend in a way we couldn't handle.  Please report this as a bug!`
+                }
+            })
             return
         }
     } catch (secondError) {
         // If we fucked up something in our error handling.
         core.logger.error(secondError)
-        response.status(500).json({error: 'server-error'})
+        response.status(500).json({ 
+            error: {
+                type: 'server-error',
+                message: `Something went wrong on the backend in a way we couldn't handle.  Please report this as a bug!`
+            }
+        })
     }
 })
 

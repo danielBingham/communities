@@ -23,6 +23,8 @@ const MigrationError = require('../errors/MigrationError')
 module.exports = class BaseMigration {
 
     constructor(core) {
+        this.core = core
+
         this.database = core.database
         this.logger = core.logger
         this.config = core.config
