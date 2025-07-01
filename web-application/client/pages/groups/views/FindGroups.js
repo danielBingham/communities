@@ -1,6 +1,6 @@
 import React from 'react'
 
-import GroupList from '/components/groups/list/GroupList'
+import GroupList from '/components/groups/GroupList'
 
 import './FindGroups.css'
 

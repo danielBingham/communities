@@ -1,7 +1,7 @@
 import React from 'react'
 import { useSelector } from 'react-redux'
 
-import GroupList from '/components/groups/list/GroupList'
+import GroupList from '/components/groups/GroupList'
 
 import './YourGroups.css'
 

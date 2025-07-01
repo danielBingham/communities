@@ -134,7 +134,7 @@ module.exports = class FeatureService {
             '80-group-moderators-can-ban-users': {
                 dependsOn: [ '89-improved-moderation-for-group-posts' ],
                 conflictsWith: [],
-                migrations: new GroupModeratorsCanBanUsers(core)
+                migration: new GroupModeratorsCanBanUsers(core)
             }
         }
     }

@@ -192,7 +192,7 @@ const GroupMembershipButton = function({ groupId, userId }) {
         )
     }
 
-    const canAdmin = currentMember && currentMember.userId != member.userId && (currentMember.role == 'admin' || currentMember.role == 'moderator')
+    const canAdmin = currentMember && member && currentMember.userId != member.userId && (currentMember.role == 'admin' || currentMember.role == 'moderator')
 
     if ( currentUser.id != userId && member && canAdmin ) {
         return (

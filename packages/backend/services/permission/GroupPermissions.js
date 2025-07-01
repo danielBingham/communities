@@ -147,7 +147,7 @@ module.exports = class GroupPermissions {
             return true
         }
 
-        if ( context.userMember !== null ) {
+        if ( context.userMember !== null && context.userMember.status !== 'banned' ) {
             return true 
         }
 

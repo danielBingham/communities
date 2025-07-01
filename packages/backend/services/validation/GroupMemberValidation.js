@@ -353,6 +353,20 @@ module.exports = class GroupMemberValidation {
                             })
                         }
                     }
+                } else if ( existing.status === 'banned' ) {
+                    if ( canModerateGroup !== true ) {
+                        errors.push({
+                            type: 'status:not-authorized',
+                            log: `Non-moderators may not change the status of a banned member.`,
+                            message: `You are not authorized to change members status.`
+                        })
+                    } else if ( canModerateGroup === true && groupMember.status !== 'member' ) {
+                        errors.push({
+                            type: 'status:invalid',
+                            log: `Invalid status '${groupMember.status}'.`,
+                            message: `Invalid status '${groupMember.status}'.`
+                        })
+                    }
                 } else {
                     // If we add a new status and forget to handle it, we want to be yelled at.
                     throw new ServiceError('invalid-status',

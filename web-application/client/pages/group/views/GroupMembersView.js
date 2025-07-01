@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux'
 import { GroupPermissions, useGroupPermission } from '/lib/hooks/permission'
 
 import GroupInvite from '/components/groups/components/GroupInvite'
-import GroupMembersList from '/components/groups/members/list/GroupMembersList'
+import GroupMembersList from '/components/groups/members/GroupMembersList'
 
 const GroupMembersView = function({ groupId }) {
 

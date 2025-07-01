@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux'
 import { ArrowRightEndOnRectangleIcon } from '@heroicons/react/24/solid'
 
 import { useRequest } from '/lib/hooks/useRequest'
+import { useGroupMember } from '/lib/hooks/GroupMember'
 
 import { postGroupMembers } from '/state/GroupMember'
 
@@ -19,10 +20,7 @@ const JoinGroup = function({ groupId }) {
         ? state.Group.dictionary[groupId] : null)
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
-    const currentMember = useSelector((state) => groupId !== null 
-        && groupId in state.GroupMember.byGroupAndUser 
-        && currentUser && currentUser.id in state.GroupMember.byGroupAndUser[groupId] 
-            ? state.GroupMember.byGroupAndUser[groupId][currentUser.id] : null)
+    const [currentMember, currentMemberRequest] = useGroupMember(groupId, currentUser.id)
 
     const joinGroup = function() {
         makeRequest(postGroupMembers({ groupId: groupId, userId: currentUser.id }))

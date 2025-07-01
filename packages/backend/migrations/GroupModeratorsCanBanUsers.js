@@ -20,19 +20,17 @@
 
 const BaseMigration = require('./BaseMigration')
 
-module.exports = class GroupModerationMigration extends BaseMigration {
+module.exports = class GroupModeratorsCanBanUsers extends BaseMigration {
 
     constructor(core) {
         super(core)
     }
 
     async initForward() { 
-        await this.core.database.query(`ALTER TYPE group_member_status ADD VALUE IF NOT EXISTS 'banned'`, [])
+        await this.database.query(`ALTER TYPE group_member_status ADD VALUE IF NOT EXISTS 'banned'`, [])
     }
 
-    async initBack() { 
-
-    }
+    async initBack() { }
 
     async migrateForward(targets) {}
 

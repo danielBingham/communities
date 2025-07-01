@@ -5,29 +5,29 @@
      *************************************************************************/
 
 
-    --primary-color-lightest: #f9fbfc;
+    --primary-color-lightest: #FAFBFC; /* Hue: 204, Saturation: 1, Brightness: 99  -- Off the pattern for a more grey hue. */
     --primary-color-light: #e6ecf2;
     --primary-color-main: #398fe5;
     --primary-color-main-highlight: #67a6e5;
     --primary-color-dark: #44484c;
     --primary-color-darkest: #161819; 
 
-    --secondary-color-lightest: #f7f3f0;
-    --secondary-color-light: #facfaf;
+    --secondary-color-lightest: #FFFCFA; 
+    --secondary-color-light: #F2E5DA;
     --secondary-color-main: #FB994C;
     --secondary-color-main-highlight: #fab37d;
     --secondary-color-dark: #4d4845;
     --secondary-color-darkest: #1a1919;
 
-    --success-color-lightest: #e2fae1;
-    --success-color-light: #b3faaf;
+    --success-color-lightest: #FAFFFA;
+    --success-color-light: #DBF2DA;
     --success-color-main: #45CB3E;
     --success-color-main-highlight: #6dcc68;
     --success-color-dark: #454d45;
     --success-color-darkest: #191a19;
 
-    --danger-color-lightest: #f7f0f0;
-    --danger-color-light: #f7adb0;
+    --danger-color-lightest: #FFFAFA;
+    --danger-color-light: #F2DADB;
     --danger-color-main: #bc0309;
     --danger-color-main-highlight: #d3565a; 
     --danger-color-dark: #4d4545;

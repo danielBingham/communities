@@ -5,8 +5,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 
 import { getGroupMembers, clearGroupMemberQuery } from '/state/GroupMember'
 
-import GroupMemberBadge from '/components/groups/members/GroupMemberBadge'
-import GroupMembershipButton from '/components/groups/components/GroupMembershipButton'
+import GroupMemberBadge from './GroupMemberBadge'
 import PaginationControls from '/components/PaginationControls'
 import Spinner from '/components/Spinner'
 

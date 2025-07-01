@@ -315,6 +315,12 @@ module.exports = class GroupMemberController {
             full: canViewFull
         })
 
+        if ( results.list.length <= 0 ) {
+            throw new ControllerError(404, 'not-found',
+                `No member found for User in Group(${groupId}).`,
+                `Either that member doesn't exist or you don't have permission to view it.`)
+        }
+
         const entity = results.dictionary[results.list[0]]
 
         const relations = await this.getRelations(currentUser, results)

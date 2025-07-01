@@ -52,8 +52,8 @@ const GroupPage = function() {
     }, [])
 
     if ( ! group 
-        || ( ! request || request.state == 'pending') 
-        || ( ! memberRequest || memberRequest.state === 'pending') )  
+        && (( ! request || request.state == 'pending') 
+            || ( memberRequest && memberRequest.state === 'pending')))
     {
         return (
             <div id="group-page">

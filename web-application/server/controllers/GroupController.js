@@ -80,6 +80,7 @@ module.exports = class GroupController {
         // Site moderators can always view all groups.
         const canModerateSite = await this.permissionService.can(currentUser, 'moderate', 'Site')
         if ( ! canModerateSite ) {
+            console.log(`Not a site moderator!`)
             // Restrict the query to only those groups the currentUser can see.
             const visibleGroupIds = await this.permissionService.get(currentUser, 'view', 'Group')
             query.params.push(visibleGroupIds)
@@ -111,8 +112,6 @@ module.exports = class GroupController {
             query.where += `${and} groups.slug = $${query.params.length}`
         }
 
-        console.log(`Page: `)
-        console.log(request.query.page)
         if ( 'page' in request.query && parseInt(request.query.page) > 0 ) {
             query.page = parseInt(request.query.page)
         }

@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux'
 import { ArrowRightStartOnRectangleIcon } from '@heroicons/react/24/solid'
 
 import { useRequest } from '/lib/hooks/useRequest'
+import { useGroupMember } from '/lib/hooks/GroupMember'
 
 import { deleteGroupMember } from '/state/GroupMember'
 
@@ -14,10 +15,7 @@ const LeaveGroup = function({ groupId }) {
     const [request, makeRequest] = useRequest()
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
-    const currentMember = useSelector((state) => groupId !== null 
-        && groupId in state.GroupMember.byGroupAndUser 
-        && currentUser && currentUser.id in state.GroupMember.byGroupAndUser[groupId] 
-            ? state.GroupMember.byGroupAndUser[groupId][currentUser.id] : null)
+    const [currentMember, currentMemberRequest] = useGroupMember(groupId, currentUser.id)
 
     const leaveGroup = function() {
         makeRequest(deleteGroupMember())
