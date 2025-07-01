@@ -32,75 +32,13 @@ module.exports = class GroupValidation {
     async validateGroup(currentUser, group, existing) {
         const errors = []
 
-        // ================== Validate Field Presence =========================
-        // Before we validate the content of the fields, we're going to validate
-        // whether they can be set or changed at all.
-
-        // These are fields the user is never allowed to set.
-        const alwaysDisallowedFields = [
-            'createdDate', 'updatedDate', 'entranceQuestions'
-        ]
-
-        for(const disallowedField of alwaysDisallowedFields ) {
-            if ( util.objectHas(group, disallowedField) ) {
-                errors.push({
-                    type: `${disallowedField}:not-allowed`,
-                    log: `${disallowedField} is not allowed.`,
-                    message: `You may not set '${disallowedField}'.`
-                })
-            }
-        }
-
-        // If we have invalid fields set, then we don't need to go any further.
-        if ( errors.length > 0 ) {
-            return errors
-        }
-
-        // We're creating a Group.
-        if ( existing === null || existing === undefined ) {
-            const requiredFields = [
-                'type', 'title', 'slug'
-            ]
-
-            for(const requiredField of requiredFields) {
-                if ( ! util.objectHas(group, requiredField) || group[requiredField] === null ) {
-                    errors.push({
-                        type: `${requiredField}:missing`,
-                        log: `${requiredField} is required.`,
-                        message: `${requiredField} is required.`
-                    })
-                }
-            }
-        } 
-        // We're editing a Group.
-        else {
-            if ( util.objectHas(group, 'id') && group.id !== existing.id ) {
-                throw new ServiceError('entity-mismatch',
-                    `Wrong 'existing' entity.`)
-            }
-
-            const disallowedFields = [
-                'type', 'title', 'slug'
-            ]
-
-            for(const disallowedField of disallowedFields) {
-                if ( util.objectHas(group, disallowedField) && group[disallowedField] !== existing[disallowedField]) {
-                    errors.push({
-                        type: `${disallowedField}:not-allowed`,
-                        log: `${disallowedField} may not be updated.`,
-                        message: `${disallowedField} may not be updated.`
-                    })
-                }
-            }
-        }
-
-        // If we have invalid fields set, then we don't need to go any further.
-        if ( errors.length > 0 ) {
-            return errors
+        if ( existing && group.id !== existing.id ) {
+            throw new ServiceError('entity-mismatch',
+                `Wrong 'existing' entity.`)
         }
 
         // Do basic validation the fields.
-        const validationErrors = validation.Group.validate(group)
+        const validationErrors = validation.Group.validate(group, existing)
         if ( validationErrors.all.length > 0 ) {
             errors.push(...validationErrors.all)
         }

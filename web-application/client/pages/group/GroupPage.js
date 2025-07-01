@@ -5,7 +5,9 @@ import { useParams, NavLink, Routes, Route } from 'react-router-dom'
 import {
     GlobeAltIcon,
     LockOpenIcon,
-    LockClosedIcon
+    LockClosedIcon,
+    UserGroupIcon,
+    DocumentCheckIcon
 } from '@heroicons/react/24/outline'
 
 import { resetEntities } from '/state/lib'
@@ -79,13 +81,27 @@ const GroupPage = function() {
         type = (<span><LockClosedIcon /> Hidden</span>)
     }
 
+    let postingPermissions = ''
+    if ( group.postPermissions === 'anyone' ) {
+        postingPermissions = ( <span><GlobeAltIcon /> Anyone may Post</span> )
+    } else if ( group.postPermissions === 'members' ) {
+        postingPermissions = ( <span><UserGroupIcon /> Members may Post</span> )
+    } else if ( group.postPermissions === 'approval' ) {
+        postingPermissions = ( <span><DocumentCheckIcon /> Posts Require Approval</span> )
+    } else if ( group.postPermissions === 'restricted' ) {
+        postingPermissions = ( <span><LockClosedIcon /> Only Moderators may Post</span> )
+    }
+
     return (
         <Page id="group-page">
             <PageLeftGutter>
                 <div className="group-page__header">
                     <GroupImage groupId={group.id} />
                     <div className="title">{ group.title}</div>
-                    <div className="type">{ type }</div>
+                    <div className="types">
+                        <span className="type">{ type }</span>
+                        <span className="post-permissions">{ postingPermissions }</span>
+                    </div>
                 </div>
                 <div className="group-page__controls">
                     <GroupMembershipButton groupId={group.id} userId={currentUser?.id} />

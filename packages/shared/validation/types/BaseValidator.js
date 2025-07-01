@@ -54,7 +54,6 @@ module.exports = class BaseValidator {
             })
         }
         return this
-
     }
 
     mustNotBeSet() {

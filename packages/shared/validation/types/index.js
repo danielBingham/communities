@@ -1,12 +1,15 @@
+const DateValidator = require('./DateValidator')
+const ObjectValidator = require('./ObjectValidator')
 const StringValidator = require('./StringValidator')
 const UUIDValidator = require('./UUIDValidator')
-const DateValidator = require('./DateValidator')
 const UrlValidator = require('./UrlValidator')
 
 
+
 module.exports = {
+    DateValidator: DateValidator,
+    ObjectValidator: ObjectValidator,
     StringValidator: StringValidator,
     UUIDValidator: UUIDValidator,
-    DateValidator: DateValidator,
     UrlValidator: UrlValidator
 }

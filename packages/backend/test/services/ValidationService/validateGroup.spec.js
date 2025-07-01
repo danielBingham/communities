@@ -38,6 +38,10 @@ describe('ValidationService.validateGroup()', function() {
         const service = new ValidationService(core)
 
         const group = { 
+            type: 'open',
+            postPermissions: 'members',
+            title: 'A test group',
+            slug: 'a-test-group',
             createdDate: 'TIMESTAMP',
             updatedDate: 'TIMESTAMP',
             entranceQuestions: {}
@@ -52,6 +56,10 @@ describe('ValidationService.validateGroup()', function() {
         const service = new ValidationService(core)
 
         const group = { 
+            type: 'open',
+            postPermissions: 'members',
+            title: 'A test group',
+            slug: 'a-test-group',
             createdDate: null,
             updatedDate: null,
             entranceQuestions: null
@@ -68,24 +76,24 @@ describe('ValidationService.validateGroup()', function() {
 
             const group = { 
                 title: 'A Group Title',
-                slug: 'a-group-title'
-
+                slug: 'a-group-title',
+                postPermissions: 'members'
             }
 
             const errors = await service.validateGroup(null, group, null)
 
             expect(errors.length).toBe(1)
-            expect(errors[0].type).toBe('type:missing')
+            expect(errors[0].type).toBe('type:required')
         })
 
-        it('Should return one error for each required field (type, title, slug) missing', async function() {
+        it('Should return one error for each required field (type, postPermissions, title, slug) missing', async function() {
             const service = new ValidationService(core)
 
             const group = { }
 
             const errors = await service.validateGroup(null, group, null)
 
-            expect(errors.length).toBe(3)
+            expect(errors.length).toBe(4)
         })
     })
 
@@ -146,6 +154,7 @@ describe('ValidationService.validateGroup()', function() {
 
             const group = { 
                 type: 'public',
+                postPermissions: 'open',
                 title: 10,
                 slug: 10,
                 about: 10,
@@ -157,7 +166,7 @@ describe('ValidationService.validateGroup()', function() {
 
             const errors = await service.validateGroup(currentUser, group, null)
 
-            expect(errors.length).toBe(5)
+            expect(errors.length).toBe(6)
         })
 
         it('Should return an error when fileId is not found in the database', async function() {
@@ -166,6 +175,7 @@ describe('ValidationService.validateGroup()', function() {
             const group = { 
                 fileId: 'c8d958ac-4bed-44ad-a934-ca28e3525461',
                 type: 'open',
+                postPermissions: 'members',
                 title: 'A Test Group',
                 slug: 'a-test-group'
             }
@@ -187,6 +197,7 @@ describe('ValidationService.validateGroup()', function() {
 
             const group = { 
                 type: 'open',
+                postPermissions: 'members',
                 title: 'A Test Group',
                 slug: 'a-test-group',
                 about: 'This is a test group.',

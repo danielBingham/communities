@@ -9,14 +9,18 @@ import { GroupPermissions, useGroupPermission } from '/lib/hooks/permission'
 import { deleteGroup } from '/state/Group'
 
 import GroupEditForm from '/components/groups/form/GroupEditForm'
+import GroupPostPermissionsUpdate from '/components/groups/form/GroupPostPermissionsUpdate'
 import Button from '/components/generic/button/Button'
 import AreYouSure from '/components/AreYouSure'
+import Radio from '/components/ui/Radio'
+import Modal from '/components/generic/modal/Modal'
 
 import "./GroupSettingsView.css"
 
 const GroupSettingsView = function({ groupId }) {
 
     const [ areYouSure, setAreYouSure ] = useState(false)
+    const [ showPostPermissionsForm, setShowPostPermissionsForm ] = useState(false)
 
     const [request, makeRequest] = useRequest()
 
@@ -43,6 +47,15 @@ const GroupSettingsView = function({ groupId }) {
                 <GroupEditForm groupId={groupId} /> 
             </div>
             <h2>Danger Zone</h2>
+            <div className="group-settings-view__update-post-permissions">
+                <div className="group-settings-view__explanation">Update this group's posting permissions.</div>
+                <div className="group-settings-view__button-wrapper">
+                    <Button type="warn" onClick={(e) => setShowPostPermissionsForm(true)}>Change Posting Permissions</Button>
+                </div>
+                <Modal isVisible={showPostPermissionsForm} setIsVisible={setShowPostPermissionsForm}>
+                    <GroupPostPermissionsUpdate groupId={groupId} onSubmit={(e) => setShowPostPermissionsForm(false)} onCancel={() => setShowPostPermissionsForm(false)} />
+                </Modal>
+            </div>
             <div className="group-settings-view__delete-your-account">
                 <div className="group-settings-view__explanation">Delete this group. This will delete
                 all posts and images in the group. This cannot
