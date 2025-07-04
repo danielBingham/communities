@@ -53,7 +53,7 @@ const GroupSettingsView = function({ groupId }) {
                 <div className="group-settings-view__button-wrapper">
                     <Button type="warn" onClick={(e) => setShowPostPermissionsForm(true)}>Change Posting Permissions</Button>
                 </div>
-                <Modal isVisible={showPostPermissionsForm} setIsVisible={setShowPostPermissionsForm}>
+                <Modal isVisible={showPostPermissionsForm} setIsVisible={setShowPostPermissionsForm} hideX={true}>
                     <GroupPostPermissionsUpdate groupId={groupId} onSubmit={(e) => setShowPostPermissionsForm(false)} onCancel={() => setShowPostPermissionsForm(false)} />
                 </Modal>
             </div>

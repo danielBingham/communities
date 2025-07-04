@@ -8,6 +8,8 @@ import {
 
 import Feed from '/components/feeds/Feed'
 
+import './GroupFeedView.css'
+
 const GroupFeedView = function({ groupId }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)

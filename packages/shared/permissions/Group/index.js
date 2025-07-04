@@ -5,7 +5,7 @@ const canAdminGroup = function(user, context) {
     }
 
     if ( context.userMember !== undefined && context.userMember !== null 
-        && context.userMember.groupId === context.groupId
+        && context.userMember.groupId === context.group.id
         && context.userMember.status === 'member' 
         && context.userMember.role === 'admin') 
     {
