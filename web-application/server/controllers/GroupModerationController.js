@@ -149,7 +149,7 @@ module.exports = class GroupModerationController extends BaseController {
             })
         }
 
-        const canViewGroupContent = await this.permissionService.can(currentUser, 'view', 'Group:content', { groupId: groupId })
+        const canViewGroupContent = await this.permissionService.can(currentUser, 'view', 'GroupPost', { groupId: groupId })
         if ( canViewGroupContent !== true ) {
             return this.sendUserErrors(response, 404, {
                 type: 'not-found',
@@ -206,7 +206,7 @@ module.exports = class GroupModerationController extends BaseController {
             })
         }
 
-        const canViewGroupContent = await this.permissionService.can(currentUser, 'view', 'Group:content', { groupId: groupId })
+        const canViewGroupContent = await this.permissionService.can(currentUser, 'view', 'GroupPost', { groupId: groupId })
         if ( canViewGroupContent !== true ) {
             return this.sendUserErrors(response, 404, {
                 type: 'not-found',
@@ -313,7 +313,7 @@ module.exports = class GroupModerationController extends BaseController {
             })
         }
 
-        const canViewGroupContent = await this.permissionService.can(currentUser, 'view', 'Group:content', { groupId: groupId })
+        const canViewGroupContent = await this.permissionService.can(currentUser, 'view', 'GroupPost', { groupId: groupId })
         if ( canViewGroupContent !== true ) {
             return this.sendUserErrors(response, 404, {
                 type: 'not-found',
@@ -384,7 +384,7 @@ module.exports = class GroupModerationController extends BaseController {
             })
         }
 
-        const canViewGroupContent = await this.permissionService.can(currentUser, 'view', 'Group:content', { groupId: groupId })
+        const canViewGroupContent = await this.permissionService.can(currentUser, 'view', 'GroupPost', { groupId: groupId })
         if ( canViewGroupContent !== true ) {
             return this.sendUserErrors(response, 404, {
                 type: 'not-found',

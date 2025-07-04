@@ -167,11 +167,11 @@ const GroupMembershipButton = function({ groupId, userId }) {
     // the group yet.
     if ( ! member && ! currentMember && currentUser.id == userId ) {
         return (
-            <span> 
+            <> 
                 { errorView }
-                { group.type == 'open' && <Button type="primary" onClick={() => joinGroup()}><ArrowLeftEndOnRectangleIcon /> Join</Button> }
-                { group.type == 'private' && <Button type="primary" onClick={() => requestEntrance()}><ArrowLeftEndOnRectangleIcon /> Request</Button> }
-            </span>
+                { group.type == 'open' && <Button type="primary" onClick={() => joinGroup()}><ArrowLeftEndOnRectangleIcon /> <span className="nav-text">Join</span></Button> }
+                { group.type == 'private' && <Button type="primary" onClick={() => requestEntrance()}><ArrowLeftEndOnRectangleIcon /> <span className="nav-text">Request</span></Button> }
+            </>
         )
     }
 
@@ -179,16 +179,16 @@ const GroupMembershipButton = function({ groupId, userId }) {
     // pending invite, or have pending request.
     if ( userId == currentUser.id && member ) {
         return (
-            <span>
+            <>
                 { errorView }
-                { member.status == 'pending-invited' && <Button type="primary" onClick={() => acceptInvite()}><ArrowLeftEndOnRectangleIcon /> Accept</Button> }
-                { member.status == 'pending-invited' && <Button onClick={() => rejectInvite()}><ArrowLeftStartOnRectangleIcon /> Reject</Button> }
-                { member.status == 'pending-requested' && <Button onClick={() => cancelRequest()}><ArrowLeftStartOnRectangleIcon /> Cancel</Button> }
-                { member.status == 'member' && <Button onClick={() => setAreYouSure(true)}><ArrowLeftStartOnRectangleIcon /> Leave</Button> }
+                { member.status == 'pending-invited' && <Button type="primary" onClick={() => acceptInvite()}><ArrowLeftEndOnRectangleIcon /> <span className="nav-text">Accept</span></Button> }
+                { member.status == 'pending-invited' && <Button onClick={() => rejectInvite()}><ArrowLeftStartOnRectangleIcon /> <span className="nav-text">Reject</span></Button> }
+                { member.status == 'pending-requested' && <Button onClick={() => cancelRequest()}><ArrowLeftStartOnRectangleIcon /> <span className="nav-text">Cancel</span></Button> }
+                { member.status == 'member' && <Button onClick={() => setAreYouSure(true)}><ArrowLeftStartOnRectangleIcon /> <span className="nav-text">Leave</span></Button> }
                 <AreYouSure isVisible={areYouSure} execute={() => { setAreYouSure(false); leaveGroup() }} cancel={() => setAreYouSure(false)} > 
                     <p>Are you sure you want to leave this group?</p>
                 </AreYouSure>
-            </span>
+            </>
         )
     }
 
@@ -196,13 +196,13 @@ const GroupMembershipButton = function({ groupId, userId }) {
 
     if ( currentUser.id != userId && member && canAdmin ) {
         return (
-            <span>
+            <>
                 { errorView }
-                { member.status == 'pending-invited' && <Button  onClick={() => cancelInvite()}><ArrowLeftStartOnRectangleIcon /> Cancel</Button> }
-                { member.status == 'pending-requested' && <Button type="primary" onClick={() => acceptRequest()}><ArrowLeftEndOnRectangleIcon /> Accept</Button> }
-                { member.status == 'pending-requested' && <Button  onClick={() => rejectRequest()}><ArrowLeftStartOnRectangleIcon /> Reject</Button> }
-                { member.status == 'member' && <Button  onClick={() => removeMember()}><ArrowLeftStartOnRectangleIcon /> Remove</Button> }
-            </span>
+                { member.status == 'pending-invited' && <Button  onClick={() => cancelInvite()}><ArrowLeftStartOnRectangleIcon /> <span className="nav-text">Cancel</span></Button> }
+                { member.status == 'pending-requested' && <Button type="primary" onClick={() => acceptRequest()}><ArrowLeftEndOnRectangleIcon /> <span className="nav-text">Accept</span></Button> }
+                { member.status == 'pending-requested' && <Button onClick={() => rejectRequest()}><ArrowLeftStartOnRectangleIcon /> <span className="nav-text">Reject</span></Button> }
+                { member.status == 'member' && <Button onClick={() => removeMember()}><ArrowLeftStartOnRectangleIcon /> <span className="nav-text">Remove</span></Button> }
+            </>
         )
     } else {
         return null

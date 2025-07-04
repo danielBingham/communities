@@ -22,18 +22,17 @@ import * as shared from '@communities/shared'
 import { useGroup } from '/lib/hooks/Group'
 import { useGroupMember } from '/lib/hooks/GroupMember'
 import { SitePermissions, useSitePermission } from './useSitePermission'
+import { GroupPermissions, useGroupPermission } from './useGroupPermission'
 
 
-export const GroupPermissions = {
+export const GroupMemberPermissions = {
     CREATE: 'create',
     VIEW: 'view',
     UPDATE: 'update',
-    DELETE: 'delete',
-    MODERATE: 'moderate',
-    ADMIN: 'admin'
+    DELETE: 'delete'
 }
 
-export const useGroupPermission = function(currentUser, action, groupId) {
+export const useGroupMemberPermission = function(currentUser, action, groupId) {
     const [group] = useGroup(groupId)
     const [currentMember] = useGroupMember(groupId, currentUser.id)
 
@@ -45,20 +44,23 @@ export const useGroupPermission = function(currentUser, action, groupId) {
         canModerateSite: canModerateSite
     }
 
+    const canModerateGroup = useGroupPermission(currentUser, GroupPermissions.MODERATE, groupId) 
+    const canAdminGroup = useGroupPermission(currentUser, GroupPermissions.ADMIN, groupId)
+
+    context.canModerateGroup = canModerateGroup
+    context.canAdminGroup = canAdminGroup
+
+
     // SiteModerators need to be able to view the group in order to moderate posts in it.
-    if ( action === GroupPermissions.VIEW ) {
-        return shared.permissions.Group.canViewGroup(currentUser, context) 
-    } else if ( action === GroupPermissions.CREATE ) {
-        return shared.permissions.Group.canCreateGroup(currentUser, context)
-    } else if ( action === GroupPermissions.UPDATE ) {
-        return shared.permissions.Group.canUpdateGroup(currentUser, context)
-    } else if ( action === GroupPermissions.DELETE ) {
-        return shared.permissions.Group.canDeleteGroup(currentUser, context)
-    } else if ( action === GroupPermissions.MODERATE ) {
-        return shared.permissions.Group.canModerateGroup(currentUser, context) 
-    } else if ( action === GroupPermissions.ADMIN ) {
-        return shared.permissions.Group.canAdminGroup(currentUser, context) 
+    if ( action === GroupMemberPermissions.VIEW ) {
+        return shared.permissions.GroupMember.canViewGroupMember(currentUser, context) 
+    } else if ( action === GroupMemberPermissions.CREATE ) {
+        return shared.permissions.GroupMember.canCreateGroupMember(currentUser, context)
+    } else if ( action === GroupMemberPermissions.UPDATE ) {
+        return shared.permissions.GroupMember.canUpdateGroupMember(currentUser, context)
+    } else if ( action === GroupMemberPermissions.DELETE ) {
+        return shared.permissions.GroupMember.canDeleteGroupMember(currentUser, context)
     } else {
-        throw new Error(`Invalid GroupPermission: ${action}.`)
+        throw new Error(`Invalid GroupMemberPermission: ${action}.`)
     }
 }

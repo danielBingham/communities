@@ -27,7 +27,7 @@ const { util, permissions } = require('@communities/shared')
 
 const ServiceError = require('../../errors/ServiceError')
 
-module.exports = class GroupPermissions {
+module.exports = class GroupPostPermissions {
 
     constructor(core, permissionService) {
         this.core 
@@ -130,52 +130,18 @@ module.exports = class GroupPermissions {
         }
     }
 
-    async canCreateGroup(user, context) {
-        return permissions.Group.canCreateGroup(user, context)
-    }
-
-    async canViewGroup(user, context) {
-        await this.ensureContext(user, context, [ 'group' ], [ 'userMember' ])
-
-        // Site moderators can always view groups.
-        context.canModerateSite = await this.permissionService.can(user, 'moderate', 'Site') 
-
-        return permissions.Group.canViewGroup(user, context)
-    }
-
-    async canUpdateGroup(user, context) {
-        await this.ensureContext(user, context, [ 'group'], [ 'userMember' ])
-
-        return permissions.Group.canUpdateGroup(user, context)
-    }
-
-    async canDeleteGroup(user, context) {
-        await this.ensureContext(user, context, [ 'group'], [ 'userMember' ])
-
-        return permissions.Group.canDeleteGroup(user, context)
-    }
-
-    async canModerateGroup(user, context) {
-        // TECHDEBT We don't actually need the `group` here and it's extra queries.  We just need the groupId, but 
-        // I don't want to go down the rabbithole of pulling that off of all the context right now.
-        await this.ensureContext(user, context, [ 'group' ], [ 'userMember' ])
-
-        return permissions.Group.canModerateGroup(user, context)
-    }
-
-    async canAdminGroup(user, context) {
-        await this.ensureContext(user, context, [ 'group'], [ 'userMember' ])
-
-        return permissions.Group.canAdminGroup(user, context)
-    }
-
-    async canViewGroupContent(user, context) {
+    async canViewGroupPost(user, context) {
         await this.ensureContext(user, context, [ 'group' ], [ 'userMember' ])
 
         // Site moderators can always view group content.
         context.canModerateSite = await this.permissionService.can(user, 'moderate', 'Site')
 
-        return permissions.Group.canViewGroupContent(user, context)
+        return permissions.GroupPost.canViewGroupPost(user, context)
     }
 
+    async canCreateGroupPost(user, context) {
+        await this.ensureContext(user, context, [ 'group' ], [ 'userMember' ])
+
+        return permissions.GroupPost.canCreateGroupPost(user, context)
+    }
 }

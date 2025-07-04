@@ -1,68 +1,63 @@
 .navigation-menu {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-.navigation-menu menu.navigation-menu__menu {
     list-style-type: none;
-    padding: 0;
+    padding: 0 0 0 10px;
     margin: 0;
 }
 
-.navigation-menu menu.navigation-menu__menu li {
+.navigation-menu li {
     font-size: 18px;
 }
-.navigation-menu menu.navigation-menu__menu a svg {
+.navigation-menu a svg {
     width: 22px;
     margin-right: 5px;
     margin-bottom: -5px;
     color: var(--icon-color);
 }
-.navigation-menu menu.navigation-menu__menu a:link,
-.navigation-menu menu.navigation-menu__menu a:visited,
-.navigation-menu menu.navigation-menu__menu a:active {
+.navigation-menu a:link,
+.navigation-menu a:visited,
+.navigation-menu a:active {
     display: block;
     padding: 10px;
     color: var(--primary-color-darkest);
 }
-.navigation-menu menu.navigation-menu__menu a:hover {
+.navigation-menu a:hover {
     background-color: var(--primary-color-light);
     border-radius: 10px;
 }
-.navigation-menu menu.navigation-menu__menu a.active  {
+.navigation-menu a.active  {
     font-weight: bold;
 }
 
-.navigation-menu menu.navigation-menu__menu .outline { 
+.navigation-menu .outline { 
     display: inline-block;
 }
-.navigation-menu menu.navigation-menu__menu .active .outline { 
+.navigation-menu .active .outline { 
     display: none;
 }
 
-.navigation-menu menu.navigation-menu__menu .solid {
+.navigation-menu  .solid {
     display: none;
 }
-.navigation-menu menu.navigation-menu__menu .active .solid{
+.navigation-menu  .active .solid{
     display: inline-block;
 }
 
 @media (width <= 1220px) {
 
-    .navigation-menu menu.navigation-menu__menu {
+    .navigation-menu {
         text-align: center;
     }
 
-    .navigation-menu menu.navigation-menu__menu li {
+    .navigation-menu li {
         display: inline-block;
     }
     
-    .navigation-menu menu.navigation-menu__menu .navigation-menu__item .nav-text {
+    .navigation-menu .navigation-menu__item .nav-text {
         display: block;
         font-size: 10px;
     }
 
-    .navigation-menu menu.navigation-menu__menu .navigation-menu__button .nav-text {
+    .navigation-menu .navigation-menu__button .nav-text {
         display: block;
         font-size: 10px;
     }

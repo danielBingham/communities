@@ -22,18 +22,15 @@ import * as shared from '@communities/shared'
 import { useGroup } from '/lib/hooks/Group'
 import { useGroupMember } from '/lib/hooks/GroupMember'
 import { SitePermissions, useSitePermission } from './useSitePermission'
+import { GroupPermissions, useGroupPermission } from './useGroupPermission'
 
 
-export const GroupPermissions = {
+export const GroupPostPermissions = {
     CREATE: 'create',
-    VIEW: 'view',
-    UPDATE: 'update',
-    DELETE: 'delete',
-    MODERATE: 'moderate',
-    ADMIN: 'admin'
+    VIEW: 'view'
 }
 
-export const useGroupPermission = function(currentUser, action, groupId) {
+export const useGroupPostPermission = function(currentUser, action, groupId) {
     const [group] = useGroup(groupId)
     const [currentMember] = useGroupMember(groupId, currentUser.id)
 
@@ -45,20 +42,17 @@ export const useGroupPermission = function(currentUser, action, groupId) {
         canModerateSite: canModerateSite
     }
 
-    // SiteModerators need to be able to view the group in order to moderate posts in it.
-    if ( action === GroupPermissions.VIEW ) {
-        return shared.permissions.Group.canViewGroup(currentUser, context) 
-    } else if ( action === GroupPermissions.CREATE ) {
-        return shared.permissions.Group.canCreateGroup(currentUser, context)
-    } else if ( action === GroupPermissions.UPDATE ) {
-        return shared.permissions.Group.canUpdateGroup(currentUser, context)
-    } else if ( action === GroupPermissions.DELETE ) {
-        return shared.permissions.Group.canDeleteGroup(currentUser, context)
-    } else if ( action === GroupPermissions.MODERATE ) {
-        return shared.permissions.Group.canModerateGroup(currentUser, context) 
-    } else if ( action === GroupPermissions.ADMIN ) {
-        return shared.permissions.Group.canAdminGroup(currentUser, context) 
+    const canModerateGroup = useGroupPermission(currentUser, GroupPermissions.MODERATE, groupId) 
+    const canAdminGroup = useGroupPermission(currentUser, GroupPermissions.ADMIN, groupId)
+
+    context.canModerateGroup = canModerateGroup
+    context.canAdminGroup = canAdminGroup
+
+    if ( action === GroupPostPermissions.VIEW ) {
+        return shared.permissions.GroupPost.canViewGroupPost(currentUser, context) 
+    } else if ( action === GroupPostPermissions.CREATE ) {
+        return shared.permissions.GroupPost.canCreateGroupPost(currentUser, context)
     } else {
-        throw new Error(`Invalid GroupPermission: ${action}.`)
+        throw new Error(`Invalid GroupPostPermission: ${action}.`)
     }
 }

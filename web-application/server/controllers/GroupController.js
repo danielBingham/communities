@@ -224,6 +224,7 @@ module.exports = class GroupController {
 
         const groupId = request.params.id
 
+        console.log(groupId)
         const results = await this.groupDAO.selectGroups({
             where: `groups.id = $1`,
             params: [groupId]

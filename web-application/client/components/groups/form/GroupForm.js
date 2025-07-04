@@ -248,7 +248,7 @@ const GroupForm = function() {
             >
                 <RadioOption
                     name="type"
-                    label="Open"
+                    label="Public"
                     value="open"
                     current={type}
                     explanation="Anyone may add themselves and all posts in the group are public."

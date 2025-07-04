@@ -1,6 +1,12 @@
 #group-page .group-page__header {
     text-align: center;
 }
+#group-page .group-page__header .group-image {
+    display: block;
+    margin: 0 auto 20px auto;
+    max-width: 200px;
+    height: 200px;
+}
 #group-page .group-page__header .title {
     font-size: 2em;
     margin: 0.5em auto;
@@ -19,12 +25,6 @@
     height: 1.2em;
     margin-bottom: -0.2em;
 }
-#group-page .group-page__header .group-image {
-    display: block;
-    margin: 0 auto 20px auto;
-    max-width: 200px;
-    height: 200px;
-}
 
 #group-page .details {
     font-size: 16px;
@@ -41,7 +41,8 @@
 }
 
 #group-page .group-page__controls {
-    text-align: center; margin: 20px auto;
+    text-align: center; 
+    margin: 20px auto;
 }
 
 #group-page .group-page__private {

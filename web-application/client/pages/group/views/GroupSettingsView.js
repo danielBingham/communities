@@ -14,6 +14,7 @@ import Button from '/components/generic/button/Button'
 import AreYouSure from '/components/AreYouSure'
 import Radio from '/components/ui/Radio'
 import Modal from '/components/generic/modal/Modal'
+import Error404 from '/components/errors/Error404'
 
 import "./GroupSettingsView.css"
 
@@ -37,7 +38,7 @@ const GroupSettingsView = function({ groupId }) {
     }
 
     if ( ! canAdminGroup ) {
-        return null
+        return ( <Error404 /> ) 
     }
 
     return (

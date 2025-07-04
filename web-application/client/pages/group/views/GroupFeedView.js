@@ -1,16 +1,21 @@
 import React from 'react'
 import { useSelector } from 'react-redux'
 
-import { GroupPermissions, useGroupPermission  } from '/lib/hooks/permission'
+import { 
+    GroupPermissions, useGroupPermission,  
+    GroupPostPermissions, useGroupPostPermission
+} from '/lib/hooks/permission'
 
 import Feed from '/components/feeds/Feed'
 
 const GroupFeedView = function({ groupId }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
-    const canViewGroup = useGroupPermission(currentUser, GroupPermissions.VIEW, groupId)
 
-    if ( ! canViewGroup ) {
+    const canViewGroup = useGroupPermission(currentUser, GroupPermissions.VIEW, groupId)
+    const canViewGroupPost = useGroupPostPermission(currentUser, GroupPostPermissions.VIEW, groupId)
+
+    if ( canViewGroup !== true || canViewGroupPost !== true ) {
         return (<div className="group-feed-view__private">The contents of this group are private.</div>)
     }
 

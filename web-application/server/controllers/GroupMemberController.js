@@ -139,7 +139,7 @@ module.exports = class GroupMemberController {
                 `That group either doesn't exist or you don't have permission to see it.`)
         }
 
-        const canViewGroupContent = await this.permissionService.can(currentUser, 'view', 'Group:content', { group: group, groupMember: member })
+        const canViewGroupContent = await this.permissionService.can(currentUser, 'view', 'GroupMember', { group: group, groupMember: member })
         if ( ! canViewGroupContent ) {
             throw new ControllerError(404, 'not-found',
                 `User(${currentUser.id}) does not have permission to view membership of Group(${groupId}).`,
@@ -500,7 +500,7 @@ module.exports = class GroupMemberController {
         // group, then remove any subscriptions they have to posts in the
         // group.
         const memberUser = await this.userDAO.getUserById(memberId)
-        const canViewGroupContent = await this.permissionService.can(memberUser, 'view', 'Group:content', { group: group })
+        const canViewGroupContent = await this.permissionService.can(memberUser, 'view', 'GroupPost', { group: group })
         if ( ! canViewGroupContent ) {
             const subscriptionResults = await this.core.database.query(`
                 SELECT post_subscriptions.id FROM post_subscriptions

@@ -43,3 +43,11 @@
     padding: 20px;
     text-align: center;
 }
+
+@media ( width <= 360px) {
+    .list .list-grid-content {
+        box-sizing: border-box;
+        grid-template-columns: repeat(auto-fit, 360px);
+    }
+}
+

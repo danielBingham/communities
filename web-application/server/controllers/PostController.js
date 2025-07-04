@@ -199,6 +199,13 @@ module.exports = class PostController {
 
         // If we're query for a particular group's posts, only grab that group.
         if ('groupId' in request.query) {
+            const canViewGroupPost = await this.permissionService.can(currentUser, 'view', 'GroupPost', { groupId: request.query.groupId })
+            if ( canViewGroupPost !== true ) {
+                throw new ControllerError(404, 'not-found',
+                    `User attempting to view posts for a group without permission.`,
+                    `Either those posts don't exit or you don't have permission to view them.`)
+            }
+
             const and = query.params.length > 0 ? ' AND ' : ''
             query.params.push(request.query.groupId)
             query.where += `${and}posts.group_id = $${query.params.length}`
@@ -213,6 +220,13 @@ module.exports = class PostController {
             }
 
             const groupId = groupResult.rows[0].id
+
+            const canViewGroupPost = await this.permissionService.can(currentUser, 'view', 'GroupPost', { groupId: groupId })
+            if ( canViewGroupPost !== true ) {
+                throw new ControllerError(404, 'not-found',
+                    `User attempting to view posts for a group without permission.`,
+                    `Either those posts don't exit or you don't have permission to view them.`)
+            }
 
             const and = query.params.length > 0 ? ' AND ' : ''
             query.params.push(groupId)

@@ -23,7 +23,7 @@ const GroupMemberDAO = require('../../daos/GroupMemberDAO')
 const PostDAO = require('../../daos/PostDAO')
 const UserRelationshipDAO = require('../../daos/UserRelationshipDAO')
 
-const { util } = require('@communities/shared')
+const { util, permissions } = require('@communities/shared')
 
 const ServiceError = require('../../errors/ServiceError')
 
@@ -117,72 +117,36 @@ module.exports = class GroupMemberPermissions {
     }
 
     async canViewGroupMember(user, context) {
-        return await this.permissionService.can(user, 'view', 'Group:content', context)
+        await this.ensureContext(user, context, [ 'group' ], [ 'userMember' ])
+
+        // Site moderators can always view group content.
+        context.canModerateSite = await this.permissionService.can(user, 'moderate', 'Site')
+
+        return permissions.GroupMember.canViewGroupMember(user, context)
     }
 
     async canCreateGroupMember(user, context) {
         await this.ensureContext(user, context, [ 'group', 'groupMember' ], [ 'userMember' ])
         
-        const canModerateGroup = await this.permissionService.can(user, 'moderate', 'Group', context)
+        context.canModerateGroup = await this.permissionService.can(user, 'moderate', 'Group', context)
 
-        // For open groups
-        if ( context.group.type === 'open' ) {
-            return canModerateGroup || (context.userMember === null && context.groupMember.userId === user.id)
-        }
-        // For private groups
-        if ( context.group.type === 'private' ) {
-            return canModerateGroup || (context.userMember === null && context.groupMember.userId === user.id)
-        }
-        // For Hidden groups
-        if ( context.group.type === 'hidden' ) {
-            return canModerateGroup
-        }
-
-        return false
+        return permissions.GroupMember.canCreateGroupMember(user, context)
     }
 
     async canUpdateGroupMember(user, context) {
         await this.ensureContext(user, context, [ 'groupMember' ])
         
-        const canModerateGroup = await this.permissionService.can(user, 'moderate', 'Group', context)
+        context.canModerateGroup = await this.permissionService.can(user, 'moderate', 'Group', context)
 
-        // Admins can promote members to moderator or admin
-        // Moderators can ban members
-        if ( canModerateGroup === true) {
-            return true
-        }
-
-        // Users can update their own GroupMember in certain circumstances.
-        if ( user.id === context.groupMember.userId ) {
-            return true
-        }
-
-        return false
+        return permissions.GroupMember.canUpdateGroupMember(user, context)
     }
 
     async canDeleteGroupMember(user, context) {
         await this.ensureContext(user, context, [ 'groupMember' ])
 
-        const canModerateGroup = await this.permissionService.can(user, 'moderate', 'Group', context)
-        const canAdminGroup = await this.permissionService.can(user, 'admin', 'Group', context)
+        context.canModerateGroup = await this.permissionService.can(user, 'moderate', 'Group', context)
+        context.canAdminGroup = await this.permissionService.can(user, 'admin', 'Group', context)
 
-        // Moderators can delete members.
-        if ( context.groupMember.role === 'member' && canModerateGroup ) {
-            return true
-        } 
-
-        // Admins can delete moderators.
-        if ( context.groupMember.role === 'moderator' && canAdminGroup) {
-            return true
-        }
-
-        // Members can delete their own GroupMember
-        if ( user.id === context.groupMember.userId ) {
-            return true
-        }
-
-        return false
+        return permissions.GroupMember.canDeleteGroupMember(user, context)
     }
-
-
 }

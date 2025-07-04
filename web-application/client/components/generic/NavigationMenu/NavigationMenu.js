@@ -11,11 +11,9 @@ import './NavigationMenu.css'
 export const NavigationMenu = function({ children, className }) {
 
     return (
-        <div className="navigation-menu">
-            <menu className={`navigation-menu__menu ${className ? className : ''}`}>
-                { children }
-            </menu> 
-        </div>
+        <menu className={`navigation-menu ${className ? className : ''}`}>
+            { children }
+        </menu> 
     )
 }
 
@@ -41,8 +39,16 @@ export const NavigationMenuButton = function({ type, onClick, icon, text, classN
     const OutlineIcon = HeroIconsOutline[`${icon}Icon`]
 
     return (
-        <li className={`navigation-menu__button ${ className ? className : className }`} ><Button type={type} onClick={onClick}><SolidIcon className="solid" /><OutlineIcon className="outline" /> <span className="nav-text">{ text }</span></Button></li>
+        <li className={`navigation-menu__button ${ className ? className : ''}`} ><Button type={type} onClick={onClick}><SolidIcon className="solid" /><OutlineIcon className="outline" /> <span className="nav-text">{ text }</span></Button></li>
     )
 
+}
+
+export const NavigationMenuItemContainer = function({ className, children }) {
+    return (
+        <li className={`navigation-menu__item ${ className ? className : '' }`}>
+            { children }
+        </li>
+    )
 }
 

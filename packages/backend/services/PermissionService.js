@@ -23,8 +23,9 @@ const GroupMemberDAO = require('../daos/GroupMemberDAO')
 const PostDAO = require('../daos/PostDAO')
 const UserRelationshipDAO = require('../daos/UserRelationshipDAO')
 
-const GroupMemberPermissions = require('./permission/GroupMemberPermissions')
 const GroupPermissions = require('./permission/GroupPermissions')
+const GroupMemberPermissions = require('./permission/GroupMemberPermissions')
+const GroupPostPermissions = require('./permission/GroupPostPermissions')
 const PostCommentPermissions = require('./permission/PostCommentPermissions')
 const PostReactionPermissions = require('./permission/PostReactionPermissions')
 const PostSubscriptionPermissions = require('./permission/PostSubscriptionPermissions')
@@ -46,8 +47,9 @@ module.exports = class PermissionService {
         this.groupMemberDAO = new GroupMemberDAO(core)
         this.userRelationshipDAO = new UserRelationshipDAO(core)
 
-        this.groupMember = new GroupMemberPermissions(core, this)
         this.group = new GroupPermissions(core, this)
+        this.groupMember = new GroupMemberPermissions(core, this)
+        this.groupPost = new GroupPostPermissions(core, this)
         this.postComment = new PostCommentPermissions(core, this)
         this.postReaction = new PostReactionPermissions(core, this)
         this.postSubscription = new PostSubscriptionPermissions(core, this)
@@ -77,7 +79,6 @@ module.exports = class PermissionService {
             }
         } else if ( entity === 'Group' ) {
             if ( action === 'view' ) {
-                console.log(`Getting visible group ids.`)
                 /**
                  * Group permissions vary by type:
                  *
@@ -154,9 +155,11 @@ module.exports = class PermissionService {
             } else if ( action === 'admin' ) {
                 return await this.group.canAdminGroup(user, context)
             }
-        } else if ( entity === 'Group:content' ) {
+        } else if ( entity === 'GroupPost' ) {
             if ( action === 'view' ) {
-                return await this.group.canViewGroupContent(user, context)
+                return await this.groupPost.canViewGroupPost(user, context)
+            } else if ( action === 'create' ) {
+                return await this.groupPost.canCreateGroupPost(user, context)
             }
         } else if ( entity === 'GroupMember' ) {
             if ( action === 'view' ) {
@@ -256,7 +259,7 @@ module.exports = class PermissionService {
                     `GroupId in context does not match Post.groupId.`)
             }
 
-            return await this.can(user, 'view', 'Group:content', context)
+            return await this.can(user, 'view', 'GroupPost', context)
         }
 
         // If the post isn't in a group, then users can view their own
