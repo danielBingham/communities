@@ -36,7 +36,7 @@ const {
     UserDAO
 } = require('@communities/backend')
 
-const { lib } = require('@communities/shared')
+const { lib, cleaning, validation } = require('@communities/shared')
 
 const ControllerError = require('../errors/ControllerError')
 
@@ -353,6 +353,7 @@ module.exports = class PostController {
         }
 
         const post = request.body
+        
 
         const validationErrors = await this.validationService.validatePost(currentUser, post)
         if ( validationErrors.length > 0 ) {

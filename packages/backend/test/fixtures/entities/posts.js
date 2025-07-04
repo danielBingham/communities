@@ -143,6 +143,23 @@ const posts = {
         postReactions: [],
         postComments: []
     },
+    // Private post to Test Private Group by User One 
+    'b75c5eae-fc6a-4056-9674-279e13076f42': {
+        id: 'b75c5eae-fc6a-4056-9674-279e13076f42',
+        type: 'group',
+        visibility: 'private',
+        userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
+        fileId: null,
+        groupId: '8661a1ef-6259-4d5a-a59f-4d75929a765f',
+        linkPreviewId: null,
+        sharedPostId: null,
+        activity: 1,
+        content: 'This is a test private post to a Test Private Group by User One.',
+        createdDate: 'TIMESTAMP',
+        updatedDate: 'TIMESTAMP',
+        postReactions: [],
+        postComments: []
+    },
 }
 
 module.exports = {

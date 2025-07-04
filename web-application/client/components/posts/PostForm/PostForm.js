@@ -13,6 +13,8 @@ import { usePostDraft } from '/lib/hooks/usePostDraft'
 import { useGroup } from '/lib/hooks/Group'
 import { usePost } from '/lib/hooks/Post'
 
+import { GroupPostPermissions, useGroupPostPermission } from '/lib/hooks/permission'
+
 import { deleteFile } from '/state/File'
 import { postPosts, patchPost, finishPostEdit, clearSharingPost } from '/state/Post'
 
@@ -35,9 +37,13 @@ import './PostForm.css'
 
 const PostForm = function({ postId, groupId, sharedPostId }) {
 
+    const currentUser = useSelector((state) => state.authentication.currentUser)
+
     const [post] = usePost(postId) 
     const [group] = useGroup(post !== null ? post.groupId : groupId)
     const [draft, setDraft] = usePostDraft(postId, groupId)
+
+    const canCreateGroupPost = useGroupPostPermission(currentUser, GroupPostPermissions.CREATE, post !== null ? post.groupId : groupId)
 
     const [content,setContent] = useState( draft && 'content' in draft ? draft.content : '')
     const [fileId,setFileId] = useState(draft && 'fileId' in draft ? draft.fileId : null)
@@ -58,8 +64,6 @@ const PostForm = function({ postId, groupId, sharedPostId }) {
     const [postRequest, makePostRequest] = useRequest()
     const [patchRequest, makePatchRequest] = useRequest()
     const [deleteFileRequest, makeDeleteFileRequest] = useRequest()
-
-    const currentUser = useSelector((state) => state.authentication.currentUser)
 
     const dispatch = useDispatch()
     const navigate = useNavigate()
@@ -190,6 +194,15 @@ const PostForm = function({ postId, groupId, sharedPostId }) {
             setDraft(null) 
         }
     }, [ patchRequest ])
+
+
+    // Don't show the form if they don't have permission to post in this Group.
+    if ( 
+        ((groupId !== undefined && groupId !== null) || (post?.groupId !== undefined && post?.groupId !== null))
+            && canCreateGroupPost !== true )
+    {
+        return null
+    }
 
     let errorView = null
     if ( error == 'overlength') {

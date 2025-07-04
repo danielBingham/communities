@@ -3,6 +3,7 @@ const Group = require('./entities/Group')
 const GroupMember = require('./entities/GroupMember')
 const GroupModeration = require('./entities/GroupModeration')
 const LinkPreview = require('./entities/LinkPreview')
+const Post = require('./entities/Post')
 const PostComment = require('./entities/PostComment')
 const PostReaction = require('./entities/PostReaction')
 const PostSubscription = require('./entities/PostSubscription')
@@ -17,6 +18,7 @@ module.exports = {
     GroupMember: GroupMember,
     GroupModeration: GroupModeration,
     LinkPreview: LinkPreview,
+    Post: Post,
     PostComment: PostComment,
     PostReaction: PostReaction,
     PostSubscription: PostSubscription,
