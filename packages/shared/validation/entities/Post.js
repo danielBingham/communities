@@ -106,6 +106,7 @@ const validateActivity = function(value, existing, action) {
 const validateContent = function(value, existing, action) {
     const validator = new StringValidator('content', value, existing, action)
     const errors = validator
+        .mustNotBeNull()
         .mustBeString()
         .mustBeShorterThan(10001)
         .getErrors()
