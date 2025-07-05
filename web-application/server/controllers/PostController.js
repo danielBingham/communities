@@ -28,6 +28,7 @@ const {
     GroupDAO,
     GroupMemberDAO,
     GroupModerationDAO,
+    GroupModerationEventDAO,
     PostDAO,
     PostCommentDAO,
     PostReactionDAO,
@@ -50,6 +51,7 @@ module.exports = class PostController {
         this.groupDAO = new GroupDAO(core)
         this.groupMemberDAO = new GroupMemberDAO(core)
         this.groupModerationDAO = new GroupModerationDAO(core)
+        this.groupModerationEventDAO = new GroupModerationEventDAO(core)
         this.postDAO = new PostDAO(core)
         this.postCommentDAO = new PostCommentDAO(core)
         this.postReactionDAO = new PostReactionDAO(core)
@@ -309,11 +311,17 @@ module.exports = class PostController {
 
     async getPosts(request, response) {
         const currentUser = request.session.user
-
-        if (!currentUser) {
+        if ( ! currentUser ) {
             throw new ControllerError(401, 'not-authenticated',
                 `User must be authenticated to retrieve posts.`,
                 `You must be authenticated to retrieve posts.`)
+        }
+
+        const canQueryPosts = await this.permissionService.can(currentUser, PermissionService.ACTIONS.QUERY, 'Post')
+        if ( canQueryPosts !== true ) {
+            throw new ControllerError(403, 'not-authorized',
+                `User attempting to query posts without authorization.`,
+                `You are not authorized to query for posts.`)
         }
 
         const query = await this.createQuery(request)
@@ -354,6 +362,11 @@ module.exports = class PostController {
         const post = cleaning.Post.clean(request.body)
 
         const canCreatePost = await this.permissionService.can(currentUser, 'create', 'Post', { post: post })
+        if ( ! canCreatePost ) {
+            throw new ControllerError(403, 'not-authorized',
+                `User not authorized to create a post.`,
+                `You are not authorized to create that post.`)
+        }
 
         const validationErrors = await this.validationService.validatePost(currentUser, post)
         if ( validationErrors.length > 0 ) {
@@ -372,11 +385,26 @@ module.exports = class PostController {
         })
 
         const entity = results.dictionary[post.id]
-
-        if (!entity) {
+        if ( ! entity ) {
             throw new ControllerError(500, 'server-error',
                 `Post(${post.id}) missing after creation.`,
                 `Post(${post.id}) missing after being created.  Please report as a bug.`)
+        }
+
+        if ( entity.groupId ) {
+            const group = await this.groupDAO.getGroupById(entity.groupId) 
+
+            if ( group.postPermissions === 'approval' ) {
+                const moderation = {
+                    userId: currentUser.id,
+                    groupId: entity.groupId,
+                    status: 'pending',
+                    postId: entity.id
+                }
+
+                await this.groupModerationDAO.insertGroupModeration(moderation)
+                await this.groupModerationEventDAO.insertGroupModerationEvents(this.groupModerationEventDAO.createEventFromGroupModeration(moderation))
+            }
         }
 
         // Notify any mentioned users

@@ -77,8 +77,10 @@ module.exports = class GroupPostPermissions {
         {
             // If userMember is in context and set to null, then we don't want
             // to try to load it.
-            if ( context.userMember !== null ) {
+            if ( util.objectHas(context, 'group') && context.group !== null && context.userMember !== null ) {
                 context.userMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(context.group.id, user.id, true)
+            } else {
+                context.userMember = null
             }
 
             if ( required.includes('userMember') && (! util.objectHas(context, 'userMember') || context.userMember === null) ) {
@@ -130,6 +132,12 @@ module.exports = class GroupPostPermissions {
         }
     }
 
+    async canCreateGroupPost(user, context) {
+        await this.ensureContext(user, context, [ 'group' ], [ 'userMember' ])
+
+        return permissions.GroupPost.canCreateGroupPost(user, context)
+    }
+
     async canViewGroupPost(user, context) {
         await this.ensureContext(user, context, [ 'group' ], [ 'userMember' ])
 
@@ -139,9 +147,4 @@ module.exports = class GroupPostPermissions {
         return permissions.GroupPost.canViewGroupPost(user, context)
     }
 
-    async canCreateGroupPost(user, context) {
-        await this.ensureContext(user, context, [ 'group' ], [ 'userMember' ])
-
-        return permissions.GroupPost.canCreateGroupPost(user, context)
-    }
 }

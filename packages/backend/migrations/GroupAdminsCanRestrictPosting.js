@@ -27,6 +27,9 @@ module.exports = class GroupModeratorsCanBanUsers extends BaseMigration {
     }
 
     async initForward() { 
+        // This can't be undone.
+        await this.database.query(`ALTER TYPE group_moderation_status ADD VALUE IF NOT EXISTS 'pending'`, [])
+
         await this.database.query(`CREATE TYPE group_post_permissions as ENUM('anyone', 'members', 'approval', 'restricted')`, [])
         await this.database.query(`ALTER TABLE groups ADD COLUMN IF NOT EXISTS post_permissions group_post_permissions DEFAULT 'members'`, [])
     }
