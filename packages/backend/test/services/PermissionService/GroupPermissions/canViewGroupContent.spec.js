@@ -53,7 +53,7 @@ describe('PermissionService.canViewGroupContent()', function() {
             // User One 
             const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-            const canView = await service.can(currentUser, 'view', 'Group:content', context)
+            const canView = await service.can(currentUser, 'view', 'GroupPost', context)
 
             expect(group.id).toBe(groupMember.groupId)
             expect(currentUser.id).toBe(groupMember.userId)
@@ -79,7 +79,7 @@ describe('PermissionService.canViewGroupContent()', function() {
             // User One 
             const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-            const canView = await service.can(currentUser, 'view', 'Group:content', context)
+            const canView = await service.can(currentUser, 'view', 'GroupPost', context)
 
             expect(context.groupId).toBe(groupMember.groupId)
             expect(currentUser.id).toBe(groupMember.userId)
@@ -105,7 +105,7 @@ describe('PermissionService.canViewGroupContent()', function() {
             // User One 
             const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-            const canView = await service.can(currentUser, 'view', 'Group:content', context)
+            const canView = await service.can(currentUser, 'view', 'GroupPost', context)
 
             expect(groupMemberRows[0].GroupMember_groupId).toBe(group.id)
             expect(groupMemberRows[0].GroupMember_userId).toBe(currentUser.id)
@@ -132,7 +132,7 @@ describe('PermissionService.canViewGroupContent()', function() {
             const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
             try {
-                const canView = await service.can(currentUser, 'view', 'Group:content', context)
+                const canView = await service.can(currentUser, 'view', 'GroupPost', context)
             } catch (error) {
                 expect(error).toBeInstanceOf(ServiceError)
                 expect(error.type).toBe('invalid-context:group')
@@ -163,7 +163,7 @@ describe('PermissionService.canViewGroupContent()', function() {
             const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
             try {
-                const canView = await service.can(currentUser, 'view', 'Group:content', context)
+                const canView = await service.can(currentUser, 'view', 'GroupPost', context)
             } catch (error) {
                 expect(error).toBeInstanceOf(ServiceError)
                 expect(error.type).toBe('invalid-context:post')
@@ -192,7 +192,7 @@ describe('PermissionService.canViewGroupContent()', function() {
             const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
             try {
-                const canView = await service.can(currentUser, 'view', 'Group:content', context)
+                const canView = await service.can(currentUser, 'view', 'GroupPost', context)
             } catch (error) {
                 expect(error).toBeInstanceOf(ServiceError)
                 expect(error.type).toBe('invalid-context:post')
@@ -219,7 +219,7 @@ describe('PermissionService.canViewGroupContent()', function() {
             const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
             try {
-                const canView = await service.can(currentUser, 'view', 'Group:content', context)
+                const canView = await service.can(currentUser, 'view', 'GroupPost', context)
             } catch (error) {
                 expect(error).toBeInstanceOf(ServiceError)
                 expect(error.type).toBe('invalid-context:groupMember')
@@ -246,7 +246,7 @@ describe('PermissionService.canViewGroupContent()', function() {
         // User One 
         const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-        const canView = await service.can(currentUser, 'view', 'Group:content', context)
+        const canView = await service.can(currentUser, 'view', 'GroupPost', context)
 
         expect(group.type).toBe('open')
         expect(groupMember.userId).toBe(currentUser.id)
@@ -272,7 +272,7 @@ describe('PermissionService.canViewGroupContent()', function() {
         // User One 
         const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-        const canView = await service.can(currentUser, 'view', 'Group:content', context)
+        const canView = await service.can(currentUser, 'view', 'GroupPost', context)
 
         expect(group.type).toBe('open')
         expect(groupMember.userId).toBe(currentUser.id)
@@ -298,7 +298,7 @@ describe('PermissionService.canViewGroupContent()', function() {
         // User One 
         const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-        const canView = await service.can(currentUser, 'view', 'Group:content', context)
+        const canView = await service.can(currentUser, 'view', 'GroupPost', context)
 
         expect(group.type).toBe('open')
         expect(groupMember.userId).toBe(currentUser.id)
@@ -323,7 +323,7 @@ describe('PermissionService.canViewGroupContent()', function() {
         core.database.query.mockReturnValue(undefined)
             .mockReturnValueOnce({ rowCount: 0, rows: [ ]})
 
-        const canView = await service.can(currentUser, 'view', 'Group:content', context)
+        const canView = await service.can(currentUser, 'view', 'GroupPost', context)
 
         expect(group.type).toBe('open')
         expect(canView).toBe(true)
@@ -346,7 +346,7 @@ describe('PermissionService.canViewGroupContent()', function() {
         // User One 
         const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-        const canView = await service.can(currentUser, 'view', 'Group:content', context)
+        const canView = await service.can(currentUser, 'view', 'GroupPost', context)
 
         expect(group.type).toBe('private')
         expect(groupMember.userId).toBe(currentUser.id)
@@ -372,7 +372,7 @@ describe('PermissionService.canViewGroupContent()', function() {
         // User One 
         const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-        const canView = await service.can(currentUser, 'view', 'Group:content', context)
+        const canView = await service.can(currentUser, 'view', 'GroupPost', context)
 
         expect(group.type).toBe('private')
         expect(groupMember.userId).toBe(currentUser.id)
@@ -398,7 +398,7 @@ describe('PermissionService.canViewGroupContent()', function() {
         // User One 
         const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-        const canView = await service.can(currentUser, 'view', 'Group:content', context)
+        const canView = await service.can(currentUser, 'view', 'GroupPost', context)
 
         expect(group.type).toBe('private')
         expect(groupMember.userId).toBe(currentUser.id)
@@ -423,7 +423,7 @@ describe('PermissionService.canViewGroupContent()', function() {
         core.database.query.mockReturnValue(undefined)
             .mockReturnValueOnce({ rowCount: 0, rows: [ ]})
 
-        const canView = await service.can(currentUser, 'view', 'Group:content', context)
+        const canView = await service.can(currentUser, 'view', 'GroupPost', context)
 
         expect(group.type).toBe('private')
         expect(canView).toBe(false)
@@ -446,7 +446,7 @@ describe('PermissionService.canViewGroupContent()', function() {
         // User One 
         const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-        const canView = await service.can(currentUser, 'view', 'Group:content', context)
+        const canView = await service.can(currentUser, 'view', 'GroupPost', context)
 
         expect(group.type).toBe('hidden')
         expect(groupMember.userId).toBe(currentUser.id)
@@ -472,7 +472,7 @@ describe('PermissionService.canViewGroupContent()', function() {
         // User One 
         const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-        const canView = await service.can(currentUser, 'view', 'Group:content', context)
+        const canView = await service.can(currentUser, 'view', 'GroupPost', context)
 
         expect(group.type).toBe('hidden')
         expect(groupMember.userId).toBe(currentUser.id)
@@ -498,7 +498,7 @@ describe('PermissionService.canViewGroupContent()', function() {
         // User One 
         const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-        const canView = await service.can(currentUser, 'view', 'Group:content', context)
+        const canView = await service.can(currentUser, 'view', 'GroupPost', context)
 
         expect(group.type).toBe('hidden')
         expect(groupMember.userId).toBe(currentUser.id)
@@ -523,7 +523,7 @@ describe('PermissionService.canViewGroupContent()', function() {
         core.database.query.mockReturnValue(undefined)
             .mockReturnValueOnce({ rowCount: 0, rows: [ ]})
 
-        const canView = await service.can(currentUser, 'view', 'Group:content', context)
+        const canView = await service.can(currentUser, 'view', 'GroupPost', context)
 
         expect(group.type).toBe('hidden')
         expect(canView).toBe(false)

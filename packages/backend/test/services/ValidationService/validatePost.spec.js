@@ -1119,7 +1119,7 @@ describe('ValidationService.validatePost()', function() {
                 expect(errors[0].type).toBe('content:too-long')
             })
 
-            it('Should pass when content is `null`', async function() {
+            it('Should error when content is `null`', async function() {
                 const service = new ValidationService(core)
 
                 const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
@@ -1136,7 +1136,8 @@ describe('ValidationService.validatePost()', function() {
 
                 const errors = await service.validatePost(currentUser, post, undefined)
 
-                expect(errors.length).toBe(0)
+                expect(errors.length).toBe(1)
+                expect(errors[0].type).toBe('content:null')
             })
         })
     })

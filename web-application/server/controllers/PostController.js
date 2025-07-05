@@ -345,15 +345,15 @@ module.exports = class PostController {
 
     async postPosts(request, response) {
         const currentUser = request.session.user
-
-        if (!currentUser) {
+        if ( ! currentUser ) {
             throw new ControllerError(401, 'not-authenticated',
                 `User must be authenticated to create a post.`,
                 `You must must be authenticated to create a post.`)
         }
 
-        const post = request.body
-        
+        const post = cleaning.Post.clean(request.body)
+
+        const canCreatePost = await this.permissionService.can(currentUser, 'create', 'Post', { post: post })
 
         const validationErrors = await this.validationService.validatePost(currentUser, post)
         if ( validationErrors.length > 0 ) {

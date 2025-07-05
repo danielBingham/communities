@@ -47,7 +47,7 @@ describe('PermissionService.canDeletePost()', function() {
             // Admin User
             const currentUser = entities['users'].dictionary['469931f6-26f2-4e1c-b4a0-849aed14e977']
 
-            const canDelete = await service.canDeletePost(currentUser, context)
+            const canDelete = await service.can(currentUser, 'delete', 'Post', context)
 
             expect(canDelete).toBe(true)
         })
@@ -67,7 +67,7 @@ describe('PermissionService.canDeletePost()', function() {
             // Admin User
             const currentUser = entities['users'].dictionary['469931f6-26f2-4e1c-b4a0-849aed14e977']
 
-            const canDelete = await service.canDeletePost(currentUser, context)
+            const canDelete = await service.can(currentUser, 'delete', 'Post', context)
 
             expect(canDelete).toBe(true)
         })
@@ -89,7 +89,7 @@ describe('PermissionService.canDeletePost()', function() {
             // User One 
             const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-            const canDelete = await service.canDeletePost(currentUser, context)
+            const canDelete = await service.can(currentUser, 'delete', 'Post', context)
 
             expect(post.userId).not.toBe(currentUser.id)
             expect(currentUser.id).toBe(groupMember.userId)
@@ -115,7 +115,7 @@ describe('PermissionService.canDeletePost()', function() {
             // User One 
             const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-            const canDelete = await service.canDeletePost(currentUser, context)
+            const canDelete = await service.can(currentUser, 'delete', 'Post', context)
 
             expect(post.userId).not.toBe(currentUser.id)
             expect(canDelete).toBe(true)
@@ -135,7 +135,7 @@ describe('PermissionService.canDeletePost()', function() {
             const currentUser = entities['users'].dictionary['469931f6-26f2-4e1c-b4a0-849aed14e977']
 
             try {
-                const canDelete = await service.canDeletePost(currentUser, context)
+                const canDelete = await service.can(currentUser, 'delete', 'Post', context)
             } catch (error) {
                 expect(error).toBeInstanceOf(ServiceError)
                 expect(error.type).toBe('invalid-context:post')
@@ -153,7 +153,7 @@ describe('PermissionService.canDeletePost()', function() {
             const currentUser = entities['users'].dictionary['469931f6-26f2-4e1c-b4a0-849aed14e977']
 
             try {
-                const canDelete = await service.canDeletePost(currentUser, context)
+                const canDelete = await service.can(currentUser, 'delete', 'Post', context)
             } catch (error) {
                 expect(error).toBeInstanceOf(ServiceError)
                 expect(error.type).toBe('missing-context')
@@ -176,7 +176,7 @@ describe('PermissionService.canDeletePost()', function() {
                 .mockReturnValueOnce({ rowCount: 0, rows: [ ]})
 
             try {
-                const canDelete = await service.canDeletePost(currentUser, context)
+                const canDelete = await service.can(currentUser, 'delete', 'Post', context)
             } catch (error) {
                 expect(error).toBeInstanceOf(ServiceError)
                 expect(error.type).toBe('missing-context')
@@ -204,7 +204,7 @@ describe('PermissionService.canDeletePost()', function() {
             const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
             try {
-                const canDelete = await service.canDeletePost(currentUser, context)
+                const canDelete = await service.can(currentUser, 'delete', 'Post', context)
             } catch (error) {
                 expect(error).toBeInstanceOf(ServiceError)
                 expect(error.type).toBe('invalid-context:post')
@@ -231,7 +231,7 @@ describe('PermissionService.canDeletePost()', function() {
             const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
             try {
-                const canDelete = await service.canDeletePost(currentUser, context)
+                const canDelete = await service.can(currentUser, 'delete', 'Post', context)
             } catch (error) {
                 expect(error).toBeInstanceOf(ServiceError)
                 expect(error.type).toBe('invalid-context:groupMember')
@@ -255,7 +255,7 @@ describe('PermissionService.canDeletePost()', function() {
             // Admin User
             const currentUser = entities['users'].dictionary['469931f6-26f2-4e1c-b4a0-849aed14e977']
 
-            const canDelete = await service.canDeletePost(currentUser, context)
+            const canDelete = await service.can(currentUser, 'delete', 'Post', context)
 
             expect(post.userId).toBe(currentUser.id)
             expect(canDelete).toBe(true)
@@ -273,7 +273,7 @@ describe('PermissionService.canDeletePost()', function() {
             // User One 
             const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-            const canDelete = await service.canDeletePost(currentUser, context)
+            const canDelete = await service.can(currentUser, 'delete', 'Post', context)
 
             expect(post.userId).not.toBe(currentUser.id)
             expect(canDelete).toBe(false)
@@ -281,7 +281,7 @@ describe('PermissionService.canDeletePost()', function() {
     })
 
     describe("for a group post", function() {
-        it("Should allow a GroupMember with role 'moderator' to delete the post", async function() {
+        it("Should not allow a GroupMember with role 'moderator' to delete the post", async function() {
             const service = new PermissionService(core)
 
             // Private post to Test Private Group by Admin User
@@ -300,15 +300,15 @@ describe('PermissionService.canDeletePost()', function() {
             // User One 
             const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-            const canDelete = await service.canDeletePost(currentUser, context)
+            const canDelete = await service.can(currentUser, 'delete', 'Post', context)
 
             expect(post.userId).not.toBe(currentUser.id)
             expect(currentUser.id).toBe(groupMember.userId)
             expect(groupMember.role).toBe('moderator')
-            expect(canDelete).toBe(true)
+            expect(canDelete).toBe(false)
         })
 
-        it("Should allow a GroupMember with role 'admin' to delete the post", async function() {
+        it("Should not allow a GroupMember with role 'admin' to delete the post", async function() {
             const service = new PermissionService(core)
 
             // Private post to Test Private Group by Admin User
@@ -327,12 +327,12 @@ describe('PermissionService.canDeletePost()', function() {
             // User One 
             const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-            const canDelete = await service.canDeletePost(currentUser, context)
+            const canDelete = await service.can(currentUser, 'delete', 'Post', context)
 
             expect(post.userId).not.toBe(currentUser.id)
             expect(currentUser.id).toBe(groupMember.userId)
             expect(groupMember.role).toBe('admin')
-            expect(canDelete).toBe(true)
+            expect(canDelete).toBe(false)
         })
 
         it("Should not allow a GroupMember who isn't an author to delete the post", async function() {
@@ -354,7 +354,7 @@ describe('PermissionService.canDeletePost()', function() {
             // User One 
             const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-            const canDelete = await service.canDeletePost(currentUser, context)
+            const canDelete = await service.can(currentUser, 'delete', 'Post', context)
 
             expect(post.userId).not.toBe(currentUser.id)
             expect(currentUser.id).toBe(groupMember.userId)
