@@ -8,7 +8,7 @@ import { getGroup } from '/state/Group'
 export const useGroup = function(groupId) {
     const group = useSelector((state) => {
         if ( ! groupId ) {
-            return undefined
+            return null 
         }
 
         if ( ! (groupId in state.Group.dictionary ) ) {

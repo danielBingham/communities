@@ -15,7 +15,7 @@ const PostVisibilityControl = function({ visibility, setVisibility, postId, grou
     const [post] = usePost(postId) 
     const [group] = useGroup(post !== null ? post.groupId : groupId)
 
-    if ( group !== null ) {
+    if ( group !== undefined && group !== null ) {
         if ( visibility === 'private' ) {
             return (
                 <div className="post-visibility-control">

@@ -9,7 +9,7 @@ export const usePostLink = function(id) {
     const [user] = useUser(post?.userId)
 
     if ( post === null 
-        || ( post.groupId !== null && group === null) 
+        || ( post.groupId !== null && group !== undefined && group === null) 
         || (post.userId !== null && user === null)
     ) {
         return ''

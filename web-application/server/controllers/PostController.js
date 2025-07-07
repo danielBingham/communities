@@ -475,11 +475,6 @@ module.exports = class PostController {
 
         const relations = await this.getRelations(currentUser, postResults)
 
-        console.log(`Entity: `)
-        console.log(post)
-        console.log(`relations: `)
-        console.log(relations)
-
         response.status(200).json({
             entity: post,
             relations: relations
