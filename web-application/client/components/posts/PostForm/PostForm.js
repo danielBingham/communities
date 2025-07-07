@@ -11,6 +11,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 import { usePostDraft } from '/lib/hooks/usePostDraft'
 
 import { useGroup } from '/lib/hooks/Group'
+import { useGroupMember } from '/lib/hooks/GroupMember'
 import { usePost } from '/lib/hooks/Post'
 
 import { GroupPostPermissions, useGroupPostPermission } from '/lib/hooks/permission'
@@ -41,9 +42,10 @@ const PostForm = function({ postId, groupId, sharedPostId }) {
 
     const [post] = usePost(postId) 
     const [group] = useGroup(post !== null ? post.groupId : groupId)
+    const [currentMember] = useGroupMember(group?.id, currentUser.id)
     const [draft, setDraft] = usePostDraft(postId, groupId)
 
-    const canCreateGroupPost = useGroupPostPermission(currentUser, GroupPostPermissions.CREATE, post !== null ? post.groupId : groupId)
+    const canCreateGroupPost = useGroupPostPermission(currentUser, GroupPostPermissions.CREATE, { group: group, userMember: currentMember })
 
     const [content,setContent] = useState( draft && 'content' in draft ? draft.content : '')
     const [fileId,setFileId] = useState(draft && 'fileId' in draft ? draft.fileId : null)
@@ -194,7 +196,6 @@ const PostForm = function({ postId, groupId, sharedPostId }) {
             setDraft(null) 
         }
     }, [ patchRequest ])
-
 
     // Don't show the form if they don't have permission to post in this Group.
     if ( 

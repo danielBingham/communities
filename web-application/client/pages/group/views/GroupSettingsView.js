@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 
 import { useRequest } from '/lib/hooks/useRequest'
 import { useGroup } from '/lib/hooks/Group'
+import { useGroupMember } from '/lib/hooks/GroupMember'
 import { GroupPermissions, useGroupPermission } from '/lib/hooks/permission'
 
 import { deleteGroup } from '/state/Group'
@@ -27,8 +28,10 @@ const GroupSettingsView = function({ groupId }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
-    const [group] = useGroup(groupId) 
-    const canAdminGroup = useGroupPermission(currentUser, GroupPermissions.ADMIN, groupId)
+    const [group, groupRequest] = useGroup(groupId) 
+    const [currentMember, currentMemberRequest] = useGroupMember(groupId, currentUser.id)
+
+    const canAdminGroup = useGroupPermission(currentUser, GroupPermissions.ADMIN, { group: group, userMember: currentMember })
 
     const navigate = useNavigate()
     const deleteCurrentGroup = function() {

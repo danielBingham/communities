@@ -8,7 +8,7 @@ const GroupMemberPermissions = require('../../../../services/permission/GroupMem
 const entities = require('../../../fixtures/entities')
 const database = require('../../../fixtures/database')
 
-describe("GroupMemberPermissions.canViewGroupMember()", function() {
+describe("GroupMemberPermissions.canQueryGroupMember()", function() {
 
     const core = {
         logger: new Logger(),
@@ -47,18 +47,14 @@ describe("GroupMemberPermissions.canViewGroupMember()", function() {
             // Open Group
             const group = entities.groups.dictionary['aeb26ec5-3644-4b7a-805e-375551ec65b6']
 
-            // User Two 'member' membership in Open Group
-            const groupMember = entities.groupMembers.dictionary['a9e18581-0826-491a-835a-751bcfc228a8']
-
             const context = {
                 group: group,
-                userMember: null,
-                groupMember: groupMember 
+                userMember: null 
             }
 
-            const canViewGroupMember = await service.can(currentUser, 'view', 'GroupMember', context)
+            const canQueryGroupMember = await service.can(currentUser, 'query', 'GroupMember', context)
 
-            expect(canViewGroupMember).toBe(true)
+            expect(canQueryGroupMember).toBe(true)
         })
 
         it("Should allow members to view GroupMembers", async function() {
@@ -69,20 +65,16 @@ describe("GroupMemberPermissions.canViewGroupMember()", function() {
             // Open Group
             const group = entities.groups.dictionary['aeb26ec5-3644-4b7a-805e-375551ec65b6']
             // User One 'member' membership in Open Group
-            const userMember = entities.groupMembers.dictionary['138de5fc-a0a9-47eb-ac51-3c92f7780ad9']
-            
-            // User Two 'member' membership in Open Group
-            const groupMember = entities.groupMembers.dictionary['a9e18581-0826-491a-835a-751bcfc228a8']
+            const membership = entities.groupMembers.dictionary['138de5fc-a0a9-47eb-ac51-3c92f7780ad9']
 
             const context = {
                 group: group,
-                userMember: userMember,
-                groupMember: groupMember
+                userMember: membership 
             }
 
-            const canViewGroupMember = await service.can(currentUser, 'view', 'GroupMember', context)
+            const canQueryGroupMember = await service.can(currentUser, 'query', 'GroupMember', context)
 
-            expect(canViewGroupMember).toBe(true)
+            expect(canQueryGroupMember).toBe(true)
         })
     })
 
@@ -96,18 +88,14 @@ describe("GroupMemberPermissions.canViewGroupMember()", function() {
             // Private Group
             const group = entities.groups.dictionary['8661a1ef-6259-4d5a-a59f-4d75929a765f']
 
-            // User Two 'member' membership in Private Group
-            const groupMember = entities.groupMembers.dictionary['bb64caa2-a6a6-43be-a11d-349b6e68f5a8']
-
             const context = {
                 group: group,
-                userMember: null,
-                groupMember: groupMember
+                userMember: null 
             }
 
-            const canViewGroupMember = await service.can(currentUser, 'view', 'GroupMember', context)
+            const canQueryGroupMember = await service.can(currentUser, 'query', 'GroupMember', context)
 
-            expect(canViewGroupMember).toBe(false)
+            expect(canQueryGroupMember).toBe(false)
         })
 
         it("Should allow members to view GroupMembers", async function() {
@@ -118,19 +106,16 @@ describe("GroupMemberPermissions.canViewGroupMember()", function() {
             // Private Group
             const group = entities.groups.dictionary['8661a1ef-6259-4d5a-a59f-4d75929a765f']
             // User One 'member' membership in Private Group
-            const userMember = entities.groupMembers.dictionary['0e1555d1-bccd-465d-85bc-4e3dbd4d29db']
-            // User Two 'member' membership in Private Group
-            const groupMember = entities.groupMembers.dictionary['bb64caa2-a6a6-43be-a11d-349b6e68f5a8']
+            const membership = entities.groupMembers.dictionary['0e1555d1-bccd-465d-85bc-4e3dbd4d29db']
 
             const context = {
                 group: group,
-                userMember: userMember,
-                groupMember: groupMember
+                userMember: membership 
             }
 
-            const canViewGroupMember = await service.can(currentUser, 'view', 'GroupMember', context)
+            const canQueryGroupMember = await service.can(currentUser, 'query', 'GroupMember', context)
 
-            expect(canViewGroupMember).toBe(true)
+            expect(canQueryGroupMember).toBe(true)
         })
     })
 
@@ -144,18 +129,14 @@ describe("GroupMemberPermissions.canViewGroupMember()", function() {
             // Hidden Group
             const group = entities.groups.dictionary['4e66c241-ef21-4143-b7b4-c4fe81a34acd']
 
-            // User Two 'member' membership in Hidden Group
-            const groupMember = entities.groupMembers.dictionary['d0fa5e53-4306-4b0d-91cb-22df17a46104']
-
             const context = {
                 group: group,
-                userMember: null,
-                groupMember: groupMember
+                userMember: null 
             }
 
-            const canViewGroupMember = await service.can(currentUser, 'view', 'GroupMember', context)
+            const canQueryGroupMember = await service.can(currentUser, 'query', 'GroupMember', context)
 
-            expect(canViewGroupMember).toBe(false)
+            expect(canQueryGroupMember).toBe(false)
         })
 
         it("Should allow members to view GroupMembers", async function() {
@@ -166,19 +147,16 @@ describe("GroupMemberPermissions.canViewGroupMember()", function() {
             // Hidden Group
             const group = entities.groups.dictionary['4e66c241-ef21-4143-b7b4-c4fe81a34acd']
             // User One 'member' membership in Private Group
-            const userMember = entities.groupMembers.dictionary['eee01f25-8669-4119-bcf6-4cd3eb3c4f26']
-            // User Two 'member' membership in Hidden Group
-            const groupMember = entities.groupMembers.dictionary['d0fa5e53-4306-4b0d-91cb-22df17a46104']
+            const membership = entities.groupMembers.dictionary['eee01f25-8669-4119-bcf6-4cd3eb3c4f26']
 
             const context = {
                 group: group,
-                userMember: userMember,
-                groupMember: groupMember
+                userMember: membership 
             }
 
-            const canViewGroupMember = await service.can(currentUser, 'view', 'GroupMember', context)
+            const canQueryGroupMember = await service.can(currentUser, 'query', 'GroupMember', context)
 
-            expect(canViewGroupMember).toBe(true)
+            expect(canQueryGroupMember).toBe(true)
         })
     })
 })

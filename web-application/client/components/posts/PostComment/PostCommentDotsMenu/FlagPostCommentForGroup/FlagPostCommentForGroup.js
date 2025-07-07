@@ -6,9 +6,13 @@ import { CheckCircleIcon, XCircleIcon, FlagIcon as FlagIconSolid } from '@heroic
 
 import { useRequest } from '/lib/hooks/useRequest'
 import { useFeature } from '/lib/hooks/feature/useFeature'
+
 import { usePost } from '/lib/hooks/Post'
 import { usePostComment } from '/lib/hooks/PostComment'
+import { useGroup } from '/lib/hooks/Group'
+import { useGroupMember } from '/lib/hooks/GroupMember'
 import { useGroupModeration } from '/lib/hooks/GroupModeration'
+
 import { useGroupPermission, GroupPermissions } from '/lib/hooks/permission'
 
 import { postGroupModerations } from '/state/GroupModeration'
@@ -31,9 +35,12 @@ const FlagPostCommentForGroup = function({ postId, postCommentId} ) {
     const [post, postRequest] = usePost(postId)
     const [comment, commentRequest] = usePostComment(postId, postCommentId)
 
+    const [group, groupRequest] = useGroup(post?.groupId)
+    const [currentMember, currentMemberRequest] = useGroupMember(group?.id, currentUser.id)
+
     const [groupModeration, groupModerationRequest] = useGroupModeration(comment?.groupModerationId)
 
-    const canModerateGroup = useGroupPermission(currentUser, GroupPermissions.MODERATE, post?.groupId)
+    const canModerateGroup = useGroupPermission(currentUser, GroupPermissions.MODERATE, { group: group, userMember: currentMember })
 
     const hasGroupModerationControls = useFeature('89-improved-moderation-for-group-posts')
 

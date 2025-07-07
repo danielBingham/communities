@@ -97,9 +97,15 @@ module.exports = class GroupModerationController extends BaseController {
         query.where += `${and} group_moderation.id != ALL($${query.params.length}::uuid[])`
 
         if ( 'status' in request.query && request.query.status !== undefined && request.query.status !== null ) {
-            const and = query.params.length > 0 ? ' AND ' : ''
-            query.params.push(request.query.status)
-            query.where += `${and} group_moderation.status = $${query.params.length}`
+            if ( Array.isArray(request.query.status) ) {
+                const and = query.params.length > 0 ? ' AND ' : ''
+                query.params.push(request.query.status)
+                query.where += `${and} group_moderation.status = ANY($${query.params.length}::group_moderation_status[])`
+            } else {
+                const and = query.params.length > 0 ? ' AND ' : ''
+                query.params.push(request.query.status)
+                query.where += `${and} group_moderation.status = $${query.params.length}`
+            }
         }
 
         if ( 'postId' in request.query && request.query.postId !== undefined && request.query.postId !== null ) {

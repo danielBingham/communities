@@ -49,8 +49,7 @@ export const GroupMemberSlice = createSlice({
     initialState: initialState,
     reducers: {
         setGroupMembersInDictionary: (state, action) => {
-            setInDictionary(state, action)
-
+            // Utilty to manage the map.
             const setByGroupAndUser = (entity) => {
                 if ( ! (entity.groupId in state.byGroupAndUser) ) {
                     state.byGroupAndUser[entity.groupId] = {}
@@ -59,11 +58,17 @@ export const GroupMemberSlice = createSlice({
             }
 
             if ( 'dictionary' in action.payload ) {
+                setInDictionary(state, action)
                 for(const [id, entity] of Object.entries(action.payload.dictionary)) {
                     setByGroupAndUser(entity)
                 }
             } else if ('entity' in action.payload ) {
-                setByGroupAndUser(action.payload.entity)
+                if ( 'id' in action.payload.entity ) {
+                    setInDictionary(state, action)
+                }
+                if ( 'userId' in action.payload.entity && 'groupId' in action.payload.entity ) {
+                    setByGroupAndUser(action.payload.entity)
+                }
             }
         },
         removeGroupMember: (state, action) => {

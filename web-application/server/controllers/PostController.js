@@ -189,7 +189,7 @@ module.exports = class PostController {
 
         const and = query.params.length > 0 ? ' AND ' : ''
         query.params.push(currentUser.id)
-        query.where += `${and} (group_moderation.status IS NULL OR group_moderation.status != 'rejected' OR posts.user_id = $${query.params.length}) 
+        query.where += `${and} (group_moderation.status IS NULL OR (group_moderation.status != 'rejected' AND group_moderation.status != 'pending') OR posts.user_id = $${query.params.length}) 
             AND (site_moderation.status IS NULL OR site_moderation.status != 'rejected' OR posts.user_id = $${query.params.length})`
 
 
@@ -402,8 +402,14 @@ module.exports = class PostController {
                     postId: entity.id
                 }
 
-                await this.groupModerationDAO.insertGroupModeration(moderation)
+                await this.groupModerationDAO.insertGroupModerations(moderation)
                 await this.groupModerationEventDAO.insertGroupModerationEvents(this.groupModerationEventDAO.createEventFromGroupModeration(moderation))
+
+                const postPatch = {
+                    id: entity.id,
+                    groupModerationId: moderation.id
+                }
+                await this.postDAO.updatePost(postPatch)
             }
         }
 
@@ -469,6 +475,11 @@ module.exports = class PostController {
 
         const relations = await this.getRelations(currentUser, postResults)
 
+        console.log(`Entity: `)
+        console.log(post)
+        console.log(`relations: `)
+        console.log(relations)
+
         response.status(200).json({
             entity: post,
             relations: relations
@@ -532,7 +543,6 @@ module.exports = class PostController {
             entity: results.dictionary[results.list[0]],
             relations: relations
         })
-
     }
 
     async deletePost(request, response) {

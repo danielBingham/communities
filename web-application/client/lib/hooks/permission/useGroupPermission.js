@@ -19,10 +19,7 @@
  ******************************************************************************/
 import * as shared from '@communities/shared'
 
-import { useGroup } from '/lib/hooks/Group'
-import { useGroupMember } from '/lib/hooks/GroupMember'
 import { SitePermissions, useSitePermission } from './useSitePermission'
-
 
 export const GroupPermissions = {
     CREATE: 'create',
@@ -33,17 +30,13 @@ export const GroupPermissions = {
     ADMIN: 'admin'
 }
 
-export const useGroupPermission = function(currentUser, action, groupId) {
-    const [group] = useGroup(groupId)
-    const [currentMember] = useGroupMember(groupId, currentUser.id)
-
-    const canModerateSite = useSitePermission(currentUser, SitePermissions.MODERATE)
-
-    const context = {
-        group: group,
-        userMember: currentMember,
-        canModerateSite: canModerateSite
+export const useGroupPermission = function(currentUser, action, context) {
+    
+    if ( ! ('group' in context) || ! ( 'userMember' in context) ) {
+        throw new Error('Missing context.')
     }
+
+    context.canModerateSite = useSitePermission(currentUser, SitePermissions.MODERATE)
 
     // SiteModerators need to be able to view the group in order to moderate posts in it.
     if ( action === GroupPermissions.VIEW ) {

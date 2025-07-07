@@ -116,11 +116,24 @@ module.exports = class GroupMemberPermissions {
         }
     }
 
-    async canViewGroupMember(user, context) {
+    async canQueryGroupMember(user, context) {
         await this.ensureContext(user, context, [ 'group' ], [ 'userMember' ])
 
-        // Site moderators can always view group content.
-        context.canModerateSite = await this.permissionService.can(user, 'moderate', 'Site')
+        if ( ! util.objectHas(context, 'canModerateSite') ) {
+            // Site moderators can always view group content.
+            context.canModerateSite = await this.permissionService.can(user, 'moderate', 'Site')
+        }
+
+        return permissions.GroupMember.canQueryGroupMember(user, context)
+    }
+
+    async canViewGroupMember(user, context) {
+        await this.ensureContext(user, context, [ 'group', 'groupMember' ], [ 'userMember' ])
+
+        if ( ! util.objectHas(context, 'canModerateSite') ) {
+            // Site moderators can always view group content.
+            context.canModerateSite = await this.permissionService.can(user, 'moderate', 'Site')
+        }
 
         return permissions.GroupMember.canViewGroupMember(user, context)
     }

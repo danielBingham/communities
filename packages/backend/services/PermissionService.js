@@ -191,7 +191,9 @@ module.exports = class PermissionService {
                 return await this.groupPost.canCreateGroupPost(user, context)
             }
         } else if ( entity === 'GroupMember' ) {
-            if ( action === PermissionService.ACTIONS.VIEW ) {
+            if ( action === PermissionService.ACTIONS.QUERY ) {
+                return await this.groupMember.canQueryGroupMember(user, context)
+            } else if ( action === PermissionService.ACTIONS.VIEW ) {
                 return await this.groupMember.canViewGroupMember(user, context)
             } else if ( action === PermissionService.ACTIONS.CREATE ) {
                 return await this.groupMember.canCreateGroupMember(user, context)

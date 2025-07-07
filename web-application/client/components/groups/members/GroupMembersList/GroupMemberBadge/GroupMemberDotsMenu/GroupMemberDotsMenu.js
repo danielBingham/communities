@@ -10,6 +10,7 @@ import { patchGroupMember } from '/state/GroupMember'
 
 import { FloatingMenu, FloatingMenuBody, FloatingMenuTrigger, FloatingMenuItem } from '/components/generic/floating-menu/FloatingMenu'
 
+import AcceptRequest from './AcceptRequest'
 import BanMember from './BanMember'
 import PromoteToAdmin from './PromoteToAdmin'
 import PromoteToModerator from './PromoteToModerator'
@@ -41,6 +42,7 @@ const GroupMemberDotsMenu = function({ groupId, userId }) {
             <FloatingMenuBody>
                 <PromoteToModerator groupId={groupId} userId={userId} />
                 <PromoteToAdmin groupId={groupId} userId={userId} />
+                <AcceptRequest groupId={groupId} userId={userId} />
                 <BanMember groupId={groupId} userId={userId} />
                 <RemoveMember groupId={groupId} userId={userId} />
             </FloatingMenuBody>

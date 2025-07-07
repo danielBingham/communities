@@ -48,6 +48,8 @@ const GroupPostPermissionsUpdate = function({ groupId, onSubmit, onCancel }) {
             return
         }
 
+        setPostPermissions(null)
+
         const groupPatch = {
             id: groupId,
             postPermissions: postPermissions

@@ -26,33 +26,27 @@ import { GroupPermissions, useGroupPermission } from './useGroupPermission'
 
 
 export const GroupMemberPermissions = {
+    QUERY: 'query',
     CREATE: 'create',
     VIEW: 'view',
     UPDATE: 'update',
     DELETE: 'delete'
 }
 
-export const useGroupMemberPermission = function(currentUser, action, groupId) {
-    const [group] = useGroup(groupId)
-    const [currentMember] = useGroupMember(groupId, currentUser.id)
-
-    const canModerateSite = useSitePermission(currentUser, SitePermissions.MODERATE)
-
-    const context = {
-        group: group,
-        userMember: currentMember,
-        canModerateSite: canModerateSite
+export const useGroupMemberPermission = function(currentUser, action, context) {
+    if ( ! ('group' in context) || ! ( 'userMember' in context) ) {
+        throw new Error('Missing context.')
     }
 
-    const canModerateGroup = useGroupPermission(currentUser, GroupPermissions.MODERATE, groupId) 
-    const canAdminGroup = useGroupPermission(currentUser, GroupPermissions.ADMIN, groupId)
+    context.canModerateSite = useSitePermission(currentUser, SitePermissions.MODERATE)
 
-    context.canModerateGroup = canModerateGroup
-    context.canAdminGroup = canAdminGroup
-
+    context.canModerateGroup = useGroupPermission(currentUser, GroupPermissions.MODERATE, context) 
+    context.canAdminGroup = useGroupPermission(currentUser, GroupPermissions.ADMIN, context)
 
     // SiteModerators need to be able to view the group in order to moderate posts in it.
-    if ( action === GroupMemberPermissions.VIEW ) {
+    if ( action === GroupMemberPermissions.QUERY ) {
+        return shared.permissions.GroupMember.canQueryGroupMember(currentUser, context)
+    } else if ( action === GroupMemberPermissions.VIEW ) {
         return shared.permissions.GroupMember.canViewGroupMember(currentUser, context) 
     } else if ( action === GroupMemberPermissions.CREATE ) {
         return shared.permissions.GroupMember.canCreateGroupMember(currentUser, context)

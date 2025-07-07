@@ -46,11 +46,16 @@ const GroupPage = function() {
     const [group, error, request] = useGroupFromSlug(slug)
     const [currentMember, memberRequest ] = useGroupMember(group?.id, currentUser?.id)
 
-    const canViewGroup = useGroupPermission(currentUser, GroupPermissions.VIEW, group?.id)
-    const canViewGroupMember = useGroupMemberPermission(currentUser, GroupMemberPermissions.VIEW, group?.id)
-    const canViewGroupPost = useGroupPostPermission(currentUser, GroupPostPermissions.VIEW, group?.id)
-    const canModerateGroup = useGroupPermission(currentUser, GroupPermissions.MODERATE, group?.id)
-    const canAdminGroup = useGroupPermission(currentUser, GroupPermissions.ADMIN, group?.id)
+    const context = {
+        group: group,
+        userMember: currentMember
+    }
+
+    const canViewGroup = useGroupPermission(currentUser, GroupPermissions.VIEW, context)
+    const canQueryGroupMember = useGroupMemberPermission(currentUser, GroupMemberPermissions.QUERY, context)
+    const canViewGroupPost = useGroupPostPermission(currentUser, GroupPostPermissions.VIEW, context)
+    const canModerateGroup = useGroupPermission(currentUser, GroupPermissions.MODERATE, context)
+    const canAdminGroup = useGroupPermission(currentUser, GroupPermissions.ADMIN, context)
 
     const dispatch = useDispatch()
     useEffect(() => {
@@ -59,9 +64,8 @@ const GroupPage = function() {
         }
     }, [])
 
-    if ( ! group 
-        && (( ! request || request.state == 'pending') 
-            || ( memberRequest && memberRequest.state === 'pending')))
+    if (  ( ! group && ( ! request || request.state == 'pending'))
+            || ( ! currentMember && ( ! memberRequest || memberRequest.state === 'pending')))
     {
         return (
             <Page id="group-page">
@@ -129,7 +133,7 @@ const GroupPage = function() {
             <PageLeftGutter>
                 { canViewGroup === true && <NavigationMenu className="group-page__menu">
                     { canViewGroupPost === true && <NavigationMenuItem to={`/group/${group.slug}`} icon="QueueList" text="Feed" /> }
-                    { canViewGroupMember === true && <NavigationMenuItem to="members" icon="UserGroup" text="Members" /> }
+                    { canQueryGroupMember === true && <NavigationMenuItem to="members" icon="UserGroup" text="Members" /> }
                     { canModerateGroup === true && <NavigationMenuItem to="moderation" icon="Flag" text="Moderation" /> }
                     { canAdminGroup === true && <NavigationMenuItem to="settings" icon="Cog6Tooth" text="Settings" /> }
                     <NavigationMenuItemContainer><GroupMembershipButton groupId={group.id} userId={currentUser?.id} /></NavigationMenuItemContainer>

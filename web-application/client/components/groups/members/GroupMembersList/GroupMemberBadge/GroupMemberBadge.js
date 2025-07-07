@@ -65,6 +65,8 @@ const GroupMemberBadge = function({ groupId, userId }) {
                         { user.email !== null && user.name == null && <div className="group-member-badge__name">{ user.email }</div> }
                         { userMember.role != 'member' && <div className="group-member-badge__role">{ userMember.role }</div> }
                         { userMember.status === 'banned' && <div className="group-member-badge__status">Banned</div> }
+                        { userMember.status === 'pending-invited' && <div className="group-member-badge__status">Invited</div> }
+                        { userMember.status === 'pending-requested' && <div className="group-member-badge__status">Requested</div> }
                         <div className="group-member-badge__about">{ user.about?.length > 100 ? user.about.substring(0,100).trim()+'...' : user.about }</div>
                         <div className="group-member-badge__controls">
                         </div>

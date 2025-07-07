@@ -18,8 +18,7 @@
  *
  ******************************************************************************/
 
-const canViewGroupMember = function(user, context) {
-
+const canQueryGroupMember = function(user, context ) {
     // Site Moderators can view GroupMembers.  This is necessary for their
     // moderation duties.
     if ( context.canModerateSite === true ) {
@@ -46,18 +45,57 @@ const canViewGroupMember = function(user, context) {
     return false 
 }
 
-const canCreateGroupMember = function(user, context) {
-    if ( context.group === undefined || context.group === null ) {
+const canViewGroupMember = function(user, context) {
+    // If we don't have our context, then bail out.
+    if ( context.group === undefined || context.group === null 
+        || context.userMember === undefined // UserMember can be null for open groups.
+        || context.groupMember === undefined || context.groupMember === null ) 
+    {
         return false
     }
 
-    if ( context.groupMember === undefined || context.groupMember === null ) {
+    // Site Moderators can view GroupMembers.  This is necessary for their
+    // moderation duties.
+    if ( context.canModerateSite === true ) {
+        return true
+    }
+
+    // Group Moderators can always view GroupMembers.
+    if ( context.canModerateGroup === true ) {
+        return true
+    }
+
+    // Anyone can view content of open group.
+    if ( context.group.type === 'open' ) {
+        return true
+    }
+
+    if ( context.userMember !== null  ) {
+        // If they are a confirmed member of the group, then they can view other confirmed members.
+        if ( context.userMember.groupId === context.group.id && context.userMember.status === 'member' && context.groupMember.status === 'member' ) {
+            return true 
+        } 
+    }
+
+    // They can view their own member, if they haven't been banned.
+    if ( context.group.id === context.groupMember.groupId && user.id === context.groupMember.userId && context.groupMember.status !== 'banned') {
+        return true
+    }
+
+    return false 
+}
+
+const canCreateGroupMember = function(user, context) {
+    if ( context.group === undefined || context.group === null 
+        || context.userMember === undefined // userMember may be null, indicating that they aren't a member of the group yet
+        || context.groupMember === undefined || context.groupMember === null ) 
+    {
         return false
     }
 
     // For open groups
     if ( context.group.type === 'open' ) {
-        return context.canModerateGroup === true || ( context.userMember !== undefined && context.userMember === null && context.groupMember.userId === user.id)
+        return context.canModerateGroup === true || ( context.userMember === null && context.groupMember.userId === user.id)
     }
     // For private groups
     if ( context.group.type === 'private' ) {
@@ -72,14 +110,14 @@ const canCreateGroupMember = function(user, context) {
 }
 
 const canUpdateGroupMember = function(user, context) {
+    if ( context.groupMember === undefined || context.groupMember === null ) {
+        return false
+    }
+
     // Admins can promote members to moderator or admin
     // Moderators can ban members
     if ( context.canModerateGroup === true) {
         return true
-    }
-
-    if ( context.groupMember === undefined || context.groupMember === null ) {
-        return false
     }
 
     // Users can update their own GroupMember in certain circumstances.
@@ -114,6 +152,7 @@ const canDeleteGroupMember = function(user, context) {
 }
 
 module.exports = {
+    canQueryGroupMember: canQueryGroupMember,
     canViewGroupMember: canViewGroupMember,
     canCreateGroupMember: canCreateGroupMember,
     canUpdateGroupMember: canUpdateGroupMember,

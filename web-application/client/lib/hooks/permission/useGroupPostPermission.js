@@ -19,34 +19,23 @@
  ******************************************************************************/
 import * as shared from '@communities/shared'
 
-import { useGroup } from '/lib/hooks/Group'
-import { useGroupMember } from '/lib/hooks/GroupMember'
 import { SitePermissions, useSitePermission } from './useSitePermission'
 import { GroupPermissions, useGroupPermission } from './useGroupPermission'
-
 
 export const GroupPostPermissions = {
     CREATE: 'create',
     VIEW: 'view'
 }
 
-export const useGroupPostPermission = function(currentUser, action, groupId) {
-    const [group] = useGroup(groupId)
-    const [currentMember] = useGroupMember(groupId, currentUser.id)
-
-    const canModerateSite = useSitePermission(currentUser, SitePermissions.MODERATE)
-
-    const context = {
-        group: group,
-        userMember: currentMember,
-        canModerateSite: canModerateSite
+export const useGroupPostPermission = function(currentUser, action, context) {
+    if ( ! ('group' in context) || ! ( 'userMember' in context) ) {
+        throw new Error('Missing context.')
     }
 
-    const canModerateGroup = useGroupPermission(currentUser, GroupPermissions.MODERATE, groupId) 
-    const canAdminGroup = useGroupPermission(currentUser, GroupPermissions.ADMIN, groupId)
+    context.canModerateSite = useSitePermission(currentUser, SitePermissions.MODERATE)
 
-    context.canModerateGroup = canModerateGroup
-    context.canAdminGroup = canAdminGroup
+    context.canModerateGroup = useGroupPermission(currentUser, GroupPermissions.MODERATE, context) 
+    context.canAdminGroup = useGroupPermission(currentUser, GroupPermissions.ADMIN, context)
 
     if ( action === GroupPostPermissions.VIEW ) {
         return shared.permissions.GroupPost.canViewGroupPost(currentUser, context) 

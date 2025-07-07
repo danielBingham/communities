@@ -19,15 +19,18 @@
  ******************************************************************************/
 
 const canViewGroupPost = function(user, context) {
+    if ( context.group === undefined || context.group === null 
+        || context.userMember === undefined) 
+    {
+        return false
+    }
+
     // Site Moderators can view Group Posts.  This is necessary for their
     // moderation duties.
     if ( context.canModerateSite === true ) {
         return true
     }
 
-    if ( context.group === undefined || context.group === null ) {
-        return false
-    }
 
     // Anyone can view content of open group.
     if ( context.group.type === 'open' ) {
@@ -35,7 +38,7 @@ const canViewGroupPost = function(user, context) {
     }
 
     // Otherwise they must be a confirmed member of the group.
-    if (context.userMember !== undefined && context.userMember !== null 
+    if ( context.userMember !== null 
         && context.userMember.groupId === context.group.id
         && context.userMember.status === 'member') 
     {
@@ -46,16 +49,18 @@ const canViewGroupPost = function(user, context) {
 }
 
 const canCreateGroupPost = function(user, context) {
-    if ( context.group === undefined || context.group === null ) {
+    if ( context.group === undefined || context.group === null 
+        || context.userMember === undefined) 
+    {
         return false
     }
 
     if ( context.group.postPermissions === 'anyone' ) {
         // Anyone may post to the group.
         return true
-    } else if ( context.group.postPermissions === 'member' ) {
+    } else if ( context.group.postPermissions === 'members' ) {
         // Confirmed members may post to the group.
-        if ( context.userMember !== undefined && context.userMember !== null 
+        if ( context.userMember !== null 
             && context.userMember.groupId === context.group.id
             && context.userMember.status === 'member') 
         {
@@ -66,7 +71,7 @@ const canCreateGroupPost = function(user, context) {
     } else if ( context.group.postPermissions === 'approval' ) {
         // Confirmed members may post to the group, however their posts will be
         // made 'pending' on the backend.
-        if ( context.userMember !== undefined && context.userMember !== null 
+        if ( context.userMember !== null 
             && context.userMember.groupId === context.group.id
             && context.userMember.status === 'member') 
         {
@@ -76,7 +81,7 @@ const canCreateGroupPost = function(user, context) {
         }
     } else if ( context.group.postPermissions === 'restricted' ) {
         // Only admins and moderators may post to the group.
-        if ( context.userMember !== undefined && context.userMember !== null 
+        if ( context.userMember !== null 
             && context.userMember.groupId === context.group.id
             && context.canModerateGroup === true ) 
         {

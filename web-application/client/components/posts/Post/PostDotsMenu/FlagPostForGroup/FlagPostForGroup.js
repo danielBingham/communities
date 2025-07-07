@@ -2,12 +2,15 @@ import React, { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 
 import { FlagIcon as FlagIconOutline } from '@heroicons/react/24/outline'
-import { CheckCircleIcon, XCircleIcon, FlagIcon as FlagIconSolid } from '@heroicons/react/24/solid'
+import { CheckCircleIcon, XCircleIcon, FlagIcon as FlagIconSolid, ClockIcon } from '@heroicons/react/24/solid'
 
 import { useRequest } from '/lib/hooks/useRequest'
 import { useFeature } from '/lib/hooks/feature/useFeature'
 import { usePost } from '/lib/hooks/Post'
+import { useGroup } from '/lib/hooks/Group'
+import { useGroupMember } from '/lib/hooks/GroupMember'
 import { useGroupModeration } from '/lib/hooks/GroupModeration'
+
 import { useGroupPermission, GroupPermissions } from '/lib/hooks/permission'
 
 import { postGroupModerations } from '/state/GroupModeration'
@@ -29,9 +32,12 @@ const FlagPostForGroup = function({ postId } ) {
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const [post, postRequest] = usePost(postId)
 
+    const [group, groupRequest] = useGroup(post?.groupId)
+    const [currentMember, currentMemberRequest] = useGroupMember(group?.id, currentUser.id)
+
     const [groupModeration, groupModerationRequest] = useGroupModeration(post?.groupModerationId)
 
-    const canModerateGroup = useGroupPermission(currentUser, GroupPermissions.MODERATE, post?.groupId)
+    const canModerateGroup = useGroupPermission(currentUser, GroupPermissions.MODERATE, { group: group, userMember: currentMember })
 
     const hasGroupModerationControls = useFeature('89-improved-moderation-for-group-posts')
 
@@ -63,7 +69,7 @@ const FlagPostForGroup = function({ postId } ) {
     // Users aren't going to flag their own posts. Or if they do, they are
     // almost certainly acting maliciously to gum up the works. Don't let
     // them flag their own posts.
-    if ( currentUser.id === post.userId ) {
+    if ( currentUser.id === post.userId  && ( groupModeration === null)) {
         return null
     }
 
@@ -104,6 +110,21 @@ const FlagPostForGroup = function({ postId } ) {
                     <FloatingMenuItem disabled={true} className="flag-post-for-group flag-post-for-group__flagged"><FlagIconSolid /> Flagged</FloatingMenuItem>
                 )
             }
+        } else if ( groupModeration.status === 'pending' ) {
+            if ( canModerateGroup === true ) {
+                return (
+                    <>
+                        <FloatingMenuItem onClick={(e) => setShowModal(true)} className="flag-post-for-group flag-post-for-group__moderate"><ClockIcon /> Moderate for Group</FloatingMenuItem>
+                        <ModerateForGroupModal postId={postId} isVisible={showModal} setIsVisible={setShowModal} />
+                    </>
+
+                )
+            } else {
+                return (
+                    <FloatingMenuItem disabled={true} className="flag-post-for-group flag-post-for-group__flagged"><ClockIcon /> Pending</FloatingMenuItem>
+                )
+            }
+
         } else if ( groupModeration.status === 'approved' ) {
             return (
                 <FloatingMenuItem disabled={true} className="flag-post-for-group flag-post-for-group__approved"><CheckCircleIcon /> Approved</FloatingMenuItem>

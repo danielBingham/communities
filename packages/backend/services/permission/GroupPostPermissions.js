@@ -135,14 +135,20 @@ module.exports = class GroupPostPermissions {
     async canCreateGroupPost(user, context) {
         await this.ensureContext(user, context, [ 'group' ], [ 'userMember' ])
 
+        if ( ! util.objectHas(context, 'canModerateGroup') ) {
+            context.canModerateGroup = await this.permissionService.can(user, 'moderate', 'Group', context)
+        }
+
         return permissions.GroupPost.canCreateGroupPost(user, context)
     }
 
     async canViewGroupPost(user, context) {
         await this.ensureContext(user, context, [ 'group' ], [ 'userMember' ])
 
-        // Site moderators can always view group content.
-        context.canModerateSite = await this.permissionService.can(user, 'moderate', 'Site')
+        if ( ! util.objectHas(context, 'canModerateSite') ) {
+            // Site moderators can always view group content.
+            context.canModerateSite = await this.permissionService.can(user, 'moderate', 'Site')
+        }
 
         return permissions.GroupPost.canViewGroupPost(user, context)
     }
