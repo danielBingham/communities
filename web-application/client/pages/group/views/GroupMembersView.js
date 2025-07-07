@@ -34,7 +34,7 @@ const GroupMembersView = function({ groupId }) {
     const canQueryGroupMember = useGroupMemberPermission(currentUser, GroupMemberPermissions.QUERY, context)
 
     if ( ! group && ( ! groupRequest || groupRequest.state === 'pending' )
-        || ! currentMember && ( ! currentMemberRequest || currentMemberRequest.state === 'pending') ) 
+        || (currentMember === undefined || ( currentMemberRequest?.state === 'pending')) ) 
     {
         return ( <div className="group-members-view"><Spinner /></div> )
     }

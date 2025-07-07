@@ -2,6 +2,7 @@ import { createSlice } from '@reduxjs/toolkit'
 
 import {
     setInDictionary,
+    setNull,
     removeEntity,
     setQueryResults,
     clearQuery,
@@ -60,15 +61,25 @@ export const GroupMemberSlice = createSlice({
             if ( 'dictionary' in action.payload ) {
                 setInDictionary(state, action)
                 for(const [id, entity] of Object.entries(action.payload.dictionary)) {
-                    setByGroupAndUser(entity)
+                    if ( entity !== null ) {
+                        setByGroupAndUser(entity)
+                    }
                 }
             } else if ('entity' in action.payload ) {
-                if ( 'id' in action.payload.entity ) {
-                    setInDictionary(state, action)
+                setInDictionary(state, action)
+                setByGroupAndUser(action.payload.entity)
+            }
+        },
+        setGroupMembersNull : (state, action) => {
+            const payload = action.payload
+
+            if ( 'groupId' in payload && 'userId' in payload ) {
+                if ( ! (payload.groupId in state.byGroupAndUser ) ) {
+                    state.byGroupAndUser[payload.groupId] = {}
                 }
-                if ( 'userId' in action.payload.entity && 'groupId' in action.payload.entity ) {
-                    setByGroupAndUser(action.payload.entity)
-                }
+                state.byGroupAndUser[payload.groupId][payload.userId] = null
+            } else {
+                setNull(state, action)
             }
         },
         removeGroupMember: (state, action) => {
@@ -84,7 +95,7 @@ export const GroupMemberSlice = createSlice({
 })
 
 export const { 
-    setGroupMembersInDictionary, removeGroupMember, 
+    setGroupMembersInDictionary, setGroupMembersNull, removeGroupMember, 
     clearGroupMemberQuery, setGroupMemberQueryResults,
     clearGroupMemberQueries, resetGroupMemberSlice
 }  = GroupMemberSlice.actions

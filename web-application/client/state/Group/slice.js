@@ -2,6 +2,7 @@ import { createSlice } from '@reduxjs/toolkit'
 
 import {
     setInDictionary,
+    setNull,
     removeEntity,
     setQueryResults,
     clearQuery,
@@ -58,6 +59,16 @@ export const GroupSlice = createSlice({
                 state.bySlug[action.payload.entity.slug] = action.payload.entity
             }
         }, 
+        setGroupNull: (state, action) => {
+            const id = action.payload
+
+            if ( id in state.dictionary ) {
+                const entity = state.dictionary[id]
+                state.bySlug[entity.slug] = null
+            }
+
+            setNull(state, action)
+        },
         removeGroup: (state, action) => {
             removeEntity(state, action)
 
@@ -71,7 +82,7 @@ export const GroupSlice = createSlice({
 })
 
 export const { 
-    setGroupsInDictionary, removeGroup, 
+    setGroupsInDictionary, setGroupNull, removeGroup, 
     clearGroupQuery, setGroupQueryResults,
     clearGroupQueries, resetGroupSlice
 }  = GroupSlice.actions

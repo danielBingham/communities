@@ -34,7 +34,7 @@ const PostView = function({ groupId }) {
         )
     }
 
-    if ( groupId !== undefined && ( ! currentMember && ( ! currentMemberRequest || currentMemberRequest.state === 'pending') ) ) {
+    if ( groupId !== undefined && ( currentMember === undefined || currentMemberRequest?.state === 'pending') ) {
         return (
             <div id={`post-${postId}`}>
                 <Spinner />

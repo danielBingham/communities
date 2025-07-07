@@ -64,8 +64,8 @@ const GroupPage = function() {
         }
     }, [])
 
-    if (  ( ! group && ( ! request || request.state == 'pending'))
-            || ( ! currentMember && ( ! memberRequest || memberRequest.state === 'pending')))
+    if (  ( group === undefined || request?.state == 'pending')
+            || ( currentMember === undefined  || memberRequest?.state === 'pending'))
     {
         return (
             <Page id="group-page">
@@ -78,7 +78,9 @@ const GroupPage = function() {
                 </PageRightGutter>
             </Page>
         )
-    } else if ( ! group ) {
+    } 
+
+    if ( ! group ) {
         // The request won't be failed, because it's a search request.  So it will
         // just return an empty result.
         return (
