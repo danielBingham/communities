@@ -3,7 +3,7 @@ import * as qs from 'qs'
 import { makeRequest } from '/state/lib/makeRequest'
 import { setRelationsInState } from '/state/lib/relations'
 
-import { setGroupMembersInDictionary, removeGroupMember, setGroupMemberQueryResults, clearGroupMemberQueries } from './slice'
+import { setGroupMembersInDictionary, setGroupMembersNull, removeGroupMember, setGroupMemberQueryResults, clearGroupMemberQueries } from './slice'
 
 /**
  * GET /group/:groupId/members or GET /group/:groupId/members?...
@@ -78,6 +78,11 @@ export const getGroupMember = function(groupId, userId) {
                 dispatch(setGroupMembersInDictionary({ entity: response.entity}))
 
                 dispatch(setRelationsInState(response.relations))
+            },
+            function(status, response) {
+                if ( status === 404 || status === 403 ) {
+                    dispatch(setGroupMembersNull({ groupId: groupId, userId: userId }))
+                }
             }
         ))
     }

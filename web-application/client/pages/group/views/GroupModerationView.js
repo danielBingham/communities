@@ -3,6 +3,10 @@ import { useSelector } from 'react-redux'
 import { useSearchParams } from 'react-router-dom'
 
 import { useRequest } from '/lib/hooks/useRequest'
+
+import { useGroup } from '/lib/hooks/Group'
+import { useGroupMember } from '/lib/hooks/GroupMember'
+
 import { useGroupPermission, GroupPermissions } from '/lib/hooks/permission'
 
 import { getGroupModerations } from '/state/GroupModeration'
@@ -21,16 +25,19 @@ const GroupModerationView = function({ groupId }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
+    const [group, groupRequest] = useGroup(groupId)
+    const [currentMember, currentMemberRequest] = useGroupMember(groupId, currentUser.id)
+
     const query = useSelector((state) => 'GroupModerationView' in state.GroupModeration.queries ? state.GroupModeration.queries['GroupModerationView']: null)
     const dictionary = useSelector((state) => state.GroupModeration.dictionary)
 
-    const canModerateGroup = useGroupPermission(currentUser, GroupPermissions.MODERATE, groupId)
+    const canModerateGroup = useGroupPermission(currentUser, GroupPermissions.MODERATE, { group: group, userMember: currentMember })
 
     useEffect(function() {
         let page = searchParams.get('page')
         page = page || 1
 
-        makeRequest(getGroupModerations(groupId, 'GroupModerationView', { status: 'flagged', page: page }))
+        makeRequest(getGroupModerations(groupId, 'GroupModerationView', { status: [ 'flagged', 'pending' ], page: page }))
     }, [])
 
     if ( canModerateGroup !== true ) {
@@ -53,7 +60,7 @@ const GroupModerationView = function({ groupId }) {
     if ( query !== null ) {
         for(const moderationId of query.list) {
             const moderation = dictionary[moderationId]
-            if ( moderation.status !== 'flagged' ) {
+            if ( moderation.status !== 'flagged' && moderation.status !== 'pending') {
                 continue
             }
 

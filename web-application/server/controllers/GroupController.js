@@ -80,7 +80,6 @@ module.exports = class GroupController {
         // Site moderators can always view all groups.
         const canModerateSite = await this.permissionService.can(currentUser, 'moderate', 'Site')
         if ( ! canModerateSite ) {
-            console.log(`Not a site moderator!`)
             // Restrict the query to only those groups the currentUser can see.
             const visibleGroupIds = await this.permissionService.get(currentUser, 'view', 'Group')
             query.params.push(visibleGroupIds)
@@ -225,6 +224,7 @@ module.exports = class GroupController {
 
         const groupId = request.params.id
 
+        console.log(groupId)
         const results = await this.groupDAO.selectGroups({
             where: `groups.id = $1`,
             params: [groupId]
@@ -293,7 +293,7 @@ module.exports = class GroupController {
                 `You don't have permission to edit that group.`)
         }
 
-        const validationErrors = await this.validationService.validateGroup(currentUser, group)
+        const validationErrors = await this.validationService.validateGroup(currentUser, group, existing)
         if ( validationErrors.length > 0 ) {
             const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
             const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')

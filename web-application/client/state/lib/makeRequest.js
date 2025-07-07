@@ -102,7 +102,7 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
                 }
                 if ( onFailure ) {
                     try {
-                        onFailure(responseBody)
+                        onFailure(status, responseBody)
                     } catch (error) {
                         logger.error(`Error handling request failure: `, error)
                     }

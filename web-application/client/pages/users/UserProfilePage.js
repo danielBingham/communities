@@ -47,12 +47,12 @@ const UserProfilePage = function(props) {
     return (
         <Page id="user-profile-page">
             <PageLeftGutter>
-                <UserView id={user.id} />
             </PageLeftGutter>
             <PageBody className='main'>
                 <Outlet /> 
             </PageBody>
             <PageRightGutter>
+                <UserView id={user.id} />
             </PageRightGutter>
         </Page>
     )

@@ -1,3 +1,6 @@
+.radio-button {
+    padding: 10px 0;
+}
 .radio-button label.radio-button__label {
     display: block;
     box-sizing: border-box;
@@ -9,6 +12,7 @@
     font-size: 12px;
     padding: 0 0 5px 5px;
     font-style: italic;
+    text-align: left;
 }
 .radio-button__wrapper {
     box-sizing: border-box;
@@ -26,10 +30,12 @@
 .radio-option__label {
     font-weight: bold;
     font-size: 18px;
+    text-align: left;
 }
 .radio-option__explanation {
     font-size: 12px;
     font-style: italic;
+    text-align: left;
 }
 .radio-option__button {
     display: block;

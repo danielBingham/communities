@@ -45,7 +45,7 @@ describe('PermissionService.canViewPost()', function() {
                 post: entities['posts'].dictionary['703955d2-77df-4635-8ab8-b9108fef217f']
             }
 
-            const canView = await service.canViewPost(user, context)
+            const canView = await service.can(user, 'view', 'Post', context)
 
             expect(canView).toBe(true)
         })
@@ -63,7 +63,7 @@ describe('PermissionService.canViewPost()', function() {
             core.database.query.mockReturnValue(undefined)
                 .mockReturnValueOnce({ rowCount: postRows.length, rows: postRows })
 
-            const canView = await service.canViewPost(user, context)
+            const canView = await service.can(user, 'view', 'Post', context)
 
             expect(canView).toBe(true)
         })
@@ -108,7 +108,7 @@ describe('PermissionService.canViewPost()', function() {
                 group: group,
             }
 
-            const canView = await service.canViewPost(user, context)
+            const canView = await service.can(user, 'view', 'Post', context)
 
             expect(post.groupId).toBe(group.id)
             expect(user.id).toBe(post.userId)
@@ -129,7 +129,7 @@ describe('PermissionService.canViewPost()', function() {
             core.database.query.mockReturnValue(undefined)
                 .mockReturnValueOnce({ rowCount: groupRows.length, rows: groupRows })
 
-            const canView = await service.canViewPost(user, context)
+            const canView = await service.can(user, 'view', 'Post', context)
 
             expect(post.userId).toBe(user.id)
             expect(canView).toBe(true)
@@ -213,7 +213,7 @@ describe('PermissionService.canViewPost()', function() {
                 userMember: groupMember
             }
 
-            const canView = await service.canViewPost(user, context)
+            const canView = await service.can(user, 'view', 'Post', context)
 
             expect(post.visibility).toBe('private')
             expect(group.type).toBe('private')
@@ -428,7 +428,8 @@ describe('PermissionService.canViewPost()', function() {
             const post = entities.posts.dictionary['703955d2-77df-4635-8ab8-b9108fef217f']
 
             const context = {
-                post: post 
+                post: post,
+                userRelationship: null
             }
 
             // Admin User 
@@ -449,7 +450,8 @@ describe('PermissionService.canViewPost()', function() {
             const post = entities.posts.dictionary['e792718e-6730-438e-85f7-a5172af3d740']
 
             const context = {
-                post: post 
+                post: post,
+                userRelationship: null
             }
 
             // User One 
@@ -519,7 +521,8 @@ describe('PermissionService.canViewPost()', function() {
             const post = entities.posts.dictionary['703955d2-77df-4635-8ab8-b9108fef217f']
 
             const context = {
-                post: post 
+                post: post,
+                userRelationship: null
             }
 
             core.database.query.mockReturnValue(undefined)
@@ -573,6 +576,7 @@ describe('PermissionService.canViewPost()', function() {
 
             const context = {
                 post: post, 
+                userRelationship: null,
                 group: group,
                 userMember: null
             }
@@ -599,6 +603,7 @@ describe('PermissionService.canViewPost()', function() {
 
             const context = {
                 post: post, 
+                userRelationship: null,
                 group: group,
                 userMember: groupMember
             }
@@ -627,6 +632,7 @@ describe('PermissionService.canViewPost()', function() {
 
             const context = {
                 post: post, 
+                userRelationship: null,
                 group: group,
                 userMember: groupMember
             }
@@ -653,6 +659,7 @@ describe('PermissionService.canViewPost()', function() {
 
             const context = {
                 post: post, 
+                userRelationship: null,
                 group: group
             }
 
@@ -680,6 +687,7 @@ describe('PermissionService.canViewPost()', function() {
 
             const context = {
                 post: post, 
+                userRelationship: null,
                 group: group
             }
 
@@ -709,6 +717,7 @@ describe('PermissionService.canViewPost()', function() {
 
             const context = {
                 post: post, 
+                userRelationship: null,
                 group: group,
                 userMember: groupMember
             }
@@ -738,6 +747,7 @@ describe('PermissionService.canViewPost()', function() {
 
             const context = {
                 post: post, 
+                userRelationship: null,
                 group: group,
                 userMember: groupMember
             }
@@ -767,6 +777,7 @@ describe('PermissionService.canViewPost()', function() {
 
             const context = {
                 post: post, 
+                userRelationship: null,
                 group: group,
                 userMember: groupMember
             }
@@ -796,6 +807,7 @@ describe('PermissionService.canViewPost()', function() {
 
             const context = {
                 post: post, 
+                userRelationship: null,
                 group: group,
                 userMember: groupMember
             }

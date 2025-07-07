@@ -10,8 +10,8 @@
     max-height: 100vh;
 
     text-align: center;
-    padding: 20px;
-    border-radius: 10px;
+    padding: 16px;
+    border-radius: 7px;
     background-color: white;
     z-index: 1000;
     overflow-y: auto;
@@ -27,12 +27,12 @@
 }
 .modal__close {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 7px;
+    right: 7px;
 }
 .modal__close svg {
-    width: 24px;
-    height: 24px;
+    width: 16px;
+    height: 16px;
     color: var(--main-border-color);
 }
 .modal__close svg:hover {

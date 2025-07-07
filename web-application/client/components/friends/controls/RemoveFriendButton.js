@@ -1,6 +1,8 @@
 import React from 'react'
 import { useSelector } from 'react-redux'
 
+import { UserMinusIcon } from '@heroicons/react/24/outline'
+
 import { useRequest } from '/lib/hooks/useRequest'
 
 import { deleteUserRelationship } from '/state/UserRelationship'
@@ -35,7 +37,7 @@ const RemoveFriendButton = function({ userId, type }) {
     }
 
     return (
-        <Button onClick={() => removeFriend()}>{ text }</Button>
+        <Button onClick={() => removeFriend()}><UserMinusIcon /> <span className="nav-text">{ text }</span></Button>
     )
 
 }

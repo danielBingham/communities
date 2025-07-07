@@ -28,6 +28,7 @@ const {
     GroupDAO,
     GroupMemberDAO,
     GroupModerationDAO,
+    GroupModerationEventDAO,
     PostDAO,
     PostCommentDAO,
     PostReactionDAO,
@@ -36,7 +37,7 @@ const {
     UserDAO
 } = require('@communities/backend')
 
-const { lib } = require('@communities/shared')
+const { lib, cleaning, validation } = require('@communities/shared')
 
 const ControllerError = require('../errors/ControllerError')
 
@@ -50,6 +51,7 @@ module.exports = class PostController {
         this.groupDAO = new GroupDAO(core)
         this.groupMemberDAO = new GroupMemberDAO(core)
         this.groupModerationDAO = new GroupModerationDAO(core)
+        this.groupModerationEventDAO = new GroupModerationEventDAO(core)
         this.postDAO = new PostDAO(core)
         this.postCommentDAO = new PostCommentDAO(core)
         this.postReactionDAO = new PostReactionDAO(core)
@@ -187,7 +189,7 @@ module.exports = class PostController {
 
         const and = query.params.length > 0 ? ' AND ' : ''
         query.params.push(currentUser.id)
-        query.where += `${and} (group_moderation.status IS NULL OR group_moderation.status != 'rejected' OR posts.user_id = $${query.params.length}) 
+        query.where += `${and} (group_moderation.status IS NULL OR (group_moderation.status != 'rejected' AND group_moderation.status != 'pending') OR posts.user_id = $${query.params.length}) 
             AND (site_moderation.status IS NULL OR site_moderation.status != 'rejected' OR posts.user_id = $${query.params.length})`
 
 
@@ -199,6 +201,13 @@ module.exports = class PostController {
 
         // If we're query for a particular group's posts, only grab that group.
         if ('groupId' in request.query) {
+            const canViewGroupPost = await this.permissionService.can(currentUser, 'view', 'GroupPost', { groupId: request.query.groupId })
+            if ( canViewGroupPost !== true ) {
+                throw new ControllerError(404, 'not-found',
+                    `User attempting to view posts for a group without permission.`,
+                    `Either those posts don't exit or you don't have permission to view them.`)
+            }
+
             const and = query.params.length > 0 ? ' AND ' : ''
             query.params.push(request.query.groupId)
             query.where += `${and}posts.group_id = $${query.params.length}`
@@ -213,6 +222,13 @@ module.exports = class PostController {
             }
 
             const groupId = groupResult.rows[0].id
+
+            const canViewGroupPost = await this.permissionService.can(currentUser, 'view', 'GroupPost', { groupId: groupId })
+            if ( canViewGroupPost !== true ) {
+                throw new ControllerError(404, 'not-found',
+                    `User attempting to view posts for a group without permission.`,
+                    `Either those posts don't exit or you don't have permission to view them.`)
+            }
 
             const and = query.params.length > 0 ? ' AND ' : ''
             query.params.push(groupId)
@@ -295,11 +311,17 @@ module.exports = class PostController {
 
     async getPosts(request, response) {
         const currentUser = request.session.user
-
-        if (!currentUser) {
+        if ( ! currentUser ) {
             throw new ControllerError(401, 'not-authenticated',
                 `User must be authenticated to retrieve posts.`,
                 `You must be authenticated to retrieve posts.`)
+        }
+
+        const canQueryPosts = await this.permissionService.can(currentUser, PermissionService.ACTIONS.QUERY, 'Post')
+        if ( canQueryPosts !== true ) {
+            throw new ControllerError(403, 'not-authorized',
+                `User attempting to query posts without authorization.`,
+                `You are not authorized to query for posts.`)
         }
 
         const query = await this.createQuery(request)
@@ -331,14 +353,20 @@ module.exports = class PostController {
 
     async postPosts(request, response) {
         const currentUser = request.session.user
-
-        if (!currentUser) {
+        if ( ! currentUser ) {
             throw new ControllerError(401, 'not-authenticated',
                 `User must be authenticated to create a post.`,
                 `You must must be authenticated to create a post.`)
         }
 
-        const post = request.body
+        const post = cleaning.Post.clean(request.body)
+
+        const canCreatePost = await this.permissionService.can(currentUser, 'create', 'Post', { post: post })
+        if ( ! canCreatePost ) {
+            throw new ControllerError(403, 'not-authorized',
+                `User not authorized to create a post.`,
+                `You are not authorized to create that post.`)
+        }
 
         const validationErrors = await this.validationService.validatePost(currentUser, post)
         if ( validationErrors.length > 0 ) {
@@ -357,11 +385,32 @@ module.exports = class PostController {
         })
 
         const entity = results.dictionary[post.id]
-
-        if (!entity) {
+        if ( ! entity ) {
             throw new ControllerError(500, 'server-error',
                 `Post(${post.id}) missing after creation.`,
                 `Post(${post.id}) missing after being created.  Please report as a bug.`)
+        }
+
+        if ( entity.groupId ) {
+            const group = await this.groupDAO.getGroupById(entity.groupId) 
+
+            if ( group.postPermissions === 'approval' ) {
+                const moderation = {
+                    userId: currentUser.id,
+                    groupId: entity.groupId,
+                    status: 'pending',
+                    postId: entity.id
+                }
+
+                await this.groupModerationDAO.insertGroupModerations(moderation)
+                await this.groupModerationEventDAO.insertGroupModerationEvents(this.groupModerationEventDAO.createEventFromGroupModeration(moderation))
+
+                const postPatch = {
+                    id: entity.id,
+                    groupModerationId: moderation.id
+                }
+                await this.postDAO.updatePost(postPatch)
+            }
         }
 
         // Notify any mentioned users
@@ -426,6 +475,11 @@ module.exports = class PostController {
 
         const relations = await this.getRelations(currentUser, postResults)
 
+        console.log(`Entity: `)
+        console.log(post)
+        console.log(`relations: `)
+        console.log(relations)
+
         response.status(200).json({
             entity: post,
             relations: relations
@@ -489,7 +543,6 @@ module.exports = class PostController {
             entity: results.dictionary[results.list[0]],
             relations: relations
         })
-
     }
 
     async deletePost(request, response) {

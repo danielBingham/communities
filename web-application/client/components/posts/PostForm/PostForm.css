@@ -2,6 +2,7 @@
     box-sizing: border-box;
     background-color: white;
     margin: 0 auto;
+    width: 100%;
 }
 
 .post-form .text-area-with-mentions textarea {

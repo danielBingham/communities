@@ -11,14 +11,24 @@
     background-color: white;
 }
 .group-settings-view__delete-your-account {
+    margin: 10px auto;
     padding: 20px;
     border: thin solid var(--danger-color-light);
     background-color: var(--danger-color-lightest);
     border-radius: 10px;
 }
-.group-settings-view__delete-your-account .group-settings-view__explanation {
+.group-settings-view__update-post-permissions {
+    margin: 10px auto;
+    padding: 20px;
+    border: thin solid var(--danger-color-light);
+    background-color: var(--danger-color-lightest);
+    border-radius: 10px;
+}
+.group-settings-view__delete-your-account .group-settings-view__explanation,
+.group-settings-view__update-post-permissions .group-settings-view__explanation {
     padding: 10px;
 }
-.group-settings-view__delete-your-account .group-settings-view__button-wrapper {
+.group-settings-view__delete-your-account .group-settings-view__button-wrapper, 
+.group-settings-view__update-post-permissions .group-settings-view__button-wrapper {
     text-align: center;
 }

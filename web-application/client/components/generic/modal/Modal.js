@@ -1,7 +1,7 @@
 import React from 'react'
 import { createPortal } from 'react-dom'
 
-import { XCircleIcon } from '@heroicons/react/24/solid'
+import { XCircleIcon } from '@heroicons/react/16/solid'
 
 import './Modal.css'
 

@@ -23,21 +23,33 @@ const GroupMemberDAO = require('../daos/GroupMemberDAO')
 const PostDAO = require('../daos/PostDAO')
 const UserRelationshipDAO = require('../daos/UserRelationshipDAO')
 
-const GroupMemberPermissions = require('./permission/GroupMemberPermissions')
 const GroupPermissions = require('./permission/GroupPermissions')
+const GroupMemberPermissions = require('./permission/GroupMemberPermissions')
+const GroupPostPermissions = require('./permission/GroupPostPermissions')
+const PostPermissions = require('./permission/PostPermissions')
 const PostCommentPermissions = require('./permission/PostCommentPermissions')
 const PostReactionPermissions = require('./permission/PostReactionPermissions')
 const PostSubscriptionPermissions = require('./permission/PostSubscriptionPermissions')
 const UserRelationshipPermissions = require('./permission/UserRelationshipPermissions')
-const { contextHas } = require('./permission/permissionUtils')
 
 const ServiceError = require('../errors/ServiceError')
-
 
 /**
  * 
  */
 module.exports = class PermissionService {
+
+    static ACTIONS = {
+        QUERY: 'query',
+        CREATE: 'create',
+        VIEW: 'view',
+        UPDATE: 'update',
+        DELETE: 'delete',
+        MODERATE: 'moderate',
+        ADMIN: 'admin',
+        SUDO: 'sudo'
+    }
+
     constructor(core) {
         this.core = core
 
@@ -46,8 +58,10 @@ module.exports = class PermissionService {
         this.groupMemberDAO = new GroupMemberDAO(core)
         this.userRelationshipDAO = new UserRelationshipDAO(core)
 
-        this.groupMember = new GroupMemberPermissions(core, this)
         this.group = new GroupPermissions(core, this)
+        this.groupMember = new GroupMemberPermissions(core, this)
+        this.groupPost = new GroupPostPermissions(core, this)
+        this.post = new PostPermissions(core, this)
         this.postComment = new PostCommentPermissions(core, this)
         this.postReaction = new PostReactionPermissions(core, this)
         this.postSubscription = new PostSubscriptionPermissions(core, this)
@@ -60,13 +74,13 @@ module.exports = class PermissionService {
      */
     async get(user, action, entity, context) {
         if ( entity === 'Post' ) {
-            if ( action === 'view' ) {
+            if ( action === PermissionService.ACTIONS.VIEW ) {
                 // TODO This is not going to scale beyond a few tens of
                 // thousands of posts. So we'll need to come up with a better
                 // way  to handle this.
                 const relationships = await this.userRelationshipDAO.getUserRelationshipsForUser(user.id)  
                 const friendIds = relationships.map((r) => r.userId === user.id ? r.relationId : r.userId)
-                const groupIds = await this.get(user, 'view', 'Group:content')
+                const groupIds = await this.get(user, PermissionService.ACTIONS.VIEW, 'Group:content')
 
                 const results = await this.core.database.query(`
                     SELECT posts.id FROM posts 
@@ -76,8 +90,7 @@ module.exports = class PermissionService {
                 return results.rows.map((r) => r.id)
             }
         } else if ( entity === 'Group' ) {
-            if ( action === 'view' ) {
-                console.log(`Getting visible group ids.`)
+            if ( action === PermissionService.ACTIONS.VIEW ) {
                 /**
                  * Group permissions vary by type:
                  *
@@ -101,7 +114,7 @@ module.exports = class PermissionService {
                 return results.rows.map((r) => r.id)
             } 
         } else if ( entity === 'Group:content' ) {
-            if ( action === 'view' ) {
+            if ( action === PermissionService.ACTIONS.VIEW ) {
                 const results = await this.core.database.query(`
                     SELECT groups.id FROM groups
                         LEFT OUTER JOIN group_members ON groups.id = group_members.group_id
@@ -132,211 +145,114 @@ module.exports = class PermissionService {
      * identified by `context`, false otherwise.
      */
     async can(user, action, entity, context) {
+        // Banned users shouldn't be able to log in.  But if they somehow do
+        // manage to bypass that protection, we want to prevent them from
+        // doing... well, anything.
+        if ( user.status === 'banned' ) {
+            return false
+        }
+
+        // Similarly, if a user is not 'confirmed', then they are not allowed
+        // to do any of the actions listed below.
+        if ( user.status !== 'confirmed' ) {
+            return false
+        }
+
         if ( entity === 'Post' ) {
-            if ( action === 'view' ) {
-                return await this.canViewPost(user, context)
-            } else if ( action === 'update') {
-                return await this.canUpdatePost(user, context)
-            } else if ( action === 'delete') {
-                return await this.canDeletePost(user, context)
-            }
+            if ( action === PermissionService.ACTIONS.QUERY ) {
+                return await this.post.canQueryPost(user, context)
+            } else if ( action === PermissionService.ACTIONS.CREATE ) {
+                return await this.post.canCreatePost(user, context)
+            } else if ( action === PermissionService.ACTIONS.VIEW ) {
+                return await this.post.canViewPost(user, context)
+            } else if ( action === PermissionService.ACTIONS.UPDATE) {
+                return await this.post.canUpdatePost(user, context)
+            } else if ( action === PermissionService.ACTIONS.DELETE) {
+                return await this.post.canDeletePost(user, context)
+            } 
         } else if ( entity === 'Group' ) {
-            if ( action === 'create' ) {
+            if ( action === PermissionService.ACTIONS.CREATE ) {
                 return await this.group.canCreateGroup(user, context)
-            } else if ( action === 'view' ) {
+            } else if ( action === PermissionService.ACTIONS.VIEW ) {
                 return await this.group.canViewGroup(user, context)
-            } else if ( action === 'update' ) {
+            } else if ( action === PermissionService.ACTIONS.UPDATE ) {
                 return await this.group.canUpdateGroup(user, context)
-            } else if ( action === 'delete' ) {
+            } else if ( action === PermissionService.ACTIONS.DELETE ) {
                 return await this.group.canDeleteGroup(user, context)
-            } else if ( action === 'moderate' ) {
+            } else if ( action === PermissionService.ACTIONS.MODERATE ) {
                 return await this.group.canModerateGroup(user, context)
-            } else if ( action === 'admin' ) {
+            } else if ( action === PermissionService.ACTIONS.ADMIN ) {
                 return await this.group.canAdminGroup(user, context)
             }
-        } else if ( entity === 'Group:content' ) {
-            if ( action === 'view' ) {
-                return await this.group.canViewGroupContent(user, context)
+        } else if ( entity === 'GroupPost' ) {
+            if ( action === PermissionService.ACTIONS.VIEW ) {
+                return await this.groupPost.canViewGroupPost(user, context)
+            } else if ( action === PermissionService.ACTIONS.CREATE ) {
+                return await this.groupPost.canCreateGroupPost(user, context)
             }
         } else if ( entity === 'GroupMember' ) {
-            if ( action === 'view' ) {
+            if ( action === PermissionService.ACTIONS.QUERY ) {
+                return await this.groupMember.canQueryGroupMember(user, context)
+            } else if ( action === PermissionService.ACTIONS.VIEW ) {
                 return await this.groupMember.canViewGroupMember(user, context)
-            } else if ( action === 'create' ) {
+            } else if ( action === PermissionService.ACTIONS.CREATE ) {
                 return await this.groupMember.canCreateGroupMember(user, context)
-            } else if ( action === 'update' ) {
+            } else if ( action === PermissionService.ACTIONS.UPDATE ) {
                 return await this.groupMember.canUpdateGroupMember(user, context)
-            } else if ( action === 'delete' ) {
+            } else if ( action === PermissionService.ACTIONS.DELETE ) {
                 return await this.groupMember.canDeleteGroupMember(user, context)
             }
         } else if ( entity === 'PostComment' ) {
-            if ( action === 'view' ) {
+            if ( action === PermissionService.ACTIONS.VIEW ) {
                 return await this.postComment.canViewPostComment(user, context)
-            } else if ( action === 'create' ) {
+            } else if ( action === PermissionService.ACTIONS.CREATE ) {
                 return await this.postComment.canCreatePostComment(user, context)
-            } else if ( action === 'update' ) {
+            } else if ( action === PermissionService.ACTIONS.UPDATE ) {
                 return await this.postComment.canUpdatePostComment(user, context)
-            } else if ( action === 'delete' ) {
+            } else if ( action === PermissionService.ACTIONS.DELETE ) {
                 return await this.postComment.canDeletePostComment(user, context)
             }
         } else if ( entity === 'PostReaction' ) {
-            if ( action === 'view' ) {
+            if ( action === PermissionService.ACTIONS.VIEW ) {
                 return await this.postReaction.canViewPostReaction(user, context)
-            } else if ( action === 'create' ) {
+            } else if ( action === PermissionService.ACTIONS.CREATE ) {
                 return await this.postReaction.canCreatePostReaction(user, context)
-            } else if ( action === 'update' ) {
+            } else if ( action === PermissionService.ACTIONS.UPDATE ) {
                 return await this.postReaction.canUpdatePostReaction(user, context)
-            } else if ( action === 'delete' ) {
+            } else if ( action === PermissionService.ACTIONS.DELETE ) {
                 return await this.postReaction.canDeletePostReaction(user, context)
             }
         } else if ( entity === 'PostSubscription' ) {
-            if ( action === 'view' ) {
+            if ( action === PermissionService.ACTIONS.VIEW ) {
                 return await this.postSubscription.canViewPostSubscription(user, context)
-            } else if ( action === 'create' ) {
+            } else if ( action === PermissionService.ACTIONS.CREATE ) {
                 return await this.postSubscription.canCreatePostSubscription(user, context)
-            } else if ( action === 'update' ) {
+            } else if ( action === PermissionService.ACTIONS.UPDATE ) {
                 return await this.postSubscription.canUpdatePostSubscription(user, context)
-            } else if ( action === 'delete' ) {
+            } else if ( action === PermissionService.ACTIONS.DELETE ) {
                 return await this.postSubscription.canDeletePostSubscription(user, context)
             }
         } else if ( entity === 'UserRelationship' ) {
-            if ( action === 'view' ) {
+            if ( action === PermissionService.ACTIONS.VIEW ) {
                 return await this.userRelationship.canViewUserRelationship(user, context)
-            } else if ( action === 'create' ) {
+            } else if ( action === PermissionService.ACTIONS.CREATE ) {
                 return await this.userRelationship.canCreateUserRelationship(user, context)
-            } else if ( action === 'update' ) {
+            } else if ( action === PermissionService.ACTIONS.UPDATE ) {
                 return await this.userRelationship.canUpdateUserRelationship(user, context)
-            } else if ( action === 'delete' ) {
+            } else if ( action === PermissionService.ACTIONS.DELETE ) {
                 return await this.userRelationship.canDeleteUserRelationship(user, context)
             }
         } else if ( entity === 'Site' ) {
-            if ( action === 'moderate' ) {
+            if ( action === PermissionService.ACTIONS.MODERATE ) {
                 return await this.canModerateSite(user, context)
-            } else if ( action === 'admin' ) {
+            } else if ( action === PermissionService.ACTIONS.ADMIN ) {
                 return await this.canAdminSite(user, context)
-            } else if ( action === 'sudo' ) {
+            } else if ( action === PermissionService.ACTIONS.SUDO ) {
                 return this.canSudoSite(user, context)
             }
         }
 
         throw new ServiceError('unsupported', `Unsupported Entity(${entity}) or Action(${action}).`)
-    }
-
-    async canViewPost(user, context) {
-        if ( ! contextHas(context, 'post') && contextHas(context, 'postId')) {
-            context.post = await this.postDAO.getPostById(context.postId)
-        } else if ( contextHas(context, 'post') && contextHas(context, 'postId') ) { 
-            if ( context.post.id !== context.postId ) {
-                throw new ServiceError('invalid-context:post',
-                    `Post.id is not the same as postId.`)
-            }
-        }
-
-        if ( ! contextHas(context, 'post') ) {
-            throw new ServiceError('missing-context', `'post' missing from context.`) 
-        }
-
-        // Site moderators can always view posts.
-        const canModerateSite = await this.canModerateSite(user)
-        if ( canModerateSite ) {
-            return true
-        }
-
-        // If the post is a Group post, then group permissions override post
-        // permissions. It depends on type of group:
-        //
-        // - Posts in Open groups are publicly visible.
-        // - Posts in Hidden or Private groups are visible to members of the group.
-        //
-        if ( context.post.groupId ) {
-            if ( contextHas(context, 'group') && context.group.id !== context.post.groupId ) {
-                throw new ServiceError('invalid-context:group', 
-                    `Group in context does not match Post.groupId.`)
-            } else if ( contextHas(context, 'groupId') && context.groupId !== context.post.groupId ) {
-                throw new ServiceError('invalid-context:groupId', 
-                    `GroupId in context does not match Post.groupId.`)
-            }
-
-            return await this.can(user, 'view', 'Group:content', context)
-        }
-
-        // If the post isn't in a group, then users can view their own
-        // posts.
-        if ( context.post.userId === user.id ) {
-            return true
-        } else if ( context.post.visibility === 'public' ) {
-            return true
-        }
-
-        // Otherwise, they can only view the posts if they are friends with the poster.
-        if ( ! contextHas(context, 'userRelationship') ) {
-            context.userRelationship = await this.userRelationshipDAO.getUserRelationshipByUserAndRelation(user.id, context.post.userId)
-        }
-
-        if ( contextHas(context, 'userRelationship') && context.userRelationship.status === 'confirmed') {
-            if ((context.userRelationship.userId !== context.post.userId && context.userRelationship.relationId !== context.post.userId)
-                || (context.userRelationship.userId !== user.id && context.userRelationship.relationId !== user.id) )
-            {
-                throw new ServiceError('invalid-context:userRelationship',
-                    `UserRelationship is not a relationship between Post author and user.`)
-            }
-            return true
-        }
-
-        return false 
-    }
-
-    async canUpdatePost(user, context) {
-        // If we don't have the post in context, attempt to load it.
-        if ( ! contextHas(context, 'post') && contextHas(context, 'postId')) {
-            context.post = await this.postDAO.getPostById(context.postId)
-        } 
-        // Context must match up.
-        else if ( contextHas(context, 'post') && contextHas(context, 'postId') ) {
-            if ( context.post.id !== context.postId ) {
-                throw new ServiceError('invalid-context:post',
-                    `Post.id does not match postId.`)
-            }
-        }
-
-        if ( ! contextHas(context, 'post')) {
-            throw new ServiceError('missing-context', `'post' missing from context.`) 
-        }
-
-        if ( context.post.userId === user.id ) {
-            return true
-        }
-
-        return false
-    }
-
-    async canDeletePost(user, context) {
-        if ( ! contextHas(context, 'post') && contextHas(context, 'postId')) {
-            context.post = await this.postDAO.getPostById(context.postId)
-        }
-        // Context must match up.
-        else if ( contextHas(context, 'post') && contextHas(context, 'postId') ) {
-            if ( context.post.id !== context.postId ) {
-                throw new ServiceError('invalid-context:post',
-                    `Post.id does not match postId.`)
-            }
-        }
-
-        if ( ! contextHas(context, 'post') ) {
-            throw new ServiceError('missing-context', `'post' missing from context.`) 
-        }
-
-        // Users can always delete their own posts.
-        if ( context.post.userId === user.id ) {
-            return true
-        }
-
-        // If the post is in a group, then moderators and admins of the group
-        // can also delete posts.
-        if ( 'groupId' in context.post && context.post.groupId !== undefined && context.post.groupId !== null) {
-            return await this.can(user, 'moderate', 'Group', context)
-        }
-
-        return false
     }
 
     async canModerateSite(user, context) {

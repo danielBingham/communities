@@ -9,6 +9,8 @@
 
     max-width: 650px;
     margin: 20px auto 20px auto;
+    width: 100%;
+    box-sizing: border-box;
 }
 .post-list .post-list__header__controls {
     text-align: right;

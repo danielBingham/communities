@@ -37,7 +37,7 @@ const PromoteToModerator = function({ groupId, userId }) {
         return null
     }
 
-    if ( userMember.status === 'banned' ) {
+    if ( userMember.status !== 'member' ) {
         return null
     }
 

@@ -15,5 +15,7 @@
 @media (width <= 1220px) {
     .group-members-list__grid {
         display: block;
+        max-width: 400px;
+        margin: 0 auto;
     }
 }

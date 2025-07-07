@@ -2,11 +2,14 @@ import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
-import { GroupPermissions, useGroupPermission } from '/lib/hooks/permission'
 
 import { usePost } from '/lib/hooks/Post'
 import { usePostComment } from '/lib/hooks/PostComment'
+import { useGroup } from '/lib/hooks/Group'
+import { useGroupMember } from '/lib/hooks/GroupMember'
 import { useGroupModeration } from '/lib/hooks/GroupModeration'
+
+import { GroupPermissions, useGroupPermission } from '/lib/hooks/permission'
 
 import { patchGroupModeration } from '/state/GroupModeration'
 
@@ -19,13 +22,17 @@ import ErrorModal from '/components/errors/ErrorModal'
 const ModerateForGroupModal = function({ postId, postCommentId, isVisible, setIsVisible }) {
     const [reason, setReason] = useState('')
    
+    const currentUser = useSelector((state) => state.authentication.currentUser)
+
     const [post, postRequest] = usePost(postId)
     const [comment, commentRequest ] = usePostComment(postId, postCommentId)
 
+    const [group, groupRequest] = useGroup(post?.groupId)
+    const [currentMember, currentMemberRequest] = useGroupMember(group?.id, currentUser.id)
+
     const [groupModeration, groupModerationRequest] = useGroupModeration(postCommentId ? comment?.groupModerationId : post?.groupModerationId)
 
-    const currentUser = useSelector((state) => state.authentication.currentUser)
-    const canModerateGroup = useGroupPermission(currentUser, GroupPermissions.MODERATE, post?.groupId)
+    const canModerateGroup = useGroupPermission(currentUser, GroupPermissions.MODERATE, { group: group, userMember: currentMember })
 
     const [request, makeRequest] = useRequest()
 

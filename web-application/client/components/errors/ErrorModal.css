@@ -1,14 +1,13 @@
 .error-modal .modal {
     border: thin solid var(--danger-color-light);
     color: var(--danger-color-dark);
-    background-color: var(--danger-color-lightest);
     z-index: 2000;
 }
 .error-modal .modal .modal__close svg {
-    color: var(--danger-color-light);
+    color: var(--danger-color-main);
 }
 .error-modal__wrapper {
-    padding: 20px;
+    padding: 10px;
 }
 .error-modal .error-modal__wrapper a:link,
 .error-modal .error-modal__wrapper a:visited,
@@ -17,4 +16,7 @@
 }
 .error-modal .error-modal__wrapper a:hover {
     color: var(--danger-color-main-highlight);
+}
+.error-modal .error-modal__button {
+    text-align: center;
 }

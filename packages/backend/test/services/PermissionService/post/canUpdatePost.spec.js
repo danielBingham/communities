@@ -47,7 +47,7 @@ describe('PermissionService.canUpdatePost()', function() {
             // Admin User
             const currentUser = entities['users'].dictionary['469931f6-26f2-4e1c-b4a0-849aed14e977']
 
-            const canUpdate = await service.canUpdatePost(currentUser, context)
+            const canUpdate = await service.can(currentUser, 'update', 'Post', context)
 
             expect(canUpdate).toBe(true)
         })
@@ -67,7 +67,7 @@ describe('PermissionService.canUpdatePost()', function() {
             // Admin User
             const currentUser = entities['users'].dictionary['469931f6-26f2-4e1c-b4a0-849aed14e977']
 
-            const canUpdate = await service.canUpdatePost(currentUser, context)
+            const canUpdate = await service.can(currentUser, 'update', 'Post', context)
 
             expect(canUpdate).toBe(true)
         })
@@ -85,7 +85,7 @@ describe('PermissionService.canUpdatePost()', function() {
             const currentUser = entities['users'].dictionary['469931f6-26f2-4e1c-b4a0-849aed14e977']
 
             try {
-                const canUpdate = await service.canUpdatePost(currentUser, context)
+                const canUpdate = await service.can(currentUser, 'update', 'Post', context)
             } catch (error) {
                 expect(error).toBeInstanceOf(ServiceError)
                 expect(error.type).toBe('invalid-context:post')
@@ -103,7 +103,7 @@ describe('PermissionService.canUpdatePost()', function() {
             const currentUser = entities['users'].dictionary['469931f6-26f2-4e1c-b4a0-849aed14e977']
 
             try {
-                const canUpdate = await service.canUpdatePost(currentUser, context)
+                const canUpdate = await service.can(currentUser, 'update', 'Post', context)
             } catch (error) {
                 expect(error).toBeInstanceOf(ServiceError)
                 expect(error.type).toBe('missing-context')
@@ -126,7 +126,7 @@ describe('PermissionService.canUpdatePost()', function() {
                 .mockReturnValueOnce({ rowCount: 0, rows: [ ]})
 
             try {
-                const canUpdate = await service.canUpdatePost(currentUser, context)
+                const canUpdate = await service.can(currentUser, 'update', 'Post', context)
             } catch (error) {
                 expect(error).toBeInstanceOf(ServiceError)
                 expect(error.type).toBe('missing-context')
@@ -150,7 +150,7 @@ describe('PermissionService.canUpdatePost()', function() {
             // Admin User
             const currentUser = entities['users'].dictionary['469931f6-26f2-4e1c-b4a0-849aed14e977']
 
-            const canUpdate = await service.canUpdatePost(currentUser, context)
+            const canUpdate = await service.can(currentUser, 'update', 'Post', context)
 
             expect(post.userId).toBe(currentUser.id)
             expect(canUpdate).toBe(true)
@@ -168,7 +168,7 @@ describe('PermissionService.canUpdatePost()', function() {
             // User One 
             const currentUser = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-            const canUpdate = await service.canUpdatePost(currentUser, context)
+            const canUpdate = await service.can(currentUser, 'update', 'Post', context)
 
             expect(post.userId).not.toBe(currentUser.id)
             expect(canUpdate).toBe(false)

@@ -2,6 +2,7 @@ import { createSlice } from '@reduxjs/toolkit'
 
 import {
     setInDictionary,
+    setNull,
     removeEntity,
     setQueryResults,
     clearQuery,
@@ -49,8 +50,7 @@ export const GroupMemberSlice = createSlice({
     initialState: initialState,
     reducers: {
         setGroupMembersInDictionary: (state, action) => {
-            setInDictionary(state, action)
-
+            // Utilty to manage the map.
             const setByGroupAndUser = (entity) => {
                 if ( ! (entity.groupId in state.byGroupAndUser) ) {
                     state.byGroupAndUser[entity.groupId] = {}
@@ -59,11 +59,27 @@ export const GroupMemberSlice = createSlice({
             }
 
             if ( 'dictionary' in action.payload ) {
+                setInDictionary(state, action)
                 for(const [id, entity] of Object.entries(action.payload.dictionary)) {
-                    setByGroupAndUser(entity)
+                    if ( entity !== null ) {
+                        setByGroupAndUser(entity)
+                    }
                 }
             } else if ('entity' in action.payload ) {
+                setInDictionary(state, action)
                 setByGroupAndUser(action.payload.entity)
+            }
+        },
+        setGroupMembersNull : (state, action) => {
+            const payload = action.payload
+
+            if ( 'groupId' in payload && 'userId' in payload ) {
+                if ( ! (payload.groupId in state.byGroupAndUser ) ) {
+                    state.byGroupAndUser[payload.groupId] = {}
+                }
+                state.byGroupAndUser[payload.groupId][payload.userId] = null
+            } else {
+                setNull(state, action)
             }
         },
         removeGroupMember: (state, action) => {
@@ -79,7 +95,7 @@ export const GroupMemberSlice = createSlice({
 })
 
 export const { 
-    setGroupMembersInDictionary, removeGroupMember, 
+    setGroupMembersInDictionary, setGroupMembersNull, removeGroupMember, 
     clearGroupMemberQuery, setGroupMemberQueryResults,
     clearGroupMemberQueries, resetGroupMemberSlice
 }  = GroupMemberSlice.actions

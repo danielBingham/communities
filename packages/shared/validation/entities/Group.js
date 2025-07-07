@@ -1,9 +1,11 @@
-const { UUIDValidator, StringValidator } = require('../types')
+const { UUIDValidator, StringValidator, DateValidator, ObjectValidator} = require('../types')
 const { validateEntity } = require('../validate')
 
-const validateType = function(type) {
-    const validator = new StringValidator('type', type)
+const validateType = function(value, existing, action) {
+    const validator = new StringValidator('type', value, existing, action)
     const errors = validator
+        .isRequiredToCreate()
+        .mustNotBeUpdated()
         .mustNotBeNull()
         .mustBeString()
         .mustBeOneOf(['open', 'private', 'hidden'])
@@ -11,9 +13,22 @@ const validateType = function(type) {
     return errors
 }
 
-const validateTitle = function(title) {
-    const validator = new StringValidator('title', title)
+const validatePostPermissions = function(value, existing, action) {
+    const validator = new StringValidator('postPermissions', value, existing, action)
     const errors = validator
+        .isRequiredToCreate()
+        .mustNotBeNull()
+        .mustBeString()
+        .mustBeOneOf(['anyone', 'members', 'approval', 'restricted'])
+        .getErrors()
+    return errors
+}
+
+const validateTitle = function(value, existing, action) {
+    const validator = new StringValidator('title', value, existing, action)
+    const errors = validator
+        .isRequiredToCreate()
+        .mustNotBeUpdated()
         .mustNotBeNull()
         .mustBeString()
         .mustNotBeEmpty()
@@ -23,9 +38,11 @@ const validateTitle = function(title) {
     return errors
 }
 
-const validateSlug = function(slug) {
-    const validator = new StringValidator('slug', slug)
+const validateSlug = function(value, existing, action) {
+    const validator = new StringValidator('slug', value, existing, action)
     const errors = validator
+        .isRequiredToCreate()
+        .mustNotBeUpdated()
         .mustNotBeNull()
         .mustBeString()
         .mustNotBeEmpty()
@@ -35,8 +52,8 @@ const validateSlug = function(slug) {
     return errors
 }
 
-const validateAbout = function(about) {
-    const validator = new StringValidator('about', about)
+const validateAbout = function(value, existing, action) {
+    const validator = new StringValidator('about', value, existing, action)
     const errors = validator
         .mustNotBeNull()
         .mustBeString()
@@ -45,12 +62,36 @@ const validateAbout = function(about) {
     return errors
 }
 
-const validateFileId = function(fileId) {
-    const validator = new UUIDValidator('fileId', fileId)
+const validateFileId = function(fileId, existing, action) {
+    const validator = new UUIDValidator('fileId', fileId, existing, action)
 
     // fileId may be null.
     const errors = validator
         .mustBeUUID()
+        .getErrors()
+    return errors
+}
+
+const validateEntranceQuestions = function(value, existing, action) {
+    const validator = new ObjectValidator('entranceQuestions', value, existing, action)
+    const errors = validator
+        .mustNotBeSet()
+        .getErrors()
+    return errors
+}
+
+const validateCreatedDate = function(createdDate, existing, action) {
+    const validator = new DateValidator('createdDate', createdDate, existing, action)
+    const errors = validator
+        .mustNotBeSet()
+        .getErrors()
+    return errors
+}
+
+const validateUpdatedDate = function(updatedDate, existing, action) {
+    const validator = new DateValidator('updatedDate', updatedDate, existing, action)
+    const errors = validator
+        .mustNotBeSet()
         .getErrors()
     return errors
 }
@@ -64,23 +105,31 @@ const validateFileId = function(fileId) {
  * @return {ValidationErrors{}} Returns an object with an array of validation
  * errors for each field.
  */
-const validate = function(group) {
+const validate = function(group, existing) {
     let validators = {
         type: validateType,
+        postPermissions: validatePostPermissions,
         title: validateTitle,
         slug: validateSlug,
         about: validateAbout,
-        fileId: validateFileId
+        fileId: validateFileId,
+        entranceQuestions: validateEntranceQuestions,
+        createdDate: validateCreatedDate,
+        updatedDate: validateUpdatedDate
     }
 
-    return validateEntity(group, validators)
+    return validateEntity(group, validators, existing)
 }
 
 module.exports = {
     validateType: validateType,
+    validatePostPermissions: validatePostPermissions,
     validateTitle: validateTitle,
     validateSlug: validateSlug,
     validateAbout: validateAbout,
     validateFileId: validateFileId,
+    validateEntranceQuestions: validateEntranceQuestions,
+    validateCreatedDate: validateCreatedDate,
+    validateUpdatedDate: validateUpdatedDate,
     validate: validate
 }

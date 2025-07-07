@@ -1,42 +1,57 @@
-import { useGroup } from '/lib/hooks/Group'
-import { useGroupMember } from '/lib/hooks/GroupMember'
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media 
+ *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
+import * as shared from '@communities/shared'
+
 import { SitePermissions, useSitePermission } from './useSitePermission'
 
-/**
- * Are the contents of this group hidden for the current member?
- */
-const canViewGroup = function(group, currentMember) {
-    return group?.type === 'open' || ( currentMember?.status == 'member')
-}
-
-const canModerateGroup = function(group, currentMember) {
-    return currentMember?.role == 'moderator' || currentMember?.role == 'admin'
-}
-
-const canAdminGroup = function(group, currentMember) {
-    return currentMember?.role == 'admin'
-}
-
 export const GroupPermissions = {
+    CREATE: 'create',
     VIEW: 'view',
+    UPDATE: 'update',
+    DELETE: 'delete',
     MODERATE: 'moderate',
     ADMIN: 'admin'
 }
 
-export const useGroupPermission = function(currentUser, action, groupId) {
-    const [group] = useGroup(groupId)
-    const [currentMember] = useGroupMember(groupId, currentUser.id)
+export const useGroupPermission = function(currentUser, action, context) {
+    
+    if ( ! ('group' in context) || ! ( 'userMember' in context) ) {
+        throw new Error('Missing context.')
+    }
 
-    const canModerateSite = useSitePermission(currentUser, SitePermissions.MODERATE)
+    context.canModerateSite = useSitePermission(currentUser, SitePermissions.MODERATE)
 
     // SiteModerators need to be able to view the group in order to moderate posts in it.
-    if ( action === GroupPermissions.VIEW && (canModerateSite || canViewGroup(group, currentMember)) ) {
-        return true 
-    } else if ( action === GroupPermissions.MODERATE && canModerateGroup(group, currentMember) ) {
-        return true 
-    } else if ( action === GroupPermissions.ADMIN && canAdminGroup(group, currentMember) ) {
-        return true 
+    if ( action === GroupPermissions.VIEW ) {
+        return shared.permissions.Group.canViewGroup(currentUser, context) 
+    } else if ( action === GroupPermissions.CREATE ) {
+        return shared.permissions.Group.canCreateGroup(currentUser, context)
+    } else if ( action === GroupPermissions.UPDATE ) {
+        return shared.permissions.Group.canUpdateGroup(currentUser, context)
+    } else if ( action === GroupPermissions.DELETE ) {
+        return shared.permissions.Group.canDeleteGroup(currentUser, context)
+    } else if ( action === GroupPermissions.MODERATE ) {
+        return shared.permissions.Group.canModerateGroup(currentUser, context) 
+    } else if ( action === GroupPermissions.ADMIN ) {
+        return shared.permissions.Group.canAdminGroup(currentUser, context) 
     } else {
-        return false
+        throw new Error(`Invalid GroupPermission: ${action}.`)
     }
 }

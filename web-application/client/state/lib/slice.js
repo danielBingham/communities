@@ -26,6 +26,10 @@ export const setInDictionary = function(state, action) {
     }
 }
 
+export const setNull = function(state, action) {
+    state.dictionary[action.payload] = null
+}
+
 export const removeEntity = function(state, action) {
     const entity = action.payload.entity
     const clearQueries = action.payload.clearQueries

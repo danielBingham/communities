@@ -45,9 +45,16 @@ const RemoveMember = function({ groupId, userId }) {
         return null
     }
 
+    let text = 'Remove Member'
+    if ( userMember.status === 'pending-invited' ) {
+        text = 'Cancel Invite'
+    } else if( userMember.status === 'pending-requested' ) {
+        text = 'Reject Request'
+    }
+
     return (
         <>
-            <FloatingMenuItem onClick={() => setAreYouSure(true)}>Remove Member</FloatingMenuItem> 
+            <FloatingMenuItem onClick={() => setAreYouSure(true)}>{ text }</FloatingMenuItem> 
             <AreYouSure isVisible={areYouSure} execute={() => { setAreYouSure(false); removeMember() }} cancel={() => setAreYouSure(false)} > 
                 <p>Are you sure you want to remove { user.name } from this group?</p>
             </AreYouSure>

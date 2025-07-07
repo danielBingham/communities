@@ -37,6 +37,13 @@ const SCHEMA = {
                 select: DAO.SELECT.ALWAYS,
                 key: 'type'
             },
+            'post_permissions': {
+                insert: DAO.INSERT.REQUIRE,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.ALWAYS,
+                key: 'postPermissions',
+                needsFeature: '140-group-admins-can-restrict-posting'
+            },
             'title': {
                 insert: DAO.INSERT.REQUIRE,
                 update: DAO.UPDATE.ALLOW,

@@ -17,13 +17,10 @@ import FlagPostForGroup from './FlagPostForGroup/FlagPostForGroup'
 import './PostDotsMenu.css'
 
 const PostDotsMenu = function({ postId }) {
-
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const post = useSelector((state) => postId && postId in state.Post.dictionary ? state.Post.dictionary[postId] : null) 
     const hasAdminModeration = useFeature('62-admin-moderation-controls')
     const hasGroupModeration = useFeature('89-improved-moderation-for-group-posts')
-
-    const [currentMember] = useGroupMember(post?.groupId, currentUser?.id) 
 
     // Must have a user and a post to show dots menu.
     if ( ! currentUser || post === null ) {
@@ -31,7 +28,6 @@ const PostDotsMenu = function({ postId }) {
     }
 
     const isAuthor = currentUser && currentUser.id == post.userId
-    const isModerator = currentMember && (currentMember.role == 'admin' || currentMember.role == 'moderator')
 
     return (
         <FloatingMenu className="post-dots-menu" closeOnClick={true}>
@@ -41,7 +37,7 @@ const PostDotsMenu = function({ postId }) {
                 { hasAdminModeration && currentUser && <FlagPost postId={postId} /> }
                 { hasGroupModeration && currentUser && post.groupId && <FlagPostForGroup postId={postId} /> }
                 { isAuthor && <EditPost postId={postId} /> }
-                { (isAuthor || isModerator) && <DeletePost postId={postId} /> }
+                { isAuthor && <DeletePost postId={postId} /> }
             </FloatingMenuBody>
         </FloatingMenu>
     )
