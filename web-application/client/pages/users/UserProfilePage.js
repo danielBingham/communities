@@ -18,10 +18,7 @@ import './UserProfilePage.css'
 const UserProfilePage = function(props) {
     const { slug } = useParams()
 
-    console.log(`## UserProfilePage(${slug})`)
     const [user, request] = useUserByUsername(slug)
-    console.log(user)
-    console.log(request)
 
     const dispatch = useDispatch()
     useEffect(() => {
@@ -51,7 +48,6 @@ const UserProfilePage = function(props) {
             )
         }
     } else if ( user === null ) {
-        console.log(`Render 404.`)
         // The request won't failed, because it's a search request.  So it will
         // just return an empty result.
         return (<Error404 />)

@@ -132,7 +132,7 @@ const DraftProfileImage = forwardRef(function({
                     crop={crop} 
                     onChange={(crop) => setCrop(crop)} aspect={1}
                     keepSelection={true}
-                    minWidth={200}
+                    minWidth={10}
                     minHeight={10}
                     circularCrop={true}
                 >

@@ -16,11 +16,7 @@ import Error404 from '/components/errors/Error404'
 import './UserView.css'
 
 const UserView = function(props) {
-    console.log(`## UserView(${props.id})`)
-
     const [user, request] = useUser(props.id)
-    console.log(user)
-    console.log(request)
 
     // ======= Render ===============================================
 

@@ -29,7 +29,6 @@ const config = require('./config')
 const core = new Core('worker', config)
 core.initialize()
 
-
 core.queue.process('resize-image', async function(job, done) {
     core.logger.setId(`Image resize: ${job.id}`)
     core.logger.info(`Beginning job 'resize-image' for user ${job.data.session.user.id}.`)
