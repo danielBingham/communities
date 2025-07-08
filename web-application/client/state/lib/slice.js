@@ -16,14 +16,6 @@ export const setInDictionary = function(state, action) {
         console.log(action)
         throw new Error(`Invalid payload sent to ${action.type}.`)
     }
-
-    const clearQueries = action.payload.clearQueries
-    if ( clearQueries === true ) {
-        // Taint the queries so that they'll be requeried.
-        for ( const [key,query] of Object.entries(state.queries)) {
-            state.queries[key].taint = true
-        }
-    }
 }
 
 export const setNull = function(state, action) {
@@ -32,24 +24,8 @@ export const setNull = function(state, action) {
 
 export const removeEntity = function(state, action) {
     const entity = action.payload.entity
-    const clearQueries = action.payload.clearQueries
-    const ignoreQuery = action.payload.ignoreQuery
-
-    // Don't remove an entity that is in use by a query unless that query is
-    // currently being cleaned up OR unless we need to taint all the queries
-    // and re-query because an entity has been deleted.
-    if ( clearQueries !== true && queryIsUsing(state.queries, entity.id, ignoreQuery) ) {
-        return
-    }
 
     delete state.dictionary[entity.id]
-
-    if (clearQueries === true ) {
-        // Taint the queries so that they'll be requeried.
-        for ( const [key,query] of Object.entries(state.queries)) {
-            state.queries[key].taint = true
-        }
-    } 
 }
 
 export const makeQuery = function(state, action) {

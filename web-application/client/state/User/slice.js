@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 import {
     setInDictionary,
+    setNull,
     removeEntity,
     setQueryResults,
     clearQuery,
@@ -57,6 +58,16 @@ export const UserSlice = createSlice({
                 state.byUsername[action.payload.entity.username] = action.payload.entity
             }
         },
+        setUserNull: (state, action) => {
+            const id = action.payload
+
+            if ( id in state.dictionary ) {
+                const entity = state.dictionary[id]
+                state.byUsername[entity.username] = null
+            }
+
+            setNull(state, action)
+        },
         removeUser: (state, action) => {
             removeEntity(state, action)
 
@@ -67,16 +78,28 @@ export const UserSlice = createSlice({
         clearUserQueries: clearQueries,
         resetUserSlice: function() {
             return initialState
-        }
+        },
+
+        setUserNullByUsername(state, action) {
+            const username = action.payload
+
+            if ( username in state.byUsername ) {
+                const entity = state.byUsername[username]
+                state.dictionary[entity.id] = null
+            }
+
+            state.byUsername[username] = null
+        },
 
     }
 })
 
 
 export const { 
-    setUsersInDictionary, removeUser, 
+    setUsersInDictionary, setUserNull, removeUser, 
     setUserQueryResults, clearUserQuery,
-    clearUserQueries, resetUserSlice
+    clearUserQueries, resetUserSlice,
+    setUserNullByUsername
 }  = UserSlice.actions
 
 export default UserSlice.reducer

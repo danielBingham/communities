@@ -9,37 +9,45 @@ import { getUser } from '/state/User'
 import UserProfileImage from '/components/users/UserProfileImage'
 import FriendButton from '/components/friends/FriendButton'
 
+import Spinner from '/components/Spinner'
+import { RequestErrorContent } from '/components/errors/RequestError'
 import Error404 from '/components/errors/Error404'
 
 import './UserView.css'
 
 const UserView = function(props) {
-    
-    const [user, request] = useUser(props.id)
+    console.log(`## UserView(${props.id})`)
 
+    const [user, request] = useUser(props.id)
+    console.log(user)
+    console.log(request)
 
     // ======= Render ===============================================
 
-    if ( ! user && ! request ) {
-        return null 
-    } else if ( ! user && (request && request.state == 'pending')) {
-        return null 
-    } else  if ( request && request.state == 'failed' ) {
-        if ( request.error.type == 'not-found' ) {
-            return ( <Error404 /> )
+    // We haven't requested the user yet.
+    if ( user === undefined  ) {
+        if ( request?.state === 'failed' ) {
+            return (
+                <article id={props.id} className="user-view">
+                    <RequestErrorContent message="Attempt to request User" request={request} />
+                </article>
+            )
         } else {
             return (
-                <article className="user-view">
-                    <div className="error">
-                        <p>We encountered an error while attempting to load the user. Please report a bug.</p>
-                        <p>Error type "{ request.error.type }" with message: { request.error.message }.</p>
-                    </div>
+                <article id={props.id} className="user-view">
+                    <Spinner />
                 </article>
             )
         }
-    } else if ( ! user && request && request.state == 'fulfilled' ) {
-        return ( <Error404 /> )
     } 
+    // We have requested the user, and we didn't find it.
+    else if ( user === null ) {
+        return (
+            <article id={props.id} className="user-view">
+                <Error404 />
+            </article>
+        )
+    }
 
     return (
         <article id={ user.id } className='user-view'>

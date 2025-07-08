@@ -3,18 +3,24 @@ import { useSelector, useDispatch } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { getUsers, clearUserQuery } from '/state/User'
-import { cleanupRelations } from '/state/lib'
+import { getUsers } from '/state/User'
 
 export const useUserByUsername = function(username) {
-    const user = useSelector((state) => username in state.User.byUsername ? state.User.byUsername[username] : null)
 
-    const [request, makeRequest, resetRequest] = useRequest()
+    const query = useSelector((state) => username in state.User.queries ? state.User.queries[username] : undefined)
+    const user = useSelector((state) => { 
+        if ( query === undefined && ! (username in state.User.byUsername) ) {
+            return undefined
+        } else if ( query !== undefined && ! (username in state.User.byUsername) ) {
+            return null
+        }
+        return state.User.byUsername[username] 
+    })
 
-    const dispatch = useDispatch()
+    const [request, makeRequest ] = useRequest()
 
     useEffect(() => {
-        if ( username && request === null && user === null ) {
+        if ( username && query === undefined && request?.state !== 'pending' ) {
             makeRequest(getUsers(username, { username: username }))
         }
     }, [ username, user, request ])

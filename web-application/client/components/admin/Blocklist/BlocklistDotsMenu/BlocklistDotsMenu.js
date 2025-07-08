@@ -7,7 +7,7 @@ import { deleteBlocklist } from '/state/Blocklist'
 
 import { DotsMenu, DotsMenuItem } from '/components/ui/DotsMenu'
 
-import RequestError from '/components/errors/RequestError'
+import { RequestErrorModal } from '/components/errors/RequestError'
 
 const BlocklistDotsMenu = function({ id }) {
 
@@ -28,8 +28,8 @@ const BlocklistDotsMenu = function({ id }) {
             <DotsMenu>
                 <DotsMenuItem onClick={() => executeDelete()} >Delete</DotsMenuItem>
             </DotsMenu>
-            <RequestError request={request} message={"Deleting Blocklist"} />
-            <RequestError request={getRequest} message={"Loading Blocklist"} />
+            <RequestErrorModal request={request} message={"Deleting Blocklist"} />
+            <RequestErrorModal request={getRequest} message={"Loading Blocklist"} />
         </>
     )
 }

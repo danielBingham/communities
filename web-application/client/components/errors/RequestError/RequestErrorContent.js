@@ -2,9 +2,9 @@ import React from 'react'
 
 import logger from '/logger'
 
-import ErrorModal from './ErrorModal'
+import Error404 from '/components/errors/Error404'
 
-const RequestError = function({ message, request, ignore404 }) {
+const RequestErrorContent = function({ message, request, ignore404 }) {
     const contextMessage = message ? message : 'Request'
 
     if ( request && request.state === 'failed' ) {
@@ -15,36 +15,40 @@ const RequestError = function({ message, request, ignore404 }) {
         if ( request.response.status >= 500 && request.response.status < 600 ) {
             logger.error(`${ contextMessage }: `, request)
             return (
-                <ErrorModal>
+                <div className="server-error">
                     <p>{ contextMessage } failed with a server-error.</p>
                     <p>Status: { request.response.status}, Type: { request.error.type }</p>
                     <p>{ request.error.message }</p>
                     <p>This is probably a bug.  Please report it!</p>
-                </ErrorModal>
+                </div>
             )
         } else if ( request.response.status >= 400 && request.response.status < 500 ) {
-            return (
-                <ErrorModal>
-                    <p>{ contextMessage } failed.</p>
-                    <p>{ request.error.message }</p>
-                </ErrorModal>
-            )
+            if ( request.response.status === 404 ) {
+                return ( <Error404 /> )
+            } else {
+                return (
+                    <div className="user-error">
+                        <p>{ contextMessage } failed.</p>
+                        <p>{ request.error.message }</p>
+                    </div>
+                )
+            }
         } else if ( request.error?.type === 'frontend-error' ) {
             return (
-                <ErrorModal>
+                <div className="frontend-error">
                     <p>{ contextMessage } succeeded, but we failed to process the response.</p>
                     <p>Refreshing your browser should clear this message.  Please report this as a bug.</p>
                     <p>{ request.error.message }</p>
-                </ErrorModal>
+                </div>
             )
         } else {
             logger.error(`${ contextMessage }: `, request)
             return (
-                <ErrorModal>
+                <div className="request-error">
                     <p>{ contextMessage } failed for unknown reason.</p>
                     <p>Please report bug.</p>
                     <p>{ request.error?.message }</p>
-                </ErrorModal>
+                </div>
             )
         }
     }
@@ -52,4 +56,4 @@ const RequestError = function({ message, request, ignore404 }) {
     return null
 }
 
-export default RequestError
+export default RequestErrorContent

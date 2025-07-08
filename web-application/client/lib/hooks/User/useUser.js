@@ -6,12 +6,20 @@ import { useRequest } from '/lib/hooks/useRequest'
 import { getUser } from '/state/User'
 
 export const useUser = function(id) {
-    const user = useSelector((state) => id && id in state.User.dictionary ? state.User.dictionary[id] : null)
+    const user = useSelector((state) => {
+        if ( ! id ) {
+            return null
+        }
+        if ( ! ( id in state.User.dictionary ) ) {
+            return undefined
+        }
+        return state.User.dictionary[id] 
+    })
 
     const [request, makeRequest ] = useRequest()
 
     useEffect(() => {
-        if ( id && user === null && request === null) {
+        if ( id && user === undefined && request?.state !== 'pending') {
             makeRequest(getUser(id))
         }
     }, [ id, user, request])

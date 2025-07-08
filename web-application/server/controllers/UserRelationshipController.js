@@ -52,10 +52,18 @@ module.exports = class UserRelationshipController {
 
         const userIds = Object.keys(userIdDictionary)
 
-        const userResults = await this.userDAO.selectUsers({ where: `users.id = ANY($1::uuid[])`, params: [ userIds ], fields: [ 'email' ] })
+        const userResults = await this.userDAO.selectUsers({ where: `users.id = ANY($1::uuid[])`, params: [ userIds ] })
+
+        const invitations = await this.core.database.query(`
+            SELECT user_id FROM tokens WHERE creator_id = $1
+        `, [ userId ])
+
+        const invitedUserIds = invitations.rows.map((row) => row.user_id)
+
+        const invitationResults = await this.userDAO.selectUsers({ where: `users.id = ANY($1::uuid[])`, params: [ invitedUserIds ], fields: [ 'email' ] })
 
         return {
-            users: userResults.dictionary
+            users: { ...userResults.dictionary, ...invitationResults.dictionary }
         }
     }
 
