@@ -145,6 +145,11 @@ module.exports = class PermissionService {
      * identified by `context`, false otherwise.
      */
     async can(user, action, entity, context) {
+        if ( user.status === null ) {
+            throw new ServiceError('missing-context',
+                `User.status requried to properly assess permissions.`)
+        }
+
         // Banned users shouldn't be able to log in.  But if they somehow do
         // manage to bypass that protection, we want to prevent them from
         // doing... well, anything.

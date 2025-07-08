@@ -449,12 +449,11 @@ module.exports = class GroupModerationController extends BaseController {
             throw new Error(`Failed to find GroupModeration(${id}) after update.`)
         }
 
-        /* TODO Notifications for GroupModeration
-         * if ( entity.status === 'rejected' ) {
+        if ( entity.status === 'rejected' ) {
             if ( entity.postId !== null && entity.postCommentId === null) {
                 await this.notificationService.sendNotifications(
                     currentUser,
-                    'Post:moderation:rejected',
+                    'Group:post:moderation:rejected',
                     {
                         moderation: entity
                     }
@@ -462,13 +461,13 @@ module.exports = class GroupModerationController extends BaseController {
             } else if ( entity.postId !== null && entity.postCommentId !== null ) {
                 await this.notificationService.sendNotifications(
                     currentUser,
-                    'Post:comment:moderation:rejected',
+                    'Group:post:comment:moderation:rejected',
                     {
                         moderation: entity
                     }
                 )
             }
-        }*/
+        }
 
         // Insert the event to track the moderation history.
         await this.groupModerationEventDAO.insertGroupModerationEvents(this.groupModerationEventDAO.createEventFromGroupModeration(entity))
