@@ -291,42 +291,45 @@ The Communities Team`)
                 text: Handlebars.compile(`You have been promoted to "admin" of group "{{{group.title}}}".`),
                 path: Handlebars.compile(`/group/{{{group.slug}}}`)
             },
-            'Group:post:deleted': {
+            'Group:post:moderation:rejected': {
                 email: {
-                    subject: Handlebars.compile('[Communities] Your post, "{{{shortText}}}", was deleted from group, "{{{group.title}}}".'),
+                    subject: Handlebars.compile('[Communities] Your post, "{{{postIntro}}}...", was removed by moderator of {{{group.title}}}. '), 
                     body: Handlebars.compile(`
-Hi {{{user.name}}},
+Hi {{{postAuthor.name}}},
 
-{{{moderator.name}}} deleted your post in group, "{{{group.title}}}".  The full text of the post was:
+Your post, "{{{postIntro}}}...", was removed by moderators of {{{group.title}}} for violating the group's rules.   
 
-{{{post.content}}}
+{{{ moderation.reason }}}
 
-You can view the group here: {{{host}}}group/{{{group.slug}}}
+The original text of the post was:
 
-Cheers,
-The Communities Team`)
+"{{{ post.content }}}"
+
+The Communities Team
+                        `)
                 },
-                text: Handlebars.compile(`{{{moderator.name}}} deleted your post, "{{{shortText}}}" in group, "{{{group.title}}}".`),
-                path: Handlebars.compile(`/group/{{{group.slug}}}`)
-
+                text: Handlebars.compile(`Moderators of {{{group.title}}} removed your post, "{{{postIntro}}}..."`),
+                path: Handlebars.compile(`/{{{link}}}`) 
             },
-            'Group:post:comment:deleted': {
+            'Group:post:comment:moderation:rejected': {
                 email: {
-                    subject: Handlebars.compile('[Communities] Your comment, "{{{shortText}}}", was deleted from a post in group, "{{{group.title}}}".'),
+                    subject: Handlebars.compile('[Communities] Your comment, "{{{commentIntro}}}...", was removed by moderators of {{{group.title}}}.'), 
                     body: Handlebars.compile(`
-Hi {{{user.name}}},
+Hi {{{commentAuthor.name}}},
 
-{{{moderator.name}}} deleted your comment from a post in group, "{{{group.title}}}".  The full text of your comment was:
+Your comment, "{{{commentIntro}}}...", was removed by moderators of {{{group.title}}} for violating the group's rules.  
 
-{{{comment.content}}}
+{{{ moderation.reason }}}
 
-You can view the post here: {{{host}}}group/{{{group.slug}}}/{{{post.id}}}
+The original text of the comment was:
 
-Cheers,
-The Communities Team`)
+"{{{ comment.content }}}"
+
+The Communities Team
+                        `)
                 },
-                text: Handlebars.compile(`{{{moderator.name}}} deleted your comment, "{{{shortText}}}" from a post in group, "{{{group.title}}}".`),
-                path: Handlebars.compile(`/group/{{{group.slug}}}/{{{post.id}}}`)
+                text: Handlebars.compile(`Moderators of {{{group.title}}} removed your comment, "{{{ commentIntro }}}..."`),
+                path: Handlebars.compile(`/{{{link}}}`) 
             }
         }
 
@@ -340,8 +343,8 @@ The Communities Team`)
             'User:friend:update': this.friendRequestAcceptedNotification.bind(this),
             'Group:member:create': this.sendGroupMemberCreatedNotification.bind(this),
             'Group:member:update': this.sendGroupMemberUpdatedNotification.bind(this),
-            'Group:post:deleted': this.sendGroupPostDeletedNotification.bind(this),
-            'Group:post:comment:deleted': this.sendGroupPostCommentDeletedNotification.bind(this)
+            'Group:post:moderation:rejected': this.sendGroupPostModerationRejectedNotification.bind(this),
+            'Group:post:comment:moderation:rejected': this.sendGroupPostCommentModerationRejectedNotification.bind(this)
         }
     }
 
@@ -418,7 +421,7 @@ The Communities Team`)
         context.postIntro = context.post.content.substring(0,20)
         context.commentIntro = context.comment.content.substring(0,20)
 
-        const postAuthor = await this.userDAO.getUserById(context.post.userId) 
+        const postAuthor = await this.userDAO.getUserById(context.post.userId, ['status']) 
         context.postAuthor = postAuthor
 
         if ( context.post.groupId ) {
@@ -431,10 +434,16 @@ The Communities Team`)
         const subscriptions = await this.postSubscriptionDAO.getSubscriptionsByPost(context.post.id)
         if ( subscriptions !== null ) {
             const subscriberIds = subscriptions.map((s) => s.userId)
-            const subscribers = await this.userDAO.selectUsers({ where: `users.id = ANY($1::uuid[])`, params: [ subscriberIds]})
+            const subscribers = await this.userDAO.selectUsers({ where: `users.id = ANY($1::uuid[])`, params: [ subscriberIds], fields: ['status']})
 
             for(const subscription of subscriptions) {
                 if ( subscription.userId == context.commentAuthor.id ) {
+                    continue
+                }
+
+                // If the user has lost the ability to view this post, then don't send them a notification.
+                const canViewPost = await this.permissionService.can(subscribers.dictionary[subscription.userId], 'view', 'Post', { post: context.post })
+                if ( canViewPost !== true ) {
                     continue
                 }
 
@@ -458,7 +467,7 @@ The Communities Team`)
 
         context.commentIntro = context.comment.content.substring(0,20)
         context.postIntro = context.post.content.substring(0,20)
-        context.postAuthor = await this.userDAO.getUserById(context.post.userId) 
+        context.postAuthor = await this.userDAO.getUserById(context.post.userId, ['status']) 
 
         if ( context.post.groupId ) {
             const group = await this.groupDAO.getGroupById(context.post.groupId)
@@ -469,7 +478,8 @@ The Communities Team`)
 
         const userResults = await this.userDAO.selectUsers({
             where: `users.username = ANY($1::text[])`,
-            params: [ mentionedUsernames ]
+            params: [ mentionedUsernames ],
+            fields: ['status']
         })
 
         // None of the mentions referred to real users.
@@ -478,6 +488,12 @@ The Communities Team`)
         }
 
         for(const userId of userResults.list ) {
+            // If the user has lost the ability to view this post, then don't send them a notification.
+            const canViewPost = await this.permissionService.can(userResults.dictionary[userId], 'view', 'Post', { post: context.post })
+            if ( canViewPost !== true ) {
+                continue
+            }
+
             const mentionContext = { ...context, mentioned: userResults.dictionary[userId] }
             await this.createNotification(userId, 'Post:comment:create:mention', mentionContext, options)
         }
@@ -492,7 +508,7 @@ The Communities Team`)
         }
 
         context.postIntro = context.post.content.substring(0,20)
-        context.postAuthor = await this.userDAO.getUserById(context.post.userId) 
+        context.postAuthor = await this.userDAO.getUserById(context.post.userId, ['status']) 
 
         if ( context.post.groupId ) {
             const group = await this.groupDAO.getGroupById(context.post.groupId)
@@ -503,7 +519,8 @@ The Communities Team`)
 
         const userResults = await this.userDAO.selectUsers({
             where: `users.username = ANY($1::text[])`,
-            params: [ mentionedUsernames ]
+            params: [ mentionedUsernames ],
+            fields: ['status']
         })
 
         // None of the mentions referred to real users.
@@ -512,6 +529,12 @@ The Communities Team`)
         }
 
         for(const userId of userResults.list ) {
+            // If the user has lost the ability to view this post, then don't send them a notification.
+            const canViewPost = await this.permissionService.can(userResults.dictionary[userId], 'view', 'Post', { post: context.post })
+            if ( canViewPost !== true ) {
+                continue
+            }
+
             const mentionContext = { ...context, mentioned: userResults.dictionary[userId] }
             await this.createNotification(userId, 'Post:mention', mentionContext, options)
         }
@@ -539,10 +562,10 @@ The Communities Team`)
         context.comment = await this.postCommentDAO.getPostCommentById(context.moderation.postCommentId)
         context.commentIntro = context.comment.content.substring(0,20)
 
-        context.commentAuthor = await this.userDAO.getUserById(context.comment.userId) 
+        context.commentAuthor = await this.userDAO.getUserById(context.comment.userId, ['status']) 
 
         context.post = await this.postDAO.getPostById(context.comment.postId)
-        context.postAuthor = await this.userDAO.getUserById(context.post.userId)
+        context.postAuthor = await this.userDAO.getUserById(context.post.userId, ['status'])
 
         let group = null
         if ( context.post.groupId ) {
@@ -571,7 +594,7 @@ The Communities Team`)
         context.post = await this.postDAO.getPostById(context.moderation.postId)
         context.postIntro = context.post.content.substring(0,20)
 
-        context.postAuthor = await this.userDAO.getUserById(context.post.userId) 
+        context.postAuthor = await this.userDAO.getUserById(context.post.userId, ['status']) 
 
         let group = null
         if ( context.post.groupId ) {
@@ -616,7 +639,7 @@ The Communities Team`)
     }
 
     async sendGroupMemberCreatedNotification(currentUser, context, options) {
-        context.user = await this.userDAO.getUserById(context.member.userId)
+        context.user = await this.userDAO.getUserById(context.member.userId, ['status'])
         if ( context.member.status == 'pending-invited' ) {
             context.inviter = currentUser
             await this.createNotification(context.user.id, 'Group:member:create:invited', context, options)
@@ -640,7 +663,7 @@ The Communities Team`)
     }
 
     async sendGroupMemberUpdatedNotification(currentUser, context, options) {
-        context.user = await this.userDAO.getUserById(context.member.userId)
+        context.user = await this.userDAO.getUserById(context.member.userId, ['status'])
         if ( context.previousStatus == 'pending-requested' && context.member.status == 'member' ) {
             await this.createNotification(
                 context.user.id,
@@ -666,31 +689,75 @@ The Communities Team`)
         }
     }
 
+    async sendGroupPostModerationRejectedNotification(currentUser, context, options) {
+        if( ! ('postId' in context.moderation) || context.moderation.postId === undefined || context.moderation.postId === null ) {
+            throw new ServiceError('missing-context',
+                `Moderation notification missing postId.`)
+        }
 
-    async sendGroupPostDeletedNotification(currentUser, context, options) {
-        context.user = await this.userDAO.getUserById(context.post.userId)
-        context.group = await this.groupDAO.getGroupById(context.post.groupId)
-        context.shortText = context.post.content.substring(0, 100) + '...'
+        context.post = await this.postDAO.getPostById(context.moderation.postId)
+        context.postIntro = context.post.content.substring(0,20)
 
-        await this.createNotification(
-            context.post.userId,
-            'Group:post:deleted',
-            context,
-            options
-        )
+        context.postAuthor = await this.userDAO.getUserById(context.post.userId, ['status']) 
+
+        let group = null
+        if ( context.post.groupId ) {
+            group = await this.groupDAO.getGroupById(context.post.groupId)
+            context.link = `group/${group.slug}/${context.post.id}`
+        } else {
+            context.link = `${context.postAuthor.username}/${context.post.id}`
+        }
+
+        // Don't send notifications to users who have lost the right to view
+        // their post.
+        const canViewPost = await this.permissionService.can(context.postAuthor, 'view', 'Post', { post: context.post, group: group })
+        if ( canViewPost !== true ) {
+            return
+        }
+
+        await this.createNotification(context.postAuthor.id, 'Group:post:moderation:rejected', context, options) 
     }
 
-    async sendGroupPostCommentDeletedNotification(currentUser, context, options) {
-        context.user = await this.userDAO.getUserById(context.comment.userId)
-        context.group = await this.groupDAO.getGroupById(context.post.groupId)
-        context.shortText = context.comment.content.substring(0, 100) + '...'
+    async sendGroupPostCommentModerationRejectedNotification(currentUser, context, options) {
+        if( ! ('postId' in context.moderation) 
+            || context.moderation.postId === undefined 
+            || context.moderation.postId === null 
+        ) {
+            throw new ServiceError('missing-context',
+                `Moderation notification missing postId.`)
+        }
 
-        await this.createNotification(
-            context.comment.userId,
-            'Group:post:comment:deleted',
-            context,
-            options
-        )
+        if ( ! ('postCommentId' in context.moderation) 
+            || context.moderation.postCommentId === undefined 
+            || context.moderation.postCommentId === null 
+        ) {
+            throw new ServiceError('missing-context',
+                `Moderation notification missing postCommentId.`)
+        }
 
+        context.comment = await this.postCommentDAO.getPostCommentById(context.moderation.postCommentId)
+        context.commentIntro = context.comment.content.substring(0,20)
+
+        context.commentAuthor = await this.userDAO.getUserById(context.comment.userId, ['status']) 
+
+        context.post = await this.postDAO.getPostById(context.comment.postId, ['status'])
+        context.postAuthor = await this.userDAO.getUserById(context.post.userId, ['status'])
+
+        let group = null
+        if ( context.post.groupId ) {
+            group = await this.groupDAO.getGroupById(context.post.groupId)
+            context.link = `group/${group.slug}/${context.post.id}#comment-${context.comment.id}`
+        } else {
+            context.link = `${context.postAuthor.username}/${context.post.id}#comment-${context.comment.id}`
+        }
+
+        // Don't send notifications to user's who have lost the right to view
+        // the post they commented on.
+        const canViewPost = await this.permissionService.can(context.commentAuthor, 'view', 'Post', { post: context.post, group: group })
+        if ( ! canViewPost ) {
+            return
+        }
+
+        await this.createNotification(context.comment.userId, 'Group:post:comment:moderation:rejected', context, options) 
     }
 }
