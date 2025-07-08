@@ -2,6 +2,7 @@ FROM node:18.17.0
 
 WORKDIR /src
 
+COPY package-lock.json package-lock.json
 COPY package.json package.json 
 COPY .npmrc .npmrc 
 RUN --mount=type=secret,id=CODEARTIFACT_AUTH_TOKEN CODEARTIFACT_AUTH_TOKEN=$(cat /run/secrets/CODEARTIFACT_AUTH_TOKEN) npm install 
