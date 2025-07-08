@@ -98,12 +98,6 @@ jobs:
         run: |
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
           npm install @communities/backend@${{ github.event.inputs.version }}
-
-      - name: Install updated backend version
-        working-directory: ./worker
-        run: |
-          export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-          npm install @communities/backend@${{ github.event.inputs.version }}
       
       - name: Install Worker NPM Modules
         working-directory: ./worker
