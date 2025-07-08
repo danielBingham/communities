@@ -12,7 +12,7 @@ import { useGroup } from '/lib/hooks/Group'
 import Spinner from '/components/Spinner'
 import { Radio, RadioOption } from '/components/ui/Radio'
 import Button from '/components/generic/button/Button'
-import RequestError from '/components/errors/RequestError'
+import { RequestErrorModal } from '/components/errors/RequestError'
 
 import './GroupPostPermissionsUpdate.css'
 
@@ -118,7 +118,7 @@ const GroupPostPermissionsUpdate = function({ groupId, onSubmit, onCancel }) {
                 <Button onClick={(e) => cancel()}>Cancel</Button> 
                 <input type="submit" name="submit" value="Submit" />
             </div> }
-            <RequestError request={request} message={"Create Group"} />
+            <RequestErrorModal request={request} message={"Create Group"} />
         </form>
     )
 

@@ -187,6 +187,10 @@ describe('ValidationService.validatePostComment()', function() {
 
             const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
 
+            core.database.query.mockReturnValue(undefined)
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: postComment.userId }] })
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: postComment.postId }] })
+
             const errors = await service.validatePostComment(currentUser, postComment, null)
 
             expect(errors.length).toBe(0)
