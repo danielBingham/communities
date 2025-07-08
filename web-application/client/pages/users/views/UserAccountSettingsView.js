@@ -7,7 +7,7 @@ import { reset } from '/state/system'
 
 import AreYouSure from '/components/AreYouSure'
 import Button from '/components/generic/button/Button'
-import RequestError from '/components/errors/RequestError'
+import { RequestErrorModal } from '/components/errors/RequestError'
 
 import NotificationSettingsSection from '/components/users/account/sections/NotificationSettingsSection'
 
@@ -64,7 +64,7 @@ const UserAccountSettingsView = function() {
                         <p>Are you sure you want to delete your account?</p>
                     </AreYouSure>
                 </div>
-                <RequestError message="Attempt to delete account" request={request} />
+                <RequestErrorModal message="Attempt to delete account" request={request} />
             </div>
         </div>
     )
