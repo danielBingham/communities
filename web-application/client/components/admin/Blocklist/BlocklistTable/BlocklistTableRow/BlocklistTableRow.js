@@ -2,7 +2,7 @@ import React from 'react'
 
 import { useBlocklist } from '/lib/hooks/Blocklist'
 
-import RequestError from '/components/errors/RequestError'
+import { RequestErrorModal } from '/components/errors/RequestError'
 import UserTag from '/components/users/UserTag'
 import DateTag from '/components/DateTag'
 import { TableRow, TableCell } from '/components/ui/Table'
@@ -26,7 +26,7 @@ const BlocklistTableRow = function({ id }) {
                 <TableCell><DateTag timestamp={blocklist.updatedDate} /></TableCell>
                 <TableCell><BlocklistDotsMenu id={id} /></TableCell>
             </TableRow>
-            <RequestError request={request} message={"Loading Blocklist"} />
+            <RequestErrorModal request={request} message={"Loading Blocklist"} />
         </>
     )
 }

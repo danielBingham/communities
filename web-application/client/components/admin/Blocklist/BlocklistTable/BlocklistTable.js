@@ -2,7 +2,7 @@ import React from 'react'
 
 import { useBlocklistQuery } from '/lib/hooks/Blocklist'
 
-import RequestError from '/components/errors/RequestError'
+import { RequestErrorModal } from '/components/errors/RequestError'
 import { Table, TableHeader, TableCell } from '/components/ui/Table'
 import PaginationControls from '/components/PaginationControls'
 import Spinner from '/components/Spinner'
@@ -42,7 +42,7 @@ const BlocklistTable = function() {
                 { blocklistViews } 
             </Table>
             <PaginationControls meta={query?.meta} />
-            <RequestError request={request} message={"Loading Blocklist"} />
+            <RequestErrorModal request={request} message={"Loading Blocklist"} />
         </div>
 
     )

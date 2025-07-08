@@ -6,7 +6,7 @@ import { queryIsUsing } from '/state/lib/queryIsUsing'
 
 import { setCurrentUser } from '/state/authentication'
 
-import { setUsersInDictionary, removeUser, setUserQueryResults, clearUserQuery } from './slice'
+import { setUsersInDictionary, setUserNull, removeUser, setUserQueryResults, clearUserQuery } from './slice'
 
 const updateCurrentUser = function(response) {
     return function(dispatch, getState) {
@@ -128,6 +128,11 @@ export const getUser = function(id) {
                 dispatch(setRelationsInState(response.relations))
 
                 dispatch(updateCurrentUser(response))
+            },
+            function(status, response) {
+                if ( status === 404 || status === 403 ) {
+                    dispatch(setUserNull(id))
+                }
             }
         ))
     }

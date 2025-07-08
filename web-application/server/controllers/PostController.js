@@ -362,7 +362,7 @@ module.exports = class PostController {
         const post = cleaning.Post.clean(request.body)
 
         const canCreatePost = await this.permissionService.can(currentUser, 'create', 'Post', { post: post })
-        if ( ! canCreatePost ) {
+        if ( canCreatePost !== true ) {
             throw new ControllerError(403, 'not-authorized',
                 `User not authorized to create a post.`,
                 `You are not authorized to create that post.`)
@@ -467,7 +467,7 @@ module.exports = class PostController {
         }
 
         const canViewPost = await this.permissionService.can(currentUser, 'view', 'Post', { post: post })
-        if (!canViewPost) {
+        if (canViewPost !== true ) {
             throw new ControllerError(404, 'not-found',
                 `User(${currentUser.id}) attempting to access Post(${postId}) without permission.`,
                 `That post either doesn't exist or you don't have permission to access it.`)
@@ -494,14 +494,21 @@ module.exports = class PostController {
         const post = request.body
 
         const existing = await this.postDAO.getPostById(postId)
-        if (!existing) {
+        if ( ! existing ) {
             throw new ControllerError(404, 'not-found',
                 `User(${currentUser.id}) attempting to update a Post(${postId}) that doesn't exist.`,
                 `You can't update a post that doesn't exist.`)
         }
 
+        const canViewPost = await this.permissionService.can(currentUser, 'view', 'Post', { post: existing })
+        if ( canViewPost !== true ) {
+            throw new ControllerError(404, 'not-found',
+                `User attempting to access Post(${postId}) without permission.`,
+                `That post either doesn't exist or you don't have permission to access it.`)
+        }
+
         const canUpdatePost = await this.permissionService.can(currentUser, 'update', 'Post', { post: existing })
-        if (!canUpdatePost) {
+        if ( canUpdatePost !== true ) {
             throw new ControllerError(403, 'not-authorized',
                 `User(${currentUser.id}) attempting to update a Post(${postId}) without permission.`,
                 `You are not authorized to update that post.`)
@@ -544,16 +551,28 @@ module.exports = class PostController {
         const currentUser = request.session.user
         const postId = request.params.id
 
-        if (!currentUser) {
+        if ( ! currentUser ) {
             throw new ControllerError(401, 'not-authenticated',
                 `User must be authenticated to edit a post.`,
                 `You must must be authenticated to edit a post.`)
         }
 
         const existing = await this.postDAO.getPostById(postId)
+        if ( ! existing ) {
+            throw new ControllerError(404, 'not-found',
+                `User attempting to access Post(${postId}) that doesn't exist.`,
+                `That post either doesn't exist or you don't have permission to access it.`)
+        }
+
+        const canViewPost = await this.permissionService.can(currentUser, 'view', 'Post', { post: existing })
+        if ( canViewPost !== true ) {
+            throw new ControllerError(404, 'not-found',
+                `User attempting to access Post(${postId}) without permission.`,
+                `That post either doesn't exist or you don't have permission to access it.`)
+        }
 
         const canDeletePost = await this.permissionService.can(currentUser, 'delete', 'Post', { post: existing })
-        if (!canDeletePost) {
+        if ( canDeletePost !== true ) {
             throw new ControllerError(403, 'not-authorized',
                 `User(${currentUser.id}) attempting to delete Post(${postId}) of User(${existing.userId}).`,
                 `You are not authorized to delete that post.`)

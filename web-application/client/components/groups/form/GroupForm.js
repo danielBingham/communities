@@ -18,7 +18,7 @@ import Input from '/components/generic/input/Input'
 import TextBox from '/components/generic/text-box/TextBox'
 import Spinner from '/components/Spinner'
 import { Radio, RadioOption } from '/components/ui/Radio'
-import RequestError from '/components/errors/RequestError'
+import { RequestErrorModal } from '/components/errors/RequestError'
 
 import './GroupForm.css'
 
@@ -317,7 +317,7 @@ const GroupForm = function() {
                 <Button onClick={(e) => cancel()}>Cancel</Button> 
                 <input type="submit" name="submit" value="Submit" />
             </div> }
-            <RequestError request={request} message={"Create Group"} />
+            <RequestErrorModal request={request} message={"Create Group"} />
         </form>
     )
 
