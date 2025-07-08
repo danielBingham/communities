@@ -113,7 +113,37 @@ module.exports = class PostCommentValidation {
             errors.push(...validationErrors.all)
         }
 
-        // TO DO Validate that userId and postId exist.
+        if ( errors.length > 0 ) {
+            return errors
+        }
+
+        if ( util.objectHas(postComment, 'userId' ) && postComment.userId !== null) {
+            const userResults = await this.core.database.query(`
+                SELECT id FROM users WHERE id = $1
+            `, [ postComment.userId ])
+
+            if ( userResults.rows.length <= 0 || userResults.rows[0].id !== postComment.userId) {
+                errors.push({
+                    type: `userId:not-found`,
+                    log: `User(${postComment.userId}) not found.`,
+                    message: `User not found for that userId.`
+                })
+            }
+        }
+
+        if ( util.objectHas(postComment, 'postId' ) && postComment.postId !== null) {
+            const postResults = await this.core.database.query(`
+                SELECT id FROM posts WHERE id = $1
+            `, [ postComment.postId ])
+
+            if ( postResults.rows.length <= 0 || postResults.rows[0].id !== postComment.postId) {
+                errors.push({
+                    type: `postId:not-found`,
+                    log: `Post(${postComment.postId}) not found.`,
+                    message: `Post not found for that postId.`
+                })
+            }
+        }
 
         return errors
     }
