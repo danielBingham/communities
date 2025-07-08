@@ -1,10 +1,11 @@
 import React from 'react'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 
 import { UserMinusIcon } from '@heroicons/react/24/outline'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
+import { resetEntities } from '/state/lib'
 import { deleteUserRelationship } from '/state/UserRelationship'
 
 import Button from '/components/generic/button/Button'
@@ -20,6 +21,7 @@ const RemoveFriendButton = function({ userId, type }) {
         return null
     }
 
+    const dispatch = useDispatch()
     const removeFriend = function() {
         const relationship = {
             userId: userId,
@@ -27,6 +29,7 @@ const RemoveFriendButton = function({ userId, type }) {
         }
 
         makeRequest(deleteUserRelationship(relationship))
+        dispatch(resetEntities())
     }
 
     let text = 'Remove'
