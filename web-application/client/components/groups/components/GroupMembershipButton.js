@@ -1,9 +1,11 @@
 import React, { useState } from 'react'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 
 import { ArrowLeftStartOnRectangleIcon, ArrowLeftEndOnRectangleIcon } from '@heroicons/react/24/solid'
 
 import { useRequest } from '/lib/hooks/useRequest'
+import { resetEntities } from '/state/lib'
+
 import { useGroup } from '/lib/hooks/Group'
 import { useGroupMember } from '/lib/hooks/GroupMember'
 
@@ -25,6 +27,8 @@ const GroupMembershipButton = function({ groupId, userId }) {
 
     const [ currentMember ] = useGroupMember(groupId, currentUser?.id)
     const [ member ]  = useGroupMember(groupId, userId)
+
+    const dispatch = useDispatch()
 
     /* ==================== When currentUser is user... ======================= */
 
@@ -78,6 +82,7 @@ const GroupMembershipButton = function({ groupId, userId }) {
             userId: userId
         }
         makeRequest(deleteGroupMember(groupMember))
+        dispatch(resetEntities())
     }
 
     /**
@@ -101,6 +106,7 @@ const GroupMembershipButton = function({ groupId, userId }) {
             userId: userId
         }
         makeRequest(deleteGroupMember(groupMember))
+        dispatch(resetEntities())
     }
 
     /* =================== When currentUser is admin... ======================== */
