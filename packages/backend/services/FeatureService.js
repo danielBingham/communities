@@ -35,6 +35,7 @@ const SiteAdminsCanBanUsersMigration = require('../migrations/SiteAdminsCanBanUs
 const GroupModerationMigration = require('../migrations/GroupModerationMigration')
 const GroupModeratorsCanBanUsers = require('../migrations/GroupModeratorsCanBanUsers')
 const GroupAdminsCanRestrictPosting = require('../migrations/GroupAdminsCanRestrictPosting')
+const CantDeleteAccountWithOutstandingInvitationsMigration = require('../migrations/CantDeleteAccountWithOutstandingInvitationsMigration')
 
 const ServiceError = require('../errors/ServiceError')
 const MigrationError = require('../errors/MigrationError')
@@ -141,6 +142,11 @@ module.exports = class FeatureService {
                 dependsOn: [ '80-group-moderators-can-ban-users' ],
                 conflictsWith: [],
                 migration: new GroupAdminsCanRestrictPosting(core)
+            },
+            '76-cant-delete-account-with-outstanding-invitations': {
+                dependsOn: [],
+                conflictsWith: [],
+                migration: new CantDeleteAccountWithOutstandingInvitationsMigration(core)
             }
         }
     }

@@ -154,7 +154,7 @@ CREATE TABLE tokens (
     user_id uuid REFERENCES users(id) ON DELETE CASCADE NOT NULL,
 
     /** User who created the token, for invitations. **/
-    creator_id uuid REFERENCES users (id),
+    creator_id uuid REFERENCES users (id) ON DELETE SET NULL,
 
     token text,
     type token_type NOT NULL,
