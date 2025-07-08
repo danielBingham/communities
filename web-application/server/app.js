@@ -32,13 +32,9 @@ const cors = require('cors')
 
 const morgan = require('morgan')
 
-const { Client, Pool } = require('pg')
 const pgSession = require('connect-pg-simple')(session)
 
-const BullQueue = require('bull')
-
 const path = require('path')
-const fs = require('fs')
 const Uuid = require('uuid')
 
 const { Core, FeatureFlags, FeatureService, ServerSideRenderingService, PageMetadataService } = require('@communities/backend')

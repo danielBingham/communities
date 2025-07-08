@@ -24,7 +24,11 @@ const FeedMenu = function() {
     const [groupsRequest, makeGroupsRequest] = useRequest()
 
     const groupDictionary = useSelector((state) => state.Group.dictionary)
-    const groups = useSelector((state) => 'FeedMenu' in state.Group.queries ? state.Group.queries['FeedMenu'].list : [])
+
+    // TODO Techdebt, kludge fix for useSelector's need for referential
+    // stability.  Future: restructure selector.
+    const emptyList = []     
+    const groups = useSelector((state) => 'FeedMenu' in state.Group.queries ? state.Group.queries['FeedMenu'].list : emptyList)
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
     const setIsOpen = (menu) => {

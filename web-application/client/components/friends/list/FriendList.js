@@ -33,19 +33,8 @@ const FriendList = function({ userId, params }) {
     // ======= Redux State ==========================================
 
     const relationshipDictionary = useSelector((state) => state.UserRelationship.dictionary)
-    const relationships = useSelector((state) => 'FriendList' in state.UserRelationship.queries ? state.UserRelationship.queries['FriendList'].list : [])
 
-    const meta = useSelector(function(state) {
-        if ( ! state.UserRelationship.queries['FriendList'] ) {
-            return {
-                count: 0,
-                page: 1,
-                pageSize: 1,
-                numberOfPages: 1
-            }
-        }
-        return state.UserRelationship.queries['FriendList'].meta
-    })
+    const query = useSelector((state) => 'FriendList' in state.UserRelationship.queries ? state.UserRelationship.queries['FriendList'] : null)
 
     // ======= Effect Handling ======================================
 
@@ -69,9 +58,9 @@ const FriendList = function({ userId, params }) {
 
     let content = ( <Spinner local={ true } /> )
 
-    if ( relationships && relationships.length > 0 ) {
+    if ( query?.list && query?.list.length > 0 ) {
         const userBadges = []
-        for( const id of relationships) {
+        for( const id of query.list) {
             const relationship = relationshipDictionary[id]
 
             // If the relationship has been removed, it may still be in the
@@ -102,7 +91,7 @@ const FriendList = function({ userId, params }) {
             <ListGridContent>
                 { content } 
             </ListGridContent>
-            <PaginationControls meta={meta} /> 
+            <PaginationControls meta={query?.meta} /> 
         </List>
     )
         

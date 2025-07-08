@@ -56,7 +56,7 @@ const validateAndCorrectDraft = function(draft, group) {
     ) {
         // If this is a group post, then the group type determines the
         // visibility.
-        if ( group !== null ) {
+        if ( group !== undefined && group !== null ) {
             if ( group.type === 'open' ) {
                 correctedDraft.visibility = 'public'
             } else {

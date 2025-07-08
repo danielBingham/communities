@@ -54,7 +54,7 @@ const PostForm = function({ postId, groupId, sharedPostId }) {
     let defaultVisibility = 'private'
     if ( post !== null && post.visibility !== null && post.visibility !== undefined ) {
         defaultVisibility = post.visibility
-    } else if ( group !== null && group.type === 'open' ) {
+    } else if (group !== undefined && group !== null && group.type === 'open' ) {
         defaultVisibility = 'public'
     }
     const [visibility, setVisibility] = useState(draft && 'visibility' in draft && draft.visibility !== null && draft.visibility !== undefined ? draft.visibility : defaultVisibility)
@@ -169,7 +169,7 @@ const PostForm = function({ postId, groupId, sharedPostId }) {
         let defaultVisibility = 'private'
         if ( post !== null ) {
             defaultVisibility = post.visibility
-        } else if ( group !== null && group.type === 'open' ) {
+        } else if ( group !== undefined && group !== null && group.type === 'open' ) {
             defaultVisibility = 'public'
         }
         setVisibility(draft ? draft.visibility : defaultVisibility)

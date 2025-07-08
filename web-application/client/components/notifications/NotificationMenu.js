@@ -47,7 +47,8 @@ const NotificationMenu = function({ }) {
 
     // ============ Redux State ===============================================
 
-    const notifications = useSelector((state) => 'NotificationMenu' in state.notifications.queries ? state.notifications.queries['NotificationMenu'].list : []) 
+    const emptyList = []
+    const notifications = useSelector((state) => 'NotificationMenu' in state.notifications.queries ? state.notifications.queries['NotificationMenu'].list : emptyList) 
     const notificationDictionary = useSelector((state) => state.notifications.dictionary)
     const unreadNotifications = notifications.filter((id) => ! notificationDictionary[id].isRead)
 

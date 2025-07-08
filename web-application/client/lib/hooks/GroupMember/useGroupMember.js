@@ -8,7 +8,7 @@ import { getGroupMember } from '/state/GroupMember'
 export const useGroupMember = function(groupId, userId) {
     const groupMember = useSelector((state) => {
         if ( ! groupId || ! userId ) {
-            return undefined 
+            return null 
         }
 
         if ( ! ( groupId in state.GroupMember.byGroupAndUser ) ) {

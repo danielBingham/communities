@@ -100,7 +100,7 @@ const Post = function({ id, expanded, showLoading, shared }) {
     }
 
     let postVisibility = (<span className="post__post-visibility"><UsersIcon /> <span className="text">Friends</span></span>)
-    if ( group !== null ) {
+    if ( group !== null && group !== undefined ) {
         if ( post.visibility === 'private' ) {
             postVisibility = (
                 <span className="post__post-visibility">
