@@ -36,6 +36,7 @@ const GroupModerationMigration = require('../migrations/GroupModerationMigration
 const GroupModeratorsCanBanUsers = require('../migrations/GroupModeratorsCanBanUsers')
 const GroupAdminsCanRestrictPosting = require('../migrations/GroupAdminsCanRestrictPosting')
 const CantDeleteAccountWithOutstandingInvitationsMigration = require('../migrations/CantDeleteAccountWithOutstandingInvitationsMigration')
+const DeleteFileFailsMigration = require('../migrations/DeleteFileFailsMigration')
 
 const ServiceError = require('../errors/ServiceError')
 const MigrationError = require('../errors/MigrationError')
@@ -147,6 +148,11 @@ module.exports = class FeatureService {
                 dependsOn: [],
                 conflictsWith: [],
                 migration: new CantDeleteAccountWithOutstandingInvitationsMigration(core)
+            },
+            '152-file-controller-server-error': {
+                dependsOn: [],
+                conflictsWith: [],
+                migration: new DeleteFileFailsMigration(core)
             }
         }
     }
