@@ -6,7 +6,7 @@ import { useUserByUsername } from '/lib/hooks/User'
 const UserMention = function({ username }) {
     const [user] = useUserByUsername(username)
 
-    if ( user === null ) {
+    if ( ! user ) {
         return (
             <span className="user-mention"><Link to={`/${username}`}>@{ username }</Link></span>
         )
