@@ -13,7 +13,8 @@ import {
     DocumentIcon,
     PencilIcon,
     ArrowRightOnRectangleIcon,
-    AdjustmentsHorizontalIcon
+    AdjustmentsHorizontalIcon,
+    MegaphoneIcon
 } from '@heroicons/react/24/outline'
 
 
@@ -76,6 +77,9 @@ const UserMenu = function(props) {
             { isAdmin && <div className="menu-section admin">
                 <div className="menu-item" onClick={props.toggleMenu}><Link to="/admin"><AdjustmentsHorizontalIcon/>Admin</Link></div>
             </div> }
+            <div className="menu-section">
+                <div className="menu-item" onClick={props.toggleMenu}><Link to="/group/communities-feedback-and-discussion"><MegaphoneIcon /> Give Feedback</Link></div>
+            </div>
             <div className="menu-section bottom"> 
                 <div className="menu-item" onClick={props.toggleMenu}><a href="" className="logout" onClick={handleLogout} ><ArrowRightOnRectangleIcon/>Log Out</a></div>
             </div>

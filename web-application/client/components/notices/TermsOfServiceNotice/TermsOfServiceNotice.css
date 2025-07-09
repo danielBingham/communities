@@ -1,0 +1,20 @@
+.terms-of-service-notice {
+    margin: 50px auto;
+    padding: 0;
+    max-width: 600px;
+}
+.terms-of-service-notice__logo {
+    text-align: center;
+}
+.terms-of-service-notice__instructions {
+    max-width: 600px;
+    text-align: center;
+}
+.card.terms-of-service-notice__terms-card {
+    max-width: 600px;
+}
+.terms-of-service-notice__close {
+    padding: 10px;
+    text-align: center;
+}
+
