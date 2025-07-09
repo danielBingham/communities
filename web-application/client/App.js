@@ -30,7 +30,7 @@ import About from '/pages/about/views/About'
 import FrequentlyAskedQuestions from '/pages/about/views/FrequentlyAskedQuestions'
 import Roadmap from '/pages/about/views/Roadmap'
 import Contribute from '/pages/about/views/Contribute'
-import TermsOfService from '/pages/about/views/TermsOfService'
+import TermsOfServiceView from '/pages/about/views/TermsOfServiceView'
 import Privacy from '/pages/about/views/Privacy'
 import Contact from '/pages/about/views/Contact'
 
@@ -40,6 +40,7 @@ import ResetPasswordPage from '/pages/authentication/ResetPasswordPage'
 import ResetPasswordRequestPage from '/pages/authentication/ResetPasswordRequestPage'
 import AcceptInvitationPage from '/pages/authentication/AcceptInvitationPage'
 import RegistrationPage from '/pages/authentication/RegistrationPage'
+import AcceptTermsOfServicePage from '/pages/authentication/AcceptTermsOfServicePage'
 
 import UserProfilePage from '/pages/users/UserProfilePage'
 
@@ -160,6 +161,7 @@ const App = function(props) {
                         <Route path="/accept-invitation" element={ <AcceptInvitationPage /> } />
                         <Route path="/register" element={ <RegistrationPage /> } />
                         <Route path="/reset-password" element={ <ResetPasswordPage /> } />
+                        <Route path="/accept-terms-of-service" element={ <AcceptTermsOfServicePage /> } />
                     </Route>
 
                     { /* ======== Pages with Headers ====================== */ }
@@ -172,7 +174,7 @@ const App = function(props) {
                             <Route path="faq" element={ <FrequentlyAskedQuestions /> } />
                             <Route path="roadmap" element={ <Roadmap /> } />
                             <Route path="contribute" element={ <Contribute /> } />
-                            <Route path="tos" element={ <TermsOfService /> } />
+                            <Route path="tos" element={ <TermsOfServiceView /> } />
                             <Route path="privacy" element={ <Privacy /> } />
                             <Route path="contact" element={ <Contact /> } />
                             <Route index element={ <About />} />
