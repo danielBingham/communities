@@ -300,7 +300,7 @@ CREATE TABLE post_versions (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     post_id uuid REFERENCES posts (id) ON DELETE CASCADE NOT NULL,
 
-    file_id uuid REFERENCES files (id) DEFAULT NULL,
+    file_id uuid REFERENCES files (id) DEFAULT NULL ON DELETE SET NULL,
 
     content text,
 
