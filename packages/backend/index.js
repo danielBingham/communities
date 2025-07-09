@@ -52,6 +52,7 @@ exports.PermissionService = require('./services/PermissionService')
 exports.S3FileService = require('./services/S3FileService')
 exports.ServerSideRenderingService = require('./services/ServerSideRenderingService')
 exports.SessionService = require('./services/SessionService')
+exports.TokenService = require('./services/TokenService')
 exports.ValidationService = require('./services/ValidationService')
 
 exports.Logger = require('./logger')

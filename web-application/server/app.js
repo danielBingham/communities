@@ -28,16 +28,21 @@
 
 const express = require('express')
 const session = require('express-session')
-const cors = require('cors')
-
-const morgan = require('morgan')
 
 const pgSession = require('connect-pg-simple')(session)
 
 const path = require('path')
 const Uuid = require('uuid')
 
-const { Core, FeatureFlags, FeatureService, ServerSideRenderingService, PageMetadataService } = require('@communities/backend')
+const { 
+    Core, 
+    FeatureFlags, 
+    FeatureService, 
+    ServerSideRenderingService, 
+    PageMetadataService, 
+    TokenService 
+} = require('@communities/backend')
+
 const ControllerError = require('./errors/ControllerError')
 
 /**********************************************************************
@@ -50,14 +55,6 @@ core.initialize()
 
 // Load express.
 const app = express()
-
-app.use(cors({
-    origin: core.config.s3.bucket_url,
-    methods: [ 'GET' ]
-}))
-
-// Use a development http logger.
-app.use(morgan('dev'))
 
 // Make sure the request limit is large so that we don't run into it.
 app.use(express.json({ limit: "50mb" }))
@@ -89,6 +86,37 @@ app.use(session({
     } 
 }))
 
+// Set the id the logger will use to identify the session.  We don't want to
+// use the actual session id, since that value is considered sensitive.  So
+// instead we'll just use a uuid.
+app.use(function(request, response, next) {
+    if ( request.session.user ) {
+        core.logger.setId(request.session.user.id)
+    } else {
+        if ( request.session.logId ) {
+            core.logger.setId(request.session.logId)
+        } else {
+            request.session.logId = Uuid.v4()
+            core.logger.setId(request.session.logId)
+        }
+    }
+    next()
+})
+
+// Request logger.
+app.use(function(request, response, next) {
+    const startTime = Date.now()
+    core.logger.debug(`BEGIN: ${request.method} ${request.originalUrl}`)
+    response.once('finish', function() {
+        const endTime = Date.now()
+        const totalTime = endTime - startTime
+        const contentSize = response.getHeader('content-length')
+
+        core.logger.debug(`END: ${request.method} ${request.originalUrl} -- [ ${response.statusCode} ] -- ${totalTime} ms ${contentSize ? `${contentSize} bytes` : ''}`)
+    })
+    next()
+})
+
 // Set the feature flags on each request, so that they are always up to date.
 // This means we can't use feature flags in Controller, Service, and DAO
 // constructors, since those are called at startup time.
@@ -107,21 +135,34 @@ app.use(function(request, response, next) {
     })
 })
 
-// Set the id the logger will use to identify the session.  We don't want to
-// use the actual session id, since that value is considered sensitive.  So
-// instead we'll just use a uuid.
+
+
 app.use(function(request, response, next) {
-    if ( request.session.user ) {
-        core.logger.setId(request.session.user.id)
-    } else {
-        if ( request.session.logId ) {
-            core.logger.setId(request.session.logId)
+    if ( (request.method === 'POST' || request.method === 'PATCH' || request.method === 'DELETE')) {
+        if ( 'csrfToken' in request.session && request.session.csrfToken !== undefined && request.session.csrfToken !== null ) {
+            const csrfToken = request.get('X-Communities-CSRF-Token')
+            if ( csrfToken !== request.session.csrfToken ) {
+                core.logger.warn(`Request arrived with an invalid CSRF Token.  Possible forged request.`)
+                response.status(403).json({
+                    error: {
+                        type: 'invalid-csrf',
+                        message: 'Your request had an invalid CSRF Token. It may have been a forged request.'
+                    }
+                })
+            } else {
+                next() 
+            }
         } else {
-            request.session.logId = Uuid.v4()
-            core.logger.setId(request.session.logId)
+            response.status(401).json({
+                error: {
+                    type: 'session-expired',
+                    message: 'Your session expired.  Please refresh your page and log back in.'
+                }
+            })
         }
+    } else {
+        next()
     }
-    next()
 })
 
 // Get the api router, pre-wired up to the controllers.
@@ -193,6 +234,7 @@ app.get(/.*\.(svg|ico|pdf|jpg|png)$/, function(request, response) {
  */
 const serverSideRenderingService = new ServerSideRenderingService(core)
 const pageMetadataService = new PageMetadataService(core)
+const tokenService = new TokenService(core)
 if ( core.config.environment == 'development' ) {
     const webpack = require('webpack')
     const webpackMiddleware = require('webpack-dev-middleware')
@@ -213,6 +255,13 @@ if ( core.config.environment == 'development' ) {
         const { assetsByChunkName, outputPath } = devMiddleware.stats.toJson() 
 
         const metadata = pageMetadataService.getRootWithDevAssets(assetsByChunkName)
+
+        // Only generate a new CSRF Token on requests to root (or if we don't have one).
+        if ( request.originalUrl === '/' || request.session?.csrfToken === undefined) {
+            request.session.csrfToken = tokenService.createToken()
+        }
+
+        metadata.csrfToken = request.session.csrfToken 
         const parsedTemplate = serverSideRenderingService.renderIndexTemplate(metadata) 
         response.send(parsedTemplate)
     })
@@ -228,9 +277,17 @@ if ( core.config.environment == 'development' ) {
     app.use('*', function(request,response) {
         const metadata = pageMetadataService.getRoot()
         const parsedTemplate = serverSideRenderingService.renderIndexTemplate(metadata) 
+
+        // Only generate a new CSRF Token on requests to root (or if we don't have one).
+        if ( request.originalUrl === '/' || request.session?.csrfToken === undefined ) {
+            request.session.csrfToken = tokenService.createToken()
+        }
+
+        metadata.csrfToken = request.session.csrfToken
         response.send(parsedTemplate)
     })
 }
+
 
 // error handler
 app.use(function(error, request, response, next) {

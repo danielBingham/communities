@@ -7,10 +7,13 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
         let status = 0
         let responseOk = false
 
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').content
+
         const fetchOptions = {
             method: method,
             headers: {
-                'Accept': 'application/json'
+                'Accept': 'application/json',
+                'X-Communities-CSRF-Token': csrfToken
             }
         }
         if ((method == 'POST' || method == 'PUT' || method == 'PATCH') && body ) {
