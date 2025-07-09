@@ -1,0 +1,27 @@
+.registration-form { 
+    width: 100%;
+    max-width: 650px;
+    margin: 0 auto;
+}
+.registration-form h2 {
+    text-align: center;
+}
+.registration-form .instructions {
+    font-size: 16px;
+    line-height: 1.7em;
+    text-align: center;
+    padding: 20px;
+}
+.registration-form .base-error {
+    text-align: center;
+    color: var(--danger-color-main);
+    padding: 10px;
+}
+
+.registration-form .field-wrapper {
+    padding: 10px;
+}
+.registration-form .submit {
+    text-align: center;
+}
+

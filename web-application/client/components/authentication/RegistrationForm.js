@@ -1,24 +1,18 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
-import { useSearchParams } from 'react-router-dom'
-
-import logger from '/logger'
 
 import { useRequest } from '/lib/hooks/useRequest'
 import { validateEmail, validateName, validateUsername, validatePassword } from '/lib/validation/user'
 
-import { validateToken } from '/state/tokens'
-import { patchUser, getUsers } from '/state/User'
+import { postUsers, getUsers } from '/state/User'
 
 import Input from '/components/generic/input/Input'
 import { Checkbox } from '/components/ui/Checkbox'
 
-import './AcceptInvitationForm.css'
+import './RegistrationForm.css'
 
-const AcceptInvitationForm = function(props) {
-    const [ searchParams, setSearchParams ] = useSearchParams()
+const RegistrationForm = function(props) {
 
-    const [ token, setToken ] = useState('')
     const [ name, setName ] = useState('')
     const [ username, setUsername ] = useState('')
     const [ email, setEmail ] = useState('')
@@ -26,7 +20,6 @@ const AcceptInvitationForm = function(props) {
     const [ confirmPassword, setConfirmPassword ] = useState('')
     const [ ageConfirmation, setAgeConfirmation ] = useState(false)
 
-    const [tokenValidationError, setTokenValidationError] = useState([])
     const [nameValidationError, setNameValidationError] = useState([])
     const [usernameValidationError, setUsernameValidationError] = useState([])
     const [emailValidationError, setEmailValidationError] = useState([])
@@ -34,14 +27,10 @@ const AcceptInvitationForm = function(props) {
     const [confirmPasswordValidationError, setConfirmPasswordValidationError] = useState([])
     const [ageConfirmationValidationError, setAgeConfirmationValidationError] = useState([])
 
-    const tokenRequestRef = useRef(null)
-
-    const [tokenRequest, makeTokenRequest] = useRequest()
     const [request, makeRequest] = useRequest()
     const [usernameRequest, makeUsernameRequest] = useRequest()
 
     const existing = useSelector((state) => username in state.User.byUsername ? state.User.byUsername[username] : undefined)
-    const user = useSelector((state) => token in state.tokens.usersByToken ? state.tokens.usersByToken[token] : null) 
 
     /**
      * Perform validation on our state and return a boolean indicating whether
@@ -56,15 +45,6 @@ const AcceptInvitationForm = function(props) {
     const isValid = function(field) {
         let error = false 
 
-        if ( field == 'token') {
-            if ( tokenRequestRef.current ) {
-                clearTimeout(tokenRequestRef.current)
-            }
-            tokenRequestRef.current = setTimeout(function() {
-                makeTokenRequest(validateToken(token, 'invitation'))
-            }, 500)
-        }
-
         if ( ! field || field == 'name' ) {
             const nameErrors = validateName(name, true) 
             error = error || nameErrors.length > 0
@@ -73,7 +53,7 @@ const AcceptInvitationForm = function(props) {
 
         if ( ! field || field == 'username' ) {
             const usernameErrors = validateUsername(username, true) 
-
+            
             if ( existing && existing.username === username ) {
                 usernameErrors.push('That username is already in use.  Please choose a different one.')
             }
@@ -119,27 +99,21 @@ const AcceptInvitationForm = function(props) {
         return ! error
     }
 
-    const acceptInvitation = function(event) {
+    const onSubmit = function(event) {
         event.preventDefault()
 
         if ( ! isValid() ) {
             return 
         }
 
-        if ( ! user ) {
-            setTokenValidationError(['You must have a valid token to register.'])
-        }
-
-        const userPatch = {
-            id: user.id,
+        const user = {
             name: name,
             username: username,
             email: email,
-            password: password,
-            token: token
+            password: password
         }
 
-        makeRequest(patchUser(userPatch))
+        makeRequest(postUsers(user))
     }
 
     const onNameChange = function(event) {
@@ -168,23 +142,9 @@ const AcceptInvitationForm = function(props) {
     }
 
     useEffect(function() {
-        if ( user ) {
-            setEmail(user.email)
-        }
-    }, [ user ])
-
-    useEffect(function() {
-        const initialToken = searchParams.get('token')
-        if ( initialToken ) {
-            setToken(initialToken)
-            makeTokenRequest(validateToken(initialToken, 'invitation'))
-        }
-    }, [ searchParams ])
-
-    useEffect(function() {
         if ( request && request.state == 'fulfilled' ) {
             window.location.href = "/"
-        } 
+        }
     }, [ request ])
 
     useEffect(function() {
@@ -193,20 +153,11 @@ const AcceptInvitationForm = function(props) {
         }
     }, [ usernameRequest])
 
-    useEffect(function() {
-        return function cleanup() {
-            if ( tokenRequestRef.current ) {
-                clearTimeout(tokenRequestRef.current)
-            }
-        }
-    }, [])
-
     /**************************************************************************
      * Render
      * ************************************************************************/
 
     let baseError = null
-    let tokenError = tokenValidationError.join(' ')
     let nameError = nameValidationError.join(' ')
     let usernameError = usernameValidationError.join(' ')
     let emailError = emailValidationError.join(' ')
@@ -214,44 +165,14 @@ const AcceptInvitationForm = function(props) {
     let confirmPasswordError = confirmPasswordValidationError.join(' ')
     let ageConfirmationError = ageConfirmationValidationError.join(' ')
 
-    if ( tokenRequest && tokenRequest.state == 'failed' ) {
-        if ( tokenRequest.error.type == 'not-authorized' ) {
-            tokenError = (<div>
-                <p>Invalid token. {tokenError}</p>
-                <p>If you did get here following a valid invitation, please
-                        reach out to us at <a
-                            href="mailto:contact@communities.social">contact@communties.social</a>,
-                        so we can figure out what went wrong and get you a new
-                    invitation.</p>
-                </div>)
-        }  else if ( tokenRequest.error.type == 'logged-in') {
-            return (
-                <div className="error">
-                    <p>You appear to already be logged in to a different user.</p>
-                    <p>Please return to the <a href="/">home page</a> and logout before attempting to accept this invitation.</p>
-                </div>
-            )
-        }
-    } 
-
     if ( request && request.state == 'failed' ) {
         baseError = (<div className="error">{ request.error.message }</div>)
     }
 
     return (
-        <div className="accept-invitation-form">
+        <div className="registration-form">
             <div className="instructions">Welcome to Communities, please complete your registration!</div>
-            <form onSubmit={acceptInvitation}>
-                { ! user && <Input
-                    name="token"
-                    label="Token"
-                    explanation="This is the token from your invitation email.  If you followed the link in the email it will be auto-populated.  Otherwise, you'll need to copy and paste it from your invitation email."
-                    value={token}
-                    className="token"
-                    onBlur={ (event) => isValid('token') }
-                    onChange={ (event) => setToken(event.target.value) } 
-                    error={tokenError}
-                /> }
+            <form onSubmit={onSubmit}>
                 <Input
                     name="name"
                     label="Name"
@@ -317,7 +238,7 @@ const AcceptInvitationForm = function(props) {
                     { baseError }
                 </div>
                 <div className="submit field-wrapper">
-                    <input type="submit" name="register" value="Accept Invitation" />
+                    <input type="submit" name="register" value="Sign Up" />
                 </div>
 
             </form>
@@ -325,4 +246,4 @@ const AcceptInvitationForm = function(props) {
     )
 }
 
-export default AcceptInvitationForm
+export default RegistrationForm

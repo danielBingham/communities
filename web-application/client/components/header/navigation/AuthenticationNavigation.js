@@ -80,7 +80,7 @@ const AuthenticationNavigation = function(props) {
         return (
             <div id="authentication-navigation" className="navigation-block not-authenticated">
                 <Button type="primary" onClick={clickLogin}>Log In</Button>
-                { /*<Button type="primary" onClick={(e) => navigate('register')}>Register</Button>*/}
+                <Button type="success" onClick={(e) => navigate('register')}>Sign Up</Button>
             </div>
         )
     }

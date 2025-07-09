@@ -39,6 +39,7 @@ import EmailConfirmationPage from '/pages/authentication/EmailConfirmationPage'
 import ResetPasswordPage from '/pages/authentication/ResetPasswordPage'
 import ResetPasswordRequestPage from '/pages/authentication/ResetPasswordRequestPage'
 import AcceptInvitationPage from '/pages/authentication/AcceptInvitationPage'
+import RegistrationPage from '/pages/authentication/RegistrationPage'
 
 import UserProfilePage from '/pages/users/UserProfilePage'
 
@@ -157,6 +158,7 @@ const App = function(props) {
                     <Route element={ <HeaderlessLayout /> }>
                         <Route path="/email-confirmation" element={ <EmailConfirmationPage />} />
                         <Route path="/accept-invitation" element={ <AcceptInvitationPage /> } />
+                        <Route path="/register" element={ <RegistrationPage /> } />
                         <Route path="/reset-password" element={ <ResetPasswordPage /> } />
                     </Route>
 

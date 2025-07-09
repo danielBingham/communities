@@ -36,7 +36,11 @@
 .text-input .text-input__show-password {
     position: absolute;
     right: 10px;
-    top: 4px;
+    top: 7px;
+    line-height: 0px;
+    padding: 0px;
+    margin: 0px;
+    text-decoration: none;
 }
 .text-input .text-input__show-password svg {
     width: 20px;
