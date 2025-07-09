@@ -89,6 +89,7 @@ module.exports = class FileController {
                 `User(${request.session.user.id}) attempted to upload an invalid file of type ${type}.`)
         }
 
+
         /**********************************************************************
          * Permissions and Validation checks complete.
          *      Upload the file.

@@ -9,6 +9,7 @@ import {  patchFile, deleteFile } from '/state/File'
 
 import ErrorModal from '/components/errors/ErrorModal'
 import Button from '/components/generic/button/Button'
+import Spinner from '/components/Spinner'
 
 import "react-image-crop/dist/ReactCrop.css"
 import "./DraftProfileImage.css"
@@ -34,6 +35,7 @@ const DraftProfileImage = forwardRef(function({
         height: width 
 
     })
+    const [isLoaded, setIsLoaded] = useState(false)
 
     const [ request, makeRequest ] = useRequest()
 
@@ -68,6 +70,8 @@ const DraftProfileImage = forwardRef(function({
         if ( newCrop.width !== crop.width || newCrop.height !== crop.height ) {
             setCrop(newCrop)
         }
+
+        setIsLoaded(true)
     }
 
     useImperativeHandle(ref, () => {
@@ -113,19 +117,30 @@ const DraftProfileImage = forwardRef(function({
     let content = null
     if ( fileId) {
         let renderWidth = width ? width : 200 
+        let style = {}
+        if ( ! isLoaded )  {
+            style = {
+                position: 'absolute',
+                top: '-10000px',
+                left: '-10000px'
+            }
+        }
         content = (
-            <div className={`file-wrapper`}>
+            <>
+            <div className={`file-wrapper`} style={style}>
                 <ReactCrop 
                     crop={crop} 
                     onChange={(crop) => setCrop(crop)} aspect={1}
                     keepSelection={true}
-                    minWidth={200}
+                    minWidth={10}
                     minHeight={10}
                     circularCrop={true}
                 >
                     <img onLoad={onLoad} src={`${configuration.backend}/file/${fileId}?width=${renderWidth}&timestamp=${Date.now()}`} />
                 </ReactCrop>
             </div>
+                { ! isLoaded && <Spinner /> }
+            </>
         )
     }
 
