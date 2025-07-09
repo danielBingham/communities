@@ -16,8 +16,8 @@ const Footer = function(props) {
      <footer>
          <div className="wrapper">
             <div className="explanation-copyright footer__block">
-                <p className="explanation">Communities is a non-profit, user-supported social media platform. Its goal is to help people build community, connect, and organize.</p>
-                <p className="explanation">It is funded and will be governed by its users.</p>
+                <p className="explanation">Communities is a non-profit, user-supported social media platform built to help people build community, connect, and organize. It is funded and will be governed by its users.</p>
+                <p className="explanation">It's currently in <a href="/about/faq#beta">Public Beta</a>.</p>
                 <p>Site text (c) <a href="https://github.com/danielbingham">Daniel Bingham</a> 2024 - 2025</p>
                 <p>All user content (c) its authors.</p>
             </div>

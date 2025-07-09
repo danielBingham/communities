@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 
 import { createToken, validateToken } from '/state/tokens'
 
@@ -24,6 +24,8 @@ const EmailConfirmationPage = function(props) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
+    const navigate = useNavigate()
+
     const requestNewConfirmationEmail = function() {
         makeCreateTokenRequest(createToken({ type: 'email-confirmation', email: currentUser.email}))
     }
@@ -34,13 +36,21 @@ const EmailConfirmationPage = function(props) {
         }
     }, [ token ])
 
+    useEffect(function() {
+        // If they don't have a token and aren't logged in, just show the login
+        // form.
+        if ( ! token && ! currentUser || (currentUser && currentUser.status != 'unconfirmed')) {
+            navigate('/')
+        }
+    }, [ currentUser, token ])
+
     let content = ( <Spinner /> )
 
     // If they don't have a token and aren't logged in, just show the login
     // form.
     if ( ! token && ! currentUser || (currentUser && currentUser.status == 'invited')) {
-        content = (
-            <LoginForm />
+        return (
+            <Spinner />
         )
     }
 

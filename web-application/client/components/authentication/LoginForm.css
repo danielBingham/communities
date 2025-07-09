@@ -14,9 +14,10 @@
 }
 .login-form .inner-wrapper {
     text-align: center;
+    padding: 10px 0 20px 0;
 }
 .login-form .forgot-password {
-    padding: 10px;
+    padding: 15px 0;
 }
 
 @media (width >= 700px) {
@@ -28,7 +29,6 @@
         border-radius: 10px;
         max-width: 500px;
         margin: 0 auto;
-        max-height: 387px;
     }
     .login-form .inner-wrapper {
         margin: 10px auto;

@@ -57,7 +57,7 @@ const FrequentlyAskedQuestions = function({}) {
                     goes to zero if you need it to, but this will only work if enough people do their part and contribute.</p>
             </section>
 
-            <section>
+            <section id="beta">
                 <h2>What does it mean for it to be a "beta"?</h2>
                 <p>It means it's still very much under development. It's messy.
                     There are design imperfections.  There will be bugs.  There are

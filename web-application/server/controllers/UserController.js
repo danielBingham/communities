@@ -360,8 +360,6 @@ module.exports = class UserController {
      * @returns {Promise}   Resolves to void.
      */
     async postUsers(request, response) {
-        const user = request.body
-
         /*************************************************************
          * Permissions Checking and Input Validation
          *
@@ -387,22 +385,15 @@ module.exports = class UserController {
          * **********************************************************/
 
         const currentUser = request.session.user
-
+        const user = request.body
 
         // ================= Initial Validation ===============================
         // Do some basic initial validation before we determine what type of 
         // POST is taking place.   
 
-        if ( ! currentUser ) {
-            throw new ControllerError(401, 'not-authenticated',
-                `Unauthenticated User attempting to create new User.`,
-                `We're currently in invite-only beta, so you must recieve an invite to register. 
-                Reach out to contact@communities.social if you'd like an invite.`)
-        }
-
         user.email = user.email.toLowerCase().trim()
 
-        if ( user.email === currentUser.email ) {
+        if ( currentUser && user.email === currentUser.email ) {
             throw new ControllerError(400, 'invalid',
                 `User attempting to invite themselves.`,
                 `You cannot invite yourself.  You've already joined!`)
@@ -454,9 +445,15 @@ module.exports = class UserController {
         } else if ( ! currentUser && ! existingUser ) {
             type = 'registration'
         } else if ( ! currentUser && existingUser ) {
-            throw new ControllerError(400, 'conflict',
-                `Attempt to re-register existing user.`,
-                `A user with that email is already registered.`)
+            if ( existingUser.email === user.email ) {
+                throw new ControllerError(409, 'conflict',
+                    `Attempt to re-register existing user.`,
+                    `A user with that email is already registered. Please log in instead.`)
+            } else if ( existingUser.username === user.username ) {
+                throw new ControllerError(409, 'conflict',
+                    `Attempt to re-register existing user.`,
+                    `A user with that username is already registered. Please choose a different one.`)
+            }
         } else {
             this.core.logger.info(`We should not have been able to get here: `)
             this.core.logger.info(currentUser)

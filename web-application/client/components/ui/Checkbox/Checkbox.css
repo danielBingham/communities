@@ -1,0 +1,26 @@
+.checkbox {
+    width: 100%;
+}
+.checkbox__grid {
+    width: 100%;
+    display: grid;
+    grid-template-columns: auto 40px;
+}
+.checkbox__grid input { 
+    justify-self: center;
+    align-self: center;
+}
+.checkbox__label {
+    text-align: left;
+    padding: 5px 0;
+}
+.checkbox__explanation {
+    font-size: 12px;
+    padding: 0 0 12px 6px;
+    font-style: italic;
+}
+.checkbox__error {
+    padding: 5px;
+    color: var(--danger-color-main);
+    text-align: center;
+}

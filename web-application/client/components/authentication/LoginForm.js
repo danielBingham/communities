@@ -122,7 +122,7 @@ const LoginForm = function(props) {
 
     return (
         <div className='login-form'>
-            <h2>Login</h2>
+            <h2>Log In</h2>
             <form onSubmit={onSubmit}>
                 <div className="error"> { errorView } </div>
                 <Input
@@ -147,12 +147,15 @@ const LoginForm = function(props) {
                     onChange={ (event) => setPassword(event.target.value) } 
                 />
                 <div className="submit field-wrapper">
-                    <input type="submit" name="login" value="Login" />
+                    <input type="submit" name="login" value="Log In" />
                 </div>
             </form>
             <div className="inner-wrapper">
                 <div className="forgot-password">
                     <Link to="/reset-password-request">Forgot password?</Link>
+                </div>
+                <div className="register">
+                    New to Communities? <Link to="/register">Sign Up</Link>
                 </div>
             </div>
         </div>
