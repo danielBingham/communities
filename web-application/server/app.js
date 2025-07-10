@@ -143,7 +143,7 @@ app.use(function(request, response, next) {
             const csrfToken = request.get('X-Communities-CSRF-Token')
             if ( csrfToken !== request.session.csrfToken ) {
                 core.logger.warn(`Request arrived with an invalid CSRF Token.  Possible forged request.`)
-                response.status(403).json({
+                response.status(452).json({
                     error: {
                         type: 'invalid-csrf',
                         message: 'Your request had an invalid CSRF Token. It may have been a forged request.'

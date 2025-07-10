@@ -31,11 +31,8 @@ const ContributionView = function() {
             </div>
             <div className="contribution-grid" style={{ display: ( showMore ? 'grid' : 'none' ) }}>
                 <ContributionCard amount={20} explanation={"Cover one other person's contribution."} />
-                <ContributionCard amount={40} explanation={"Cover three other people's contributions."} />
-                <ContributionCard amount={60} explanation={"Cover five other people's contributions."} />
+                <ContributionCard amount={50} explanation={"Cover four other people's contributions."} />
                 <ContributionCard amount={100} explanation={"Cover nine other person's contribution."} />
-                <ContributionCard amount={200} explanation={"Cover many people's contributions."} />
-                <ContributionCard amount={500} explanation={"Wow!"} />
             </div>
         </div>
     )

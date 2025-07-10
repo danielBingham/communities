@@ -1,0 +1,27 @@
+.contribution-notice {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+}
+.contribution-notice .contribution-notice__logo {
+    text-align: center;
+}
+.contribution-notice .contribution-notice__explanation {
+    margin: 0 auto;
+    font-size: 20px;
+    line-height: 1.7em;
+    text-align: center;
+}
+.contribution-notice .contribution-grid {
+    display: grid;
+    margin: 50px auto 0 auto;
+    grid-template-columns: repeat(auto-fit, 260px);
+
+}
+.contribution-notice .additional-contributions {
+    margin: 20px auto;
+    text-align: center;
+}
+.contribution-notice .contribution-notice__skip {
+    text-align: center;
+}

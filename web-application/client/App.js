@@ -41,6 +41,7 @@ import ResetPasswordRequestPage from '/pages/authentication/ResetPasswordRequest
 import AcceptInvitationPage from '/pages/authentication/AcceptInvitationPage'
 import RegistrationPage from '/pages/authentication/RegistrationPage'
 import AcceptTermsOfServicePage from '/pages/authentication/AcceptTermsOfServicePage'
+import SetContributionPage from '/pages/authentication/SetContributionPage'
 
 import UserProfilePage from '/pages/users/UserProfilePage'
 
@@ -162,6 +163,7 @@ const App = function(props) {
                         <Route path="/register" element={ <RegistrationPage /> } />
                         <Route path="/reset-password" element={ <ResetPasswordPage /> } />
                         <Route path="/accept-terms-of-service" element={ <AcceptTermsOfServicePage /> } />
+                        <Route path="/set-contribution" element={ <SetContributionPage /> } />
                     </Route>
 
                     { /* ======== Pages with Headers ====================== */ }
