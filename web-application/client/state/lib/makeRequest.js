@@ -98,6 +98,11 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
                     }
                 }
 
+                // Invalid CSRF.  Refresh the page.
+                if ( status === 452 )  {
+                    window.location.reload()
+                }
+
                 if ( status >= 500 ) {
                     logger.error(`Request failed: `, result)
                 } else {
