@@ -50,287 +50,291 @@ const ControllerError = require('./errors/ControllerError')
  **********************************************************************/
 const config = require('./config') 
 
-const core = new Core('web-application', config)
-core.initialize()
-
 // Load express.
 const app = express()
 
-// Make sure the request limit is large so that we don't run into it.
-app.use(express.json({ limit: "50mb" }))
-app.use(express.urlencoded({ limit: "50mb", extended: false }))
+const core = new Core('web-application', config)
+core.initialize().then(function() {
 
-// Set up our session storage.  We're going to use database backed sessions to
-// maintain a stateless app.
-core.logger.info('Setting up the database backed session store.')
-const sessionStore = new pgSession({
-    pool: core.database,
-    createTableIfMissing: true
-})
-app.use(session({
-    key: core.config.session.key,
-    secret: core.config.session.secret,
-    store: sessionStore,
-    resave: false,
-    saveUninitialized: true,
-    proxy: true,
-    cookie: { 
-        path: '/',
-        httpOnly: true,
-        // TODO TECHDEBT 
-        //secure: true,
-        //secure: config.session.secure_cookie,
-        sameSite: "lax",
-        maxAge: 1000 * 60 * 60 * 24 * 14 // 14 days, two weeks
+    // Trust the proxy.
+    app.set('trust proxy', true)
 
-    } 
-}))
+    // Make sure the request limit is large so that we don't run into it.
+    app.use(express.json({ limit: "50mb" }))
+    app.use(express.urlencoded({ limit: "50mb", extended: false }))
 
-// Set the id the logger will use to identify the session.  We don't want to
-// use the actual session id, since that value is considered sensitive.  So
-// instead we'll just use a uuid.
-app.use(function(request, response, next) {
-    if ( request.session.user ) {
-        core.logger.setId(request.session.user.id)
-    } else {
-        if ( request.session.logId ) {
-            core.logger.setId(request.session.logId)
-        } else {
-            request.session.logId = Uuid.v4()
-            core.logger.setId(request.session.logId)
-        }
-    }
-    next()
-})
-
-// Request logger.
-app.use(function(request, response, next) {
-    const startTime = Date.now()
-    core.logger.debug(`BEGIN: ${request.method} ${request.originalUrl}`)
-    response.once('finish', function() {
-        const endTime = Date.now()
-        const totalTime = endTime - startTime
-        const contentSize = response.getHeader('content-length')
-
-        core.logger.debug(`END: ${request.method} ${request.originalUrl} -- [ ${response.statusCode} ] -- ${totalTime} ms ${contentSize ? `${contentSize} bytes` : ''}`)
+    // Set up our session storage.  We're going to use database backed sessions to
+    // maintain a stateless app.
+    core.logger.info('Setting up the database backed session store.')
+    const sessionStore = new pgSession({
+        pool: core.database,
+        createTableIfMissing: true
     })
-    next()
-})
+    app.use(session({
+        key: core.config.session.key,
+        secret: core.config.session.secret,
+        store: sessionStore,
+        resave: false,
+        saveUninitialized: true,
+        proxy: true,
+        cookie: { 
+            path: '/',
+            httpOnly: true,
+            // TODO TECHDEBT 
+            //secure: true,
+            //secure: config.session.secure_cookie,
+            sameSite: "lax",
+            maxAge: 1000 * 60 * 60 * 24 * 14 // 14 days, two weeks
 
-// Set the feature flags on each request, so that they are always up to date.
-// This means we can't use feature flags in Controller, Service, and DAO
-// constructors, since those are called at startup time.
-//
-// TECHDEBT This is pretty awkward, and it's worth considering if we want to
-// change something here. Should we be creating Controllers, Services, and DAOs
-// just in time so that we can use Feature Flags in constructors?
-//
-// Or is it better to retain this pattern? Does it save memory to use a single
-// instance created at startup?  Is it enough that we care?
-app.use(function(request, response, next) {
-    const featureService = new FeatureService(core)
-    featureService.getEnabledFeatures().then(function(features) {
-        core.features = new FeatureFlags(features)
-        next()
-    })
-})
-
-
-
-app.use(function(request, response, next) {
-    if ( (request.method === 'POST' || request.method === 'PATCH' || request.method === 'DELETE')) {
-        if ( 'csrfToken' in request.session && request.session.csrfToken !== undefined && request.session.csrfToken !== null ) {
-            const csrfToken = request.get('X-Communities-CSRF-Token')
-            if ( csrfToken !== request.session.csrfToken ) {
-                core.logger.warn(`Request arrived with an invalid CSRF Token.  Possible forged request.`)
-                response.status(403).json({
-                    error: {
-                        type: 'invalid-csrf',
-                        message: 'Your request had an invalid CSRF Token. It may have been a forged request.'
-                    }
-                })
-            } else {
-                next() 
-            }
-        } else {
-            response.status(401).json({
-                error: {
-                    type: 'session-expired',
-                    message: 'Your session expired.  Please refresh your page and log back in.'
-                }
-            })
-        }
-    } else {
-        next()
-    }
-})
-
-// Get the api router, pre-wired up to the controllers.
-const router = require('./router')(core)
-
-// Load our router at the ``/api/v0/`` route.  This allows us to version our api. If,
-// in the future, we want to release an updated version of the api, we can load it at
-// ``/api/v1/`` and so on, with out impacting the old versions of the router.
-if( process.env?.MAINTENANCE_MODE === 'true' ) {
-    core.logger.info('Entering maintenance mode.')
-
-    app.use(core.config.backend, function(request, response) {
-        response.json({
-            maintenance_mode: true
-        })
-    })
-} else {
-    core.logger.info(`Configuring the API Backend on path '${core.config.backend}'`)
-
-    app.use(core.config.backend, router)
-}
-
-app.get('/health', function(request, response) {
-    response.status(200).send()
-})
-
-/**
- * Send configuration information up to the front-end.  Be *very careful*
- * about what goes in here.
- */
-app.get('/config', function(request, response) {
-    response.status(200).json({
-        backend: core.config.backend, 
-        environment: process.env.NODE_ENV,
-        log_level: core.config.log_level,
-        maintenance_mode: process.env.MAINTENANCE_MODE === 'true' ? true : false,
-        stripe: {
-            portal: core.config.stripe.portal,
-            links: core.config.stripe.links
-        },
-        features: core.features.features
-    })
-})
-
-/**
- * Handle requests for static image and pdf files.  We'll send these directly
- * to the public path.
- */
-app.get(/.*\.(svg|ico|pdf|jpg|png)$/, function(request, response) {
-    const filepath = path.join(process.cwd(), 'public', request.originalUrl)
-    response.sendFile(filepath)
-})
-
-
-/**
- * For javascript files and the index file we need to use different logic on
- * development and production.
- *
- * On development, we're going to use the webpack-dev-middleware to generate
- * the assets on the fly.  For production, we render the assets generated by
- * the webpack build from the `/dist` directory.
- *
- * For the index.html template, we need to run it through our server side 
- * rendering logic to populate the <head> with the page metadata.  We'll
- * do this for both development and production.
- *
- * TECHDEBT the webpack-dev-middleware server side rendering logic is
- * experimental, it may break on us in future versions.
- */
-const serverSideRenderingService = new ServerSideRenderingService(core)
-const pageMetadataService = new PageMetadataService(core)
-const tokenService = new TokenService(core)
-if ( core.config.environment == 'development' ) {
-    const webpack = require('webpack')
-    const webpackMiddleware = require('webpack-dev-middleware')
-    const webpackConfig = require('../webpack.config')
-
-    webpackConfig.mode = 'development'
-
-    const compiler = webpack(webpackConfig)
-    app.use(webpackMiddleware(compiler, { 
-        publicPath: webpackConfig.output.publicPath,
-        serverSideRender: true,
-        index: false
+        } 
     }))
 
-    app.use(function(request, response) {
-        core.logger.debug(`Index File Request with webpack-dev-middleware server side rendering.`)
-        const { devMiddleware } = response.locals.webpack
-        const { assetsByChunkName, outputPath } = devMiddleware.stats.toJson() 
-
-        const metadata = pageMetadataService.getRootWithDevAssets(assetsByChunkName)
-
-        // Only generate a new CSRF Token on requests to root (or if we don't have one).
-        if ( request.originalUrl === '/' || request.session?.csrfToken === undefined) {
-            request.session.csrfToken = tokenService.createToken()
+    // Set the id the logger will use to identify the session.  We don't want to
+    // use the actual session id, since that value is considered sensitive.  So
+    // instead we'll just use a uuid.
+    app.use(function(request, response, next) {
+        if ( request.session.user ) {
+            core.logger.setId(request.session.user.id)
+        } else {
+            if ( request.session.logId ) {
+                core.logger.setId(request.session.logId)
+            } else {
+                request.session.logId = Uuid.v4()
+                core.logger.setId(request.session.logId)
+            }
         }
-
-        metadata.csrfToken = request.session.csrfToken 
-        const parsedTemplate = serverSideRenderingService.renderIndexTemplate(metadata) 
-        response.send(parsedTemplate)
+        next()
     })
-} else {
 
-    // Javascript files go to dist.
-    app.get(/.*\.(css|js|js.map)$/, function(request, response) {
-        const filepath = path.join(process.cwd(), 'public/dist', request.originalUrl)
+    // Request logger.
+    app.use(function(request, response, next) {
+        const startTime = Date.now()
+        core.logger.debug(`BEGIN: ${request.method} ${request.originalUrl}`)
+        response.once('finish', function() {
+            const endTime = Date.now()
+            const totalTime = endTime - startTime
+            const contentSize = response.getHeader('content-length')
+
+            core.logger.debug(`END: ${request.method} ${request.originalUrl} -- [ ${response.statusCode} ] -- ${totalTime} ms ${contentSize ? `${contentSize} bytes` : ''}`)
+        })
+        next()
+    })
+
+    // Set the feature flags on each request, so that they are always up to date.
+    // This means we can't use feature flags in Controller, Service, and DAO
+    // constructors, since those are called at startup time.
+    //
+    // TECHDEBT This is pretty awkward, and it's worth considering if we want to
+    // change something here. Should we be creating Controllers, Services, and DAOs
+    // just in time so that we can use Feature Flags in constructors?
+    //
+    // Or is it better to retain this pattern? Does it save memory to use a single
+    // instance created at startup?  Is it enough that we care?
+    app.use(function(request, response, next) {
+        const featureService = new FeatureService(core)
+        featureService.getEnabledFeatures().then(function(features) {
+            core.features = new FeatureFlags(features)
+            next()
+        })
+    })
+
+
+
+    app.use(function(request, response, next) {
+        if ( (request.method === 'POST' || request.method === 'PATCH' || request.method === 'DELETE')) {
+            if ( 'csrfToken' in request.session && request.session.csrfToken !== undefined && request.session.csrfToken !== null ) {
+                const csrfToken = request.get('X-Communities-CSRF-Token')
+                if ( csrfToken !== request.session.csrfToken ) {
+                    core.logger.warn(`Request arrived with an invalid CSRF Token.  Possible forged request.`)
+                    response.status(403).json({
+                        error: {
+                            type: 'invalid-csrf',
+                            message: 'Your request had an invalid CSRF Token. It may have been a forged request.'
+                        }
+                    })
+                } else {
+                    next() 
+                }
+            } else {
+                response.status(401).json({
+                    error: {
+                        type: 'session-expired',
+                        message: 'Your session expired.  Please refresh your page and log back in.'
+                    }
+                })
+            }
+        } else {
+            next()
+        }
+    })
+
+    // Get the api router, pre-wired up to the controllers.
+    const router = require('./router')(core)
+
+    // Load our router at the ``/api/v0/`` route.  This allows us to version our api. If,
+    // in the future, we want to release an updated version of the api, we can load it at
+    // ``/api/v1/`` and so on, with out impacting the old versions of the router.
+    if( process.env?.MAINTENANCE_MODE === 'true' ) {
+        core.logger.info('Entering maintenance mode.')
+
+        app.use(core.config.backend, function(request, response) {
+            response.json({
+                maintenance_mode: true
+            })
+        })
+    } else {
+        core.logger.info(`Configuring the API Backend on path '${core.config.backend}'`)
+
+        app.use(core.config.backend, router)
+    }
+
+    app.get('/health', function(request, response) {
+        response.status(200).send()
+    })
+
+    /**
+     * Send configuration information up to the front-end.  Be *very careful*
+     * about what goes in here.
+     */
+    app.get('/config', function(request, response) {
+        response.status(200).json({
+            backend: core.config.backend, 
+            environment: process.env.NODE_ENV,
+            log_level: core.config.log_level,
+            maintenance_mode: process.env.MAINTENANCE_MODE === 'true' ? true : false,
+            stripe: {
+                portal: core.config.stripe.portal,
+                links: core.config.stripe.links
+            },
+            features: core.features.features
+        })
+    })
+
+    /**
+     * Handle requests for static image and pdf files.  We'll send these directly
+     * to the public path.
+     */
+    app.get(/.*\.(svg|ico|pdf|jpg|png)$/, function(request, response) {
+        const filepath = path.join(process.cwd(), 'public', request.originalUrl)
         response.sendFile(filepath)
     })
 
-    // Everything else goes to the index file.
-    app.use('*', function(request,response) {
-        const metadata = pageMetadataService.getRoot()
-        const parsedTemplate = serverSideRenderingService.renderIndexTemplate(metadata) 
 
-        // Only generate a new CSRF Token on requests to root (or if we don't have one).
-        if ( request.originalUrl === '/' || request.session?.csrfToken === undefined ) {
-            request.session.csrfToken = tokenService.createToken()
-        }
+    /**
+     * For javascript files and the index file we need to use different logic on
+     * development and production.
+     *
+     * On development, we're going to use the webpack-dev-middleware to generate
+     * the assets on the fly.  For production, we render the assets generated by
+     * the webpack build from the `/dist` directory.
+     *
+     * For the index.html template, we need to run it through our server side 
+     * rendering logic to populate the <head> with the page metadata.  We'll
+     * do this for both development and production.
+     *
+     * TECHDEBT the webpack-dev-middleware server side rendering logic is
+     * experimental, it may break on us in future versions.
+     */
+    const serverSideRenderingService = new ServerSideRenderingService(core)
+    const pageMetadataService = new PageMetadataService(core)
+    const tokenService = new TokenService(core)
+    if ( core.config.environment == 'development' ) {
+        const webpack = require('webpack')
+        const webpackMiddleware = require('webpack-dev-middleware')
+        const webpackConfig = require('../webpack.config')
 
-        metadata.csrfToken = request.session.csrfToken
-        response.send(parsedTemplate)
-    })
-}
+        webpackConfig.mode = 'development'
+
+        const compiler = webpack(webpackConfig)
+        app.use(webpackMiddleware(compiler, { 
+            publicPath: webpackConfig.output.publicPath,
+            serverSideRender: true,
+            index: false
+        }))
+
+        app.use(function(request, response) {
+            core.logger.debug(`Index File Request with webpack-dev-middleware server side rendering.`)
+            const { devMiddleware } = response.locals.webpack
+            const { assetsByChunkName, outputPath } = devMiddleware.stats.toJson() 
+
+            const metadata = pageMetadataService.getRootWithDevAssets(assetsByChunkName)
+
+            // Only generate a new CSRF Token on requests to root (or if we don't have one).
+            if ( request.originalUrl === '/' || request.session?.csrfToken === undefined) {
+                request.session.csrfToken = tokenService.createToken()
+            }
+
+            metadata.csrfToken = request.session.csrfToken 
+            const parsedTemplate = serverSideRenderingService.renderIndexTemplate(metadata) 
+            response.send(parsedTemplate)
+        })
+    } else {
+
+        // Javascript files go to dist.
+        app.get(/.*\.(css|js|js.map)$/, function(request, response) {
+            const filepath = path.join(process.cwd(), 'public/dist', request.originalUrl)
+            response.sendFile(filepath)
+        })
+
+        // Everything else goes to the index file.
+        app.use('*', function(request,response) {
+            const metadata = pageMetadataService.getRoot()
+            const parsedTemplate = serverSideRenderingService.renderIndexTemplate(metadata) 
+
+            // Only generate a new CSRF Token on requests to root (or if we don't have one).
+            if ( request.originalUrl === '/' || request.session?.csrfToken === undefined ) {
+                request.session.csrfToken = tokenService.createToken()
+            }
+
+            metadata.csrfToken = request.session.csrfToken
+            response.send(parsedTemplate)
+        })
+    }
 
 
-// error handler
-app.use(function(error, request, response, next) {
-    console.error(error)
-    try {
-        // Log the error.
-        if ( error instanceof ControllerError ) {
-            if ( error.status < 500 ) {
-                core.logger.warn(error)
+    // error handler
+    app.use(function(error, request, response, next) {
+        console.error(error)
+        try {
+            // Log the error.
+            if ( error instanceof ControllerError ) {
+                if ( error.status < 500 ) {
+                    core.logger.warn(error)
+                } else {
+                    core.logger.error(error)
+                }
             } else {
                 core.logger.error(error)
             }
-        } else {
-            core.logger.error(error)
-        }
 
-        if ( error instanceof ControllerError) {
-            response.status(error.status).json({
-                error: {
-                    type: error.type, 
-                    message: error.publicMessage
-                }
-            })
-            return 
-        } else { 
+            if ( error instanceof ControllerError) {
+                response.status(error.status).json({
+                    error: {
+                        type: error.type, 
+                        message: error.publicMessage
+                    }
+                })
+                return 
+            } else { 
+                response.status(500).json({ 
+                    error: {
+                        type: 'server-error',
+                        message: `Something went wrong on the backend in a way we couldn't handle.  Please report this as a bug!`
+                    }
+                })
+                return
+            }
+        } catch (secondError) {
+            // If we fucked up something in our error handling.
+            core.logger.error(secondError)
             response.status(500).json({ 
                 error: {
                     type: 'server-error',
                     message: `Something went wrong on the backend in a way we couldn't handle.  Please report this as a bug!`
                 }
             })
-            return
         }
-    } catch (secondError) {
-        // If we fucked up something in our error handling.
-        core.logger.error(secondError)
-        response.status(500).json({ 
-            error: {
-                type: 'server-error',
-                message: `Something went wrong on the backend in a way we couldn't handle.  Please report this as a bug!`
-            }
-        })
-    }
+    })
 })
 
 
