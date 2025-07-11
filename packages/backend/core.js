@@ -20,6 +20,7 @@
 const { Client, Pool } = require('pg')
 const BullQueue = require('bull')
 const Postmark = require('postmark')
+const { createClient } = require('redis')
 
 const Logger = require('./logger')
 
@@ -47,6 +48,11 @@ module.exports = class Core {
          * database.
          */
         this.database = null
+
+        /**
+         * An instance of of Redis Client.
+         */
+        this.redis = null
 
         /**
          * An instance of of a bull queue that we'll use to queue up long
@@ -83,7 +89,7 @@ module.exports = class Core {
     /**
      * Initialize the common dependencies.
      */
-    initialize() {
+    async initialize() {
 
         /**********************************************************************
          * Logger Initialization
@@ -117,8 +123,11 @@ module.exports = class Core {
          **********************************************************************/
         this.logger.info(`Connecting to redis ${this.config.redis.host}:${this.config.redis.port}.`)
 
-        // TECHDEBT - Are we even using this?
-        this.queue = new BullQueue('peer-review', { redis: this.config.redis })
+        this.redis = createClient({ url: `redis://${this.config.redis.host}:${this.config.redis.port}` })
+        this.redis.on('error', err => this.logger.error(`Redis connection error: `, err))
+        await this.redis.connect()
+
+        this.queue = new BullQueue('communities', { redis: this.config.redis })
 
         this.postmarkClient = new Postmark.ServerClient(this.config.postmark.api_token)
     }
@@ -138,6 +147,7 @@ module.exports = class Core {
         this.logger.info('Connection pool closed.')
 
         this.logger.info('Closing the redis queue connection.')
+        await this.redis.destroy()
         await this.queue.close()
         this.queue = null
         this.logger.info('Redis queue closed.')
