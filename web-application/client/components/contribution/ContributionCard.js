@@ -5,7 +5,7 @@ import Button from '/components/generic/button/Button'
 
 import './ContributionCard.css'
 
-const ContributionCard = function({ amount, explanation }) {
+const ContributionCard = function({ amount, explanation, onClick }) {
 
     const ref = useRef(null)
 
@@ -13,6 +13,16 @@ const ContributionCard = function({ amount, explanation }) {
     const links = useSelector((state) => state.system.configuration.stripe.links)
 
     const contribution = `$${amount}`
+
+    const onClickInternal = function(event) {
+        if ( onClick && typeof onClick === 'function' ) {
+            onClick()
+        }
+
+        if ( ref.current ) {
+            ref.current.click()
+        }
+    }
 
     let postFix = ''
     if ( currentUser ) {
@@ -30,7 +40,7 @@ const ContributionCard = function({ amount, explanation }) {
                     ref={ref} 
                     style={{ display: 'none' }}
                 >Contribute { contribution } / month</a>
-                <Button type="primary" onClick={(e) => ref.current.click() }>Contribute</Button>
+                <Button type="primary" onClick={onClickInternal}>Contribute</Button>
             </div>
         </div>
     )
