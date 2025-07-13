@@ -111,10 +111,19 @@ module.exports = class GroupController {
             query.where += `${and} groups.slug = $${query.params.length}`
         }
 
+        if ( request.query.title && request.query.title.length > 0 ) {
+            query.params.push(request.query.title)
+            const and = query.params.length > 1 ? ' AND ' : ''
+            query.where += `${and} SIMILARITY(groups.title, $${query.params.length}) > 0`
+            query.order = `SIMILARITY(groups.title, $${query.params.length}) desc`
+        }
+
         if ( 'page' in request.query && parseInt(request.query.page) > 0 ) {
             query.page = parseInt(request.query.page)
         }
 
+        console.log(request.query)
+        console.log(query)
         return query
     }
 

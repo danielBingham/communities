@@ -1,0 +1,12 @@
+.find-groups .search {
+    display: flex;
+    position: relative;
+    padding: 10px;
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto;
+}
+.find-groups .search input {
+    flex-grow: 1;
+    padding: 5px;
+}

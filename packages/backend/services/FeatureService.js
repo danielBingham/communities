@@ -37,6 +37,7 @@ const GroupModeratorsCanBanUsers = require('../migrations/GroupModeratorsCanBanU
 const GroupAdminsCanRestrictPosting = require('../migrations/GroupAdminsCanRestrictPosting')
 const CantDeleteAccountWithOutstandingInvitationsMigration = require('../migrations/CantDeleteAccountWithOutstandingInvitationsMigration')
 const DeleteFileFailsMigration = require('../migrations/DeleteFileFailsMigration')
+const GroupSearchMigration = require('../migrations/GroupSearchMigration')
 
 const ServiceError = require('../errors/ServiceError')
 const MigrationError = require('../errors/MigrationError')
@@ -153,6 +154,11 @@ module.exports = class FeatureService {
                 dependsOn: [],
                 conflictsWith: [],
                 migration: new DeleteFileFailsMigration(core)
+            },
+            '166-group-search': {
+                dependsOn: [],
+                conflictsWith: [],
+                migration: new GroupSearchMigration(core)
             }
         }
     }
