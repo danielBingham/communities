@@ -38,6 +38,7 @@ const GroupAdminsCanRestrictPosting = require('../migrations/GroupAdminsCanRestr
 const CantDeleteAccountWithOutstandingInvitationsMigration = require('../migrations/CantDeleteAccountWithOutstandingInvitationsMigration')
 const DeleteFileFailsMigration = require('../migrations/DeleteFileFailsMigration')
 const GroupSearchMigration = require('../migrations/GroupSearchMigration')
+const LimitLoginAttemptsMigration = require('../migrations/LimitLoginAttemptsMigration')
 
 const ServiceError = require('../errors/ServiceError')
 const MigrationError = require('../errors/MigrationError')
@@ -159,6 +160,11 @@ module.exports = class FeatureService {
                 dependsOn: [],
                 conflictsWith: [],
                 migration: new GroupSearchMigration(core)
+            },
+            '163-limit-login-attempts': {
+                dependsOn: [],
+                conflictsWith: [],
+                migration: new LimitLoginAttemptsMigration(core)
             }
         }
     }

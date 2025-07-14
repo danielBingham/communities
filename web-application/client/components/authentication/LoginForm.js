@@ -95,6 +95,8 @@ const LoginForm = function(props) {
     if ( request && request.state == 'failed') {
         if ( request.response.status == 403 ) {
             errorMessage = "Login failed."
+        } else if ( request.response.status === 429 ) {
+            errorMessage = "Too many failed attempts.  Please wait 15 minutes and try again."
         } else if ( request.response.status == 400) {
             if ( request.error.type == 'no-password' ) {
                 errorMessage = "Your account appears to have been created using OAuth.  Please login with the authentication method you used to create it."

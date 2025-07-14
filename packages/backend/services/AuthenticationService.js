@@ -86,11 +86,12 @@ module.exports = class AuthenticationService {
          * 3. They have a password set. (If they don't, they authenticated with
          * ORCID iD and cannot authenticate with this endpoint.)
          * 4. The submitted credentials include a password.
-         * 5. The passwords match.
+         * 5. They are not currently in authentication timeout (more than 10 failed attempts in 15 minutes).
+         * 6. The passwords match.
          * 
          * **********************************************************/
         const results = await this.database.query(
-            'select id, password, status from users where email = $1',
+            'select id, password, failed_authentication_attempts, last_authentication_attempt_date, status from users where email = $1',
             [ credentials.email ]
         )
 
@@ -119,13 +120,26 @@ module.exports = class AuthenticationService {
             throw new ServiceError('no-credential-password', `User(${credentials.email}) attempted to login with no password.`)
         }
 
-        // 5. The passwords match.
+
         const userMatch = results.rows[0]
+
+        // 5. They are not currently in authentication timeout (10 failed attempts in 15 minutes).
+        const failedAttempts = userMatch.failed_authentication_attempts
+        const lastAttempt = new Date(userMatch.last_authentication_attempt_date)
+        const fifteenMinutes = 15 * 60 * 1000
+        if ( failedAttempts >= 10 && Date.now() - lastAttempt.getTime() < fifteenMinutes ) {
+            throw new ServiceError('authentication-timeout', `Too many failed log in attempts.  Please wait 15 minutes.`)
+        }
+
+        // 6. The passwords match.
         const passwords_match = this.checkPassword(credentials.password, userMatch.password)
         if (passwords_match !== true) {
+            await this.database.query(`UPDATE users SET failed_authentication_attempts = failed_authentication_attempts+1, last_authentication_attempt_date = now() WHERE id = $1`, [ userMatch.id])
+
             throw new ServiceError('authentication-failed', `Failed login for email ${credentials.email}.`)
         }
-        
+       
+        await this.database.query(`UPDATE users SET failed_authentication_attempts = 0, last_authentication_attempt_date = now() WHERE id = $1`, [ userMatch.id])
         return userMatch.id 
     }
 
