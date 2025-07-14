@@ -122,8 +122,6 @@ module.exports = class GroupController {
             query.page = parseInt(request.query.page)
         }
 
-        console.log(request.query)
-        console.log(query)
         return query
     }
 
