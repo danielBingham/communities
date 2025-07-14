@@ -82,6 +82,9 @@ CREATE TABLE users (
     settings jsonb DEFAULT '{}'::jsonb,
     notices jsonb DEFAULT '{}'::jsonb,
 
+    failed_authentication_attempts int DEFAULT 0,
+    last_authentication_attempt_date timestamptz,
+
     created_date timestamptz,
     updated_date timestamptz 
 );
@@ -94,8 +97,8 @@ CREATE INDEX users__name_trgm ON users USING GIN (name gin_trgm_ops);
  * a non-local environment, it will be changed as soon as the environment is
  * finished creating.
  */
-INSERT INTO users (name, username, email, password, status, permissions, siteRole, created_date, updated_date)
-    VALUES ('Administrator', 'administrator', 'contact@communities.social', '$2b$10$ywAqKPvFH51jeILdx.Piy.mm5ci37vMpy7G4lEBWObfIzOif5ZgzK', 'confirmed', 'superadmin', 'superadmin', now(), now());
+INSERT INTO users (name, username, email, password, status, permissions, siteRole, last_authentication_attempt_date, created_date, updated_date)
+    VALUES ('Administrator', 'administrator', 'contact@communities.social', '$2b$10$ywAqKPvFH51jeILdx.Piy.mm5ci37vMpy7G4lEBWObfIzOif5ZgzK', 'confirmed', 'superadmin', 'superadmin', now(), now(), now());
 
 CREATE TYPE user_relationship_status AS ENUM('pending', 'confirmed');
 CREATE TABLE user_relationships (

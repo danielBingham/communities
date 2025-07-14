@@ -127,6 +127,15 @@ const SCHEMA = {
                 select: DAO.SELECT.REQUEST,
                 key: 'invitations'
             },
+            'last_authentication_attempt_date': {
+                insert: DAO.INSERT.OVERRIDE,
+                insertOverride: 'now()',
+                update: DAO.UPDATE.OVERRIDE,
+                updateOverride: 'now()',
+                select: DAO.SELECT.REQUEST,
+                key: 'lastAuthenticationAttemptDate',
+                needsFeature: '163-limit-login-attempts'
+            },
             'created_date': {
                 insert: DAO.INSERT.OVERRIDE,
                 insertOverride: 'now()',

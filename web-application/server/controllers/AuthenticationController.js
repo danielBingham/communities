@@ -123,7 +123,7 @@ module.exports = class AuthenticationController {
      */
     async postAuthentication(request, response) {
         const credentials = request.body
-        credentials.email = credentials.email.toLowerCase()
+        credentials.email = credentials.email.trim().toLowerCase()
 
         /************************************************************
          *  This is the authentication endpoint, so anyone may call it.
@@ -166,6 +166,8 @@ module.exports = class AuthenticationController {
                     throw new ControllerError(400, 'password-required', error.message)
                 } else if ( error.type == 'authentication-failed' ) {
                     throw new ControllerError(403, 'authentication-failed', error.message)
+                } else if ( error.type == 'authentication-timeout' ) {
+                    throw new ControllerError(429, 'authentication-timeout', error.message)
                 } else {
                     throw error
                 }
@@ -225,6 +227,8 @@ module.exports = class AuthenticationController {
                     throw new ControllerError(400, 'password-required', error.message)
                 } else if ( error.type == 'authentication-failed' ) {
                     throw new ControllerError(403, 'authentication-failed', error.message)
+                } else if ( error.type == 'authentication-timeout' ) {
+                    throw new ControllerError(403, 'authentication-timeout', error.message)
                 } else {
                     throw error
                 }

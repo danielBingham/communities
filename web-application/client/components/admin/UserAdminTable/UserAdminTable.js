@@ -47,6 +47,7 @@ const UserAdminTable = function() {
                     <TableCell>Email</TableCell>
                     <TableCell>Status</TableCell>
                     <TableCell>Role</TableCell>
+                    <TableCell>Last Login Attempt</TableCell>
                     <TableCell>Joined</TableCell>
                     <TableCell></TableCell>
                 </TableHeader>
