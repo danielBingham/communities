@@ -55,6 +55,23 @@ menu.feed-menu__menu li.view-more {
 }
 
 
+.groups-feed-menu__pages {
+    display: flex;
+}
+.groups-feed-menu__pages a {
+    flex-grow: 1;
+    align-self: center;
+    justify-self: center;
+    text-align: center;
+}
+.groups-feed-menu__pages a.disabled:link,
+.groups-feed-menu__pages a.disabled:visited,
+.groups-feed-menu__pages a.disabled:active,
+.groups-feed-menu__pages a.disabled:hover {
+    color: var(--primary-color-light);
+}
+
+
 .feed-menu__sub-menu menu {
     list-style-type: none;
     margin: 0;
@@ -136,6 +153,5 @@ menu.feed-menu__menu li.view-more {
         border-top: thin solid var(--main-border-color);
         border-bottom: thin solid var(--main-border-color);
     }
-
 }
 

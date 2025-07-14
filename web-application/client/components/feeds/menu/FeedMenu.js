@@ -20,15 +20,13 @@ const FeedMenu = function() {
     const [width, setWidth] = useState(window.innerWidth)
     const [feedsIsOpen, setFeedsIsOpen] = useLocalStorage('FeedMenu.feedsIsOpen', false)
     const [groupsIsOpen, setGroupsIsOpen] = useLocalStorage('FeedMenu.feedsIsOpen', false)
+    const [groupsPage, setGroupsPage] = useLocalStorage('FeedMenu.groupsPage', 1)
 
     const [groupsRequest, makeGroupsRequest] = useRequest()
 
     const groupDictionary = useSelector((state) => state.Group.dictionary)
 
-    // TODO Techdebt, kludge fix for useSelector's need for referential
-    // stability.  Future: restructure selector.
-    const emptyList = []     
-    const groups = useSelector((state) => 'FeedMenu' in state.Group.queries ? state.Group.queries['FeedMenu'].list : emptyList)
+    const groupsQuery = useSelector((state) => 'FeedMenu' in state.Group.queries ? state.Group.queries['FeedMenu'] : undefined)
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
     const setIsOpen = (menu) => {
@@ -54,6 +52,16 @@ const FeedMenu = function() {
         }
     }
 
+    const pageGroups = function(page) {
+        if ( page <= 0 ) {
+            setGroupsPage(1)
+        } else if ( page >= groupsQuery?.meta.numberOfPages ) {
+            setGroupsPage(groupsQuery?.meta.numberOfPages)
+        } else {
+            setGroupsPage(page)
+        }
+    }
+
     useEffect(() => {
         const handleWindowResize = () => setWidth(window.innerWidth)
 
@@ -72,18 +80,21 @@ const FeedMenu = function() {
 
     useEffect(() => {
         if ( currentUser ) {
-            makeGroupsRequest(getGroups('FeedMenu', { memberStatus: 'member' }))
+            console.log(`Query!`)
+            makeGroupsRequest(getGroups('FeedMenu', { page: groupsPage, memberStatus: 'member' }))
         }
 
-    }, [ currentUser ])
+    }, [ currentUser, groupsPage ])
 
     const groupViews = []
-    for(const groupId of groups) {
-        const group = groupDictionary[groupId]
+    if ( groupsQuery ) {
+        for(const groupId of groupsQuery.list) {
+            const group = groupDictionary[groupId]
 
-        groupViews.push(<li key={group.slug}>
-            <GroupImage groupId={groupId} width={30}/> <NavLink to={`/g/${group.slug}`} onClick={() => closeMenus()}>{ group.title }</NavLink> 
-        </li>)
+            groupViews.push(<li key={group.slug}>
+                <GroupImage groupId={groupId} width={30}/> <NavLink to={`/g/${group.slug}`} onClick={() => closeMenus()}>{ group.title }</NavLink> 
+            </li>)
+        }
     }
 
     const feedsMenu = (
@@ -96,6 +107,13 @@ const FeedMenu = function() {
     const groupsMenu = (
         <menu className="group-feed-menu__groups">
             { groupViews }
+            <li>
+                <div className="groups-feed-menu__pages">
+                    <a className={groupsPage === 1 ? 'disabled' : ''} href="" onClick={(e) => { e.preventDefault(); pageGroups(groupsPage-1) }}>Prev</a>
+                    <span>Page {groupsPage}</span>
+                    <a className={groupsPage === groupsQuery?.meta.numberOfPages ? 'disabled' : ''} href="" onClick={(e) => { e.preventDefault(); pageGroups(groupsPage+1) }}>Next</a>
+                </div>
+            </li>
             <li className="view-more" >
                 <Link to="/groups">All Groups</Link>
             </li>

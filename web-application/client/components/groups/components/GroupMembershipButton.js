@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { ArrowLeftStartOnRectangleIcon, ArrowLeftEndOnRectangleIcon } from '@heroicons/react/24/solid'
@@ -19,6 +19,7 @@ import './GroupActionMenu.css'
 
 const GroupMembershipButton = function({ groupId, userId }) {
     const [ areYouSure, setAreYouSure ] = useState(false)
+    const [ shouldResetEntities, setShouldResetEntities ] = useState(false)
 
     const [request, makeRequest] = useRequest()
 
@@ -82,7 +83,7 @@ const GroupMembershipButton = function({ groupId, userId }) {
             userId: userId
         }
         makeRequest(deleteGroupMember(groupMember))
-        dispatch(resetEntities())
+        setShouldResetEntities(true)
     }
 
     /**
@@ -106,7 +107,7 @@ const GroupMembershipButton = function({ groupId, userId }) {
             userId: userId
         }
         makeRequest(deleteGroupMember(groupMember))
-        dispatch(resetEntities())
+        setShouldResetEntities(true)
     }
 
     /* =================== When currentUser is admin... ======================== */
@@ -155,6 +156,12 @@ const GroupMembershipButton = function({ groupId, userId }) {
         }
         makeRequest(deleteGroupMember(groupMember))
     }
+
+    useEffect(function() {
+        if ( request?.state === 'fulfilled' && shouldResetEntities ) {
+                dispatch(resetEntities())
+        }
+    }, [ request, shouldResetEntities ])
 
     if ( ! currentUser || ! group ) {
         return null

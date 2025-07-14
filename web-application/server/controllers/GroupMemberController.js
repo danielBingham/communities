@@ -495,7 +495,7 @@ module.exports = class GroupMemberController {
         // If they lose permission to view the group's content by leaving the
         // group, then remove any subscriptions they have to posts in the
         // group.
-        const memberUser = await this.userDAO.getUserById(memberId)
+        const memberUser = await this.userDAO.getUserById(memberId, [ 'status' ])
         const canViewGroupContent = await this.permissionService.can(memberUser, 'view', 'GroupPost', { group: group })
         if ( canViewGroupContent !== true ) {
             const subscriptionResults = await this.core.database.query(`
