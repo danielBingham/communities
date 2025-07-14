@@ -43,12 +43,26 @@ module.exports = class S3FileService {
 
 
     async uploadFile(sourcePath, targetPath) {
-        const filestream = fs.createReadStream(sourcePath)
+        return new Promise((resolve, reject) => {
+            const filestream = fs.createReadStream(sourcePath)
+            filestream.on('error', (error) => { reject(error) })
+            filestream.on('ready', () => {
+                const params = {
+                    Bucket: this.config.s3.bucket,
+                    Key: targetPath,
+                    Body: filestream
+                }
 
+                this.s3Client.send(new PutObjectCommand(params)).then(() => resolve())
+            })
+        })
+    }
+
+    async uploadFileFromStream(readStream, targetPath) {
         const params = {
             Bucket: this.config.s3.bucket,
             Key: targetPath,
-            Body: filestream
+            Body: readStream 
         }
 
         await this.s3Client.send(new PutObjectCommand(params))

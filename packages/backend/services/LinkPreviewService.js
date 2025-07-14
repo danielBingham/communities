@@ -20,11 +20,24 @@
 
 const ServiceError = require('../errors/ServiceError')
 
+const fs = require('fs')
+const { Buffer } = require('buffer')
+
+const mime = require('mime')
 const jsdom = require('jsdom')
+const { v4: uuidv4 } = require('uuid')
+
+const FileDAO = require('../daos/FileDAO')
+
+const S3FileService = require('./S3FileService')
 
 module.exports = class LinkPreviewService {
     constructor(core) {
         this.core = core
+
+        this.fileDAO = new FileDAO(core)
+
+        this.fileService = new S3FileService(core)
     }
 
     async getPreview(url, userAgent) {
@@ -75,6 +88,47 @@ module.exports = class LinkPreviewService {
         }
 
         const image = doc.querySelector('meta[property="og:image"]')?.getAttribute('content') || ''
+        let fileId = null
+        if ( image !== '' ) {
+            fileId = uuidv4()
+
+            try {
+                this.core.logger.debug(`Attempting to fetch canonical image: '${image}'...`)
+                const response = await fetch(image, { heaaders: { 'User-Agent': userAgent }})
+
+                const contentType = response.headers.get('Content-Type')
+                const extension =  mime.getExtension(contentType)
+
+                const tmpPath = `tmp/${fileId}.${extension}`
+                const filepath = `previews/${fileId}.${extension}`
+
+                this.core.logger.debug(`Writing image to tmp path: '${tmpPath}'...`) 
+                const blob = await response.blob()
+                const buffer = await blob.arrayBuffer()
+                fs.writeFileSync(tmpPath, Buffer.from(buffer))
+
+                this.core.logger.debug(`Uploading image to s3: '${filepath}'...`)
+                await this.fileService.uploadFile(tmpPath, filepath)
+
+                this.core.logger.debug(`Cleaning up image: '${tmpPath}'...`)
+                this.fileService.removeLocalFile(tmpPath)
+
+                const file = {
+                    id: fileId,
+                    userId: null,
+                    type: contentType,
+                    location: this.core.config.s3.bucket_url,
+                    filepath: filepath
+                }
+                await this.fileDAO.insertFile(file)
+            } catch (error) {
+                // On error cases, just null out the fileId and we'll fall
+                // back.
+                this.core.logger.error(error)
+                fileId = null
+            }
+        }
+
 
         let cannonicalUrl = doc.querySelector('meta[property="og:url"]')?.getAttribute('content') || null
         if ( cannonicalUrl === null ) {
@@ -92,13 +146,17 @@ module.exports = class LinkPreviewService {
             type = 'website'
         }
 
-        return {
+        const linkPreview = {
             url: cannonicalUrl,
             title: title,
             type: type,
             siteName: siteName,
             description: description,
-            imageUrl: image
+            imageUrl: image,
+            fileId: fileId
         }
+
+        console.log(`Created preview: `, linkPreview)
+        return linkPreview
     }
 }

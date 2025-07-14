@@ -66,6 +66,13 @@ const SCHEMA = {
                 select: 'always',
                 key: 'imageUrl'
             },
+            'file_id': {
+                insert: 'allowed',
+                update: 'allowed',
+                select: 'always',
+                key: 'fileId',
+                needsFeature: '171-download-canonical-image-for-link-previews'
+            },
             'created_date': {
                 insert: 'override',
                 insertOverride: 'now()',
