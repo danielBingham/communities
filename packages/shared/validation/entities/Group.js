@@ -1,6 +1,15 @@
 const { UUIDValidator, StringValidator, DateValidator, ObjectValidator} = require('../types')
 const { validateEntity } = require('../validate')
 
+const validateId = function(id, existing, action) {
+    const validator = new UUIDValidator('id', id, existing, action)
+    const errors = validator
+        .mustNotBeNull()
+        .mustBeUUID()
+        .getErrors()
+    return errors
+}
+
 const validateType = function(value, existing, action) {
     const validator = new StringValidator('type', value, existing, action)
     const errors = validator
@@ -107,6 +116,7 @@ const validateUpdatedDate = function(updatedDate, existing, action) {
  */
 const validate = function(group, existing) {
     let validators = {
+        id: validateId,
         type: validateType,
         postPermissions: validatePostPermissions,
         title: validateTitle,
@@ -122,6 +132,7 @@ const validate = function(group, existing) {
 }
 
 module.exports = {
+    validateId: validateId,
     validateType: validateType,
     validatePostPermissions: validatePostPermissions,
     validateTitle: validateTitle,

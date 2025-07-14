@@ -286,7 +286,7 @@ CREATE TABLE posts (
 
     file_id uuid REFERENCES files (id) DEFAULT NULL,
     link_preview_id uuid REFERENCES link_previews (id) DEFAULT NULL,
-    shared_post_id uuid REFERENCES posts (id) DEFAULT NULL,
+    shared_post_id uuid REFERENCES posts (id) ON DELETE SET NULL DEFAULT NULL,
 
 
     site_moderation_id uuid DEFAULT NULL, /* REFERENCES site_moderation (id) ON DELETE SET NULL -- defined below*/
