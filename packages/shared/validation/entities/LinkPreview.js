@@ -75,6 +75,15 @@ const validateImageUrl = function(imageUrl, existing, action) {
     return errors
 }
 
+const validateFileId = function(fileId, existing, action) {
+    const validator = new UUIDValidator('fileId', fileId, existing, action)
+    const errors = validator
+        .mustBeUUID()
+        .getErrors()
+    return errors
+
+}
+
 const validateCreatedDate = function(createdDate, existing, action) {
     const validator = new DateValidator('createdDate', createdDate, existing, action)
     const errors = validator
@@ -108,6 +117,7 @@ const validate = function(linkPreview, existing) {
         siteName: validateSiteName,
         description: validateDescription,
         imageUrl: validateImageUrl,
+        fileId: validateFileId,
         createdDate: validateCreatedDate,
         updatedDate: validateUpdatedDate
     }
@@ -123,6 +133,7 @@ module.exports = {
     validateSiteName: validateSiteName,
     validateDescription: validateDescription,
     validateImageUrl: validateImageUrl,
+    validateFileId: validateFileId,
     validateCreatedDate: validateCreatedDate,
     validateUpdatedDate: validateUpdatedDate,
     validate: validate

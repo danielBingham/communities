@@ -13,6 +13,7 @@ const LinkPreview = function({ id }) {
 
     const [request, makeRequest] = useRequest()
 
+    const configuration = useSelector((state) => state.system.configuration)
     const linkPreview = useSelector((state) => id && id in state.LinkPreview.dictionary ? state.LinkPreview.dictionary[id] : null) 
 
     useEffect(function() {
@@ -60,10 +61,15 @@ const LinkPreview = function({ id }) {
         }
     }
 
+    let imageUrl = linkPreview.imageUrl
+    if ( linkPreview.fileId !== null ) {
+        imageUrl = `${configuration.backend}/file/${linkPreview.fileId}`
+    }
+
     return (
         <div className="link-preview">
             <a target="_blank" href={linkPreview.url}>
-                <img src={linkPreview.imageUrl} />
+                <img src={imageUrl} />
                 <div className="link-preview__details">
                     <div className="link-preview__site">{linkPreview.siteName}</div>
                     <h2 className="link-preview__title">{linkPreview.title}</h2>

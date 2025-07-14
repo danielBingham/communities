@@ -24,6 +24,7 @@ const clean = function(linkPreview) {
         siteName: cleanSiteName,
         description: cleanDescription,
         imageUrl: urlCleaner,
+        fileId: uuidCleaner,
         createdDate: null,
         updatedDate: null 
     }
@@ -38,5 +39,6 @@ module.exports = {
     cleanSiteName: cleanSiteName,
     cleanDescription: cleanDescription,
     cleanImageUrl: urlCleaner,
+    fileId: uuidCleaner,
     clean: clean
 }

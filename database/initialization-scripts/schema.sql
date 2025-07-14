@@ -204,6 +204,7 @@ CREATE TABLE link_previews (
     site_name text,
     description text,
     image_url text,
+    file_id uuid REFERENCES files (id) ON DELETE SET NULL,
 
     created_date timestamptz,
     updated_date timestamptz

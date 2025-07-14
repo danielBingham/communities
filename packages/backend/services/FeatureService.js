@@ -39,6 +39,7 @@ const CantDeleteAccountWithOutstandingInvitationsMigration = require('../migrati
 const DeleteFileFailsMigration = require('../migrations/DeleteFileFailsMigration')
 const GroupSearchMigration = require('../migrations/GroupSearchMigration')
 const LimitLoginAttemptsMigration = require('../migrations/LimitLoginAttemptsMigration')
+const DownloadCanonicalImageForLinkPreviewsMigration = require('../migrations/DownloadCanonicalImageForLinkPreviewsMigration')
 
 const ServiceError = require('../errors/ServiceError')
 const MigrationError = require('../errors/MigrationError')
@@ -165,6 +166,11 @@ module.exports = class FeatureService {
                 dependsOn: [],
                 conflictsWith: [],
                 migration: new LimitLoginAttemptsMigration(core)
+            },
+            '171-download-canonical-image-for-link-previews': {
+                dependsOn: [],
+                conflictsWith: [],
+                migration: new DownloadCanonicalImageForLinkPreviewsMigration(core)
             }
         }
     }
