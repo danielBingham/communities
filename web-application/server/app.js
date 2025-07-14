@@ -281,8 +281,10 @@ core.initialize().then(function() {
             const metadata = pageMetadataService.getRoot()
             const parsedTemplate = serverSideRenderingService.renderIndexTemplate(metadata) 
 
-            // Only generate a new CSRF Token on requests to root (or if we don't have one).
-            if ( request.originalUrl === '/' || request.session?.csrfToken === undefined ) {
+            // Only generate a new CSRF Token if we don't have one. Since we're
+            // storing it in the session, we'll need to generate a new one
+            // anytime we destroy the session, which is the desired behavior.
+            if ( request.session?.csrfToken === undefined  || request.session?.csrfToken === null ) {
                 request.session.csrfToken = tokenService.createToken()
             }
 

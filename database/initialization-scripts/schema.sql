@@ -244,6 +244,8 @@ CREATE TABLE groups (
     updated_date timestamptz
 );
 CREATE INDEX groups__file_id ON groups (file_id);
+CREATE INDEX groups_title ON groups (title);
+CREATE INDEX groups_title_trgm ON groups USING GIN (title gin_trgm_ops);
 
 CREATE TYPE group_member_status AS ENUM('pending-invited', 'pending-requested', 'member', 'banned');
 CREATE TYPE group_member_role AS ENUM('admin', 'moderator', 'member'); 

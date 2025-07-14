@@ -12,6 +12,10 @@ export const useGroupQuery = function(queryParameters) {
 
     params.page = searchParams.get('page') || 1
 
+    if ( searchParams.get('q') ) {
+        params.title = searchParams.get('q')
+    }
+
     // TODO TECHDEBT The order of items in an object is not guaranteed, so just
     // because the params objects are the same does not mean the generated keys are the
     // same.  We'll probably want a solution for this at some point.
