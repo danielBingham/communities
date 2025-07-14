@@ -40,6 +40,7 @@ const DeleteFileFailsMigration = require('../migrations/DeleteFileFailsMigration
 const GroupSearchMigration = require('../migrations/GroupSearchMigration')
 const LimitLoginAttemptsMigration = require('../migrations/LimitLoginAttemptsMigration')
 const DownloadCanonicalImageForLinkPreviewsMigration = require('../migrations/DownloadCanonicalImageForLinkPreviewsMigration')
+const DeleteGroupsWithSharedPostsMigration = require('../migrations/DeleteGroupsWithSharedPostsMigration')
 
 const ServiceError = require('../errors/ServiceError')
 const MigrationError = require('../errors/MigrationError')
@@ -171,6 +172,11 @@ module.exports = class FeatureService {
                 dependsOn: [],
                 conflictsWith: [],
                 migration: new DownloadCanonicalImageForLinkPreviewsMigration(core)
+            },
+            '168-delete-groups-with-shared-posts': {
+                dependsOn: [],
+                conflictsWith: [],
+                migration: new DeleteGroupsWithSharedPostsMigration(core)
             }
         }
     }
