@@ -80,7 +80,6 @@ const FeedMenu = function() {
 
     useEffect(() => {
         if ( currentUser ) {
-            console.log(`Query!`)
             makeGroupsRequest(getGroups('FeedMenu', { page: groupsPage, memberStatus: 'member' }))
         }
 
