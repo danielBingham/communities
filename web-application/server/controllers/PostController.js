@@ -29,6 +29,7 @@ const {
     GroupMemberDAO,
     GroupModerationDAO,
     GroupModerationEventDAO,
+    LinkPreviewDAO,
     PostDAO,
     PostCommentDAO,
     PostReactionDAO,
@@ -52,6 +53,7 @@ module.exports = class PostController {
         this.groupMemberDAO = new GroupMemberDAO(core)
         this.groupModerationDAO = new GroupModerationDAO(core)
         this.groupModerationEventDAO = new GroupModerationEventDAO(core)
+        this.linkPreviewDAO = new LinkPreviewDAO(core)
         this.postDAO = new PostDAO(core)
         this.postCommentDAO = new PostCommentDAO(core)
         this.postReactionDAO = new PostReactionDAO(core)
@@ -98,12 +100,25 @@ module.exports = class PostController {
         const postFileResults = await this.fileDAO.selectFiles(`WHERE files.id = ANY($1::uuid[])`, [fileIds])
         const fileDictionary = postFileResults.reduce((dictionary, file) => { dictionary[file.id] = file; return dictionary }, {})
 
+        const linkPreviewIds = []
+        for(const postId of results.list) {
+            const post = results.dictionary[postId]
+            if ( post.linkPreviewId !== null ) {
+                linkPreviewIds.push(post.linkPreviewId)
+            }
+        }
+        const linkPreviewResults = await this.linkPreviewDAO.selectLinkPreviews({
+            where: `link_previews.id = ANY($1::uuid[])`,
+            params: [ linkPreviewIds ]
+        })
+
         const relations = {
-            users: userResults.dictionary,
+            files: fileDictionary,
+            linkPreviews: linkPreviewResults.dictionary,
             postComments: postCommentResults.dictionary,
             postReactions: postReactionResults.dictionary,
             postSubscriptions: postSubscriptionResults.dictionary,
-            files: fileDictionary,
+            users: userResults.dictionary
         }
 
         if ( this.core.features.has('19-private-groups') ) {

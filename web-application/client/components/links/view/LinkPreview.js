@@ -17,11 +17,9 @@ const LinkPreview = function({ id }) {
     const linkPreview = useSelector((state) => id && id in state.LinkPreview.dictionary ? state.LinkPreview.dictionary[id] : null) 
 
     useEffect(function() {
-        if ( id ) {
+        if ( id && ! linkPreview ) {
             makeRequest(getLinkPreview(id))
-        } else {
-            logger.error(new Error('Attempt to load a LinkPreview without an id.'))
-        }
+        } 
     }, [id])
 
     if ( ! linkPreview ) {
