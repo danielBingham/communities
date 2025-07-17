@@ -4,25 +4,25 @@
 
 Cases covering the User Registration flow.
 
-- [ ] Register a new user named James Johnson with username `james-johnson` (communities-james-johnson@mailinator.com)
-    - [ ] Attempt to register with too short a password.
-        - [ ] Confirm validation error.
-    - [ ] Attempt to register without checking Age Confirmation.
-        - [ ] Confirm validation error.
-    - [ ] Successfully register.
-        - [ ] Confirm email.
-        - [ ] Accept Terms of Service.
-        - [ ] Skip Pay What you Can.
-    - [ ] Turn off all email notifications.
+- [x] Register a new user named James Johnson with username `james-johnson` (communities-james-johnson@mailinator.com)
+    - [x] Attempt to register with too short a password.
+        - [x] Confirm validation error.
+    - [x] Attempt to register without checking Age Confirmation.
+        - [x] Confirm validation error.
+    - [x] Successfully register.
+        - [x] Confirm email.
+        - [x] Accept Terms of Service.
+        - [x] Skip Pay What you Can.
+    - [x] Turn off all email notifications.
 
-- [ ] Register a new user named Marcia Garcia (communities-marcia-garcia@mailinator.com)
-    - [ ] Attempt to register with the username `james-johnson`
-        - [ ] Confirm validation error.
-    - [ ] Register with the username `marcia-garcia`
-    - [ ] Successfully register.
-        - [ ] Confirm email.
-        - [ ] Accept Terms of Service.
-        - [ ] Skip Pay What you Can.
+- [x] Register a new user named Marcia Garcia (communities-marcia-garcia@mailinator.com)
+    - [x] Attempt to register with the username `james-johnson`
+        - [x] Confirm validation error.
+    - [x] Register with the username `marcia-garcia`
+    - [x] Successfully register.
+        - [x] Confirm email.
+        - [x] Accept Terms of Service.
+        - [x] Skip Pay What you Can.
     - [ ] Turn off all email notifications.
 
 ### User Invitation
@@ -30,22 +30,22 @@ Cases covering the User Registration flow.
 Cases covering the User Invitation flow, in which a user is sent an invitation
 email and may use it to register on the platform.
 
-- [ ] From the administrator (Admin) account invite John Doe (communities-john-doe@mailinator.com).
-    - [ ] As Admin, Confirm invitation is visible on the "Friend Requests" page.
-    - [ ] As John Doe, Accept the invite and register John Doe with username `john-doe`
-    - [ ] Successfully register.
-        - [ ] Confirm email.
-        - [ ] Accept Terms of Service.
-        - [ ] Skip Pay What you Can.
-    - [ ] Turn off all email notifications.
-    - [ ] As John Doe, accept the friend request and view Admin's profile page.
+- [x] From the administrator (Admin) account invite John Doe (communities-john-doe@mailinator.com).
+    - [x] As Admin, Confirm invitation is visible on the "Friend Requests" page.
+    - [x] As John Doe, Accept the invite and register John Doe with username `john-doe`
+    - [x] Successfully register.
+        - [x] Confirm email.
+        - [x] Accept Terms of Service.
+        - [x] Skip Pay What you Can.
+    - [x] Turn off all email notifications.
+    - [x] As John Doe, accept the friend request and view Admin's profile page.
 
 - [ ] As John Doe, invite Jane Doe (communities-jane.doe@mailiantor.com).
     - [ ] As John Doe, confirm invitation is visible on the "Friend Requests" page.
-    - [ ] As John Doe, from the same browser session attempt to accept the invite.
-        - [ ] Expectation: Error.
-    - [ ] As Admin, confirm the invitation is *not* visible on the "Friend Requests" page.
-    - [ ] From a different browser session accept the invite and register Jane Doe with username `jane.doe`.
+    - [x] As John Doe, from the same browser session attempt to accept the invite.
+        - [x] Expectation: Error.
+    - [x] As Admin, confirm the invitation is *not* visible on the "Friend Requests" page.
+    - [x] From a different browser session accept the invite and register Jane Doe with username `jane.doe`.
     - [ ] Successfully register.
         - [ ] Confirm email.
         - [ ] Accept Terms of Service.
@@ -53,34 +53,34 @@ email and may use it to register on the platform.
     - [ ] Turn off all email notifications.
     - [ ] As Jane Doe, accept the friend request and view John Doe's profile page.
 
-- [ ] As Jane Doe, invite James Smith (communities-james_smith@mailinator.com).
-    - [ ] As Jane Doe, confirm the invitation is visible on the "Friend Requests" page.
-    - [ ] From a different browser session accept the invite and register James Smith with username `james_smith`.
-    - [ ] Successfully register.
-        - [ ] Confirm email.
-        - [ ] Accept Terms of Service.
-        - [ ] Skip Pay What you Can.
-    - [ ] Turn off all email notifications.
-    - [ ] As James Smith, accept the Friend Request and view Jane Doe's profile page.
+- [x] As Jane Doe, invite James Smith (communities-james_smith@mailinator.com).
+    - [x] As Jane Doe, confirm the invitation is visible on the "Friend Requests" page.
+    - [x] From a different browser session accept the invite and register James Smith with username `james_smith`.
+    - [x] Successfully register.
+        - [x] Confirm email.
+        - [x] Accept Terms of Service.
+        - [x] Skip Pay What you Can.
+    - [x] Turn off all email notifications.
+    - [x] As James Smith, accept the Friend Request and view Jane Doe's profile page.
 
 ### Friend Requests
 
 Cases covering sending friend requests, accepting friend requests, and
 rejecting friend requests.
 
-- [ ] As Jane Doe, send Admin a friend request.
-    - [ ] As admin, reject the friend request.  Confirm its removed.
+- [x] As Jane Doe, send Admin a friend request.
+    - [x] As admin, reject the friend request.  Confirm its removed.
 
-- [ ] As Jane Doe, send Admin a friend request.
-     - [ ] As Admin, accept the friend request. Confirm request accepted.
-     - [ ] As Admin, remove Jane Doe as a friend.
+- [x] As Jane Doe, send Admin a friend request.
+     - [x] As Admin, accept the friend request. Confirm request accepted.
+     - [x] As Admin, remove Jane Doe as a friend.
 
-- [ ] As Jane Doe, send Admin a friend request.
-    - [ ] As Admin, confirm friend request visible.
-    - [ ] As Jane Doe, cancel the friend request. Confirm removed.
-    - [ ] As Admin, confirm removed.
+- [x] As Jane Doe, send Admin a friend request.
+    - [x] As Admin, confirm friend request visible.
+    - [x] As Jane Doe, cancel the friend request. Confirm removed.
+    - [x] As Admin, confirm removed.
 
-- [ ] With two browser windows open, one As Admin and one As Jane Doe, have Jane Doe
+- [x] With two browser windows open, one As Admin and one As Jane Doe, have Jane Doe
      and Admin send each other simultaneous friend requests.  Confirm relationship
      confirmed.
 
@@ -89,28 +89,28 @@ rejecting friend requests.
 Cases covering the authentication system, logging in, logging out, reset
 password flow, etc.
 
-- [ ] As John Doe, log out.
-- [ ] As John Doe, attempt to log in with the wrong password. Confirm login fails.
-- [ ] As John Doe, log in with the right password.  Confirm login succeeds.
+- [x] As John Doe, log out.
+- [x] As John Doe, attempt to log in with the wrong password. Confirm login fails.
+- [x] As John Doe, log in with the right password.  Confirm login succeeds.
 
-- [ ] As Jane Doe, attempt to login with the wrong password.  Confirm login fails.
-- [ ] As Jane Doe, attempt to login with the right password. Confirm login succeeds.
+- [x] As Jane Doe, attempt to login with the wrong password.  Confirm login fails.
+- [x] As Jane Doe, attempt to login with the right password. Confirm login succeeds.
 
-- [ ] As Jane Doe, log out and request a password reset. Change Jane Doe's password.
-- [ ] As Jane Doe, log out and attempt to login with old password.  Confirm login fails.
-- [ ] As Jane Doe, attempt to login with new password.  Confirm login succeeds.
+- [x] As Jane Doe, log out and request a password reset. Change Jane Doe's password.
+- [x] As Jane Doe, log out and attempt to login with old password.  Confirm login fails.
+- [x] As Jane Doe, attempt to login with new password.  Confirm login succeeds.
 
-- [ ] As James Smith, attempt to log in with the wrong password 10 times.
-    - [ ] Confirm authentication timeout.
-    - [ ] Wait 15 minutes.
-    - [ ] Attempt to log in with the wrong password once.  Confirm login fails.
-    - [ ] Attempt to log in with the correct password.  Confirm log in succeeds.
+- [x] As James Smith, attempt to log in with the wrong password 10 times.
+    - [x] Confirm authentication timeout.
+    - [x] Wait 15 minutes.
+    - [x] Attempt to log in with the wrong password once.  Confirm login fails.
+    - [x] Attempt to log in with the correct password.  Confirm log in succeeds.
 
 ### User Searching
 
 Cases covering searching for users.
 
-- [ ] As Jane Doe, on the Find Friends page, search for "Admin", confirm list filtered.
+- [x] As Jane Doe, on the Find Friends page, search for "Admin", confirm list filtered.
 
 ### Posting
 
