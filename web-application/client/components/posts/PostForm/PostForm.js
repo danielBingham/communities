@@ -223,7 +223,7 @@ const PostForm = function({ postId, groupId, sharedPostId }) {
     if ( ! fileId && ! linkPreviewId && ! showLinkForm && ! (sharedPostId || post?.sharedPostId)) {
         attachmentControlsView = (
             <div className="attachment-controls">
-                <div className="image">
+                <div className="post-form__image">
                     <FileUploadInput 
                         text="Add Image"
                         onChange={onFileChange} 
@@ -232,7 +232,7 @@ const PostForm = function({ postId, groupId, sharedPostId }) {
                         types={[ 'image/jpeg', 'image/png' ]} 
                     />
                 </div>
-                <div className="link">
+                <div className="post-form__link">
                     <Button type="primary" onClick={(e) => {setShowLinkForm(true)}}><LinkIcon /><span className="attachment-button-text"> Add Link</span></Button>
                 </div>
             </div>

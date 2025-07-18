@@ -39,7 +39,14 @@ const Post = function({ id, expanded, showLoading, shared }) {
     const hasAdminModeration = useFeature('62-admin-moderation-controls')
 
     const [post, request] = usePost(id)
+    if ( shared ) {
+        console.log(`Post (Shared? ${shared}): `, post)
+    }
     const [user, userRequest] = useUser(post?.userId)
+    if ( shared ) {
+        console.log(`User: `, user)
+        console.log(`UserRequest: `, userRequest)
+    }
     const [group, groupRequest] = useGroup(post?.groupId) 
     const [groupModeration, groupModerationRequest] = useGroupModeration(post?.groupModerationId)
     const [siteModeration, siteModerationRequest] = useSiteModeration(post?.siteModerationId)
@@ -74,7 +81,7 @@ const Post = function({ id, expanded, showLoading, shared }) {
             || (siteModerationRequest && siteModerationRequest.state === 'pending')
         ) ) 
     {
-        return ( <div id={id} className="post"><Spinner /></div> )
+        return ( <div id={id} className={`post ${ shared ? 'shared' : ''}`}><div className="post__loading"><Spinner /></div></div> )
     }
 
     // ------------------------------------------------------------------------
@@ -182,7 +189,7 @@ const Post = function({ id, expanded, showLoading, shared }) {
             </div> }
             <PostImage id={id} />
             { post.linkPreviewId && <LinkPreview id={post.linkPreviewId} /> }
-            { post.sharedPostId && <Post id={post.sharedPostId} shared={true} /> }
+            { post.sharedPostId && <Post id={post.sharedPostId} shared={true} showLoading={true} /> }
             { ! shared && <PostReactions postId={id} /> }
             { ! shared && <PostComments postId={id} expanded={expanded} /> }
         </div>
