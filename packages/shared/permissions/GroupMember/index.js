@@ -29,6 +29,14 @@ const canQueryGroupMember = function(user, context ) {
         return false
     }
 
+    // Always exclude banned members.
+    if ( context.userMember !== undefined && context.userMember !== null
+        && context.userMember.groupId === context.group.id
+        && context.userMember.status === 'banned' )
+    {
+        return false
+    }
+
     // Anyone can view content of open group.
     if ( context.group.type === 'open' ) {
         return true
@@ -58,6 +66,14 @@ const canViewGroupMember = function(user, context) {
     // moderation duties.
     if ( context.canModerateSite === true ) {
         return true
+    }
+
+    // Always exclude banned members.
+    if ( context.userMember !== undefined && context.userMember !== null
+        && context.userMember.groupId === context.group.id
+        && context.userMember.status === 'banned' )
+    {
+        return false
     }
 
     // Group Moderators can always view GroupMembers.
@@ -93,6 +109,14 @@ const canCreateGroupMember = function(user, context) {
         return false
     }
 
+    // Always exclude banned members.
+    if ( context.userMember !== undefined && context.userMember !== null
+        && context.userMember.groupId === context.group.id
+        && context.userMember.status === 'banned' )
+    {
+        return false
+    }
+
     // For open groups
     if ( context.group.type === 'open' ) {
         return context.canModerateGroup === true || ( context.userMember === null && context.groupMember.userId === user.id)
@@ -114,6 +138,14 @@ const canUpdateGroupMember = function(user, context) {
         return false
     }
 
+    // Always exclude banned members.
+    if ( context.userMember !== undefined && context.userMember !== null
+        && context.userMember.groupId === context.group.id
+        && context.userMember.status === 'banned' )
+    {
+        return false
+    }
+
     // Admins can promote members to moderator or admin
     // Moderators can ban members
     if ( context.canModerateGroup === true) {
@@ -130,6 +162,14 @@ const canUpdateGroupMember = function(user, context) {
 
 const canDeleteGroupMember = function(user, context) {
     if ( context.groupMember === undefined || context.groupMember === null ) {
+        return false
+    }
+
+    // Always exclude banned members.
+    if ( context.userMember !== undefined && context.userMember !== null
+        && context.userMember.groupId === context.group.id
+        && context.userMember.status === 'banned' )
+    {
         return false
     }
 
