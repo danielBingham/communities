@@ -1,10 +1,7 @@
-import React, { useState, useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { useSearchParams } from 'react-router-dom'
+import React from 'react'
+import { useSelector } from 'react-redux'
 
-import { useRequest } from '/lib/hooks/useRequest'
-
-import {getUserRelationships, clearUserRelationshipQuery } from '/state/UserRelationship'
+import { useUserRelationshipQuery } from '/lib/hooks/UserRelationship'
 
 import UserBadge from '/components/users/UserBadge'
 import FriendButton from '/components/friends/FriendButton'
@@ -24,35 +21,10 @@ import PaginationControls from '/components/PaginationControls'
 import './FriendList.css'
 
 const FriendList = function({ userId, params }) {
-    const [ searchParams, setSearchParams ] = useSearchParams()
-   
-    // ======= Request Tracking =====================================
 
-    const [request, makeRequest] = useRequest()
-
-    // ======= Redux State ==========================================
-
+    const currentUser = useSelector((state) => state.authentication.currentUser)
     const relationshipDictionary = useSelector((state) => state.UserRelationship.dictionary)
-
-    const query = useSelector((state) => 'FriendList' in state.UserRelationship.queries ? state.UserRelationship.queries['FriendList'] : null)
-
-    // ======= Effect Handling ======================================
-
-    const dispatch = useDispatch()
-
-    useEffect(function() {
-        const queryParams = { ...params }
-
-        queryParams.page = searchParams.get('page')
-        if ( ! queryParams.page ) {
-            queryParams.page = 1
-        }
-
-        makeRequest(getUserRelationships('FriendList', userId, queryParams))
-        return function cleanup() {
-            dispatch(clearUserRelationshipQuery({ name: 'FriendList'}))
-        }
-    }, [ searchParams, params ])
+    const [query, request] = useUserRelationshipQuery(currentUser.id, params) 
 
     // ======= Render ===============================================
 
