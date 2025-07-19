@@ -12,7 +12,8 @@ const Contribute = function() {
 
     return (
         <div className="contribute-view">
-            <div className="intro">
+            <div className="contribute-view__intro">
+                <h1>Pay What You Can</h1>
                 Communities is a <strong>non-profit social network</strong>.  We're not taking
                 venture capital, not showing you ads, and not selling your
                     data.<br />  
@@ -31,11 +32,8 @@ const Contribute = function() {
             </div>
             <div className="contribution-grid" style={{ display: ( showMore ? 'grid' : 'none' ) }}>
                 <ContributionCard amount={20} explanation={"Cover one other person's contribution."} />
-                <ContributionCard amount={40} explanation={"Cover three other people's contributions."} />
-                <ContributionCard amount={60} explanation={"Cover five other people's contributions."} />
+                <ContributionCard amount={50} explanation={"Cover three other people's contributions."} />
                 <ContributionCard amount={100} explanation={"Cover nine other person's contribution."} />
-                <ContributionCard amount={200} explanation={"Cover many people's contributions."} />
-                <ContributionCard amount={500} explanation={"Wow!"} />
             </div>
         </div>
     )

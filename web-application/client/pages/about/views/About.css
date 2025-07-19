@@ -1,11 +1,10 @@
 .about-view {
     box-sizing: border-box;
-    max-width: 800px;
+    max-width: 700px;
     min-width: 340px;
     width: 100%;
 
-    padding: 20px;
-    font-size: 18px;
+    font-size: 16px;
     line-height: 1.7em;
     margin: 0 auto;
 }
@@ -13,13 +12,16 @@
     text-align: center;
 }
 .about-view h2 {
-    margin-top: 80px;
+    margin-top: 2em;
 }
 .about-view h3 {
-    margin-top: 60px;
+    margin-top: 1.5em;
 }
 .about-view h4 {
-    margin-top: 40px;
+    margin-top: 1em;
+}
+.about-view li {
+    padding: 0.25em 0;
 }
 
 .about-view .beta {

@@ -14,7 +14,7 @@ const FrequentlyAskedQuestions = function({}) {
 
     return (
         <article className="faq">
-
+            <h1>Frequently Asked Questions</h1>
             <section>
                 <h2>What do you mean "non-profit"?</h2>
                 <p>We aren't building this to make a profit. It just needs

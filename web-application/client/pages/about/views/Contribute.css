@@ -1,12 +1,34 @@
 .contribute-view {
-    width: 100%;
+    box-sizing: border-box;
     max-width: 800px;
-}
-.contribute-view .intro{
-    margin: 0 auto;
-    font-size: 20px;
+    min-width: 340px;
+    width: 100%;
+
+    font-size: 16px;
     line-height: 1.7em;
+    margin: 0 auto;
 }
+.contribute-view__intro {
+    width: 700px;
+    margin: 0 auto;
+}
+.contribute-view h1 {
+    text-align: center;
+}
+.contribute-view h2 {
+    margin-top: 2em;
+}
+.contribute-view h3 {
+    margin-top: 1.5em;
+}
+.contribute-view h4 {
+    margin-top: 1em;
+}
+.contribute-view li {
+    padding: 0.25em 0;
+}
+
+
 .contribute-view .contribution-grid {
     display: grid;
     margin: 50px auto 0 auto;

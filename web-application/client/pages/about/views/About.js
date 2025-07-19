@@ -14,9 +14,12 @@ const About = function({}) {
 
     return (
         <article className="about-view">
+            <h1>Welcome to Communities!</h1>
             <p>Communities is a user-supported social media platform that will be a
                 non-profit, multi-stakeholder cooperative.</p>
-            <p className="beta">It is currently in early invite-only beta.  We hope to begin open beta shortly.  If you're interested in participating in the closed beta, email <a href="contact@communities.social">contact@communities.social</a> to request an invite.</p>
+            <p className="beta">Communities is currently in Open Beta.  You're
+            welcome to use it, but it's not finished and there will still be
+            some bugs.</p>
             <h3>Social, Not Parasocial</h3>
             <p>Communities is designed to enable real, social
                 connection. It's a platform where you can find communities of
