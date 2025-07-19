@@ -1,4 +1,4 @@
-#error-404 .error-404__error {
+.error-404__error {
     padding: 20px;
     border: thin solid var(--main-border-color);
     border-radius: 10px;
@@ -7,7 +7,7 @@
     margin: 0 auto;
     font-size: 16px;
 }
-#error-404 h1 {
+.error-404__error h1 {
     font-size: 2em;
     text-align: center;
 }

@@ -82,7 +82,7 @@ module.exports = class GroupModerationMigration extends BaseMigration {
         await this.database.query(`ALTER TABLE post_comments DROP COLUMN IF EXISTS group_moderation_id`, [])
         await this.database.query(`ALTER TABLE post_comments DROP COLUMN IF EXISTS site_moderation_id`, [])
 
-        await this.databse.query(`ALTER TABLE posts DROP COLUMN IF EXISTS group_moderation_id`, [])
+        await this.database.query(`ALTER TABLE posts DROP COLUMN IF EXISTS group_moderation_id`, [])
         await this.database.query(`ALTER TABLE posts DROP COLUMN IF EXISTS site_moderation_id`, [])
 
         await this.database.query(`DROP INDEX IF EXISTS group_moderation_events__post_comment_id`, [])

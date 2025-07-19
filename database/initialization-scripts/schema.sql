@@ -240,7 +240,7 @@ CREATE TABLE groups (
     slug text,
     about text,
 
-    file_id uuid REFERENCES files (id) DEFAULT NULL,
+    file_id uuid REFERENCES files (id) ON DELETE SET NULL DEFAULT NULL,
 
     entrance_questions jsonb DEFAULT '{}'::jsonb,
 

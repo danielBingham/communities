@@ -156,7 +156,6 @@ module.exports = class LinkPreviewService {
             fileId: fileId
         }
 
-        console.log(`Created preview: `, linkPreview)
         return linkPreview
     }
 }

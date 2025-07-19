@@ -69,6 +69,7 @@ module.exports = class FeatureDAO {
                 ${this.getFeatureSelectionString()}
             FROM features
             ${where}
+            ORDER BY features.created_date DESC
         `
 
         const results = await this.database.query(sql, params)

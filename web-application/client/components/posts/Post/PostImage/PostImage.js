@@ -1,6 +1,8 @@
 import React from 'react'
 import { useSelector } from 'react-redux'
 
+import { Image } from '/components/ui/Image'
+
 import './PostImage.css'
 
 const PostImage = function({ id, className }) {
@@ -13,21 +15,14 @@ const PostImage = function({ id, className }) {
         return null
     }
 
-    let content = null 
-    if ( post.fileId ) {
-        content = (
-            <img src={`${configuration.backend}/file/${post.fileId}?width=650`} />
-        )
-    } else if ( ! post.fileId ) {
+    if ( ! post.fileId ) {
         return null
     }
 
     return (
-        <>
         <div className={ className ? `post-image ${className}` : "post-image"}>
-            {content}
+            <Image id={post.fileId} width={650} />
         </div>
-        </>
     )
 }
 

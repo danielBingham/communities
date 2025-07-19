@@ -140,7 +140,12 @@ const FlagPostComment = function({ postId, id } ) {
                         <li>Direct harrassment.</li>
                         <li>Other forms of content that can cause immediate, direct harm.</li>
                     </ul>
-                    <p>Are you sure you want to flag this comment?</p>
+                    <p>
+                        If you think it should be moderated but it doesn't rise to
+                        the level of "needing urgent response" because it could
+                        cause "immediate, direct harm", then please 'demote' it
+                        instead.
+                    </p>
                 </div>
             </AreYouSure>
         </>

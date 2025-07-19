@@ -427,26 +427,25 @@ module.exports = class PostCommentController {
 
         await this.postCommentDAO.deletePostComment({ id: commentId })
 
-
-        await this.postDAO.updatePost(postPatch)
-
         const postResult = await this.postDAO.selectPosts({ where: `posts.id = $1`,
             params: [ postId ]
         })
 
-        const entity = postResult.dictionary[postId]
+        const post = postResult.dictionary[postId]
 
-        if ( ! entity ) {
+        if ( ! post ) {
             throw new ControllerError(500, 'server-error',
                 `Post(${postId}) missing after update.`,
                 `Post missing after being updated.  Please report as a bug.`)
         }
 
+        // ============= Update the Post Activity ======================
+        
         const reactionResults = await this.core.database.query(`
             SELECT reaction FROM post_reactions WHERE post_reactions.post_id = $1 AND post_reactions.user_id = $2
         `, [ postId, currentUser.id])
 
-        let activity = parseInt(entity.activity)
+        let activity = parseInt(post.activity)
         if ( reactionResults.rows.length <= 0 || reactionResults.rows[0].reaction != 'block') {
             activity -= 1
         } 
@@ -456,15 +455,19 @@ module.exports = class PostCommentController {
             activity: activity
         }
 
-        const posts = {}
-        posts[entity.id] = entity
+        await this.postDAO.updatePost(postPatch)
 
-        if ( entity.groupId !== null && currentUser.id !== comment.userId ) {
+        // Just update our existing dictionary rather than requerying.
+        postResult.dictionary[postId].activity -= 1 
+
+        // =============== Get the Post to return it to the frontend ============
+
+        if ( post.groupId !== null && currentUser.id !== comment.userId ) {
             await this.notificationService.sendNotifications(
                 currentUser, 
                 'Group:post:comment:deleted',
                 {
-                    post: entity,
+                    post: post,
                     comment: comment,
                     moderator: currentUser
                 }
@@ -472,9 +475,9 @@ module.exports = class PostCommentController {
         }
 
         response.status(200).json({
-            entity: entity,
+            entity: {},
             relations: {
-                posts: posts
+                posts:postResult.dictionary 
             }
         })
 

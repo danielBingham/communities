@@ -2,6 +2,9 @@
     background-color: white;
     font-size: 16px;
 }
+.post .post__loading {
+    padding: 20px 0;
+}
 .post.shared {
     max-width: 630px;
     width: 100%;
@@ -9,7 +12,7 @@
     box-shadow: none;
     border-radius: 7px;
 }
-.post.shared img {
+.post.shared .post-image img {
     border-radius: 0 0 7px 7px;
 }
 .post.shared .link-preview {

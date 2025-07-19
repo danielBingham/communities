@@ -41,6 +41,7 @@ const GroupSearchMigration = require('../migrations/GroupSearchMigration')
 const LimitLoginAttemptsMigration = require('../migrations/LimitLoginAttemptsMigration')
 const DownloadCanonicalImageForLinkPreviewsMigration = require('../migrations/DownloadCanonicalImageForLinkPreviewsMigration')
 const DeleteGroupsWithSharedPostsMigration = require('../migrations/DeleteGroupsWithSharedPostsMigration')
+const GroupCreatorsCantDeleteAccountMigration = require('../migrations/GroupCreatorsCantDeleteAccountMigration')
 
 const ServiceError = require('../errors/ServiceError')
 const MigrationError = require('../errors/MigrationError')
@@ -177,6 +178,11 @@ module.exports = class FeatureService {
                 dependsOn: [],
                 conflictsWith: [],
                 migration: new DeleteGroupsWithSharedPostsMigration(core)
+            },
+            'group-creators-cant-delete-account': {
+                dependsOn: [],
+                conflictsWith: [],
+                migration: new GroupCreatorsCantDeleteAccountMigration(core)
             }
         }
     }

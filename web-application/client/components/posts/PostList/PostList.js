@@ -29,7 +29,7 @@ const PostList = function({ name, params }) {
 
     let postViews = []
     for(const postId of query.list) {
-        postViews.push(<Post key={postId} id={postId} />)
+        postViews.push(<Post key={postId} id={postId} showLoading={true} />)
     }
 
     let explanation = ''

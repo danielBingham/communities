@@ -31,6 +31,13 @@ const canViewGroupPost = function(user, context) {
         return true
     }
 
+    // Banned users cannot see content.
+    if ( context.userMember !== null && context.userMember.groupId === context.group.id
+        && context.userMember.status === 'banned' ) 
+    {
+        return false
+    }
+
 
     // Anyone can view content of open group.
     if ( context.group.type === 'open' ) {
@@ -51,6 +58,13 @@ const canViewGroupPost = function(user, context) {
 const canCreateGroupPost = function(user, context) {
     if ( context.group === undefined || context.group === null 
         || context.userMember === undefined) 
+    {
+        return false
+    }
+
+    // Banned users cannot create posts.
+    if ( context.userMember !== null && context.userMember.groupId === context.group.id
+        && context.userMember.status === 'banned' ) 
     {
         return false
     }

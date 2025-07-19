@@ -29,6 +29,7 @@ const {
     GroupMemberDAO,
     GroupModerationDAO,
     GroupModerationEventDAO,
+    LinkPreviewDAO,
     PostDAO,
     PostCommentDAO,
     PostReactionDAO,
@@ -52,6 +53,7 @@ module.exports = class PostController {
         this.groupMemberDAO = new GroupMemberDAO(core)
         this.groupModerationDAO = new GroupModerationDAO(core)
         this.groupModerationEventDAO = new GroupModerationEventDAO(core)
+        this.linkPreviewDAO = new LinkPreviewDAO(core)
         this.postDAO = new PostDAO(core)
         this.postCommentDAO = new PostCommentDAO(core)
         this.postReactionDAO = new PostReactionDAO(core)
@@ -66,14 +68,9 @@ module.exports = class PostController {
     }
 
     async getRelations(currentUser, results, requestedRelations) {
-        const userIds = []
-        for (const postId of results.list) {
-            const post = results.dictionary[postId]
 
-            userIds.push(post.userId)
-        }
-        const userResults = await this.userDAO.selectUsers({ where: `users.id = ANY($1::uuid[])`, params: [userIds]})
-
+        // We only need these for the initial posts.  These are not displayed on Shared Posts.
+        //
         const postCommentResults = await this.postCommentDAO.selectPostComments({
             where: `post_comments.post_id = ANY($1::uuid[])`,
             params: [results.list]
@@ -89,21 +86,76 @@ module.exports = class PostController {
             params: [results.list, currentUser.id]
         })
 
+        // Get the Shared Posts as relations.
+        const sharedPostIds = []
+        for(const postId of results.list) {
+            const post = results.dictionary[postId]
+            if ( post.sharedPostId !== null ) {
+                sharedPostIds.push(post.sharedPostId)
+            }
+        }
+        const sharedPostResults = await this.postDAO.selectPosts({
+            where: `posts.id = ANY($1::uuid[])`,
+            params: [ sharedPostIds ]
+        })
+
+        // These will be displayed on Shared Posts, so we need to retrieve them
+        // both for the top level posts and the shared posts.
+        const userIds = []
+        for (const postId of results.list) {
+            const post = results.dictionary[postId]
+
+            userIds.push(post.userId)
+        }
+        for(const postId of sharedPostResults.list) {
+            const post = sharedPostResults.dictionary[postId]
+            userIds.push(post.userId)
+        }
 
         const fileIds = []
         for (const postId of results.list) {
             const post = results.dictionary[postId]
-            fileIds.push(post.fileId)
+            if ( post.fileId !== null ) {
+                fileIds.push(post.fileId)
+            }
+        }
+        for(const postId of sharedPostResults.list) {
+            const post = sharedPostResults.dictionary[postId]
+            if ( post.fileId !== null ) {
+                fileIds.push(post.fileId)
+            }
         }
         const postFileResults = await this.fileDAO.selectFiles(`WHERE files.id = ANY($1::uuid[])`, [fileIds])
         const fileDictionary = postFileResults.reduce((dictionary, file) => { dictionary[file.id] = file; return dictionary }, {})
 
+        const linkPreviewIds = []
+        for(const postId of results.list) {
+            const post = results.dictionary[postId]
+            if ( post.linkPreviewId !== null ) {
+                linkPreviewIds.push(post.linkPreviewId)
+            }
+        }
+        for(const postId of sharedPostResults.list) {
+            const post = sharedPostResults.dictionary[postId]
+            if ( post.linkPreviewId !== null ) {
+                linkPreviewIds.push(post.linkPreviewId)
+            }
+        }
+        const linkPreviewResults = await this.linkPreviewDAO.selectLinkPreviews({
+            where: `link_previews.id = ANY($1::uuid[])`,
+            params: [ linkPreviewIds ]
+        })
+
+        const userResults = await this.userDAO.selectUsers({ where: `users.id = ANY($1::uuid[])`, params: [userIds]})
+
         const relations = {
-            users: userResults.dictionary,
+            files: fileDictionary,
+            linkPreviews: linkPreviewResults.dictionary,
+            posts: sharedPostResults.dictionary,
             postComments: postCommentResults.dictionary,
             postReactions: postReactionResults.dictionary,
             postSubscriptions: postSubscriptionResults.dictionary,
-            files: fileDictionary,
+            users: userResults.dictionary
         }
 
         if ( this.core.features.has('19-private-groups') ) {
