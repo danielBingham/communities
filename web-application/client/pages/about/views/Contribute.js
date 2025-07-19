@@ -12,7 +12,7 @@ const Contribute = function() {
 
     return (
         <div className="contribute-view">
-            <div className="contribute-view__intro">
+            <article className="contribute-view__intro">
                 <h1>Pay What You Can</h1>
                 Communities is a <strong>non-profit social network</strong>.  We're not taking
                 venture capital, not showing you ads, and not selling your
@@ -20,7 +20,7 @@ const Contribute = function() {
                 <p>We <strong>need user contributions</strong> for this to work.  
                 Please contribute if you can!</p>
                 <p><strong>Beta:</strong> If you've already set up a contribution, <a href={portalURI}>click here</a> to manage it. If you have any issues, please reach out to <a href="mailto:contact@communities.social">contact@communities.social</a>.</p>
-            </div>
+            </article>
             <div className="contribution-grid">
                 <ContributionCard amount={5} explanation={"Cost of a cup of coffee."} />
                 <ContributionCard amount={10} explanation={"Sustainable contribution."} />

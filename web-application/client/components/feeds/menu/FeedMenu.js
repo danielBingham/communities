@@ -106,15 +106,15 @@ const FeedMenu = function() {
     const groupsMenu = (
         <menu className="group-feed-menu__groups">
             { groupViews }
-            <li>
+            { groupsQuery?.meta.numberOfPages > 1 && <li>
                 <div className="groups-feed-menu__pages">
                     <a className={groupsPage === 1 ? 'disabled' : ''} href="" onClick={(e) => { e.preventDefault(); pageGroups(groupsPage-1) }}>Prev</a>
                     <span>Page {groupsPage}</span>
                     <a className={groupsPage === groupsQuery?.meta.numberOfPages ? 'disabled' : ''} href="" onClick={(e) => { e.preventDefault(); pageGroups(groupsPage+1) }}>Next</a>
                 </div>
-            </li>
+            </li> }
             <li className="view-more" >
-                <Link to="/groups">All Groups</Link>
+                <Link to="/groups/find">Find Groups</Link>
             </li>
         </menu>
     )
