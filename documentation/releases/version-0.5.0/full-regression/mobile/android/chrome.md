@@ -1,9 +1,3 @@
-## Migrations
-- [ ] As Administrator, run any migrations associated with this release.
-- [ ] As Administrator, create content associated with those migrations. Confirm content creates.
-- [ ] As Administrator, rollback the migrations. Confirm migrations rollback cleanly.
-- [ ] As Administrator, run migrations forward again.
-
 ## Regression
 
 ### User Registration
