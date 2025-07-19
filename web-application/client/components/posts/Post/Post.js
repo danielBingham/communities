@@ -39,14 +39,7 @@ const Post = function({ id, expanded, showLoading, shared }) {
     const hasAdminModeration = useFeature('62-admin-moderation-controls')
 
     const [post, request] = usePost(id)
-    if ( shared ) {
-        console.log(`Post (Shared? ${shared}): `, post)
-    }
     const [user, userRequest] = useUser(post?.userId)
-    if ( shared ) {
-        console.log(`User: `, user)
-        console.log(`UserRequest: `, userRequest)
-    }
     const [group, groupRequest] = useGroup(post?.groupId) 
     const [groupModeration, groupModerationRequest] = useGroupModeration(post?.groupModerationId)
     const [siteModeration, siteModerationRequest] = useSiteModeration(post?.siteModerationId)
