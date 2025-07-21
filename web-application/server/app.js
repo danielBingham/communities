@@ -145,11 +145,11 @@ core.initialize().then(function() {
             if ( 'csrfToken' in request.session && request.session.csrfToken !== undefined && request.session.csrfToken !== null ) {
                 const csrfToken = request.get('X-Communities-CSRF-Token')
                 if ( csrfToken !== request.session.csrfToken ) {
-                    core.logger.warn(`Request arrived with an invalid CSRF Token.  Possible forged request.`)
+                    core.logger.warn(`Request arrived with an invalid CSRF Token.  Possible forged request.\n \tSubmitted token: ${csrfToken}\n \tStored Token: ${request.session.csrfToken}`)
                     response.status(403).json({
                         error: {
                             type: 'invalid-csrf',
-                            message: 'Your request had an invalid CSRF Token. It may have been a forged request.'
+                            message: 'Request rejected as a potential forged request. This is to protect you from attackers attempting to steal your account credentials. If this request was you, refresh the page and try again. If you continue to see this message, reach out to support at contact@communities.social.'
                         }
                     })
                 } else {
@@ -259,8 +259,9 @@ core.initialize().then(function() {
 
             const metadata = pageMetadataService.getRootWithDevAssets(assetsByChunkName)
 
-            // Only generate a new CSRF Token on requests to root (or if we don't have one).
-            if ( request.originalUrl === '/' || request.session?.csrfToken === undefined) {
+            // Only generate a new csrfToken if we don't have one.
+            if ( request.session?.csrfToken === undefined || request.session?.csrfToken === null ) {
+                core.logger.debug(`Generating a new CSRF token.  Current token: ${request.session?.csrfToken}`)
                 request.session.csrfToken = tokenService.createToken()
             }
 
