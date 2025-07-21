@@ -190,7 +190,7 @@ const RegistrationForm = function(props) {
                     value={username}
                     className="username"
                     onBlur={ onUsernameBlur }
-                    onChange={ (event) => setUsername(event.target.value) } 
+                    onChange={ (event) => setUsername(event.target.value.toLowerCase()) } 
                     error={usernameError}
                 />
                 <Input
