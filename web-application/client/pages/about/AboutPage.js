@@ -16,7 +16,7 @@ const AboutPage = function() {
                     <NavigationMenuItem to="/about/contribute" icon="Heart" text="Contribute" />
                     <NavigationMenuItem to="/about/tos" icon="ClipboardDocumentCheck" text="Terms" />
                     <NavigationMenuItem to="/about/privacy" icon="ShieldCheck" text="Privacy" />
-                    <NavigationMenuItem to="/about/contact" icon="Megaphone" text="Contact" />
+                    <NavigationMenuItem to="/about/contact" icon="Envelope" text="Contact" />
                 </NavigationMenu>
             </PageLeftGutter>
             <PageBody className="content">
