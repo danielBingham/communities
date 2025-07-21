@@ -134,8 +134,11 @@ module.exports = class AuthenticationService {
             const failedAttempts = userMatch.failed_authentication_attempts
             const lastAttempt = new Date(userMatch.last_authentication_attempt_date)
             const fifteenMinutes = 15 * 60 * 1000
-            if ( failedAttempts >= 10 && Date.now() - lastAttempt.getTime() < fifteenMinutes ) {
+            const hasBeenFifteenMinutesSinceLastAttempt = Date.now() - lastAttempt.getTime() > fifteenMinutes
+            if ( failedAttempts >= 10 && hasBeenFifteenMinutesSinceLastAttempt !== true) {
                 throw new ServiceError('authentication-timeout', `Too many failed log in attempts.  Please wait 15 minutes.`)
+            } else if ( failedAttempts >= 10 && hasBeenFifteenMinutesSinceLastAttempt === true ) {
+                await this.database.query(`UPDATE users SET failed_authentication_attempts = 0 WHERE id = $1`, [ userMatch.id ])
             }
         }
 
