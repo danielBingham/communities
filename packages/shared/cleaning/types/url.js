@@ -3,7 +3,7 @@ const urlCleaner = function(value) {
         return value
     }
 
-    return value.toLowerCase().trim()
+    return value.trim()
 }
 
 module.exports = {
