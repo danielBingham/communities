@@ -15,7 +15,7 @@ const FrequentlyAskedQuestions = function({}) {
     return (
         <article className="faq">
             <h1>Frequently Asked Questions</h1>
-            <section>
+            <section id="non-profit">
                 <h2>What do you mean "non-profit"?</h2>
                 <p>We aren't building this to make a profit. It just needs
                     to be sustainable.</p>
@@ -23,9 +23,9 @@ const FrequentlyAskedQuestions = function({}) {
                     infrastructure costs and support a good living for those who
                     dedicate themselves to building and maintaining it full
                 time.</p> 
-                <p>We haven't formed the cooperative structure yet,
-                but the goal is to form it as one of the 501(c) non-profits
-            when we do.</p>
+                <p>We're in the early bootstrapping period, so we haven't
+                    formed the cooperative structure yet, but the goal is to
+                    form it as one of the 501(c) non-profits when we do.</p>
             </section>
 
             <section>
@@ -78,11 +78,10 @@ const FrequentlyAskedQuestions = function({}) {
                 features we want to build that we haven't gotten to build
                     yet.</p>
                 <p>It also means we haven't put all the proper security
-                controls in place or be audited yet.</p>
-                <p> If you join now, you're getting in early and helping us
-                    get established. You're also agreeing to help us test -
-                    meaning you agree that things may break on you and when it
-                does you'll tell us about it!</p>
+                controls in place or been audited yet.</p>
+                <p> If you join now, you're getting in early and helping us get
+                    established. You're also agreeing that things may break on
+                    you and when it does you'll tell us about it!</p>
                 <p>During the beta, <strong>you use the platform at your own
                     risk.</strong></p>
             </section>

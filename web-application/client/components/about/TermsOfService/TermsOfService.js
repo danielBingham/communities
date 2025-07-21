@@ -34,7 +34,7 @@ const TermsOfService = function({}) {
             <h2>B. Open Beta</h2>
             <p><strong>Short version:</strong> <em>Communities Social, LLC is a temporary structure formed during our bootstrapping phase while we design and assemble the planned cooperative structure. These terms will be transferred over to the cooperative once it is formed. The Communities platform is currently in Open Beta. The terms defined in Section G. Beta Features apply to the entire Service for the duration of the Open Beta period.</em></p>
 
-            <h3>1. Temporary Structure</h3>
+            <h3 id="llc">1. Temporary Structure</h3>
             <p>Communities Social, LLC is a temporary structure formed during our bootstrapping phase while we develop the planned cooperative structure and form the non-profit.  Once the non-profit cooperative is formed, Communities Social, LLC will be dissolved and the Service and these terms will be transferred to the non-profit.</p>
 
             <h3>2. Open Beta Period</h3>
