@@ -1,171 +1,30 @@
-## Regression
+# Full Regression
 
-### User Registration
+For each heading, copy the `Cases` section of the linked file under the heading and execute the test cases within.
 
-Cases covering the User Registration flow.
+## [User Registration](documentation/testing/test-cases/User/create/registration.md)
+## [User Invitation](documentation/testing/test-cases/User/create/invitation.md)
+## [User Searching](documentation/testing/test-cases/User/query.md)
 
-- [ ] Register a new user named James Johnson with username `james-johnson` (communities-james-johnson@mailinator.com)
-    - [ ] Attempt to register with too short a password.
-        - [ ] Confirm validation error.
-    - [ ] Attempt to register without checking Age Confirmation.
-        - [ ] Confirm validation error.
-    - [ ] Successfully register.
-        - [ ] Confirm email.
-        - [ ] Accept Terms of Service.
-        - [ ] Skip Pay What you Can.
-    - [ ] Turn off all email notifications.
+## [Friend Requests](documentation/testing/test-cases/UserRelationship/create-update-delete.md)
 
-- [ ] Register a new user named Marcia Garcia (communities-marcia-garcia@mailinator.com)
-    - [ ] Attempt to register with the username `james-johnson`
-        - [ ] Confirm validation error.
-    - [ ] Register with the username `marcia-garcia`
-    - [ ] Successfully register.
-        - [ ] Confirm email.
-        - [ ] Accept Terms of Service.
-        - [ ] Skip Pay What you Can.
-    - [ ] Turn off all email notifications.
+## [Authentication](documentation/testing/test-cases/Authentication/authentication.md)
 
-### User Invitation
+## [Create Post](documentation/testing/test-cases/Post/create.md)
+## [Update Post](documentation/testing/test-cases/Post/update.md)
+## [Delete Post](documentation/testing/test-cases/Post/delete.md)
 
-Cases covering the User Invitation flow, in which a user is sent an invitation
-email and may use it to register on the platform.
+## [Create PostReaction](documentation/testing/test-cases/PostReaction/create.md)
+## [Delete PostReaction](documentation/testing/test-cases/PostReaction/delete.md)
+## [Update PostReaction](documentation/testing/test-cases/PostReaction/update.md)
 
-- [ ] From the administrator (Admin) account invite John Doe (communities-john-doe@mailinator.com).
-    - [ ] As Admin, Confirm invitation is visible on the "Friend Requests" page.
-    - [ ] As John Doe, Accept the invite and register John Doe with username `john-doe`
-    - [ ] Successfully register.
-        - [ ] Confirm email.
-        - [ ] Accept Terms of Service.
-        - [ ] Skip Pay What you Can.
-    - [ ] Turn off all email notifications.
-    - [ ] As John Doe, accept the friend request and view Admin's profile page.
+## [Read PostComment](documentation/testing/test-cases/PostComment/read.md)
+## [Create PostComment](documentation/testing/test-cases/PostComment/create.md)
+## [Delete PostComment](documentation/testing/test-cases/PostComment/update.md)
+## [Update PostComment](documentation/testing/test-cases/PostComment/delete.md)
 
-- [ ] As John Doe, invite Jane Doe (communities-jane.doe@mailiantor.com).
-    - [ ] As John Doe, confirm invitation is visible on the "Friend Requests" page.
-    - [ ] As John Doe, from the same browser session attempt to accept the invite.
-        - [ ] Expectation: Error.
-    - [ ] As Admin, confirm the invitation is *not* visible on the "Friend Requests" page.
-    - [ ] From a different browser session accept the invite and register Jane Doe with username `jane.doe`.
-    - [ ] Successfully register.
-        - [ ] Confirm email.
-        - [ ] Accept Terms of Service.
-        - [ ] Skip Pay What you Can.
-    - [ ] Turn off all email notifications.
-    - [ ] As Jane Doe, accept the friend request and view John Doe's profile page.
-
-- [ ] As Jane Doe, invite James Smith (communities-james_smith@mailinator.com).
-    - [ ] As Jane Doe, confirm the invitation is visible on the "Friend Requests" page.
-    - [ ] From a different browser session accept the invite and register James Smith with username `james_smith`.
-    - [ ] Successfully register.
-        - [ ] Confirm email.
-        - [ ] Accept Terms of Service.
-        - [ ] Skip Pay What you Can.
-    - [ ] Turn off all email notifications.
-    - [ ] As James Smith, accept the Friend Request and view Jane Doe's profile page.
-
-### Friend Requests
-
-Cases covering sending friend requests, accepting friend requests, and
-rejecting friend requests.
-
-- [ ] As Jane Doe, send Admin a friend request.
-    - [ ] As admin, reject the friend request.  Confirm its removed.
-
-- [ ] As Jane Doe, send Admin a friend request.
-     - [ ] As Admin, accept the friend request. Confirm request accepted.
-     - [ ] As Admin, remove Jane Doe as a friend.
-
-- [ ] As Jane Doe, send Admin a friend request.
-    - [ ] As Admin, confirm friend request visible.
-    - [ ] As Jane Doe, cancel the friend request. Confirm removed.
-    - [ ] As Admin, confirm removed.
-
-- [ ] With two browser windows open, one As Admin and one As Jane Doe, have Jane Doe
-     and Admin send each other simultaneous friend requests.  Confirm relationship
-     confirmed.
-
-### Authentication
-
-Cases covering the authentication system, logging in, logging out, reset
-password flow, etc.
-
-- [ ] As John Doe, log out.
-- [ ] As John Doe, attempt to log in with the wrong password. Confirm login fails.
-- [ ] As John Doe, log in with the right password.  Confirm login succeeds.
-
-- [ ] As Jane Doe, attempt to login with the wrong password.  Confirm login fails.
-- [ ] As Jane Doe, attempt to login with the right password. Confirm login succeeds.
-
-- [ ] As Jane Doe, log out and request a password reset. Change Jane Doe's password.
-- [ ] As Jane Doe, log out and attempt to login with old password.  Confirm login fails.
-- [ ] As Jane Doe, attempt to login with new password.  Confirm login succeeds.
-
-- [ ] As James Smith, attempt to log in with the wrong password 10 times.
-    - [ ] Confirm authentication timeout.
-    - [ ] Wait 15 minutes.
-    - [ ] Attempt to log in with the wrong password once.  Confirm login fails.
-    - [ ] Attempt to log in with the correct password.  Confirm log in succeeds.
-
-### User Searching
-
-Cases covering searching for users.
-
-- [ ] As Jane Doe, on the Find Friends page, search for "Admin", confirm list filtered.
-
-### Posting
-
-Cases covering making posts in all their forms and with all their attachments.
-
-- [ ] As John Doe, make a private post with just text.
-- [ ] As John Doe, make a private post with just an image.
-- [ ] As John Doe, make a post with just a link.
-- [ ] As John Doe, make a post with text and an image.
-- [ ] As John Doe, make a post with text and a link.
-- [ ] As John Doe, make a post mentioning Jane Doe.
-    - [ ] As Jane Doe, confirm notification.
-
-- [ ] As John Doe, write a post draft with a link.
-    - [ ] Navigate away from the home feed and back to feed.  Confirm draft remains. 
-    - [ ] Close the Communities browser window. Reopen and reload.  Confirm draft remains.
-    - [ ] Log out.  Log back in. Confirm draft is gone.
-
-### Reactions
-
-- [ ] As Admin, Like Jane Doe's post.
-    - [ ] As Admin, unlike Jane Doe's post.
-
-- [ ] As Admin, dislike Jane Doe's post.
-     - [ ] As Admin, remove dislike of Jane Doe's post.
-
-- [ ] As Admin, block Jane Doe's post.
-    - [ ] As Admin, remove block of Jane Doe's post.
-
-- [ ] As Jane Doe, react to each of John Doe's posts.
-
-### Post Comments
-
-- [ ] As Admin, comment on John Doe's post.
-    - [ ] As Admin, edit comment.
-    - [ ] As Admin, delete comment.
-    - [ ] As Admin, comment on John Doe's post.
-- [ ] As John Doe, comment on Jane Doe's post.
-- [ ] As Jane Doe comment on same John Doe post that Admin did.
-    - [ ] As Jane Doe, edit comment.
-    - [ ] As Jane Doe, edit comment and cancel edit.
-    - [ ] As Jane Doe, delete comment.
-    - [ ] As Jane Doe, write comment and cancel before posting.
-    - [ ] As Jane Doe, comment on same John Doe post.
-- [ ] As Jane Doe, comment on Admin's post.
-- [ ] As Jane Doe, click on comment notification from Admin's comment.
-
-### Post Subscriptions
-
-- [ ] As John Doe, unsubscribe from a post.
-    - [ ] As Jane Doe, comment on the post John Doe unsubscribed from. 
-    - [ ] As John Doe, confirm no email.
-- [ ] As John Doe, subscribe to the unsubscribed post.
-    - [ ] As Jane Doe, comment on the post John Doe unsubscribed from.
-    - [ ] As John Doe, confirm email.
+## [Create PostSubscription](documentation/testing/test-cases/PostSubscription/create.md)
+## [Delete PostSubscription](documentation/testing/test-cases/PostSubscription/delete.md)
  
 ### Profile Editing
 
