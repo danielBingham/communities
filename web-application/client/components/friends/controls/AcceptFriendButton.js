@@ -1,8 +1,9 @@
-import React from 'react'
-import { useSelector } from 'react-redux'
+import React, { useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
+import { resetEntities } from '/state/lib'
 import { patchUserRelationship } from '/state/UserRelationship'
 
 import Button from '/components/generic/button/Button'
@@ -15,10 +16,7 @@ const AcceptFriendButton = function({ userId, type }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
-    if ( ! currentUser || currentUser.id == userId) {
-        return null
-    }
-
+    const dispatch = useDispatch()
     const acceptFriend = function() {
         const relationship = {
             userId: userId,
@@ -27,6 +25,19 @@ const AcceptFriendButton = function({ userId, type }) {
         }
 
         makeRequest(patchUserRelationship(relationship))
+    }
+
+    useEffect(() => {
+        return () => {
+            // Reset entities on unmount.  Unmount will occur when the patched
+            // UserRelationship has been updated so that their state is no
+            // longer pending.
+            dispatch(resetEntities())
+        }
+    }, [])
+
+    if ( ! currentUser || currentUser.id == userId) {
+        return null
     }
 
     return (
