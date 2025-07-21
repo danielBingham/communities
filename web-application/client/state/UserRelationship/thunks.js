@@ -127,7 +127,7 @@ export const deleteUserRelationship = function(relationship) {
                 dispatch(removeUserRelationship({ entity: response.entity }))
 
                 dispatch(setRelationsInState(response.relations))
-            }
+            } 
         ))
     }
 } 

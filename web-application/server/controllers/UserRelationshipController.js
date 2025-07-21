@@ -430,7 +430,7 @@ module.exports = class UserRelationshipController {
         })
 
         if ( existingResults.list.length <= 0 ) {
-            throw new ControllerError(400, 'invalid',
+            throw new ControllerError(404, 'not-found',
                 `No relationship exists between User(${userId}) and User(${relationId}).`,
                 `No relationship exists between those users. Nothing to delete.`)
         }
