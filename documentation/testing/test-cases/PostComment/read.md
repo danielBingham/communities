@@ -7,7 +7,6 @@ Cases covering who can and cannot see post comments.
 - [ ] User1 has been created.
 - [ ] User2 has been created and is friends with User1.
 - [ ] User3 has been created and is friends with User2, but not User1.
-- [ ] User4 has been created and is friends with User1.
 
 ## Cases
 

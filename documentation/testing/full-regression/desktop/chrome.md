@@ -15,13 +15,13 @@ For each heading, copy the `Cases` section of the linked file under the heading 
 ## [Delete Post](documentation/testing/test-cases/Post/delete.md)
 
 ## [Create PostReaction](documentation/testing/test-cases/PostReaction/create.md)
-## [Delete PostReaction](documentation/testing/test-cases/PostReaction/delete.md)
 ## [Update PostReaction](documentation/testing/test-cases/PostReaction/update.md)
+## [Delete PostReaction](documentation/testing/test-cases/PostReaction/delete.md)
 
 ## [Read PostComment](documentation/testing/test-cases/PostComment/read.md)
 ## [Create PostComment](documentation/testing/test-cases/PostComment/create.md)
-## [Delete PostComment](documentation/testing/test-cases/PostComment/update.md)
 ## [Update PostComment](documentation/testing/test-cases/PostComment/delete.md)
+## [Delete PostComment](documentation/testing/test-cases/PostComment/update.md)
 
 ## [Create PostSubscription](documentation/testing/test-cases/PostSubscription/create.md)
 ## [Delete PostSubscription](documentation/testing/test-cases/PostSubscription/delete.md)
