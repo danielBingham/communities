@@ -15,7 +15,7 @@ const TermsOfService = function({}) {
     return (
         <article className="tos">
             <h1>Communities Terms of Service</h1>
-            <p>Effective Date: [Date]</p>
+            <p>Effective Date: July 21, 2025</p>
             <p>Thank you for using Communities! These Terms of Service ("Terms") govern your use of the Communities platform (the "Service") operated by Communities Social, LLC ("Communities," "we," "us," or "our").  </p>
             <h2>A. Definitions</h2>
             <p><strong>Short version:</strong> <em>We use basic terms throughout these Terms and they have specific meanings.</em></p>
@@ -85,6 +85,8 @@ const TermsOfService = function({}) {
                     </ul>
                 </li>
                 <li>Propagates <strong>Misinformation, Disinformation, or Propaganda</strong>. Communities strives to be a place where people can have productive dialogs based on accurate information and share perspectives grounded in reality.</li>
+                <li>Is <strong>Spam or AI Slop</strong>. Spam and slop prevent productive dialog and real connection by drowning it out.</li>
+                <li>Is <strong>Psychologically, Emotionally, or Physically Abusive</strong>.  Abuse does not belong in a healthy community.</li>
             </ul>
             <h3>4. Violations of Acceptable Use</h3>
             <p>Violations of our Acceptable Use policy may be remediated in a range of ways, including but not limited to:</p>
