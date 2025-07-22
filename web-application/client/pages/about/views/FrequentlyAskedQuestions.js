@@ -35,8 +35,7 @@ const FrequentlyAskedQuestions = function({}) {
                     us to operate during our bootstrap phase.</p>
                 <p> If we're able to achieve financial sustainability, then
                     we'll convert the LLC to a 501(c) non-profit structured as
-                    a multi-stakeholder cooperative. There's a clause in the
-                LLC's Operating Agreement requiring this conversion.</p>
+                    a multi-stakeholder cooperative.</p>
                 <p>A multi-stakeholder cooperative is one
                     governed democratically and collaboratively by its workers 
                     and its users.</p>

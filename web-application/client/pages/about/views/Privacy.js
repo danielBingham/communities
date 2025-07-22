@@ -17,7 +17,7 @@ const Privacy = function({}) {
             <h1>Communities General Privacy Statement</h1>
 
             <h2>Communities Privacy Statement</h2>
-            <p>Effective date: [TBD]</p>
+            <p>Effective date: July 21, 2025</p>
             <p>Welcome to the Communities Privacy Statement. This is where we describe how we handle your “Personal Data”, which is information that is directly linked or can be linked to you. It applies to the Personal Data that Communities Social, LLC, processes as the “Data Controller” when you interact with websites, applications, and services that display this Statement (collectively, “Services”).</p>
             <h3>Third Party Access and Data Protection</h3>
             <p>When you use third-party extensions, integrations, or follow references and links within our Services, the privacy policies of these third parties apply to any Personal Data you provide or consent to share with them. Their privacy statements will govern how this data is processed.</p>
