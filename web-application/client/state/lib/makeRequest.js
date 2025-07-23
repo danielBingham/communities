@@ -8,9 +8,11 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
         let responseOk = false
 
         const csrfToken = document.querySelector('meta[name="csrf-token"]').content
+        const abortController = new AbortController()
 
         const fetchOptions = {
             method: method,
+            signal: abortController.signal,
             headers: {
                 'Accept': 'application/json',
                 'X-Communities-CSRF-Token': csrfToken
@@ -39,7 +41,7 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
             fullEndpoint = configuration.backend + endpoint
         }
 
-        return fetch(fullEndpoint, fetchOptions).then(function(response) {
+        const promise = fetch(fullEndpoint, fetchOptions).then(function(response) {
             status = response.status
            
             // If they've been logged out, send them to the home page, which will
@@ -118,5 +120,7 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
                 return Promise.reject(result)
             }
         })
+
+        return [ promise, abortController ]
     }
 }

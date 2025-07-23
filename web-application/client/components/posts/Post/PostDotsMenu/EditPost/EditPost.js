@@ -1,13 +1,15 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { useSelector } from 'react-redux'
 
 import { PencilIcon } from '@heroicons/react/24/outline'
 
 import { usePostDraft } from '/lib/hooks/usePostDraft'
-import { FloatingMenuItem } from '/components/generic/floating-menu/FloatingMenu'
+import { DotsMenuItem, CloseMenuContext } from '/components/ui/DotsMenu'
 
 const EditPost = function({ postId }) {
     const [draft, setDraft] = usePostDraft(postId)
+
+    const closeMenu = useContext(CloseMenuContext)
 
     const post = useSelector((state) => postId in state.Post.dictionary ? state.Post.dictionary[postId] : null)
 
@@ -28,10 +30,11 @@ const EditPost = function({ postId }) {
             }
         }
         setDraft(newDraft)
+        closeMenu()
     }
 
     return (
-        <FloatingMenuItem onClick={() => startEdit()} className="edit"><PencilIcon /> Edit</FloatingMenuItem> 
+        <DotsMenuItem onClick={() => startEdit()} className="edit"><PencilIcon /> Edit</DotsMenuItem> 
     )
 
 }

@@ -38,7 +38,7 @@ const PostVisibilityControl = function({ visibility, setVisibility, postId, grou
 
     return (
         <div className="post-visibility-control">
-            <DropdownMenu closeOnClick={true}>
+            <DropdownMenu autoClose={true}>
                 <DropdownMenuTrigger showArrow={false}>{ current }</DropdownMenuTrigger>
                 <DropdownMenuBody>
                     <DropdownMenuItem onClick={() => setVisibility('private')}>

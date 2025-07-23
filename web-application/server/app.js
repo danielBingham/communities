@@ -28,6 +28,7 @@
 
 const express = require('express')
 const session = require('express-session')
+const cors = require('cors')
 
 const pgSession = require('connect-pg-simple')(session)
 
@@ -55,6 +56,12 @@ const app = express()
 
 const core = new Core('web-application', config)
 core.initialize().then(function() {
+
+    app.use(cors({
+        origin: core.config.host,
+        methods: [ 'GET', 'POST', 'PATCH', 'DELETE' ],
+        allowedHeaders: [ 'Content-Type', 'Accept', 'X-Communities-CSRF-Token' ]
+    }))
 
     // Trust the proxy.
     app.set('trust proxy', true)
@@ -156,6 +163,7 @@ core.initialize().then(function() {
                     next() 
                 }
             } else {
+                core.logger.debug(`Expired session.`)
                 response.status(401).json({
                     error: {
                         type: 'session-expired',

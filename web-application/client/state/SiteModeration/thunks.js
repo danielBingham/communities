@@ -58,9 +58,7 @@ export const postSiteModerations = function(siteModeration) {
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )).catch(function(error) {
-            throw error
-        })
+        ))
     }
 }
 

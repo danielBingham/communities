@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import { useSelector } from 'react-redux'
 
 import { FlagIcon as FlagIconOutline } from '@heroicons/react/24/outline'
@@ -12,7 +12,7 @@ import { useSitePermission, SitePermissions } from '/lib/hooks/permission'
 
 import { postSiteModerations } from '/state/SiteModeration'
 
-import { FloatingMenuItem } from '/components/generic/floating-menu/FloatingMenu'
+import { DotsMenuItem, CloseMenuContext } from '/components/ui/DotsMenu'
 
 import ErrorModal from '/components/errors/ErrorModal'
 import WarningModal from '/components/errors/WarningModal'
@@ -25,6 +25,8 @@ import './FlagPost.css'
 const FlagPost = function({ postId } ) {
     const [ areYouSureSite, setAreYouSureSite ] = useState(false)
     const [ showModal, setShowModal ] = useState(false)
+
+    const closeMenu = useContext(CloseMenuContext)
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const [post, postRequest] = usePost(postId)
@@ -43,6 +45,7 @@ const FlagPost = function({ postId } ) {
     useEffect(() => {
         if ( request && request.state === 'fulfilled' ) {
             setAreYouSureSite(false)
+            closeMenu()
         } 
     }, [ request])
 
@@ -92,30 +95,30 @@ const FlagPost = function({ postId } ) {
             if ( canModerateSite === true ) {
                 return (
                     <>
-                        <FloatingMenuItem className="flag-post flag-post__moderate" onClick={(e)=>setShowModal(true)}><FlagIconSolid /> Moderate for Site</FloatingMenuItem>
+                        <DotsMenuItem className="flag-post flag-post__moderate" onClick={(e)=>setShowModal(true)}><FlagIconSolid /> Moderate for Site</DotsMenuItem>
                         <ModerateForSiteModal postId={postId} isVisible={showModal} setIsVisible={setShowModal} />
                     </>
 
                 )
             } else {
                 return (
-                    <FloatingMenuItem disabled={true} className="flag-post flag-post__flagged"><FlagIconSolid /> Flagged</FloatingMenuItem>
+                    <DotsMenuItem disabled={true} className="flag-post flag-post__flagged"><FlagIconSolid /> Flagged</DotsMenuItem>
                 )
             }
         } else if ( siteModeration.status === 'approved' ) {
             return (
-                <FloatingMenuItem disabled={true} className="flag-post flag-post__approved"><CheckCircleIcon /> Approved</FloatingMenuItem>
+                <DotsMenuItem disabled={true} className="flag-post flag-post__approved"><CheckCircleIcon /> Approved</DotsMenuItem>
             )
         } else if ( siteModeration.status === 'rejected' ) {
             return (
-                <FloatingMenuItem disabled={true} className="flag-post flag-post__rejected"><XCircleIcon /> Removed</FloatingMenuItem>
+                <DotsMenuItem disabled={true} className="flag-post flag-post__rejected"><XCircleIcon /> Removed</DotsMenuItem>
             )
         }
     }
 
     return (
         <>
-            <FloatingMenuItem onClick={(e) => setAreYouSureSite(true)} className="flag-post"><FlagIconOutline /> Flag for Site Moderators</FloatingMenuItem>
+            <DotsMenuItem onClick={(e) => setAreYouSureSite(true)} className="flag-post"><FlagIconOutline /> Flag for Site Moderators</DotsMenuItem>
             <AreYouSure className="flag-post" 
                 isVisible={areYouSureSite} 
                 isPending={request && request.state === 'pending'} 

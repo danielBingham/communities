@@ -1,1 +1,1 @@
-export { DotsMenu, DotsMenuItem } from './DotsMenu'
+export { DotsMenu, DotsMenuItem, CloseMenuContext } from './DotsMenu'

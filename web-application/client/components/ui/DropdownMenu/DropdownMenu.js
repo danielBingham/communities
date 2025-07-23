@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef, useContext, createContext, Children } from 'react'
 
-export const VisibleContext = createContext(false)
-export const ToggleMenuContext = createContext(null)
-export const CloseOnClickContext = createContext(false)
+const IsOpenContext = createContext([ false, null ])
+const AutoCloseContext = createContext(false)
+
+export const CloseMenuContext = createContext(null)
 
 import './DropdownMenu.css'
 
@@ -11,33 +12,24 @@ import './DropdownMenu.css'
  *
  * @param {object} props    The standard React props object - empty.
  */
-export const DropdownMenu = function({ children, className, closeOnClick, startVisible }) {
+export const DropdownMenu = function({ children, className, autoClose, startIsOpen }) {
 
-    // ======= Render State =========================================
-
-    const [visible, setVisible] = useState(startVisible === true)
+    const openState = useState(startIsOpen === true)
+    
+    const isOpen = openState[0]
+    const setIsOpen = openState[1]
 
     const menuRef = useRef(null)
-
-    // ======= Request Tracking =====================================
-
-    // ======= Redux State ==========================================
-
-
-    // ======= Actions and Event Handling ===========================
     
-    const toggleMenu = function() {
-        setVisible(!visible)
+    const closeMenu = function() {
+        setIsOpen(false)
     }
-
-
-    // ======= Effect Handling ======================================
 
     useEffect(function() {
         const onBodyClick = function(event) {
             if (menuRef.current && ! menuRef.current.contains(event.target) ) 
             {
-                setVisible(false)
+                setIsOpen(false)
             } 
         }
         document.body.addEventListener('mousedown', onBodyClick)
@@ -45,20 +37,20 @@ export const DropdownMenu = function({ children, className, closeOnClick, startV
         return function cleanup() {
             document.body.removeEventListener('mousedown', onBodyClick)
         }
-    }, [ visible, menuRef])
+    }, [ isOpen, menuRef])
 
     // ======= Render ===============================================
     //
 
     return (
         <div ref={menuRef} className={`dropdown-menu ${ className ? className : ''}`}>
-            <VisibleContext.Provider value={visible}>
-                <ToggleMenuContext.Provider value={toggleMenu}>
-                    <CloseOnClickContext.Provider value={closeOnClick}>
+            <IsOpenContext.Provider value={openState}>
+                <CloseMenuContext.Provider value={closeMenu}>
+                    <AutoCloseContext.Provider value={autoClose}>
                         { children }
-                    </CloseOnClickContext.Provider>
-                </ToggleMenuContext.Provider>
-            </VisibleContext.Provider>
+                    </AutoCloseContext.Provider>
+                </CloseMenuContext.Provider>
+            </IsOpenContext.Provider>
         </div>
     )
 
@@ -71,25 +63,13 @@ export const DropdownMenu = function({ children, className, closeOnClick, startV
  */
 export const DropdownMenuTrigger = function({ className, children }) {
 
-    // ======= Render State =========================================
-
-    const visible = useContext(VisibleContext)
-    const toggleMenu = useContext(ToggleMenuContext)
-
-
-    // ======= Request Tracking =====================================
-
-    // ======= Redux State ==========================================
-
-    // ======= Actions and Event Handling ===========================
-
-    // ======= Effect Handling ======================================
+    const [isOpen, setIsOpen] = useContext(IsOpenContext)
 
     // ======= Render ===============================================
 
     return (
-        <div className={`dropdown-menu__trigger ${visible ? 'active' : '' } ${className ? className : ''}`} >
-            <a href="" className="no-close" onClick={(e) => { e.preventDefault(); toggleMenu(); }}>{ children }</a>
+        <div className={`dropdown-menu__trigger ${isOpen ? 'active' : '' } ${className ? className : ''}`} >
+            <a href="" className="no-close" onClick={(e) => { e.preventDefault(); setIsOpen(!isOpen); }}>{ children }</a>
         </div>
     )
 }
@@ -101,23 +81,12 @@ export const DropdownMenuTrigger = function({ className, children }) {
  */
 export const DropdownMenuBody = function(props) {
 
-    // ======= Render State =========================================
-
-    const visible = useContext(VisibleContext)
-    const toggleMenu = useContext(ToggleMenuContext)
-
-    // ======= Request Tracking =====================================
-
-    // ======= Redux State ==========================================
-
-    // ======= Actions and Event Handling ===========================
-
-    // ======= Effect Handling ======================================
+    const [ isOpen, setIsOpen ] = useContext(IsOpenContext)
 
     // ======= Render ===============================================
    
     return (
-        <div className={`dropdown-menu__body ${ props.className ? props.className : ''}`} style={{ display: (visible ? 'block' : 'none' ) }} >
+        <div className={`dropdown-menu__body ${ props.className ? props.className : ''}`} style={{ display: (isOpen ? 'block' : 'none' ) }} >
             { props.children }
         </div>
     )
@@ -130,20 +99,6 @@ export const DropdownMenuBody = function(props) {
  * @param {object} props    The standard React props object - empty.
  */
 export const DropdownMenuHeader = function({ title, children }) {
-
-    // ======= Render State =========================================
-
-    const visible = useContext(VisibleContext)
-    const toggleMenu = useContext(ToggleMenuContext)
-
-
-    // ======= Request Tracking =====================================
-
-    // ======= Redux State ==========================================
-
-    // ======= Actions and Event Handling ===========================
-
-    // ======= Effect Handling ======================================
 
     // ======= Render ===============================================
 
@@ -167,32 +122,22 @@ export const DropdownMenuHeader = function({ title, children }) {
  */
 export const DropdownMenuItem = function({ className, disabled, children, onClick }) {
 
-    // ======= Render State =========================================
+    const closeMenu = useContext(CloseMenuContext)
+    const autoClose = useContext(AutoCloseContext)
 
-    const visible = useContext(VisibleContext)
-    const toggleMenu = useContext(ToggleMenuContext)
-    const closeOnClick = useContext(CloseOnClickContext)
-
-    // ======= Request Tracking =====================================
-
-    // ======= Redux State ==========================================
-
-    // ======= Actions and Event Handling ===========================
     const onClickInternal = function(event) {
         if ( disabled === true ) {
             return
-        }
-        
-        if ( closeOnClick === true) {
-            toggleMenu(); 
         }
 
         if ( onClick ) {
             onClick(event); 
         }
-    }
 
-    // ======= Effect Handling ======================================
+        if ( autoClose === true) {
+            closeMenu(); 
+        }
+    }
 
     // ======= Render ===============================================
  
