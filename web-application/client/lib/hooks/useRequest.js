@@ -9,38 +9,36 @@ export function useRequest() {
     const dispatch = useDispatch()
 
     const makeRequest = function(reduxThunk) {
-        if ( request !== null && abortController.current !== null ) {
+        if ( request?.state === 'pending' && abortController.current !== null ) {
             abortController.current.abort()
+            abortController.current = null
         }
 
-        const request = {
+        setRequest({
             state: 'pending',
             request: null,
             response: null, 
             error: null,
-        }
-        setRequest(request)
+        })
 
         const [promise, controller] = dispatch(reduxThunk)
         abortController.current = controller
         promise
             .then((result) => {
-                const newRequest = { 
+                setRequest({ 
                     state: 'fulfilled',
                     request: result.request,
                     response: result.response,
                     error: null
-                }
-                setRequest(newRequest)
+                })
             })
             .catch((result) => {
-                const newRequest = { 
+                setRequest({ 
                     state: 'failed',
                     request: result.request,
                     response: result.response,
                     error: result.error
-                }
-                setRequest(newRequest)
+                })
             })
     }
 
@@ -51,8 +49,9 @@ export function useRequest() {
     // On unmount, cancel the request.
     useEffect(() => {
         return () => {
-           if ( abortController.current !== null ) {
+           if ( request?.state === 'pending' && abortController.current !== null ) {
                abortController.current.abort()
+               abortController.current = null
            }
         }
     },[])

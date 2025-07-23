@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import { useSelector } from 'react-redux'
 
 import { FlagIcon as FlagIconOutline } from '@heroicons/react/24/outline'
@@ -12,7 +12,7 @@ import { useSitePermission, SitePermissions } from '/lib/hooks/permission'
 
 import { postSiteModerations } from '/state/SiteModeration'
 
-import { FloatingMenuItem } from '/components/generic/floating-menu/FloatingMenu'
+import { DotsMenuItem, CloseMenuContext } from '/components/ui/DotsMenu'
 
 import ErrorModal from '/components/errors/ErrorModal'
 import WarningModal from '/components/errors/WarningModal'
@@ -36,6 +36,8 @@ const FlagPostComment = function({ postId, id } ) {
 
     const [request, makeRequest] = useRequest()
 
+    const closeMenu = useContext(CloseMenuContext)
+
     const executeFlag = function() {
         const newModeration = { 
             userId: currentUser.id, 
@@ -49,6 +51,7 @@ const FlagPostComment = function({ postId, id } ) {
     useEffect(() => {
         if ( request && request.state === 'fulfilled' ) {
             setAreYouSure(false)
+            closeMenu()
         } 
     }, [ areYouSure, request])
 
@@ -98,30 +101,30 @@ const FlagPostComment = function({ postId, id } ) {
             if ( canModerateSite === true ) {
                 return (
                     <>
-                        <FloatingMenuItem className="flag-post-comment flag-post-comment__moderate" onClick={(e)=>setShowModal(true)}><FlagIconSolid /> Moderate for Site</FloatingMenuItem>
+                        <DotsMenuItem className="flag-post-comment flag-post-comment__moderate" onClick={(e)=>setShowModal(true)}><FlagIconSolid /> Moderate for Site</DotsMenuItem>
                         <ModerateForSiteModal postId={postId} postCommentId={id} isVisible={showModal} setIsVisible={setShowModal} />
                     </>
 
                 )
             } else {
                 return (
-                    <FloatingMenuItem disabled={true} className="flag-post-comment flag-post-comment__flagged"><FlagIconSolid /> Flagged</FloatingMenuItem>
+                    <DotsMenuItem disabled={true} className="flag-post-comment flag-post-comment__flagged"><FlagIconSolid /> Flagged</DotsMenuItem>
                 )
             }
         } else if ( siteModeration.status === 'approved' ) {
             return (
-                <FloatingMenuItem disabled={true} className="flag-post-comment flag-post-comment__approved"><CheckCircleIcon /> Approved</FloatingMenuItem>
+                <DotsMenuItem disabled={true} className="flag-post-comment flag-post-comment__approved"><CheckCircleIcon /> Approved</DotsMenuItem>
             )
         } else if ( siteModeration.status === 'rejected' ) {
             return (
-                <FloatingMenuItem disabled={true} className="flag-post-comment flag-post-comment__rejected"><XCircleIcon /> Removed</FloatingMenuItem>
+                <DotsMenuItem disabled={true} className="flag-post-comment flag-post-comment__rejected"><XCircleIcon /> Removed</DotsMenuItem>
             )
         }
     }
 
     return (
         <>
-            <FloatingMenuItem onClick={(e) => setAreYouSure(true)} className="flag-post-comment"><FlagIconOutline /> Flag for Site Moderators</FloatingMenuItem>
+            <DotsMenuItem onClick={(e) => setAreYouSure(true)} className="flag-post-comment"><FlagIconOutline /> Flag for Site Moderators</DotsMenuItem>
             <AreYouSure className="flag-post-comment" 
                 isVisible={areYouSure} 
                 isPending={request && request.state === 'pending'} 

@@ -17,7 +17,7 @@ import { useGroupPermission, GroupPermissions } from '/lib/hooks/permission'
 
 import { postGroupModerations } from '/state/GroupModeration'
 
-import { FloatingMenuItem } from '/components/generic/floating-menu/FloatingMenu'
+import { DotsMenuItem } from '/components/ui/DotsMenu'
 
 import ErrorModal from '/components/errors/ErrorModal'
 import WarningModal from '/components/errors/WarningModal'
@@ -107,30 +107,30 @@ const FlagPostCommentForGroup = function({ postId, postCommentId} ) {
             if ( canModerateGroup === true ) {
                 return (
                     <>
-                        <FloatingMenuItem onClick={(e) => setShowModal(true)} className="flag-post-comment-for-group flag-post-comment-for-group__moderate"><FlagIconSolid /> Moderate for Group</FloatingMenuItem>
+                        <DotsMenuItem onClick={(e) => setShowModal(true)} className="flag-post-comment-for-group flag-post-comment-for-group__moderate"><FlagIconSolid /> Moderate for Group</DotsMenuItem>
                         <ModerateForGroupModal postId={postId} postCommentId={postCommentId} isVisible={showModal} setIsVisible={setShowModal} />
                     </>
 
                 )
             } else {
                 return (
-                    <FloatingMenuItem disabled={true} className="flag-post-comment-for-group flag-post-comment-for-group__flagged"><FlagIconSolid /> Flagged</FloatingMenuItem>
+                    <DotsMenuItem disabled={true} className="flag-post-comment-for-group flag-post-comment-for-group__flagged"><FlagIconSolid /> Flagged</DotsMenuItem>
                 )
             }
         } else if ( groupModeration.status === 'approved' ) {
             return (
-                <FloatingMenuItem disabled={true} className="flag-post-comment-for-group flag-post-comment-for-group__approved"><CheckCircleIcon /> Approved</FloatingMenuItem>
+                <DotsMenuItem disabled={true} className="flag-post-comment-for-group flag-post-comment-for-group__approved"><CheckCircleIcon /> Approved</DotsMenuItem>
             )
         } else if ( groupModeration.status === 'rejected' ) {
             return (
-                <FloatingMenuItem disabled={true} className="flag-post-comment-for-group flag-post-comment-for-group__rejected"><XCircleIcon /> Removed</FloatingMenuItem>
+                <DotsMenuItem disabled={true} className="flag-post-comment-for-group flag-post-comment-for-group__rejected"><XCircleIcon /> Removed</DotsMenuItem>
             )
         }
     }
 
     return (
         <>
-            <FloatingMenuItem onClick={(e) => setAreYouSureGroup(true)} className="flag-post-comment-for-group"><FlagIconOutline /> Flag for Group Moderators</FloatingMenuItem>
+            <DotsMenuItem onClick={(e) => setAreYouSureGroup(true)} className="flag-post-comment-for-group"><FlagIconOutline /> Flag for Group Moderators</DotsMenuItem>
 
             <AreYouSure className="flag-post-comment-for-group"
                 isVisible={areYouSureGroup}
