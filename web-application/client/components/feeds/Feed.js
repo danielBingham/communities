@@ -18,6 +18,7 @@ const Feed = function({ type }) {
 
     const [request, makeRequest] = useRequest()
 
+    const currentUser = useSelector((state) => state.authentication.currentUser)
     const group = useSelector((state) => type == 'group' && slug in state.Group.bySlug ? state.Group.bySlug[slug] : null)
 
     useEffect(() => {
@@ -52,7 +53,7 @@ const Feed = function({ type }) {
 
     return (
         <div className="feed">
-            { type !== 'user' && <PostForm groupId={ group ? group.id : null } /> }
+            { ( type !== 'user' || currentUser.username === slug ) && <PostForm groupId={ group ? group.id : null } /> }
             <PostList name={`Feed:${type}`} params={ params } /> 
         </div>
     )

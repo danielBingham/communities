@@ -273,7 +273,7 @@ const PostForm = function({ postId, groupId, sharedPostId }) {
             <TextAreaWithMentions
                 value={content}
                 setValue={onContentChange}
-                placeholder={group ? `Write your post in ${group.title}...` : "Write your post..." }
+                placeholder={group ? `Write a post in ${group.title}...` : "Write a post to your feed..." }
                 groupId={groupId}
             />
 
