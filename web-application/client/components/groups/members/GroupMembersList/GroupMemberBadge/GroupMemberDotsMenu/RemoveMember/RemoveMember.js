@@ -67,7 +67,7 @@ const RemoveMember = function({ groupId, userId }) {
             <AreYouSure isVisible={areYouSure} execute={() => { setAreYouSure(false); removeMember() }} cancel={() => setAreYouSure(false)} > 
                 <p>Are you sure you want to remove { user.name } from this group?</p>
             </AreYouSure>
-            <RequestErrorModal message="Attempt to remove member" request={request} />
+            <RequestErrorModal message="Attempt to remove member" request={request} ignore404={true} />
         </>
     )
 }

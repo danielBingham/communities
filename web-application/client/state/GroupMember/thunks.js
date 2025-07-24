@@ -107,6 +107,11 @@ export const patchGroupMember = function(member) {
                 dispatch(setGroupMembersInDictionary({ entity: response.entity}))
 
                 dispatch(setRelationsInState(response.relations))
+            },
+            function(status, response) {
+                if ( status === 404 || status === 403 ) {
+                    dispatch(setGroupMembersNull({ groupId: member.groupId, userId: member.userId }))
+                }
             }
         ))
     }
@@ -131,6 +136,12 @@ export const deleteGroupMember = function(member) {
                 dispatch(removeGroupMember({ entity: response.entity}))
                 dispatch(setRelationsInState(response.relations))
                 dispatch(clearGroupMemberQueries())
+            },
+            function(status, response) {
+                if ( status === 404 || status === 403 ) {
+                    dispatch(setGroupMembersNull({ groupId: member.groupId, userId: member.userId }))
+                    dispatch(clearGroupMemberQueries())
+                }
             }
         ))
     }
