@@ -26,7 +26,7 @@ const Contribute = function() {
                 <ContributionCard amount={10} explanation={"Sustainable contribution."} />
                 <ContributionCard amount={15} explanation={"Cost of streaming service."} />
             </div>
-           
+
             <div className="additional-contributions">
                 <a href="" onClick={(e) => { e.preventDefault(); setShowMore( ! showMore) }}>{ showMore ? 'Hide' : 'Show' } Supporter Levels</a>
             </div>
