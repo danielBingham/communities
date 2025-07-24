@@ -36,6 +36,14 @@ const AcceptFriendButton = function({ userId, type }) {
         }
     }, [])
 
+    useEffect(function() {
+        if ( request?.state === 'failed' && request?.response.status === 404 ) {
+            // TODO There's probably a better way to handle this.
+            // That relationship doesn't exist.  Reset entities to requery.
+            dispatch(resetEntities())
+        }
+    }, [ request ])
+
     if ( ! currentUser || currentUser.id == userId) {
         return null
     }
