@@ -269,7 +269,6 @@ core.initialize().then(function() {
 
             // Only generate a new csrfToken if we don't have one.
             if ( request.session?.csrfToken === undefined || request.session?.csrfToken === null ) {
-                core.logger.debug(`Generating a new CSRF token for '${request.sessionID}'.  Current token: ${request.session?.csrfToken}`)
                 request.session.csrfToken = tokenService.createToken()
             }
             metadata.csrfToken = request.session.csrfToken 
