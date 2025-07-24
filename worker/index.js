@@ -27,37 +27,38 @@ const {
 const config = require('./config')
 
 const core = new Core('worker', config)
-core.initialize()
+core.initialize().then(function() {
+ 
+    core.queue.process('resize-image', async function(job, done) {
+        core.logger.setId(`Image resize: ${job.id}`)
+        core.logger.info(`Beginning job 'resize-image' for user ${job.data.session.user.id} and file ${job.data.file.id}.`)
 
-core.queue.process('resize-image', async function(job, done) {
-    core.logger.setId(`Image resize: ${job.id}`)
-    core.logger.info(`Beginning job 'resize-image' for user ${job.data.session.user.id}.`)
+        const imageService = new ImageService(core)
 
-    const imageService = new ImageService(core)
+        try {
+            job.progress({ step: 'initializing', stepDescription: `Initializing...`, progress: 0 })
 
-    try {
-        job.progress({ step: 'initializing', stepDescription: `Initializing...`, progress: 0 })
+            let progress = 0
+            for (const size of imageService.imageSizes) {
+                await imageService.resize(job.data.file, size)
 
-        let progress = 0
-        for (const size of imageService.imageSizes) {
-            await imageService.resize(job.data.file, size)
+                progress += 20
+                job.progress({ step: 'resizing', stepDescription: `Resizing...`, progress: progress })
+            }
 
-            progress += 20
-            job.progress({ step: 'resizing', stepDescription: `Resizing...`, progress: progress })
+            job.progress({ step: 'complete', stepDescription: `Complete!`, progress: 100 })
+
+            core.logger.info(`Finished job 'resize-image' for user ${job.data.session.user.id}.`)
+            core.logger.setId(null)
+            done(null)
+        } catch (error) {
+            core.logger.error(error)
+            done(error)
         }
+    })
 
-        job.progress({ step: 'complete', stepDescription: `Complete!`, progress: 100 })
-
-        core.logger.info(`Finished job 'resize-image' for user ${job.data.session.user.id}.`)
-        core.logger.setId(null)
-        done(null)
-    } catch (error) {
-        core.logger.error(error)
-        done(error)
-    }
+    core.logger.info('Initialized and listening...')
 })
-
-core.logger.info('Initialized and listening...')
 
 const shutdown = async function() {
     core.logger.info('Attempting a graceful shutdown...')
