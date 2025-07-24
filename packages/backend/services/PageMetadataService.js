@@ -46,7 +46,7 @@ module.exports = class PageMetadataService {
      * constructor for object structure.
      */
     getRoot() {
-        return this.baseMetadata
+        return { ...this.baseMetadata }
     }
 
     /**

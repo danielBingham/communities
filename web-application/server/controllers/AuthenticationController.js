@@ -254,7 +254,7 @@ module.exports = class AuthenticationController {
          * Anyone may call it.
          **********************************************************************/
 
-        request.session.destroy(function(error) {
+        request.session.regenerate(function(error) {
             if (error) {
                 console.error(error)
                 response.status(500).json({error: 'server-error'})

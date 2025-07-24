@@ -269,11 +269,11 @@ core.initialize().then(function() {
 
             // Only generate a new csrfToken if we don't have one.
             if ( request.session?.csrfToken === undefined || request.session?.csrfToken === null ) {
-                core.logger.debug(`Generating a new CSRF token.  Current token: ${request.session?.csrfToken}`)
+                core.logger.debug(`Generating a new CSRF token for '${request.sessionID}'.  Current token: ${request.session?.csrfToken}`)
                 request.session.csrfToken = tokenService.createToken()
             }
-
             metadata.csrfToken = request.session.csrfToken 
+            
             const parsedTemplate = serverSideRenderingService.renderIndexTemplate(metadata) 
             response.send(parsedTemplate)
         })
@@ -288,7 +288,6 @@ core.initialize().then(function() {
         // Everything else goes to the index file.
         app.use('*', function(request,response) {
             const metadata = pageMetadataService.getRoot()
-            const parsedTemplate = serverSideRenderingService.renderIndexTemplate(metadata) 
 
             // Only generate a new CSRF Token if we don't have one. Since we're
             // storing it in the session, we'll need to generate a new one
@@ -296,8 +295,9 @@ core.initialize().then(function() {
             if ( request.session?.csrfToken === undefined  || request.session?.csrfToken === null ) {
                 request.session.csrfToken = tokenService.createToken()
             }
-
             metadata.csrfToken = request.session.csrfToken
+
+            const parsedTemplate = serverSideRenderingService.renderIndexTemplate(metadata) 
             response.send(parsedTemplate)
         })
     }
