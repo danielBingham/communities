@@ -23,6 +23,7 @@ const DraftProfileImage = forwardRef(function({
 
     const configuration = useSelector((state) => state.system.configuration)
 
+    const [ cacheBust, setCacheBust ] = useState(0)
     const [ dimensions, setDimensions ] = useState({
         width: 1,
         height: 1 
@@ -118,8 +119,11 @@ const DraftProfileImage = forwardRef(function({
         // Reset the crop once we're done cropping so that it doesn't appear
         // outside the image if the draft is still shown.
         //
+        // Aslo bust the cache.
+        //
         // The draft image will still be shown in UserProfileEditForm.
         if ( request && request.state == 'fulfilled' ) {
+            setCacheBust(cacheBust+1)
             setCrop({
                 unit: 'px',
                 x: 0,
@@ -163,7 +167,7 @@ const DraftProfileImage = forwardRef(function({
                     minHeight={10}
                     circularCrop={true}
                 >
-                    <img ref={imageRef} onLoad={onLoad} src={`${configuration.backend}/file/${fileId}`} />
+                    <img ref={imageRef} onLoad={onLoad} src={`${configuration.backend}/file/${fileId}?cacheBust=${cacheBust}`} />
                 </ReactCrop>
             </div>
                 { ! isLoaded && <Spinner /> }
