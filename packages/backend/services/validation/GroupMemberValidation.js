@@ -315,11 +315,11 @@ module.exports = class GroupMemberValidation {
                     }
                 } else if ( existing.status === 'pending-requested' ) {
                     if ( groupMember.status !== 'pending-requested') {
-                        if ( groupMember.status !== 'member' ) {
+                        if ( groupMember.status !== 'member' && groupMember.status !== 'banned') {
                             errors.push({
                                 type: `status:invalid`,
-                                log: `May only change status of requesting users to 'member'.`,
-                                message: `You may only change the status of requesting users to 'member'.  Delete the member to remove them.`
+                                log: `May only change status of requesting users to 'member' or 'banned'.`,
+                                message: `You may only change the status of requesting users to 'member' or 'banned'.  Delete the member to remove them.`
                             })
                         }
 
@@ -405,7 +405,7 @@ module.exports = class GroupMemberValidation {
                             })
                         }
 
-                        if ( canAdminGroup !== true ) {
+                        if ( canAdminGroup !== true && ! (currentUser.id === groupMember.userId && groupMember.role === 'member') ) {
                             errors.push({
                                 type: `role:not-authorized`,
                                 log: `User not authorized to update a GroupMember's role.`,

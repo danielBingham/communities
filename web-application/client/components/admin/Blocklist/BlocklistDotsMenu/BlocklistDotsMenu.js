@@ -1,11 +1,11 @@
-import React from 'react'
+import React, { useEffect, useContext } from 'react'
 
 import { useBlocklist } from '/lib/hooks/Blocklist'
 import { useRequest } from '/lib/hooks/useRequest'
 
 import { deleteBlocklist } from '/state/Blocklist'
 
-import { DotsMenu, DotsMenuItem } from '/components/ui/DotsMenu'
+import { DotsMenu, DotsMenuItem, CloseMenuContext } from '/components/ui/DotsMenu'
 
 import { RequestErrorModal } from '/components/errors/RequestError'
 
@@ -15,9 +15,17 @@ const BlocklistDotsMenu = function({ id }) {
 
     const [request, makeRequest] = useRequest()
 
+    const closeMenu = useContext(CloseMenuContext)
+
     const executeDelete = function() {
         makeRequest(deleteBlocklist(blocklist))
     }
+
+    useEffect(function() {
+        if ( request?.state === 'fulfilled' ) {
+            closeMenu()
+        }
+    }, [ request ])
 
     if ( blocklist === null ) {
         return null

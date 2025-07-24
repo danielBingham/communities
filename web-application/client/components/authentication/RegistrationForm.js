@@ -143,7 +143,7 @@ const RegistrationForm = function(props) {
 
     useEffect(function() {
         if ( request && request.state == 'fulfilled' ) {
-            window.location.href = "/"
+            window.location.href = "/email-confirmation"
         }
     }, [ request ])
 
@@ -190,7 +190,7 @@ const RegistrationForm = function(props) {
                     value={username}
                     className="username"
                     onBlur={ onUsernameBlur }
-                    onChange={ (event) => setUsername(event.target.value) } 
+                    onChange={ (event) => setUsername(event.target.value.toLowerCase()) } 
                     error={usernameError}
                 />
                 <Input

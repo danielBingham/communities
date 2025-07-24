@@ -14,8 +14,8 @@ const FrequentlyAskedQuestions = function({}) {
 
     return (
         <article className="faq">
-
-            <section>
+            <h1>Frequently Asked Questions</h1>
+            <section id="non-profit">
                 <h2>What do you mean "non-profit"?</h2>
                 <p>We aren't building this to make a profit. It just needs
                     to be sustainable.</p>
@@ -23,14 +23,19 @@ const FrequentlyAskedQuestions = function({}) {
                     infrastructure costs and support a good living for those who
                     dedicate themselves to building and maintaining it full
                 time.</p> 
+                <p>We're in the early bootstrapping period, so we haven't
+                    formed the cooperative structure yet, but the goal is to
+                    form it as one of the 501(c) non-profits when we do.</p>
             </section>
 
             <section>
                 <h2>How is it structured?</h2>
-                <p>Currently, it's the side project of a single 
-                    engineer.</p>
-                <p> If we're able to raise enough funding to work on it full time and build a team, then it will be
-                    structured as a multi-stakeholder cooperative.</p>
+                <p>Communities is currently incorporated as Communities
+                Social, LLC. The LLC is a temporary legal structure allowing
+                    us to operate during our bootstrap phase.</p>
+                <p> If we're able to achieve financial sustainability, then
+                    we'll convert the LLC to a 501(c) non-profit structured as
+                    a multi-stakeholder cooperative.</p>
                 <p>A multi-stakeholder cooperative is one
                     governed democratically and collaboratively by its workers 
                     and its users.</p>
@@ -57,26 +62,27 @@ const FrequentlyAskedQuestions = function({}) {
                     goes to zero if you need it to, but this will only work if enough people do their part and contribute.</p>
             </section>
 
+            <section>
+                <h2>Is it Open Source?</h2>
+                <p>Yes.  It is <a href="https://github.com/danielbingham/communities">open source</a> under the <a href="https://github.com/danielbingham/communities?tab=AGPL-3.0-1-ov-file#readme">GPL 3.0 license.</a></p>
+                <p>This is primarily for transparency, accountability, and
+                contribution purposes, but would also allow the platform to be
+                forked as a last resort.</p>
+            </section>
+
             <section id="beta">
                 <h2>What does it mean for it to be a "beta"?</h2>
-                <p>It means it's still very much under development. It's messy.
-                    There are design imperfections.  There will be bugs.  There are
-                    features we want to build that we haven't gotten to build yet.</p>
-                <p> If you join now, you're getting in early, but you're also
-                    agreeing to help us test - meaning you agree that things may
-                break on you and when it does you'll tell us about it!</p>
-                <p>Also, please be careful about what you post at this stage.
-                We'll do our best to keep your private posts private, but we
-                can make no guarantees during the beta. Software development is
-            hard, and it takes a lot of brains to make sure we don't mess up.
-                Right now we don't have enough brains to guarantee that with
-                    any reasonable certainty.</p>
-                <p>During the beta, <strong>please
-                    understand that you use the platform at your own
+                <p>It means it's still very much under development. There are
+                    design imperfections.  There will be bugs.  There are
+                features we want to build that we haven't gotten to build
+                    yet.</p>
+                <p>It also means we haven't put all the proper security
+                controls in place or been audited yet.</p>
+                <p> If you join now, you're getting in early and helping us get
+                    established. You're also agreeing that things may break on
+                    you and when it does you'll tell us about it!</p>
+                <p>During the beta, <strong>you use the platform at your own
                     risk.</strong></p>
-                <p>Once we're funded enough that we can build a team, we'll be
-                happy to make some legally enforceable guarantees about the
-            safety of your data.</p>
             </section>
 
             <section>

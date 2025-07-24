@@ -74,7 +74,7 @@ const Post = function({ id, expanded, showLoading, shared }) {
             || (siteModerationRequest && siteModerationRequest.state === 'pending')
         ) ) 
     {
-        return ( <div id={id} className="post"><Spinner /></div> )
+        return ( <div id={id} className={`post ${ shared ? 'shared' : ''}`}><div className="post__loading"><Spinner /></div></div> )
     }
 
     // ------------------------------------------------------------------------
@@ -182,7 +182,7 @@ const Post = function({ id, expanded, showLoading, shared }) {
             </div> }
             <PostImage id={id} />
             { post.linkPreviewId && <LinkPreview id={post.linkPreviewId} /> }
-            { post.sharedPostId && <Post id={post.sharedPostId} shared={true} /> }
+            { post.sharedPostId && <Post id={post.sharedPostId} shared={true} showLoading={true} /> }
             { ! shared && <PostReactions postId={id} /> }
             { ! shared && <PostComments postId={id} expanded={expanded} /> }
         </div>

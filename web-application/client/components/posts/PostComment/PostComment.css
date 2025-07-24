@@ -1,6 +1,6 @@
 @keyframes highlight {
     0% {
-        background-color: var(--secondary-color-lightest);
+        background-color: var(--secondary-color-light);
     }
     100% {
         background-color: var(--primary-color-lightest);

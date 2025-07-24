@@ -12,6 +12,7 @@
 }
 .card.terms-of-service-notice__terms-card {
     max-width: 600px;
+    padding: 20px;
 }
 .terms-of-service-notice__close {
     padding: 10px;

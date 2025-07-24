@@ -28,6 +28,7 @@
 
 const express = require('express')
 const session = require('express-session')
+const cors = require('cors')
 
 const pgSession = require('connect-pg-simple')(session)
 
@@ -55,6 +56,12 @@ const app = express()
 
 const core = new Core('web-application', config)
 core.initialize().then(function() {
+
+    app.use(cors({
+        origin: core.config.host,
+        methods: [ 'GET', 'POST', 'PATCH', 'DELETE' ],
+        allowedHeaders: [ 'Content-Type', 'Accept', 'X-Communities-CSRF-Token' ]
+    }))
 
     // Trust the proxy.
     app.set('trust proxy', true)
@@ -145,17 +152,18 @@ core.initialize().then(function() {
             if ( 'csrfToken' in request.session && request.session.csrfToken !== undefined && request.session.csrfToken !== null ) {
                 const csrfToken = request.get('X-Communities-CSRF-Token')
                 if ( csrfToken !== request.session.csrfToken ) {
-                    core.logger.warn(`Request arrived with an invalid CSRF Token.  Possible forged request.`)
+                    core.logger.warn(`Request arrived with an invalid CSRF Token.  Possible forged request.\n \tSubmitted token: ${csrfToken}\n \tStored Token: ${request.session.csrfToken}`)
                     response.status(403).json({
                         error: {
                             type: 'invalid-csrf',
-                            message: 'Your request had an invalid CSRF Token. It may have been a forged request.'
+                            message: 'Request rejected as a potential forged request. This is to protect you from attackers attempting to steal your account credentials. If this request was you, refresh the page and try again. If you continue to see this message, reach out to support at contact@communities.social.'
                         }
                     })
                 } else {
                     next() 
                 }
             } else {
+                core.logger.debug(`Expired session.`)
                 response.status(401).json({
                     error: {
                         type: 'session-expired',
@@ -259,8 +267,9 @@ core.initialize().then(function() {
 
             const metadata = pageMetadataService.getRootWithDevAssets(assetsByChunkName)
 
-            // Only generate a new CSRF Token on requests to root (or if we don't have one).
-            if ( request.originalUrl === '/' || request.session?.csrfToken === undefined) {
+            // Only generate a new csrfToken if we don't have one.
+            if ( request.session?.csrfToken === undefined || request.session?.csrfToken === null ) {
+                core.logger.debug(`Generating a new CSRF token.  Current token: ${request.session?.csrfToken}`)
                 request.session.csrfToken = tokenService.createToken()
             }
 

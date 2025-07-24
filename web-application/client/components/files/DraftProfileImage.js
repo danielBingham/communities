@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react'
+import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef } from 'react'
 import { useSelector } from 'react-redux'
 
 import { ReactCrop } from 'react-image-crop'
@@ -23,6 +23,7 @@ const DraftProfileImage = forwardRef(function({
 
     const configuration = useSelector((state) => state.system.configuration)
 
+    const [ cacheBust, setCacheBust ] = useState(0)
     const [ dimensions, setDimensions ] = useState({
         width: 1,
         height: 1 
@@ -38,6 +39,7 @@ const DraftProfileImage = forwardRef(function({
     const [isLoaded, setIsLoaded] = useState(false)
 
     const [ request, makeRequest ] = useRequest()
+    const imageRef = useRef(null)
 
     const remove = function() {
         setFileId(null)
@@ -83,6 +85,33 @@ const DraftProfileImage = forwardRef(function({
     }, [ fileId, crop, dimensions ])
 
     useEffect(function() {
+        if ( imageRef.current !== null && isLoaded) {
+            const img = imageRef.current
+            if ( dimensions.width != img.clientWidth || dimensions.height != img.clientHeight ) {
+                setDimensions({ 
+                    width: img.clientWidth,
+                    height: img.clientHeight
+                })
+            }
+
+            const newCrop = { ...crop }
+            if ( img.clientWidth < crop.width ) {
+                newCrop.width = img.clientWidth
+                newCrop.height = img.clientWidth
+            }
+
+            if ( img.clientHeight < newCrop.height ) {
+                newCrop.height = img.clientHeight
+                newCrop.width = img.clientHeight
+            }
+
+            if ( newCrop.width !== crop.width || newCrop.height !== crop.height ) {
+                setCrop(newCrop)
+            }
+        }
+    }, [ crop, isLoaded] )
+
+    useEffect(function() {
         if ( request && request.state !== state) {
             setState(request.state)
         }
@@ -90,8 +119,11 @@ const DraftProfileImage = forwardRef(function({
         // Reset the crop once we're done cropping so that it doesn't appear
         // outside the image if the draft is still shown.
         //
+        // Aslo bust the cache.
+        //
         // The draft image will still be shown in UserProfileEditForm.
         if ( request && request.state == 'fulfilled' ) {
+            setCacheBust(cacheBust+1)
             setCrop({
                 unit: 'px',
                 x: 0,
@@ -116,7 +148,6 @@ const DraftProfileImage = forwardRef(function({
 
     let content = null
     if ( fileId) {
-        let renderWidth = width ? width : 200 
         let style = {}
         if ( ! isLoaded )  {
             style = {
@@ -136,7 +167,7 @@ const DraftProfileImage = forwardRef(function({
                     minHeight={10}
                     circularCrop={true}
                 >
-                    <img onLoad={onLoad} src={`${configuration.backend}/file/${fileId}?width=${renderWidth}&timestamp=${Date.now()}`} />
+                    <img ref={imageRef} onLoad={onLoad} src={`${configuration.backend}/file/${fileId}?cacheBust=${cacheBust}`} />
                 </ReactCrop>
             </div>
                 { ! isLoaded && <Spinner /> }

@@ -6,7 +6,7 @@ import { useFeature } from '/lib/hooks/feature'
 
 import { EllipsisHorizontalIcon } from '@heroicons/react/24/solid'
 
-import { FloatingMenu, FloatingMenuBody, FloatingMenuTrigger, FloatingMenuItem } from '/components/generic/floating-menu/FloatingMenu'
+import { DotsMenu } from '/components/ui/DotsMenu'
 
 import SubscribeToPost from './SubscribeToPost/SubscribeToPost'
 import EditPost from './EditPost/EditPost'
@@ -30,16 +30,13 @@ const PostDotsMenu = function({ postId }) {
     const isAuthor = currentUser && currentUser.id == post.userId
 
     return (
-        <FloatingMenu className="post-dots-menu" closeOnClick={true}>
-            <FloatingMenuTrigger showArrow={false}><EllipsisHorizontalIcon className="dots" /></FloatingMenuTrigger>
-            <FloatingMenuBody>
-                { currentUser && <SubscribeToPost postId={postId} /> }
-                { hasAdminModeration && currentUser && <FlagPost postId={postId} /> }
-                { hasGroupModeration && currentUser && post.groupId && <FlagPostForGroup postId={postId} /> }
-                { isAuthor && <EditPost postId={postId} /> }
-                { isAuthor && <DeletePost postId={postId} /> }
-            </FloatingMenuBody>
-        </FloatingMenu>
+        <DotsMenu className="post-dots-menu">
+            { currentUser && <SubscribeToPost postId={postId} /> }
+            { hasAdminModeration && currentUser && <FlagPost postId={postId} /> }
+            { hasGroupModeration && currentUser && post.groupId && <FlagPostForGroup postId={postId} /> }
+            { isAuthor && <EditPost postId={postId} /> }
+            { isAuthor && <DeletePost postId={postId} /> }
+        </DotsMenu>
     )
 }
 

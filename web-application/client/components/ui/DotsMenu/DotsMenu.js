@@ -2,25 +2,26 @@ import React from 'react'
 
 import { EllipsisHorizontalIcon } from '@heroicons/react/24/solid'
 
-import { FloatingMenu, FloatingMenuBody, FloatingMenuTrigger, FloatingMenuItem } from '/components/generic/floating-menu/FloatingMenu'
+import { DropdownMenu, DropdownMenuBody, DropdownMenuTrigger, DropdownMenuItem } from '/components/ui/DropdownMenu'
+export { CloseMenuContext } from '/components/ui/DropdownMenu'
 
 import './DotsMenu.css'
 
 export const DotsMenu = function({ className, children }) {
     return (
-        <FloatingMenu className={`dots-menu ${className ? className : ''}`} closeOnClick={true}>
-            <FloatingMenuTrigger showArrow={false}><EllipsisHorizontalIcon className="dots-menu__dots" /></FloatingMenuTrigger>
-            <FloatingMenuBody>
+        <DropdownMenu className={`dots-menu ${className ? className : ''}`}>
+            <DropdownMenuTrigger><EllipsisHorizontalIcon className="dots-menu__dots" /></DropdownMenuTrigger>
+            <DropdownMenuBody>
                 { children }
-            </FloatingMenuBody>
-        </FloatingMenu>
+            </DropdownMenuBody>
+        </DropdownMenu>
     )
 }
 
 export const DotsMenuItem = function({ className, children, onClick }) {
     return (
-        <FloatingMenuItem onClick={onClick} className={`dots-menu__item ${ className ? className : ''}`}>
+        <DropdownMenuItem onClick={onClick} className={`dots-menu__item ${ className ? className : ''}`}>
             { children }
-        </FloatingMenuItem>
+        </DropdownMenuItem>
     )
 }

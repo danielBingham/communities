@@ -1,13 +1,13 @@
-import React from 'react'
+import React, { useEffect, useContext } from 'react'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
 import { patchUser } from '/state/User'
 
 import { TableRow, TableCell } from '/components/ui/Table'
-import ErrorModal from '/components/errors/ErrorModal'
+import { DotsMenu, DotsMenuItem, CloseMenuContext } from '/components/ui/DotsMenu'
 import DateTag from '/components/DateTag'
-import { DotsMenu, DotsMenuItem } from '/components/ui/DotsMenu'
+import { RequestErrorModal } from '/components/errors/RequestError'
 
 import './UserAdminTableRow.css'
 
@@ -15,21 +15,17 @@ const UserAdminTableRow = function({ user }) {
 
     const [request, makeRequest] = useRequest()
 
+    const closeMenu = useContext(CloseMenuContext)
+
     const changeUserStatus = function(status) {
         makeRequest(patchUser({ id: user.id, status: status }))
     }
 
-  
-    let error = null
-    if ( request && request.state === 'failed' ) {
-        error = (
-            <ErrorModal>
-                <p>Failed to ban "{ user.name }".</p>
-                <p>Error: { request.error.type }</p>
-                <p>Message: { request.error.message }</p>
-            </ErrorModal>
-        )
-    }
+    useEffect(function() {
+        if ( request?.state === 'fulfilled' ) {
+            closeMenu()
+        }
+    }, [ request ])
 
     return (
         <TableRow className="user-admin-table__row">
@@ -46,7 +42,7 @@ const UserAdminTableRow = function({ user }) {
                     { user.status !== 'banned' && <DotsMenuItem onClick={() => { changeUserStatus('banned')}}>Ban</DotsMenuItem> }
                     { user.status === 'banned' && <DotsMenuItem onClick={() => { changeUserStatus('confirmed')}}>Unban</DotsMenuItem> }
                 </DotsMenu>
-                { error } 
+                <RequestErrorModal message={`Attemp to ${user.status !== 'banned' ? 'ban' : 'unban'} user`} request={request} />
             </TableCell>
         </TableRow>
     )

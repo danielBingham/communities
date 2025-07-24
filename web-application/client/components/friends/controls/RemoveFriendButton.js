@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { UserMinusIcon } from '@heroicons/react/24/outline'
@@ -17,10 +17,6 @@ const RemoveFriendButton = function({ userId, type }) {
     const [request, makeRequest] = useRequest()
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
-    if ( ! currentUser || currentUser.id == userId) {
-        return null
-    }
-
     const dispatch = useDispatch()
     const removeFriend = function() {
         const relationship = {
@@ -29,7 +25,27 @@ const RemoveFriendButton = function({ userId, type }) {
         }
 
         makeRequest(deleteUserRelationship(relationship))
-        dispatch(resetEntities())
+    }
+
+    useEffect(() => {
+        return () => {
+            // Reset entities on unmount.  Unmount will occur when the patched
+            // UserRelationship has been updated so that their state is no
+            // longer pending.
+            dispatch(resetEntities())
+        }
+    }, [])
+
+    useEffect(function() {
+        if ( request?.state === 'failed' && request?.response.status === 404 ) {
+            // TODO There's probably a better way to handle this.
+            // That relationship doesn't exist.  Reset entities to requery.
+            dispatch(resetEntities())
+        }
+    }, [ request ])
+
+    if ( ! currentUser || currentUser.id == userId) {
+        return null
     }
 
     let text = 'Remove'

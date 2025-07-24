@@ -1,7 +1,5 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import { useSelector } from 'react-redux'
-
-import { FlagIcon } from '@heroicons/react/24/outline'
 
 import { useRequest } from '/lib/hooks/useRequest'
 import { useGroupMember } from '/lib/hooks/GroupMember'
@@ -9,8 +7,9 @@ import { useUser } from '/lib/hooks/User'
 
 import { patchGroupMember } from '/state/GroupMember'
 
-import { FloatingMenuItem } from '/components/generic/floating-menu/FloatingMenu'
+import { DotsMenuItem, CloseMenuContext } from '/components/ui/DotsMenu'
 import AreYouSure from '/components/AreYouSure'
+import { RequestErrorModal } from '/components/errors/RequestError'
 
 import './PromoteToModerator.css'
 
@@ -25,6 +24,8 @@ const PromoteToModerator = function({ groupId, userId }) {
     const [user, userRequest] = useUser(userId)
     const [userMember, userMemberRequest] = useGroupMember(groupId, userId)
 
+    const closeMenu = useContext(CloseMenuContext)
+
     const promote = function() {
         makeRequest(patchGroupMember({ groupId: groupId, userId: userId, role: 'moderator' }))
     }
@@ -32,6 +33,12 @@ const PromoteToModerator = function({ groupId, userId }) {
     const demote = function() {
         makeRequest(patchGroupMember({ groupId: groupId, userId: userId, role: 'member' }))
     }
+
+    useEffect(function() {
+        if ( request?.state === 'fulfilled') {
+            closeMenu()
+        }
+    }, [ request ])
 
     if ( ! currentMember || ! userMember ) {
         return null
@@ -46,10 +53,11 @@ const PromoteToModerator = function({ groupId, userId }) {
         if ( currentMember.role === 'admin' || currentUser.id === userMember.userId ) {
             return (
                 <>
-                    <FloatingMenuItem onClick={() => setAreYouSure(true)}>{ currentUser.id === userMember.userId ? 'Resign Moderator': 'Demote to Member' }</FloatingMenuItem> 
+                    <DotsMenuItem onClick={() => setAreYouSure(true)}>{ currentUser.id === userMember.userId ? 'Resign Moderator': 'Demote to Member' }</DotsMenuItem> 
                     <AreYouSure isVisible={areYouSure} execute={() => { setAreYouSure(false); demote() }} cancel={() => setAreYouSure(false)} > 
                         <p>Are you sure you want to { currentUser.id === userMember.userId ? 'resign' : `demote ${user.name}` }?</p>
                     </AreYouSure>
+                    <RequestErrorModal message="Attempt to demote moderator" request={request} />
                 </>
             )
         } else {
@@ -64,10 +72,11 @@ const PromoteToModerator = function({ groupId, userId }) {
 
     return (
         <>
-            <FloatingMenuItem onClick={() => setAreYouSure(true)}>Promote to Moderator</FloatingMenuItem> 
+            <DotsMenuItem onClick={() => setAreYouSure(true)}>Promote to Moderator</DotsMenuItem> 
             <AreYouSure isVisible={areYouSure} execute={() => { setAreYouSure(false); promote() }} cancel={() => setAreYouSure(false)} > 
                 <p>Are you sure you want to promote { user.name } to moderator?</p>
             </AreYouSure>
+            <RequestErrorModal message="Attempt to promote moderator" request={request} />
         </>
     )
 }

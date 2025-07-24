@@ -17,8 +17,8 @@
 .navigation-menu a:visited,
 .navigation-menu a:active {
     display: block;
-    padding: 10px;
     color: var(--primary-color-darkest);
+    padding: 10px;
 }
 .navigation-menu a:hover {
     background-color: var(--primary-color-light);
@@ -27,6 +27,7 @@
 .navigation-menu a.active  {
     font-weight: bold;
 }
+
 
 .navigation-menu .outline { 
     display: inline-block;
@@ -42,7 +43,7 @@
     display: inline-block;
 }
 
-@media (width <= 1220px) {
+@media (700px < width <= 1220px) {
 
     .navigation-menu {
         text-align: center;
@@ -50,6 +51,38 @@
 
     .navigation-menu li {
         display: inline-block;
+    }
+
+    .navigation-menu .navigation-menu__item .nav-text {
+        display: block;
+        font-size: 10px;
+    }
+
+    .navigation-menu .navigation-menu__button .nav-text {
+        display: block;
+        font-size: 10px;
+    }
+
+}
+@media (width <= 700px) {
+
+    .navigation-menu {
+        text-align: center;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(47px, 1fr));
+        align-items: center;
+        justify-items: center;
+        padding: 0;
+    }
+
+    .navigation-menu li {
+        display: block;
+    }
+
+    .navigation-menu a:link,
+    .navigation-menu a:visited,
+    .navigation-menu a:active {
+        padding: 0;
     }
     
     .navigation-menu .navigation-menu__item .nav-text {

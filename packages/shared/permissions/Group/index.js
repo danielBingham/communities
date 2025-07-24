@@ -23,6 +23,14 @@ const canAdminGroup = function(user, context) {
         return false
     }
 
+    // Always exclude banned members.
+    if ( context.userMember !== undefined && context.userMember !== null
+        && context.userMember.groupId === context.group.id
+        && context.userMember.status === 'banned' )
+    {
+        return false
+    }
+
     if ( context.userMember !== undefined && context.userMember !== null 
         && context.userMember.groupId === context.group.id
         && context.userMember.status === 'member' 
@@ -35,6 +43,14 @@ const canAdminGroup = function(user, context) {
 
 const canModerateGroup = function(user, context) {
     if ( context.group === undefined || context.group === null ) {
+        return false
+    }
+
+    // Always exclude banned members.
+    if ( context.userMember !== undefined && context.userMember !== null
+        && context.userMember.groupId === context.group.id
+        && context.userMember.status === 'banned' )
+    {
         return false
     }
 
@@ -61,6 +77,15 @@ const canViewGroup = function(user, context) {
     if ( context.group === undefined || context.group === null ) {
         return false
     }
+
+    // Always exclude banned members.
+    if ( context.userMember !== undefined && context.userMember !== null
+        && context.userMember.groupId === context.group.id
+        && context.userMember.status === 'banned' )
+    {
+        return false
+    }
+
 
     if ( context.group.type === 'open' || context.group.type == 'private') {
         return true

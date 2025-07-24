@@ -4,11 +4,12 @@
     top: 50%;
     transform: translateX(-50%) translateY(-50%);
 
-   /* width: 220px;
-    height: 100px; */
+    box-sizing: border-box;
+    max-width: 650px;
+    min-width: 340px;
+    max-height: 100vh;
+
     text-align: center;
-    /*margin-left: -110px;
-    margin-top: -50px;*/
     padding: 20px;
     border: thin solid var(--main-border-color);
     border-radius: 10px;

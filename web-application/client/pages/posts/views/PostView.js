@@ -5,7 +5,10 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useGroup } from '/lib/hooks/Group'
 import { useGroupMember } from '/lib/hooks/GroupMember'
 
-import { useGroupPermission, GroupPermissions } from '/lib/hooks/permission'
+import { 
+    useGroupPermission, GroupPermissions, 
+    GroupPostPermissions, useGroupPostPermission 
+ } from '/lib/hooks/permission'
 
 import Post from '/components/posts/Post'
 
@@ -25,6 +28,7 @@ const PostView = function({ groupId }) {
     const [currentMember, currentMemberRequest] = useGroupMember(groupId, currentUser.id)
 
     const canViewGroup = useGroupPermission(currentUser, GroupPermissions.VIEW, { group: group, userMember: currentMember })
+    const canViewGroupPost = useGroupPostPermission(currentUser, GroupPostPermissions.VIEW, { group: group, userMember: currentMember })
 
     if ( groupId !== undefined && ( ! group && ( ! groupRequest || groupRequest.state === 'pending' ))) {
         return  ( 
@@ -42,7 +46,7 @@ const PostView = function({ groupId }) {
         )
     }
 
-    if ( groupId !== undefined && canViewGroup !== true ) {
+    if ( groupId !== undefined && (canViewGroup !== true || canViewGroupPost !== true) ) {
         return ( <Error404 /> ) 
     } 
 

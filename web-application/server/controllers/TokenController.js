@@ -235,6 +235,9 @@ module.exports = class TokenController extends BaseController {
         }
         
         const tokenParams  = request.body
+        if ( tokenParams.email ) {
+            tokenParams.email = tokenParams.email.toLowerCase().trim()
+        }
 
         const typeErrors = validation.Token.validateType(tokenParams.type)
         if ( typeErrors.length > 0 ) { 

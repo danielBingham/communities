@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 
 import { TrashIcon } from '@heroicons/react/24/outline'
 
@@ -6,7 +6,8 @@ import { useRequest } from '/lib/hooks/useRequest'
 
 import { deletePostComment } from '/state/PostComment'
 
-import { FloatingMenuItem } from '/components/generic/floating-menu/FloatingMenu'
+import { DotsMenuItem, CloseMenuContext } from '/components/ui/DotsMenu'
+import { RequestErrorModal } from '/components/errors/RequestError'
 
 import AreYouSure from '/components/AreYouSure'
 
@@ -17,17 +18,27 @@ const DeletePostComment = function({ postId, id } ) {
 
     const [request, makeRequest] = useRequest()
 
+    const closeMenu = useContext(CloseMenuContext)
+
     const deleteComment = function() {
         setAreYouSure(false)
         makeRequest(deletePostComment({ postId: postId, id: id }))
     }
 
+    useEffect(function() {
+        if ( request?.state === 'fulfilled' ) {
+            closeMenu()
+        }
+    }, [ request ])
+
+
     return (
         <>
-            <FloatingMenuItem onClick={(e) => setAreYouSure(true)} className="delete"><TrashIcon /> delete</FloatingMenuItem>
+            <DotsMenuItem onClick={(e) => setAreYouSure(true)} className="delete"><TrashIcon /> delete</DotsMenuItem>
             <AreYouSure isVisible={areYouSure} execute={deleteComment} cancel={() => setAreYouSure(false)}> 
                 <p>Are you sure you want to delete this comment?</p>
             </AreYouSure>
+            <RequestErrorModal message="Attempt to delete comment" request={request} />
         </>
     )
 }

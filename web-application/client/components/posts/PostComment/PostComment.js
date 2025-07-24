@@ -8,6 +8,7 @@ import { useFeature } from '/lib/hooks/feature'
 import { usePostComment } from '/lib/hooks/PostComment'
 import { useSiteModeration } from '/lib/hooks/SiteModeration'
 import { useGroupModeration } from '/lib/hooks/GroupModeration'
+import { usePostLink } from '/lib/hooks/Post'
 
 import DateTag from '/components/DateTag'
 import UserTag from '/components/users/UserTag'
@@ -25,6 +26,9 @@ const PostComment = function({ postId, id }) {
     const [comment, request] = usePostComment(postId, id)
     const [siteModeration, siteModerationRequest] = useSiteModeration(comment?.siteModerationId)
     const [groupModeration, groupModerationRequest] = useGroupModeration(comment?.groupModerationId)
+    
+    const postLink = usePostLink(postId)
+
     const hasAdminModeration = useFeature('62-admin-moderation-controls')
 
     const location = useLocation()
@@ -57,7 +61,7 @@ const PostComment = function({ postId, id }) {
             <div id={`comment-${comment.id}`} key={comment.id} className={`post-comment ${ highlight ? 'highlight' : ''}`}>
                 <div className="post-comment__header">
                     <div>
-                        <UserTag id={comment.userId} /> commented <a href={`#comment-${comment.id}`}><DateTag timestamp={comment.createdDate} /></a>
+                        <UserTag id={comment.userId} /> commented <a href={`${postLink}#comment-${comment.id}`}><DateTag timestamp={comment.createdDate} /></a>
                     </div>
                     <div>
                         <PostCommentModeration postId={postId} postCommentId={id} />
@@ -90,7 +94,7 @@ const PostComment = function({ postId, id }) {
         <div id={`comment-${comment.id}`} key={comment.id} className={`post-comment ${ highlight ? 'highlight' : ''}`}>
             <div className="post-comment__header">
                 <div>
-                    <UserTag id={comment.userId} /> commented <a href={`#comment-${comment.id}`}><DateTag timestamp={comment.createdDate} /></a>
+                    <UserTag id={comment.userId} /> commented <a href={`${postLink}#comment-${comment.id}`}><DateTag timestamp={comment.createdDate} /></a>
                 </div>
                 <div>
                     { hasAdminModeration && <PostCommentModeration postId={postId} postCommentId={id} /> }

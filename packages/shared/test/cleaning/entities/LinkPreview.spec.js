@@ -17,12 +17,12 @@ describe('LinkPreview', function() {
         const cleaned = cleaning.LinkPreview.clean(linkPreview) 
         const expected = {
             id: 'a335d429-a7c5-429a-b6b0-5413e94e7921',
-            url: 'http://example.com',
+            url: 'httP://ExAmPlE.com',
             title: 'A test title',
             type: 'website',
             siteName: 'Example',
             description: 'A test description',
-            imageUrl: 'https://example.com',
+            imageUrl: 'HTTPS://EXAMPLE.COM',
             createdDate: ' TIMESTAMP ',
             updatedDate: ' TIMESTAMP '
         }
@@ -48,12 +48,12 @@ describe('LinkPreview', function() {
         const cleaned = cleaning.LinkPreview.clean(linkPreview) 
         const expected = {
             id: 'a335d429-a7c5-429a-b6b0-5413e94e7921',
-            url: 'http://example.com',
+            url: 'httP://ExAmPlE.com',
             title: 'A test title',
             type: 'website',
             siteName: 'Example',
             description: 'A test description',
-            imageUrl: 'https://example.com',
+            imageUrl: 'HTTPS://EXAMPLE.COM',
             createdDate: ' TIMESTAMP ',
             updatedDate: ' TIMESTAMP '
         }
@@ -74,10 +74,10 @@ describe('LinkPreview', function() {
         const cleaned = cleaning.LinkPreview.clean(linkPreview) 
         const expected = {
             id: 'a335d429-a7c5-429a-b6b0-5413e94e7921',
-            url: 'http://example.com',
+            url: 'httP://ExAmPlE.com',
             title: 'A test title',
             description: 'A test description',
-            imageUrl: 'https://example.com',
+            imageUrl: 'HTTPS://EXAMPLE.COM',
         }
 
         expect(cleaned).toStrictEqual(expected)

@@ -90,8 +90,14 @@ module.exports = class AuthenticationService {
          * 6. The passwords match.
          * 
          * **********************************************************/
+
+        let sql = 'select id, password, status from users where email = $1'
+        if ( this.core.features.has('163-limit-login-attempts') ) {
+            sql = 'select id, password, failed_authentication_attempts, last_authentication_attempt_date, status from users where email = $1'
+        }
+
         const results = await this.database.query(
-            'select id, password, failed_authentication_attempts, last_authentication_attempt_date, status from users where email = $1',
+            sql,
             [ credentials.email ]
         )
 
@@ -123,23 +129,32 @@ module.exports = class AuthenticationService {
 
         const userMatch = results.rows[0]
 
-        // 5. They are not currently in authentication timeout (10 failed attempts in 15 minutes).
-        const failedAttempts = userMatch.failed_authentication_attempts
-        const lastAttempt = new Date(userMatch.last_authentication_attempt_date)
-        const fifteenMinutes = 15 * 60 * 1000
-        if ( failedAttempts >= 10 && Date.now() - lastAttempt.getTime() < fifteenMinutes ) {
-            throw new ServiceError('authentication-timeout', `Too many failed log in attempts.  Please wait 15 minutes.`)
+        if ( this.core.features.has('163-limit-login-attempts') ) {
+            // 5. They are not currently in authentication timeout (10 failed attempts in 15 minutes).
+            const failedAttempts = userMatch.failed_authentication_attempts
+            const lastAttempt = new Date(userMatch.last_authentication_attempt_date)
+            const fifteenMinutes = 15 * 60 * 1000
+            const hasBeenFifteenMinutesSinceLastAttempt = Date.now() - lastAttempt.getTime() > fifteenMinutes
+            if ( failedAttempts >= 10 && hasBeenFifteenMinutesSinceLastAttempt !== true) {
+                throw new ServiceError('authentication-timeout', `Too many failed log in attempts.  Please wait 15 minutes.`)
+            } else if ( failedAttempts >= 10 && hasBeenFifteenMinutesSinceLastAttempt === true ) {
+                await this.database.query(`UPDATE users SET failed_authentication_attempts = 0 WHERE id = $1`, [ userMatch.id ])
+            }
         }
 
         // 6. The passwords match.
         const passwords_match = this.checkPassword(credentials.password, userMatch.password)
         if (passwords_match !== true) {
-            await this.database.query(`UPDATE users SET failed_authentication_attempts = failed_authentication_attempts+1, last_authentication_attempt_date = now() WHERE id = $1`, [ userMatch.id])
+            if ( this.core.features.has('163-limit-login-attempts') ) {
+                await this.database.query(`UPDATE users SET failed_authentication_attempts = failed_authentication_attempts+1, last_authentication_attempt_date = now() WHERE id = $1`, [ userMatch.id])
+            }
 
             throw new ServiceError('authentication-failed', `Failed login for email ${credentials.email}.`)
         }
        
-        await this.database.query(`UPDATE users SET failed_authentication_attempts = 0, last_authentication_attempt_date = now() WHERE id = $1`, [ userMatch.id])
+        if ( this.core.features.has('163-limit-login-attempts') ) {
+            await this.database.query(`UPDATE users SET failed_authentication_attempts = 0, last_authentication_attempt_date = now() WHERE id = $1`, [ userMatch.id])
+        }
         return userMatch.id 
     }
 

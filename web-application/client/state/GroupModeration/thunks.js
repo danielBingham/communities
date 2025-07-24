@@ -58,9 +58,7 @@ export const postGroupModerations = function(groupModeration) {
 
                 dispatch(setRelationsInState(response.relations))
             }
-        )).catch(function(error) {
-            throw error
-        })
+        ))
     }
 }
 

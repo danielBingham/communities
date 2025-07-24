@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useLayoutEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
@@ -13,9 +13,9 @@ import GroupEditForm from '/components/groups/form/GroupEditForm'
 import GroupPostPermissionsUpdate from '/components/groups/form/GroupPostPermissionsUpdate'
 import Button from '/components/generic/button/Button'
 import AreYouSure from '/components/AreYouSure'
-import Radio from '/components/ui/Radio'
 import Modal from '/components/generic/modal/Modal'
 import Error404 from '/components/errors/Error404'
+import { RequestErrorModal } from '/components/errors/RequestError'
 
 import "./GroupSettingsView.css"
 
@@ -37,8 +37,13 @@ const GroupSettingsView = function({ groupId }) {
     const deleteCurrentGroup = function() {
         setAreYouSure(false)
         makeRequest(deleteGroup(group))
-        navigate('/groups')
     }
+
+    useLayoutEffect(function() {
+        if ( request?.state === 'fulfilled' ) {
+            navigate('/groups')
+        }
+    }, [ request ])
 
     if ( ! canAdminGroup ) {
         return ( <Error404 /> ) 
@@ -70,6 +75,7 @@ const GroupSettingsView = function({ groupId }) {
                 <AreYouSure isVisible={areYouSure} execute={deleteCurrentGroup} cancel={() => setAreYouSure(false)}> 
                     <p>Are you sure you want to delete this group?</p>
                 </AreYouSure>
+                <RequestErrorModal message="Attempt to delete the group" request={request} />
             </div>
         </div>
     )

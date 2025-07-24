@@ -21,8 +21,8 @@
     padding: 5px;
     color: var(--danger-color-main);
 }
-.post-form .post-form__controls .attachment-controls .image,
-.post-form .post-form__controls .attachment-controls .link {
+.post-form .post-form__controls .attachment-controls .post-form__image,
+.post-form .post-form__controls .attachment-controls .post-form__link {
     display: inline-block;
 }
 .post-form .attachments .attachment {

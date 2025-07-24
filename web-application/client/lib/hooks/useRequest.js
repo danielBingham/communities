@@ -1,45 +1,60 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 
 import logger from '/logger'
 
 export function useRequest() {
     const [request, setRequest] = useState(null)
-
+    const abortController = useRef(null)
     const dispatch = useDispatch()
+
     const makeRequest = function(reduxThunk) {
-        const request = {
+        if ( request?.state === 'pending' && abortController.current !== null ) {
+            abortController.current.abort()
+            abortController.current = null
+        }
+
+        setRequest({
             state: 'pending',
             request: null,
             response: null, 
             error: null,
-        }
-        setRequest(request)
+        })
 
-        dispatch(reduxThunk)
+        const [promise, controller] = dispatch(reduxThunk)
+        abortController.current = controller
+        promise
             .then((result) => {
-                const newRequest = { 
+                setRequest({ 
                     state: 'fulfilled',
                     request: result.request,
                     response: result.response,
                     error: null
-                }
-                setRequest(newRequest)
+                })
             })
             .catch((result) => {
-                const newRequest = { 
+                setRequest({ 
                     state: 'failed',
                     request: result.request,
                     response: result.response,
                     error: result.error
-                }
-                setRequest(newRequest)
+                })
             })
     }
 
     const resetRequest = function() {
         setRequest(null) 
     }
+
+    // On unmount, cancel the request.
+    useEffect(() => {
+        return () => {
+           if ( request?.state === 'pending' && abortController.current !== null ) {
+               abortController.current.abort()
+               abortController.current = null
+           }
+        }
+    },[])
 
     return [ request, makeRequest, resetRequest ]
 }

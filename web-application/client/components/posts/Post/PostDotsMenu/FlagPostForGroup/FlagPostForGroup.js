@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import { useSelector } from 'react-redux'
 
 import { FlagIcon as FlagIconOutline } from '@heroicons/react/24/outline'
@@ -15,7 +15,7 @@ import { useGroupPermission, GroupPermissions } from '/lib/hooks/permission'
 
 import { postGroupModerations } from '/state/GroupModeration'
 
-import { FloatingMenuItem } from '/components/generic/floating-menu/FloatingMenu'
+import { DotsMenuItem, CloseMenuContext } from '/components/ui/DotsMenu'
 
 import ErrorModal from '/components/errors/ErrorModal'
 import WarningModal from '/components/errors/WarningModal'
@@ -28,6 +28,8 @@ import './FlagPostForGroup.css'
 const FlagPostForGroup = function({ postId } ) {
     const [ areYouSureGroup, setAreYouSureGroup ] = useState(false)
     const [ showModal, setShowModal ] = useState(false)
+
+    const closeMenu = useContext(CloseMenuContext)
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const [post, postRequest] = usePost(postId)
@@ -50,6 +52,7 @@ const FlagPostForGroup = function({ postId } ) {
     useEffect(() => {
         if ( request && request.state === 'fulfilled' ) {
             setAreYouSureGroup(false)
+            closeMenu()
         }  
     }, [ request])
 
@@ -100,45 +103,45 @@ const FlagPostForGroup = function({ postId } ) {
             if ( canModerateGroup === true ) {
                 return (
                     <>
-                        <FloatingMenuItem onClick={(e) => setShowModal(true)} className="flag-post-for-group flag-post-for-group__moderate"><FlagIconSolid /> Moderate for Group</FloatingMenuItem>
+                        <DotsMenuItem onClick={(e) => setShowModal(true)} className="flag-post-for-group flag-post-for-group__moderate"><FlagIconSolid /> Moderate for Group</DotsMenuItem>
                         <ModerateForGroupModal postId={postId} isVisible={showModal} setIsVisible={setShowModal} />
                     </>
 
                 )
             } else {
                 return (
-                    <FloatingMenuItem disabled={true} className="flag-post-for-group flag-post-for-group__flagged"><FlagIconSolid /> Flagged</FloatingMenuItem>
+                    <DotsMenuItem disabled={true} className="flag-post-for-group flag-post-for-group__flagged"><FlagIconSolid /> Flagged</DotsMenuItem>
                 )
             }
         } else if ( groupModeration.status === 'pending' ) {
             if ( canModerateGroup === true ) {
                 return (
                     <>
-                        <FloatingMenuItem onClick={(e) => setShowModal(true)} className="flag-post-for-group flag-post-for-group__moderate"><ClockIcon /> Moderate for Group</FloatingMenuItem>
+                        <DotsMenuItem onClick={(e) => setShowModal(true)} className="flag-post-for-group flag-post-for-group__moderate"><ClockIcon /> Moderate for Group</DotsMenuItem>
                         <ModerateForGroupModal postId={postId} isVisible={showModal} setIsVisible={setShowModal} />
                     </>
 
                 )
             } else {
                 return (
-                    <FloatingMenuItem disabled={true} className="flag-post-for-group flag-post-for-group__flagged"><ClockIcon /> Pending</FloatingMenuItem>
+                    <DotsMenuItem disabled={true} className="flag-post-for-group flag-post-for-group__flagged"><ClockIcon /> Pending</DotsMenuItem>
                 )
             }
 
         } else if ( groupModeration.status === 'approved' ) {
             return (
-                <FloatingMenuItem disabled={true} className="flag-post-for-group flag-post-for-group__approved"><CheckCircleIcon /> Approved</FloatingMenuItem>
+                <DotsMenuItem disabled={true} className="flag-post-for-group flag-post-for-group__approved"><CheckCircleIcon /> Approved</DotsMenuItem>
             )
         } else if ( groupModeration.status === 'rejected' ) {
             return (
-                <FloatingMenuItem disabled={true} className="flag-post-for-group flag-post-for-group__rejected"><XCircleIcon /> Removed</FloatingMenuItem>
+                <DotsMenuItem disabled={true} className="flag-post-for-group flag-post-for-group__rejected"><XCircleIcon /> Removed</DotsMenuItem>
             )
         }
     }
 
     return (
         <>
-            <FloatingMenuItem onClick={(e) => setAreYouSureGroup(true)} className="flag-post-for-group"><FlagIconOutline /> Flag for Group Moderators</FloatingMenuItem>
+            <DotsMenuItem onClick={(e) => setAreYouSureGroup(true)} className="flag-post-for-group"><FlagIconOutline /> Flag for Group Moderators</DotsMenuItem>
 
             <AreYouSure className="flag-post-for-group"
                 isVisible={areYouSureGroup}

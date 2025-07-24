@@ -7,6 +7,8 @@ import { useRequest } from '/lib/hooks/useRequest'
 
 import { getLinkPreview } from '/state/LinkPreview'
 
+import { Image } from '/components/ui/Image'
+
 import './LinkPreview.css'
 
 const LinkPreview = function({ id }) {
@@ -17,11 +19,9 @@ const LinkPreview = function({ id }) {
     const linkPreview = useSelector((state) => id && id in state.LinkPreview.dictionary ? state.LinkPreview.dictionary[id] : null) 
 
     useEffect(function() {
-        if ( id ) {
+        if ( id && ! linkPreview ) {
             makeRequest(getLinkPreview(id))
-        } else {
-            logger.error(new Error('Attempt to load a LinkPreview without an id.'))
-        }
+        } 
     }, [id])
 
     if ( ! linkPreview ) {
@@ -61,15 +61,11 @@ const LinkPreview = function({ id }) {
         }
     }
 
-    let imageUrl = linkPreview.imageUrl
-    if ( linkPreview.fileId !== null ) {
-        imageUrl = `${configuration.backend}/file/${linkPreview.fileId}`
-    }
-
     return (
         <div className="link-preview">
             <a target="_blank" href={linkPreview.url}>
-                <img src={imageUrl} />
+                { linkPreview.fileId !== null && <Image id={linkPreview.fileId} width={650} /> }
+                { linkPreview.fileId === null && <Image src={linkPreview.imageUrl} /> }
                 <div className="link-preview__details">
                     <div className="link-preview__site">{linkPreview.siteName}</div>
                     <h2 className="link-preview__title">{linkPreview.title}</h2>

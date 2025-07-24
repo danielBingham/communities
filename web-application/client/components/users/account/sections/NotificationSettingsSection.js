@@ -6,6 +6,8 @@ import { useRequest } from '/lib/hooks/useRequest'
 import { patchUser } from '/state/User'
 
 import Toggle from '/components/generic/toggle/Toggle'
+import { RequestErrorModal } from '/components/errors/RequestError'
+
 
 const NotificationSettingsSection = function({}) {
 
@@ -100,6 +102,7 @@ const NotificationSettingsSection = function({}) {
                     toggled={ 'Group:member:create:invited' in notifications && notifications['Group:member:create:invited'].email === false ? false : true} 
                     onClick={(e) => toggleNotificationSetting('Group:member:create:invited')} />
             </div>
+            <RequestErrorModal message={'Attempt to update Notification Settings'} request={request} />
         </div>
     )
 
