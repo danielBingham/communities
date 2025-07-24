@@ -332,251 +332,384 @@ For each heading, copy the `Cases` section of the linked file under the heading 
 
 ## [Read PostComment](documentation/testing/test-cases/PostComment/read.md)
 
-## Pre-requisites
+### Pre-requisites
 
 - [ ] User1 has been created.
 - [ ] User2 has been created and is friends with User1.
 - [ ] User3 has been created and is friends with User2, but not User1.
 
-## Cases
+### Cases
 
 - [x] As User1, create a public post.
     - [x] As User2, comment on User1's post.
     - [x] As User3, attempt to view User2's comment by direct link.  Confirm visible.
 
-- [ ] As User1, create a private post.
-    - [ ] As User2, comment on User1's post.
-    - [ ] As User3, attempt to view User2's comment by direct link.  Confirm not visible.
+- [x] As User1, create a private post.
+    - [x] As User2, comment on User1's post.
+    - [x] As User3, attempt to view User2's comment by direct link.  Confirm not visible.
 
-- [ ] As User1, create public post.
-    - [ ] As User3, comment on User1's post.
-    - [ ] As User1, change visibility to private.
-    - [ ] As User2, comment on User1's post.
-    - [ ] As User3, confirm no comment notification is recieved.
-    - [ ] As User3, attempt to view User2's comment by direct link.  Confirm not visible.
+- [x] As User1, create public post.
+    - [x] As User3, comment on User1's post.
+    - [x] As User1, change visibility to private.
+    - [x] As User2, comment on User1's post.
+    - [x] As User3, confirm no comment notification is recieved.
+    - [x] As User3, attempt to view User2's comment by direct link.  Confirm not visible.
 
-### Mentions
+#### Mentions
 
-- [ ] As User1 create a public post.
-    - [ ] As User2, comment on User1's post and mention User3.
-    - [ ] As User3, confirm mention notification. Click through notification and confirm comment is visible.
+- [x] As User1 create a public post.
+    - [x] As User2, comment on User1's post and mention User3.
+    - [x] As User3, confirm mention notification. Click through notification and confirm comment is visible.
 
-- [ ] As User1 create a private post.
-    - [ ] As User2, comment on User1's post and mention User3.
-    - [ ] As User3, confirm no mention notification.
-    - [ ] As User3, attempt to visit direct link for comment. confirm not visible.
+- [x] As User1 create a private post.
+    - [x] As User2, comment on User1's post and mention User3.
+    - [x] As User3, confirm no mention notification.
+    - [x] As User3, attempt to visit direct link for comment. confirm not visible.
 
 ## [Update PostComment](documentation/testing/test-cases/PostComment/delete.md)
+
+### Pre-requisites
+
+- [x] User1 has been created.
+- [x] User2 has been created and is friends with User1.
+- [x] User3 has been created and is friends with User2.
+- [x] User1 has created a public post.
+
+### Cases
+
+- [x] As User2, comment on User1's post.
+    - [x] As User2, edit comment.
+    - [x] As User2, write edit text.
+    - [x] As User2, post the edit. Confirm comment shows the edit.
+
+- [x] As User2, comment on User1's post.
+    - [x] As User2, edit the comment.  Write some edit text.
+    - [x] As User2, cancel the edit.  Confirm comment shows original text.
+
+#### Mentions
+
+- [x] As User2, comment on User1's post and mention User3.
+    - [x] As User3, confirm mention notification.
+    - [x] As User2, edit the comment.  Confirm User3 is not notified again.
+
+
+- [x] As User2, comment on User1's post. NOTE: This case covers a current bug.
+    - [x] As User2, edit the comment and add a mention of User3.
+    - [x] As User3, confirm notification.
+
+#### Drafts
+
+- [x] As User2, comment on User1's post.
+    - [x] As User2, edit the comment.  Write some new text.
+    - [x] Reload the browser, confirm new text remains.
+    - [x] Navigate away from the page and back, confirm new text remains.
+    - [x] As User1, view the comment.  Confirm new text is absent.
+    - [x] As User2, post the comment.  Confirm edit shows up properly.
+
+- [x] As User2, comment on User1's post.
+    - [x] As User2, edit the comment.  Write some new text.
+    - [x] As User2, log out and log back in.  Confirm text is gone.
+
+- [x] As User2, comment on User1's post.
+    - [x] As User2, edit the comment. Write some new text.
+    - [x] As User2, reload the browser.  Confirm text remains.
+    - [x] As User2, cancel the edit.  Confirm previous text is restored.
+
 ## [Delete PostComment](documentation/testing/test-cases/PostComment/update.md)
 
+### Pre-requisites
+
+- [x] User1 has been created.
+- [x] User2 has been created.
+- [x] User1 has created a public post.
+
+### Cases
+
+- [x] As User2, comment on User1's post.
+    - [x] As User2, delete the comment.
+    - [x] Confirm the comment is removed.
+
+- [x] As User2, comment on User1's post.
+    - [x] As User1, check the dots menu for User2's comment.
+        - [x] Confirm "delete" is not shown.
+
+- [x] As User2, comment on User1's post, mentioning User1.
+    - [x] As User2, delete the comment.
+    - [x] As User1, click on the mention notification. Confirm is shows the post, but comment is gone.
+
 ## [Create PostSubscription](documentation/testing/test-cases/PostSubscription/create.md)
+
+### Pre-requisites
+
+- [x] User1 has been created.
+- [x] User2 has been created and is friends with User1.
+- [x] User3 has been created and is friends with User2, but not User1.
+
+### Cases
+
+- [x] When a user creates a post they should be subscribed to the post and notified of comments.
+    - [x] As User1, create a post.
+    - [x] As User1, confirm subscribed.
+    - [x] As User2, comment on User1's post.
+    - [x] As User1, confirm notified.
+
+- [x] When a user comments on a post, they should be subscribed to the post and notified of comments.
+    - [x] As User1, create a post.
+    - [x] As User2, comment on User1's post.
+    - [x] As User2, confirm subscribed.
+    - [x] As User1, comment on User1's post.
+    - [x] As User2, confirm notified.
+
+- [x] When a user subscribes to a post, they should be notified of comments.
+    - [x] As User1, create a public post.
+    - [x] As User3, subscribe to User1's post.
+    - [x] As User2, comment on User1's post.
+    - [x] As User3, confirm notification.
+
+- [x] When a user loses the ability to view a subscribed post they should no longer be notified of comments.
+    - [x] As User1, create a public post.
+    - [x] As User3, subscribe to User1's post.
+    - [x] As User1, change visibility of post to private.
+    - [x] As User2, comment on User1's post.
+    - [x] As User3, confirm no notification.
+
 ## [Delete PostSubscription](documentation/testing/test-cases/PostSubscription/delete.md)
+
+### Pre-requisites
+
+- [ ] User1 has been created.
+- [ ] User2 has been created and is friends with User1.
+- [ ] User3 has been created and is friends with User2, but not User1.
+
+### Cases
+
+- [x] When a user unsubscribes from a post they created, they should no longer be notified of comments. 
+    - [x] As User1, create a post.
+    - [x] As User1, unsubscribe from post. 
+    - [x] As User2, comment on User1's post.
+    - [x] As User1, confirm not notified.
+
+- [x] When a user unsubscribes from a post they commented on, they should no longer be notified of comments. 
+    - [x] As User1, create a post.
+    - [x] As User2, comment on User1's post.
+    - [x] As User2, unsubscribe from User1's post. 
+    - [x] As User1, comment on User1's post.
+    - [x] As User2, confirm not notified.
+
+- [x] When a user unsubscribes from a post they subscribed to, they should not longer be notified of comments. 
+    - [x] As User1, create a public post.
+    - [x] As User3, subscribe to User1's post.
+    - [x] As User2, comment on User1's post.
+    - [x] As User3, confirm notification.
+    - [x] As User3, unsubscribe from User1's post.
+    - [x] As User2 comment on User1's post.
+    - [x] As User3, confirm no notification.
  
 ### Profile Editing
 
-- [ ] As Jane Doe, upload a profile image and submit form.
-- [ ] As Jane Doe, remove profile image and submit form.
-- [ ] As Jane Doe, edit name and bio and submit form.
-- [ ] As Jane Doe, edit name and bio and don't submit form.
-- [ ] As Jane Doe, change email.  Confirm email.
-- [ ] As user2, change password. Log out and log back in with new password.
+- [x] As Jane Doe, upload a profile image and submit form.
+- [x] As Jane Doe, remove profile image and submit form.
+- [x] As Jane Doe, edit name and bio and submit form.
+- [x] As Jane Doe, edit name and bio and don't submit form.
+- [x] As Jane Doe, change email.  Confirm email.
+- [x] As user2, change password. Log out and log back in with new password.
 
 ### Settings 
 
-- [ ] As Jane Doe, turn off Post Comments.
-    - [ ] As John Doe, comment on a Jane Doe post. Confirm no emails.
-- [ ] As Jane Doe, turn off friend requests.
+- [x] As Jane Doe, turn off Post Comments.
+    - [x] As John Doe, comment on a Jane Doe post. Confirm no emails.
+- [x] As Jane Doe, turn off friend requests.
 
 ### Admin Moderation
 
-- [ ] As John Doe, unfriend Admin.
-- [ ] As Jane Doe, unfriend Admin.
+- [x] As John Doe, unfriend Admin.
+- [x] As Jane Doe, unfriend Admin.
 
-- [ ] As John Doe, flag one of Jane Doe's posts.
-    - [ ] As Admin, confirm the flagged post shows up on the Admin Moderation queue.
-    - [ ] As Admin, approve the flagged post.
-    - [ ] As John Doe, confirm the flagged post remains visible in the feed and can no longer be flagged.
-- [ ] As John Doe, flag one of Jane Doe's comments.
-    - [ ] As Admin, confirm the flagged comment shows up on the Admin Moderation queue.
-    - [ ] As Admin, approve the flagged comment.
-    - [ ] As John Doe, confirm the flagged comment remains visible in the feed and can no longer be flagged.
-- [ ] As Jane Doe, flag one of John Doe's posts.
-    - [ ] As Admin, confirm the flagged post shows up on the Admin Moderation queue.
-    - [ ] As Admin, reject the flagged post with a reason.
-    - [ ] As Jane Doe, confirm the rejected post shows the moderation message and reason.
-- [ ] As Jane Doe, flag one of John Doe's comments.
-    - [ ] As Admin, confirm the flagged comment shows up on the Admin Moderation queue.
-    - [ ] As Admin, reject the flagged comment with a reason.
-    - [ ] As Jane Doe, confirm the rejected comment shows the moderation message and reason.
+- [x] As John Doe, flag one of Jane Doe's posts.
+    - [x] As Admin, confirm the flagged post shows up on the Admin Moderation queue.
+    - [x] As Admin, approve the flagged post.
+    - [x] As John Doe, confirm the flagged post remains visible in the feed and can no longer be flagged.
+- [x] As John Doe, flag one of Jane Doe's comments.
+    - [x] As Admin, confirm the flagged comment shows up on the Admin Moderation queue.
+    - [x] As Admin, approve the flagged comment.
+    - [x] As John Doe, confirm the flagged comment remains visible in the feed and can no longer be flagged.
+- [x] As Jane Doe, flag one of John Doe's posts.
+    - [x] As Admin, confirm the flagged post shows up on the Admin Moderation queue.
+    - [x] As Admin, reject the flagged post with a reason.
+    - [x] As Jane Doe, confirm the rejected post shows the moderation message and reason.
+- [x] As Jane Doe, flag one of John Doe's comments.
+    - [x] As Admin, confirm the flagged comment shows up on the Admin Moderation queue.
+    - [x] As Admin, reject the flagged comment with a reason.
+    - [x] As Jane Doe, confirm the rejected comment shows the moderation message and reason.
 
 ### Groups
 
 #### Test 'open' Groups
 
-- [ ] As John Doe, create an "open" group named "Open Test Group"
-    - [ ] As John Doe, create a post in "Open Test Group".
+- [x] As John Doe, create an "open" group named "Open Test Group"
+    - [x] As John Doe, create a post in "Open Test Group".
 
-- [ ] As Jane Doe, attempt to view "Open Test Group", confirm posts and members are visible.
-    - [ ] As Jane Doe, attempt to view a specific post in "Open Test Group" by loading the direct link.  Confirm visible.
+- [x] As Jane Doe, attempt to view "Open Test Group", confirm posts and members are visible.
+    - [x] As Jane Doe, attempt to view a specific post in "Open Test Group" by loading the direct link.  Confirm visible.
 
-- [ ] As John Doe, invite Jane Doe to "Open Test Group"
-    - [ ] As Jane Doe, reject the invite.
-    - [ ] As John Doe, invite Jane Doe to "Open Test Group"
-    - [ ] As Jane Doe, accept the invite and join the group.
-    - [ ] As Jane Doe, attempt to view a specific post by loading the direct link.  Confirm visible.
-    - [ ] As Jane Doe, post in the group.
-    - [ ] As Jane Doe, comment on John Doe's post in the group.
+- [x] As John Doe, invite Jane Doe to "Open Test Group"
+    - [x] As Jane Doe, reject the invite.
+    - [x] As John Doe, invite Jane Doe to "Open Test Group"
+    - [x] As Jane Doe, accept the invite and join the group.
+    - [x] As Jane Doe, attempt to view a specific post by loading the direct link.  Confirm visible.
+    - [x] As Jane Doe, post in the group.
+    - [x] As Jane Doe, comment on John Doe's post in the group.
 
-- [ ] As John Doe, promote Jane Doe to "moderator".
+- [x] As John Doe, promote Jane Doe to "moderator".
 
-- [ ] As Jane Doe, invite James Smith to "Open Test Group"
-    - [ ] As James Smith, accept the email invite.
-    - [ ] As James Smith, accept the group invite.
-    - [ ] As James Smith, attempt to view a specific post by loading the direct link.  Confirm visible.
-    - [ ] As James Smith, post in the group.
-    - [ ] As James Smith, leave the group.
-        - [ ] Confirm James Smith's, post remains.
-        - [ ] As Jane Doe, comment on James Smith's post.  Confirm James Smith still subscribed and notified.
+- [x] As Jane Doe, invite James Smith to "Open Test Group"
+    - [x] As James Smith, accept the group invite.
+    - [x] As James Smith, attempt to view a specific post by loading the direct link.  Confirm visible.
+    - [x] As James Smith, post in the group.
+    - [x] As James Smith, leave the group.
+        - [x] Confirm James Smith's, post remains.
+        - [x] As Jane Doe, comment on James Smith's post.  Confirm James Smith still subscribed and notified.
 
-- [ ] As John Doe, invite Maria Rodriguez to "Open Test Group" using an email
-    - [ ] As Maria Rodriguez, accept the email invite.
-    - [ ] As Maria Rodriguez, accept the group invite.
-    - [ ] As Maria Rodriguez, attempt to view a specific post by loading the direct link.  Confirm visible.
-    - [ ] As Maria Rodriguez, make a post.
-    - [ ] As John Doe, remove Maria Rodriguez from the group.
-        - [ ] Confirm Maria Rodriguez's post remains.
-        - [ ] As John Doe, comment on Maria Rodriguez's post.  Confirm Maria Rodriguez still subscribed and notified.
-    - [ ] As Maria Rodriguez, delete account.
+- [x] As John Doe, invite Maria Rodriguez to "Open Test Group" using an email
+    - [x] As Maria Rodriguez, accept the email invite.
+    - [x] As Maria Rodriguez, accept the group invite.
+    - [x] As Maria Rodriguez, attempt to view a specific post by loading the direct link.  Confirm visible.
+    - [x] As Maria Rodriguez, make a post.
+    - [x] As John Doe, remove Maria Rodriguez from the group.
+        - [x] Confirm Maria Rodriguez's post remains.
+        - [x] As John Doe, comment on Maria Rodriguez's post.  Confirm Maria Rodriguez still subscribed and notified.
+    - [x] As Maria Rodriguez, delete account.
 
-- [ ] As John Doe, flag Jane Doe's post in the group for Admin.
-    - [ ] As Admin, confirm flagged post shows up in Admin Moderation queue.
-    - [ ] As Admin, reject the flagged post with a reason.
-    - [ ] As John Doe, confirm the rejected post shows the moderation message and reason.
-- [ ] As John Doe, flag Jane Doe's comment on a post in the group.
-    - [ ] As Admin, confirm the flagged comment shows up in the Admin Moderation Queue.
-    - [ ] As Admin, reject the flagged comment.
-    - [ ] As John Doe, confirm the rejected comment shows the moderation message and reason.
+- [x] As John Doe, flag Jane Doe's post in the group for Admin.
+    - [x] As Admin, confirm flagged post shows up in Admin Moderation queue.
+    - [x] As Admin, reject the flagged post with a reason.
+    - [x] As John Doe, confirm the rejected post shows the moderation message and reason.
+- [x] As John Doe, flag Jane Doe's comment on a post in the group.
+    - [x] As Admin, confirm the flagged comment shows up in the Admin Moderation Queue.
+    - [x] As Admin, reject the flagged comment.
+    - [x] As John Doe, confirm the rejected comment shows the moderation message and reason.
 
-- [ ] As John Doe, promote Jane Doe to group "admin"
+- [x] As John Doe, promote Jane Doe to group "admin"
 
-- [ ] As John Doe, modify the group's profile in Settings.
-- [ ] As Jane Doe, modify the group's profile in Settings.
-- [ ] As John Doe, delete the group.
-    - [ ] Confirm all posts deleted.
+- [x] As John Doe, modify the group's profile in Settings.
+- [x] As Jane Doe, modify the group's profile in Settings.
+- [x] As John Doe, delete the group.
+    - [x] Confirm all posts deleted.
 
 #### Test 'private' Groups
 
-- [ ] As John Doe, create a "private" group named "Private Test Group"
-    - [ ] As John Doe, create a post in "Private Test Group".
+- [x] As John Doe, create a "private" group named "Private Test Group"
+    - [x] As John Doe, create a post in "Private Test Group".
 
-- [ ] As Jane Doe, attempt to view "Private Test Group", confirm posts and members are *not* visible.
-    - [ ] As Jane Doe, attempt to view a specific post in "Private Test Group" by loading the direct link.  Confirm 404.
+- [x] As Jane Doe, attempt to view "Private Test Group", confirm posts and members are *not* visible.
+    - [x] As Jane Doe, attempt to view a specific post in "Private Test Group" by loading the direct link.  Confirm 404.
 
-- [ ] As John Doe, invite Jane Doe to "Private Test Group"
-    - [ ] As Jane Doe, reject the invite.
-    - [ ] As John Doe, invite Jane Doe to "Private Test Group".
-    - [ ] As Jane Doe, accept the invite and join the group.
-    - [ ] As Jane Doe, confirm posts and members are now visible.
-        - [ ] As Jane Doe, attempt to view a specific post in "Private Test Group" by loading the direct link, confirm visible.
-        - [ ] As Jane Doe, comment on the viewed post.
-        - [ ] As Jane Doe, post in the group.
+- [x] As Jane Doe, request an invite to "Private Test Group"
+    - [x] As John Doe, request the invite.
+    - [x] As Jane Doe, rquest an invite to "Private Test Group".
+    - [x] As John Doe, accept the request and join the group.
+    - [x] As Jane Doe, confirm posts and members are now visible.
+        - [x] As Jane Doe, attempt to view a specific post in "Private Test Group" by loading the direct link, confirm visible.
+        - [x] As Jane Doe, comment on the viewed post.
+        - [x] As Jane Doe, post in the group.
 
-- As John Doe, promote Jane Doe to "moderator".
+- [x] As John Doe, promote Jane Doe to "moderator".
 
-- [ ] As Jane Doe, invite James Smith to "Private Test Group"
-    - [ ] As James Smith, accept the email invite.
-    - [ ] As James Smith, accept the group invite.
-    - [ ] As James Smith, attempt to view a specific post by loading the direct link.  Confirm visible.
-    - [ ] As James Smith, post in the group.
-    - [ ] As James Smith, leave the group.
-        - [ ] As James Smith, confirm post no longer visible.
-        - [ ] As Jane Doe, confirm James Smith's, post remains.
-        - [ ] As Jane Doe, comment on James Smith's post.  Confirm James Smith is *not* still subscribed and *not* notified.
+- [x] As Jane Doe, invite James Smith to "Private Test Group"
+    - [x] As James Smith, accept the email invite.
+    - [x] As James Smith, accept the group invite.
+    - [x] As James Smith, attempt to view a specific post by loading the direct link.  Confirm visible.
+    - [x] As James Smith, post in the group.
+    - [x] As James Smith, leave the group.
+        - [x] As James Smith, confirm post no longer visible.
+        - [x] As Jane Doe, confirm James Smith's, post remains.
+        - [x] As Jane Doe, comment on James Smith's post.  Confirm James Smith is *not* still subscribed and *not* notified.
 
-- [ ] As John Doe, invite Maria Rodriguez to "Private Test Group" using an email
-    - [ ] As Maria Rodriguez, accept the email invite.
-    - [ ] As Maria Rodriguez, accept the group invite.
-    - [ ] As Maria Rodriguez, attempt to view a specific post by loading the direct link.  Confirm visible.
-    - [ ] As Maria Rodriguez, make a post.
-    - [ ] As John Doe, remove Maria Rodriguez from the group.
-        - [ ] As John Doe, confirm Maria Rodriguez's post remains.
-        - [ ] As John Doe, comment on Maria Rodriguez's post.  Confirm Maria Rodriguez is *not* still subscribed and is *not* notified.
-        - [ ] As Maria Rodriguez, confirm Maria Rodriguez's post is no longer visible.
-    - [ ] As Maria Rodriguez, delete account.
+- [x] As John Doe, invite Maria Rodriguez to "Private Test Group" using an email
+    - [x] As Maria Rodriguez, accept the email invite.
+    - [x] As Maria Rodriguez, accept the group invite.
+    - [x] As Maria Rodriguez, attempt to view a specific post by loading the direct link.  Confirm visible.
+    - [x] As Maria Rodriguez, make a post.
+    - [x] As John Doe, remove Maria Rodriguez from the group.
+        - [x] As John Doe, confirm Maria Rodriguez's post remains.
+        - [x] As John Doe, comment on Maria Rodriguez's post.  Confirm Maria Rodriguez is *not* still subscribed and is *not* notified.
+        - [x] As Maria Rodriguez, confirm Maria Rodriguez's post is no longer visible.
+    - [x] As Maria Rodriguez, delete account.
 
-- [ ] As John Doe, flag Jane Doe's post in the group for Admin.
-    - [ ] As Admin, confirm flagged post shows up in Admin Moderation queue.
-    - [ ] As Admin, reject the flagged post with a reason.
-    - [ ] As John Doe, confirm the rejected post shows the moderation message and reason.
-- [ ] As John Doe, flag Jane Doe's comment on a post in the group.
-    - [ ] As Admin, confirm the flagged comment shows up in the Admin Moderation Queue.
-    - [ ] As Admin, reject the flagged comment.
-    - [ ] As John Doe, confirm the rejected comment shows the moderation message and reason.
+- [x] As John Doe, flag Jane Doe's post in the group for Admin.
+    - [x] As Admin, confirm flagged post shows up in Admin Moderation queue.
+    - [x] As Admin, reject the flagged post with a reason.
+    - [x] As John Doe, confirm the rejected post shows the moderation message and reason.
+- [x] As John Doe, flag Jane Doe's comment on a post in the group.
+    - [x] As Admin, confirm the flagged comment shows up in the Admin Moderation Queue.
+    - [x] As Admin, reject the flagged comment.
+    - [x] As John Doe, confirm the rejected comment shows the moderation message and reason.
 
-- [ ] As John Doe, promote Jane Doe to group "admin"
+- [x] As John Doe, promote Jane Doe to group "admin"
 
-- [ ] As John Doe, modify the group's profile in Settings.
-- [ ] As Jane Doe, modify the group's profile in Settings.
-- [ ] As John Doe, delete the group.
-    - [ ] Confirm all posts deleted.
+- [x] As John Doe, modify the group's profile in Settings.
+- [x] As Jane Doe, modify the group's profile in Settings.
+- [x] As John Doe, delete the group.
+    - [x] Confirm all posts deleted.
 
 #### Test 'hidden' Groups
 
-- [ ] As John Doe, create a "hidden" group named "Hidden Test Group"
-    - [ ] As John Doe, create a post in "Hidden Test Group".
+- [x] As John Doe, create a "hidden" group named "Hidden Test Group"
+    - [x] As John Doe, create a post in "Hidden Test Group".
 
-- [ ] As Jane Doe, attempt to view "Hidden Test Group", confirm 404.
-    - [ ] As user2, attempt to view a specific post in "Hidden Test Group" by loading the direct link, confirm 404.
+- [x] As Jane Doe, attempt to view "Hidden Test Group", confirm 404.
+    - [x] As user2, attempt to view a specific post in "Hidden Test Group" by loading the direct link, confirm 404.
 
-- [ ] As John Doe, invite Jane Doe to "Hidden Test Group"
-    - [ ] As Jane Doe, confirm "Hidden Test Group" is visible.
-    - [ ] As Jane Doe, reject the invite.
-    - [ ] As Jane Doe, confirm group is no longer visible.
-    - [ ] As John Doe, invite Jane Doe to "Hidden Test Group".
-    - [ ] As Jane Doe, accept the invite and join the group.
-    - [ ] As Jane Doe, confirm posts and members are now visible.
-        - [ ] As Jane Doe, attempt to view a specific post in "Hidden Test Group" by loading the direct link, confirm visible.
-        - [ ] As Jane Doe, comment on the viewed post.
-        - [ ] As Jane Doe, post in the group.
+- [x] As John Doe, invite Jane Doe to "Hidden Test Group"
+    - [x] As Jane Doe, confirm "Hidden Test Group" is visible.
+    - [x] As Jane Doe, reject the invite.
+    - [x] As Jane Doe, confirm group is no longer visible.
+    - [x] As John Doe, invite Jane Doe to "Hidden Test Group".
+    - [x] As Jane Doe, accept the invite and join the group.
+    - [x] As Jane Doe, confirm posts and members are now visible.
+        - [x] As Jane Doe, attempt to view a specific post in "Hidden Test Group" by loading the direct link, confirm visible.
+        - [x] As Jane Doe, comment on the viewed post.
+        - [x] As Jane Doe, post in the group.
 
-- [ ] As Jane Doe, invite James Smith to "Hidden Test Group" using an email
-    - [ ] As James Smith, accept the email invite.
-    - [ ] As James Smith, confirm group is visible.
-    - [ ] As James Smith, accept the group invite.
-    - [ ] As James Smith, attempt to view a specific post by loading the direct link.  Confirm visible.
-    - [ ] As James Smith, post in the group.
-    - [ ] As James Smith, leave the group.
-        - [ ] As James Smith, confirm group is no longer visible.
-        - [ ] As James Smith, confirm post is no longer visible.
-        - [ ] As Jane Doe, confirm James Smith's, post remains.
-        - [ ] As Jane Doe, comment on James Smith's post.  Confirm James Smith is *not* still subscribed and *not* notified.
+- [x] As John Doe, promote Jane Doe to "moderator".
 
-- [ ] As John Doe, invite Maria Rodriguez to "Hidden Test Group" using an email
-    - [ ] As Maria Rodriguez, accept the email invite.
-    - [ ] As Maria Rodriguez, confirm the group is visible.
-    - [ ] As Maria Rodriguez, accept the group invite.
-    - [ ] As Maria Rodriguez, attempt to view a specific post by loading the direct link.  Confirm visible.
-    - [ ] As Maria Rodriguez, make a post.
-    - [ ] As John Doe, remove Maria Rodriguez from the group.
-        - [ ] As John Doe, confirm Maria Rodriguez's post remains.
-        - [ ] As John Doe, comment on Maria Rodriguez's post.  Confirm Maria Rodriguez is *not* still subscribed and is *not* notified.
-        - [ ] As Maria Rodriguez, confirm Maria Rodriguez's post is no longer visible.
-        - [ ] As Maria Rodriguez, confirm the group is no longer visible.
-    - [ ] As Maria Rodriguez, delete account.
+- [x] As Jane Doe, invite James Smith to "Hidden Test Group" 
+    - [x] As James Smith, confirm group is visible.
+    - [x] As James Smith, accept the group invite.
+    - [x] As James Smith, attempt to view a specific post by loading the direct link.  Confirm visible.
+    - [x] As James Smith, post in the group.
+    - [x] As James Smith, leave the group.
+        - [x] As James Smith, confirm group is no longer visible.
+        - [x] As James Smith, confirm post is no longer visible.
+        - [x] As Jane Doe, confirm James Smith's, post remains.
+        - [x] As Jane Doe, comment on James Smith's post.  Confirm James Smith is *not* still subscribed and *not* notified.
+
+- [x] As John Doe, invite Maria Rodriguez to "Hidden Test Group" using an email
+    - [x] As Maria Rodriguez, accept the email invite.
+    - [x] As Maria Rodriguez, confirm the group is visible.
+    - [x] As Maria Rodriguez, accept the group invite.
+    - [x] As Maria Rodriguez, attempt to view a specific post by loading the direct link.  Confirm visible.
+    - [x] As Maria Rodriguez, make a post.
+    - [x] As John Doe, remove Maria Rodriguez from the group.
+        - [x] As John Doe, confirm Maria Rodriguez's post remains.
+        - [x] As John Doe, comment on Maria Rodriguez's post.  Confirm Maria Rodriguez is *not* still subscribed and is *not* notified.
+        - [x] As Maria Rodriguez, confirm Maria Rodriguez's post is no longer visible.
+        - [x] As Maria Rodriguez, confirm the group is no longer visible.
+    - [x] As Maria Rodriguez, delete account.
  
-- [ ] As John Doe, flag Jane Doe's post in the group for Admin.
-    - [ ] As Admin, confirm flagged post shows up in Admin Moderation queue.
-    - [ ] As Admin, reject the flagged post with a reason.
-    - [ ] As John Doe, confirm the rejected post shows the moderation message and reason.
-- [ ] As John Doe, flag Jane Doe's comment on a post in the group.
-    - [ ] As Admin, confirm the flagged comment shows up in the Admin Moderation Queue.
-    - [ ] As Admin, reject the flagged comment.
-    - [ ] As John Doe, confirm the rejected comment shows the moderation message and reason.
+- [x] As John Doe, flag Jane Doe's post in the group for Admin.
+    - [x] As Admin, confirm flagged post shows up in Admin Moderation queue.
+    - [x] As Admin, reject the flagged post with a reason.
+    - [x] As John Doe, confirm the rejected post shows the moderation message and reason.
+- [x] As John Doe, flag Jane Doe's comment on a post in the group.
+    - [x] As Admin, confirm the flagged comment shows up in the Admin Moderation Queue.
+    - [x] As Admin, reject the flagged comment.
+    - [x] As John Doe, confirm the rejected comment shows the moderation message and reason.
 
-- [ ] As John Doe, promote Jane Doe to group "admin"
+- [x] As John Doe, promote Jane Doe to group "admin"
 
-- [ ] As John Doe, modify the group's profile in Settings.
-- [ ] As Jane Doe, modify the group's profile in Settings.
-- [ ] As John Doe, delete the group.
-    - [ ] Confirm all posts deleted.
+- [x] As John Doe, modify the group's profile in Settings.
+- [x] As Jane Doe, modify the group's profile in Settings.
+- [x] As John Doe, delete the group.
+    - [x] Confirm all posts deleted.
 
