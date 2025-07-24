@@ -21,12 +21,35 @@
         margin: 0 auto;
     }
 }
-@media (width <= 1220px) {
+@media (700px < width <= 1220px) {
     .page {
         display: grid;
         grid-template-columns: 1fr;
         grid-template-rows: auto;
         margin: 0 auto;
+    }
+
+    .page .page-left-gutter {
+        grid-row: 2 / 3;
+    }
+    .page .page-right-gutter {
+        grid-row: 1 / 2;
+    }
+    .page .page-body {
+        box-sizing: border-box;
+        margin: 0 auto;
+        grid-row: 3 / 4;
+        width: 100%;
+        padding-top: 10px;
+    }
+}
+@media (width <= 700px) {
+    .page {
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+        margin: 0 auto;
+        padding: 0 5px;
     }
 
     .page .page-left-gutter {
