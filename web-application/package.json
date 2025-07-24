@@ -1,6 +1,6 @@
 {
   "name": "@communities/web-application",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "The web application for Communities.  Non-profit social media.",
   "author": "Daniel Bingham",
   "license": "GPL-3.0",
@@ -28,8 +28,8 @@
     }
   },
   "dependencies": {
-    "@communities/backend": "^0.5.1",
-    "@communities/shared": "^0.5.1",
+    "@communities/backend": "^0.5.2",
+    "@communities/shared": "^0.5.2",
     "@heroicons/react": "2.x",
     "@reduxjs/toolkit": "1.x",
     "@sentry/react": "9.x",
