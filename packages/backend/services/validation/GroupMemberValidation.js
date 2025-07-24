@@ -405,7 +405,7 @@ module.exports = class GroupMemberValidation {
                             })
                         }
 
-                        if ( canAdminGroup !== true ) {
+                        if ( canAdminGroup !== true && ! (currentUser.id === groupMember.userId && groupMember.role === 'member') ) {
                             errors.push({
                                 type: `role:not-authorized`,
                                 log: `User not authorized to update a GroupMember's role.`,
