@@ -150,7 +150,7 @@ module.exports = class GroupModerationController extends BaseController {
         if ( canViewGroup !== true ) {
             return this.sendUserErrors(response, 404, {
                 type: 'not-found',
-                log: `GroupModeration(${id}) queried by User without authorization to view Group.`,
+                log: `GroupModerations queried by User without authorization to view Group.`,
                 message: `That doesn't exist or you don't have permission to see it.`
             })
         }
@@ -159,7 +159,7 @@ module.exports = class GroupModerationController extends BaseController {
         if ( canViewGroupContent !== true ) {
             return this.sendUserErrors(response, 404, {
                 type: 'not-found',
-                log: `GroupModeration(${id}) queried by User without authorization.`,
+                log: `GroupModerations queried by User without authorization.`,
                 message: `That doesn't exist or you don't have permission to see it.`
             })
         }
