@@ -93,8 +93,13 @@ const LoginForm = function(props) {
 
     let errorMessage = ''
     if ( request && request.state == 'failed') {
+        console.log(request)
         if ( request.response.status == 403 ) {
-            errorMessage = "Login failed."
+            if ( request.error?.type === 'invalid-csrf' ) {
+                errorMessage = "Your CSRF token was invalid.  Please refresh this page and try again."
+            } else {
+                errorMessage = "Login failed."
+            }
         } else if ( request.response.status === 429 ) {
             errorMessage = "Too many failed attempts.  Please wait 15 minutes and try again."
         } else if ( request.response.status == 400) {
