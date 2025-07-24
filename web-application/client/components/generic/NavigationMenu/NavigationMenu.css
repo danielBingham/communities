@@ -53,12 +53,6 @@
         display: inline-block;
     }
 
-    .navigation-menu a:link,
-    .navigation-menu a:visited,
-    .navigation-menu a:active {
-        padding: 0;
-    }
-    
     .navigation-menu .navigation-menu__item .nav-text {
         display: block;
         font-size: 10px;
