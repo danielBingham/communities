@@ -23,7 +23,7 @@ const PostListSortControl = function() {
 
     const sort = searchParams.get('sort') || 'newest'
     return (
-        <DropdownMenu className="post-list-sort-control" closeOnClick={true}>
+        <DropdownMenu className="post-list-sort-control" autoClose={true}>
             <DropdownMenuTrigger><span className="post-list-sort-control__button"><BarsArrowUpIcon /><span className="text"> { sortTitleMap[sort]}</span></span></DropdownMenuTrigger>
             <DropdownMenuBody>
                 <DropdownMenuItem onClick={() => setSort('newest')}>Newest</DropdownMenuItem>
