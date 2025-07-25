@@ -10,8 +10,10 @@ import { getUsers } from '/state/User'
 import PaginationControls from '/components/PaginationControls'
 import { Table, TableHeader, TableCell } from '/components/ui/Table'
 import { RequestErrorModal } from '/components/errors/RequestError'
+import Spinner from '/components/Spinner'
 
 import UserAdminTableRow from './UserAdminTableRow'
+
 
 import './UserAdminTable.css'
 
@@ -27,7 +29,15 @@ const UserAdminTable = function() {
         let page = searchParams.get('page')
         page = page || 1
         makeRequest(getUsers('UserAdmin', { page: page, admin: true }))
-    }, [])
+    }, [ searchParams ])
+
+    if ( ! query ) {
+        return (
+            <div className="user-admin-table">
+                <Spinner />
+            </div>
+        )
+    }
 
     const userRows = []
     if ( query !== null ) {
@@ -37,9 +47,22 @@ const UserAdminTable = function() {
         }
     }
 
+    let explanation = ''
+    if ( parseInt(query.meta.count) === 0 ) {
+        explanation = `Showing 0 users`
+    } else {
+        const pageStart = ( query.meta.page-1) * query.meta.pageSize + 1
+        const pageEnd = query.meta.count - (query.meta.page-1) * query.meta.pageSize > query.meta.pageSize ? ( query.meta.page * query.meta.pageSize ) : query.meta.count 
+
+        explanation = `Showing ${pageStart} to ${pageEnd} of ${query.meta.count} Users`
+    }
+
     return (
-        <>
-            <Table className="user-admin-table">
+        <div className="user-admin-table">
+            <div className="user-admin-header">
+                {explanation} 
+            </div>
+            <Table className="user-admin-table__table">
                 <TableHeader className="user-admin-table__header">
                     <TableCell>ID</TableCell>
                     <TableCell>Name</TableCell> 
@@ -55,7 +78,7 @@ const UserAdminTable = function() {
             </Table>
             <PaginationControls meta={query?.meta} />
             <RequestErrorModal message="Getting Users" request={request} />
-        </>
+        </div>
     )
 
 }
