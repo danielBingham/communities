@@ -109,6 +109,10 @@ module.exports = class GroupMemberController {
                 AND (group_members.status = 'member' OR group_members.user_id = $${query.params.length})`
         }
 
+        if ( 'page' in urlQuery) {
+            query.page = parseInt(urlQuery.page)
+        }
+
         return query
     }
 

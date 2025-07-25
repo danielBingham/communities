@@ -1,9 +1,8 @@
 import React, { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
-import { useRequest } from '/lib/hooks/useRequest'
+import { useGroupMemberQuery } from '/lib/hooks/GroupMember'
 
-import { getGroupMembers, clearGroupMemberQuery } from '/state/GroupMember'
 
 import GroupMemberBadge from './GroupMemberBadge'
 import PaginationControls from '/components/PaginationControls'
@@ -13,29 +12,16 @@ import './GroupMembersList.css'
 
 const GroupMembersList = function({ groupId, params }) {
 
-    const [request, makeRequest] = useRequest()
-
-    const currentUser = useSelector((state) => state.authentication.currentUser)
-
     const dictionary = useSelector((state) => state.GroupMember.dictionary)
-    const queries = useSelector((state) => state.GroupMember.queries)
+    const [ query, request ] = useGroupMemberQuery(groupId, params)
 
-    useEffect(() => {
-        if ( ! ('GroupMembersList' in queries)) {
-            const queryParams = { ...params }
-            makeRequest(getGroupMembers(groupId, 'GroupMembersList', queryParams))
-        }
-    }, [ groupId, params, queries ])
-
-    if ( ! ('GroupMembersList' in queries)) {
+    if ( query === undefined || query === null ) {
         return (
             <div className="group-members-list">
                 <Spinner />
             </div>
         )
     }
-
-    const query = queries['GroupMembersList']
 
     const memberViews = []
     for(const id of query.list) {
