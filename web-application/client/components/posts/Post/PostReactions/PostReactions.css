@@ -26,6 +26,9 @@
     text-align: left;
     padding: 10px 30px;
 }
+.reactions__detail div {
+    padding: 2px 0;
+}
 
 .reactions__detail svg.reaction {
     display: inline-block;
