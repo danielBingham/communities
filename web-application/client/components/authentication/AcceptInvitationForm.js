@@ -254,8 +254,8 @@ const AcceptInvitationForm = function(props) {
                 /> }
                 <Input
                     name="name"
-                    label="Name"
-                    explanation="The name people will see on your profile.  We strongly encourage you to use your real name, but we don't enforce that."
+                    label="Full Name"
+                    explanation="The name people will see on your profile.  We encourage you to use your real, full name so that people can find you, but we don't enforce that."
                     value={name}
                     className="name"
                     onBlur={ (event) => isValid('name') }
