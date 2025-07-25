@@ -1,6 +1,6 @@
 {
   "name": "@communities/worker",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "private": true,
   "main": "index.js",
   "repository": {},
@@ -13,8 +13,8 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "3.x",
-    "@communities/backend": "^0.5.3",
-    "@communities/shared": "^0.5.3",
+    "@communities/backend": "^0.5.4",
+    "@communities/shared": "^0.5.4",
     "bull": "4.x",
     "mime": "3.x",
     "pg": "8.x",
