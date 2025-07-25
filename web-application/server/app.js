@@ -51,12 +51,14 @@ const ControllerError = require('./errors/ControllerError')
  **********************************************************************/
 const config = require('./config') 
 
+
 // Load express.
 const app = express()
 
 const core = new Core('web-application', config)
 core.initialize().then(function() {
 
+    core.logger.info(`Starting up with server version: ${process.env.npm_package_version}`)
     app.use(cors({
         origin: core.config.host,
         methods: [ 'GET', 'POST', 'PATCH', 'DELETE' ],
@@ -206,6 +208,7 @@ core.initialize().then(function() {
      */
     app.get('/config', function(request, response) {
         response.status(200).json({
+            version: process.env.npm_package_version,
             backend: core.config.backend, 
             environment: process.env.NODE_ENV,
             log_level: core.config.log_level,
@@ -215,6 +218,12 @@ core.initialize().then(function() {
                 links: core.config.stripe.links
             },
             features: core.features.features
+        })
+    })
+
+    app.get('/version', function(request, response) {
+        response.status(200).json({
+            version: process.env.npm_package_version,
         })
     })
 
@@ -286,6 +295,7 @@ core.initialize().then(function() {
 
         // Everything else goes to the index file.
         app.use('*', function(request,response) {
+            core.logger.debug(`Loading index file.`)
             const metadata = pageMetadataService.getRoot()
 
             // Only generate a new CSRF Token if we don't have one. Since we're

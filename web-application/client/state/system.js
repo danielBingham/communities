@@ -12,7 +12,8 @@ const systemSlice = createSlice({
     initialState: {
         requests: {},
         configuration: null,
-        features: {}
+        features: {},
+        version: null
     },
     reducers: {
         reset: function(state, action) { },
@@ -23,9 +24,23 @@ const systemSlice = createSlice({
 
         setFeatures: function(state, action) {
             state.features = action.payload
+        },
+
+        setVersion: function(state, action) {
+            state.version = action.payload
         }
     }
 })
+
+export const getVersion = function() {
+    return function(dispatch, getState) {
+        return dispatch(makeRequest('GET', '/version', null,
+            function(response) {
+                dispatch(systemSlice.actions.setVersion(response.version))
+            }
+        ))
+    }
+}
 
 /**
  * GET /config
@@ -43,6 +58,8 @@ export const getConfiguration = function() {
             function(config) {
                 dispatch(systemSlice.actions.setFeatures(config.features))
                 delete config.features
+                dispatch(systemSlice.actions.setVersion(config.version))
+                delete config.version
                 dispatch(systemSlice.actions.setConfiguration(config))
             }
         ))
