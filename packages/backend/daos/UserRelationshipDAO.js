@@ -21,7 +21,8 @@
 const DAOError = require('../errors/DAOError')
 const DAO = require('./DAO')
 
-const DEFAULT_PAGE_SIZE = 200
+const DEFAULT_PAGE_SIZE = 20
+
 // Base schema.  We'll modify it with any feature flags in the
 // constructor.
 const SCHEMA = {

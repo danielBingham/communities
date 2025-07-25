@@ -96,6 +96,10 @@ module.exports = class UserRelationshipController {
             query.where += ` AND user_relationships.status = $${query.params.length}`
         }
 
+        if ( 'page' in requestQuery ) {
+            query.page = parseInt(requestQuery.page)
+        }
+
         return query
     }
 
