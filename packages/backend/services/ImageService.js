@@ -53,7 +53,18 @@ module.exports = class ImageService {
     async crop(file, crop, renderedDimensions) {
         // Load the original file into memory.
         const fileContents = await this.fileService.getFile(file.filepath)
-        const dimensions = imageSize(fileContents)
+
+        let orientedContents = null
+        try {
+            orientedContents = await sharp(fileContents).rotate().toBuffer() 
+        } catch ( error ) {
+            this.core.logger.info(`Attempt to orient file before crop failed.`)
+            this.core.logger.info(file)
+            this.core.logger.info(crop)
+            this.core.logger.info(renderedDimensions)
+            throw error 
+        }
+        const dimensions = imageSize(orientedContents)
         
         // The image will have been scaled equivalently in each dimension in
         // order to maintain the aspect ratio. In theory, we should be able to
@@ -112,8 +123,7 @@ module.exports = class ImageService {
         const targetPath = `files/${filename}`
 
         try { 
-            await sharp(fileContents)
-                .rotate()
+            await sharp(orientedContents)
                 .extract({ left: x, top: y, width: width, height: height })
                 .toFile(tmpPath)
         } catch (error) {
@@ -121,6 +131,7 @@ module.exports = class ImageService {
             this.core.logger.info(file)
             this.core.logger.info(dimensions)
             this.core.logger.info(crop)
+            this.core.logger.info(renderedDimensions)
             this.core.logger.info(`widthRatio: ${widthRatio}, heightRatio: ${heightRatio}, x: ${x}, y: ${y}, width: ${width}, height: ${height}`)
             throw error 
         }
