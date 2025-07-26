@@ -18,6 +18,9 @@
  *
  ******************************************************************************/
 
+const path = require('path')
+const fs = require('fs')
+
 const Handlebars = require('handlebars')
 
 const { lib } = require('@communities/shared')
@@ -35,6 +38,10 @@ const EmailService = require('./EmailService')
 const PermissionService = require('./PermissionService')
 
 const ServiceError = require('../errors/ServiceError')
+
+const PostCommentNotifications = require('./notification/PostCommentNotifications')
+
+const definitions = require('./notification/definitions')
 
 module.exports = class NotificationService {
 
@@ -54,64 +61,12 @@ module.exports = class NotificationService {
         this.emailService = new EmailService(core)
         this.permissionService = new PermissionService(core)
 
+        this.postCommentNotifications = new PostCommentNotifications(core, this)
+
+        const layoutTemplate = fs.readFileSync(path.resolve(__dirname, './notification/definitions/layout.hbs'), 'utf8')
+        Handlebars.registerPartial('layout', layoutTemplate)
+
         this.notificationDefinitions = { 
-            'Post:comment:create': {
-                email: {
-                    subject: Handlebars.compile('[Communities] {{{commentAuthor.name}}} commented on your post "{{{postIntro}}}..."'), 
-                    body: Handlebars.compile(`
-Hi {{{postAuthor.name}}},
-
-{{{commentAuthor.name}}} left a new comment on your post "{{{postIntro}}}...":
-
-{{{comment.content}}}
-
-Read the comment in context here: {{{host}}}{{{link}}}
-
-Cheers,
-The Communities Team
-                        `)
-                },
-                text: Handlebars.compile(`{{{commentAuthor.name}}} commented, "{{{commentIntro}}}...", on your post, "{{{postIntro}}}...".`),
-                path: Handlebars.compile(`/{{{link}}}`) 
-            },
-            'Post:comment:create:subscriber': {
-                email: {
-                    subject: Handlebars.compile('[Communities] {{{commentAuthor.name}}} commented, "{{{commentIntro}}}", on a post, "{{{postIntro}}}...", you subscribe to, '), 
-                    body: Handlebars.compile(`
-Hi {{{subscriber.name}}},
-
-{{{commentAuthor.name}}} left a new comment on a post by {{{postAuthor.name}}}, "{{{postIntro}}}...", you subscribe to:
-
-"{{{comment.content}}}"
-
-Read the comment in context here: {{{host}}}{{{link}}}
-
-Cheers,
-The Communities Team
-                        `)
-                },
-                text: Handlebars.compile(`{{{commentAuthor.name}}} commented, "{{{commentIntro}}}...", on a post, "{{{postIntro}}}...", you subscribe to.`),
-                path: Handlebars.compile(`/{{{link}}}`) 
-            },
-            'Post:comment:create:mention': {
-                email: {
-                    subject: Handlebars.compile('[Communities] {{{commentAuthor.name}}} mentioned you in their comment, "{{{commentIntro}}}", on a post by {{{postAuthor.name}}}, "{{{postIntro}}}..."'), 
-                    body: Handlebars.compile(`
-Hi {{{mention.name}}},
-
-{{{commentAuthor.name}}} mentioned you in their comment on a post by {{{postAuthor.name}}}, "{{{postIntro}}}...":
-
-"{{{comment.content}}}"
-
-Read the comment in context here: {{{host}}}{{{link}}}
-
-Cheers,
-The Communities Team
-                        `)
-                },
-                text: Handlebars.compile(`{{{commentAuthor.name}}} mentioned you in their comment, "{{{commentIntro}}}...", on a post by {{{postAuthor.name}}}, "{{{postIntro}}}...".`),
-                path: Handlebars.compile(`/{{{link}}}`) 
-            },
             'Post:comment:moderation:rejected': {
                 email: {
                     subject: Handlebars.compile('[Communities] Your comment, "{{{commentIntro}}}...", was removed by Communities moderators. '), 
@@ -334,7 +289,7 @@ The Communities Team
         }
 
         this.notificationMap = { 
-            'Post:comment:create': this.sendNewCommentNotification.bind(this),
+            'Post:comment:create': this.sendNewCommentNotifications.bind(this),
             'Post:comment:create:mention': this.sendPostCommentCreateMentionNotification.bind(this),
             'Post:comment:moderation:rejected': this.sendPostCommentModerationNotification.bind(this),
             'Post:mention': this.sendPostMentionNotification.bind(this),
@@ -349,6 +304,17 @@ The Communities Team
     }
 
     async sendNotifications(currentUser, type, context, options) {
+        const segments = type.split(':')
+
+        const entity = segments[0]
+        const action = segments[1]
+
+        if ( entity === 'PostComment' ) {
+            if ( action === 'create' ) {
+                return await this.postCommentNotifications.create(currentUser, type, context, options)
+            }
+        }
+
         return await this.notificationMap[type](currentUser, context, options)
     }
 
@@ -367,10 +333,25 @@ The Communities Team
      * 
      */
     async createNotification(userId, type, context, options) {
-        const definition = this.notificationDefinitions[type]
-        if ( ! definition ) {
+        const definitionPath = type.split(':')
+
+        // Walk down to the definition
+        let definition = definitions
+        for(const segment of definitionPath) {
+            if ( segment in definition ) {
+                definition = definition[segment]
+            } else {
+                throw new ServiceError('missing-definition',
+                    `Failed to find notification definitions for type '${type}'. Segment '${segment}' missing.`)
+            }
+        }
+
+        if ( definition === undefined || definition === null ) {
             throw new ServiceError('missing-definition',
                 `Failed to find notification definitions for type '${type}'.`)
+        } else if ( definition.type !== type ) {
+            throw new ServiceError('wrong-type',
+                `Got definition for type '${definition.type}' instead of '${type}'.`)
         }
        
         context.host = this.core.config.host
@@ -397,8 +378,8 @@ The Communities Team
             const notification = {
                 userId: userId,
                 type: type,
-                description: definition.text(context),
-                path: definition.path(context) 
+                description: definition.web.text(context),
+                path: definition.web.path(context) 
             }
             await this.notificationDAO.insertNotification(notification)
         }
@@ -417,7 +398,7 @@ The Communities Team
         }
     }
 
-    async sendNewCommentNotification(currentUser, context, options) {
+    async sendNewCommentNotifications(currentUser, context, options) {
         context.postIntro = context.post.content.substring(0,20)
         context.commentIntro = context.comment.content.substring(0,20)
 
@@ -448,7 +429,7 @@ The Communities Team
                 }
 
                 if ( subscription.userId == postAuthor.id) {
-                    await this.createNotification(postAuthor.id, 'Post:comment:create', context, options) 
+                    await this.createNotification(postAuthor.id, 'Post:comment:create:author', context, options) 
                 } else {
                     const subscriberContext = { ...context, subscriber: subscribers.dictionary[subscription.userId] }
                     await this.createNotification(subscription.userId, 'Post:comment:create:subscriber', subscriberContext, options)
