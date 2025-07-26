@@ -43,7 +43,7 @@ module.exports = class EmailService {
             "From": "no-reply@communities.social",
             "To": address,
             "Subject": subject,
-            "TextBody": body,
+            "HtmlBody": body,
             "MessageStream": "notifications"
         })
     }
