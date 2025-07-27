@@ -68,28 +68,6 @@ module.exports = class NotificationService {
 
         this.notificationDefinitions = { 
             'Post:comment:moderation:rejected': {
-                email: {
-                    subject: Handlebars.compile('[Communities] Your comment, "{{{commentIntro}}}...", was removed by Communities moderators. '), 
-                    body: Handlebars.compile(`
-Hi {{{commentAuthor.name}}},
-
-Your comment, "{{{commentIntro}}}...", was removed by Communities moderators for
-violating our terms of service.   
-
-{{{ moderation.reason }}}
-
-The original text of the comment was:
-
-"{{{ comment.content }}}"
-
-Please reread our terms and site moderation policies, as multiple violations
-can result in a ban.
-
-The Communities Team
-                        `)
-                },
-                text: Handlebars.compile(`Communities moderators removed your comment, "{{{ commentIntro }}}..."`),
-                path: Handlebars.compile(`/{{{link}}}`) 
             },
             'Post:mention': {
                 email: {
