@@ -231,21 +231,11 @@ module.exports = class PostCommentController {
 
         await this.notificationService.sendNotifications(
             currentUser, 
-            'Post:comment:create',
+            'PostComment:create',
             {
                 post: relations.posts[postId],
                 commentAuthor: currentUser,
                 comment: entity
-            }
-        )
-
-        await this.notificationService.sendNotifications(
-            currentUser,
-            'Post:comment:create:mention',
-            {
-                post: relations.posts[postId],
-                commentAuthor: currentUser,
-                comment:entity
             }
         )
 
