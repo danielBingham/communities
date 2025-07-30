@@ -22,16 +22,16 @@ const Handlebars = require('handlebars')
 const fs = require('fs')
 const path = require('path')
 
-const emailBodyTemplate = fs.readFileSync(path.resolve(__dirname, './author.hbs'), 'utf8')
+const emailBodyTemplate = fs.readFileSync(path.resolve(__dirname, './relation.hbs'), 'utf8')
 
 module.exports = {
-    type: 'SiteModeration:update:commentRejected',
+    type: 'UserRelationship:create:relation',
     email: {
-        subject: Handlebars.compile('[Communities] Your comment, "{{{commentIntro}}}...", was removed by Communities moderators. '), 
+        subject: Handlebars.compile('[Communities] {{{requester.name}}} sent you a Friend Request'),
         body: Handlebars.compile(emailBodyTemplate)
     },
     web: {
-        text: Handlebars.compile(`Communities moderators removed your comment, "{{{ commentIntro }}}..."`),
-        path: Handlebars.compile(`/{{{link}}}`) 
+        text: Handlebars.compile(`{{{requester.name}}} sent you a friend request.`),
+        path: Handlebars.compile(`/{{{requester.username}}}`)
     }
 }

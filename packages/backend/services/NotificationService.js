@@ -40,6 +40,7 @@ const PermissionService = require('./PermissionService')
 const ServiceError = require('../errors/ServiceError')
 
 const PostCommentNotifications = require('./notification/PostCommentNotifications')
+const SiteModerationNotifications = require('./notification/SiteModerationNotifications')
 
 const definitions = require('./notification/definitions')
 
@@ -62,13 +63,12 @@ module.exports = class NotificationService {
         this.permissionService = new PermissionService(core)
 
         this.postCommentNotifications = new PostCommentNotifications(core, this)
+        this.siteModerationNotifications = new SiteModerationNotifications(core, this)
 
         const layoutTemplate = fs.readFileSync(path.resolve(__dirname, './notification/definitions/layout.hbs'), 'utf8')
         Handlebars.registerPartial('layout', layoutTemplate)
 
         this.notificationDefinitions = { 
-            'Post:comment:moderation:rejected': {
-            },
             'Post:mention': {
                 email: {
                     subject: Handlebars.compile('[Communities] {{{postAuthor.name}}} mentioned you in their post "{{{postIntro}}}..."'), 
@@ -86,62 +86,6 @@ The Communities Team
                 text: Handlebars.compile(`{{{postAuthor.name}}} mentioned you in their post, "{{{postIntro}}}...".`),
                 path: Handlebars.compile(`/{{{link}}}`) 
 
-            },
-            'Post:moderation:rejected': {
-                email: {
-                    subject: Handlebars.compile('[Communities] Your post, "{{{postIntro}}}...", was removed by Communities moderators. '), 
-                    body: Handlebars.compile(`
-Hi {{{postAuthor.name}}},
-
-Your post, "{{{postIntro}}}...", was removed by Communities moderators for
-violating our terms of service.   
-
-{{{ moderation.reason }}}
-
-The original text of the post was:
-
-"{{{ post.content }}}"
-
-Please reread our terms and site moderation policies, as multiple violations
-can result in a ban.
-
-The Communities Team
-                        `)
-                },
-                text: Handlebars.compile(`Communities moderators removed your post, "{{{postIntro}}}..."`),
-                path: Handlebars.compile(`/{{{link}}}`) 
-            },
-            'User:friend:create': {
-                email: {
-                    subject: Handlebars.compile('[Communities] {{{requester.name}}} sent you a Friend Request'),
-                    body: Handlebars.compile(`
-Hi {{{friend.name}}},
-
-You have a new friend request on Communities from {{{requester.name}}}.
-
-To accept, log in to your account and view your friend requests: {{{host}}}friends/requests
-
-Cheers,
-The Communities Team`)
-                },
-                text: Handlebars.compile(`{{{requester.name}}} sent you a friend request.`),
-                path: Handlebars.compile(`/{{{requester.username}}}`)
-            },
-            'User:friend:update': {
-                email: {
-                    subject: Handlebars.compile('[Communities] {{{friend.name}}} accepted your Friend Request'),
-                    body: Handlebars.compile(`
-Hi {{{requester.name}}},
-
-{{{friend.name}}} accepted your friend request.
-
-You can now view their profile here: {{{host}}}{{{friend.username}}}
-
-Cheers,
-The Communities Team`)
-                },
-                text: Handlebars.compile(`{{{friend.name}}} accepted your friend request.`),
-                path: Handlebars.compile(`/{{{friend.username}}}`)
             },
             'Group:member:create:invited': {
                 email: {
@@ -267,13 +211,7 @@ The Communities Team
         }
 
         this.notificationMap = { 
-            'Post:comment:create': this.sendNewCommentNotifications.bind(this),
-            'Post:comment:create:mention': this.sendPostCommentCreateMentionNotification.bind(this),
-            'Post:comment:moderation:rejected': this.sendPostCommentModerationNotification.bind(this),
             'Post:mention': this.sendPostMentionNotification.bind(this),
-            'Post:moderation:rejected': this.sendPostModerationNotification.bind(this),
-            'User:friend:create': this.sendFriendRequestNotification.bind(this),
-            'User:friend:update': this.friendRequestAcceptedNotification.bind(this),
             'Group:member:create': this.sendGroupMemberCreatedNotification.bind(this),
             'Group:member:update': this.sendGroupMemberUpdatedNotification.bind(this),
             'Group:post:moderation:rejected': this.sendGroupPostModerationRejectedNotification.bind(this),
@@ -290,6 +228,14 @@ The Communities Team
         if ( entity === 'PostComment' ) {
             if ( action === 'create' ) {
                 return await this.postCommentNotifications.create(currentUser, type, context, options)
+            }
+        } else if ( entity === 'SiteModeration' ) {
+            if ( action === 'update' ) {
+                return await this.siteModerationNotifications.update(currentUser, type, context, options)
+            }
+        } else if ( entity === 'UserRelatioship' ) {
+            if ( action === 'create' ) {
+                return await this.userRelationshipNotifications.create(currentUser, type, context, options)
             }
         }
 

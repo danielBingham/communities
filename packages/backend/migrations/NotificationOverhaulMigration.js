@@ -43,6 +43,9 @@ module.exports = class LimitLoginAttemptsMigration extends BaseMigration {
             settings.notifications['PostComment:create:subscriber'] = settings.notifications['Post:comment:create:subscriber']
             settings.notifications['PostComment:create:mention'] = settings.notifications['Post:comment:create:mention']
 
+            settings.notifications['SiteModeration:update:post-rejected-author'] = settings.notifications['Post:moderation:rejected']
+            settings.notifications['SiteModeration:update:comment-rejected-author'] = settings.notifications['Post:comment:moderation:rejected']
+
             await this.database.query(`
                 UPDATE users SET settings = $1 WHERE id = $2
             `, [ settings, id])
