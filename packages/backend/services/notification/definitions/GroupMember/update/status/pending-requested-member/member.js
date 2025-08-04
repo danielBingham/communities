@@ -22,16 +22,16 @@ const Handlebars = require('handlebars')
 const fs = require('fs')
 const path = require('path')
 
-const emailBodyTemplate = fs.readFileSync(path.resolve(__dirname, './author.hbs'), 'utf8')
+const emailBodyTemplate = fs.readFileSync(path.resolve(__dirname, './member.hbs'), 'utf8')
 
 module.exports = {
-    type: 'PostComment:create:author',
+    type: 'GroupMember:update:status:pending-requested-member:member',
     email: {
-        subject: Handlebars.compile('[Communities] {{{commentAuthor.name}}} commented on your post "{{{postIntro}}}..."'), 
+        subject: Handlebars.compile('[Communities] Your request to join group, "{{{group.title}}}" has been accepted!'),
         body: Handlebars.compile(emailBodyTemplate)
     },
     web: {
-        text: Handlebars.compile(`{{{commentAuthor.name}}} commented, "{{{commentIntro}}}...", on your post, "{{{postIntro}}}...".`),
-        path: Handlebars.compile(`/{{{link}}}`)
+        text: Handlebars.compile(`Your request to join group "{{{group.title}}}" has been accepted.`),
+        path: Handlebars.compile(`/group/{{{group.slug}}}`)
     }
 }

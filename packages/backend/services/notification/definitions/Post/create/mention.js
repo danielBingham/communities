@@ -18,8 +18,20 @@
  *
  ******************************************************************************/
 
-const create = require('./create')
+const Handlebars = require('handlebars')
+const fs = require('fs')
+const path = require('path')
+
+const emailBodyTemplate = fs.readFileSync(path.resolve(__dirname, './mention.hbs'), 'utf8')
 
 module.exports = {
-    create: create
+    type: 'Post:create:mention',
+    email: {
+        subject: Handlebars.compile('[Communities] {{{postAuthor.name}}} mentioned you in their post "{{{postIntro}}}..."'), 
+        body: Handlebars.compile(emailBodyTemplate)
+    },
+    web: {
+        text: Handlebars.compile(`{{{postAuthor.name}}} mentioned you in their post, "{{{postIntro}}}...".`),
+        path: Handlebars.compile(`/{{{link}}}`) 
+    }
 }

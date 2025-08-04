@@ -28,6 +28,10 @@ const UserDAO = require('../../daos/UserDAO')
 const PermissionService = require('../PermissionService')
 
 module.exports = class UserRelationshipNotifications {
+    static notifications = [
+        'UserRelationship:create:relation',
+        'UserRelationship:update:user'
+    ]
 
     constructor(core, notificationService) {
         this.core = core
@@ -54,13 +58,13 @@ module.exports = class UserRelationshipNotifications {
     async create(currentUser, type, context, options) {
         await this.ensureContext(currentUser, type, context, options)
 
-        await this.createNotification(context.relationId, 'UserRelationship:create:relation', context, options)
+        await this.notificationService.createNotification(context.relationId, 'UserRelationship:create:relation', context, options)
     }
 
     async update(currentUser, type, context, options) {
         await this.ensureContext(currentUser, type, context, options)
 
-        await this.createNotification(context.userId, 'UserRelationship:update:user', context, options)
+        await this.notificationService.createNotification(context.userId, 'UserRelationship:update:user', context, options)
     }
 
 }

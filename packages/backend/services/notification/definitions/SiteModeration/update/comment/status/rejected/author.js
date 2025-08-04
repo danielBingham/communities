@@ -25,13 +25,13 @@ const path = require('path')
 const emailBodyTemplate = fs.readFileSync(path.resolve(__dirname, './author.hbs'), 'utf8')
 
 module.exports = {
-    type: 'PostComment:create:author',
+    type: 'SiteModeration:update:comment:status:rejected:author',
     email: {
-        subject: Handlebars.compile('[Communities] {{{commentAuthor.name}}} commented on your post "{{{postIntro}}}..."'), 
+        subject: Handlebars.compile('[Communities] Your comment, "{{{commentIntro}}}...", was removed by Communities moderators. '), 
         body: Handlebars.compile(emailBodyTemplate)
     },
     web: {
-        text: Handlebars.compile(`{{{commentAuthor.name}}} commented, "{{{commentIntro}}}...", on your post, "{{{postIntro}}}...".`),
-        path: Handlebars.compile(`/{{{link}}}`)
+        text: Handlebars.compile(`Communities moderators removed your comment, "{{{ commentIntro }}}..."`),
+        path: Handlebars.compile(`/{{{link}}}`) 
     }
 }

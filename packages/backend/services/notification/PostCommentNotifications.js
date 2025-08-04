@@ -28,6 +28,11 @@ const UserDAO = require('../../daos/UserDAO')
 const PermissionService = require('../PermissionService')
 
 module.exports = class PostCommentNotifications {
+        static notifications = [
+            'PostComment:create:author',
+            'PostComment:create:mention',
+            'PostComment:create:subscriber'
+        ]
 
     constructor(core, notificationService) {
         this.core = core

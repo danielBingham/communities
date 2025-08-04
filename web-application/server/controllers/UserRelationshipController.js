@@ -217,7 +217,7 @@ module.exports = class UserRelationshipController {
 
             await this.notificationService.sendNotifications(
                 currentUser, 
-                'User:friend:update',
+                'UserRelationship:update',
                 {
                     userId: entity.userId,
                     relationId: entity.relationId 
@@ -267,7 +267,7 @@ module.exports = class UserRelationshipController {
            
             await this.notificationService.sendNotifications(
                 currentUser, 
-                'User:friend:create',
+                'UserRelationship:create',
                 {
                     userId: userId,
                     relationId: relationId
@@ -393,7 +393,7 @@ module.exports = class UserRelationshipController {
 
         await this.notificationService.sendNotifications(
             currentUser, 
-            'User:friend:update',
+            'UserRelationship:update',
             {
                 userId: entity.userId,
                 relationId: entity.relationId

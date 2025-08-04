@@ -18,8 +18,20 @@
  *
  ******************************************************************************/
 
-const PostComment = require('./PostComment')
+const Handlebars = require('handlebars')
+const fs = require('fs')
+const path = require('path')
+
+const emailBodyTemplate = fs.readFileSync(path.resolve(__dirname, './author.hbs'), 'utf8')
 
 module.exports = {
-    PostComment: PostComment
+    type: 'GroupModeration:update:post:status:rejected:author',
+    email: {
+        subject: Handlebars.compile('[Communities] Your post, "{{{postIntro}}}...", was removed by moderator of {{{group.title}}}. '), 
+        body: Handlebars.compile(emailBodyTemplate)
+    },
+    web: {
+        text: Handlebars.compile(`Moderators of {{{group.title}}} removed your post, "{{{postIntro}}}..."`),
+        path: Handlebars.compile(`/{{{link}}}`) 
+    }
 }

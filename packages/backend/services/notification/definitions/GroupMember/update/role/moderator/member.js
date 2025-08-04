@@ -22,16 +22,16 @@ const Handlebars = require('handlebars')
 const fs = require('fs')
 const path = require('path')
 
-const emailBodyTemplate = fs.readFileSync(path.resolve(__dirname, './commentRejected.hbs'), 'utf8')
+const emailBodyTemplate = fs.readFileSync(path.resolve(__dirname, './member.hbs'), 'utf8')
 
 module.exports = {
-    type: 'SiteModeration:update:commentRejected',
+    type: 'GroupMember:update:role:moderator:member',
     email: {
-        subject: Handlebars.compile('[Communities] Your comment, "{{{commentIntro}}}...", was removed by Communities moderators. '), 
+        subject: Handlebars.compile('[Communities] You have been promoted to "moderator" of group, "{{{group.title}}}".'),
         body: Handlebars.compile(emailBodyTemplate)
     },
     web: {
-        text: Handlebars.compile(`Communities moderators removed your comment, "{{{ commentIntro }}}..."`),
-        path: Handlebars.compile(`/{{{link}}}`) 
+        text: Handlebars.compile(`You have been promoted to "moderator" of group "{{{group.title}}}".`),
+        path: Handlebars.compile(`/group/{{{group.slug}}}`)
     }
 }

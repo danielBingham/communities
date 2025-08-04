@@ -22,16 +22,16 @@ const Handlebars = require('handlebars')
 const fs = require('fs')
 const path = require('path')
 
-const emailBodyTemplate = fs.readFileSync(path.resolve(__dirname, './postRejected.hbs'), 'utf8')
+const emailBodyTemplate = fs.readFileSync(path.resolve(__dirname, './moderator.hbs'), 'utf8')
 
 module.exports = {
-    type: 'SiteModeration:update:postRejected',
+    type: 'GroupMember:create:status:pending-requested:moderator',
     email: {
-        subject: Handlebars.compile('[Communities] Your post, "{{{postIntro}}}...", was removed by Communities moderators. '), 
+        subject: Handlebars.compile('[Communities]  {{{user.name}}} asked to join group, "{{{group.title}}}"'),
         body: Handlebars.compile(emailBodyTemplate)
     },
     web: {
-        text: Handlebars.compile(`Communities moderators removed your post, "{{{postIntro}}}..."`),
-        path: Handlebars.compile(`/{{{link}}}`) 
+        text: Handlebars.compile(`{{{user.name}}} asked to join group "{{{group.title}}}"`),
+        path: Handlebars.compile(`/group/{{{group.slug}}}/members`)
     }
 }

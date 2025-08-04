@@ -18,6 +18,8 @@
  *
  ******************************************************************************/
 
+const path = require('path')
+
 const { lib } = require('@communities/shared')
 
 const GroupDAO = require('../../daos/GroupDAO')
@@ -27,10 +29,11 @@ const UserDAO = require('../../daos/UserDAO')
 
 const PermissionService = require('../PermissionService')
 
-module.exports = class SiteModerationNotifications {
+module.exports = class GroupModerationNotifications {
+    
     static notifications = [
-        'SiteModeration:update:comment:status:rejected:author',
-        'SiteModeration:update:post:status:rejected:author'
+        'GroupModeration:update:post:status:rejected:author',
+        'GroupModeration:update:comment:status:rejected:author'
     ]
 
     constructor(core, notificationService) {
@@ -45,35 +48,16 @@ module.exports = class SiteModerationNotifications {
         this.permissionService = new PermissionService(core)
     }
 
-    async ensureContext(currentUser, type, context, options) {
-        if( ! ('postId' in context.moderation) 
-            || context.moderation.postId === undefined 
-            || context.moderation.postId === null ) 
-        {
+    async ensureContext(currentUser, type, context) {
+        if( ! ('postId' in context.moderation) || context.moderation.postId === undefined || context.moderation.postId === null ) {
             throw new ServiceError('missing-context',
                 `Moderation notification missing postId.`)
-        }
-
-        if ( type === 'SiteModeration:update:comment:status:rejected:author' 
-            && ( ! ('postCommentId' in context.moderation) 
-                || context.moderation.postCommentId === undefined 
-                || context.moderation.postCommentId === null )) 
-        {
-            throw new ServiceError('missing-context',
-                `Moderation notification missing postCommentId.`)
         }
 
         context.post = await this.postDAO.getPostById(context.moderation.postId)
         context.postIntro = context.post.content.substring(0,20)
 
         context.postAuthor = await this.userDAO.getUserById(context.post.userId, ['status']) 
-
-        if ( type === 'SiteModeration:update:comment:status:rejected:author' ) {
-            context.comment = await this.postCommentDAO.getPostCommentById(context.moderation.postCommentId)
-            context.commentIntro = context.comment.content.substring(0,20)
-
-            context.commentAuthor = await this.userDAO.getUserById(context.comment.userId, ['status']) 
-        }
 
         let group = null
         if ( context.post.groupId ) {
@@ -82,35 +66,37 @@ module.exports = class SiteModerationNotifications {
         } else {
             context.link = `${context.postAuthor.username}/${context.post.id}`
         }
-    }
 
-    async update(currentUser, type, context, options) {
-        await this.ensureContext(currentUser, type, context, options)
-
-        if ( type === 'SiteModeration:update:post:status:rejected:author') {
-            // Don't send notifications to users who have lost the right to view
-            // their post.
-            const canViewPost = await this.permissionService.can(context.postAuthor, 
-                'view', 'Post', { post: context.post, group: group })
-            if ( ! canViewPost ) {
-                return
+        if ( type === 'GroupModeration:update:comment:status:rejected:author' ) {
+            if ( ! ('postCommentId' in context.moderation) 
+                || context.moderation.postCommentId === undefined 
+                || context.moderation.postCommentId === null 
+            ) {
+                throw new ServiceError('missing-context',
+                    `Moderation notification missing postCommentId.`)
             }
 
-            await this.notificationService.createNotification(context.postAuthor.id, 
-                type, context, options) 
+            context.comment = await this.postCommentDAO.getPostCommentById(context.moderation.postCommentId)
+            context.commentIntro = context.comment.content.substring(0,20)
 
-        } else if ( type === 'SiteModeration:update:comment:status:rejected:author' ) {
-            // Don't send notifications to user's who have lost the right to view
-            // the post they commented on.
-            const canViewPost = await this.permissionService.can(context.commentAuthor, 
-                'view', 'Post', { post: context.post, group: group })
-            if ( ! canViewPost ) {
-                return
-            }
-
-            await this.notificationService.createNotification(context.commentAuthor.id, 
-                type, context, options) 
+            context.commentAuthor = await this.userDAO.getUserById(context.comment.userId, ['status']) 
         }
     }
 
+    async update(currentUser, type, context, options) {
+        await this.ensureContext(currentUser, type, context)
+
+        // Don't send notifications to users who have lost the right to view
+        // their post.
+        const canViewPost = await this.permissionService.can(context.postAuthor, 'view', 'Post', { post: context.post, group: group })
+        if ( canViewPost !== true ) {
+            return
+        }
+
+        if ( type === 'GroupModeration:update:post:status:rejected:author' ) {
+            await this.notificationService.createNotification(context.postAuthor.id, 'GroupModeration:update:post:status:rejected:author', context, options) 
+        } else if ( type === 'GroupModeration:update:comment:status:rejected:author' ) {
+            await this.notificationService.createNotification(context.comment.userId, 'GroupModeration:update:comment:status:rejected:author', context, options) 
+        }
+    }
 }

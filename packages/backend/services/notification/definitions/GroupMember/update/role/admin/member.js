@@ -18,12 +18,20 @@
  *
  ******************************************************************************/
 
-const author = require('./author.js')
-const subscriber = require('./subscriber.js')
-const mention = require('./mention.js')
+const Handlebars = require('handlebars')
+const fs = require('fs')
+const path = require('path')
+
+const emailBodyTemplate = fs.readFileSync(path.resolve(__dirname, './member.hbs'), 'utf8')
 
 module.exports = {
-    author: author,
-    subscriber: subscriber,
-    mention: mention
+    type: 'GroupMember:update:role:admin:member',
+    email: {
+        subject: Handlebars.compile('[Communities] You have been promoted to "admin" of group, "{{{group.title}}}".'),
+        body: Handlebars.compile(emailBodyTemplate)
+    },
+    web: {
+        text: Handlebars.compile(`You have been promoted to "admin" of group "{{{group.title}}}".`),
+        path: Handlebars.compile(`/group/{{{group.slug}}}`)
+    }
 }
