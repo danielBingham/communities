@@ -100,6 +100,24 @@ const FrequentlyAskedQuestions = function({}) {
                 </ul>
                 <p>There's a lot more we can do once we have the time to really dig into the research.  We'll keep looking for ways to make this critical communication tool healthier, less distracting, and more useful.</p>
             </section>
+
+            <section>
+                <h2>May I share sexually explicit, NSFW,  or graphic content here?</h2>
+                <p><strong>Not right now.</strong>  In the long run, it will be
+                    up to the community to decide whether to allow sexually
+                    explicit or graphic content.</p>
+                <p>There are a lot of moderation
+                    challenges that come with sexually explicit content and a
+                    lot of nuance in how to potentially allow it while
+                    maintaining a healthy and non-abusive community space.</p>
+                <p>We
+                    want to let the community form around the platform and
+                    become strong before we tackle that challenging topic. We
+                    also don't have the resources or tools to moderate it
+                    appropriately yet.</p>
+                <p>So for now <strong>sexually explicit and graphic content is
+                    not allowed on Communities</strong>.</p>
+            </section>
         </article>
     )
 

@@ -23,6 +23,13 @@ const canAdminGroup = function(user, context) {
         return false
     }
 
+    // TODO This is a really blunt tool.  Lets create something more granular in the future.
+    // SiteModerators can admin groups in order to remove.
+    if ( user.siteRole === 'admin' || user.siteRole === 'superadmin' ) {
+        return true
+    }
+
+
     // Always exclude banned members.
     if ( context.userMember !== undefined && context.userMember !== null
         && context.userMember.groupId === context.group.id
@@ -44,6 +51,12 @@ const canAdminGroup = function(user, context) {
 const canModerateGroup = function(user, context) {
     if ( context.group === undefined || context.group === null ) {
         return false
+    }
+
+    // TODO This is a really blunt tool.  Lets create something more granular in the future.
+    // SiteModerators can admin groups in order to remove.
+    if ( user.siteRole === 'admin' || user.siteRole === 'superadmin' ) {
+        return true
     }
 
     // Always exclude banned members.
