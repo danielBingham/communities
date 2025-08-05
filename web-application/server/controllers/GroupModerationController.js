@@ -453,7 +453,7 @@ module.exports = class GroupModerationController extends BaseController {
             if ( entity.postId !== null && entity.postCommentId === null) {
                 await this.notificationService.sendNotifications(
                     currentUser,
-                    'Group:post:moderation:rejected',
+                    'GroupModeration:update:post:status:rejected:author',
                     {
                         moderation: entity
                     }
@@ -461,7 +461,7 @@ module.exports = class GroupModerationController extends BaseController {
             } else if ( entity.postId !== null && entity.postCommentId !== null ) {
                 await this.notificationService.sendNotifications(
                     currentUser,
-                    'Group:post:comment:moderation:rejected',
+                    'GroupModeration:update:comment:status:rejected:author',
                     {
                         moderation: entity
                     }

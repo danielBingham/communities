@@ -295,7 +295,7 @@ module.exports = class SiteModerationController {
             if ( entity.postId !== null && entity.postCommentId === null) {
                 await this.notificationService.sendNotifications(
                     currentUser,
-                    'Post:moderation:rejected',
+                    'SiteModeration:update:post:status:rejected:author',
                     {
                         moderation: entity
                     }
@@ -303,7 +303,7 @@ module.exports = class SiteModerationController {
             } else if ( entity.postId !== null && entity.postCommentId !== null ) {
                 await this.notificationService.sendNotifications(
                     currentUser,
-                    'Post:comment:moderation:rejected',
+                    'SiteModeration:update:comment:status:rejected:author',
                     {
                         moderation: entity
                     }

@@ -79,6 +79,11 @@ module.exports = class PostCommentNotifications {
     }
 
     async createAuthor(currentUser, type, context, options) {
+        // They'll be notified of the mention and we don't want to send duplicate notifications.
+        if ( type === 'PostComment:create' && context.mentionedUsernames.includes(context.postAuthor.username) ) {
+           return 
+        }
+
         const subscription = await this.postSubscriptionDAO.getPostSubscriptionByPostAndUser(context.post.id, context.postAuthor.id)
 
         if ( subscription !== null ) {
@@ -106,7 +111,7 @@ module.exports = class PostCommentNotifications {
                 }
 
                 // They'll be notified of the mention and we don't want to send duplicate notifications.
-                if ( type === 'PostComment:create' && context.mentionedUsernames.includes(subscribers.dictionary[subscription.userId]) ) {
+                if ( type === 'PostComment:create' && context.mentionedUsernames.includes(subscribers.dictionary[subscription.userId].username) ) {
                     continue
                 }
 
@@ -131,7 +136,7 @@ module.exports = class PostCommentNotifications {
         // User.status is needed by PermissionService
         const userResults = await this.userDAO.selectUsers({
             where: `users.username = ANY($1::text[])`,
-            params: [ mentionedUsernames ],
+            params: [ context.mentionedUsernames ],
             fields: ['status']
         })
 

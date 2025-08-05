@@ -53,12 +53,17 @@ module.exports = class EmailService {
 
 
         const emailTextBody = `
-Hello ${user.name}!
-
-Please confirm your email address by following this link: ${confirmationLink}
-
-Cheers,
-The Communities Team
+<html>
+<head></head>
+<body>
+<div>
+<p>Hello ${user.name}!</p>
+<p>Please confirm your email address by following this link: <a href="${confirmationLink}">Confirm Email</a></p>
+<p>Cheers,</p>
+<p>The Communities Team</p>
+</div>
+</body>
+</html>
 `
 
 
@@ -67,7 +72,7 @@ The Communities Team
             "From": "no-reply@communities.social",
             "To": user.email,
             "Subject": `[Communities] Please confirm your email, ${user.name}!`,
-            "TextBody": emailTextBody,
+            "HtmlBody": emailTextBody,
             "MessageStream": "email-confirmation"
         })
     }
@@ -76,14 +81,18 @@ The Communities Team
         const resetLink = this.config.host + `reset-password?token=${token.token}`
 
         const emailTextBody = `
-Hello ${user.name},
-
-Someone requested a password reset for your Communities account.
-
-If this was you, please use the following link to reset your password: ${resetLink}
-
-Cheers,
-The Communities Team
+<html>
+<head></head>
+<body>
+<div>
+<p>Hello ${user.name},</p>
+<p>Someone requested a password reset for your Communities account.</p>
+<p>If this was you, please use the following link to reset your password: <a href="${resetLink}">Reset Password</a></p>
+<p>Cheers,</p>
+<p>The Communities Team</p>
+</div>
+</body>
+</html>
 `
 
 
@@ -91,7 +100,7 @@ The Communities Team
             "From": "no-reply@communities.social",
             "To": user.email,
             "Subject": "[Communities] Please reset your password",
-            "TextBody": emailTextBody,
+            "HtmlBody": emailTextBody,
             "MessageStream": "password-reset"
         })
     }
@@ -100,23 +109,26 @@ The Communities Team
         const invitationLink = this.config.host + `accept-invitation?token=${token.token}`
 
         const emailTextBody = `
-Hello ${user.email.substring(0, user.email.indexOf('@'))},
-
-You have been invited to join Communities by ${inviter.name}!  
-
-Communities is a non-profit, user supported social media platform built to help users build community, connect, and organize. We're on a mission to de-enshitify the internet.
-
-We're currently in invite only private beta.  If you'd like to join and come kick the tires, click the following link: ${invitationLink}
-
-Cheers!
-The Communities Team`
+<html>
+<head></head>
+<body>
+<div>
+<p>Hello ${user.email.substring(0, user.email.indexOf('@'))},</p>
+<p>You have been invited to join Communities by ${inviter.name}!</p>
+<p>Communities is a non-profit, cooperative social media platform built to help users build community, connect, and organize.</p>
+<p>We're currently in public beta.  If you'd like to join, click the following link: <a href="${invitationLink}">Accept Invitation</a></p>
+<p>Cheers!</p>
+<p>The Communities Team</p>
+</div>
+</body>
+</html>`
 
 
         await this.sendEmail({
             "From": "no-reply@communities.social",
             "To": user.email,
             "Subject": `[Communities] ${inviter.name} invites you to join Communities`,
-            "TextBody": emailTextBody,
+            "HtmlBody": emailTextBody,
             "MessageStream": "invitation"
         })
     }

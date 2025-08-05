@@ -88,6 +88,29 @@ module.exports = class NotificationService {
 
         const layoutTemplate = fs.readFileSync(path.resolve(__dirname, './notification/definitions/layout.hbs'), 'utf8')
         Handlebars.registerPartial('layout', layoutTemplate)
+
+        this.notificationMigrationMap = {
+            'GroupMember:create:status:pending-invited:member': 'Group:member:create:invited',
+            'GroupMember:create:status:pending-requested:moderator': 'Group:member:create:requested',
+            'GroupMember:update:status:pending-requested-member:member': 'Group:member:update:request:accepted',
+            'GroupMember:update:role:moderator:member': 'Group:member:update:promoted:moderator',
+            'GroupMember:update:role:admin:member': 'Group:member:update:promoted:admin',
+
+            'GroupModeration:update:post:status:rejected:author': 'Group:post:moderation:rejected',
+            'GroupModeration:update:comment:status:rejected:author': 'Group:post:comment:moderation:rejected',
+
+            'Post:create:mention': 'Post:mention',
+
+            'PostComment:create:author': 'Post:comment:create',
+            'PostComment:create:subscriber': 'Post:comment:create:subscriber',
+            'PostComment:create:mention': 'Post:comment:create:mention',
+
+            'SiteModeration:update:post:status:rejected:author': 'Post:moderation:rejected',
+            'SiteModeration:update:comment:status:rejected:author': 'Post:comment:moderation:rejected',
+
+            'UserRelationship:create:relation': 'User:friend:create',
+            'UserRelationship:update:user': 'User:friend:update',
+        }
     }
 
     async sendNotifications(currentUser, type, context, options) {
@@ -166,8 +189,16 @@ module.exports = class NotificationService {
             email: true,
             push: true
         }
-        if ('notifications' in settings && settings.notifications !== undefined && type in settings.notifications ) {
-            notificationSetting = settings.notifications[type]
+        if ( 'notifications' in settings && settings.notifications !== undefined ) {
+            if ( type in settings.notifications ) {
+                notificationSetting = settings.notifications[type]
+            } else {
+                // Fall back to pre-migration setting.
+                const migratedType = this.notificationMigrationMap[type]
+                if ( migratedType in settings.notifications ) {
+                    notificationSetting = settings.notifications[type]
+                }
+            } 
         }
 
         // Only create the web notification if the user has web notifications

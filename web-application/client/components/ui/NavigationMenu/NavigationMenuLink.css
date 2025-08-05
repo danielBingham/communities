@@ -1,0 +1,54 @@
+a.navigation-menu__link svg {
+    width: 22px;
+    margin-right: 5px;
+    margin-bottom: -5px;
+    color: var(--icon-color);
+}
+
+a.navigation-menu__link:link,
+a.navigation-menu__link:visited,
+a.navigation-menu__link:active {
+    display: block;
+    color: var(--primary-color-darkest);
+    padding: 10px;
+}
+a.navigation-menu__link:hover {
+    background-color: var(--primary-color-light);
+    border-radius: 10px;
+}
+
+/* The `.active` class comes from `NavLink`. */
+a.navigation-menu__link.active  {
+    font-weight: bold;
+}
+a.navigation-menu__link .outline { 
+    display: inline-block;
+}
+a.navigation-menu__link.active .outline { 
+    display: none;
+}
+a.navigation-menu__link .solid {
+    display: none;
+}
+a.naviation-menu__link.active .solid {
+    display: inline-block;
+}
+
+@media (700px < width <= 1220px) {
+    a.navigation-menu__link .nav-text {
+        display: block;
+        font-size: 10px;
+    }
+}
+@media (width <= 700px) {
+    a.navigation-menu__link:link,
+    a.navigation-menu__link:visited,
+    a.navigation-menu__link:active {
+        padding: 0;
+    }
+    
+    a.navigation-menu__link .nav-text {
+        display: block;
+        font-size: 10px;
+    }
+}

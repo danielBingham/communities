@@ -39,12 +39,27 @@ module.exports = class LimitLoginAttemptsMigration extends BaseMigration {
             const id = row.id
             const settings = row.settings
 
+            settings.notifications['GroupMember:create:status:pending-invited:member'] = settings.notifications['Group:member:create:invited']
+            settings.notifications['GroupMember:create:status:pending-requested:moderator'] = settings.notifications['Group:member:create:requested']
+            settings.notifications['GroupMember:update:status:pending-requested-member:member'] = settings.notifications['Group:member:update:request:accepted']
+            settings.notifications['GroupMember:update:role:moderator:member'] = settings.notifications['Group:member:update:promoted:moderator']
+            settings.notifications['GroupMember:update:role:admin:member'] = settings.notifications['Group:member:update:promoted:admin']
+
+            settings.notifications['GroupModeration:update:post:status:rejected:author'] = settings.notifications['Group:post:moderation:rejected']
+            settings.notifications['GroupModeration:update:comment:status:rejected:author'] = settings.notifications['Group:post:comment:moderation:rejected']
+
+            settings.notifications['Post:create:mention'] = settings.notifications['Post:mention']
+
             settings.notifications['PostComment:create:author'] = settings.notifications['Post:comment:create']
             settings.notifications['PostComment:create:subscriber'] = settings.notifications['Post:comment:create:subscriber']
             settings.notifications['PostComment:create:mention'] = settings.notifications['Post:comment:create:mention']
 
-            settings.notifications['SiteModeration:update:post-rejected-author'] = settings.notifications['Post:moderation:rejected']
-            settings.notifications['SiteModeration:update:comment-rejected-author'] = settings.notifications['Post:comment:moderation:rejected']
+            settings.notifications['SiteModeration:update:post:status:rejected:author'] = settings.notifications['Post:moderation:rejected']
+            settings.notifications['SiteModeration:update:comment:status:rejected:author'] = settings.notifications['Post:comment:moderation:rejected']
+
+            settings.notifications['UserRelationship:create:relation'] = settings.notifications['User:friend:create']
+            settings.notifications['UserRelationship:update:user'] = settings.notifications['User:friend:update']
+
 
             await this.database.query(`
                 UPDATE users SET settings = $1 WHERE id = $2
@@ -52,5 +67,40 @@ module.exports = class LimitLoginAttemptsMigration extends BaseMigration {
         }
     }
 
-    async migrateBack(targets) {}
+    async migrateBack(targets) {
+        const settingsResults = await this.database.query(`
+            SELECT id, settings from users
+        `, [])
+
+        for(const row of settingsResults.rows) {
+            const id = row.id
+            const settings = row.settings
+
+            delete settings.notifications['GroupMember:create:status:pending-invited:member']
+            delete settings.notifications['GroupMember:create:status:pending-requested:moderator']
+            delete settings.notifications['GroupMember:update:status:pending-requested-member:member']
+            delete settings.notifications['GroupMember:update:role:moderator:member']
+            delete settings.notifications['GroupMember:update:role:admin:member']
+
+            delete settings.notifications['GroupModeration:update:post:status:rejected:author']
+            delete settings.notifications['GroupModeration:update:comment:status:rejected:author']
+
+            delete settings.notifications['Post:create:mention']
+
+            delete settings.notifications['PostComment:create:author']
+            delete settings.notifications['PostComment:create:subscriber']
+            delete settings.notifications['PostComment:create:mention']
+
+            delete settings.notifications['SiteModeration:update:post:status:rejected:author']
+            delete settings.notifications['SiteModeration:update:comment:status:rejected:author']
+
+            delete settings.notifications['UserRelationship:create:relation']
+            delete settings.notifications['UserRelationship:update:user']
+
+
+            await this.database.query(`
+                UPDATE users SET settings = $1 WHERE id = $2
+            `, [ settings, id])
+        }
+    }
 }

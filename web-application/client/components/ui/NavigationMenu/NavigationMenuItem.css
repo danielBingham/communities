@@ -1,0 +1,16 @@
+li.navigation-menu__item {
+    font-size: 18px;
+}
+
+@media (700px < width <= 1220px) {
+
+    li.navigation-menu__item {
+        display: inline-block;
+    }
+}
+
+@media (width <= 700px) {
+    li.navigation-menu__item {
+        display: block;
+    }
+}
