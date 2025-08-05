@@ -130,10 +130,13 @@ module.exports = class LinkPreviewService {
         }
 
 
-        let cannonicalUrl = doc.querySelector('meta[property="og:url"]')?.getAttribute('content') || null
+    /*    The canonical URL is causing problems.  We're going to ignore it for now.
+     *    Maybe we'll store it in a different attribute in the future.
+     *
+     *    let cannonicalUrl = doc.querySelector('meta[property="og:url"]')?.getAttribute('content') || null
         if ( cannonicalUrl === null ) {
             cannonicalUrl = url
-        }
+        }*/
 
         let siteName = doc.querySelector('meta[property="og:site_name"]')?.getAttribute('content') || null
         if ( siteName === null ) {
@@ -147,7 +150,7 @@ module.exports = class LinkPreviewService {
         }
 
         const linkPreview = {
-            url: cannonicalUrl,
+            url: url,
             title: title,
             type: type,
             siteName: siteName,

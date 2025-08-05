@@ -21,6 +21,8 @@
 const { LinkPreviewDAO, LinkPreviewService, ValidationService, PermissionService } = require('@communities/backend')
 const { cleaning, validation } = require('@communities/shared')
 
+const ControllerError = require('../errors/ControllerError')
+
 module.exports = class LinkPreviewController {
     constructor(core) {
         this.core = core
@@ -93,17 +95,9 @@ module.exports = class LinkPreviewController {
             // If we haven't fetched this LinkPreview, then fetch and validate it. 
             const linkPreview = cleaning.LinkPreview.clean(await this.linkPreviewService.getPreview(url, request.get('User-Agent')))
 
-            // TODO Find a better way to handle cases where the canonical URL
-            // is different from the requested URL.  In this particular case,
-            // the canonical URL strips off the query string, meaning the link
-            // loses informationabout the location in the page the user meant
-            // to link.
-            if ( linkPreview.url !== url ) {
-                url = linkPreview.url
-            }
-
             const validationErrors = await this.validationService.validateLinkPreview(currentUser, linkPreview)
             if ( validationErrors.length > 0 ) {
+                this.core.logger.debug(linkPreview)
                 const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
                 throw new ControllerError(500, 'server-error',
                     `LinkPreview failed to validate: ${logString}`,

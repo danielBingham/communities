@@ -87,6 +87,7 @@ const TermsOfService = function({}) {
                 <li>Propagates <strong>Misinformation, Disinformation, or Propaganda</strong>. Communities strives to be a place where people can have productive dialogs based on accurate information and share perspectives grounded in reality.</li>
                 <li>Is <strong>Spam or AI Slop</strong>. Spam and slop prevent productive dialog and real connection by drowning it out.</li>
                 <li>Is <strong>Psychologically, Emotionally, or Physically Abusive</strong>.  Abuse does not belong in a healthy community.</li>
+                <li>Is <strong>sexually explicit</strong> or <strong>graphic</strong>.  In the long run, the question of whether to allow sexually explicit, NSFW, or graphic content will be up to the community to determine.  During our beta and bootstrapping period we are asking users to refrain from sharing it until the community has a chance to form and then decide how best to handle it.</li>
             </ul>
             <h3>4. Violations of Acceptable Use</h3>
             <p>Violations of our Acceptable Use policy may be remediated in a range of ways, including but not limited to:</p>
