@@ -74,6 +74,10 @@ header .active .solid {
         grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
     }
 
+    header .communities-logo {
+        justify-self: center;
+    }
+
     header a.nav-link {
         display: inline-block;
         text-align: center;
