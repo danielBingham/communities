@@ -1,7 +1,3 @@
-#authentication-navigation.navigation-block.authenticated {
-    /*padding: 13px 0; */
-}
-
 #authentication-navigation {
     position: relative;
     cursor: pointer;
@@ -41,7 +37,7 @@
     white-space: nowrap;
 }
 #authentication-navigation.not-authenticated {
-    padding: 0;
+    padding: 0 10px 0 0;
 }
 #authentication-navigation.not-authenticated a:link, 
 #authentication-navigation.not-authenticated a:active, 
@@ -59,7 +55,7 @@
     margin: 0 5px;
 }
 
-@media (width < 700px) {
+@media (width < 1000px) {
     #authentication-navigation .navigation-text {
         display: none;
     }

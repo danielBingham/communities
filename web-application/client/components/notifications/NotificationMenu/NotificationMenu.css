@@ -34,7 +34,6 @@
 }
 .notification-menu .notification-trigger {
     position: relative;
-    padding: 0 20px;
 }
 .notification-menu .notification-trigger a:hover {
     filter: none;
