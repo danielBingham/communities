@@ -10,6 +10,8 @@ import {
     LockClosedIcon,
     CreditCardIcon,
     Cog8ToothIcon,
+    BellIcon,
+    ExclamationTriangleIcon,
     DocumentIcon,
     PencilIcon,
     ArrowRightOnRectangleIcon,
@@ -72,7 +74,8 @@ const UserMenu = function(props) {
                 <div className="menu-item" onClick={props.toggleMenu}><Link to="/account/change-email"><EnvelopeIcon />Change Email</Link></div>
                 <div className="menu-item" onClick={props.toggleMenu}><Link to="/account/change-password"><LockClosedIcon />Change Password</Link></div>
                 <div className="menu-item" onClick={props.toggleMenu}><Link to="/account/contribute"><CreditCardIcon /> Contribute</Link></div>
-                <div className="menu-item" onClick={props.toggleMenu}><Link to="/account/settings"><Cog8ToothIcon />Settings</Link></div>
+                <div className="menu-item" onClick={props.toggleMenu}><Link to="/account/notifications"><BellIcon />Notifications</Link></div>
+                <div className="menu-item" onClick={props.toggleMenu}><Link to="/account/danger-zone"><ExclamationTriangleIcon /> Danger Zone</Link></div>
             </div>
             { isAdmin && <div className="menu-section admin">
                 <div className="menu-item" onClick={props.toggleMenu}><Link to="/admin"><AdjustmentsHorizontalIcon/>Admin</Link></div>

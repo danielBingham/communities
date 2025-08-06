@@ -49,7 +49,6 @@
         grid-template-columns: 1fr;
         grid-template-rows: auto;
         margin: 0 auto;
-        padding: 0 5px;
     }
 
     .page .page-left-gutter {

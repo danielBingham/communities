@@ -2,7 +2,7 @@ import React from 'react'
 
 import './NavigationMenu.css'
 
-export const NavigationMenu = function({ children, className }) {
+const NavigationMenu = function({ children, className }) {
 
     return (
         <menu className={`navigation-menu ${className ? className : ''}`}>
@@ -11,3 +11,4 @@ export const NavigationMenu = function({ children, className }) {
     )
 }
 
+export default NavigationMenu

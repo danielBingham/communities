@@ -1,0 +1,11 @@
+.user-notification-settings {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+}
+.user-settings__notification-settings__section {
+    padding: 20px;
+    border: thin solid var(--main-border-color);
+    border-radius: 10px;
+    background-color: white;
+}

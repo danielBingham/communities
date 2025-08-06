@@ -2,33 +2,33 @@ import React from 'react'
 
 import './Page.css'
 
-export const Page = function({ id, children }) {
+export const Page = function({ id, className, children }) {
     return (
-        <div id={id} className="page">
+        <div id={id} className={`page ${className ? className : ''}`}>
             { children }
         </div>
     )
 }
 
-export const PageLeftGutter = function({ children }) {
+export const PageLeftGutter = function({ id, className, children }) {
     return (
-        <div className="page-left-gutter">
+        <div id={id} className={`page-left-gutter ${ className ? className : ''}`}>
             { children }
         </div>
     )
 }
 
-export const PageRightGutter = function({ children }) {
+export const PageRightGutter = function({ id, className, children }) {
     return (
-        <div className="page-right-gutter">
+        <div id={id} className={`page-right-gutter ${ className ? className : ''}`}>
             { children }
         </div>
     )
 }
 
-export const PageBody = function({ children }) {
+export const PageBody = function({ id, className, children }) {
     return (
-        <div className="page-body">
+        <div id={id} className={`page-body ${ className ? className : ''}`}>
             { children }
         </div>
     )
