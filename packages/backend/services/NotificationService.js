@@ -196,7 +196,7 @@ module.exports = class NotificationService {
                 // Fall back to pre-migration setting.
                 const migratedType = this.notificationMigrationMap[type]
                 if ( migratedType in settings.notifications ) {
-                    notificationSetting = settings.notifications[type]
+                    notificationSetting = settings.notifications[migratedType]
                 }
             } 
         }
