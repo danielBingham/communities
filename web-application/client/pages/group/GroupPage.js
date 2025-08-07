@@ -43,7 +43,7 @@ const GroupPage = function() {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
-    const [group, error, request] = useGroupFromSlug(slug)
+    const [group, request] = useGroupFromSlug(slug)
     const [currentMember, memberRequest ] = useGroupMember(group?.id, currentUser?.id)
 
     const context = {

@@ -185,7 +185,7 @@ module.exports = class FeatureService {
                 conflictsWith: [],
                 migration: new GroupCreatorsCantDeleteAccountMigration(core)
             },
-            '177-notification-overhal': {
+            '177-notification-overhaul': {
                 dependsOn: [],
                 conflictsWith: [],
                 migration: new NotificationOverhaulMigration(core)

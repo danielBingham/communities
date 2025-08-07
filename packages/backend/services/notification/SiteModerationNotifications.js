@@ -75,10 +75,10 @@ module.exports = class SiteModerationNotifications {
             context.commentAuthor = await this.userDAO.getUserById(context.comment.userId, ['status']) 
         }
 
-        let group = null
+        context.group = null
         if ( context.post.groupId ) {
-            group = await this.groupDAO.getGroupById(context.post.groupId)
-            context.link = `group/${group.slug}/${context.post.id}`
+            context.group = await this.groupDAO.getGroupById(context.post.groupId)
+            context.link = `group/${context.group.slug}/${context.post.id}`
         } else {
             context.link = `${context.postAuthor.username}/${context.post.id}`
         }
@@ -91,7 +91,7 @@ module.exports = class SiteModerationNotifications {
             // Don't send notifications to users who have lost the right to view
             // their post.
             const canViewPost = await this.permissionService.can(context.postAuthor, 
-                'view', 'Post', { post: context.post, group: group })
+                'view', 'Post', { post: context.post, group: context.group })
             if ( ! canViewPost ) {
                 return
             }
@@ -103,7 +103,7 @@ module.exports = class SiteModerationNotifications {
             // Don't send notifications to user's who have lost the right to view
             // the post they commented on.
             const canViewPost = await this.permissionService.can(context.commentAuthor, 
-                'view', 'Post', { post: context.post, group: group })
+                'view', 'Post', { post: context.post, group: context.group })
             if ( ! canViewPost ) {
                 return
             }

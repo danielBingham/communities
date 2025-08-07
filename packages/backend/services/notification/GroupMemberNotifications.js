@@ -23,6 +23,7 @@ const path = require('path')
 const { lib } = require('@communities/shared')
 
 const GroupDAO = require('../../daos/GroupDAO')
+const GroupMemberDAO = require('../../daos/GroupMemberDAO')
 const PostCommentDAO = require('../../daos/PostCommentDAO')
 const PostSubscriptionDAO = require('../../daos/PostSubscriptionDAO')
 const UserDAO = require('../../daos/UserDAO')
@@ -44,6 +45,7 @@ module.exports = class GroupMemberNotifications {
         this.notificationService = notificationService
 
         this.groupDAO = new GroupDAO(core)
+        this.groupMemberDAO = new GroupMemberDAO(core)
         this.postCommentDAO = new PostCommentDAO(core)
         this.postSubscriptionDAO = new PostSubscriptionDAO(core)
         this.userDAO = new UserDAO(core)

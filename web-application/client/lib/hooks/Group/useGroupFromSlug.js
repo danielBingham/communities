@@ -6,13 +6,45 @@ import { useRequest } from '/lib/hooks/useRequest'
 import { getGroups } from '/state/Group'
 
 export const useGroupFromSlug = function(slug, relations) {
-    const [error, setError] = useState(null)
-
     const [request, makeRequest, resetRequest ] = useRequest()
 
-    const query = useSelector((state) => slug in state.Group.queries ? state.Group.queries[slug] : null)
-    const id = query ? query.list[0] : null
-    const group = useSelector((state) => id !== null && id in state.Group.dictionary ? state.Group.dictionary[id] : null)
+    const query = useSelector(function(state) {
+        if ( slug === undefined || slug === null ) {
+            return null
+        }
+
+        if ( ! (slug in state.Group.queries) ) {
+            return undefined
+        }
+
+        return state.Group.queries[slug]
+    })
+
+    let id = undefined
+    if ( query !== undefined && query !== null ) {
+        if ( query.list.length <= 0 ) {
+            id = null
+        } else {
+            id = query.list[0]
+        }
+    } else if ( query === null ) {
+        id = null
+    }
+
+    const group = useSelector(function(state)  {
+        if ( id === undefined ) {
+            return undefined
+        }
+        if ( id === null ) {
+            return null
+        }
+
+        if ( ! (id in state.Group.dictionary ) ) {
+            return null
+        }
+
+        return state.Group.dictionary[id]
+    })
 
     useEffect(() => {
         if ( slug && ! ( request && request.state == 'pending' )) {
@@ -20,11 +52,5 @@ export const useGroupFromSlug = function(slug, relations) {
         }
     }, [ slug, JSON.stringify(relations), query === null ])
 
-    useEffect(() => {
-        if ( request && request.state == 'failed' ) {
-            setError(request.error)
-        }
-    }, [ request ])
-
-    return [group, error, request]
+    return [group, request]
 }

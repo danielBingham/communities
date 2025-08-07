@@ -39,27 +39,140 @@ module.exports = class LimitLoginAttemptsMigration extends BaseMigration {
             const id = row.id
             const settings = row.settings
 
-            settings.notifications['GroupMember:create:status:pending-invited:member'] = settings.notifications['Group:member:create:invited']
-            settings.notifications['GroupMember:create:status:pending-requested:moderator'] = settings.notifications['Group:member:create:requested']
-            settings.notifications['GroupMember:update:status:pending-requested-member:member'] = settings.notifications['Group:member:update:request:accepted']
-            settings.notifications['GroupMember:update:role:moderator:member'] = settings.notifications['Group:member:update:promoted:moderator']
-            settings.notifications['GroupMember:update:role:admin:member'] = settings.notifications['Group:member:update:promoted:admin']
+            if ( 'Group:member:create:invited' in settings.notifications ) {
+                settings.notifications['GroupMember:create:status:pending-invited:member'] = {
+                    web: settings.notifications['Group:member:create:invited'].web,
+                    email: settings.notifications['Group:member:create:invited'].email,
+                    desktop: settings.notifications['Group:member:create:invited'].push,
+                    mobile: settings.notifications['Group:member:create:invited'].push
+                }
+            }
 
-            settings.notifications['GroupModeration:update:post:status:rejected:author'] = settings.notifications['Group:post:moderation:rejected']
-            settings.notifications['GroupModeration:update:comment:status:rejected:author'] = settings.notifications['Group:post:comment:moderation:rejected']
+            if ( 'Group:member:create:requested' in settings.notifications ) {
+                settings.notifications['GroupMember:create:status:pending-requested:moderator'] = {
+                    web: settings.notifications['Group:member:create:requested'].web,
+                    email: settings.notifications['Group:member:create:requested'].email,
+                    desktop: settings.notifications['Group:member:create:requested'].push,
+                    mobile: settings.notifications['Group:member:create:requested'].push
+                }
+            }
 
-            settings.notifications['Post:create:mention'] = settings.notifications['Post:mention']
+            if ( 'Group:member:update:request:accepted' in settings.notifications ) {
+                settings.notifications['GroupMember:update:status:pending-requested-member:member'] = {
+                    web: settings.notifications['Group:member:update:request:accepted'].web,
+                    email: settings.notifications['Group:member:update:request:accepted'].email,
+                    desktop: settings.notifications['Group:member:update:request:accepted'].push,
+                    mobile: settings.notifications['Group:member:update:request:accepted'].push
+                }
+            }
+            
+            if ( 'Group:member:update:promoted:moderator' in settings.notifications ) {
+                settings.notifications['GroupMember:update:role:moderator:member'] = {
+                    web: settings.notifications['Group:member:update:promoted:moderator'].web,
+                    email: settings.notifications['Group:member:update:promoted:moderator'].email,
+                    desktop: settings.notifications['Group:member:update:promoted:moderator'].push,
+                    mobile: settings.notifications['Group:member:update:promoted:moderator'].push
+                }
+            }
+            
+            if ( 'Group:member:update:promoted:admin' in settings.notifications ) {
+                settings.notifications['GroupMember:update:role:admin:member'] = {
+                    web: settings.notifications['Group:member:update:promoted:admin'].web,
+                    email: settings.notifications['Group:member:update:promoted:admin'].email,
+                    desktop: settings.notifications['Group:member:update:promoted:admin'].push,
+                    mobile: settings.notifications['Group:member:update:promoted:admin'].push
+                }
+            }
 
-            settings.notifications['PostComment:create:author'] = settings.notifications['Post:comment:create']
-            settings.notifications['PostComment:create:subscriber'] = settings.notifications['Post:comment:create:subscriber']
-            settings.notifications['PostComment:create:mention'] = settings.notifications['Post:comment:create:mention']
+            if ( 'Group:post:moderation:rejected' in settings.notifications ) {
+                settings.notifications['GroupModeration:update:post:status:rejected:author'] = {
+                    web: settings.notifications['Group:post:moderation:rejected'].web,
+                    email: settings.notifications['Group:post:moderation:rejected'].email,
+                    desktop: settings.notifications['Group:post:moderation:rejected'].push,
+                    mobile: settings.notifications['Group:post:moderation:rejected'].push
+                }
+            }
+            
+            if ( 'Group:post:comment:moderation:rejected' in settings.notifications ) {
+                settings.notifications['GroupModeration:update:comment:status:rejected:author'] = {
+                    web: settings.notifications['Group:post:comment:moderation:rejected'].web,
+                    email: settings.notifications['Group:post:comment:moderation:rejected'].email,
+                    desktop: settings.notifications['Group:post:comment:moderation:rejected'].push,
+                    mobile: settings.notifications['Group:post:comment:moderation:rejected'].push
+                }
+            }
 
-            settings.notifications['SiteModeration:update:post:status:rejected:author'] = settings.notifications['Post:moderation:rejected']
-            settings.notifications['SiteModeration:update:comment:status:rejected:author'] = settings.notifications['Post:comment:moderation:rejected']
+            if ( 'Post:mention' in settings.notifications ) {
+                settings.notifications['Post:create:mention'] = {
+                    web: settings.notifications['Post:mention'].web,
+                    email: settings.notifications['Post:mention'].email,
+                    desktop: settings.notifications['Post:mention'].push,
+                    mobile: settings.notifications['Post:mention'].push
+                }
+            }
 
-            settings.notifications['UserRelationship:create:relation'] = settings.notifications['User:friend:create']
-            settings.notifications['UserRelationship:update:user'] = settings.notifications['User:friend:update']
+            if ( 'Post:comment:create' in settings.notifications ) {
+                settings.notifications['PostComment:create:author'] = {
+                    web: settings.notifications['Post:comment:create'].web,
+                    email: settings.notifications['Post:comment:create'].email,
+                    desktop: settings.notifications['Post:comment:create'].push,
+                    mobile: settings.notifications['Post:comment:create'].push
+                }
+            }
+            
+            if ( 'Post:comment:create:subscriber' in settings.notifications ) {
+                settings.notifications['PostComment:create:subscriber'] = {
+                    web: settings.notifications['Post:comment:create:subscriber'].web,
+                    email: settings.notifications['Post:comment:create:subscriber'].email,
+                    desktop: settings.notifications['Post:comment:create:subscriber'].push,
+                    mobile: settings.notifications['Post:comment:create:subscriber'].push
+                }
+            }
+            
+            if ( 'Post:comment:create:mention' in settings.notifications ) {
+                settings.notifications['PostComment:create:mention'] = {
+                    web: settings.notifications['Post:comment:create:mention'].web,
+                    email: settings.notifications['Post:comment:create:mention'].email,
+                    desktop: settings.notifications['Post:comment:create:mention'].push,
+                    mobile: settings.notifications['Post:comment:create:mention'].push
+                }
+            }
 
+            if ( 'Post:moderation:rejected' in settings.notifications ) {
+                settings.notifications['SiteModeration:update:post:status:rejected:author'] = {
+                    web: settings.notifications['Post:moderation:rejected'].web,
+                    email: settings.notifications['Post:moderation:rejected'].email,
+                    desktop: settings.notifications['Post:moderation:rejected'].push,
+                    mobile: settings.notifications['Post:moderation:rejected'].push
+                }
+            }
+            
+            if ( 'Post:comment:moderation:rejected' in settings.notifications ) {
+                settings.notifications['SiteModeration:update:comment:status:rejected:author'] = {
+                    web: settings.notifications['Post:comment:moderation:rejected'].web,
+                    email: settings.notifications['Post:comment:moderation:rejected'].email,
+                    desktop: settings.notifications['Post:comment:moderation:rejected'].push,
+                    mobile: settings.notifications['Post:comment:moderation:rejected'].push
+                }
+            }
+
+            if ( 'User:friend:create' in settings.notifications ) {
+                settings.notifications['UserRelationship:create:relation'] = {
+                    web: settings.notifications['User:friend:create'].web,
+                    email: settings.notifications['User:friend:create'].email,
+                    desktop: settings.notifications['User:friend:create'].push,
+                    mobile: settings.notifications['User:friend:create'].push
+                }
+            }
+            
+            if ( 'User:friend:update' in settings.notifications ) {
+                settings.notifications['UserRelationship:update:user'] = {
+                    web: settings.notifications['User:friend:update'].web,
+                    email: settings.notifications['User:friend:update'].email,
+                    desktop: settings.notifications['User:friend:update'].push,
+                    mobile: settings.notifications['User:friend:update'].push
+                }
+            }
 
             await this.database.query(`
                 UPDATE users SET settings = $1 WHERE id = $2

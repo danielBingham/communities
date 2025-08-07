@@ -23,6 +23,7 @@ const path = require('path')
 const { lib } = require('@communities/shared')
 
 const GroupDAO = require('../../daos/GroupDAO')
+const PostDAO = require('../../daos/PostDAO')
 const PostCommentDAO = require('../../daos/PostCommentDAO')
 const PostSubscriptionDAO = require('../../daos/PostSubscriptionDAO')
 const UserDAO = require('../../daos/UserDAO')
@@ -41,6 +42,7 @@ module.exports = class GroupModerationNotifications {
         this.notificationService = notificationService
 
         this.groupDAO = new GroupDAO(core)
+        this.postDAO = new PostDAO(core)
         this.postCommentDAO = new PostCommentDAO(core)
         this.postSubscriptionDAO = new PostSubscriptionDAO(core)
         this.userDAO = new UserDAO(core)
@@ -59,10 +61,10 @@ module.exports = class GroupModerationNotifications {
 
         context.postAuthor = await this.userDAO.getUserById(context.post.userId, ['status']) 
 
-        let group = null
+        context.group = null 
         if ( context.post.groupId ) {
-            group = await this.groupDAO.getGroupById(context.post.groupId)
-            context.link = `group/${group.slug}/${context.post.id}`
+            context.group = await this.groupDAO.getGroupById(context.post.groupId)
+            context.link = `group/${context.group.slug}/${context.post.id}`
         } else {
             context.link = `${context.postAuthor.username}/${context.post.id}`
         }
@@ -86,16 +88,23 @@ module.exports = class GroupModerationNotifications {
     async update(currentUser, type, context, options) {
         await this.ensureContext(currentUser, type, context)
 
-        // Don't send notifications to users who have lost the right to view
-        // their post.
-        const canViewPost = await this.permissionService.can(context.postAuthor, 'view', 'Post', { post: context.post, group: group })
-        if ( canViewPost !== true ) {
-            return
-        }
-
         if ( type === 'GroupModeration:update:post:status:rejected:author' ) {
+            // Don't send notifications to users who have lost the right to view
+            // their post.
+            const canViewPost = await this.permissionService.can(context.postAuthor, 'view', 'Post', { post: context.post, group: context.group })
+            if ( canViewPost !== true ) {
+                return
+            }
+
             await this.notificationService.createNotification(context.postAuthor.id, 'GroupModeration:update:post:status:rejected:author', context, options) 
         } else if ( type === 'GroupModeration:update:comment:status:rejected:author' ) {
+            // Don't send notifications to users who have lost the right to view
+            // their post.
+            const canViewPost = await this.permissionService.can(context.commentAuthor, 'view', 'Post', { post: context.post, group: context.group })
+            if ( canViewPost !== true ) {
+                return
+            }
+
             await this.notificationService.createNotification(context.comment.userId, 'GroupModeration:update:comment:status:rejected:author', context, options) 
         }
     }

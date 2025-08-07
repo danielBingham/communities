@@ -185,10 +185,12 @@ module.exports = class NotificationService {
        
         // Use the default values if `type` isn't in their settings.
         let notificationSetting = {
-            web: true,
-            email: true,
-            push: true
+            web: true, /* This is the root notification.  If this is off, no notifications are sent. */
+            email: true, /* Send an email notification. */
+            desktop: true, /* Send a desktop push notification. */
+            mobile: true /* Send a mobile push notification. */
         }
+
         if ( 'notifications' in settings && settings.notifications !== undefined ) {
             if ( type in settings.notifications ) {
                 notificationSetting = settings.notifications[type]
