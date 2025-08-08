@@ -425,9 +425,6 @@ module.exports = class UserController {
                 `Attempt to invite or register a user from blocked domain '${domain}'.`,
                 `Users are not allowed to register using emails from '${domain}'.`)
         }
-        console.log(`CurrentUser: `, currentUser)
-        console.log(`Existing: `, existingUser)
-        console.log(`User: `, user)
 
         // ================== Type Determination and Authentication ===========
         // There are three types of POST requests, three circumstances where
@@ -473,8 +470,6 @@ module.exports = class UserController {
                 `Invalid POST type. We shouldn't be able to get here.`,
                 `We encountered a server error.  Please report this as a bug.`)
         }
-
-        console.log(`type: `, type)
 
         // ================== Validation ======================================
         // Validate the `user` entity, based on the type, to ensure  we have a
