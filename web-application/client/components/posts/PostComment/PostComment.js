@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { useLocation } from 'react-router-dom'
 
-import Linkify from 'react-linkify'
-
 import { useFeature } from '/lib/hooks/feature'
 import { usePostComment } from '/lib/hooks/PostComment'
 import { useSiteModeration } from '/lib/hooks/SiteModeration'
@@ -104,7 +102,7 @@ const PostComment = function({ postId, id }) {
                 </div>
             </div>
             <div className="post-comment__content">
-                <Linkify><TextWithMentions text={ comment.content } /></Linkify>
+                <TextWithMentions text={ comment.content } />
             </div>
         </div>
     )

@@ -194,21 +194,48 @@ module.exports = class ValidationService {
         // In this case they are editing.
         else {
 
-            if ( ! this.has(user, 'id') || user.id === null ) {
-                errors.push({
-                    type: `id:missing`,
-                    log: `id is required to edit a user.`,
-                    message: `id is required.`
-                })
-                return errors
+            // Id is not required for a reinvitation.
+            if ( type !== 'reinvitation' ) { 
+                    if ( ! this.has(user, 'id') || user.id === null ) {
+                    errors.push({
+                        type: `id:missing`,
+                        log: `id is required to edit a user.`,
+                        message: `id is required.`
+                    })
+                    return errors
+                }
+
+                // If Id is not in user, it's because this is a re-invitation.
+                if ( user.id !== existing.id ) {
+                    throw new ServiceError('invalid-id',
+                        `Attempting to edit the worng user.`)
+                }
             }
 
-            if ( user.id !== existing.id ) {
-                throw new ServiceError('invalid-id',
-                    `Attempting to edit the worng user.`)
-            }
 
-            if ( type === 'invitation-acceptance' ) {
+            if ( type === 'reinvitation' ) {
+                const disallowedFields = [
+                    'fileId', 'name', 'username', 'password', 'settings', 'notices', 'about', 'location', 'status'
+                ]
+
+                for(const disallowedField of disallowedFields ) {
+                    if ( this.has(user, disallowedField) ) {
+                        errors.push({
+                            type: `${disallowedField}:not-allowed`,
+                            log: `${disallowedField} is not allowed when inviting a user.`,
+                            message: `You may not set '${disallowedField}' for a user you are inviting.`
+                        })
+                    }
+                }
+
+                if ( ! this.has(user, 'email') || user.email === null ) {
+                    errors.push({
+                        type: `email:missing`,
+                        log: `Attempt to invite a user without an email.`,
+                        message: `You cannot invite a user without an email.`
+                    })
+                }
+            } else if ( type === 'invitation-acceptance' || type === 'invitation-overwrite' ) {
 
                 // Some fields we don't allow the user to set on registration,
                 // though they may be allowed to edit them later.

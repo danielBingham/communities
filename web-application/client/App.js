@@ -162,7 +162,6 @@ const App = function(props) {
                     <Route element={ <HeaderlessLayout /> }>
                         <Route path="/email-confirmation" element={ <EmailConfirmationPage />} />
                         <Route path="/accept-invitation" element={ <AcceptInvitationPage /> } />
-                        <Route path="/register" element={ <RegistrationPage /> } />
                         <Route path="/reset-password" element={ <ResetPasswordPage /> } />
                         <Route path="/accept-terms-of-service" element={ <AcceptTermsOfServicePage /> } />
                         <Route path="/set-contribution" element={ <SetContributionPage /> } />
@@ -174,6 +173,8 @@ const App = function(props) {
                         { /* ========== Authentication Controls =============== */ }
                         <Route path="/login" element={ <LoginPage /> } />
                         <Route path="/reset-password-request" element={ <ResetPasswordRequestPage /> } />
+                        <Route path="/register" element={ <RegistrationPage /> } />
+
                         <Route path="/about" element={ <AboutPage /> } >
                             <Route path="faq" element={ <FrequentlyAskedQuestions /> } />
                             <Route path="roadmap" element={ <Roadmap /> } />

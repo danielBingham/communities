@@ -12,7 +12,6 @@ import { useGroup } from '/lib/hooks/Group'
 import { useSiteModeration } from '/lib/hooks/SiteModeration'
 import { useGroupModeration } from '/lib/hooks/GroupModeration'
 
-import Linkify from 'react-linkify'
 
 import Spinner from '/components/Spinner'
 import DateTag from '/components/DateTag'
@@ -172,7 +171,7 @@ const Post = function({ id, expanded, showLoading, shared }) {
                 </div>
             </div>
             { post.content && post.content.length > 0 && (post.content.length <= 1000 || showMore) && <div className="post__content">
-                <Linkify><TextWithMentions text={ post.content } /></Linkify>
+                <TextWithMentions text={ post.content } />
                 {/*{ post.content.length >= 1000 && showMore && <div className="show-more">
                     <a href="" onClick={(e) => { e.preventDefault(); setShowMore(false) }}>Hide More.</a></div> */}
             </div> } 

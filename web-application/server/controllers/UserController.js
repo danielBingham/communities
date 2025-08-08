@@ -406,7 +406,7 @@ module.exports = class UserController {
 
         })
 
-        const existingUser = existingUserResults.dictionary[existingUserResults.list[0]] 
+        let existingUser = existingUserResults.dictionary[existingUserResults.list[0]] 
         if ( existingUser && existingUser.status === 'banned' ) {
             throw new ControllerError(403, 'not-authorized',
                 `Attempt to re-register or re-invite banned user.`,
@@ -425,6 +425,9 @@ module.exports = class UserController {
                 `Attempt to invite or register a user from blocked domain '${domain}'.`,
                 `Users are not allowed to register using emails from '${domain}'.`)
         }
+        console.log(`CurrentUser: `, currentUser)
+        console.log(`Existing: `, existingUser)
+        console.log(`User: `, user)
 
         // ================== Type Determination and Authentication ===========
         // There are three types of POST requests, three circumstances where
@@ -445,7 +448,7 @@ module.exports = class UserController {
         } else if ( ! currentUser && ! existingUser ) {
             type = 'registration'
         } else if ( ! currentUser && existingUser ) {
-            if ( existingUser.email === user.email ) {
+            if ( existingUser.email === user.email && existingUser.status !== 'invited' ) {
                 throw new ControllerError(409, 'conflict',
                     `Attempt to re-register existing user.`,
                     `A user with that email is already registered. Please log in instead.`)
@@ -453,6 +456,14 @@ module.exports = class UserController {
                 throw new ControllerError(409, 'conflict',
                     `Attempt to re-register existing user.`,
                     `A user with that username is already registered. Please choose a different one.`)
+            } else if ( existingUser.email === user.email && existingUser.status === 'invited' ) {
+                // Allow invited users to register themselves.
+                type = 'invitation-overwrite'
+                user.id = existingUser.id
+            } else {
+                throw new ControllerError(500, 'server-error',
+                    `Invalid user creation attempt.  User registering existing user without matching email or username.`,
+                    `We encoutered a server error.  Please report this as a bug.`)
             }
         } else {
             this.core.logger.info(`We should not have been able to get here: `)
@@ -462,6 +473,8 @@ module.exports = class UserController {
                 `Invalid POST type. We shouldn't be able to get here.`,
                 `We encountered a server error.  Please report this as a bug.`)
         }
+
+        console.log(`type: `, type)
 
         // ================== Validation ======================================
         // Validate the `user` entity, based on the type, to ensure  we have a
@@ -512,7 +525,7 @@ module.exports = class UserController {
 
                 await this.notificationService.sendNotifications(
                     currentUser, 
-                    'User:friend:create',
+                    'UserRelationship:create',
                     {
                         userId: currentUser.id,
                         relationId:existingUser.id 
@@ -542,11 +555,11 @@ module.exports = class UserController {
                 relations: relations 
             })
             return
-        }
+        } 
 
         if ( type === 'invitation' ) {
             user.status = 'invited'
-        } else if ( type === 'registration' ) {
+        } else if ( type === 'registration' || type === 'invitation-overwrite' ) {
             user.status = 'unconfirmed'
 
             // By the time we get here, we've validated that the password exists.
@@ -554,7 +567,11 @@ module.exports = class UserController {
         }
 
         try {
-            await this.userDAO.insertUsers(user)
+            if ( type === 'invitation-overwrite' ) {
+                await this.userDAO.updateUser(user)
+            } else {
+                await this.userDAO.insertUsers(user)
+            }
         } catch ( error ) {
             if ( error instanceof backend.DAOError ) {
                 // `insertUser()` check both of the following:
@@ -608,7 +625,7 @@ module.exports = class UserController {
 
             await this.notificationService.sendNotifications(
                 currentUser, 
-                'User:friend:create',
+                'UserRelationship:create',
                 {
                     userId: currentUser.id,
                     relationId:createdUser.id 
@@ -623,7 +640,7 @@ module.exports = class UserController {
                 }
             })
             return
-        } else if ( type === 'registration' ) {
+        } else if ( type === 'registration' || type === 'invitation-overwrite') {
             const token = this.tokenDAO.createToken('email-confirmation')
             token.userId = createdUser.id
             token.creatorId = createdUser.id
