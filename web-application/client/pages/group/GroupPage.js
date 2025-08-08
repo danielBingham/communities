@@ -30,7 +30,7 @@ import GroupFeedView from '/pages/group/views/GroupFeedView'
 import GroupModerationView from '/pages/group/views/GroupModerationView'
 import GroupSettingsView from '/pages/group/views/GroupSettingsView'
 
-import { NavigationMenu, NavigationMenuItem, NavigationMenuItemContainer } from '/components/generic/NavigationMenu'
+import { NavigationMenu, NavigationMenuLink, NavigationMenuItem} from '/components/ui/NavigationMenu'
 import { Page, PageLeftGutter, PageRightGutter, PageBody } from '/components/generic/Page'
 import Error404 from '/components/errors/Error404'
 import Spinner from '/components/Spinner'
@@ -43,7 +43,7 @@ const GroupPage = function() {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
-    const [group, error, request] = useGroupFromSlug(slug)
+    const [group, request] = useGroupFromSlug(slug)
     const [currentMember, memberRequest ] = useGroupMember(group?.id, currentUser?.id)
 
     const context = {
@@ -134,11 +134,11 @@ const GroupPage = function() {
         <Page id="group-page">
             <PageLeftGutter>
                 { canViewGroup === true && <NavigationMenu className="group-page__menu">
-                    { canViewGroupPost === true && <NavigationMenuItem to={`/group/${group.slug}`} icon="QueueList" text="Feed" /> }
-                    { canQueryGroupMember === true && <NavigationMenuItem to="members" icon="UserGroup" text="Members" /> }
-                    { canModerateGroup === true && <NavigationMenuItem to="moderation" icon="Flag" text="Moderation" /> }
-                    { canAdminGroup === true && <NavigationMenuItem to="settings" icon="Cog6Tooth" text="Settings" /> }
-                    <NavigationMenuItemContainer><GroupMembershipButton groupId={group.id} userId={currentUser?.id} /></NavigationMenuItemContainer>
+                    { canViewGroupPost === true && <NavigationMenuLink to={`/group/${group.slug}`} icon="QueueList" text="Feed" /> }
+                    { canQueryGroupMember === true && <NavigationMenuLink to="members" icon="UserGroup" text="Members" /> }
+                    { canModerateGroup === true && <NavigationMenuLink to="moderation" icon="Flag" text="Moderation" /> }
+                    { canAdminGroup === true && <NavigationMenuLink to="settings" icon="Cog6Tooth" text="Settings" /> }
+                    <NavigationMenuItem><GroupMembershipButton groupId={group.id} userId={currentUser?.id} /></NavigationMenuItem>
                 </NavigationMenu> }
             </PageLeftGutter>
             <PageBody>

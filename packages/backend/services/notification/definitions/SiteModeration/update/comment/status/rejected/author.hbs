@@ -1,0 +1,13 @@
+{{#> layout}}
+<div>
+    <p>Hi {{commentAuthor.name}},</p>
+    <p>Your comment, "{{commentIntro}}..." on post "{{postIntro}}", was removed by
+        Communities moderators for violating our terms of service.</p>
+    <p>{{ moderation.reason }}</p>
+    <p>The original text of the comment was:</p>
+    <p>"{{ comment.content }}"</p>
+    <p>Please reread our terms and site moderation policies, as multiple violations
+        can result in a ban.</p>
+    <p>The Communities Team</p>
+</div>
+{{/layout}}

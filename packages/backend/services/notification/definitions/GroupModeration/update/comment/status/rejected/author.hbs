@@ -1,0 +1,10 @@
+{{#> layout}}
+<div>
+    <p>Hi {{commentAuthor.name}},</p>
+    <p>Your comment, "{{commentIntro}}...", was removed by moderators of {{group.title}} for violating the group's rules.</p>
+    <p>{{ moderation.reason }}</p>
+    <p>The original text of the comment was:</p>
+    <p>"{{ comment.content }}"</p>
+    <p>The Communities Team</p>
+</div>
+{{/layout}}

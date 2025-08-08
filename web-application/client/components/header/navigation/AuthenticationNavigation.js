@@ -68,7 +68,7 @@ const AuthenticationNavigation = function(props) {
     
     if ( currentUser ) {
         return (
-            <div ref={menuRef} id="authentication-navigation" className="navigation-block authenticated">
+            <div ref={menuRef} id="authentication-navigation" className="authenticated">
                 <span className="logged-in-user">
                     <a href="" className="no-close" onClick={toggleMenu}>
                         <UserProfileImage userId={currentUser.id} noLink={true} />
@@ -78,7 +78,7 @@ const AuthenticationNavigation = function(props) {
         )
     } else {
         return (
-            <div id="authentication-navigation" className="navigation-block not-authenticated">
+            <div id="authentication-navigation" className="not-authenticated">
                 <Button type="primary" onClick={clickLogin}>Log In</Button>
                 <Button type="success" onClick={(e) => navigate('register')}>Sign Up</Button>
             </div>

@@ -40,14 +40,10 @@ const Header = function(props) {
     if ( currentUser === null || currentUser === undefined ) {
         return (
             <header>
-                <div className="grid">
+                <div className="unauthenticated-grid">
                     <CommunitiesLogo />
-                    <div id="navigation">
-                        <div id="about-navigation" className="navigation-block">
-                            <Link className="nav-link" to="/about">{ location.pathname.startsWith('/about') ? <InformationCircleIconSolid /> : <InformationCircleIconOutline /> }<span className="nav-text">About</span></Link>
-                        </div>
-                        <AuthenticationNavigation  />
-                    </div>
+                    <Link className="nav-link" to="/about">{ location.pathname.startsWith('/about') ? <InformationCircleIconSolid /> : <InformationCircleIconOutline /> }<span className="nav-text">About</span></Link>
+                    <AuthenticationNavigation  />
                 </div>
             </header>
         )
@@ -55,19 +51,13 @@ const Header = function(props) {
     } else {
         return (
             <header>
-                <div className="grid">
+                <div className="authenticated-grid">
                     <CommunitiesLogo />
-                    <div id="navigation">
-                        <div id="primary" className="navigation-block">
-                            <NavLink className="nav-link" to="/"><QueueListIconSolid className="solid" /><QueueListIconOutline className="outline" /> <span className="nav-text">Feeds</span></NavLink>
-                            <NavLink className="nav-link" to="/friends"><UsersIconSolid className="solid" /><UsersIconOutline className="outline" /> <span className="nav-text">Friends</span></NavLink> 
-                            <NavLink className="nav-link" to="/groups"><UserGroupIconOutline className="outline" /><UserGroupIconSolid className="solid" /> <span className="nav-text">Groups</span></NavLink>
-                        </div>
-                        <div id="notification" className="navigation-block">
-                            <NotificationMenu /> 
-                        </div>
-                        <AuthenticationNavigation  />
-                    </div>
+                    <NavLink className="nav-link" to="/"><QueueListIconSolid className="solid" /><QueueListIconOutline className="outline" /> <span className="nav-text">Feeds</span></NavLink>
+                    <NavLink className="nav-link" to="/friends"><UsersIconSolid className="solid" /><UsersIconOutline className="outline" /> <span className="nav-text">Friends</span></NavLink> 
+                    <NavLink className="nav-link" to="/groups"><UserGroupIconOutline className="outline" /><UserGroupIconSolid className="solid" /> <span className="nav-text">Groups</span></NavLink>
+                    <NotificationMenu /> 
+                    <AuthenticationNavigation  />
                 </div>
             </header>
         )

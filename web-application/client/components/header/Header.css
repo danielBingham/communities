@@ -10,31 +10,29 @@ header {
     color: var(--header-text-color);
     box-shadow: 0px 0px 6px -3px rgba(0,0,0,0.25);
     z-index: 10;
+    font-size: 18px;
+    padding: 0 10px;
 }
 
-header .grid {
+header .authenticated-grid {
     box-sizing: border-box;
     display: grid;
-}
-header #navigation {
-    display: flex;
+    grid-template-columns: auto 120px 120px 120px 120px max-content;
     align-items: center;
-    justify-content: right;
-
-    font-size: 18px;
+    justify-items: center;
+}
+header .unauthenticated-grid {
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: auto 120px max-content;
+    align-items: center;
+    justify-items: center;
 }
 
-header #primary.navigation-block {
-    margin-left: 7px;
+header .communities-logo {
+    justify-self: left;
 }
 
-header .navigation-block a.nav-link:link, 
-header .navigation-block a.nav-link:active, 
-header .navigation-block a.nav-link:visited,
-header .navigation-block a.nav-link:hover {
-    padding: 5px;
-    margin: 0 5px;
-}
 header .floating-menu .menu-item:hover {
     color: white;
     background-color: var(--header-menu-background-highlight-color);
@@ -57,46 +55,35 @@ header svg {
     margin-right: 6px;
     margin-bottom: -2px;
 }
-header .mobile-menu-trigger {
-    text-align: center;
-}
-header .mobile-menu-trigger svg {
-    width: 24px;
-    height: 24px;
-    margin-bottom: -3px
-}
 
-header .mobile-menu {
-    text-align: center;
-}
-
-header #navigation .outline {
+header .outline {
     display: inline-block;
 }
-header #navigation .active .outline {
+header .active .outline {
     display: none;
 }
-header #navigation .solid {
+header .solid {
     display: none;
 }
-header #navigation .active .solid {
+header .active .solid {
     display: inline-block;
 }
 
-@media (1220px < width) {
-    header .grid {
-        grid-template-columns: 200px auto;
-        padding: 0 25px;
+@media (width <= 1000px) {
+    header .authenticated-grid {
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
     }
-}
-@media (width <= 1220px) {
-    header .grid {
-        grid-template-columns: 32px auto;
-        padding: 0 0 0 15px;
+
+    header .communities-logo {
+        justify-self: center;
     }
-    header #navigation .navigation-block a.nav-link {
+
+    header a.nav-link {
         display: inline-block;
         text-align: center;
+    }
+    header svg {
+        margin-right: 0;
     }
     header .nav-text {
         display: block;
@@ -105,6 +92,12 @@ header #navigation .active .solid {
     }
     header .communities-logo .logo-text {
         display: none;
+    }
+}
+
+@media (width <= 450px) {
+    header .unauthenticated-grid {
+        grid-template-columns: 1fr 1fr max-content;
     }
 }
 

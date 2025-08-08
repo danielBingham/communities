@@ -1,0 +1,17 @@
+.danger-zone-view {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+}
+.danger-zone-view__delete-your-account {
+    padding: 20px;
+    border: thin solid var(--danger-color-light);
+    background-color: var(--danger-color-lightest);
+    border-radius: 10px;
+}
+.danger-zone-view__explanation {
+    padding: 10px;
+}
+.danger-zone-view__button-wrapper {
+    text-align: center;
+}

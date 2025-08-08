@@ -261,7 +261,7 @@ module.exports = class GroupMemberController {
 
         await this.notificationService.sendNotifications(
             currentUser, 
-            'Group:member:create', 
+            'GroupMember:create', 
             {
                 group: group,
                 member: entity
@@ -422,7 +422,7 @@ module.exports = class GroupMemberController {
 
         await this.notificationService.sendNotifications(
             currentUser, 
-            'Group:member:update', 
+            'GroupMember:update', 
             {
                 group: group,
                 previousStatus: existing.status,

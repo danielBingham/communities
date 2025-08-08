@@ -42,6 +42,7 @@ const LimitLoginAttemptsMigration = require('../migrations/LimitLoginAttemptsMig
 const DownloadCanonicalImageForLinkPreviewsMigration = require('../migrations/DownloadCanonicalImageForLinkPreviewsMigration')
 const DeleteGroupsWithSharedPostsMigration = require('../migrations/DeleteGroupsWithSharedPostsMigration')
 const GroupCreatorsCantDeleteAccountMigration = require('../migrations/GroupCreatorsCantDeleteAccountMigration')
+const NotificationOverhaulMigration = require('../migrations/NotificationOverhaulMigration')
 
 const ServiceError = require('../errors/ServiceError')
 const MigrationError = require('../errors/MigrationError')
@@ -183,6 +184,11 @@ module.exports = class FeatureService {
                 dependsOn: [],
                 conflictsWith: [],
                 migration: new GroupCreatorsCantDeleteAccountMigration(core)
+            },
+            '177-notification-overhaul': {
+                dependsOn: [],
+                conflictsWith: [],
+                migration: new NotificationOverhaulMigration(core)
             }
         }
     }

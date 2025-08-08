@@ -4,7 +4,7 @@ import { Outlet, useNavigate } from 'react-router-dom'
 
 import { resetEntities } from '/state/lib'
 
-import { NavigationMenu, NavigationMenuItem, NavigationMenuButton } from '/components/generic/NavigationMenu'
+import { NavigationMenu, NavigationMenuLink, NavigationMenuButton } from '/components/ui/NavigationMenu'
 import { Page, PageBody, PageLeftGutter, PageRightGutter } from '/components/generic/Page'
 
 import './GroupsPage.css'
@@ -29,8 +29,8 @@ const GroupsPage = function() {
                         onClick={() => navigate('/groups/create')} 
                         icon="Plus"
                         text="Create Group" />
-                    <NavigationMenuItem to="/groups" icon="UserGroup" text="Your Groups" />
-                    <NavigationMenuItem to="/groups/find" icon="MagnifyingGlass" text="Find Groups" />
+                    <NavigationMenuLink to="/groups" icon="UserGroup" text="Your Groups" />
+                    <NavigationMenuLink to="/groups/find" icon="MagnifyingGlass" text="Find Groups" />
                 </NavigationMenu>
             </PageLeftGutter>
             <PageBody className="content">

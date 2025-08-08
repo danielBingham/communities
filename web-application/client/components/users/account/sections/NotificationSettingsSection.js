@@ -16,15 +16,6 @@ const NotificationSettingsSection = function({}) {
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const features = useSelector((state) => state.system.features)
 
-    if ( ! ('1-notification-settings' in features) || features['1-notification-settings'].status !== 'enabled' ) {
-        console.error(new Error(`Attempt to render NotificationSettingsSection without '1-notification-settings' enabled.`))
-        return null
-    }
-
-    if ( ! currentUser ) {
-        console.error(new Error(`Attempt to render NotificationSettingsSection without an authenticated user.`))
-        return null
-    }
 
     const toggleNotificationSetting = function(notification) {
         const settings = JSON.parse(JSON.stringify(currentUser.settings)) 
@@ -49,6 +40,16 @@ const NotificationSettingsSection = function({}) {
         }
 
         makeRequest(patchUser(userPatch))
+    }
+
+    if ( ! ('1-notification-settings' in features) || features['1-notification-settings'].status !== 'enabled' ) {
+        console.error(new Error(`Attempt to render NotificationSettingsSection without '1-notification-settings' enabled.`))
+        return null
+    }
+
+    if ( ! currentUser ) {
+        console.error(new Error(`Attempt to render NotificationSettingsSection without an authenticated user.`))
+        return null
     }
    
     const notifications = currentUser.settings.notifications ? currentUser.settings.notifications : {}

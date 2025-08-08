@@ -1,5 +1,7 @@
 import React from 'react'
 
+import Linkify from 'react-linkify'
+
 import * as shared from '@communities/shared'
 
 import UserMention from '/components/users/UserMention'
@@ -13,7 +15,7 @@ const TextWithMentions = function({ text }) {
             const username = tokens[index].substring(1)
             views.push(<UserMention key={index} username={username} />)
         } else {
-            views.push(<span key={index} >{ tokens[index] }</span>)
+            views.push(<span key={index} ><Linkify>{ tokens[index] }</Linkify></span>)
         }
     }
 

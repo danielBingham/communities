@@ -1,0 +1,20 @@
+button.navigation-menu__button svg {
+    display: inline-block;
+    width: 22px;
+    margin-right: 5px;
+    margin-bottom: -5px;
+    color: white;
+}
+
+@media (700px < width <= 1220px) {
+    button.navigation-menu__button .nav-text {
+        display: block;
+        font-size: 10px;
+    }
+}
+@media (width <= 700px) {
+    button.navigation-menu__button .nav-text {
+        display: block;
+        font-size: 10px;
+    }
+}

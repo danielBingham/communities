@@ -132,7 +132,7 @@ body {
     font-style: normal;
     background-color: var(--main-background-color);
 
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 a:link, a:active, a:visited {

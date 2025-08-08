@@ -1,0 +1,27 @@
+a.navigation-menu__link.navigation-submenu__link svg {
+    width: 18px;
+    margin-right: 3px;
+    margin-bottom: -3px;
+}
+a.navigation-menu__link.navigation-submenu__link:link,
+a.navigation-menu__link.navigation-submenu__link:visited,
+a.navigation-menu__link.navigation-submenu__link:active {
+    padding: 7px;
+    font-size: 14px;
+}
+a.navigation-menu__link.navigation-submenu__link:hover {
+    border-radius: 7px;
+}
+
+@media ( width <= 1220px) {
+    .navigation-menu__sub-menu a.navigation-menu__link {
+        white-space: nowrap;
+    }
+    .navigation-menu__sub-menu a.navigation-menu__link:hover {
+        border-radius: 0;
+    }
+    .navigation-menu__sub-menu a.navigation-menu__link .nav-text {
+        display: inline-block;
+        font-size: 14px;
+    }
+}

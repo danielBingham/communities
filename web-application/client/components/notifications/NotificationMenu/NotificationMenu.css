@@ -34,17 +34,16 @@
 }
 .notification-menu .notification-trigger {
     position: relative;
-    padding: 0 20px;
 }
 .notification-menu .notification-trigger a:hover {
     filter: none;
 }
 .notification-menu .notification-trigger .unread-indicator {
     position: absolute;
-    top: 2px;
-    right: 24px;
+    top: 0px;
+    right: 0px;
     font-size: 10px;
-    padding: 2px 4px;
+    padding: 1px 3px;
 
     color: white;
 
@@ -53,9 +52,10 @@
 }
 .notification-menu .notification-body {
     max-height: 400px;
-    overflow: auto;
-    margin-left: -60px;
+    overflow-y: auto;
+    overflow-x: hidden;
     top: 52px;
+    right: -30px;
 }
 .notification-menu .notification-header {
     padding: 0px 10px 5px 10px;

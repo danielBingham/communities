@@ -4,7 +4,7 @@
         box-sizing: border-box;
 
         margin: 65px auto; /** push us below the header **/
-        min-width: 375px;
+        min-width: 360px;
         width: 100%;
         padding-top: 20px;
         padding-bottom: 50px;
@@ -19,7 +19,7 @@
         box-sizing: border-box;
 
         margin: 65px auto; /** push us below the header **/
-        min-width: 375px;
+        min-width: 360px;
         width: 100%;
         padding-top: 20px;
         padding-bottom: 50px;
@@ -33,7 +33,7 @@
         box-sizing: border-box;
 
         margin: 65px auto; /** push us below the header **/
-        min-width: 375px;
+        min-width: 360px;
         width: 100%;
         padding-top: 10px;
         padding-bottom: 50px;

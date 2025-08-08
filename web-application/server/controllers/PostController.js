@@ -468,7 +468,7 @@ module.exports = class PostController {
         // Notify any mentioned users
         await this.notificationService.sendNotifications(
             currentUser,
-            'Post:mention',
+            'Post:create',
             {
                 post: entity
             }
