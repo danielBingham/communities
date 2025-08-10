@@ -23,7 +23,7 @@
     "@aws-sdk/s3-request-presigner": "3.x",
     "@babel/runtime": "7.x",
     "@communities/shared": "^0.5.12",
-    "bcrypt": "5.x",
+    "bcrypt": "6.x",
     "bull": "4.x",
     "handlebars": "4.x",
     "image-size": "2.x",
