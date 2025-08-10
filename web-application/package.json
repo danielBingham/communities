@@ -31,7 +31,7 @@
     "@communities/backend": "^0.5.12",
     "@communities/shared": "^0.5.12",
     "@heroicons/react": "2.x",
-    "@reduxjs/toolkit": "1.x",
+    "@reduxjs/toolkit": "2.x",
     "@sentry/react": "9.x",
     "@sentry/webpack-plugin": "3.x",
     "connect-pg-simple": "7.x",
@@ -47,8 +47,6 @@
     "react-linkify": "1.0.0-alpha",
     "react-redux": "8.x",
     "react-router-dom": "6.x",
-    "redux": "4.x",
-    "redux-thunk": "2.x",
     "textarea-caret": "3.x",
     "uuid": "11.x"
   },
