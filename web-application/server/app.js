@@ -294,7 +294,7 @@ core.initialize().then(function() {
         })
 
         // Everything else goes to the index file.
-        app.use('*', function(request,response) {
+        app.all('{*any}', function(request,response) {
             core.logger.debug(`Loading index file.`)
             const metadata = pageMetadataService.getRoot()
 
