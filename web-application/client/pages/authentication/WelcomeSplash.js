@@ -10,7 +10,7 @@ const WelcomeSplash = function() {
     return (
         <div className="welcome-splash">
             <div className="intro">
-                Communities is a <strong>not-for-profit, cooperative social network</strong> designed 
+                Communities is a <strong>social network that will be a not-for-profit, cooperative</strong> designed 
                 to help people connect and organize. <br />
                 <p>Funded by users. Governed by the people who use and build it.</p>
                 <p>No ads. No tracking. No algorithm deciding what you see.</p>
