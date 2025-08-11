@@ -6,6 +6,8 @@ import { useScrollRestoration } from '/lib/hooks/useScrollRestoration'
 import Header from '/components/header/Header'
 import Footer from '/components/header/Footer'
 
+import { IosBuffer } from '/components/ui/DeviceTweaks'
+
 import './MainLayout.css'
 
 const MainLayout = function() {
@@ -15,6 +17,7 @@ const MainLayout = function() {
     return (
         <>
         <Header />
+        <IosBuffer />  
         <main>
             <Outlet />
         </main>

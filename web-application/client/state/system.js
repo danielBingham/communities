@@ -58,8 +58,10 @@ export const getConfiguration = function() {
             function(config) {
                 dispatch(systemSlice.actions.setFeatures(config.features))
                 delete config.features
+
+                // Set the initial version, but leave the server version in
+                // config.
                 dispatch(systemSlice.actions.setVersion(config.version))
-                delete config.version
                 dispatch(systemSlice.actions.setConfiguration(config))
             }
         ))

@@ -4,7 +4,6 @@ const {
 
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 const outputDirectory = 'public/dist';
 
@@ -13,7 +12,8 @@ module.exports = {
     output: {
         path: path.resolve(__dirname, outputDirectory),
         filename: '[name].[hash].bundle.js',
-        publicPath: '/'
+        publicPath: '/',
+        clean: true
     },
     resolve: {
         roots: [__dirname+'/client/']
@@ -36,12 +36,36 @@ module.exports = {
             }
         ]
     },
-    plugins: [new HtmlWebpackPlugin({
-        template: 'server/views/index.html'
-    }), sentryWebpackPlugin({
-        authToken: process.env.SENTRY_AUTH_TOKEN,
-        org: "communities",
-        project: "frontend"
-    })],
+    devServer: {
+        port: 3000,
+        open: true,
+        historyApiFallback: true,
+        server: {
+            type: 'https',
+            options: {
+                key: './security/key.pem',
+                cert: './security/cert.pem'
+            }
+        },
+        proxy: [
+            {
+                context: ["/health", "/version", "/config", "/api/0.0.0"],
+                target: "https://localhost:8080",
+                changeOrigin: true,
+                secure: false
+            }
+        ]
+    },
+    plugins: [
+        new HtmlWebpackPlugin({
+            filename: 'index.html',
+            template: './server/views/index.html'
+        }), 
+        sentryWebpackPlugin({
+            authToken: process.env.SENTRY_AUTH_TOKEN,
+            org: "communities",
+            project: "frontend"
+        })
+    ],
     devtool: "source-map"
 };

@@ -12,8 +12,11 @@
   "main": "server/bin/www",
   "scripts": {
     "start": "node ./server/bin/www",
-    "build": "webpack --mode production",
-    "dev": "export NODE_ENV=development && nodemon ./server/bin/www",
+    "build": "rm ./public/dist/* && export NODE_ENV=production && webpack --mode production",
+    "build-dev": "rm ./public/dist/* && export NODE_ENV=development && webpack --mode development",
+    "client": "webpack serve --mode development --devtool inline-source-map",
+    "server": "export NODE_ENV=development && nodemon ./server/bin/www",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
     "jest": "jest",
     "test": "jest test"
   },
@@ -28,6 +31,7 @@
     }
   },
   "dependencies": {
+    "@capacitor/core": "^7.4.2",
     "@communities/backend": "^0.5.12",
     "@communities/shared": "^0.5.12",
     "@heroicons/react": "2.x",
@@ -61,7 +65,7 @@
     "@babel/runtime": "7.x",
     "babel-jest": "30.x",
     "babel-loader": "8.x",
-    "clean-webpack-plugin": "4.x",
+    "concurrently": "^9.2.0",
     "css-loader": "6.x",
     "dotenv": "16.x",
     "form-data": "4.x",
@@ -74,7 +78,7 @@
     "nodemon": "3.x",
     "style-loader": "3.x",
     "webpack": "5.x",
-    "webpack-cli": "4.x",
-    "webpack-dev-middleware": "6.x"
+    "webpack-cli": "6.x",
+    "webpack-dev-server": "5.x"
   }
 }
