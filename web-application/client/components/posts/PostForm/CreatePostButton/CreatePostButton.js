@@ -1,48 +1,52 @@
 import React from 'react'
 import { useSelector } from 'react-redux'
+import { Link, useLocation } from 'react-router-dom'
 
-import { useRequest } from '/lib/hooks/useRequest'
+import { PlusIcon } from '@heroicons/react/24/solid'
 
-import { postPosts } from '/state/Post'
+import { useGroup } from '/lib/hooks/Group'
 
 import UserProfileImage from '/components/users/UserProfileImage'
+import Button from '/components/ui/Button'
 
 import './CreatePostButton.css'
 
-const CreatePostButton = function() {
-
-    const [request, makeRequest] = useRequest()
+const CreatePostButton = function({ type, groupId }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
-    const postInProgress = useSelector((state) => state.Post.inProgress)
+    const location = useLocation()
+
+    const [group, request] = useGroup(groupId)
 
     // Must have a currentUser and no postInProgress to show the button.
-    if ( ! currentUser || postInProgress ) {
+    if ( ! currentUser ) {
         return null
     }
 
-    const createPost = function(event) {
-        event.preventDefault()
-        event.stopPropagation()
-
-        const newPost = {
-            userId: currentUser.id,
-            fileId: null,
-            status: 'writing',
-            content: ''
-        }
-        makeRequest(postPosts(newPost))
+    const params = new URLSearchParams()
+    if ( groupId ) {
+        params.set('groupId', groupId)
     }
+    params.set('origin', location.pathname)
 
-    return (
-        <div className="create-post">
-            <UserProfileImage userId={currentUser.id} />
-            <a href="" onClick={createPost} className="create-post-button">
-                Write a new post...
-            </a>
-        </div>
-    )
-
+    if ( type === 'form' ) {
+        return (
+            <div className="create-post">
+                <div className="create-post__image-wrapper">
+                    <UserProfileImage userId={currentUser.id} />
+                </div>
+                <div className="create-post__button-wrapper">
+                    <Link to={`/create?${ params.toString() }`} className="create-post__button">
+                        Write a new post { groupId && group ? `to ${group.title}` : 'to your feed' }...
+                    </Link>
+                </div>
+            </div>
+        )
+    } else if ( type === 'button' ) {
+        return (
+            <Button href={`/create?${params.toString()}`} type="primary"><PlusIcon /> <span className="nav-text">Create Post</span></Button>
+        )
+    }
 }
 
 export default CreatePostButton

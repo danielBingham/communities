@@ -7,7 +7,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 import { getGroups } from '/state/Group'
 
 import PostList from '/components/posts/PostList'
-import PostForm from '/components/posts/PostForm'
+import PostForm, { CreatePostButton } from '/components/posts/PostForm'
 
 import Spinner from '/components/Spinner'
 
@@ -53,7 +53,7 @@ const Feed = function({ type }) {
 
     return (
         <div className="feed">
-            { ( type !== 'user' || currentUser.username === slug ) && <PostForm groupId={ group ? group.id : null } /> }
+            { ( type !== 'user' || currentUser.username === slug ) && <CreatePostButton type="form" groupId={ group ? group.id : null } /> }
             <PostList name={`Feed:${type}`} params={ params } /> 
         </div>
     )

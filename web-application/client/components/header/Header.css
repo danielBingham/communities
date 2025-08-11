@@ -13,7 +13,6 @@ header {
     font-size: 18px;
     padding: 0 10px;
 }
-
 header .authenticated-grid {
     box-sizing: border-box;
     display: grid;

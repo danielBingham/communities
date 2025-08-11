@@ -21,6 +21,8 @@ import CommunitiesLogo from '/components/header/CommunitiesLogo'
 import AuthenticationNavigation from './navigation/AuthenticationNavigation'
 import NotificationMenu from '/components/notifications/NotificationMenu'
 
+import { IosBuffer } from '/components/ui/DeviceTweaks'
+
 import './Header.css'
 
 /**
@@ -40,6 +42,7 @@ const Header = function(props) {
     if ( currentUser === null || currentUser === undefined ) {
         return (
             <header>
+                <IosBuffer />
                 <div className="unauthenticated-grid">
                     <CommunitiesLogo />
                     <Link className="nav-link" to="/about">{ location.pathname.startsWith('/about') ? <InformationCircleIconSolid /> : <InformationCircleIconOutline /> }<span className="nav-text">About</span></Link>
@@ -51,6 +54,7 @@ const Header = function(props) {
     } else {
         return (
             <header>
+                <IosBuffer />
                 <div className="authenticated-grid">
                     <CommunitiesLogo />
                     <NavLink className="nav-link" to="/"><QueueListIconSolid className="solid" /><QueueListIconOutline className="outline" /> <span className="nav-text">Feeds</span></NavLink>

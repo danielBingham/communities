@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux'
 import { Link, NavLink } from 'react-router-dom'
 
 import { QueueListIcon as QueueListIconOutline} from '@heroicons/react/24/outline'
-import { QueueListIcon as QueueListIconSolid, UsersIcon, SparklesIcon } from '@heroicons/react/24/solid'
+import { QueueListIcon as QueueListIconSolid, UsersIcon, SparklesIcon, PlusIcon } from '@heroicons/react/24/solid'
 import { UserGroupIcon as UserGroupIconOutline } from '@heroicons/react/24/outline'
 import { UserGroupIcon as UserGroupIconSolid} from '@heroicons/react/24/solid'
 
@@ -13,6 +13,7 @@ import { useLocalStorage } from '/lib/hooks/useLocalStorage'
 import { getGroups } from '/state/Group'
 
 import GroupImage from '/components/groups/view/GroupImage'
+import { CreatePostButton } from '/components/posts/PostForm'
 
 import './FeedMenu.css'
 
@@ -113,9 +114,6 @@ const FeedMenu = function() {
                     <a className={groupsPage === groupsQuery?.meta.numberOfPages ? 'disabled' : ''} href="" onClick={(e) => { e.preventDefault(); pageGroups(groupsPage+1) }}>Next</a>
                 </div>
             </li> }
-            <li className="view-more" >
-                <Link to="/groups/find">Find Groups</Link>
-            </li>
         </menu>
     )
 
@@ -123,6 +121,7 @@ const FeedMenu = function() {
         return (
             <div className="feed-menu">
                 <menu className="feed-menu__menu">
+                    <li><CreatePostButton type="button" /></li>
                     <li>
                         <div className="feed-menu__sub-menu">
                             <a href="" onClick={(e) => { e.preventDefault(); setIsOpen('feeds')}} className="header">{ feedsIsOpen ? <QueueListIconSolid/> : <QueueListIconOutline/> } <span className="nav-text">Your Feeds</span></a>
@@ -131,7 +130,7 @@ const FeedMenu = function() {
                     </li>
                     <li>
                         <div className="feed-menu__sub-menu">
-                            <a href="" onClick={(e) => { e.preventDefault(); setIsOpen('groups')}} className="header">{ groupsIsOpen ? <UserGroupIconSolid/> : <UserGroupIconOutline/> }<span className="nav-text">Your Groups</span></a>
+                            <a href="" onClick={(e) => { e.preventDefault(); setIsOpen('groups')}} className="header">{ groupsIsOpen ? <UserGroupIconSolid/> : <UserGroupIconOutline/> }<span className="nav-text">Groups Feeds</span></a>
                             { groupsIsOpen && groupsMenu }
                         </div>
                     </li>
@@ -142,11 +141,12 @@ const FeedMenu = function() {
         return (
             <div className="feed-menu">
                 <menu className="feed-menu__menu">
+                    <li><CreatePostButton type="button" /></li>
                     <li>
                         <a href="" onClick={(e) => { e.preventDefault(); setIsOpen('feeds')}} className="header">{ feedsIsOpen ? <QueueListIconSolid/> : <QueueListIconOutline/> } <span className="nav-text">Your Feeds</span></a>
                     </li>
                     <li>
-                        <a href="" onClick={(e) => { e.preventDefault(); setIsOpen('groups')}} className="header">{ groupsIsOpen ? <UserGroupIconSolid/> : <UserGroupIconOutline/> }<span className="nav-text">Your Groups</span></a>
+                        <a href="" onClick={(e) => { e.preventDefault(); setIsOpen('groups')}} className="header">{ groupsIsOpen ? <UserGroupIconSolid/> : <UserGroupIconOutline/> }<span className="nav-text">Groups Feeds</span></a>
                     </li>
                 </menu>
                 { (feedsIsOpen || groupsIsOpen) && <div className="feed-menu__sub-menu">
