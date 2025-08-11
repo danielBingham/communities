@@ -32,8 +32,8 @@ module.exports = class PageMetadataService {
         this.baseMetadata = {
             url: core.config.host,
             applicationName: "Communities",
-            title: "Communities -- Non-profit Social Media",
-            description: "Communities is a non-profit social media platform.",
+            title: "Communities",
+            description: "Communities is a social media platform in Open Beta working towards incorporating as a non-profit, cooperative.",
             image: `${core.config.host}favicon-32x32.png`,
             type: "website",
             version: process.env.npm_package_version
