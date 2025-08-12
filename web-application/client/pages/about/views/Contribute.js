@@ -14,7 +14,7 @@ const Contribute = function() {
         <div className="contribute-view">
             <article className="contribute-view__intro">
                 <h1>Pay What You Can</h1>
-                Communities is a <strong>non-profit social network</strong>.  We're not taking
+                Communities is a social network that will be a <strong>non-profit cooperative</strong>.  We're not taking
                 venture capital, not showing you ads, and not selling your
                     data.<br />  
                 <p>We <strong>need user contributions</strong> for this to work.  

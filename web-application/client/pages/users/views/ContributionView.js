@@ -13,7 +13,7 @@ const ContributionView = function() {
     return (
         <div className="contribution-view">
             <div className="intro">
-                Communities is a <strong>non-profit social network</strong>.  We're not taking
+                Communities is a social network that is working towards becoming a <strong>non-profit cooperative</strong>.  We're not taking
                 venture capital, not showing you ads, and not selling your
                     data. We're trying to de-enshittify the internet. <br />  
                 <p>We <strong>need user contributions</strong> for this to work.  
