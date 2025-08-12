@@ -8,6 +8,7 @@ import './Footer.css'
 const Footer = function(props) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
+    const config = useSelector((state) => state.system.configuration)
     const [version, request] = useVersion()
 
     if ( currentUser === null || currentUser === undefined ) {
@@ -16,7 +17,7 @@ const Footer = function(props) {
 
     // ======= Render ===============================================
     
-    const loadedVersion = document.querySelector('meta[name="communities-version"]').content
+    const loadedVersion = config.version 
     return (
      <footer>
          <div className="wrapper">

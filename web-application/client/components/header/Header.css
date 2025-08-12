@@ -1,5 +1,6 @@
 header {
     box-sizing: border-box;
+    max-width: 100vw;
     position: fixed;
     left: 0;
     right: 0;
@@ -13,7 +14,6 @@ header {
     font-size: 18px;
     padding: 0 10px;
 }
-
 header .authenticated-grid {
     box-sizing: border-box;
     display: grid;

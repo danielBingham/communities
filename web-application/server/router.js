@@ -599,7 +599,7 @@ module.exports = function(core) {
      *      API 404 
      *************************************************************************/
 
-    router.use('*', function(request, response) {
+    router.all('*any', function(request, response) {
         throw new ControllerError(404, 'no-resource', `Request for non-existent resource ${request.originalUrl}.`)
     })
 

@@ -1,0 +1,48 @@
+.button {
+    all: unset;
+
+    display: inline-block;
+    border-radius: 5px;
+    padding: 5px 15px;
+    margin: 5px;
+    cursor: pointer;
+}
+.button svg {
+    width: 1.2em;
+    height: 1.2em;
+    margin-bottom: -0.2em;
+    margin-right: 5px;
+}
+
+
+.button:hover {
+    filter: opacity(80%);
+}
+button.button:disabled {
+    filter: opacity(50%);
+}
+
+
+.button.default {
+    background-color: var(--primary-color-light);
+    border: none;
+    color: var(--primary-color-dark);
+}
+.button.default:hover{
+    filter: brightness(95%);
+}
+.button.primary {
+    background-color: var(--primary-color-main);
+    border: thin solid var(--primary-color-main);
+    color: white;
+}
+.button.success {
+    background-color: var(--success-color-main);
+    border: thin solid var(--success-color-main);
+    color: white;
+}
+.button.warn {
+    background-color: var(--danger-color-main);
+    border: thin solid var(--danger-color-main);
+    color: white;
+}

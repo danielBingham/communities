@@ -24,6 +24,7 @@ import AdminPage from '/pages/admin/AdminPage'
 
 import HomePage from '/pages/HomePage'
 import Feed from '/components/feeds/Feed'
+import CreatePostPage from '/pages/posts/CreatePostPage'
 
 import AboutPage from '/pages/about/AboutPage'
 import About from '/pages/about/views/About'
@@ -72,7 +73,6 @@ import ErrorBoundary from '/errors/ErrorBoundary'
 import Spinner from '/components/Spinner'
 
 import './app.css';
-
 
 /**
  * App component acts as the root for the component tree, loading the layout
@@ -165,6 +165,9 @@ const App = function(props) {
                         <Route path="/reset-password" element={ <ResetPasswordPage /> } />
                         <Route path="/accept-terms-of-service" element={ <AcceptTermsOfServicePage /> } />
                         <Route path="/set-contribution" element={ <SetContributionPage /> } />
+
+                        <Route element={<AuthenticatedLayout />}>
+                        </Route>
                     </Route>
 
                     { /* ======== Pages with Headers ====================== */ }
@@ -213,6 +216,8 @@ const App = function(props) {
                             </Route> 
 
                             <Route path="/group/:slug/*" element={<GroupPage />} />
+
+                            <Route path="/create" element={<CreatePostPage />} />
 
                             <Route path="/" element={ <HomePage /> }> 
                                 <Route path="/f/:slug" element={ <Feed type="feed" /> } />

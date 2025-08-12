@@ -7,6 +7,7 @@
 
     --primary-color-lightest: #FAFBFC; /* Hue: 204, Saturation: 1, Brightness: 99  -- Off the pattern for a more grey hue. */
     --primary-color-light: #e6ecf2;
+    --primary-color-grey: #797c80;
     --primary-color-main: #398fe5;
     --primary-color-main-highlight: #67a6e5;
     --primary-color-dark: #44484c;

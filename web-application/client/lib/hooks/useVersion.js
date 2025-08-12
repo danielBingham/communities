@@ -7,6 +7,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 import { getVersion } from '/state/system'
 
 export const useVersion = function() {
+    const config = useSelector((state) => state.system.configuration)
     const version = useSelector((state) => state.system.version)
     const location = useLocation()
 
@@ -17,7 +18,7 @@ export const useVersion = function() {
     }, [ location ])
 
     useEffect(() => {
-        const loadedVersion = document.querySelector('meta[name="communities-version"]').content
+        const loadedVersion = config.version 
         console.log(`Version: ${version}, loadedVersion: ${loadedVersion}`)
         if ( loadedVersion !== version ) {
             window.location.reload(true)

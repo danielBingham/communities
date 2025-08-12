@@ -7,7 +7,6 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
         let status = 0
         let responseOk = false
 
-        const csrfToken = document.querySelector('meta[name="csrf-token"]').content
         const abortController = new AbortController()
 
         const fetchOptions = {
@@ -15,15 +14,22 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
             signal: abortController.signal,
             headers: {
                 'Accept': 'application/json',
-                'X-Communities-CSRF-Token': csrfToken
             }
         }
+
         if ((method == 'POST' || method == 'PUT' || method == 'PATCH') && body ) {
-            if ( body instanceof FormData ) {
-                fetchOptions.body = body
-            } else {
-                fetchOptions.body = JSON.stringify(body)
-                fetchOptions.headers['Content-Type'] = 'application/json'
+            if ( body ) {
+                if ( body instanceof FormData ) {
+                    fetchOptions.body = body
+                } else {
+                    fetchOptions.body = JSON.stringify(body)
+                    fetchOptions.headers['Content-Type'] = 'application/json'
+                }
+            }
+
+            if ( configuration ) {
+                const csrfToken = configuration.csrf 
+                fetchOptions.headers['X-Communities-CSRF-Token'] = csrfToken
             }
         }
 
@@ -41,6 +47,7 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
             fullEndpoint = configuration.backend + endpoint
         }
 
+        //console.log(`Making request to: `, fullEndpoint)
         const promise = fetch(fullEndpoint, fetchOptions).then(function(response) {
             status = response.status
            
@@ -53,6 +60,7 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
             responseOk = response.ok
             return response.json()
         }).then(function(responseBody) {
+            //console.log(`ResponseBody: ${JSON.stringify(responseBody)}.`)
             const result = {
                 request: {
                     endpoint: endpoint,

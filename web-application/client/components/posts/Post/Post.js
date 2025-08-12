@@ -44,9 +44,6 @@ const Post = function({ id, expanded, showLoading, shared }) {
     const [siteModeration, siteModerationRequest] = useSiteModeration(post?.siteModerationId)
 
     const [draft, setDraft] = usePostDraft(id)
-    if ( draft !== null) {
-        return <PostForm postId={id} groupId={ post && post.groupId} />
-    }
 
     if ( (request !== null && request.state == 'failed' && ( ! post || ! user ))) {
         return (

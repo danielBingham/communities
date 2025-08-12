@@ -5,8 +5,6 @@ import { useAuthentication } from '/lib/hooks/useAuthentication'
 
 import WelcomeSplash from '/pages/authentication/WelcomeSplash'
 
-import { PostShareModal } from '/components/posts/Post/PostReactions'
-
 const AuthenticatedLayout = function() {
 
     const currentUser = useAuthentication() 
@@ -19,7 +17,6 @@ const AuthenticatedLayout = function() {
 
     return (
         <div className="authenticated">
-            <PostShareModal /> 
             <Outlet />
         </div>
     )

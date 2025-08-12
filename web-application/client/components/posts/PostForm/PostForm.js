@@ -36,14 +36,14 @@ import ErrorModal from '/components/errors/ErrorModal'
 
 import './PostForm.css'
 
-const PostForm = function({ postId, groupId, sharedPostId }) {
+const PostForm = function({ postId, groupId, sharedPostId, origin }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
     const [post] = usePost(postId) 
     const [group] = useGroup(post !== null ? post.groupId : groupId)
     const [currentMember] = useGroupMember(group?.id, currentUser.id)
-    const [draft, setDraft] = usePostDraft(postId, groupId)
+    const [draft, setDraft] = usePostDraft(postId, groupId, sharedPostId)
 
     const canCreateGroupPost = useGroupPostPermission(currentUser, GroupPostPermissions.CREATE, { group: group, userMember: currentMember })
 
@@ -118,6 +118,7 @@ const PostForm = function({ postId, groupId, sharedPostId }) {
         if ( sharedPostId ) {
             dispatch(clearSharingPost())
         }
+        navigate(origin)
     }
 
     const onFileChange = function(fileId) {

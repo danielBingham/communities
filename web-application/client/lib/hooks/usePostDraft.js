@@ -70,10 +70,12 @@ const validateAndCorrectDraft = function(draft, group) {
     return correctedDraft
 }
 
-export const usePostDraft = function(id, groupId) {
+export const usePostDraft = function(id, groupId, sharedPostId) {
     let postKey = id !== null && id !== undefined ? id : 'new'
     if ( postKey === 'new' &&  groupId !== null && groupId !== undefined) {
         postKey = `${postKey}_${groupId}`
+    } else if ( postKey === 'new' && sharedPostId !== null && sharedPostId !== undefined ) {
+        postKey = `${postKey}-shared:${sharedPostId}`
     }
 
     const [group] = useGroup(groupId)

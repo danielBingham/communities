@@ -2,11 +2,13 @@
 
 For each heading, copy the `Cases` section of the linked file under the heading and execute the test cases within.
 
-## [User Registration](documentation/testing/test-cases/User/create/registration.md)
-## [User Invitation](documentation/testing/test-cases/User/create/invitation.md)
-## [User Searching](documentation/testing/test-cases/User/query.md)
+## [Create User: Registration](documentation/testing/test-cases/User/create/registration.md)
+## [Create User: Invitation](documentation/testing/test-cases/User/create/invitation.md)
+## [Update User: Profile](documentation/testing/test-cases/User/update/profile.md)
+## [Update User: Settings](documentation/testing/test-cases/User/update/settings.md)
+## [Query User](documentation/testing/test-cases/User/query.md)
 
-## [Friend Requests](documentation/testing/test-cases/UserRelationship/create-update-delete.md)
+## [UserRelationship](documentation/testing/test-cases/UserRelationship/create-update-delete.md)
 
 ## [Authentication](documentation/testing/test-cases/Authentication/authentication.md)
 
@@ -26,14 +28,6 @@ For each heading, copy the `Cases` section of the linked file under the heading 
 ## [Create PostSubscription](documentation/testing/test-cases/PostSubscription/create.md)
 ## [Delete PostSubscription](documentation/testing/test-cases/PostSubscription/delete.md)
  
-### Profile Editing
-
-- [ ] As Jane Doe, upload a profile image and submit form.
-- [ ] As Jane Doe, remove profile image and submit form.
-- [ ] As Jane Doe, edit name and bio and submit form.
-- [ ] As Jane Doe, edit name and bio and don't submit form.
-- [ ] As Jane Doe, change email.  Confirm email.
-- [ ] As user2, change password. Log out and log back in with new password.
 
 ### Settings 
 

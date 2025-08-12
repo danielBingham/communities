@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
@@ -36,6 +37,8 @@ const PostReactions = function({ postId }) {
     const userReaction = userReactionId ? postReactions[userReactionId] : null
 
     const dispatch = useDispatch()
+    const navigate = useNavigate()
+    const location = useLocation()
 
     const react = function(reaction) {
         if ( request && request.state == 'pending' ) {
@@ -62,6 +65,7 @@ const PostReactions = function({ postId }) {
         } else {
             dispatch(setSharingPost(postId))
         }
+        navigate(`/create?sharedPostId=${postId}&origin=${encodeURIComponent(location.pathname)}`)
     }
 
     if ( ! post ) {
