@@ -42,3 +42,18 @@
     color: var(--primary-color-darkest);
     background-color: white;
 }
+
+@media (width < 700px) {
+    .create-post {
+        box-sizing: border-box;
+        width: 100%;
+        margin: 0 auto;
+        padding: 7px;
+
+        border-radius: 0;
+        border-top: thin solid var(--main-border-color);
+        border-bottom: thin solid var(--main-border-color);
+        border-left: none;
+        border-right: none;
+    }
+}
