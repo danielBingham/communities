@@ -5,6 +5,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { PlusIcon } from '@heroicons/react/24/solid'
 
 import { useGroup } from '/lib/hooks/Group'
+import { usePostDraft } from '/lib/hooks/usePostDraft'
 
 import UserProfileImage from '/components/users/UserProfileImage'
 import Button from '/components/ui/Button'
@@ -17,6 +18,7 @@ const CreatePostButton = function({ type, groupId }) {
     const location = useLocation()
 
     const [group, request] = useGroup(groupId)
+    const [draft, setDraft] = usePostDraft(undefined, groupId)
 
     // Must have a currentUser and no postInProgress to show the button.
     if ( ! currentUser ) {
@@ -37,7 +39,8 @@ const CreatePostButton = function({ type, groupId }) {
                 </div>
                 <div className="create-post__button-wrapper">
                     <Link to={`/create?${ params.toString() }`} className="create-post__button">
-                        Write a new post { groupId && group ? `to ${group.title}` : 'to your feed' }...
+                        { draft && draft.content.length > 0 && <span>{ draft.content }</span> }
+                        { ( ! draft || draft.content.length <= 0) && <span>Write a new post { groupId && group ? `to ${group.title}` : 'to your feed' }...</span> }
                     </Link>
                 </div>
             </div>

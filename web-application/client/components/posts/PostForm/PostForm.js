@@ -43,7 +43,7 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
     const [post] = usePost(postId) 
     const [group] = useGroup(post !== null ? post.groupId : groupId)
     const [currentMember] = useGroupMember(group?.id, currentUser.id)
-    const [draft, setDraft] = usePostDraft(postId, groupId)
+    const [draft, setDraft] = usePostDraft(postId, groupId, sharedPostId)
 
     const canCreateGroupPost = useGroupPostPermission(currentUser, GroupPostPermissions.CREATE, { group: group, userMember: currentMember })
 
