@@ -1,5 +1,6 @@
 header {
     box-sizing: border-box;
+    max-width: 100vw;
     position: fixed;
     left: 0;
     right: 0;
