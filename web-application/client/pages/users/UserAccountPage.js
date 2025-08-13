@@ -31,7 +31,7 @@ const UserAccountPage = function(props) {
                     </NavigationSubmenu>
                 </NavigationMenu>
             </PageLeftGutter>
-            <PageBody className="content">
+            <PageBody>
                 <Outlet /> 
             </PageBody>
             <PageRightGutter>

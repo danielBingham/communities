@@ -33,7 +33,7 @@ const GroupsPage = function() {
                     <NavigationMenuLink to="/groups/find" icon="MagnifyingGlass" text="Find Groups" />
                 </NavigationMenu>
             </PageLeftGutter>
-            <PageBody className="content">
+            <PageBody>
                 { <Outlet /> }
             </PageBody>
             <PageRightGutter>

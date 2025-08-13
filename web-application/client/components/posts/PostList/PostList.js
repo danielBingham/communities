@@ -1,6 +1,8 @@
 import React from 'react'
 import { usePostQuery } from '/lib/hooks/Post'
 
+import { ArrowPathIcon } from '@heroicons/react/24/solid'
+
 import PaginationControls from '/components/PaginationControls'
 import Post from '/components/posts/Post'
 import Spinner from '/components/Spinner'
@@ -8,10 +10,12 @@ import Spinner from '/components/Spinner'
 import PostListSortControl from './PostListSortControl'
 import PostListSinceControl from './PostListSinceControl'
 
+import Button from '/components/ui/Button'
+
 import './PostList.css'
 
 const PostList = function({ name, params }) {
-    const [query, request] = usePostQuery(params)
+    const [query, request, reset] = usePostQuery(params)
 
     if ( query === null ) {
         return (
@@ -46,7 +50,10 @@ const PostList = function({ name, params }) {
         <div className="post-list">
             <div className="post-list__header">
                 <div className="post-list__header__explanation">{ explanation }</div>
-                <div className="post-list__header__controls"><PostListSinceControl /> <PostListSortControl /></div>
+                <div className="post-list__header__controls"> 
+                    <Button onClick={(e) => reset()}><ArrowPathIcon /> <span className="nav-text">Refresh</span></Button> 
+                    <PostListSinceControl /> 
+                    <PostListSortControl /></div>
             </div>
             <div className="post-list__posts">
                 { postViews }

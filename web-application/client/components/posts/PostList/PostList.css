@@ -5,7 +5,7 @@
 }
 .post-list .post-list__header {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: min-content 1fr;
 
     max-width: 650px;
     margin: 20px auto 20px auto;
@@ -19,4 +19,9 @@
     align-self: center;
     text-align: left;
     padding-left: 7px;
+    white-space: nowrap;
+}
+
+@media (width <= 700px) {
+    .post-list .post-list__header__controls .nav-text { display: none; }
 }
