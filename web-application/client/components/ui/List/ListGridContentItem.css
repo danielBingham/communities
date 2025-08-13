@@ -1,0 +1,5 @@
+.list__grid-content__item {
+    box-sizing: border-box;
+    width: 360px;
+    padding: 10px;
+}

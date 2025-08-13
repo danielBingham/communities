@@ -8,6 +8,8 @@ import { getGroup } from '/state/Group'
 
 import GroupImage from '/components/groups/view/GroupImage'
 
+import { ListGridContentItem } from '/components/ui/List'
+
 import './GroupBadge.css'
 
 const GroupBadge = function({ id }) {
@@ -35,7 +37,7 @@ const GroupBadge = function({ id }) {
 
     if ( group ) {
         return (
-            <div className="group-badge">
+            <ListGridContentItem className="group-badge">
                 <div className="group-badge__grid">
                     <GroupImage groupId={group.id} />
                     <div className="group-badge__details" >
@@ -43,7 +45,7 @@ const GroupBadge = function({ id }) {
                         <div className="group-badge__about">{ group.about?.length > 100 ? group.about.substring(0,100).trim()+'...' : group.about }</div>
                     </div> 
                 </div>
-            </div>
+            </ListGridContentItem>
         )
     } else {
         return (null)

@@ -1,5 +1,15 @@
 .list__grid-content {
-    display: grid;
     margin: 0 auto;
+    width: 100%;
+    max-width: 720px;
+    min-width: 360px;
+
+}
+.list__grid-content__grid {
+    margin: 0 auto;
+    display: grid;
     grid-template-columns: repeat(auto-fit, 360px);
+    justify-content: center;
+    align-items: center;
+    justify-items: center;
 }
