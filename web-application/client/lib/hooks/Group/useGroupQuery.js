@@ -7,7 +7,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 import { getGroups, clearGroupQuery } from '/state/Group'
 
 export const useGroupQuery = function(queryParameters) {
-    const params = queryParameters ? queryParameters : {}
+    const params = queryParameters ? { ...queryParameters } : {}
     const [ searchParams, setSearchParams ] = useSearchParams()
 
     params.page = searchParams.get('page') || 1

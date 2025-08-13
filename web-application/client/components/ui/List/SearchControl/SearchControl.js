@@ -35,6 +35,7 @@ const SearchControl = function({ entity, className, onSubmit, onFocus }) {
     }
 
     const onKeyUp = function(event) {
+        console.log(`KeyUp Fired: ${event.key}`)
         if ( event.key === 'Enter' ) {
             executeSearch()
         } else if ( event.key === 'Escape' ) {
@@ -58,6 +59,7 @@ const SearchControl = function({ entity, className, onSubmit, onFocus }) {
                 onChange={onChange}
                 onKeyUp={onKeyUp}
                 placeholder={`Search ${entity}...`}
+                autoComplete="off"
             />
             <Button onClick={(e) => executeSearch()}><MagnifyingGlassIcon /> <span className="nav-text">Search</span></Button>
         </div>
