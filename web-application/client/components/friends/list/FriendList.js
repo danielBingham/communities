@@ -10,13 +10,10 @@ import Spinner from '/components/Spinner'
 import { 
     List, 
     ListHeader, 
-    ListTitle, 
-    ListControls, 
-    ListControl, 
     ListGridContent, 
-    ListNoContent 
-} from '/components/generic/list/List'
+} from '/components/ui/List'
 import PaginationControls from '/components/PaginationControls'
+import Button from '/components/ui/Button'
 
 import './FriendList.css'
 
@@ -25,6 +22,7 @@ const FriendList = function({ userId, params }) {
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const relationshipDictionary = useSelector((state) => state.UserRelationship.dictionary)
     const [query, request] = useUserRelationshipQuery(currentUser.id, params) 
+
 
     // ======= Render ===============================================
 
@@ -58,8 +56,19 @@ const FriendList = function({ userId, params }) {
         content = null
     } 
 
+    let explanation = ''
+    if ( ! query || parseInt(query.meta.count) === 0 ) {
+        explanation = `0 Friends`
+    } else {
+        const pageStart = ( query.meta.page-1) * query.meta.pageSize + 1
+        const pageEnd = query.meta.count - (query.meta.page-1) * query.meta.pageSize > query.meta.pageSize ? ( query.meta.page * query.meta.pageSize ) : query.meta.count 
+
+        explanation = `${pageStart} to ${pageEnd} of ${query.meta.count} Friends`
+    }
+
     return (
         <List className="friend-list">
+            <ListHeader explanation={explanation}></ListHeader>
             <ListGridContent>
                 { content } 
             </ListGridContent>

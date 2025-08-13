@@ -2,6 +2,8 @@
     background-color: var(--page-background-color);
     color: var(--page-text-color);
 }
+.page-left-gutter { padding: 5px 0; }
+.page-right-gutter { pagging: 5px 0; }
 
 @media (1600px <= width) {
     .page {
@@ -40,7 +42,6 @@
         margin: 0 auto;
         grid-row: 3 / 4;
         width: 100%;
-        padding-top: 30px;
     }
 }
 @media (width <= 700px) {
@@ -62,6 +63,5 @@
         margin: 0 auto;
         grid-row: 3 / 4;
         width: 100%;
-        padding-top: 30px;
     }
 }

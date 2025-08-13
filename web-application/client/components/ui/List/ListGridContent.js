@@ -6,7 +6,9 @@ const ListGridContent = function({ className, children }) {
 
     return (
         <div className={`list__grid-content ${ className ? className : ''}`}>
-            { children }
+            <div className="list__grid-content__grid">
+                { children }
+            </div>
         </div>
     )
 }
