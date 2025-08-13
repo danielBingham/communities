@@ -57,7 +57,7 @@ const UserProfilePage = function(props) {
         <Page id="user-profile-page">
             <PageLeftGutter>
             </PageLeftGutter>
-            <PageBody className='main'>
+            <PageBody>
                 <Outlet /> 
             </PageBody>
             <PageRightGutter>

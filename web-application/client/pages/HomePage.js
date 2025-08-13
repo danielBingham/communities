@@ -27,7 +27,7 @@ const HomePage = function() {
             <PageLeftGutter className="home-page__sidebar">
                 { hasGroups && <FeedMenu /> }
             </PageLeftGutter>
-            <PageBody className="content">
+            <PageBody>
                 <div className="feed">
                     <Outlet />
                 </div>
