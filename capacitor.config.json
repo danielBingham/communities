@@ -2,8 +2,9 @@
   "appId": "social.communities",
   "appName": "Communities",
   "webDir": "web-application/public/dist/",
-  "server": {
-    "url": "https://localhost:3000",
-    "cleartext": true
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    }
   }
 }

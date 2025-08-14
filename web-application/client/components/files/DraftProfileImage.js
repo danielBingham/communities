@@ -10,6 +10,7 @@ import {  patchFile, deleteFile } from '/state/File'
 import ErrorModal from '/components/errors/ErrorModal'
 import Button from '/components/generic/button/Button'
 import Spinner from '/components/Spinner'
+import Image from '/components/ui/Image'
 
 import "react-image-crop/dist/ReactCrop.css"
 import "./DraftProfileImage.css"
@@ -51,6 +52,7 @@ const DraftProfileImage = forwardRef(function({
 
     const onLoad = function(event) {
         const img = event.target
+        console.log(`width: ${img.clientWidth}, height: ${img.clientHeight}`)
         if ( dimensions.width != img.clientWidth || dimensions.height != img.clientHeight ) {
             setDimensions({ 
                 width: img.clientWidth,
@@ -167,7 +169,7 @@ const DraftProfileImage = forwardRef(function({
                     minHeight={10}
                     circularCrop={true}
                 >
-                    <img ref={imageRef} onLoad={onLoad} src={`${configuration.backend}/file/${fileId}?cacheBust=${cacheBust}`} />
+                    <Image ref={imageRef} onLoad={onLoad} src={`${configuration.host}${configuration.backend}/file/${fileId}?cacheBust=${cacheBust}`} />
                 </ReactCrop>
             </div>
                 { ! isLoaded && <Spinner /> }
