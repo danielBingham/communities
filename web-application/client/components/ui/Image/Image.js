@@ -13,7 +13,6 @@ const Image = function({ id, src, width, ref, onLoad }) {
     const onLoadInternal = function(event) {
         setIsLoading(false)  
 
-        console.log(`width: ${event.target.naturalWidth}, height: ${event.target.naturalHeight}`)
         if ( onLoad ) {
             onLoad(event)
         }

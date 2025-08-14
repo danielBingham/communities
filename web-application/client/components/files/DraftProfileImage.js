@@ -52,7 +52,6 @@ const DraftProfileImage = forwardRef(function({
 
     const onLoad = function(event) {
         const img = event.target
-        console.log(`width: ${img.clientWidth}, height: ${img.clientHeight}`)
         if ( dimensions.width != img.clientWidth || dimensions.height != img.clientHeight ) {
             setDimensions({ 
                 width: img.clientWidth,

@@ -19,7 +19,6 @@ export const useVersion = function() {
 
     useEffect(() => {
         const loadedVersion = config.version 
-        console.log(`Version: ${version}, loadedVersion: ${loadedVersion}`)
         if ( loadedVersion !== version ) {
             window.location.reload(true)
         }

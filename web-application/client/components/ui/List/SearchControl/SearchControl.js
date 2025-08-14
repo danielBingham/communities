@@ -35,7 +35,6 @@ const SearchControl = function({ entity, className, onSubmit, onFocus }) {
     }
 
     const onKeyUp = function(event) {
-        console.log(`KeyUp Fired: ${event.key}`)
         if ( event.key === 'Enter' ) {
             executeSearch()
         } else if ( event.key === 'Escape' ) {
