@@ -7,7 +7,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 
 import { getLinkPreview } from '/state/LinkPreview'
 
-import { Image } from '/components/ui/Image'
+import Image from '/components/ui/Image'
 
 import './LinkPreview.css'
 

@@ -5,6 +5,8 @@ const {
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
+const host = process.env.NODE_ENV === 'development' ? 'https://localhost:3000' : 'https://communities.social'
+
 const outputDirectory = 'public/dist';
 
 module.exports = {
@@ -40,6 +42,9 @@ module.exports = {
         port: 3000,
         open: true,
         historyApiFallback: true,
+        allowedHosts: [
+            host
+        ],
         server: {
             type: 'https',
             options: {
@@ -59,7 +64,10 @@ module.exports = {
     plugins: [
         new HtmlWebpackPlugin({
             filename: 'index.html',
-            template: './server/views/index.html'
+            template: './server/views/index.html',
+            meta: {
+                "communities-host": host 
+            }
         }), 
         sentryWebpackPlugin({
             authToken: process.env.SENTRY_AUTH_TOKEN,

@@ -16,6 +16,7 @@
     height: 32px;
     margin-right: 2px;
     margin-bottom: -6px;
+    border-radius: 4px;
 }
 .communities-logo a:link, .communities-logo a:active, .communities-logo a:visited {
     color: var(--header-text-color);

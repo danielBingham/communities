@@ -59,8 +59,9 @@ const core = new Core('web-application', config)
 core.initialize().then(function() {
 
     core.logger.info(`Starting up with server version: ${process.env.npm_package_version}`)
+    core.logger.info(`Starting server on host: ${core.config.host}.`)
     app.use(cors({
-        origin: core.config.host,
+        origin: [ core.config.host, 'capacitor://localhost' ],
         methods: [ 'GET', 'POST', 'PATCH', 'DELETE' ],
         allowedHeaders: [ 'Content-Type', 'Accept', 'X-Communities-CSRF-Token' ]
     }))
@@ -218,6 +219,7 @@ core.initialize().then(function() {
 
         response.status(200).json({
             version: process.env.npm_package_version,
+            host: core.config.host,
             backend: core.config.backend, 
             environment: process.env.NODE_ENV,
             log_level: core.config.log_level,
