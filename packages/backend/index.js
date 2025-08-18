@@ -54,6 +54,7 @@ exports.ServerSideRenderingService = require('./services/ServerSideRenderingServ
 exports.SessionService = require('./services/SessionService')
 exports.TokenService = require('./services/TokenService')
 exports.ValidationService = require('./services/ValidationService')
+exports.WebSocketService = require('./services/WebSocketService')
 
 exports.Logger = require('./logger')
 exports.FeatureFlags = require('./features')

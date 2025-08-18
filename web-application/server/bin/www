@@ -2,17 +2,16 @@
 
 console.log('Beginning server bootstrapping...')
 
-/**
- * Module dependencies.
- */
-var { app, core } = require('../app')
-const fs = require('fs')
+const { createCore } = require('../core')
+const { createSessionParser } = require('../session')
+const { createExpressApp } = require('../app')
+const { createWebSocketServer } = require('../wsServer')
+const { createHTTPServer } = require('../httpServer')
 
 /**
  * Normalize a port into a number, string, or false.
  */
-
-function normalizePort(val) {
+const normalizePort = function(val) {
   var port = parseInt(val, 10);
 
   if (isNaN(port)) {
@@ -28,94 +27,43 @@ function normalizePort(val) {
   return false;
 }
 
-/**
- * Create HTTP server.
- */
-let server = null
-if ( process.env.NODE_ENV == 'development') {
-    const https = require('https')
-    const httpsOptions = {
-      key: fs.readFileSync('./security/key.pem'),
-      cert: fs.readFileSync('./security/cert.pem')
-    }
-    server = https.createServer(httpsOptions, app)
-} else {
-    const http = require('http')
-    server = http.createServer(app);
-}
+createCore('web-application').then(function(core) {
+  const sessionParser = createSessionParser(core)
+  const app = createExpressApp(core, sessionParser)
+  const webSocketServer = createWebSocketServer(core)
+  const server = createHTTPServer(core, app, sessionParser, webSocketServer)
 
-
-
-
-/**
- * Event listener for HTTP server "error" event.
- */
-
-function onError(error) {
-  core.logger.error('ERROR.')
-  if (error.syscall !== 'listen') {
-    throw error;
-  }
-
-  var bind = typeof port === 'string'
-    ? 'Pipe ' + port
-    : 'Port ' + port;
-
-  // handle specific listen errors with friendly messages
-  switch (error.code) {
-    case 'EACCES':
-      core.logger.error(bind + ' requires elevated privileges');
-      process.exit(1);
-      break;
-    case 'EADDRINUSE':
-      core.logger.error(bind + ' is already in use');
-      process.exit(1);
-      break;
-    default:
-      core.logger.error(error)
-      throw error;
-  }
-}
-server.on('error', onError);
-
-/**
- * Event listener for HTTP server "listening" event.
- */
-function onListening() {
-  var addr = server.address();
-  var bind = typeof addr === 'string'
-    ? 'pipe ' + addr
-    : 'port ' + addr.port;
-  core.logger.info('Listening on ' + bind);
-}
-server.on('listening', onListening);
-
-
-/**
- * Get port from environment and store in Express.
- */
-
-var port = normalizePort(process.env.PORT || '8080');
-app.set('port', port);
-core.logger.info(`Starting up server on port ${port}.`)
-
-/**
- * Listen on provided port, on all network interfaces.
- */
-server.listen(port);
-
-const shutdownServer = function() {
+  /**
+   * Handle server shutdown
+   */
+  const shutdownServer = function() {
     core.logger.info('Attempting a graceful shutdown...')
     // Close the http server so we stop taking new connections before we close
     // down the resources needed to process those connections.
     server.close(async function() {
-        // Now close down the resources needed to process the http connections.
-        await core.shutdown()
+      // Now close down the resources needed to process the http connections.
+      await core.shutdown()
 
-        core.logger.info('Shutdown complete.')
-        process.exit(0)
+      core.logger.info('Shutdown complete.')
+      process.exit(0)
     })
-}
+  }
+  process.on('SIGTERM', shutdownServer)
+  process.on('SIGINT', shutdownServer)
 
-process.on('SIGTERM', shutdownServer)
-process.on('SIGINT', shutdownServer)
+  /**
+   * Get port from environment and store in Express.
+   */
+  var port = normalizePort(process.env.PORT || '8080');
+  app.set('port', port);
+
+  /**
+   * Listen on provided port, on all network interfaces.
+   */
+  core.logger.info(`Starting up the HTTP server:
+    host: ${core.config.host}
+    port: ${port}.
+    version: ${process.env.npm_package_version}
+  `)
+  server.listen(port);
+})
