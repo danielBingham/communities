@@ -28,8 +28,6 @@ export default class Socket {
     connect(host) {
         if ( this.socket === null ) {
             this.socket = new WebSocket(host)
-            console.log(`Created a new socket: `)
-            console.log(this.socket)
 
             this.socket.addEventListener('message', (event) => {
                 const data = JSON.parse(event.data)
@@ -41,6 +39,8 @@ export default class Socket {
             this.socket.addEventListener('error', (error) => {
                 this.handleError(error)
             })
+        } else {
+            console.log(`Warning: Attempt to connect a connected socket.`)
         }
     }
 

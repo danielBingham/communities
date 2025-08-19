@@ -63,6 +63,13 @@ module.exports = {
                 target: "https://localhost:8080",
                 changeOrigin: true,
                 secure: false
+            },
+            {
+                context: [ "/socket" ],
+                target: "https://localhost:8080",
+                secure: false,
+                changeOrigin: true,
+                ws: true
             }
         ]
     },

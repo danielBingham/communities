@@ -22,17 +22,17 @@ const ControllerError = require('./errors/ControllerError')
 
 const createErrorsMiddleware = function(core) {
     return function(error, request, response, next) {
-        console.error(error)
+        const logger = 'logger' in request ? request.logger : core.logger
         try {
             // Log the error.
             if ( error instanceof ControllerError ) {
                 if ( error.status < 500 ) {
-                    core.logger.warn(error)
+                    logger.warn(error)
                 } else {
-                    core.logger.error(error)
+                    logger.error(error)
                 }
             } else {
-                core.logger.error(error)
+                logger.error(error)
             }
 
             if ( error instanceof ControllerError) {
@@ -54,7 +54,7 @@ const createErrorsMiddleware = function(core) {
             }
         } catch (secondError) {
             // If we fucked up something in our error handling.
-            core.logger.error(secondError)
+            logger.error(secondError)
             response.status(500).json({ 
                 error: {
                     type: 'server-error',

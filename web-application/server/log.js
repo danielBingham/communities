@@ -19,32 +19,36 @@
  ******************************************************************************/
 
 const Uuid = require('uuid')
+const { Logger } = require('@communities/backend') 
 
 const createLogMiddleware = function(core) {
     return function(request, response, next) {
         // Set the id the logger will use to identify the session.  We don't want to
         // use the actual session id, since that value is considered sensitive.  So
         // instead we'll just use a uuid.
+        let id = null
         if ( request.session.user ) {
-            core.logger.setId(request.session.user.id)
+            id = request.session.user.id
         } else {
             if ( request.session.logId ) {
-                core.logger.setId(request.session.logId)
+                id = request.session.logId
             } else {
                 request.session.logId = Uuid.v4()
-                core.logger.setId(request.session.logId)
+                id = request.session.logId
             }
         }
 
+        request.logger = new Logger(core.logger.level, id, request.method, request.originalUrl)
+
         // Log start and end of the request.
         const startTime = Date.now()
-        core.logger.debug(`BEGIN: ${request.method} ${request.originalUrl}`)
+        request.logger.debug(`BEGIN: ${request.method} ${request.url}`)
         response.once('finish', function() {
             const endTime = Date.now()
             const totalTime = endTime - startTime
             const contentSize = response.getHeader('content-length')
 
-            core.logger.debug(`END: ${request.method} ${request.originalUrl} -- [ ${response.statusCode} ] -- ${totalTime} ms ${contentSize ? `${contentSize} bytes` : ''}`)
+            request.logger.debug(`END: ${request.method} ${request.url} -- [ ${response.statusCode} ] -- ${totalTime} ms ${contentSize ? `${contentSize} bytes` : ''}`)
         })
         next()
     }

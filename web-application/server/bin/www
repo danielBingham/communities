@@ -5,8 +5,8 @@ console.log('Beginning server bootstrapping...')
 const { createCore } = require('../core')
 const { createSessionParser } = require('../session')
 const { createExpressApp } = require('../app')
-const { createWebSocketServer } = require('../wsServer')
 const { createHTTPServer } = require('../httpServer')
+const { createWebSocketServer } = require('../wsServer')
 
 /**
  * Normalize a port into a number, string, or false.
@@ -30,8 +30,8 @@ const normalizePort = function(val) {
 createCore('web-application').then(function(core) {
   const sessionParser = createSessionParser(core)
   const app = createExpressApp(core, sessionParser)
-  const webSocketServer = createWebSocketServer(core)
-  const server = createHTTPServer(core, app, sessionParser, webSocketServer)
+  const server = createHTTPServer(core, app)
+  const webSocketServer = createWebSocketServer(core, sessionParser, server)
 
   /**
    * Handle server shutdown

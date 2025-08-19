@@ -22,7 +22,7 @@ const fs = require('fs')
 const https = require('https')
 const http = require('http')
 
-const createHTTPServer = function(core, app, sessionParser, webSocketServer) {
+const createHTTPServer = function(core, app) {
     core.logger.info(`Initializing the HTTP server...`)
     let server = null
 
@@ -59,34 +59,6 @@ const createHTTPServer = function(core, app, sessionParser, webSocketServer) {
                 throw error
         }
     })
-
-    const onSocketError = function(error) {
-        core.logger.error(error)
-    }
-
-    if ( webSocketServer && sessionParser ) {
-        core.logger.info(`Wiring Web Socket Server to HTTP upgrades...`)
-        server.on('upgrade', function (request, httpSocket, head) {
-            console.log(`Recieved upgrade request...`)
-            httpSocket.on('error', onSocketError) 
-            
-            sessionParser(request, {}, function() {
-                console.log(request.session)
-                /*if ( ! request.session.user ) {
-                    console.log(`Denied upgrade request.`)
-                    httpSocket.write('HTTP/1.1 401 Unauthorized\r\n\r\n')
-                    httpSocket.destroy()
-                    return
-                }*/
-
-                httpSocket.removeListener('error', onSocketError)
-
-                webSocketServer.handleUpgrade(request, httpSocket, head, function (webSocket) {
-                    webSocketServer.emit('connection', webSocket, request)
-                })
-            })
-        })
-    }
 
     server.on('listening', function() {
         var addr = server.address();

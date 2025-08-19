@@ -32,13 +32,24 @@ import { makeRequest } from '/state/lib/makeRequest'
 const socketSlice = createSlice({
     name: 'socket',
     initialState: {
-        isConnected: false
+        isConnected: false,
+        inProgress: false
     },
     reducers: {
-        connect: (state, action) => {},
-        disconnect: (state, action) => {},
-        open: (state, action) => { state.isConnected = true },
-        close: (state, action) => { state.isConnected = false }
+        connect: (state, action) => {
+            state.inProgress = true 
+        },
+        disconnect: (state, action) => {
+            state.inProgress = true
+        },
+        open: (state, action) => { 
+            state.isConnected = true 
+            state.inProgress = false
+        },
+        close: (state, action) => { 
+            state.isConnected = false 
+            state.inProgress = false
+        }
     }
 })
 

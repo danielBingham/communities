@@ -18,20 +18,71 @@
  *
  ******************************************************************************/
 
-const { WebSocketService } = require('@communities/backend')
+const { WebSocketServer } = require('ws')
 
-/**
- * We only want one of these to exist at a time. We don't need more than one
- * socket server running, it just wastes resources and will result in duplicate
- * messaging.
- */
-let webSocketService = null
-
-const createWebSocketServer = function(core) {
+const createWebSocketServer = function(core, sessionParser, httpServer) {
   core.logger.info(`Initializing the Web Socket Server...`)
-  webSocketService = new WebSocketService(core)
-  webSocketService.initialize()
-  return webSocketService.getServer()
+  const webSocketServer = new WebSocketServer({ noServer: true })
+
+  const errorListener = function(error) {
+    core.logger.debug(`Socket error: `)
+    core.logger.error(error)
+  }
+
+  webSocketServer.on('connection', function(socket, request) {
+    const currentUser = request.session.user
+
+    if ( ! currentUser ) {
+      core.logger.warn('Unauthenticated user opened a WebSocket connection.')
+      socket.close()
+      return
+    }
+
+    core.logger.debug(`Establishing socket connection for User(${currentUser.id})...`)
+
+    socket.on('error', (error) => {
+      core.logger.error(error)
+    })
+
+    const eventListener = (event) => {
+      core.logger.debug(`Processing event '${event.entity}:${event.action}'`)
+      socket.send(JSON.stringify(event))
+    }
+
+    core.events.listen(currentUser.id, eventListener)
+
+    socket.on('close', () => {
+      core.events.stopListening(currentUser.id, eventListener)
+    })
+  })
+
+  httpServer.on('upgrade', function(request, httpSocket, head) {
+    httpSocket.on('error', errorListener)
+
+    const { pathname } = new URL(request.url, core.config.wsHost)
+
+    if ( pathname === '/socket') {
+      sessionParser(request, {}, () => {
+        const currentUser = request.session.user
+        if ( ! currentUser ) {
+          core.logger.warn(`UPGRADE: Unauthenticated request...`)
+          httpSocket.write('HTTP/1.1 401 Unauthorized\r\n\r\n')
+          httpSocket.destroy()
+          return
+        }
+
+        httpSocket.removeListener('error', errorListener)
+
+        webSocketServer.handleUpgrade(request, httpSocket, head, function(socket) {
+          webSocketServer.emit('connection', socket, request)
+        })
+      })
+    } else {
+      httpSocket.destroy()
+    }
+  })
+
+  return webSocketServer
 }
 
 module.exports = {

@@ -61,19 +61,23 @@ export const createSocketMiddleware = function(socket) {
         return function(next) {
             return function(action) {
                 const state = getState()
+
                 if ( action.type === socketConnect.type ) {
-                    console.log(`Attempting socket connection to '${state.system.configuration.wsHost}'...`)
                     socket.connect(state.system.configuration.wsHost)
 
+                    socket.on('error', (error) => {
+                        console.error(`Socket error: `, error)
+                    })
+
                     socket.on('open', () => { 
-                        console.log(`Socket connection successful...`)
+                        console.log(`Socket connected...`)
                         dispatch(socketOpen()) 
                     })
-                    socket.on('close', () => { dispatch(socketClose()) })
+                    socket.on('close', () => { 
+                        dispatch(socketClose()) 
+                    })
 
                     socket.on('message', (event) => {
-                        console.log(`Message received: `)
-                        console.log(event)
                         if ( event.entity === 'Notification' ) {
                             dispatch(handleNotificationEvent(event))
                         }

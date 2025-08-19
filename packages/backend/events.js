@@ -26,7 +26,6 @@ module.exports = class Events {
 
         this.logger = logger
 
-        this.handlers = {}
         this.listeners = {} 
     }
 
@@ -46,6 +45,11 @@ module.exports = class Events {
     }
     
     handleEvent(event) {
+        console.log(`Handling event: `)
+        console.log(event)
+
+        console.log(`With listeners: `)
+        console.log(this.listeners)
         if ( Array.isArray(event.audience) ) {
             for(const userId of event.audience ) {
                 if ( userId in this.listeners ) {

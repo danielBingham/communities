@@ -44,6 +44,8 @@ const { createLogMiddleware } = require('./log')
 const { createCSRFMiddleware } = require('./csrf')
 const { createErrorsMiddleware } = require('./errors')
 
+const createRouter = require('./router')
+
 
 
 /**********************************************************************
@@ -99,7 +101,7 @@ const createExpressApp = function(core, sessionParser) {
     app.use(createCSRFMiddleware(core))
 
     // Get the api router, pre-wired up to the controllers.
-    const router = require('./router')(core)
+    const router = createRouter(core)
 
     // Load our router at the ``/api/v0/`` route.  This allows us to version our api. If,
     // in the future, we want to release an updated version of the api, we can load it at
@@ -125,7 +127,7 @@ const createExpressApp = function(core, sessionParser) {
             request.session.csrfToken = tokenService.createToken()
         }
 
-        response.status(200).json({
+       response.status(200).json({
             version: process.env.npm_package_version,
             host: core.config.host,
             wsHost: core.config.wsHost,
@@ -165,8 +167,7 @@ const createExpressApp = function(core, sessionParser) {
 
     // Everything else goes to the index file.
     app.all('{*any}', function(request,response) {
-        core.logger.debug(`Loading index file.`)
-        console.log(request)
+        request.logger.debug(`Loading index file.`)
         const filepath = path.join(process.cwd(), 'public/dist/index.html')
         response.sendFile(filepath)
     })

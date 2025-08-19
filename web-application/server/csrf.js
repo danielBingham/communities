@@ -24,7 +24,7 @@ const createCSRFMiddleware = function(core) {
             if ( 'csrfToken' in request.session && request.session.csrfToken !== undefined && request.session.csrfToken !== null ) {
                 const csrfToken = request.get('X-Communities-CSRF-Token')
                 if ( csrfToken !== request.session.csrfToken ) {
-                    core.logger.warn(`Request arrived with an invalid CSRF Token.  Possible forged request.\n \tSubmitted token: ${csrfToken}\n \tStored Token: ${request.session.csrfToken}`)
+                    request.logger.warn(`Request arrived with an invalid CSRF Token.  Possible forged request.\n \tSubmitted token: ${csrfToken}\n \tStored Token: ${request.session.csrfToken}`)
                     response.status(403).json({
                         error: {
                             type: 'invalid-csrf',
@@ -35,7 +35,7 @@ const createCSRFMiddleware = function(core) {
                     next() 
                 }
             } else {
-                core.logger.debug(`Expired session.`)
+                request.logger.debug(`Expired session.`)
                 response.status(401).json({
                     error: {
                         type: 'session-expired',
