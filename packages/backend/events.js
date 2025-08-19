@@ -38,23 +38,15 @@ module.exports = class Events {
 
         await this.subscriber.subscribe('communities:events', (message, channel) =>  {
             const event = JSON.parse(message)
-            console.log(`Events: Got an event: `)
-            console.log(event)
             this.handleEvent(event) 
         })
     }
     
     handleEvent(event) {
-        console.log(`Handling event: `)
-        console.log(event)
-
-        console.log(`With listeners: `)
-        console.log(this.listeners)
         if ( Array.isArray(event.audience) ) {
             for(const userId of event.audience ) {
                 if ( userId in this.listeners ) {
                     for(const listener of this.listeners[userId]) {
-                        console.log(`Triggering a listener for ${userId}.`)
                         // Don't send the audience.
                         listener({ 
                             entity: event.entity, 
@@ -70,7 +62,6 @@ module.exports = class Events {
             if ( userId in this.listeners ) {
                 for(const listener of this.listeners[userId]) {
                     // Don't send the audience.
-                    console.log(`Triggering a listener for ${userId}.`)
                     listener({ 
                         entity: event.entity, 
                         action: event.action,
@@ -113,8 +104,6 @@ module.exports = class Events {
             options: options
         }
 
-        console.log(`Triggering event: `)
-        console.log(event)
         await this.redis.publish('communities:events', JSON.stringify(event))
     }
 }
