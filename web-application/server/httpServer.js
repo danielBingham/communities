@@ -67,14 +67,17 @@ const createHTTPServer = function(core, app, sessionParser, webSocketServer) {
     if ( webSocketServer && sessionParser ) {
         core.logger.info(`Wiring Web Socket Server to HTTP upgrades...`)
         server.on('upgrade', function (request, httpSocket, head) {
+            console.log(`Recieved upgrade request...`)
             httpSocket.on('error', onSocketError) 
             
             sessionParser(request, {}, function() {
-                if ( ! request.session.user ) {
+                console.log(request.session)
+                /*if ( ! request.session.user ) {
+                    console.log(`Denied upgrade request.`)
                     httpSocket.write('HTTP/1.1 401 Unauthorized\r\n\r\n')
                     httpSocket.destroy()
                     return
-                }
+                }*/
 
                 httpSocket.removeListener('error', onSocketError)
 

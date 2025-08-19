@@ -18,6 +18,8 @@
  *
  ******************************************************************************/
 
+const ControllerError = require('./errors/ControllerError')
+
 const createErrorsMiddleware = function(core) {
     return function(error, request, response, next) {
         console.error(error)

@@ -18,6 +18,8 @@
  *
  ******************************************************************************/
 
+const Uuid = require('uuid')
+
 const createLogMiddleware = function(core) {
     return function(request, response, next) {
         // Set the id the logger will use to identify the session.  We don't want to

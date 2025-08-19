@@ -68,8 +68,6 @@ const NotificationMenu = function({ }) {
         makeMarkReadRequest(patchNotifications(notifications))  
     }
 
-
-
     // ============ Effect Handling ===========================================
 
     useEffect(function() {

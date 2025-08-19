@@ -33,7 +33,8 @@
     "postmark": "4.x",
     "redis": "5.x",
     "sharp": "~0.33.5",
-    "uuid": "11.x"
+    "uuid": "11.x",
+    "ws": "^8.18.3"
   },
   "devDependencies": {
     "jest": "29.x"

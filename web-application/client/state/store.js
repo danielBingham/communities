@@ -9,7 +9,7 @@ import GroupReducer from './Group'
 import GroupMemberReducer from './GroupMember'
 import GroupModerationReducer from './GroupModeration'
 import jobsReducer from './jobs'
-import notificationsReducer from './notifications'
+import notificationsReducer, { handleNotificationEvent } from './notifications'
 import LinkPreviewReducer from './LinkPreview'
 import PostReducer from './Post'
 import PostCommentReducer from './PostComment'
@@ -18,9 +18,11 @@ import PostSubscriptionReducer from './PostSubscription'
 import tokensReducer from './tokens'
 import SiteModerationReducer from './SiteModeration'
 import systemReducer from './system'
+import socketReducer, { connect as socketConnect, disconnect as socketDisconnect, open as socketOpen, close as socketClose } from './socket'
 import UserReducer from './User'
 import UserRelationshipReducer from './UserRelationship'
 
+import Socket from '/lib/Socket' 
 
 const reducers = combineReducers({
     authentication: authenticationReducer,
@@ -41,6 +43,7 @@ const reducers = combineReducers({
     User: UserReducer,
     UserRelationship: UserRelationshipReducer,
     SiteModeration: SiteModerationReducer,
+    socket: socketReducer,
     system: systemReducer
 })
 
@@ -51,6 +54,41 @@ const rootReducer = function(state, action) {
     return reducers(state,action)
 }
 
+// Wire up the WebSocket.
+const rootSocket = new Socket()
+export const createSocketMiddleware = function(socket) {
+    return function({ dispatch, getState }) {
+        return function(next) {
+            return function(action) {
+                const state = getState()
+                if ( action.type === socketConnect.type ) {
+                    console.log(`Attempting socket connection to '${state.system.configuration.wsHost}'...`)
+                    socket.connect(state.system.configuration.wsHost)
+
+                    socket.on('open', () => { 
+                        console.log(`Socket connection successful...`)
+                        dispatch(socketOpen()) 
+                    })
+                    socket.on('close', () => { dispatch(socketClose()) })
+
+                    socket.on('message', (event) => {
+                        console.log(`Message received: `)
+                        console.log(event)
+                        if ( event.entity === 'Notification' ) {
+                            dispatch(handleNotificationEvent(event))
+                        }
+                    })
+
+                } else if ( action.type === socketDisconnect.type ) {
+                    socket.disconnect() 
+                }
+                return next(action)
+            }
+        }
+    }
+}
+
 export default configureStore({
-    reducer: rootReducer
+    reducer: rootReducer,
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(createSocketMiddleware(rootSocket))
 })

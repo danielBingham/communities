@@ -27,7 +27,7 @@ module.exports = class Events {
         this.logger = logger
 
         this.handlers = {}
-        this.listener = {} 
+        this.listeners = {} 
     }
 
     async initialize() {
@@ -39,6 +39,8 @@ module.exports = class Events {
 
         await this.subscriber.subscribe('communities:events', (message, channel) =>  {
             const event = JSON.parse(message)
+            console.log(`Events: Got an event: `)
+            console.log(event)
             this.handleEvent(event) 
         })
     }
@@ -48,6 +50,7 @@ module.exports = class Events {
             for(const userId of event.audience ) {
                 if ( userId in this.listeners ) {
                     for(const listener of this.listeners[userId]) {
+                        console.log(`Triggering a listener for ${userId}.`)
                         // Don't send the audience.
                         listener({ 
                             entity: event.entity, 
@@ -63,6 +66,7 @@ module.exports = class Events {
             if ( userId in this.listeners ) {
                 for(const listener of this.listeners[userId]) {
                     // Don't send the audience.
+                    console.log(`Triggering a listener for ${userId}.`)
                     listener({ 
                         entity: event.entity, 
                         action: event.action,
@@ -105,6 +109,8 @@ module.exports = class Events {
             options: options
         }
 
+        console.log(`Triggering event: `)
+        console.log(event)
         await this.redis.publish('communities:events', JSON.stringify(event))
     }
 }

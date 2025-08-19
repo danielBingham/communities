@@ -212,7 +212,10 @@ module.exports = class NotificationService {
                 description: definition.web.text(context),
                 path: definition.web.path(context) 
             }
-            await this.notificationDAO.insertNotification(notification)
+            notification.id = await this.notificationDAO.insertNotification(notification)
+
+            const results = await this.notificationDAO.selectNotifications(`WHERE notifications.id = $1`, [ notification.id ]) 
+            await this.core.events.trigger(userId, 'Notification', 'create', { dictionary: results.dictionary })
         }
 
         // Only send the email if the user has emails turned on for that

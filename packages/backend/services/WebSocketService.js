@@ -63,11 +63,12 @@ module.exports = class WebSocketService {
 
         this.server.on('connection', (socket, request) => {
             const currentUser = request.session.user
-            
+          
             if ( ! currentUser ) {
                 throw new Error('Socket connection received with no active session.')
             }
 
+            console.log(`Websocket connected for User(${currentUser.id}).`)
             this.addUserSocket(currentUser, socket)
 
             socket.on('error', console.error)

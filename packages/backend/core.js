@@ -129,6 +129,7 @@ module.exports = class Core {
         await this.redis.connect()
 
         this.events = new Events(this.redis, this.logger)
+        await this.events.initialize()
 
         this.queue = new BullQueue('communities', { redis: this.config.redis })
 

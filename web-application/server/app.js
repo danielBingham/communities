@@ -44,7 +44,6 @@ const { createLogMiddleware } = require('./log')
 const { createCSRFMiddleware } = require('./csrf')
 const { createErrorsMiddleware } = require('./errors')
 
-const ControllerError = require('./errors/ControllerError')
 
 
 /**********************************************************************
@@ -129,6 +128,7 @@ const createExpressApp = function(core, sessionParser) {
         response.status(200).json({
             version: process.env.npm_package_version,
             host: core.config.host,
+            wsHost: core.config.wsHost,
             backend: core.config.backend, 
             environment: process.env.NODE_ENV,
             log_level: core.config.log_level,
@@ -166,6 +166,7 @@ const createExpressApp = function(core, sessionParser) {
     // Everything else goes to the index file.
     app.all('{*any}', function(request,response) {
         core.logger.debug(`Loading index file.`)
+        console.log(request)
         const filepath = path.join(process.cwd(), 'public/dist/index.html')
         response.sendFile(filepath)
     })
