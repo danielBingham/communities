@@ -5,6 +5,15 @@ const {
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
+if ( process.env.NODE_ENV == 'development' ) {
+    require('dotenv').config()
+}
+
+let host = "https://communities.social"
+if ( 'HOST' in process.env ) {
+    host = process.env.HOST
+}
+
 const outputDirectory = 'public/dist';
 
 module.exports = {
@@ -40,9 +49,7 @@ module.exports = {
         port: 3000,
         open: true,
         historyApiFallback: true,
-        allowedHosts: [
-            process.env.HOST 
-        ],
+        allowedHosts: [ host ],
         server: {
             type: 'https',
             options: {
@@ -55,8 +62,7 @@ module.exports = {
                 context: ["/health", "/version", "/config", "/api/0.0.0"],
                 target: "https://localhost:8080",
                 changeOrigin: true,
-                secure: false,
-                ws: true
+                secure: false
             }
         ]
     },
@@ -65,7 +71,7 @@ module.exports = {
             filename: 'index.html',
             template: './server/views/index.html',
             meta: {
-                "communities-host": process.env.HOST 
+                "communities-host": host 
             }
         }), 
         sentryWebpackPlugin({

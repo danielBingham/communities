@@ -12,8 +12,8 @@
   "main": "server/bin/www",
   "scripts": {
     "start": "node ./server/bin/www",
-    "build": "(rm ./public/dist/* || true) && export NODE_ENV=production && export HOST=https://communities.social && webpack --mode production",
-    "build-dev": "(rm ./public/dist/* || true) && export NODE_ENV=development && export HOST=https://localhost:8080 && webpack --mode development",
+    "build": "(rm ./public/dist/* || true) && export NODE_ENV=production && webpack --mode production",
+    "build-dev": "(rm ./public/dist/* || true) && export NODE_ENV=development  && webpack --mode development",
     "client": "webpack serve --mode development --devtool inline-source-map",
     "server": "nodemon ./server/bin/www",
     "dev": "export NODE_ENV=development && concurrently \"npm run server\" \"npm run client\"",
