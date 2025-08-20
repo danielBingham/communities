@@ -26,12 +26,15 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
                     fetchOptions.headers['Content-Type'] = 'application/json'
                 }
             }
+        }
 
-            if ( configuration ) {
+        if ( method !== 'GET' ) {
+            if ( configuration && 'csrf' in configuration) {
                 const csrfToken = configuration.csrf 
                 fetchOptions.headers['X-Communities-CSRF-Token'] = csrfToken
             }
         }
+
 
         let host = document.querySelector('meta[name="communities-host"]').content
         let fullEndpoint = ''

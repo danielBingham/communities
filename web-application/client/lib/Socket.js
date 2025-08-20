@@ -81,22 +81,16 @@ export default class Socket {
 
     ping() {
         try { 
-            this.send({ entity: 'Ping' })
-        } catch (error) {
-            if ( error instanceof SocketError ) {
-                if ( error.type === 'unready' ) {
-                    if ( ! this.isConnecting() && ! this.isOpen() ) {
-                        console.log(`Socket connection lost.`)
-                        this.disconnect()
-                    }
-                } else {
-                    console.error(error)
+            const sent = this.send({ entity: 'Ping' })
+            if ( sent === false ) {
+                if ( ! this.isConnecting() && ! this.isOpen() ) {
+                    console.log(`Socket connection lost.`)
                     this.disconnect()
                 }
-            } else {
-                console.error(error)
-                this.disconnect()
             }
+        } catch (error) {
+            console.error(error)
+            this.disconnect()
         }
 
         this.keepAliveTimeout = setTimeout(() => {
@@ -218,8 +212,9 @@ export default class Socket {
     send(message) {
         if ( this.isOpen() ) {
             this.socket.send(JSON.stringify(message))
+            return true
         } else {
-            throw new SocketError('unready', 'Attempt to send message to unready socket.')
+            return false
         }
     }
 

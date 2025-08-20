@@ -87,6 +87,12 @@ module.exports = class PostCommentNotifications {
         const subscription = await this.postSubscriptionDAO.getPostSubscriptionByPostAndUser(context.post.id, context.postAuthor.id)
 
         if ( subscription !== null ) {
+
+            // Don't notify the comment author of their own comment.
+            if ( subscription.userId == context.commentAuthor.id ) {
+               return 
+            }
+
             await this.notificationService.createNotification(context.postAuthor.id, 'PostComment:create:author', context, options) 
         }
     }
@@ -146,6 +152,10 @@ module.exports = class PostCommentNotifications {
         }
 
         for(const userId of userResults.list ) {
+            // Don't notify the comment author of their own comment.
+            if ( userId == context.commentAuthor.id ) {
+                continue
+            }
 
             // If the user has lost the ability to view this post, then don't send them a notification.
             const canViewPost = await this.permissionService.can(userResults.dictionary[userId], 'view', 'Post', { post: context.post })
