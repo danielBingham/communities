@@ -18,57 +18,214 @@
  *
  ******************************************************************************/
 
+export class SocketError extends Error {
+    constructor(type, message) {
+        super(message)
+        this.type = type
+    }
+}
+
 export default class Socket {
     constructor() {
         this.socket = null
 
-        this.messageHandlers = []
+        this.keepAliveTimeout = null
+        this.keepAliveInterval = null
+
+        this.eventHandlers = {
+            'error': [],
+            'message': [],
+            'close': [],
+            'open': []
+        }
+    }
+
+    resetHandlers() {
+        this.eventHandlers['error'] = []
+        this.eventHandlers['message'] = []
+        this.eventHandlers['close'] = []
+        this.eventHandlers['open'] = []
+    }
+
+    isOpen() {
+        if ( this.socket !== null ) {
+            return this.socket.readyState === WebSocket.OPEN
+        } else {
+            return false
+        }
+    }
+
+    isClosed() {
+        if ( this.socket !== null ) {
+            return this.socket.readyState === WebSocket.CLOSED
+        } else {
+            return true
+        }
+    }
+
+    isConnecting() {
+        if ( this.socket !== null ) {
+            return this.socket.readyState === WebSocket.CONNECTING
+        } else {
+            return false
+        }
+    }
+
+    isClosing() {
+        if ( this.socket !== null ) { 
+            return this.socket.readyState === WebSocket.CLOSING
+        } else {
+            return false
+        }
+    }
+
+    ping() {
+        try { 
+            this.send({ entity: 'Ping' })
+        } catch (error) {
+            if ( error instanceof SocketError ) {
+                if ( error.type === 'unready' ) {
+                    if ( ! this.isConnecting() && ! this.isOpen() ) {
+                        console.log(`Socket connection lost.`)
+                        this.disconnect()
+                    }
+                } else {
+                    console.error(error)
+                    this.disconnect()
+                }
+            } else {
+                console.error(error)
+                this.disconnect()
+            }
+        }
+
+        this.keepAliveTimeout = setTimeout(() => {
+            console.log(`Socket connection lost.`)
+            this.disconnect() 
+        }, 10000)
+    }
+
+    pong() {
+        clearTimeout(this.keepAliveTimeout) 
+        this.keepAliveTimeout = null
+    }
+
+    startListening() {
+        if ( this.socket !== null ) {
+            this.socket.addEventListener('message', (event) => {
+                const data = JSON.parse(event.data)
+                if ( data.entity === 'Pong' ) {
+                    this.pong()
+                } else { 
+                    for(const handler of this.eventHandlers['message']) {
+                        handler(data)
+                    }
+                }
+            })
+
+            this.socket.addEventListener('error', (event) => {
+                console.error(`Socket error: `, event)
+
+                for(const handler of this.eventHandlers['error']) {
+                    handler(event)
+                }
+                this.disconnect()
+            })
+
+            this.socket.addEventListener('open', (event) => {
+                if ( this.keepAliveTimeout !== null ) {
+                    clearTimeout(this.keepAliveTimeout)
+                }
+                if ( this.keepAliveInterval !== null ) {
+                    clearInterval(this.keepAliveInterval)
+                }
+
+                this.keepAliveInterval = setInterval(() => {
+                    this.ping()
+                }, 30000)
+
+                for(const handler of this.eventHandlers['open']) {
+                    handler(event)
+                }
+            })
+
+            this.socket.addEventListener('close', (event) => {
+                // Clear any hanging keepAlives
+                clearTimeout(this.keepAliveTimeout)
+                this.keepAliveTimeout = null
+                clearInterval(this.keepAliveInterval)
+                this.keepAliveInterval = null
+
+                for(const handler of this.eventHandlers['close']) {
+                    handler(event)
+                }
+
+                // Once we've handled the close event, reset.
+                this.resetHandlers()
+                this.socket = null
+            })
+        } else {
+            console.log(`Warning: Attempt to listen without a created socket.`)
+        }
     }
 
     connect(host) {
         if ( this.socket === null ) {
             this.socket = new WebSocket(host)
+            this.startListening()
+        } else if ( this.socket !== null && this.socket.readyState !== WebSocket.OPEN && this.socket.readyState !== WebSocket.CONNECTING ) {
+            // Ensure we're closing the old one.
+            this.socket.close()
 
-            this.socket.addEventListener('message', (event) => {
-                const data = JSON.parse(event.data)
-                for(const handler of this.messageHandlers) {
-                    handler(data)
-                }
-            })
-
-            this.socket.addEventListener('error', (error) => {
-                this.handleError(error)
-            })
+            // Open a new one.
+            this.socket = new WebSocket(host)
+            this.startListening()
         } else {
             console.log(`Warning: Attempt to connect a connected socket.`)
         }
     }
 
-    handleError(error) {
-        console.error(error)
-    }
-
     disconnect() {
         if ( this.socket !== null ) {
-            this.socket.close()
+            if ( this.socket.readyState === WebSocket.OPEN 
+                || this.socket.readyState === WebSocket.CONNECTING 
+                || this.socket.readyState === WebSocket.CLOSING
+            ) {
+                this.socket.close()
+            } else {
+                // If we're calling this, then the socket was somehow closed
+                // without us triggering the appropriate handlers.
+                for(const handler of this.eventHandlers['close']) {
+                    handler()
+                }
+                // If the socket is already closed, then cleanup and reset.
+                this.resetHandlers()
+                this.socket = null
+            }
+        } else {
+            // If we don't have a socket, then trigger the close event handlers
+            // anyway.
+            for(const handler of this.eventHandlers['close']) {
+                handler()
+            }
+
+            // If the socket is already closed, then cleanup and reset.
+            this.resetHandlers()
             this.socket = null
         }
     }
 
     send(message) {
-        if ( this.socket ) {
+        if ( this.isOpen() ) {
             this.socket.send(JSON.stringify(message))
+        } else {
+            throw new SocketError('unready', 'Attempt to send message to unready socket.')
         }
     }
 
     on(event, handler) {
-        if ( this.socket !== null ) {
-            if ( event === 'message' ) {
-                this.messageHandlers.push(handler)
-            } else {
-                this.socket.addEventListener(event, handler)
-            }
-        }
+        this.eventHandlers[event].push(handler)
     }
+
 }
 

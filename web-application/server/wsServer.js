@@ -44,6 +44,17 @@ const createWebSocketServer = function(core, sessionParser, httpServer) {
       core.logger.error(error)
     })
 
+    socket.on('message', (message) => {
+      const event = JSON.parse(message)
+
+      if ( event.entity === 'Ping' ) {
+        socket.send(JSON.stringify({ entity: 'Pong' }))
+      } else {
+        core.logger.warn('Unrecognized event recieved: ')
+        core.logger.warn(event)
+      }
+    })
+
     const eventListener = (event) => {
       core.logger.debug(`Processing event '${event.entity}:${event.action}'`)
       socket.send(JSON.stringify(event))

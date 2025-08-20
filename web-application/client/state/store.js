@@ -22,7 +22,7 @@ import socketReducer, { connect as socketConnect, disconnect as socketDisconnect
 import UserReducer from './User'
 import UserRelationshipReducer from './UserRelationship'
 
-import Socket from '/lib/Socket' 
+import Socket, { SocketError } from '/lib/Socket' 
 
 const reducers = combineReducers({
     authentication: authenticationReducer,
@@ -54,6 +54,7 @@ const rootReducer = function(state, action) {
     return reducers(state,action)
 }
 
+
 // Wire up the WebSocket.
 const rootSocket = new Socket()
 export const createSocketMiddleware = function(socket) {
@@ -65,22 +66,24 @@ export const createSocketMiddleware = function(socket) {
                 if ( action.type === socketConnect.type ) {
                     socket.connect(state.system.configuration.wsHost)
 
-                    socket.on('error', (error) => {
-                        console.error(`Socket error: `, error)
-                    })
-
+                    /**********************************************************
+                     * Open Connection Handler
+                     **********************************************************/
                     socket.on('open', () => { 
                         console.log(`Socket connected...`)
                         dispatch(socketOpen()) 
-                    })
-                    socket.on('close', () => { 
-                        dispatch(socketClose()) 
                     })
 
                     socket.on('message', (event) => {
                         if ( event.entity === 'Notification' ) {
                             dispatch(handleNotificationEvent(event))
                         }
+                    })
+
+                    socket.on('close', () => { 
+                        console.log(`Socket closed...`)
+                        dispatch(socketClose()) 
+
                     })
 
                 } else if ( action.type === socketDisconnect.type ) {
