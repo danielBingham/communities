@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { Outlet } from 'react-router-dom'
 
 import { useAuthentication } from '/lib/hooks/useAuthentication'
@@ -6,7 +7,6 @@ import { useAuthentication } from '/lib/hooks/useAuthentication'
 import WelcomeSplash from '/pages/authentication/WelcomeSplash'
 
 const AuthenticatedLayout = function() {
-
     const currentUser = useAuthentication() 
 
     if ( ! currentUser ) {

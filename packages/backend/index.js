@@ -40,6 +40,8 @@ exports.UserRelationshipDAO = require('./daos/UserRelationshipDAO')
 exports.DAOError = require('./errors/DAOError')
 exports.ServiceError = require('./errors/ServiceError')
 
+exports.NotificationEvents = require('./events/NotificationEvents')
+
 exports.AuthenticationService = require('./services/AuthenticationService')
 exports.EmailService = require('./services/EmailService')
 exports.FeatureService = require('./services/FeatureService')
@@ -54,6 +56,7 @@ exports.ServerSideRenderingService = require('./services/ServerSideRenderingServ
 exports.SessionService = require('./services/SessionService')
 exports.TokenService = require('./services/TokenService')
 exports.ValidationService = require('./services/ValidationService')
+exports.WebSocketService = require('./services/WebSocketService')
 
 exports.Logger = require('./logger')
 exports.FeatureFlags = require('./features')

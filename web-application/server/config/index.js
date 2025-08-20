@@ -12,6 +12,7 @@ if ( process.env.NODE_ENV == 'development' ) {
 
 const config = {
     host: process.env.HOST,
+    wsHost: process.env.WS_HOST,
     environment: process.env.NODE_ENV,
     backend: '/api/0.0.0',
     // Database configuration

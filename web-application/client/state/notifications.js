@@ -92,9 +92,37 @@ export const notificationsSlice = createSlice({
                     list: [ ...list ]
                 }
             }
+        },
+
+        prependToQuery: function(state, action) {
+            const name = action.payload.name
+            const list = action.payload.list
+
+            if ( name in state.queries ) {
+                state.queries[name].list = [ ...list, ...state.queries[name].list ]
+            } else {
+                state.queries[name] = {
+                    list: [ ...list ]
+                }
+            }
+
         }
     }
 })
+
+export const handleNotificationEvent = function(event) {
+    return function(dispatch, getState) {
+        if ( event.action === 'create' ) {
+            if ( 'entity' in event.context ) {
+                dispatch(notificationsSlice.actions.setNotificationsInDictionary({ entity: event.context.entity }))
+                dispatch(notificationsSlice.actions.prependToQuery({ name: 'NotificationMenu', list: [ event.context.entity.id ] }))
+            } else if ( 'dictionary' in event.context ) {
+                dispatch(notificationsSlice.actions.setNotificationsInDictionary({ dictionary: event.context.dictionary }))
+                dispatch(notificationsSlice.actions.prependToQuery({ name: 'NotificationMenu', list: Object.values(event.context.dictionary).map((notification) => notification.id) }))
+            }
+        }
+    }
+}
 
 
 /**

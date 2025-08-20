@@ -22,6 +22,7 @@ const BullQueue = require('bull')
 const Postmark = require('postmark')
 const { createClient } = require('redis')
 
+const Events = require('./events')
 const Logger = require('./logger')
 
 /***
@@ -126,6 +127,9 @@ module.exports = class Core {
         this.redis = createClient({ url: `redis://${this.config.redis.host}:${this.config.redis.port}` })
         this.redis.on('error', err => this.logger.error(`Redis connection error: `, err))
         await this.redis.connect()
+
+        this.events = new Events(this.redis, this.logger)
+        await this.events.initialize()
 
         this.queue = new BullQueue('communities', { redis: this.config.redis })
 

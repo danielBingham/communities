@@ -5,7 +5,14 @@ const {
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-const host = process.env.NODE_ENV === 'development' ? 'https://localhost:3000' : 'https://communities.social'
+if ( process.env.NODE_ENV == 'development' ) {
+    require('dotenv').config()
+}
+
+let host = "https://communities.social"
+if ( 'HOST' in process.env ) {
+    host = process.env.HOST
+}
 
 const outputDirectory = 'public/dist';
 
@@ -42,9 +49,7 @@ module.exports = {
         port: 3000,
         open: true,
         historyApiFallback: true,
-        allowedHosts: [
-            host
-        ],
+        allowedHosts: [ host ],
         server: {
             type: 'https',
             options: {
@@ -58,6 +63,13 @@ module.exports = {
                 target: "https://localhost:8080",
                 changeOrigin: true,
                 secure: false
+            },
+            {
+                context: [ "/socket" ],
+                target: "https://localhost:8080",
+                secure: false,
+                changeOrigin: true,
+                ws: true
             }
         ]
     },

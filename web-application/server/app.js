@@ -27,13 +27,9 @@
  ******************************************************************************/
 
 const express = require('express')
-const session = require('express-session')
 const cors = require('cors')
 
-const pgSession = require('connect-pg-simple')(session)
-
 const path = require('path')
-const Uuid = require('uuid')
 
 const { 
     Core, 
@@ -44,22 +40,24 @@ const {
     TokenService 
 } = require('@communities/backend')
 
-const ControllerError = require('./errors/ControllerError')
+const { createLogMiddleware } = require('./log')
+const { createCSRFMiddleware } = require('./csrf')
+const { createErrorsMiddleware } = require('./errors')
+
+const createRouter = require('./router')
+
+
 
 /**********************************************************************
  * Load Configuration
  **********************************************************************/
 const config = require('./config') 
 
+const createExpressApp = function(core, sessionParser) {
+    core.logger.info(`Initializing the Express App...`)
+    // Load express.
+    const app = express()
 
-// Load express.
-const app = express()
-
-const core = new Core('web-application', config)
-core.initialize().then(function() {
-
-    core.logger.info(`Starting up with server version: ${process.env.npm_package_version}`)
-    core.logger.info(`Starting server on host: ${core.config.host}.`)
     app.use(cors({
         origin: [ core.config.host, 'capacitor://localhost' ],
         methods: [ 'GET', 'POST', 'PATCH', 'DELETE' ],
@@ -75,60 +73,10 @@ core.initialize().then(function() {
 
     // Set up our session storage.  We're going to use database backed sessions to
     // maintain a stateless app.
-    core.logger.info('Setting up the database backed session store.')
-    const sessionStore = new pgSession({
-        pool: core.database,
-        createTableIfMissing: true
-    })
-    app.use(session({
-        key: core.config.session.key,
-        secret: core.config.session.secret,
-        store: sessionStore,
-        resave: false,
-        saveUninitialized: true,
-        proxy: true,
-        cookie: { 
-            path: '/',
-            httpOnly: true,
-            // TODO TECHDEBT 
-            //secure: true,
-            //secure: config.session.secure_cookie,
-            sameSite: "lax",
-            maxAge: 1000 * 60 * 60 * 24 * 14 // 14 days, two weeks
+    app.use(sessionParser)
 
-        } 
-    }))
-
-    // Set the id the logger will use to identify the session.  We don't want to
-    // use the actual session id, since that value is considered sensitive.  So
-    // instead we'll just use a uuid.
-    app.use(function(request, response, next) {
-        if ( request.session.user ) {
-            core.logger.setId(request.session.user.id)
-        } else {
-            if ( request.session.logId ) {
-                core.logger.setId(request.session.logId)
-            } else {
-                request.session.logId = Uuid.v4()
-                core.logger.setId(request.session.logId)
-            }
-        }
-        next()
-    })
-
-    // Request logger.
-    app.use(function(request, response, next) {
-        const startTime = Date.now()
-        core.logger.debug(`BEGIN: ${request.method} ${request.originalUrl}`)
-        response.once('finish', function() {
-            const endTime = Date.now()
-            const totalTime = endTime - startTime
-            const contentSize = response.getHeader('content-length')
-
-            core.logger.debug(`END: ${request.method} ${request.originalUrl} -- [ ${response.statusCode} ] -- ${totalTime} ms ${contentSize ? `${contentSize} bytes` : ''}`)
-        })
-        next()
-    })
+    // Request and log initialization middleware
+    app.use(createLogMiddleware(core))
 
     // Set the feature flags on each request, so that they are always up to date.
     // This means we can't use feature flags in Controller, Service, and DAO
@@ -148,56 +96,18 @@ core.initialize().then(function() {
         })
     })
 
-
-
-    app.use(function(request, response, next) {
-        if ( (request.method === 'POST' || request.method === 'PATCH' || request.method === 'DELETE')) {
-            if ( 'csrfToken' in request.session && request.session.csrfToken !== undefined && request.session.csrfToken !== null ) {
-                const csrfToken = request.get('X-Communities-CSRF-Token')
-                if ( csrfToken !== request.session.csrfToken ) {
-                    core.logger.warn(`Request arrived with an invalid CSRF Token.  Possible forged request.\n \tSubmitted token: ${csrfToken}\n \tStored Token: ${request.session.csrfToken}`)
-                    response.status(403).json({
-                        error: {
-                            type: 'invalid-csrf',
-                            message: 'Request rejected as a potential forged request. This is to protect you from attackers attempting to steal your account credentials. If this request was you, refresh the page and try again. If you continue to see this message, reach out to support at contact@communities.social.'
-                        }
-                    })
-                } else {
-                    next() 
-                }
-            } else {
-                core.logger.debug(`Expired session.`)
-                response.status(401).json({
-                    error: {
-                        type: 'session-expired',
-                        message: 'Your session expired.  Please refresh your page and log back in.'
-                    }
-                })
-            }
-        } else {
-            next()
-        }
-    })
+    // Perform the CSRF check, checking the token provided in the header
+    // against the one stored in the session.
+    app.use(createCSRFMiddleware(core))
 
     // Get the api router, pre-wired up to the controllers.
-    const router = require('./router')(core)
+    const router = createRouter(core)
 
     // Load our router at the ``/api/v0/`` route.  This allows us to version our api. If,
     // in the future, we want to release an updated version of the api, we can load it at
     // ``/api/v1/`` and so on, with out impacting the old versions of the router.
-    if( process.env?.MAINTENANCE_MODE === 'true' ) {
-        core.logger.info('Entering maintenance mode.')
-
-        app.use(core.config.backend, function(request, response) {
-            response.json({
-                maintenance_mode: true
-            })
-        })
-    } else {
-        core.logger.info(`Configuring the API Backend on path '${core.config.backend}'`)
-
-        app.use(core.config.backend, router)
-    }
+    core.logger.info(`Configuring the API Backend on path '${core.config.backend}'`)
+    app.use(core.config.backend, router)
 
     app.get('/health', function(request, response) {
         response.status(200).send()
@@ -217,9 +127,10 @@ core.initialize().then(function() {
             request.session.csrfToken = tokenService.createToken()
         }
 
-        response.status(200).json({
+       response.status(200).json({
             version: process.env.npm_package_version,
             host: core.config.host,
+            wsHost: core.config.wsHost,
             backend: core.config.backend, 
             environment: process.env.NODE_ENV,
             log_level: core.config.log_level,
@@ -256,59 +167,17 @@ core.initialize().then(function() {
 
     // Everything else goes to the index file.
     app.all('{*any}', function(request,response) {
-        core.logger.debug(`Loading index file.`)
+        request.logger.debug(`Loading index file.`)
         const filepath = path.join(process.cwd(), 'public/dist/index.html')
         response.sendFile(filepath)
     })
 
+    // Register the error handler.
+    app.use(createErrorsMiddleware(core))
 
-    // error handler
-    app.use(function(error, request, response, next) {
-        console.error(error)
-        try {
-            // Log the error.
-            if ( error instanceof ControllerError ) {
-                if ( error.status < 500 ) {
-                    core.logger.warn(error)
-                } else {
-                    core.logger.error(error)
-                }
-            } else {
-                core.logger.error(error)
-            }
-
-            if ( error instanceof ControllerError) {
-                response.status(error.status).json({
-                    error: {
-                        type: error.type, 
-                        message: error.publicMessage
-                    }
-                })
-                return 
-            } else { 
-                response.status(500).json({ 
-                    error: {
-                        type: 'server-error',
-                        message: `Something went wrong on the backend in a way we couldn't handle.  Please report this as a bug!`
-                    }
-                })
-                return
-            }
-        } catch (secondError) {
-            // If we fucked up something in our error handling.
-            core.logger.error(secondError)
-            response.status(500).json({ 
-                error: {
-                    type: 'server-error',
-                    message: `Something went wrong on the backend in a way we couldn't handle.  Please report this as a bug!`
-                }
-            })
-        }
-    })
-})
-
+    return app
+}
 
 module.exports = { 
-    app: app,
-    core: core
+    createExpressApp: createExpressApp
 }

@@ -24,6 +24,7 @@ import { useNavigate } from 'react-router-dom'
 import { BellIcon } from '@heroicons/react/24/outline'
 
 import { useRequest } from '/lib/hooks/useRequest'
+import { subscribe, unsubscribe } from '/state/events'
 
 import { 
     FloatingMenu,
@@ -40,19 +41,17 @@ import './NotificationMenu.css'
 
 const NotificationMenu = function({ }) {
 
-    // ============ Request Tracking ==========================================
-
     const [request, makeRequest] = useRequest()
     const [markReadRequest, makeMarkReadRequest] = useRequest()
-
-    // ============ Redux State ===============================================
 
     const emptyList = []
     const notifications = useSelector((state) => 'NotificationMenu' in state.notifications.queries ? state.notifications.queries['NotificationMenu'].list : emptyList) 
     const notificationDictionary = useSelector((state) => state.notifications.dictionary)
     const unreadNotifications = notifications.filter((id) => ! notificationDictionary[id].isRead)
 
-    // ============ Helpers and Actions =======================================
+    const isConnected = useSelector((state) => state.socket.isConnected)
+
+    const dispatch = useDispatch()
 
     const markAllRead = function(event) {
         event.preventDefault()
@@ -68,9 +67,19 @@ const NotificationMenu = function({ }) {
         makeMarkReadRequest(patchNotifications(notifications))  
     }
 
+    useEffect(function() {
+        return function() {
+            if ( isConnected ) {
+                dispatch(unsubscribe({ entity: 'Notification', action: 'create' }))
+            }
+        }
+    }, [])
 
-
-    // ============ Effect Handling ===========================================
+    useEffect(function() {
+        if ( isConnected ) {
+            dispatch(subscribe({ entity: 'Notification', action: 'create' }))
+        }
+    }, [ isConnected ])
 
     useEffect(function() {
         makeRequest(getNotifications('NotificationMenu'))

@@ -18,9 +18,10 @@
  *
  ******************************************************************************/
 import React from 'react'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
+import { resetEntities } from '/state/lib'
 import { useRequest } from '/lib/hooks/useRequest'
 
 import { FloatingMenuItem } from '/components/generic/floating-menu/FloatingMenu'
@@ -31,17 +32,12 @@ import './NotificationMenuItem.css'
 
 const NotificationMenu = function({ notificationId }) {
 
-    // ============ Request Tracking ==========================================
-
     const [request, makeRequest] = useRequest()
-
-    // ============ Redux State ===============================================
 
     const notification = useSelector((state) => notificationId && notificationId in state.notifications.dictionary ? state.notifications.dictionary[notificationId] : null)
 
-    // ============ Helpers and Actions =======================================
-
     const navigate = useNavigate()
+    const dispatch = useDispatch()
 
     const notificationClicked = function(notification) {
         if ( notification.isRead == false ) {
@@ -51,10 +47,9 @@ const NotificationMenu = function({ notificationId }) {
             makeRequest(patchNotification(patchedNotification))
         }
 
+        dispatch(resetEntities())
         navigate(notification.path)
     }
-
-    // ============ Effect Handling ===========================================
 
     // ============ Render ====================================================
 

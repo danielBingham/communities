@@ -5,9 +5,11 @@ import {
     Route
 } from 'react-router-dom'
 
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
+import { useRetries } from '/lib/hooks/useRetries'
+import { useSocket } from '/lib/hooks/useSocket'
 
 import logger from '/logger'
 
@@ -79,38 +81,27 @@ import './app.css';
  * and all other components.
  */
 const App = function(props) {
-    const [ retries, setRetries ] = useState(0)
-
-    // ======= Request Tracking =====================================
  
-    const [ configurationRequest, makeConfigurationRequest] = useRequest()
+    const [configurationRequest, makeConfigurationRequest] = useRequest()
     const [authenticationRequest, makeAuthenticationRequest] = useRequest()
-
-    // ======= Redux State ==========================================
 
     const configuration = useSelector((state) => state.system.configuration)
 
-    // ======= Effect Handling ======================================
-
-    useEffect(function() {
-        makeConfigurationRequest(getConfiguration())
-    }, [])
-
     // Note to self: These are system slice requests.  They go through
     // state/system and don't hit the API backend, instead they hit the root.
+    useRetries('Load Configuration', function() {
+        makeConfigurationRequest(getConfiguration())
+    }, configurationRequest)
+
+    const isSocketConnected = useSocket()
+
     useEffect(function() {
-        if ( configurationRequest && configurationRequest.state == 'fulfilled') {
-            if ( ! configuration.maintenance_mode ) {
-                // Logger is a singleton, this will effect all other imports.
-                logger.setLevel(configuration.log_level)
-                makeAuthenticationRequest(getAuthentication())
-            }
-        } else if ( configurationRequest && configurationRequest.state == 'failed') {
-            if ( retries < 5 ) {
-                makeConfigurationRequest(getConfiguration())
-                setRetries(retries+1)
-            }
-        }
+        if ( configurationRequest?.state == 'fulfilled') {
+            console.log(`Configuration loaded...`)
+            // Logger is a singleton, this will effect all other imports.
+            logger.setLevel(configuration.log_level)
+            makeAuthenticationRequest(getAuthentication())
+        } 
     }, [ configurationRequest ])
 
     // ======= Render ===============================================

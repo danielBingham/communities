@@ -41,7 +41,7 @@ module.exports = class Logger  {
         'silly'
     ]
 
-    constructor(level) {
+    constructor(level, id, method, url) {
         if (Number.isInteger(level)) {
             this.level = level
         } else {
@@ -61,11 +61,23 @@ module.exports = class Logger  {
                 this.level = Logger.levels.silly
             }
         }
-        this.id = 'unknown' 
-    }
 
-    setId(id) {
-        this.id = id
+        // For the core logger, we don't know what request this is.
+        this.id = 'core' 
+        if ( id ) {
+            this.id = id
+        }
+
+        this.method = ''
+        if ( method ) {
+            this.method = method
+        }
+
+        this.url = ''
+        if ( url ) {
+            this.url = url
+        }
+
     }
 
     log(level, message) {
@@ -75,7 +87,7 @@ module.exports = class Logger  {
         }
 
         const now = new Date()
-        let logPrefix = `${now.toISOString()} ${this.id} ${Logger.levelDescriptions[level]} :: `
+        let logPrefix = `${now.toISOString()} ${this.id} ${this.method} ${this.url} ${Logger.levelDescriptions[level]} :: `
         if ( typeof message === 'object' ) {
             if ( level == Logger.levels.error) {
                 console.log(logPrefix + 'Error encountered.') 
