@@ -26,21 +26,20 @@ const createWebSocketServer = function(core, sessionParser, httpServer) {
   const webSocketServer = new WebSocketServer({ noServer: true })
 
   const errorListener = function(error) {
-    core.logger.debug(`Socket error: `)
+    core.logger.error(`Socket error: `)
     core.logger.error(error)
   }
 
   webSocketServer.on('connection', function(socket, request) {
     const currentUser = request.session.user
     const connectionId = Uuid.v4()
+    core.logger.debug(`Establishing socket Connection(${connectionId})...`)
 
     if ( ! currentUser ) {
       core.logger.warn(`Unauthenticated user opened a socket Connection(${connectionId}).`)
       socket.close()
       return
     }
-
-    core.logger.debug(`Establishing socket Connection(${connectionId}) for User(${currentUser.id})...`)
 
     socket.on('error', (error) => {
       core.logger.error(error)
@@ -62,11 +61,11 @@ const createWebSocketServer = function(core, sessionParser, httpServer) {
     })
 
     core.events.registerConnection(currentUser.id, connectionId, (event) => {
-      core.logger.debug(`Processing event for Connection(${connectionId}) and User(${currentUser.id}) :: '${event.entity}:${event.action}'`)
       socket.send(JSON.stringify(event))
     })
 
     socket.on('close', () => {
+      core.logger.debug(`Closing socket Connection(${connectionId}).`)
       core.events.unregisterConnection(currentUser.id, connectionId)
     })
   })

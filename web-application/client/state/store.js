@@ -67,7 +67,6 @@ export const createSocketMiddleware = function(socket) {
                 const currentUser = state.authentication.currentUser
 
                 if ( action.type === connect.type ) {
-                    console.log(`Attempting socket connection...`)
                     socket.connect(state.system.configuration.wsHost)
 
                     /**********************************************************
@@ -79,7 +78,6 @@ export const createSocketMiddleware = function(socket) {
                     })
 
                     socket.on('message', (event) => {
-                        console.log(`Message recieved...`)
                         if ( event.action === 'confirmSubscription' ) {
                             dispatch(confirmSubscription({ entity: event.entity, action: event.context.action }))
                         } else if ( event.action === 'confirmUnsubscription' ) {
@@ -96,7 +94,6 @@ export const createSocketMiddleware = function(socket) {
                     })
 
                 } else if ( action.type === subscribe.type ) {
-                    console.log(`Subscribing to Event(${action.payload.entity}:${action.payload.action}).`)
                     const event = {
                         entity: action.payload.entity,
                         audience: currentUser?.id,
@@ -107,7 +104,6 @@ export const createSocketMiddleware = function(socket) {
                     }
                     socket.send(event)
                 } else if ( action.type === unsubscribe.type ) {
-                    console.log(`Unsubscribing from Event(${action.payload.entity}:${action.payload.action}).`)
                     const event = {
                         entity: action.payload.entity,
                         audience: currentUser?.id,
@@ -118,7 +114,6 @@ export const createSocketMiddleware = function(socket) {
                     }
                     socket.send(event)
                 } else if ( action.type === disconnect.type ) {
-                    console.log(`Disconnecting...`)
                     dispatch(clearSubscriptions())
                     socket.disconnect() 
                 }

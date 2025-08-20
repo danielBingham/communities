@@ -69,7 +69,6 @@ const NotificationMenu = function({ }) {
 
     useEffect(function() {
         return function() {
-            console.log(`== CLEAN useEffect(${isConnected}) ==`)
             if ( isConnected ) {
                 dispatch(unsubscribe({ entity: 'Notification', action: 'create' }))
             }
@@ -77,7 +76,6 @@ const NotificationMenu = function({ }) {
     }, [])
 
     useEffect(function() {
-        console.log(`== useEffect(${isConnected}) ==`)
         if ( isConnected ) {
             dispatch(subscribe({ entity: 'Notification', action: 'create' }))
         }

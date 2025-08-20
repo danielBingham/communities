@@ -75,7 +75,6 @@ module.exports = class Events {
     }
 
     getSubscriptions(entity, action) {
-        console.log(`getSubscriptions(${entity}, ${action})`)
         if ( ! (entity in this.subscriptions ) ) {
             throw new Error(`Missing subscriptions for '${entity}'.  Did you remember to register the handler?`)
         }
@@ -92,7 +91,6 @@ module.exports = class Events {
     }
 
     registerHandler(entity, actions, handler) {
-        this.logger.debug(`Registering Handler for '${entity}'.`)
         this.handlers[entity] = handler
 
         this.subscriptions[entity] = {}
@@ -123,10 +121,6 @@ module.exports = class Events {
     }
     
     handleEvent(event) {
-        this.logger.debug(`Handling event in events: `)
-        console.log(`Event: `, event)
-        console.log(`Handlers: `, this.handlers)
-        console.log(`Subscriptions: `, this.subscriptions)
         if ( event.entity in this.handlers ) {
             if ( event.entity in this.subscriptions ) {
                 const handler = this.handlers[event.entity]
@@ -154,8 +148,6 @@ module.exports = class Events {
             event.context = {}
         }
 
-        this.logger.debug(`Subscribing User(${userId}) from Event(${event.entity}:${event.context.action}).`)
-
         event.context.userId = userId
         event.context.connectionId = connectionId
 
@@ -181,8 +173,6 @@ module.exports = class Events {
         const confirmEvent = { ...event }
         confirmEvent.action = 'confirmSubscription'
         this.sendEventToUserConnection(userId, connectionId, confirmEvent)
-
-        console.log(`PostSubscription: `, this.subscriptions)
     }
 
     unsubscribe(userId, connectionId, event, options) {
@@ -202,8 +192,6 @@ module.exports = class Events {
         if ( ! ('context' in event) ) {
             event.context = {}
         }
-
-        this.logger.debug(`Unsubscribing User(${userId}) from Event(${event.entity}:${event.context.action}).`)
 
         event.context.userId = userId
         event.context.connectionId = connectionId
