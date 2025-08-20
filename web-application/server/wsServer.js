@@ -19,6 +19,7 @@
  ******************************************************************************/
 
 const { WebSocketServer } = require('ws')
+const Uuid = require('uuid')
 
 const createWebSocketServer = function(core, sessionParser, httpServer) {
   core.logger.info(`Initializing the Web Socket Server...`)
@@ -31,14 +32,15 @@ const createWebSocketServer = function(core, sessionParser, httpServer) {
 
   webSocketServer.on('connection', function(socket, request) {
     const currentUser = request.session.user
+    const connectionId = Uuid.v4()
 
     if ( ! currentUser ) {
-      core.logger.warn('Unauthenticated user opened a WebSocket connection.')
+      core.logger.warn(`Unauthenticated user opened a socket Connection(${connectionId}).`)
       socket.close()
       return
     }
 
-    core.logger.debug(`Establishing socket connection for User(${currentUser.id})...`)
+    core.logger.debug(`Establishing socket Connection(${connectionId}) for User(${currentUser.id})...`)
 
     socket.on('error', (error) => {
       core.logger.error(error)
@@ -49,21 +51,23 @@ const createWebSocketServer = function(core, sessionParser, httpServer) {
 
       if ( event.entity === 'Ping' ) {
         socket.send(JSON.stringify({ entity: 'Pong' }))
+      } else if ( event.action === 'subscribe' ) {
+        core.events.subscribe(currentUser.id, connectionId, event)
+      } else if ( event.action === 'unsubscribe' ) {
+        core.events.unsubscribe(currentUser.id, connectionId, event)
       } else {
-        core.logger.warn('Unrecognized event recieved: ')
+        core.logger.warn(`Unrecognized event recieved on Connect(${connectionId}): `)
         core.logger.warn(event)
       }
     })
 
-    const eventListener = (event) => {
-      core.logger.debug(`Processing event '${event.entity}:${event.action}'`)
+    core.events.registerConnection(currentUser.id, connectionId, (event) => {
+      core.logger.debug(`Processing event for Connection(${connectionId}) and User(${currentUser.id}) :: '${event.entity}:${event.action}'`)
       socket.send(JSON.stringify(event))
-    }
-
-    core.events.listen(currentUser.id, eventListener)
+    })
 
     socket.on('close', () => {
-      core.events.stopListening(currentUser.id, eventListener)
+      core.events.unregisterConnection(currentUser.id, connectionId)
     })
   })
 

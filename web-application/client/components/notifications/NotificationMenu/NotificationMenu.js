@@ -24,6 +24,7 @@ import { useNavigate } from 'react-router-dom'
 import { BellIcon } from '@heroicons/react/24/outline'
 
 import { useRequest } from '/lib/hooks/useRequest'
+import { subscribe, unsubscribe } from '/state/events'
 
 import { 
     FloatingMenu,
@@ -48,6 +49,10 @@ const NotificationMenu = function({ }) {
     const notificationDictionary = useSelector((state) => state.notifications.dictionary)
     const unreadNotifications = notifications.filter((id) => ! notificationDictionary[id].isRead)
 
+    const isConnected = useSelector((state) => state.socket.isConnected)
+
+    const dispatch = useDispatch()
+
     const markAllRead = function(event) {
         event.preventDefault()
         
@@ -61,6 +66,22 @@ const NotificationMenu = function({ }) {
 
         makeMarkReadRequest(patchNotifications(notifications))  
     }
+
+    useEffect(function() {
+        return function() {
+            console.log(`== CLEAN useEffect(${isConnected}) ==`)
+            if ( isConnected ) {
+                dispatch(unsubscribe({ entity: 'Notification', action: 'create' }))
+            }
+        }
+    }, [])
+
+    useEffect(function() {
+        console.log(`== useEffect(${isConnected}) ==`)
+        if ( isConnected ) {
+            dispatch(subscribe({ entity: 'Notification', action: 'create' }))
+        }
+    }, [ isConnected ])
 
     useEffect(function() {
         makeRequest(getNotifications('NotificationMenu'))

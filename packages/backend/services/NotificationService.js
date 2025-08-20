@@ -214,6 +214,7 @@ module.exports = class NotificationService {
             }
             notification.id = await this.notificationDAO.insertNotification(notification)
 
+            this.core.logger.debug(`Triggering event Notification event.`)
             const results = await this.notificationDAO.selectNotifications(`WHERE notifications.id = $1`, [ notification.id ]) 
             await this.core.events.trigger(userId, 'Notification', 'create', { dictionary: results.dictionary })
         }

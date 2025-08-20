@@ -40,6 +40,8 @@ exports.UserRelationshipDAO = require('./daos/UserRelationshipDAO')
 exports.DAOError = require('./errors/DAOError')
 exports.ServiceError = require('./errors/ServiceError')
 
+exports.NotificationEvents = require('./events/NotificationEvents')
+
 exports.AuthenticationService = require('./services/AuthenticationService')
 exports.EmailService = require('./services/EmailService')
 exports.FeatureService = require('./services/FeatureService')

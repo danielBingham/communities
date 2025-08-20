@@ -26,7 +26,39 @@ module.exports = class Events {
 
         this.logger = logger
 
-        this.listeners = {} 
+        /**
+         * A dictionary of event subscriptions organized by Entity and action.  Each Entity
+         * controls how it manages subscriptions, since a subscription may
+         * depend on elements specific to that entity (such as its id).
+         *
+         * The top layer of the map is gauranteed to be Entity.  Below that you
+         * will have to check each entity's Event handler to determine how that
+         * entity organizes its subscriptions.
+         */
+        this.subscriptions = {}
+
+        this.subscriptionsByConnection = {} 
+
+        /**
+         * A dictionary tracking users and their connections.
+         *
+         * Structure: 
+         *
+         * [userId]: {
+         *   [connectionId]: connection(),
+         *   [connectionId]: connection()
+         * }
+         */
+        this.connections = {} 
+
+        /**
+         * A Dictionary of event handlers by Entity.  Handlers are registered by the Entity Controllers.
+         *
+         * Structure:
+         *
+         * [Entity]: handler()
+         */
+        this.handlers = {}
     }
 
     async initialize() {
@@ -41,48 +73,177 @@ module.exports = class Events {
             this.handleEvent(event) 
         })
     }
+
+    getSubscriptions(entity, action) {
+        console.log(`getSubscriptions(${entity}, ${action})`)
+        if ( ! (entity in this.subscriptions ) ) {
+            throw new Error(`Missing subscriptions for '${entity}'.  Did you remember to register the handler?`)
+        }
+
+        if ( action === undefined || action === null ) {
+            return this.subscriptions[entity]
+        } 
+
+        if ( ! (action in this.subscriptions[entity]) ) {
+            throw new Error(`Missing subscriptions for '${action}'.  Did you remember to register that action?`)
+        }
+
+        return this.subscriptions[entity][action]
+    }
+
+    registerHandler(entity, actions, handler) {
+        this.logger.debug(`Registering Handler for '${entity}'.`)
+        this.handlers[entity] = handler
+
+        this.subscriptions[entity] = {}
+        for(const action of actions) {
+            this.subscriptions[entity][action] = {}
+        }
+    }
+
+    sendEventToUserConnection(userId, connectionId, event) {
+        if ( ! (userId in this.connections ) ) {
+            this.logger.error(`Attempt to send an event to a user with no connections.`)
+            return
+        }
+
+        if ( ! (connectionId in this.connections[userId] ) ) {
+            this.logger.error(`Attempt to send an event to a non-existent connection.`)
+            return
+        }
+
+        const connection = this.connections[userId][connectionId]
+        // Don't send the audience.
+        connection({ 
+            entity: event.entity, 
+            action: event.action,
+            context: event.context,
+            options: event.options
+        })
+    }
     
     handleEvent(event) {
-        if ( Array.isArray(event.audience) ) {
-            for(const userId of event.audience ) {
-                if ( userId in this.listeners ) {
-                    for(const listener of this.listeners[userId]) {
-                        // Don't send the audience.
-                        listener({ 
-                            entity: event.entity, 
-                            action: event.action,
-                            context: event.context,
-                            options: event.options
-                        })
-                    }
-                }
-            }
-        } else {
-            const userId = event.audience
-            if ( userId in this.listeners ) {
-                for(const listener of this.listeners[userId]) {
-                    // Don't send the audience.
-                    listener({ 
-                        entity: event.entity, 
-                        action: event.action,
-                        context: event.context,
-                        options: event.options
-                    })
+        this.logger.debug(`Handling event in events: `)
+        console.log(`Event: `, event)
+        console.log(`Handlers: `, this.handlers)
+        console.log(`Subscriptions: `, this.subscriptions)
+        if ( event.entity in this.handlers ) {
+            if ( event.entity in this.subscriptions ) {
+                const handler = this.handlers[event.entity]
+                const handled = handler(event)
+                if ( ! handled ) {
+                    this.logger.error(`Unhandled Event(${event.entity}:${event.action})`)
+                    return
                 }
             }
         }
     }
 
-    listen(userId, listener) {
-        if ( ! (userId in this.listeners) ) {
-            this.listeners[userId] = []
+    subscribe(userId, connectionId, event) {
+        if ( ! (userId in this.connections )) {
+            this.logger.error(`Attempt to subscribe a user who isn't listening!`)
+            return
         }
-        this.listeners[userId].push(listener) 
+
+        if ( ! (connectionId in this.connections[userId])) {
+            this.logger.error(`Attempt to subscribe a connection that isn't listening!`)
+            return
+        }
+
+        if ( ! ('context' in event) ) {
+            event.context = {}
+        }
+
+        this.logger.debug(`Subscribing User(${userId}) from Event(${event.entity}:${event.context.action}).`)
+
+        event.context.userId = userId
+        event.context.connectionId = connectionId
+
+        if (event.entity in this.handlers ) {
+            const handler = this.handlers[event.entity]
+            const handled = handler(event)
+            if ( ! handled ) {
+                this.logger.error(`Unhandled Event(${event.entity}:${event.action})`)
+                return
+            }
+        }
+
+        if ( ! (userId in this.subscriptionsByConnection ) ) {
+            this.subscriptionsByConnection[userId] = {}
+        }
+
+        if ( ! (connectionId in this.subscriptionsByConnection) ) {
+            this.subscriptionsByConnection[userId][connectionId] = []
+        }
+
+        this.subscriptionsByConnection[userId][connectionId].push(event)
+
+        const confirmEvent = { ...event }
+        confirmEvent.action = 'confirmSubscription'
+        this.sendEventToUserConnection(userId, connectionId, confirmEvent)
+
+        console.log(`PostSubscription: `, this.subscriptions)
+    }
+
+    unsubscribe(userId, connectionId, event, options) {
+        options = options || {}
+        if ( ! (userId in this.connections )) {
+            this.logger.error(`Attempt to unsubscribe a user who isn't listening!`)
+            return
+        }
+
+        if ( ! (connectionId in this.connections[userId])) {
+            this.logger.error(`Attempt to unsubscribe a connection that isn't listening!`)
+            return
+        }
+
+
+
+        if ( ! ('context' in event) ) {
+            event.context = {}
+        }
+
+        this.logger.debug(`Unsubscribing User(${userId}) from Event(${event.entity}:${event.context.action}).`)
+
+        event.context.userId = userId
+        event.context.connectionId = connectionId
+
+        if (event.entity in this.handlers ) {
+            const handler = this.handlers[event.entity]
+            const handled = handler(event)
+            if ( ! handled ) {
+                this.logger.error(`Unhandled Event(${event.entity}:${event.action})`)
+                return
+            }
+        }
+
+        if ( options?.skipConfirmation !== true ) { 
+            const confirmEvent = { ...event }
+            confirmEvent.action = 'confirmUnsubscription'
+            this.sendEventToUserConnection(userId, connectionId, confirmEvent)
+        }
+    }
+
+    registerConnection(userId, connectionId, connection) {
+        if ( ! (userId in this.connections) ) {
+            this.connections[userId] = {} 
+        }
+
+        this.connections[userId][connectionId] = connection
     }
     
-    stopListening(userId, listener) {
-        if ( userId in this.listeners) {
-            this.listeners[userId] = this.listeners[userId].filter((l) => l !== listener)
+    unregisterConnection(userId, connectionId) {
+        if ( userId in this.subscriptionsByConnection ) {
+            if ( connectionId in this.subscriptionsByConnection[userId] ) {
+                for(const event of this.subscriptionsByConnection[userId][connectionId]) {
+                    event.action = 'unsubscribe'
+                    this.unsubscribe(userId, connectionId, event, { skipConfirmation: true })
+                }
+            }
+        }
+
+        if ( userId in this.connections) {
+            delete this.connections[userId][connectionId]
         }
     }
 

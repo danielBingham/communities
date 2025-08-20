@@ -28,6 +28,9 @@ export const useSocket = function() {
                     dispatch(disconnect())
                 }
             }
+        } else if ( isConnected ) {
+            // Reset the delay once we've successfully connected.
+            setDelay(125)
         }
     }, [ currentUser, isConnected, inProgress ])
 

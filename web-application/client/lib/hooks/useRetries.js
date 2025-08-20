@@ -27,6 +27,12 @@ export const useRetries = function(name, makeRequest, request, maxRetries) {
             }, delay) 
             setDelay(Math.floor(delay * 1.5))
             setAttempt(attempt + 1)
+        } else if ( request?.state === 'fulfilled' ) {
+            // When we succeed at the request, reset.
+            clearTimeout(timeoutId.current)
+            timeoutId.current = null
+            setAttempt(0)
+            setDelay(125)
         }
 
         return function() {
