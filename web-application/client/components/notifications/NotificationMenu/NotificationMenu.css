@@ -20,7 +20,7 @@
 .notification-menu {
     color: var(--header-text-color);
 }
-.notification-menu .menu-trigger svg {
+.notification-menu .notification-trigger svg {
     color: var(--header-text-color);
     width: 24px;
     height: 24px;
@@ -50,6 +50,12 @@
     border-radius: 14px;
     background-color: var(--input-highlight-color);
 }
+
+.notification-menu .notification-permissions {
+    min-width: 200px;
+    text-align: center;
+}
+
 .notification-menu .notification-body {
     max-height: 400px;
     overflow-y: auto;

@@ -17,41 +17,43 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
 
 import { BellIcon } from '@heroicons/react/24/outline'
 
 import { useRequest } from '/lib/hooks/useRequest'
-import { subscribe, unsubscribe } from '/state/events'
-
-import { 
-    FloatingMenu,
-    FloatingMenuHeader,
-    FloatingMenuTrigger,
-    FloatingMenuBody
-} from '/components/generic/floating-menu/FloatingMenu'
+import { useEventSubscription } from '/lib/hooks/useEventSubscription'
 
 import { getNotifications, patchNotifications } from '/state/notifications'
+import { patchDevice } from '/state/authentication'
+
+import { 
+    DropdownMenu, 
+    DropdownMenuHeader, 
+    DropdownMenuTrigger, 
+    DropdownMenuBody,
+    DropdownMenuModal
+} from '/components/ui/DropdownMenu'
+import Button from '/components/ui/Button'
 
 import NotificationMenuItem from './NotificationMenuItem'
 
 import './NotificationMenu.css'
 
 const NotificationMenu = function({ }) {
+    const device = useSelector((state) => state.authentication.device)
 
     const [request, makeRequest] = useRequest()
     const [markReadRequest, makeMarkReadRequest] = useRequest()
+    const [patchDeviceRequest, makePatchDeviceRequest] = useRequest()
 
     const emptyList = []
     const notifications = useSelector((state) => 'NotificationMenu' in state.notifications.queries ? state.notifications.queries['NotificationMenu'].list : emptyList) 
     const notificationDictionary = useSelector((state) => state.notifications.dictionary)
     const unreadNotifications = notifications.filter((id) => ! notificationDictionary[id].isRead)
 
-    const isConnected = useSelector((state) => state.socket.isConnected)
-
-    const dispatch = useDispatch()
+    useEventSubscription('Notification', 'create')
 
     const markAllRead = function(event) {
         event.preventDefault()
@@ -67,19 +69,11 @@ const NotificationMenu = function({ }) {
         makeMarkReadRequest(patchNotifications(notifications))  
     }
 
-    useEffect(function() {
-        return function() {
-            if ( isConnected ) {
-                dispatch(unsubscribe({ entity: 'Notification', action: 'create' }))
-            }
-        }
-    }, [])
-
-    useEffect(function() {
-        if ( isConnected ) {
-            dispatch(subscribe({ entity: 'Notification', action: 'create' }))
-        }
-    }, [ isConnected ])
+    const requestNotificationPermissions = function(event) {
+        Notification.requestPermission().then((permission) => {
+            makePatchDeviceRequest(patchDevice({ notificationPermission: permission }))
+        })
+    }
 
     useEffect(function() {
         makeRequest(getNotifications('NotificationMenu'))
@@ -101,20 +95,33 @@ const NotificationMenu = function({ }) {
         )
     }
 
+    let needToRequestPermission = false
+    if ( device !== null && device.platform === 'web' ) {
+        if ( ! ( "notificationPermission" in device ) || ( device.notificationPermission !== Notification.permission && device.notificationPermission !== 'denied')) {
+            if ( "Notification" in window && Notification.permission !== 'granted' && Notification.permission !== 'denied' ) {
+                needToRequestPermission = true
+            }
+        }
+    }
+
     const unread = unreadNotifications.length
     return (
-        <FloatingMenu className="notification-menu" closeOnClick={true}>
-            <FloatingMenuTrigger className="notification-trigger" showArrow={false} >
+        <DropdownMenu className="notification-menu" autoClose={true}>
+            <DropdownMenuTrigger className="notification-trigger" >
                 <BellIcon />
                 { unread > 0 && <div className="unread-indicator">{unread}</div> }
-            </FloatingMenuTrigger>
-            <FloatingMenuBody className="notification-body">
-                <div className="notification-header">
+            </DropdownMenuTrigger>
+            { needToRequestPermission && <DropdownMenuModal className="notification-permissions">
+                <p>Show desktop notifications?</p>
+                <p><Button onClick={(e) => makePatchDeviceRequest(patchDevice({ notificationPermission: 'denied'}))}>No</Button><Button onClick={requestNotificationPermissions} type="primary">Yes</Button></p>
+            </DropdownMenuModal> }
+            <DropdownMenuBody className="notification-body">
+                <DropdownMenuHeader className="notification-header">
                     <span className="mark-read"><a href="" onClick={(e) =>  markAllRead(e) }>Mark All Read</a></span>
-                </div>
+                </DropdownMenuHeader>
                 { notificationViews }
-            </FloatingMenuBody>
-        </FloatingMenu>
+            </DropdownMenuBody>
+        </DropdownMenu>
     )
 
 }

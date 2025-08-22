@@ -25,7 +25,10 @@ module.exports = class NotificationEvents {
     }
 
     handle(event) {
-        if ( event.action === 'subscribe' ) {
+        if ( event.action === 'unregister' ) {
+            this.unregisterConnection(event.context.userId, event.context.connectionId)
+            return true
+        } else if ( event.action === 'subscribe' ) {
             this.subscribe(event)
             return true
         } else if ( event.action === 'unsubscribe' ) {
@@ -37,6 +40,16 @@ module.exports = class NotificationEvents {
         }
 
         return false
+    }
+
+    unregisterConnection(userId, connectionId) {
+        const subscriptions = this.core.events.getSubscriptions('Notification')
+
+        for(const action  of Object.keys(subscriptions)) {
+            if ( userId in subscriptions[action] ) {
+                subscriptions[action][userId] = subscriptions[action][userId].filter((cid) => cid !== connectionId)
+            }
+        }
     }
 
     subscribe(event) {
@@ -51,7 +64,10 @@ module.exports = class NotificationEvents {
             subscriptions[action][event.context.userId] = [] 
         }
 
-        subscriptions[action][event.context.userId].push(event.context.connectionId) 
+        // Don't double subscribe a connection.
+        if ( ! subscriptions[action][event.context.userId].includes(event.context.connectionId) ) {
+            subscriptions[action][event.context.userId].push(event.context.connectionId) 
+        }
     }
 
     unsubscribe(event) {

@@ -1,0 +1,13 @@
+.dropdown-menu__trigger {
+    font-size: 14px;
+    cursor: pointer;
+}
+.dropdown-menu__trigger a:link {
+    color: var(--main-text-color);
+}
+.dropdown-menu__trigger a:active,
+.dropdown-menu__trigger a:hover,
+.dropdown-menu__trigger a:visited {
+    color: var(--main-text-color);
+    filter: brightness(90%);
+}

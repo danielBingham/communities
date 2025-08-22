@@ -26,6 +26,21 @@ module.exports = class NumberValidator extends BaseValidator {
         return this
     }
 
+    mustNotBeNaN() {
+        if ( this.shortCircuit() ) {
+            return this
+        }
+
+        if ( this.value === NaN ) {
+            this.errors.push({
+                type: `${this.name}:NaN`,
+                log: `'${this.name}' must be a valid number.`,
+                message: `'${this.name}' must be a valid number.`
+            })
+        }
+        return this
+    }
+
     mustBeInteger() {
         if ( this.shortCircuit() ) {
             return this

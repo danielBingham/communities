@@ -4,7 +4,7 @@ const intCleaner = function(value) {
     } else if ( typeof value === 'string' ) {
         return Number.parseInt(value.trim())
     } else {
-        return value
+        return undefined 
     }
 }
 

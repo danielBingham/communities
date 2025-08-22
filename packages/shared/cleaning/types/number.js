@@ -17,18 +17,15 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-const cleaning = require('./cleaning')
-const lib = require('./lib')
-const permissions = require('./permissions')
-const schema = require('./schema')
-const validation = require('./validation')
-const util = require('./util')
 
-module.exports = {
-    cleaning: cleaning,
-    lib: lib,
-    permissions: permissions,
-    schema: schema,
-    validation: validation,
-    util: util
+const cleanNumber = function(value) {
+    if ( typeof value === 'number' ) {
+        return value
+    } else if ( typeof value === 'string') { 
+        return Number(value)
+    } 
+
+    return undefined
 }
+
+module.exports = cleanNumber 

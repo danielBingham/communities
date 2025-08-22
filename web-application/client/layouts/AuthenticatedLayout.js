@@ -1,5 +1,4 @@
-import React, { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import React from 'react'
 import { Outlet } from 'react-router-dom'
 
 import { useAuthentication } from '/lib/hooks/useAuthentication'

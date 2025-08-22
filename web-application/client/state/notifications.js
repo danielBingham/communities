@@ -112,13 +112,58 @@ export const notificationsSlice = createSlice({
 
 export const handleNotificationEvent = function(event) {
     return function(dispatch, getState) {
+        const device = getState().authentication.device
+        const host = getState().system.configuration.host
+        const settings = getState().authentication.currentUser?.settings?.notifications
+        const defaultNotificationSettings = {
+            web: true,
+            email: true,
+            desktop: true,
+            mobile: true
+        }
+        
         if ( event.action === 'create' ) {
             if ( 'entity' in event.context ) {
                 dispatch(notificationsSlice.actions.setNotificationsInDictionary({ entity: event.context.entity }))
                 dispatch(notificationsSlice.actions.prependToQuery({ name: 'NotificationMenu', list: [ event.context.entity.id ] }))
+
+                if ( device.platform === 'web' && "Notification" in window && Notification.permission === 'granted') {
+                    const entity = event.context.entity
+                    const notificationSetting = settings && entity.type in settings ? settings[entity.type] : defaultNotificationSettings
+                    if ( notificationSetting.desktop === true ) {
+                        const notification = new Notification("Communities", 
+                            { 
+                                body: entity.description, 
+                                icon: `${host}/assets/icon-1024x1024.png`,
+                                image: `${host}/assets/icon-1024x1024.png`
+                            }
+                        )
+                        notification.addEventListener('click', (event) => {
+                            window.location.href = entity.path
+                        })
+                    }
+                }
             } else if ( 'dictionary' in event.context ) {
                 dispatch(notificationsSlice.actions.setNotificationsInDictionary({ dictionary: event.context.dictionary }))
                 dispatch(notificationsSlice.actions.prependToQuery({ name: 'NotificationMenu', list: Object.values(event.context.dictionary).map((notification) => notification.id) }))
+                if ( device.platform === 'web' && "Notification" in window && Notification.permission === 'granted' ) {
+                    for(const [id, entity] of Object.entries(event.context.dictionary)) { 
+                        const notificationSetting = settings && entity.type in settings ? settings[entity.type] : defaultNotificationSettings
+                        if ( notificationSetting.desktop === true ) { 
+                            const notification = new Notification("Communities", 
+                                { 
+                                    body: entity.description, 
+                                    icon: `${host}/assets/icon-1024x1024.png`,
+                                    image: `${host}/assets/icon-1024x1024.png`
+
+                                }
+                            )
+                            notification.addEventListener('click', (event) => {
+                                window.location.href = entity.path
+                            })
+                        }
+                    }
+                }
             }
         }
     }

@@ -94,25 +94,35 @@ export const createSocketMiddleware = function(socket) {
                     })
 
                 } else if ( action.type === subscribe.type ) {
-                    const event = {
-                        entity: action.payload.entity,
-                        audience: currentUser?.id,
-                        action: 'subscribe',
-                        context: {
-                            action: action.payload.action
+                    if ( socket.isOpen() ) {
+                        const event = {
+                            entity: action.payload.entity,
+                            audience: currentUser?.id,
+                            action: 'subscribe',
+                            context: {
+                                action: action.payload.action
+                            }
                         }
+                        socket.send(event)
+                    } else {
+                        // If the socket is closed, then we need to clear the
+                        // subscriptions.
+                        dispatch(clearSubscriptions())
                     }
-                    socket.send(event)
                 } else if ( action.type === unsubscribe.type ) {
-                    const event = {
-                        entity: action.payload.entity,
-                        audience: currentUser?.id,
-                        action: 'unsubscribe',
-                        context: {
-                            action: action.payload.action
+                    // If the socket isn't open, then we don't need to do
+                    // anything.
+                    if ( socket.isOpen() ) {
+                        const event = {
+                            entity: action.payload.entity,
+                            audience: currentUser?.id,
+                            action: 'unsubscribe',
+                            context: {
+                                action: action.payload.action
+                            }
                         }
+                        socket.send(event)
                     }
-                    socket.send(event)
                 } else if ( action.type === disconnect.type ) {
                     dispatch(clearSubscriptions())
                     socket.disconnect() 

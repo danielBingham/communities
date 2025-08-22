@@ -17,14 +17,13 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
 import { resetEntities } from '/state/lib'
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { FloatingMenuItem } from '/components/generic/floating-menu/FloatingMenu'
+import { DropdownMenuItem } from '/components/ui/DropdownMenu'
 
 import { patchNotification } from '/state/notifications'
 
@@ -54,12 +53,12 @@ const NotificationMenu = function({ notificationId }) {
     // ============ Render ====================================================
 
     return (
-        <FloatingMenuItem 
+        <DropdownMenuItem
             onClick={(e) => notificationClicked(notification)}
             className={`notification ${notification.isRead ? 'read' : '' }`}
         >
             { notification.description }
-        </FloatingMenuItem>
+        </DropdownMenuItem>
     )
 
 }

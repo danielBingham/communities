@@ -1,0 +1,4 @@
+.dropdown-menu__header {
+    padding: 5px;
+    border-bottom: thin solid var(--primary-color-light);
+}

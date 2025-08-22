@@ -4,7 +4,6 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useRequest } from '/lib/hooks/useRequest'
 import { validateEmail, validatePassword } from '/lib/validation/user'
 
-import { patchAuthentication } from '/state/authentication'
 import { patchUser } from '/state/User'
 
 import Input from '/components/generic/input/Input'
@@ -24,7 +23,6 @@ const ChangeEmailForm = function(props) {
 
     // ======= Request Tracking =====================================
 
-    const [authRequest, makeAuthRequest] = useRequest()
     const [request, makeRequest] = useRequest()
 
     // ======= Redux State ==========================================
@@ -78,25 +76,15 @@ const ChangeEmailForm = function(props) {
             return
         }
 
-        // TODO TECHDEBT : We don't need to do this.  It's built into the patch
-        // endpoint now.
-        makeAuthRequest(patchAuthentication(currentUser.email, password))
+        const user = {
+            id: currentUser.id,
+            email: email,
+            oldPassword: password
+        }
+        makeRequest(patchUser(user))
     }
 
     // ======= Effect Handling ======================================
-
-    useEffect(function() {
-        if ( authRequest && authRequest.state == 'fulfilled') {
-            if ( authRequest.response.status === 200 ) {
-                const user = {
-                    id: currentUser.id,
-                    email: email,
-                    oldPassword: password
-                }
-                makeRequest(patchUser(user))
-            } 
-        }
-    }, [ authRequest ])
 
     useEffect(function() {
         if ( request && request.state == 'fulfilled' ) {
@@ -108,7 +96,7 @@ const ChangeEmailForm = function(props) {
     // ======= Render ===============================================
 
     let submit = null
-    if ( ( request && request.state == 'pending') || (authRequest && authRequest.state == 'pending') ) {
+    if ( ( request && request.state == 'pending') ) {
         submit = ( <Spinner /> )
     } else {
         submit = ( <input type="submit" name="submit" value="Change Email" /> )
@@ -120,19 +108,6 @@ const ChangeEmailForm = function(props) {
             <div key="request-failed" className="request-failed">
                 { request.errorMessage && <span>{request.errorMessage}</span>}
                 { ! request.errorMessage && <span>Something went wrong with the request: { request.error }.</span>}
-            </div>
-        )
-    }
-    if ( authRequest && authRequest.state == 'fulfilled' && authRequest.response.status !== 200 ) {
-        errors.push(
-            <div key="auth-failed" className="auth-failed">
-                Authentication failed.  Please make sure you typed your password correctly.
-            </div>
-        )
-    } else if (authRequest && authRequest.state == 'failed' ) {
-        errors.push(
-            <div key="auth-failed" className="auth-failed">
-                Authentication failed.  Please make sure you typed your password correctly.
             </div>
         )
     }

@@ -181,67 +181,6 @@ module.exports = class AuthenticationController {
     }
 
     /**
-     * PATCH /authentication
-     *
-     * Can be used to check a user's authentication with out modifying the
-     * session.
-     *
-     * @param {Object} request  Standard Express request object.
-     * @param {Object} request.body Should contain the authentication credentials.
-     * @param {string} request.body.email   The user's email.
-     * @param {string} request.body.password    The user's password.
-     * @param {Object} response Standard Express response object.
-     *
-     * @returns {Promise}   Resolves to void.
-     */
-    async patchAuthentication(request, response) {
-        const credentials = request.body
-        credentials.email = credentials.email.toLowerCase()
-
-        /************************************************************
-         *  This is the endpoint for validating an existing authentication, so
-         *  anyone may call it.  Authentication checks happen in
-         *  AuthenticationService::authenticateUser()
-         ************************************************************/
-
-        try {
-            const userId = await this.auth.authenticateUser(credentials)
-
-            const userResults = await this.userDAO.selectUsers({ where: 'users.id = $1', params: [ userId ], fields: 'all' })
-
-            if ( ! userResults.dictionary[userId] ) {
-                throw new ControllerError(500, 'server-error', `Failed to find User(${userId}) after authenticating them!`)
-            }
-
-            return response.status(200).json({
-                user: userResults.dictionary[userId]
-            })
-        } catch (error ) {
-            if ( error instanceof backend.ServiceError ) {
-                if ( error.type == 'no-user' ) {
-                    throw new ControllerError(403, 'authentication-failed', error.message)
-                } else if ( error.type == 'multiple-users') {
-                    throw new ControllerError(403, 'authentication-failed', error.message)
-                } else if ( error.type == 'no-user-password' ) {
-                    throw new ControllerError(403, 'authentication-failed', error.message)
-                } else if ( error.type === 'banned' ) {
-                    throw new ControllerError(403, 'authentication-failed', error.message)
-                } else if ( error.type == 'no-credential-password' ) {
-                    throw new ControllerError(400, 'password-required', error.message)
-                } else if ( error.type == 'authentication-failed' ) {
-                    throw new ControllerError(403, 'authentication-failed', error.message)
-                } else if ( error.type == 'authentication-timeout' ) {
-                    throw new ControllerError(403, 'authentication-timeout', error.message)
-                } else {
-                    throw error
-                }
-            } else {
-                throw error 
-            }
-        }
-    }
-
-    /**
      * DELETE /authentication
      *
      * Destroy the session and logout the user.
