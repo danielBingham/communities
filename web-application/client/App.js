@@ -11,7 +11,6 @@ import { useRequest } from '/lib/hooks/useRequest'
 import { useRetries } from '/lib/hooks/useRetries'
 import { useSocket } from '/lib/hooks/useSocket'
 import { useDevice } from '/lib/hooks/useDevice'
-import { useNotifications } from '/lib/hooks/useNotifications'
 
 import logger from '/logger'
 
@@ -106,7 +105,6 @@ const App = function(props) {
 
     const isSocketConnected = useSocket()
     const [device, deviceRequest] = useDevice()
-    useNotifications()
 
     // ======= Render ===============================================
 

@@ -47,8 +47,17 @@ module.exports = class PostCommentNotifications {
     }
 
     async ensureContext(currentUser, type, context) {
-        context.postIntro = context.post.content.substring(0,20)
-        context.commentIntro = context.comment.content.substring(0,20)
+        if ( context.post.content.length > 20 ) {
+            context.postIntro = context.post.content.substring(0,20) + '...'
+        } else {
+            context.postIntro = context.post.content
+        }
+
+        if ( context.comment.content.length > 20 ) {
+            context.commentIntro = context.comment.content.substring(0,20) + '...'
+        } else {
+            context.commentIntro = context.comment.content
+        }
 
         context.postAuthor = await this.userDAO.getUserById(context.post.userId, ['status']) 
 

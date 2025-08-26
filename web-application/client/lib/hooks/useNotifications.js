@@ -1,12 +1,14 @@
 import { useEffect } from 'react'
 import { useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 
 import { PushNotifications } from '@capacitor/push-notifications'
+
+import logger from '/logger'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
 import { patchDevice } from '/state/authentication'
-
 
 
 export const useNotifications = function() {
@@ -16,27 +18,28 @@ export const useNotifications = function() {
    
     const [request, makeRequest, resetRequest] = useRequest()
 
+    const navigate = useNavigate()
+
     const listenForPushNotifications = async function() {
         await PushNotifications.addListener('registration', (token) => {
-            console.log(`Got a Push Notification Token: `, token)
-            console.log(`Existing request? `, request)
             if ( ! request ) {
                 makeRequest(patchDevice({ iosDeviceToken: token.value }))
             }
         })
 
         await PushNotifications.addListener('registrationError', (error) => {
-            console.error(`Push Notification Registration failed:: `, error)
-
+            logger.error(`Push Notification Registration failed:: `, error)
         })
 
         await PushNotifications.addListener('pushNotificationReceived', (notification) => {
-            console.log(`Notification Received: `, notification)
+            // Do nothing.  The notification will be handled through the event system.
         })
 
-        await PushNotifications.addListener('pushNotificationActionPerformed', (notification) => {
-            console.log(`Notification action performed: `, notification)
-
+        await PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
+            // Navigate to the notification path.
+            if ( action.actionId === 'tap' ) {
+                navigate(action.notification.data.path)
+            }
         })
     } 
 
@@ -54,10 +57,11 @@ export const useNotifications = function() {
         }
     }
 
+    // TODO TECHDEBT We should separate the notification settings from the
+    // device so they can be updated separately without triggering effect
+    // loops.
     useEffect(function() {
-        console.log(`Platform changed: `, platform)
         return () => {
-            console.log(`Cleanup platform: `, platform)
             if ( platform !== undefined && platform !== null) {
                 if ( platform === 'ios' || platform === 'android' ) {
                     PushNotifications.removeAllListeners()
@@ -68,18 +72,13 @@ export const useNotifications = function() {
 
     useEffect(function() {
         if ( currentUser !== null && device !== null ) {
-            console.log(`Have device and user.`)
             if ( ! request && (device.platform === 'ios' || device.platform === 'android' )) {
-                console.log(`Setting up Push Notifications: `)
-                console.log(`Device: `, device)
-                console.log(`Request: `, request)
                 listenForPushNotifications().then(function() {
-                    console.log(`Registering Push Notifications...`)
                     registerPushNotifications().catch(function(error) {
-                        console.error(error)
+                        logger.error(error)
                     })
                 }).catch(function(error) {
-                    console.error(error)
+                    logger.error(error)
                 })
             }  else if ( device.platform === 'web' ) {
                 if ( ! ("notificationPermission" in device) && "Notification" in window ) {
