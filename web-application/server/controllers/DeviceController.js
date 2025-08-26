@@ -34,7 +34,7 @@ module.exports = class DeviceController extends BaseController {
         const currentUser = request.session.user
 
         if ( ! currentUser ) {
-            return this.sendErrors(response, 401, {
+            return this.sendUserErrors(response, 401, {
                 type: 'not-authenticated',
                 log: `Unauthenticated user attempted to update device.`,
                 message: `You cannot update device without authenticating.`
@@ -46,7 +46,7 @@ module.exports = class DeviceController extends BaseController {
 
         const errors = this.deviceSchema.validate(device)
         if ( errors.all.length > 0 ) {
-            return this.sendErrors(response, 400, errors.all)
+            return this.sendUserErrors(response, 400, errors.all)
         }
 
         console.log(`Patching device: `, device)

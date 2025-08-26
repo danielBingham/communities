@@ -75,7 +75,7 @@ module.exports = class BaseController {
 
     sendUserErrors(response, status, errors) {
         if ( status < 400 || status > 499 ) {
-            throw new Error(`'sendUserError' should only be used for user errors (400 - 499).`)
+            throw new Error(`'sendUserErrors' should only be used for user errors (400 - 499).`)
         }
 
         if ( Array.isArray(errors) ) {

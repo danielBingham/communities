@@ -46,6 +46,8 @@ const PostCommentNotifications = require('./notification/PostCommentNotification
 const SiteModerationNotifications = require('./notification/SiteModerationNotifications')
 const UserRelationshipNotifications = require('./notification/UserRelationshipNotifications')
 
+const IOSNotifications = require('./notification/IOSNotifications')
+
 // ================== Load Notification Definitions =================================
 const notifications = [
     ...GroupMemberNotifications.notifications,
@@ -85,6 +87,8 @@ module.exports = class NotificationService {
         this.postCommentNotifications = new PostCommentNotifications(core, this)
         this.siteModerationNotifications = new SiteModerationNotifications(core, this)
         this.userRelationshipNotifications = new UserRelationshipNotifications(core, this)
+
+        this.iosNotifications = new IOSNotifications(core)
 
         const layoutTemplate = fs.readFileSync(path.resolve(__dirname, './notification/definitions/layout.hbs'), 'utf8')
         Handlebars.registerPartial('layout', layoutTemplate)
@@ -205,16 +209,16 @@ module.exports = class NotificationService {
 
         // Only create the web notification if the user has web notifications
         // turned on for that notification.
-        if ( notificationSetting.web && options?.noWeb !== true) {
-            const notification = {
-                userId: userId,
-                type: type,
-                description: definition.web.text(context),
-                path: definition.web.path(context) 
-            }
-            notification.id = await this.notificationDAO.insertNotification(notification)
+        const notification = {
+            userId: userId,
+            type: type,
+            description: definition.web.text(context),
+            path: definition.web.path(context) ,
+            isRead: notificationSetting.web === false || options?.noWeb === true 
+        }
+        notification.id = await this.notificationDAO.insertNotification(notification)
 
-            this.core.logger.debug(`Triggering event Notification event.`)
+        if ( notificationSetting.web && options?.noWeb !== true) {
             const results = await this.notificationDAO.selectNotifications(`WHERE notifications.id = $1`, [ notification.id ]) 
             await this.core.events.trigger(userId, 'Notification', 'create', { dictionary: results.dictionary })
         }
@@ -230,6 +234,10 @@ module.exports = class NotificationService {
                 definition.email.subject(context), 
                 definition.email.body(context)
             )
+        }
+
+        if ( notificationSetting.mobile && options?.noMobile !== true && results.rows[0].status !== 'invited' ) {
+            await this.iosNotifications.sendIOSNotification(userId, notification)
         }
     }
 

@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useSelector } from 'react-redux'
 
+import { Capacitor } from '@capacitor/core'
 import { Device } from '@capacitor/device'
 
 import { patchDevice } from '/state/authentication'
@@ -14,12 +15,18 @@ export const useDevice = function() {
     const [ request, makeRequest ] = useRequest()
 
     const recordDeviceInfo = async function() {
-        const id = await Device.getId()
-        const info = await Device.getInfo()
+        let deviceInfo = {}
+        if ( Capacitor.isPluginAvailable('Device') ) {
+            const id = await Device.getId()
+            const info = await Device.getInfo()
 
-        const deviceInfo = {
-            ...id,
-            ...info
+
+            deviceInfo = {
+                ...id,
+                ...info
+            }
+        } else {
+            deviceInfo.platform = Capacitor.getPlatform()
         }
 
         makeRequest(patchDevice(deviceInfo))
@@ -27,7 +34,9 @@ export const useDevice = function() {
 
     useEffect(function() {
         if ( currentUser !== null && device === null ) {
-            recordDeviceInfo()
+            recordDeviceInfo().catch(function(error) {
+                console.error(error)
+            })
         }
     }, [ currentUser, device ])
 

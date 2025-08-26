@@ -24,21 +24,23 @@ module.exports = class SessionService {
     }
 
 
-    async getSession(userId) {
+    async getSessions(userId) {
         const results = await this.core.database.query(`
             SELECT sid, sess FROM session 
-                WHERE (sess #>> '{user,id}')::bigint = $1
+                WHERE (sess #>> '{user,id}')::uuid = $1
         `, [ userId ])
 
-        let session = null
+        let sessions = [] 
         if ( results.rows.length > 0 ) {
-            session = {
-                id: results.rows[0].sid,
-                data: results.rows[0].sess
+            for(const row of results.rows) {
+                sessions.push({
+                    id: row.sid,
+                    data: row.sess
+                })
             }
         }
 
-        return session
+        return sessions
     }
 
     async setSession(session) {
@@ -49,6 +51,5 @@ module.exports = class SessionService {
         if ( results.rowCount <= 0 ) {
             throw new Error('Failed to update session!')
         }
-
     }
 }
