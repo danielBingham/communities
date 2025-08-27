@@ -32,6 +32,8 @@
   },
   "dependencies": {
     "@capacitor/core": "^7.4.2",
+    "@capacitor/device": "^7.0.2",
+    "@capacitor/push-notifications": "^7.0.2",
     "@communities/backend": "^0.5.13",
     "@communities/shared": "^0.5.13",
     "@heroicons/react": "2.x",

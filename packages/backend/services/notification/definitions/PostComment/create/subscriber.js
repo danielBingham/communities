@@ -27,11 +27,11 @@ const emailBodyTemplate = fs.readFileSync(path.resolve(__dirname, './subscriber.
 module.exports = {
     type: 'PostComment:create:subscriber',
     email: {
-        subject: Handlebars.compile('[Communities] {{{commentAuthor.name}}} commented, "{{{commentIntro}}}", on a post, "{{{postIntro}}}...", you subscribe to, '), 
+        subject: Handlebars.compile('[Communities] {{{commentAuthor.name}}} commented, "{{{commentIntro}}}", on a post, "{{{postIntro}}}", you subscribe to, '), 
         body: Handlebars.compile(emailBodyTemplate) 
     },
     web: {
-        text: Handlebars.compile(`{{{commentAuthor.name}}} commented, "{{{commentIntro}}}...", on a post, "{{{postIntro}}}...", you subscribe to.`),
+        text: Handlebars.compile(`{{{commentAuthor.name}}} commented, "{{{commentIntro}}}", on a post, "{{{postIntro}}}", you subscribe to.`),
         path: Handlebars.compile(`/{{{link}}}`) 
     }
 }

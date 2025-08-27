@@ -37,8 +37,6 @@ module.exports = class Events {
          */
         this.subscriptions = {}
 
-        this.subscriptionsByConnection = {} 
-
         /**
          * A dictionary tracking users and their connections.
          *
@@ -160,16 +158,6 @@ module.exports = class Events {
             }
         }
 
-        if ( ! (userId in this.subscriptionsByConnection ) ) {
-            this.subscriptionsByConnection[userId] = {}
-        }
-
-        if ( ! (connectionId in this.subscriptionsByConnection) ) {
-            this.subscriptionsByConnection[userId][connectionId] = []
-        }
-
-        this.subscriptionsByConnection[userId][connectionId].push(event)
-
         const confirmEvent = { ...event }
         confirmEvent.action = 'confirmSubscription'
         this.sendEventToUserConnection(userId, connectionId, confirmEvent)
@@ -186,8 +174,6 @@ module.exports = class Events {
             this.logger.error(`Attempt to unsubscribe a connection that isn't listening!`)
             return
         }
-
-
 
         if ( ! ('context' in event) ) {
             event.context = {}
@@ -221,13 +207,15 @@ module.exports = class Events {
     }
     
     unregisterConnection(userId, connectionId) {
-        if ( userId in this.subscriptionsByConnection ) {
-            if ( connectionId in this.subscriptionsByConnection[userId] ) {
-                for(const event of this.subscriptionsByConnection[userId][connectionId]) {
-                    event.action = 'unsubscribe'
-                    this.unsubscribe(userId, connectionId, event, { skipConfirmation: true })
-                }
+        const event = {
+            action: 'unregister',
+            context: {
+                userId: userId,
+                connectionId: connectionId
             }
+        }
+        for (const [entity, handler] of Object.entries(this.handlers)) {
+            handler(event)
         }
 
         if ( userId in this.connections) {

@@ -17,22 +17,20 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-.notification {
+.dropdown-menu__item.notification {
     width: 250px;
     padding: 20px;
     font-size: 14px;
     background-color: white;
     border-bottom: thin solid var(--main-border-color);
     font-weight: bold;
+    white-space: normal;
 }
-.notification.read {
+.dropdown-menu__item.notification.read {
     background-color: var(--page-header-background-color);
     font-weight: normal;
 }
-.floating-menu.notification-menu .menu-body .menu-item.notification {
-    white-space: normal;
-}
-.notification:hover {
+.dropdown-menu__item.notification:hover, .dropdown-menu__item.notification.read:hover {
     background-color: var(--input-highlight-color);
     color: white;
 }

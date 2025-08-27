@@ -41,6 +41,14 @@ const config = {
     postmark: {
         api_token: process.env.POSTMARK_API_TOKEN
     },
+    notifications: {
+        ios: {
+            privateCert: process.env.NOTIFICATIONS_IOS_PRIVATE_CERT,
+            publicCert: process.env.NOTIFICATIONS_IOS_PUBLIC_CERT,
+            applicationBundleID: process.env.NOTIFICATIONS_IOS_APPLICATION_BUNDLE_ID,
+            endpoint: process.env.NOTIFICATIONS_IOS_ENDPOINT
+        }
+    },
     stripe: {},
     log_level: process.env.LOG_LEVEL 
 }

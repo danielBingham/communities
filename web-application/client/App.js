@@ -10,6 +10,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { useRequest } from '/lib/hooks/useRequest'
 import { useRetries } from '/lib/hooks/useRetries'
 import { useSocket } from '/lib/hooks/useSocket'
+import { useDevice } from '/lib/hooks/useDevice'
 
 import logger from '/logger'
 
@@ -93,8 +94,6 @@ const App = function(props) {
         makeConfigurationRequest(getConfiguration())
     }, configurationRequest)
 
-    const isSocketConnected = useSocket()
-
     useEffect(function() {
         if ( configurationRequest?.state == 'fulfilled') {
             console.log(`Configuration loaded...`)
@@ -104,16 +103,10 @@ const App = function(props) {
         } 
     }, [ configurationRequest ])
 
-    // ======= Render ===============================================
+    const isSocketConnected = useSocket()
+    const [device, deviceRequest] = useDevice()
 
-   if ( configuration?.maintenance_mode ) {
-        return (
-            <div className="maintenance-mode">
-                <h1>Communities - Scheduled Maintenance</h1>
-                <p>Communities is currently undergoing scheduled maintenance.  Please check back later.</p>
-            </div>
-        )
-   }
+    // ======= Render ===============================================
 
     if ( ! configurationRequest || ! authenticationRequest ) {
         return (

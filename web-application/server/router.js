@@ -488,12 +488,6 @@ module.exports = function(core) {
         })
     })
 
-    router.patch('/authentication', function(request, response, next) {
-        authenticationController.patchAuthentication(request, response).catch(function(error) {
-            next(error)
-        })
-    })
-
     router.get('/authentication', function(request, response, next) {
         authenticationController.getAuthentication(request,response).catch(function(error) {
             next(error)
@@ -503,6 +497,18 @@ module.exports = function(core) {
     router.delete('/authentication', function(request, response) {
         // Delete isn't async
         authenticationController.deleteAuthentication(request, response)
+    })
+
+    /**************************************************************************
+     *      Device Tracking REST Routes
+     **************************************************************************/
+    const DeviceController = require('./controllers/DeviceController')
+    const deviceController = new DeviceController(core)
+
+    router.patch('/device', function(request, response, next) {
+        deviceController.patchDevice(request, response).catch(function(error) {
+            next(error)
+        })
     })
 
     /**************************************************************************
