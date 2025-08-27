@@ -25,6 +25,7 @@
     "@communities/shared": "^0.5.13",
     "bcrypt": "6.x",
     "bull": "4.x",
+    "firebase-admin": "^13.4.0",
     "handlebars": "4.x",
     "image-size": "2.x",
     "jsdom": "26.x",

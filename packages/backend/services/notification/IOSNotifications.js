@@ -48,9 +48,9 @@ module.exports = class IOSNotifications {
         for(const session of sessions) {
             if ( 'device' in session.data 
                 && session.data.device.platform === 'ios' 
-                && 'iosDeviceToken' in session.data.device) 
+                && 'deviceToken' in session.data.device) 
             {
-                const token = session.data.device.iosDeviceToken
+                const token = session.data.device.deviceToken
                 const path = `/3/device/${token}`
 
                 const body = {

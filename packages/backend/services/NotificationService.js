@@ -39,14 +39,15 @@ const PermissionService = require('./PermissionService')
 
 const ServiceError = require('../errors/ServiceError')
 
-const GroupMemberNotifications = require('./notification/GroupMemberNotifications')
-const GroupModerationNotifications = require('./notification/GroupModerationNotifications')
-const PostNotifications = require('./notification/PostNotifications')
-const PostCommentNotifications = require('./notification/PostCommentNotifications')
-const SiteModerationNotifications = require('./notification/SiteModerationNotifications')
-const UserRelationshipNotifications = require('./notification/UserRelationshipNotifications')
+const GroupMemberNotifications = require('./notification/entities/GroupMemberNotifications')
+const GroupModerationNotifications = require('./notification/entities/GroupModerationNotifications')
+const PostNotifications = require('./notification/entities/PostNotifications')
+const PostCommentNotifications = require('./notification/entities/PostCommentNotifications')
+const SiteModerationNotifications = require('./notification/entities/SiteModerationNotifications')
+const UserRelationshipNotifications = require('./notification/entities/UserRelationshipNotifications')
 
 const IOSNotifications = require('./notification/IOSNotifications')
+const AndroidNotifications = require('./notification/AndroidNotifications')
 
 // ================== Load Notification Definitions =================================
 const notifications = [
@@ -89,6 +90,7 @@ module.exports = class NotificationService {
         this.userRelationshipNotifications = new UserRelationshipNotifications(core, this)
 
         this.iosNotifications = new IOSNotifications(core)
+        this.androidNotifications = new AndroidNotifications(core)
 
         const layoutTemplate = fs.readFileSync(path.resolve(__dirname, './notification/definitions/layout.hbs'), 'utf8')
         Handlebars.registerPartial('layout', layoutTemplate)
@@ -238,6 +240,7 @@ module.exports = class NotificationService {
 
         if ( notificationSetting.mobile && options?.noMobile !== true && results.rows[0].status !== 'invited' ) {
             await this.iosNotifications.sendIOSNotification(userId, notification)
+            await this.androidNotifications.sendAndroidNotification(userId, notification)
         }
     }
 

@@ -155,10 +155,10 @@ module.exports = class DeviceSchema extends Schema {
                     return errors
                 }
             },
-            iosDeviceToken: {
+            deviceToken: {
                 clean: (value) => { return stringCleaner(value) },
                 validate: (value, existing, action) => {
-                    const validator = new StringValidator('iosDeviceToken', value, existing, action)
+                    const validator = new StringValidator('deviceToken', value, existing, action)
                     const errors = validator
                         .mustBeString()
                         .getErrors()
