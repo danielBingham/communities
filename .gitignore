@@ -12,4 +12,3 @@ infrastructure/**/secrets/
 **/*.lock.hcl
 database/test-data/**
 .DS_Store
-**/google-services.json
