@@ -6,6 +6,8 @@
  *
  **************************************************************************************************/
 
+const firebaseServiceAccount = require('../../security/firebase-admin-key.json')
+
 if ( process.env.NODE_ENV == 'development' ) {
     require('dotenv').config()
 }
@@ -47,6 +49,9 @@ const config = {
             publicCert: process.env.NOTIFICATIONS_IOS_PUBLIC_CERT,
             applicationBundleID: process.env.NOTIFICATIONS_IOS_APPLICATION_BUNDLE_ID,
             endpoint: process.env.NOTIFICATIONS_IOS_ENDPOINT
+        },
+        android: {
+            firebaseServiceAccount: firebaseServiceAccount
         }
     },
     stripe: {},

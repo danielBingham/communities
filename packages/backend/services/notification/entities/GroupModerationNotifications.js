@@ -22,13 +22,13 @@ const path = require('path')
 
 const { lib } = require('@communities/shared')
 
-const GroupDAO = require('../../daos/GroupDAO')
-const PostDAO = require('../../daos/PostDAO')
-const PostCommentDAO = require('../../daos/PostCommentDAO')
-const PostSubscriptionDAO = require('../../daos/PostSubscriptionDAO')
-const UserDAO = require('../../daos/UserDAO')
+const GroupDAO = require('../../../daos/GroupDAO')
+const PostDAO = require('../../../daos/PostDAO')
+const PostCommentDAO = require('../../../daos/PostCommentDAO')
+const PostSubscriptionDAO = require('../../../daos/PostSubscriptionDAO')
+const UserDAO = require('../../../daos/UserDAO')
 
-const PermissionService = require('../PermissionService')
+const PermissionService = require('../../PermissionService')
 
 module.exports = class GroupModerationNotifications {
     
