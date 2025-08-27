@@ -49,10 +49,10 @@ module.exports = class AndroidNotifications {
         for(const session of sessions) {
             if ( 'device' in session.data 
                 && session.data.device.platform === 'android' 
-                && 'iosDeviceToken' in session.data.device) 
+                && 'deviceToken' in session.data.device) 
             {
 
-                const token = session.data.device.iosDeviceToken
+                const token = session.data.device.deviceToken
                 const message = {
                     token: token,
                     notification: {

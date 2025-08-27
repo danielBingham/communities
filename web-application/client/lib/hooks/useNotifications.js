@@ -23,7 +23,7 @@ export const useNotifications = function() {
     const listenForPushNotifications = async function() {
         await PushNotifications.addListener('registration', (token) => {
             if ( ! request ) {
-                makeRequest(patchDevice({ iosDeviceToken: token.value }))
+                makeRequest(patchDevice({ deviceToken: token.value }))
             }
         })
 
