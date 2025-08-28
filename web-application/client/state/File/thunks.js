@@ -1,7 +1,34 @@
+import logger from '/logger'
+
 import { makeRequest } from '/state/lib/makeRequest'
 import { setRelationsInState }  from '/state/lib/relations'
 
-import { setFilesInDictionary, removeFile } from './slice'
+import { setFilesInDictionary, removeFile, setInCache } from './slice'
+
+export const loadFile = function(url) {
+    return async function(dispatch, getState) {
+        const state = getState()
+        if ( url in state.File.cache ) {
+            return
+        }
+
+        dispatch(setInCache({ url: url, objectUrl: null }))
+        try { 
+            const response = await fetch(url)
+
+            if ( response.status >= 400) {
+                logger.error(`Failed to retrieve Image(${url}).  Got status: ${response.status}.`)
+            } else {
+                const blob = await response.blob()
+                const objectUrl = URL.createObjectURL(blob)
+                dispatch(setInCache({ url: url, objectUrl: objectUrl }))
+            }
+        } catch(error) {
+            logger.error(`Failed to retrieve image: ${url}`)
+            logger.error(error)
+        }
+    }
+}
 
 /**
  * POST /upload

@@ -41,15 +41,12 @@ module.exports = class DeviceController extends BaseController {
             })
         }
 
-        console.log(request.body)
         const device = this.deviceSchema.clean(request.body)
 
         const errors = this.deviceSchema.validate(device)
         if ( errors.all.length > 0 ) {
             return this.sendUserErrors(response, 400, errors.all)
         }
-
-        console.log(`Patching device: `, device)
 
         if ( ! ('device' in request.session ) ) {
             request.session.device = {}
