@@ -1,67 +1,20 @@
-import React, { useState, useEffect } from 'react'
-import { useSelector } from 'react-redux'
+import { Capacitor } from '@capacitor/core'
 
-import Spinner from '/components/Spinner'
+import FetchImage from './FetchImage/FetchImage'
+import HtmlImage from './HtmlImage/HtmlImage'
 
 import './Image.css'
 
 const Image = function({ id, src, width, ref, onLoad }) {
-    const [imageUrl, setImageUrl] = useState(null)
-    const [isLoading, setIsLoading] = useState(true)
-    const configuration = useSelector((state) => state.system.configuration)
 
-    const onLoadInternal = function(event) {
-        setIsLoading(false)  
-
-        if ( onLoad ) {
-            onLoad(event)
-        }
-    }
-
-    useEffect(function() {
-        if ( ! id && ! src) {
-            console.error(new Error(`One of 'props.src' or 'props.id' is required!`))
-            return 
-        }
-
-        const widthSelector = width ? `?width=${width}` : ''
-
-        let url = ''
-        if ( src !== undefined && src !== null ) {
-            url = src
-        } else if ( id !== undefined && id !== null ) {
-            url = `${configuration.host}${configuration.backend}/file/${id}${widthSelector}`
-        }
-
-        fetch(url).then(function(response) {
-            return response.blob()
-        }).then(function(imageBlob) {
-            const imageObjectUrl = URL.createObjectURL(imageBlob)
-            setImageUrl(imageObjectUrl)
-        }).catch(function(error) {
-            console.log(`Failed to retrieve image: ${url}`)
-            console.error(error)
-        })
-
-    }, [ id, src, width])
-
-    if ( ! id && ! src) {
-        console.error(new Error(`One of 'props.src' or 'props.id' is required!`))
+    if ( Capacitor.getPlatform() === 'web' || Capacitor.getPlatform() === 'android' ) {
+        return ( <HtmlImage id={id} src={src} width={width} ref={ref} onLoad={onLoad} /> )
+    } else if ( Capacitor.getPlatform() === 'ios' ) {
+        return ( <FetchImage id={id} src={src} width={width} ref={ref} onLoad={onLoad} /> )
+    } else {
+        logger.error(`Unhandled Platform(${Capacitor.getPlatform()}) in Image.`) 
         return null
     }
-
-    return (
-        <>
-            { imageUrl !== null && <img 
-                ref={ref}
-                onLoad={onLoadInternal} 
-                src={`${imageUrl}`} 
-            /> }
-            { isLoading && <div className="image__loading">
-                <Spinner /> 
-            </div> }
-        </>
-    ) 
 }
 
 export default Image 

@@ -38,7 +38,9 @@ const initialState = {
      *  ...
      * }
      */
-    queries: {}
+    queries: {},
+
+    cache: {}
 
 }
 
@@ -55,10 +57,17 @@ export const FileSlice = createSlice({
         setFileQueryResults: setQueryResults,
         clearFileQuery: clearQuery,
         clearFileQueries: clearQueries,
-        resetFileSlice: () => initialState
+        resetFileSlice: () => initialState,
+
+        setInCache: function(state, action ) {
+            const url = action.payload.url
+            const objectUrl = action.payload.objectUrl
+
+            state.cache[url] = objectUrl 
+        }
     }
 })
 
-export const {  setFilesInDictionary, removeFile, resetFileSlice }  = FileSlice.actions
+export const {  setFilesInDictionary, removeFile, resetFileSlice, setInCache }  = FileSlice.actions
 
 export default FileSlice.reducer
