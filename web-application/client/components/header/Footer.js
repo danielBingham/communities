@@ -1,15 +1,11 @@
-import React from 'react'
 import { useSelector } from 'react-redux'
 
-import { useVersion } from '/lib/hooks/useVersion'
 
 import './Footer.css'
 
-const Footer = function(props) {
-
+const Footer = function({ version }) {
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const config = useSelector((state) => state.system.configuration)
-    const [version, request] = useVersion()
 
     if ( currentUser === null || currentUser === undefined ) {
         return null

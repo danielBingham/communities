@@ -3,10 +3,14 @@ import { createRoot } from 'react-dom/client'
 
 import { Provider } from 'react-redux'
 
+import { CapacitorUpdater } from '@capgo/capacitor-updater'
+
 import * as Sentry from "@sentry/react";
 
 import App from './App'
 import store from './state/store'
+
+CapacitorUpdater.notifyAppReady()
 
 console.log(`Communities startup...`)
 Sentry.init({

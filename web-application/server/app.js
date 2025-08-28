@@ -150,6 +150,12 @@ const createExpressApp = function(core, sessionParser) {
         })
     })
 
+    app.get('/\/dist\/dist\.zip$/', function(request, response) {
+        console.log(`Getting new distribution.`)
+        const filepath = path.join(process.cwd(), 'public/dist/dist.zip')
+        response.sendFile(filepath)
+    })
+
     /**
      * Handle requests for static image and pdf files.  We'll send these directly
      * to the public path.

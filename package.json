@@ -5,7 +5,8 @@
     "@capacitor/core": "^7.4.2",
     "@capacitor/device": "^7.0.2",
     "@capacitor/ios": "^7.4.2",
-    "@capacitor/push-notifications": "^7.0.2"
+    "@capacitor/push-notifications": "^7.0.2",
+    "@capgo/capacitor-updater": "7.8.7"
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5"

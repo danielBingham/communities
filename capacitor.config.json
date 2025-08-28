@@ -5,6 +5,10 @@
   "plugins": {
     "CapacitorHttp": {
       "enabled": true
+    },
+    "CapacitorUpdater": {
+      "autoUpdate": false,
+      "keepUrlPathAfterReload": true
     }
   }
 }
