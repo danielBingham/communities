@@ -11,13 +11,14 @@ import {
     List, 
     ListHeader, 
     ListGridContent, 
+    SearchControl
 } from '/components/ui/List'
 import PaginationControls from '/components/PaginationControls'
 import Button from '/components/ui/Button'
 
 import './FriendList.css'
 
-const FriendList = function({ userId, params }) {
+const FriendList = function({ userId, params, noSearch, descriptor }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const relationshipDictionary = useSelector((state) => state.UserRelationship.dictionary)
@@ -56,19 +57,22 @@ const FriendList = function({ userId, params }) {
         content = null
     } 
 
+    descriptor = descriptor ? descriptor : 'Friends'
     let explanation = ''
     if ( ! query || parseInt(query.meta.count) === 0 ) {
-        explanation = `0 Friends`
+        explanation = `0 ${descriptor}`
     } else {
         const pageStart = ( query.meta.page-1) * query.meta.pageSize + 1
         const pageEnd = query.meta.count - (query.meta.page-1) * query.meta.pageSize > query.meta.pageSize ? ( query.meta.page * query.meta.pageSize ) : query.meta.count 
 
-        explanation = `${pageStart} to ${pageEnd} of ${query.meta.count} Friends`
+        explanation = `${pageStart} to ${pageEnd} of ${query.meta.count} ${descriptor}`
     }
 
     return (
         <List className="friend-list">
-            <ListHeader explanation={explanation}></ListHeader>
+            <ListHeader explanation={explanation}>
+                { ! noSearch && <SearchControl entity={descriptor} /> }
+            </ListHeader>
             <ListGridContent>
                 { content } 
             </ListGridContent>

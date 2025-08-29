@@ -4,7 +4,7 @@ import { Outlet } from 'react-router-dom'
 
 import { resetEntities } from '/state/lib'
 
-import { NavigationMenu, NavigationMenuLink, NavigationMenuButton } from '/components/ui/NavigationMenu'
+import { NavigationMenu, NavigationMenuLink, NavigationSubmenu, NavigationSubmenuLink, NavigationMenuButton } from '/components/ui/NavigationMenu'
 import { Page, PageBody, PageLeftGutter, PageRightGutter } from '/components/generic/Page'
 
 import './FriendsPage.css'
@@ -24,7 +24,10 @@ const FriendsPage = function() {
                 <NavigationMenu>
                     <NavigationMenuButton href="/friends/invite" type="primary" icon="Plus" text="Invite" /> 
                     <NavigationMenuLink to="/friends" icon="Users" text="Your Friends" />
-                    <NavigationMenuLink to="/friends/requests" icon="UserPlus" text="Requests" />
+                    <NavigationSubmenu icon="UserPlus" title="Pending">
+                        <NavigationSubmenuLink to="/friends/requests" icon="UserPlus" text="Requests" />
+                        <NavigationSubmenuLink to="/friends/invited" icon="Envelope" text="Invitations" />
+                    </NavigationSubmenu>
                     <NavigationMenuLink to="/friends/find" icon="MagnifyingGlass" text="Find Friends" /> 
                 </NavigationMenu>
             </PageLeftGutter>

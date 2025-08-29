@@ -58,11 +58,9 @@ const createExpressApp = function(core, sessionParser) {
     // Load express.
     const app = express()
 
-    app.use(cors({
-        origin: [ core.config.host, 'capacitor://localhost' ],
-        methods: [ 'GET', 'POST', 'PATCH', 'DELETE' ],
-        allowedHeaders: [ 'Content-Type', 'Accept', 'X-Communities-CSRF-Token' ]
-    }))
+    // Use the extended parser so we use 'qs' to parse query strings.
+    // We use 'qs' on the frontend to create them.
+    app.set('query parser', 'extended') 
 
     // Trust the proxy.
     app.set('trust proxy', true)
@@ -70,6 +68,12 @@ const createExpressApp = function(core, sessionParser) {
     // Make sure the request limit is large so that we don't run into it.
     app.use(express.json({ limit: "50mb" }))
     app.use(express.urlencoded({ limit: "50mb", extended: false }))
+
+    app.use(cors({
+        origin: [ core.config.host, 'capacitor://localhost' ],
+        methods: [ 'GET', 'POST', 'PATCH', 'DELETE' ],
+        allowedHeaders: [ 'Content-Type', 'Accept', 'X-Communities-CSRF-Token' ]
+    }))
 
     // Set up our session storage.  We're going to use database backed sessions to
     // maintain a stateless app.

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import { postUsers } from '/state/User'
 
@@ -17,6 +18,8 @@ const InviteUsersForm = function() {
 
     const [request, makeRequest] = useRequest()
 
+    const navigate = useNavigate()
+
     const sendInvitations = function() {
         const emails = list.split(',').map((e) => e.trim())
         const users = []
@@ -32,6 +35,7 @@ const InviteUsersForm = function() {
     useEffect(function() {
         if ( request?.state === 'fulfilled' ) {
             setList('')
+            navigate('/friends/invited')
         }
     }, [ request ])
 

@@ -10,7 +10,20 @@ export const useUserRelationshipQuery = function(userId, queryParameters) {
     const params = queryParameters ? queryParameters : {}
     const [ searchParams, setSearchParams ] = useSearchParams()
 
+
     params.page = searchParams.get('page') || 1
+    if ( searchParams.get('q') ) {
+        if ( 'user' in params ) {
+            params.user.name = searchParams.get('q')
+        } else {
+            params.user = {
+                name: searchParams.get('q')
+            }
+        }
+    } else if ( 'user' in params && ! searchParams.get('q') ) {
+        delete params.user.name
+    }
+
 
     // TODO TECHDEBT The order of items in an object is not guaranteed, so just
     // because the params objects are the same does not mean the generated keys are the
