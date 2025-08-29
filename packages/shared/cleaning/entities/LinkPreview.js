@@ -1,6 +1,6 @@
 const { urlCleaner } = require('../types/url')
 const { stringCleaner } = require('../types/string')
-const { uuidCleaner } = require('../types/uuid')
+const { cleanUuid } = require('../types/uuid')
 const { cleanEntity } = require('../clean')
 
 const cleanTitle = function(value) {
@@ -17,14 +17,14 @@ const cleanDescription = function(value) {
 
 const clean = function(linkPreview) {
     const cleaners = {
-        id: uuidCleaner,
+        id: cleanUuid,
         url: urlCleaner,
         title: cleanTitle,
         type: stringCleaner,
         siteName: cleanSiteName,
         description: cleanDescription,
         imageUrl: urlCleaner,
-        fileId: uuidCleaner,
+        fileId: cleanUuid,
         createdDate: null,
         updatedDate: null 
     }
@@ -32,13 +32,13 @@ const clean = function(linkPreview) {
 }
 
 module.exports = {
-    cleanId: uuidCleaner,
+    cleanId: cleanUuid,
     cleanUrl: urlCleaner,
     cleanTitle: cleanTitle,
     cleanType: stringCleaner,
     cleanSiteName: cleanSiteName,
     cleanDescription: cleanDescription,
     cleanImageUrl: urlCleaner,
-    fileId: uuidCleaner,
+    fileId: cleanUuid,
     clean: clean
 }

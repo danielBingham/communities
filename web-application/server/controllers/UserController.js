@@ -25,12 +25,13 @@
  ******************************************************************************/
 const backend = require('@communities/backend')
 
+const BaseController = require('./BaseController')
 const ControllerError = require('../errors/ControllerError')
 
-module.exports = class UserController {
+module.exports = class UserController extends BaseController{
 
     constructor(core) {
-        this.core = core
+        super(core)
 
         this.database = core.database
         this.logger = core.logger
@@ -39,8 +40,9 @@ module.exports = class UserController {
         this.auth = new backend.AuthenticationService(core)
         this.emailService = new backend.EmailService(core)
         this.notificationService = new backend.NotificationService(core)
-        this.validationService = new backend.ValidationService(core)
         this.permissionService = new backend.PermissionService(core)
+        this.userService = new backend.UserService(core)
+        this.validationService = new backend.ValidationService(core)
 
         this.userDAO = new backend.UserDAO(core)
         this.userRelationshipsDAO = new backend.UserRelationshipDAO(core)
@@ -350,322 +352,67 @@ module.exports = class UserController {
      * Create a new `user`.
      *
      * @param {Object} request  Standard Express request object.
-     * @param {Object} request.body The user definition.
-     * @param {string} request.body.email   The user's email.
-     * @param {string} request.body.name    The users's name.
-     * @param {string} request.body.password    (Optional) The user's password.  Required if no user is logged in.
-     * @param {string} request.body.institution (Optional) The user's institution.
      * @param {Object} response Standard Express response object.
      *
      * @returns {Promise}   Resolves to void.
      */
     async postUsers(request, response) {
-        /*************************************************************
-         * Permissions Checking and Input Validation
-         *
-         * There are two possible flows this endpoint can take, depending on
-         * whether or not we have a logged in user already:
-         *
-         * 1. If no user is logged in, then we assume they are creating their
-         * own user.  We'll send an email confirmation.
-         * 2. If a user is logged in, then we assume they are inviting the user
-         * they are creating.  We send an invitation email.
-         *
-         * Permissions: 
-         * Anyone can call this endpoint.
-         *
-         * Validation:
-         * 1. request.body.email must not already be attached to a user in the
-         * database.
-         * 2. Invitation => no password needed
-         * 3. Registration => must include password
-         * 4. request.body.name is required.
-         * 5. request.body.email is required. 
-         *
-         * **********************************************************/
-
         const currentUser = request.session.user
-        const user = request.body
 
-        // ================= Initial Validation ===============================
-        // Do some basic initial validation before we determine what type of 
-        // POST is taking place.   
+        let userErrors = []
+        let resultingUsers = [] 
 
-        user.email = user.email.toLowerCase().trim()
-
-        if ( currentUser && user.email === currentUser.email ) {
-            throw new ControllerError(400, 'invalid',
-                `User attempting to invite themselves.`,
-                `You cannot invite yourself.  You've already joined!`)
+        // This is an invitation.
+        if ( currentUser ) {
+            if ( Array.isArray(request.body) ) {
+                for(const user of request.body) {
+                    const [invitedUser, errors] = await this.userService.inviteUser(currentUser, user)
+                    if ( errors.length > 0 ) {
+                        userErrors.push(...errors)
+                    } 
+                    if ( invitedUser !== null ) {
+                        resultingUsers.push(invitedUser)
+                    }
+                }
+            } else {
+                const [invitedUser, errors] = await this.userService.inviteUser(currentUser, request.body)
+                if ( errors.length > 0 ) {
+                    userErrors.push(...errors)
+                } 
+                if ( invitedUser !== null ) {
+                    resultingUsers.push(invitedUser)
+                }
+            }
+        } 
+        // This is a registration.
+        else {
+            const [registeredUser, errors] = await this.userService.registerUser(request.body)
+            if ( errors.length > 0 ) {
+                userErrors.push(...errors)
+            } 
+            if ( registeredUser !== null ) {
+                resultingUsers.push(registeredUser)
+                request.session.user = registeredUser
+            }
         }
 
-        const existingUserResults = await this.userDAO.selectUsers({
-            where: 'users.email=$1 OR users.username=$2',
-            params: [ user.email, user.username ],
-            fields: 'all'
+        if ( userErrors.length > 0 ) {
+            return this.sendUserErrors(response, 400, userErrors)
+        }
 
+        const userIds  = resultingUsers.map((u) => u.id)
+        const results = await this.userDAO.selectUsers({
+            where: `users.id = ANY($1::uuid[])`,
+            params: [ userIds ]
         })
 
-        let existingUser = existingUserResults.dictionary[existingUserResults.list[0]] 
-        if ( existingUser && existingUser.status === 'banned' ) {
-            throw new ControllerError(403, 'not-authorized',
-                `Attempt to re-register or re-invite banned user.`,
-                `That user has been banned.`)
-        }
+        const relations = await this.getRelations(request.session.user, results)
+        relations.users = results.dictionary
 
-        // Check the email's domain in the domain blocklist.
-        const domain = user.email.substring(user.email.indexOf('@')+1)
-
-        const blocklistResults = await this.core.database.query(`
-            SELECT id FROM blocklist WHERE domain = $1
-        `, [ domain ])
-
-        if ( blocklistResults.rows.length > 0 ) {
-            throw new ControllerError(403, 'not-authorized',
-                `Attempt to invite or register a user from blocked domain '${domain}'.`,
-                `Users are not allowed to register using emails from '${domain}'.`)
-        }
-
-        // ================== Type Determination and Authentication ===========
-        // There are three types of POST requests, three circumstances where
-        // POST is appropriate to use:
-        //
-        // - invitation: We're inviting a user.
-        // - reinvitation: We're reinviting a user who's already been invited.
-        // - registration: We're registering.
-        //
-        // In the first two, a currentUser will exist in the session who is different
-        // from the user being invited.  In registration, the session should not have
-        // a user logged in.
-        let type = null
-        if ( currentUser && ! existingUser ) {
-            type = 'invitation'
-        } else if ( currentUser && existingUser) {
-            type = 'reinvitation'
-        } else if ( ! currentUser && ! existingUser ) {
-            type = 'registration'
-        } else if ( ! currentUser && existingUser ) {
-            if ( existingUser.email === user.email && existingUser.status !== 'invited' ) {
-                throw new ControllerError(409, 'conflict',
-                    `Attempt to re-register existing user.`,
-                    `A user with that email is already registered. Please log in instead.`)
-            } else if ( existingUser.username === user.username ) {
-                throw new ControllerError(409, 'conflict',
-                    `Attempt to re-register existing user.`,
-                    `A user with that username is already registered. Please choose a different one.`)
-            } else if ( existingUser.email === user.email && existingUser.status === 'invited' ) {
-                // Allow invited users to register themselves.
-                type = 'invitation-overwrite'
-                user.id = existingUser.id
-            } else {
-                throw new ControllerError(500, 'server-error',
-                    `Invalid user creation attempt.  User registering existing user without matching email or username.`,
-                    `We encoutered a server error.  Please report this as a bug.`)
-            }
-        } else {
-            this.core.logger.info(`We should not have been able to get here: `)
-            this.core.logger.info(currentUser)
-            this.core.logger.info(existingUser)
-            throw new ControllerError(500, 'server-error',
-                `Invalid POST type. We shouldn't be able to get here.`,
-                `We encountered a server error.  Please report this as a bug.`)
-        }
-
-        // ================== Validation ======================================
-        // Validate the `user` entity, based on the type, to ensure  we have a
-        // valid user.
-        
-        const validationErrors = await this.validationService.validateUser(user, existingUser, type)
-        if ( validationErrors.length > 0 ) {
-            const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
-            const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
-            throw new ControllerError(400, 'invalid',
-                `User submitted an invalid user: ${logString}`,
-                errorString)
-        }
-
-        // ================== Execute =========================================
-        // At this point we've validated the type and validated the user, so now
-        // we execute the appropriate action, based on the type.
-
-        if ( type === 'reinvitation' ) {
-            // If they are in an 'invited' state, meaning they've been invited,
-            // but haven't accepted yet, send them a new invitation.
-            if ( existingUser.status === 'invited' ) {
-                const token = this.tokenDAO.createToken('invitation')
-                token.userId = existingUser.id
-                token.creatorId = currentUser.id
-                token.id = await this.tokenDAO.insertToken(token)
-
-                await this.emailService.sendInvitation(currentUser, existingUser, token)
-            } 
-
-            // If we haven't already added them as a friend, send them a friend
-            // request.
-            let existingRelationship = await this.userRelationshipsDAO.getUserRelationshipByUserAndRelation(currentUser.id, existingUser.id)
-
-            if ( existingRelationship !== null && existingUser.status == 'confirmed' ) {
-                throw new ControllerError(400, 'exists',
-                    `User already confirmed and friended.`,
-                    `${existingUser.name} has already joined and you already sent them a friend request.`)
-            }
-
-            if ( ! existingRelationship ) {
-                await this.userRelationshipsDAO.insertUserRelationships({ 
-                    userId: currentUser.id,
-                    relationId: existingUser.id,
-                    status: "pending"
-                })
-                existingRelationship = await this.userRelationshipsDAO.getUserRelationshipByUserAndRelation(currentUser.id, existingUser.id)
-
-                await this.notificationService.sendNotifications(
-                    currentUser, 
-                    'UserRelationship:create',
-                    {
-                        userId: currentUser.id,
-                        relationId:existingUser.id 
-                    },
-                    { noEmail: existingUser.status === 'invited' }
-                )
-            } 
-
-            const relations = {}
-            if ( existingRelationship ) {
-                relations.userRelationships = { 
-                    [ existingRelationship.id ]: existingRelationship
-                }
-            }
-            const invitedUserResults = await this.userDAO.selectUsers({ where: `users.id = $1`, params: [ existingUser.id ], fields: [ 'email' ] })
-            
-            if ( ! (existingUser.id in invitedUserResults.dictionary)) {
-                throw new ControllerError(500, 'server-error',
-                    `We couldn't find User(${existingUser.id}) when query for clean User.`,
-                    `We couldn't find the User record after we invited them.  Please report this as a bug.`)
-            }
-
-            relations.users = invitedUserResults.dictionary
-
-            response.status(201).json({
-                entity: currentUser,
-                relations: relations 
-            })
-            return
-        } 
-
-        if ( type === 'invitation' ) {
-            user.status = 'invited'
-        } else if ( type === 'registration' || type === 'invitation-overwrite' ) {
-            user.status = 'unconfirmed'
-
-            // By the time we get here, we've validated that the password exists.
-            user.password = this.auth.hashPassword(user.password)
-        }
-
-        try {
-            if ( type === 'invitation-overwrite' ) {
-                await this.userDAO.updateUser(user)
-            } else {
-                await this.userDAO.insertUsers(user)
-            }
-        } catch ( error ) {
-            if ( error instanceof backend.DAOError ) {
-                // `insertUser()` check both of the following:
-                // 4. request.body.name is required.
-                // 5. request.body.email is required. 
-                if ( error.type == 'name-missing' ) {
-                    throw new ControllerError(400, 'invalid', 
-                        error.message,
-                        `You must include a name.`)
-                } else if ( error.type == 'email-missing' ) {
-                    throw new ControllerError(400, 'bad-data', 
-                        error.message,
-                        `You must include an email.`)
-                } else {
-                    throw error
-                }
-            } else {
-                throw error
-            }
-        }
-
-        // ================== Follow up =======================================
-        // Send notifications, trigger events, and return the results.
-
-        // The DAO will set id on the `user`.
-        const createdUserResults = await this.userDAO.selectUsers({ where: 'users.id = $1', params: [user.id], fields: [ 'email', 'status' ] })
-
-        if ( ! createdUserResults.dictionary[user.id] ) {
-            throw new ControllerError(500, 'server-error', 
-                `No user found after insertion. Looking for user with email: "${user.email}".`,
-                `We created the user, but couldn't find them after creation. Please report bug.`)
-        }
-
-        const createdUser = createdUserResults.dictionary[user.id]
-
-        if ( type === 'invitation' ) {
-            const token = this.tokenDAO.createToken('invitation')
-            token.userId = createdUser.id
-            token.creatorId = currentUser.id
-            token.id = await this.tokenDAO.insertToken(token)
-
-            await this.emailService.sendInvitation(currentUser, createdUser, token)
-
-            // Since the user exists, go ahead and insert the friend
-            // relationship.
-            await this.userRelationshipsDAO.insertUserRelationships({ 
-                userId: currentUser.id,
-                relationId: createdUser.id,
-                status: "pending"
-            })
-
-            await this.notificationService.sendNotifications(
-                currentUser, 
-                'UserRelationship:create',
-                {
-                    userId: currentUser.id,
-                    relationId:createdUser.id 
-                },
-                { noEmail: true }
-            )
-
-            response.status(201).json({
-                entity: currentUser,
-                relations: { 
-                    users: createdUserResults.dictionary                    
-                }
-            })
-            return
-        } else if ( type === 'registration' || type === 'invitation-overwrite') {
-            const token = this.tokenDAO.createToken('email-confirmation')
-            token.userId = createdUser.id
-            token.creatorId = createdUser.id
-            token.id = await this.tokenDAO.insertToken(token)
-
-            await this.emailService.sendEmailConfirmation(createdUser, token)
-
-            let results = await this.userDAO.selectUsers({ where: `users.id = $1`, params: [ createdUser.id ], fields: 'all' })
-
-            if (! results.dictionary[createdUser.id] ) {
-                throw new ControllerError(500, 'server-error', 
-                    `No user found after insertion. Looking for id ${createdUser.id}.`,
-                    `We created the user, but couldn't find them after creation. Please report bug.`)
-            }
-
-            // Log the user in.
-            request.session.user = createdUser
-
-            const relations = await this.getRelations(request.session.user, results)
-
-            response.status(201).json({ 
-                entity: results.dictionary[createdUser.id],
-                relations: relations
-            })
-            return
-        } else {
-            throw new ControllerError(500, 'server-error',
-                `Invalid POST /users type: ${type}.`,
-                `We encountered an error on the server we couldn't recover from.  Please report a bug.`)
-        }
+        response.status(201).json({ 
+            entity: request.session.user,
+            relations: relations
+        })
     }
 
     /**

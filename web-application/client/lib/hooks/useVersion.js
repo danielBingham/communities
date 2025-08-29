@@ -17,12 +17,11 @@ export const useVersion = function() {
     const [request, makeRequest ] = useRequest()
 
     const updateMobile = async function() {
-        console.log(`Getting bundle: ${config.host + '/dist/dist.zip'}.`)
+        const url = new URL('/dist/dist.zip', config.host).href
         const bundle = await CapacitorUpdater.download({
             version: version,
-            url: config.host + '/dist/dist.zip'
+            url: url 
         })
-        console.log(`Got bundle: `, JSON.stringify(bundle))
         await CapacitorUpdater.set(bundle)
     }
 
