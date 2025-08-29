@@ -1,16 +1,16 @@
 const { stringCleaner } = require('../types/string')
-const { uuidCleaner } = require('../types/uuid')
+const { cleanUuid } = require('../types/uuid')
 const { cleanEntity } = require('../clean')
 
 const clean = function(groupModeration) {
     const cleaners = {
-        id: uuidCleaner,
-        userId: uuidCleaner,
-        groupId: uuidCleaner,
+        id: cleanUuid,
+        userId: cleanUuid,
+        groupId: cleanUuid,
         status: stringCleaner,
         reason: stringCleaner,
-        postId: uuidCleaner,
-        postCommentId: uuidCleaner,
+        postId: cleanUuid,
+        postCommentId: cleanUuid,
         createdDate: null,
         updatedDate: null 
     }
@@ -18,12 +18,12 @@ const clean = function(groupModeration) {
 }
 
 module.exports = {
-    cleanId: uuidCleaner,
-    cleanUserId: uuidCleaner,
-    cleanGroupId: uuidCleaner,
+    cleanId: cleanUuid,
+    cleanUserId: cleanUuid,
+    cleanGroupId: cleanUuid,
     cleanStatus: stringCleaner,
     cleanReason: stringCleaner,
-    cleanPostId: uuidCleaner,
-    cleanPostCommentId: uuidCleaner,
+    cleanPostId: cleanUuid,
+    cleanPostCommentId: cleanUuid,
     clean: clean
 }

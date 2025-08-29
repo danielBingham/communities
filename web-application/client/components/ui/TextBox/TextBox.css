@@ -1,0 +1,41 @@
+.text-box {
+    padding: 10px 0;
+    align-items: center;
+}
+.text-box label {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    text-align: left;
+    padding: 5px 0;
+}
+.text-box .text-box_explanation {
+    font-size: 12px;
+    padding: 0 0 5px 5px;
+    font-style: italic;
+}
+.text-box textarea {
+    box-sizing: border-box;
+    width: 100%;
+    height: 200px;
+    border: thin solid var(--input-border-color);
+}
+.text-box textarea:focus {
+    outline-color: var(--input-highlight-color) !important;
+}
+.text-box .text-box_error {
+    padding: 5px;
+    text-align: center;
+    color: red;
+}
+
+@media ( width < 700px ) {
+    .text-box label {
+        text-align: center;
+        padding: 5px;
+    }
+    .text-box .text-box_explanation {
+        text-align: center;
+        padding: 5px;
+    }
+}

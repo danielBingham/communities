@@ -61,7 +61,9 @@ import UserAccountNotificationsView from '/pages/users/views/UserAccountNotifica
 import FriendsPage from '/pages/friends/FriendsPage'
 import YourFriendsList from '/pages/friends/views/YourFriendsList'
 import FriendRequestsList from '/pages/friends/views/FriendRequestsList'
+import FriendInvitationList from '/pages/friends/views/FriendInvitationList'
 import FindFriends from '/pages/friends/views/FindFriends'
+import InviteFriends from '/pages/friends/views/InviteFriends'
 
 import GroupsPage from '/pages/groups/GroupsPage'
 import YourGroups from '/pages/groups/views/YourGroups'
@@ -189,7 +191,9 @@ const App = function(props) {
 
                             <Route path="/friends" element={ <FriendsPage />}>
                                 <Route path="requests" element={ <FriendRequestsList />} />
+                                <Route path="invited" element={ <FriendInvitationList />} />
                                 <Route path="find" element={ <FindFriends /> } />
+                                <Route path="invite" element={ <InviteFriends /> } />
                                 <Route index element={<YourFriendsList />} />
                             </Route>
 

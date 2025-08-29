@@ -93,9 +93,9 @@ export const getUsers = function(name, params) {
  *
  * @returns {string} A uuid requestId that can be used to track this request.
  */
-export const postUsers = function(user) {
+export const postUsers = function(users) {
     return function(dispatch, getState) {
-        return dispatch(makeRequest('POST', '/users', user,
+        return dispatch(makeRequest('POST', '/users', users,
             function(response) {
                 dispatch(setUsersInDictionary({ entity: response.entity }))
 

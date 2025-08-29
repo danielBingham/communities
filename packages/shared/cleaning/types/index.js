@@ -3,7 +3,8 @@ const cleanNumber = require('./number')
 const cleanBoolean = require('./boolean')
 const { stringCleaner } = require('./string')
 const { urlCleaner } = require('./url')
-const { uuidCleaner } = require('./uuid')
+const { cleanUuid } = require('./uuid')
+const cleanEmail = require('./email')
 
 module.exports = {
     intCleaner: intCleaner,
@@ -11,5 +12,6 @@ module.exports = {
     cleanBoolean: cleanBoolean,
     stringCleaner: stringCleaner,
     urlCleaner: urlCleaner,
-    uuidCleaner: uuidCleaner
+    cleanUuid: cleanUuid,
+    cleanEmail: cleanEmail
 }

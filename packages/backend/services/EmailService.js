@@ -49,7 +49,7 @@ module.exports = class EmailService {
     }
 
     async sendEmailConfirmation(user, token) {
-        const confirmationLink = this.config.host + `email-confirmation?token=${token.token}`
+        const confirmationLink = new URL(`email-confirmation?token=${token.token}`, this.config.host).href
 
 
         const emailTextBody = `
@@ -78,7 +78,7 @@ module.exports = class EmailService {
     }
 
     async sendPasswordReset(user, token) {
-        const resetLink = this.config.host + `reset-password?token=${token.token}`
+        const resetLink = new URL(`reset-password?token=${token.token}`, this.config.host).href
 
         const emailTextBody = `
 <html>
@@ -106,7 +106,7 @@ module.exports = class EmailService {
     }
 
     async sendInvitation(inviter, user, token) {
-        const invitationLink = this.config.host + `accept-invitation?token=${token.token}`
+        const invitationLink = new URL(`accept-invitation?token=${token.token}`, this.config.host).href
 
         const emailTextBody = `
 <html>

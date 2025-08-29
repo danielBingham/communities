@@ -19,9 +19,10 @@
  ******************************************************************************/
 
 module.exports = class ServiceError extends Error {
-    constructor(type, message) {
+    constructor(type, message, errors) {
         super(message)
 
         this.type = type
+        this.errors = errors
     }
 }

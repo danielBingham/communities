@@ -384,7 +384,7 @@ module.exports = class ValidationService {
                     errors.push({
                         type: 'email:invalid',
                         log: `Invalid email: ${user.email}`,
-                        message: `Your email is not valid.  Please provide a valid email.`
+                        message: `'${user.email}' is not a valid email address.  Please provide a valid email.`
                     })
                 }
 

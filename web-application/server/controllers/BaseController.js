@@ -84,7 +84,8 @@ module.exports = class BaseController {
                 this.core.logger.warn(error.log)
                 returnedErrors.push({
                     type: error.type,
-                    message: error.message
+                    message: error.message,
+                    context: error.context
                 })
             }
 
@@ -110,7 +111,8 @@ module.exports = class BaseController {
             // construct a new error to return without it.
             const returnedError = {
                 type: errors.type,
-                message: errors.message
+                message: errors.message,
+                context: errors.context
             }
             response.status(status).json({
                 error: returnedError

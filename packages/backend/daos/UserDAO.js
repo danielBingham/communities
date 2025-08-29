@@ -212,6 +212,20 @@ module.exports = class UserDAO extends DAO {
         return results.dictionary[id]
     }
 
+    async getUserByEmail(email, fields) {
+        const results = await this.selectUsers({
+            where: `users.email = $1`,
+            params: [ email ],
+            fields: fields
+        })
+
+        if ( results.list.length <= 0 ) {
+            return null
+        }
+
+        return results.dictionary[results.list[0]]
+    }
+
     /**
      * Retrieve user records from the database.
      *
