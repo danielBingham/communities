@@ -44,6 +44,7 @@ const eventsSlice = createSlice({
             state.subscriptions.push(subscription)
         },
         confirmUnsubscription: function(state, action) {
+            const subscription = action.payload
             state.pendingUnsubscriptions = state.pendingSubscriptions.filter((s) => s.entity === subscription.entity && s.action === subscription.action)
             state.subscriptions = state.subscriptions.filter((s) => s.entity === subscription.entity && s.action === subscription.action)
         },

@@ -7,7 +7,8 @@ import {
     LockOpenIcon,
     LockClosedIcon,
     UserGroupIcon,
-    DocumentCheckIcon
+    DocumentCheckIcon,
+    PlusIcon
 } from '@heroicons/react/24/outline'
 
 import { resetEntities } from '/state/lib'
@@ -20,17 +21,20 @@ import {
     GroupPostPermissions, useGroupPostPermission 
 } from '/lib/hooks/permission'
 
+import Button from '/components/ui/Button'
+
 import PostView from '/pages/posts/views/PostView'
 
 import GroupMembershipButton from '/components/groups/components/GroupMembershipButton'
 import GroupImage from '/components/groups/view/GroupImage'
 
 import GroupMembersView from '/pages/group/views/GroupMembersView'
+import GroupInviteView from '/pages/group/views/GroupInviteView'
 import GroupFeedView from '/pages/group/views/GroupFeedView'
 import GroupModerationView from '/pages/group/views/GroupModerationView'
 import GroupSettingsView from '/pages/group/views/GroupSettingsView'
 
-import { NavigationMenu, NavigationMenuLink, NavigationMenuItem} from '/components/ui/NavigationMenu'
+import { NavigationMenu, NavigationMenuLink, NavigationSubmenu, NavigationSubmenuLink, NavigationMenuItem} from '/components/ui/NavigationMenu'
 import { Page, PageLeftGutter, PageRightGutter, PageBody } from '/components/generic/Page'
 import Error404 from '/components/errors/Error404'
 import Spinner from '/components/Spinner'
@@ -134,8 +138,17 @@ const GroupPage = function() {
         <Page id="group-page">
             <PageLeftGutter>
                 { canViewGroup === true && <NavigationMenu className="group-page__menu">
+                    <NavigationMenuItem><Button type="primary"><PlusIcon /> Create Post</Button></NavigationMenuItem> 
                     { canViewGroupPost === true && <NavigationMenuLink to={`/group/${group.slug}`} icon="QueueList" text="Feed" /> }
-                    { canQueryGroupMember === true && <NavigationMenuLink to="members" icon="UserGroup" text="Members" /> }
+                    { canQueryGroupMember === true && <NavigationSubmenu  icon="UserGroup" title="Members"> 
+                        <NavigationSubmenuLink to={`/group/${group.slug}/members`} icon="UserGroup" text="Members" />
+                        <NavigationSubmenuLink to={`/group/${group.slug}/members/admin`} icon="ExclamationTriangle" text="Administrators" />
+                        { canModerateGroup && <NavigationSubmenuLink to={`/group/${group.slug}/members/invitations`} icon="UserPlus" text="Invitations" /> }
+                        { canModerateGroup && group.type === 'private' && <NavigationSubmenuLink to={`/group/${group.slug}/members/requests`} icon="UserPlus" text="Requests" /> }
+                        { canModerateGroup && <NavigationSubmenuLink to={`/group/${group.slug}/members/banned`} icon="XCircle" text="Banned Users" /> }
+                        { canModerateGroup && <NavigationSubmenuLink to={`/group/${group.slug}/members/email-invites`} icon="Envelope" text="Email Invitations" /> }
+
+                    </NavigationSubmenu>}
                     { canModerateGroup === true && <NavigationMenuLink to="moderation" icon="Flag" text="Moderation" /> }
                     { canAdminGroup === true && <NavigationMenuLink to="settings" icon="Cog6Tooth" text="Settings" /> }
                     <NavigationMenuItem><GroupMembershipButton groupId={group.id} userId={currentUser?.id} /></NavigationMenuItem>
@@ -144,7 +157,15 @@ const GroupPage = function() {
             <PageBody>
                 <div className="group-page__main">
                     <Routes>
-                        <Route path="members" element={ <GroupMembersView groupId={group.id} /> } />
+                        <Route path="members">
+                            <Route path="admin" element={ <GroupMembersView groupId={group.id} type="admin" /> } />
+                            <Route path="invitations" element={ <GroupMembersView groupId={group.id} type="invitations" /> } />
+                            <Route path="requests" element={ <GroupMembersView groupId={group.id} type="requests" /> } />
+                            <Route path="banned" element={ <GroupMembersView groupId={group.id} type="banned" /> } />
+                            <Route path="email-invites" element={ <GroupMembersView groupId={group.id} type="email-invites" /> } />
+                            <Route index element={ <GroupMembersView groupId={group.id} type="member" /> } />
+                        </Route>
+                        <Route path="invite" element={ <GroupInviteView groupId={group.id} /> } />
                         <Route path="moderation" element={ <GroupModerationView groupId={group.id} /> } />
                         <Route path="settings" element={<GroupSettingsView groupId={group.id} /> } />
                         <Route path=":postId" element={ <PostView groupId={group.id} /> } />

@@ -114,6 +114,22 @@ module.exports = class UserRelationshipController {
                 query.order = `ARRAY_POSITION($${query.params.length}::uuid[], user_relationships.id)`
             }
         }
+       
+        if ( 'GroupMember' in requestQuery ) {
+            const GroupMemberQuery = requestQuery.GroupMember
+            if ( 'is' in GroupMemberQuery && GroupMemberQuery.is === 'empty') {
+                const results = await this.core.database.query(`
+                    SELECT user_relationships.id
+                        FROM user_relationships
+                            LEFT OUTER JOIN group_members ON (user_relationships.user_id = $1 AND user_relationships.friend_id = group_members.user_id AND group_members.group_id = $2) 
+                                OR (user_relationships.friend_id = $1 AND user_relationships.user_id = group_members.user_id AND group_members.group_id = $2)
+                        WHERE (user_relationships.user_id = $1 OR user_relationships.friend_id = $1) AND group_members.group_id IS NULL 
+                `, [ userId, GroupMemberQuery.groupId])
+
+                query.params.push(results.rows.map((r) => r.id))
+                query.where += ` AND user_relationships.id = ANY($${query.params.length}::uuid[])`
+            }
+        }
 
         if ( 'page' in requestQuery ) {
             query.page = parseInt(requestQuery.page)

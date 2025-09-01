@@ -11,6 +11,8 @@ import UserProfileImage from '/components/users/UserProfileImage'
 import GroupMembershipButton from '/components/groups/components/GroupMembershipButton'
 import GroupMemberDotsMenu from './GroupMemberDotsMenu'
 
+import { ListGridContentItem } from '/components/ui/List'
+
 import './GroupMemberBadge.css'
 
 const GroupMemberBadge = function({ groupId, userId }) {
@@ -56,7 +58,7 @@ const GroupMemberBadge = function({ groupId, userId }) {
     // user, so just skip any users missing a name.
     if ( user && userMember) {
         return (
-            <div className="group-member-badge">
+            <ListGridContentItem className="group-member-badge">
                 <div className="group-member-badge__grid">
                     <UserProfileImage userId={user.id} />
                     <div className="group-member-badge__details" >
@@ -72,7 +74,7 @@ const GroupMemberBadge = function({ groupId, userId }) {
                         </div>
                     </div> 
                 </div>
-            </div>
+            </ListGridContentItem>
         )
     } else {
         return (null)

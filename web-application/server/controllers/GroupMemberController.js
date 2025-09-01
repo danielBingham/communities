@@ -109,6 +109,56 @@ module.exports = class GroupMemberController {
                 AND (group_members.status = 'member' OR group_members.user_id = $${query.params.length})`
         }
 
+        if ( 'status' in urlQuery ) {
+            if ( Array.isArray(urlQuery.status) ) {
+                query.params.push(urlQuery.status)
+                query.where += ` AND group_members.status = ANY($${query.params.length}::group_member_status[])`
+            } else {
+                query.params.push(urlQuery.status)
+                query.where += ` AND group_members.status = $${query.params.length}`
+            }
+        }
+
+        if ( 'role' in urlQuery) {
+            if ( Array.isArray(urlQuery.role) ) {
+                query.params.push(urlQuery.role)
+                query.where += ` AND group_members.role = ANY($${query.params.length}::group_member_role[])`
+            } else {
+                query.params.push(urlQuery.role)
+                query.where += ` AND group_members.role = $${query.params.length})`
+            }
+        }
+
+        if ( 'user' in urlQuery ) {
+            const userQuery = urlQuery.user
+            if ( 'name' in userQuery ) {
+                const results = await this.core.database.query(`
+                    SELECT group_members.id 
+                        FROM group_members
+                            LEFT OUTER JOIN users ON group_members.user_id = users.id
+                        WHERE group_members.group_id = $1 AND SIMILARITY(users.name, $2) > 0.15
+                        ORDER BY SIMILARITY(users.name, $2) DESC
+                `, [ context.group.id, userQuery.name ])
+
+                query.params.push(results.rows.map((r) => r.id))
+                query.where += ` AND group_members.id = ANY($${query.params.length}::uuid[])`
+                query.order = `ARRAY_POSITION($${query.params.length}::uuid[], group_members.id)`
+
+            }
+
+            if ( 'status' in userQuery ) {
+                const results = await this.core.database.query(`
+                    SELECT group_members.id 
+                        FROM group_members
+                            LEFT OUTER JOIN users ON group_members.user_id = users.id
+                        WHERE group_members.group_id = $1 AND users.status = $2 
+                `, [ context.group.id, userQuery.status])
+
+                query.params.push(results.rows.map((r) => r.id))
+                query.where += ` AND group_members.id = ANY($${query.params.length}::uuid[])`
+            }
+        }
+
         if ( 'page' in urlQuery) {
             query.page = parseInt(urlQuery.page)
         }

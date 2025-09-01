@@ -1,4 +1,3 @@
-import React from 'react'
 import { useSelector } from 'react-redux'
 
 import { useGroup } from '/lib/hooks/Group'
@@ -11,13 +10,13 @@ import {
 } from '/lib/hooks/permission'
 
 import Spinner from '/components/Spinner'
+import Button from '/components/ui/Button'
 
-import GroupInvite from '/components/groups/components/GroupInvite'
 import GroupMembersList from '/components/groups/members/GroupMembersList'
 
 import './GroupMembersView.css'
 
-const GroupMembersView = function({ groupId }) {
+const GroupMembersView = function({ groupId, type }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
@@ -47,10 +46,36 @@ const GroupMembersView = function({ groupId }) {
         )
     }
 
+    if ( ! canModerateGroup && type !== 'member' && type !== 'admin' ) {
+        return null
+    }
+
+    let descriptor = 'Members'
+    let params = { status: 'member' }
+    if ( type === 'admin' ) {
+        descriptor = 'Administrators'
+        params = { role: [ 'admin', 'moderator' ] }
+    } else if ( type === 'invitations' ) {
+        descriptor = 'Invitations'
+        params = { status: 'pending-invited' }
+    } else if ( type === 'requests' && group.type === 'private' ) {
+        descriptor = 'Requests'
+        params = { status: 'pending-requested' } 
+    } else if ( type === 'banned' ) {
+        descriptor = 'Banned Members'
+        params = { status: 'banned' } 
+    } else if ( type === 'email-invites' ) {
+        descriptor = 'Invitations'
+        params = { status: 'pending-invited', user: { status: 'invited' }}
+    }
+
     return (
         <div className="group-members-view">
-            { canModerateGroup && <GroupInvite groupId={groupId} /> }
-            <GroupMembersList groupId={groupId} />
+            { canModerateGroup && <div className="group-members-view__controls">
+                <Button href={`/group/${group.slug}/invite`} type="primary">Invite Friends</Button>
+                <Button href={`/group/${group.slug}/email-invite`} type="primary">Invite by Email</Button>
+            </div> }
+            <GroupMembersList descriptor={descriptor} groupId={groupId} params={params}/>
         </div>
     )
 }
