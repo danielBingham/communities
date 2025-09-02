@@ -19,23 +19,27 @@
  ******************************************************************************/
 
 const { 
+    UserErrors, 
+
     FileDAO,
     GroupDAO, 
     GroupMemberDAO, 
     PostSubscriptionDAO,
     UserDAO,  
 
+    GroupMemberService,
     NotificationService, 
     PermissionService,
     ValidationService
 }  = require('@communities/backend')
 
+const BaseController = require('./BaseController')
 const ControllerError = require('../errors/ControllerError')
 
-module.exports = class GroupMemberController {
+module.exports = class GroupMemberController extends BaseController {
 
     constructor(core) {
-        this.core = core
+        super(core)
 
         this.fileDAO = new FileDAO(core)
         this.groupDAO = new GroupDAO(core)
@@ -231,95 +235,54 @@ module.exports = class GroupMemberController {
     }
 
     async postGroupMembers(request, response) {
+        const logger = 'logger' in request ? request.logger : this.core.logger
+        const userErrors = new UserErrors(this.core, logger)
+
         const currentUser = request.session.user
 
         if ( ! currentUser ) {
-            throw new ControllerError(401, 'not-authenticated',
-                `User must be authenticated to add members to a Group.`,
-                `You must must be authenticated to add members to a Group.`)
+            userErrors.addErrors(401, {
+                type: 'not-authenticated',
+                log: `User attempting to create a GroupMember without authenticating.`,
+                message: `You must log in to create a GroupMember.`
+            })
+            response.status(userErrors.status).json(userErrors.getErrors())
+            return
         }
 
         const groupId = request.params.groupId
-        const member = request.body
 
-        // GroupIds must be consistent.
-        if ( member.groupId !== groupId ) {
-            throw new ControllerError(400, 'invalid',
-                `User(${currentUser.id}) attempting to add member to Group(${member.groupId}) on Group(${groupId})'s endpoint.`,
-                `The groupId in the member and the route must match.`)
+        const groupMemberService = new GroupMemberService(this.core)
+
+        const members = []
+        if ( Array.isArray(request.body) ) {
+            for (const member of request.body) {
+                const [ entity, errors ] = await groupMemberService.inviteGroupMember(currentUser, groupId, member)
+                if ( errors.hasErrors()) {
+                    const errorResult = errors.getErrors()
+                    return response.status(errors.status).json(errorResult) 
+                }
+                members.push(entity)
+            }
+        } else {
+            const [ entity, errors ] = await groupMemberService.inviteGroupMember(currentUser, groupId, request.body)
+            if ( errors.hasErrors()) {
+                const errorResult = errors.getErrors()
+                return response.status(errors.status).json(errorResult)
+            }
+            members.push(entity)
         }
 
-        const group = await this.groupDAO.getGroupById(groupId)
-        if ( ! group ) {
-            throw new ControllerError(404, 'not-found',
-                `User(${currentUser.id}) attempting to add a member to a Group that doesn't exist.`,
-                `Either that Group doesn't exist or you don't have permission to see it.`)
-        }
-
-        const currentMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(groupId, currentUser.id) 
-
-        const canViewGroup = await this.permissionService.can(currentUser, 'view', 'Group', { group: group, userMember: currentMember })
-        if ( canViewGroup !== true ) {
-            throw new ControllerError(404, 'not-found',
-                `User(${currentUser.id}) attempting to add a member to a group without permission to view it.`,
-                `Either that group doesn't exist or you don't have permission to see it.`)
-        }
-
-        const canCreateGroupMember = await this.permissionService.can(currentUser, 'create', 'GroupMember', 
-            { group: group, userMember: currentMember, groupMember: member })
-
-        if ( canCreateGroupMember !== true ) {
-            throw new ControllerError(403, 'not-authorized',
-                `User attempting to create a new member in Group(${groupId}) without authorization.`,
-                `You are not authorized to add members to that Group.`)
-        }
-
-        const existing = await this.groupMemberDAO.getGroupMemberByGroupAndUser(groupId, member.userId)
-
-        // If a member already exists, then bail out.
-        if ( existing && existing.userId == member.userId ) {
-            throw new ControllerError(409, 'conflict',
-                `User attempting to add a member to a Group that has already been added.`,
-                `That member has already been added to that Group.`)
-        }
-
-        const validationErrors = await this.validationService.validateGroupMember(currentUser, member)
-        if ( validationErrors.length > 0 ) {
-            const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
-            const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
-            throw new ControllerError(400, 'invalid',
-                `User submitted an invalid GroupMember: ${logString}`,
-                errorString)
-        }
-
-        await this.groupMemberDAO.insertGroupMembers(member)
-
+        const memberIds = members.map((m) => m.id)
         const results = await this.groupMemberDAO.selectGroupMembers({
-            where: `group_members.user_id = $1 AND group_members.group_id = $2`,
-            params: [member.userId, member.groupId]
+            where: `group_members.id = ANY($1::uuid[])`,
+            params: [ memberIds ]
         })
-
-        if ( results.list.length <= 0 ) {
-            throw new ControllerError(500, 'server-error',
-                `Failed to find GroupMember(${member.groupId},${member.userId}) after insertion.`,
-                `We encountered an error we couldn't recover from. Please report as a bug!`)
-        }
-
-        const entity = results.dictionary[results.list[0]]
 
         const relations = await this.getRelations(currentUser, results)
 
-        await this.notificationService.sendNotifications(
-            currentUser, 
-            'GroupMember:create', 
-            {
-                group: group,
-                member: entity
-            }
-        )
-
         response.status(201).json({
-            entity: entity,
+            dictionary: results.dictionary,
             relations: relations
         })
     }

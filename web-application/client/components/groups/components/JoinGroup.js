@@ -23,7 +23,7 @@ const JoinGroup = function({ groupId }) {
     const [currentMember, currentMemberRequest] = useGroupMember(groupId, currentUser.id)
 
     const joinGroup = function() {
-        makeRequest(postGroupMembers({ groupId: groupId, userId: currentUser.id }))
+        makeRequest(postGroupMembers(groupId, { groupId: groupId, userId: currentUser.id }))
 
     }
 

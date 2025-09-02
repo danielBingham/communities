@@ -101,7 +101,8 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
                         result.error.message = responseBody.error.message
                         result.error.all = [{
                             type: responseBody.error.type,
-                            message: responseBody.error.message
+                            message: responseBody.error.message,
+                            context: responseBody.error.context
                         }]
                     }
                 }  else {

@@ -55,7 +55,7 @@ const GroupMembershipButton = function({ groupId, userId }) {
             status: 'member',
             role: 'member'
         }
-        makeRequest(postGroupMembers(groupMember))
+        makeRequest(postGroupMembers(groupId, groupMember))
     }
 
     /**
@@ -70,7 +70,7 @@ const GroupMembershipButton = function({ groupId, userId }) {
             role: 'member'
 
         }
-        makeRequest(postGroupMembers(groupMember))
+        makeRequest(postGroupMembers(groupId, groupMember))
     }
 
     /**
@@ -133,7 +133,7 @@ const GroupMembershipButton = function({ groupId, userId }) {
             status: 'pending-invited',
             role: 'member'
         }
-        makeRequest(postGroupMembers(groupMember))
+        makeRequest(postGroupMembers(groupId, groupMember))
     }
 
 

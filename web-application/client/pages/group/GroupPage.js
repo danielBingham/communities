@@ -30,6 +30,7 @@ import GroupImage from '/components/groups/view/GroupImage'
 
 import GroupMembersView from '/pages/group/views/GroupMembersView'
 import GroupInviteView from '/pages/group/views/GroupInviteView'
+import GroupEmailInviteView from '/pages/group/views/GroupEmailInviteView'
 import GroupFeedView from '/pages/group/views/GroupFeedView'
 import GroupModerationView from '/pages/group/views/GroupModerationView'
 import GroupSettingsView from '/pages/group/views/GroupSettingsView'
@@ -146,7 +147,7 @@ const GroupPage = function() {
                         { canModerateGroup && <NavigationSubmenuLink to={`/group/${group.slug}/members/invitations`} icon="UserPlus" text="Invitations" /> }
                         { canModerateGroup && group.type === 'private' && <NavigationSubmenuLink to={`/group/${group.slug}/members/requests`} icon="UserPlus" text="Requests" /> }
                         { canModerateGroup && <NavigationSubmenuLink to={`/group/${group.slug}/members/banned`} icon="XCircle" text="Banned Users" /> }
-                        { canModerateGroup && <NavigationSubmenuLink to={`/group/${group.slug}/members/email-invites`} icon="Envelope" text="Email Invitations" /> }
+                        { canModerateGroup && <NavigationSubmenuLink to={`/group/${group.slug}/members/email-invitations`} icon="Envelope" text="Email Invitations" /> }
 
                     </NavigationSubmenu>}
                     { canModerateGroup === true && <NavigationMenuLink to="moderation" icon="Flag" text="Moderation" /> }
@@ -162,10 +163,11 @@ const GroupPage = function() {
                             <Route path="invitations" element={ <GroupMembersView groupId={group.id} type="invitations" /> } />
                             <Route path="requests" element={ <GroupMembersView groupId={group.id} type="requests" /> } />
                             <Route path="banned" element={ <GroupMembersView groupId={group.id} type="banned" /> } />
-                            <Route path="email-invites" element={ <GroupMembersView groupId={group.id} type="email-invites" /> } />
+                            <Route path="email-invitations" element={ <GroupMembersView groupId={group.id} type="email-invitations" /> } />
                             <Route index element={ <GroupMembersView groupId={group.id} type="member" /> } />
                         </Route>
                         <Route path="invite" element={ <GroupInviteView groupId={group.id} /> } />
+                        <Route path="email-invite" element={ <GroupEmailInviteView groupId={group.id} /> } />
                         <Route path="moderation" element={ <GroupModerationView groupId={group.id} /> } />
                         <Route path="settings" element={<GroupSettingsView groupId={group.id} /> } />
                         <Route path=":postId" element={ <PostView groupId={group.id} /> } />

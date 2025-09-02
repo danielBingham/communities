@@ -64,7 +64,7 @@ const GroupMembersView = function({ groupId, type }) {
     } else if ( type === 'banned' ) {
         descriptor = 'Banned Members'
         params = { status: 'banned' } 
-    } else if ( type === 'email-invites' ) {
+    } else if ( type === 'email-invitations' ) {
         descriptor = 'Invitations'
         params = { status: 'pending-invited', user: { status: 'invited' }}
     }
