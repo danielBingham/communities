@@ -11,7 +11,6 @@ import {
 } from '/lib/hooks/permission'
 
 import Spinner from '/components/Spinner'
-import Button from '/components/ui/Button'
 import { 
     List, 
     ListHeader, 
@@ -22,6 +21,7 @@ import PaginationControls from '/components/PaginationControls'
 
 import UserBadge from '/components/users/UserBadge'
 import GroupMembershipButton from '/components/groups/components/GroupMembershipButton'
+import GroupMembersControls from '/components/groups/GroupMembersControls'
 
 import './GroupInviteView.css'
 
@@ -106,10 +106,7 @@ const GroupInviteView = function({ groupId }) {
 
     return (
         <div className="group-invite-view">
-            { canModerateGroup && <div className="group-invite-view__controls">
-                <Button href={`/group/${group.slug}/invite`} type="primary">Invite Friends</Button>
-                <Button href={`/group/${group.slug}/email-invite`} type="primary">Invite by Email</Button>
-            </div> }
+            <GroupMembersControls groupId={groupId} />
             <div className="group-invite-view__invitations">
                 <List className="friend-list">
                     <ListHeader explanation={explanation}>
