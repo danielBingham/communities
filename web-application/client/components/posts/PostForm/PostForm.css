@@ -3,7 +3,7 @@
     background-color: white;
     margin: 0 auto;
     width: 100%;
-    min-height: 75vh;
+    height: calc(100vh - 85px);
     
     display: grid;
     grid-template-rows: 1fr min-content min-content min-content;

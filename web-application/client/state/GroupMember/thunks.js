@@ -44,13 +44,18 @@ export const getGroupMembers = function(groupId, name, params) {
  *
  * @returns {string} A uuid requestId that can be used to track this request.
  */
-export const postGroupMembers = function(member) {
+export const postGroupMembers = function(groupId, members) {
     return function(dispatch, getState) {
-        const endpoint = `/group/${encodeURIComponent(member.groupId)}/members`
-        const body = member
+        const endpoint = `/group/${encodeURIComponent(groupId)}/members`
+        const body = members
         return dispatch(makeRequest('POST', endpoint, body,
             function(response) {
-                dispatch(setGroupMembersInDictionary({ entity: response.entity}))
+                if ( 'entity' in response ) {
+                    dispatch(setGroupMembersInDictionary({ entity: response.entity}))
+                } 
+                if ( 'dictionary' in response ) {
+                    dispatch(setGroupMembersInDictionary({ dictionary: response.dictionary }))
+                }
 
                 dispatch(setRelationsInState(response.relations))
                 dispatch(clearGroupMemberQueries())

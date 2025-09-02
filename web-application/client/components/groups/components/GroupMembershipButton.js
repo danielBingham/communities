@@ -8,6 +8,9 @@ import { resetEntities } from '/state/lib'
 
 import { useGroup } from '/lib/hooks/Group'
 import { useGroupMember } from '/lib/hooks/GroupMember'
+import { 
+    GroupPermissions, useGroupPermission
+} from '/lib/hooks/permission'
 
 import { postGroupMembers, patchGroupMember, deleteGroupMember } from '/state/GroupMember'
 
@@ -29,9 +32,17 @@ const GroupMembershipButton = function({ groupId, userId }) {
     const [ currentMember ] = useGroupMember(groupId, currentUser?.id)
     const [ member ]  = useGroupMember(groupId, userId)
 
+    const context = {
+        group: group,
+        userMember: currentMember
+    }
+
+    const canModerateGroup = useGroupPermission(currentUser, GroupPermissions.MODERATE, context)
+
     const dispatch = useDispatch()
 
     /* ==================== When currentUser is user... ======================= */
+
 
     /**
      * ...and user is not yet a group member, and the group is 'open', they can
@@ -44,7 +55,7 @@ const GroupMembershipButton = function({ groupId, userId }) {
             status: 'member',
             role: 'member'
         }
-        makeRequest(postGroupMembers(groupMember))
+        makeRequest(postGroupMembers(groupId, groupMember))
     }
 
     /**
@@ -59,7 +70,7 @@ const GroupMembershipButton = function({ groupId, userId }) {
             role: 'member'
 
         }
-        makeRequest(postGroupMembers(groupMember))
+        makeRequest(postGroupMembers(groupId, groupMember))
     }
 
     /**
@@ -111,6 +122,21 @@ const GroupMembershipButton = function({ groupId, userId }) {
     }
 
     /* =================== When currentUser is admin... ======================== */
+
+    /**
+     * ...and user is not a member, currentUser can invite.
+     */
+    const invite = () => {
+        const groupMember = {
+            groupId: groupId,
+            userId: userId,
+            status: 'pending-invited',
+            role: 'member'
+        }
+        makeRequest(postGroupMembers(groupId, groupMember))
+    }
+
+
     /**
      * ...and user has requested entrance, currentUser can accept user.
      */
@@ -205,9 +231,7 @@ const GroupMembershipButton = function({ groupId, userId }) {
         )
     }
 
-    const canAdmin = currentMember && member && currentMember.userId != member.userId && (currentMember.role == 'admin' || currentMember.role == 'moderator')
-
-    if ( currentUser.id != userId && member && canAdmin ) {
+    if ( currentUser.id !== userId && member && canModerateGroup ) {
         return (
             <>
                 { errorView }
@@ -217,6 +241,13 @@ const GroupMembershipButton = function({ groupId, userId }) {
                 { member.status == 'member' && <Button onClick={() => removeMember()}><ArrowLeftStartOnRectangleIcon /> <span className="nav-text">Remove</span></Button> }
             </>
         )
+    } else if ( currentUser.id !== userId  && canModerateGroup ) {
+        return (
+            <>
+                { errorView }
+                <Button type="primary" onClick={() => invite()}><ArrowLeftEndOnRectangleIcon /> <span className="nav-text">Invite</span></Button>
+            </>
+        ) 
     } else {
         return null
     }

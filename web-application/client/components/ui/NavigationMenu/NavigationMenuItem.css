@@ -1,3 +1,10 @@
 li.navigation-menu__item {
     font-size: 18px;
 }
+
+@media ( width < 700px ) {
+    li.navigation-menu__item button {
+        font-size: 10px;
+    }
+}
+    
