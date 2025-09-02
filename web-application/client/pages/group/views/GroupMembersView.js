@@ -12,6 +12,7 @@ import {
 import Spinner from '/components/Spinner'
 import Button from '/components/ui/Button'
 
+import GroupMembersControls from '/components/groups/GroupMembersControls'
 import GroupMembersList from '/components/groups/members/GroupMembersList'
 
 import './GroupMembersView.css'
@@ -57,7 +58,7 @@ const GroupMembersView = function({ groupId, type }) {
         params = { role: [ 'admin', 'moderator' ] }
     } else if ( type === 'invitations' ) {
         descriptor = 'Invitations'
-        params = { status: 'pending-invited' }
+        params = { status: 'pending-invited', user: { status: 'confirmed' }}
     } else if ( type === 'requests' && group.type === 'private' ) {
         descriptor = 'Requests'
         params = { status: 'pending-requested' } 
@@ -71,10 +72,7 @@ const GroupMembersView = function({ groupId, type }) {
 
     return (
         <div className="group-members-view">
-            { canModerateGroup && <div className="group-members-view__controls">
-                <Button href={`/group/${group.slug}/invite`} type="primary">Invite Friends</Button>
-                <Button href={`/group/${group.slug}/email-invite`} type="primary">Invite by Email</Button>
-            </div> }
+            <GroupMembersControls groupId={groupId} />
             <GroupMembersList descriptor={descriptor} groupId={groupId} params={params}/>
         </div>
     )
