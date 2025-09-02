@@ -22,6 +22,7 @@ const TokenDAO = require('../daos/TokenDAO')
 const UserDAO = require('../daos/UserDAO')
 const UserRelationshipDAO = require('../daos/UserRelationshipDAO')
 
+const AuthenticationService = require('./AuthenticationService')
 const EmailService = require('./EmailService')
 const NotificationService = require('./NotificationService')
 const TokenService = require('./TokenService')
@@ -37,6 +38,7 @@ module.exports = class UserService {
         this.userDAO = new UserDAO(core)
         this.userRelationshipsDAO = new UserRelationshipDAO(core)
 
+        this.auth = new AuthenticationService(core)
         this.emailService = new EmailService(core)
         this.notificationService = new NotificationService(core)
         this.tokenService = new TokenService(core)

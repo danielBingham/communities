@@ -55,6 +55,8 @@ module.exports = class GroupMemberNotifications {
 
     async ensureContext(currentUser, type, context) {
         context.user = await this.userDAO.getUserById(context.member.userId, ['status'])
+
+        context.link = new URL(`/group/${context.group.slug}`, this.core.config.host)
     }
 
     async create(currentUser, type, context, options) {
@@ -62,8 +64,13 @@ module.exports = class GroupMemberNotifications {
 
         if ( context.member.status == 'pending-invited' ) {
             context.inviter = currentUser
+            context.link = new URL(`/group/${context.group.slug}`, this.core.config.host).href
+
+
             await this.notificationService.createNotification(context.user.id, 'GroupMember:create:status:pending-invited:member', context, options)
         } else if ( context.member.status == 'pending-requested' ) {
+            context.link = new URL(`/group/${context.group.slug}/members/requests`, this.core.config.host).href
+
             const moderatorResults = await this.groupMemberDAO.selectGroupMembers({
                 where: `(group_members.role = 'admin' OR group_members.role = 'moderator') AND group_members.group_id = $1`,
                 params: [ context.group.id ]
