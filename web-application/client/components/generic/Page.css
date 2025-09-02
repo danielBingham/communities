@@ -1,9 +1,10 @@
 .page .page-body {
     background-color: var(--page-background-color);
     color: var(--page-text-color);
+    width: 100%;
 }
 .page-left-gutter { padding: 5px 0; }
-.page-right-gutter { pagging: 5px 0; }
+.page-right-gutter { padding: 5px 0; }
 
 @media (1600px <= width) {
     .page {
@@ -26,7 +27,7 @@
 @media (700px < width <= 1220px) {
     .page {
         display: grid;
-        grid-template-columns: 1fr;
+        grid-template-columns: 100%;
         grid-template-rows: auto;
         margin: 0 auto;
     }
@@ -46,8 +47,9 @@
 }
 @media (width <= 700px) {
     .page {
+        width: 100%;
         display: grid;
-        grid-template-columns: 1fr;
+        grid-template-columns: 100%;
         grid-template-rows: auto;
         margin: 0 auto;
     }

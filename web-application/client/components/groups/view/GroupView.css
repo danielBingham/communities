@@ -17,6 +17,7 @@
     max-width: 400px;
     margin: 0 auto;
     text-align: center;
+    word-wrap: break-word;
 }
 .group-view .details .bio {
     font-size: 14px;

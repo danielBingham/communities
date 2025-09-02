@@ -27,6 +27,7 @@
 .create-post a.create-post__button:link,
 .create-post a.create-post__button:active,
 .create-post a.create-post__button:visited {
+    box-sizing: border-box;
     display: block;
     padding: 10px;
     font-size: 16px;

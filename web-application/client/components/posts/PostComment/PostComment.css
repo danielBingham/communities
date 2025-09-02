@@ -12,6 +12,7 @@
     font-size: 14px;
     background-color: var(--primary-color-lightest);
     border-radius: 10px;
+    max-width: 100%;
 }
 .post-comment.highlight {
     animation-duration: 0.75s;
@@ -32,6 +33,7 @@
 .post-comment .post-comment__content {
     padding: 0 10px 15px 10px;
     white-space: pre-line;
+    max-width: 100%;
 }
 .post-comment .post-comment__content .post-comment__moderated {
     font-size: 14px;
