@@ -1,0 +1,19 @@
+.group-membership-button svg {
+    display: inline-block;
+    width: 22px;
+    margin-right: 5px;
+    margin-bottom: -5px;
+}
+
+@media (700px < width <= 1220px) {
+    .navigation-menu__item .group-membership-button .nav-text {
+        display: block;
+        font-size: 10px;
+    }
+}
+@media (width <= 700px) {
+    .navigation-menu__item .group-membership-button .nav-text {
+        display: block;
+        font-size: 10px;
+    }
+}

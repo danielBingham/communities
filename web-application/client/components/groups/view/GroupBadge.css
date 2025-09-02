@@ -12,10 +12,11 @@
 .group-badge__details {
     padding: 10px;
     align-items: center;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 .group-badge__title {
     font-size: 18px;
-    overflow-wrap: break-word;
 }
 .group-badge__about {
     font-size: 12px;

@@ -11,6 +11,8 @@
 .group-member-badge__details {
     padding: 10px;
     align-items: center;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 .group-member-badge__role {
     text-transform: capitalize;
@@ -18,7 +20,6 @@
 }
 .group-member-badge__name {
     font-size: 18px;
-    overflow-wrap: break-word;
 }
 .group-member-badge__about {
     font-size: 12px;
@@ -26,6 +27,9 @@
 
 @media ( width < 400px ) {
     .group-member-badge {
+        max-width: 360px;
+    }
+    .group-member-badge-grid {
         max-width: 360px;
     }
 }

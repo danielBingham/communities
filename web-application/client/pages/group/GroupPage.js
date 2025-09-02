@@ -35,7 +35,7 @@ import GroupFeedView from '/pages/group/views/GroupFeedView'
 import GroupModerationView from '/pages/group/views/GroupModerationView'
 import GroupSettingsView from '/pages/group/views/GroupSettingsView'
 
-import { NavigationMenu, NavigationMenuLink, NavigationSubmenu, NavigationSubmenuLink, NavigationMenuItem} from '/components/ui/NavigationMenu'
+import { NavigationMenu, NavigationMenuLink, NavigationMenuButton, NavigationSubmenu, NavigationSubmenuLink, NavigationMenuItem} from '/components/ui/NavigationMenu'
 import { Page, PageLeftGutter, PageRightGutter, PageBody } from '/components/generic/Page'
 import Error404 from '/components/errors/Error404'
 import Spinner from '/components/Spinner'
@@ -139,7 +139,7 @@ const GroupPage = function() {
         <Page id="group-page">
             <PageLeftGutter>
                 { canViewGroup === true && <NavigationMenu className="group-page__menu">
-                    <NavigationMenuItem><Button type="primary"><PlusIcon /> Create Post</Button></NavigationMenuItem> 
+                    <NavigationMenuButton href={`/create?groupId=${group.id}`} icon="Plus" type="primary" text="Create" /> 
                     { canViewGroupPost === true && <NavigationMenuLink to={`/group/${group.slug}`} icon="QueueList" text="Feed" /> }
                     { canQueryGroupMember === true && <NavigationSubmenu  icon="UserGroup" title="Members"> 
                         <NavigationSubmenuLink to={`/group/${group.slug}/members`} icon="UserGroup" text="Members" />
