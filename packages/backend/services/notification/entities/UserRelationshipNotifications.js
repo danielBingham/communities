@@ -59,11 +59,15 @@ module.exports = class UserRelationshipNotifications {
     async create(currentUser, type, context, options) {
         await this.ensureContext(currentUser, type, context, options)
 
+        context.link = new URL(`/friends/requests`, this.core.config.host).href
+
         await this.notificationService.createNotification(context.relationId, 'UserRelationship:create:relation', context, options)
     }
 
     async update(currentUser, type, context, options) {
         await this.ensureContext(currentUser, type, context, options)
+
+        context.link = new URL(`/${context.friend.username}`, this.core.config.host).href
 
         await this.notificationService.createNotification(context.userId, 'UserRelationship:update:user', context, options)
     }

@@ -137,7 +137,7 @@ module.exports = class UserController extends BaseController{
         if ( 'name' in query && query.name.length > 0) {
             const and = result.params.length > 0 ? ' AND ' : ''
             result.params.push(query.name)
-            result.where += `${and} SIMILARITY(users.name, $${result.params.length}) > 0`
+            result.where += `${and} SIMILARITY(users.name, $${result.params.length}) > 0.15`
             result.order = `SIMILARITY(users.name, $${result.params.length}) desc`
         }
 
@@ -150,7 +150,7 @@ module.exports = class UserController extends BaseController{
         if ( 'mention' in query && query.mention.length > 0 ) {
             const and = result.params.length > 0 ? ' AND ' : ''
             result.params.push(query.mention)
-            result.where += `${and} SIMILARITY(users.name, $${result.params.length}) > 0`
+            result.where += `${and} SIMILARITY(users.name, $${result.params.length}) > 0.15`
             result.order = `SIMILARITY(users.name, $${result.params.length}) desc`
 
             if ( 'postId' in query && 'groupId' in query) {
