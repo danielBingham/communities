@@ -1,6 +1,4 @@
-import React, { useState, useEffect} from 'react'
-import { useSelector } from 'react-redux'
-import { Link } from 'react-router-dom'
+import { useState, useEffect} from 'react'
 
 import './CommunitiesLogo.css'
 
@@ -25,7 +23,7 @@ const CommunitiesLogo = function() {
 
     return (
         <>
-            { imageUrl !== null && <div className="communities-logo"><Link to="/"><img src={imageUrl} /><span className="logo-text">ommunities</span></Link></div> }
+            { imageUrl !== null && <div className="communities-logo"><a href="/"><img src={imageUrl} /><span className="logo-text">ommunities</span></a></div> }
         </>
     )
 

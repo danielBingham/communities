@@ -28,6 +28,7 @@ import TextAreaWithMentions from '/components/posts/TextAreaWithMentions'
 
 import LinkForm from './LinkForm/LinkForm'
 import PostVisibilityControl from './PostVisibilityControl/PostVisibilityControl'
+import PostTypeControl from './PostTypeControl'
 
 import Post from '/components/posts/Post'
 
@@ -58,6 +59,7 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
         defaultVisibility = 'public'
     }
     const [visibility, setVisibility] = useState(draft && 'visibility' in draft && draft.visibility !== null && draft.visibility !== undefined ? draft.visibility : defaultVisibility)
+    const [type, setType] = useState(draft && 'type' in draft ? draft.type : 'feed')
 
     const [showLinkForm, setShowLinkForm] = useState(false)
 
@@ -72,7 +74,7 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
 
     const submit = function() {
         const newPost = {
-            type: 'feed',
+            type: draft && 'type' in draft ? draft.type : 'feed',
             visibility: visibility,
             userId: currentUser.id,
             fileId: fileId,
@@ -177,8 +179,20 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
     }, [ postId, groupId ])
 
     useEffect(function() {
-        setDraft({ content: content, fileId: fileId, linkPreviewId: linkPreviewId, visibility: visibility })
-    }, [ postId, content, fileId, linkPreviewId, visibility ])
+        if ( type === 'announcement' || type === 'info' ) {
+            setVisibility('public')
+        }
+    }, [ type ] ) 
+
+    useEffect(function() {
+        const newDraft = { ...draft }
+        newDraft.content = content
+        newDraft.fileId = fileId
+        newDraft.linkPreviewId = linkPreviewId
+        newDraft.visibility = visibility
+        newDraft.type = type
+        setDraft(newDraft)
+    }, [ postId, content, fileId, linkPreviewId, visibility, type ])
 
     useEffect(function() {
         if (postRequest && postRequest.state == 'fulfilled') {
@@ -285,8 +299,9 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
             <div className="post-form__controls">
                 <div className="post-form__controls__attachments">{ attachmentControlsView }</div>
                 <div className="post-form__controls__visibility">
+                    <PostTypeControl type={type} setType={setType} postId={postId} groupId={groupId} sharedPostId={sharedPostId} />
                     <PostVisibilityControl 
-                        visibility={visibility} setVisibility={setVisibility} postId={postId} groupId={groupId} />
+                        visibility={visibility} setVisibility={setVisibility} type={type} postId={postId} groupId={groupId} />
                 </div>
             </div>
             <div className="buttons">

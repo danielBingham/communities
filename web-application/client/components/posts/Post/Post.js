@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate, Link } from 'react-router-dom'
 
-import { UsersIcon, UserGroupIcon, GlobeAltIcon } from '@heroicons/react/24/solid'
+import { UsersIcon, UserGroupIcon, GlobeAltIcon, MegaphoneIcon } from '@heroicons/react/24/solid'
+import { InformationCircleIcon } from '@heroicons/react/16/solid'
 
 import { useFeature } from '/lib/hooks/feature'
 import { usePostDraft } from '/lib/hooks/usePostDraft'
@@ -157,8 +158,8 @@ const Post = function({ id, expanded, showLoading, shared }) {
             <div className="post__header"> 
                 <div className="post__poster-image"><div><UserProfileImage userId={post.userId} /></div></div>
                 <div className="post__details">
-                    <div><UserTag id={post.userId} hideProfile={true} /> { post.groupId &&<span>posted in <GroupTag id={post.groupId} hideProfile={true} /></span>}</div> 
-                    <div><span className="post__visibility">{ postVisibility }</span> &bull; <Link to={postLink}><DateTag timestamp={post.createdDate} /></Link> </div>
+                    <div><UserTag id={post.userId} hideProfile={true} />  { post.groupId &&<span>posted in <GroupTag id={post.groupId} hideProfile={true} /></span>}</div> 
+                    <div><span className="post__visibility">{ postVisibility }</span> &bull; { post.type === 'announcement' || post.type === 'info' ? <span><span className="post__type">{ post.type === 'announcement' ? <MegaphoneIcon /> : <InformationCircleIcon /> }{ post.type }</span> &bull;</span> : ''} <Link to={postLink}><DateTag timestamp={post.createdDate} /></Link> </div>
                 </div>
                 <div className="post__moderation">
                     { hasAdminModeration && ! shared && <PostModeration postId={post.id} /> }

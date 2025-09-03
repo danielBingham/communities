@@ -225,6 +225,18 @@ module.exports = class PostValidation {
             }
         }
 
+        if ( util.objectHas(post, 'type') &&  ( post.type === 'announcement' || post.type === 'info' ) ) {
+            const canAdminSite = await this.permissionService.can(currentUser, 'admin', 'Site')
+
+            if ( ! canAdminSite ) {
+                errors.push({
+                    type: 'not-authorized',
+                    log: `Non-admin user attempting to make '${post.type}' post.`,
+                    message: `You are not authorized to create '${post.type}' posts.`
+                })
+            }
+        }
+
         return errors
     }
 }

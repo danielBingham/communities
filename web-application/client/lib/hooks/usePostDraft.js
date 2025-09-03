@@ -17,16 +17,18 @@ const has = function(draft, field) {
 // TODO FeatureFlagging and migration system that handles localstorage
 // migrations!
 const validateAndCorrectDraft = function(draft, group) {
-    if ( draft === undefined || draft === null ) {
-        return null
-    }
-
     const correctedDraft = {
         content: '',
         fileId: null,
         linkPreviewId: null,
-        visibility: 'private'
+        visibility: 'private',
+        type: group !== undefined && group !== null ? 'group' : 'feed'
     }
+
+    if ( draft === undefined || draft === null ) {
+        return correctedDraft 
+    }
+
     if ( has(draft, 'content') 
         && draft.content !== null
         && typeof draft.content === 'string' 
@@ -66,6 +68,14 @@ const validateAndCorrectDraft = function(draft, group) {
             correctedDraft.visibility = draft.visibility
         }
     }
+
+    if ( has(draft, 'type') ) {
+        if ( group !== null && group !== undefined && draft.type !== 'group' ) {
+            correctedDraft.type = 'group'
+        }  else if ( draft.type === 'feed' || draft.type === 'announcement' || draft.type === 'info' )  {
+            correctedDraft.type = draft.type
+        }
+    } 
 
     return correctedDraft
 }

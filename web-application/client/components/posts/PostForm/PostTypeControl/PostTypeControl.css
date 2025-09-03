@@ -1,7 +1,8 @@
-.post-visibility-control {
+.post__type-control {
     display: inline-block;
+    text-align: right;
 }
-.post-visibility-control__current  {
+.post__type-control__current  {
     display: inline-block;
     padding: 5px 15px;
     margin: 5px;
@@ -10,8 +11,9 @@
     border: thin solid var(--primary-color-light);
     color: var(--primary-color-dark);
     background-color: var(--primary-color-light);
+    text-transform: capitalize;
 }
-.post-visibility-control svg {
+.post__type-control svg {
     width: 1.2em;
     height: 1.2em;
     margin-bottom: -0.2em;
@@ -22,8 +24,9 @@
 
 
 }
+
 @media (width < 700px) {
-    .post-visibility-control__current .text {
+    .post__type-control .nav-text {
         display: none;
     }
 }

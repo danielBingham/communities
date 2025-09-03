@@ -93,13 +93,11 @@ export class Logger  {
         } else {
             if ( object !== undefined && object !== null ) {
                 if ( level == Logger.levels.error) {
-                    console.error(logPrefix + message)
-                    console.error(object)
-                    Sentry.captureException(`${message}: ${JSON.stringify(object)}`)
+                    console.error(logPrefix + message, object)
+                    Sentry.captureException(`${logPrefix + message}: ${JSON.stringify(object)}`)
                 } else {
-                    console.log(logPrefix + message)
-                    console.log(object)
-                    Sentry.captureMessage(`${message}: ${JSON.stringify(object)}`)
+                    console.log(logPrefix + message, object)
+                    Sentry.captureMessage(`${logPrefix + message}: ${JSON.stringify(object)}`)
                 }
 
             } else {

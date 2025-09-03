@@ -10,7 +10,7 @@ import { DropdownMenu, DropdownMenuBody, DropdownMenuTrigger, DropdownMenuItem }
 
 import './PostVisibilityControl.css'
 
-const PostVisibilityControl = function({ visibility, setVisibility, postId, groupId }) {
+const PostVisibilityControl = function({ visibility, setVisibility, type, postId, groupId }) {
 
     const [post] = usePost(postId) 
     const [group] = useGroup(post !== null ? post.groupId : groupId)
@@ -29,6 +29,14 @@ const PostVisibilityControl = function({ visibility, setVisibility, postId, grou
                 </div>
             )
         }
+    }
+
+    if ( type === 'announcement' || type === 'info' ) {
+        return (
+            <div className="post-visibility-control">
+                <span className="post-visibility-control__current"> <GlobeAltIcon /> <span className="text">Public</span></span>
+            </div>
+        )
     }
 
     let current = (<span className="post-visibility-control__current"><UsersIcon /> <span className="text">Friends</span></span>)

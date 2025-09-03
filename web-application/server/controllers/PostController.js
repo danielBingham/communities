@@ -232,10 +232,16 @@ module.exports = class PostController {
             }
 
             // Permissions control statements, this determines what is visible.
-            if ( this.core.features.has(`19-private-groups`) ) {
-                query.where += `((posts.user_id = ANY($${query.params.length - 1}::uuid[]) AND posts.type = 'feed') OR (posts.type = 'group' AND posts.group_id = ANY($${query.params.length}::uuid[])) OR posts.visibility = 'public')`
+            if ( this.core.features.has('230-admin-announcements') ) {
+                const showAnnouncements = 'showAnnouncements' in currentUser.settings ? currentUser.settings.showAnnouncements : true
+                const showInfo = 'showInfo' in currentUser.settings ? currentUser.settings.showInfo : true
+                query.where += `
+                    ((posts.user_id = ANY($${query.params.length - 1}::uuid[]) AND posts.type = 'feed') 
+                        ${ showAnnouncements ? `OR posts.type = 'announcement'` : ''}
+                        ${ showInfo ? `OR posts.type = 'info'` : ''}
+                        OR (posts.type = 'group' AND posts.group_id = ANY($${query.params.length}::uuid[])) OR posts.visibility = 'public')`
             } else {
-                query.where += `(posts.user_id = ANY($${query.params.length}::uuid[]) OR posts.visibility = 'public')`
+                query.where += `((posts.user_id = ANY($${query.params.length - 1}::uuid[]) AND posts.type = 'feed') OR (posts.type = 'group' AND posts.group_id = ANY($${query.params.length}::uuid[])) OR posts.visibility = 'public')`
             }
         }
 
@@ -322,9 +328,18 @@ module.exports = class PostController {
 
                 const and = query.params.length > 0 ? ' AND ' : ''
 
+                const showAnnouncements = 'showAnnouncements' in currentUser.settings ? currentUser.settings.showAnnouncements : true
+                const showInfo = 'showInfo' in currentUser.settings ? currentUser.settings.showInfo : true
+
                 query.params.push(friendIds)
                 query.params.push(groupMemberships)
-                query.where += `${and} ((posts.type = 'feed' and posts.user_id = ANY($${query.params.length-1}::uuid[])) OR (posts.type = 'group' AND posts.group_id = ANY($${query.params.length}::uuid[])))`
+                query.where += `${and} 
+                    (
+                        (posts.type = 'feed' and posts.user_id = ANY($${query.params.length-1}::uuid[])) 
+                            ${ showAnnouncements ? `OR posts.type = 'announcement'` : ''}
+                            ${ showInfo ? `OR posts.type = 'info'` : ''}
+                            OR (posts.type = 'group' AND posts.group_id = ANY($${query.params.length}::uuid[]))
+                    )`
             }
         }
 

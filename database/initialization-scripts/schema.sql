@@ -272,7 +272,7 @@ CREATE INDEX group_members__user_id ON group_members (user_id);
  * Tags 
  *****************************************************************************/
 
-CREATE TYPE post_type as ENUM('feed', 'group', 'event');
+CREATE TYPE post_type as ENUM('feed', 'group', 'event', 'announcement', 'info');
 CREATE TYPE post_visibility as ENUM('public', 'private');
 
 CREATE TABLE posts (
