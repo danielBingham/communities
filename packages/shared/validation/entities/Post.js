@@ -38,7 +38,7 @@ const validateType = function(value, existing, action) {
         .mustNotBeNull()
         .mustBeString()
         .mustNotBeEmpty()
-        .mustBeOneOf([ 'feed', 'group' ])
+        .mustBeOneOf([ 'feed', 'group', 'announcement', 'info' ])
         .getErrors()
     return errors
 }

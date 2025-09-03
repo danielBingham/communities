@@ -72,7 +72,7 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
 
     const submit = function() {
         const newPost = {
-            type: 'feed',
+            type: draft && 'type' in draft ? draft.type : 'feed',
             visibility: visibility,
             userId: currentUser.id,
             fileId: fileId,
@@ -177,7 +177,12 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
     }, [ postId, groupId ])
 
     useEffect(function() {
-        setDraft({ content: content, fileId: fileId, linkPreviewId: linkPreviewId, visibility: visibility })
+        const newDraft = { ...draft }
+        newDraft.content = content
+        newDraft.fileId = fileId
+        newDraft.linkPreviewId = linkPreviewId
+        newDraft.visibility = visibility
+        setDraft(newDraft)
     }, [ postId, content, fileId, linkPreviewId, visibility ])
 
     useEffect(function() {
@@ -286,7 +291,7 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
                 <div className="post-form__controls__attachments">{ attachmentControlsView }</div>
                 <div className="post-form__controls__visibility">
                     <PostVisibilityControl 
-                        visibility={visibility} setVisibility={setVisibility} postId={postId} groupId={groupId} />
+                        visibility={visibility} setVisibility={setVisibility} type={draft && 'type' in draft ? draft.type : 'feed'} postId={postId} groupId={groupId} />
                 </div>
             </div>
             <div className="buttons">

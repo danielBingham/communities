@@ -25,7 +25,8 @@ const validateAndCorrectDraft = function(draft, group) {
         content: '',
         fileId: null,
         linkPreviewId: null,
-        visibility: 'private'
+        visibility: 'private',
+        type: group !== undefined && group !== null ? 'group' : 'feed'
     }
     if ( has(draft, 'content') 
         && draft.content !== null
@@ -66,6 +67,14 @@ const validateAndCorrectDraft = function(draft, group) {
             correctedDraft.visibility = draft.visibility
         }
     }
+
+    if ( has(draft, 'type') ) {
+        if ( group !== null && group !== undefined && draft.type !== 'group' ) {
+            correctedDraft.type = 'group'
+        }  else if ( draft.type === 'feed' || draft.type === 'announcement' || draft.type === 'info' )  {
+            correctedDraft.type = draft.type
+        }
+    } 
 
     return correctedDraft
 }
