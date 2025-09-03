@@ -1,5 +1,9 @@
 import React from 'react'
 
+import logger from '/logger'
+
+import CommunitiesLogo from '/components/header/CommunitiesLogo'
+
 import './ErrorBoundary.css'
 
 export default class ErrorBoundary extends React.Component {
@@ -30,7 +34,7 @@ export default class ErrorBoundary extends React.Component {
     // Used for logging error information.  For now we're not going to use
     // this.
     componentDidCatch(error, errorInfo) {
-        console.error(error)
+        logger.error(error.message, errorInfo)
     }
 
     // Render the error UI.
@@ -39,28 +43,25 @@ export default class ErrorBoundary extends React.Component {
         // You can render any custom fallback UI
         if (this.state.hasError) {            
             return ( 
-                <div id="error-boundary">
-                    <h1>You found a Bug!</h1>
-                    <p>
-                        Something went wrong in a way that we couldn't
-                        handle, or haven't handled yet.  This is definitely a
-                    bug, please report it by emailing <a
-                        href="mailto:contact@communities.social">contact@communities.social</a>.</p>
-                    <p>We'll need as much information as you can give us.  What
-                        were you doing before this happened?  What did you do
-                    that triggered this?
-                    </p>
-                    <p>You'll find more information in your browser console.
-                        You can get to it by right clicking on this page and
-                        then selecting "Inspect" at the bottom of the menu.  It
-                        should pop open a window with a bunch of tabs. The
-                        "Elements" tab should be selected.  Choose the
-                        "Console" tab. If there's anything in there, scroll
-                        to the top, copy it and send it to us.  Also copy and
-                    paste
-                    the error message below.</p>
-                    <div className="error-message"><span className="label">Error Message:</span> { this.state.errorMessage }</div>
-                </div>
+                <>
+                    <header className="error-boundary"><CommunitiesLogo /> </header>
+                    <main>
+                        <div id="error-boundary">
+                            <h1>You found a Bug!</h1>
+                            <p>Something went wrong.  This is definitely a bug.</p>
+                            <p>The error has been recorded, but if you have time to file a bug report and provide details about what you were doing when this error occurred, that would really help us debug it!</p>
+                            <p>Here are the ways you can report it:</p>
+                            <ul>
+                                <li>Post in <a href="/group/communities-feedback-and-discussion">Communities Feedback and Discussion</a></li>
+                                <li><a href="mailto:contact@communities.social">Email us</a></li>
+                                <li><a href="https://github.com/danielbingham/communities/issues">Open an issue</a> in the <a href="https://github.com/danielbingham/communities">Github Repository</a></li>
+                            </ul>
+                            <p>If you don't have time, we understand.  And we'll do our best to sort it out with the information already collected!</p>
+                            <p className="error-boundary__buttons"><a className="error-boundary__button" href="/">Continue</a></p>
+
+                        </div>
+                    </main>
+                </>
             )
 
         }

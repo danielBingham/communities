@@ -55,6 +55,7 @@ import ChangePasswordForm from '/pages/users/views/ChangePasswordForm'
 import ChangeEmailForm from '/pages/users/views/ChangeEmailForm'
 import ContributionView from '/pages/users/views/ContributionView'
 import UserAccountSettingsView from '/pages/users/views/UserAccountSettingsView'
+import UserAccountPreferencesView from '/pages/users/views/UserAccountPreferencesView'
 import UserAccountDangerZoneView from '/pages/users/views/UserAccountDangerZoneView'
 import UserAccountNotificationsView from '/pages/users/views/UserAccountNotificationsView'
 
@@ -182,6 +183,7 @@ const App = function(props) {
                                 <Route path="change-email" element={ <ChangeEmailForm /> } />
                                 <Route path="contribute" element={ <ContributionView /> } />
                                 <Route path="settings" element={ <UserAccountSettingsView /> } /> { /* deprecated */ }
+                                <Route path="preferences" element={ <UserAccountPreferencesView /> } />
                                 <Route path="danger-zone" element={ <UserAccountDangerZoneView/> } />
                                 <Route path="notifications" element={ <UserAccountNotificationsView /> } />
                                 <Route index element={ <UserProfileEditForm/> } />

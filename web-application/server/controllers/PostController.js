@@ -233,9 +233,8 @@ module.exports = class PostController {
 
             // Permissions control statements, this determines what is visible.
             if ( this.core.features.has('230-admin-announcements') ) {
-                console.log(`HI`)
-                const showAnnouncements = currentUser.settings.showAnnouncements || true
-                const showInfo = currentUser.settings.showInfo || true
+                const showAnnouncements = 'showAnnouncements' in currentUser.settings ? currentUser.settings.showAnnouncements : true
+                const showInfo = 'showInfo' in currentUser.settings ? currentUser.settings.showInfo : true
                 query.where += `
                     ((posts.user_id = ANY($${query.params.length - 1}::uuid[]) AND posts.type = 'feed') 
                         ${ showAnnouncements ? `OR posts.type = 'announcement'` : ''}
@@ -329,8 +328,8 @@ module.exports = class PostController {
 
                 const and = query.params.length > 0 ? ' AND ' : ''
 
-                const showAnnouncements = currentUser.settings.showAnnouncements || true
-                const showInfo = currentUser.settings.showInfo || true
+                const showAnnouncements = 'showAnnouncements' in currentUser.settings ? currentUser.settings.showAnnouncements : true
+                const showInfo = 'showInfo' in currentUser.settings ? currentUser.settings.showInfo : true
 
                 query.params.push(friendIds)
                 query.params.push(groupMemberships)

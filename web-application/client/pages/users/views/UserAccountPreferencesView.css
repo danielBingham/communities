@@ -1,0 +1,11 @@
+.user-account-preferences-view {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+}
+.user-account-preferences-view__section {
+    padding: 20px;
+    border: thin solid var(--main-border-color);
+    border-radius: 10px;
+    background-color: white;
+}
