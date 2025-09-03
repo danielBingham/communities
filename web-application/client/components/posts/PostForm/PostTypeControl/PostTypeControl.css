@@ -1,4 +1,5 @@
 .post__type-control {
+    display: inline-block;
     text-align: right;
 }
 .post__type-control__current  {
@@ -23,5 +24,9 @@
 
 
 }
+
 @media (width < 700px) {
+    .post__type-control .nav-text {
+        display: none;
+    }
 }

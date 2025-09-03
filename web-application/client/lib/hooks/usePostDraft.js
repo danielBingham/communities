@@ -17,10 +17,6 @@ const has = function(draft, field) {
 // TODO FeatureFlagging and migration system that handles localstorage
 // migrations!
 const validateAndCorrectDraft = function(draft, group) {
-    if ( draft === undefined || draft === null ) {
-        return null
-    }
-
     const correctedDraft = {
         content: '',
         fileId: null,
@@ -28,6 +24,11 @@ const validateAndCorrectDraft = function(draft, group) {
         visibility: 'private',
         type: group !== undefined && group !== null ? 'group' : 'feed'
     }
+
+    if ( draft === undefined || draft === null ) {
+        return correctedDraft 
+    }
+
     if ( has(draft, 'content') 
         && draft.content !== null
         && typeof draft.content === 'string' 

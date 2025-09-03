@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useSelector } from 'react-redux'
 
+import { QueueListIcon, InformationCircleIcon, MegaphoneIcon } from '@heroicons/react/24/solid'
+
 import { usePostDraft } from '/lib/hooks/usePostDraft'
 import { useSitePermission, SitePermissions } from '/lib/hooks/permission'
 
@@ -8,18 +10,12 @@ import { DropdownMenu, DropdownMenuBody, DropdownMenuTrigger, DropdownMenuItem }
 
 import './PostTypeControl.css'
 
-const PostTypeControl = function({ postId, groupId, sharedPostId }) {
+const PostTypeControl = function({ type, setType, postId, groupId, sharedPostId }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
     const [draft, setDraft ] = usePostDraft(postId, groupId, sharedPostId)
     const canAdminSite = useSitePermission(currentUser, SitePermissions.ADMIN)
-
-    const setType = function(type) {
-        const newDraft = { ...draft }
-        newDraft.type = type
-        setDraft(newDraft)
-    }
 
     if ( groupId ) {
         return null
@@ -29,7 +25,13 @@ const PostTypeControl = function({ postId, groupId, sharedPostId }) {
         return null
     }
 
-    let current = (<span className="post__type-control__current">{ draft ? draft.type : 'Feed' }</span>)
+
+    let current = (<span className="post__type-control__current"><QueueListIcon /> <span className="nav-text">Feed</span></span>)
+    if ( draft && draft.type === 'info' ) {
+        current = (<span className="post__type-control__current"><InformationCircleIcon /> <span className="nav-text">Info</span></span>)
+    } else if ( draft && draft.type === 'announcement' ) {
+        current = (<span className="post__type-control__current"><MegaphoneIcon /> <span className="nav-text">Announcement</span></span>)
+    }
 
     return (
         <div className="post__type-control">
@@ -37,13 +39,13 @@ const PostTypeControl = function({ postId, groupId, sharedPostId }) {
                 <DropdownMenuTrigger showArrow={false}>{ current }</DropdownMenuTrigger>
                 <DropdownMenuBody>
                     <DropdownMenuItem onClick={() => setType('feed')}>
-                        <span>Feed</span>
+                        <span><QueueListIcon /> Feed</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setType('info')}>
-                        <span>Info</span>
+                        <span><InformationCircleIcon /> Info</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setType('announcement')}>
-                        <span>Announcement</span>
+                        <span><MegaphoneIcon /> Announcement</span>
                     </DropdownMenuItem>
                 </DropdownMenuBody>
             </DropdownMenu>

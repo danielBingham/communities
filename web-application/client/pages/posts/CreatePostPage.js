@@ -6,7 +6,6 @@ import { resetEntities } from '/state/lib'
 
 import { Page, PageRightGutter, PageLeftGutter, PageBody } from '/components/generic/Page'
 import PostForm from '/components/posts/PostForm'
-import PostTypeControl from '/components/posts/PostForm/PostTypeControl'
 
 const CreatePostPage = function() {
 
@@ -27,7 +26,6 @@ const CreatePostPage = function() {
     return (
         <Page id="create-post-page">
             <PageLeftGutter>
-                <PostTypeControl postId={postId} groupId={groupId} sharedPostId={sharedPostId} />
             </PageLeftGutter>
             <PageBody>
                 <PostForm postId={postId} groupId={groupId} sharedPostId={sharedPostId} origin={origin} />
