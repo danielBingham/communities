@@ -20,7 +20,10 @@ module "eks" {
   private_subnet_ids = var.private_subnet_ids
   public_subnet_ids = var.public_subnet_ids
 
-  application = "peer-review" 
+  control_plane_version = "1.31"
+  node_group_version = "1.31"
+
+  application = "communities" 
   environment = "staging" 
   service = "cluster"
 }

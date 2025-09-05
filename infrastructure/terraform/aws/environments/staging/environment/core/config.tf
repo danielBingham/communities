@@ -1,8 +1,15 @@
 terraform {
+  backend "s3" {
+    bucket = "communities-social-terraform-state"
+    key = "staging/environment/core"
+    region = "us-east-1"
+    use_lockfile = true
+  }
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 4.0"
+      version = "~> 6.0"
     }
   }
 }

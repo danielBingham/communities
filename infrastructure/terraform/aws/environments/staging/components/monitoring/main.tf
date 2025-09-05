@@ -3,7 +3,7 @@ module "sns" {
 
   alarm_email = var.alarm_email 
 
-  application = "peer-review"
+  application = "communities"
   environment = "staging"
   service = "monitoring"
 }

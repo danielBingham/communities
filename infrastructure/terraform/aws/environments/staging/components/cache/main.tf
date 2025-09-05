@@ -19,7 +19,10 @@ module "elasticache" {
   vpc_id = var.vpc_id 
   subnet_ids = var.subnet_ids 
 
-  application = "peer-review" 
+  engine_version = "7.0"
+  parameter_group_name = "default.redis7"
+
+  application = "communities" 
   environment = "staging" 
   service = "cache" 
 }

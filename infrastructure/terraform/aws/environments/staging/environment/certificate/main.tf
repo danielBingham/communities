@@ -9,5 +9,5 @@ module "certificate_component" {
   source = "../../components/certificate"
 
   hosted_zone_id = var.hosted_zone_id
-  domain = "staging.peer-review.io"
+  domain = "staging.communities.social"
 }

@@ -719,7 +719,7 @@ spec:
     spec:
       containers:
       - args:
-        - --cluster-name=peer-review-staging-cluster-eks-cluster
+        - --cluster-name=communities-staging-cluster-eks-cluster
         - --ingress-class=alb
         image: amazon/aws-alb-ingress-controller:v2.4.4
         livenessProbe:

@@ -1,108 +1,122 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: peer-review-workers-deployment
+  name: workers 
   labels: 
-    application: peer-review
+    application: communities
     function: workers 
     environment: staging
 spec:
   selector:
     matchLabels:
-      application: peer-review
+      application: communities
       function: workers 
       environment: staging
-  replicas: 1
+  replicas: 2
   template: 
     metadata:
-      name: peer-review-workers-pod-template
+      name: communities-workers-pod-template
       labels:
-        application: peer-review
+        application: communities
         function: workers 
         environment: staging
-        container: peerreview
+        container: worker 
     spec:
       terminationGracePeriodSeconds: 600 
+      volumes:
+        - name: workspace
+          emptyDir:
+            sizeLimit: 200M
       containers:
-        - name: peer-review-workers-container
-          image: ghcr.io/danielbingham/peerreview-worker:0.3.10
+        - name: workers-container
+          image: 843012963492.dkr.ecr.us-east-1.amazonaws.com/communities/worker:0.5.13
           resources:
             requests:
-              cpu: 100m
+              cpu: 200m
+              memory: 200M
+          volumeMounts:
+            - mountPath: '/src/tmp'
+              name: workspace
           env:
             - name: DEBUG
-              value: "peer-review:*"
+              value: "communities:*"
             - name: NODE_ENV
               value: staging
+            - name: HOST
+              value: https://staging.communities.social/
             - name: LOG_LEVEL
               value: debug 
             - name: DATABASE_HOST
               valueFrom:
                 secretKeyRef:
-                  name: peer-review-database-credentials
+                  name: communities-database-credentials
                   key: host
                   optional: false
             - name: DATABASE_PORT
               valueFrom:
                 secretKeyRef:
-                  name: peer-review-database-credentials
+                  name: communities-database-credentials
                   key: port
                   optional: false
             - name: DATABASE_USER
               valueFrom:
                 secretKeyRef:
-                  name: peer-review-database-credentials
+                  name: communities-database-credentials
                   key: username
                   optional: false
             - name: DATABASE_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: peer-review-database-credentials
+                  name: communities-database-credentials
                   key: password
                   optional: false
+            - name: REDIS_HOST
+              value: communities-staging-cache-redis-cluster.sh2hpr.0001.use1.cache.amazonaws.com
+            - name: REDIS_PORT
+              value: '6379'
             - name: SESSION_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: peer-review-session-secret
+                  name: communities-session-secret
                   key: session_secret
                   optional: false
+            - name: S3_BUCKET_URL
+              value: https://communities-staging-storage.s3.amazonaws.com
+            - name: S3_BUCKET
+              value: communities-staging-storage
             - name: S3_ACCESS_ID
               valueFrom:
                 secretKeyRef:
-                  name: peer-review-s3-credentials
+                  name: communities-s3-credentials
                   key: access_id
                   optional: false
             - name: S3_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: peer-review-s3-credentials
+                  name: communities-s3-credentials
                   key: access_key
                   optional: false
             - name: POSTMARK_API_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: peer-review-postmark-secrets
+                  name: communities-postmark-secrets
                   key: api_token 
                   optional: false
-            - name: REDIS_HOST
-              value: peer-review-staging-cache-redis-cluster.sh2hpr.0001.use1.cache.amazonaws.com
-            - name: REDIS_PORT
-              value: '6379'
 
 ---
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
-  name: peer-review-workers 
+  name: communities-workers 
   labels:
-    application: peer-review
+    application: communities
     function: workers
     environment: staging
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: peer-review-workers-deployment 
-  minReplicas: 1
-  maxReplicas: 4 
+    name: workers 
+  minReplicas: 2
+  maxReplicas: 20 
   targetCPUUtilizationPercentage: 50
