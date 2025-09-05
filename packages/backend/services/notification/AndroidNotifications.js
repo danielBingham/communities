@@ -18,6 +18,9 @@
  *
  ******************************************************************************/
 
+const path = require('path')
+const fs = require('fs')
+
 const { initializeApp, getApp, getApps, cert } = require('firebase-admin/app')
 const { getMessaging } = require('firebase-admin/messaging')
 
@@ -32,8 +35,9 @@ module.exports = class AndroidNotifications {
 
         this.app = null
         if ( getApps().length <= 0 ) {
+            const serviceAccount = JSON.parse(fs.readFileSync(path.join(process.cwd(), this.core.config.notifications.android.firebaseServiceAccount)))
             this.app = initializeApp({
-                credential: cert(this.core.config.notifications.android.firebaseServiceAccount)
+                credential: cert(serviceAccount)
             }, 'communities')
         } else {
             this.app = getApp('communities')

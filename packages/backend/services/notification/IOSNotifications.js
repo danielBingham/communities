@@ -31,8 +31,8 @@ module.exports = class IOSNotifications {
         this.sessionService = new SessionService(core)
 
         this.client = http2.connect(this.core.config.notifications.ios.endpoint, {
-            key: this.core.config.notifications.ios.privateCert,
-            cert: this.core.config.notifications.ios.publicCert
+            key: fs.readFileSync(path.join(process.cwd(), this.core.config.notifications.ios.privateCert)),
+            cert: fs.readFileSync(path.join(process.cwd(), this.core.config.notifications.ios.publicCert))
         })
         this.client.on("error", (error) => this.core.logger.error(error))
         this.client.on("goaway", (errorCode, lastStreamId, data) => {

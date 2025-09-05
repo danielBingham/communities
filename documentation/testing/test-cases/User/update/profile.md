@@ -1,12 +1,12 @@
-# User Update -- Profile 
+## [Update User: Profile](documentation/testing/test-cases/User/update/profile.md)
 
 Cases covering the user updating their profile.
 
-## Pre-requisites
+### Pre-requisites
 
 - [ ] User1 has registered.
 
-## Cases
+### Cases
 
 - [ ] User can upload a profile image.
     1. As User1:

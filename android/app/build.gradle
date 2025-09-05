@@ -22,6 +22,23 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    flavorDimensions = ["environment"]
+    productFlavors {
+        production {
+            dimension "environment"
+            manifestPlaceholders = [displayName:"Communities"]
+        }
+        staging {
+            dimension "environment"
+            applicationIdSuffix ".staging"
+            manifestPlaceholders = [displayName:"Communities - Staging"]
+        }
+        local {
+            dimension "environment"
+            applicationIdSuffix ".local"
+            manifestPlaceholders = [displayName:"Communities - Local"]
+        }
+    }
 }
 
 repositories {

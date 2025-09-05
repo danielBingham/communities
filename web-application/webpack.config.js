@@ -10,8 +10,10 @@ if ( process.env.NODE_ENV == 'development' ) {
 }
 
 let host = "https://communities.social"
-if ( 'HOST' in process.env ) {
-    host = process.env.HOST
+if ( process.env.NODE_ENV === 'development') {
+    host = 'https://localhost:3000' 
+} else if ( process.env.NODE_ENV === 'staging' ) {
+    host = 'https://staging.communities.social'
 }
 
 const outputDirectory = 'public/dist';
