@@ -30,7 +30,7 @@ const core = new Core('worker', config)
 core.initialize().then(function() {
  
     core.queue.process('resize-image', async function(job, done) {
-        core.logger.setId(`Image resize: ${job.id}`)
+        core.logger.id = `Image resize: ${job.id}`
         core.logger.info(`Beginning job 'resize-image' for user ${job.data.session.user.id} and file ${job.data.file.id}.`)
 
         const imageService = new ImageService(core)
@@ -49,7 +49,7 @@ core.initialize().then(function() {
             job.progress({ step: 'complete', stepDescription: `Complete!`, progress: 100 })
 
             core.logger.info(`Finished job 'resize-image' for user ${job.data.session.user.id}.`)
-            core.logger.setId(null)
+            core.logger.id = 'core' 
             done(null)
         } catch (error) {
             core.logger.error(error)
