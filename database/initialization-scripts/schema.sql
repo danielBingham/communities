@@ -97,7 +97,7 @@ CREATE INDEX users__name_trgm ON users USING GIN (name gin_trgm_ops);
  * a non-local environment, it will be changed as soon as the environment is
  * finished creating.
  */
-INSERT INTO users (name, username, email, password, status, permissions, siteRole, last_authentication_attempt_date, created_date, updated_date)
+INSERT INTO users (name, username, email, password, status, permissions, site_role, last_authentication_attempt_date, created_date, updated_date)
     VALUES ('Administrator', 'administrator', 'contact@communities.social', '$2b$10$ywAqKPvFH51jeILdx.Piy.mm5ci37vMpy7G4lEBWObfIzOif5ZgzK', 'confirmed', 'superadmin', 'superadmin', now(), now(), now());
 
 CREATE TYPE user_relationship_status AS ENUM('pending', 'confirmed');
@@ -306,7 +306,7 @@ CREATE TABLE post_versions (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     post_id uuid REFERENCES posts (id) ON DELETE CASCADE NOT NULL,
 
-    file_id uuid REFERENCES files (id) DEFAULT NULL ON DELETE SET NULL,
+    file_id uuid REFERENCES files (id) ON DELETE SET NULL DEFAULT NULL,
 
     content text,
 
