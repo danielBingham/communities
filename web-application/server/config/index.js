@@ -6,8 +6,6 @@
  *
  **************************************************************************************************/
 
-const firebaseServiceAccount = require('../../security/firebase-admin-key.json')
-
 if ( process.env.NODE_ENV == 'development' ) {
     require('dotenv').config()
 }
@@ -16,6 +14,7 @@ const config = {
     host: process.env.HOST,
     wsHost: process.env.WS_HOST,
     environment: process.env.NODE_ENV,
+    log_level: process.env.LOG_LEVEL,
     backend: '/api/0.0.0',
     // Database configuration
     database: {
@@ -45,17 +44,16 @@ const config = {
     },
     notifications: {
         ios: {
-            privateCert: process.env.NOTIFICATIONS_IOS_PRIVATE_CERT,
-            publicCert: process.env.NOTIFICATIONS_IOS_PUBLIC_CERT,
+            privateCert: process.env.NOTIFICATIONS_IOS_PRIVATE_CERT_PATH,
+            publicCert: process.env.NOTIFICATIONS_IOS_PUBLIC_CERT_PATH,
             applicationBundleID: process.env.NOTIFICATIONS_IOS_APPLICATION_BUNDLE_ID,
             endpoint: process.env.NOTIFICATIONS_IOS_ENDPOINT
         },
         android: {
-            firebaseServiceAccount: firebaseServiceAccount
+            firebaseServiceAccount: process.env.NOTIFICATIONS_FIREBASE_SERVICE_ACCOUNT_PATH 
         }
     },
-    stripe: {},
-    log_level: process.env.LOG_LEVEL 
+    stripe: {}
 }
 
 if ( process.env.NODE_ENV == 'production' ) {

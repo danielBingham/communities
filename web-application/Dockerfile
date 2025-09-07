@@ -2,6 +2,9 @@ FROM node:24.5.0
 
 WORKDIR /src
 
+ARG NODE_ENV=production
+ENV NODE_ENV=$NODE_ENV
+
 COPY package-lock.json package-lock.json
 COPY package.json package.json 
 COPY .npmrc .npmrc 

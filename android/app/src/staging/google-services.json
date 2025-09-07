@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "442022855664",
+    "project_id": "communities---staging",
+    "storage_bucket": "communities---staging.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:442022855664:android:d8bb8bc452d65cf111d335",
+        "android_client_info": {
+          "package_name": "social.communities.staging"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAkCZw7xGBJmSyUgh_6nfp-hIWCkRdwkIQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

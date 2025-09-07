@@ -18,6 +18,9 @@
  *
  ******************************************************************************/
 
+const path = require('path')
+const fs = require('fs')
+
 const { initializeApp, getApp, getApps, cert } = require('firebase-admin/app')
 const { getMessaging } = require('firebase-admin/messaging')
 
@@ -32,8 +35,9 @@ module.exports = class AndroidNotifications {
 
         this.app = null
         if ( getApps().length <= 0 ) {
+            const serviceAccount = JSON.parse(fs.readFileSync(path.join(process.cwd(), this.core.config.notifications.android.firebaseServiceAccount)))
             this.app = initializeApp({
-                credential: cert(this.core.config.notifications.android.firebaseServiceAccount)
+                credential: cert(serviceAccount)
             }, 'communities')
         } else {
             this.app = getApp('communities')
@@ -64,17 +68,20 @@ module.exports = class AndroidNotifications {
                         notificationId: notification.id
                     }
                 }
+                
+                this.core.logger.debug(`Attempting to send notification: `, message)
+                this.core.logger.debug(`To device: `, session.data.device)
 
-                this.messaging.send(message)
-                    .then((response) => {
-                        this.core.logger.debug(`Got response: `)
-                        this.core.logger.debug(response)
-                    }).catch((error) => { 
-                        this.core.logger.error(error)
-                        throw error
-                    })
+                try { 
+                    const response = await this.messaging.send(message)
+                    this.core.logger.debug(`Got response: `)
+                    this.core.logger.debug(response)
+                } catch (error) {
+                    this.core.logger.error(`Failed sending Android Notification: `, error)
+                    this.core.logger.error(`Message: `, message)
+                    this.core.logger.error(`Device: `, session.data.device)
+                }
             }
-
         }
     }
 }

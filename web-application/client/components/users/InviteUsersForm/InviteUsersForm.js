@@ -40,7 +40,6 @@ const InviteUsersForm = function({ groupId }) {
     useEffect(function() {
         if ( request?.state === 'fulfilled' ) {
             if ( groupId ) {
-                console.log(request)
                 const users = request.response.body.relations.users
                 const groupMembers = []
                 for(const [id, user] of Object.entries(users)) {

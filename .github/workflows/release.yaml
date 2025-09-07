@@ -27,7 +27,7 @@ jobs:
       - name: Checkout Repo 
         uses: actions/checkout@v5
         with:
-          ref: ${{ ( github.events.inputs.environment === 'staging' && 'staging') || 'main' }}
+          ref: ${{ ( github.events.inputs.environment == 'staging' && 'staging') || 'main' }}
 
       - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4

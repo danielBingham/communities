@@ -57,10 +57,10 @@ the database instance was created in.
 With the tunnel running, you can then run psql against localhost with the
 correct port to access the database.
 
-First, run `psql` and create the `peer_review` database.
+First, run `psql` and create the `communities` database.
 
 > **Note**
-> On locals we create an app user and use that user to create the peer_review
+> On locals we create an app user and use that user to create the communities
 > databsae.  We also do a lot more to lock down the permissions.  Digital Ocean
 > doesn't grant us access to the root postgres use, so we can't lock down
 > permissions.  Instead, we're just going to use the doamdin user they supply.
@@ -73,7 +73,7 @@ psql (14.4 (Ubuntu 14.4-0ubuntu0.22.04.1))
 SSL connection (protocol: TLSv1.3, cipher: TLS_AES_256_GCM_SHA384, bits: 256, compression: off)
 Type "help" for help.
 
-defaultdb=> CREATE DATABASE peer_review;
+defaultdb=> CREATE DATABASE communities;
 CREATE DATABASE
 ```
 
@@ -81,28 +81,13 @@ Then logout.  Next you'll run two `psql` commands to load in the database
 schema and the field structure.  From the root repo directory:
 
 ```bash
-$ psql --host localhost --username postgres --dbname peer_review --port [port] --file="database/permissions.sql"
+$ psql --host localhost --username postgres --dbname communities --port [port] --file="database/permissions.sql"
 
-$ psql --host localhost --username postgres --dbname peer_review --port [port] --file="database/schema.sql"
+$ psql --host localhost --username postgres --dbname communities --port [port] --file="database/schema.sql"
 Password for user postgres:
 CREATE TABLE
 [... more statements ...]
 CREATE TABLE
-```
-
-Finally, we'll login using `psql` and use the `\copy` commands to initialize
-the fields and their relationships.
-
-```bash
-$ psql --host localhost --username postgres --dbname peer_review --port [port]
-Password for user postgres:
-psql (14.4 (Ubuntu 14.4-0ubuntu0.22.04.1))
-SSL connection (protocol: TLSv1.3, cipher: TLS_AES_256_GCM_SHA384, bits: 256, compression: off)
-Type "help" for help.
-
-peer_review=> \copy fields FROM database/dump/fields.csv
-
-peer_review=> \copy field_relationships FROM database/dump/field_relationships.csv
 ```
 
 At this point, the database is ready to go.
@@ -122,7 +107,7 @@ $ aws eks update-kubeconfig --region region-code --name my-cluster
 
 Then you will need to install the AWS Load Balancer Controller and its
 dependencies.  The manifests to create the controller are stored alongside the
-peer review manifests in `infrastructure/kubernetes/staging/`.  You will need to apply them 
+communities manifests in `infrastructure/kubernetes/staging/`.  You will need to apply them 
 in the following order:
 
 - `aws-load-balancer-controller-service-account.yaml`
@@ -143,7 +128,7 @@ The database credentials: `infrastructure/kubernetes/staging/secrets/database-se
 apiVersion: v1
 kind: Secret
 metadata:
-  name: peer-review-database-credentials 
+  name: communities-database-credentials 
 type: Opaque
 stringData:
   username: app 
@@ -158,7 +143,7 @@ The session secret key: `infrastructure/kubernetes/staging/secrets/session-secre
 apiVersion: v1
 kind: Secret
 metadata:
-  name: peer-review-session-secret
+  name: communities-session-secret
 type: Opaque
 stringData:
   session_secret: <Generate a random key> 
@@ -170,7 +155,7 @@ The S3 Acess ID and Access Key: `infrastructure/kubernetes/staging/secrets/s3-se
 apiVersion: v1
 kind: Secret
 metadata:
-  name: peer-review-s3-credentials
+  name: communities-s3-credentials
 type: Opaque
 stringData:
   access_id: <access id from AWS> 
@@ -183,7 +168,7 @@ The Postmark secret: `infrastructure/kubernetes/staging/secrets/postmark-secrets
 apiVersion: v1
 kind: Secret
 metadata:
-  name: peer-review-postmark-secrets
+  name: communities-postmark-secrets
 type: Opaque
 stringData:
   api_token: <api-token-from-postmark> 
@@ -199,9 +184,10 @@ Before you create the web application deployment, add the ELB Readiness Gate lab
 $ kubectl label namespace default elbv2.k8s.aws/pod-readiness-gate-inject=enabled
 ```
 
-Finally, you'll need to create the Peer Review deployment.
+Finally, you'll need to create the Communities deployment.
 
 ```
+$ kubectl apply -f infrastructure/kubernetes/staging/workers.yaml
 $ kubectl apply -f infrastructure/kubernetes/staging/web-application.yaml
 ```
 

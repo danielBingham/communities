@@ -1,9 +1,7 @@
 module "s3" {
   source = "../../../../modules/s3"
 
-  domain = "https://staging.peer-review.io"
-
-  application = "peer-review" 
+  application = "communities" 
   environment = "staging" 
   service = "storage" 
 }

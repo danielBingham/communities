@@ -8,7 +8,7 @@ module "bastion" {
   subnet_id = var.subnet_ids[count.index]
   public_key_path = var.public_key_path
 
-  application = "peer-review" 
+  application = "communities" 
   environment = "staging" 
   service = "network" 
 }

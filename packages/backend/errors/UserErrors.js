@@ -53,7 +53,6 @@ module.exports = class UserErrors {
                 context: errors.context
             })
         }
-        console.log(`Post add: `, this.errors)
     }
 
     getErrors() {
