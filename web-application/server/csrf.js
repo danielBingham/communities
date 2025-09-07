@@ -20,32 +20,45 @@
 
 const createCSRFMiddleware = function(core) {
     return function(request, response, next) {
-        if ( (request.method === 'POST' || request.method === 'PATCH' || request.method === 'DELETE')) {
-            if ( 'csrfToken' in request.session && request.session.csrfToken !== undefined && request.session.csrfToken !== null ) {
-                const csrfToken = request.get('X-Communities-CSRF-Token')
-                if ( csrfToken !== request.session.csrfToken ) {
-                    request.logger.warn(`Request arrived with an invalid CSRF Token.  Possible forged request.\n \tSubmitted token: ${csrfToken}\n \tStored Token: ${request.session.csrfToken}`)
-                    response.status(403).json({
-                        error: {
-                            type: 'invalid-csrf',
-                            message: 'Request rejected as a potential forged request. This is to protect you from attackers attempting to steal your account credentials. If this request was you, refresh the page and try again. If you continue to see this message, reach out to support at contact@communities.social.'
-                        }
-                    })
-                } else {
-                    next() 
-                }
-            } else {
-                request.logger.debug(`Expired session.`)
-                response.status(401).json({
-                    error: {
-                        type: 'session-expired',
-                        message: 'Your session expired.  Please refresh your page and log back in.'
-                    }
-                })
-            }
-        } else {
+
+        if ( request.method === 'GET' ) {
             next()
+            return
         }
+
+        if ( ! ( 'csrfToken' in request.session ) 
+            || request.session.csrfToken === undefined 
+            || request.session.csrfToken === null ) 
+        {
+            request.logger.debug(`Expired session.`)
+            response.status(401).json({
+                error: {
+                    type: 'session-expired',
+                    message: 'Your session expired.  Please refresh your page and log back in.'
+                }
+            })
+            return
+        }
+
+        const csrfToken = request.get('X-Communities-CSRF-Token')
+
+        if ( csrfToken !== request.session.csrfToken ) {
+            request.logger.warn(`
+                Request arrived with an invalid CSRF Token.  Possible forged request. 
+                    Submitted token: ${csrfToken} 
+                    Stored Token: ${request.session.csrfToken}
+            `)
+            response.status(403).json({
+                error: {
+                    type: 'invalid-csrf',
+                    message: 'Request rejected as a potential forged request. This is to protect you from attackers attempting to steal your account credentials. If this request was you, refresh the page and try again. If you continue to see this message, reach out to support at contact@communities.social.'
+                }
+            })
+            return
+        } 
+        
+
+        next() 
     }
 }
 

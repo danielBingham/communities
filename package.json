@@ -5,7 +5,7 @@
   "license": "GPL-3.0",
   "scripts": {
     "build": "export NODE_ENV=production && npm run build --prefix=web-application && npx cap sync",
-    "build-staging": "export NODE_ENV=staging && npm run build-staging --prefix=web-application && npx cap sync",
+    "build-staging": "export NODE_ENV=staging && npm run build --prefix=web-application && npx cap sync",
     "build-dev": "export NODE_ENV=development && npm run build-dev --prefix=web-application && npx cap sync",
     "dev": "export NODE_ENV=development && concurrently \"npm run dev --prefix=worker\" \"npm run dev --prefix=web-application\"",
     "test": "npm run test --prefix=packages/shared && npm run test --prefix=packages/backend && npm run test --prefix=web-application"

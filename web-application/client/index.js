@@ -12,7 +12,8 @@ import store from './state/store'
 
 CapacitorUpdater.notifyAppReady()
 
-console.log(`Communities startup...`)
+let host = document.querySelector('meta[name="communities-host"]').content
+console.log(`Communities startup with host "${host}"...`)
 Sentry.init({
   dsn: "https://3738393d51a9e4de9b7fe4b2bbb0bf56@o4509038666055680.ingest.us.sentry.io/4509038670249984"
 });

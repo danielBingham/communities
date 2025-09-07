@@ -79,7 +79,7 @@ const createWebSocketServer = function(core, sessionParser, httpServer) {
       sessionParser(request, {}, () => {
         const currentUser = request.session.user
         if ( ! currentUser ) {
-          core.logger.warn(`UPGRADE: Unauthenticated request...`)
+          core.logger.warn(`WebSocket Upgrade Failed: Unauthenticated request: `, request)
           httpSocket.write('HTTP/1.1 401 Unauthorized\r\n\r\n')
           httpSocket.destroy()
           return

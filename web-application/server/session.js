@@ -37,12 +37,9 @@ const createSessionParser = function(core) {
         cookie: { 
             path: '/',
             httpOnly: true,
-            // TODO TECHDEBT 
-            //secure: true,
-            //secure: config.session.secure_cookie,
+            secure: true,
             sameSite: "lax",
-            maxAge: 1000 * 60 * 60 * 24 * 14 // 14 days, two weeks
-
+            maxAge: 1000 * 60 * 60 * 24 * 30 // 30 days 
         } 
     })
 

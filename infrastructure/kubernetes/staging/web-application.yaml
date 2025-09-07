@@ -32,9 +32,9 @@ spec:
             secretName: communities-push-notification-secrets
       containers:
         - name: web-application-container
-          image: 843012963492.dkr.ecr.us-east-1.amazonaws.com/communities/web-application:0.5.13
+          image: 843012963492.dkr.ecr.us-east-1.amazonaws.com/communities/web-application:0.6.0-rc4
           ports:
-            - containerPort: 3000 
+            - containerPort: 8080 
           resources:
             requests:
               cpu: 200m
@@ -45,15 +45,15 @@ spec:
           startupProbe:
             httpGet:
               path: '/health'
-              port: 3000 
+              port: 8080 
             periodSeconds: 3 
             failureThreshold: 20
           livenessProbe:
             httpGet:
               path: '/health'
-              port: 3000 
-            failureThreshold: 1
-            periodSeconds: 10
+              port: 8080 
+            failureThreshold: 2
+            periodSeconds: 30
           volumeMounts:
             - mountPath: '/src/tmp'
               name: workspace
@@ -155,9 +155,9 @@ metadata:
   name: web-application-service
   annotations:
     service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:us-east-1:843012963492:certificate/a79f1e60-9d96-4f90-ab09-2bda5216a724
-    alb.ingress.kubernetes.io/healthcheck-interval-seconds: '10'
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: '30'
     alb.ingress.kubernetes.io/healthcheck-path: /health
-    alb.ingress.kubernetes.io/healthcheck-port: '3000'
+    alb.ingress.kubernetes.io/healthcheck-port: '8080'
     alb.ingress.kubernetes.io/healthcheck-timeout-seconds: '5'
     alb.ingress.kubernetes.io/success-codes: '200'
 spec:
@@ -170,11 +170,11 @@ spec:
     - name: http
       protocol: TCP
       port: 80 
-      targetPort: 3000 
+      targetPort: 8080 
     - name: https
       protocol: TCP
       port: 443 
-      targetPort: 3000 
+      targetPort: 8080 
 
 ---
 apiVersion: networking.k8s.io/v1
@@ -192,7 +192,7 @@ metadata:
     alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:us-east-1:843012963492:certificate/a79f1e60-9d96-4f90-ab09-2bda5216a724" 
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
     alb.ingress.kubernetes.io/ssl-redirect: '443'
-    alb.ingress.kubernetes.io/load-balancer-attributes: idle_timeout.timeout_seconds=10
+    alb.ingress.kubernetes.io/load-balancer-attributes: idle_timeout.timeout_seconds=60
     alb.ingress.kubernetes.io/target-group-attributes: stickiness.enabled=true
 spec:
   ingressClassName: alb
