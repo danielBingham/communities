@@ -68,17 +68,20 @@ module.exports = class AndroidNotifications {
                         notificationId: notification.id
                     }
                 }
+                
+                this.core.logger.debug(`Attempting to send notification: `, message)
+                this.core.logger.debug(`To device: `, session.data.device)
 
-                this.messaging.send(message)
-                    .then((response) => {
-                        this.core.logger.debug(`Got response: `)
-                        this.core.logger.debug(response)
-                    }).catch((error) => { 
-                        this.core.logger.error(error)
-                        throw error
-                    })
+                try { 
+                    const response = await this.messaging.send(message)
+                    this.core.logger.debug(`Got response: `)
+                    this.core.logger.debug(response)
+                } catch (error) {
+                    this.core.logger.error(`Failed sending Android Notification: `, error)
+                    this.core.logger.error(`Message: `, message)
+                    this.core.logger.error(`Device: `, session.data.device)
+                }
             }
-
         }
     }
 }

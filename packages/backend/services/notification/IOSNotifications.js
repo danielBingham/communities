@@ -30,10 +30,15 @@ module.exports = class IOSNotifications {
 
         this.sessionService = new SessionService(core)
 
+        const keyPath = path.join(process.cwd(), this.core.config.notifications.ios.privateCert) 
+        const certPath = path.join(process.cwd(), this.core.config.notifications.ios.publicCert)
+        const key = fs.readFileSync(keyPath)
+        const cert = fs.readFileSync(certPath)
         this.client = http2.connect(this.core.config.notifications.ios.endpoint, {
-            key: fs.readFileSync(path.join(process.cwd(), this.core.config.notifications.ios.privateCert)),
-            cert: fs.readFileSync(path.join(process.cwd(), this.core.config.notifications.ios.publicCert))
+            key: key,
+            cert: cert 
         })
+
         this.client.on("error", (error) => this.core.logger.error(error))
         this.client.on("goaway", (errorCode, lastStreamId, data) => {
             this.core.logger.debug(`IOS Notifications:: 'goaway' Frame: `)
@@ -64,35 +69,37 @@ module.exports = class IOSNotifications {
                     notificationId: notification.id
                 }
 
-                const request = this.client.request({
+                const headers = {
                     ":method": "POST",
                     "apns-topic": this.core.config.notifications.ios.applicationBundleID,
                     "apns-push-type": "alert",
                     ":scheme": "https",
                     ":path": path
-                })
+                }
+
+                const request = this.client.request(headers)
 
                 let requestError = false
                 request.on("error", (error) => {
                     requestError = true 
-                    this.core.logger.debug(`IOS Notifications:: Request Error:`)
-                    this.core.logger.error(error)
+                    this.core.logger.error(`=== IOS Notifications:: Request Error ===\n`, error)
                 })
                 request.on("frameError", (type, code, id) => {
                     requestError = true
-                    this.core.logger.debug(`IOS Notifications:: FrameError: type: ${type}, code: ${code}, id: ${id}.`)
+                    this.core.logger.error(`=== IOS Notifications:: FrameError ===\n type: ${type}, code: ${code}, id: ${id}.`)
                 })
-                request.on("response", (headers, flags) => {
-                    if ( headers[':status'] !== 200 ) {
+                request.on("response", (responseHeaders, flags) => {
+                    if ( responseHeaders[':status'] !== 200 ) {
                         requestError = true
-                        this.core.logger.error(`IOS Notifications:: Failed request:`)
-                        this.core.logger.debug(`Response headers: `)
-                        this.core.logger.debug(headers)
+                        this.core.logger.error(`=== IOS Notifications:: Failed Request ===`)
+                        this.core.logger.error(`Body: `, body)
+                        this.core.logger.error(`Headers: `, headers)
+                        this.core.logger.error(`Response Headers: `, responseHeaders)
                     }
                 })
                 request.on("data", (data) => {
                     if ( requestError ) {
-                        this.core.logger.debug(`IOS Notifications:: Data frame: `, data)
+                        this.core.logger.error(`=== IOS Notifications:: Data frame ===\n`, data)
                     }
                 })
                 request.setEncoding("utf8")

@@ -15,6 +15,7 @@ const config = {
 
 // ============ Staging Environment Build =================
 if ( process.env.NODE_ENV === 'staging' ) {
+  //config.appId = "social.communities.staging"
   config.ios = {
     scheme: 'App Staging'
   }
@@ -33,6 +34,7 @@ else if ( process.env.NODE_ENV === 'production' ) {
 } 
 // =========== Development / Local Environment Build ======
 else {
+  //config.appId = "social.communities.local"
   config.ios = {
     scheme: 'App Local'
   }
