@@ -6,6 +6,13 @@ on:
       version:
         decription: 'A semantic version to use when tagging this release.'
         required: true
+      environment:
+        type: choice
+        description: 'The environment to build this container for.  If you choose staging, the version should have an `-rc.N` term.'
+        required: true
+        options:
+          - production
+          - staging
 jobs:
   build:
 
@@ -18,7 +25,9 @@ jobs:
     steps:
 
       - name: Checkout Repo 
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ ( github.events.inputs.environment === 'staging' && 'staging') || 'main' }}
 
       - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
@@ -157,7 +166,7 @@ jobs:
         working-directory: ./web-application
         run: |
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-          docker build --secret id=CODEARTIFACT_AUTH_TOKEN -t 843012963492.dkr.ecr.us-east-1.amazonaws.com/communities/web-application:${{ github.event.inputs.version }} . 
+          docker build --secret id=CODEARTIFACT_AUTH_TOKEN --build-arg NODE_ENV=${{ github.event.inputs.environment }} -t 843012963492.dkr.ecr.us-east-1.amazonaws.com/communities/web-application:${{ github.event.inputs.version }} . 
 
       - name: Login to ECR 
         run: |
