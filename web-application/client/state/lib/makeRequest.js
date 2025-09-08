@@ -35,7 +35,7 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
             signal: abortController.signal,
             headers: {
                 'Accept': 'application/json',
-                'X-Communities-Platform': Capacitor.getPlatform()
+        //        'X-Communities-Platform': Capacitor.getPlatform()
             }
         }
 

@@ -4,14 +4,14 @@ const config = {
   webDir: "web-application/public/dist/",
   plugins: {
     CapacitorHttp: {
-      enabled: true
+      enabled: false 
     },
     CapacitorUpdater: {
       autoUpdate: false,
       keepUrlPathAfterReload: true
     },
     CapacitorCookies: {
-      enabled: true
+      enabled: false 
     }
   }
 }
