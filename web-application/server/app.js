@@ -31,6 +31,8 @@ const cors = require('cors')
 
 const path = require('path')
 
+const cookieParser = require('cookie-parser')
+
 const { 
     Core, 
     FeatureFlags, 
@@ -72,12 +74,17 @@ const createExpressApp = function(core, sessionParser) {
     app.use(cors({
         origin: [ core.config.host, 'capacitor://localhost', 'https://localhost' ],
         methods: [ 'GET', 'POST', 'PATCH', 'DELETE' ],
-        allowedHeaders: [ 'Content-Type', 'Accept', 'X-Communities-CSRF-Token' ]
+        allowedHeaders: [ 'Content-Type', 'Accept', 'X-Communities-CSRF-Token', 'X-Communities-Platform' ]
     }))
+
+    app.use(cookieParser(core.config.session.secret))
 
     // Set up our session storage.  We're going to use database backed sessions to
     // maintain a stateless app.
     app.use((request, response, next) => {
+        core.logger.debug(`Cookies: `, request.cookies) 
+        core.logger.debug(`Signed Cookies: `, request.signedCookies)
+
         sessionParser(request, response, () => {
             next()
         })
