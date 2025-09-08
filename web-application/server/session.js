@@ -39,7 +39,7 @@ const createSessionParser = function(core) {
             path: '/',
             httpOnly: true,
             secure: true,
-            sameSite: "none",
+            sameSite: "strict",
             maxAge: 1000 * 60 * 60 * 24 * 30 // 30 days 
         } 
     })

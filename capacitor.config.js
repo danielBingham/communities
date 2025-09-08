@@ -9,6 +9,9 @@ const config = {
     CapacitorUpdater: {
       autoUpdate: false,
       keepUrlPathAfterReload: true
+    },
+    CapacitorCookies: {
+      enabled: true
     }
   }
 }
