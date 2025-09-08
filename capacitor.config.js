@@ -11,7 +11,7 @@ const config = {
       keepUrlPathAfterReload: true
     },
     CapacitorCookies: {
-      enabled: false 
+      enabled: true
     }
   }
 }
