@@ -77,7 +77,11 @@ const createExpressApp = function(core, sessionParser) {
 
     // Set up our session storage.  We're going to use database backed sessions to
     // maintain a stateless app.
-    app.use(sessionParser)
+    app.use((request, response, next) => {
+        sessionParser(request, response, () => {
+            next()
+        })
+    })
 
     // Request and log initialization middleware
     app.use(createLogMiddleware(core))

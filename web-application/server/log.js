@@ -55,6 +55,7 @@ const createLogMiddleware = function(core) {
                 const totalTime = endTime - startTime
                 const contentSize = response.getHeader('content-length')
 
+                request.logger.debug(`Response Headers: `, response.getHeaders())
                 request.logger.debug(`==================== END: ${request.method} ${request.url} -- [ ${response.statusCode} ] -- ${totalTime} ms ${contentSize ? `${contentSize} bytes` : ''} ====================`)
             })
         }
