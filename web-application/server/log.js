@@ -23,7 +23,6 @@ const { Logger } = require('@communities/backend')
 
 const createLogMiddleware = function(core) {
     return function(request, response, next) {
-        console.log(request)
 
         // Set the id the logger will use to identify the session.  We don't want to
         // use the actual session id, since that value is considered sensitive.  So
@@ -44,13 +43,17 @@ const createLogMiddleware = function(core) {
 
         // Log start and end of the request.
         const startTime = Date.now()
-        request.logger.debug(`BEGIN: ${request.method} ${request.url}`)
+        request.logger.debug(`==================== BEGIN: ${request.method} ${request.url} ====================`)
+        request.logger.debug(`Host: ${request.host}, Hostname: ${request.hostname}, SessionId: ${request.sessionID}`)
+        request.logger.debug(`Cookies: `, request.cookies)
+        request.logger.debug(`Headers: `, request.headers)
+        request.logger.debug(`Session: `, request.session)
         response.once('finish', function() {
             const endTime = Date.now()
             const totalTime = endTime - startTime
             const contentSize = response.getHeader('content-length')
 
-            request.logger.debug(`END: ${request.method} ${request.url} -- [ ${response.statusCode} ] -- ${totalTime} ms ${contentSize ? `${contentSize} bytes` : ''}`)
+            request.logger.debug(`==================== END: ${request.method} ${request.url} -- [ ${response.statusCode} ] -- ${totalTime} ms ${contentSize ? `${contentSize} bytes` : ''} ====================`)
         })
         next()
     }
