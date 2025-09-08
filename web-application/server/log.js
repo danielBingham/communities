@@ -41,20 +41,24 @@ const createLogMiddleware = function(core) {
 
         request.logger = new Logger(core.logger.level, id, request.method, request.originalUrl)
 
-        // Log start and end of the request.
-        const startTime = Date.now()
-        request.logger.debug(`==================== BEGIN: ${request.method} ${request.url} ====================`)
-        request.logger.debug(`Host: ${request.host}, Hostname: ${request.hostname}, SessionId: ${request.sessionID}`)
-        request.logger.debug(`Cookies: `, request.cookies)
-        request.logger.debug(`Headers: `, request.headers)
-        request.logger.debug(`Session: `, request.session)
-        response.once('finish', function() {
-            const endTime = Date.now()
-            const totalTime = endTime - startTime
-            const contentSize = response.getHeader('content-length')
+        // Don't both loggering the health requests.
+        if ( request.url !== '/health' ) {
+            // Log start and end of the request.
+            const startTime = Date.now()
+            request.logger.debug(`==================== BEGIN: ${request.method} ${request.url} ====================`)
+            request.logger.debug(`Host: ${request.host}, Hostname: ${request.hostname}, SessionId: ${request.sessionID}`)
+            request.logger.debug(`Cookies: `, request.cookies)
+            request.logger.debug(`Headers: `, request.headers)
+            request.logger.debug(`Session: `, request.session)
+            response.once('finish', function() {
+                const endTime = Date.now()
+                const totalTime = endTime - startTime
+                const contentSize = response.getHeader('content-length')
 
-            request.logger.debug(`==================== END: ${request.method} ${request.url} -- [ ${response.statusCode} ] -- ${totalTime} ms ${contentSize ? `${contentSize} bytes` : ''} ====================`)
-        })
+                request.logger.debug(`==================== END: ${request.method} ${request.url} -- [ ${response.statusCode} ] -- ${totalTime} ms ${contentSize ? `${contentSize} bytes` : ''} ====================`)
+            })
+        }
+
         next()
     }
 }
