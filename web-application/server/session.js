@@ -35,7 +35,7 @@ const createSessionParser = function(core) {
         saveUninitialized: true,
         proxy: true,
         cookie: { 
-            domain: core.config.host,
+            domain: new URL('/', core.config.host).hostname,
             path: '/',
             httpOnly: true,
             secure: true,
