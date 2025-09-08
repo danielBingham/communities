@@ -23,6 +23,8 @@ const { Logger } = require('@communities/backend')
 
 const createLogMiddleware = function(core) {
     return function(request, response, next) {
+        console.log(request)
+
         // Set the id the logger will use to identify the session.  We don't want to
         // use the actual session id, since that value is considered sensitive.  So
         // instead we'll just use a uuid.
