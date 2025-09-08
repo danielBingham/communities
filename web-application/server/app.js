@@ -70,7 +70,7 @@ const createExpressApp = function(core, sessionParser) {
     app.use(express.urlencoded({ limit: "50mb", extended: false }))
 
     app.use(cors({
-        origin: [ core.config.host, 'capacitor://localhost' ],
+        origin: [ core.config.host, 'capacitor://localhost', 'https://localhost' ],
         methods: [ 'GET', 'POST', 'PATCH', 'DELETE' ],
         allowedHeaders: [ 'Content-Type', 'Accept', 'X-Communities-CSRF-Token' ]
     }))
