@@ -72,7 +72,9 @@ const createExpressApp = function(core, sessionParser) {
     app.use(cors({
         origin: [ core.config.host, 'capacitor://localhost', 'https://localhost' ],
         methods: [ 'GET', 'POST', 'PATCH', 'DELETE' ],
-        allowedHeaders: [ 'Content-Type', 'Accept', 'X-Communities-CSRF-Token', 'X-Communities-Platform' ]
+        allowedHeaders: [ 'Content-Type', 'Accept', 'X-Communities-CSRF-Token', 'X-Communities-Platform' ],
+        credentials: true,
+        exposedHeaders: '*'
     }))
 
     // Set up our session storage.  We're going to use database backed sessions to
