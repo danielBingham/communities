@@ -35,8 +35,8 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
             signal: abortController.signal,
             headers: {
                 'Accept': 'application/json',
-        //        'X-Communities-Platform': Capacitor.getPlatform()
-            }
+                'X-Communities-Platform': Capacitor.getPlatform()
+            },
         }
 
         if ((method == 'POST' || method == 'PUT' || method == 'PATCH') && body ) {
@@ -75,14 +75,6 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
 
         const promise = fetch(fullEndpoint, fetchOptions).then(function(response) {
             status = response.status
-            console.log(`Response Headers: `)
-            console.log(response.headers)
-            for(const [key, value] of response.headers.entries()) {
-                console.log(`${key}=${value}`)
-            }
-            const cookies = response.headers.getSetCookie()
-            console.log(`Cookies: `)
-            console.log(cookies)
           
             // If they've been logged out, send them to the home page, which will
             // let them log back in again.

@@ -3,15 +3,9 @@ const config = {
   appName: "Communities",
   webDir: "web-application/public/dist/",
   plugins: {
-    CapacitorHttp: {
-      enabled: false 
-    },
     CapacitorUpdater: {
       autoUpdate: false,
       keepUrlPathAfterReload: true
-    },
-    CapacitorCookies: {
-      enabled: false 
     }
   }
 }
