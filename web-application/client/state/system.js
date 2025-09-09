@@ -10,13 +10,28 @@ import { makeRequest } from '/state/lib/makeRequest'
 const systemSlice = createSlice({
     name: 'system',
     initialState: {
-        requests: {},
+        host: document.querySelector('meta[name="communities-host"]').content,
+        api: document.querySelector('meta[name="communities-api"]').content,
+        csrf: null,
         configuration: null,
         features: {},
-        version: null
+        clientVersion: null,
+        serverVersion: null
     },
     reducers: {
         reset: function(state, action) { },
+
+        setHost: function(state, action) {
+            state.host = action.payload
+        },
+
+        setAPI: function(state, action) {
+            state.api = action.payload
+        },
+
+        setCSRF: function(state, action) {
+            state.csrf = action.payload
+        },
 
         setConfiguration: function(state, action) {
             state.configuration = action.payload 
@@ -26,48 +41,45 @@ const systemSlice = createSlice({
             state.features = action.payload
         },
 
-        setVersion: function(state, action) {
-            state.version = action.payload
+        setClientVersion: function(state, action) {
+            state.clientVersion = action.payload
+        },
+
+        setServerVersion: function(state, action) {
+            state.serverVersion = action.payload
         }
     }
 })
 
 export const getVersion = function() {
     return function(dispatch, getState) {
-        return dispatch(makeRequest('GET', '/version', null,
+        return dispatch(makeRequest('GET', '/system/version', null,
             function(response) {
-                dispatch(systemSlice.actions.setVersion(response.version))
+                dispatch(systemSlice.actions.setServerVersion(response.version))
             }
         ))
     }
 }
 
 /**
- * GET /config
+ * GET /initialization
  *
- * Get the configuration from the backend.
- *
- * Makes the request async and returns an id that can be used to track the
- * request and get the results of a completed request from this state slice.
- *
- * @returns {string} A uuid requestId that can be used to track this request.
+ * Initialize the current session.
  */
-export const getConfiguration = function() {
+export const getInitialization = function() {
     return function(dispatch, getState) {
-        return dispatch(makeRequest('GET', '/config', null,
-            function(config) {
-                dispatch(systemSlice.actions.setFeatures(config.features))
-                delete config.features
-
-                // Set the initial version, but leave the server version in
-                // config.
-                dispatch(systemSlice.actions.setVersion(config.version))
-                dispatch(systemSlice.actions.setConfiguration(config))
+        return dispatch(makeRequest('GET', '/system/initialization', null,
+            function(responseBody) {
+                dispatch(systemSlice.actions.setClientVersion(responseBody.version))
+                dispatch(systemSlice.actions.setServerVersion(responseBody.version))
+                dispatch(systemSlice.actions.setCSRF(responseBody.csrf))
+                dispatch(systemSlice.actions.setFeatures(responseBody.features))
+                dispatch(systemSlice.actions.setConfiguration(responseBody.config))
             }
         ))
     }
 }
 
 
-export const { reset, setConfiguration, setFeatures } = systemSlice.actions
+export const { reset, setHost, setAPI, setConfiguration, setFeatures } = systemSlice.actions
 export default systemSlice.reducer

@@ -14,7 +14,7 @@ import { useDevice } from '/lib/hooks/useDevice'
 
 import logger from '/logger'
 
-import { getConfiguration } from '/state/system'
+import { getInitialization } from '/state/system'
 import { getAuthentication } from '/state/authentication'
 
 import MainLayout from '/layouts/MainLayout'
@@ -86,28 +86,27 @@ import './app.css';
  */
 const App = function(props) {
  
-    const [configurationRequest, makeConfigurationRequest] = useRequest()
+    const [getInitializationRequest, makeGetInitializationRequest] = useRequest()
     const [authenticationRequest, makeAuthenticationRequest] = useRequest()
 
     const configuration = useSelector((state) => state.system.configuration)
 
     // Note to self: These are system slice requests.  They go through
     // state/system and don't hit the API backend, instead they hit the root.
-    useRetries('Load Configuration', function() {
-        makeConfigurationRequest(getConfiguration())
-    }, configurationRequest)
+    useRetries('Initialize', function() {
+        makeGetInitializationRequest(getInitialization())
+    }, getInitializationRequest)
 
     useEffect(function() {
-        if ( configurationRequest?.state == 'fulfilled') {
-            console.log(`Configuration loaded...`)
+        if ( getInitializationRequest?.state == 'fulfilled') {
+            console.log(`System initialized...`)
             // Logger is a singleton, this will effect all other imports.
             logger.setLevel(configuration.log_level)
             makeAuthenticationRequest(getAuthentication())
         } 
-    }, [ configurationRequest ])
+    }, [ getInitializationRequest ])
 
     const isSocketConnected = useSocket()
-    const [device, deviceRequest] = useDevice()
 
     // ======= Render ===============================================
 

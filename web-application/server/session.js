@@ -18,7 +18,7 @@
  *
  ******************************************************************************/
 
-const session = require('express-session')
+const session = require('@communities/session')
 const pgSession = require('connect-pg-simple')(session)
 
 const createSessionParser = function(core) {
@@ -28,7 +28,9 @@ const createSessionParser = function(core) {
         createTableIfMissing: true
     })
     const sessionParser = session({
-        key: core.config.session.key,
+        name: core.config.session.cookieName,
+        authHeader: core.config.session.headerName,
+        platformHeader: core.config.session.platformHeader,
         secret: core.config.session.secret,
         store: sessionStore,
         resave: false,

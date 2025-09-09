@@ -42,6 +42,7 @@
     "@reduxjs/toolkit": "2.x",
     "@sentry/react": "9.x",
     "@sentry/webpack-plugin": "3.x",
+    "capacitor-secure-storage-plugin": "^0.11.0",
     "connect-pg-simple": "10.x",
     "cors": "2.x",
     "express": "5.x",

@@ -18,29 +18,34 @@
  *
  ******************************************************************************/
 import { Capacitor } from '@capacitor/core'
+import { SecureStoragePlugin } from 'capacitor-secure-storage-plugin'
 
 import logger from '/logger'
 
+
 export const makeRequest = function(method, endpoint, body, onSuccess, onFailure) {
     return function(dispatch, getState) {
-        const configuration = getState().system.configuration
 
-        let status = 0
-        let responseOk = false
-
+        const system = getState().system
         const abortController = new AbortController()
 
-        const fetchOptions = {
-            method: method,
-            signal: abortController.signal,
-            headers: {
-                'Accept': 'application/json',
-                'X-Communities-Platform': Capacitor.getPlatform()
-            },
-        }
+        const request = async function() {
 
-        if ((method == 'POST' || method == 'PUT' || method == 'PATCH') && body ) {
-            if ( body ) {
+            // ==================== Assemble the Request ======================
+            //
+            
+            const fetchOptions = {
+                method: method,
+                signal: abortController.signal,
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Communities-Platform': Capacitor.getPlatform()
+                },
+            }
+
+            // Make sure we handle the body appropriately. If it isn't a
+            // FormData instance, then fallback to JSON.
+            if ((method == 'POST' || method == 'PATCH') && body ) {
                 if ( body instanceof FormData ) {
                     fetchOptions.body = body
                 } else {
@@ -48,75 +53,71 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
                     fetchOptions.headers['Content-Type'] = 'application/json'
                 }
             }
-        }
 
-        if ( method !== 'GET' ) {
-            if ( configuration && 'csrf' in configuration) {
-                const csrfToken = configuration.csrf 
-                fetchOptions.headers['X-Communities-CSRF-Token'] = csrfToken
+            // Send the CSRF token unless this is a GET request or we don't have it.
+            if ( method !== 'GET' && system.csrf !== null ) {
+                fetchOptions.headers['X-Communities-CSRF-Token'] = system.csrf 
             }
-        }
 
+            // For Android and IOS we need to do Token authentication, since
+            // Cookies don't work in native apps or through Capacitor.
+            if ( Capacitor.getPlatform() === 'android' || Capacitor.getPlatform() === 'ios' ) {
+                let authToken = null
+                try { 
+                    authToken = await SecureStoragePlugin.get({ key: 'auth-token' })
+                } catch (error) {
+                    logger.warn(`Missing auth token.  Will make an unauthenticated request.`)
+                }
 
-        let host = document.querySelector('meta[name="communities-host"]').content
-        let fullEndpoint = ''
-        // System slice requests need to go to the root, rather than the API
-        // backend.  These requests include querying for the configuration that
-        // contains the API backend itself, as well as for feature flags.
-        if ( endpoint === '/config' || endpoint === '/version') {
-            fullEndpoint = host + endpoint
-        } else if (configuration == null ) {
-            // If we're querying from anything other than the system slice before
-            // we've got our configuration, then we have an error.
-            throw new Error('Attempting to query from the API before the configuration is set!')
-        } else {
-            fullEndpoint = host + configuration.backend + endpoint
-        }
+                if ( authToken !== null && authToken !== undefined ) {
+                    fetchOptions.headers['X-Communities-Auth'] = authToken
+                }
+            }
 
-        const promise = fetch(fullEndpoint, fetchOptions).then(function(response) {
-            status = response.status
-          
+            let apiUrl = new URL(system.api, system.host).href
+            let fullEndpoint = new URL(endpoint, apiUrl).href 
+
+            // ==================== Make the Request ==========================
+            //
+            
+            const response = await fetch(fullEndpoint, fetchOptions)
+
             // If they've been logged out, send them to the home page, which will
             // let them log back in again.
-            if ( status === 401 ) {
+            if ( response.status === 401 ) {
                 window.location.href = "/"
             }
 
-            responseOk = response.ok
-            return response.json()
-        }).then(function(responseBody) {
+            // For Android and IOS we need to check the request header for an
+            // authentication token and save it in secure storage if we find
+            // one. This is the Session ID.  
+            if ( Capacitor.getPlatform() === 'android' || Capacitor.getPlatform() === 'ios' ) {
+                if ( response.headers.has('X-Communities-Auth') ) {
+                    await SecureStoragePlugin.set({ key: 'auth-token', value: response.headers.get('X-Communities-Auth') })
+                }
+            }
+            
+            const responseBody = await response.json()
+
             const result = {
+                success: response.ok,
                 request: {
                     endpoint: endpoint,
                     method: method
                 },
                 response: {
-                    status:  status,
+                    status:  response.status,
                     body: responseBody
                 },
                 error: null
             }
 
-            if ( responseOk ) {
-                if ( onSuccess ) {
-                    try {
-                        onSuccess(responseBody)
-                        return result 
-                    } catch (error) {
-                        logger.error(`Error handling request success: `, error)
-                        result.error = {
-                            type: 'frontend-error',
-                            message: `Failed to process response: ${error.message}.`
-                        }
-                        return Promise.reject(result)
-                    }
-                }
-            } else {
+            if ( ! response.ok ) {
                 if ( 'error' in responseBody ) {
                     result.error = {
                         type: responseBody.error.type
                     }
-                    
+
                     if ( 'all' in responseBody.error && Array.isArray(responseBody.error.all) ) {
                         result.error.all = responseBody.error.all
                     } else {
@@ -134,26 +135,43 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
                 }
 
                 // Invalid CSRF.  Refresh the page.
-                if ( status === 452 )  {
+                if ( response.status === 452 )  {
                     window.location.reload()
                 }
 
-                if ( status >= 500 ) {
+                if ( response.status >= 500 ) {
                     logger.error(`Request failed: `, result)
                 } else {
-                    logger.warn(`Request returned ${status}: `, result)
+                    logger.warn(`Request returned ${response.status}: `, result)
                 }
                 if ( onFailure ) {
                     try {
-                        onFailure(status, responseBody)
+                        onFailure(response.status, responseBody)
                     } catch (error) {
                         logger.error(`Error handling request failure: `, error)
                     }
                 } 
-                return Promise.reject(result)
+                return result
             }
-        })
 
-        return [ promise, abortController ]
+            if ( onSuccess ) {
+                try {
+                    onSuccess(responseBody)
+                } catch (error) {
+                    logger.error(`Error handling request success: `, error)
+                    result.success = false
+                    result.error = {
+                        type: 'frontend-error',
+                        message: `Failed to process response: ${error.message}.`
+                    }
+                    return result
+                }
+            }
+
+            return result 
+        }
+
+        const promise = request()
+        return [promise, abortController]
     }
 }
