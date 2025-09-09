@@ -1,6 +1,6 @@
 {
   "name": "@communities/web-application",
-  "version": "0.6.0-rc18",
+  "version": "0.6.0-rc19",
   "description": "The web application for Communities.  Non-profit social media.",
   "author": "Daniel Bingham",
   "license": "GPL-3.0",
@@ -36,8 +36,8 @@
     "@capacitor/device": "^7.0.2",
     "@capacitor/push-notifications": "^7.0.3",
     "@capgo/capacitor-updater": "^7.0.36",
-    "@communities/backend": "^0.6.0-rc18",
-    "@communities/shared": "^0.6.0-rc18",
+    "@communities/backend": "^0.6.0-rc19",
+    "@communities/shared": "^0.6.0-rc19",
     "@heroicons/react": "2.x",
     "@reduxjs/toolkit": "2.x",
     "@sentry/react": "9.x",
