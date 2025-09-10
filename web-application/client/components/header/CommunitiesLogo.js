@@ -9,7 +9,7 @@ const CommunitiesLogo = function() {
         const host = document.querySelector('meta[name="communities-host"]').content
         const url = `${host}/assets/icon-1024x1024.png`
 
-        fetch(url).then(function(response) {
+        fetch(url, { mode: 'no-cors' }).then(function(response) {
             return response.blob()
         }).then(function(imageBlob) {
             const imageObjectUrl = URL.createObjectURL(imageBlob)

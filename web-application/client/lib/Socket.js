@@ -18,6 +18,11 @@
  *
  ******************************************************************************/
 
+import logger from '/logger'
+
+import { Capacitor } from '@capacitor/core'
+import { SecureStoragePlugin } from 'capacitor-secure-storage-plugin'
+
 export class SocketError extends Error {
     constructor(type, message) {
         super(message)
@@ -84,17 +89,17 @@ export default class Socket {
             const sent = this.send({ entity: 'Ping' })
             if ( sent === false ) {
                 if ( ! this.isConnecting() && ! this.isOpen() ) {
-                    console.log(`Socket connection lost.`)
+                    logger.warn(`Socket :: Connection lost.`)
                     this.disconnect()
                 }
             }
         } catch (error) {
-            console.error(error)
+            logger.error(error)
             this.disconnect()
         }
 
         this.keepAliveTimeout = setTimeout(() => {
-            console.log(`Socket connection lost.`)
+            logger.warn(`Socket :: Connection lost.`)
             this.disconnect() 
         }, 10000)
     }
@@ -118,7 +123,7 @@ export default class Socket {
             })
 
             this.socket.addEventListener('error', (event) => {
-                console.error(`Socket error: `, event)
+                logger.error(`Socket :: Error: ${event.message} ::`, event)
 
                 for(const handler of this.eventHandlers['error']) {
                     handler(event)
@@ -127,6 +132,7 @@ export default class Socket {
             })
 
             this.socket.addEventListener('open', (event) => {
+                logger.info(`Socket :: Connected.`)
                 if ( this.keepAliveTimeout !== null ) {
                     clearTimeout(this.keepAliveTimeout)
                 }
@@ -144,6 +150,7 @@ export default class Socket {
             })
 
             this.socket.addEventListener('close', (event) => {
+                logger.info(`Socket :: Closed.`)
                 // Clear any hanging keepAlives
                 clearTimeout(this.keepAliveTimeout)
                 this.keepAliveTimeout = null
@@ -159,23 +166,43 @@ export default class Socket {
                 this.socket = null
             })
         } else {
-            console.log(`Warning: Attempt to listen without a created socket.`)
+            logger.warn(`Socket :: Attempt to listen without a created socket.`)
         }
     }
 
-    connect(host) {
-        if ( this.socket === null ) {
-            this.socket = new WebSocket(host)
-            this.startListening()
-        } else if ( this.socket !== null && this.socket.readyState !== WebSocket.OPEN && this.socket.readyState !== WebSocket.CONNECTING ) {
-            // Ensure we're closing the old one.
-            this.socket.close()
+    async connect(host) {
+        logger.info(`>>> UPGRADE /socket :: BEGIN connection to ${host}...`)
+        const protocols = [ 'wss', 'x-communities-platform', Capacitor.getPlatform() ]
 
-            // Open a new one.
-            this.socket = new WebSocket(host)
-            this.startListening()
-        } else {
-            console.log(`Warning: Attempt to connect a connected socket.`)
+        if ( Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android' ) {
+            try { 
+                const secureValue = await SecureStoragePlugin.get({ key: 'auth-token' })
+                const authToken = encodeURIComponent(secureValue.value)
+                protocols.push('x-communities-auth', authToken)
+                logger.debug(`>>> UPGRADE /socket :: Got auth token: ${authToken}`)
+            } catch (error) {
+                logger.warn(`>>> UPGRADE /socket :: Missing auth token. Refusing to connect.`)
+                return
+            }
+        }
+
+        try {
+            if ( this.socket === null ) {
+
+                this.socket = new WebSocket(host, protocols)
+                this.startListening()
+            } else if ( this.socket !== null && this.socket.readyState !== WebSocket.OPEN && this.socket.readyState !== WebSocket.CONNECTING ) {
+                // Ensure we're closing the old one.
+                this.socket.close()
+
+                // Open a new one.
+                this.socket = new WebSocket(host, protocols)
+                this.startListening()
+            } else {
+                logger.warn(`>>> UPGRADE /socket :: Attempt to connect a connected socket.`)
+            }
+        } catch (error) {
+            logger.error(`>>> UPGRADE /socket :: Connection failed: ${error.message}`, error)
         }
     }
 

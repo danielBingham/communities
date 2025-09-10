@@ -16,7 +16,6 @@
 var Buffer = require('safe-buffer').Buffer
 var cookie = require('cookie');
 var crypto = require('crypto')
-var debug = require('debug')('express-session');
 var deprecate = require('depd')('express-session');
 var onHeaders = require('on-headers')
 var parseUrl = require('parseurl');
@@ -105,6 +104,8 @@ function session(options) {
   // get the session store
   var store = opts.store || new MemoryStore()
 
+  var logger = opts.logger
+
   // get the trust proxy setting
   var trustProxy = opts.proxy
 
@@ -157,7 +158,7 @@ function session(options) {
   // meant for a production environment
   /* istanbul ignore next: not tested */
   if (env === 'production' && store instanceof MemoryStore) {
-    console.warn(warning);
+    logger.warn(warning);
   }
 
   // generates the new session
@@ -166,13 +167,14 @@ function session(options) {
     req.session = new Session(req);
     req.session.cookie = new Cookie(cookieOptions);
 
-    if ( platformHeader in req.headers
-      && ( req.headers[platformHeader] === 'web'
-          || req.headers[platformHeader] === 'ios'
-          || req.headers[platformHeader] === 'android' ))
+    const platform = getHeader(req, platformHeader)
+    if ( platform === 'web'
+          || platform === 'ios'
+          || platform === 'android' )
     {
-      req.session.platform = req.headers[platformHeader]
+      req.session.platform = platform
     } else {
+      // If platform isn't set in the request, default to web.
       req.session.platform = 'web'
     }
 
@@ -193,6 +195,11 @@ function session(options) {
   })
 
   return function session(req, res, next) {
+
+    if ( req.logger ) {
+      logger = req.logger
+    }
+
     // self-awareness
     if (req.session) {
       next()
@@ -202,7 +209,7 @@ function session(options) {
     // Handle connection as if there is no session if
     // the store has temporarily disconnected etc
     if (!storeReady) {
-      debug('store is disconnected')
+      logger.debug('store is disconnected')
       next()
       return
     }
@@ -210,7 +217,7 @@ function session(options) {
     // pathname mismatch
     var originalPath = parseUrl.original(req).pathname || '/'
     if (originalPath.indexOf(cookieOptions.path || '/') !== 0) {
-      debug('pathname mismatch')
+      logger.debug('pathname mismatch')
       next()
       return
     }
@@ -233,13 +240,13 @@ function session(options) {
     // expose store
     req.sessionStore = store;
 
-    let cookieId = undefined
-    const platform = req.headers[platformHeader]
+    var cookieId = undefined
+    var platform = getHeader(req, platformHeader)
     if ( platform === 'web' ) {
       // get the session ID from the cookie
       cookieId = req.sessionID = getcookie(req, name, secrets);
     } else if ( platform === 'ios' || platform === 'android' ) {
-      cookieId = req.sessionId = getAuthHeader(req, authHeader, secrets);
+      cookieId = req.sessionID = getAuthHeader(req, authHeader, secrets);
     } else {
       // If platform is not specified, fall back to cookie auth.
       // get the session ID from the cookie
@@ -248,18 +255,24 @@ function session(options) {
 
     // set-cookie
     onHeaders(res, function(){
+      logger.debug(`--------------- Firing onHeaders --------------------`)
       if (!req.session) {
-        debug('no session');
+        logger.debug(`No session.`)
+        logger.debug('no session');
+        logger.debug(`---------------- End onHeaders -----------------------`)
         return;
       }
 
       if (!shouldSetCookie(req)) {
+        logger.debug(`Should not set cookie.`)
+        logger.debug(`---------------- End onHeaders -----------------------`)
         return;
       }
 
       // only send secure cookies via https
       if (req.session.cookie.secure && !issecure(req, trustProxy)) {
-        debug('not secured');
+        logger.debug('not secured');
+        logger.debug(`---------------- End onHeaders -----------------------`)
         return;
       }
 
@@ -272,16 +285,21 @@ function session(options) {
       // set cookie
       try {
         if ( platform === 'web' ) {
+          logger.debug(`Setting cookie: ${name}=${req.sessionId} `)
           setcookie(res, name, req.sessionID, secrets[0], req.session.cookie.data)
         } else if ( platform === 'ios' || platform === 'android' ) {
-          setAuthHeader(res, authHeader, req.sessionId, secrets[0])
+          logger.debug(`Setting Auth header: ${authHeader}=${req.sessionID}`)
+          setAuthHeader(res, authHeader, req.sessionID, secrets[0])
         } else {
+          logger.debug(`Setting cookie: ${name}=${req.sessionId} `)
           // If platform is not specified, fall back to cookies.
           setcookie(res, name, req.sessionID, secrets[0], req.session.cookie.data)
         }
       } catch (err) {
+        logger.error(err)
         defer(next, err)
       }
+      logger.debug(`---------------- End onHeaders -----------------------`)
     });
 
     // proxy end() to commit the session
@@ -332,7 +350,7 @@ function session(options) {
           encoding = undefined;
 
           if (chunk.length !== 0) {
-            debug('split response');
+            logger.debug('split response');
             ret = _write.call(res, chunk.slice(0, chunk.length - 1));
             chunk = chunk.slice(chunk.length - 1, chunk.length);
             return ret;
@@ -347,13 +365,13 @@ function session(options) {
 
       if (shouldDestroy(req)) {
         // destroy session
-        debug('destroying');
+        logger.debug('destroying');
         store.destroy(req.sessionID, function ondestroy(err) {
           if (err) {
             defer(next, err);
           }
 
-          debug('destroyed');
+          logger.debug('destroyed');
           writeend();
         });
 
@@ -362,7 +380,7 @@ function session(options) {
 
       // no session to save
       if (!req.session) {
-        debug('no session');
+        logger.debug('no session');
         return _end.call(res, chunk, encoding);
       }
 
@@ -384,13 +402,13 @@ function session(options) {
         return writetop();
       } else if (storeImplementsTouch && shouldTouch(req)) {
         // store implements touch method
-        debug('touching');
+        logger.debug('touching');
         store.touch(req.sessionID, req.session, function ontouch(err) {
           if (err) {
             defer(next, err);
           }
 
-          debug('touched');
+          logger.debug('touched');
           writeend();
         });
 
@@ -402,6 +420,7 @@ function session(options) {
 
     // generate the session
     function generate() {
+      logger.debug(`Generating a new session for ${req.sessionID}`)
       store.generate(req);
       originalId = req.sessionID;
       originalHash = hash(req.session);
@@ -437,12 +456,12 @@ function session(options) {
       var _save = sess.save;
 
       function reload(callback) {
-        debug('reloading %s', this.id)
+        logger.debug('reloading %s', this.id)
         _reload.call(this, rewrapmethods(this, callback))
       }
 
       function save() {
-        debug('saving %s', this.id);
+        logger.debug('saving %s', this.id);
         savedHash = hash(this);
         _save.apply(this, arguments);
       }
@@ -481,7 +500,7 @@ function session(options) {
     function shouldSave(req) {
       // cannot set cookie without a session ID
       if (typeof req.sessionID !== 'string') {
-        debug('session ignored because of bogus req.sessionID %o', req.sessionID);
+        logger.debug('session ignored because of bogus req.sessionID %o', req.sessionID);
         return false;
       }
 
@@ -494,7 +513,7 @@ function session(options) {
     function shouldTouch(req) {
       // cannot set cookie without a session ID
       if (typeof req.sessionID !== 'string') {
-        debug('session ignored because of bogus req.sessionID %o', req.sessionID);
+        logger.debug('session ignored because of bogus req.sessionID %o', req.sessionID);
         return false;
       }
 
@@ -515,28 +534,28 @@ function session(options) {
 
     // generate a session if the browser doesn't send a sessionID
     if (!req.sessionID) {
-      debug('no SID sent, generating session');
+      logger.debug('no SID sent, generating session');
       generate();
       next();
       return;
     }
 
     // generate the session object
-    debug('fetching %s', req.sessionID);
+    logger.debug('fetching %s', req.sessionID);
     store.get(req.sessionID, function(err, sess){
       // error handling
       if (err && err.code !== 'ENOENT') {
-        debug('error %j', err);
+        logger.debug('error %j', err);
         next(err)
         return
       }
 
       try {
         if (err || !sess) {
-          debug('no session found')
+          logger.debug('no session found')
           generate()
         } else {
-          debug('session found')
+          logger.debug('session found')
           inflate(req, sess)
         }
       } catch (e) {
@@ -548,6 +567,16 @@ function session(options) {
     });
   };
 };
+
+function getHeader(req, header) {
+  const h = header.toLowerCase()
+  if ( h in req.headers ) {
+    return req.headers[h]
+  } else {
+    return undefined
+  }
+}
+
 
 /**
  * Generate a session ID for a new session.
@@ -583,12 +612,9 @@ function getcookie(req, name, secrets) {
         val = unsigncookie(raw.slice(2), secrets);
 
         if (val === false) {
-          debug('cookie signature invalid');
           val = undefined;
         }
-      } else {
-        debug('cookie unsigned')
-      }
+      } 
     }
   }
 
@@ -614,12 +640,9 @@ function getcookie(req, name, secrets) {
         }
 
         if (val === false) {
-          debug('cookie signature invalid');
           val = undefined;
         }
-      } else {
-        debug('cookie unsigned')
-      }
+      } 
     }
   }
 
@@ -627,7 +650,7 @@ function getcookie(req, name, secrets) {
 }
 
 function getAuthHeader(req, name, secrets) {
-  const header = req.headers[name]
+  const header = getHeader(req, name)
   let val = undefined
 
   if ( header ) {
@@ -635,12 +658,9 @@ function getAuthHeader(req, name, secrets) {
       val = unsigncookie(header.slice(2), secrets)
 
       if (val === false) {
-        debug('auth header signature invalid');
         val = undefined;
       }
-    } else {
-      debug('cookie unsigned')
-    }
+    } 
   }
 
   return val
@@ -716,8 +736,6 @@ function issecure(req, trustProxy) {
 function setcookie(res, name, val, secret, options) {
   var signed = 's:' + signature.sign(val, secret);
   var data = cookie.serialize(name, signed, options);
-
-  debug('set-cookie %s', data);
 
   var prev = res.getHeader('Set-Cookie') || []
   var header = Array.isArray(prev) ? prev.concat(data) : [prev, data];

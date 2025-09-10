@@ -107,19 +107,20 @@ const App = function(props) {
     }, [ getInitializationRequest ])
 
     const isSocketConnected = useSocket()
+    useDevice()
 
     // ======= Render ===============================================
 
-    if ( ! configurationRequest || ! authenticationRequest ) {
+    if ( ! getInitializationRequest || ! authenticationRequest ) {
         return (
             <Spinner />
         )
-    } else if ( (configurationRequest && configurationRequest.state != 'fulfilled')
+    } else if ( (getInitializationRequest && getInitializationRequest.state != 'fulfilled')
         || (authenticationRequest && authenticationRequest.state != 'fulfilled')
     ) {
-        if (configurationRequest && configurationRequest.state == 'failed' && retries < 5) {
+        if (getInitializationRequest && getInitializationRequest.state == 'failed' && retries < 5) {
             return (<div className="error">Attempt to retrieve configuration from the backend failed, retrying...</div>)
-        } else if (configurationRequest && configurationRequest.state == 'failed' && retries >= 5 ) {
+        } else if (getInitializationRequest && getInitializationRequest.state == 'failed' && retries >= 5 ) {
             return (<div className="error">Failed to connect to the backend.  Try refreshing.</div>)
         } else if (authenticationRequest && authenticationRequest.state == 'failed' ) {
             return (<div className="error">Authentication request failed with error: {authenticationRequest.error}.</div>)

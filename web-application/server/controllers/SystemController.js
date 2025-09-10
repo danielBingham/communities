@@ -20,12 +20,12 @@
 
 const { TokenService } = require('@communities/backend')
 
-const BaseController = require('../BaseController')
+const BaseController = require('./BaseController')
 
 module.exports = class SystemController extends BaseController {
 
     constructor(core) {
-        this.core = core
+        super(core)
     }
 
     async getInitialization(request, response) {
@@ -46,10 +46,11 @@ module.exports = class SystemController extends BaseController {
         // storing it in the session, we'll need to generate a new one
         // anytime we destroy the session, which is the desired behavior.
         if ( request.session?.csrfToken === undefined  || request.session?.csrfToken === null ) {
-            const tokenService = new TokenService(core)
+            const tokenService = new TokenService(this.core)
             request.session.csrfToken = tokenService.createToken()
-            result.csrf = request.session.csrfToken
-        }
+        } 
+
+        result.csrf = request.session.csrfToken
 
        response.status(200).json(result)
     }

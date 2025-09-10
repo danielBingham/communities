@@ -89,6 +89,7 @@ module.exports = class AuthenticationController {
                 })
             } catch (error) {
                 if ( error.type == 'no-user' ) {
+                    console.log(`<<<<<<<<<<<<<<<<<< Destroying the session.`)
                     request.session.destroy(function(error) {
                         if (error) {
                             console.error(error)
@@ -102,6 +103,7 @@ module.exports = class AuthenticationController {
                 }
             }
         } else {
+            console.log(`<<<<<<<<<<<<<<< Blank response.`)
             response.status(200).json({
                 session: null
             })

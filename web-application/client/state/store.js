@@ -69,14 +69,12 @@ export const createSocketMiddleware = function(socket) {
                 const currentUser = state.authentication.currentUser
 
                 if ( action.type === connect.type ) {
-                    logger.debug(`Attempting socket connection to '${state.system.configuration.wsHost}'.`)
                     socket.connect(state.system.configuration.wsHost)
 
                     /**********************************************************
                      * Open Connection Handler
                      **********************************************************/
                     socket.on('open', () => { 
-                        logger.debug(`Socket connected...`)
                         dispatch(open()) 
                     })
 
@@ -91,7 +89,6 @@ export const createSocketMiddleware = function(socket) {
                     })
 
                     socket.on('close', () => { 
-                        logger.debug(`Socket closed...`)
                         dispatch(clearSubscriptions())
                         dispatch(close()) 
                     })

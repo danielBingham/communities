@@ -52,7 +52,7 @@ module.exports = class AndroidNotifications {
 
         for(const session of sessions) {
             if ( 'device' in session.data 
-                && session.data.device.platform === 'android' 
+                && session.data.platform === 'android' 
                 && 'deviceToken' in session.data.device) 
             {
 

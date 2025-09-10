@@ -39,15 +39,14 @@ const UserProfileImage = function({ userId, className, noLink, width }) {
 
     let content = ( <UserCircleIcon /> ) 
     if ( user && user.fileId ) {
-        const imageSrc = `${configuration.host}${configuration.backend}/file/${user.fileId}?width=200`
         if ( noLink === true ) {
             content = (
-                <Image src={imageSrc} />
+                <Image id={user.fileId} width={200} />
             )
 
         } else {
             content = (
-                <Link to={`/${user.username}`}><Image src={imageSrc} /></Link>
+                <Link to={`/${user.username}`}><Image id={user.fileId} width={200} /></Link>
             )
         }
     } 

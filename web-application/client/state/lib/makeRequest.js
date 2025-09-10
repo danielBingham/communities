@@ -23,8 +23,9 @@ import { SecureStoragePlugin } from 'capacitor-secure-storage-plugin'
 import logger from '/logger'
 
 
-export const makeRequest = function(method, endpoint, body, onSuccess, onFailure) {
+export const makeRequest = function(method, endpoint, body, onSuccess, onFailure, options) {
     return function(dispatch, getState) {
+        logger.debug(`>>> ${method} ${endpoint} >>>`)
 
         const system = getState().system
         const abortController = new AbortController()
@@ -39,7 +40,8 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
                 signal: abortController.signal,
                 headers: {
                     'Accept': 'application/json',
-                    'X-Communities-Platform': Capacitor.getPlatform()
+                    'X-Communities-Platform': Capacitor.getPlatform(),
+                    'Cache-Control': 'no-store'
                 },
             }
 
@@ -64,7 +66,9 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
             if ( Capacitor.getPlatform() === 'android' || Capacitor.getPlatform() === 'ios' ) {
                 let authToken = null
                 try { 
-                    authToken = await SecureStoragePlugin.get({ key: 'auth-token' })
+                    const secureValue = await SecureStoragePlugin.get({ key: 'auth-token' })
+                    authToken = secureValue.value
+                    logger.debug(`Got auth token: ${authToken}`)
                 } catch (error) {
                     logger.warn(`Missing auth token.  Will make an unauthenticated request.`)
                 }
@@ -74,13 +78,24 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
                 }
             }
 
-            let apiUrl = new URL(system.api, system.host).href
-            let fullEndpoint = new URL(endpoint, apiUrl).href 
+            // Because the URL's weird resolution rules, we need to make sure
+            // to convert these into relative URLs that URL can handle.
+            let relativeEndpoint = endpoint
+            if ( relativeEndpoint.startsWith('/') ) {
+                relativeEndpoint = '.' + relativeEndpoint 
+            }
+            let fullEndpoint = new URL(relativeEndpoint, system.api).href 
 
             // ==================== Make the Request ==========================
             //
-            
+
+            logger.debug(`<<< ${method} ${endpoint} :: Sending ${method} ${fullEndpoint} with options: ${JSON.stringify(fetchOptions)}`)
             const response = await fetch(fullEndpoint, fetchOptions)
+            logger.debug(`>>> ${method} ${endpoint} ::  Got ${response.status} with headers: `)
+            for(const [header, value] of response.headers) {
+                logger.debug(`>>> ${method} ${endpoint} :: Header::  ${header}=${value}`)
+            }
+            logger.debug(`>>> ${method} ${fullEndpoint} :: End Headers`)
 
             // If they've been logged out, send them to the home page, which will
             // let them log back in again.
@@ -93,11 +108,18 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
             // one. This is the Session ID.  
             if ( Capacitor.getPlatform() === 'android' || Capacitor.getPlatform() === 'ios' ) {
                 if ( response.headers.has('X-Communities-Auth') ) {
+                    logger.debug(`Setting auth token: ${response.headers.get('X-Communities-Auth')}`)
                     await SecureStoragePlugin.set({ key: 'auth-token', value: response.headers.get('X-Communities-Auth') })
                 }
             }
-            
-            const responseBody = await response.json()
+          
+            let responseBody = {}
+            if ( options?.isFile === true ) {
+                const blob = await response.blob()
+                responseBody.fileURL = URL.createObjectURL(blob)
+            } else {
+                responseBody = await response.json()
+            }
 
             const result = {
                 success: response.ok,
@@ -140,15 +162,15 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
                 }
 
                 if ( response.status >= 500 ) {
-                    logger.error(`Request failed: `, result)
+                    logger.error(`<<< ${method} ${endpoint} :: Failed: `, result)
                 } else {
-                    logger.warn(`Request returned ${response.status}: `, result)
+                    logger.warn(`<<< ${method} ${endpoint} :: Returned ${response.status}: `, result)
                 }
                 if ( onFailure ) {
                     try {
                         onFailure(response.status, responseBody)
                     } catch (error) {
-                        logger.error(`Error handling request failure: `, error)
+                        logger.error(`<<< ${method} ${endpoint} :: Error handling request failure: `, error)
                     }
                 } 
                 return result
@@ -158,7 +180,7 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
                 try {
                     onSuccess(responseBody)
                 } catch (error) {
-                    logger.error(`Error handling request success: `, error)
+                    logger.error(`<<< ${method} ${endpoint} :: Error handling request success: `, error)
                     result.success = false
                     result.error = {
                         type: 'frontend-error',
@@ -168,6 +190,7 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
                 }
             }
 
+            logger.debug(`<<< ${method} ${endpoint} <<<`)
             return result 
         }
 

@@ -42,7 +42,7 @@ const DraftImageFile = function({ fileId, setFileId, width, deleteOnRemove }) {
         content = (
             <div className="file">
                 <a className="remove" href="" onClick={(e) => { e.preventDefault(); remove() }}><XCircleIcon /></a>
-                <img src={`${configuration.host}${configuration.backend}/file/${fileId}?width=${renderWidth}`} />
+                <img id={fileId} width={renderWidth}  />
             </div>
         )
     }

@@ -57,17 +57,49 @@ export const FileSlice = createSlice({
         setFileQueryResults: setQueryResults,
         clearFileQuery: clearQuery,
         clearFileQueries: clearQueries,
-        resetFileSlice: () => initialState,
+        resetFileSlice: (state, action) => {
+            // Make sure we revoke all the URLs in the cache so that we
+            // don't leak memory.
+            for(const [fileId, widths] of Object.entries(state.cache)) {
+                for(const [width, url] of Object.entries(widths)) {
+                    URL.revokeObjectURL(url)
+                }
+            }
 
-        setInCache: function(state, action ) {
-            const url = action.payload.url
-            const objectUrl = action.payload.objectUrl
+            return initialState
+        },
 
-            state.cache[url] = objectUrl 
+        setInCache: (state, action ) => {
+            const fileId = action.payload.fileId
+            const width = action.payload.width
+
+            if ( ! ( fileId in state.cache) ) {
+                state.cache[fileId] = {}
+            }
+
+            const objectURL = action.payload.objectURL
+
+            if ( width ) {
+                state.cache[fileId][width] = objectURL
+            } else {
+                state.cache[fileId]['full'] = objectURL
+            }
+        },
+
+        removeFromCache: (state, action) => {
+            const fileId = action.payload.fileId
+
+
+            if ( fileId in state.cache ) {
+                for(const [width, url] of Object.entries(state.cache[fileId]) ) {
+                    URL.revokeObjectURL(url)
+                }
+                delete state.cache[fileId]
+            }
         }
     }
 })
 
-export const {  setFilesInDictionary, removeFile, resetFileSlice, setInCache }  = FileSlice.actions
+export const {  setFilesInDictionary, removeFile, resetFileSlice, setInCache, removeFromCache }  = FileSlice.actions
 
 export default FileSlice.reducer

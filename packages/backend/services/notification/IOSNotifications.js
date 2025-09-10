@@ -52,7 +52,7 @@ module.exports = class IOSNotifications {
 
         for(const session of sessions) {
             if ( 'device' in session.data 
-                && session.data.device.platform === 'ios' 
+                && session.data.platform === 'ios' 
                 && 'deviceToken' in session.data.device) 
             {
                 const token = session.data.device.deviceToken

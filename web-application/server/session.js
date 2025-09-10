@@ -29,10 +29,11 @@ const createSessionParser = function(core) {
     })
     const sessionParser = session({
         name: core.config.session.cookieName,
-        authHeader: core.config.session.headerName,
+        headerName: core.config.session.headerName,
         platformHeader: core.config.session.platformHeader,
         secret: core.config.session.secret,
         store: sessionStore,
+        logger: core.logger,
         resave: false,
         saveUninitialized: true,
         proxy: true,

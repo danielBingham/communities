@@ -14,7 +14,7 @@ CapacitorUpdater.notifyAppReady()
 
 let host = document.querySelector('meta[name="communities-host"]').content
 let api = document.querySelector('meta[name="communities-api"]').content
-let environment = document.querySelector('meta[name="communities-environmente"]').content
+let environment = document.querySelector('meta[name="communities-environment"]').content
 
 console.log(`Communities startup with::\n 
   environment: "${environment}"\n

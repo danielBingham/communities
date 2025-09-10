@@ -22,7 +22,7 @@ const DraftProfileImage = forwardRef(function({
     deleteOnRemove 
 }, ref) {
 
-    const configuration = useSelector((state) => state.system.configuration)
+    const system = useSelector((state) => state.system)
 
     const [ cacheBust, setCacheBust ] = useState(0)
     const [ dimensions, setDimensions ] = useState({
@@ -168,7 +168,7 @@ const DraftProfileImage = forwardRef(function({
                     minHeight={10}
                     circularCrop={true}
                 >
-                    <Image ref={imageRef} onLoad={onLoad} src={`${configuration.host}${configuration.backend}/file/${fileId}?cacheBust=${cacheBust}`} />
+                    <Image ref={imageRef} onLoad={onLoad} id={fileId} />
                 </ReactCrop>
             </div>
                 { ! isLoaded && <Spinner /> }

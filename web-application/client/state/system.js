@@ -2,6 +2,16 @@ import { createSlice } from '@reduxjs/toolkit'
 
 import { makeRequest } from '/state/lib/makeRequest'
 
+let host = document.querySelector('meta[name="communities-host"]').content
+
+let apiPath = document.querySelector('meta[name="communities-api"]').content
+if ( ! apiPath.endsWith('/') ) {
+    apiPath = apiPath + '/'
+}
+
+let api = new URL(apiPath, host).href
+
+
 /***
  * System slice convers data essential for the system to function and that must
  * be queried from the root, rather than the API, during system setup.  All requests
@@ -10,8 +20,8 @@ import { makeRequest } from '/state/lib/makeRequest'
 const systemSlice = createSlice({
     name: 'system',
     initialState: {
-        host: document.querySelector('meta[name="communities-host"]').content,
-        api: document.querySelector('meta[name="communities-api"]').content,
+        host: host,
+        api: api,
         csrf: null,
         configuration: null,
         features: {},
