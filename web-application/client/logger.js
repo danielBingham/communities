@@ -157,6 +157,12 @@ export class Logger  {
     }
 }
 
-const logger = new Logger('info')
+let environment = document.querySelector('meta[name="communities-environment"]').content
+let initialLogLevel = 'info'
+if ( environment === 'development' ) {
+    initialLogLevel = 'debug'
+}
+
+const logger = new Logger(initialLogLevel)
 export default logger
 
