@@ -1,5 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit'
 
+import { Capacitor } from '@capacitor/core'
+import { SecureStoragePlugin } from 'capacitor-secure-storage-plugin'
+
 import { makeRequest } from '/state/lib/makeRequest'
 
 import { reset } from '/state/system'
@@ -130,11 +133,21 @@ export const deleteAuthentication = function() {
 
         return dispatch(makeRequest('DELETE', endpoint, null,
             function(responseBody) {
-                dispatch(reset())
-                // As soon as we reset the redux store, we need to redirect to
-                // the home page.  We don't want to go through anymore render
-                // cycles because that could have undefined impacts.
-                window.location.href = "/"
+                if ( Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android' ) {
+                    SecureStoragePlugin.clear().then(function() {
+                        dispatch(reset())
+                        // As soon as we reset the redux store, we need to redirect to
+                        // the home page.  We don't want to go through anymore render
+                        // cycles because that could have undefined impacts.
+                        window.location.href = "/"
+                    })
+                } else {
+                    dispatch(reset())
+                    // As soon as we reset the redux store, we need to redirect to
+                    // the home page.  We don't want to go through anymore render
+                    // cycles because that could have undefined impacts.
+                    window.location.href = "/"
+                }
             }
         ))
     }

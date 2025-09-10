@@ -100,6 +100,9 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
             // If they've been logged out, send them to the home page, which will
             // let them log back in again.
             if ( response.status === 401 ) {
+                if ( Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android' ) {
+                    await SecureStoragePlugin.clear()
+                }
                 window.location.href = "/"
             }
 
