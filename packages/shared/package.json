@@ -1,7 +1,7 @@
 {
   "name": "@communities/shared",
   "type": "commonjs",
-  "version": "0.6.0-rc20",
+  "version": "0.6.0-rc23",
   "description": "The shared libraries of Communities.",
   "author": "Daniel Bingham",
   "license": "GPL-3.0",
