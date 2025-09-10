@@ -6,11 +6,17 @@ import { setRelationsInState }  from '/state/lib/relations'
 import { setFilesInDictionary, removeFile, setInCache, removeFromCache } from './slice'
 
 export const loadFile = function(fileId, width) {
-    return async function(dispatch, getState) {
+    return function(dispatch, getState) {
         const state = getState()
 
         if ( fileId in state.File.cache && width in state.File.cache[fileId] ) {
-            return
+            const promise = new Promise((resolve, reject) => resolve({ 
+                success: true,
+                request: null,
+                response: null,
+                error: null
+            }))
+            return [ promise, null ] 
         }
 
         dispatch(setInCache({ fileId: fileId, width: width, objectURL: null }))
@@ -23,7 +29,7 @@ export const loadFile = function(fileId, width) {
         const query = new URLSearchParams(params)
         const url = new URL(path, state.system.api).href + '?' + query
 
-        dispatch(makeRequest('GET', url, null,
+        return dispatch(makeRequest('GET', url, null,
             function(response) {
                 dispatch(setInCache({ fileId: fileId, width: width, objectURL: response.fileURL }))
             }, 

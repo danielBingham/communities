@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
+import { useRequest } from '/lib/hooks/useRequest'
+
 import logger from '/logger'
 
 import { loadFile } from '/state/File'
@@ -40,7 +42,7 @@ const FetchImage = function({ id, width, ref, onLoad }) {
         return null
     })
 
-    const dispatch = useDispatch()
+    const [ request, makeRequest ] = useRequest()
 
     const onLoadInternal = function(event) {
         setIsLoading(false)  
@@ -63,7 +65,7 @@ const FetchImage = function({ id, width, ref, onLoad }) {
         }
 
         if ( imageUrl === null || needToLoad ) {
-            dispatch(loadFile(id, width))
+            makeRequest(loadFile(id, width))
         } 
     }, [ id, width, needToLoad])
 
