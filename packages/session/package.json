@@ -37,17 +37,14 @@
   },
   "files": [
     "session/",
-    "HISTORY.md",
     "index.js"
   ],
   "engines": {
     "node": ">= 24.5.0"
   },
   "scripts": {
-    "lint": "eslint . && node ./scripts/lint-readme.js",
     "test": "./test/support/gencert.sh && mocha --require test/support/env --check-leaks --bail --no-exit --reporter spec test/",
     "test-ci": "nyc --reporter=lcov --reporter=text npm test",
-    "test-cov": "nyc npm test",
-    "version": "node scripts/version-history.js && git add HISTORY.md"
+    "test-cov": "nyc npm test"
   }
 }
