@@ -28,7 +28,7 @@ const GroupImage = function({ groupId, className, width }) {
     let content = ( <UserGroupIcon /> ) 
     if ( group && group.fileId ) {
         content = (
-            <Image src={`${configuration.host}${configuration.backend}/file/${group.fileId}?width=${renderWidth}`} />
+            <Image id={group.fileId} width={renderWidth} />
         )
     } 
 

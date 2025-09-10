@@ -19,6 +19,7 @@
  ******************************************************************************/
 
 import * as Sentry from "@sentry/react";
+import { Capacitor } from '@capacitor/core'
 
 export class Logger  {
     /**
@@ -79,6 +80,16 @@ export class Logger  {
 
         const now = new Date()
         let logPrefix = `${now.toISOString()} ${Logger.levelDescriptions[level]} :: `
+
+        if ( Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android' ) {
+            if ( typeof message === 'object' ) {
+                message = JSON.stringify(message)
+            }
+
+            if ( object ) {
+                object = JSON.stringify(object)
+            }
+        }
 
         if ( typeof message === 'object' ) {
             if ( level == Logger.levels.error) {
@@ -146,6 +157,12 @@ export class Logger  {
     }
 }
 
-const logger = new Logger('info')
+let environment = document.querySelector('meta[name="communities-environment"]').content
+let initialLogLevel = 'info'
+if ( environment === 'development' ) {
+    initialLogLevel = 'debug'
+}
+
+const logger = new Logger(initialLogLevel)
 export default logger
 

@@ -32,26 +32,15 @@ const cors = require('cors')
 const path = require('path')
 
 const { 
-    Core, 
     FeatureFlags, 
     FeatureService, 
-    ServerSideRenderingService, 
-    PageMetadataService, 
-    TokenService 
 } = require('@communities/backend')
 
-const { createLogMiddleware } = require('./log')
+const { createLogMiddleware, createLogIdMiddleware } = require('./log')
 const { createCSRFMiddleware } = require('./csrf')
 const { createErrorsMiddleware } = require('./errors')
 
 const createRouter = require('./router')
-
-
-
-/**********************************************************************
- * Load Configuration
- **********************************************************************/
-const config = require('./config') 
 
 const createExpressApp = function(core, sessionParser) {
     core.logger.info(`Initializing the Express App...`)
@@ -65,6 +54,9 @@ const createExpressApp = function(core, sessionParser) {
     // Trust the proxy.
     app.set('trust proxy', true)
 
+    // Request and log initialization middleware
+    app.use(createLogMiddleware(core))
+
     // Make sure the request limit is large so that we don't run into it.
     app.use(express.json({ limit: "50mb" }))
     app.use(express.urlencoded({ limit: "50mb", extended: false }))
@@ -72,21 +64,33 @@ const createExpressApp = function(core, sessionParser) {
     app.use(cors({
         origin: [ core.config.host, 'capacitor://localhost', 'https://localhost' ],
         methods: [ 'GET', 'POST', 'PATCH', 'DELETE' ],
-        allowedHeaders: [ 'Content-Type', 'Accept', 'X-Communities-CSRF-Token', 'X-Communities-Platform' ],
-        credentials: true,
+        allowedHeaders: [ 
+            'Content-Type', 'Accept', 'Cache-Control',
+            'Sec-WebSocket-Protocol',
+            'X-Communities-CSRF-Token', 'X-Communities-Platform', 'X-Communities-Auth' 
+        ],
         exposedHeaders: '*'
     }))
 
-    // Set up our session storage.  We're going to use database backed sessions to
-    // maintain a stateless app.
-    app.use((request, response, next) => {
-        sessionParser(request, response, () => {
-            next()
-        })
+    app.use('/api', function(request, response, next) {
+        // Don't cache API responses.  We'll take care of that in redux.
+        response.setHeader('Cache-Control', 'no-store')
+        next()
     })
 
-    // Request and log initialization middleware
-    app.use(createLogMiddleware(core))
+    // Set up our session storage.  We're going to use database backed sessions to
+    // maintain a stateless app.
+    //
+    // We only want to setup the sessions for API requests.  We don't care
+    // about them for requests for static assets.
+    app.use('/api', function(request, response, next) {
+        sessionParser(request, response, next)
+    })
+
+    // Assign an ID to the request logger if we have a session.  The ID will
+    // follow the requests around.
+    app.use('/api', createLogIdMiddleware(core))
+
 
     // Set the feature flags on each request, so that they are always up to date.
     // This means we can't use feature flags in Controller, Service, and DAO
@@ -98,7 +102,9 @@ const createExpressApp = function(core, sessionParser) {
     //
     // Or is it better to retain this pattern? Does it save memory to use a single
     // instance created at startup?  Is it enough that we care?
-    app.use(function(request, response, next) {
+    //
+    // Feature flags only matter for API requests.
+    app.use('/api', function(request, response, next) {
         const featureService = new FeatureService(core)
         featureService.getEnabledFeatures().then(function(features) {
             core.features = new FeatureFlags(features)
@@ -108,7 +114,10 @@ const createExpressApp = function(core, sessionParser) {
 
     // Perform the CSRF check, checking the token provided in the header
     // against the one stored in the session.
-    app.use(createCSRFMiddleware(core))
+    //
+    // We only care about CSRF for the API.  For static assets it doesn't
+    // matter.
+    app.use('/api', createCSRFMiddleware(core))
 
     // Get the api router, pre-wired up to the controllers.
     const router = createRouter(core)
@@ -116,49 +125,18 @@ const createExpressApp = function(core, sessionParser) {
     // Load our router at the ``/api/v0/`` route.  This allows us to version our api. If,
     // in the future, we want to release an updated version of the api, we can load it at
     // ``/api/v1/`` and so on, with out impacting the old versions of the router.
-    core.logger.info(`Configuring the API Backend on path '${core.config.backend}'`)
-    app.use(core.config.backend, router)
+    core.logger.info(`Configuring the API Backend on path '/api/0.0.0'`)
+    app.use('/api/0.0.0', router)
 
+    // Super simple health check, minimal work.
     app.get('/health', function(request, response) {
         response.status(200).send()
     })
 
-    /**
-     * Send configuration information up to the front-end.  Be *very careful*
-     * about what goes in here.
-     */
-    app.get('/config', function(request, response) {
-        const tokenService = new TokenService(core)
-
-        // Only generate a new CSRF Token if we don't have one. Since we're
-        // storing it in the session, we'll need to generate a new one
-        // anytime we destroy the session, which is the desired behavior.
-        if ( request.session?.csrfToken === undefined  || request.session?.csrfToken === null ) {
-            request.session.csrfToken = tokenService.createToken()
-        }
-
-       response.status(200).json({
-            version: process.env.npm_package_version,
-            host: core.config.host,
-            wsHost: core.config.wsHost,
-            backend: core.config.backend, 
-            environment: process.env.NODE_ENV,
-            log_level: core.config.log_level,
-            maintenance_mode: process.env.MAINTENANCE_MODE === 'true' ? true : false,
-            stripe: {
-                portal: core.config.stripe.portal,
-                links: core.config.stripe.links
-            },
-            csrf: request.session.csrfToken,
-            features: core.features.features
-        })
-    })
-
-    app.get('/version', function(request, response) {
-        response.status(200).json({
-            version: process.env.npm_package_version,
-        })
-    })
+    // ==================== Static Asset Requests =============================
+    // These are requests for static assets where we just want to return the
+    // asset and do no additional work.
+    // ========================================================================
 
     app.get('/\/dist\/dist\.zip$/', function(request, response) {
         const filepath = path.join(process.cwd(), 'public/dist/dist.zip')
@@ -169,7 +147,7 @@ const createExpressApp = function(core, sessionParser) {
      * Handle requests for static image and pdf files.  We'll send these directly
      * to the public path.
      */
-    app.get(/.*\.(svg|ico|pdf|jpg|png)$/, function(request, response) {
+    app.get(/.*\.(svg|ico|jpg|png)$/, function(request, response) {
         const filepath = path.join(process.cwd(), 'public', request.originalUrl)
         response.sendFile(filepath)
     })

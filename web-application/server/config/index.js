@@ -15,7 +15,6 @@ const config = {
     wsHost: process.env.WS_HOST,
     environment: process.env.NODE_ENV,
     log_level: process.env.LOG_LEVEL,
-    backend: '/api/0.0.0',
     // Database configuration
     database: {
         host: process.env.DATABASE_HOST,
@@ -29,9 +28,10 @@ const config = {
         port: process.env.REDIS_PORT 
     },
     session: {
-        key: 'communities_id',
-        secret: process.env.SESSION_SECRET,
-        secure_cookie: false
+        cookieName: 'communities_id',
+        headerName: 'X-Communities-Auth',
+        platformHeader: 'X-Communities-Platform',
+        secret: process.env.SESSION_SECRET
     },
     s3: {
         bucket_url: process.env.S3_BUCKET_URL,

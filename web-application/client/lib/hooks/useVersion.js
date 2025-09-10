@@ -27,7 +27,7 @@ export const useVersion = function() {
 
     useEffect(() => {
         if ( config !== null ) {
-                makeRequest(getVersion())
+            makeRequest(getVersion())
         }
     }, [ config, location ])
 

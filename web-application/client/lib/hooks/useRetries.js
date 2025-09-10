@@ -17,14 +17,17 @@ export const useRetries = function(name, makeRequest, request, maxRetries) {
                 return
             }
 
-            if ( attempt > 0 ) {
+            if ( attempt === 0 ) {
+                makeRequest()
+            } else if ( attempt > 0 ) {
                 console.log(`${name} failed.  Retrying in ${delay} ms...`)
+
+                timeoutId.current = setTimeout(function() {
+                    makeRequest()
+                    timeoutId.current = null
+                }, delay) 
             }
 
-            timeoutId.current = setTimeout(function() {
-                makeRequest()
-                timeoutId.current = null
-            }, delay) 
             setDelay(Math.floor(delay * 1.5))
             setAttempt(attempt + 1)
         } else if ( request?.state === 'fulfilled' ) {

@@ -113,7 +113,7 @@ export const notificationsSlice = createSlice({
 export const handleNotificationEvent = function(event) {
     return function(dispatch, getState) {
         const device = getState().authentication.device
-        const host = getState().system.configuration.host
+        const host = getState().system.host
         const settings = getState().authentication.currentUser?.settings?.notifications
         const defaultNotificationSettings = {
             web: true,

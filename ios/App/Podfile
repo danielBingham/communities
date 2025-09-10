@@ -15,6 +15,7 @@ def capacitor_pods
   pod 'CapacitorDevice', :path => '../../node_modules/@capacitor/device'
   pod 'CapacitorPushNotifications', :path => '../../node_modules/@capacitor/push-notifications'
   pod 'CapgoCapacitorUpdater', :path => '../../node_modules/@capgo/capacitor-updater'
+  pod 'CapacitorSecureStoragePlugin', :path => '../../node_modules/capacitor-secure-storage-plugin'
 end
 
 target 'App' do

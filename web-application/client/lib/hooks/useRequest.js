@@ -26,18 +26,22 @@ export function useRequest() {
         promise
             .then((result) => {
                 setRequest({ 
-                    state: 'fulfilled',
+                    state: result.success ? 'fulfilled' : 'failed',
                     request: result.request,
                     response: result.response,
-                    error: null
+                    error: result.error 
                 })
             })
-            .catch((result) => {
+            .catch((error) => {
+                logger.error(`Request error: `, error)
                 setRequest({ 
                     state: 'failed',
-                    request: result.request,
-                    response: result.response,
-                    error: result.error
+                    request: {},
+                    response: {},
+                    error: {
+                        type: 'unknown',
+                        message: 'Unhandled request error.'
+                    }
                 })
             })
     }

@@ -63,7 +63,7 @@ module.exports = class Logger  {
         }
 
         // For the core logger, we don't know what request this is.
-        this.id = 'core' 
+        this.id = '' 
         if ( id ) {
             this.id = id
         }
@@ -77,7 +77,35 @@ module.exports = class Logger  {
         if ( url ) {
             this.url = url
         }
+    }
 
+    setId(id) {
+        this.id = id
+    }
+
+    getPrefix(level) {
+        const now = new Date()
+
+        let first = `${now.toISOString()} ${Logger.levelDescriptions[level]} :: `
+
+        let second = ''
+        if ( this.id !== '' ) {
+            second += this.id + ' '
+        }
+
+        if ( this.method !== '' ) {
+            second += this.method + ' '
+        }
+
+        if ( this.url !== '' ) {
+            second += this.url + ' '
+        }
+
+        if ( second !== '' ) {
+            second += ':: '
+        }
+        
+        return `${first}${second}` 
     }
 
     log(level, message, object) {
@@ -86,8 +114,7 @@ module.exports = class Logger  {
             return
         }
 
-        const now = new Date()
-        let logPrefix = `${now.toISOString()} ${Logger.levelDescriptions[level]} :: `
+        const logPrefix = this.getPrefix(level)
 
         if ( typeof message === 'object' ) {
             if ( level == Logger.levels.error) {

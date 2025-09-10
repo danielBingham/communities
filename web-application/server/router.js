@@ -17,6 +17,30 @@ module.exports = function(core) {
     const router = express.Router()
 
     /******************************************************************************
+     * System
+     ******************************************************************************/
+    const SystemController = require('./controllers/SystemController')
+    const systemController = new SystemController(core)
+
+    router.get('/system/initialization', function(request, response, next) {
+        systemController.getInitialization(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.post('/system/initialization', function(request, response, next) {
+        systemController.postInitialization(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.get('/system/version', function(request, response, next) {
+        systemController.getVersion(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    /******************************************************************************
      * Feature Flag Management and Migration Rest Routes
      *****************************************************************************/
     const FeatureController = require('./controllers/FeatureController')

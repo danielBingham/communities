@@ -13,6 +13,7 @@ dependencies {
     implementation project(':capacitor-device')
     implementation project(':capacitor-push-notifications')
     implementation project(':capgo-capacitor-updater')
+    implementation project(':capacitor-secure-storage-plugin')
 
 }
 
