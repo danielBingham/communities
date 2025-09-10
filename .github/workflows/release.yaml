@@ -93,6 +93,25 @@ jobs:
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
           npm publish
 
+      # Test, Version, and Publish @communities/session
+      #
+      - name: Install Session Dependencies 
+        working-directory: ./packages/session
+        run: |
+          export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
+          npm ci
+
+      - name: Version the Session Package
+        working-directory: ./packages/session
+        run: |
+          npm version ${{ github.event.inputs.version }}
+
+      - name: Publish to AWS CodeArtifact 
+        working-directory: ./packages/session
+        run: |
+          export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
+          npm publish
+
       # Build the worker docker container and push it to ECR 
       - name: Install updated Shared version
         working-directory: ./worker
@@ -143,6 +162,12 @@ jobs:
         run: |
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
           npm install @communities/backend@${{ github.event.inputs.version }}
+
+      - name: Install updated session version
+        working-directory: ./web-application
+        run: |
+          export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
+          npm install @communities/session@${{ github.event.inputs.version }}
 
       - name: Install Web Application NPM Modules
         working-directory: ./web-application
