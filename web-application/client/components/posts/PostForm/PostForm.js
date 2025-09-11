@@ -217,6 +217,10 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
         ((groupId !== undefined && groupId !== null) || (post?.groupId !== undefined && post?.groupId !== null))
             && canCreateGroupPost !== true )
     {
+        logger.debug(`## PostForm :: No permission to post in Group.`)
+        logger.debug(`groupId: `, groupId)
+        logger.debug(`post: `, post)
+        logger.debug(`canCreateGroupPost: `, canCreateGroupPost)
         return null
     }
 
