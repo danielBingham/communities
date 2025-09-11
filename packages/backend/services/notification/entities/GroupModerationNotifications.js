@@ -64,9 +64,11 @@ module.exports = class GroupModerationNotifications {
         context.group = null 
         if ( context.post.groupId ) {
             context.group = await this.groupDAO.getGroupById(context.post.groupId)
-            context.link = `group/${context.group.slug}/${context.post.id}`
+            context.path = `/group/${context.group.slug}/${context.post.id}`
+            context.link = new URL(context.path, this.core.config.host).href
         } else {
-            context.link = `${context.postAuthor.username}/${context.post.id}`
+            context.path = `/${context.postAuthor.username}/${context.post.id}`
+            context.link = new URL(context.path, this.core.config.host).href
         }
 
         if ( type === 'GroupModeration:update:comment:status:rejected:author' ) {

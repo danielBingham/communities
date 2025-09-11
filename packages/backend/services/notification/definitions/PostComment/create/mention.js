@@ -32,6 +32,6 @@ module.exports = {
     },
     web: {
         text: Handlebars.compile(`{{{commentAuthor.name}}} mentioned you in their comment, "{{{commentIntro}}}", on a post by {{{postAuthor.name}}}, "{{{postIntro}}}".`),
-        path: Handlebars.compile(`/{{{link}}}`) 
+        path: Handlebars.compile(`{{{ path }}}`) 
     }
 }

@@ -52,9 +52,11 @@ module.exports = class PostNotifications {
 
         if ( context.post.groupId ) {
             const group = await this.groupDAO.getGroupById(context.post.groupId)
-            context.link = new URL(`group/${group.slug}/${context.post.id}`, this.core.config.host).href
+            context.path = `group/${group.slug}/${context.post.id}`
+            context.link = new URL(context.path, this.core.config.host).href
         } else {
-            context.link = new URL(`${context.postAuthor.username}/${context.post.id}`, this.core.config.host).href
+            context.path = `${context.postAuthor.username}/${context.post.id}`
+            context.link = new URL(context.path, this.core.config.host).href
         }
 
     }

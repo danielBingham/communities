@@ -32,6 +32,6 @@ module.exports = {
     },
     web: {
         text: Handlebars.compile(`Communities moderators removed your post, "{{{postIntro}}}..."`),
-        path: Handlebars.compile(`/{{{link}}}`) 
+        path: Handlebars.compile(`{{{ path }}}`) 
     }
 }
