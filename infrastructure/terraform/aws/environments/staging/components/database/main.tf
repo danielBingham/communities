@@ -24,6 +24,7 @@ module "rds" {
 
   instance_class = "db.t4g.medium"
   engine_version = "16.6"
+  snapshot = var.snapshot 
 
   application = "communities" 
   environment = "staging" 
