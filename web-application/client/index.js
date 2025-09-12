@@ -5,8 +5,10 @@ import { Provider } from 'react-redux'
 
 import { Capacitor } from '@capacitor/core'
 import { CapacitorUpdater } from '@capgo/capacitor-updater'
+import { StatusBar, Style } from '@capacitor/status-bar'
 
 import * as Sentry from "@sentry/react";
+
 
 import App from './App'
 import store from './state/store'
@@ -29,6 +31,8 @@ if ( Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android' 
         dsn: "https://3738393d51a9e4de9b7fe4b2bbb0bf56@o4509038666055680.ingest.us.sentry.io/4509038670249984"
       });
     }
+
+    StatusBar.setStyle({ style: Style.Dark })
 
     const container = document.getElementById('root')
     const root = createRoot(container)

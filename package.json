@@ -18,6 +18,7 @@
     "@capacitor/device": "^7.0.2",
     "@capacitor/ios": "^7.4.2",
     "@capacitor/push-notifications": "^7.0.2",
+    "@capacitor/status-bar": "^7.0.3",
     "@capgo/capacitor-updater": "7.8.7",
     "capacitor-secure-storage-plugin": "^0.11.0"
   },
