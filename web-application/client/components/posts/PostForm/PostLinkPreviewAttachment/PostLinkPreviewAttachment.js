@@ -1,6 +1,10 @@
 import { usePost } from '/lib/hooks/Post'
 import { usePostDraft } from '/lib/hooks/usePostDraft'
 
+import { XCircleIcon } from '@heroicons/react/24/solid'
+
+import LinkPreview from '/components/links/view/LinkPreview'
+
 import './PostLinkPreviewAttachment.css'
 
 const PostLinkPreviewAttachment = function({ postId, groupId, sharedPostId }) {

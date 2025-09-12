@@ -18,7 +18,7 @@ const PostVisibilityControl = function({ postId, groupId, sharedPostId }) {
 
     const setVisibility = function(visibility) {
         const newDraft = { ...draft }
-        draft.visibility = visibility
+        newDraft.visibility = visibility
         setDraft(newDraft)
     }
 

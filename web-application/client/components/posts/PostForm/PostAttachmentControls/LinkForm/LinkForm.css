@@ -1,12 +1,16 @@
 .link-form {
-    display: flex;
-    padding: 10px 0;
+    width: 100%;
+    max-width: 650px;
 }
 .link-form input {
-    flex-grow: 1;
+    width: 100%;
     padding: 5px;
     font-size: 16px;
     margin-right: 5px;
+}
+.link-form__buttons {
+    margin-top: 8px;
+    text-align: right;
 }
 
 @media (1600px <= width) {

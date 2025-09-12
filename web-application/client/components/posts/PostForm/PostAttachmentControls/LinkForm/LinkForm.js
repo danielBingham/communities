@@ -59,10 +59,10 @@ const LinkForm = function({ setShowLinkForm, setLinkPreviewId }) {
                 value={url}
             />
             { inProgress && <div className="link-form__buttons"><Spinner /></div> }
-            { ! inProgress && <>
+            { ! inProgress && <div className="link-form__buttons">
                 <Button onClick={(e) => close()}><XMarkIcon /> <span className="button-text">Cancel</span></Button>
                 <Button type="primary" onClick={(e) => submit()}><LinkIcon /> <span className="button-text">Add Link</span></Button>
-            </> }
+            </div> }
         </div>
     )
 

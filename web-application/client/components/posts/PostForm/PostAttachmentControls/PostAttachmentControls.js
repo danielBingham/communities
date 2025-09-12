@@ -58,7 +58,7 @@ const PostAttachmentControls = function({ postId, groupId, sharedPostId }) {
             <div className="post-form__link">
                 <Button type="primary" onClick={(e) => {setShowLinkForm(true)}}><LinkIcon /><span className="attachment-button-text"> Add Link</span></Button>
             </div>
-            <Modal isVisible={ showLinkForm} setIsVisible={setShowLinkForm}>
+            <Modal isVisible={ showLinkForm} setIsVisible={setShowLinkForm} hideX={true}>
                 <LinkForm setLinkPreviewId={setLinkPreviewId} setShowLinkForm={setShowLinkForm} />
             </Modal>
         </div>
