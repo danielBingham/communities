@@ -5,7 +5,8 @@ import './Footer.css'
 
 const Footer = function({ version }) {
     const currentUser = useSelector((state) => state.authentication.currentUser)
-    const config = useSelector((state) => state.system.configuration)
+    const clientVersion = useSelector((state) => state.system.clientVersion)
+    const serverVersion = useSelector((state) => state.system.serverVersion)
 
     if ( currentUser === null || currentUser === undefined ) {
         return null
@@ -13,14 +14,13 @@ const Footer = function({ version }) {
 
     // ======= Render ===============================================
     
-    const loadedVersion = config.version 
     return (
      <footer>
          <div className="wrapper">
             <div className="explanation-copyright footer__block">
                 <p className="explanation">Communities is user-supported social media site working towards not for profit<sup><a href="/about/tos#llc">1</a></sup> <sup><a href="/about/faq#non-profit">2</a></sup>, cooperative governance. It is designed to help people build community, connect, and organize. It is funded and will be governed by its users.</p>
                 <p className="explanation">Communities is <a href="https://github.com/danielbingham/communities">open source</a> under the <a href="https://github.com/danielBingham/communities?tab=AGPL-3.0-1-ov-file">AGPL 3.0 license</a> and it's currently in <a href="/about/faq#beta">Public Beta</a>.</p>
-                <p>Version: { loadedVersion === version ? `${loadedVersion}` : `${loadedVersion}/${version}` }</p>
+                <p>Version: { clientVersion === serverVersion ? `${clientVersion}` : `${clientVersion}/${serverVersion}` }</p>
                 <p>Site text and design (c) Communities Social, LLC 2024 - 2025</p>
             </div>
             <div className="about-links footer__block">

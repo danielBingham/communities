@@ -10,8 +10,9 @@ import { useRequest } from '/lib/hooks/useRequest'
 import { getVersion } from '/state/system'
 
 export const useVersion = function() {
-    const config = useSelector((state) => state.system.configuration)
-    const version = useSelector((state) => state.system.version)
+    const clientVersion = useSelector((state) => state.system.clientVersion)
+    const serverVersion = useSelector((state) => state.system.serverVersion)
+
     const location = useLocation()
 
     const [request, makeRequest ] = useRequest()
@@ -26,23 +27,18 @@ export const useVersion = function() {
     }
 
     useEffect(() => {
-        if ( config !== null ) {
-            makeRequest(getVersion())
-        }
-    }, [ config, location ])
+        makeRequest(getVersion())
+    }, [ location ])
 
     useEffect(() => {
-        if ( config !== null ) {
-            const loadedVersion = config.version 
-            if ( loadedVersion !== version ) {
-                if ( Capacitor.getPlatform() === 'web' ) {
-                    window.location.reload(true)
-                } else if ( Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android' ) {
-                    updateMobile()
-                }
+        if ( clientVersion !== serverVersion) {
+            if ( Capacitor.getPlatform() === 'web' ) {
+                window.location.reload(true)
+            } else if ( Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android' ) {
+                updateMobile()
             }
         }
-    }, [ version, config ])
+    }, [ serverVersion, clientVersion ])
 
-    return [version, request]
+    return [clientVersion, request]
 }
