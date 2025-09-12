@@ -1,18 +1,15 @@
-import React, { useState, useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
-import { useNavigate, Link } from 'react-router-dom'
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
 
 import { UsersIcon, UserGroupIcon, GlobeAltIcon, MegaphoneIcon } from '@heroicons/react/24/solid'
 import { InformationCircleIcon } from '@heroicons/react/16/solid'
 
 import { useFeature } from '/lib/hooks/feature'
-import { usePostDraft } from '/lib/hooks/usePostDraft'
 import { usePost } from '/lib/hooks/Post'
 import { useUser } from '/lib/hooks/User'
 import { useGroup } from '/lib/hooks/Group'
 import { useSiteModeration } from '/lib/hooks/SiteModeration'
 import { useGroupModeration } from '/lib/hooks/GroupModeration'
-
 
 import Spinner from '/components/Spinner'
 import DateTag from '/components/DateTag'
@@ -21,7 +18,6 @@ import UserProfileImage from '/components/users/UserProfileImage'
 
 import LinkPreview from '/components/links/view/LinkPreview'
 import GroupTag from '/components/groups/view/GroupTag'
-import PostForm from '/components/posts/PostForm'
 
 import PostDotsMenu from './PostDotsMenu'
 import PostModeration from './PostModeration'
@@ -43,8 +39,6 @@ const Post = function({ id, expanded, showLoading, shared }) {
     const [group, groupRequest] = useGroup(post?.groupId) 
     const [groupModeration, groupModerationRequest] = useGroupModeration(post?.groupModerationId)
     const [siteModeration, siteModerationRequest] = useSiteModeration(post?.siteModerationId)
-
-    const [draft, setDraft] = usePostDraft(id)
 
     if ( (request !== null && request.state == 'failed' && ( ! post || ! user ))) {
         return (

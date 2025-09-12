@@ -37,22 +37,7 @@ const initialState = {
      */
     queries: {},
 
-    /**
-     * Posts which are currently being edited.
-     *
-     * {
-     *   [ postId ]: boolean
-     * }
-     *   
-     **/
-    editing: {},
-
     drafts: {},
-
-    /**
-     * The id of a post we are actively sharing.
-     */
-    sharingPost: null
 }
 
 export const PostSlice = createSlice({
@@ -66,34 +51,12 @@ export const PostSlice = createSlice({
         clearPostQueries: clearQueries,
         resetPostSlice: () => initialState,
 
-        clearInProgress: function(state, action) {
-            state.inProgress = null
-        },
-
-        startPostEdit: function(state, action) {
-            const postId = action.payload
-            state.editing[postId] = true
-        },
-
-        finishPostEdit: function(state, action) {
-            const postId = action.payload
-            delete state.editing[postId]
-        },
-
         setDraft: function(state, action) {
-            state.drafts[action.payload.id] = action.payload.draft
+            state.drafts[action.payload.key] = action.payload.draft
         },
 
         clearDraft: function(state, action) {
-            delete state.drafts[action.payload.id]
-        },
-
-        setSharingPost: function(state, action) {
-            state.sharingPost = action.payload
-        },
-
-        clearSharingPost: function(state, action) {
-            state.sharingPost = null
+            delete state.drafts[action.payload.key]
         }
     }
 })
@@ -102,9 +65,7 @@ export const {
     setPostsInDictionary, removePost, 
     clearPostQuery, setPostQueryResults,
     clearPostQueries, resetPostSlice,
-    startPostEdit, finishPostEdit,
     setDraft, clearDraft,
-    setSharingPost, clearSharingPost
 } = PostSlice.actions
 
 export default PostSlice.reducer

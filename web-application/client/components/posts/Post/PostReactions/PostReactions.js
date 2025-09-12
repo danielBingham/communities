@@ -1,10 +1,9 @@
-import React, { useState } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import { useState } from 'react'
+import { useSelector } from 'react-redux'
 import { useNavigate, useLocation } from 'react-router-dom'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { setSharingPost } from '/state/Post'
 import { postPostReaction, patchPostReaction, deletePostReaction } from '/state/PostReaction'
 
 import { 
@@ -36,7 +35,6 @@ const PostReactions = function({ postId }) {
     const userReactionId = post.reactions.find((rid) => rid in postReactions ? postReactions[rid].userId == currentUser?.id : false)
     const userReaction = userReactionId ? postReactions[userReactionId] : null
 
-    const dispatch = useDispatch()
     const navigate = useNavigate()
     const location = useLocation()
 
@@ -60,12 +58,8 @@ const PostReactions = function({ postId }) {
     }
 
     const sharePost = function() {
-        if ( post && post.sharedPostId ) {
-            dispatch(setSharingPost(post.sharedPostId))
-        } else {
-            dispatch(setSharingPost(postId))
-        }
-        navigate(`/create?sharedPostId=${postId}&origin=${encodeURIComponent(location.pathname)}`)
+        let sharedPostId = post && post.sharedPostId ? post.sharedPostId : postId
+        navigate(`/create?sharedPostId=${sharedPostId}&origin=${encodeURIComponent(location.pathname)}`)
     }
 
     if ( ! post ) {

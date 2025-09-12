@@ -10,12 +10,21 @@ import { DropdownMenu, DropdownMenuBody, DropdownMenuTrigger, DropdownMenuItem }
 
 import './PostTypeControl.css'
 
-const PostTypeControl = function({ type, setType, postId, groupId, sharedPostId }) {
+const PostTypeControl = function({ postId, groupId, sharedPostId }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
     const [draft, setDraft ] = usePostDraft(postId, groupId, sharedPostId)
     const canAdminSite = useSitePermission(currentUser, SitePermissions.ADMIN)
+
+    const setType = function(type) {
+        const newDraft = { ...draft }
+        newDraft.type = type
+        if ( type === 'announcement' || type === 'info' ) {
+            newDraft.visibility = 'public'
+        }
+        setDraft(newDraft)
+    }
 
     if ( groupId ) {
         return null
@@ -27,9 +36,9 @@ const PostTypeControl = function({ type, setType, postId, groupId, sharedPostId 
 
 
     let current = (<span className="post__type-control__current"><QueueListIcon /> <span className="nav-text">Feed</span></span>)
-    if ( draft && draft.type === 'info' ) {
+    if ( draft.type === 'info' ) {
         current = (<span className="post__type-control__current"><InformationCircleIcon /> <span className="nav-text">Info</span></span>)
-    } else if ( draft && draft.type === 'announcement' ) {
+    } else if ( draft.type === 'announcement' ) {
         current = (<span className="post__type-control__current"><MegaphoneIcon /> <span className="nav-text">Announcement</span></span>)
     }
 

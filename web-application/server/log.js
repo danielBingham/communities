@@ -32,7 +32,7 @@ const createLogMiddleware = function(core) {
             request.logger.info(`BEGIN`)
             request.logger.debug(`Host: ${request.host}, Hostname: ${request.hostname}`)
             request.logger.debug(`Headers: `, request.headers)
-            request.logger.debug(`Session: `, request.session)
+            request.logger.debug(`Body: `, request.body)
             response.once('finish', function() {
                 request.logger.debug(`Finishing ${request.method} ${request.url}`)
                 const endTime = Date.now()
@@ -69,6 +69,7 @@ const createLogIdMiddleware = function(core) {
                 request.session.logId = request.logger.id
             }
             request.logger.info(`${oldId} -> ${request.logger.id}`)
+            request.logger.debug(`Session: `, request.session)
         } 
         next()
     }

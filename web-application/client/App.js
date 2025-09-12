@@ -7,6 +7,8 @@ import {
 
 import { useSelector, useDispatch } from 'react-redux'
 
+import migrateLocalStorage from '/migrations/StorageMigrations'
+
 import { useRequest } from '/lib/hooks/useRequest'
 import { useRetries } from '/lib/hooks/useRetries'
 import { useSocket } from '/lib/hooks/useSocket'
@@ -102,6 +104,10 @@ const App = function(props) {
             console.log(`System initialized...`)
             // Logger is a singleton, this will effect all other imports.
             logger.setLevel(configuration.log_level)
+
+            console.log(`Migrating local storage...`)
+            migrateLocalStorage()
+
             makeAuthenticationRequest(getAuthentication())
         } 
     }, [ getInitializationRequest ])

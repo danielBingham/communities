@@ -54,12 +54,12 @@ const createExpressApp = function(core, sessionParser) {
     // Trust the proxy.
     app.set('trust proxy', true)
 
-    // Request and log initialization middleware
-    app.use(createLogMiddleware(core))
-
     // Make sure the request limit is large so that we don't run into it.
     app.use(express.json({ limit: "50mb" }))
     app.use(express.urlencoded({ limit: "50mb", extended: false }))
+
+    // Request and log initialization middleware
+    app.use(createLogMiddleware(core))
 
     app.use(cors({
         origin: [ core.config.host, 'capacitor://localhost', 'https://localhost' ],

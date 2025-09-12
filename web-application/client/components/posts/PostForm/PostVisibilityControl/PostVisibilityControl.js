@@ -1,28 +1,35 @@
-import React, { useState } from 'react'
-
 import { UsersIcon, UserGroupIcon, GlobeAltIcon } from '@heroicons/react/24/solid'
 
 import { useGroup } from '/lib/hooks/Group'
 import { usePost } from '/lib/hooks/Post'
+import { usePostDraft } from '/lib/hooks/usePostDraft'
 
 import { DropdownMenu, DropdownMenuBody, DropdownMenuTrigger, DropdownMenuItem } from '/components/ui/DropdownMenu'
 
 
 import './PostVisibilityControl.css'
 
-const PostVisibilityControl = function({ visibility, setVisibility, type, postId, groupId }) {
+const PostVisibilityControl = function({ postId, groupId, sharedPostId }) {
 
     const [post] = usePost(postId) 
     const [group] = useGroup(post !== null ? post.groupId : groupId)
 
+    const [draft, setDraft] = usePostDraft(postId, groupId, sharedPostId)
+
+    const setVisibility = function(visibility) {
+        const newDraft = { ...draft }
+        draft.visibility = visibility
+        setDraft(newDraft)
+    }
+
     if ( group !== undefined && group !== null ) {
-        if ( visibility === 'private' ) {
+        if ( draft.visibility === 'private' ) {
             return (
                 <div className="post-visibility-control">
                     <span className="post-visibility-control__current"> <UserGroupIcon /> <span className="text">Group</span></span>
                 </div>
             )
-        } else if ( visibility === 'public' ) {
+        } else if ( draft.visibility === 'public' ) {
             return (
                 <div className="post-visibility-control">
                     <span className="post-visibility-control__current"> <GlobeAltIcon /> <span className="text">Public</span></span>
@@ -31,7 +38,7 @@ const PostVisibilityControl = function({ visibility, setVisibility, type, postId
         }
     }
 
-    if ( type === 'announcement' || type === 'info' ) {
+    if ( draft.type === 'announcement' || draft.type === 'info' ) {
         return (
             <div className="post-visibility-control">
                 <span className="post-visibility-control__current"> <GlobeAltIcon /> <span className="text">Public</span></span>
@@ -40,7 +47,7 @@ const PostVisibilityControl = function({ visibility, setVisibility, type, postId
     }
 
     let current = (<span className="post-visibility-control__current"><UsersIcon /> <span className="text">Friends</span></span>)
-    if (visibility == 'public' ) {
+    if (draft.visibility == 'public' ) {
         current = (<span className="post-visibility-control__current"> <GlobeAltIcon /> <span className="text">Public</span></span>)
     }
 

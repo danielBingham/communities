@@ -2,7 +2,10 @@ import React, { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { useSearchParams } from 'react-router-dom'
 
+import logger from '/logger'
+
 import { resetEntities } from '/state/lib'
+import { usePost } from '/lib/hooks/Post'
 
 import { Page, PageRightGutter, PageLeftGutter, PageBody } from '/components/generic/Page'
 import PostForm from '/components/posts/PostForm'
@@ -19,9 +22,21 @@ const CreatePostPage = function() {
     }, [])
 
     const postId = searchParams.get('postId')
-    const groupId = searchParams.get('groupId')
-    const sharedPostId = searchParams.get('sharedPostId')
+    let groupId = searchParams.get('groupId')
+    let sharedPostId = searchParams.get('sharedPostId')
     const origin = searchParams.get('origin')
+
+    const [post] = usePost(postId)
+
+    logger.debug(`#### CreatePostPage:: post: `, post)
+    if ( post ) {
+        if ( post.groupId !== null ) {
+            groupId = post.groupId
+        }
+        if ( post.sharedPostId !== null ) {
+            sharedPostId = post.sharedPostId
+        }
+    }
 
     return (
         <Page id="create-post-page">

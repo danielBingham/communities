@@ -2,9 +2,12 @@ import { useSelector, useDispatch } from 'react-redux'
 
 import * as uuid from 'uuid'
 
+import logger from '/logger'
+
 import { setDraft as setPostDraft, clearDraft as clearPostDraft } from '/state/Post'
 
 import { useGroup } from '/lib/hooks/Group'
+import { usePost } from '/lib/hooks/Post'
 
 const has = function(draft, field) {
     return field in draft && draft[field] !== undefined
@@ -16,16 +19,33 @@ const has = function(draft, field) {
 // TODO Should we call this "MigrateDraft" to make that clear?
 // TODO FeatureFlagging and migration system that handles localstorage
 // migrations!
-const validateAndCorrectDraft = function(draft, group) {
+const validateAndCorrectDraft = function(draft, post, group, sharedPostId) {
+    logger.debug(`-- validateAndCorrectDraft::`)
+    logger.debug(`-- validateAndCorrectDraft:: draft: `, draft)
+    logger.debug(`-- validateAndCorrectDraft:: post: `, post)
+    logger.debug(`-- validateAndCorrectDraft:: group: `, group)
+    logger.debug(`-- validateAndCorrectDraft:: sharedPostId: `, sharedPostId)
+
+    let defaultType = 'feed'
+    let defaultVisibility = 'private'
+    if ( group !== undefined && group !== null ) {
+        defaultType = 'group'
+        if ( group.type === 'open' ) {
+            defaultVisibility = 'public'
+        }
+    }
+    
     const correctedDraft = {
-        content: '',
-        fileId: null,
-        linkPreviewId: null,
-        visibility: 'private',
-        type: group !== undefined && group !== null ? 'group' : 'feed'
+        content: post ? post.content : '',
+        fileId: post ? post.fileId : null,
+        linkPreviewId: post ? post.linkPreveiwId : null,
+        sharedPostId: post ? post.sharedPostId : sharedPostId,
+        visibility: post ? post.visibility : defaultVisibility,
+        type: post ? post.type : defaultType 
     }
 
     if ( draft === undefined || draft === null ) {
+        logger.debug(`Null draft: `, correctedDraft)
         return correctedDraft 
     }
 
@@ -37,9 +57,17 @@ const validateAndCorrectDraft = function(draft, group) {
         correctedDraft.content = draft.content
     }
 
+    if ( has(draft, 'sharedPostId')
+        && draft.sharedPostId !== null
+        && uuid.validate(draft.sharedPostId)
+    ) {
+        correctedDraft.sharedPostId = draft.sharedPostId
+    }
+
     if ( has(draft, 'fileId') 
         && draft.fileId !== null 
         && uuid.validate(draft.fileId)
+        && correctedDraft.sharedPostId === null
     ) {
         correctedDraft.fileId = draft.fileId
     }
@@ -47,6 +75,7 @@ const validateAndCorrectDraft = function(draft, group) {
     if( has(draft, 'linkPreviewId')
         && draft.linkPreviewId !== null
         && uuid.validate(draft.linkPreviewId)
+        && correctedDraft.sharedPostId === null
         && correctedDraft.fileId === null
     ) {
         correctedDraft.linkPreviewId = draft.linkPreviewId
@@ -77,25 +106,45 @@ const validateAndCorrectDraft = function(draft, group) {
         }
     } 
 
+    logger.debug(`-- validateAndCorrectDraft:: correctedDraft: `, correctedDraft)
     return correctedDraft
 }
 
-export const usePostDraft = function(id, groupId, sharedPostId) {
-    let postKey = id !== null && id !== undefined ? id : 'new'
-    if ( postKey === 'new' &&  groupId !== null && groupId !== undefined) {
-        postKey = `${postKey}_${groupId}`
-    } else if ( postKey === 'new' && sharedPostId !== null && sharedPostId !== undefined ) {
-        postKey = `${postKey}-shared:${sharedPostId}`
+const getDraftKey = function(id, groupId, sharedPostId) {
+    let key = ''
+
+    if ( id !== null && id !== undefined ) {
+        key = key + `postId:${id}`
+    } else {
+        key = key + `postId:new`
     }
 
+    if ( groupId !== null && groupId !== undefined ) {
+        key = key + `groupId:${groupId}`
+    }
+
+    if ( sharedPostId !== null && sharedPostId !== undefined ) {
+        key = key + `sharedPostId:${sharedPostId}`
+    }
+
+    return key 
+}
+
+export const usePostDraft = function(id, groupId, sharedPostId) {
+    logger.debug(`-- usePostDraft(${id}, ${groupId}, ${sharedPostId}) --`)
+    const postKey = getDraftKey(id, groupId, sharedPostId)
+
     const [group] = useGroup(groupId)
+    const [post] = usePost(id)
+
+    logger.debug(`-- usePostDraft:: post: `, post)
 
 
     // Here we want to correct the draft, because we may need to migrate drafts
     // in local storage due to code updates.
     let savedDraft = JSON.parse(localStorage.getItem(`post.draft[${postKey}]`))
     const draft = validateAndCorrectDraft(
-        useSelector((state) => postKey in state.Post.drafts ? state.Post.drafts[postKey] : savedDraft), group
+        useSelector((state) => postKey in state.Post.drafts ? state.Post.drafts[postKey] : savedDraft), post, group, sharedPostId
     )
 
     const dispatch = useDispatch()
@@ -104,11 +153,11 @@ export const usePostDraft = function(id, groupId, sharedPostId) {
         if ( newDraft !== null ) {
             // TechDebt TODO really we should be validating the draft and
             // throwing an error here.
-            const correctedDraft = validateAndCorrectDraft(newDraft, group) 
-            dispatch(setPostDraft({ id: postKey, draft: correctedDraft}))
+            const correctedDraft = validateAndCorrectDraft(newDraft, post, group, sharedPostId) 
+            dispatch(setPostDraft({ key: postKey, draft: correctedDraft}))
             localStorage.setItem(`post.draft[${postKey}]`, JSON.stringify(correctedDraft))
         } else {
-            dispatch(clearPostDraft({ id: postKey }))
+            dispatch(clearPostDraft({ key: postKey }))
             localStorage.removeItem(`post.draft[${postKey}]`)
         }
     }
