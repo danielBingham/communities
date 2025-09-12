@@ -35,6 +35,7 @@
     "@capacitor/core": "^7.4.3",
     "@capacitor/device": "^7.0.2",
     "@capacitor/push-notifications": "^7.0.3",
+    "@capacitor/status-bar": "^7.0.3",
     "@capgo/capacitor-updater": "^7.0.36",
     "@communities/backend": "^0.6.0-rc24",
     "@communities/session": "^0.6.0-rc24",
