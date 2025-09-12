@@ -2,6 +2,7 @@ const config = {
   appId: "social.communities",
   appName: "Communities",
   webDir: "web-application/public/dist/",
+  backgroundColor: "#FFFFFF",
   plugins: {
     CapacitorUpdater: {
       autoUpdate: false,
