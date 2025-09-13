@@ -20,14 +20,25 @@
 
 const { 
     Core, 
+    FeatureFlags,
 
-    ImageService
+    FeatureService,
+    ImageService,
+    NotificationService
+
 } = require('@communities/backend')
 
 const config = require('./config')
 
 const core = new Core('worker', config)
-core.initialize().then(function() {
+
+async function initialize() {
+
+    await core.initialize()
+
+    const featureService = new FeatureService(core)
+    const features = await featureService.getEnabledFeatures()
+    core.features = new FeatureFlags(features)
  
     core.queue.process('resize-image', async function(job, done) {
         core.logger.id = `Image resize: ${job.id}`
@@ -57,8 +68,33 @@ core.initialize().then(function() {
         }
     })
 
+    core.queue.process('send-notifications', async function(job, done) {
+        core.logger.id = `send-notifications: ${job.id}`
+        core.logger.info(`Beginning job 'send-notifications' of '${job.data.type}' for User(${job.data.currentUser.id}).`)
+        core.logger.info(`Data: `, job.data)
+
+        const notificationService = new NotificationService(core)
+
+        try {
+            job.progress({ step: 'initializing', stepDescription: `Initializing...`, progress: 0 })
+            
+            await notificationService.triggerNotifications(job.data.currentUser, job.data.type, job.data.context, job.data.options)
+
+            job.progress({ step: 'complete', stepDescription: `Complete!`, progress: 100 })
+
+            core.logger.info(`Finished job 'send-notifications' of '${job.data.type}' for user ${job.data.currentUser.id}.`)
+            core.logger.id = 'core' 
+            done(null)
+        } catch (error) {
+            core.logger.error(error)
+            done(error)
+        }
+    })
+
     core.logger.info('Initialized and listening...')
-})
+}
+
+initialize()
 
 const shutdown = async function() {
     core.logger.info('Attempting a graceful shutdown...')

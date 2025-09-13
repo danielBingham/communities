@@ -43,7 +43,7 @@ module.exports = class IOSNotifications {
         this.client.on("goaway", (errorCode, lastStreamId, data) => {
             this.core.logger.debug(`IOS Notifications:: 'goaway' Frame: `)
             this.core.logger.debug(`Code: ${errorCode}, StreamId: ${lastStreamId}`)
-            this.core.logger.debug(`Data: `, data)
+            this.core.logger.debug(`Data: `, data.toString('utf8'))
         })
     }
 

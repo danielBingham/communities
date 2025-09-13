@@ -120,6 +120,15 @@ module.exports = class NotificationService {
     }
 
     async sendNotifications(currentUser, type, context, options) {
+        await this.core.queue.add('send-notifications', { 
+            currentUser: currentUser,
+            type: type,
+            context: context,
+            options: options
+        })
+    }
+
+    async triggerNotifications(currentUser, type, context, options) {
         const segments = type.split(':')
 
         const entity = segments[0]
@@ -231,16 +240,28 @@ module.exports = class NotificationService {
         if ( notificationSetting.email && options?.noEmail !== true && results.rows[0].status !== 'invited') {
             const email = results.rows[0].email
 
-            await this.emailService.sendNotificationEmail(
-                email, 
-                definition.email.subject(context), 
-                definition.email.body(context)
-            )
+            try {
+                await this.emailService.sendNotificationEmail(
+                    email, 
+                    definition.email.subject(context), 
+                    definition.email.body(context)
+                )
+            } catch (error) {
+                core.logger.error(error)
+            }
         }
 
         if ( notificationSetting.mobile && options?.noMobile !== true && results.rows[0].status !== 'invited' ) {
-            await this.iosNotifications.sendIOSNotification(userId, notification)
-            await this.androidNotifications.sendAndroidNotification(userId, notification)
+            try {
+                await this.iosNotifications.sendIOSNotification(userId, notification)
+            } catch (error) {
+                core.logger.error(error)
+            }
+            try {
+                await this.androidNotifications.sendAndroidNotification(userId, notification)
+            } catch (error) {
+                core.logger.error(error)
+            }
         }
     }
 
