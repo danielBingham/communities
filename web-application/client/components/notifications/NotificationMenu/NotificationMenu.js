@@ -20,6 +20,9 @@
 import { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
+import { Capacitor } from '@capacitor/core'
+import { App } from '@capacitor/app'
+
 import { BellIcon } from '@heroicons/react/24/outline'
 
 import { useRequest } from '/lib/hooks/useRequest'
@@ -77,6 +80,14 @@ const NotificationMenu = function({ }) {
 
     useEffect(function() {
         makeRequest(getNotifications('NotificationMenu'))
+
+        if ( Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android' ) {
+            App.addListener('appStateChange', ({ isActive }) => {
+                if ( isActive ) {
+                    makeRequest(getNotifications('NotificationMenu'))
+                }
+            })
+        }
     }, [])
 
     // ============ Render ====================================================
