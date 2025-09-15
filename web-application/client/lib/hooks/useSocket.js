@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Capacitor } from '@capacitor/core'
 import { App } from '@capacitor/app'
 
+import logger from '/logger'
 
 import { connect, disconnect } from '/state/socket'
 
@@ -20,16 +21,16 @@ export const useSocket = function() {
     const [delay, setDelay] = useState(125)
 
     const dispatch = useDispatch()
-    useEffect(function() {
 
+    useEffect(function() {
         if ( Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android' ) {
-            App.addListener('appStateChanged', function(event) {
+            App.addListener('appStateChange', (event) => {
                 setIsActive(event.isActive)
             })
         }
 
         return () => {
-            if ( Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform === 'android' ) {
+            if ( Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android' ) {
                 App.removeAllListeners()
             }
         }

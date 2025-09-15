@@ -69,6 +69,7 @@ export const createSocketMiddleware = function(socket) {
                 const currentUser = state.authentication.currentUser
 
                 if ( action.type === connect.type ) {
+                    logger.debug(`Store:: Attempting socket connection...`)
                     socket.connect(state.system.configuration.wsHost)
 
                     /**********************************************************
@@ -124,6 +125,7 @@ export const createSocketMiddleware = function(socket) {
                         socket.send(event)
                     }
                 } else if ( action.type === disconnect.type ) {
+                    logger.debug(`Store:: Attempting socket disconnection...`)
                     dispatch(clearSubscriptions())
                     socket.disconnect() 
                 }

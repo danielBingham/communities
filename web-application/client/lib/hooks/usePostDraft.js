@@ -20,12 +20,6 @@ const has = function(draft, field) {
 // TODO FeatureFlagging and migration system that handles localstorage
 // migrations!
 const validateAndCorrectDraft = function(draft, post, group, sharedPostId) {
-    logger.debug(`-- validateAndCorrectDraft::`)
-    logger.debug(`-- validateAndCorrectDraft:: draft: `, draft)
-    logger.debug(`-- validateAndCorrectDraft:: post: `, post)
-    logger.debug(`-- validateAndCorrectDraft:: group: `, group)
-    logger.debug(`-- validateAndCorrectDraft:: sharedPostId: `, sharedPostId)
-
     let defaultType = 'feed'
     let defaultVisibility = 'private'
     if ( group !== undefined && group !== null ) {
@@ -45,7 +39,6 @@ const validateAndCorrectDraft = function(draft, post, group, sharedPostId) {
     }
 
     if ( draft === undefined || draft === null ) {
-        logger.debug(`Null draft: `, correctedDraft)
         return correctedDraft 
     }
 
@@ -106,7 +99,6 @@ const validateAndCorrectDraft = function(draft, post, group, sharedPostId) {
         }
     } 
 
-    logger.debug(`-- validateAndCorrectDraft:: correctedDraft: `, correctedDraft)
     return correctedDraft
 }
 
@@ -131,14 +123,10 @@ const getDraftKey = function(id, groupId, sharedPostId) {
 }
 
 export const usePostDraft = function(id, groupId, sharedPostId) {
-    logger.debug(`-- usePostDraft(${id}, ${groupId}, ${sharedPostId}) --`)
     const postKey = getDraftKey(id, groupId, sharedPostId)
 
     const [group] = useGroup(groupId)
     const [post] = usePost(id)
-
-    logger.debug(`-- usePostDraft:: post: `, post)
-
 
     // Here we want to correct the draft, because we may need to migrate drafts
     // in local storage due to code updates.
