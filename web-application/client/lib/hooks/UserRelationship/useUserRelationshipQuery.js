@@ -37,6 +37,7 @@ export const useUserRelationshipQuery = function(userId, queryParameters) {
     const dispatch = useDispatch()
     useEffect(() => {
         if ( query === null && request === null ) {
+            console.log(`Re-querying relations...`)
             makeRequest(getUserRelationships(key, userId, params)) 
         }
 
@@ -48,7 +49,7 @@ export const useUserRelationshipQuery = function(userId, queryParameters) {
         }
     }, [ key, query, request ])
 
-    return [query, request]
+    return [query, request, resetRequest ]
 }
 
 

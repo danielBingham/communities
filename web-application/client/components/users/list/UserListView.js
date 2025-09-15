@@ -11,12 +11,13 @@ import {
     SearchControl
 } from '/components/ui/List'
 import PaginationControls from '/components/PaginationControls'
+import Refresher from '/components/ui/Refresher'
 
 import './UserListView.css'
 
 const UserListView = function({ params }) {
 
-    const [query, request] = useUserQuery(params)
+    const [query, request, reset] = useUserQuery(params)
 
     // ======= Render ===============================================
 
@@ -51,6 +52,7 @@ const UserListView = function({ params }) {
         <div className="user-list-view">
             <List className="user-list">
                 <ListHeader explanation={explanation}>
+                    <Refresher onRefresh={() => reset()} />
                     <SearchControl entity="People" />
                 </ListHeader>
                 <ListGridContent>

@@ -5,7 +5,8 @@ For each heading, copy the `Cases` section of the linked file under the heading 
 ## [Create User: Registration](documentation/testing/test-cases/User/create/registration.md)
 ## [Create User: Invitation](documentation/testing/test-cases/User/create/invitation.md)
 ## [Update User: Profile](documentation/testing/test-cases/User/update/profile.md)
-## [Update User: Settings](documentation/testing/test-cases/User/update/settings.md)
+## [Update User: Preferences](documentation/testing/test-cases/User/update/preferences.md)
+## [Update User: Notifications](documentation/testing/text-cases/User/update/notifications.md)
 ## [Query User](documentation/testing/test-cases/User/query.md)
 
 ## [UserRelationship](documentation/testing/test-cases/UserRelationship/create-update-delete.md)
@@ -28,12 +29,6 @@ For each heading, copy the `Cases` section of the linked file under the heading 
 ## [Create PostSubscription](documentation/testing/test-cases/PostSubscription/create.md)
 ## [Delete PostSubscription](documentation/testing/test-cases/PostSubscription/delete.md)
  
-
-### Settings 
-
-- [ ] As Jane Doe, turn off Post Comments.
-    - [ ] As John Doe, comment on a Jane Doe post. Confirm no emails.
-- [ ] As Jane Doe, turn off friend requests.
 
 ### Admin Moderation
 

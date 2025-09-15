@@ -39,7 +39,7 @@ export const useUserQuery = function(queryParameters) {
         }
     }, [ key, query, request ])
 
-    return [query, request]
+    return [query, request, resetRequest]
 }
 
 

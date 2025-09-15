@@ -48,7 +48,7 @@ export const useGroupMemberQuery = function(groupId, queryParameters) {
         }
     }, [ key, query, request ])
 
-    return [query, request]
+    return [query, request, resetRequest]
 }
 
 

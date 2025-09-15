@@ -40,7 +40,7 @@ export const useGroupQuery = function(queryParameters) {
         }
     }, [ key, query, request ])
 
-    return [query, request]
+    return [query, request, resetRequest]
 }
 
 

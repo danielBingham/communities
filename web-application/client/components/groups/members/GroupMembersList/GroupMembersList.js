@@ -12,13 +12,14 @@ import {
 } from '/components/ui/List'
 import PaginationControls from '/components/PaginationControls'
 import Spinner from '/components/Spinner'
+import Refresher from '/components/ui/Refresher'
 
 import './GroupMembersList.css'
 
 const GroupMembersList = function({ groupId, params, descriptor, noSearch }) {
 
     const dictionary = useSelector((state) => state.GroupMember.dictionary)
-    const [ query, request ] = useGroupMemberQuery(groupId, params)
+    const [ query, request, reset ] = useGroupMemberQuery(groupId, params)
 
     if ( query === undefined || query === null ) {
         return (
@@ -53,6 +54,7 @@ const GroupMembersList = function({ groupId, params, descriptor, noSearch }) {
     return (
         <List className="group-members-list">
             <ListHeader explanation={explanation}>
+                <Refresher onRefresh={() => reset()} />
                 { ! noSearch && <SearchControl entity={descriptor} /> }
             </ListHeader>
             <ListGridContent>

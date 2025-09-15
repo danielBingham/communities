@@ -15,6 +15,7 @@ import {
 } from '/components/ui/List'
 import PaginationControls from '/components/PaginationControls'
 import Button from '/components/ui/Button'
+import Refresher from '/components/ui/Refresher'
 
 import './FriendList.css'
 
@@ -22,7 +23,7 @@ const FriendList = function({ userId, params, noSearch, descriptor }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const relationshipDictionary = useSelector((state) => state.UserRelationship.dictionary)
-    const [query, request] = useUserRelationshipQuery(currentUser.id, params) 
+    const [query, request, reset] = useUserRelationshipQuery(currentUser.id, params) 
 
 
     // ======= Render ===============================================
@@ -71,6 +72,7 @@ const FriendList = function({ userId, params, noSearch, descriptor }) {
     return (
         <List className="friend-list">
             <ListHeader explanation={explanation}>
+                <Refresher onRefresh={() => reset()} />
                 { ! noSearch && <SearchControl entity={descriptor} /> }
             </ListHeader>
             <ListGridContent>

@@ -6,6 +6,7 @@ import { resetEntities } from '/state/lib'
 
 import FeedMenu from '/components/feeds/menu/FeedMenu'
 import { Page, PageBody, PageLeftGutter, PageRightGutter } from '/components/generic/Page'
+import Refresher from '/components/ui/Refresher'
 
 import './HomePage.css'
 
@@ -28,6 +29,7 @@ const HomePage = function() {
                 { hasGroups && <FeedMenu /> }
             </PageLeftGutter>
             <PageBody>
+                <Refresher />
                 <div className="feed">
                     <Outlet />
                 </div>
