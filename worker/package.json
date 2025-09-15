@@ -1,6 +1,6 @@
 {
   "name": "@communities/worker",
-  "version": "0.6.0-rc28",
+  "version": "0.6.0-rc29",
   "private": true,
   "main": "index.js",
   "repository": {},
@@ -12,8 +12,8 @@
     "dev": "export NODE_ENV=development && node ./index.js"
   },
   "dependencies": {
-    "@communities/backend": "^0.6.0-rc28",
-    "@communities/shared": "^0.6.0-rc28"
+    "@communities/backend": "^0.6.0-rc29",
+    "@communities/shared": "^0.6.0-rc29"
   },
   "devDependencies": {
     "dotenv": "16.x"
