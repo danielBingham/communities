@@ -2,6 +2,7 @@ import React from 'react'
 import { useSelector } from 'react-redux'
 import { useParams, useNavigate } from 'react-router-dom'
 
+import { usePost } from '/lib/hooks/Post'
 import { useGroup } from '/lib/hooks/Group'
 import { useGroupMember } from '/lib/hooks/GroupMember'
 
@@ -17,12 +18,15 @@ import './PostView.css'
 import Error404 from '/components/errors/Error404'
 import Button from '/components/generic/button/Button'
 import Spinner from '/components/Spinner'
+import Refresher from '/components/ui/Refresher'
 
 const PostView = function({ groupId }) {
     const { slug, postId } = useParams()
     const navigate = useNavigate()
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
+
+    const [post, postRequest, refresh] = usePost(postId)
 
     const [group, groupRequest] = useGroup(groupId)
     const [currentMember, currentMemberRequest] = useGroupMember(groupId, currentUser.id)
@@ -56,6 +60,7 @@ const PostView = function({ groupId }) {
     }
     return (
         <div id={`post-${postId}`}>
+            <Refresher onRefresh={() => refresh()} />
             <div className="post-page__header"><Button onClick={(e) => navigate(backlink)}>Back to { groupId !== undefined ? 'Group' : 'Profile' }</Button></div>
             <Post id={postId} expanded={true} /> 
         </div>

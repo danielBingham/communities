@@ -8,7 +8,11 @@ import { getPost } from '/state/Post'
 export const usePost = function(postId) {
     const post = useSelector((state) => postId && postId in state.Post.dictionary ? state.Post.dictionary[postId] : null)
 
-    const [request, makeRequest ] = useRequest()
+    const [request, makeRequest, resetRequest ] = useRequest()
+
+    const refresh = function() {
+        makeRequest(getPost(postId))
+    }
 
     useEffect(() => {
         if ( postId && post === null && request === null ) {
@@ -16,5 +20,5 @@ export const usePost = function(postId) {
         }
     }, [ postId, post, request ])
 
-    return [post, request]
+    return [post, request, refresh]
 }
