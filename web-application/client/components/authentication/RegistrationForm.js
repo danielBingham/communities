@@ -168,7 +168,7 @@ const RegistrationForm = function(props) {
     if ( request && request.state == 'failed' ) {
         if ( 'message' in request.error ) {
             baseError = (<div className="error">{ request.error.message }</div>)
-        } else if ( 'all ' in request.error ) {
+        } else if ( 'all' in request.error ) {
             let message = ''
             for(const error of request.error.all) {
                 message = message + error.message
