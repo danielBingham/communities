@@ -160,7 +160,7 @@ module.exports = class UserService {
                 errors.push({
                     type: 'duplicate',
                     log: `User already confirmed and friended.`,
-                    message: `That user has already registered and is already your friend.`,
+                    message: `'${user.email}' has already registered and ${ existingRelationship.status === 'confirmed' ? 'you are already friends' : 'you have a pending request' }.`,
                     context: {
                         email: user.email
                     }
