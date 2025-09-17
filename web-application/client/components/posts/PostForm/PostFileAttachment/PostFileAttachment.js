@@ -26,7 +26,7 @@ const PostFileAttachment = function({ postId, groupId, sharedPostId }) {
     return (
         <div className="attachment">
             <div className="attached">
-                <DraftImageFile fileId={draft.fileId} setFileId={setFileId} width={650} deleteOnRemove={ ! post || post.fileId != fileId } />
+                <DraftImageFile fileId={draft.fileId} setFileId={setFileId} width={650} deleteOnRemove={ ! post || post.fileId != draft.fileId } />
             </div>
         </div>
     )
