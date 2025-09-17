@@ -32,7 +32,7 @@ const validateAndCorrectDraft = function(draft, post, group, sharedPostId) {
     const correctedDraft = {
         content: post ? post.content : '',
         fileId: post ? post.fileId : null,
-        linkPreviewId: post ? post.linkPreveiwId : null,
+        linkPreviewId: post ? post.linkPreviewId : null,
         sharedPostId: post ? post.sharedPostId : sharedPostId,
         visibility: post ? post.visibility : defaultVisibility,
         type: post ? post.type : defaultType 
