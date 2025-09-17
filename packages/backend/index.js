@@ -62,6 +62,8 @@ exports.UserService = require('./services/UserService')
 exports.ValidationService = require('./services/ValidationService')
 exports.WebSocketService = require('./services/WebSocketService')
 
+exports.NotificationWorker = require('./services/notification/NotificationWorker')
+
 exports.Logger = require('./logger')
 exports.FeatureFlags = require('./features')
 exports.Core = require('./core')

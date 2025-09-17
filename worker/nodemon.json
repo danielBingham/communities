@@ -1,0 +1,3 @@
+{
+  "watch": ["./", "../packages/backend", "../packages/shared" ]
+}

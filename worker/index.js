@@ -24,7 +24,9 @@ const {
 
     FeatureService,
     ImageService,
-    NotificationService
+    NotificationService,
+
+    NotificationWorker
 
 } = require('@communities/backend')
 
@@ -73,12 +75,12 @@ async function initialize() {
         core.logger.info(`Beginning job 'send-notifications' of '${job.data.type}' for User(${job.data.currentUser.id}).`)
         core.logger.info(`Data: `, job.data)
 
-        const notificationService = new NotificationService(core)
+        const notificationWorker = new NotificationWorker(core)
 
         try {
             job.progress({ step: 'initializing', stepDescription: `Initializing...`, progress: 0 })
             
-            await notificationService.triggerNotifications(job.data.currentUser, job.data.type, job.data.context, job.data.options)
+            await notificationWorker.processNotification(job.data.currentUser, job.data.type, job.data.context, job.data.options)
 
             job.progress({ step: 'complete', stepDescription: `Complete!`, progress: 100 })
 

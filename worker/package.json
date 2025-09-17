@@ -9,13 +9,14 @@
   },
   "scripts": {
     "start": "node ./index.js",
-    "dev": "export NODE_ENV=development && node ./index.js"
+    "dev": "export NODE_ENV=development && nodemon ./index.js"
   },
   "dependencies": {
     "@communities/backend": "^0.6.0-rc29",
     "@communities/shared": "^0.6.0-rc29"
   },
   "devDependencies": {
-    "dotenv": "16.6.1"
+    "dotenv": "16.6.1",
+    "nodemon": "3.1.10"
   }
 }
