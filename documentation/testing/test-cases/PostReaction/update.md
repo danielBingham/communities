@@ -1,14 +1,14 @@
-# Update PostReaction
+## [Update PostReaction](documentation/testing/test-cases/PostReaction/update.md)
 
 Cases covering updating reactions to Posts.
 
-## Pre-requisites
+### Pre-requisites
 
 - [ ] User1 has been created.
 - [ ] User2 has been created and has created at least three posts.
 - [ ] User1 has reacted to each of User2 posts.
 
-## Cases
+### Cases
 
 - [ ] As User1, dislike the User2 Post previously liked. 
     - [ ] Confirm dislike highlighted and like not highlighted.

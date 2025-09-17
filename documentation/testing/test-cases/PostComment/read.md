@@ -1,14 +1,14 @@
-# Read PostComment 
+## [Read PostComment](documentation/testing/test-cases/PostComment/read.md)
 
 Cases covering who can and cannot see post comments.
 
-## Pre-requisites
+### Pre-requisites
 
 - [ ] User1 has been created.
 - [ ] User2 has been created and is friends with User1.
 - [ ] User3 has been created and is friends with User2, but not User1.
 
-## Cases
+### Cases
 
 - [ ] As User1, create a public post.
     - [ ] As User2, comment on User1's post.
@@ -25,7 +25,7 @@ Cases covering who can and cannot see post comments.
     - [ ] As User3, confirm no comment notification is recieved.
     - [ ] As User3, attempt to view User2's comment by direct link.  Confirm not visible.
 
-### Mentions
+#### Mentions
 
 - [ ] As User1 create a public post.
     - [ ] As User2, comment on User1's post and mention User3.

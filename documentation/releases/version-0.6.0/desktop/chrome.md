@@ -408,30 +408,227 @@ Test cases related to editing posts.
 
 #### Post Edit Drafts
 
-- [ ] As User1, edit post with an image - change text and image.
-    - [ ] Navigate away from the home feed and back to feed.  Confirm draft remains. 
-    - [ ] Close the Communities browser window. Reopen and reload.  Confirm draft remains.
-    - [ ] Post the draft. Confirm draft posts correctly.
+- [x] As User1, edit post with an image - change text and image.
+    - [x] Navigate away from the home feed and back to feed.  Confirm draft remains. 
+    - [x] Close the Communities browser window. Reopen and reload.  Confirm draft remains.
+    - [x] Post the draft. Confirm draft posts correctly.
 
-- [ ] As User1, edit a post with an image - change text and image.
-    - [ ] Log out. Log back in. Confirm draft is gone.
+- [x] As User1, edit a post with an image - change text and image.
+    - [x] Log out. Log back in. Confirm draft is gone.
 
-- [ ] As User1, edit a post with a link - change text and link.
-    - [ ] Navigate away from the home feed and back to feed.  Confirm draft remains. 
-    - [ ] Close the Communities browser window. Reopen and reload.  Confirm draft remains.
-    - [ ] Post the draft.  Confirm draft posts correctly. 
+- [x] As User1, edit a post with a link - change text and link.
+    - [x] Navigate away from the home feed and back to feed.  Confirm draft remains. 
+    - [x] Close the Communities browser window. Reopen and reload.  Confirm draft remains.
+    - [x] Post the draft.  Confirm draft posts correctly. 
 
-- [ ] As User1, edit a post with a link - change text and link.
-    - [ ] Log out. Log back in. Confirm draft is gone.
+- [x] As User1, edit a post with a link - change text and link.
+    - [x] Log out. Log back in. Confirm draft is gone.
 
 ## [Delete Post](documentation/testing/test-cases/Post/delete.md)
 
+Test cases related to deleting posts.
+
+### Pre-requisites
+
+- [ ] User1 has been created.
+- [ ] User2 has been created and is friends with User1.
+
+### Cases
+
+- [x] As User1, create a private post with text and an image.
+    - [x] As User1, delete the post.
+    - [x] As User1, attempt to view the post. Confirm its gone.
+    - [x] As User2, attempt to view the post. Confirm its gone.
+
+- [x] As User1, create a private post with text and a link.
+    - [x] As User1, delete the post.
+    - [x] As User1, attempt to view the post. Confirm its gone.
+    - [x] As User2, attempt to view the post. Confirm its gone.
+
+- [x] As User1, create a public post with text and a link.
+    - [x] As User2, share the post.
+    - [x] As User1, delete the post.
+    - [x] As User1, attempt to view the post.  Confirm its gone.
+    - [x] As User2, view the share. Confirm original post is gone but share remains.
+
 ## [Create PostReaction](documentation/testing/test-cases/PostReaction/create.md)
+
+Cases covering reacting to Posts.
+
+### Pre-requisites
+
+- [ ] User1 has been created.
+- [ ] User2 has been created and has created at least three posts.
+
+### Cases
+
+- [x] As User1, like one of User2's Posts.
+    - [x] Confirm like highlighted and "likes" is incremented by 1.
+    - [x] Confirm clicking on the reactions shows User1 as liking.
+    - [x] Confirm post increases rank when feed is sorted by "Most Activity"
+
+- [x] As User1, dislike a second one of User2's Posts.
+    - [x] Confirm dislike highlighted and "dislikes" is incremented by 1.
+    - [x] Confirm clicking on the reactions shows User1 as disliking.
+    - [x] Confirm post increases rank when feed is sorted by "Most Activity"
+ 
+- [x] As User1, demote a third one of User2's Posts.
+    - [x] Confirm "Are You Sure" modal shows.
+    - [x] Select "Yes".
+    - [x] Confirm demote is highlighted and "demotes" is incremented by 1.
+    - [x] Confirm clicking on reactions show User1 as demoting.
+    - [x] Confirm post decreases rank when feed is sorted by "Most Activity".
+
 ## [Update PostReaction](documentation/testing/test-cases/PostReaction/update.md)
+
+Cases covering updating reactions to Posts.
+
+### Pre-requisites
+
+- [ ] User1 has been created.
+- [ ] User2 has been created and has created at least three posts.
+- [ ] User1 has reacted to each of User2 posts.
+
+### Cases
+
+- [x] As User1, dislike the User2 Post previously liked. 
+    - [x] Confirm dislike highlighted and like not highlighted.
+    - [x] Confirm "dislikes" is incremented by 1 and "likes" is decremented by 1.
+    - [x] Confirm clicking on the reactions shows User1 as disliking.
+    - [x] Confirm post rank when feed is sorted by "Most Activity" stays the same
+
+- [x] As User1, demote the User2 Post previously disliked
+    - [x] Confirm "Are You Sure" modal is shown.
+    - [x] Select "yes".
+    - [x] Confirm demote highlighted and dislike not highlighted.
+    - [x] Confirm demotes is incremented by 1 and dislikes is decremented by 1.
+    - [x] Confirm clicking on the reactions shows User1 as demoting.
+    - [x] Confirm post decreases rank when feed is sorted by "Most Activity"
+
+- [x] As User1, like the User2 Post previously demoted 
+    - [x] Confirm like is highlighted and demote is not highlighted
+    - [x] Confirm likes is incremented by 1 and demotes is decremented by 1.
+    - [x] Confirm clicking on reactions show User1 as liking.
+    - [x] Confirm post increases rank when feed is sorted by "Most Activity".
+
 ## [Delete PostReaction](documentation/testing/test-cases/PostReaction/delete.md)
 
+Cases covering removing reactions from Posts.
+
+### Pre-requisites
+
+- [ ] User1 has been created.
+- [ ] User2 has been created and has created at least three posts.
+- [ ] User1 has reacted to each of User2's posts.
+
+### Cases
+
+- [x] As User1, unlike one of User2's Posts.
+    - [x] Confirm like unhighlighted and "likes" is decremented by 1.
+    - [x] Confirm clicking on the reactions doesn't show User1 as liking.
+    - [x] Confirm post decreases rank when feed is sorted by "Most Activity"
+
+- [x] As User1, remove a dislike from a second one of User2's Posts.
+    - [x] Confirm dislike is not highlighted and "dislikes" is decremented by 1.
+    - [x] Confirm clicking on the reactions does not show User1 as disliking.
+    - [x] Confirm post decreases rank when feed is sorted by "Most Activity"
+
+- [x] As User1, remove a demote from a third one of User2's Posts.
+    - [x] Confirm demote is not highlighted and "demotes" is decremented by 1.
+    - [x] Confirm clicking on reactions does not show User1 as demoting.
+    - [x] Confirm post increaess rank when feed is sorted by "Most Activity".
+
 ## [Read PostComment](documentation/testing/test-cases/PostComment/read.md)
+
+Cases covering who can and cannot see post comments.
+
+### Pre-requisites
+
+- [x] User1 has been created.
+- [x] User2 has been created and is friends with User1.
+- [x] User3 has been created and is friends with User2, but not User1.
+
+### Cases
+
+- [x] As User1, create a public post.
+    - [x] As User2, comment on User1's post.
+    - [x] As User3, attempt to view User2's comment by direct link.  Confirm visible.
+
+- [x] As User1, create a private post.
+    - [x] As User2, comment on User1's post.
+    - [x] As User3, attempt to view User2's comment by direct link.  Confirm not visible.
+
+- [x] As User1, create public post.
+    - [x] As User3, comment on User1's post.
+    - [x] As User1, change visibility to private.
+    - [x] As User2, comment on User1's post.
+    - [x] As User3, confirm no comment notification is recieved.
+    - [x] As User3, attempt to view User2's comment by direct link.  Confirm not visible.
+
+#### Mentions
+
+- [x] As User1 create a public post.
+    - [x] As User2, comment on User1's post and mention User3.
+    - [x] As User3, confirm mention notification. Click through notification and confirm comment is visible.
+
+- [x] As User1 create a private post.
+    - [x] As User2, comment on User1's post and mention User3.
+    - [x] As User3, confirm no mention notification.
+    - [x] As User3, attempt to visit direct link for comment. confirm not visible.
+
 ## [Create PostComment](documentation/testing/test-cases/PostComment/create.md)
+
+Cases covering making comments on posts.
+
+### Pre-requisites
+
+- [ ] User1 has been created.
+- [ ] User2 has been created.
+- [ ] User1 has created a public post.
+
+### Cases
+
+- [x] As User2 comment "First." on User1's post.
+    - [x] Confirm comment appears on User1's post.
+
+- [x] As User1 comment "Second." on User1's post.
+    - [x] Confirm comment appears on User1's post.
+
+- [x] As User2 comment "Third." on User1's post after User1.
+    - [x] Confirm comment appears on User1's post.
+    - [x] Confirm comments appear in correct order:
+        - User2: "First." 
+        - User1: "Second." 
+        - User2: "Third." 
+
+#### Mentions
+
+- [x] As User2 comment on User1's post and begin a mention by typing '@' and the beginning of User1's name.
+    - [x] Confirm mention suggestions menu is limited to User2's friends and User1.
+    - [x] Confirm list is filtered by User1's name. Continue typing it and confirm it continues to be filtered.
+    - [x] Use the down arrow key to walk down the list.
+    - [x] Use the up arrow key to walk up the list.
+    - [x] Select User1 and hit the "Enter" key. Confirm mention completes with User1's username.
+    - [x] Post comment.
+    - [x] As User1, confirm mention notification received.
+    - [x] As User1, click on the notification.  Confirm comment highlighted.
+
+#### Drafts
+
+- [x] As User2, write a comment draft.
+    - [x] Navigate away from the home feed and back to feed.  Confirm draft remains. 
+    - [x] Close the Communities browser window. Reopen and reload.  Confirm draft remains.
+    - [x] Post the draft. Confirm comment posts correctly.
+
+- [x] As User2, write a comment draft.
+    - [x] Log out. Log back in. Confirm draft is gone.
+
+- [x] As User2, write a comment draft.
+    - [x] Cancel the draft.
+    - [x] Confirm draft is gone.
+    - [x] Reload the page.  Confirm draft is still gone.
+    - [x] Navigate away and back. Confirm draft is still gone.
+
 ## [Update PostComment](documentation/testing/test-cases/PostComment/delete.md)
 ## [Delete PostComment](documentation/testing/test-cases/PostComment/update.md)
 

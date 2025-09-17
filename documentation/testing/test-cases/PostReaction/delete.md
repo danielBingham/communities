@@ -1,14 +1,14 @@
-# Delete PostReaction
+## [Delete PostReaction](documentation/testing/test-cases/PostReaction/delete.md)
 
 Cases covering removing reactions from Posts.
 
-## Pre-requisites
+### Pre-requisites
 
 - [ ] User1 has been created.
 - [ ] User2 has been created and has created at least three posts.
 - [ ] User1 has reacted to each of User2's posts.
 
-## Cases
+### Cases
 
 - [ ] As User1, unlike one of User2's Posts.
     - [ ] Confirm like unhighlighted and "likes" is decremented by 1.
