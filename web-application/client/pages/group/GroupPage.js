@@ -57,6 +57,7 @@ const GroupPage = function() {
     }
 
     const canViewGroup = useGroupPermission(currentUser, GroupPermissions.VIEW, context)
+    const canCreateGroupPost = useGroupPostPermission(currentUser, GroupPostPermissions.CREATE, context)
     const canQueryGroupMember = useGroupMemberPermission(currentUser, GroupMemberPermissions.QUERY, context)
     const canViewGroupPost = useGroupPostPermission(currentUser, GroupPostPermissions.VIEW, context)
     const canModerateGroup = useGroupPermission(currentUser, GroupPermissions.MODERATE, context)
@@ -139,7 +140,7 @@ const GroupPage = function() {
         <Page id="group-page">
             <PageLeftGutter>
                 { canViewGroup === true && <NavigationMenu className="group-page__menu">
-                    <NavigationMenuButton href={`/create?groupId=${group.id}`} icon="Plus" type="primary" text="Create" /> 
+                    { canCreateGroupPost === true && <NavigationMenuButton href={`/create?groupId=${group.id}`} icon="Plus" type="primary" text="Create" />  }
                     { canViewGroupPost === true && <NavigationMenuLink to={`/group/${group.slug}`} icon="QueueList" text="Feed" /> }
                     { canQueryGroupMember === true && <NavigationSubmenu  icon="UserGroup" title="Members"> 
                         <NavigationSubmenuLink to={`/group/${group.slug}/members`} icon="UserGroup" text="Members" />
