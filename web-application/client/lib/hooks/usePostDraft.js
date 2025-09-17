@@ -55,6 +55,8 @@ const validateAndCorrectDraft = function(draft, post, group, sharedPostId) {
         && uuid.validate(draft.sharedPostId)
     ) {
         correctedDraft.sharedPostId = draft.sharedPostId
+    } else if ( has(draft, 'sharedPostId') && draft.sharedPostId === null ) {
+        correctedDraft.sharedPostId = null
     }
 
     if ( has(draft, 'fileId') 
@@ -63,6 +65,8 @@ const validateAndCorrectDraft = function(draft, post, group, sharedPostId) {
         && correctedDraft.sharedPostId === null
     ) {
         correctedDraft.fileId = draft.fileId
+    } else if ( has(draft, 'fileId') && draft.fileId === null ) {
+        correctedDraft.fileId = null
     }
 
     if( has(draft, 'linkPreviewId')
@@ -72,6 +76,8 @@ const validateAndCorrectDraft = function(draft, post, group, sharedPostId) {
         && correctedDraft.fileId === null
     ) {
         correctedDraft.linkPreviewId = draft.linkPreviewId
+    } else if ( has(draft, 'linkPreviewId') && draft.linkPreviewId === null ) {
+        correctedDraft.linkPreviewId = null
     }
 
     if ( has(draft, 'visibility')
