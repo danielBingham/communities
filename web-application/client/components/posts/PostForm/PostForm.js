@@ -97,18 +97,18 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
     useEffect(function() {
         if (postRequest && postRequest.state == 'fulfilled') {
             setDraft(null)
-            if ( group ) {
-                navigate(`/group/${group.slug}/${postRequest.response.body.entity.id}`)
-            } else {
-                navigate(`/${currentUser.username}/${postRequest.response.body.entity.id}`)
-            }
+            navigate(origin)
         }
     }, [ group, postRequest ])
 
     useEffect(function() {
         if (patchRequest && patchRequest.state == 'fulfilled') {
             setDraft(null) 
-            navigate(origin)
+            if ( group ) {
+                navigate(`/group/${group.slug}/${patchRequest.response.body.entity.id}`)
+            } else {
+                navigate(`/${currentUser.username}/${patchRequest.response.body.entity.id}`)
+            }
         }
     }, [ patchRequest ])
 
