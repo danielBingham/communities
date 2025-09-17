@@ -1,15 +1,15 @@
-# Post Update
+## [Update Post](documentation/testing/test-cases/Post/update.md)
 
 Test cases related to editing posts.
 
-## Pre-requisites
+### Pre-requisites
 
 - [ ] User1 has been created.
 - [ ] User2 has been created.
 
-## Cases
+### Cases
 
-### Post Editing
+#### Post Editing
 
 - [ ] As User1, create a post with text and an image.
     - [ ] Edit the post and change the text.  Save the edit.  Confirm post updated appropriately.
@@ -28,7 +28,7 @@ Test cases related to editing posts.
     - [ ] As User1, edit the shared post and change the text and the link.  Save the edit.
     - [ ] As User2, confirm the share updated appropriately.
 
-### Post Edit Drafts
+#### Post Edit Drafts
 
 - [ ] As User1, edit post with an image - change text and image.
     - [ ] Navigate away from the home feed and back to feed.  Confirm draft remains. 
