@@ -1,14 +1,14 @@
-# Delete PostComment 
+## [Delete PostComment](documentation/testing/test-cases/PostComment/update.md)
 
 Cases covering making comments on posts.
 
-## Pre-requisites
+### Pre-requisites
 
 - [ ] User1 has been created.
 - [ ] User2 has been created.
 - [ ] User1 has created a public post.
 
-## Cases
+### Cases
 
 - [ ] As User2, comment on User1's post.
     - [ ] As User2, delete the comment.

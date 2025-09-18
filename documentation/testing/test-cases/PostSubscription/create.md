@@ -1,14 +1,14 @@
-# Create PostSubscription 
+## [Create PostSubscription](documentation/testing/test-cases/PostSubscription/create.md)
 
 Cases covering subscribing to posts.
 
-## Pre-requisites
+### Pre-requisites
 
 - [ ] User1 has been created.
 - [ ] User2 has been created and is friends with User1.
 - [ ] User3 has been created and is friends with User2, but not User1.
 
-## Cases
+### Cases
 
 - [ ] When a user creates a post they should be subscribed to the post and notified of comments.
     - [ ] As User1, create a post.

@@ -630,12 +630,152 @@ Cases covering making comments on posts.
     - [x] Navigate away and back. Confirm draft is still gone.
 
 ## [Update PostComment](documentation/testing/test-cases/PostComment/delete.md)
+
+Cases covering making comments on posts.
+
+### Pre-requisites
+
+- [x] User1 has been created.
+- [x] User2 has been created.
+- [x] User3 has been created and is friends with User2.
+- [x] User1 has created a public post.
+
+### Cases
+
+- [x] As User2, comment on User1's post.
+    - [x] As User2, edit comment.
+    - [x] As User2, write edit text.
+    - [x] As User2, post the edit. Confirm comment shows the edit.
+
+- [x] As User2, comment on User1's post.
+    - [x] As User2, edit the comment.  Write some edit text.
+    - [x] As User2, cancel the edit.  Confirm comment shows original text.
+
+#### Mentions
+
+- [x] As User2, comment on User1's post and mention User3.
+    - [x] As User3, confirm mention notification.
+    - [x] As User2, edit the comment.  Confirm User3 is not notified again.
+
+
+- [-] As User2, comment on User1's post. NOTE: This case covers a current bug.
+    - [-] As User2, edit the comment and add a mention of User3.
+    - [-] As User3, confirm notification.
+
+#### Drafts
+
+- [x] As User2, comment on User1's post.
+    - [x] As User2, edit the comment.  Write some new text.
+    - [x] Reload the browser, confirm new text remains.
+    - [x] Navigate away from the page and back, confirm new text remains.
+    - [x] As User1, view the comment.  Confirm new text is absent.
+    - [x] As User2, post the comment.  Confirm edit shows up properly.
+
+- [x] As User2, comment on User1's post.
+    - [x] As User2, edit the comment.  Write some new text.
+    - [x] As User2, log out and log back in.  Confirm text is gone.
+
+- [x] As User2, comment on User1's post.
+    - [x] As User2, edit the comment. Write some new text.
+    - [x] As User2, reload the browser.  Confirm text remains.
+    - [x] As User2, cancel the edit.  Confirm previous text is restored.
+    
 ## [Delete PostComment](documentation/testing/test-cases/PostComment/update.md)
 
-## [Create PostSubscription](documentation/testing/test-cases/PostSubscription/create.md)
-## [Delete PostSubscription](documentation/testing/test-cases/PostSubscription/delete.md)
- 
+Cases covering making comments on posts.
 
+### Pre-requisites
+
+- [x] User1 has been created.
+- [x] User2 has been created.
+- [x] User1 has created a public post.
+
+### Cases
+
+- [x] As User2, comment on User1's post.
+    - [x] As User2, delete the comment.
+    - [x] Confirm the comment is removed.
+
+- [x] As User2, comment on User1's post.
+    - [x] As User1, check the dots menu for User2's comment.
+        - [x] Confirm "delete" is not shown.
+
+- [x] As User2, comment on User1's post, mentioning User1.
+    - [x] As User2, delete the comment.
+    - [x] As User1, click on the mention notification. Confirm is shows the post, but comment is gone.
+
+## [Create PostSubscription](documentation/testing/test-cases/PostSubscription/create.md)
+
+Cases covering subscribing to posts.
+
+### Pre-requisites
+
+- [x] User1 has been created.
+- [x] User2 has been created and is friends with User1.
+- [x] User3 has been created and is friends with User2, but not User1.
+
+### Cases
+
+- [x] When a user creates a post they should be subscribed to the post and notified of comments.
+    - [x] As User1, create a post.
+    - [x] As User1, confirm subscribed.
+    - [x] As User2, comment on User1's post.
+    - [x] As User1, confirm notified.
+
+- [x] When a user comments on a post, they should be subscribed to the post and notified of comments.
+    - [x] As User1, create a post.
+    - [x] As User2, comment on User1's post.
+    - [x] As User2, confirm subscribed.
+    - [x] As User1, comment on User1's post.
+    - [x] As User2, confirm notified.
+
+- [x] When a user subscribes to a post, they should be notified of comments.
+    - [x] As User1, create a public post.
+    - [x] As User3, subscribe to User1's post.
+    - [x] As User2, comment on User1's post.
+    - [x] As User3, confirm notification.
+
+- [x] When a user loses the ability to view a subscribed post they should no longer be notified of comments.
+    - [x] As User1, create a public post.
+    - [x] As User3, subscribe to User1's post.
+    - [x] As User1, change visibility of post to private.
+    - [x] As User2, comment on User1's post.
+    - [x] As User3, confirm no notification.
+
+## [Delete PostSubscription](documentation/testing/test-cases/PostSubscription/delete.md)
+
+Cases covering unsubscribing from posts.
+
+### Pre-requisites
+
+- [ ] User1 has been created.
+- [ ] User2 has been created and is friends with User1.
+- [ ] User3 has been created and is friends with User2, but not User1.
+
+### Cases
+
+- [x] When a user unsubscribes from a post they created, they should no longer be notified of comments. 
+    - [x] As User1, create a post.
+    - [x] As User1, unsubscribe from post. 
+    - [x] As User2, comment on User1's post.
+    - [x] As User1, confirm not notified.
+
+- [x] When a user unsubscribes from a post they commented on, they should no longer be notified of comments. 
+    - [x] As User1, create a post.
+    - [x] As User2, comment on User1's post.
+    - [x] As User2, unsubscribe from User1's post. 
+    - [x] As User1, comment on User1's post.
+    - [x] As User2, confirm not notified.
+
+- [x] When a user unsubscribes from a post they subscribed to, they should not longer be notified of comments. 
+    - [x] As User1, create a public post.
+    - [x] As User3, subscribe to User1's post.
+    - [x] As User2, comment on User1's post.
+    - [x] As User3, confirm notification.
+    - [x] As User3, unsubscribe from User1's post.
+    - [x] As User2 comment on User1's post.
+    - [x] As User3, confirm no notification.
+ 
 ### Admin Moderation
 
 - [ ] As John Doe, unfriend Admin.

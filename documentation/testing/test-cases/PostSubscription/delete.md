@@ -1,14 +1,14 @@
-# Delete PostSubscription 
+## [Delete PostSubscription](documentation/testing/test-cases/PostSubscription/delete.md)
 
 Cases covering unsubscribing from posts.
 
-## Pre-requisites
+### Pre-requisites
 
 - [ ] User1 has been created.
 - [ ] User2 has been created and is friends with User1.
 - [ ] User3 has been created and is friends with User2, but not User1.
 
-## Cases
+### Cases
 
 - [ ] When a user unsubscribes from a post they created, they should no longer be notified of comments. 
     - [ ] As User1, create a post.

@@ -1,15 +1,15 @@
-# Update PostComment 
+## [Update PostComment](documentation/testing/test-cases/PostComment/delete.md)
 
 Cases covering making comments on posts.
 
-## Pre-requisites
+### Pre-requisites
 
 - [ ] User1 has been created.
 - [ ] User2 has been created.
 - [ ] User3 has been created and is friends with User2.
 - [ ] User1 has created a public post.
 
-## Cases
+### Cases
 
 - [ ] As User2, comment on User1's post.
     - [ ] As User2, edit comment.
@@ -20,7 +20,7 @@ Cases covering making comments on posts.
     - [ ] As User2, edit the comment.  Write some edit text.
     - [ ] As User2, cancel the edit.  Confirm comment shows original text.
 
-### Mentions
+#### Mentions
 
 - [ ] As User2, comment on User1's post and mention User3.
     - [ ] As User3, confirm mention notification.
@@ -30,9 +30,8 @@ Cases covering making comments on posts.
 - [ ] As User2, comment on User1's post. NOTE: This case covers a current bug.
     - [ ] As User2, edit the comment and add a mention of User3.
     - [ ] As User3, confirm notification.
-    
 
-### Drafts
+#### Drafts
 
 - [ ] As User2, comment on User1's post.
     - [ ] As User2, edit the comment.  Write some new text.
