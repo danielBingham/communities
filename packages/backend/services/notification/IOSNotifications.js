@@ -95,7 +95,7 @@ module.exports = class IOSNotifications {
     }
 
     connect() {
-        const promise = new Promise(function(resolve, reject) {
+        const promise = new Promise((resolve, reject) => {
             this.core.logger.info(`=== IOS Notifications:: Connecting...`)
             this.shouldReconnect = true
             this.attempts = this.attempts + 1
