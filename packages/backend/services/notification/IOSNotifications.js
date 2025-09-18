@@ -47,9 +47,10 @@ module.exports = class IOSNotifications {
 
         this.timeoutId = null
         this.attempts = 0
+        this.shouldReconnect = false
 
         this.state = STATE.DISCONNECTED
-        this.client = this.connect()
+        this.client = null
     }
 
     getCredentials() {
@@ -66,6 +67,10 @@ module.exports = class IOSNotifications {
     }
 
     reconnect(reason) {
+        if ( ! this.shouldReconnect) {
+            return
+        }
+
         let retryTimeout = 1000
         if ( reason === REASON.SHUTDOWN) {
             this.core.logger.info(`=== IOS Notifications:: Server Shutdown. Reconnecting...`)
@@ -84,61 +89,82 @@ module.exports = class IOSNotifications {
         if ( this.timeoutId === null ) {
             this.timeoutId = setTimeout(() => {
                 this.timeoutId = null
-                this.client = this.connect()
+                this.connect()
             }, retryTimeout)
         }
     }
 
     connect() {
-        this.core.logger.info(`=== IOS Notifications:: Connecting...`)
-        this.attempts = this.attempts + 1
-        this.state = STATE.CONNECTING
+        const promise = new Promise(function(resolve, reject) {
+            this.core.logger.info(`=== IOS Notifications:: Connecting...`)
+            this.shouldReconnect = true
+            this.attempts = this.attempts + 1
+            this.state = STATE.CONNECTING
 
-        // `client` is a ClientHttp2Session: https://nodejs.org/api/http2.html#class-clienthttp2session
-        // Which extends Http2Session: https://nodejs.org/api/http2.html#class-http2session
-        const client = http2.connect(this.core.config.notifications.ios.endpoint, this.getCredentials())
+            // `client` is a ClientHttp2Session: https://nodejs.org/api/http2.html#class-clienthttp2session
+            // Which extends Http2Session: https://nodejs.org/api/http2.html#class-http2session
+            this.client = http2.connect(this.core.config.notifications.ios.endpoint, this.getCredentials())
 
-        client.on("close", () => {
-            this.core.logger.debug(`=== IOS Notifications:: Connection closed.`)
-            if ( this.state !== STATE.DISCONNECTING ) {
-                this.reconnect()
-            }
-            this.state = STATE.DISCONNECTED
+            this.client.on("close", () => {
+                this.core.logger.debug(`=== IOS Notifications:: Connection closed.`)
+                if ( this.state !== STATE.DISCONNECTING ) {
+                    this.reconnect()
+                }
+                this.state = STATE.DISCONNECTED
+            })
+
+            this.client.on("connect", () => {
+                this.core.logger.debug(`=== IOS Notifications:: Connected.`)
+                this.timeoutId = null
+                this.attempts = 0
+
+                this.state = STATE.CONNECTED
+                resolve()
+                this.flushQueue()
+            })
+
+            this.client.on("error", (error) => this.core.logger.error(error))
+            this.client.on("goaway", (errorCode, lastStreamId, data) => {
+                this.core.logger.debug(`=== IOS Notifications:: 'goaway' Frame: `, data.toString('utf8'))
+                this.core.logger.debug(`Code: ${errorCode}, StreamId: ${lastStreamId}`)
+                this.state = STATE.DISCONNECTING
+
+                const payload = JSON.parse(data.toString('utf8'))
+                if ( 'reason' in payload) {
+                    this.reconnect(payload.reason)
+                }
+            })
         })
+        return promise
+    }
 
-        client.on("connect", () => {
-            this.core.logger.debug(`=== IOS Notifications:: Connected.`)
-            this.timeoutId = null
-            this.attempts = 0
+    disconnect() {
+        if ( this.state === STATE.DISCONNECTED || this.state === STATE.DISCONNECTING ) {
+            return
+        }
+        this.core.logger.info(`=== IOS Notifications:: Disconnecting...`)
 
-            this.state = STATE.CONNECTED
-            this.flushQueue()
-        })
-
-        client.on("error", (error) => this.core.logger.error(error))
-        client.on("goaway", (errorCode, lastStreamId, data) => {
-            this.core.logger.debug(`=== IOS Notifications:: 'goaway' Frame: `, data.toString('utf8'))
-            this.core.logger.debug(`Code: ${errorCode}, StreamId: ${lastStreamId}`)
-            this.state = STATE.DISCONNECTING
-
-            const payload = JSON.parse(data.toString('utf8'))
-            if ( 'reason' in payload) {
-                this.reconnect(payload.reason)
-            }
-        })
-
-        return client
+        this.state = STATE.DISCONNECTING
+        this.shouldReconnect = false
+        if ( this.timeoutId !== null ) {
+            cancelTimeout(this.timeoutId)
+        }
+        this.client.close()
     }
 
     async notify(userId, notification) {
+        await this.connect()
+
         this.core.logger.debug(`=== IOS Notifications:: Notifying User(${userId})...`)
         this.queue.push({ userId: userId, notification: notification })
 
         await this.flushQueue()
+
+        this.disconnect()
     }
 
     async flushQueue() {
-        if ( this.state !== STATE.CONNECTED ) {
+        if ( this.client === null || this.state !== STATE.CONNECTED ) {
             return
         }
 
@@ -229,7 +255,7 @@ module.exports = class IOSNotifications {
                     this.core.logger.error(`Body: `, body)
                     this.core.logger.error(`Headers: `, headers)
                     this.core.logger.error(`Response Headers: `, responseHeaders)
-                }
+                } 
             })
             clientStream.on("data", (data) => {
                 if ( requestError ) {
