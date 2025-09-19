@@ -139,7 +139,10 @@ const createExpressApp = function(core, sessionParser) {
     // ========================================================================
 
     app.get('/\/dist\/dist\.zip$/', function(request, response) {
+        core.logger.debug(`Request for distro bundle.`)
+        core.logger.debug(`Process: `, process.cwd())
         const filepath = path.join(process.cwd(), 'public/dist/dist.zip')
+        core.logger.debug(`Filepath: `, filepath)
         response.sendFile(filepath)
     })
 
