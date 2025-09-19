@@ -20,7 +20,7 @@ export const useUserByUsername = function(username) {
     const [request, makeRequest ] = useRequest()
 
     useEffect(() => {
-        if ( username && query === undefined && request?.state !== 'pending' ) {
+        if ( username && user === undefined && request?.state !== 'pending' ) {
             makeRequest(getUsers(username, { username: username }))
         }
     }, [ username, user, request ])
