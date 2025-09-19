@@ -27,6 +27,7 @@ import PostVisibilityControl from './PostVisibilityControl'
 import PostTypeControl from './PostTypeControl'
 
 import ErrorModal from '/components/errors/ErrorModal'
+import ErrorCard from '/components/errors/ErrorCard'
 
 
 import './PostForm.css'
@@ -105,13 +106,18 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
         }
     }, [ patchRequest ])
 
+
     // Don't show the form if they don't have permission to post in this Group.
-    if ( 
-        ((groupId !== undefined && groupId !== null) || (post?.groupId !== undefined && post?.groupId !== null))
-            && canCreateGroupPost !== true )
+    if ((groupId !== undefined && groupId !== null) || (post?.groupId !== undefined && post?.groupId !== null))
     {
-        logger.warn(`### PostForm:: No permission to post in Group.`)
-        return null
+        if ( ! group ) {
+            return null
+        } else if (canCreateGroupPost !== true) {
+            logger.warn(`### PostForm:: No permission to post in Group.`)
+            return (
+                <ErrorCard href={`/group/${group.slug}`}><p>You don't have permission to post in { group.title }.</p></ErrorCard>
+            )
+        }
     }
 
     if ( postRequest && postRequest.state == 'failed' ) {
