@@ -24,7 +24,7 @@ export const useVersion = function() {
         logger.debug(`=== useVersion:: updateMobile()`)
         const url = new URL('/dist/dist.zip', host).href
         const bundle = await CapacitorUpdater.download({
-            version: version,
+            version: serverVersion,
             url: url 
         })
 
