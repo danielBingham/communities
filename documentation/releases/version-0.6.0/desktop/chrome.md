@@ -837,135 +837,137 @@ Cases covering unsubscribing from posts.
         - [x] As John Doe, comment on Maria Rodriguez's post.  Confirm Maria Rodriguez still subscribed and notified.
     - [x] As Maria Rodriguez, delete account.
 
-- [ ] As John Doe, flag Jane Doe's post in the group for Admin.
-    - [ ] As Admin, confirm flagged post shows up in Admin Moderation queue.
-    - [ ] As Admin, reject the flagged post with a reason.
-    - [ ] As John Doe, confirm the rejected post shows the moderation message and reason.
-- [ ] As John Doe, flag Jane Doe's comment on a post in the group.
-    - [ ] As Admin, confirm the flagged comment shows up in the Admin Moderation Queue.
-    - [ ] As Admin, reject the flagged comment.
-    - [ ] As John Doe, confirm the rejected comment shows the moderation message and reason.
+- [x] As John Doe, flag Jane Doe's post in the group for Admin.
+    - [x] As Admin, confirm flagged post shows up in Admin Moderation queue.
+    - [x] As Admin, reject the flagged post with a reason.
+    - [x] As John Doe, confirm the rejected post shows the moderation message and reason.
+- [x] As John Doe, flag Jane Doe's comment on a post in the group.
+    - [x] As Admin, confirm the flagged comment shows up in the Admin Moderation Queue.
+    - [x] As Admin, reject the flagged comment.
+    - [x] As John Doe, confirm the rejected comment shows the moderation message and reason.
 
-- [ ] As John Doe, promote Jane Doe to group "admin"
+- [x] As John Doe, promote Jane Doe to group "admin"
 
-- [ ] As John Doe, modify the group's profile in Settings.
-- [ ] As Jane Doe, modify the group's profile in Settings.
-- [ ] As John Doe, delete the group.
-    - [ ] Confirm all posts deleted.
+- [x] As John Doe, modify the group's profile in Settings.
+- [x] As Jane Doe, modify the group's profile in Settings.
+- [x] As John Doe, delete the group.
+    - [x] Confirm all posts deleted.
 
 #### Test 'private' Groups
 
-- [ ] As John Doe, create a "private" group named "Private Test Group"
-    - [ ] As John Doe, create a post in "Private Test Group".
+- [x] As John Doe, create a "private" group named "Private Test Group"
+    - [x] As John Doe, create a post in "Private Test Group".
 
-- [ ] As Jane Doe, attempt to view "Private Test Group", confirm posts and members are *not* visible.
-    - [ ] As Jane Doe, attempt to view a specific post in "Private Test Group" by loading the direct link.  Confirm 404.
+- [x] As Jane Doe, attempt to view "Private Test Group", confirm posts and members are *not* visible.
+    - [x] As Jane Doe, attempt to view a specific post in "Private Test Group" by loading the direct link.  Confirm 404.
 
-- [ ] As John Doe, invite Jane Doe to "Private Test Group"
-    - [ ] As Jane Doe, reject the invite.
-    - [ ] As John Doe, invite Jane Doe to "Private Test Group".
-    - [ ] As Jane Doe, accept the invite and join the group.
-    - [ ] As Jane Doe, confirm posts and members are now visible.
-        - [ ] As Jane Doe, attempt to view a specific post in "Private Test Group" by loading the direct link, confirm visible.
-        - [ ] As Jane Doe, comment on the viewed post.
-        - [ ] As Jane Doe, post in the group.
+- [x] As John Doe, invite Jane Doe to "Private Test Group"
+    - [x] As Jane Doe, reject the invite.
+    - [x] As John Doe, invite Jane Doe to "Private Test Group".
+    - [x] As Jane Doe, accept the invite and join the group.
+    - [x] As Jane Doe, confirm posts and members are now visible.
+        - [x] As Jane Doe, attempt to view a specific post in "Private Test Group" by loading the direct link, confirm visible.
+        - [x] As Jane Doe, comment on the viewed post.
+        - [x] As Jane Doe, post in the group.
 
-- As John Doe, promote Jane Doe to "moderator".
+- [x] As John Doe, promote Jane Doe to "moderator".
 
-- [ ] As Jane Doe, invite James Smith to "Private Test Group"
-    - [ ] As James Smith, accept the email invite.
-    - [ ] As James Smith, accept the group invite.
-    - [ ] As James Smith, attempt to view a specific post by loading the direct link.  Confirm visible.
-    - [ ] As James Smith, post in the group.
-    - [ ] As James Smith, leave the group.
-        - [ ] As James Smith, confirm post no longer visible.
-        - [ ] As Jane Doe, confirm James Smith's, post remains.
-        - [ ] As Jane Doe, comment on James Smith's post.  Confirm James Smith is *not* still subscribed and *not* notified.
+- [x] As Jane Doe, invite James Smith to "Private Test Group"
+    - [x] As James Smith, accept the email invite.
+    - [x] As James Smith, accept the group invite.
+    - [x] As James Smith, attempt to view a specific post by loading the direct link.  Confirm visible.
+    - [x] As James Smith, post in the group.
+    - [x] As James Smith, leave the group.
+        - [x] As James Smith, confirm post no longer visible.
+        - [x] As Jane Doe, confirm James Smith's, post remains.
+        - [x] As Jane Doe, comment on James Smith's post.  Confirm James Smith is *not* still subscribed and *not* notified.
 
-- [ ] As John Doe, invite Maria Rodriguez to "Private Test Group" using an email
-    - [ ] As Maria Rodriguez, accept the email invite.
-    - [ ] As Maria Rodriguez, accept the group invite.
-    - [ ] As Maria Rodriguez, attempt to view a specific post by loading the direct link.  Confirm visible.
-    - [ ] As Maria Rodriguez, make a post.
-    - [ ] As John Doe, remove Maria Rodriguez from the group.
-        - [ ] As John Doe, confirm Maria Rodriguez's post remains.
-        - [ ] As John Doe, comment on Maria Rodriguez's post.  Confirm Maria Rodriguez is *not* still subscribed and is *not* notified.
-        - [ ] As Maria Rodriguez, confirm Maria Rodriguez's post is no longer visible.
-    - [ ] As Maria Rodriguez, delete account.
+- [x] As John Doe, invite Maria Rodriguez to "Private Test Group" using an email
+    - [x] As Maria Rodriguez, accept the email invite.
+    - [x] As Maria Rodriguez, accept the group invite.
+    - [x] As Maria Rodriguez, attempt to view a specific post by loading the direct link.  Confirm visible.
+    - [x] As Maria Rodriguez, make a post.
+    - [x] As John Doe, remove Maria Rodriguez from the group.
+        - [x] As John Doe, confirm Maria Rodriguez's post remains.
+        - [x] As John Doe, comment on Maria Rodriguez's post.  Confirm Maria Rodriguez is *not* still subscribed and is *not* notified.
+        - [x] As Maria Rodriguez, confirm Maria Rodriguez's post is no longer visible.
+    - [x] As Maria Rodriguez, delete account.
 
-- [ ] As John Doe, flag Jane Doe's post in the group for Admin.
-    - [ ] As Admin, confirm flagged post shows up in Admin Moderation queue.
-    - [ ] As Admin, reject the flagged post with a reason.
-    - [ ] As John Doe, confirm the rejected post shows the moderation message and reason.
-- [ ] As John Doe, flag Jane Doe's comment on a post in the group.
-    - [ ] As Admin, confirm the flagged comment shows up in the Admin Moderation Queue.
-    - [ ] As Admin, reject the flagged comment.
-    - [ ] As John Doe, confirm the rejected comment shows the moderation message and reason.
+- [x] As John Doe, flag Jane Doe's post in the group for Admin.
+    - [x] As Admin, confirm flagged post shows up in Admin Moderation queue.
+    - [x] As Admin, reject the flagged post with a reason.
+    - [x] As John Doe, confirm the rejected post shows the moderation message and reason.
+- [x] As John Doe, flag Jane Doe's comment on a post in the group.
+    - [x] As Admin, confirm the flagged comment shows up in the Admin Moderation Queue.
+    - [x] As Admin, reject the flagged comment.
+    - [x] As John Doe, confirm the rejected comment shows the moderation message and reason.
 
-- [ ] As John Doe, promote Jane Doe to group "admin"
+- [x] As John Doe, promote Jane Doe to group "admin"
 
-- [ ] As John Doe, modify the group's profile in Settings.
-- [ ] As Jane Doe, modify the group's profile in Settings.
-- [ ] As John Doe, delete the group.
-    - [ ] Confirm all posts deleted.
+- [x] As John Doe, modify the group's profile in Settings.
+- [x] As Jane Doe, modify the group's profile in Settings.
+- [x] As John Doe, delete the group.
+    - [x] Confirm all posts deleted.
 
 #### Test 'hidden' Groups
 
-- [ ] As John Doe, create a "hidden" group named "Hidden Test Group"
-    - [ ] As John Doe, create a post in "Hidden Test Group".
+- [x] As John Doe, create a "hidden" group named "Hidden Test Group"
+    - [x] As John Doe, create a post in "Hidden Test Group".
 
-- [ ] As Jane Doe, attempt to view "Hidden Test Group", confirm 404.
-    - [ ] As user2, attempt to view a specific post in "Hidden Test Group" by loading the direct link, confirm 404.
+- [x] As Jane Doe, attempt to view "Hidden Test Group", confirm 404.
+    - [x] As user2, attempt to view a specific post in "Hidden Test Group" by loading the direct link, confirm 404.
 
-- [ ] As John Doe, invite Jane Doe to "Hidden Test Group"
-    - [ ] As Jane Doe, confirm "Hidden Test Group" is visible.
-    - [ ] As Jane Doe, reject the invite.
-    - [ ] As Jane Doe, confirm group is no longer visible.
-    - [ ] As John Doe, invite Jane Doe to "Hidden Test Group".
-    - [ ] As Jane Doe, accept the invite and join the group.
-    - [ ] As Jane Doe, confirm posts and members are now visible.
-        - [ ] As Jane Doe, attempt to view a specific post in "Hidden Test Group" by loading the direct link, confirm visible.
-        - [ ] As Jane Doe, comment on the viewed post.
-        - [ ] As Jane Doe, post in the group.
+- [x] As John Doe, invite Jane Doe to "Hidden Test Group"
+    - [x] As Jane Doe, confirm "Hidden Test Group" is visible.
+    - [x] As Jane Doe, reject the invite.
+    - [x] As Jane Doe, confirm group is no longer visible.
+    - [x] As John Doe, invite Jane Doe to "Hidden Test Group".
+    - [x] As Jane Doe, accept the invite and join the group.
+    - [x] As Jane Doe, confirm posts and members are now visible.
+        - [x] As Jane Doe, attempt to view a specific post in "Hidden Test Group" by loading the direct link, confirm visible.
+        - [x] As Jane Doe, comment on the viewed post.
+        - [x] As Jane Doe, post in the group.
 
-- [ ] As Jane Doe, invite James Smith to "Hidden Test Group" using an email
-    - [ ] As James Smith, accept the email invite.
-    - [ ] As James Smith, confirm group is visible.
-    - [ ] As James Smith, accept the group invite.
-    - [ ] As James Smith, attempt to view a specific post by loading the direct link.  Confirm visible.
-    - [ ] As James Smith, post in the group.
-    - [ ] As James Smith, leave the group.
-        - [ ] As James Smith, confirm group is no longer visible.
-        - [ ] As James Smith, confirm post is no longer visible.
-        - [ ] As Jane Doe, confirm James Smith's, post remains.
-        - [ ] As Jane Doe, comment on James Smith's post.  Confirm James Smith is *not* still subscribed and *not* notified.
+- [x] As John Doe, promote Jane Doe to "moderator".
 
-- [ ] As John Doe, invite Maria Rodriguez to "Hidden Test Group" using an email
-    - [ ] As Maria Rodriguez, accept the email invite.
-    - [ ] As Maria Rodriguez, confirm the group is visible.
-    - [ ] As Maria Rodriguez, accept the group invite.
-    - [ ] As Maria Rodriguez, attempt to view a specific post by loading the direct link.  Confirm visible.
-    - [ ] As Maria Rodriguez, make a post.
-    - [ ] As John Doe, remove Maria Rodriguez from the group.
-        - [ ] As John Doe, confirm Maria Rodriguez's post remains.
-        - [ ] As John Doe, comment on Maria Rodriguez's post.  Confirm Maria Rodriguez is *not* still subscribed and is *not* notified.
-        - [ ] As Maria Rodriguez, confirm Maria Rodriguez's post is no longer visible.
-        - [ ] As Maria Rodriguez, confirm the group is no longer visible.
-    - [ ] As Maria Rodriguez, delete account.
+- [x] As Jane Doe, invite James Smith to "Hidden Test Group" using an email
+    - [x] As James Smith, accept the email invite.
+    - [x] As James Smith, confirm group is visible.
+    - [x] As James Smith, accept the group invite.
+    - [x] As James Smith, attempt to view a specific post by loading the direct link.  Confirm visible.
+    - [x] As James Smith, post in the group.
+    - [x] As James Smith, leave the group.
+        - [x] As James Smith, confirm group is no longer visible.
+        - [x] As James Smith, confirm post is no longer visible.
+        - [x] As Jane Doe, confirm James Smith's, post remains.
+        - [x] As Jane Doe, comment on James Smith's post.  Confirm James Smith is *not* still subscribed and *not* notified.
+
+- [x] As John Doe, invite Maria Rodriguez to "Hidden Test Group" using an email
+    - [x] As Maria Rodriguez, accept the email invite.
+    - [x] As Maria Rodriguez, confirm the group is visible.
+    - [x] As Maria Rodriguez, accept the group invite.
+    - [x] As Maria Rodriguez, attempt to view a specific post by loading the direct link.  Confirm visible.
+    - [x] As Maria Rodriguez, make a post.
+    - [x] As John Doe, remove Maria Rodriguez from the group.
+        - [x] As John Doe, confirm Maria Rodriguez's post remains.
+        - [x] As John Doe, comment on Maria Rodriguez's post.  Confirm Maria Rodriguez is *not* still subscribed and is *not* notified.
+        - [x] As Maria Rodriguez, confirm Maria Rodriguez's post is no longer visible.
+        - [x] As Maria Rodriguez, confirm the group is no longer visible.
+    - [x] As Maria Rodriguez, delete account.
  
-- [ ] As John Doe, flag Jane Doe's post in the group for Admin.
-    - [ ] As Admin, confirm flagged post shows up in Admin Moderation queue.
-    - [ ] As Admin, reject the flagged post with a reason.
-    - [ ] As John Doe, confirm the rejected post shows the moderation message and reason.
-- [ ] As John Doe, flag Jane Doe's comment on a post in the group.
-    - [ ] As Admin, confirm the flagged comment shows up in the Admin Moderation Queue.
-    - [ ] As Admin, reject the flagged comment.
-    - [ ] As John Doe, confirm the rejected comment shows the moderation message and reason.
+- [x] As John Doe, flag Jane Doe's post in the group for Admin.
+    - [x] As Admin, confirm flagged post shows up in Admin Moderation queue.
+    - [x] As Admin, reject the flagged post with a reason.
+    - [x] As John Doe, confirm the rejected post shows the moderation message and reason.
+- [x] As John Doe, flag Jane Doe's comment on a post in the group.
+    - [x] As Admin, confirm the flagged comment shows up in the Admin Moderation Queue.
+    - [x] As Admin, reject the flagged comment.
+    - [x] As John Doe, confirm the rejected comment shows the moderation message and reason.
 
-- [ ] As John Doe, promote Jane Doe to group "admin"
+- [x] As John Doe, promote Jane Doe to group "admin"
 
-- [ ] As John Doe, modify the group's profile in Settings.
-- [ ] As Jane Doe, modify the group's profile in Settings.
-- [ ] As John Doe, delete the group.
-    - [ ] Confirm all posts deleted.
+- [x] As John Doe, modify the group's profile in Settings.
+- [x] As Jane Doe, modify the group's profile in Settings.
+- [x] As John Doe, delete the group.
+    - [x] Confirm all posts deleted.
 

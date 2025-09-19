@@ -18,7 +18,7 @@ Cases covering reacting to Posts.
     - [ ] Confirm dislike highlighted and "dislikes" is incremented by 1.
     - [ ] Confirm clicking on the reactions shows User1 as disliking.
     - [ ] Confirm post increases rank when feed is sorted by "Most Activity"
- 
+  
 - [ ] As User1, demote a third one of User2's Posts.
     - [ ] Confirm "Are You Sure" modal shows.
     - [ ] Select "Yes".
