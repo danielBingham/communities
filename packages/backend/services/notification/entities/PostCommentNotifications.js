@@ -34,9 +34,9 @@ module.exports = class PostCommentNotifications {
             'PostComment:create:subscriber'
         ]
 
-    constructor(core, notificationService) {
+    constructor(core, notificationWorker) {
         this.core = core
-        this.notificationService = notificationService
+        this.notificationWorker = notificationWorker
 
         this.groupDAO = new GroupDAO(core)
         this.postCommentDAO = new PostCommentDAO(core)
@@ -104,7 +104,7 @@ module.exports = class PostCommentNotifications {
                return 
             }
 
-            await this.notificationService.createNotification(context.postAuthor.id, 'PostComment:create:author', context, options) 
+            await this.notificationWorker.createNotification(context.postAuthor.id, 'PostComment:create:author', context, options) 
         }
     }
 
@@ -139,7 +139,7 @@ module.exports = class PostCommentNotifications {
                 }
 
                 const subscriberContext = { ...context, subscriber: subscribers.dictionary[subscription.userId] }
-                await this.notificationService.createNotification(subscription.userId, 'PostComment:create:subscriber', subscriberContext, options)
+                await this.notificationWorker.createNotification(subscription.userId, 'PostComment:create:subscriber', subscriberContext, options)
             }
         }
     }
@@ -175,7 +175,7 @@ module.exports = class PostCommentNotifications {
             }
 
             const mentionContext = { ...context, mentioned: userResults.dictionary[userId] }
-            await this.notificationService.createNotification(userId, 'PostComment:create:mention', mentionContext, options)
+            await this.notificationWorker.createNotification(userId, 'PostComment:create:mention', mentionContext, options)
         }
 
     }

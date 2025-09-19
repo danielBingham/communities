@@ -37,9 +37,9 @@ module.exports = class GroupModerationNotifications {
         'GroupModeration:update:comment:status:rejected:author'
     ]
 
-    constructor(core, notificationService) {
+    constructor(core, notificationWorker) {
         this.core = core
-        this.notificationService = notificationService
+        this.notificationWorker = notificationWorker
 
         this.groupDAO = new GroupDAO(core)
         this.postDAO = new PostDAO(core)
@@ -98,7 +98,7 @@ module.exports = class GroupModerationNotifications {
                 return
             }
 
-            await this.notificationService.createNotification(context.postAuthor.id, 'GroupModeration:update:post:status:rejected:author', context, options) 
+            await this.notificationWorker.createNotification(context.postAuthor.id, 'GroupModeration:update:post:status:rejected:author', context, options) 
         } else if ( type === 'GroupModeration:update:comment:status:rejected:author' ) {
             // Don't send notifications to users who have lost the right to view
             // their post.
@@ -107,7 +107,7 @@ module.exports = class GroupModerationNotifications {
                 return
             }
 
-            await this.notificationService.createNotification(context.comment.userId, 'GroupModeration:update:comment:status:rejected:author', context, options) 
+            await this.notificationWorker.createNotification(context.comment.userId, 'GroupModeration:update:comment:status:rejected:author', context, options) 
         }
     }
 }

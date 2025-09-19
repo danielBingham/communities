@@ -34,9 +34,9 @@ module.exports = class UserRelationshipNotifications {
         'UserRelationship:update:user'
     ]
 
-    constructor(core, notificationService) {
+    constructor(core, notificationWorker) {
         this.core = core
-        this.notificationService = notificationService
+        this.notificationWorker = notificationWorker
 
         this.groupDAO = new GroupDAO(core)
         this.postCommentDAO = new PostCommentDAO(core)
@@ -62,7 +62,7 @@ module.exports = class UserRelationshipNotifications {
         context.path = `/friends/requests`
         context.link = new URL(context.path, this.core.config.host).href
 
-        await this.notificationService.createNotification(context.relationId, 'UserRelationship:create:relation', context, options)
+        await this.notificationWorker.createNotification(context.relationId, 'UserRelationship:create:relation', context, options)
     }
 
     async update(currentUser, type, context, options) {
@@ -71,7 +71,7 @@ module.exports = class UserRelationshipNotifications {
         context.path = `/${context.friend.username}`
         context.link = new URL(context.path, this.core.config.host).href
 
-        await this.notificationService.createNotification(context.userId, 'UserRelationship:update:user', context, options)
+        await this.notificationWorker.createNotification(context.userId, 'UserRelationship:update:user', context, options)
     }
 
 }

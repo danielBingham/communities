@@ -40,9 +40,9 @@ module.exports = class GroupMemberNotifications {
             'GroupMember:update:role:admin:member'
     ]
 
-    constructor(core, notificationService) {
+    constructor(core, notificationWorker) {
         this.core = core
-        this.notificationService = notificationService
+        this.notificationWorker = notificationWorker
 
         this.groupDAO = new GroupDAO(core)
         this.groupMemberDAO = new GroupMemberDAO(core)
@@ -69,7 +69,7 @@ module.exports = class GroupMemberNotifications {
             context.link = new URL(context.path, this.core.config.host).href
 
 
-            await this.notificationService.createNotification(context.user.id, 'GroupMember:create:status:pending-invited:member', context, options)
+            await this.notificationWorker.createNotification(context.user.id, 'GroupMember:create:status:pending-invited:member', context, options)
         } else if ( context.member.status == 'pending-requested' ) {
             context.path = `/group/${context.group.slug}/members/requests`
             context.link = new URL(context.path, this.core.config.host).href
@@ -82,7 +82,7 @@ module.exports = class GroupMemberNotifications {
             for(const id of moderatorResults.list ) {
                 const moderatorMember = moderatorResults.dictionary[id]
 
-                await this.notificationService.createNotification(
+                await this.notificationWorker.createNotification(
                     moderatorMember.userId, 
                     'GroupMember:create:status:pending-requested:moderator', 
                     { ...context, moderator: moderatorMember },
@@ -96,21 +96,21 @@ module.exports = class GroupMemberNotifications {
         await this.ensureContext(currentUser, type, context)
 
         if ( context.previousStatus == 'pending-requested' && context.member.status == 'member' ) {
-            await this.notificationService.createNotification(
+            await this.notificationWorker.createNotification(
                 context.user.id,
                 'GroupMember:update:status:pending-requested-member:member',
                 context,
                 options
             )
         } else if ( context.previousRole == 'member' && context.member.role == 'moderator' ) {
-            await this.notificationService.createNotification(
+            await this.notificationWorker.createNotification(
                 context.user.id,
                 'GroupMember:update:role:moderator:member',
                 { ...context, promoter: currentUser },
                 options
             )
         } else if ( context.previousRole == 'moderator' && context.member.role == 'admin' ) {
-            await this.notificationService.createNotification(
+            await this.notificationWorker.createNotification(
                 context.user.id,
                 'GroupMember:update:role:admin:member',
                 { ...context, promoter: currentUser },

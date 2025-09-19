@@ -33,9 +33,9 @@ module.exports = class SiteModerationNotifications {
         'SiteModeration:update:post:status:rejected:author'
     ]
 
-    constructor(core, notificationService) {
+    constructor(core, notificationWorker) {
         this.core = core
-        this.notificationService = notificationService
+        this.notificationWorker = notificationWorker
 
         this.groupDAO = new GroupDAO(core)
         this.postDAO = new PostDAO(core)
@@ -98,7 +98,7 @@ module.exports = class SiteModerationNotifications {
                 return
             }
 
-            await this.notificationService.createNotification(context.postAuthor.id, 
+            await this.notificationWorker.createNotification(context.postAuthor.id, 
                 type, context, options) 
 
         } else if ( type === 'SiteModeration:update:comment:status:rejected:author' ) {
@@ -110,7 +110,7 @@ module.exports = class SiteModerationNotifications {
                 return
             }
 
-            await this.notificationService.createNotification(context.commentAuthor.id, 
+            await this.notificationWorker.createNotification(context.commentAuthor.id, 
                 type, context, options) 
         }
     }

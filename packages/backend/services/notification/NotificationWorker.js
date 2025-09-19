@@ -58,9 +58,8 @@ for(const notification of notifications) {
 }
 
 module.exports = class NotificationWorker {
-    constructor(core, notificationService) {
+    constructor(core, logger) {
         this.core = core
-        this.notificationService = notificationService
 
         this.notificationDAO = new NotificationDAO(core)
 
@@ -74,7 +73,7 @@ module.exports = class NotificationWorker {
         this.siteModerationNotifications = new SiteModerationNotifications(core, this)
         this.userRelationshipNotifications = new UserRelationshipNotifications(core, this)
 
-        this.iosNotifications = new IOSNotifications(core)
+        this.iosNotifications = new IOSNotifications(core, logger)
         this.androidNotifications = new AndroidNotifications(core)
 
         const layoutTemplate = fs.readFileSync(path.resolve(__dirname, './definitions/layout.hbs'), 'utf8')

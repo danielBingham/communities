@@ -38,8 +38,9 @@ const REASON = {
 
 module.exports = class IOSNotifications {
 
-    constructor(core) {
+    constructor(core, logger) {
         this.core = core
+        this.logger = logger ? logger : core.logger
 
         this.sessionService = new SessionService(core)
 
@@ -73,16 +74,16 @@ module.exports = class IOSNotifications {
 
         let retryTimeout = 1000
         if ( reason === REASON.SHUTDOWN) {
-            this.core.logger.info(`=== IOS Notifications:: Server Shutdown. Reconnecting...`)
+            this.logger.info(`=== IOS Notifications:: Server Shutdown. Reconnecting...`)
             retryTimeout = retryTimeout * Math.exp(this.attempts) 
         } else if ( reason === REASON.UNAVAILABLE ) {
-            this.core.logger.info(`=== IOS Notifications:: Service Unavailable. Trying in 15 minutes...`)
+            this.logger.info(`=== IOS Notifications:: Service Unavailable. Trying in 15 minutes...`)
             retryTimeout = 15 * 60 * 1000 * Math.exp(this.attempts)
         } else if ( reason === REASON.ERROR ) {
-            this.core.logger.info(`=== IOS Notifications:: Server Error. Reconnecting...`)
+            this.logger.info(`=== IOS Notifications:: Server Error. Reconnecting...`)
             retryTimeout = 1000 * Math.exp(this.attempts)
         } else {
-            this.core.logger.info(`=== IOS Notifications:: Unknown disconnect.  Reconnecting...`)
+            this.logger.info(`=== IOS Notifications:: Unknown disconnect.  Reconnecting...`)
             retryTimeout = 1000 * Math.exp(this.attempts)
         }
        
@@ -96,7 +97,7 @@ module.exports = class IOSNotifications {
 
     connect() {
         const promise = new Promise((resolve, reject) => {
-            this.core.logger.info(`=== IOS Notifications:: Connecting...`)
+            this.logger.info(`=== IOS Notifications:: Connecting...`)
             this.shouldReconnect = true
             this.attempts = this.attempts + 1
             this.state = STATE.CONNECTING
@@ -106,7 +107,7 @@ module.exports = class IOSNotifications {
             this.client = http2.connect(this.core.config.notifications.ios.endpoint, this.getCredentials())
 
             this.client.on("close", () => {
-                this.core.logger.debug(`=== IOS Notifications:: Connection closed.`)
+                this.logger.debug(`=== IOS Notifications:: Connection closed.`)
                 if ( this.state !== STATE.DISCONNECTING ) {
                     this.reconnect()
                 }
@@ -114,7 +115,7 @@ module.exports = class IOSNotifications {
             })
 
             this.client.on("connect", () => {
-                this.core.logger.debug(`=== IOS Notifications:: Connected.`)
+                this.logger.debug(`=== IOS Notifications:: Connected.`)
                 this.timeoutId = null
                 this.attempts = 0
 
@@ -123,10 +124,10 @@ module.exports = class IOSNotifications {
                 this.flushQueue()
             })
 
-            this.client.on("error", (error) => this.core.logger.error(error))
+            this.client.on("error", (error) => this.logger.error(error))
             this.client.on("goaway", (errorCode, lastStreamId, data) => {
-                this.core.logger.debug(`=== IOS Notifications:: 'goaway' Frame: `, data.toString('utf8'))
-                this.core.logger.debug(`Code: ${errorCode}, StreamId: ${lastStreamId}`)
+                this.logger.debug(`=== IOS Notifications:: 'goaway' Frame: `, data.toString('utf8'))
+                this.logger.debug(`Code: ${errorCode}, StreamId: ${lastStreamId}`)
                 this.state = STATE.DISCONNECTING
 
                 const payload = JSON.parse(data.toString('utf8'))
@@ -142,7 +143,7 @@ module.exports = class IOSNotifications {
         if ( this.state === STATE.DISCONNECTED || this.state === STATE.DISCONNECTING ) {
             return
         }
-        this.core.logger.info(`=== IOS Notifications:: Disconnecting...`)
+        this.logger.info(`=== IOS Notifications:: Disconnecting...`)
 
         this.state = STATE.DISCONNECTING
         this.shouldReconnect = false
@@ -155,7 +156,7 @@ module.exports = class IOSNotifications {
     async notify(userId, notification) {
         await this.connect()
 
-        this.core.logger.debug(`=== IOS Notifications:: Notifying User(${userId})...`)
+        this.logger.debug(`=== IOS Notifications:: Notifying User(${userId})...`)
         this.queue.push({ userId: userId, notification: notification })
 
         await this.flushQueue()
@@ -168,7 +169,7 @@ module.exports = class IOSNotifications {
             return
         }
 
-        this.core.logger.debug(`=== IOS Notifications:: Flushing the Queue...`)
+        this.logger.debug(`=== IOS Notifications:: Flushing the Queue...`)
         while ( this.queue.length > 0 ) {
             const item = this.queue.shift()
             await this.sendNotificationToUser(item.userId, item.notification)
@@ -230,9 +231,9 @@ module.exports = class IOSNotifications {
                 ":path": path
             }
 
-            this.core.logger.debug(`=== IOS Notifications:: Attempting to send notification: `, body)
-            this.core.logger.debug(`=== IOS Notifications:: With headers: `, headers)
-            this.core.logger.debug(`=== IOS Notifications:: To device: `, session.data.device)
+            this.logger.debug(`=== IOS Notifications:: Attempting to send notification: `, body)
+            this.logger.debug(`=== IOS Notifications:: With headers: `, headers)
+            this.logger.debug(`=== IOS Notifications:: To device: `, session.data.device)
 
             // `request` is a ClientHttp2Stream: https://nodejs.org/api/http2.html#class-clienthttp2stream
             // Which extends Http2Stream: https://nodejs.org/api/http2.html#class-http2stream
@@ -242,24 +243,24 @@ module.exports = class IOSNotifications {
             let requestError = false
             clientStream.on("error", (error) => {
                 requestError = true 
-                this.core.logger.error(`=== IOS Notifications:: Request Error ===\n`, error)
+                this.logger.error(`=== IOS Notifications:: Request Error ===\n`, error)
             })
             clientStream.on("frameError", (type, code, id) => {
                 requestError = true
-                this.core.logger.error(`=== IOS Notifications:: FrameError ===\n type: ${type}, code: ${code}, id: ${id}.`)
+                this.logger.error(`=== IOS Notifications:: FrameError ===\n type: ${type}, code: ${code}, id: ${id}.`)
             })
             clientStream.on("response", (responseHeaders, flags) => {
                 if ( responseHeaders[':status'] !== 200 ) {
                     requestError = true
-                    this.core.logger.error(`=== IOS Notifications:: Failed Request ===`)
-                    this.core.logger.error(`Body: `, body)
-                    this.core.logger.error(`Headers: `, headers)
-                    this.core.logger.error(`Response Headers: `, responseHeaders)
+                    this.logger.error(`=== IOS Notifications:: Failed Request ===`)
+                    this.logger.error(`Body: `, body)
+                    this.logger.error(`Headers: `, headers)
+                    this.logger.error(`Response Headers: `, responseHeaders)
                 } 
             })
             clientStream.on("data", (data) => {
                 if ( requestError ) {
-                    this.core.logger.error(`=== IOS Notifications:: Data frame ===\n`, data)
+                    this.logger.error(`=== IOS Notifications:: Data frame ===\n`, data)
                 }
             })
             clientStream.setEncoding("utf8")
