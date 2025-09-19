@@ -32,9 +32,9 @@ module.exports = class PostNotifications {
         'Post:create:mention'
     ]
 
-    constructor(core, notificationService) {
+    constructor(core, notificationWorker) {
         this.core = core
-        this.notificationService = notificationService
+        this.notificationWorker = notificationWorker
 
         this.groupDAO = new GroupDAO(core)
         this.postCommentDAO = new PostCommentDAO(core)
@@ -84,7 +84,7 @@ module.exports = class PostNotifications {
             }
 
             const mentionContext = { ...context, mentioned: userResults.dictionary[userId] }
-            await this.notificationService.createNotification(userId, 
+            await this.notificationWorker.createNotification(userId, 
                 'Post:create:mention', mentionContext, options)
         }
     }
