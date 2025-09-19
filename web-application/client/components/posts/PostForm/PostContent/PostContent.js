@@ -19,7 +19,6 @@ const PostContent = function({ postId, groupId, sharedPostId }) {
     const [draft, setDraft] = usePostDraft(postId, groupId, sharedPostId)
 
     const setContent = function(content) {
-        logger.debug(`## PostContent :: -- setContent: `, content)
         const newDraft = { ...draft }
         newDraft.content = content 
         setDraft(newDraft)

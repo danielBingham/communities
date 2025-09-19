@@ -50,13 +50,6 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
     const dispatch = useDispatch()
     const navigate = useNavigate()
 
-    logger.debug(`## PostForm(${postId}, ${groupId}, ${sharedPostId}, ${origin}) ##`)
-    logger.debug(`## PostForm :: post: `, post)
-    logger.debug(`## PostForm :: group: `, group)
-    logger.debug(`## PostForm :: currentMember: `, currentMember)
-    logger.debug(`## PostForm :: draft: `, draft)
-    logger.debug(`## PostForm :: canCreateGroupPost: `, canCreateGroupPost)
-
     const submit = function() {
         const newPost = {
             type: draft.type, 
@@ -117,10 +110,7 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
         ((groupId !== undefined && groupId !== null) || (post?.groupId !== undefined && post?.groupId !== null))
             && canCreateGroupPost !== true )
     {
-        logger.debug(`## PostForm :: No permission to post in Group.`)
-        logger.debug(`groupId: `, groupId)
-        logger.debug(`post: `, post)
-        logger.debug(`canCreateGroupPost: `, canCreateGroupPost)
+        logger.warn(`### PostForm:: No permission to post in Group.`)
         return null
     }
 
