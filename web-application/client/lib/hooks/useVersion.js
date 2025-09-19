@@ -12,6 +12,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 import { getVersion } from '/state/system'
 
 export const useVersion = function() {
+    const host = useSelector((state) => state.system.host)
     const clientVersion = useSelector((state) => state.system.clientVersion)
     const serverVersion = useSelector((state) => state.system.serverVersion)
 
@@ -21,7 +22,7 @@ export const useVersion = function() {
 
     const updateMobile = async function() {
         logger.debug(`=== useVersion:: updateMobile()`)
-        const url = new URL('/dist/dist.zip', config.host).href
+        const url = new URL('/dist/dist.zip', host).href
         const bundle = await CapacitorUpdater.download({
             version: version,
             url: url 
