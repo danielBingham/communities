@@ -7,8 +7,6 @@ import { useVersion } from '/lib/hooks/useVersion'
 import Header from '/components/header/Header'
 import Footer from '/components/header/Footer'
 
-import { IosBuffer, AndroidBuffer } from '/components/ui/DeviceTweaks'
-
 import './MainLayout.css'
 
 const MainLayout = function() {

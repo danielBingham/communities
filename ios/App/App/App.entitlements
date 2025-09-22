@@ -4,5 +4,10 @@
 <dict>
 	<key>aps-environment</key>
 	<string>development</string>
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:staging.communities.social</string>
+		<string>applinks:communities.social</string>
+	</array>
 </dict>
 </plist>

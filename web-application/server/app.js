@@ -146,6 +146,30 @@ const createExpressApp = function(core, sessionParser) {
         response.sendFile(filepath)
     })
 
+    app.get('/.well-known/apple-app-site-association', function(request, response) {
+        core.logger.debug(`Request for apple site association.`)
+        const json = {
+            "applinks": {
+                "apps": [],
+                "details": [
+                    {
+                        "appID": "GAK47A8S5M.social.communities",
+                        "paths": ["*"]
+                    },
+                    {
+                        "appID": "GAK47A8S5M.social.communities.staging",
+                        "paths": ["*"]
+                    },
+                    {
+                        "appID": "GAK47A8S5M.social.communities.local",
+                        "paths": ["*"]
+                    }
+                ]
+            }
+        }
+        response.json(json)
+    })
+
     /**
      * Handle requests for static image and pdf files.  We'll send these directly
      * to the public path.

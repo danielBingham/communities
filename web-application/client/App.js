@@ -148,84 +148,86 @@ const App = function(props) {
         <ErrorBoundary>
             <Router>
                 <Routes>
-                    { /* ========= Headerless pages ====================== */ }
-                    { /* These pages are primarily used in various
-                    authentication flows that don't allow breaking out of the
-                    flow.  So they don't have a header. */ }
-                    <Route element={ <HeaderlessLayout /> }>
-                        <Route path="/email-confirmation" element={ <EmailConfirmationPage />} />
-                        <Route path="/accept-invitation" element={ <AcceptInvitationPage /> } />
-                        <Route path="/reset-password" element={ <ResetPasswordPage /> } />
-                        <Route path="/accept-terms-of-service" element={ <AcceptTermsOfServicePage /> } />
-                        <Route path="/set-contribution" element={ <SetContributionPage /> } />
+                    <Route element={ <RootLayout /> }>
+                        { /* ========= Headerless pages ====================== */ }
+                        { /* These pages are primarily used in various
+                        authentication flows that don't allow breaking out of the
+                        flow.  So they don't have a header. */ }
+                        <Route element={ <HeaderlessLayout /> }>
+                            <Route path="/email-confirmation" element={ <EmailConfirmationPage />} />
+                            <Route path="/accept-invitation" element={ <AcceptInvitationPage /> } />
+                            <Route path="/reset-password" element={ <ResetPasswordPage /> } />
+                            <Route path="/accept-terms-of-service" element={ <AcceptTermsOfServicePage /> } />
+                            <Route path="/set-contribution" element={ <SetContributionPage /> } />
 
-                        <Route element={<AuthenticatedLayout />}>
-                        </Route>
-                    </Route>
-
-                    { /* ======== Pages with Headers ====================== */ }
-                    <Route element={<MainLayout />}>
-
-                        { /* ========== Authentication Controls =============== */ }
-                        <Route path="/login" element={ <LoginPage /> } />
-                        <Route path="/reset-password-request" element={ <ResetPasswordRequestPage /> } />
-                        <Route path="/register" element={ <RegistrationPage /> } />
-
-                        <Route path="/about" element={ <AboutPage /> } >
-                            <Route path="faq" element={ <FrequentlyAskedQuestions /> } />
-                            <Route path="roadmap" element={ <Roadmap /> } />
-                            <Route path="contribute" element={ <Contribute /> } />
-                            <Route path="tos" element={ <TermsOfServiceView /> } />
-                            <Route path="privacy" element={ <Privacy /> } />
-                            <Route path="contact" element={ <Contact /> } />
-                            <Route index element={ <About />} />
+                            <Route element={<AuthenticatedLayout />}>
+                            </Route>
                         </Route>
 
-                        <Route element={<AuthenticatedLayout />}>
+                        { /* ======== Pages with Headers ====================== */ }
+                        <Route element={<MainLayout />}>
 
-                            <Route path="/account" element={<UserAccountPage /> }>
-                                <Route path="profile" element={ <UserProfileEditForm />  } />
-                                <Route path="change-password" element={ <ChangePasswordForm /> } />
-                                <Route path="change-email" element={ <ChangeEmailForm /> } />
-                                <Route path="contribute" element={ <ContributionView /> } />
-                                <Route path="settings" element={ <UserAccountSettingsView /> } /> { /* deprecated */ }
-                                <Route path="preferences" element={ <UserAccountPreferencesView /> } />
-                                <Route path="danger-zone" element={ <UserAccountDangerZoneView/> } />
-                                <Route path="notifications" element={ <UserAccountNotificationsView /> } />
-                                <Route index element={ <UserProfileEditForm/> } />
+                            { /* ========== Authentication Controls =============== */ }
+                            <Route path="/login" element={ <LoginPage /> } />
+                            <Route path="/reset-password-request" element={ <ResetPasswordRequestPage /> } />
+                            <Route path="/register" element={ <RegistrationPage /> } />
+
+                            <Route path="/about" element={ <AboutPage /> } >
+                                <Route path="faq" element={ <FrequentlyAskedQuestions /> } />
+                                <Route path="roadmap" element={ <Roadmap /> } />
+                                <Route path="contribute" element={ <Contribute /> } />
+                                <Route path="tos" element={ <TermsOfServiceView /> } />
+                                <Route path="privacy" element={ <Privacy /> } />
+                                <Route path="contact" element={ <Contact /> } />
+                                <Route index element={ <About />} />
                             </Route>
 
-                            <Route path="/admin/*" element={ <AdminPage />} />
+                            <Route element={<AuthenticatedLayout />}>
 
-                            <Route path="/friends" element={ <FriendsPage />}>
-                                <Route path="requests" element={ <FriendRequestsList />} />
-                                <Route path="invited" element={ <FriendInvitationList />} />
-                                <Route path="find" element={ <FindFriends /> } />
-                                <Route path="invite" element={ <InviteFriends /> } />
-                                <Route index element={<YourFriendsList />} />
+                                <Route path="/account" element={<UserAccountPage /> }>
+                                    <Route path="profile" element={ <UserProfileEditForm />  } />
+                                    <Route path="change-password" element={ <ChangePasswordForm /> } />
+                                    <Route path="change-email" element={ <ChangeEmailForm /> } />
+                                    <Route path="contribute" element={ <ContributionView /> } />
+                                    <Route path="settings" element={ <UserAccountSettingsView /> } /> { /* deprecated */ }
+                                    <Route path="preferences" element={ <UserAccountPreferencesView /> } />
+                                    <Route path="danger-zone" element={ <UserAccountDangerZoneView/> } />
+                                    <Route path="notifications" element={ <UserAccountNotificationsView /> } />
+                                    <Route index element={ <UserProfileEditForm/> } />
+                                </Route>
+
+                                <Route path="/admin/*" element={ <AdminPage />} />
+
+                                <Route path="/friends" element={ <FriendsPage />}>
+                                    <Route path="requests" element={ <FriendRequestsList />} />
+                                    <Route path="invited" element={ <FriendInvitationList />} />
+                                    <Route path="find" element={ <FindFriends /> } />
+                                    <Route path="invite" element={ <InviteFriends /> } />
+                                    <Route index element={<YourFriendsList />} />
+                                </Route>
+
+                                <Route path="/groups" element={<GroupsPage />}>
+                                    <Route path="create" element={ <CreateGroup />} />
+                                    <Route path="find" element={ <FindGroups />} />
+                                    <Route index element={<YourGroups />} />
+                                </Route> 
+
+                                <Route path="/group/:slug/*" element={<GroupPage />} />
+
+                                <Route path="/create" element={<CreatePostPage />} />
+
+                                <Route path="/" element={ <HomePage /> }> 
+                                    <Route path="/f/:slug" element={ <Feed type="feed" /> } />
+                                    <Route path="/g/:slug" element={ <Feed type="group" /> } />
+                                    <Route index element={ <Feed type="feed" /> } />
+                                </Route>
+
+                                <Route path="/:slug" element={ <UserProfilePage /> }>
+                                    <Route path=":postId" element={ <PostView /> } />
+                                    <Route index element={ <Feed type="user" /> } />
+                                </Route>
+
                             </Route>
-
-                            <Route path="/groups" element={<GroupsPage />}>
-                                <Route path="create" element={ <CreateGroup />} />
-                                <Route path="find" element={ <FindGroups />} />
-                                <Route index element={<YourGroups />} />
-                            </Route> 
-
-                            <Route path="/group/:slug/*" element={<GroupPage />} />
-
-                            <Route path="/create" element={<CreatePostPage />} />
-
-                            <Route path="/" element={ <HomePage /> }> 
-                                <Route path="/f/:slug" element={ <Feed type="feed" /> } />
-                                <Route path="/g/:slug" element={ <Feed type="group" /> } />
-                                <Route index element={ <Feed type="feed" /> } />
-                            </Route>
-
-                            <Route path="/:slug" element={ <UserProfilePage /> }>
-                                <Route path=":postId" element={ <PostView /> } />
-                                <Route index element={ <Feed type="user" /> } />
-                            </Route>
-
                         </Route>
                     </Route>
                 </Routes>
