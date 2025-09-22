@@ -19,8 +19,6 @@ const MainLayout = function() {
     return (
         <>
         <Header />
-        <IosBuffer />  
-        <AndroidBuffer />
         <main>
             <Outlet />
         </main>

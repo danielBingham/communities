@@ -34,6 +34,8 @@ if ( Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android' 
 
     StatusBar.setStyle({ style: Style.Light})
 
+    document.body.classList.add(Capacitor.getPlatform())
+
     const container = document.getElementById('root')
     const root = createRoot(container)
     root.render(

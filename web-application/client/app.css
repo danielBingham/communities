@@ -137,6 +137,9 @@ body {
     overflow-y: auto;
     overflow-wrap: break-word;
 }
+body.android, body.ios {
+    padding-top: 40px;
+}
 
 a:link, a:active, a:visited {
     text-decoration: none;
