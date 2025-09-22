@@ -19,6 +19,7 @@ import logger from '/logger'
 import { getInitialization } from '/state/system'
 import { getAuthentication } from '/state/authentication'
 
+import RootLayout from '/layouts/RootLayout'
 import MainLayout from '/layouts/MainLayout'
 import HeaderlessLayout from '/layouts/HeaderlessLayout'
 import AuthenticatedLayout from '/layouts/AuthenticatedLayout'
