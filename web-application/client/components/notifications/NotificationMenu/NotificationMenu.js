@@ -80,14 +80,6 @@ const NotificationMenu = function({ }) {
 
     useEffect(function() {
         makeRequest(getNotifications('NotificationMenu'))
-
-        if ( Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android' ) {
-            App.addListener('appStateChange', ({ isActive }) => {
-                if ( isActive ) {
-                    makeRequest(getNotifications('NotificationMenu'))
-                }
-            })
-        }
     }, [])
 
     // ============ Render ====================================================

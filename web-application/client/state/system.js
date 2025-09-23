@@ -26,7 +26,8 @@ const systemSlice = createSlice({
         configuration: null,
         features: {},
         clientVersion: null,
-        serverVersion: null
+        serverVersion: null,
+        isActive: true
     },
     reducers: {
         reset: function(state, action) { },
@@ -57,6 +58,10 @@ const systemSlice = createSlice({
 
         setServerVersion: function(state, action) {
             state.serverVersion = action.payload
+        },
+
+        setIsActive: function(state, action) {
+            state.isActive = action.payload
         }
     }
 })
@@ -91,5 +96,5 @@ export const getInitialization = function() {
 }
 
 
-export const { reset, setHost, setAPI, setConfiguration, setFeatures } = systemSlice.actions
+export const { reset, setHost, setAPI, setConfiguration, setFeatures, setIsActive } = systemSlice.actions
 export default systemSlice.reducer
