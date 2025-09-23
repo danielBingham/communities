@@ -17,6 +17,7 @@ import { deleteFile } from '/state/File'
 import { postPosts, patchPost } from '/state/Post'
 
 import Button from '/components/generic/button/Button'
+import Spinner from '/components/Spinner'
 
 import PostContent from './PostContent'
 import SharedPostAttachment from './SharedPostAttachment'
@@ -110,9 +111,11 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
     // Don't show the form if they don't have permission to post in this Group.
     if ((groupId !== undefined && groupId !== null) || (post?.groupId !== undefined && post?.groupId !== null))
     {
-        if ( ! group ) {
-            return null
-        } else if (canCreateGroupPost !== true) {
+        if ( ! group || ! currentMember ) {
+            return (
+                <Spinner />
+            )
+        } else if (currentMember !== undefined && canCreateGroupPost !== true) {
             logger.warn(`### PostForm:: No permission to post in Group.`)
             return (
                 <ErrorCard href={`/group/${group.slug}`}><p>You don't have permission to post in { group.title }.</p></ErrorCard>
