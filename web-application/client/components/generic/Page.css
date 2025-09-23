@@ -1,3 +1,8 @@
+.page {
+    box-sizing: border-box;
+    padding: 20px 0;
+}
+
 .page .page-body {
     background-color: var(--page-background-color);
     color: var(--page-text-color);

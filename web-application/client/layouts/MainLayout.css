@@ -3,11 +3,10 @@
     main {
         box-sizing: border-box;
 
-        margin: 65px auto; /** push us below the header **/
+        margin: 65px auto 0 auto; /** push us below the header **/
         min-width: 360px;
         width: 100%;
-        padding-top: 20px;
-        padding-bottom: 50px;
+        min-height: calc(100vh - 436px);
 
         color: var(--main-text-color);
         background-color: var(--main-background-color);
@@ -18,11 +17,10 @@
     main {
         box-sizing: border-box;
 
-        margin: 65px auto; /** push us below the header **/
+        margin: 65px auto 0 auto; /** push us below the header **/
         min-width: 360px;
         width: 100%;
-        padding-top: 20px;
-        padding-bottom: 50px;
+        min-height: calc(100vh - 436px);
 
         color: var(--main-text-color);
         background-color: var(--main-background-color);
@@ -32,11 +30,10 @@
     main {
         box-sizing: border-box;
 
-        margin: 65px auto; /** push us below the header **/
+        margin: 65px auto 0 auto; /** push us below the header **/
         min-width: 360px;
         width: 100%;
-        padding-top: 10px;
-        padding-bottom: 50px;
+        min-height: calc(100vh - 436px);
 
         color: var(--main-text-color);
         background-color: var(--main-background-color);
