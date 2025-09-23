@@ -170,6 +170,22 @@ const createExpressApp = function(core, sessionParser) {
         response.json(json)
     })
 
+    app.get('/.well-known/assetlinks.json', function(request, response) {
+        core.logger.debug(`Request for Android Asset Links.`)
+        const json = [
+            {
+                "relation": ["delegate_permission/common.handle_all_urls"],
+                "target": {
+                    "namespace": "android_app",
+                    "package_name": "social.communities.staging",
+                    "sha256_cert_fingerprints":
+                    ["7C:32:5C:22:C1:83:AB:E5:D7:0B:D7:9B:8D:19:5E:EB:22:5F:9E:02:61:00:9C:CD:91:1B:6A:78:5A:E7:AE:1F"]
+                }
+            }
+        ]
+        response.json(json)
+    })
+
     /**
      * Handle requests for static image and pdf files.  We'll send these directly
      * to the public path.

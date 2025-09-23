@@ -7,8 +7,8 @@ android {
         applicationId "social.communities"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "0.1.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -26,17 +26,17 @@ android {
     productFlavors {
         production {
             dimension "environment"
-            manifestPlaceholders = [displayName:"Communities"]
+            manifestPlaceholders = [displayName:"Communities", domain: "communities.social"]
         }
         staging {
             dimension "environment"
             applicationIdSuffix ".staging"
-            manifestPlaceholders = [displayName:"Communities - Staging"]
+            manifestPlaceholders = [displayName:"Communities - Staging", domain: "staging.communities.social"]
         }
         local {
             dimension "environment"
             applicationIdSuffix ".local"
-            manifestPlaceholders = [displayName:"Communities - Local"]
+            manifestPlaceholders = [displayName:"Communities - Local", domain: "localhost:3000"]
         }
     }
 }
