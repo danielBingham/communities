@@ -1,15 +1,15 @@
-### Friend Requests
+## [UserRelationship](documentation/testing/test-cases/UserRelationship/create-update-delete.md)
 
 Cases covering sending friend requests, accepting friend requests, and
 rejecting friend requests.
 
-## Pre-requisites
+### Pre-requisites
 
-- User1 has been created.
-- User2 has been created.
-- User1 and User2 are not friends.
+- [ ] User1 has been created.
+- [ ] User2 has been created.
+- [ ] User1 and User2 are not friends.
 
-## Cases
+### Cases
 
 - [ ] Users can send friend requests.
     - [ ] As User1, send User2 a friend request.

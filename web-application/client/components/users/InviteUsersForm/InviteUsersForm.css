@@ -1,0 +1,16 @@
+.invite-users-form {
+    box-sizing: border-box;
+    width: 800px;
+    margin: 0 auto;
+}
+
+.invite-users-form__buttons {
+    text-align: center;
+}
+
+@media ( width < 800px ) {
+    .invite-users-form {
+        width: 100%;
+        max-width: 100vw;
+    }
+}

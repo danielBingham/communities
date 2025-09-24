@@ -26,12 +26,13 @@ const UserAccountPage = function(props) {
                     <NavigationMenuLink to="/account/change-password" icon="LockClosed" text="Password" />
                     <NavigationMenuLink to="/account/contribute" icon="CreditCard" text="Contribution" />
                     <NavigationSubmenu id="UserAccountPage" title="Settings" icon="Cog8Tooth"> 
+                        <NavigationSubmenuLink to="/account/preferences" icon="AdjustmentsHorizontal" text="Preferences" />
                         <NavigationSubmenuLink to="/account/notifications" icon="Bell" text="Notifications" />
                         <NavigationSubmenuLink to="/account/danger-zone" icon="ExclamationTriangle" text="Danger Zone" />
                     </NavigationSubmenu>
                 </NavigationMenu>
             </PageLeftGutter>
-            <PageBody className="content">
+            <PageBody>
                 <Outlet /> 
             </PageBody>
             <PageRightGutter>

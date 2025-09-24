@@ -32,6 +32,6 @@ module.exports = {
     },
     web: {
         text: Handlebars.compile(`{{{user.name}}} asked to join group "{{{group.title}}}"`),
-        path: Handlebars.compile(`/group/{{{group.slug}}}/members`)
+        path: Handlebars.compile(`{{{ path }}}`)
     }
 }

@@ -27,3 +27,8 @@ variable "subnet_ids" {
   description = "Subnet ids to launch the database into."
   type = list(any)
 }
+
+variable "snapshot" {
+  description = "(Optional) The id of a Cluster Snapshot to use to initialize the database." 
+  default = null
+}

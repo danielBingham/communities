@@ -87,7 +87,8 @@ resource "aws_rds_cluster" "this" {
 
   backup_retention_period = 7
   preferred_backup_window = "07:00-09:00"
-  
+
+  snapshot_identifier = var.snapshot
   skip_final_snapshot = true
 
   tags = merge(

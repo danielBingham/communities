@@ -43,6 +43,7 @@ const DownloadCanonicalImageForLinkPreviewsMigration = require('../migrations/Do
 const DeleteGroupsWithSharedPostsMigration = require('../migrations/DeleteGroupsWithSharedPostsMigration')
 const GroupCreatorsCantDeleteAccountMigration = require('../migrations/GroupCreatorsCantDeleteAccountMigration')
 const NotificationOverhaulMigration = require('../migrations/NotificationOverhaulMigration')
+const AdminAnnouncementsMigration = require('../migrations/AdminAnnouncementsMigration')
 
 const ServiceError = require('../errors/ServiceError')
 const MigrationError = require('../errors/MigrationError')
@@ -189,6 +190,11 @@ module.exports = class FeatureService {
                 dependsOn: [],
                 conflictsWith: [],
                 migration: new NotificationOverhaulMigration(core)
+            },
+            '230-admin-announcements': {
+                dependsOn: [],
+                conflictsWith: [],
+                migration: new AdminAnnouncementsMigration(core)
             }
         }
     }

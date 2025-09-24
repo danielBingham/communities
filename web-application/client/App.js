@@ -5,15 +5,21 @@ import {
     Route
 } from 'react-router-dom'
 
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
+
+import migrateLocalStorage from '/migrations/StorageMigrations'
 
 import { useRequest } from '/lib/hooks/useRequest'
+import { useRetries } from '/lib/hooks/useRetries'
+import { useSocket } from '/lib/hooks/useSocket'
+import { useDevice } from '/lib/hooks/useDevice'
 
 import logger from '/logger'
 
-import { getConfiguration } from '/state/system'
+import { getInitialization } from '/state/system'
 import { getAuthentication } from '/state/authentication'
 
+import RootLayout from '/layouts/RootLayout'
 import MainLayout from '/layouts/MainLayout'
 import HeaderlessLayout from '/layouts/HeaderlessLayout'
 import AuthenticatedLayout from '/layouts/AuthenticatedLayout'
@@ -24,6 +30,7 @@ import AdminPage from '/pages/admin/AdminPage'
 
 import HomePage from '/pages/HomePage'
 import Feed from '/components/feeds/Feed'
+import CreatePostPage from '/pages/posts/CreatePostPage'
 
 import AboutPage from '/pages/about/AboutPage'
 import About from '/pages/about/views/About'
@@ -51,13 +58,16 @@ import ChangePasswordForm from '/pages/users/views/ChangePasswordForm'
 import ChangeEmailForm from '/pages/users/views/ChangeEmailForm'
 import ContributionView from '/pages/users/views/ContributionView'
 import UserAccountSettingsView from '/pages/users/views/UserAccountSettingsView'
+import UserAccountPreferencesView from '/pages/users/views/UserAccountPreferencesView'
 import UserAccountDangerZoneView from '/pages/users/views/UserAccountDangerZoneView'
 import UserAccountNotificationsView from '/pages/users/views/UserAccountNotificationsView'
 
 import FriendsPage from '/pages/friends/FriendsPage'
 import YourFriendsList from '/pages/friends/views/YourFriendsList'
 import FriendRequestsList from '/pages/friends/views/FriendRequestsList'
+import FriendInvitationList from '/pages/friends/views/FriendInvitationList'
 import FindFriends from '/pages/friends/views/FindFriends'
+import InviteFriends from '/pages/friends/views/InviteFriends'
 
 import GroupsPage from '/pages/groups/GroupsPage'
 import YourGroups from '/pages/groups/views/YourGroups'
@@ -73,67 +83,51 @@ import Spinner from '/components/Spinner'
 
 import './app.css';
 
-
 /**
  * App component acts as the root for the component tree, loading the layout
  * and all other components.
  */
 const App = function(props) {
-    const [ retries, setRetries ] = useState(0)
-
-    // ======= Request Tracking =====================================
  
-    const [ configurationRequest, makeConfigurationRequest] = useRequest()
+    const [getInitializationRequest, makeGetInitializationRequest] = useRequest()
     const [authenticationRequest, makeAuthenticationRequest] = useRequest()
-
-    // ======= Redux State ==========================================
 
     const configuration = useSelector((state) => state.system.configuration)
 
-    // ======= Effect Handling ======================================
-
-    useEffect(function() {
-        makeConfigurationRequest(getConfiguration())
-    }, [])
-
     // Note to self: These are system slice requests.  They go through
     // state/system and don't hit the API backend, instead they hit the root.
+    useRetries('Initialize', function() {
+        makeGetInitializationRequest(getInitialization())
+    }, getInitializationRequest)
+
     useEffect(function() {
-        if ( configurationRequest && configurationRequest.state == 'fulfilled') {
-            if ( ! configuration.maintenance_mode ) {
-                // Logger is a singleton, this will effect all other imports.
-                logger.setLevel(configuration.log_level)
-                makeAuthenticationRequest(getAuthentication())
-            }
-        } else if ( configurationRequest && configurationRequest.state == 'failed') {
-            if ( retries < 5 ) {
-                makeConfigurationRequest(getConfiguration())
-                setRetries(retries+1)
-            }
-        }
-    }, [ configurationRequest ])
+        if ( getInitializationRequest?.state == 'fulfilled') {
+            console.log(`System initialized...`)
+            // Logger is a singleton, this will effect all other imports.
+            logger.setLevel(configuration.log_level)
+
+            console.log(`Migrating local storage...`)
+            migrateLocalStorage()
+
+            makeAuthenticationRequest(getAuthentication())
+        } 
+    }, [ getInitializationRequest ])
+
+    const isSocketConnected = useSocket()
+    useDevice()
 
     // ======= Render ===============================================
 
-   if ( configuration?.maintenance_mode ) {
-        return (
-            <div className="maintenance-mode">
-                <h1>Communities - Scheduled Maintenance</h1>
-                <p>Communities is currently undergoing scheduled maintenance.  Please check back later.</p>
-            </div>
-        )
-   }
-
-    if ( ! configurationRequest || ! authenticationRequest ) {
+    if ( ! getInitializationRequest || ! authenticationRequest ) {
         return (
             <Spinner />
         )
-    } else if ( (configurationRequest && configurationRequest.state != 'fulfilled')
+    } else if ( (getInitializationRequest && getInitializationRequest.state != 'fulfilled')
         || (authenticationRequest && authenticationRequest.state != 'fulfilled')
     ) {
-        if (configurationRequest && configurationRequest.state == 'failed' && retries < 5) {
+        if (getInitializationRequest && getInitializationRequest.state == 'failed' && retries < 5) {
             return (<div className="error">Attempt to retrieve configuration from the backend failed, retrying...</div>)
-        } else if (configurationRequest && configurationRequest.state == 'failed' && retries >= 5 ) {
+        } else if (getInitializationRequest && getInitializationRequest.state == 'failed' && retries >= 5 ) {
             return (<div className="error">Failed to connect to the backend.  Try refreshing.</div>)
         } else if (authenticationRequest && authenticationRequest.state == 'failed' ) {
             return (<div className="error">Authentication request failed with error: {authenticationRequest.error}.</div>)
@@ -155,76 +149,86 @@ const App = function(props) {
         <ErrorBoundary>
             <Router>
                 <Routes>
-                    { /* ========= Headerless pages ====================== */ }
-                    { /* These pages are primarily used in various
-                    authentication flows that don't allow breaking out of the
-                    flow.  So they don't have a header. */ }
-                    <Route element={ <HeaderlessLayout /> }>
-                        <Route path="/email-confirmation" element={ <EmailConfirmationPage />} />
-                        <Route path="/accept-invitation" element={ <AcceptInvitationPage /> } />
-                        <Route path="/reset-password" element={ <ResetPasswordPage /> } />
-                        <Route path="/accept-terms-of-service" element={ <AcceptTermsOfServicePage /> } />
-                        <Route path="/set-contribution" element={ <SetContributionPage /> } />
-                    </Route>
+                    <Route element={ <RootLayout /> }>
+                        { /* ========= Headerless pages ====================== */ }
+                        { /* These pages are primarily used in various
+                        authentication flows that don't allow breaking out of the
+                        flow.  So they don't have a header. */ }
+                        <Route element={ <HeaderlessLayout /> }>
+                            <Route path="/email-confirmation" element={ <EmailConfirmationPage />} />
+                            <Route path="/accept-invitation" element={ <AcceptInvitationPage /> } />
+                            <Route path="/reset-password" element={ <ResetPasswordPage /> } />
+                            <Route path="/accept-terms-of-service" element={ <AcceptTermsOfServicePage /> } />
+                            <Route path="/set-contribution" element={ <SetContributionPage /> } />
 
-                    { /* ======== Pages with Headers ====================== */ }
-                    <Route element={<MainLayout />}>
-
-                        { /* ========== Authentication Controls =============== */ }
-                        <Route path="/login" element={ <LoginPage /> } />
-                        <Route path="/reset-password-request" element={ <ResetPasswordRequestPage /> } />
-                        <Route path="/register" element={ <RegistrationPage /> } />
-
-                        <Route path="/about" element={ <AboutPage /> } >
-                            <Route path="faq" element={ <FrequentlyAskedQuestions /> } />
-                            <Route path="roadmap" element={ <Roadmap /> } />
-                            <Route path="contribute" element={ <Contribute /> } />
-                            <Route path="tos" element={ <TermsOfServiceView /> } />
-                            <Route path="privacy" element={ <Privacy /> } />
-                            <Route path="contact" element={ <Contact /> } />
-                            <Route index element={ <About />} />
+                            <Route element={<AuthenticatedLayout />}>
+                            </Route>
                         </Route>
 
-                        <Route element={<AuthenticatedLayout />}>
+                        { /* ======== Pages with Headers ====================== */ }
+                        <Route element={<MainLayout />}>
 
-                            <Route path="/account" element={<UserAccountPage /> }>
-                                <Route path="profile" element={ <UserProfileEditForm />  } />
-                                <Route path="change-password" element={ <ChangePasswordForm /> } />
-                                <Route path="change-email" element={ <ChangeEmailForm /> } />
-                                <Route path="contribute" element={ <ContributionView /> } />
-                                <Route path="settings" element={ <UserAccountSettingsView /> } /> { /* deprecated */ }
-                                <Route path="danger-zone" element={ <UserAccountDangerZoneView/> } />
-                                <Route path="notifications" element={ <UserAccountNotificationsView /> } />
-                                <Route index element={ <UserProfileEditForm/> } />
+                            { /* ========== Authentication Controls =============== */ }
+                            <Route path="/login" element={ <LoginPage /> } />
+                            <Route path="/reset-password-request" element={ <ResetPasswordRequestPage /> } />
+                            <Route path="/register" element={ <RegistrationPage /> } />
+
+                            <Route path="/about" element={ <AboutPage /> } >
+                                <Route path="faq" element={ <FrequentlyAskedQuestions /> } />
+                                <Route path="roadmap" element={ <Roadmap /> } />
+                                <Route path="contribute" element={ <Contribute /> } />
+                                <Route path="tos" element={ <TermsOfServiceView /> } />
+                                <Route path="privacy" element={ <Privacy /> } />
+                                <Route path="contact" element={ <Contact /> } />
+                                <Route index element={ <About />} />
                             </Route>
 
-                            <Route path="/admin/*" element={ <AdminPage />} />
+                            <Route element={<AuthenticatedLayout />}>
 
-                            <Route path="/friends" element={ <FriendsPage />}>
-                                <Route path="requests" element={ <FriendRequestsList />} />
-                                <Route path="find" element={ <FindFriends /> } />
-                                <Route index element={<YourFriendsList />} />
+                                <Route path="/account" element={<UserAccountPage /> }>
+                                    <Route path="profile" element={ <UserProfileEditForm />  } />
+                                    <Route path="change-password" element={ <ChangePasswordForm /> } />
+                                    <Route path="change-email" element={ <ChangeEmailForm /> } />
+                                    <Route path="contribute" element={ <ContributionView /> } />
+                                    <Route path="settings" element={ <UserAccountSettingsView /> } /> { /* deprecated */ }
+                                    <Route path="preferences" element={ <UserAccountPreferencesView /> } />
+                                    <Route path="danger-zone" element={ <UserAccountDangerZoneView/> } />
+                                    <Route path="notifications" element={ <UserAccountNotificationsView /> } />
+                                    <Route index element={ <UserProfileEditForm/> } />
+                                </Route>
+
+                                <Route path="/admin/*" element={ <AdminPage />} />
+
+                                <Route path="/friends" element={ <FriendsPage />}>
+                                    <Route path="requests" element={ <FriendRequestsList />} />
+                                    <Route path="invited" element={ <FriendInvitationList />} />
+                                    <Route path="find" element={ <FindFriends /> } />
+                                    <Route path="invite" element={ <InviteFriends /> } />
+                                    <Route index element={<YourFriendsList />} />
+                                </Route>
+
+                                <Route path="/groups" element={<GroupsPage />}>
+                                    <Route path="create" element={ <CreateGroup />} />
+                                    <Route path="find" element={ <FindGroups />} />
+                                    <Route index element={<YourGroups />} />
+                                </Route> 
+
+                                <Route path="/group/:slug/*" element={<GroupPage />} />
+
+                                <Route path="/create" element={<CreatePostPage />} />
+
+                                <Route path="/" element={ <HomePage /> }> 
+                                    <Route path="/f/:slug" element={ <Feed type="feed" /> } />
+                                    <Route path="/g/:slug" element={ <Feed type="group" /> } />
+                                    <Route index element={ <Feed type="feed" /> } />
+                                </Route>
+
+                                <Route path="/:slug" element={ <UserProfilePage /> }>
+                                    <Route path=":postId" element={ <PostView /> } />
+                                    <Route index element={ <Feed type="user" /> } />
+                                </Route>
+
                             </Route>
-
-                            <Route path="/groups" element={<GroupsPage />}>
-                                <Route path="create" element={ <CreateGroup />} />
-                                <Route path="find" element={ <FindGroups />} />
-                                <Route index element={<YourGroups />} />
-                            </Route> 
-
-                            <Route path="/group/:slug/*" element={<GroupPage />} />
-
-                            <Route path="/" element={ <HomePage /> }> 
-                                <Route path="/f/:slug" element={ <Feed type="feed" /> } />
-                                <Route path="/g/:slug" element={ <Feed type="group" /> } />
-                                <Route index element={ <Feed type="feed" /> } />
-                            </Route>
-
-                            <Route path="/:slug" element={ <UserProfilePage /> }>
-                                <Route path=":postId" element={ <PostView /> } />
-                                <Route index element={ <Feed type="user" /> } />
-                            </Route>
-
                         </Route>
                     </Route>
                 </Routes>

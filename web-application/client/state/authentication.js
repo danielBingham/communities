@@ -1,5 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit'
 
+import { Capacitor } from '@capacitor/core'
+import { SecureStoragePlugin } from 'capacitor-secure-storage-plugin'
+
 import { makeRequest } from '/state/lib/makeRequest'
 
 import { reset } from '/state/system'
@@ -14,12 +17,18 @@ export const authenticationSlice = createSlice({
          *
          * @type {object} 
          */
-        currentUser: null
+        currentUser: null,
+
+        device: null
     },
     reducers: {
 
         setCurrentUser: function(state, action) {
             state.currentUser = action.payload
+        },
+
+        setDevice: function(state, action) {
+            state.device = action.payload
         }
     }
 
@@ -108,35 +117,6 @@ export const postAuthentication = function(email, password) {
 }
 
 /**
- * PATCH /authentication
- *
- * Check a user's credentials, with out modifying the session.  Does retrieve
- * the user (on authentication) and store them the result. 
- *
- * Makes the request async and returns an id that can be used to track the
- * request and get the results of a completed request from this state slice.
- *
- * @param {string} email - The email of the user we'd like to authenticate.
- * @param {string} password - Their password.
- *
- * @returns {string} A uuid requestId we can use to track this request.
- */
-export const patchAuthentication = function(email, password) {
-    return function(dispatch, getState) {
-       const endpoint = '/authentication'
-        const body = {
-            email: email,
-            password: password
-        }
-        return dispatch(makeRequest('PATCH', endpoint, body, 
-            function(responseBody) {
-                dispatch(setUsersInDictionary({ entity: responseBody.user }))  
-            }
-        ))
-    }
-}
-
-/**
  * DELETE /authentication
  *
  * Attempt to logout the current user from the backend, destroying their
@@ -153,16 +133,48 @@ export const deleteAuthentication = function() {
 
         return dispatch(makeRequest('DELETE', endpoint, null,
             function(responseBody) {
-                dispatch(reset())
-                // As soon as we reset the redux store, we need to redirect to
-                // the home page.  We don't want to go through anymore render
-                // cycles because that could have undefined impacts.
-                window.location.href = "/"
+                if ( Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android' ) {
+                    SecureStoragePlugin.clear().then(function() {
+                        dispatch(reset())
+                        // As soon as we reset the redux store, we need to redirect to
+                        // the home page.  We don't want to go through anymore render
+                        // cycles because that could have undefined impacts.
+                        window.location.href = "/"
+                    })
+                } else {
+                    dispatch(reset())
+                    // As soon as we reset the redux store, we need to redirect to
+                    // the home page.  We don't want to go through anymore render
+                    // cycles because that could have undefined impacts.
+                    window.location.href = "/"
+                }
             }
         ))
     }
 }
 
-export const { setCurrentUser } = authenticationSlice.actions
+export const postDevice = function(deviceInfo) {
+    return function(dispatch, getState) {
+        const endpoint = '/device'
+
+        return dispatch(makeRequest('POST', endpoint, deviceInfo,
+            function(responseBody) {
+                dispatch(authenticationSlice.actions.setDevice(responseBody.entity))
+            }))
+    }
+}
+
+export const patchDevice = function(deviceInfo) {
+    return function(dispatch, getState) {
+        const endpoint = '/device'
+
+        return dispatch(makeRequest('PATCH', endpoint, deviceInfo,
+            function(responseBody) {
+                dispatch(authenticationSlice.actions.setDevice(responseBody.entity))
+            }))
+    }
+}
+
+export const { setCurrentUser, setNotificationPermissions } = authenticationSlice.actions
 
 export default authenticationSlice.reducer

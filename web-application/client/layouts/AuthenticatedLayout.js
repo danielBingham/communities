@@ -2,14 +2,13 @@ import React from 'react'
 import { Outlet } from 'react-router-dom'
 
 import { useAuthentication } from '/lib/hooks/useAuthentication'
+import { useNotifications } from '/lib/hooks/useNotifications'
 
 import WelcomeSplash from '/pages/authentication/WelcomeSplash'
 
-import { PostShareModal } from '/components/posts/Post/PostReactions'
-
 const AuthenticatedLayout = function() {
-
     const currentUser = useAuthentication() 
+    useNotifications()
 
     if ( ! currentUser ) {
         return (
@@ -19,7 +18,6 @@ const AuthenticatedLayout = function() {
 
     return (
         <div className="authenticated">
-            <PostShareModal /> 
             <Outlet />
         </div>
     )

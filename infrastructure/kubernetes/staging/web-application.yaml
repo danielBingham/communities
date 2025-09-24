@@ -1,0 +1,227 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-application 
+  labels: 
+    application: communities
+    function: frontend-and-api 
+    environment: staging
+spec:
+  selector:
+    matchLabels:
+      application: communities
+      function: frontend-and-api 
+      environment: staging
+  replicas: 2
+  template: 
+    metadata:
+      name: web-application-pod-template
+      labels:
+        application: communities
+        function: frontend-and-api 
+        environment: staging
+        container: web-application 
+    spec:
+      terminationGracePeriodSeconds: 70
+      volumes:
+        - name: workspace
+          emptyDir:
+            sizeLimit: 200M
+        - name: push-notification-secrets 
+          secret:
+            secretName: communities-push-notification-secrets
+      containers:
+        - name: web-application-container
+          image: 843012963492.dkr.ecr.us-east-1.amazonaws.com/communities/web-application:0.6.0-rc5
+          ports:
+            - containerPort: 8080 
+          resources:
+            requests:
+              cpu: 200m
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 40"]
+          startupProbe:
+            httpGet:
+              path: '/health'
+              port: 8080 
+            periodSeconds: 3 
+            failureThreshold: 20
+          livenessProbe:
+            httpGet:
+              path: '/health'
+              port: 8080 
+            failureThreshold: 2
+            periodSeconds: 30
+          volumeMounts:
+            - mountPath: '/src/tmp'
+              name: workspace
+            - mountPath: '/src/security/'
+              name: push-notification-secrets 
+          env:
+            ## Root Config values
+            - name: NODE_ENV
+              value: 'staging'
+            - name: HOST
+              value: 'https://staging.communities.social/'
+            - name: WS_HOST
+              value: 'wss://staging.communities.social/socket'
+            - name: LOG_LEVEL
+              value: 'debug'
+
+            ## Database 
+            - name: DATABASE_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: communities-database-credentials
+                  key: host
+                  optional: false
+            - name: DATABASE_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: communities-database-credentials
+                  key: port
+                  optional: false
+            - name: DATABASE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: communities-database-credentials
+                  key: username
+                  optional: false
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: communities-database-credentials
+                  key: password
+                  optional: false
+
+            ## Redis 
+            - name: REDIS_HOST
+              value: 'communities-staging-cache-redis-cluster.sh2hpr.0001.use1.cache.amazonaws.com'
+            - name: REDIS_PORT
+              value: '6379'
+
+            ## Session
+            - name: SESSION_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: communities-session-secret
+                  key: session_secret
+                  optional: false
+
+            ## S3
+            - name: S3_BUCKET_URL
+              value: 'https://communities-staging-storage.s3.amazonaws.com'
+            - name: S3_BUCKET
+              value: 'communities-staging-storage'
+            - name: S3_ACCESS_ID
+              valueFrom:
+                secretKeyRef:
+                  name: communities-s3-credentials
+                  key: access_id
+                  optional: false
+            - name: S3_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: communities-s3-credentials
+                  key: access_key
+                  optional: false
+
+            ## Postmark
+            - name: POSTMARK_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: communities-postmark-secrets
+                  key: api_token 
+                  optional: false
+
+            ## Notifications
+            - name: NOTIFICATIONS_IOS_PRIVATE_CERT_PATH
+              value: '/security/apns-private.key.pem'
+            - name: NOTIFICATIONS_IOS_PUBLIC_CERT_PATH
+              value: '/security/apns-public.crt.pem'
+            - name: NOTIFICATIONS_IOS_APPLICATION_BUNDLE_ID
+              value: 'social.communities.staging'
+            - name: NOTIFICATIONS_IOS_ENDPOINT
+              value: 'https://api.sandbox.push.apple.com:443'
+            - name: NOTIFICATIONS_FIREBASE_SERVICE_ACCOUNT_PATH
+              value: '/security/firebase-service-account.json'
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-application-service
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:us-east-1:843012963492:certificate/a79f1e60-9d96-4f90-ab09-2bda5216a724
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: '30'
+    alb.ingress.kubernetes.io/healthcheck-path: /health
+    alb.ingress.kubernetes.io/healthcheck-port: '8080'
+    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: '5'
+    alb.ingress.kubernetes.io/success-codes: '200'
+spec:
+  type: NodePort 
+  selector:
+    application: communities
+    function: frontend-and-api
+    environment: staging
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80 
+      targetPort: 8080 
+    - name: https
+      protocol: TCP
+      port: 443 
+      targetPort: 8080 
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: web-application-ingress 
+  labels:
+    application: communities
+    function: frontend-and-api
+    environment: staging
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/load-balancer-name: web-application-staging
+    alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:us-east-1:843012963492:certificate/a79f1e60-9d96-4f90-ab09-2bda5216a724" 
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: '443'
+    alb.ingress.kubernetes.io/load-balancer-attributes: idle_timeout.timeout_seconds=60
+    alb.ingress.kubernetes.io/target-group-attributes: stickiness.enabled=true
+spec:
+  ingressClassName: alb
+  rules:
+  - host: staging.communities.social
+    http:
+      paths:
+      - pathType: Prefix
+        path: /
+        backend:
+          service:
+            name: web-application-service
+            port: 
+              number: 80
+
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: web-application 
+  labels:
+    application: communities
+    function: frontend-and-api
+    environment: staging
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: web-application 
+  minReplicas: 2
+  maxReplicas: 20 
+  targetCPUUtilizationPercentage: 70

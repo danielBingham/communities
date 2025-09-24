@@ -8,6 +8,9 @@ import { resetEntities } from '/state/lib'
 
 import { useGroup } from '/lib/hooks/Group'
 import { useGroupMember } from '/lib/hooks/GroupMember'
+import { 
+    GroupPermissions, useGroupPermission
+} from '/lib/hooks/permission'
 
 import { postGroupMembers, patchGroupMember, deleteGroupMember } from '/state/GroupMember'
 
@@ -15,7 +18,7 @@ import AreYouSure from '/components/AreYouSure'
 import ErrorModal from '/components/errors/ErrorModal'
 import Button from '/components/generic/button/Button'
 
-import './GroupActionMenu.css'
+import './GroupMembershipButton.css'
 
 const GroupMembershipButton = function({ groupId, userId }) {
     const [ areYouSure, setAreYouSure ] = useState(false)
@@ -29,9 +32,17 @@ const GroupMembershipButton = function({ groupId, userId }) {
     const [ currentMember ] = useGroupMember(groupId, currentUser?.id)
     const [ member ]  = useGroupMember(groupId, userId)
 
+    const context = {
+        group: group,
+        userMember: currentMember
+    }
+
+    const canModerateGroup = useGroupPermission(currentUser, GroupPermissions.MODERATE, context)
+
     const dispatch = useDispatch()
 
     /* ==================== When currentUser is user... ======================= */
+
 
     /**
      * ...and user is not yet a group member, and the group is 'open', they can
@@ -44,7 +55,7 @@ const GroupMembershipButton = function({ groupId, userId }) {
             status: 'member',
             role: 'member'
         }
-        makeRequest(postGroupMembers(groupMember))
+        makeRequest(postGroupMembers(groupId, groupMember))
     }
 
     /**
@@ -59,7 +70,7 @@ const GroupMembershipButton = function({ groupId, userId }) {
             role: 'member'
 
         }
-        makeRequest(postGroupMembers(groupMember))
+        makeRequest(postGroupMembers(groupId, groupMember))
     }
 
     /**
@@ -111,6 +122,21 @@ const GroupMembershipButton = function({ groupId, userId }) {
     }
 
     /* =================== When currentUser is admin... ======================== */
+
+    /**
+     * ...and user is not a member, currentUser can invite.
+     */
+    const invite = () => {
+        const groupMember = {
+            groupId: groupId,
+            userId: userId,
+            status: 'pending-invited',
+            role: 'member'
+        }
+        makeRequest(postGroupMembers(groupId, groupMember))
+    }
+
+
     /**
      * ...and user has requested entrance, currentUser can accept user.
      */
@@ -180,11 +206,11 @@ const GroupMembershipButton = function({ groupId, userId }) {
     // the group yet.
     if ( ! member && ! currentMember && currentUser.id == userId ) {
         return (
-            <> 
+            <div className="group-membership-button"> 
                 { errorView }
                 { group.type == 'open' && <Button type="primary" onClick={() => joinGroup()}><ArrowLeftEndOnRectangleIcon /> <span className="nav-text">Join</span></Button> }
                 { group.type == 'private' && <Button type="primary" onClick={() => requestEntrance()}><ArrowLeftEndOnRectangleIcon /> <span className="nav-text">Request</span></Button> }
-            </>
+            </div>
         )
     }
 
@@ -192,7 +218,7 @@ const GroupMembershipButton = function({ groupId, userId }) {
     // pending invite, or have pending request.
     if ( userId == currentUser.id && member ) {
         return (
-            <>
+            <div className="group-membership-button">
                 { errorView }
                 { member.status == 'pending-invited' && <Button type="primary" onClick={() => acceptInvite()}><ArrowLeftEndOnRectangleIcon /> <span className="nav-text">Accept</span></Button> }
                 { member.status == 'pending-invited' && <Button onClick={() => rejectInvite()}><ArrowLeftStartOnRectangleIcon /> <span className="nav-text">Reject</span></Button> }
@@ -201,22 +227,27 @@ const GroupMembershipButton = function({ groupId, userId }) {
                 <AreYouSure isVisible={areYouSure} execute={() => { setAreYouSure(false); leaveGroup() }} cancel={() => setAreYouSure(false)} > 
                     <p>Are you sure you want to leave this group?</p>
                 </AreYouSure>
-            </>
+            </div>
         )
     }
 
-    const canAdmin = currentMember && member && currentMember.userId != member.userId && (currentMember.role == 'admin' || currentMember.role == 'moderator')
-
-    if ( currentUser.id != userId && member && canAdmin ) {
+    if ( currentUser.id !== userId && member && canModerateGroup ) {
         return (
-            <>
+            <div className="group-membership-button">
                 { errorView }
                 { member.status == 'pending-invited' && <Button  onClick={() => cancelInvite()}><ArrowLeftStartOnRectangleIcon /> <span className="nav-text">Cancel</span></Button> }
                 { member.status == 'pending-requested' && <Button type="primary" onClick={() => acceptRequest()}><ArrowLeftEndOnRectangleIcon /> <span className="nav-text">Accept</span></Button> }
                 { member.status == 'pending-requested' && <Button onClick={() => rejectRequest()}><ArrowLeftStartOnRectangleIcon /> <span className="nav-text">Reject</span></Button> }
                 { member.status == 'member' && <Button onClick={() => removeMember()}><ArrowLeftStartOnRectangleIcon /> <span className="nav-text">Remove</span></Button> }
-            </>
+            </div>
         )
+    } else if ( currentUser.id !== userId  && canModerateGroup ) {
+        return (
+            <div className="group-membership-button">
+                { errorView }
+                <Button type="primary" onClick={() => invite()}><ArrowLeftEndOnRectangleIcon /> <span className="nav-text">Invite</span></Button>
+            </div>
+        ) 
     } else {
         return null
     }

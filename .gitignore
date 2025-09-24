@@ -4,6 +4,7 @@ node_modules/
 web-application/public/uploads/*
 web-application/public/dist
 web-application/security/*
+worker/security/*
 *.tfstate
 *.tfstate.*
 *.tfvars

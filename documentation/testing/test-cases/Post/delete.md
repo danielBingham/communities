@@ -1,13 +1,13 @@
-# Post Update
+## [Delete Post](documentation/testing/test-cases/Post/delete.md)
 
 Test cases related to editing posts.
 
-## Pre-requisites
+### Pre-requisites
 
 - [ ] User1 has been created.
 - [ ] User2 has been created and is friends with User1.
 
-## Cases
+### Cases
 
 - [ ] As User1, create a private post with text and an image.
     - [ ] As User1, delete the post.

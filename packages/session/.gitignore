@@ -1,0 +1,6 @@
+.nyc_output
+coverage
+node_modules
+npm-debug.log
+/test/fixtures/server.crt
+/test/fixtures/server.key

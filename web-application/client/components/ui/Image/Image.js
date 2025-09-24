@@ -1,40 +1,25 @@
-import React, { useState } from 'react'
-import { useSelector } from 'react-redux'
+import { Capacitor } from '@capacitor/core'
 
-import Spinner from '/components/Spinner'
+import FetchImage from './FetchImage/FetchImage'
+import HtmlImage from './HtmlImage/HtmlImage'
 
 import './Image.css'
 
-const Image = function({ id, src, width }) {
-    const [isLoading, setIsLoading] = useState(true)
-    const configuration = useSelector((state) => state.system.configuration)
+const Image = function({ id, src, width, ref, onLoad }) {
 
-    if ( ! id && ! src) {
-        console.error(new Error(`One of 'props.src' or 'props.id' is required!`))
+    if ( id ) {
+        return ( <FetchImage id={id}  width={width} ref={ref} onLoad={onLoad} /> )
+    } else if ( src ) {
+        return ( <HtmlImage src={src} width={width} ref={ref} onLoad={onLoad} /> )
+    }
+
+    /*if ( Capacitor.getPlatform() === 'web' || Capacitor.getPlatform() === 'android' ) {
+    } else if ( Capacitor.getPlatform() === 'ios' ) {
+        return ( <FetchImage id={id} src={src} width={width} ref={ref} onLoad={onLoad} /> )
+    } else {
+        logger.error(`Unhandled Platform(${Capacitor.getPlatform()}) in Image.`) 
         return null
-    }
-
-    let url = ''
-    if ( src !== undefined && src !== null ) {
-        url = src
-    } else if ( id !== undefined && id !== null ) {
-        url = `${configuration.backend}/file/${id}`
-    }
-
-    const style = isLoading ? { position: 'absolute', top: '-10000px', left: '-10000px' } : {}
-    const widthSelector = width ? `?width=${width}` : ''
-    return (
-        <div>
-            <img 
-                onLoad={(e) => setIsLoading(false)} 
-                style={style}
-                src={`${url}${widthSelector}`} 
-            />
-            { isLoading && <div className="image__loading">
-                <Spinner /> 
-            </div> }
-        </div>
-    )
+    }*/
 }
 
 export default Image 

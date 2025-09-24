@@ -20,6 +20,7 @@
 const cleaning = require('./cleaning')
 const lib = require('./lib')
 const permissions = require('./permissions')
+const schema = require('./schema')
 const validation = require('./validation')
 const util = require('./util')
 
@@ -27,6 +28,7 @@ module.exports = {
     cleaning: cleaning,
     lib: lib,
     permissions: permissions,
+    schema: schema,
     validation: validation,
     util: util
 }

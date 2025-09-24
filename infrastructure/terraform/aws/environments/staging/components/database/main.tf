@@ -23,8 +23,10 @@ module "rds" {
   subnet_ids = var.subnet_ids 
 
   instance_class = "db.t4g.medium"
+  engine_version = "16.6"
+  snapshot = var.snapshot 
 
-  application = "peer-review" 
+  application = "communities" 
   environment = "staging" 
   service = "database" 
 }

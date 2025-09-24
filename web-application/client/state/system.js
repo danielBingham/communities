@@ -2,6 +2,16 @@ import { createSlice } from '@reduxjs/toolkit'
 
 import { makeRequest } from '/state/lib/makeRequest'
 
+let host = document.querySelector('meta[name="communities-host"]').content
+
+let apiPath = document.querySelector('meta[name="communities-api"]').content
+if ( ! apiPath.endsWith('/') ) {
+    apiPath = apiPath + '/'
+}
+
+let api = new URL(apiPath, host).href
+
+
 /***
  * System slice convers data essential for the system to function and that must
  * be queried from the root, rather than the API, during system setup.  All requests
@@ -10,13 +20,29 @@ import { makeRequest } from '/state/lib/makeRequest'
 const systemSlice = createSlice({
     name: 'system',
     initialState: {
-        requests: {},
+        host: host,
+        api: api,
+        csrf: null,
         configuration: null,
         features: {},
-        version: null
+        clientVersion: null,
+        serverVersion: null,
+        isActive: true
     },
     reducers: {
         reset: function(state, action) { },
+
+        setHost: function(state, action) {
+            state.host = action.payload
+        },
+
+        setAPI: function(state, action) {
+            state.api = action.payload
+        },
+
+        setCSRF: function(state, action) {
+            state.csrf = action.payload
+        },
 
         setConfiguration: function(state, action) {
             state.configuration = action.payload 
@@ -26,46 +52,49 @@ const systemSlice = createSlice({
             state.features = action.payload
         },
 
-        setVersion: function(state, action) {
-            state.version = action.payload
+        setClientVersion: function(state, action) {
+            state.clientVersion = action.payload
+        },
+
+        setServerVersion: function(state, action) {
+            state.serverVersion = action.payload
+        },
+
+        setIsActive: function(state, action) {
+            state.isActive = action.payload
         }
     }
 })
 
 export const getVersion = function() {
     return function(dispatch, getState) {
-        return dispatch(makeRequest('GET', '/version', null,
+        return dispatch(makeRequest('GET', '/system/version', null,
             function(response) {
-                dispatch(systemSlice.actions.setVersion(response.version))
+                dispatch(systemSlice.actions.setServerVersion(response.version))
             }
         ))
     }
 }
 
 /**
- * GET /config
+ * GET /initialization
  *
- * Get the configuration from the backend.
- *
- * Makes the request async and returns an id that can be used to track the
- * request and get the results of a completed request from this state slice.
- *
- * @returns {string} A uuid requestId that can be used to track this request.
+ * Initialize the current session.
  */
-export const getConfiguration = function() {
+export const getInitialization = function() {
     return function(dispatch, getState) {
-        return dispatch(makeRequest('GET', '/config', null,
-            function(config) {
-                dispatch(systemSlice.actions.setFeatures(config.features))
-                delete config.features
-                dispatch(systemSlice.actions.setVersion(config.version))
-                delete config.version
-                dispatch(systemSlice.actions.setConfiguration(config))
+        return dispatch(makeRequest('GET', '/system/initialization', null,
+            function(responseBody) {
+                dispatch(systemSlice.actions.setClientVersion(responseBody.version))
+                dispatch(systemSlice.actions.setServerVersion(responseBody.version))
+                dispatch(systemSlice.actions.setCSRF(responseBody.csrf))
+                dispatch(systemSlice.actions.setFeatures(responseBody.features))
+                dispatch(systemSlice.actions.setConfiguration(responseBody.config))
             }
         ))
     }
 }
 
 
-export const { reset, setConfiguration, setFeatures } = systemSlice.actions
+export const { reset, setHost, setAPI, setConfiguration, setFeatures, setIsActive } = systemSlice.actions
 export default systemSlice.reducer

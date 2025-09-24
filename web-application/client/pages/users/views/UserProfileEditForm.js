@@ -101,9 +101,8 @@ const UserProfileEditForm = function(props) {
 
         if ( fileId !== null && fileId !== undefined ) {
             fileRef.current?.submit()
-        } else {
-            makeRequest(patchUser(assembleUser()))
-        }
+        } 
+        makeRequest(patchUser(assembleUser()))
     }
 
     const cancel = function() {
@@ -147,13 +146,6 @@ const UserProfileEditForm = function(props) {
             setFileId(currentUser.fileId)
         }
     }, [])
-
-    useEffect(function() {
-        if ((fileId !== null && fileState === 'fulfilled') && ! request ) 
-        {
-            makeRequest(patchUser(assembleUser()))
-        }
-    }, [ fileId, fileState ])
 
     // Reset the request if a change has been made.
     useEffect(function() {

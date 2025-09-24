@@ -124,9 +124,8 @@ const GroupForm = function() {
         // it errors).
         if ( fileId !== null && fileId !== undefined ) {
             fileRef.current?.submit()
-        } else {
-            makeRequest(postGroups(assembleGroup()))
         }
+        makeRequest(postGroups(assembleGroup()))
     }
 
     const cancel = function(event) {
@@ -162,9 +161,7 @@ const GroupForm = function() {
 
     const navigate = useNavigate()
     useEffect(() => {
-        if ( fileId !== null && fileState == 'fulfilled' && ! request ) {
-            makeRequest(postGroups(assembleGroup()))
-        } else if ( (fileState === 'fulfilled' ) && (request && request.state == 'fulfilled')) {
+        if ( request?.state === 'fulfilled') {
             setTitle(null)
             setType(null)
             setPostPermissions(null)
@@ -173,17 +170,8 @@ const GroupForm = function() {
             setFileId(null)
    
             navigate(`/group/${encodeURIComponent(request.response.body.entity.slug)}`)
-        } else if ( fileId === null && (request && request.state == 'fulfilled') ) {
-            setTitle(null)
-            setType(null)
-            setPostPermissions(null)
-            setSlug(null)
-            setAbout(null)
-            setFileId(null)
-   
-            navigate(`/group/${encodeURIComponent(request.response.body.entity.slug)}`)
-        }
-    }, [ request, fileState, fileId])
+        } 
+    }, [ request, fileId])
 
     let baseError = null 
 

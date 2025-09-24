@@ -1,0 +1,16 @@
+.list__search-control {
+    display: flex;
+}
+.list__search-control input { 
+    flex-grow: 1;
+}
+@media (width > 700px ) {
+    .list__search-control input {
+        width: 300px;
+    }
+}
+@media (width <= 500px) {
+    .list__search-control .nav-text {
+        display: none;
+    }
+}

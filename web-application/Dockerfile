@@ -1,6 +1,11 @@
-FROM node:18.17.0
+FROM node:24.5.0
 
 WORKDIR /src
+
+ARG NODE_ENV=production
+ENV NODE_ENV=$NODE_ENV
+
+RUN apt-get update && apt-get install -y zip unzip
 
 COPY package-lock.json package-lock.json
 COPY package.json package.json 

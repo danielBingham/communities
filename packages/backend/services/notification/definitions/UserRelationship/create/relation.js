@@ -32,6 +32,6 @@ module.exports = {
     },
     web: {
         text: Handlebars.compile(`{{{requester.name}}} sent you a friend request.`),
-        path: Handlebars.compile(`/{{{requester.username}}}`)
+        path: Handlebars.compile(`{{{ path }}}`)
     }
 }

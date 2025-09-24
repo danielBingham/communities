@@ -27,11 +27,11 @@ const emailBodyTemplate = fs.readFileSync(path.resolve(__dirname, './author.hbs'
 module.exports = {
     type: 'PostComment:create:author',
     email: {
-        subject: Handlebars.compile('[Communities] {{{commentAuthor.name}}} commented on your post "{{{postIntro}}}..."'), 
+        subject: Handlebars.compile('[Communities] {{{commentAuthor.name}}} commented on your post "{{{postIntro}}}"'), 
         body: Handlebars.compile(emailBodyTemplate)
     },
     web: {
-        text: Handlebars.compile(`{{{commentAuthor.name}}} commented, "{{{commentIntro}}}...", on your post, "{{{postIntro}}}...".`),
-        path: Handlebars.compile(`/{{{link}}}`)
+        text: Handlebars.compile(`{{{commentAuthor.name}}} commented, "{{{commentIntro}}}", on your post, "{{{postIntro}}}"`),
+        path: Handlebars.compile(`{{{ path }}}`)
     }
 }

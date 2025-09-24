@@ -1,7 +1,15 @@
+.page {
+    box-sizing: border-box;
+    padding: 20px 0;
+}
+
 .page .page-body {
     background-color: var(--page-background-color);
     color: var(--page-text-color);
+    width: 100%;
 }
+.page-left-gutter { padding: 5px 0; }
+.page-right-gutter { padding: 5px 0; }
 
 @media (1600px <= width) {
     .page {
@@ -24,7 +32,7 @@
 @media (700px < width <= 1220px) {
     .page {
         display: grid;
-        grid-template-columns: 1fr;
+        grid-template-columns: 100%;
         grid-template-rows: auto;
         margin: 0 auto;
     }
@@ -40,13 +48,13 @@
         margin: 0 auto;
         grid-row: 3 / 4;
         width: 100%;
-        padding-top: 30px;
     }
 }
 @media (width <= 700px) {
     .page {
+        width: 100%;
         display: grid;
-        grid-template-columns: 1fr;
+        grid-template-columns: 100%;
         grid-template-rows: auto;
         margin: 0 auto;
     }
@@ -62,6 +70,5 @@
         margin: 0 auto;
         grid-row: 3 / 4;
         width: 100%;
-        padding-top: 30px;
     }
 }

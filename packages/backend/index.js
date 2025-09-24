@@ -17,6 +17,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
+
 exports.BlocklistDAO = require('./daos/BlocklistDAO')
 exports.FeatureDAO = require('./daos/FeatureDAO') 
 exports.FileDAO = require('./daos/FileDAO')
@@ -39,11 +40,15 @@ exports.UserRelationshipDAO = require('./daos/UserRelationshipDAO')
 
 exports.DAOError = require('./errors/DAOError')
 exports.ServiceError = require('./errors/ServiceError')
+exports.UserErrors = require('./errors/UserErrors')
+
+exports.NotificationEvents = require('./events/NotificationEvents')
 
 exports.AuthenticationService = require('./services/AuthenticationService')
 exports.EmailService = require('./services/EmailService')
 exports.FeatureService = require('./services/FeatureService')
 exports.FileService = require('./services/FileService')
+exports.GroupMemberService = require('./services/GroupMemberService')
 exports.ImageService = require('./services/ImageService')
 exports.LinkPreviewService = require('./services/LinkPreviewService')
 exports.NotificationService = require('./services/NotificationService')
@@ -53,7 +58,11 @@ exports.S3FileService = require('./services/S3FileService')
 exports.ServerSideRenderingService = require('./services/ServerSideRenderingService')
 exports.SessionService = require('./services/SessionService')
 exports.TokenService = require('./services/TokenService')
+exports.UserService = require('./services/UserService')
 exports.ValidationService = require('./services/ValidationService')
+exports.WebSocketService = require('./services/WebSocketService')
+
+exports.NotificationWorker = require('./services/notification/NotificationWorker')
 
 exports.Logger = require('./logger')
 exports.FeatureFlags = require('./features')

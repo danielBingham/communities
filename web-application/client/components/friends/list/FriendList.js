@@ -10,21 +10,21 @@ import Spinner from '/components/Spinner'
 import { 
     List, 
     ListHeader, 
-    ListTitle, 
-    ListControls, 
-    ListControl, 
     ListGridContent, 
-    ListNoContent 
-} from '/components/generic/list/List'
+    SearchControl
+} from '/components/ui/List'
 import PaginationControls from '/components/PaginationControls'
+import Button from '/components/ui/Button'
+import Refresher from '/components/ui/Refresher'
 
 import './FriendList.css'
 
-const FriendList = function({ userId, params }) {
+const FriendList = function({ userId, params, noSearch, descriptor }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const relationshipDictionary = useSelector((state) => state.UserRelationship.dictionary)
-    const [query, request] = useUserRelationshipQuery(currentUser.id, params) 
+    const [query, request, reset] = useUserRelationshipQuery(currentUser.id, params) 
+
 
     // ======= Render ===============================================
 
@@ -58,8 +58,23 @@ const FriendList = function({ userId, params }) {
         content = null
     } 
 
+    descriptor = descriptor ? descriptor : 'Friends'
+    let explanation = ''
+    if ( ! query || parseInt(query.meta.count) === 0 ) {
+        explanation = `0 ${descriptor}`
+    } else {
+        const pageStart = ( query.meta.page-1) * query.meta.pageSize + 1
+        const pageEnd = query.meta.count - (query.meta.page-1) * query.meta.pageSize > query.meta.pageSize ? ( query.meta.page * query.meta.pageSize ) : query.meta.count 
+
+        explanation = `${pageStart} to ${pageEnd} of ${query.meta.count} ${descriptor}`
+    }
+
     return (
         <List className="friend-list">
+            <ListHeader explanation={explanation}>
+                <Refresher onRefresh={() => reset()} />
+                { ! noSearch && <SearchControl entity={descriptor} /> }
+            </ListHeader>
             <ListGridContent>
                 { content } 
             </ListGridContent>

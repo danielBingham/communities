@@ -19,3 +19,16 @@ resource "aws_s3_bucket" "this" {
     }
   )
 }
+
+resource "aws_s3_bucket_cors_configuration" "this" {
+  bucket = aws_s3_bucket.this.bucket
+
+  cors_rule {
+
+    allowed_headers = ["*"]
+    allowed_methods = ["HEAD", "GET"]
+    //allowed_origins = ["https://localhost:3000", "https://localhost", "capacitor://localhost"]
+    allowed_origins = ["*"] 
+    expose_headers = []
+  }
+}

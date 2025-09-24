@@ -6,6 +6,13 @@ on:
       version:
         decription: 'A semantic version to use when tagging this release.'
         required: true
+      environment:
+        type: choice
+        description: 'The environment to build this container for.  If you choose staging, the version should have an `-rc.N` term.'
+        required: true
+        options:
+          - production
+          - staging
 jobs:
   build:
 
@@ -18,7 +25,7 @@ jobs:
     steps:
 
       - name: Checkout Repo 
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
@@ -86,6 +93,25 @@ jobs:
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
           npm publish
 
+      # Test, Version, and Publish @communities/session
+      #
+      - name: Install Session Dependencies 
+        working-directory: ./packages/session
+        run: |
+          export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
+          npm ci
+
+      - name: Version the Session Package
+        working-directory: ./packages/session
+        run: |
+          npm version ${{ github.event.inputs.version }}
+
+      - name: Publish to AWS CodeArtifact 
+        working-directory: ./packages/session
+        run: |
+          export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
+          npm publish
+
       # Build the worker docker container and push it to ECR 
       - name: Install updated Shared version
         working-directory: ./worker
@@ -137,6 +163,12 @@ jobs:
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
           npm install @communities/backend@${{ github.event.inputs.version }}
 
+      - name: Install updated session version
+        working-directory: ./web-application
+        run: |
+          export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
+          npm install @communities/session@${{ github.event.inputs.version }}
+
       - name: Install Web Application NPM Modules
         working-directory: ./web-application
         run: |
@@ -157,7 +189,7 @@ jobs:
         working-directory: ./web-application
         run: |
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-          docker build --secret id=CODEARTIFACT_AUTH_TOKEN -t 843012963492.dkr.ecr.us-east-1.amazonaws.com/communities/web-application:${{ github.event.inputs.version }} . 
+          docker build --secret id=CODEARTIFACT_AUTH_TOKEN --build-arg NODE_ENV=${{ github.event.inputs.environment }} -t 843012963492.dkr.ecr.us-east-1.amazonaws.com/communities/web-application:${{ github.event.inputs.version }} . 
 
       - name: Login to ECR 
         run: |

@@ -1,5 +1,3 @@
-import React from 'react'
-
 import logger from '/logger'
 
 import Error404 from '/components/errors/Error404'
@@ -19,19 +17,35 @@ const RequestErrorContent = function({ message, request, ignore404 }) {
                     <p>{ contextMessage } failed with a server-error.</p>
                     <p>Status: { request.response.status}, Type: { request.error.type }</p>
                     <p>{ request.error.message }</p>
-                    <p>This is probably a bug.  Please report it!</p>
                 </div>
             )
         } else if ( request.response.status >= 400 && request.response.status < 500 ) {
             if ( request.response.status === 404 ) {
                 return ( <Error404 /> )
             } else {
-                return (
-                    <div className="user-error">
-                        <p>{ contextMessage } failed.</p>
-                        <p>{ request.error.message }</p>
-                    </div>
-                )
+                if ( 'all' in request.error ) {
+                    const errorViews = []
+                    for(const error of request.error.all) {
+                        errorViews.push(
+                            <div className="user-error">
+                                <p>{ error.message }</p>
+                            </div>
+                        )
+                    }
+                    return (
+                        <div className="user-errors">
+                            <p>{ contextMessage } failed.</p>
+                            { errorViews }
+                        </div>
+                    )
+                } else {
+                    return (
+                        <div className="user-error">
+                            <p>{ contextMessage } failed.</p>
+                            <p>{ request.error.message }</p>
+                        </div>
+                    )
+                }
             }
         } else if ( request.error?.type === 'frontend-error' ) {
             return (

@@ -17,6 +17,30 @@ module.exports = function(core) {
     const router = express.Router()
 
     /******************************************************************************
+     * System
+     ******************************************************************************/
+    const SystemController = require('./controllers/SystemController')
+    const systemController = new SystemController(core)
+
+    router.get('/system/initialization', function(request, response, next) {
+        systemController.getInitialization(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.post('/system/initialization', function(request, response, next) {
+        systemController.postInitialization(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.get('/system/version', function(request, response, next) {
+        systemController.getVersion(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    /******************************************************************************
      * Feature Flag Management and Migration Rest Routes
      *****************************************************************************/
     const FeatureController = require('./controllers/FeatureController')
@@ -488,12 +512,6 @@ module.exports = function(core) {
         })
     })
 
-    router.patch('/authentication', function(request, response, next) {
-        authenticationController.patchAuthentication(request, response).catch(function(error) {
-            next(error)
-        })
-    })
-
     router.get('/authentication', function(request, response, next) {
         authenticationController.getAuthentication(request,response).catch(function(error) {
             next(error)
@@ -503,6 +521,18 @@ module.exports = function(core) {
     router.delete('/authentication', function(request, response) {
         // Delete isn't async
         authenticationController.deleteAuthentication(request, response)
+    })
+
+    /**************************************************************************
+     *      Device Tracking REST Routes
+     **************************************************************************/
+    const DeviceController = require('./controllers/DeviceController')
+    const deviceController = new DeviceController(core)
+
+    router.patch('/device', function(request, response, next) {
+        deviceController.patchDevice(request, response).catch(function(error) {
+            next(error)
+        })
     })
 
     /**************************************************************************
@@ -599,7 +629,7 @@ module.exports = function(core) {
      *      API 404 
      *************************************************************************/
 
-    router.use('*', function(request, response) {
+    router.all('*any', function(request, response) {
         throw new ControllerError(404, 'no-resource', `Request for non-existent resource ${request.originalUrl}.`)
     })
 

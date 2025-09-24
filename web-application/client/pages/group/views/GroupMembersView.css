@@ -3,4 +3,6 @@
     padding: 20px;
     text-align: center;
 }
-
+.group-members-view__controls {
+    text-align: right;
+}

@@ -5,9 +5,11 @@ import { Link } from 'react-router-dom'
 import { useRequest } from '/lib/hooks/useRequest'
 import { useUser } from '/lib/hooks/User'
 
-
 import UserProfileImage from '/components/users/UserProfileImage'
 import FriendButton from '/components/friends/FriendButton'
+
+import { ListGridContentItem } from '/components/ui/List'
+
 import './UserBadge.css'
 
 const UserBadge = function({ id, children }) {
@@ -29,7 +31,7 @@ const UserBadge = function({ id, children }) {
     // In that case, we'll just return null for now.
     if ( user ) {
         return (
-            <div className="user-badge">
+            <ListGridContentItem className="user-badge">
                 <div className="user-badge__grid">
                     <UserProfileImage userId={user.id} />
                     <div className="user-badge__details" >
@@ -41,7 +43,7 @@ const UserBadge = function({ id, children }) {
                         </div>
                     </div> 
                 </div>
-            </div>
+            </ListGridContentItem>
         )
     } else {
         return (null)

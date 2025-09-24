@@ -1,11 +1,11 @@
-const { uuidCleaner } = require('../types/uuid')
+const { cleanUuid } = require('../types/uuid')
 const { cleanEntity } = require('../clean')
 
 const clean = function(postSubscription) {
     const cleaners = {
-        id: uuidCleaner,
-        userId: uuidCleaner,
-        postId: uuidCleaner,
+        id: cleanUuid,
+        userId: cleanUuid,
+        postId: cleanUuid,
         createdDate: null,
         updatedDate: null 
     }
@@ -13,8 +13,8 @@ const clean = function(postSubscription) {
 }
 
 module.exports = {
-    cleanId: uuidCleaner,
-    cleanUserId: uuidCleaner,
-    cleanPostId: uuidCleaner,
+    cleanId: cleanUuid,
+    cleanUserId: cleanUuid,
+    cleanPostId: cleanUuid,
     clean: clean
 }

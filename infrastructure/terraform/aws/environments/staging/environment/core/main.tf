@@ -33,6 +33,8 @@ module "database" {
   # These come from the output of components/network.
   vpc_id = module.network.vpc_id 
   subnet_ids = module.network.private_subnet_ids 
+
+  snapshot = "production-09-11-2025-12-54-00-001"
 }
 
 module "cache" {

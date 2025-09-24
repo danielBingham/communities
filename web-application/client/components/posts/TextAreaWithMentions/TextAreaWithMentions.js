@@ -150,6 +150,13 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
         }
     }
 
+    // Focus the form on initial load.
+    useEffect(function() {
+        if ( textareaRef.current !== null ) {
+            textareaRef.current.focus()
+        }
+    }, [])
+
     // Construct the suggestions list.
     const userSuggestions = []
     if ( query !== null ) {

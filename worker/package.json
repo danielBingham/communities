@@ -1,6 +1,6 @@
 {
   "name": "@communities/worker",
-  "version": "0.5.13",
+  "version": "0.6.0-rc40",
   "private": true,
   "main": "index.js",
   "repository": {},
@@ -9,18 +9,14 @@
   },
   "scripts": {
     "start": "node ./index.js",
-    "dev": "export NODE_ENV=development && node ./index.js"
+    "dev": "export NODE_ENV=development && nodemon --trace-deprecation ./index.js"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "3.x",
-    "@communities/backend": "^0.5.13",
-    "@communities/shared": "^0.5.13",
-    "bull": "4.x",
-    "mime": "3.x",
-    "pg": "8.x",
-    "sharp": "~0.33.5"
+    "@communities/backend": "^0.6.0-rc40",
+    "@communities/shared": "^0.6.0-rc40"
   },
   "devDependencies": {
-    "dotenv": "16.x"
+    "dotenv": "16.6.1",
+    "nodemon": "3.1.10"
   }
 }

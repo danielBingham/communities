@@ -76,24 +76,59 @@ module.exports = class UserRelationshipController {
             requestedRelations: requestQuery.relations ? requestQuery.relations : {}
         }
 
-        // Only return those relationships where the user has confirmed.
-/*        const confirmedUserResults = await this.core.database.query(`
-            SELECT user_relationships.id FROM user_relationships
-                LEFT OUTER JOIN users ON user_relationships.user_id = users.id
-                LEFT OUTER JOIN users relation ON user_relationships.friend_id = relation.id
-            WHERE users.status = 'confirmed' AND relation.status = 'confirmed' 
-                AND (user_relationships.user_id = $1 OR user_relationships.friend_id = $1)
-        `, [ userId ])
-
-        query.params.push(confirmedUserResults.rows.map((r) => r.id))
-        query.where += `user_relationships.id = ANY($${query.params.length}::uuid[])`*/
-
         query.params.push(userId)
         query.where += `(user_relationships.user_id = $1 OR user_relationships.friend_id = $1)`
 
-        if ( requestQuery.status ) {
+        if ( 'status' in requestQuery ) {
             query.params.push(requestQuery.status)
             query.where += ` AND user_relationships.status = $${query.params.length}`
+        }
+
+        if ( 'user' in requestQuery ) {
+            const userQuery = requestQuery.user
+            if ( 'status' in userQuery ) {
+                const results = await this.core.database.query(`
+                SELECT user_relationships.id FROM user_relationships
+                    LEFT OUTER JOIN users ON user_relationships.user_id = users.id
+                    LEFT OUTER JOIN users relation ON user_relationships.friend_id = relation.id
+                WHERE ((users.id != $1 AND users.status = $2) OR (relation.id != $1 AND relation.status = $2))
+                    AND (user_relationships.user_id = $1 OR user_relationships.friend_id = $1)
+            `, [ userId, userQuery.status ])
+
+                query.params.push(results.rows.map((r) => r.id))
+                query.where += ` AND user_relationships.id = ANY($${query.params.length}::uuid[])`
+            }
+
+            if ( 'name' in userQuery ) {
+                const results = await this.core.database.query(`
+                    SELECT user_relationships.id
+                        FROM users
+                            LEFT JOIN user_relationships ON users.id = user_relationships.user_id OR users.id = user_relationships.friend_id
+                            LEFT JOIN users relation ON user_relationships.user_id = relation.id OR user_relationships.friend_id = relation.id
+                        WHERE users.id = $1 AND SIMILARITY(relation.name, $2) > 0.15
+                        ORDER BY SIMILARITY(relation.name, $2) desc
+            `, [ userId, userQuery.name])
+
+                query.params.push(results.rows.map((r) => r.id))
+                query.where += ` AND user_relationships.id = ANY($${query.params.length}::uuid[])`
+                query.order = `ARRAY_POSITION($${query.params.length}::uuid[], user_relationships.id)`
+            }
+        }
+       
+        if ( 'GroupMember' in requestQuery ) {
+            const GroupMemberQuery = requestQuery.GroupMember
+            if ( 'is' in GroupMemberQuery && GroupMemberQuery.is === 'empty') {
+                const results = await this.core.database.query(`
+                    SELECT user_relationships.id
+                        FROM user_relationships
+                            LEFT OUTER JOIN group_members ON (user_relationships.user_id = $1 AND user_relationships.friend_id = group_members.user_id AND group_members.group_id = $2) 
+                                OR (user_relationships.friend_id = $1 AND user_relationships.user_id = group_members.user_id AND group_members.group_id = $2)
+                        WHERE (user_relationships.user_id = $1 OR user_relationships.friend_id = $1) AND group_members.group_id IS NULL 
+                `, [ userId, GroupMemberQuery.groupId])
+
+                query.params.push(results.rows.map((r) => r.id))
+                query.where += ` AND user_relationships.id = ANY($${query.params.length}::uuid[])`
+            }
         }
 
         if ( 'page' in requestQuery ) {

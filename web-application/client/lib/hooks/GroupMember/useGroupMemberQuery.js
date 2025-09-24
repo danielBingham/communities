@@ -13,7 +13,15 @@ export const useGroupMemberQuery = function(groupId, queryParameters) {
     params.page = searchParams.get('page') || 1
 
     if ( searchParams.get('q') ) {
-        params.title = searchParams.get('q')
+        if ( 'user' in params ) {
+            params.user.name = searchParams.get('q')
+        } else {
+            params.user = {
+                name: searchParams.get('q')
+            }
+        }
+    } else if ( 'user' in params && ! searchParams.get('q') ) {
+        delete params.user.name
     }
 
     // TODO TECHDEBT The order of items in an object is not guaranteed, so just
@@ -40,7 +48,7 @@ export const useGroupMemberQuery = function(groupId, queryParameters) {
         }
     }, [ key, query, request ])
 
-    return [query, request]
+    return [query, request, resetRequest]
 }
 
 

@@ -34,7 +34,7 @@ module.exports = class PageMetadataService {
             applicationName: "Communities",
             title: "Communities",
             description: "Communities is a social media platform in Open Beta working towards incorporating as a non-profit, cooperative.",
-            image: `${core.config.host}favicon-32x32.png`,
+            image: new URL('favicon-32x32.png', core.config.host).href,
             type: "website",
             version: process.env.npm_package_version
         }

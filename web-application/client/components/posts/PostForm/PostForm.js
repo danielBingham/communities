@@ -1,9 +1,6 @@
-import React, { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { useSelector, useDispatch} from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-
-import { LinkIcon } from '@heroicons/react/24/outline'
-import { XCircleIcon, UsersIcon } from '@heroicons/react/24/solid'
 
 import logger from '/logger'
 
@@ -17,51 +14,36 @@ import { usePost } from '/lib/hooks/Post'
 import { GroupPostPermissions, useGroupPostPermission } from '/lib/hooks/permission'
 
 import { deleteFile } from '/state/File'
-import { postPosts, patchPost, finishPostEdit, clearSharingPost } from '/state/Post'
+import { postPosts, patchPost } from '/state/Post'
 
-import FileUploadInput from '/components/files/FileUploadInput'
-import DraftImageFile from '/components/files/DraftImageFile'
-import LinkPreview from '/components/links/view/LinkPreview'
 import Button from '/components/generic/button/Button'
+import Spinner from '/components/Spinner'
 
-import TextAreaWithMentions from '/components/posts/TextAreaWithMentions'
-
-import LinkForm from './LinkForm/LinkForm'
-import PostVisibilityControl from './PostVisibilityControl/PostVisibilityControl'
-
-import Post from '/components/posts/Post'
+import PostContent from './PostContent'
+import SharedPostAttachment from './SharedPostAttachment'
+import PostFileAttachment from './PostFileAttachment'
+import PostLinkPreviewAttachment from './PostLinkPreviewAttachment'
+import PostAttachmentControls from './PostAttachmentControls'
+import PostVisibilityControl from './PostVisibilityControl'
+import PostTypeControl from './PostTypeControl'
 
 import ErrorModal from '/components/errors/ErrorModal'
+import ErrorCard from '/components/errors/ErrorCard'
 
 
 import './PostForm.css'
 
-const PostForm = function({ postId, groupId, sharedPostId }) {
+const PostForm = function({ postId, groupId, sharedPostId, origin }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
     const [post] = usePost(postId) 
     const [group] = useGroup(post !== null ? post.groupId : groupId)
+
+    const [draft, setDraft] = usePostDraft(postId, groupId, sharedPostId)
+    
     const [currentMember] = useGroupMember(group?.id, currentUser.id)
-    const [draft, setDraft] = usePostDraft(postId, groupId)
-
     const canCreateGroupPost = useGroupPostPermission(currentUser, GroupPostPermissions.CREATE, { group: group, userMember: currentMember })
-
-    const [content,setContent] = useState( draft && 'content' in draft ? draft.content : '')
-    const [fileId,setFileId] = useState(draft && 'fileId' in draft ? draft.fileId : null)
-    const [linkPreviewId, setLinkPreviewId] = useState(draft && 'linkPreviewId' in draft ? draft.linkPreviewId : null)
-
-    let defaultVisibility = 'private'
-    if ( post !== null && post.visibility !== null && post.visibility !== undefined ) {
-        defaultVisibility = post.visibility
-    } else if (group !== undefined && group !== null && group.type === 'open' ) {
-        defaultVisibility = 'public'
-    }
-    const [visibility, setVisibility] = useState(draft && 'visibility' in draft && draft.visibility !== null && draft.visibility !== undefined ? draft.visibility : defaultVisibility)
-
-    const [showLinkForm, setShowLinkForm] = useState(false)
-
-    const [error,setError] = useState('')
 
     const [postRequest, makePostRequest] = useRequest()
     const [patchRequest, makePatchRequest] = useRequest()
@@ -72,13 +54,13 @@ const PostForm = function({ postId, groupId, sharedPostId }) {
 
     const submit = function() {
         const newPost = {
-            type: 'feed',
-            visibility: visibility,
+            type: draft.type, 
+            visibility: draft.visibility,
             userId: currentUser.id,
-            fileId: fileId,
-            linkPreviewId: linkPreviewId,
-            sharedPostId: post ? post.sharedPostId : sharedPostId,
-            content: content
+            fileId: draft.fileId,
+            linkPreviewId: draft.linkPreviewId,
+            sharedPostId: draft.sharedPostId,
+            content: draft.content
         }
 
         if ( groupId ) {
@@ -92,124 +74,53 @@ const PostForm = function({ postId, groupId, sharedPostId }) {
             newPost.id = postId
             makePatchRequest(patchPost(newPost))
             
-            if ( post.fileId !== fileId ) {
+            if ( post.fileId !== newPost.fileId ) {
                 makeDeleteFileRequest(deleteFile(post.fileId))
             }
-
-            dispatch(finishPostEdit(postId))
         }
     }
 
     const cancel = function() {
+        if ( draft.fileId !== null && post?.fileId !== draft.fileId ) {
+            makeDeleteFileRequest(deleteFile(draft.fileId))
+        }
+
         setDraft(null) 
-
-        setFileId(null)
-        setLinkPreviewId(null)
-        setContent('')
-        setError('')
-
-        if ( fileId !== null && post?.fileId !== fileId ) {
-            makeDeleteFileRequest(deleteFile(fileId))
-        }
-
-        if ( postId ) {
-            dispatch(finishPostEdit(postId))
-        }
-        if ( sharedPostId ) {
-            dispatch(clearSharingPost())
-        }
+        navigate(origin)
     }
-
-    const onFileChange = function(fileId) {
-        if ( sharedPostId !== null && sharedPostId !== undefined ) {
-            setLinkPreviewId(null)
-            setFileId(null)
-            console.error('Cannot change the file when there is a shared Post.')
-            return
-        }
-
-        setFileId(fileId)
-
-        // If we're setting fileId, unset linkPreviewId.
-        if ( fileId !== null && fileId !== undefined ) {
-            setLinkPreviewId(null)
-        }
-    }
-
-    const setLink = function(linkPreviewId) {
-        if ( sharedPostId !== null && sharedPostId !== undefined ) {
-            setLinkPreviewId(null)
-            setFileId(null)
-            console.error('Cannot change the Link when there is a shared Post.')
-            return
-        }
-
-        setLinkPreviewId(linkPreviewId)
-
-        // If we're setting the LinkPreview, then unset the file. 
-        if ( linkPreviewId !== null && linkPreviewId !== undefined ) {
-            setFileId(null)
-        }
-    }
-
-    const onContentChange = function(newContent) {
-        if ( newContent.length > 10000 ) {
-            setError('overlength')
-        } else {
-            setError('')
-            setContent(newContent)
-        }
-    }
-
-    useEffect(function() {
-        setContent(draft ? draft.content : '')
-        setFileId(draft ? draft.fileId : null)
-        setLinkPreviewId(draft ? draft.linkPreviewId : null)
-
-        let defaultVisibility = 'private'
-        if ( post !== null ) {
-            defaultVisibility = post.visibility
-        } else if ( group !== undefined && group !== null && group.type === 'open' ) {
-            defaultVisibility = 'public'
-        }
-        setVisibility(draft ? draft.visibility : defaultVisibility)
-    }, [ postId, groupId ])
-
-    useEffect(function() {
-        setDraft({ content: content, fileId: fileId, linkPreviewId: linkPreviewId, visibility: visibility })
-    }, [ postId, content, fileId, linkPreviewId, visibility ])
 
     useEffect(function() {
         if (postRequest && postRequest.state == 'fulfilled') {
             setDraft(null)
-            dispatch(clearSharingPost())
-            if ( group ) {
-                navigate(`/group/${group.slug}/${postRequest.response.body.entity.id}`)
-            } else {
-                navigate(`/${currentUser.username}/${postRequest.response.body.entity.id}`)
-            }
+            navigate(origin)
         }
     }, [ group, postRequest ])
 
     useEffect(function() {
         if (patchRequest && patchRequest.state == 'fulfilled') {
             setDraft(null) 
+            if ( group ) {
+                navigate(`/group/${group.slug}/${patchRequest.response.body.entity.id}`)
+            } else {
+                navigate(`/${currentUser.username}/${patchRequest.response.body.entity.id}`)
+            }
         }
     }, [ patchRequest ])
 
-    // Don't show the form if they don't have permission to post in this Group.
-    if ( 
-        ((groupId !== undefined && groupId !== null) || (post?.groupId !== undefined && post?.groupId !== null))
-            && canCreateGroupPost !== true )
-    {
-        return null
-    }
 
-    let errorView = null
-    if ( error == 'overlength') {
-        errorView = (
-            <div className="error">Posts are limited to 10,000 characters...</div>
-        )
+    // Don't show the form if they don't have permission to post in this Group.
+    if ((groupId !== undefined && groupId !== null) || (post?.groupId !== undefined && post?.groupId !== null))
+    {
+        if ( ! group || ! currentMember ) {
+            return (
+                <Spinner />
+            )
+        } else if (currentMember !== undefined && canCreateGroupPost !== true) {
+            logger.warn(`### PostForm:: No permission to post in Group.`)
+            return (
+                <ErrorCard href={`/group/${group.slug}`}><p>You don't have permission to post in { group.title }.</p></ErrorCard>
+            )
+        }
     }
 
     if ( postRequest && postRequest.state == 'failed' ) {
@@ -218,74 +129,21 @@ const PostForm = function({ postId, groupId, sharedPostId }) {
         )
     }
 
-    let attachmentView = null
-    let attachmentControlsView = null
-    if ( ! fileId && ! linkPreviewId && ! showLinkForm && ! (sharedPostId || post?.sharedPostId)) {
-        attachmentControlsView = (
-            <div className="attachment-controls">
-                <div className="post-form__image">
-                    <FileUploadInput 
-                        text="Add Image"
-                        onChange={onFileChange} 
-                        fileId={fileId} 
-                        setFileId={setFileId} 
-                        types={[ 'image/jpeg', 'image/png' ]} 
-                    />
-                </div>
-                <div className="post-form__link">
-                    <Button type="primary" onClick={(e) => {setShowLinkForm(true)}}><LinkIcon /><span className="attachment-button-text"> Add Link</span></Button>
-                </div>
-            </div>
-        )
-    } else if ( fileId ) {
-        attachmentView = (
-            <div className="attachment">
-                <div className="attached">
-                    <DraftImageFile fileId={fileId} setFileId={setFileId} width={650} deleteOnRemove={ ! post || post.fileId != fileId } />
-                </div>
-            </div>
-        )
-    } else if ( linkPreviewId ) {
-        attachmentView = (
-            <div className="link-preview">
-                <a className="remove" href="" onClick={(e) => { e.preventDefault(); setLinkPreviewId(null) }}><XCircleIcon /></a>
-                <LinkPreview id={linkPreviewId} />
-            </div>
-        )
-    } else if ( showLinkForm ) {
-        attachmentView = (
-            <LinkForm setLinkPreviewId={setLink} setShowLinkForm={setShowLinkForm} />
-        )
-
-    } else if ( sharedPostId ) {
-        attachmentView = (
-            <Post id={sharedPostId} shared={true} />
-        )
-    } else if ( post && post.sharedPostId ) {
-        attachmentView = (
-            <Post id={post.sharedPostId} shared={true} />
-        )
-    }
-
-
     return (
         <div className="post-form">
-            <TextAreaWithMentions
-                value={content}
-                setValue={onContentChange}
-                placeholder={group ? `Write a post in ${group.title}...` : "Write a post to your feed..." }
-                groupId={groupId}
-            />
-
-            { errorView }
+            <PostContent postId={postId} groupId={groupId} sharedPostId={sharedPostId} />
             <div className="attachments">
-                { attachmentView }
+                <SharedPostAttachment postId={postId} groupId={groupId} sharedPostId={sharedPostId} />
+                <PostLinkPreviewAttachment postId={postId} groupId={groupId} sharedPostId={sharedPostId} />
+                <PostFileAttachment postId={postId} groupId={groupId} sharedPostId={sharedPostId} />
             </div>
             <div className="post-form__controls">
-                <div className="post-form__controls__attachments">{ attachmentControlsView }</div>
+                <div className="post-form__controls__attachments">
+                    <PostAttachmentControls postId={postId} groupId={groupId} sharedPostId={sharedPostId} />
+                </div>
                 <div className="post-form__controls__visibility">
-                    <PostVisibilityControl 
-                        visibility={visibility} setVisibility={setVisibility} postId={postId} groupId={groupId} />
+                    <PostTypeControl postId={postId} groupId={groupId} sharedPostId={sharedPostId} />
+                    <PostVisibilityControl postId={postId} groupId={groupId} sharedPostId={sharedPostId} />
                 </div>
             </div>
             <div className="buttons">
@@ -294,7 +152,6 @@ const PostForm = function({ postId, groupId, sharedPostId }) {
             </div>
         </div>
     )
-
 }
 
 export default PostForm

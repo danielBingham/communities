@@ -32,6 +32,6 @@ module.exports = {
     },
     web: {
         text: Handlebars.compile(`You have been promoted to "admin" of group "{{{group.title}}}".`),
-        path: Handlebars.compile(`/group/{{{group.slug}}}`)
+        path: Handlebars.compile(`{{{ path }}}`)
     }
 }

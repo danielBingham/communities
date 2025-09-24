@@ -1,14 +1,14 @@
-# Create PostComment 
+## [Create PostComment](documentation/testing/test-cases/PostComment/create.md)
 
 Cases covering making comments on posts.
 
-## Pre-requisites
+### Pre-requisites
 
 - [ ] User1 has been created.
 - [ ] User2 has been created.
 - [ ] User1 has created a public post.
 
-## Cases
+### Cases
 
 - [ ] As User2 comment "First." on User1's post.
     - [ ] Confirm comment appears on User1's post.
@@ -23,7 +23,7 @@ Cases covering making comments on posts.
         - User1: "Second." 
         - User2: "Third." 
 
-### Mentions
+#### Mentions
 
 - [ ] As User2 comment on User1's post and begin a mention by typing '@' and the beginning of User1's name.
     - [ ] Confirm mention suggestions menu is limited to User2's friends and User1.
@@ -35,7 +35,7 @@ Cases covering making comments on posts.
     - [ ] As User1, confirm mention notification received.
     - [ ] As User1, click on the notification.  Confirm comment highlighted.
 
-### Drafts
+#### Drafts
 
 - [ ] As User2, write a comment draft.
     - [ ] Navigate away from the home feed and back to feed.  Confirm draft remains. 

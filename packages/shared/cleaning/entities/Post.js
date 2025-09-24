@@ -1,18 +1,18 @@
-const { uuidCleaner, stringCleaner, intCleaner } = require('../types')
+const { cleanUuid, stringCleaner, intCleaner } = require('../types')
 const { cleanEntity } = require('../clean')
 
 const clean = function(postSubscription) {
     const cleaners = {
-        id: uuidCleaner,
-        userId: uuidCleaner,
-        groupId: uuidCleaner,
+        id: cleanUuid,
+        userId: cleanUuid,
+        groupId: cleanUuid,
         type: stringCleaner,
         visibility: stringCleaner,
-        fileId: uuidCleaner,
-        linkPreviewId: uuidCleaner,
-        sharedPostId: uuidCleaner,
-        siteModerationId: uuidCleaner,
-        groupModerationId: uuidCleaner,
+        fileId: cleanUuid,
+        linkPreviewId: cleanUuid,
+        sharedPostId: cleanUuid,
+        siteModerationId: cleanUuid,
+        groupModerationId: cleanUuid,
         activity: null,
         content: stringCleaner,
         createdDate: null,
@@ -22,16 +22,16 @@ const clean = function(postSubscription) {
 }
 
 module.exports = {
-    cleanId: uuidCleaner,
-    cleanUserId: uuidCleaner,
-    cleanGroupId: uuidCleaner,
+    cleanId: cleanUuid,
+    cleanUserId: cleanUuid,
+    cleanGroupId: cleanUuid,
     cleanType: stringCleaner,
     cleanVisibility: stringCleaner,
-    cleanFileId: uuidCleaner,
-    cleanLinkPreviewId: uuidCleaner,
-    cleanSharedPostId: uuidCleaner,
-    cleanSiteModerationId: uuidCleaner,
-    cleanGroupModerationId: uuidCleaner,
+    cleanFileId: cleanUuid,
+    cleanLinkPreviewId: cleanUuid,
+    cleanSharedPostId: cleanUuid,
+    cleanSiteModerationId: cleanUuid,
+    cleanGroupModerationId: cleanUuid,
     cleanContent: stringCleaner,
     clean: clean
 }

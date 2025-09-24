@@ -7,6 +7,7 @@
 
     --primary-color-lightest: #FAFBFC; /* Hue: 204, Saturation: 1, Brightness: 99  -- Off the pattern for a more grey hue. */
     --primary-color-light: #e6ecf2;
+    --primary-color-grey: #797c80;
     --primary-color-main: #398fe5;
     --primary-color-main-highlight: #67a6e5;
     --primary-color-dark: #44484c;
@@ -124,6 +125,7 @@ body {
     padding: 0;
     margin: 0;
     height: 100%;
+    width: 100%;
 
     font-family: Roboto, Arial, sans-serif; 
     /*font-family: "Atkinson Hyperlegible", Roboto, Arial, sans-serif;*/
@@ -133,6 +135,10 @@ body {
     background-color: var(--main-background-color);
 
     overflow-y: auto;
+    overflow-wrap: break-word;
+}
+body.android, body.ios {
+    padding-top: 40px;
 }
 
 a:link, a:active, a:visited {
@@ -197,7 +203,7 @@ svg.icon {
 
 @media (width >= 700px) {
     #root {
-        height: 100vh;
+        min-height: 100vh;
     }
 
 }

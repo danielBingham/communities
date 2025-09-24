@@ -12,8 +12,9 @@ if ( process.env.NODE_ENV == 'development' ) {
 
 const config = {
     host: process.env.HOST,
+    wsHost: process.env.WS_HOST,
     environment: process.env.NODE_ENV,
-    backend: '/api/0.0.0',
+    log_level: process.env.LOG_LEVEL,
     // Database configuration
     database: {
         host: process.env.DATABASE_HOST,
@@ -27,9 +28,10 @@ const config = {
         port: process.env.REDIS_PORT 
     },
     session: {
-        key: 'communities_id',
-        secret: process.env.SESSION_SECRET,
-        secure_cookie: false
+        cookieName: 'communities_id',
+        headerName: 'X-Communities-Auth',
+        platformHeader: 'X-Communities-Platform',
+        secret: process.env.SESSION_SECRET
     },
     s3: {
         bucket_url: process.env.S3_BUCKET_URL,
@@ -40,8 +42,18 @@ const config = {
     postmark: {
         api_token: process.env.POSTMARK_API_TOKEN
     },
-    stripe: {},
-    log_level: process.env.LOG_LEVEL 
+    notifications: {
+        ios: {
+            privateCert: process.env.NOTIFICATIONS_IOS_PRIVATE_CERT_PATH,
+            publicCert: process.env.NOTIFICATIONS_IOS_PUBLIC_CERT_PATH,
+            applicationBundleID: process.env.NOTIFICATIONS_IOS_APPLICATION_BUNDLE_ID,
+            endpoint: process.env.NOTIFICATIONS_IOS_ENDPOINT
+        },
+        android: {
+            firebaseServiceAccount: process.env.NOTIFICATIONS_FIREBASE_SERVICE_ACCOUNT_PATH 
+        }
+    },
+    stripe: {}
 }
 
 if ( process.env.NODE_ENV == 'production' ) {

@@ -10,6 +10,7 @@ import {  patchFile, deleteFile } from '/state/File'
 import ErrorModal from '/components/errors/ErrorModal'
 import Button from '/components/generic/button/Button'
 import Spinner from '/components/Spinner'
+import Image from '/components/ui/Image'
 
 import "react-image-crop/dist/ReactCrop.css"
 import "./DraftProfileImage.css"
@@ -21,7 +22,7 @@ const DraftProfileImage = forwardRef(function({
     deleteOnRemove 
 }, ref) {
 
-    const configuration = useSelector((state) => state.system.configuration)
+    const system = useSelector((state) => state.system)
 
     const [ cacheBust, setCacheBust ] = useState(0)
     const [ dimensions, setDimensions ] = useState({
@@ -167,7 +168,7 @@ const DraftProfileImage = forwardRef(function({
                     minHeight={10}
                     circularCrop={true}
                 >
-                    <img ref={imageRef} onLoad={onLoad} src={`${configuration.backend}/file/${fileId}?cacheBust=${cacheBust}`} />
+                    <Image ref={imageRef} onLoad={onLoad} id={fileId} />
                 </ReactCrop>
             </div>
                 { ! isLoaded && <Spinner /> }

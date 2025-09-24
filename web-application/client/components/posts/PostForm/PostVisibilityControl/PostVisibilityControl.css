@@ -1,3 +1,6 @@
+.post-visibility-control {
+    display: inline-block;
+}
 .post-visibility-control__current  {
     display: inline-block;
     padding: 5px 15px;

@@ -27,11 +27,11 @@ const emailBodyTemplate = fs.readFileSync(path.resolve(__dirname, './mention.hbs
 module.exports = {
     type: 'PostComment:create:mention',
     email: {
-        subject: Handlebars.compile('[Communities] {{{commentAuthor.name}}} mentioned you in their comment, "{{{commentIntro}}}", on a post by {{{postAuthor.name}}}, "{{{postIntro}}}..."'), 
+        subject: Handlebars.compile('[Communities] {{{commentAuthor.name}}} mentioned you in their comment, "{{{commentIntro}}}", on a post by {{{postAuthor.name}}}, "{{{postIntro}}}"'), 
         body: Handlebars.compile(emailBodyTemplate)
     },
     web: {
-        text: Handlebars.compile(`{{{commentAuthor.name}}} mentioned you in their comment, "{{{commentIntro}}}...", on a post by {{{postAuthor.name}}}, "{{{postIntro}}}...".`),
-        path: Handlebars.compile(`/{{{link}}}`) 
+        text: Handlebars.compile(`{{{commentAuthor.name}}} mentioned you in their comment, "{{{commentIntro}}}", on a post by {{{postAuthor.name}}}, "{{{postIntro}}}".`),
+        path: Handlebars.compile(`{{{ path }}}`) 
     }
 }

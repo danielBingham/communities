@@ -4,7 +4,6 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useRequest } from '/lib/hooks/useRequest'
 import { validatePassword } from '/lib/validation/user'
 
-import { patchAuthentication } from '/state/authentication'
 import { patchUser } from '/state/User'
 
 import Input from '/components/generic/input/Input'
@@ -26,7 +25,6 @@ const ChangePasswordForm = function(props) {
     // ======= Request Tracking =====================================
 
     const [request, makeRequest] = useRequest()
-    const [authRequest, makeAuthRequest] = useRequest()
 
     // ======= Redux State ==========================================
 
@@ -78,24 +76,16 @@ const ChangePasswordForm = function(props) {
             return
         }
 
-        makeAuthRequest(patchAuthentication(currentUser.email, oldPassword))
+        const user = {
+            id: currentUser.id,
+            password: newPassword,
+            oldPassword: oldPassword
+        }
+
+        makeRequest(patchUser(user))
     }
 
     // ======= Effect Handling ======================================
-
-    useEffect(function() {
-        if ( authRequest && authRequest.state == 'fulfilled') {
-            if ( authRequest.response.status == 200 ) {
-                const user = {
-                    id: currentUser.id,
-                    password: newPassword,
-                    oldPassword: oldPassword
-                }
-
-                makeRequest(patchUser(user))
-            }
-        }
-    }, [ authRequest ])
 
     useEffect(function() {
         if ( request && request.state == 'fulfilled' ) {
@@ -108,35 +98,22 @@ const ChangePasswordForm = function(props) {
     // ======= Render ===============================================
 
     let submit = null
-    if ( ( request && request.state == 'pending') || (authRequest && authRequest.state == 'pending') ) {
+    if ( ( request && request.state == 'pending') ) {
         submit = ( <Spinner /> )
     } else {
         submit = ( <input type="submit" name="submit" value="Change Password" /> )
     }
 
     let oldPasswordError = null
-    if ( authRequest && authRequest.state == 'fulfilled' && authRequest.response.status != 200) {
-        oldPasswordError = ( 
-            <div className="authentication-failure">
-                Authentication failed.  Make sure you typed your old password correctly.
-            </div>
-        )
-    } else if ( authRequest && authRequest.state == 'failed' ) {
-        oldPasswordError = ( 
-            <div className="authentication-failure">
-                Authentication failed.  Make sure you typed your old password correctly.
-            </div>
-        )
-    }
 
     let result = null
-    if ( authRequest && authRequest.state == 'fulfilled' && request && request.state == 'fulfilled' ) {
+    if ( request && request.state == 'fulfilled' ) {
         result = (
             <div className="success">
                 Password successfully updated!
             </div>
         )
-    } else if ( authRequest && authRequest.state == 'fulfilled' && request && request.state == 'failed' ) {
+    } else if ( request && request.state == 'failed' ) {
         result = (
             <div className="request-failure">
                 Something went wrong with the attempt to update your password.  Please try again.<br />

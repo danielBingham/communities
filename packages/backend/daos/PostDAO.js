@@ -279,7 +279,6 @@ module.exports = class PostDAO extends DAO {
             ${where}
             ORDER BY ${order}, post_comments.created_date ASC 
         `
-        
         const results = await this.core.database.query(sql, params)
 
         if ( results.rows.length <= 0 ) {

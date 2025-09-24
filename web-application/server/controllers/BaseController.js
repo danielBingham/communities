@@ -75,7 +75,7 @@ module.exports = class BaseController {
 
     sendUserErrors(response, status, errors) {
         if ( status < 400 || status > 499 ) {
-            throw new Error(`'sendUserError' should only be used for user errors (400 - 499).`)
+            throw new Error(`'sendUserErrors' should only be used for user errors (400 - 499).`)
         }
 
         if ( Array.isArray(errors) ) {
@@ -84,7 +84,8 @@ module.exports = class BaseController {
                 this.core.logger.warn(error.log)
                 returnedErrors.push({
                     type: error.type,
-                    message: error.message
+                    message: error.message,
+                    context: error.context
                 })
             }
 
@@ -110,7 +111,8 @@ module.exports = class BaseController {
             // construct a new error to return without it.
             const returnedError = {
                 type: errors.type,
-                message: errors.message
+                message: errors.message,
+                context: errors.context
             }
             response.status(status).json({
                 error: returnedError

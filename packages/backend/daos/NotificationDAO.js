@@ -84,9 +84,9 @@ module.exports = class NotificationsDAO {
             INSERT INTO notifications 
                 ( user_id, description, path, type, is_read, created_date )
             VALUES
-                ( $1, $2, $3, $4, false, now() )
+                ( $1, $2, $3, $4, $5, now() )
             RETURNING id
-        `, [ notification.userId, notification.description, notification.path, notification.type ])
+        `, [ notification.userId, notification.description, notification.path, notification.type, notification.isRead ])
 
         if ( results.rowCount <= 0 ) {
             throw new DAOError('insert-failed', `Attempt to insert notification failed.`)

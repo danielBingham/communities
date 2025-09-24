@@ -1,7 +1,42 @@
+import logger from '/logger'
+
 import { makeRequest } from '/state/lib/makeRequest'
 import { setRelationsInState }  from '/state/lib/relations'
 
-import { setFilesInDictionary, removeFile } from './slice'
+import { setFilesInDictionary, removeFile, setInCache, removeFromCache } from './slice'
+
+export const loadFile = function(fileId, width) {
+    return function(dispatch, getState) {
+        const state = getState()
+
+        if ( fileId in state.File.cache && width in state.File.cache[fileId] ) {
+            const promise = new Promise((resolve, reject) => resolve({ 
+                success: true,
+                request: null,
+                response: null,
+                error: null
+            }))
+            return [ promise, null ] 
+        }
+
+        dispatch(setInCache({ fileId: fileId, width: width, objectURL: null }))
+
+        const path = `./file/${encodeURIComponent(fileId)}`
+        const params = { fileId: fileId }
+        if ( width ) {
+            params.width = width
+        }
+        const query = new URLSearchParams(params)
+        const url = new URL(path, state.system.api).href + '?' + query
+
+        return dispatch(makeRequest('GET', url, null,
+            function(response) {
+                dispatch(setInCache({ fileId: fileId, width: width, objectURL: response.fileURL }))
+            }, 
+        null,
+        { isFile: true }))
+    }
+}
 
 /**
  * POST /upload
@@ -32,8 +67,9 @@ export const uploadFile = function(file) {
 
 export const patchFile = function(fileId, patch) {
     return function(dispatch, getState) {
-        return dispatch(makeRequest('PATCH', `/file/${fileId}`, patch,
+        return dispatch(makeRequest('PATCH', `/file/${encodeURIComponent(fileId)}`, patch,
             function(response) {
+                dispatch(removeFromCache({ fileId: fileId }))
                 dispatch(setFilesInDictionary({ entity: response.entity}))
 
                 dispatch(setRelationsInState(response.relations))
@@ -56,8 +92,9 @@ export const patchFile = function(fileId, patch) {
  */
 export const deleteFile = function(fileId) {
     return function(dispatch, getState) {
-        return dispatch(makeRequest('DELETE', `/file/${fileId}`, null,
+        return dispatch(makeRequest('DELETE', `/file/${encodeURIComponent(fileId)}`, null,
             function(response) {
+                dispatch(removeFromCache({ fileId: fileId }))
                 dispatch(removeFile({ entity: response.entity }))
             }
         ))

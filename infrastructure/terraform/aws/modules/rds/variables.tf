@@ -14,6 +14,14 @@ variable "engine_version" {
   default = "16.6"
 }
 
+/**
+ * Optional Snapshot identifier to restore from.
+ */
+variable "snapshot" {
+  description = "The name of a snapshot to restore from."
+  default = null
+}
+
 
 /**
  * Credential variables.  

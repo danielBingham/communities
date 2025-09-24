@@ -1,0 +1,32 @@
+.post__type-control {
+    display: inline-block;
+    text-align: right;
+}
+.post__type-control__current  {
+    display: inline-block;
+    padding: 5px 15px;
+    margin: 5px;
+    border-radius: 5px;
+
+    border: thin solid var(--primary-color-light);
+    color: var(--primary-color-dark);
+    background-color: var(--primary-color-light);
+    text-transform: capitalize;
+}
+.post__type-control svg {
+    width: 1.2em;
+    height: 1.2em;
+    margin-bottom: -0.2em;
+    margin-right: 5px;
+}
+
+@media (width >= 700px) {
+
+
+}
+
+@media (width < 700px) {
+    .post__type-control .nav-text {
+        display: none;
+    }
+}

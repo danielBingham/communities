@@ -1,12 +1,12 @@
-# User Registration
+## [Create User: Invitation](documentation/testing/test-cases/User/create/invitation.md)
 
 Cases covering the User Registration flow.
 
-## Pre-requisites
+### Pre-requisites
 
 No pre-requisites.
 
-## Cases
+### Cases
 
 - [ ] Register a new user named John Doe with username `john-doe` (communities-john-doe@mailinator.com)
     - [ ] Attempt to register with too short a password.

@@ -20,23 +20,38 @@
 
 const { 
     Core, 
+    Logger,
+    FeatureFlags,
 
-    ImageService
+    FeatureService,
+    ImageService,
+    NotificationService,
+
+    NotificationWorker
+
 } = require('@communities/backend')
 
 const config = require('./config')
 
 const core = new Core('worker', config)
-core.initialize().then(function() {
+
+async function initialize() {
+
+    await core.initialize()
+
+    const featureService = new FeatureService(core)
+    const features = await featureService.getEnabledFeatures()
+    core.features = new FeatureFlags(features)
  
     core.queue.process('resize-image', async function(job, done) {
-        core.logger.setId(`Image resize: ${job.id}`)
+        core.logger.id = `Image resize: ${job.id}`
         core.logger.info(`Beginning job 'resize-image' for user ${job.data.session.user.id} and file ${job.data.file.id}.`)
 
-        const imageService = new ImageService(core)
-
         try {
+
             job.progress({ step: 'initializing', stepDescription: `Initializing...`, progress: 0 })
+
+            const imageService = new ImageService(core)
 
             let progress = 0
             for (const size of imageService.imageSizes) {
@@ -49,7 +64,30 @@ core.initialize().then(function() {
             job.progress({ step: 'complete', stepDescription: `Complete!`, progress: 100 })
 
             core.logger.info(`Finished job 'resize-image' for user ${job.data.session.user.id}.`)
-            core.logger.setId(null)
+            core.logger.id = 'core' 
+            done(null)
+        } catch (error) {
+            core.logger.error(error)
+            done(error)
+        }
+    })
+
+    core.queue.process('send-notifications', async function(job, done) {
+        const logger = new Logger(core.logger.level, `send-notifications: ${job.id}`)
+        logger.info(`Beginning job 'send-notifications' of '${job.data.type}' for User(${job.data.currentUser.id}).`)
+        logger.info(`Data: `, job.data)
+
+        try {
+            job.progress({ step: 'initializing', stepDescription: `Initializing...`, progress: 0 })
+
+            const notificationWorker = new NotificationWorker(core, logger)
+            
+            await notificationWorker.processNotification(job.data.currentUser, job.data.type, job.data.context, job.data.options)
+
+            job.progress({ step: 'complete', stepDescription: `Complete!`, progress: 100 })
+
+            core.logger.info(`Finished job 'send-notifications' of '${job.data.type}' for user ${job.data.currentUser.id}.`)
+            core.logger.id = 'core' 
             done(null)
         } catch (error) {
             core.logger.error(error)
@@ -58,7 +96,9 @@ core.initialize().then(function() {
     })
 
     core.logger.info('Initialized and listening...')
-})
+}
+
+initialize()
 
 const shutdown = async function() {
     core.logger.info('Attempting a graceful shutdown...')

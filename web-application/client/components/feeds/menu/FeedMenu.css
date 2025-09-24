@@ -125,6 +125,13 @@ menu.feed-menu__menu li.view-more {
 @media (width <= 1220px) {
     menu.feed-menu__menu {
         text-align: center;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+        align-items: center;
+        justify-items: center;
+        padding: 0;
+        max-width: 360px;
+        margin: 0 auto;
     }
 
     menu.feed-menu__menu li {
@@ -132,6 +139,11 @@ menu.feed-menu__menu li.view-more {
     }
     
     menu.feed-menu__menu .nav-text {
+        display: block;
+        font-size: 10px;
+    }
+
+    menu.feed-menu__menu button .nav-text {
         display: block;
         font-size: 10px;
     }

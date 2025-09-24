@@ -74,6 +74,7 @@ const UserMenu = function(props) {
                 <div className="menu-item" onClick={props.toggleMenu}><Link to="/account/change-email"><EnvelopeIcon />Change Email</Link></div>
                 <div className="menu-item" onClick={props.toggleMenu}><Link to="/account/change-password"><LockClosedIcon />Change Password</Link></div>
                 <div className="menu-item" onClick={props.toggleMenu}><Link to="/account/contribute"><CreditCardIcon /> Contribute</Link></div>
+                <div className="menu-item" onClick={props.toggleMenu}><Link to="/account/preferences"><AdjustmentsHorizontalIcon /> Preferences</Link></div>
                 <div className="menu-item" onClick={props.toggleMenu}><Link to="/account/notifications"><BellIcon />Notifications</Link></div>
                 <div className="menu-item" onClick={props.toggleMenu}><Link to="/account/danger-zone"><ExclamationTriangleIcon /> Danger Zone</Link></div>
             </div>

@@ -21,6 +21,8 @@ import CommunitiesLogo from '/components/header/CommunitiesLogo'
 import AuthenticationNavigation from './navigation/AuthenticationNavigation'
 import NotificationMenu from '/components/notifications/NotificationMenu'
 
+import { IosBuffer, AndroidBuffer } from '/components/ui/DeviceTweaks'
+
 import './Header.css'
 
 /**

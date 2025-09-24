@@ -1,1 +1,5 @@
-export { DropdownMenu, DropdownMenuTrigger, DropdownMenuBody, DropdownMenuHeader, DropdownMenuItem, CloseMenuContext } from './DropdownMenu'
+export { DropdownMenu, CloseMenuContext } from './DropdownMenu'
+export { DropdownMenuTrigger } from './DropdownMenuTrigger'
+export { DropdownMenuBody, DropdownMenuModal } from './DropdownMenuBody'
+export { DropdownMenuHeader } from './DropdownMenuHeader'
+export { DropdownMenuItem } from './DropdownMenuItem'
