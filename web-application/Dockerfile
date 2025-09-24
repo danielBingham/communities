@@ -10,7 +10,15 @@ RUN apt-get update && apt-get install -y zip unzip
 COPY package-lock.json package-lock.json
 COPY package.json package.json 
 COPY .npmrc .npmrc 
-RUN --mount=type=secret,id=CODEARTIFACT_AUTH_TOKEN CODEARTIFACT_AUTH_TOKEN=$(cat /run/secrets/CODEARTIFACT_AUTH_TOKEN) npm install 
+
+# Techdebt we need a better way to handle this.  The --production=false flag
+# is needed because webpack (and all its dependencies) are dev dependencies.
+# With `--production=true`, npm will not install dev dependencies.  Which means
+# it won't install webpack, which means we can't build.
+#
+# Setting NODE_ENV=production automatically sets --production=true, so we have
+# to override here to ensure the dev dependencies install.
+RUN --mount=type=secret,id=CODEARTIFACT_AUTH_TOKEN CODEARTIFACT_AUTH_TOKEN=$(cat /run/secrets/CODEARTIFACT_AUTH_TOKEN) npm install --production=false
 
 # Copy only the files and directories we need, one per command, from least
 # likely to change to most likely to change.  This maximizes layer caching in
