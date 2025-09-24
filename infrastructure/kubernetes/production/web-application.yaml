@@ -32,7 +32,7 @@ spec:
             secretName: communities-push-notification-secrets
       containers:
         - name: web-application-container
-          image: 843012963492.dkr.ecr.us-east-1.amazonaws.com/communities/web-application:0.6.0
+          image: 843012963492.dkr.ecr.us-east-1.amazonaws.com/communities/web-application:0.6.3
           ports:
             - containerPort: 8080 
           resources:

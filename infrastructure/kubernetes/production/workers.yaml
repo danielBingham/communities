@@ -32,7 +32,7 @@ spec:
             secretName: communities-push-notification-secrets
       containers:
         - name: workers-container
-          image: 843012963492.dkr.ecr.us-east-1.amazonaws.com/communities/worker:0.6.0
+          image: 843012963492.dkr.ecr.us-east-1.amazonaws.com/communities/worker:0.6.3
           resources:
             requests:
               cpu: 200m

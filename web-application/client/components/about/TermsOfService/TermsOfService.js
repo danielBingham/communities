@@ -1,16 +1,25 @@
 import React, { useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
+
+import logger from '/logger'
 
 import './TermsOfService.css'
 
 const TermsOfService = function({}) {
+    const location = useLocation()
 
     useEffect(function() {
-        if ( document.location.hash ) {
-            document.querySelector(document.location.hash).scrollIntoView({
-                block: 'center'
-            })
+        if ( location.hash ) {
+            const hashElement = document.querySelector(location.hash)
+            if ( hashElement ) {
+                hashElement.scrollIntoView({
+                    block: 'center'
+                })
+            } else {
+                logger.warn(`Missing element for hash: '${document.location.hash}' `, hashElement)
+            }
         }
-    }, [])
+    }, [ location ])
 
     return (
         <article className="tos">
@@ -66,7 +75,7 @@ const TermsOfService = function({}) {
             <p><strong>Short version:</strong> <em>There are limits to the kinds of content that may be posted to Communities.  Violating these limits may result in the removal of your content, either using community moderation tools or through administrator moderation tools.  Repeatedly violating these limits may result in the loss of access to Service features, or the removal of your accounts and a permanent ban from the platform.</em></p>
             <h3>1. Compliance with Laws and Regulations</h3>
             <p>Your use of the Service must not violate any applicable laws, including copyright or trademark laws, export control laws, or other laws in your jurisdiction.</p>
-            <h3>2. Content Restrictions</h3>
+            <h3 id="d-acceptable-use_2-content-restrictions">2. Content Restrictions</h3>
             <p>You may not post, upload, or otherwise share Content that:</p>
             <ul>
                 <li>Is unlawful, threatening, abusive, harassing, or defamatory</li>
@@ -74,7 +83,9 @@ const TermsOfService = function({}) {
                 <li>Infringes any patent, trademark, trade secret, copyright, or other proprietary rights</li>
                 <li>Promotes illegal activities or conduct that is abusive, threatening, or defamatory</li>
                 <li>Contains or installs any viruses, worms, malware, trojan horses, or other content designed to interrupt, destroy, or limit the functionality of any computer software or hardware</li>
+                <li>Includes any sort of child sexual abuse or exploitation</li>
             </ul>
+            <p>Content that violates these restrictions will be removed as soon as possible.  If you encounter any content violating these restrictions, please flag it for site administrators or notify us via <a href="mailto:contact@communities.social">contact@communities.social</a> immediately.</p>
             <h3>3. Community Standards</h3>
             <p>All Content must adhere to our Community Standards, which define what kinds of content may be shared on the platform and what kinds of content are candidates for community or administrator moderation. Content may be moderated if it:</p>
             <ul>

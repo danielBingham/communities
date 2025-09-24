@@ -2,11 +2,13 @@ import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 
 export const useScrollRestoration = function() {
-    const { pathname } = useLocation()
+    const location = useLocation()
 
     useEffect(() => {
-        window.scrollTo(0,0) 
-    }, [ pathname ])
+        if ( ! ( 'hash' in location ) || location.hash === '' ) {
+            window.scrollTo(0,0) 
+        }
+    }, [ location ])
 
     return null 
 }
