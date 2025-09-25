@@ -12,8 +12,8 @@
   "main": "server/bin/www",
   "scripts": {
     "start": "node ./server/bin/www",
-    "build": "(rm ./public/dist/* || true) && webpack --mode production && (cp -r ./public/assets ./public/dist) && (cd ./public/dist && zip -r dist.zip *)",
-    "build-dev": "(rm ./public/dist/* || true) && export NODE_ENV=development  && webpack --mode development && (cp -r ./public/assets ./public/dist) && (cd ./public/dist && zip -r dist.zip *)",
+    "build": "(rm ./public/dist/* || true) && webpack --mode production && (cd ./public/dist && zip -r dist.zip *)",
+    "build-dev": "(rm ./public/dist/* || true) && export NODE_ENV=development  && webpack --mode development && (cd ./public/dist && zip -r dist.zip *)",
     "client": "webpack serve --mode development --devtool inline-source-map --no-open",
     "server": "nodemon ./server/bin/www",
     "dev": "export NODE_ENV=development && concurrently \"npm run server\" \"npm run client\"",

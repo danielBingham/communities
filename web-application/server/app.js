@@ -187,11 +187,23 @@ const createExpressApp = function(core, sessionParser) {
     })
 
     /**
-     * Handle requests for static image and pdf files.  We'll send these directly
-     * to the public path.
+     * Favicons live on the public path.
+     */
+    app.get('/favicon-32x32.png', function(request, response) {
+        const filepath = path.join(process.cwd(), 'public/', request.originalUrl)
+        response.sendFile(filepath)
+    })
+
+    app.get('/favicon.ico', function(request, response) {
+        const filepath = path.join(process.cwd(), 'public/', request.originalUrl)
+        response.sendFile(filepath)
+    })
+
+    /**
+     * Any other static images are going to be bundled into the dist.
      */
     app.get(/.*\.(svg|ico|jpg|png)$/, function(request, response) {
-        const filepath = path.join(process.cwd(), 'public', request.originalUrl)
+        const filepath = path.join(process.cwd(), 'public/dist', request.originalUrl)
         response.sendFile(filepath)
     })
 

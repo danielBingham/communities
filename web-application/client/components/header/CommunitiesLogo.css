@@ -10,13 +10,17 @@
 
     text-align: left;
 }
-.communities-logo img {
+.communities-logo__logo {
     display: inline-block;
     width: 32px;
     height: 32px;
     margin-right: 2px;
     margin-bottom: -6px;
     border-radius: 4px;
+    
+    background-image: url(icon-1024x1024.png);
+    background-size: cover;
+    background-position: center;
 }
 .communities-logo a:link, .communities-logo a:active, .communities-logo a:visited {
     color: var(--header-text-color);
