@@ -15,7 +15,7 @@ const WelcomeSplash = function() {
             <div className="welcome-splash__text">
                 <div className="welcome-splash__text-wrapper">
                     <p><a href="/about">Communities</a> is a place built for people, not profit.</p>
-                    <p>It will be a <strong>cooperative, nonprofit social network</strong> where members guide the direction, support the growth, and help shape how it evolves.</p>
+                    <p>It is a <strong>cooperative social network</strong> where members guide the direction, support the growth, and help shape how it evolves.</p>
                     <p>No ads. No data mining. <strong>No algorithm in control.</strong></p>
                     <p>Here, <strong>you decide what matters.</strong> It's about connection and community.</p>
                     <div className="welcome-splash__beta">

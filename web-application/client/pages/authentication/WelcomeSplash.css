@@ -9,7 +9,7 @@
     line-height: 1.4em;
 }
 .welcome-splash__banner {
-    background-image: url('splash-banner.jpg');
+    background-image: url('splash-banner.png');
     background-size: cover;
     background-position: center;
 }
