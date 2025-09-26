@@ -6,7 +6,7 @@ import { validatePassword } from '/lib/validation/user'
 
 import { patchUser } from '/state/User'
 
-import Input from '/components/generic/input/Input'
+import Input from '/components/ui/Input'
 import Spinner from '/components/Spinner'
 
 import './ChangePasswordForm.css'

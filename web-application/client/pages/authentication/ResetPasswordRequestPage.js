@@ -6,7 +6,7 @@ import { validateEmail } from '/lib/validation/user'
 import { createToken } from '/state/tokens'
 
 import CommunitiesLogo from '/components/header/CommunitiesLogo'
-import Input from '/components/generic/input/Input'
+import Input from '/components/ui/Input'
 import Spinner from '/components/Spinner'
 import Button from '/components/generic/button/Button'
 

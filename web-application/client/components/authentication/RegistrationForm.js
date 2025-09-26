@@ -6,7 +6,7 @@ import { validateEmail, validateName, validateUsername, validatePassword } from 
 
 import { postUsers, getUsers } from '/state/User'
 
-import Input from '/components/generic/input/Input'
+import Input from '/components/ui/Input'
 import { Checkbox } from '/components/ui/Checkbox'
 
 import './RegistrationForm.css'
@@ -19,6 +19,7 @@ const RegistrationForm = function(props) {
     const [ password, setPassword ] = useState('')
     const [ confirmPassword, setConfirmPassword ] = useState('')
     const [ ageConfirmation, setAgeConfirmation ] = useState(false)
+    const [ dateOfBirth, setDateOfBirth ] = useState('')
 
     const [nameValidationError, setNameValidationError] = useState([])
     const [usernameValidationError, setUsernameValidationError] = useState([])
@@ -26,6 +27,7 @@ const RegistrationForm = function(props) {
     const [passwordValidationError, setPasswordValidationError] = useState([])
     const [confirmPasswordValidationError, setConfirmPasswordValidationError] = useState([])
     const [ageConfirmationValidationError, setAgeConfirmationValidationError] = useState([])
+    const [dateOfBirthError, setDateOfBirthError] = useState([])
 
     const [request, makeRequest] = useRequest()
     const [usernameRequest, makeUsernameRequest] = useRequest()
@@ -45,6 +47,7 @@ const RegistrationForm = function(props) {
     const isValid = function(field) {
         let error = false 
 
+        
         if ( ! field || field == 'name' ) {
             const nameErrors = validateName(name, true) 
             error = error || nameErrors.length > 0
@@ -83,6 +86,10 @@ const RegistrationForm = function(props) {
             } 
 
             setConfirmPasswordValidationError(passwordConfirmationErrors)
+        }
+
+        if ( ! field || field === 'dateOfBirth' ) {
+            console.log(dateOfBirth)
         }
 
         if ( ! field || field === 'ageConfirmation' ) {
@@ -234,14 +241,18 @@ const RegistrationForm = function(props) {
                     onChange={ (event) => setConfirmPassword(event.target.value) }
                     error={confirmPasswordError}
                 />
-                <Checkbox
-                    name="age-confirmation"
-                    label="Confirm Your Age"
-                    value={ageConfirmation}
-                    explanation="Due to legal restrictions, you must be at least 18 years old to register for Communities. By checking this box you confirm that you are at least 18 years old." 
-                    onClick={(e) => setAgeConfirmation( ! ageConfirmation)}
-                    error={ageConfirmationError}
+                <Input
+                    name="dateOfBirth"
+                    type="date"
+                    label="Date of Birth"
+                    explanation="Please enter your date of birth.  This is required by state laws that mandate social media platforms enforce age limits on their users."
+                    value={dateOfBirth}
+                    className="date-of-birth"
+                    onBlur={ (event) => isValid('dateOfBirth') }
+                    onChange={ (event) => setDateOfBirth(event.target.value) }
+                    error={dateOfBirthError}
                 />
+
                 <div className="base-error">
                     { baseError }
                 </div>

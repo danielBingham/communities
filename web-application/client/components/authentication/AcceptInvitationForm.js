@@ -10,7 +10,7 @@ import { validateEmail, validateName, validateUsername, validatePassword } from 
 import { validateToken } from '/state/tokens'
 import { patchUser, getUsers } from '/state/User'
 
-import Input from '/components/generic/input/Input'
+import Input from '/components/ui/Input'
 import { Checkbox } from '/components/ui/Checkbox'
 
 import './AcceptInvitationForm.css'
