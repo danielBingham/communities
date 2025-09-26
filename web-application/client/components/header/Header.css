@@ -77,9 +77,6 @@ header .active .solid {
         grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
     }
 
-    header .communities-logo {
-        justify-self: center;
-    }
 
     header a.nav-link {
         display: inline-block;
@@ -99,6 +96,10 @@ header .active .solid {
 }
 
 @media (width <= 450px) {
+    header .communities-logo {
+        justify-self: center;
+    }
+
     header .unauthenticated-grid {
         grid-template-columns: 1fr 1fr max-content;
     }
