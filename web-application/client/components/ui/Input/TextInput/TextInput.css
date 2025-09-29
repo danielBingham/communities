@@ -1,0 +1,63 @@
+.text-input {
+    padding: 10px 0;
+}
+.text-input label {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    text-align: left;
+    padding: 5px 0;
+}
+.text-input .text-input-explanation {
+    font-size: 12px;
+    padding: 0 0 5px 5px;
+    font-style: italic;
+}
+.text-input input {
+    box-sizing: border-box;
+    padding: 7px;
+    border: thin solid var(--input-border-color);
+    color: var(--main-text-color);
+    border-radius: 7px;
+    font-size: 16px;
+    width: 100%;
+}
+.text-input input {
+    outline-color: var(--input-highlight-color) !important;
+}
+.text-input .text-input-error {
+    padding: 5px;
+    color: var(--danger-color-main);
+    text-align: center;
+}
+.text-input .text-input__wrapper {
+    position: relative;
+}
+.text-input .text-input__control {
+    position: absolute;
+    right: 10px;
+    top: 7px;
+    line-height: 0px;
+    padding: 0px;
+    margin: 0px;
+    text-decoration: none;
+}
+.text-input .text-input__control svg {
+    width: 20px;
+    height: 20px;
+    color: var(--input-border-color);
+}
+.text-input input:focus + .text-input__control svg {
+    color: var(--primary-color-main);
+}
+
+@media ( width < 700px ) {
+    .text-input label {
+        text-align: center;
+        padding: 5px;
+    }
+    .text-input .text-input-explanation {
+        text-align: center;
+        padding: 5px;
+    }
+}

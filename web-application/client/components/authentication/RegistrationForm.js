@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 
+import * as shared from '@communities/shared'
+
 import { useRequest } from '/lib/hooks/useRequest'
 import { validateEmail, validateName, validateUsername, validatePassword } from '/lib/validation/user'
 
@@ -18,16 +20,14 @@ const RegistrationForm = function(props) {
     const [ email, setEmail ] = useState('')
     const [ password, setPassword ] = useState('')
     const [ confirmPassword, setConfirmPassword ] = useState('')
-    const [ ageConfirmation, setAgeConfirmation ] = useState(false)
-    const [ dateOfBirth, setDateOfBirth ] = useState('')
+    const [ birthdate, setBirthdate ] = useState('')
 
     const [nameValidationError, setNameValidationError] = useState([])
     const [usernameValidationError, setUsernameValidationError] = useState([])
     const [emailValidationError, setEmailValidationError] = useState([])
     const [passwordValidationError, setPasswordValidationError] = useState([])
     const [confirmPasswordValidationError, setConfirmPasswordValidationError] = useState([])
-    const [ageConfirmationValidationError, setAgeConfirmationValidationError] = useState([])
-    const [dateOfBirthError, setDateOfBirthError] = useState([])
+    const [birthdateError, setBirthdateError] = useState([])
 
     const [request, makeRequest] = useRequest()
     const [usernameRequest, makeUsernameRequest] = useRequest()
@@ -88,19 +88,14 @@ const RegistrationForm = function(props) {
             setConfirmPasswordValidationError(passwordConfirmationErrors)
         }
 
-        if ( ! field || field === 'dateOfBirth' ) {
-            console.log(dateOfBirth)
-        }
-
-        if ( ! field || field === 'ageConfirmation' ) {
-            const ageConfirmationErrors = []
-
-            if ( ageConfirmation !== true ) {
-                ageConfirmationErrors.push('You must confirm your age.')
-                error = true
+        if ( ! field || field === 'birthdate' ) {
+            const birthdateValidationErrors = shared.validation.User.validateBirthdate(birthdate) 
+            if ( birthdateValidationErrors.length > 0 ) {
+                setBirthdateError(birthdateValidationErrors.reduce((string, error) => `${string} ${error.message}`, ''))
+            } else {
+                setBirthdateError(null)
             }
-
-            setAgeConfirmationValidationError(ageConfirmationErrors)
+            error = error || birthdateValidationErrors.length > 0
         }
 
         return ! error
@@ -117,7 +112,8 @@ const RegistrationForm = function(props) {
             name: name,
             username: username,
             email: email,
-            password: password
+            password: password,
+            bithdate: birthdate
         }
 
         makeRequest(postUsers(user))
@@ -170,7 +166,6 @@ const RegistrationForm = function(props) {
     let emailError = emailValidationError.join(' ')
     let passwordError = passwordValidationError.join(' ')
     let confirmPasswordError = confirmPasswordValidationError.join(' ')
-    let ageConfirmationError = ageConfirmationValidationError.join(' ')
 
     if ( request && request.state == 'failed' ) {
         if ( 'message' in request.error ) {
@@ -242,15 +237,15 @@ const RegistrationForm = function(props) {
                     error={confirmPasswordError}
                 />
                 <Input
-                    name="dateOfBirth"
+                    name="birthdate"
                     type="date"
                     label="Date of Birth"
                     explanation="Please enter your date of birth.  This is required by state laws that mandate social media platforms enforce age limits on their users."
-                    value={dateOfBirth}
+                    value={birthdate}
                     className="date-of-birth"
-                    onBlur={ (event) => isValid('dateOfBirth') }
-                    onChange={ (event) => setDateOfBirth(event.target.value) }
-                    error={dateOfBirthError}
+                    onBlur={ (event) => isValid('birthdate') }
+                    onChange={ (event) => setBirthdate(event.target.value) }
+                    error={birthdateError}
                 />
 
                 <div className="base-error">

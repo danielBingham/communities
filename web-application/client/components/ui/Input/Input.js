@@ -1,89 +1,60 @@
-import React, { useRef, useState } from 'react'
 import logger from '/logger'
 
-import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/solid'
+import PasswordInput from './PasswordInput'
+import DateInput from './DateInput'
+import TextInput from './TextInput'
 
 import './Input.css'
 
 const Input = function({ name, type, label, explanation, className, value, onChange, onKeyDown, onBlur, onFocus, error }) {
-    const [isPasswordVisible, setIsPasswordVisible] = useState(false)
 
-    const inputRef = useRef(null)
-
-    const onChangeInternal = function(event) {
-        if ( onChange && typeof onChange === "function") {
-            onChange(event)
-        }
-
-    }
-
-    const onBlurInternal = function(event) {
-        if ( onBlur && typeof onBlur === "function") {
-            onBlur(event)
-        }
-    }
-
-    const onFocusInternal = function(event) {
-        if ( onFocus && typeof onFocus === "function" ) {
-            onFocus(event)
-        }
-    }
-
-    const onKeyDownInternal = function(event) {
-        if ( onKeyDown && typeof onKeyDown === "function" ) {
-            onKeyDown(event)
-        }
-    }
-
-    const togglePasswordVisibility = function(event) {
-        event.preventDefault()
-        event.stopPropagation()
-        inputRef.current?.focus()
-
-        setIsPasswordVisible( ! isPasswordVisible)
-    }
-
-    if ( value === undefined || value === null ) {
-        logger.error(`No value for ${name}.`)
-    }
-
-    let internalType = type
-    if ( type === 'password' && isPasswordVisible ) {
-        internalType = 'text'
-    }
-   
-    let passwordControl = null
     if ( type === 'password' ) {
-        if ( isPasswordVisible === true ) {
-            passwordControl = (<a href="" onClick={togglePasswordVisibility} className="text-input__show-password"><EyeSlashIcon /></a>)
-        } else {
-            passwordControl = (<a href="" onClick={togglePasswordVisibility} className="text-input__show-password"><EyeIcon /></a>)
-        }
+        return ( 
+            <PasswordInput
+                name={name}
+                label={label}
+                explanation={explanation}
+                className={className}
+                value={value}
+                onChange={onChange}
+                onKeyDown={onKeyDown}
+                onBlur={onBlur}
+                onFocus={onFocus}
+                error={error}
+            />
+        )
+    } else if ( type === 'date' ) {
+        return (
+            <DateInput
+                name={name}
+                label={label}
+                explanation={explanation}
+                className={className}
+                value={value}
+                onChange={onChange}
+                onKeyDown={onKeyDown}
+                onBlur={onBlur}
+                onFocus={onFocus}
+                error={error}
+            />
+        )
+    } else {
+        return (
+            <TextInput
+                name={name}
+                type={type}
+                label={label}
+                explanation={explanation}
+                className={className}
+                value={value}
+                onChange={onChange}
+                onKeyDown={onKeyDown}
+                onBlur={onBlur}
+                onFocus={onFocus}
+                error={error}
+            />
+        )
     }
-
-
-
-    return (
-        <div className={`text-input ${className ? className : ''}`}>
-            { label && <label htmlFor={name}>{label}</label> }
-            { explanation && <p className="text-input-explanation">{ explanation }</p> }
-            <div className="text-input__wrapper">
-                <input 
-                    ref={inputRef}
-                    type={internalType} 
-                    name={name} 
-                    value={value} 
-                    onKeyDown={onKeyDownInternal}
-                    onChange={onChangeInternal} 
-                    onBlur={onBlurInternal} 
-                    onFocus={onFocusInternal} 
-                /> 
-                { passwordControl }
-            </div>
-            { error && <div className="text-input-error">{ error }</div> }
-        </div>
-    )
-
 }
 
 export default Input

@@ -65,6 +65,13 @@ const SCHEMA = {
                 select: DAO.SELECT.NEVER,
                 key: 'password'
             },
+            'birthdate': {
+                insert: DAO.INSERT.ALLOW,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.REQUEST,
+                key: 'birthdate',
+                needsFeature: '253-better-age-gate'
+            },
             'status': {
                 insert: DAO.INSERT.ALLOW,
                 update: DAO.UPDATE.ALLOW,

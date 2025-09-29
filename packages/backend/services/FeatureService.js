@@ -44,6 +44,7 @@ const DeleteGroupsWithSharedPostsMigration = require('../migrations/DeleteGroups
 const GroupCreatorsCantDeleteAccountMigration = require('../migrations/GroupCreatorsCantDeleteAccountMigration')
 const NotificationOverhaulMigration = require('../migrations/NotificationOverhaulMigration')
 const AdminAnnouncementsMigration = require('../migrations/AdminAnnouncementsMigration')
+const BetterAgeGateMigration = require('../migrations/BetterAgeGateMigration')
 
 const ServiceError = require('../errors/ServiceError')
 const MigrationError = require('../errors/MigrationError')
@@ -195,6 +196,11 @@ module.exports = class FeatureService {
                 dependsOn: [],
                 conflictsWith: [],
                 migration: new AdminAnnouncementsMigration(core)
+            },
+            '253-better-age-gate': {
+                dependsOn: [],
+                conflictsWith: [],
+                migration: new BetterAgeGateMigration(core)
             }
         }
     }
