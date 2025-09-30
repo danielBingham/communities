@@ -28,31 +28,23 @@ export function useAuthentication() {
                     return
                 }
 
-                // Have them set their birthdate.
                 if ( currentUser.birthdate === '' ) {
+                    // TECHDEBT If we didn't collect their birthdate at
+                    // registration then we're just not going to worry about it
+                    // for now. Only about 120 people in the database won't
+                    // have a birthdate set. The chance that anyone in that
+                    // group is underage is pretty damned low. Especially since
+                    // it is overwhelmingly pulled from my community.
+                    //
+                    // We can come back to this in the future if we need to.
 
                 } else {
-                    console.log(currentUser.birthdate)
                     const birthdate = new Date(currentUser.birthdate)
                     const now = new Date() 
-                    console.log(`Birthdate: `, birthdate.toUTCString())
-                    console.log(`Birthdate:\n
-                        Year: ${birthdate.getUTCFullYear()}
-                        Month: ${birthdate.getUTCMonth()}
-                        Day: ${birthdate.getUTCDate()}`)
-                        
-                    console.log(`Now: `, now.toUTCString())
-                    console.log(`Now:\n
-                        Year: ${now.getUTCFullYear()}
-                        Month: ${now.getUTCMonth()}
-                        Day: ${now.getUTCDate()}`)
 
                     let age = now.getUTCFullYear() - birthdate.getUTCFullYear()
                     const month = now.getUTCMonth() - birthdate.getUTCMonth()
                     const day = now.getUTCDate() - birthdate.getUTCDate()
-                    console.log(`Age: `, age)
-                    console.log(`Month: `, month)
-                    console.log(`Day: `, day)
 
                     if ( month < 0 || day < 0 ) {
                         age = age - 1
