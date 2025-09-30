@@ -14,7 +14,7 @@ import DraftProfileImage from '/components/files/DraftProfileImage'
 import FileUploadInput from '/components/files/FileUploadInput'
 
 import Button from '/components/generic/button/Button'
-import Input from '/components/generic/input/Input'
+import Input from '/components/ui/Input'
 import TextBox from '/components/generic/text-box/TextBox'
 import Spinner from '/components/Spinner'
 import { Radio, RadioOption } from '/components/ui/Radio'

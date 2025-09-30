@@ -33,7 +33,7 @@
 .text-input .text-input__wrapper {
     position: relative;
 }
-.text-input .text-input__show-password {
+.text-input .text-input__control {
     position: absolute;
     right: 10px;
     top: 7px;
@@ -42,12 +42,12 @@
     margin: 0px;
     text-decoration: none;
 }
-.text-input .text-input__show-password svg {
+.text-input .text-input__control svg {
     width: 20px;
     height: 20px;
     color: var(--input-border-color);
 }
-.text-input input:focus + .text-input__show-password svg {
+.text-input input:focus + .text-input__control svg {
     color: var(--primary-color-main);
 }
 

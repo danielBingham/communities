@@ -49,6 +49,7 @@ import AcceptInvitationPage from '/pages/authentication/AcceptInvitationPage'
 import RegistrationPage from '/pages/authentication/RegistrationPage'
 import AcceptTermsOfServicePage from '/pages/authentication/AcceptTermsOfServicePage'
 import SetContributionPage from '/pages/authentication/SetContributionPage'
+import AgeGate from '/pages/authentication/AgeGate'
 
 import UserProfilePage from '/pages/users/UserProfilePage'
 
@@ -160,6 +161,7 @@ const App = function(props) {
                             <Route path="/reset-password" element={ <ResetPasswordPage /> } />
                             <Route path="/accept-terms-of-service" element={ <AcceptTermsOfServicePage /> } />
                             <Route path="/set-contribution" element={ <SetContributionPage /> } />
+                            <Route path="/age-gate" element={ <AgeGate /> } />
 
                             <Route element={<AuthenticatedLayout />}>
                             </Route>

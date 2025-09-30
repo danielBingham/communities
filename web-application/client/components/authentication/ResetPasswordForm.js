@@ -9,7 +9,7 @@ import { patchUser } from '/state/User'
 
 import Button from '/components/generic/button/Button'
 import Spinner from '/components/Spinner'
-import Input from '/components/generic/input/Input'
+import Input from '/components/ui/Input'
 
 import './ResetPasswordForm.css'
 

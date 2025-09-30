@@ -12,7 +12,7 @@ import UserProfileImage from '/components/users/UserProfileImage'
 import DraftProfileImage from '/components/files/DraftProfileImage'
 import FileUploadInput from '/components/files/FileUploadInput'
 
-import Input from '/components/generic/input/Input'
+import Input from '/components/ui/Input'
 import TextBox from '/components/generic/text-box/TextBox'
 import Button from '/components/generic/button/Button'
 import Spinner from '/components/Spinner'

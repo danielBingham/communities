@@ -507,6 +507,7 @@ describe('validate', function() {
             username: null,
             email: null,
             password: null,
+            birthdate: null,
             status: null,
             siteRole: null,
             about: null,
@@ -515,12 +516,13 @@ describe('validate', function() {
         }
         const errors = validation.User.validate(user)
 
-        expect(errors.all.length).toBe(10)
+        expect(errors.all.length).toBe(11)
         expect(errors.id.length).toBe(1)
         expect(errors.name.length).toBe(1)
         expect(errors.username.length).toBe(1)
         expect(errors.email.length).toBe(1)
         expect(errors.password.length).toBe(1)
+        expect(errors.birthdate.length).toBe(1)
         expect(errors.status.length).toBe(1)
         expect(errors.siteRole.length).toBe(1)
         expect(errors.about.length).toBe(1)
@@ -549,7 +551,8 @@ describe('validate', function() {
             name: 'John Doe',
             username: 'john-doe',
             email: 'john.doe@example.com',
-            password: 'passwordpassword'
+            password: 'passwordpassword',
+            birthdate: '2001-01-01'
         }
 
         const errors = validation.User.validate(user)

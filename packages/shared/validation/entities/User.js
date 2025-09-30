@@ -62,6 +62,18 @@ const validatePassword = function(password, existing, action) {
     return errors
 }
 
+const validateBirthdate = function(value, existing, action) {
+    const validator = new DateValidator('birthdate', value, existing, action)
+    const errors = validator
+        .isRequiredToCreate()
+        .mustNotBeNull()
+        .mustBeString()
+        .mustNotBeEmpty()
+        .mustBeValidDate()
+        .getErrors()
+    return errors
+}
+
 const validateStatus = function(status, existing, action) {
     const validator = new StringValidator('status', status, existing, action)
     const errors = validator
@@ -125,6 +137,7 @@ const validate = function(user, existing) {
         username: validateUsername,
         email: validateEmail,
         password: validatePassword,
+        birthdate: validateBirthdate,
         status: validateStatus,
         siteRole: validateSiteRole,
         about: validateAbout,
@@ -141,6 +154,7 @@ module.exports = {
     validateUsername: validateUsername,
     validateEmail: validateEmail,
     validatePassword: validatePassword,
+    validateBirthdate: validateBirthdate,
     validateStatus: validateStatus,
     validateSiteRole: validateSiteRole,
     validateAbout: validateAbout,
