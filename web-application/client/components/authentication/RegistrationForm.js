@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 
 import * as shared from '@communities/shared'
@@ -113,7 +113,7 @@ const RegistrationForm = function(props) {
             username: username,
             email: email,
             password: password,
-            bithdate: birthdate
+            birthdate: birthdate
         }
 
         makeRequest(postUsers(user))

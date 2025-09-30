@@ -70,6 +70,7 @@ const validateBirthdate = function(value, existing, action) {
         .mustBeString()
         .mustNotBeEmpty()
         .mustBeValidDate()
+        .getErrors()
     return errors
 }
 

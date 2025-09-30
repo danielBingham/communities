@@ -17,23 +17,37 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-const BaseMigration = require('./BaseMigration')
+import logger from '/logger'
 
-module.exports = class BetterAgeGateMigration extends BaseMigration {
+import { deleteAuthentication } from '/state/authentication'
 
-    constructor(core) {
-        super(core)
+import { useRequest } from '/lib/hooks/useRequest'
+
+import CommunitiesLogo from '/components/header/CommunitiesLogo'
+import Button from '/components/ui/Button'
+
+import './AgeGate.css'
+
+const AgeGate = function() {
+    const [request, makeRequest] = useRequest()
+
+    const logout = function() {
+        // Clear local storage so their drafts don't carry over to another
+        // login session.
+        localStorage.clear()
+
+        makeRequest(deleteAuthentication())
     }
 
-    async initForward() { 
-        await this.core.database.query(`ALTER TABLE users ADD COLUMN birthdate text DEFAULT ''`, [])
-    }
+    return (
+        <div id="age-gate">
+            <div className="logo"><CommunitiesLogo /></div>
+            <p>You must be at least 18 years of age to use Communities.</p>
+            <p>When you turn 18 years old, you will be able to use your Communities account.</p>
+            <p><Button type='warn' onClick={() => logout()}>Log out</Button></p>
+        </div>
+    )
 
-    async initBack() { 
-        await this.core.database.query(`ALTER TABLE users DROP COLUMN birthdate`, [])
-    }
-
-    async migrateForward(targets) { }
-
-    async migrateBack(targets) { }
 }
+
+export default AgeGate

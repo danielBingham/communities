@@ -42,13 +42,15 @@ module.exports = class DateValidator extends BaseValidator {
 
     mustBeValidDate()   {
         if ( this.shortCircuit() || this.value === '') {
-            return
+            return this
         }
 
-        const parts = this.value.split('-')
-        const date = new Date(parts[0], parts[1], parts[2])
+        let [ year, month, day ] = this.value.split('-').map((p) => parseInt(p, 10))
+        // Date() zero indexes the month (sigh)
+        month = month -1
+        const date = new Date(this.value)
 
-        if ( date.getFullYear() !== parts[0] || date.getMonth() !== parts[1] || date.getDate() !== parts[2] ) {
+        if ( date.getUTCFullYear() !== year || date.getUTCMonth() !== month || date.getUTCDate() !== day ) {
             this.errors.push({
                 type: `${this.name}:invalid`,
                 log: `${this.name} must be a valid date.`,
