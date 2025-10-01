@@ -51,7 +51,7 @@ module.exports = class GroupMemberPermissions {
 
         // Only the blocker can view the blocking relationship.
         if ( context.relationship !== null && context.relationship.status === 'blocked' ) {
-            return user.id === context.userId
+            return user.id === context.relationship.userId
         }
 
         // UserRelationship.userId is the creator of the relationship.
@@ -108,7 +108,7 @@ module.exports = class GroupMemberPermissions {
 
         // Only the blocker can delete the blocking relationship.
         if ( context.relationship !== null && context.relationship.status === 'blocked' ) {
-            return user.id === context.userId
+            return user.id === context.relationship.userId
         }
 
         // UserRelationship.userId is the creator of the relationship.

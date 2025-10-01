@@ -137,15 +137,15 @@ module.exports = class UserController extends BaseController{
         // Permissions
         // ====================================================================
         const blockResults = await this.core.database.query(`
-            SElECT user_id, friend_id
+            SElECT user_id 
                 FROM user_relationships
-                    WHERE (friend_id = $1) AND status = 'blocked'
+                    WHERE friend_id = $1 AND status = 'blocked'
         `, [currentUser.id])
-        const blockIds = blockResults.rows.map((r) => r.user_id == currentUser.id ? r.friend_id : r.user_id)
+        const blockIds = blockResults.rows.map((r) => r.user_id )
 
         // You can't see users who have blocked you.
         result.params.push(blockIds)
-        result.where += `users.id != ALL($${result.params.length})`
+        result.where += `users.id != ALL($${result.params.length}::uuid[])`
         // ====================================================================
         // END Permissions
         // ====================================================================

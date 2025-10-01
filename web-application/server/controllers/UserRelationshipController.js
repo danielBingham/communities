@@ -77,7 +77,9 @@ module.exports = class UserRelationshipController {
         }
 
         query.params.push(userId)
-        query.where += `(user_relationships.user_id = $1 OR user_relationships.friend_id = $1)`
+        query.where += `
+            (user_relationships.user_id = $1 OR (user_relationships.friend_id = $1 AND user_relationships.status != 'blocked'))
+        `
 
         if ( 'status' in requestQuery ) {
             query.params.push(requestQuery.status)

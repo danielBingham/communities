@@ -203,9 +203,9 @@ module.exports = class PostController {
 
         const currentUser = request.session.user
 
-        // ========== Post Visibility ===================== 
-
-        // Posts by friends, we'll use this later.
+        // ====================================================================
+        //  Post Visibility and Permissions
+        //  ===================================================================
         const friendResults = await this.core.database.query(`
             SELECT
                 user_id, friend_id
@@ -261,6 +261,10 @@ module.exports = class PostController {
                 )`
             }
         }
+
+        // ====================================================================
+        // END Post Visibility and Permissions
+        // ====================================================================
 
         const and = query.params.length > 0 ? ' AND ' : ''
         query.params.push(currentUser.id)

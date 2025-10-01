@@ -80,7 +80,7 @@ export const UserSlice = createSlice({
             return initialState
         },
 
-        setUserNullByUsername(state, action) {
+        setUserNullByUsername: (state, action) => {
             const username = action.payload
 
             if ( username in state.byUsername ) {
