@@ -24,9 +24,3 @@
 .user-view .name {
     font-size: 2em;
 }
-.user-view .details svg {
-    width: 20px;
-    margin-right: 5px;
-    margin-bottom: -5px;
-    color: var(--icon-color); 
-}

@@ -34,9 +34,26 @@ module.exports = class GroupMemberPermissions {
         this.userRelationshipDAO = new UserRelationshipDAO(core)
     }
 
-    async ensureContext(user, context, required, optional) { }
+    async ensureContext(user, context, required, optional) { 
+        if ( ! ('userId' in context) ) {
+            throw new ServiceError('missing-context', `Missing context 'userId'.`)
+        }
+
+        if ( ! ('relationId' in context) ) {
+            throw new ServiceError('missing-context', `Missing context 'relationId'.`)
+        }
+
+        context.relationship = await this.userRelationshipDAO.getUserRelationshipByUserAndRelation(context.userId, context.relationId)
+    }
 
     async canViewUserRelationship(user, context) {
+        await this.ensureContext(user, context)
+
+        // Only the blocker can view the blocking relationship.
+        if ( context.relationship !== null && context.relationship.status === 'blocked' ) {
+            return user.id === context.userId
+        }
+
         // UserRelationship.userId is the creator of the relationship.
         // UserRelationship.relationId is the reciever of the relationship request.
         //
@@ -49,6 +66,13 @@ module.exports = class GroupMemberPermissions {
     }
 
     async canCreateUserRelationship(user, context) {
+        await this.ensureContext(user, context)
+
+        // Can't create if already blocked.
+        if ( context.relationship !== null && context.relationship.status === 'blocked' ) {
+            return false 
+        }
+
         // UserRelationship.userId is the creator of the relationship.
         // UserRelationship.relationId is the reciever of the relationship request.
         //
@@ -61,6 +85,13 @@ module.exports = class GroupMemberPermissions {
     }
 
     async canUpdateUserRelationship(user, context) {
+        await this.ensureContext(user, context)
+
+        // A block relationship can't be updated, only deleted.
+        if ( context.relationship !== null && context.relationship.status === 'blocked' ) {
+            return false
+        }
+
         // UserRelationship.userId is the creator of the relationship.
         // UserRelationship.relationId is the reciever of the relationship request.
         //
@@ -73,6 +104,13 @@ module.exports = class GroupMemberPermissions {
     }
 
     async canDeleteUserRelationship(user, context) {
+        await this.ensureContext(user, context)
+
+        // Only the blocker can delete the blocking relationship.
+        if ( context.relationship !== null && context.relationship.status === 'blocked' ) {
+            return user.id === context.userId
+        }
+
         // UserRelationship.userId is the creator of the relationship.
         // UserRelationship.relationId is the reciever of the relationship request.
         //

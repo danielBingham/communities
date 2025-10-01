@@ -676,7 +676,7 @@ module.exports = class ValidationService {
                 })
             }
 
-            if ( userRelationship.status !== 'pending' ) {
+            if ( userRelationship.status !== 'pending' && userRelationship.status !== 'blocked' ) {
                 errors.push({
                     type: `status:invalid`,
                     log: `User attempting to create a confirmed relationship to User(${userRelationship.relationId}).`,

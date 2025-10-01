@@ -8,6 +8,7 @@ import { getUser } from '/state/User'
 
 import UserProfileImage from '/components/users/UserProfileImage'
 import FriendButton from '/components/friends/FriendButton'
+import BlockButton from '/components/friends/BlockButton'
 
 import Spinner from '/components/Spinner'
 import { RequestErrorContent } from '/components/errors/RequestError'
@@ -50,7 +51,10 @@ const UserView = function(props) {
             <UserProfileImage userId={user.id} /> 
             <div className="details">
                 <div className="name"> { user.name }</div>
-                <div className="friendship"><FriendButton userId={user.id} /></div>
+                <div className="relationship">
+                    <FriendButton userId={user.id} />
+                    <BlockButton userId={user.id} />
+                </div>
                 <div className="about"> { user.about }</div>
             </div>
         </article>

@@ -216,32 +216,49 @@ module.exports = class PostController {
         const friendIds = friendResults.rows.map((r) => r.user_id == currentUser.id ? r.friend_id : r.user_id)
         friendIds.push(currentUser.id)
 
+        const blockResults = await this.core.database.query(`
+            SElECT user_id, friend_id
+                FROM user_relationships
+                    WHERE (user_id = $1 OR friend_id = $1) AND status = 'blocked'
+        `, [currentUser.id])
+
+        const blockIds = blockResults.rows.map((r) => r.user_id == currentUser.id ? r.friend_id : r.user_id)
+
         const canModerateSite = await this.permissionService.can(currentUser, 'moderate', 'Site')
         // Moderators can view anything, everyone else is restricted.
         if ( ! canModerateSite ) {
             query.params.push(friendIds)
+            const friendParam = query.params.length
+
+            query.params.push(blockIds)
+            const blockParam = query.params.length
 
             // Posts in groups
-            if ( this.core.features.has(`19-private-groups`) ) {
-                const visibleGroupResults = await this.core.database.query(`
+            const visibleGroupResults = await this.core.database.query(`
                     SELECT groups.id FROM groups LEFT OUTER JOIN group_members ON groups.id = group_members.group_id WHERE (group_members.user_id = $1 AND group_members.status = 'member') OR groups.type = 'open'
                 `, [currentUser.id])
 
-                const visibleGroupIds = visibleGroupResults.rows.map((r) => r.id)
-                query.params.push(visibleGroupIds)
-            }
+            const visibleGroupIds = visibleGroupResults.rows.map((r) => r.id)
+            query.params.push(visibleGroupIds)
+            const groupParam = query.params.length
 
             // Permissions control statements, this determines what is visible.
             if ( this.core.features.has('230-admin-announcements') ) {
                 const showAnnouncements = 'showAnnouncements' in currentUser.settings ? currentUser.settings.showAnnouncements : true
                 const showInfo = 'showInfo' in currentUser.settings ? currentUser.settings.showInfo : true
-                query.where += `
-                    ((posts.user_id = ANY($${query.params.length - 1}::uuid[]) AND posts.type = 'feed') 
+                query.where += `(
+                        (posts.user_id = ANY($${friendParam}::uuid[]) AND posts.type = 'feed') 
                         ${ showAnnouncements ? `OR posts.type = 'announcement'` : ''}
                         ${ showInfo ? `OR posts.type = 'info'` : ''}
-                        OR (posts.type = 'group' AND posts.group_id = ANY($${query.params.length}::uuid[])) OR posts.visibility = 'public')`
+                        OR (posts.type = 'group' AND posts.group_id = ANY($${groupParam}::uuid[]) AND posts.user_id != ALL($${blockParam}::uuid[])) 
+                        OR (posts.visibility = 'public' AND posts.user_id != ALL($${blockParam}::uuid[]))
+                )`
             } else {
-                query.where += `((posts.user_id = ANY($${query.params.length - 1}::uuid[]) AND posts.type = 'feed') OR (posts.type = 'group' AND posts.group_id = ANY($${query.params.length}::uuid[])) OR posts.visibility = 'public')`
+                query.where += `(
+                    (posts.user_id = ANY($${friendParam}::uuid[]) AND posts.type = 'feed') 
+                    OR (posts.type = 'group' AND posts.group_id = ANY($${groupParam}::uuid[]) AND posts.user_id != ALL($${blockParam}::uuid[])) 
+                    OR (posts.visibility = 'public' AND posts.user_id != ALL($${blockParam}::uuid[]))
+                )`
             }
         }
 

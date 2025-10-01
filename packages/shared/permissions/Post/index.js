@@ -48,18 +48,26 @@ const canViewPost = function(user, context) {
         return true
     }
 
+    // Users can view their own posts.
+    if ( context.post.userId === user.id ) {
+        return true
+    } 
+
+    // Neither user can see posts when one has blocked the other.
+    if ( util.objectHas(context, 'userRelationship') ) {
+        if ( context.userRelationship !== null && context.userRelationship.status === 'blocked') {
+            return false 
+        }
+    }
+
     // If the post is a Group post, then group permissions override post
     // permissions. 
     if ( context.post.groupId ) {
         return context.canViewGroupPost === true 
     }
 
-    // Users can view their own posts.
-    if ( context.post.userId === user.id ) {
-        return true
-    } 
     // Anyone can view public posts.
-    else if ( context.post.visibility === 'public' ) {
+    if ( context.post.visibility === 'public' ) {
         return true
     }
 

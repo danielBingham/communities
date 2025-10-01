@@ -4,7 +4,7 @@ import { makeRequest } from '/state/lib/makeRequest'
 import { setRelationsInState } from '/state/lib/relations'
 
 import {
-    setUserRelationshipsInDictionary, removeUserRelationship, 
+    setUserRelationshipsInDictionary, setUserRelationshipNull, removeUserRelationship, 
     setUserRelationshipQueryResults, clearUserRelationshipQuery,
     clearUserRelationshipQueries
 } from './slice'
@@ -78,6 +78,11 @@ export const getUserRelationship = function(userId, relationId) {
                 dispatch(setUserRelationshipsInDictionary({ entity: response.entity }))
 
                 dispatch(setRelationsInState(response.relations))
+            },
+            function(status, response) {
+                if ( status === 404 || status === 403 ) {
+                    dispatch(setUserRelationshipNull({ userId: userId, relationId: relationId }))
+                }
             }
         ))
     }

@@ -101,7 +101,7 @@ CREATE INDEX users__name_trgm ON users USING GIN (name gin_trgm_ops);
 INSERT INTO users (name, username, email, password, status, permissions, site_role, last_authentication_attempt_date, created_date, updated_date)
     VALUES ('Administrator', 'administrator', 'contact@communities.social', '$2b$10$ywAqKPvFH51jeILdx.Piy.mm5ci37vMpy7G4lEBWObfIzOif5ZgzK', 'confirmed', 'superadmin', 'superadmin', now(), now(), now());
 
-CREATE TYPE user_relationship_status AS ENUM('pending', 'confirmed');
+CREATE TYPE user_relationship_status AS ENUM('pending', 'confirmed', 'blocked');
 CREATE TABLE user_relationships (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id uuid REFERENCES users(id) ON DELETE CASCADE NOT NULL,
