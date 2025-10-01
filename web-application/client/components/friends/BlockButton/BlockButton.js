@@ -17,12 +17,14 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import { useState } from 'react'
-import { useSelector } from 'react-redux'
+import { useState, useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 
 import { NoSymbolIcon } from '@heroicons/react/24/outline'
 
 import logger from '/logger'
+
+import { resetEntities } from '/state/lib'
 
 import { useRequest } from '/lib/hooks/useRequest'
 import { useUser } from '/lib/hooks/User'
@@ -42,6 +44,7 @@ const BlockButton = function({ userId }) {
 
     const [request, makeRequest] = useRequest()
 
+    const dispatch = useDispatch()
 
     const block = function() {
         // We're always going to post the block, even if there's an existing
@@ -63,6 +66,13 @@ const BlockButton = function({ userId }) {
         makeRequest(deleteUserRelationship(relationship))
         setAreYouSure(false)
     }
+
+    useEffect(() => {
+        if ( request?.state === 'fulfilled' ) {
+            // Reset state after the block.
+            dispatch(resetEntities())
+        }
+    }, [ request] ) 
 
     if ( user === undefined) {
         return null
