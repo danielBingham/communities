@@ -47,6 +47,14 @@ describe("UserRelationshipPermissions.canUpdateUserRelationship()", function() {
             status: 'pending'
         }
 
+        core.database.query.mockReturnValueOnce({ rowCount: 0, rows: [{
+            UserRelationship_id: '',
+            UserRelationship_userId: `f5e9e853-6803-4a74-98c3-23fb0933062f`,
+            UserRelationship_relationId: '0a67da87-b9b5-4c38-b0d1-3551347ffce4',
+            UserRelationship_status: 'pending',
+            UserRelationship_createdDate: '',
+            UserRelationship_updatedDate: ''
+        }] })
         const canUpdateUserRelationship = await service.can(currentUser, 'update', 'UserRelationship', 
             { userId: userRelationship.userId, relationId: userRelationship.relationId })
 
@@ -66,6 +74,14 @@ describe("UserRelationshipPermissions.canUpdateUserRelationship()", function() {
             status: 'confirmed'
         }
 
+        core.database.query.mockReturnValueOnce({ rowCount: 0, rows: [{
+            UserRelationship_id: '',
+            UserRelationship_userId: 'f5e9e853-6803-4a74-98c3-23fb0933062f',
+            UserRelationship_relationId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
+            UserRelationship_status: 'confirmed',
+            UserRelationship_createdDate: '',
+            UserRelationship_updatedDate: ''
+        }] })
         const canUpdateUserRelationship = await service.can(currentUser, 'update', 'UserRelationship', 
             { userId: userRelationship.userId, relationId: userRelationship.relationId })
 
