@@ -454,7 +454,7 @@ module.exports = class UserController extends BaseController{
         const userId = request.params.id
 
         if ( currentUser && currentUser.id !== userId) {
-            const relationship = await this.userRelationshipDAO.getUserRelationshipForUserAndRelation(currentUser.id, userId)
+            const relationship = await this.userRelationshipsDAO.getUserRelationshipByUserAndRelation(currentUser.id, userId)
             if ( relationship?.status === 'blocked' && currentUser.id === relationship?.relationId) {
                 throw new ControllerError(404, 'not-found', 
                     `User(${currentUser.id}) attempting to view User(${userId}) who blocked them.`,

@@ -25,7 +25,8 @@ const {
     GroupModerationDAO, 
     GroupModerationEventDAO,
     PostDAO,
-    PostCommentDAO
+    PostCommentDAO,
+    UserDAO
 }  = require('@communities/backend')
 
 const { cleaning, validation } = require('@communities/shared')
@@ -42,6 +43,7 @@ module.exports = class GroupModerationController extends BaseController {
         this.groupModerationEventDAO = new GroupModerationEventDAO(core)
         this.postDAO = new PostDAO(core)
         this.postCommentDAO = new PostCommentDAO(core)
+        this.userDAO = new UserDAO(core)
 
         this.notificationService = new NotificationService(core)
         this.permissionService = new PermissionService(core)
@@ -59,9 +61,23 @@ module.exports = class GroupModerationController extends BaseController {
             params: [ results.list ]
         })
 
+        const userIds = []
+        for(const [id, post] of Object.entries(postResults.dictionary)) {
+            userIds.push(post.userId)
+        }
+        for(const [id, comment] of Object.entries(postCommentResults.dictionary)) {
+            userIds.push(comment.userId)
+        }
+
+        const userResults = await this.userDAO.selectUsers({
+            where: `users.id = ANY($1::uuid[])`,
+            params: [ userIds ]
+        })
+
         return {
             posts: postResults.dictionary,
-            postComments: postCommentResults.dictionary
+            postComments: postCommentResults.dictionary,
+            users: userResults.dictionary
         } 
     }
 
