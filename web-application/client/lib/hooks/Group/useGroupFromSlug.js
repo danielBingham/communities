@@ -46,8 +46,6 @@ export const useGroupFromSlug = function(slug, relations) {
         return state.Group.dictionary[id]
     })
 
-    console.log(`--- useGroupFromSlug:: group:`, group)
-
     useEffect(() => {
         if ( slug && group === undefined && request?.state !== 'pending') {
             makeRequest(getGroups(slug, { slug: slug, relations: relations }))

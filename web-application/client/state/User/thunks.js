@@ -132,6 +132,9 @@ export const getUser = function(id) {
             function(status, response) {
                 if ( status === 404 || status === 403 ) {
                     dispatch(setUserNull(id))
+                } else if ( status === 500 ) {
+                    // Avoid infinite looping on server error.
+                    dispatch(setUserNull(id))
                 }
             }
         ))

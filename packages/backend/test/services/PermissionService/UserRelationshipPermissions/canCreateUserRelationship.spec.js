@@ -47,6 +47,7 @@ describe("UserRelationshipPermissions.canCreateUserRelationship()", function() {
             status: 'pending'
         }
 
+        core.database.query.mockReturnValueOnce({ rowCount: 0, rows: [] })
         const canCreateUserRelationship = await service.can(currentUser, 'create', 'UserRelationship', 
             { userId: userRelationship.userId, relationId: userRelationship.relationId })
 
@@ -65,6 +66,7 @@ describe("UserRelationshipPermissions.canCreateUserRelationship()", function() {
             status: 'pending'
         }
 
+        core.database.query.mockReturnValueOnce({ rowCount: 0, rows: [] })
         const canCreateUserRelationship = await service.can(currentUser, 'create', 'UserRelationship', 
             { userId: userRelationship.userId, relationId: userRelationship.relationId })
 

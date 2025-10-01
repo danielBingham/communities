@@ -100,6 +100,7 @@ module.exports = class GroupMemberController extends BaseController {
         // If they are a moderator or admin, they can view all group members,
         // including ones who are still pending.
         if ( canModerateGroup ) {
+            // Group moderators can see all users, even if they are blocked.
             query.params.push(context.group.id)
             query.where = `group_members.group_id = $${query.params.length}`
         } 
@@ -107,10 +108,27 @@ module.exports = class GroupMemberController extends BaseController {
         // Otherwise they can only view confirmed group members and their own
         // membership (pending or not).
         else {
+            const blockResults = await this.core.database.query(`
+                SElECT user_id, friend_id
+                    FROM user_relationships
+                        WHERE (friend_id = $1) AND status = 'blocked'
+            `, [currentUser.id])
+            const blockIds = blockResults.rows.map((r) => r.user_id == currentUser.id ? r.friend_id : r.user_id)
+
+            // You can't see users who have blocked you.
+            query.params.push(blockIds)
+            const blockParam = query.params.length
             query.params.push(context.group.id)
+            const groupParam = query.params.length
             query.params.push(currentUser.id)
-            query.where = `group_members.group_id = $${query.params.length-1} 
-                AND (group_members.status = 'member' OR group_members.user_id = $${query.params.length})`
+            const currentUserParam = query.params.length
+
+            query.where = `group_members.group_id = $${groupParam} 
+                AND (
+                    group_members.status = 'member' 
+                    OR (group_members.user_id = $${currentUserParam} AND group_members.user_id != ALL($${blockParam}::uuid[]))
+                )`
+
         }
 
         if ( 'status' in urlQuery ) {

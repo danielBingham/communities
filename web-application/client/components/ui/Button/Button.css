@@ -46,3 +46,6 @@ button.button:disabled {
     border: thin solid var(--danger-color-main);
     color: white;
 }
+.button.warn svg {
+    color: white !important;
+}
