@@ -91,9 +91,9 @@ const RegistrationForm = function(props) {
         if ( ! field || field === 'birthdate' ) {
             const birthdateErrors = shared.validation.User.validateBirthdate(birthdate) 
             if ( birthdateErrors.length > 0 ) {
-                setBirthdateValidationError(birthdateErrors.reduce((string, error) => `${string} ${error.message}`, ''))
+                setBirthdateValidationError(birthdateErrors.map((error) => error.message))
             } else {
-                setBirthdateValidationError(null)
+                setBirthdateValidationError([])
             }
             error = error || birthdateErrors.length > 0
         }
