@@ -345,13 +345,6 @@ module.exports = class UserRelationshipController {
         const userId = request.params.userId
         const relationId = request.params.relationId
 
-        const canViewUserRelationship = await this.permissionService.can(currentUser, 'view', 'UserRelationship', { userId: userId, relationId: relationId })
-        if ( canViewUserRelationship !== true ) {
-            throw new ControllerError(404, 'not-found',
-                `User attempting to view relationship for User(${userId}) and User(${relationId}) without authorization.`,
-                `Either that UserRelationship doesn't exist or you don't have permission to view it.`)
-        }
-
         const results = await this.userRelationshipDAO.selectUserRelationships({
             where: `(user_id = $1 AND friend_id = $2) OR (user_id = $2 AND friend_id = $1)`,
             params: [ userId, relationId ]
@@ -362,6 +355,16 @@ module.exports = class UserRelationshipController {
                 `No relationship found for User(${userId}) and User(${relationId}).`,
                 `No relationship found for User(${userId}) and User(${relationId}).`)
         }
+
+        const relationship = results.dictionary[results.list[0]]
+        const canViewUserRelationship = await this.permissionService.can(currentUser, 'view', 'UserRelationship', 
+            { userId: userId, relationId: relationId, relationship: relationship })
+        if ( canViewUserRelationship !== true ) {
+            throw new ControllerError(404, 'not-found',
+                `User attempting to view relationship for User(${userId}) and User(${relationId}) without authorization.`,
+                `Either that UserRelationship doesn't exist or you don't have permission to view it.`)
+        }
+
 
         const entity = results.dictionary[results.list[0]]
 

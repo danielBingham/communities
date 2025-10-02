@@ -24,7 +24,7 @@ const { util } = require('@communities/shared')
 
 const ServiceError = require('../../errors/ServiceError')
 
-module.exports = class GroupMemberPermissions {
+module.exports = class UserRelationshipPermissions {
 
     constructor(core, permissionService) {
         this.core 
