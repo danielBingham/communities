@@ -10,7 +10,7 @@ import { validateEmail, validatePassword } from '/lib/validation/user'
 import { postAuthentication } from '/state/authentication'
 
 import Button from '/components/generic/button/Button'
-import Input from '/components/generic/input/Input'
+import Input from '/components/ui/Input'
 import Spinner from '/components/Spinner'
 
 import './LoginForm.css'

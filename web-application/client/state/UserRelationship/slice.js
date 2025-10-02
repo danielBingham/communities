@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 import {
     setInDictionary,
+    setNull,
     removeEntity,
     setQueryResults,
     clearQuery,
@@ -49,39 +50,48 @@ export const UserRelationshipSlice = createSlice({
         setUserRelationshipsInDictionary: function(state, action) {
             setInDictionary(state, action)
 
-            if ( 'dictionary' in action.payload ) {
-                for(const [id, entity] of Object.entries(action.payload.dictionary)) {
-                    if ( entity.userId in state.byUserId ) {
-                        state.byUserId[entity.userId][entity.relationId] = entity.id
-                    } else {
-                        state.byUserId[entity.userId] = {}
-                        state.byUserId[entity.userId][entity.relationId] = entity.id
-                    }
-
-                    if ( entity.relationId in state.byUserId ) {
-                        state.byUserId[entity.relationId][entity.userId] = entity.id
-                    } else {
-                        state.byUserId[entity.relationId] = {}
-                        state.byUserId[entity.relationId][entity.userId] = entity.id
-                    }
-                }
-            } else if ( 'entity' in action.payload ) {
-                const entity = action.payload.entity
+            const setRelationshipInMaps = function(entity) {
                 if ( entity.userId in state.byUserId ) {
-                    state.byUserId[entity.userId][entity.relationId] = entity.id
+                    state.byUserId[entity.userId][entity.relationId] = entity
                 } else {
                     state.byUserId[entity.userId] = {}
-                    state.byUserId[entity.userId][entity.relationId] = entity.id
+                    state.byUserId[entity.userId][entity.relationId] = entity
                 }
 
                 if ( entity.relationId in state.byUserId ) {
-                    state.byUserId[entity.relationId][entity.userId] = entity.id
+                    state.byUserId[entity.relationId][entity.userId] = entity
                 } else {
                     state.byUserId[entity.relationId] = {}
-                    state.byUserId[entity.relationId][entity.userId] = entity.id
+                    state.byUserId[entity.relationId][entity.userId] = entity
                 }
             }
 
+            if ( 'dictionary' in action.payload ) {
+                for(const [id, entity] of Object.entries(action.payload.dictionary)) {
+                    setRelationshipInMaps(entity)
+                }
+            } else if ( 'entity' in action.payload ) {
+                setRelationshipInMaps(action.payload.entity)
+            }
+
+        },
+        setUserRelationshipNull: function(state, action) {
+            const userId = action.payload.userId
+            const relationId = action.payload.relationId
+
+            if ( userId in state.byUserId ) {
+                state.byUserId[userId][relationId] = null
+            } else {
+                state.byUserId[userId] = {}
+                state.byUserId[userId][relationId] = null
+            }
+
+            if ( relationId in state.byUserId ) {
+                state.byUserId[relationId][userId] = null
+            } else {
+                state.byUserId[relationId] = {}
+                state.byUserId[relationId][userId] = null
+            }
         },
         removeUserRelationship: function(state, action) {
             removeEntity(state, action)
@@ -104,7 +114,7 @@ export const UserRelationshipSlice = createSlice({
 })
 
 export const { 
-    setUserRelationshipsInDictionary, removeUserRelationship, 
+    setUserRelationshipsInDictionary, setUserRelationshipNull, removeUserRelationship, 
     setUserRelationshipQueryResults, clearUserRelationshipQuery,
     clearUserRelationshipQueries, resetUserRelationshipSlice
 }  = UserRelationshipSlice.actions

@@ -77,7 +77,9 @@ module.exports = class UserRelationshipController {
         }
 
         query.params.push(userId)
-        query.where += `(user_relationships.user_id = $1 OR user_relationships.friend_id = $1)`
+        query.where += `
+            (user_relationships.user_id = $1 OR (user_relationships.friend_id = $1 AND user_relationships.status != 'blocked'))
+        `
 
         if ( 'status' in requestQuery ) {
             query.params.push(requestQuery.status)
@@ -194,6 +196,7 @@ module.exports = class UserRelationshipController {
 
         const userId = request.params.userId
         const relationId = request.body.relationId
+        const status = request.body.status
 
         const canCreateUserRelationship = await this.permissionService.can(currentUser, 'create', 'UserRelationship', 
             { userId: userId, relationId: relationId })
@@ -208,7 +211,14 @@ module.exports = class UserRelationshipController {
             params: [ userId, relationId]
         })
       
-        const existing = existingResults.list.length > 0 ? existingResults.dictionary[existingResults.list[0]] : null
+        let existing = existingResults.list.length > 0 ? existingResults.dictionary[existingResults.list[0]] : null
+
+        // If we're blocking a user, then delete the existing relationship.
+        // We're replacing it with a block relationship.
+        if ( status === 'blocked' && existing !== null ) {
+            await this.userRelationshipDAO.deleteUserRelationship(existing)
+            existing = null
+        }
 
         // If User(relationId) already sent User(userId) their own friend
         // request, then just confirm that relationship.
@@ -273,7 +283,7 @@ module.exports = class UserRelationshipController {
             const userRelationship = {
                 userId: userId,
                 relationId: relationId,
-                status: 'pending'
+                status: status 
             }
 
             const validationErrors = await this.validationService.validateUserRelationship(currentUser, userRelationship)
@@ -299,15 +309,17 @@ module.exports = class UserRelationshipController {
                     `UserRelationship(${userId}, ${relationId}) missing after insert.`,
                     `We created the relationship between you and ${relationId}, but it wasn't there when we queried it. Please report bug.`)
             }
-           
-            await this.notificationService.sendNotifications(
-                currentUser, 
-                'UserRelationship:create',
-                {
-                    userId: userId,
-                    relationId: relationId
-                }
-            )
+          
+            if ( userRelationship.status !== 'blocked' ) {
+                await this.notificationService.sendNotifications(
+                    currentUser, 
+                    'UserRelationship:create',
+                    {
+                        userId: userId,
+                        relationId: relationId
+                    }
+                )
+            }
 
             const relations = await this.getRelations(currentUser, userId, results)
 
@@ -333,13 +345,6 @@ module.exports = class UserRelationshipController {
         const userId = request.params.userId
         const relationId = request.params.relationId
 
-        const canViewUserRelationship = await this.permissionService.can(currentUser, 'view', 'UserRelationship', { userId: userId, relationId: relationId })
-        if ( canViewUserRelationship !== true ) {
-            throw new ControllerError(404, 'not-found',
-                `User attempting to view relationship for User(${userId}) and User(${relationId}) without authorization.`,
-                `Either that UserRelationship doesn't exist or you don't have permission to view it.`)
-        }
-
         const results = await this.userRelationshipDAO.selectUserRelationships({
             where: `(user_id = $1 AND friend_id = $2) OR (user_id = $2 AND friend_id = $1)`,
             params: [ userId, relationId ]
@@ -350,6 +355,16 @@ module.exports = class UserRelationshipController {
                 `No relationship found for User(${userId}) and User(${relationId}).`,
                 `No relationship found for User(${userId}) and User(${relationId}).`)
         }
+
+        const relationship = results.dictionary[results.list[0]]
+        const canViewUserRelationship = await this.permissionService.can(currentUser, 'view', 'UserRelationship', 
+            { userId: userId, relationId: relationId, relationship: relationship })
+        if ( canViewUserRelationship !== true ) {
+            throw new ControllerError(404, 'not-found',
+                `User attempting to view relationship for User(${userId}) and User(${relationId}) without authorization.`,
+                `Either that UserRelationship doesn't exist or you don't have permission to view it.`)
+        }
+
 
         const entity = results.dictionary[results.list[0]]
 

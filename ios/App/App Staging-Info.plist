@@ -50,5 +50,11 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>You can take photos to upload to posts.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>You can upload newly added photos to your posts.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>You can upload photos from your photo library to your posts.</string>
 </dict>
 </plist>

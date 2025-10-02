@@ -311,7 +311,7 @@ module.exports = class UserService {
             errors.push(...validationErrors)
             return [ null, errors ]
         }
-        
+
         // ================== Register ========================================
         // We've validated the user.  Go ahead and register them.
 

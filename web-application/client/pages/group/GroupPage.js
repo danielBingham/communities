@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { useParams, NavLink, Routes, Route } from 'react-router-dom'
+import { useParams, Routes, Route } from 'react-router-dom'
 
 import {
     GlobeAltIcon,

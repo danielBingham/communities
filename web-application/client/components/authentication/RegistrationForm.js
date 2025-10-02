@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
+
+import * as shared from '@communities/shared'
 
 import { useRequest } from '/lib/hooks/useRequest'
 import { validateEmail, validateName, validateUsername, validatePassword } from '/lib/validation/user'
 
 import { postUsers, getUsers } from '/state/User'
 
-import Input from '/components/generic/input/Input'
+import Input from '/components/ui/Input'
 import { Checkbox } from '/components/ui/Checkbox'
 
 import './RegistrationForm.css'
@@ -18,14 +20,14 @@ const RegistrationForm = function(props) {
     const [ email, setEmail ] = useState('')
     const [ password, setPassword ] = useState('')
     const [ confirmPassword, setConfirmPassword ] = useState('')
-    const [ ageConfirmation, setAgeConfirmation ] = useState(false)
+    const [ birthdate, setBirthdate ] = useState('')
 
     const [nameValidationError, setNameValidationError] = useState([])
     const [usernameValidationError, setUsernameValidationError] = useState([])
     const [emailValidationError, setEmailValidationError] = useState([])
     const [passwordValidationError, setPasswordValidationError] = useState([])
     const [confirmPasswordValidationError, setConfirmPasswordValidationError] = useState([])
-    const [ageConfirmationValidationError, setAgeConfirmationValidationError] = useState([])
+    const [birthdateValidationError, setBirthdateValidationError] = useState([])
 
     const [request, makeRequest] = useRequest()
     const [usernameRequest, makeUsernameRequest] = useRequest()
@@ -45,6 +47,7 @@ const RegistrationForm = function(props) {
     const isValid = function(field) {
         let error = false 
 
+        
         if ( ! field || field == 'name' ) {
             const nameErrors = validateName(name, true) 
             error = error || nameErrors.length > 0
@@ -85,15 +88,14 @@ const RegistrationForm = function(props) {
             setConfirmPasswordValidationError(passwordConfirmationErrors)
         }
 
-        if ( ! field || field === 'ageConfirmation' ) {
-            const ageConfirmationErrors = []
-
-            if ( ageConfirmation !== true ) {
-                ageConfirmationErrors.push('You must confirm your age.')
-                error = true
+        if ( ! field || field === 'birthdate' ) {
+            const birthdateErrors = shared.validation.User.validateBirthdate(birthdate) 
+            if ( birthdateErrors.length > 0 ) {
+                setBirthdateValidationError(birthdateErrors.map((error) => error.message))
+            } else {
+                setBirthdateValidationError([])
             }
-
-            setAgeConfirmationValidationError(ageConfirmationErrors)
+            error = error || birthdateErrors.length > 0
         }
 
         return ! error
@@ -110,7 +112,8 @@ const RegistrationForm = function(props) {
             name: name,
             username: username,
             email: email,
-            password: password
+            password: password,
+            birthdate: birthdate
         }
 
         makeRequest(postUsers(user))
@@ -163,7 +166,7 @@ const RegistrationForm = function(props) {
     let emailError = emailValidationError.join(' ')
     let passwordError = passwordValidationError.join(' ')
     let confirmPasswordError = confirmPasswordValidationError.join(' ')
-    let ageConfirmationError = ageConfirmationValidationError.join(' ')
+    let birthdateError = birthdateValidationError.join(' ')
 
     if ( request && request.state == 'failed' ) {
         if ( 'message' in request.error ) {
@@ -234,14 +237,18 @@ const RegistrationForm = function(props) {
                     onChange={ (event) => setConfirmPassword(event.target.value) }
                     error={confirmPasswordError}
                 />
-                <Checkbox
-                    name="age-confirmation"
-                    label="Confirm Your Age"
-                    value={ageConfirmation}
-                    explanation="Due to legal restrictions, you must be at least 18 years old to register for Communities. By checking this box you confirm that you are at least 18 years old." 
-                    onClick={(e) => setAgeConfirmation( ! ageConfirmation)}
-                    error={ageConfirmationError}
+                <Input
+                    name="birthdate"
+                    type="date"
+                    label="Date of Birth"
+                    explanation="Please enter your date of birth.  This is required by state laws that mandate social media platforms enforce age limits on their users."
+                    value={birthdate}
+                    className="date-of-birth"
+                    onBlur={ (event) => isValid('birthdate') }
+                    onChange={ (event) => setBirthdate(event.target.value) }
+                    error={birthdateError}
                 />
+
                 <div className="base-error">
                     { baseError }
                 </div>

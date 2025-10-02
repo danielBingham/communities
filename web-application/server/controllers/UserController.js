@@ -133,6 +133,25 @@ module.exports = class UserController extends BaseController{
             requestedRelations: query.relations ? query.relations : []
         }
 
+        // ====================================================================
+        // Permissions
+        // ====================================================================
+        if ( currentUser ) {
+            const blockResults = await this.core.database.query(`
+                SElECT user_id 
+                    FROM user_relationships
+                        WHERE friend_id = $1 AND status = 'blocked'
+            `, [currentUser.id])
+            const blockIds = blockResults.rows.map((r) => r.user_id )
+
+            // You can't see users who have blocked you.
+            result.params.push(blockIds)
+            result.where += `users.id != ALL($${result.params.length}::uuid[])`
+        }
+        // ====================================================================
+        // END Permissions
+        // ====================================================================
+
 
         if ( 'name' in query && query.name.length > 0) {
             const and = result.params.length > 0 ? ' AND ' : ''
@@ -418,7 +437,7 @@ module.exports = class UserController extends BaseController{
     /**
      * GET /user/:id
      *
-     * Get details for a single user in thethis.database.
+     * Get details for a single user.
      *
      * @param {Object} request  Standard Express request object.
      * @param {int} request.params.id   The id of the user we wish to retrieve.
@@ -434,22 +453,32 @@ module.exports = class UserController extends BaseController{
          * 
          * **********************************************************/
         const currentUser = request.session.user
+        const userId = request.params.id
 
-        let results = null
-        if ( currentUser && currentUser.id == request.params.id ) {
-            results = await this.userDAO.selectUsers({ where: `users.id = $1 AND users.status != 'invited'`, params: [ request.params.id ], fields: 'all' })
-        } else {
-            results = await this.userDAO.selectUsers({ where: `users.id = $1 AND users.status != 'invited'`, params: [request.params.id]})
+        if ( currentUser && currentUser.id !== userId) {
+            const relationship = await this.userRelationshipsDAO.getUserRelationshipByUserAndRelation(currentUser.id, userId)
+            if ( relationship?.status === 'blocked' && currentUser.id === relationship?.relationId) {
+                throw new ControllerError(404, 'not-found', 
+                    `User(${currentUser.id}) attempting to view User(${userId}) who blocked them.`,
+                    `Either that user doesn't exist or you don't have permissions to view them.`)
+            }
         }
 
-        if ( ! results.dictionary[ request.params.id] ) {
-            throw new ControllerError(404, 'not-found', `User(${request.params.id}) not found.`)
+        let results = null
+        if ( currentUser && currentUser.id === userId) {
+            results = await this.userDAO.selectUsers({ where: `users.id = $1 AND users.status != 'invited'`, params: [ userId ], fields: 'all' })
+        } else {
+            results = await this.userDAO.selectUsers({ where: `users.id = $1 AND users.status != 'invited'`, params: [ userId ]})
+        }
+
+        if ( ! results.dictionary[userId] ) {
+            throw new ControllerError(404, 'not-found', `User(${userId}) not found.`)
         }
 
         const relations = await this.getRelations(currentUser, results)
 
         return response.status(200).json({ 
-            entity: results.dictionary[request.params.id],
+            entity: results.dictionary[userId],
             relations: relations
         })
     }

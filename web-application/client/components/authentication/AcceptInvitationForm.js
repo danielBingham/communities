@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { useSearchParams } from 'react-router-dom'
 
+import * as shared from '@communities/shared'
+
 import logger from '/logger'
 
 import { useRequest } from '/lib/hooks/useRequest'
@@ -10,7 +12,7 @@ import { validateEmail, validateName, validateUsername, validatePassword } from 
 import { validateToken } from '/state/tokens'
 import { patchUser, getUsers } from '/state/User'
 
-import Input from '/components/generic/input/Input'
+import Input from '/components/ui/Input'
 import { Checkbox } from '/components/ui/Checkbox'
 
 import './AcceptInvitationForm.css'
@@ -24,7 +26,7 @@ const AcceptInvitationForm = function(props) {
     const [ email, setEmail ] = useState('')
     const [ password, setPassword ] = useState('')
     const [ confirmPassword, setConfirmPassword ] = useState('')
-    const [ ageConfirmation, setAgeConfirmation ] = useState(false)
+    const [ birthdate, setBirthdate ] = useState('')
 
     const [tokenValidationError, setTokenValidationError] = useState([])
     const [nameValidationError, setNameValidationError] = useState([])
@@ -32,7 +34,7 @@ const AcceptInvitationForm = function(props) {
     const [emailValidationError, setEmailValidationError] = useState([])
     const [passwordValidationError, setPasswordValidationError] = useState([])
     const [confirmPasswordValidationError, setConfirmPasswordValidationError] = useState([])
-    const [ageConfirmationValidationError, setAgeConfirmationValidationError] = useState([])
+    const [birthdateValidationError, setBirthdateValidationError] = useState([])
 
     const tokenRequestRef = useRef(null)
 
@@ -105,15 +107,14 @@ const AcceptInvitationForm = function(props) {
             setConfirmPasswordValidationError(passwordConfirmationErrors)
         }
 
-        if ( ! field || field === 'ageConfirmation' ) {
-            const ageConfirmationErrors = []
-
-            if ( ageConfirmation !== true ) {
-                ageConfirmationErrors.push('You must confirm your age.')
-                error = true
+        if ( ! field || field === 'birthdate' ) {
+            const birthdateErrors = shared.validation.User.validateBirthdate(birthdate) 
+            if ( birthdateErrors.length > 0 ) {
+                setBirthdateValidationError(birthdateErrors.map((error) => error.message))
+            } else {
+                setBirthdateValidationError([])
             }
-
-            setAgeConfirmationValidationError(ageConfirmationErrors)
+            error = error || birthdateErrors.length > 0
         }
 
         return ! error
@@ -136,6 +137,7 @@ const AcceptInvitationForm = function(props) {
             username: username,
             email: email,
             password: password,
+            birthdate: birthdate,
             token: token
         }
 
@@ -212,7 +214,7 @@ const AcceptInvitationForm = function(props) {
     let emailError = emailValidationError.join(' ')
     let passwordError = passwordValidationError.join(' ')
     let confirmPasswordError = confirmPasswordValidationError.join(' ')
-    let ageConfirmationError = ageConfirmationValidationError.join(' ')
+    let birthdateError = birthdateValidationError.join(' ')
 
     if ( tokenRequest && tokenRequest.state == 'failed' ) {
         if ( tokenRequest.error.type == 'not-authorized' ) {
@@ -305,13 +307,16 @@ const AcceptInvitationForm = function(props) {
                     onChange={ (event) => setConfirmPassword(event.target.value) }
                     error={confirmPasswordError}
                 />
-                <Checkbox
-                    name="age-confirmation"
-                    label="Confirm Your Age"
-                    value={ageConfirmation}
-                    explanation="Due to legal restrictions, you must be at least 18 years old to register for Communities. By checking this box you confirm that you are at least 18 years old." 
-                    onClick={(e) => setAgeConfirmation( ! ageConfirmation)}
-                    error={ageConfirmationError}
+                <Input
+                    name="birthdate"
+                    type="date"
+                    label="Date of Birth"
+                    explanation="Please enter your date of birth.  This is required by state laws that mandate social media platforms enforce age limits on their users."
+                    value={birthdate}
+                    className="date-of-birth"
+                    onBlur={ (event) => isValid('birthdate') }
+                    onChange={ (event) => setBirthdate(event.target.value) }
+                    error={birthdateError}
                 />
                 <div className="base-error">
                     { baseError }

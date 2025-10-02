@@ -24,7 +24,7 @@ const validateStatus = function(status) {
     const errors = validator
         .mustNotBeNull()
         .mustBeString()
-        .mustBeOneOf([ 'pending', 'confirmed' ])
+        .mustBeOneOf([ 'pending', 'confirmed', 'blocked' ])
         .getErrors()
     return errors
 }
