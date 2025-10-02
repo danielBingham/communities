@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux'
 
 import './Footer.css'
 
-const Footer = function({ version }) {
+const Footer = function() {
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const clientVersion = useSelector((state) => state.system.clientVersion)
     const serverVersion = useSelector((state) => state.system.serverVersion)
