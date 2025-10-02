@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 
 import LoginForm from '/components/authentication/LoginForm'
 
+import GoogleBadge from './get-it-on-google-play.png'
 import './WelcomeSplash.css'
 
 const WelcomeSplash = function() {
@@ -26,6 +27,12 @@ const WelcomeSplash = function() {
             <div className="welcome-splash__login">
                 <div className="welcome-splash__login-wrapper">
                     <LoginForm /> 
+                </div>
+                <div className="welcome-splash__store-badges">
+                    <div className="welcome-splash__store-badge-grid">
+                        <a href="https://play.google.com/store/apps/details?id=social.communities" className="welcome-splash__google-store"><img src={GoogleBadge} /></a>
+                        <span className="welcome-splash__apple-store">iOS Coming Soon!</span>
+                    </div>
                 </div>
             </div>
         </div>
