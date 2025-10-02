@@ -157,7 +157,7 @@ module.exports = class AuthenticationController {
                 session: session
             })
         } catch (error ) {
-            this.core.logger.error(error)
+            request.logger.warn(error)
             if ( error instanceof backend.ServiceError ) {
                 if ( error.type == 'no-user' ) {
                     throw new ControllerError(403, 'authentication-failed', error.message)

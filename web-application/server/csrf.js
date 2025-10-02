@@ -30,7 +30,7 @@ const createCSRFMiddleware = function(core) {
             || request.session.csrfToken === undefined 
             || request.session.csrfToken === null ) 
         {
-            request.logger.debug(`Expired session.`)
+            request.logger.verbose(`CSRF check identified an expired session.`)
             response.status(401).json({
                 error: {
                     type: 'session-expired',

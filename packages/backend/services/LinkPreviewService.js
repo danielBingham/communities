@@ -93,7 +93,6 @@ module.exports = class LinkPreviewService {
             fileId = uuidv4()
 
             try {
-                this.core.logger.debug(`Attempting to fetch canonical image: '${image}'...`)
                 const response = await fetch(image, { heaaders: { 'User-Agent': userAgent }})
 
                 const contentType = response.headers.get('Content-Type')
@@ -102,15 +101,12 @@ module.exports = class LinkPreviewService {
                 const tmpPath = `tmp/${fileId}.${extension}`
                 const filepath = `previews/${fileId}.${extension}`
 
-                this.core.logger.debug(`Writing image to tmp path: '${tmpPath}'...`) 
                 const blob = await response.blob()
                 const buffer = await blob.arrayBuffer()
                 fs.writeFileSync(tmpPath, Buffer.from(buffer))
 
-                this.core.logger.debug(`Uploading image to s3: '${filepath}'...`)
                 await this.fileService.uploadFile(tmpPath, filepath)
 
-                this.core.logger.debug(`Cleaning up image: '${tmpPath}'...`)
                 this.fileService.removeLocalFile(tmpPath)
 
                 const file = {

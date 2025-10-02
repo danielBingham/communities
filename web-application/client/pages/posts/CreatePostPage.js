@@ -28,7 +28,6 @@ const CreatePostPage = function() {
 
     const [post] = usePost(postId)
 
-    logger.debug(`#### CreatePostPage:: post: `, post)
     if ( post ) {
         if ( post.groupId !== null ) {
             groupId = post.groupId

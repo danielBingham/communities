@@ -11,6 +11,7 @@ if ( ! apiPath.endsWith('/') ) {
 
 let api = new URL(apiPath, host).href
 
+let clientVersion = document.querySelector('meta[name="communities-version"]').content
 
 /***
  * System slice convers data essential for the system to function and that must
@@ -25,7 +26,7 @@ const systemSlice = createSlice({
         csrf: null,
         configuration: null,
         features: {},
-        clientVersion: null,
+        clientVersion: clientVersion,
         serverVersion: null,
         isActive: true
     },
@@ -85,7 +86,6 @@ export const getInitialization = function() {
     return function(dispatch, getState) {
         return dispatch(makeRequest('GET', '/system/initialization', null,
             function(responseBody) {
-                dispatch(systemSlice.actions.setClientVersion(responseBody.version))
                 dispatch(systemSlice.actions.setServerVersion(responseBody.version))
                 dispatch(systemSlice.actions.setCSRF(responseBody.csrf))
                 dispatch(systemSlice.actions.setFeatures(responseBody.features))

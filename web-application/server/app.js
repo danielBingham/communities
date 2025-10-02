@@ -139,15 +139,15 @@ const createExpressApp = function(core, sessionParser) {
     // ========================================================================
 
     app.get('/dist/dist.zip', function(request, response) {
-        core.logger.debug(`Request for distro bundle.`)
-        core.logger.debug(`Process: `, process.cwd())
+        core.logger.verbose(`Request for distro bundle.`)
+        core.logger.verbose(`Process: `, process.cwd())
         const filepath = path.join(process.cwd(), 'public/dist/dist.zip')
-        core.logger.debug(`Filepath: `, filepath)
+        core.logger.verbose(`Filepath: `, filepath)
         response.sendFile(filepath)
     })
 
     app.get('/.well-known/apple-app-site-association', function(request, response) {
-        core.logger.debug(`Request for apple site association.`)
+        core.logger.verbose(`Request for apple site association.`)
         const json = {
             "applinks": {
                 "apps": [],
@@ -171,7 +171,7 @@ const createExpressApp = function(core, sessionParser) {
     })
 
     app.get('/.well-known/assetlinks.json', function(request, response) {
-        core.logger.debug(`Request for Android Asset Links.`)
+        core.logger.verbose(`Request for Android Asset Links.`)
         let json = [
             {
                 "relation": ["delegate_permission/common.handle_all_urls"],
@@ -228,7 +228,7 @@ const createExpressApp = function(core, sessionParser) {
 
     // Everything else goes to the index file.
     app.all('{*any}', function(request,response) {
-        request.logger.debug(`Loading index file.`)
+        request.logger.verbose(`Loading index file.`)
         const filepath = path.join(process.cwd(), 'public/dist/index.html')
         response.sendFile(filepath)
     })

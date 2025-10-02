@@ -30,16 +30,16 @@ const createLogMiddleware = function(core) {
             // Log start and end of the request.
             const startTime = Date.now()
             request.logger.info(`BEGIN`)
-            request.logger.debug(`Host: ${request.host}, Hostname: ${request.hostname}`)
-            request.logger.debug(`Headers: `, request.headers)
-            request.logger.debug(`Body: `, request.body)
+            request.logger.verbose(`Host: ${request.host}, Hostname: ${request.hostname}`)
+            request.logger.verbose(`Headers: `, request.headers)
+            request.logger.verbose(`Body: `, request.body)
             response.once('finish', function() {
-                request.logger.debug(`Finishing ${request.method} ${request.url}`)
+                request.logger.verbose(`Finishing ${request.method} ${request.url}`)
                 const endTime = Date.now()
                 const totalTime = endTime - startTime
                 const contentSize = response.getHeader('content-length')
 
-                request.logger.debug(`Response Headers: `, response.getHeaders())
+                request.logger.verbose(`Response Headers: `, response.getHeaders())
                 request.logger.info(`END -- [ ${response.statusCode} ] -- ${totalTime} ms ${contentSize ? `${contentSize} bytes` : ''}`)
             })
         }
@@ -69,7 +69,7 @@ const createLogIdMiddleware = function(core) {
                 request.session.logId = request.logger.id
             }
             request.logger.info(`${oldId} -> ${request.logger.id}`)
-            request.logger.debug(`Session: `, request.session)
+            request.logger.verbose(`Session: `, request.session)
         } 
         next()
     }

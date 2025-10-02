@@ -66,7 +66,7 @@ const createWebSocketServer = function(core, sessionParser, httpServer) {
   webSocketServer.on('connection', function(socket, request) {
     const currentUser = request.session.user
     const connectionId = Uuid.v4()
-    core.logger.debug(`++++++++++ Establishing socket Connection(${connectionId})...`)
+    core.logger.verbose(`++++++++++ Establishing socket Connection(${connectionId})...`)
 
     if ( ! currentUser ) {
       core.logger.warn(`Unauthenticated user opened a socket Connection(${connectionId}).`)
@@ -98,14 +98,14 @@ const createWebSocketServer = function(core, sessionParser, httpServer) {
     })
 
     socket.on('close', () => {
-      core.logger.debug(`---------- Closing socket Connection(${connectionId}).`)
+      core.logger.verbose(`---------- Closing socket Connection(${connectionId}).`)
       core.events.unregisterConnection(currentUser.id, connectionId)
     })
   })
 
   httpServer.on('upgrade', function(request, httpSocket, head) {
     core.logger.info(`<<<<<<<<< UPGRADE /socket`)
-    core.logger.debug(`Headers: `, request.headers)
+    core.logger.verbose(`Headers: `, request.headers)
 
     httpSocket.on('error', errorListener)
 
@@ -118,8 +118,8 @@ const createWebSocketServer = function(core, sessionParser, httpServer) {
         const currentUser = request.session.user
         if ( ! currentUser ) {
           core.logger.warn(`WebSocket Upgrade Failed: Unauthenticated request`)
-          core.logger.debug(`Headers: `, request.headers)
-          core.logger.debug(`Session: `, request.session)
+          core.logger.verbose(`Headers: `, request.headers)
+          core.logger.verbose(`Session: `, request.session)
           httpSocket.write('HTTP/1.1 401 Unauthorized\r\n\r\n')
           httpSocket.destroy()
           return

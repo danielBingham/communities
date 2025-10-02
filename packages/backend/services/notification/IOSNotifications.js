@@ -107,7 +107,7 @@ module.exports = class IOSNotifications {
             this.client = http2.connect(this.core.config.notifications.ios.endpoint, this.getCredentials())
 
             this.client.on("close", () => {
-                this.logger.debug(`=== IOS Notifications:: Connection closed.`)
+                this.logger.verbose(`=== IOS Notifications:: Connection closed.`)
                 if ( this.state !== STATE.DISCONNECTING ) {
                     this.reconnect()
                 }
@@ -115,7 +115,7 @@ module.exports = class IOSNotifications {
             })
 
             this.client.on("connect", () => {
-                this.logger.debug(`=== IOS Notifications:: Connected.`)
+                this.logger.verbose(`=== IOS Notifications:: Connected.`)
                 this.timeoutId = null
                 this.attempts = 0
 
@@ -126,8 +126,8 @@ module.exports = class IOSNotifications {
 
             this.client.on("error", (error) => this.logger.error(error))
             this.client.on("goaway", (errorCode, lastStreamId, data) => {
-                this.logger.debug(`=== IOS Notifications:: 'goaway' Frame: `, data.toString('utf8'))
-                this.logger.debug(`Code: ${errorCode}, StreamId: ${lastStreamId}`)
+                this.logger.verbose(`=== IOS Notifications:: 'goaway' Frame: `, data.toString('utf8'))
+                this.logger.verbose(`Code: ${errorCode}, StreamId: ${lastStreamId}`)
                 this.state = STATE.DISCONNECTING
 
                 const payload = JSON.parse(data.toString('utf8'))
@@ -156,7 +156,7 @@ module.exports = class IOSNotifications {
     async notify(userId, notification) {
         await this.connect()
 
-        this.logger.debug(`=== IOS Notifications:: Notifying User(${userId})...`)
+        this.logger.verbose(`=== IOS Notifications:: Notifying User(${userId})...`)
         this.queue.push({ userId: userId, notification: notification })
 
         await this.flushQueue()
@@ -169,7 +169,7 @@ module.exports = class IOSNotifications {
             return
         }
 
-        this.logger.debug(`=== IOS Notifications:: Flushing the Queue...`)
+        this.logger.verbose(`=== IOS Notifications:: Flushing the Queue...`)
         while ( this.queue.length > 0 ) {
             const item = this.queue.shift()
             await this.sendNotificationToUser(item.userId, item.notification)
@@ -231,9 +231,9 @@ module.exports = class IOSNotifications {
                 ":path": path
             }
 
-            this.logger.debug(`=== IOS Notifications:: Attempting to send notification: `, body)
-            this.logger.debug(`=== IOS Notifications:: With headers: `, headers)
-            this.logger.debug(`=== IOS Notifications:: To device: `, session.data.device)
+            this.logger.verbose(`=== IOS Notifications:: Attempting to send notification: `, body)
+            this.logger.verbose(`=== IOS Notifications:: With headers: `, headers)
+            this.logger.verbose(`=== IOS Notifications:: To device: `, session.data.device)
 
             // `request` is a ClientHttp2Stream: https://nodejs.org/api/http2.html#class-clienthttp2stream
             // Which extends Http2Stream: https://nodejs.org/api/http2.html#class-http2stream

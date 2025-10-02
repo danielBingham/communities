@@ -179,7 +179,6 @@ export default class Socket {
                 const secureValue = await SecureStoragePlugin.get({ key: 'auth-token' })
                 const authToken = encodeURIComponent(secureValue.value)
                 protocols.push('x-communities-auth', authToken)
-                logger.debug(`>>> UPGRADE /socket :: Got auth token: ${authToken}`)
             } catch (error) {
                 logger.warn(`>>> UPGRADE /socket :: Missing auth token. Refusing to connect.`)
                 return

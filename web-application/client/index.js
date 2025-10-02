@@ -9,6 +9,7 @@ import { StatusBar, Style } from '@capacitor/status-bar'
 
 import * as Sentry from "@sentry/react";
 
+import logger from '/logger'
 
 import App from './App'
 import store from './state/store'
@@ -19,11 +20,13 @@ if ( Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android' 
     let host = document.querySelector('meta[name="communities-host"]').content
     let api = document.querySelector('meta[name="communities-api"]').content
     let environment = document.querySelector('meta[name="communities-environment"]').content
+    let version = document.querySelector('meta[name="communities-version"]').content
 
-    console.log(`Communities startup with::\n 
+    logger.info(`Communities startup with::\n 
       environment: "${environment}"\n
       host: "${host}"\n
       API: "${api}"\n
+      Version: "${version}"\n
     `)
 
     if ( environment === 'production' ) {
@@ -50,11 +53,13 @@ else {
   let host = document.querySelector('meta[name="communities-host"]').content
   let api = document.querySelector('meta[name="communities-api"]').content
   let environment = document.querySelector('meta[name="communities-environment"]').content
+  let version = document.querySelector('meta[name="communities-version"]').content
 
   console.log(`Communities startup with::\n 
     environment: "${environment}"\n
     host: "${host}"\n
     API: "${api}"\n
+    Version: "${version}"\n
   `)
 
   if ( environment === 'production' ) {

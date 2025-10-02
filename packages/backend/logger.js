@@ -25,19 +25,17 @@ module.exports = class Logger  {
         error: 0,
         warn: 1,
         info: 2,
-        http: 3,
+        debug: 3,
         verbose: 4,
-        debug: 5,
-        silly: 6
+        silly: 5
     }
 
     static levelDescriptions = [
         'error',
         'warn',
         'info',
-        'http',
-        'verbose',
         'debug',
+        'verbose',
         'silly'
     ]
 
@@ -45,20 +43,11 @@ module.exports = class Logger  {
         if (Number.isInteger(level)) {
             this.level = level
         } else {
-            if (level == 'error') {
-                this.level = Logger.levels.error
-            } else if (level == 'warn') {
-                this.level = Logger.levels.warn
-            } else if (level == 'info') {
-                this.level = Logger.levels.info
-            } else if (level == 'http') {
-                this.level = Logger.levels.http
-            } else if (level == 'verbose') {
-                this.level = Logger.levels.verbose
-            } else if (level == 'debug') {
-                this.level = Logger.levels.debug
-            } else if (level == 'silly') {
-                this.level = Logger.levels.silly
+            for(let l = 0; l <= Logger.levels.silly; l++) {
+                if ( level === Logger.levelDescriptions[l] ) {
+                    this.level = l
+                    break
+                }
             }
         }
 
@@ -118,9 +107,9 @@ module.exports = class Logger  {
 
         if ( typeof message === 'object' ) {
             if ( level == Logger.levels.error) {
-                console.error(logPrefix + 'Error encountered: ', message) 
+                console.error(logPrefix, message) 
             } else {
-                console.log(logPrefix + 'Logging object: ', message)
+                console.log(logPrefix, message)
             }
         } else {
             if ( object !== undefined && object !== null ) {
@@ -141,10 +130,18 @@ module.exports = class Logger  {
     }
 
     error(message, object) {
+        if ( this.level < Logger.levels.error ) {
+            return
+        }
+
         this.log(Logger.levels.error, message, object)    
     }
 
     warn(message, object) {
+        if ( this.level < Logger.levels.warn ) {
+            return
+        }
+
         if ( message instanceof Error ) {
             const content = `Warning: ${message.message}`
             this.log(Logger.levels.warn, content, object)
@@ -154,22 +151,34 @@ module.exports = class Logger  {
     }
 
     info(message, object) {
+        if ( this.level < Logger.levels.info ) {
+            return
+        }
+
         this.log(Logger.levels.info, message, object)
     }
 
-    http(message, object) {
-        this.log(Logger.levels.http, message, object)
-    }
-
-    verbose(message, object) {
-        this.log(Logger.levels.verbose, message, object)
-    }
-
     debug(message, object) {
+        if ( this.level < Logger.levels.debug) {
+            return
+        }
+
         this.log(Logger.levels.debug, message, object)
     }
 
+    verbose(message, object) {
+        if ( this.level < Logger.levels.verbose) {
+            return
+        }
+
+        this.log(Logger.levels.verbose, message, object)
+    }
+
     silly(message, object) {
+        if ( this.level < Logger.levels.silly) {
+            return
+        }
+
         this.log(Logger.levels.silly, message, object)
     }
 

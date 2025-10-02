@@ -161,7 +161,7 @@ module.exports = class FileController {
             path = `files/${id}.${width}.${mime.getExtension(file.type)}`
             const hasFile = await this.fileService.hasFile(path)
             if ( ! hasFile ) {
-                this.core.logger.debug(`Missing width "${width}" for File(${id}).`)
+                request.logger.warn(`Missing width "${width}" for File(${id}).`)
                 path = file.filepath
             }
         }

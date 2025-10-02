@@ -25,7 +25,7 @@ import logger from '/logger'
 
 export const makeRequest = function(method, endpoint, body, onSuccess, onFailure, options) {
     return function(dispatch, getState) {
-        logger.debug(`>>> ${method} ${endpoint} >>>`)
+        logger.verbose(`>>> ${method} ${endpoint} >>>`)
 
         const system = getState().system
         const abortController = new AbortController()
@@ -68,7 +68,6 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
                 try { 
                     const secureValue = await SecureStoragePlugin.get({ key: 'auth-token' })
                     authToken = secureValue.value
-                    logger.debug(`Got auth token: ${authToken}`)
                 } catch (error) {
                     logger.warn(`Missing auth token.  Will make an unauthenticated request.`)
                 }
@@ -89,13 +88,14 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
             // ==================== Make the Request ==========================
             //
 
-            logger.debug(`<<< ${method} ${endpoint} :: Sending ${method} ${fullEndpoint} with options: ${JSON.stringify(fetchOptions)}`)
+            logger.verbose(`<<< ${method} ${endpoint} :: Sending ${method} ${fullEndpoint}.`)
+            //logger.verbose(`<<< ${method} ${endpoint} :: With options: ${JSON.stringify(fetchOptions)}`)
             const response = await fetch(fullEndpoint, fetchOptions)
-            logger.debug(`>>> ${method} ${endpoint} ::  Got ${response.status} with headers: `)
-            for(const [header, value] of response.headers) {
-                logger.debug(`>>> ${method} ${endpoint} :: Header::  ${header}=${value}`)
+            logger.verbose(`>>> ${method} ${endpoint} ::  Got ${response.status}.`)
+            /*for(const [header, value] of response.headers) {
+                logger.verbose(`>>> ${method} ${endpoint} :: Header::  ${header}=${value}`)
             }
-            logger.debug(`>>> ${method} ${fullEndpoint} :: End Headers`)
+            logger.verbose(`>>> ${method} ${fullEndpoint} :: End Headers`)*/
 
             // If they've been logged out, send them to the home page, which will
             // let them log back in again.
@@ -111,7 +111,6 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
             // one. This is the Session ID.  
             if ( Capacitor.getPlatform() === 'android' || Capacitor.getPlatform() === 'ios' ) {
                 if ( response.headers.has('X-Communities-Auth') ) {
-                    logger.debug(`Setting auth token: ${response.headers.get('X-Communities-Auth')}`)
                     await SecureStoragePlugin.set({ key: 'auth-token', value: response.headers.get('X-Communities-Auth') })
                 }
             }
@@ -193,7 +192,7 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
                 }
             }
 
-            logger.debug(`<<< ${method} ${endpoint} <<<`)
+            logger.verbose(`<<< ${method} ${endpoint} <<<`)
             return result 
         }
 

@@ -3,6 +3,7 @@ const config = {
   appName: "Communities",
   webDir: "web-application/public/dist/",
   backgroundColor: "#FFFFFF",
+  loggingBehavior: 'production',
   plugins: {
     CapacitorUpdater: {
       autoUpdate: false,
