@@ -172,17 +172,30 @@ const createExpressApp = function(core, sessionParser) {
 
     app.get('/.well-known/assetlinks.json', function(request, response) {
         core.logger.debug(`Request for Android Asset Links.`)
-        const json = [
+        let json = [
             {
                 "relation": ["delegate_permission/common.handle_all_urls"],
                 "target": {
                     "namespace": "android_app",
-                    "package_name": "social.communities.staging",
+                    "package_name": "social.communities",
                     "sha256_cert_fingerprints":
-                    ["7C:32:5C:22:C1:83:AB:E5:D7:0B:D7:9B:8D:19:5E:EB:22:5F:9E:02:61:00:9C:CD:91:1B:6A:78:5A:E7:AE:1F"]
+                    ["FD:47:DA:14:D7:86:25:1A:92:B6:B0:C8:C1:77:7B:F2:EF:12:C8:27:9D:FF:DB:ED:72:56:4C:48:6B:97:E4:76"]
                 }
             }
         ]
+        if ( process.env.NODE_ENV === 'staging' ) {
+            json = [
+                {
+                    "relation": ["delegate_permission/common.handle_all_urls"],
+                    "target": {
+                        "namespace": "android_app",
+                        "package_name": "social.communities.staging",
+                        "sha256_cert_fingerprints":
+                        ["7C:32:5C:22:C1:83:AB:E5:D7:0B:D7:9B:8D:19:5E:EB:22:5F:9E:02:61:00:9C:CD:91:1B:6A:78:5A:E7:AE:1F"]
+                    }
+                }
+            ]
+        }
         response.json(json)
     })
 
