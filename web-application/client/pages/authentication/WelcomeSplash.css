@@ -85,6 +85,9 @@
     .welcome-splash__login-wrapper {
         padding: 50px 0;
     }
+    .welcome-splash__store-badges {
+        padding-bottom: 100px;
+    }
 
 }
 @media (width <= 1000px) {
@@ -101,6 +104,9 @@
     }
     .welcome-splash__login-wrapper {
         padding: 50px 0;
+    }
+    .welcome-splash__store-badges {
+        padding-bottom: 100px;
     }
 }
 
