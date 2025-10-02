@@ -55,7 +55,7 @@ else {
   let environment = document.querySelector('meta[name="communities-environment"]').content
   let version = document.querySelector('meta[name="communities-version"]').content
 
-  console.log(`Communities startup with::\n 
+  logger.info(`Communities startup with::\n 
     environment: "${environment}"\n
     host: "${host}"\n
     API: "${api}"\n
