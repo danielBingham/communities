@@ -21,6 +21,8 @@
 const { WebSocketServer } = require('ws')
 const Uuid = require('uuid')
 
+const { Logger } = require('@communities/backend') 
+
 // ============ Header Smuggling ==============================================
 // We have to smuggle our custom headers in through the Sec-WebSocket-Protocol
 // header, since the WebSocket API doesn't give us any way to set custom headers.
@@ -66,16 +68,19 @@ const createWebSocketServer = function(core, sessionParser, httpServer) {
   webSocketServer.on('connection', function(socket, request) {
     const currentUser = request.session.user
     const connectionId = Uuid.v4()
-    core.logger.verbose(`++++++++++ Establishing socket Connection(${connectionId})...`)
+    const logger = new Logger(core.logger.level, currentUser?.username, connectionId)
 
     if ( ! currentUser ) {
-      core.logger.warn(`Unauthenticated user opened a socket Connection(${connectionId}).`)
+      logger.warn(`Unauthenticated user opened a socket connection.`)
       socket.close()
       return
     }
 
+    logger.info(`Socket connection established.`)
+
+
     socket.on('error', (error) => {
-      core.logger.error(error)
+      logger.error(error)
     })
 
     socket.on('message', (message) => {
@@ -88,8 +93,7 @@ const createWebSocketServer = function(core, sessionParser, httpServer) {
       } else if ( event.action === 'unsubscribe' ) {
         core.events.unsubscribe(currentUser.id, connectionId, event)
       } else {
-        core.logger.warn(`Unrecognized event recieved on Connect(${connectionId}): `)
-        core.logger.warn(event)
+        logger.warn(`Unrecognized event recieved: %O`, event)
       }
     })
 
@@ -98,14 +102,13 @@ const createWebSocketServer = function(core, sessionParser, httpServer) {
     })
 
     socket.on('close', () => {
-      core.logger.verbose(`---------- Closing socket Connection(${connectionId}).`)
+      logger.info(`Closing socket connection.`)
       core.events.unregisterConnection(currentUser.id, connectionId)
     })
   })
 
   httpServer.on('upgrade', function(request, httpSocket, head) {
-    core.logger.info(`<<<<<<<<< UPGRADE /socket`)
-    core.logger.verbose(`Headers: `, request.headers)
+    core.logger.verbose(`<<<<<<<<< UPGRADE /socket\n Headers: %O`, request.headers)
 
     httpSocket.on('error', errorListener)
 
@@ -128,7 +131,6 @@ const createWebSocketServer = function(core, sessionParser, httpServer) {
         httpSocket.removeListener('error', errorListener)
 
         webSocketServer.handleUpgrade(request, httpSocket, head, function(socket) {
-          core.logger.info(`>>>>>>>>> UPGRADE /socket Complete`)
           webSocketServer.emit('connection', socket, request)
         })
       })
