@@ -27,7 +27,7 @@ const RegistrationForm = function(props) {
     const [emailValidationError, setEmailValidationError] = useState([])
     const [passwordValidationError, setPasswordValidationError] = useState([])
     const [confirmPasswordValidationError, setConfirmPasswordValidationError] = useState([])
-    const [birthdateError, setBirthdateError] = useState([])
+    const [birthdateValidationError, setBirthdateValidationError] = useState([])
 
     const [request, makeRequest] = useRequest()
     const [usernameRequest, makeUsernameRequest] = useRequest()
@@ -89,13 +89,13 @@ const RegistrationForm = function(props) {
         }
 
         if ( ! field || field === 'birthdate' ) {
-            const birthdateValidationErrors = shared.validation.User.validateBirthdate(birthdate) 
-            if ( birthdateValidationErrors.length > 0 ) {
-                setBirthdateError(birthdateValidationErrors.reduce((string, error) => `${string} ${error.message}`, ''))
+            const birthdateErrors = shared.validation.User.validateBirthdate(birthdate) 
+            if ( birthdateErrors.length > 0 ) {
+                setBirthdateValidationError(birthdateErrors.reduce((string, error) => `${string} ${error.message}`, ''))
             } else {
-                setBirthdateError(null)
+                setBirthdateValidationError(null)
             }
-            error = error || birthdateValidationErrors.length > 0
+            error = error || birthdateErrors.length > 0
         }
 
         return ! error
@@ -166,6 +166,7 @@ const RegistrationForm = function(props) {
     let emailError = emailValidationError.join(' ')
     let passwordError = passwordValidationError.join(' ')
     let confirmPasswordError = confirmPasswordValidationError.join(' ')
+    let birthdateError = birthdateValidationError.join(' ')
 
     if ( request && request.state == 'failed' ) {
         if ( 'message' in request.error ) {
