@@ -55,9 +55,6 @@ const Refresher = function({ onRefresh }) {
                 return
             }
 
-            event.preventDefault()
-            event.stopPropagation()
-
             ref.current.style.display = 'block'
 
             const initialY = event.touches[0].screenY
@@ -72,13 +69,18 @@ const Refresher = function({ onRefresh }) {
                     return
                 }
 
-                event.preventDefault()
-                event.stopPropagation()
 
                 const currentY = event.touches[0].screenY
                 const dY = currentY - initialY 
                 const translation = tension(dY)
                 const rotation = dY
+
+                if ( dY < 0 ) {
+                    return
+                } 
+
+                event.preventDefault()
+                event.stopPropagation()
 
                 if ( dY > THRESHOLD ) {
                     shouldRefresh = true
@@ -93,9 +95,6 @@ const Refresher = function({ onRefresh }) {
                 if ( ! ref.current ) {
                     return
                 }
-
-                event.preventDefault()
-                event.stopPropagation()
 
                 ref.current.style.transform = `translateX(-50%)`
                 ref.current.style.display = `none`
@@ -113,9 +112,6 @@ const Refresher = function({ onRefresh }) {
                     return
                 }
 
-                event.preventDefault()
-                event.stopPropagation()
-
                 ref.current.style.transform = `translateX(-50%)`
                 ref.current.style.display = `none`
 
@@ -125,11 +121,11 @@ const Refresher = function({ onRefresh }) {
             }
 
             document.body.addEventListener('touchmove', handleMove, { passive: false })
-            document.body.addEventListener('touchend', handleEnd, { passive: false })
-            document.body.addEventListener('touchcancel', handleCancel, { passive: false })
+            document.body.addEventListener('touchend', handleEnd)
+            document.body.addEventListener('touchcancel', handleCancel)
         }
 
-        document.body.addEventListener('touchstart', handleStart, { passive: false })
+        document.body.addEventListener('touchstart', handleStart)
 
         return () => {
             if ( Capacitor.getPlatform() !== 'android' && Capacitor.getPlatform !== 'ios' ) {
