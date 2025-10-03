@@ -69,103 +69,84 @@ export class Logger  {
         return `${first}` 
     }
 
-    log(level, message, object) {
+    log(level, message, ...args) {
         // We don't need to log anything. 
         if ( level > this.level ) {
             return
         }
 
         let logPrefix = this.getPrefix(level) 
-
-        if ( Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android' ) {
-            if ( typeof message === 'object' ) {
-                message = JSON.stringify(message)
-            }
-
-            if ( object ) {
-                object = JSON.stringify(object)
-            }
-        }
-
-        if ( typeof message === 'object' ) {
-            if ( level == Logger.levels.error) {
-                console.error(logPrefix, message) 
-                Sentry.captureException(message)
+        if ( typeof message === 'string' ) {
+            const prefixedMessage = logPrefix + message
+            if ( level === Logger.levels.error ) {
+                console.error(prefixedMessage, ...args)
+                Sentry.captureException(new Error(message))
+            } else if ( level === Logger.levels.warn ) {
+                console.warn(prefixedMessage, ...args)
+                Sentry.captureException(new Error(message))
             } else {
-                console.log(logPrefix, message)
+                console.log(prefixedMessage, ...args)
             }
         } else {
-            if ( object !== undefined && object !== null ) {
-                if ( level == Logger.levels.error) {
-                    console.error(logPrefix + message, object)
-                    Sentry.captureException(`${logPrefix + message}: ${JSON.stringify(object)}`)
-                } else {
-                    console.log(logPrefix + message, object)
-                }
-
+            if ( level === Logger.levels.error ) {
+                console.error(logPrefix, message, ...args)
+                Sentry.captureException(message)
+            } else if ( level === Logger.levels.warn ) {
+                console.warn(logPrefix, message, ...args)
+                Sentry.captureException(message)
             } else {
-                if ( level == Logger.levels.error) {
-                    console.error(logPrefix + message)
-                    Sentry.captureException(message)
-                } else {
-                    console.log(logPrefix + message)
-                }
+                console.log(logPrefix, message, ...args)
             }
         }
     }
 
-    error(message, object) {
+    error(message, ...args) {
         if ( this.level < Logger.levels.error ) {
             return
         }
 
-        this.log(Logger.levels.error, message, object)    
+        this.log(Logger.levels.error, message, ...args)    
     }
 
-    warn(message, object) {
+    warn(message, ...args) {
         if ( this.level < Logger.levels.warn ) {
             return
         }
 
-        if ( message instanceof Error ) {
-            const content = `Warning: ${message.message}`
-            this.log(Logger.levels.warn, content, object)
-        } else {
-            this.log(Logger.levels.warn, message, object)
-        }
+        this.log(Logger.levels.warn, message, ...args)
     }
 
-    info(message, object) {
+    info(message, ...args) {
         if ( this.level < Logger.levels.info ) {
             return
         }
 
-        this.log(Logger.levels.info, message, object)
+        this.log(Logger.levels.info, message, ...args)
     }
 
 
-    debug(message, object) {
+    debug(message, ...args) {
         if ( this.level < Logger.levels.debug) {
             return
         }
 
-        this.log(Logger.levels.debug, message, object)
+        this.log(Logger.levels.debug, message, ...args)
     }
 
-    verbose(message, object) {
+    verbose(message, ...args) {
         if ( this.level < Logger.levels.verbose) {
             return
         }
 
-        this.log(Logger.levels.verbose, message, object)
+        this.log(Logger.levels.verbose, message, ...args)
     }
 
-    silly(message, object) {
+    silly(message, ...args) {
         if ( this.level < Logger.levels.silly) {
             return
         }
 
-        this.log(Logger.levels.silly, message, object)
+        this.log(Logger.levels.silly, message, ...args)
     }
 }
 
@@ -173,6 +154,8 @@ let environment = document.querySelector('meta[name="communities-environment"]')
 let initialLogLevel = 'info'
 if ( environment === 'development' ) {
     initialLogLevel = 'debug'
+} else if ( environment === 'staging' ) {
+    initialLogLevel = 'verbose'
 }
 
 const logger = new Logger(initialLogLevel)
