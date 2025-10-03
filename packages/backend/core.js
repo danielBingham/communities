@@ -118,6 +118,7 @@ module.exports = class Core {
 
         this.logger.info(`Connecting to postgres database at ${databaseConfig.host}:${databaseConfig.port} with ${databaseConfig.user}.`)
         this.database = new Pool(databaseConfig)
+        this.logger.database = this.database
 
         /**********************************************************************
          * Bull Queue Initialization

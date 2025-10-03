@@ -17,6 +17,8 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
+const Uuid = require('uuid')
+
 module.exports = class Logger  {
     /**
      * Use NPM's logging levels.
@@ -39,7 +41,10 @@ module.exports = class Logger  {
         'silly'
     ]
 
-    constructor(level, id, method, url) {
+    constructor(level) {
+        this.database = null
+
+        this.level = Logger.levels.info
         if (Number.isInteger(level)) {
             this.level = level
         } else {
@@ -50,26 +55,20 @@ module.exports = class Logger  {
                 }
             }
         }
+        this.platform = 'server'
+       
+        this.traceId = Uuid.v4()
+        this.userId = null
+        this.username = null
 
-        // For the core logger, we don't know what request this is.
-        this.id = '' 
-        if ( id ) {
-            this.id = id
-        }
+        // This should be a UUID generated and attached to the session
+        // specifically to serve as a session trace for logging.
+        //
+        // IT MUST NOT be the actual session id.
+        this.sessionId = null
 
-        this.method = ''
-        if ( method ) {
-            this.method = method
-        }
-
-        this.url = ''
-        if ( url ) {
-            this.url = url
-        }
-    }
-
-    setId(id) {
-        this.id = id
+        this.method = null
+        this.endpoint = null
     }
 
     getPrefix(level) {
@@ -78,15 +77,23 @@ module.exports = class Logger  {
         let first = `${now.toISOString()} ${Logger.levelDescriptions[level]} :: `
 
         let second = ''
-        if ( this.id !== '' ) {
-            second += this.id + ' '
+        if ( this.sessionId !== null ) {
+            second += this.sessionId + ' ' 
         }
 
-        if ( this.method !== '' ) {
+        if ( this.username !== null ) {
+            second += this.username + ' '
+        } else if ( this.userId !== null ) {
+            second += this.userId + ' '
+        } else if ( this.traceId !== null ) {
+            second += this.traceId + ' '
+        }
+
+        if ( this.method !== null ) {
             second += this.method + ' '
         }
 
-        if ( this.url !== '' ) {
+        if ( this.endpoint !== null ) {
             second += this.url + ' '
         }
 
@@ -121,6 +128,22 @@ module.exports = class Logger  {
                 console.warn(logPrefix, message, ...args)
             } else {
                 console.log(logPrefix, message, ...args)
+            }
+        }
+
+        if ( this.database !== null ) {
+            const databaseMessage = util.format(message, ...args)
+
+            try {
+                this.database.query(`INSERT INTO logs (level, platform, trace_id, user_id, session_id, method, endpoint, message)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                `, [ Logger.levelDescriptions[level], this.platform, this.traceId, this.userId, this.sessionId, this.method, this.endpoint, databaseMessage]).catch((error) => {
+                    console.warn(`Failed to write log to database.`)
+                    console.error(error)
+                })
+            } catch (error) {
+                console.warn(`Failed to write log to database.`)
+                console.error(error)
             }
         }
     }

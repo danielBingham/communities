@@ -524,4 +524,25 @@ CREATE INDEX permissions__role_id ON permissions (role_id);
 
 CREATE INDEX permissions__post_id ON permissions (post_id);
 
+/******************************************************************************
+ * Logs
+ ******************************************************************************/
+
+CREATE TYPE log_levels as ENUM('error', 'warn', 'info', 'debug', 'verbose', 'silly');
+CREATE TYPE log_platform as ENUM('web', 'ios', 'android', 'server', 'worker');
+CREATE TABLE logs (
+    id uuid PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
+
+    level log_levels DEFAULT 'info',
+    platform log_platform DEFAULT 'server',
+
+    trace_id uuid NOT NULL,
+    user_id uuid REFERENCES users (id) ON DELETE SET NULL DEFAULT NULL,
+    session_id text DEFAULT NULL,
+
+    method text DEFAULT NULL,
+    endpoint text DEFAULT NULL,
+
+    message text DEFAULT ''
+);
 

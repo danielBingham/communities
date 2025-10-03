@@ -23,7 +23,9 @@ const { Logger } = require('@communities/backend')
 
 const createLogMiddleware = function(core) {
     return function(request, response, next) {
-        request.logger = new Logger(core.logger.level, Uuid.v4(), request.method, request.originalUrl)
+        request.logger = new Logger(core.logger.level)
+        request.logger.method = request.method
+        request.logger.endpoint = request.originalUrl
 
         // Don't both logging the health requests.
         if ( request.url !== '/health' ) {
@@ -56,20 +58,21 @@ const createLogIdMiddleware = function(core) {
             return
         }
 
-        const oldId = request.logger.id
         // Set the id the logger will use to identify the session.  We don't want to
         // use the actual session id, since that value is considered sensitive.  So
         // instead we'll just use a uuid.
         if ( 'session' in request ) {
             if ( 'user' in request.session ) {
-                request.logger.setId(request.session.user.username)
-            }  else if ( 'logId' in request.session ) {
-                request.logger.setId(request.session.logId)
+                request.logger.userId = request.session.user.id
+                request.logger.username = request.session.user.username
+            }  
+
+            if ( 'logId' in request.session ) {
+                request.logger.sessionId = request.session.logId
             } else if ( ! ( 'logId' in request.session ) ) {
-                request.session.logId = request.logger.id
+                request.session.logId = Uuid.v4()
+                request.logger.sessionId = request.session.logId
             }
-            request.logger.info(`${oldId} -> ${request.logger.id}`)
-            request.logger.verbose(`Session: `, request.session)
         } 
         next()
     }
