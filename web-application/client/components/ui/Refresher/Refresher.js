@@ -55,6 +55,9 @@ const Refresher = function({ onRefresh }) {
                 return
             }
 
+            event.preventDefault()
+            event.stopPropagation()
+
             ref.current.style.display = 'block'
 
             const initialY = event.touches[0].screenY
@@ -68,6 +71,9 @@ const Refresher = function({ onRefresh }) {
                 if ( event.touches.length <= 0 ) {
                     return
                 }
+
+                event.preventDefault()
+                event.stopPropagation()
 
                 const currentY = event.touches[0].screenY
                 const dY = currentY - initialY 
@@ -88,7 +94,11 @@ const Refresher = function({ onRefresh }) {
                     return
                 }
 
+                event.preventDefault()
+                event.stopPropagation()
+
                 ref.current.style.transform = `translateX(-50%)`
+                ref.current.style.display = `none`
 
                 document.body.removeEventListener('touchmove', handleMove)
                 document.body.removeEventListener('touchend', handleEnd)
@@ -103,18 +113,23 @@ const Refresher = function({ onRefresh }) {
                     return
                 }
 
+                event.preventDefault()
+                event.stopPropagation()
+
                 ref.current.style.transform = `translateX(-50%)`
+                ref.current.style.display = `none`
+
                 document.body.removeEventListener('touchmove', handleMove)
                 document.body.removeEventListener('touchend', handleEnd)
                 document.body.removeEventListener('touchcancel', handleCancel)
             }
 
-            document.body.addEventListener('touchmove', handleMove)
-            document.body.addEventListener('touchend', handleEnd)
-            document.body.addEventListener('touchcancel', handleCancel)
+            document.body.addEventListener('touchmove', handleMove, { passive: false })
+            document.body.addEventListener('touchend', handleEnd, { passive: false })
+            document.body.addEventListener('touchcancel', handleCancel, { passive: false })
         }
 
-        document.body.addEventListener('touchstart', handleStart)
+        document.body.addEventListener('touchstart', handleStart, { passive: false })
 
         return () => {
             if ( Capacitor.getPlatform() !== 'android' && Capacitor.getPlatform !== 'ios' ) {
