@@ -1,3 +1,3 @@
 {
-  "watch": ["./server/", "../packages/backend", "../packages/shared", "../packages/session"]
+  "watch": ["./server/", "../packages/backend", "../packages/shared", "../packages/session", "./webpack.config.js"]
 }

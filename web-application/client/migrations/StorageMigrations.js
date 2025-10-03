@@ -22,7 +22,7 @@ import logger from '/logger'
 const currentVersion = 1
 
 const migrateVersion0to1= function() {
-    logger.debug(`Migrating localStorage from version 0 to version 1...`)
+    logger.info(`Migrating localStorage from version 0 to version 1...`)
     // We're not going to both trying to migrate from version zero.  Just wipe
     // it out and give us a clean slate.  The only thing in there should be
     // drafts.
@@ -40,7 +40,7 @@ export default function migrateLocalStorage() {
         storageVersion = 0
     }
 
-    logger.debug(`Current localStorage version: `, storageVersion)
+    logger.info(`Current localStorage version: `, storageVersion)
 
     // Start with the storage version and run each migration up to the current
     // version in order.  This is why order matters in the migrations array.
@@ -49,9 +49,9 @@ export default function migrateLocalStorage() {
             const migration = migrations[index]
             migration()
         }
-        logger.debug(`Migrated localStorage to version: `, currentVersion)
+        logger.info(`Migrated localStorage to version: `, currentVersion)
         localStorage.setItem('version', currentVersion)
     } else {
-        logger.debug(`localStorage up to date with version: `, currentVersion)
+        logger.info(`localStorage up to date with version: `, currentVersion)
     }
 }

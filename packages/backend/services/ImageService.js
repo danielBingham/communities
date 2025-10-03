@@ -58,10 +58,11 @@ module.exports = class ImageService {
         try {
             orientedContents = await sharp(fileContents).rotate().toBuffer() 
         } catch ( error ) {
-            this.core.logger.info(`Attempt to orient file before crop failed.`)
-            this.core.logger.info(file)
-            this.core.logger.info(crop)
-            this.core.logger.info(renderedDimensions)
+            this.core.logger.error(`Attempt to orient file before crop failed.\n
+                file: %O\n
+                crop: %O\n
+                renderedDimensions: %O
+            `, file, crop, renderedDimensions)
             throw error 
         }
         const dimensions = imageSize(orientedContents)
@@ -127,12 +128,14 @@ module.exports = class ImageService {
                 .extract({ left: x, top: y, width: width, height: height })
                 .toFile(tmpPath)
         } catch (error) {
-            this.core.logger.info(`Attempt to crop a file failed.`)
-            this.core.logger.info(file)
-            this.core.logger.info(dimensions)
-            this.core.logger.info(crop)
-            this.core.logger.info(renderedDimensions)
-            this.core.logger.info(`widthRatio: ${widthRatio}, heightRatio: ${heightRatio}, x: ${x}, y: ${y}, width: ${width}, height: ${height}`)
+            this.core.logger.error(`=== ImageService:: Attempt to crop a file failed::\n
+                file: %O\n
+                dimensions: %O\n
+                crop: %O\n
+                renderedDimensions: %O\n
+                widthRatio: ${widthRatio}, heightRatio: ${heightRatio}, x: ${x}, y: ${y}, width: ${width}, height: ${height}
+            `, file, dimensions, crop, renderedDimensions)
+            this.core.logger.error(error)
             throw error 
         }
 

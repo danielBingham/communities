@@ -209,7 +209,7 @@ function session(options) {
     // Handle connection as if there is no session if
     // the store has temporarily disconnected etc
     if (!storeReady) {
-      logger.debug('store is disconnected')
+      logger.verbose('store is disconnected')
       next()
       return
     }
@@ -217,7 +217,7 @@ function session(options) {
     // pathname mismatch
     var originalPath = parseUrl.original(req).pathname || '/'
     if (originalPath.indexOf(cookieOptions.path || '/') !== 0) {
-      logger.debug('pathname mismatch')
+      logger.verbose('pathname mismatch')
       next()
       return
     }
@@ -255,24 +255,24 @@ function session(options) {
 
     // set-cookie
     onHeaders(res, function(){
-      logger.debug(`--------------- Firing onHeaders --------------------`)
+      logger.verbose(`--------------- Firing onHeaders --------------------`)
       if (!req.session) {
-        logger.debug(`No session.`)
-        logger.debug('no session');
-        logger.debug(`---------------- End onHeaders -----------------------`)
+        logger.verbose(`No session.`)
+        logger.verbose('no session');
+        logger.verbose(`---------------- End onHeaders -----------------------`)
         return;
       }
 
       if (!shouldSetCookie(req)) {
-        logger.debug(`Should not set cookie.`)
-        logger.debug(`---------------- End onHeaders -----------------------`)
+        logger.verbose(`Should not set cookie.`)
+        logger.verbose(`---------------- End onHeaders -----------------------`)
         return;
       }
 
       // only send secure cookies via https
       if (req.session.cookie.secure && !issecure(req, trustProxy)) {
-        logger.debug('not secured');
-        logger.debug(`---------------- End onHeaders -----------------------`)
+        logger.verbose('not secured');
+        logger.verbose(`---------------- End onHeaders -----------------------`)
         return;
       }
 
@@ -285,13 +285,13 @@ function session(options) {
       // set cookie
       try {
         if ( platform === 'web' ) {
-          logger.debug(`Setting cookie: ${name}=${req.sessionId} `)
+          logger.verbose(`Setting cookie: ${name}=${req.sessionId} `)
           setcookie(res, name, req.sessionID, secrets[0], req.session.cookie.data)
         } else if ( platform === 'ios' || platform === 'android' ) {
-          logger.debug(`Setting Auth header: ${authHeader}=${req.sessionID}`)
+          logger.verbose(`Setting Auth header: ${authHeader}=${req.sessionID}`)
           setAuthHeader(res, authHeader, req.sessionID, secrets[0])
         } else {
-          logger.debug(`Setting cookie: ${name}=${req.sessionId} `)
+          logger.verbose(`Setting cookie: ${name}=${req.sessionId} `)
           // If platform is not specified, fall back to cookies.
           setcookie(res, name, req.sessionID, secrets[0], req.session.cookie.data)
         }
@@ -299,7 +299,7 @@ function session(options) {
         logger.error(err)
         defer(next, err)
       }
-      logger.debug(`---------------- End onHeaders -----------------------`)
+      logger.verbose(`---------------- End onHeaders -----------------------`)
     });
 
     // proxy end() to commit the session
@@ -350,7 +350,7 @@ function session(options) {
           encoding = undefined;
 
           if (chunk.length !== 0) {
-            logger.debug('split response');
+            logger.verbose('split response');
             ret = _write.call(res, chunk.slice(0, chunk.length - 1));
             chunk = chunk.slice(chunk.length - 1, chunk.length);
             return ret;
@@ -365,13 +365,13 @@ function session(options) {
 
       if (shouldDestroy(req)) {
         // destroy session
-        logger.debug('destroying');
+        logger.verbose('destroying');
         store.destroy(req.sessionID, function ondestroy(err) {
           if (err) {
             defer(next, err);
           }
 
-          logger.debug('destroyed');
+          logger.verbose('destroyed');
           writeend();
         });
 
@@ -380,7 +380,7 @@ function session(options) {
 
       // no session to save
       if (!req.session) {
-        logger.debug('no session');
+        logger.verbose('no session');
         return _end.call(res, chunk, encoding);
       }
 
@@ -402,13 +402,13 @@ function session(options) {
         return writetop();
       } else if (storeImplementsTouch && shouldTouch(req)) {
         // store implements touch method
-        logger.debug('touching');
+        logger.verbose('touching');
         store.touch(req.sessionID, req.session, function ontouch(err) {
           if (err) {
             defer(next, err);
           }
 
-          logger.debug('touched');
+          logger.verbose('touched');
           writeend();
         });
 
@@ -420,7 +420,7 @@ function session(options) {
 
     // generate the session
     function generate() {
-      logger.debug(`Generating a new session for ${req.sessionID}`)
+      logger.verbose(`Generating a new session for ${req.sessionID}`)
       store.generate(req);
       originalId = req.sessionID;
       originalHash = hash(req.session);
@@ -456,12 +456,12 @@ function session(options) {
       var _save = sess.save;
 
       function reload(callback) {
-        logger.debug('reloading %s', this.id)
+        logger.verbose('reloading %s', this.id)
         _reload.call(this, rewrapmethods(this, callback))
       }
 
       function save() {
-        logger.debug('saving %s', this.id);
+        logger.verbose('saving %s', this.id);
         savedHash = hash(this);
         _save.apply(this, arguments);
       }
@@ -500,7 +500,7 @@ function session(options) {
     function shouldSave(req) {
       // cannot set cookie without a session ID
       if (typeof req.sessionID !== 'string') {
-        logger.debug('session ignored because of bogus req.sessionID %o', req.sessionID);
+        logger.verbose('session ignored because of bogus req.sessionID %o', req.sessionID);
         return false;
       }
 
@@ -513,7 +513,7 @@ function session(options) {
     function shouldTouch(req) {
       // cannot set cookie without a session ID
       if (typeof req.sessionID !== 'string') {
-        logger.debug('session ignored because of bogus req.sessionID %o', req.sessionID);
+        logger.verbose('session ignored because of bogus req.sessionID %o', req.sessionID);
         return false;
       }
 
@@ -534,28 +534,28 @@ function session(options) {
 
     // generate a session if the browser doesn't send a sessionID
     if (!req.sessionID) {
-      logger.debug('no SID sent, generating session');
+      logger.verbose('no SID sent, generating session');
       generate();
       next();
       return;
     }
 
     // generate the session object
-    logger.debug('fetching %s', req.sessionID);
+    logger.verbose('fetching %s', req.sessionID);
     store.get(req.sessionID, function(err, sess){
       // error handling
       if (err && err.code !== 'ENOENT') {
-        logger.debug('error %j', err);
+        logger.verbose('error %j', err);
         next(err)
         return
       }
 
       try {
         if (err || !sess) {
-          logger.debug('no session found')
+          logger.verbose('no session found')
           generate()
         } else {
-          logger.debug('session found')
+          logger.verbose('session found')
           inflate(req, sess)
         }
       } catch (e) {

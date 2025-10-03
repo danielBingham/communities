@@ -136,8 +136,7 @@ module.exports = class GroupMemberDAO extends DAO {
         const entity = results.dictionary[results.list[0]]
 
         if ( entity.groupId !== groupId || entity.userId !== userId ) {
-            this.core.logger.info(entity)
-            this.core.logger.error(`Entity does not match query (${groupId}, ${userId}) in 'getGroupMemberByGroupAndUser'.  This should not happen.`)
+            this.core.logger.error(`Entity does not match query (${groupId}, ${userId}) in 'getGroupMemberByGroupAndUser'.  This should not happen.\n Entity: %s`, entity)
             return null
         }
 

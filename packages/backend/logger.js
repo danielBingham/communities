@@ -25,19 +25,17 @@ module.exports = class Logger  {
         error: 0,
         warn: 1,
         info: 2,
-        http: 3,
+        debug: 3,
         verbose: 4,
-        debug: 5,
-        silly: 6
+        silly: 5
     }
 
     static levelDescriptions = [
         'error',
         'warn',
         'info',
-        'http',
-        'verbose',
         'debug',
+        'verbose',
         'silly'
     ]
 
@@ -45,20 +43,11 @@ module.exports = class Logger  {
         if (Number.isInteger(level)) {
             this.level = level
         } else {
-            if (level == 'error') {
-                this.level = Logger.levels.error
-            } else if (level == 'warn') {
-                this.level = Logger.levels.warn
-            } else if (level == 'info') {
-                this.level = Logger.levels.info
-            } else if (level == 'http') {
-                this.level = Logger.levels.http
-            } else if (level == 'verbose') {
-                this.level = Logger.levels.verbose
-            } else if (level == 'debug') {
-                this.level = Logger.levels.debug
-            } else if (level == 'silly') {
-                this.level = Logger.levels.silly
+            for(let l = 0; l <= Logger.levels.silly; l++) {
+                if ( level === Logger.levelDescriptions[l] ) {
+                    this.level = l
+                    break
+                }
             }
         }
 
@@ -108,7 +97,7 @@ module.exports = class Logger  {
         return `${first}${second}` 
     }
 
-    log(level, message, object) {
+    log(level, message, ...args) {
         // We don't need to log anything. 
         if ( level > this.level ) {
             return
@@ -116,61 +105,72 @@ module.exports = class Logger  {
 
         const logPrefix = this.getPrefix(level)
 
-        if ( typeof message === 'object' ) {
-            if ( level == Logger.levels.error) {
-                console.error(logPrefix + 'Error encountered: ', message) 
+        if ( typeof message === 'string' ) {
+            const prefixedMessage = logPrefix + message
+            if ( level === Logger.levels.error ) {
+                console.error(prefixedMessage, ...args)
+            } else if ( level === Logger.levels.warn ) {
+                console.warn(prefixedMessage, ...args)
             } else {
-                console.log(logPrefix + 'Logging object: ', message)
+                console.log(prefixedMessage, ...args)
             }
         } else {
-            if ( object !== undefined && object !== null ) {
-                if ( level == Logger.levels.error) {
-                    console.error(logPrefix + message, object)
-                } else {
-                    console.log(logPrefix + message, object)
-                }
-
+            if ( level === Logger.levels.error ) {
+                console.error(logPrefix, message, ...args)
+            } else if ( level === Logger.levels.warn ) {
+                console.warn(logPrefix, message, ...args)
             } else {
-                if ( level == Logger.levels.error) {
-                    console.error(logPrefix + message)
-                } else {
-                    console.log(logPrefix + message)
-                }
+                console.log(logPrefix, message, ...args)
             }
         }
     }
 
-    error(message, object) {
-        this.log(Logger.levels.error, message, object)    
-    }
-
-    warn(message, object) {
-        if ( message instanceof Error ) {
-            const content = `Warning: ${message.message}`
-            this.log(Logger.levels.warn, content, object)
-        } else {
-            this.log(Logger.levels.warn, message, object)
+    error(message, ...args) {
+        if ( this.level < Logger.levels.error ) {
+            return
         }
+
+        this.log(Logger.levels.error, message, ...args)    
     }
 
-    info(message, object) {
-        this.log(Logger.levels.info, message, object)
+    warn(message, ...args) {
+        if ( this.level < Logger.levels.warn ) {
+            return
+        }
+
+        this.log(Logger.levels.warn, message, ...args)
     }
 
-    http(message, object) {
-        this.log(Logger.levels.http, message, object)
+    info(message, ...args) {
+        if ( this.level < Logger.levels.info ) {
+            return
+        }
+
+        this.log(Logger.levels.info, message, ...args)
     }
 
-    verbose(message, object) {
-        this.log(Logger.levels.verbose, message, object)
+    debug(message, ...args) {
+        if ( this.level < Logger.levels.debug) {
+            return
+        }
+
+        this.log(Logger.levels.debug, message, ...args)
     }
 
-    debug(message, object) {
-        this.log(Logger.levels.debug, message, object)
+    verbose(message, ...args) {
+        if ( this.level < Logger.levels.verbose) {
+            return
+        }
+
+        this.log(Logger.levels.verbose, message, ...args)
     }
 
-    silly(message, object) {
-        this.log(Logger.levels.silly, message, object)
+    silly(message, ...args) {
+        if ( this.level < Logger.levels.silly) {
+            return
+        }
+
+        this.log(Logger.levels.silly, message, ...args)
     }
 
 }

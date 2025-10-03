@@ -47,7 +47,7 @@ const PaginationControls = function({ meta }) {
         <div className="page-controls">
             <div><Button onClick={(e) => {e.preventDefault(); goToPage(firstPage)}}>First</Button></div>
             <div><Button onClick={(e) => {e.preventDefault(); goToPage(prevPage)}}>Previous</Button></div>
-            <div><span className="control">Page { page } of { meta.numberOfPages }</span></div>
+            <div><span className="control">{ page } of { meta.numberOfPages }</span></div>
             <div><Button onClick={(e) => {e.preventDefault(); goToPage(nextPage)}}>Next</Button></div>
             <div><Button onClick={(e) => {e.preventDefault(); goToPage(lastPage)}}>Last</Button></div>
         </div>

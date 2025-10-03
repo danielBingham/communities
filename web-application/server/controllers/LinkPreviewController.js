@@ -97,7 +97,7 @@ module.exports = class LinkPreviewController {
 
             const validationErrors = await this.validationService.validateLinkPreview(currentUser, linkPreview)
             if ( validationErrors.length > 0 ) {
-                this.core.logger.debug(linkPreview)
+                request.logger.warn(`Failed link preview: `, linkPreview)
                 const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
                 throw new ControllerError(500, 'server-error',
                     `LinkPreview failed to validate: ${logString}`,

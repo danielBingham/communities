@@ -4,6 +4,7 @@ const {
 
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const package = require('./package.json')
 
 let host = "https://communities.social"
 if ( process.env.NODE_ENV === 'development') {
@@ -84,7 +85,8 @@ module.exports = {
             meta: {
                 "communities-host": host,
                 "communities-api": api,
-                "communities-environment": process.env.NODE_ENV
+                "communities-environment": process.env.NODE_ENV,
+                "communities-version": package.version
             }
         }), 
         sentryWebpackPlugin({

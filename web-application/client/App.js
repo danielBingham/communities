@@ -103,11 +103,11 @@ const App = function(props) {
 
     useEffect(function() {
         if ( getInitializationRequest?.state == 'fulfilled') {
-            console.log(`System initialized...`)
+            logger.info(`System initialized...`)
             // Logger is a singleton, this will effect all other imports.
             logger.setLevel(configuration.log_level)
 
-            console.log(`Migrating local storage...`)
+            logger.info(`Migrating local storage...`)
             migrateLocalStorage()
 
             makeAuthenticationRequest(getAuthentication())

@@ -94,13 +94,13 @@ module.exports = class AndroidNotifications {
                 }
             }
 
-            this.core.logger.debug(`Attempting to send notification: `, message)
-            this.core.logger.debug(`To device: `, session.data.device)
+            this.core.logger.verbose(`Attempting to send notification: `, message)
+            this.core.logger.verbose(`To device: `, session.data.device)
 
             try { 
                 const response = await this.messaging.send(message)
-                this.core.logger.debug(`Got response: `)
-                this.core.logger.debug(response)
+                this.core.logger.verbose(`Got response: `)
+                this.core.logger.verbose(response)
             } catch (error) {
                 this.core.logger.error(`Failed sending Android Notification: `, error)
                 this.core.logger.error(`Message: `, message)
