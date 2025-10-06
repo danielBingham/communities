@@ -7,6 +7,11 @@ export const useScrollRestoration = function() {
     useEffect(() => {
         if ( ! ( 'hash' in location ) || location.hash === '' ) {
             window.scrollTo(0,0) 
+        } else {
+            const element = document.querySelector(location.hash)
+            if ( element !== null && element !== undefined ) {
+                element.scrollIntoView(true)
+            }
         }
     }, [ location ])
 

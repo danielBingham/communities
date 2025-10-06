@@ -41,7 +41,9 @@ const PasswordInput = function({ name, label, explanation, className, value, err
             onBlur={onBlur}
             onFocus={onFocus}
             error={error}
-        />
+        >
+            { passwordControl }
+        </TextInput>
     )
 }
 

@@ -8,19 +8,6 @@ import './TermsOfService.css'
 const TermsOfService = function({}) {
     const location = useLocation()
 
-    useEffect(function() {
-        if ( location.hash ) {
-            const hashElement = document.querySelector(location.hash)
-            if ( hashElement ) {
-                hashElement.scrollIntoView({
-                    block: 'center'
-                })
-            } else {
-                logger.warn(`Missing element for hash: '${document.location.hash}' `, hashElement)
-            }
-        }
-    }, [ location ])
-
     return (
         <article className="tos">
             <h1>Communities Terms of Service</h1>

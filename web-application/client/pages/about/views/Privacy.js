@@ -4,14 +4,6 @@ import './Privacy.css'
 
 const Privacy = function({}) {
 
-    useEffect(function() {
-        if ( document.location.hash ) {
-            document.querySelector(document.location.hash).scrollIntoView({
-                block: 'center'
-            })
-        }
-    }, [])
-
     return (
         <article className="privacy">
             <h1>Communities General Privacy Statement</h1>

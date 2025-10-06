@@ -69,10 +69,18 @@ const Refresher = function({ onRefresh }) {
                     return
                 }
 
+
                 const currentY = event.touches[0].screenY
                 const dY = currentY - initialY 
                 const translation = tension(dY)
                 const rotation = dY
+
+                if ( dY < 0 ) {
+                    return
+                } 
+
+                event.preventDefault()
+                event.stopPropagation()
 
                 if ( dY > THRESHOLD ) {
                     shouldRefresh = true
@@ -89,6 +97,7 @@ const Refresher = function({ onRefresh }) {
                 }
 
                 ref.current.style.transform = `translateX(-50%)`
+                ref.current.style.display = `none`
 
                 document.body.removeEventListener('touchmove', handleMove)
                 document.body.removeEventListener('touchend', handleEnd)
@@ -104,12 +113,14 @@ const Refresher = function({ onRefresh }) {
                 }
 
                 ref.current.style.transform = `translateX(-50%)`
+                ref.current.style.display = `none`
+
                 document.body.removeEventListener('touchmove', handleMove)
                 document.body.removeEventListener('touchend', handleEnd)
                 document.body.removeEventListener('touchcancel', handleCancel)
             }
 
-            document.body.addEventListener('touchmove', handleMove)
+            document.body.addEventListener('touchmove', handleMove, { passive: false })
             document.body.addEventListener('touchend', handleEnd)
             document.body.addEventListener('touchcancel', handleCancel)
         }

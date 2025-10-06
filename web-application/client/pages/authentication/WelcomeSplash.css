@@ -42,13 +42,10 @@
     width: 150px;
 }
 .welcome-splash__apple-store {
-    box-sizing: border-box;
     display: block;
-    padding: 10px;
+}
+.welcome-splash__apple-store img {
     width: 150px;
-    height: 44px;
-    border: thin solid var(--main-border-color);
-    border-radius: 5px;
 }
 
 @media (width >= 1500px) {
