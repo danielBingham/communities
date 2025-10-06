@@ -1,4 +1,4 @@
-main.headerless {
+main#headerless {
     box-sizing: border-box;
     width: 100%;
     max-width: 1400px;

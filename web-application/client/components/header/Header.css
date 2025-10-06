@@ -14,7 +14,10 @@ header {
     font-size: 18px;
     padding: 0 10px;
 }
-.ios header, .android header {
+.ios header {
+    padding-top: 50px;
+}
+.android header {
     padding-top: 40px;
 }
 header .authenticated-grid {

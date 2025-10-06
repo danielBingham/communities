@@ -5,7 +5,7 @@ import './HeaderlessLayout.css'
 const HeaderlessLayout = function() {
 
     return (
-        <main className="headerless">
+        <main id="headerless">
             <Outlet />
         </main>
     )

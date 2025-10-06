@@ -1,0 +1,40 @@
+@media (1600px <= width) {
+    main#authenticated {
+        box-sizing: border-box;
+
+        margin: 65px auto 0 auto; /** push us below the header **/
+        min-width: 360px;
+        width: 100%;
+        min-height: calc(100vh - 436px);
+
+        color: var(--main-text-color);
+        background-color: var(--main-background-color);
+    }
+}
+
+@media (1220px < width < 1600px) {
+    main#authenticated {
+        box-sizing: border-box;
+
+        margin: 65px auto 0 auto; /** push us below the header **/
+        min-width: 360px;
+        width: 100%;
+        min-height: calc(100vh - 436px);
+
+        color: var(--main-text-color);
+        background-color: var(--main-background-color);
+    }
+}
+@media (width <= 1220px) {
+    main#authenticated {
+        box-sizing: border-box;
+
+        margin: 65px auto 0 auto; /** push us below the header **/
+        min-width: 360px;
+        width: 100%;
+        min-height: calc(100vh - 436px);
+
+        color: var(--main-text-color);
+        background-color: var(--main-background-color);
+    }
+}

@@ -1,21 +1,19 @@
 import { Outlet } from 'react-router-dom'
 
 import Header from '/components/header/Header'
-import Footer from '/components/header/Footer'
 
-import './MainLayout.css'
+import './FooterlessLayout.css'
 
-const MainLayout = function() {
+const FooterlessLayout = function() {
 
     return (
         <>
         <Header />
-        <main>
+        <main id="footerless">
             <Outlet />
         </main>
-        <Footer />
         </>
     )
 }
 
-export default MainLayout
+export default FooterlessLayout

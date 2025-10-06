@@ -10,6 +10,9 @@ footer a:link, footer a:active, footer a:visited {
 footer a:hover {
     color: var(--header-text-highlight-color);
 }
+.ios footer, .android footer {
+    padding-bottom: 40px;
+}
 
 @media (800px <= width) {
     footer {
