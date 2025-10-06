@@ -67,7 +67,7 @@ const EmailConfirmationPage = function(props) {
     else if ( ! token && currentUser && currentUser.status == 'unconfirmed' ) {
         content = (
             <div className="email-confirmation-page__instructions">
-                <p>Please check your email for a confirmation request and follow
+                <p>Please check your email, "{ currentUser.email }", for a confirmation request and follow
                     the link within to confirm your address.</p>
                 <p> You can use the button below to send a
                 new email if needed. If you need help, don't hesitate to reach out to <a
