@@ -4,14 +4,6 @@ import './About.css'
 
 const About = function({}) {
 
-    useEffect(function() {
-        if ( document.location.hash ) {
-            document.querySelector(document.location.hash).scrollIntoView({
-                block: 'center'
-            })
-        }
-    }, [])
-
     return (
         <article className="about-view">
             <h1>Welcome to Communities!</h1>

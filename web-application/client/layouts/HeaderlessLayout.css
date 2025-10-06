@@ -6,4 +6,5 @@ main.headerless {
     margin: auto auto;
     color: var(--main-text-color);
     background-color: var(--main-background-color);
+    padding-bottom: 60px;
 }

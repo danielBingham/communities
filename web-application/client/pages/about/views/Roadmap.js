@@ -4,14 +4,6 @@ import './Roadmap.css'
 
 const Roadmap = function({}) {
 
-    useEffect(function() {
-        if ( document.location.hash ) {
-            document.querySelector(document.location.hash).scrollIntoView({
-                block: 'center'
-            })
-        }
-    }, [])
-
     return (
         <article className="roadmap-view">
             <h1>Development Roadmap</h1>
