@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 
 import { createToken, validateToken } from '/state/tokens'
+import { deleteAuthentication } from '/state/authentication'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
@@ -21,6 +22,7 @@ const EmailConfirmationPage = function(props) {
 
     const [ request, makeRequest ] = useRequest()
     const [ createTokenRequest, makeCreateTokenRequest ] = useRequest()
+    const [ logoutRequest, makeLogoutRequest ] = useRequest()
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
@@ -28,6 +30,14 @@ const EmailConfirmationPage = function(props) {
 
     const requestNewConfirmationEmail = function() {
         makeCreateTokenRequest(createToken({ type: 'email-confirmation', email: currentUser.email}))
+    }
+
+    const logout = function() {
+        // Clear local storage so their drafts don't carry over to another
+        // login session.
+        localStorage.clear()
+
+        makeRequest(deleteAuthentication())
     }
 
     useEffect(function() {
@@ -62,7 +72,7 @@ const EmailConfirmationPage = function(props) {
                 <p> You can use the button below to send a
                 new email if needed. If you need help, don't hesitate to reach out to <a
                 href="mailto:contact@communities.social">contact@communities.social</a>.</p>
-                <Button type="primary" onClick={(e) => requestNewConfirmationEmail()}>Resend Confirmation Email</Button>
+                <Button type="warn" onClick={() => logout()}>Cancel</Button> <Button type="primary" onClick={(e) => requestNewConfirmationEmail()}>Resend Confirmation Email</Button>
                 { createTokenRequest && createTokenRequest.state == 'fulfilled' && <p>Confirmation request sent!</p> }
             </div>
         )
@@ -87,7 +97,7 @@ const EmailConfirmationPage = function(props) {
                 <p> You can use the button below to send a
                 new email if needed. If you need help, don't hesitate to reach out to <a
                 href="mailto:contact@communities.social">contact@communities.social</a>.</p>
-                <Button type="primary" onClick={(e) => requestNewConfirmationEmail()}>Resend Confirmation Email</Button>
+                <Button type="warn" onClick={() => logout()}>Cancel</Button> <Button type="primary" onClick={(e) => requestNewConfirmationEmail()}>Resend Confirmation Email</Button>
                 { createTokenRequest && createTokenRequest.state == 'fulfilled' && <p>Confirmation request sent!</p> }
             </div>
         )
