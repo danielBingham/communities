@@ -2,9 +2,10 @@
 #registration-page .logo {
     text-align: center;
 }
+
 @media (width > 700px) {
     #registration-page {
-        margin: 0px auto;
+        margin: 105px auto;
         box-sizing: border-box;
         display: block;
         padding: 20px;
@@ -19,6 +20,7 @@
 @media (width <= 700px) {
     #registration-page {
         box-sizing: border-box;
+        margin: 105px auto;
         display: block;
         padding: 10px;
         width: 100%;

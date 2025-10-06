@@ -20,8 +20,8 @@ import { getInitialization } from '/state/system'
 import { getAuthentication } from '/state/authentication'
 
 import RootLayout from '/layouts/RootLayout'
-import MainLayout from '/layouts/MainLayout'
 import HeaderlessLayout from '/layouts/HeaderlessLayout'
+import FooterlessLayout from '/layouts/FooterlessLayout'
 import AuthenticatedLayout from '/layouts/AuthenticatedLayout'
 
 // Admin page for managing features.  Must be logged in and an admin to load it
@@ -151,7 +151,6 @@ const App = function(props) {
             <Router>
                 <Routes>
                     <Route element={ <RootLayout /> }>
-                        { /* ========= Headerless pages ====================== */ }
                         { /* These pages are primarily used in various
                         authentication flows that don't allow breaking out of the
                         flow.  So they don't have a header. */ }
@@ -162,15 +161,9 @@ const App = function(props) {
                             <Route path="/accept-terms-of-service" element={ <AcceptTermsOfServicePage /> } />
                             <Route path="/set-contribution" element={ <SetContributionPage /> } />
                             <Route path="/age-gate" element={ <AgeGate /> } />
-
-                            <Route element={<AuthenticatedLayout />}>
-                            </Route>
                         </Route>
 
-                        { /* ======== Pages with Headers ====================== */ }
-                        <Route element={<MainLayout />}>
-
-                            { /* ========== Authentication Controls =============== */ }
+                        <Route element={<FooterlessLayout />}>
                             <Route path="/login" element={ <LoginPage /> } />
                             <Route path="/reset-password-request" element={ <ResetPasswordRequestPage /> } />
                             <Route path="/register" element={ <RegistrationPage /> } />
@@ -184,53 +177,52 @@ const App = function(props) {
                                 <Route path="contact" element={ <Contact /> } />
                                 <Route index element={ <About />} />
                             </Route>
+                        </Route>
 
-                            <Route element={<AuthenticatedLayout />}>
-
-                                <Route path="/account" element={<UserAccountPage /> }>
-                                    <Route path="profile" element={ <UserProfileEditForm />  } />
-                                    <Route path="change-password" element={ <ChangePasswordForm /> } />
-                                    <Route path="change-email" element={ <ChangeEmailForm /> } />
-                                    <Route path="contribute" element={ <ContributionView /> } />
-                                    <Route path="settings" element={ <UserAccountSettingsView /> } /> { /* deprecated */ }
-                                    <Route path="preferences" element={ <UserAccountPreferencesView /> } />
-                                    <Route path="danger-zone" element={ <UserAccountDangerZoneView/> } />
-                                    <Route path="notifications" element={ <UserAccountNotificationsView /> } />
-                                    <Route index element={ <UserProfileEditForm/> } />
-                                </Route>
-
-                                <Route path="/admin/*" element={ <AdminPage />} />
-
-                                <Route path="/friends" element={ <FriendsPage />}>
-                                    <Route path="requests" element={ <FriendRequestsList />} />
-                                    <Route path="invited" element={ <FriendInvitationList />} />
-                                    <Route path="find" element={ <FindFriends /> } />
-                                    <Route path="invite" element={ <InviteFriends /> } />
-                                    <Route index element={<YourFriendsList />} />
-                                </Route>
-
-                                <Route path="/groups" element={<GroupsPage />}>
-                                    <Route path="create" element={ <CreateGroup />} />
-                                    <Route path="find" element={ <FindGroups />} />
-                                    <Route index element={<YourGroups />} />
-                                </Route> 
-
-                                <Route path="/group/:slug/*" element={<GroupPage />} />
-
-                                <Route path="/create" element={<CreatePostPage />} />
-
-                                <Route path="/" element={ <HomePage /> }> 
-                                    <Route path="/f/:slug" element={ <Feed type="feed" /> } />
-                                    <Route path="/g/:slug" element={ <Feed type="group" /> } />
-                                    <Route index element={ <Feed type="feed" /> } />
-                                </Route>
-
-                                <Route path="/:slug" element={ <UserProfilePage /> }>
-                                    <Route path=":postId" element={ <PostView /> } />
-                                    <Route index element={ <Feed type="user" /> } />
-                                </Route>
-
+                        <Route element={<AuthenticatedLayout />}>
+                            <Route path="/account" element={<UserAccountPage /> }>
+                                <Route path="profile" element={ <UserProfileEditForm />  } />
+                                <Route path="change-password" element={ <ChangePasswordForm /> } />
+                                <Route path="change-email" element={ <ChangeEmailForm /> } />
+                                <Route path="contribute" element={ <ContributionView /> } />
+                                <Route path="settings" element={ <UserAccountSettingsView /> } /> { /* deprecated */ }
+                                <Route path="preferences" element={ <UserAccountPreferencesView /> } />
+                                <Route path="danger-zone" element={ <UserAccountDangerZoneView/> } />
+                                <Route path="notifications" element={ <UserAccountNotificationsView /> } />
+                                <Route index element={ <UserProfileEditForm/> } />
                             </Route>
+
+                            <Route path="/admin/*" element={ <AdminPage />} />
+
+                            <Route path="/friends" element={ <FriendsPage />}>
+                                <Route path="requests" element={ <FriendRequestsList />} />
+                                <Route path="invited" element={ <FriendInvitationList />} />
+                                <Route path="find" element={ <FindFriends /> } />
+                                <Route path="invite" element={ <InviteFriends /> } />
+                                <Route index element={<YourFriendsList />} />
+                            </Route>
+
+                            <Route path="/groups" element={<GroupsPage />}>
+                                <Route path="create" element={ <CreateGroup />} />
+                                <Route path="find" element={ <FindGroups />} />
+                                <Route index element={<YourGroups />} />
+                            </Route> 
+
+                            <Route path="/group/:slug/*" element={<GroupPage />} />
+
+                            <Route path="/create" element={<CreatePostPage />} />
+
+                            <Route path="/" element={ <HomePage /> }> 
+                                <Route path="/f/:slug" element={ <Feed type="feed" /> } />
+                                <Route path="/g/:slug" element={ <Feed type="group" /> } />
+                                <Route index element={ <Feed type="feed" /> } />
+                            </Route>
+
+                            <Route path="/:slug" element={ <UserProfilePage /> }>
+                                <Route path=":postId" element={ <PostView /> } />
+                                <Route index element={ <Feed type="user" /> } />
+                            </Route>
+
                         </Route>
                     </Route>
                 </Routes>
