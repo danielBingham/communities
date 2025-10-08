@@ -41,7 +41,18 @@ module.exports = class LinkPreviewService {
     }
 
     async getPreview(url, userAgent) {
-        const response = await fetch(url, 
+        let rootUrl = null
+        try {
+            rootUrl = new URL(url)
+        } catch (error) {
+            throw new ServiceError('invalid-url', `Failed to parse the provided url.`)
+        }
+
+        if ( rootUrl === null ) {
+            throw new ServiceError('invalid-url', `Failed to parse the provided url.`)
+        }
+
+        const response = await fetch(rootUrl.href, 
         {
             method: 'GET',
             headers: {
@@ -87,36 +98,44 @@ module.exports = class LinkPreviewService {
             description = doc.querySelector('meta[name="description"]')?.getAttribute('content') || ''
         }
 
-        const image = doc.querySelector('meta[property="og:image"]')?.getAttribute('content') || ''
+        let image = doc.querySelector('meta[property="og:image"]')?.getAttribute('content') || ''
         let fileId = null
         if ( image !== '' ) {
             fileId = uuidv4()
 
             try {
-                const response = await fetch(image, { heaaders: { 'User-Agent': userAgent }})
+                const imageUrl = new URL(image, rootUrl.protocol + rootUrl.host)
 
-                const contentType = response.headers.get('Content-Type')
-                const extension =  mime.getExtension(contentType)
+                const response = await fetch(imageUrl.href, { heaaders: { 'User-Agent': userAgent }})
 
-                const tmpPath = `tmp/${fileId}.${extension}`
-                const filepath = `previews/${fileId}.${extension}`
+                if ( response.ok ) {
+                    image = imageUrl.href
 
-                const blob = await response.blob()
-                const buffer = await blob.arrayBuffer()
-                fs.writeFileSync(tmpPath, Buffer.from(buffer))
+                    const contentType = response.headers.get('Content-Type')
+                    const extension =  mime.getExtension(contentType)
 
-                await this.fileService.uploadFile(tmpPath, filepath)
+                    const tmpPath = `tmp/${fileId}.${extension}`
+                    const filepath = `previews/${fileId}.${extension}`
 
-                this.fileService.removeLocalFile(tmpPath)
+                    const blob = await response.blob()
+                    const buffer = await blob.arrayBuffer()
+                    fs.writeFileSync(tmpPath, Buffer.from(buffer))
 
-                const file = {
-                    id: fileId,
-                    userId: null,
-                    type: contentType,
-                    location: this.core.config.s3.bucket_url,
-                    filepath: filepath
+                    await this.fileService.uploadFile(tmpPath, filepath)
+
+                    this.fileService.removeLocalFile(tmpPath)
+
+                    const file = {
+                        id: fileId,
+                        userId: null,
+                        type: contentType,
+                        location: this.core.config.s3.bucket_url,
+                        filepath: filepath
+                    }
+                    await this.fileDAO.insertFile(file)
+                } else {
+                    image = ''
                 }
-                await this.fileDAO.insertFile(file)
             } catch (error) {
                 // On error cases, just null out the fileId and we'll fall
                 // back.
@@ -151,7 +170,7 @@ module.exports = class LinkPreviewService {
             type: type,
             siteName: siteName,
             description: description,
-            imageUrl: image,
+            imageUrl: image, 
             fileId: fileId
         }
 
