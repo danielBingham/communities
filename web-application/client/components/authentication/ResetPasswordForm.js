@@ -181,7 +181,7 @@ const ResetPasswordForm = function(props) {
                 <Input
                     name="new-password"
                     label="New Password"
-                    explanation="Enter a new password.  It must be at least 16 characters long."
+                    explanation="Enter a new password.  It must be at least 12 characters long."
                     type="password"
                     value={newPassword}
                     onBlur={ (event) => isValid('newPassword') }

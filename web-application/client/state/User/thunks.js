@@ -6,7 +6,7 @@ import { queryIsUsing } from '/state/lib/queryIsUsing'
 
 import { setCurrentUser } from '/state/authentication'
 
-import { setUsersInDictionary, setUserNull, removeUser, setUserQueryResults, clearUserQuery } from './slice'
+import { setUsersInDictionary, setUserNull, removeUser, setUserQueryResults, clearUserQuery, clearUserQueries } from './slice'
 
 const updateCurrentUser = function(response) {
     return function(dispatch, getState) {
@@ -183,6 +183,7 @@ export const deleteUser = function(user) {
     return function(dispatch, getState) {
         return dispatch(makeRequest('DELETE', `/user/${encodeURIComponent(user.id)}`, null,
             function(response) {
+                dispatch(clearUserQueries())
                 dispatch(removeUser({ entity: user }))
             }
         ))
