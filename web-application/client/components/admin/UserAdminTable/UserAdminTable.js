@@ -28,8 +28,11 @@ const UserAdminTable = function() {
     useEffect(function() {
         let page = searchParams.get('page')
         page = page || 1
-        makeRequest(getUsers('UserAdmin', { page: page, admin: true }))
-    }, [ searchParams ])
+        
+        if ( query === null ) {
+            makeRequest(getUsers('UserAdmin', { page: page, admin: true }))
+        }
+    }, [ query, searchParams ])
 
     if ( ! query ) {
         return (

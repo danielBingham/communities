@@ -811,29 +811,34 @@ module.exports = class UserController extends BaseController{
 
         const userId = request.params.id
 
-        if ( userId !== currentUser.id ) {
+        const canAdminSite = await this.permissionService.can(currentUser, 'admin', 'Site')
+        if ( userId !== currentUser.id && canAdminSite !== true ) {
             throw new ControllerError(403, 'not-authorized',
                 `User(${currentUser.id}) attempting to delete User(${userId}) without permission.`,
                 `You may not delete another user, only yourself.`)
         }
 
-        if ( currentUser.status === 'banned' ) {
+        if ( currentUser.status === 'banned' && canAdminSite !== true) {
             throw new ControllerError(403, 'not-authorized',
                 `User(${currentUser.id}) attempting to delete themselves, but they are banned.`,
                 `You are banned, you may not delete yourself.`)
         }
 
 
-        await this.userDAO.deleteUser(currentUser)
+        await this.userDAO.deleteUser({ id: userId })
 
-        request.session.destroy(function(error) {
-            if (error) {
-                console.error(error)
-                response.status(500).json({error: 'server-error'})
-            } else {
-                response.status(200).json(null)
-            }
-        })
+        if ( userId === currentUser.id ) {
+            request.session.destroy(function(error) {
+                if (error) {
+                    console.error(error)
+                    response.status(500).json({error: 'server-error'})
+                } else {
+                    response.status(200).json(null)
+                }
+            })
+        } else {
+            response.status(200).json(null)
+        }
     }
 
 } 
