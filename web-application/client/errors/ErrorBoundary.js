@@ -45,8 +45,8 @@ export default class ErrorBoundary extends React.Component {
             return ( 
                 <>
                     <header className="error-boundary"><CommunitiesLogo /> </header>
-                    <main>
-                        <div id="error-boundary">
+                    <main id="error-boundary">
+                        <div className="error-boundary__card">
                             <h1>You found a Bug!</h1>
                             <p>Something went wrong.  This is definitely a bug.</p>
                             <p>The error has been recorded, but if you have time to file a bug report and provide details about what you were doing when this error occurred, that would really help us debug it!</p>

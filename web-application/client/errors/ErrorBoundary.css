@@ -1,17 +1,23 @@
-#error-boundary {
+.ios #error-boundary, .android #error-boundary {
+    padding-bottom: 60px;
+}
+.error-boundary__card {
     background-color: white;
     font-size: 16px;
     box-sizing: border-box;
 }
 
-#error-boundary h1 {
+.error-boundary__card h1 {
     text-align: center;
 }
-#error-boundary .error-message .label {
+.error-boundary__card .error-message .label {
     font-weight: bold;
 }
 .error-boundary__buttons {
     text-align: center;
+}
+.ios main#footerless, .android main#footerless {
+    padding-bottom: 60px;
 }
 
 a.error-boundary__button:link,
@@ -32,9 +38,49 @@ a.error-boundary__button:hover {
     filter: opacity(80%);
 }
 
+@media (1600px <= width) {
+    main#error-boundary {
+        box-sizing: border-box;
+
+        margin: 65px auto 0 auto; /** push us below the header **/
+        min-width: 360px;
+        width: 100%;
+        min-height: calc(100vh - 436px);
+
+        color: var(--main-text-color);
+        background-color: var(--main-background-color);
+    }
+}
+
+@media (1220px < width < 1600px) {
+    main#error-boundary {
+        box-sizing: border-box;
+
+        margin: 65px auto 0 auto; /** push us below the header **/
+        min-width: 360px;
+        width: 100%;
+        min-height: calc(100vh - 436px);
+
+        color: var(--main-text-color);
+        background-color: var(--main-background-color);
+    }
+}
+@media (width <= 1220px) {
+    main#error-boundary {
+        box-sizing: border-box;
+
+        margin: 65px auto 0 auto; /** push us below the header **/
+        min-width: 360px;
+        width: 100%;
+        min-height: calc(100vh - 436px);
+
+        color: var(--main-text-color);
+        background-color: var(--main-background-color);
+    }
+}
 
 @media (width >= 700px) {
-    #error-boundary {
+    .error-boundary__card {
         border: thin solid var(--main-border-color);
         border-radius: 7px;
         padding: 20px;
@@ -45,7 +91,7 @@ a.error-boundary__button:hover {
 
 }
 @media (width < 750px) {
-    #error-boundary {
+    .error-boundary__card {
         border-top: thin solid var(--main-border-color);
         border-bottom: thin solid var(--main-border-color);
         padding: 20px;
