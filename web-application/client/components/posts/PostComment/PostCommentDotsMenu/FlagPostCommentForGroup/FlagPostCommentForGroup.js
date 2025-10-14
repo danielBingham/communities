@@ -5,7 +5,6 @@ import { FlagIcon as FlagIconOutline } from '@heroicons/react/24/outline'
 import { CheckCircleIcon, XCircleIcon, FlagIcon as FlagIconSolid } from '@heroicons/react/24/solid'
 
 import { useRequest } from '/lib/hooks/useRequest'
-import { useFeature } from '/lib/hooks/feature/useFeature'
 
 import { usePost } from '/lib/hooks/Post'
 import { usePostComment } from '/lib/hooks/PostComment'
@@ -42,8 +41,6 @@ const FlagPostCommentForGroup = function({ postId, postCommentId} ) {
 
     const canModerateGroup = useGroupPermission(currentUser, GroupPermissions.MODERATE, { group: group, userMember: currentMember })
 
-    const hasGroupModerationControls = useFeature('89-improved-moderation-for-group-posts')
-
     const [request, makeRequest] = useRequest()
 
     const flagForGroup = function() {
@@ -56,10 +53,6 @@ const FlagPostCommentForGroup = function({ postId, postCommentId} ) {
         }  
     }, [ request])
 
-
-    if ( ! hasGroupModerationControls ) {
-        return null
-    }
 
     if ( ! currentUser ) {
         return null

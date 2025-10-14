@@ -145,19 +145,9 @@ module.exports = class PostController {
             where: `link_previews.id = ANY($1::uuid[])`,
             params: [ linkPreviewIds ]
         })
-
         const userResults = await this.userDAO.selectUsers({ where: `users.id = ANY($1::uuid[])`, params: [userIds]})
 
-        const relations = {
-            files: fileDictionary,
-            linkPreviews: linkPreviewResults.dictionary,
-            posts: sharedPostResults.dictionary,
-            postComments: postCommentResults.dictionary,
-            postReactions: postReactionResults.dictionary,
-            postSubscriptions: postSubscriptionResults.dictionary,
-            users: userResults.dictionary
-        }
-
+        // ==== Group ====
         const groupIds = []
         for (const postId of results.list) {
             const post = results.dictionary[postId]
@@ -168,22 +158,29 @@ module.exports = class PostController {
             params: [groupIds]
         })
 
-        relations.groups = groupResults.dictionary
-
+        // ==== SiteModeration ====
         const siteModerationResults = await this.siteModerationDAO.selectSiteModerations({
             where: `site_moderation.post_id = ANY($1::uuid[]) OR site_moderation.post_comment_id = ANY($2::uuid[])`,
             params: [ results.list, postCommentResults.list ]
         })
 
-        relations.siteModerations = siteModerationResults.dictionary
+        // ==== GroupModeration ====
+        const groupModerationResults = await this.groupModerationDAO.selectGroupModerations({
+            where: `group_moderation.post_id = ANY($1::uuid[]) OR group_moderation.post_comment_id = ANY($2::uuid[])`, 
+            params: [ results.list, postCommentResults.list ]
+        })
 
-        if ( this.core.features.has('89-improved-moderation-for-group-posts') ) {
-            const groupModerationResults = await this.groupModerationDAO.selectGroupModerations({
-                where: `group_moderation.post_id = ANY($1::uuid[]) OR group_moderation.post_comment_id = ANY($2::uuid[])`, 
-                params: [ results.list, postCommentResults.list ]
-            })
-
-            relations.groupModerations = groupModerationResults.dictionary
+        const relations = {
+            files: fileDictionary,
+            groups: groupResults.dictionary,
+            groupModerations: groupModerationResults.dictionary,
+            linkPreviews: linkPreviewResults.dictionary,
+            posts: sharedPostResults.dictionary,
+            postComments: postCommentResults.dictionary,
+            postReactions: postReactionResults.dictionary,
+            postSubscriptions: postSubscriptionResults.dictionary,
+            siteModerations: siteModerationResults.dictionary,
+            users: userResults.dictionary
         }
 
         return relations

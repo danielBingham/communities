@@ -37,7 +37,6 @@ CREATE TABLE features (
  */
 INSERT INTO features (name, status, created_date, updated_date)
     VALUES 
-        ('89-improved-moderation-for-group-posts', 'enabled', now(), now()),
         ('80-group-moderators-can-ban-users', 'enabled', now(), now());
 
 

@@ -77,15 +77,13 @@ const SCHEMA = {
                 insert: 'allowed',
                 update: 'allowed',
                 selected: 'always',
-                key: 'siteModerationId',
-                needsFeature: '89-improved-moderation-for-group-posts'
+                key: 'siteModerationId'
             },
             'group_moderation_id': {
                 insert: 'allowed',
                 update: 'allowed',
                 selected: 'always',
-                key: 'groupModerationId',
-                needsFeature: '89-improved-moderation-for-group-posts'
+                key: 'groupModerationId'
             },
             'activity': {
                 insert: 'allowed',
