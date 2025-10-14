@@ -116,7 +116,7 @@ module.exports = class FeatureController {
         }
 
         // 2. User must be an admin or a superadmin.
-        if ( request.session.user.permissions != 'admin' && request.session.user.permissions != 'superadmin' ) {
+        if ( request.session.user.siteRole != 'admin' && request.session.user.siteRole != 'superadmin' ) {
             throw new ControllerError(403, 'not-authorized',
                 `Attempt to initialize a feature from a non-admin user.`)
         }
@@ -200,7 +200,7 @@ module.exports = class FeatureController {
                 `Unauthenticated user attempt to access non-enabled Feature(${name}).`)
         }
 
-        if ( request.session.user.permissions != 'admin' && request.session.user.permissions != 'superadmin') {
+        if ( request.session.user.siteRole != 'admin' && request.session.user.siteRole != 'superadmin') {
             throw new ControllerError(404, 'no-resource',
                 `Non-admin User(${request.session.user.id}) attempting to access Feature(${name}).`)
         }
@@ -243,7 +243,7 @@ module.exports = class FeatureController {
         }
 
         // 2. User must be an admin or a superadmin.
-        if ( request.session.user.permissions != 'admin' && request.session.user.permissions != 'superadmin') {
+        if ( request.session.user.siteRole != 'admin' && request.session.user.siteRole != 'superadmin') {
             throw new ControllerError(404, 'no-resource',
                 `Non-admin attempting to access Feature(${request.params.id}).`)
         }

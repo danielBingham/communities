@@ -10,7 +10,6 @@ const UserAccountNotificationsView = function() {
 
     const features = useSelector((state) => state.system.features)
 
-    const hasNotificationSettings = '1-notification-settings' in features && features['1-notification-settings'].status === 'enabled'
     const hasNotificationOverhaul = '177-notification-overhaul' in features && features['177-notification-overhaul'].status === 'enabled'
 
     if ( hasNotificationOverhaul ) {
@@ -109,7 +108,7 @@ const UserAccountNotificationsView = function() {
         )
     } else {
         return (<div className="user-settings">
-            { hasNotificationSettings && <NotificationSettingsSection />}
+             <NotificationSettingsSection />
         </div>
         )
     }

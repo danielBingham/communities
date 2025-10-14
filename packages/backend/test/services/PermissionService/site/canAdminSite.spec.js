@@ -33,12 +33,6 @@ describe('PermissionService.canAdminSite()', function() {
         core.database.query.mockReset()
         // Disable logging.
         core.logger.level = -1 
-
-        core.features.features = {
-            '62-admin-moderation-controls': {
-                status: 'enabled'
-            }
-        }
     })
 
     it("Should not allow a user with the 'member' role to admin", async function() {

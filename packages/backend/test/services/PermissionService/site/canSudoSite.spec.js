@@ -34,11 +34,7 @@ describe('PermissionService.canSudoSite()', function() {
         // Disable logging.
         core.logger.level = -1 
 
-        core.features.features = {
-            '62-admin-moderation-controls': {
-                status: 'enabled'
-            }
-        }
+        core.features.features = { }
     })
 
     it("Should not allow a user with the 'member' role to admin", async function() {

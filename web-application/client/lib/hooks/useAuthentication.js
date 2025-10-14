@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom'
 
 export function useAuthentication() {
     const currentUser = useSelector((state) => state.authentication.currentUser)
-    const features = useSelector((state) => state.system.features)
 
     const navigate = useNavigate()
     useEffect(function() {
@@ -45,13 +44,13 @@ export function useAuthentication() {
                 navigate("/email-confirmation")
                 return
             } else if ( currentUser.status === 'confirmed' ) {
-                const showTermsNotice = '3-notices' in features && ! currentUser.notices?.termsOfService
+                const showTermsNotice = ! currentUser.notices?.termsOfService
                 if ( showTermsNotice ) {
                     navigate('/accept-terms-of-service')
                     return
                 }
 
-                const showContributionNotice = '3-notices' in features && ! currentUser.notices?.contribution
+                const showContributionNotice = ! currentUser.notices?.contribution
                 if ( showContributionNotice ) {
                     navigate('/set-contribution')
                     return

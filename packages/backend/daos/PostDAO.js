@@ -41,22 +41,19 @@ const SCHEMA = {
                 insert: 'allowed',
                 update: 'denied',
                 select: 'always',
-                key: 'groupId',
-                needsFeature: '19-private-groups'
+                key: 'groupId'
             },
             'type': {
                 insert: 'required',
                 update: 'denied',
                 select: 'always',
-                key: 'type',
-                needsFeature: '19-private-groups'
+                key: 'type'
             },
             'visibility': {
                 insert: 'required',
                 update: 'allowed',
                 select: 'always',
-                key: 'visibility',
-                needsFeature: '17-public-posts'
+                key: 'visibility'
             },
             'file_id': {
                 insert: 'allowed',
@@ -74,8 +71,7 @@ const SCHEMA = {
                 insert: 'allowed',
                 update: 'denied',
                 selected: 'always',
-                key: 'sharedPostId',
-                needsFeature: '18-post-sharing'
+                key: 'sharedPostId'
             },
             'site_moderation_id': {
                 insert: 'allowed',

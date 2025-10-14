@@ -34,8 +34,6 @@ const FlagPost = function({ postId } ) {
     const [siteModeration, siteModerationRequest] = useSiteModeration(post?.siteModerationId)
     const canModerateSite = useSitePermission(currentUser, SitePermissions.MODERATE)
 
-    const hasAdminModerationControls = useFeature('62-admin-moderation-controls')
-
     const [request, makeRequest] = useRequest()
 
     const flagForSite = function() {
@@ -48,10 +46,6 @@ const FlagPost = function({ postId } ) {
             closeMenu()
         } 
     }, [ request])
-
-    if ( ! hasAdminModerationControls ) {
-        return null
-    }
 
     if ( ! currentUser ) {
         return null

@@ -158,28 +158,24 @@ module.exports = class PostController {
             users: userResults.dictionary
         }
 
-        if ( this.core.features.has('19-private-groups') ) {
-            const groupIds = []
-            for (const postId of results.list) {
-                const post = results.dictionary[postId]
-                groupIds.push(post.groupId)
-            }
-            const groupResults = await this.groupDAO.selectGroups({
-                where: `groups.id = ANY($1::uuid[])`,
-                params: [groupIds]
-            })
-
-            relations.groups = groupResults.dictionary
+        const groupIds = []
+        for (const postId of results.list) {
+            const post = results.dictionary[postId]
+            groupIds.push(post.groupId)
         }
+        const groupResults = await this.groupDAO.selectGroups({
+            where: `groups.id = ANY($1::uuid[])`,
+            params: [groupIds]
+        })
 
-        if ( this.core.features.has('62-admin-moderation-controls') ) {
-            const siteModerationResults = await this.siteModerationDAO.selectSiteModerations({
-                where: `site_moderation.post_id = ANY($1::uuid[]) OR site_moderation.post_comment_id = ANY($2::uuid[])`,
-                params: [ results.list, postCommentResults.list ]
-            })
+        relations.groups = groupResults.dictionary
 
-            relations.siteModerations = siteModerationResults.dictionary
-        }
+        const siteModerationResults = await this.siteModerationDAO.selectSiteModerations({
+            where: `site_moderation.post_id = ANY($1::uuid[]) OR site_moderation.post_comment_id = ANY($2::uuid[])`,
+            params: [ results.list, postCommentResults.list ]
+        })
+
+        relations.siteModerations = siteModerationResults.dictionary
 
         if ( this.core.features.has('89-improved-moderation-for-group-posts') ) {
             const groupModerationResults = await this.groupModerationDAO.selectGroupModerations({

@@ -63,7 +63,7 @@ const UserMenu = function(props) {
 
     // ======= Render ===============================================
 
-    const isAdmin = currentUser.permissions == 'admin' || currentUser.permissions == 'superadmin'
+    const isAdmin = currentUser.siteRole == 'admin' || currentUser.siteRole == 'superadmin'
     return (
         <div id="user-menu" className="floating-menu" style={{ display: ( props.visible ? 'block' : 'none' ) }} >
             <div className="menu-section">

@@ -21,9 +21,6 @@
 const FeatureDAO = require('../daos/FeatureDAO')
 
 const ExampleMigration = require('../migrations/ExampleMigration')
-const NotificationSettingsMigration = require('../migrations/NotificationSettingsMigration')
-const NoticeMigration = require('../migrations/NoticeMigration')
-const RelationshipsOwnStateMigration = require('../migrations/RelationshipsOwnStateMigration')
 const CommentSubscriptionsMigration = require('../migrations/CommentSubscriptionsMigration')
 const FixActivityMigration = require('../migrations/FixActivityMigration')
 const PrivateGroupsMigration = require('../migrations/PrivateGroupsMigration')
@@ -82,61 +79,6 @@ module.exports = class FeatureService {
                 dependsOn: [],
                 conflictsWith: [],
                 migration: new ExampleMigration(core)
-            },
-            '1-notification-settings': {
-                dependsOn: [],
-                conflictsWith: [],
-                migration: new NotificationSettingsMigration(core)
-            },
-            '3-notices': {
-                dependsOn: [],
-                conflictsWith: [],
-                migration: new NoticeMigration(core)
-            },
-            '5-relationships-own-state': {
-                dependsOn: [],
-                conflictsWith: [],
-                migration: new RelationshipsOwnStateMigration(core)
-            },
-            '13-comment-subscriptions-migration': {
-                dependsOn: [],
-                conflictsWith: [],
-                migration: new CommentSubscriptionsMigration(core)
-            },
-            'fix-post-activity': {
-                dependsOn: [],
-                conflictsWith: [],
-                migration: new FixActivityMigration(core)
-            },
-            '19-private-groups': {
-                dependsOn: [],
-                conflictsWith: [],
-                migration: new PrivateGroupsMigration(core)
-            },
-            '9-image-transcoding': {
-                dependsOn: [],
-                conflictsWith: [],
-                migration: new ImageResizeMigration(core)
-            },
-            '17-public-posts': {
-                dependsOn:[],
-                conflictsWith: [],
-                migration: new PublicPostsMigration(core)
-            },
-            '18-post-sharing': {
-                dependsOn: ['17-public-posts'],
-                conflictsWith: [],
-                migration: new PostSharingMigration(core)
-            },
-            '62-admin-moderation-controls': {
-                dependsOn: ['18-post-sharing'],
-                conflictsWith: [],
-                migration: new AdminModerationMigration(core)
-            },
-            '87-site-admins-can-ban-users': {
-                dependsOn: ['62-admin-moderation-controls'],
-                conflictsWith: [],
-                migration: new SiteAdminsCanBanUsersMigration(core)
             },
             '89-improved-moderation-for-group-posts': {
                 dependsOn: [ '62-admin-moderation-controls' ],

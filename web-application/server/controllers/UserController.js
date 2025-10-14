@@ -291,7 +291,7 @@ module.exports = class UserController extends BaseController{
         }
 
         if ( 'admin' in query && query.admin === 'true') {
-            if ( currentUser.permissions === 'admin' || currentUser.permissions === 'superadmin' ) {
+            if ( currentUser.siteRole === 'admin' || currentUser.siteRole === 'superadmin' ) {
                 result.fields = 'all'
             } else {
                 throw new ControllerError(403, 'not-authorized',
@@ -672,7 +672,7 @@ module.exports = class UserController extends BaseController{
         // - admin-edit
         //
         else if ( currentUser.id !== existingUser.id 
-            && (currentUser.permissions === 'admin' || currentUser.permissions === 'superadmin')) 
+            && (currentUser.siteRole === 'admin' || currentUser.siteRole === 'superadmin')) 
         {
             type = 'admin-edit'
         }

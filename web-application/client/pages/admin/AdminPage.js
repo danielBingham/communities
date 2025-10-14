@@ -18,13 +18,12 @@ import './AdminPage.css'
 const AdminPage = function(props) {
     
     const currentUser = useSelector((state) => state.authentication.currentUser)
-    const hasAdminModerationControls = useFeature('62-admin-moderation-controls')
    
     const navigate = useNavigate()
 
     // Only admins and superadmins may be here.
     useEffect(function() {
-        if ( ! currentUser || (currentUser.permissions != 'admin' && currentUser.permissions != 'superadmin')) {
+        if ( ! currentUser || (currentUser.siteRole != 'admin' && currentUser.siteRole != 'superadmin')) {
             navigate("/")
         }
     }, [ currentUser ])
@@ -43,7 +42,7 @@ const AdminPage = function(props) {
             <PageLeftGutter>
                 <menu className="admin__menu">
                     <li><NavLink to={``} end><span className="nav-text"> Dashboard</span></NavLink></li>
-                    { hasAdminModerationControls && <li><NavLink to="moderation" end><span className="nav-text"> Moderation</span></NavLink></li> }
+                    <li><NavLink to="moderation" end><span className="nav-text"> Moderation</span></NavLink></li> 
                     <li><NavLink to="blocklist" end><span className="nav-text">Blocklist</span></NavLink></li>
                     <li><NavLink to="features" end><span className="nav-text"> Features</span></NavLink></li>
                     <li><NavLink to="users" end><span className="nav-text"> Users</span></NavLink></li>

@@ -88,11 +88,9 @@ const SCHEMA = {
                 insert: DAO.INSERT.DENY,
                 update: DAO.UPDATE.ALLOW,
                 select: DAO.SELECT.REQUEST,
-                key: 'siteRole',
-                needsFeature: '62-admin-moderation-controls'
+                key: 'siteRole'
             },
             'settings': {
-                needsFeature: '1-notification-settings',
                 insert: DAO.INSERT.ALLOW,
                 insertDefault: function() {
                     return {
@@ -104,7 +102,6 @@ const SCHEMA = {
                 key: 'settings'
             },
             'notices': {
-                needsFeature: '3-notices',
                 insert: DAO.INSERT.ALLOW,
                 insertDefault: function() {
                     return {}
