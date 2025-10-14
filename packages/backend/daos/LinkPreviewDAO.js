@@ -70,8 +70,7 @@ const SCHEMA = {
                 insert: 'allowed',
                 update: 'allowed',
                 select: 'always',
-                key: 'fileId',
-                needsFeature: '171-download-canonical-image-for-link-previews'
+                key: 'fileId'
             },
             'created_date': {
                 insert: 'override',

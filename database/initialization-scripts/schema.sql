@@ -35,10 +35,9 @@ CREATE TABLE features (
 /**
  * Insert those features that have already been migrated in the schema.
  */
-INSERT INTO features (name, status, created_date, updated_date)
+/*INSERT INTO features (name, status, created_date, updated_date)
     VALUES 
-        ('80-group-moderators-can-ban-users', 'enabled', now(), now());
-
+        ('80-group-moderators-can-ban-users', 'enabled', now(), now());*/
 
 
 /******************************************************************************

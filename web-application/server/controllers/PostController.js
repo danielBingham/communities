@@ -236,23 +236,15 @@ module.exports = class PostController {
             const groupParam = query.params.length
 
             // Permissions control statements, this determines what is visible.
-            if ( this.core.features.has('230-admin-announcements') ) {
-                const showAnnouncements = 'showAnnouncements' in currentUser.settings ? currentUser.settings.showAnnouncements : true
-                const showInfo = 'showInfo' in currentUser.settings ? currentUser.settings.showInfo : true
-                query.where += `(
+            const showAnnouncements = 'showAnnouncements' in currentUser.settings ? currentUser.settings.showAnnouncements : true
+            const showInfo = 'showInfo' in currentUser.settings ? currentUser.settings.showInfo : true
+            query.where += `(
                         (posts.user_id = ANY($${friendParam}::uuid[]) AND posts.type = 'feed') 
                         ${ showAnnouncements ? `OR posts.type = 'announcement'` : ''}
                         ${ showInfo ? `OR posts.type = 'info'` : ''}
                         OR (posts.type = 'group' AND posts.group_id = ANY($${groupParam}::uuid[]) AND posts.user_id != ALL($${blockParam}::uuid[])) 
                         OR (posts.visibility = 'public' AND posts.user_id != ALL($${blockParam}::uuid[]))
                 )`
-            } else {
-                query.where += `(
-                    (posts.user_id = ANY($${friendParam}::uuid[]) AND posts.type = 'feed') 
-                    OR (posts.type = 'group' AND posts.group_id = ANY($${groupParam}::uuid[]) AND posts.user_id != ALL($${blockParam}::uuid[])) 
-                    OR (posts.visibility = 'public' AND posts.user_id != ALL($${blockParam}::uuid[]))
-                )`
-            }
         }
 
         // ====================================================================
