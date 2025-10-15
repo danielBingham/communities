@@ -40,7 +40,7 @@ module.exports = class LinkPreviewService {
         this.fileService = new S3FileService(core)
     }
 
-    async getPreview(url, userAgent) {
+    async getPreview(url, headers) {
         let rootUrl = null
         try {
             rootUrl = new URL(url)
@@ -52,16 +52,36 @@ module.exports = class LinkPreviewService {
             throw new ServiceError('invalid-url', `Failed to parse the provided url.`)
         }
 
-        const response = await fetch(rootUrl.href, 
-        {
-            method: 'GET',
-            headers: {
-                'User-Agent': userAgent
+        const scrapeHeaders = {
+            'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'Accept-Encoding':'gzip, deflate, br',
+            'Accept-Language':'en-US,en;q=0.9',
+            'Cache-Control': 'max-age=0',
+            'Sec-Ch-Ua': headers['sec-ch-ua'],
+            'Sec-Ch-Ua-Mobile': headers['sec-ch-ua-mobile'],
+            'Sec-Ch-Ua-Platform': headers['sec-ch-ua-platform'],
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'same-origin',
+            'Sec-Fetch-User':'?1',
+            'Upgrade-Insecure-Requests': '1',
+            'User-Agent': headers['user-agent'],
+        }
+        let response = await fetch(rootUrl.href, 
+            {
+                method: 'GET',
+                headers: scrapeHeaders
             }
-        })
+        )
 
         if ( ! response.ok) {
-            throw new ServiceError('request-failed', `Attempt to retrieve a link preview failed with status: ${response.status}`)
+            this.core.logger.info(`LinkPreviewService:: User-agent failed trying raw retrieval.`)
+            // If it fails with the user agent, try again without.
+            response = await fetch(rootUrl.href)
+
+            if ( ! response.ok) {
+                throw new ServiceError('request-failed', `Attempt to retrieve a link preview failed with status: ${response.status}`)
+            }
         }
 
         const data = await response.text()
@@ -106,7 +126,7 @@ module.exports = class LinkPreviewService {
             try {
                 const imageUrl = new URL(image, rootUrl.protocol + rootUrl.host)
 
-                const response = await fetch(imageUrl.href, { heaaders: { 'User-Agent': userAgent }})
+                const response = await fetch(imageUrl.href, { heaaders: { 'User-Agent': headers['user-agent'] }})
 
                 if ( response.ok ) {
                     image = imageUrl.href

@@ -93,7 +93,7 @@ module.exports = class LinkPreviewController {
         // TODO Refectch existing LinkPreviews every so often (every hour? day?)
         if ( existing === null ) {
             // If we haven't fetched this LinkPreview, then fetch and validate it. 
-            const linkPreview = cleaning.LinkPreview.clean(await this.linkPreviewService.getPreview(url, request.get('User-Agent')))
+            const linkPreview = cleaning.LinkPreview.clean(await this.linkPreviewService.getPreview(url, request.headers))
 
             const validationErrors = await this.validationService.validateLinkPreview(currentUser, linkPreview)
             if ( validationErrors.length > 0 ) {
