@@ -42,11 +42,6 @@ const NotificationSettingsSection = function({}) {
         makeRequest(patchUser(userPatch))
     }
 
-    if ( ! ('1-notification-settings' in features) || features['1-notification-settings'].status !== 'enabled' ) {
-        console.error(new Error(`Attempt to render NotificationSettingsSection without '1-notification-settings' enabled.`))
-        return null
-    }
-
     if ( ! currentUser ) {
         console.error(new Error(`Attempt to render NotificationSettingsSection without an authenticated user.`))
         return null

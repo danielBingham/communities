@@ -27,8 +27,6 @@ const PostComment = function({ postId, id }) {
     
     const postLink = usePostLink(postId)
 
-    const hasAdminModeration = useFeature('62-admin-moderation-controls')
-
     const location = useLocation()
     // This is necessary to enable linking to anchors in the page.
     //
@@ -95,7 +93,7 @@ const PostComment = function({ postId, id }) {
                     <UserTag id={comment.userId} /> commented <a href={`${postLink}#comment-${comment.id}`}><DateTag timestamp={comment.createdDate} /></a>
                 </div>
                 <div>
-                    { hasAdminModeration && <PostCommentModeration postId={postId} postCommentId={id} /> }
+                    { <PostCommentModeration postId={postId} postCommentId={id} /> }
                 </div>
                 <div className="post-comment__controls">
                     <PostCommentDotsMenu postId={postId} id={id} />

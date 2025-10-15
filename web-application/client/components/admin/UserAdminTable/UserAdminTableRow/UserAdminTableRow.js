@@ -41,7 +41,7 @@ const UserAdminTableRow = function({ user }) {
             <TableCell>{ user.username }</TableCell> 
             <TableCell>{ user.email }</TableCell> 
             <TableCell>{ user.status }</TableCell> 
-            <TableCell>{ user.permissions }</TableCell>
+            <TableCell>{ user.siteRole}</TableCell>
             <TableCell><DateTag timestamp={user.lastAuthenticationAttemptDate} /></TableCell>
             <TableCell><DateTag timestamp={user.createdDate} /></TableCell>
             <TableCell>

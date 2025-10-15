@@ -32,8 +32,6 @@ const FlagPostComment = function({ postId, id } ) {
     const [siteModeration, siteModerationRequest] = useSiteModeration(comment?.siteModerationId)
     const canModerateSite = useSitePermission(currentUser, SitePermissions.MODERATE)
 
-    const hasAdminModerationControls = useFeature('62-admin-moderation-controls')
-
     const [request, makeRequest] = useRequest()
 
     const closeMenu = useContext(CloseMenuContext)
@@ -54,10 +52,6 @@ const FlagPostComment = function({ postId, id } ) {
             closeMenu()
         } 
     }, [ areYouSure, request])
-
-    if ( ! hasAdminModerationControls ) {
-        return null
-    }
 
     if ( ! currentUser ) {
         return null

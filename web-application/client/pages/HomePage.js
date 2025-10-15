@@ -12,10 +12,6 @@ import './HomePage.css'
 
 const HomePage = function() {
 
-    const features = useSelector((state) => state.system.features)
-
-    const hasGroups = '19-private-groups' in features
-
     const dispatch = useDispatch()
     useEffect(() => {
         return () => {
@@ -26,7 +22,7 @@ const HomePage = function() {
     return (
         <Page id="home-page">
             <PageLeftGutter className="home-page__sidebar">
-                { hasGroups && <FeedMenu /> }
+                <FeedMenu /> 
             </PageLeftGutter>
             <PageBody>
                 <Refresher />
