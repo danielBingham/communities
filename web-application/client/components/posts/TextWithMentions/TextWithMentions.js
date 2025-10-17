@@ -1,21 +1,32 @@
-import React from 'react'
+import * as linkify from 'linkifyjs'
+import "linkify-plugin-mention"
 
-import Linkify from 'react-linkify'
-
-import * as shared from '@communities/shared'
-
-import UserMention from '/components/users/UserMention'
+import logger from '/logger'
 
 const TextWithMentions = function({ text }) {
-    const tokens = shared.lib.mentions.tokenizeMentions(text)
-    const views = []
+    const links = linkify.find(text)
+    console.log(text)
 
-    for(let index = 0; index < tokens.length; index++) {
-        if ( tokens[index].at(0) === '@' ) {
-            const username = tokens[index].substring(1)
-            views.push(<UserMention key={index} username={username} />)
+    links.sort((a, b) => a.start - b.start)
+    console.log(links)
+
+    let start = 0
+    const views = []
+    for(const link of links) {
+        const section = text.slice(start, link.start)
+        if ( section.length > 0 ) {
+            views.push(<span key={start}>{ section }</span>)
+        }
+       
+        start = link.end
+
+        if ( link.type === 'mention' ) {
+            views.push(<a key={link.start} href={link.href}>{ link.value }</a>)
+        } else if ( link.type === 'url' ) {
+            views.push(<a target="_blank" key={link.start} href={link.href}>{ link.value }</a>)
         } else {
-            views.push(<span key={index} ><Linkify>{ tokens[index] }</Linkify></span>)
+            views.push(<span key={link.start}>{ link.value }</span>)
+            logger.error(`Invalid link type detected: ${link}.`)
         }
     }
 
