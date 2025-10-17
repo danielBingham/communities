@@ -5,10 +5,8 @@ import logger from '/logger'
 
 const TextWithMentions = function({ text }) {
     const links = linkify.find(text)
-    console.log(text)
 
     links.sort((a, b) => a.start - b.start)
-    console.log(links)
 
     let start = 0
     const views = []
@@ -26,7 +24,7 @@ const TextWithMentions = function({ text }) {
             views.push(<a target="_blank" key={link.start} href={link.href}>{ link.value }</a>)
         } else {
             views.push(<span key={link.start}>{ link.value }</span>)
-            logger.error(`Invalid link type detected: ${link}.`)
+            logger.error(`Invalid link type detected: ${link.type}.`)
         }
     }
 
