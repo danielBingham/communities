@@ -1,22 +1,38 @@
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media 
+ *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
+const linkify = require('linkifyjs')
+require("linkify-plugin-mention")
+
 const parseMentions = function(text) {
     const usernames = []
 
-    // Add front and rear spaces to catch any mentions at the beginning or end
-    // of the string.
-    const matches = text.matchAll(/@([a-zA-Z0-9\-_]+)/g)
-
-    for(const match of matches) {
-        usernames.push(match[1])
+    const links = linkify.find(text)
+    for(const link of links) {
+        if ( link.type === 'mention' ) {
+            usernames.push(link.value.substring(1))
+        }
     }
 
     return usernames
 }
 
-const tokenizeMentions = function(text) {
-    return text.split(/(@[a-zA-Z0-9\-_]+)/)
-}
-
 module.exports = {
     parseMentions: parseMentions,
-    tokenizeMentions: tokenizeMentions
 }

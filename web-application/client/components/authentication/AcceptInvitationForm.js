@@ -165,7 +165,10 @@ const AcceptInvitationForm = function(props) {
     }
 
     const onUsernameBlur = function(event) {
-        makeUsernameRequest(getUsers(username, { username: username }))
+        let lowerUsername = username.toLowerCase()
+        setUsername(lowerUsername)
+
+        makeUsernameRequest(getUsers(username, { username: lowerUsername }))
         isValid('username')
     }
 
@@ -267,7 +270,7 @@ const AcceptInvitationForm = function(props) {
                 <Input
                     name="username"
                     label="Username"
-                    explanation="The unique username that will be used to link to your profile.  Can only contain letters, numbers, dash ( - ), or undercore ( _ )"
+                    explanation="The unique username that will be used to link to your profile.  Must start with a letter and can only contain letters, numbers, dash ( - ), or undercore ( _ )"
                     value={username}
                     className="username"
                     onBlur={ onUsernameBlur }
