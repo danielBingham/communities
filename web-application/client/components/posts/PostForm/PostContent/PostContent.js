@@ -80,6 +80,10 @@ const PostContent = function({ postId, groupId, sharedPostId }) {
             const links = linkify.find(draft.content)
             if ( links.length > 0 ) {
                 for(const link of links ) {
+                    if ( link.type !== 'url' ) {
+                        continue
+                    }
+
                     if ( failedLinks.includes(link.href) ) {
                         continue
                     }

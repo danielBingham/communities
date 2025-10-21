@@ -21,6 +21,7 @@
 const FeatureDAO = require('../daos/FeatureDAO')
 
 const ExampleMigration = require('../migrations/ExampleMigration')
+const UsernameMigration = require('../migrations/UsernameMigration')
 
 const ServiceError = require('../errors/ServiceError')
 const MigrationError = require('../errors/MigrationError')
@@ -57,6 +58,11 @@ module.exports = class FeatureService {
                 dependsOn: [],
                 conflictsWith: [],
                 migration: new ExampleMigration(core)
+            },
+            'issue-198-auto-generate-link-previews': {
+                dependsOn: [],
+                conflictsWith: [],
+                migration: new UsernameMigration(core)
             }
         }
     }
