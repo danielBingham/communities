@@ -452,7 +452,7 @@ module.exports = class ValidationService {
                     })
                 }
 
-                if ( user.username.match(/^[a-zA-Z0-9\.\-_]+$/) === null ) {
+                if ( user.username.match(/^[a-zA-Z0-9\-_]+$/) === null ) {
                     errors.push({
                         type: 'username:invalid',
                         log: `Username is invalid.`,

@@ -3,7 +3,7 @@ const parseMentions = function(text) {
 
     // Add front and rear spaces to catch any mentions at the beginning or end
     // of the string.
-    const matches = text.matchAll(/@([a-zA-Z0-9\.\-_]+)/g)
+    const matches = text.matchAll(/@([a-zA-Z0-9\-_]+)/g)
 
     for(const match of matches) {
         usernames.push(match[1])
@@ -13,7 +13,7 @@ const parseMentions = function(text) {
 }
 
 const tokenizeMentions = function(text) {
-    return text.split(/(@[a-zA-Z0-9\.\-_]+)/)
+    return text.split(/(@[a-zA-Z0-9\-_]+)/)
 }
 
 module.exports = {

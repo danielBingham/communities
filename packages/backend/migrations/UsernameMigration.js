@@ -43,7 +43,7 @@ module.exports = class UsernameMigration extends BaseMigration {
             // Replace periods with dashes.
             username = username.replace(".", "-")
 
-            username = username.trim()
+            username = username.toLowerCase().trim()
 
             // If the username changed, update it.
             if ( username !== row.username ) {
@@ -63,6 +63,42 @@ module.exports = class UsernameMigration extends BaseMigration {
                 }
 
                 await this.core.database.query(`UPDATE users SET username = $1 WHERE id = $2`, [ username, row.id ])
+
+                // Now we need to update any mentions in posts.
+                const postResults = await this.core.database.query(`SELECT id, content FROM posts WHERE content LIKE '%$1%'`, [ row.username ])
+                if ( postResults.rows.length > 0 ) {
+                    for(const row of postResults.rows) {
+                        const inMiddleRegex = new RegExp(`(\\s)@${row.username}(\\s)`, 'g')
+                        let newContent = row.content.replaceAll(inMiddleRegex, `$1@${username}$2`)
+
+                        const atBeginningRegex = new RegExp(`^@${row.username}(\\s)`, 'g')
+                        newContent = newContent.replaceAll(atBeginningRegex, `@${username}$1`)
+
+                        const atEndRegex = new RegExp(`(\\s)@${row.username}$`, 'g')
+                        newContent = newContent.replaceAll(atEndRegex, `$1@${username}`)
+
+                        await this.core.database.query(`UPDATE posts SET content = $1 WHERE id = $2`, [ newContent, row.id ])
+                    }
+                }
+                
+                // And then we need to update any mentions in comments.
+                const postCommentResults = await this.core.database.query(`SELECT id, content FROM post_comments WHERE content LIKE '%$1%'`, [ row.username])
+                if ( postCommentResults.rows.length > 0 ) {
+                    for(const row of postCommentResults.rows) {
+                        const inMiddleRegex = new RegExp(`(\\s)@${row.username}(\\s)`, 'g')
+                        let newContent = row.content.replaceAll(inMiddleRegex, `$1@${username}$2`)
+
+                        const atBeginningRegex = new RegExp(`^@${row.username}(\\s)`, 'g')
+                        newContent = newContent.replaceAll(atBeginningRegex, `@${username}$1`)
+
+                        const atEndRegex = new RegExp(`(\\s)@${row.username}$`, 'g')
+                        newContent = newContent.replaceAll(atEndRegex, `$1@${username}`)
+
+                        await this.core.database.query(`UPDATE post_comments SET content = $1 WHERE id = $2`, [ newContent, row.id ])
+                    }
+                }
+
+
             }
         }
 

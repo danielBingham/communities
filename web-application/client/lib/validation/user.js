@@ -50,7 +50,7 @@ export const validateUsername = function(username, required) {
         errors.push('Username is too long. Limit is 512 characters.')
     }         
 
-    if ( username.match(/^[a-zA-Z0-9\.\-_]+$/) === null ) {
+    if ( username.match(/^[a-zA-Z0-9\-_]+$/) === null ) {
         errors.push(`Username may only contain letters, numbers, '.', '-', or '_'.`)
     }
 
