@@ -45,7 +45,6 @@ const validateAndCorrectDraft = function(draft, post, group, sharedPostId) {
     if ( has(draft, 'content') 
         && draft.content !== null
         && typeof draft.content === 'string' 
-        && draft.content.length > 0
     ) {
         correctedDraft.content = draft.content
     }
