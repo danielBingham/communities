@@ -3,7 +3,14 @@ import * as qs from 'qs'
 import { makeRequest } from '/state/lib/makeRequest'
 import { setRelationsInState } from '/state/lib/relations'
 
-import { setLinkPreviewsInDictionary, removeLinkPreview, clearLinkPreviewQuery, setLinkPreviewQueryResults, clearLinkPreviewQueries } from './slice'
+import { 
+    setLinkPreviewsInDictionary, 
+    setLinkPreviewNull, 
+    removeLinkPreview, 
+    clearLinkPreviewQuery, 
+    setLinkPreviewQueryResults, 
+    clearLinkPreviewQueries 
+} from './slice'
 
 /**
  * GET /link-previews or GET /link-previews?...
@@ -72,11 +79,17 @@ export const postLinkPreviews = function(linkPreview) {
  */
 export const getLinkPreview = function(id) {
     return function(dispatch, getState) {
+        dispatch(setLinkPreviewNull(id))
         return dispatch(makeRequest('GET', `/link-preview/${encodeURIComponent(id)}`, null,
             function(response) {
                 dispatch(setLinkPreviewsInDictionary({ entity: response.entity}))
 
                 dispatch(setRelationsInState(response.relations))
+            },
+            function(status, response) {
+                if ( status === 404 || status === 403 ) {
+                    dispatch(setLinkPreviewNull(id))
+                }
             }
         ))
     }

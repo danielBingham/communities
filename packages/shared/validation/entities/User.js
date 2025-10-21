@@ -31,7 +31,7 @@ const validateUsername = function(username, existing, action) {
         .mustBeString()
         .mustNotBeEmpty()
         .mustBeShorterThan(512)
-        .mustMatch(/^[a-zA-Z0-9\.\-_]+$/)
+        .mustMatch(/^[a-zA-Z][a-zA-Z0-9\-_]+$/)
         .getErrors()
     return errors
 }

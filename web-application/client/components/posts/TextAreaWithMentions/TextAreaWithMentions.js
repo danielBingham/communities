@@ -85,14 +85,14 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
         if ( event.key == 'Enter' ) {
             event.preventDefault()
             selectSuggestion(highlightedSuggestion)
-        } else if ( event.key == 'ArrowDown' ) {
+        } else if ( event.key == 'ArrowDown' || ( ! event.shiftKey && event.key === 'Tab') ) {
             event.preventDefault()
             if ( highlightedSuggestion + 1 < query.list.length ) {
                 setHighlightedSuggestion(highlightedSuggestion+1)
             } else {
                 setHighlightedSuggestion(query.list.length-1)
             }
-        } else if ( event.key == 'ArrowUp' ) {
+        } else if ( event.key == 'ArrowUp' || (event.shiftKey && event.key === 'Tab') ) {
             event.preventDefault()
             if ( highlightedSuggestion-1 <= 0 ) {
                 setHighlightedSuggestion(0)

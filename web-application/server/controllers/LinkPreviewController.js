@@ -92,8 +92,25 @@ module.exports = class LinkPreviewController {
         const existing = await this.linkPreviewDAO.getLinkPreviewByUrl(url)
         // TODO Refectch existing LinkPreviews every so often (every hour? day?)
         if ( existing === null ) {
-            // If we haven't fetched this LinkPreview, then fetch and validate it. 
-            const linkPreview = cleaning.LinkPreview.clean(await this.linkPreviewService.getPreview(url, request.headers))
+            let linkPreview = null
+            try {
+                // If we haven't fetched this LinkPreview, then fetch and validate it. 
+                linkPreview = cleaning.LinkPreview.clean(await this.linkPreviewService.getPreview(url, request.headers))
+            } catch (error ) {
+                if ( 'type' in error && error.type === 'not-found' ) {
+                    throw new ControllerError(404, 'not-found',
+                        error.message,
+                        `We did not find a site at that url.`)
+                } else if ( 'type' in error && error.type === 'not-authorized' ) {
+                    throw new ControllerError(404, 'not-found',
+                        error.message,
+                        `We were not allowed to scrape that site to generate a preview.`)
+                } else {
+                    throw new ControllerError(404, 'not-found',
+                        error.message,
+                        `We were not able to scrape that site to generate a preivew.`)
+                }
+            }
 
             const validationErrors = await this.validationService.validateLinkPreview(currentUser, linkPreview)
             if ( validationErrors.length > 0 ) {

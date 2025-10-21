@@ -121,7 +121,7 @@ const RegistrationForm = function(props) {
 
     const onNameChange = function(event) {
         let currentUsername = name.toLowerCase().replaceAll(/\s/g, '-')
-        currentUsername = currentUsername.replaceAll(/[^a-zA-Z0-9\.\-_]/g, '')
+        currentUsername = currentUsername.replaceAll(/[^a-zA-Z0-9\-_]/g, '')
 
         // When this is called, `event.target.value` will be the next value of
         // `title` and `title` will be the current value for it.  We only want
@@ -132,7 +132,7 @@ const RegistrationForm = function(props) {
         // to change it, because the user already customized it.
         if ( username == currentUsername) {
             let newUsername = event.target.value.toLowerCase().replaceAll(/\s/g, '-')
-            newUsername = newUsername.replaceAll(/[^a-zA-Z0-9\.\-_]/g, '')
+            newUsername = newUsername.replaceAll(/[^a-zA-Z0-9\-_]/g, '')
             setUsername(newUsername)
         }
 
@@ -140,7 +140,10 @@ const RegistrationForm = function(props) {
     }
 
     const onUsernameBlur = function(event) {
-        makeUsernameRequest(getUsers(username, { username: username }))
+        let lowerUsername = username.toLowerCase()
+        setUsername(lowerUsername)
+
+        makeUsernameRequest(getUsers(username, { username: lowerUsername }))
         isValid('username')
     }
 
@@ -197,11 +200,11 @@ const RegistrationForm = function(props) {
                 <Input
                     name="username"
                     label="Username"
-                    explanation="The unique username that will be used to link to your profile.  Can only contain letters, numbers, period ( . ), dash ( - ), or undercore ( _ )"
+                    explanation="The unique username that will be used to link to your profile.  Must start with a letter and can only contain letters, numbers, dash ( - ), or undercore ( _ )"
                     value={username}
                     className="username"
                     onBlur={ onUsernameBlur }
-                    onChange={ (event) => setUsername(event.target.value.toLowerCase()) } 
+                    onChange={ (event) => setUsername(event.target.value) } 
                     error={usernameError}
                 />
                 <Input

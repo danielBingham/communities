@@ -3,11 +3,18 @@ const { lib } = require('../../../')
 describe('parseMentions()', function() {
 
     it("Should return a list of all usernames mentioned", function() {
-        const testString = `This is a test @johndoe and we'll just have to see if it works. @jane.doe @bob_smith`
+        const testString = `This is a test @johndoe and we'll just have to see if it works. @jane-doe @bob_smith`
 
         const usernames = lib.mentions.parseMentions(testString)
 
-        expect(usernames).toStrictEqual([ 'johndoe', 'jane.doe', 'bob_smith' ])
+        expect(usernames).toStrictEqual([ 'johndoe', 'jane-doe', 'bob_smith' ])
+    })
+    
+    it("Should handle all possible types of usernames", function() {
+        const testString = `@a---- @a_ @john- @-doe @----h @_doe @james---smith @james-smith- @james-smith-III-`
+        const usernames = lib.mentions.parseMentions(testString)
+        
+        expect(usernames).toStrictEqual([ `a----`, `a_`, `john-`, `-doe`, `----h`, `_doe`, `james---smith`, `james-smith-`, `james-smith-III-` ])
     })
 
     it("Should correctly return the usernames when embedded in the text with characters not allowed to be part of the username", function() {
