@@ -80,6 +80,7 @@ const validateAndCorrectDraft = function(draft, post, group, sharedPostId) {
         correctedDraft.linkPreviewId = null
     }
 
+
     if ( has(draft, 'visibility')
         && draft.visibility !== null
         && ( draft.visibility === 'private' || draft.visibility == 'public' )

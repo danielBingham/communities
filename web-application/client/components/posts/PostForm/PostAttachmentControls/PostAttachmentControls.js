@@ -40,7 +40,6 @@ const PostAttachmentControls = function({ postId, groupId, sharedPostId }) {
         setDraft(newDraft)
     }
 
-
     if ( draft.sharedPostId || draft.fileId || draft.linkPreviewId ) {
         return null
     }
@@ -55,12 +54,6 @@ const PostAttachmentControls = function({ postId, groupId, sharedPostId }) {
                     types={[ 'image/jpeg', 'image/png' ]} 
                 />
             </div>
-            <div className="post-form__link">
-                <Button type="primary" onClick={(e) => {setShowLinkForm(true)}}><LinkIcon /><span className="attachment-button-text"> Add Link</span></Button>
-            </div>
-            <Modal isVisible={ showLinkForm} setIsVisible={setShowLinkForm} hideX={true}>
-                <LinkForm setLinkPreviewId={setLinkPreviewId} setShowLinkForm={setShowLinkForm} />
-            </Modal>
         </div>
     )
 

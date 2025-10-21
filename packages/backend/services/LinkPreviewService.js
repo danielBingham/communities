@@ -80,7 +80,13 @@ module.exports = class LinkPreviewService {
             response = await fetch(rootUrl.href)
 
             if ( ! response.ok) {
-                throw new ServiceError('request-failed', `Attempt to retrieve a link preview failed with status: ${response.status}`)
+                if ( response.status === 404 ) {
+                    throw new ServiceError('not-found', `Didn't find a site for link: ${rootUrl.href}`)
+                } else if ( response.status === 403 ) {
+                    throw new ServiceError('not-authorized', `Site denied our attempt to scrape: ${rootUrl.href}`)
+                } else {
+                    throw new ServiceError('request-failed', `Attempt to retrieve LinkPreview(${rootUrl.href}) failed with status: ${response.status}`)
+                }
             }
         }
 

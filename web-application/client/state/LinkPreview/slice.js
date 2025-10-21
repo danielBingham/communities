@@ -2,6 +2,7 @@ import { createSlice } from '@reduxjs/toolkit'
 
 import {
     setInDictionary,
+    setNull,
     removeEntity,
     setQueryResults,
     clearQuery,
@@ -46,6 +47,7 @@ export const LinkPreviewSlice = createSlice({
     initialState: initialState,
     reducers: {
         setLinkPreviewsInDictionary: setInDictionary, 
+        setLinkPreviewNull: setNull,
         removeLinkPreview: removeEntity,
         setLinkPreviewQueryResults: setQueryResults,
         clearLinkPreviewQuery: clearQuery,
@@ -55,7 +57,7 @@ export const LinkPreviewSlice = createSlice({
 })
 
 export const { 
-    setLinkPreviewsInDictionary, removeLinkPreview, 
+    setLinkPreviewsInDictionary, setLinkPreviewNull, removeLinkPreview, 
      clearLinkPreviewQuery, setLinkPreviewQueryResults,
     clearLinkPreviewQueries, resetLinkPreviewSlice
 }  = LinkPreviewSlice.actions

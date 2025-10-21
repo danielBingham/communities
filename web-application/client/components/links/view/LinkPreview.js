@@ -3,28 +3,27 @@ import { useSelector } from 'react-redux'
 
 import logger from '/logger'
 
-import { useRequest } from '/lib/hooks/useRequest'
-
-import { getLinkPreview } from '/state/LinkPreview'
+import { useLinkPreview } from '/lib/hooks/LinkPreview'
 
 import Image from '/components/ui/Image'
+import Spinner from '/components/Spinner'
 
 import './LinkPreview.css'
 
 const LinkPreview = function({ id }) {
 
-    const [request, makeRequest] = useRequest()
-
     const configuration = useSelector((state) => state.system.configuration)
-    const linkPreview = useSelector((state) => id && id in state.LinkPreview.dictionary ? state.LinkPreview.dictionary[id] : null) 
+    const [ linkPreview, request ] = useLinkPreview(id)
 
-    useEffect(function() {
-        if ( id && ! linkPreview ) {
-            makeRequest(getLinkPreview(id))
-        } 
-    }, [id])
-
-    if ( ! linkPreview ) {
+    if ( linkPreview === undefined ) {
+        return null
+    } else if ( linkPreview === null && request?.state === 'pending' ) {
+        return (
+            <div className="link-preview">
+                <Spinner />
+            </div>
+        )
+    } else if ( linkPreview === null ) {
         return null
     }
 
