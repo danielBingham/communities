@@ -1,4 +1,4 @@
-const { UUIDValidator, StringValidator, DateValidator } = require('../types')
+const { UUIDValidator, StringValidator, DateValidator, EmailValidator } = require('../types')
 const { validateEntity, cleanEntity } = require('../validate')
 
 const validateId = function(id, existing, action) {
@@ -31,20 +31,20 @@ const validateUsername = function(username, existing, action) {
         .mustBeString()
         .mustNotBeEmpty()
         .mustBeShorterThan(512)
-        .mustMatch(/^[a-zA-Z][a-zA-Z0-9\-_]+$/)
+        .mustMatch(/^[a-zA-Z][a-zA-Z0-9\-_]+$/, 'Must start with a letter and may only contain numbers, letters, hyphen ( - ), and underscore ( _ ).')
         .getErrors()
     return errors
 }
 
 const validateEmail = function(email, existing, action) {
-    const validator = new StringValidator('email', email, existing, action)
+    const validator = new EmailValidator('email', email, existing, action)
     const errors = validator
         .isRequiredToCreate()
         .mustNotBeNull()
         .mustBeString()
         .mustNotBeEmpty()
         .mustBeShorterThan(512)
-        .mustMatch(/^\S+@\S+$/)
+        .mustBeEmail()
         .getErrors()
     return errors
 }

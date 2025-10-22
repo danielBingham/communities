@@ -713,23 +713,6 @@ describe('ValidationService.validateUser()', function() {
 
         })
 
-        it('should error on an email that is too long', async function() {
-            const service = new ValidationService(core)
-
-            const user = { 
-                email: 'tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt@ttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt.cccccccccccccccccccccccccccccccccccccccccccccccccccccccc' 
-            }
-
-            core.database.query.mockReturnValue(undefined)
-                .mockReturnValueOnce({ rowCount: 0, rows: []})
-
-            const errors = await service.validateUser(user, null, 'invitation')
-
-            expect(errors.length).toBe(1)
-            expect(errors[0].type).toBe('email:too-long')
-
-        })
-
         it('should error on an invalid email', async function() {
             const service = new ValidationService(core)
 

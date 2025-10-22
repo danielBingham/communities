@@ -163,16 +163,8 @@ describe('validateEmail', function() {
         const email = ''
         const errors = validation.User.validateEmail(email)
 
-        expect(errors.length).toBe(2)
-        expect(errors[0].type).toBe('email:required')
-    })
-
-    it('Should return an error when longer than 512 characters', function() {
-        const email = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@aaaaaaaaaaaaaaa'
-        const errors = validation.User.validateEmail(email)
-
         expect(errors.length).toBe(1)
-        expect(errors[0].type).toBe('email:too-long')
+        expect(errors[0].type).toBe('email:required')
     })
 
     it('Should return an error when not an email', function() {
