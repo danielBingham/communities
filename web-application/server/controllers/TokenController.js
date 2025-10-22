@@ -17,7 +17,14 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-const backend = require('@communities/backend')
+const { 
+    AuthenticationService, 
+    EmailService, 
+    RateLimitService,
+
+    TokenDAO,
+    UserDAO
+} = require('@communities/backend')
 const { validation } = require('@communities/shared')
 
 const BaseController = require('./BaseController')
@@ -25,23 +32,23 @@ const BaseController = require('./BaseController')
 const ControllerError = require('../errors/ControllerError')
 
 const rateLimits = {
-    [BaseController.METHODS.QUERY]: {
+    [RateLimitService.METHODS.QUERY]: {
         period: 60 * 1000,
         numberOfRequests: 20
     },
-    [BaseController.METHODS.GET]: {
+    [RateLimitService.METHODS.GET]: {
         period: 60 * 1000,
         numberOfRequests: 20
     },
-    [BaseController.METHODS.POST]: {
+    [RateLimitService.METHODS.POST]: {
         period: 60 * 1000,
         numberOfRequests: 20
     },
-    [BaseController.METHODS.PATCH]: {
+    [RateLimitService.METHODS.PATCH]: {
         period: 60 * 1000,
         numberOfRequests: 20
     },
-    [BaseController.METHODS.DELETE]: {
+    [RateLimitService.METHODS.DELETE]: {
         period: 60 * 1000,
         numberOfRequests: 20
     }
@@ -50,17 +57,18 @@ const rateLimits = {
 module.exports = class TokenController extends BaseController {
 
     constructor(core) {
-        super(core, 'Token', rateLimits)
+        super(core)
 
         this.database = core.database
         this.logger = core.logger
         this.config = core.config
 
-        this.authenticationService = new backend.AuthenticationService(core)
-        this.emailService = new backend.EmailService(core)
+        this.authenticationService = new AuthenticationService(core)
+        this.emailService = new EmailService(core)
+        this.rateLimitService = new RateLimitService(core, 'Token', rateLimits)
 
-        this.tokenDAO = new backend.TokenDAO(core)
-        this.userDAO = new backend.UserDAO(core)
+        this.tokenDAO = new TokenDAO(core)
+        this.userDAO = new UserDAO(core)
     }
 
     /**
@@ -93,11 +101,11 @@ module.exports = class TokenController extends BaseController {
          * 
          * **********************************************************/
 
-        const shouldRateLimit = await this.shouldRateLimit(BaseController.METHODS.GET, request) 
+        const shouldRateLimit = await this.rateLimitService.shouldRateLimit(request) 
         if ( shouldRateLimit === true ) {
             throw new ControllerError(429, 'too-many-requests',
                 `Ip Address '${request.ip}' being rate limited`,
-                `You are submitting too many requests.  Only ${rateLimits[BaseController.METHODS.GET].numberOfRequests} allowed per ${rateLimits[BaseController.METHODS.GET].period/1000} seconds.`)
+                `You are submitting too many requests.  Only ${rateLimits[RateLimitService.METHODS.GET].numberOfRequests} allowed per ${rateLimits[RateLimitService.METHODS.GET].period/1000} seconds.`)
         }
 
         const currentUser = request.session.user
@@ -227,11 +235,11 @@ module.exports = class TokenController extends BaseController {
          *
          * **********************************************************/
 
-        const shouldRateLimit = await this.shouldRateLimit(BaseController.METHODS.POST, request) 
+        const shouldRateLimit = await this.rateLimitService.shouldRateLimit(RateLimitService.METHODS.POST, request) 
         if ( shouldRateLimit === true ) {
             throw new ControllerError(429, 'too-many-requests',
                 `Ip Address '${req.ip}' being rate limited`,
-                `You are submitting too many requests.  Only ${rateLimits[BaseController.METHODS.POST].numberOfRequests} allowed per ${rateLimits[BaseController.METHODS.POST].period/1000} seconds.`)
+                `You are submitting too many requests.  Only ${rateLimits[RateLimitService.METHODS.POST].numberOfRequests} allowed per ${rateLimits[RateLimitService.METHODS.POST].period/1000} seconds.`)
         }
         
         const tokenParams  = request.body

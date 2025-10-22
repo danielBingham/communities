@@ -23,10 +23,51 @@
  * Restful routes for manipulating users.
  *
  ******************************************************************************/
-const backend = require('@communities/backend')
+const {
+    AuthenticationService,
+    EmailService,
+    NotificationService,
+    PermissionService,
+    RateLimitService,
+    UserService,
+    ValidationService,
+
+    UserDAO,
+    UserRelationshipDAO,
+    GroupMemberDAO,
+    TokenDAO,
+    FileDAO,
+    PostDAO,
+
+    DAOError,
+    ServiceError
+} = require('@communities/backend')
 
 const BaseController = require('./BaseController')
 const ControllerError = require('../errors/ControllerError')
+
+const rateLimits = {
+    [RateLimitService.METHODS.QUERY]: {
+        period: 60 * 1000,
+        numberOfRequests: 1000
+    },
+    [RateLimitService.METHODS.GET]: {
+        period: 60 * 1000,
+        numberOfRequests: 1000
+    },
+    [RateLimitService.METHODS.POST]: {
+        period: 60 * 1000,
+        numberOfRequests: 30
+    },
+    [RateLimitService.METHODS.PATCH]: {
+        period: 60 * 1000,
+        numberOfRequests: 30
+    },
+    [RateLimitService.METHODS.DELETE]: {
+        period: 60 * 1000,
+        numberOfRequests: 30
+    }
+}
 
 module.exports = class UserController extends BaseController{
 
@@ -37,19 +78,20 @@ module.exports = class UserController extends BaseController{
         this.logger = core.logger
         this.config = core.config
 
-        this.auth = new backend.AuthenticationService(core)
-        this.emailService = new backend.EmailService(core)
-        this.notificationService = new backend.NotificationService(core)
-        this.permissionService = new backend.PermissionService(core)
-        this.userService = new backend.UserService(core)
-        this.validationService = new backend.ValidationService(core)
+        this.auth = new AuthenticationService(core)
+        this.emailService = new EmailService(core)
+        this.notificationService = new NotificationService(core)
+        this.permissionService = new PermissionService(core)
+        this.rateLimitService = new RateLimitService(core, 'User', rateLimits)
+        this.userService = new UserService(core)
+        this.validationService = new ValidationService(core)
 
-        this.userDAO = new backend.UserDAO(core)
-        this.userRelationshipsDAO = new backend.UserRelationshipDAO(core)
-        this.groupMemberDAO = new backend.GroupMemberDAO(core)
-        this.tokenDAO = new backend.TokenDAO(core)
-        this.fileDAO = new backend.FileDAO(core)
-        this.postDAO = new backend.PostDAO(core)
+        this.userDAO = new UserDAO(core)
+        this.userRelationshipsDAO = new UserRelationshipDAO(core)
+        this.groupMemberDAO = new GroupMemberDAO(core)
+        this.tokenDAO = new TokenDAO(core)
+        this.fileDAO = new FileDAO(core)
+        this.postDAO = new PostDAO(core)
     }
 
     async getRelations(currentUser, results, requestedRelations) {
@@ -331,13 +373,13 @@ module.exports = class UserController extends BaseController{
      * @returns {Promise}   Resolves to void.
      */
     async getUsers(request, response) {
-        /*************************************************************
-         * Permissions Checking and Input Validation
-         *
-         * Anyone may call this endpoint.
-         * 
-         * **********************************************************/
-
+        const shouldRateLimit = await this.rateLimitService.shouldRateLimit(request) 
+        if ( shouldRateLimit === true ) {
+            throw new ControllerError(429, 'too-many-requests',
+                `Ip Address '${request.ip}' being rate limited`,
+                `You are submitting too many requests.  Only ${rateLimits[RateLimitService.METHODS.QUERY].numberOfRequests} allowed per ${rateLimits[RateLimitService.METHODS.QUERY].period/1000} seconds.`)
+        }
+        
         const query = await this.parseQuery(request.session.user, request.query)
 
         if ( query.emptyResult ) {
@@ -376,6 +418,13 @@ module.exports = class UserController extends BaseController{
      * @returns {Promise}   Resolves to void.
      */
     async postUsers(request, response) {
+        const shouldRateLimit = await this.rateLimitService.shouldRateLimit(request) 
+        if ( shouldRateLimit === true ) {
+            throw new ControllerError(429, 'too-many-requests',
+                `Ip Address '${request.ip}' being rate limited`,
+                `You are submitting too many requests.  Only ${rateLimits[RateLimitService.METHODS.POST].numberOfRequests} allowed per ${rateLimits[RateLimitService.METHODS.POST].period/1000} seconds.`)
+        }
+
         const currentUser = request.session.user
 
         let userErrors = []
@@ -446,12 +495,13 @@ module.exports = class UserController extends BaseController{
      * @returns {Promise}   Resolves to void.
      */
     async getUser(request, response) {
-        /*************************************************************
-         * Permissions Checking and Input Validation
-         *
-         * Anyone may call this endpoint.
-         * 
-         * **********************************************************/
+        const shouldRateLimit = await this.rateLimitService.shouldRateLimit(request) 
+        if ( shouldRateLimit === true ) {
+            throw new ControllerError(429, 'too-many-requests',
+                `Ip Address '${request.ip}' being rate limited`,
+                `You are submitting too many requests.  Only ${rateLimits[RateLimitService.METHODS.GET].numberOfRequests} allowed per ${rateLimits[RateLimitService.METHODS.GET].period/1000} seconds.`)
+        }
+
         const currentUser = request.session.user
         const userId = request.params.id
 
@@ -506,6 +556,13 @@ module.exports = class UserController extends BaseController{
      * @returns {Promise}   Resolves to void.
      */
     async patchUser(request, response) {
+        const shouldRateLimit = await this.rateLimitService.shouldRateLimit(request) 
+        if ( shouldRateLimit === true ) {
+            throw new ControllerError(429, 'too-many-requests',
+                `Ip Address '${request.ip}' being rate limited`,
+                `You are submitting too many requests.  Only ${rateLimits[RateLimitService.METHODS.PATCH].numberOfRequests} allowed per ${rateLimits[RateLimitService.METHODS.PATCH].period/1000} seconds.`)
+        }
+
         const user = request.body
         const id = request.params.id
 
@@ -585,7 +642,7 @@ module.exports = class UserController extends BaseController{
             try {
                 token = await this.tokenDAO.validateToken(user.token, [ 'reset-password', 'invitation' ])
             } catch (error ) {
-                if ( error instanceof backend.DAOError ) {
+                if ( error instanceof DAOError ) {
                     throw new ControllerError(403, 'not-authorized', error.message, `Invalid token.`)
                 } else {
                     throw error
@@ -646,7 +703,7 @@ module.exports = class UserController extends BaseController{
                 // They've successfully authenticated with old password.
                 type = 'authenticated-edit'
             } catch (error ) {
-                if ( error instanceof backend.ServiceError ) {
+                if ( error instanceof ServiceError ) {
                     if ( error.type == 'authentication-failed' || error.type == 'no-user' || error.type == 'no-user-password' ) {
                         throw new ControllerError(403, 'not-authorized', error.message)
                     } else if ( error.type == 'multiple-users' ) {
@@ -801,6 +858,13 @@ module.exports = class UserController extends BaseController{
      * Delete an existing user.
      */
     async deleteUser(request, response) {
+        const shouldRateLimit = await this.rateLimitService.shouldRateLimit(request) 
+        if ( shouldRateLimit === true ) {
+            throw new ControllerError(429, 'too-many-requests',
+                `Ip Address '${request.ip}' being rate limited`,
+                `You are submitting too many requests.  Only ${rateLimits[RateLimitService.METHODS.DELETE].numberOfRequests} allowed per ${rateLimits[RateLimitService.METHODS.DELETE].period/1000} seconds.`)
+        }
+
         const currentUser = request.session.user
 
         if ( ! currentUser ) {

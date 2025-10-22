@@ -18,9 +18,17 @@
  *
  ******************************************************************************/
 
-const backend = require('@communities/backend')
+const { 
+    AuthenticationService,
+
+    UserDAO,
+    TokenDAO,
+
+    ServiceError
+} = require('@communities/backend')
 
 const ControllerError = require('../errors/ControllerError')
+
 
 /**
  * Controller for the authentication resource.
@@ -37,9 +45,10 @@ module.exports = class AuthenticationController {
         this.logger = core.logger
         this.config = core.config
 
-        this.auth = new backend.AuthenticationService(core)
-        this.userDAO = new backend.UserDAO(core)
-        this.tokenDAO = new backend.TokenDAO(core)
+        this.auth = new AuthenticationService(core)
+
+        this.userDAO = new UserDAO(core)
+        this.tokenDAO = new TokenDAO(core)
     }
 
 
@@ -158,7 +167,7 @@ module.exports = class AuthenticationController {
             })
         } catch (error ) {
             request.logger.warn(error)
-            if ( error instanceof backend.ServiceError ) {
+            if ( error instanceof ServiceError ) {
                 if ( error.type == 'no-user' ) {
                     throw new ControllerError(403, 'authentication-failed', error.message)
                 } else if ( error.type == 'multiple-users') {
