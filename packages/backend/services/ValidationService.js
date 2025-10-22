@@ -372,15 +372,8 @@ module.exports = class ValidationService {
                     message: `Your email must be a string.`
                 })
             } else {
-                if ( user.email.length > 512 ) {
-                    errors.push({
-                        type: 'email:too-long',
-                        log: `Email is too long: ${user.email.length}`,
-                        message: `Your email is too long. We can only accept emails less than 512 characters.`
-                    })
-                }
-
-                if ( ! user.email.includes('@') ) {
+                const emailValidationErrors = validation.User.validateEmail(user.email)
+                if ( emailValidationErrors.length > 0 ) {
                     errors.push({
                         type: 'email:invalid',
                         log: `Invalid email: ${user.email}`,

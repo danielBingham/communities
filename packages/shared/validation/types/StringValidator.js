@@ -52,7 +52,7 @@ module.exports = class StringValidator extends BaseValidator {
             this.errors.push({
                 type: `${this.name}:too-long`,
                 log: `${this.value.length} characters is too long. Must be less than ${length} characters.`,
-                message: `${this.value.length} characters is too long. Must be less than ${length} characters.`
+                message: `Must be less than ${length} characters.`
             })
         }
         return this
@@ -68,7 +68,7 @@ module.exports = class StringValidator extends BaseValidator {
             this.errors.push({
                 type: `${this.name}:too-short`,
                 log: `${this.value.length} characters is too short. Must be longer than ${length} characters.`,
-                message: `${this.value.length} characters is too short . Must be longer than ${length} characters.`
+                message: `Must be longer than ${length} characters.`
             })
         }
         return this
@@ -83,7 +83,7 @@ module.exports = class StringValidator extends BaseValidator {
             this.errors.push({
                 type: `${this.name}:invalid`,
                 log: `${this.value} is not valid. ${message}`,
-                message: `${this.value} is not valid. ${message}`
+                message: `${message}`
             })
         }
         return this
@@ -98,7 +98,7 @@ module.exports = class StringValidator extends BaseValidator {
             this.errors.push({
                 type: `${this.name}:invalid`,
                 log: `${this.value} is not a valid ${this.name}. Must be one of ${validValues.join(', ')}`,
-                message: `${this.value} is not a valid ${this.name}. Must be one of ${validValues.join(', ')}`
+                message: `Must be one of ${validValues.join(', ')}`
             })
         }
         return this
