@@ -37,6 +37,7 @@ const ContributionCard = function({ amount, explanation, onClick }) {
                 <div className="explanation">{ explanation }</div>
                 <a 
                     href={`${links[amount]}${postFix}`} 
+                    target="_blank"
                     ref={ref} 
                     style={{ display: 'none' }}
                 >Contribute { contribution } / month</a>
