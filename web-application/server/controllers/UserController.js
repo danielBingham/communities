@@ -28,7 +28,6 @@ const {
     EmailService,
     NotificationService,
     PermissionService,
-    RateLimitService,
     UserService,
     ValidationService,
 
@@ -46,29 +45,6 @@ const {
 const BaseController = require('./BaseController')
 const ControllerError = require('../errors/ControllerError')
 
-const rateLimits = {
-    [RateLimitService.METHODS.QUERY]: {
-        period: 60 * 1000,
-        numberOfRequests: 1000
-    },
-    [RateLimitService.METHODS.GET]: {
-        period: 60 * 1000,
-        numberOfRequests: 1000
-    },
-    [RateLimitService.METHODS.POST]: {
-        period: 60 * 1000,
-        numberOfRequests: 30
-    },
-    [RateLimitService.METHODS.PATCH]: {
-        period: 60 * 1000,
-        numberOfRequests: 30
-    },
-    [RateLimitService.METHODS.DELETE]: {
-        period: 60 * 1000,
-        numberOfRequests: 30
-    }
-}
-
 module.exports = class UserController extends BaseController{
 
     constructor(core) {
@@ -82,7 +58,6 @@ module.exports = class UserController extends BaseController{
         this.emailService = new EmailService(core)
         this.notificationService = new NotificationService(core)
         this.permissionService = new PermissionService(core)
-        this.rateLimitService = new RateLimitService(core, 'User', rateLimits)
         this.userService = new UserService(core)
         this.validationService = new ValidationService(core)
 
@@ -373,13 +348,6 @@ module.exports = class UserController extends BaseController{
      * @returns {Promise}   Resolves to void.
      */
     async getUsers(request, response) {
-        const shouldRateLimit = await this.rateLimitService.shouldRateLimit(request) 
-        if ( shouldRateLimit === true ) {
-            throw new ControllerError(429, 'too-many-requests',
-                `Ip Address '${request.ip}' being rate limited`,
-                `You are submitting too many requests.  Only ${rateLimits[RateLimitService.METHODS.QUERY].numberOfRequests} allowed per ${rateLimits[RateLimitService.METHODS.QUERY].period/1000} seconds.`)
-        }
-        
         const query = await this.parseQuery(request.session.user, request.query)
 
         if ( query.emptyResult ) {
@@ -418,13 +386,6 @@ module.exports = class UserController extends BaseController{
      * @returns {Promise}   Resolves to void.
      */
     async postUsers(request, response) {
-        const shouldRateLimit = await this.rateLimitService.shouldRateLimit(request) 
-        if ( shouldRateLimit === true ) {
-            throw new ControllerError(429, 'too-many-requests',
-                `Ip Address '${request.ip}' being rate limited`,
-                `You are submitting too many requests.  Only ${rateLimits[RateLimitService.METHODS.POST].numberOfRequests} allowed per ${rateLimits[RateLimitService.METHODS.POST].period/1000} seconds.`)
-        }
-
         const currentUser = request.session.user
 
         let userErrors = []
@@ -495,13 +456,6 @@ module.exports = class UserController extends BaseController{
      * @returns {Promise}   Resolves to void.
      */
     async getUser(request, response) {
-        const shouldRateLimit = await this.rateLimitService.shouldRateLimit(request) 
-        if ( shouldRateLimit === true ) {
-            throw new ControllerError(429, 'too-many-requests',
-                `Ip Address '${request.ip}' being rate limited`,
-                `You are submitting too many requests.  Only ${rateLimits[RateLimitService.METHODS.GET].numberOfRequests} allowed per ${rateLimits[RateLimitService.METHODS.GET].period/1000} seconds.`)
-        }
-
         const currentUser = request.session.user
         const userId = request.params.id
 
@@ -556,13 +510,6 @@ module.exports = class UserController extends BaseController{
      * @returns {Promise}   Resolves to void.
      */
     async patchUser(request, response) {
-        const shouldRateLimit = await this.rateLimitService.shouldRateLimit(request) 
-        if ( shouldRateLimit === true ) {
-            throw new ControllerError(429, 'too-many-requests',
-                `Ip Address '${request.ip}' being rate limited`,
-                `You are submitting too many requests.  Only ${rateLimits[RateLimitService.METHODS.PATCH].numberOfRequests} allowed per ${rateLimits[RateLimitService.METHODS.PATCH].period/1000} seconds.`)
-        }
-
         const user = request.body
         const id = request.params.id
 
@@ -858,13 +805,6 @@ module.exports = class UserController extends BaseController{
      * Delete an existing user.
      */
     async deleteUser(request, response) {
-        const shouldRateLimit = await this.rateLimitService.shouldRateLimit(request) 
-        if ( shouldRateLimit === true ) {
-            throw new ControllerError(429, 'too-many-requests',
-                `Ip Address '${request.ip}' being rate limited`,
-                `You are submitting too many requests.  Only ${rateLimits[RateLimitService.METHODS.DELETE].numberOfRequests} allowed per ${rateLimits[RateLimitService.METHODS.DELETE].period/1000} seconds.`)
-        }
-
         const currentUser = request.session.user
 
         if ( ! currentUser ) {

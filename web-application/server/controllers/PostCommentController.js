@@ -24,7 +24,6 @@ const {
     NotificationService, 
     PermissionService, 
     ValidationService,
-    RateLimitService,
 
     PostDAO, 
     UserRelationshipDAO, 
@@ -35,29 +34,6 @@ const {
 } = require('@communities/backend')
 
 const ControllerError = require('../errors/ControllerError')
-
-const rateLimits = {
-    [RateLimitService.METHODS.QUERY]: {
-        period: 60 * 1000,
-        numberOfRequests: 1000
-    },
-    [RateLimitService.METHODS.GET]: {
-        period: 60 * 1000,
-        numberOfRequests: 1000
-    },
-    [RateLimitService.METHODS.POST]: {
-        period: 60 * 1000,
-        numberOfRequests: 30
-    },
-    [RateLimitService.METHODS.PATCH]: {
-        period: 60 * 1000,
-        numberOfRequests: 30
-    },
-    [RateLimitService.METHODS.DELETE]: {
-        period: 60 * 1000,
-        numberOfRequests: 30
-    }
-}
 
 module.exports = class PostCommentController {
 
@@ -72,7 +48,6 @@ module.exports = class PostCommentController {
 
         this.notificationService = new NotificationService(core)
         this.permissionService = new PermissionService(core)
-        this.rateLimitService = new RateLimitService(core, 'PostComment', rateLimits)
         this.validationService = new ValidationService(core)
     }
 
@@ -109,13 +84,6 @@ module.exports = class PostCommentController {
     }
 
     async getPostComments(request, response) {
-        const shouldRateLimit = await this.rateLimitService.shouldRateLimit(request) 
-        if ( shouldRateLimit === true ) {
-            throw new ControllerError(429, 'too-many-requests',
-                `Ip Address '${request.ip}' being rate limited`,
-                `You are submitting too many requests.  Only ${rateLimits[RateLimitService.METHODS.QUERY].numberOfRequests} allowed per ${rateLimits[RateLimitService.METHODS.QUERY].period/1000} seconds.`)
-        }
-
         const currentUser = request.session.user
         const postId = request.params.postId
 
@@ -160,13 +128,6 @@ module.exports = class PostCommentController {
     }
 
     async postPostComments(request, response) {
-        const shouldRateLimit = await this.rateLimitService.shouldRateLimit(request) 
-        if ( shouldRateLimit === true ) {
-            throw new ControllerError(429, 'too-many-requests',
-                `Ip Address '${request.ip}' being rate limited`,
-                `You are submitting too many requests.  Only ${rateLimits[RateLimitService.METHODS.POST].numberOfRequests} allowed per ${rateLimits[RateLimitService.METHODS.POST].period/1000} seconds.`)
-        }
-
         const currentUser = request.session.user
         const postId = request.params.postId
 
@@ -283,13 +244,6 @@ module.exports = class PostCommentController {
     }
 
     async getPostComment(request, response) {
-        const shouldRateLimit = await this.rateLimitService.shouldRateLimit(request) 
-        if ( shouldRateLimit === true ) {
-            throw new ControllerError(429, 'too-many-requests',
-                `Ip Address '${request.ip}' being rate limited`,
-                `You are submitting too many requests.  Only ${rateLimits[RateLimitService.METHODS.GET].numberOfRequests} allowed per ${rateLimits[RateLimitService.METHODS.GET].period/1000} seconds.`)
-        }
-
         const currentUser = request.session.user
         const postId = request.params.postId
         const id = request.params.id
@@ -340,13 +294,6 @@ module.exports = class PostCommentController {
     }
 
     async patchPostComment(request, response) {
-        const shouldRateLimit = await this.rateLimitService.shouldRateLimit(request) 
-        if ( shouldRateLimit === true ) {
-            throw new ControllerError(429, 'too-many-requests',
-                `Ip Address '${request.ip}' being rate limited`,
-                `You are submitting too many requests.  Only ${rateLimits[RateLimitService.METHODS.PATCH].numberOfRequests} allowed per ${rateLimits[RateLimitService.METHODS.PATCH].period/1000} seconds.`)
-        }
-
         const currentUser = request.session.user
         const postId = request.params.postId
         const commentId = request.params.id
@@ -429,13 +376,6 @@ module.exports = class PostCommentController {
     }
 
     async deletePostComment(request, response) {
-        const shouldRateLimit = await this.rateLimitService.shouldRateLimit(request) 
-        if ( shouldRateLimit === true ) {
-            throw new ControllerError(429, 'too-many-requests',
-                `Ip Address '${request.ip}' being rate limited`,
-                `You are submitting too many requests.  Only ${rateLimits[RateLimitService.METHODS.DELETE].numberOfRequests} allowed per ${rateLimits[RateLimitService.METHODS.DELETE].period/1000} seconds.`)
-        }
-
         const currentUser = request.session.user
         const postId = request.params.postId
         const commentId = request.params.id

@@ -20,7 +20,6 @@
 const { 
     AuthenticationService, 
     EmailService, 
-    RateLimitService,
 
     TokenDAO,
     UserDAO
@@ -30,29 +29,6 @@ const { validation } = require('@communities/shared')
 const BaseController = require('./BaseController')
 
 const ControllerError = require('../errors/ControllerError')
-
-const rateLimits = {
-    [RateLimitService.METHODS.QUERY]: {
-        period: 60 * 1000,
-        numberOfRequests: 20
-    },
-    [RateLimitService.METHODS.GET]: {
-        period: 60 * 1000,
-        numberOfRequests: 20
-    },
-    [RateLimitService.METHODS.POST]: {
-        period: 60 * 1000,
-        numberOfRequests: 20
-    },
-    [RateLimitService.METHODS.PATCH]: {
-        period: 60 * 1000,
-        numberOfRequests: 20
-    },
-    [RateLimitService.METHODS.DELETE]: {
-        period: 60 * 1000,
-        numberOfRequests: 20
-    }
-}
 
 module.exports = class TokenController extends BaseController {
 
@@ -65,7 +41,6 @@ module.exports = class TokenController extends BaseController {
 
         this.authenticationService = new AuthenticationService(core)
         this.emailService = new EmailService(core)
-        this.rateLimitService = new RateLimitService(core, 'Token', rateLimits)
 
         this.tokenDAO = new TokenDAO(core)
         this.userDAO = new UserDAO(core)
@@ -100,14 +75,6 @@ module.exports = class TokenController extends BaseController {
          * 4. Token(:token) must have type equal to request.query.type 
          * 
          * **********************************************************/
-
-        const shouldRateLimit = await this.rateLimitService.shouldRateLimit(request) 
-        if ( shouldRateLimit === true ) {
-            throw new ControllerError(429, 'too-many-requests',
-                `Ip Address '${request.ip}' being rate limited`,
-                `You are submitting too many requests.  Only ${rateLimits[RateLimitService.METHODS.GET].numberOfRequests} allowed per ${rateLimits[RateLimitService.METHODS.GET].period/1000} seconds.`)
-        }
-
         const currentUser = request.session.user
 
         // 1. :token must be included.
@@ -234,13 +201,6 @@ module.exports = class TokenController extends BaseController {
          * 2. request.body.type must be 'reset-password' or 'email-confirmation'
          *
          * **********************************************************/
-
-        const shouldRateLimit = await this.rateLimitService.shouldRateLimit(RateLimitService.METHODS.POST, request) 
-        if ( shouldRateLimit === true ) {
-            throw new ControllerError(429, 'too-many-requests',
-                `Ip Address '${req.ip}' being rate limited`,
-                `You are submitting too many requests.  Only ${rateLimits[RateLimitService.METHODS.POST].numberOfRequests} allowed per ${rateLimits[RateLimitService.METHODS.POST].period/1000} seconds.`)
-        }
         
         const tokenParams  = request.body
         if ( tokenParams.email ) {

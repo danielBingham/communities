@@ -174,13 +174,6 @@ module.exports = class LinkPreviewController {
             relations: await this.getRelations(results)
         })
     }
-
-    async patchLinkPreview(request, response) {
-        throw new ControllerError(501, 'not-implemented',
-            `PATCH LinkPreview is not yet implemented.`,
-            `PATCH LinkPreview is not yet implemented.`)
-    }
-
 }
 
 
