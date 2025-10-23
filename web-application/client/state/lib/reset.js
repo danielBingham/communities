@@ -1,5 +1,5 @@
 import { resetBlocklistSlice } from '/state/Blocklist'
-import { resetFileSlice } from '/state/File'
+import { cleanFileCache } from '/state/File'
 import { resetGroupSlice } from '/state/Group'
 import { resetGroupMemberSlice } from '/state/GroupMember'
 import { resetGroupModerationSlice } from '/state/GroupModeration'
@@ -15,7 +15,7 @@ import { resetUserRelationshipSlice } from '/state/UserRelationship'
 export const resetEntities = function() {
     return function(dispatch, getState) {
         dispatch(resetBlocklistSlice())
-        dispatch(resetFileSlice())
+        dispatch(cleanFileCache())
         dispatch(resetGroupSlice())
         dispatch(resetGroupMemberSlice())
         dispatch(resetGroupModerationSlice())
