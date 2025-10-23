@@ -20,57 +20,9 @@
 
 module.exports = class BaseController {
 
-    static METHODS = {
-        QUERY: 'query',
-        GET: 'get',
-        POST: 'post',
-        PATCH: 'patch',
-        DELETE: 'delete'
-    }
-
-    constructor(core, entity, rateLimits) {
+    constructor(core) {
         this.core = core
 
-        this.entity = entity || null
-        this.rateLimits = rateLimits || null
-    }
-
-    async shouldRateLimit(method, request) {
-        if ( this.rateLimits === undefined || this.rateLimits === null ) {
-            return false
-        }
-
-        const limits = this.rateLimits[method]
-
-        const ipAddress = request.ip
-
-        let requestsJSON = await this.core.redis.get(`web-application:${this.entity}:${method}:requests:${ipAddress}`)
-        let requests = {}
-        if ( requestsJSON !== null ) {
-            requests = JSON.parse(requestsJSON)
-        } 
-
-        const now = Date.now()
-        let requestCount = 0
-        for(const [timestamp, request] of Object.entries(requests)) {
-            if ( now - timestamp > limits.period ) {
-                delete requests[timestamp]
-                continue
-            }
-            requestCount += 1
-        }
-
-        const userId = request.session.user?.id
-        requests[now] = {
-            userId: userId || null
-        }
-        await this.core.redis.set(`web-application:${this.entity}:${method}:requests:${ipAddress}`, JSON.stringify(requests))
-
-        if ( requestCount > limits.numberOfRequests ) {
-            return true
-        }
-
-        return false
     }
 
     sendUserErrors(response, status, errors) {

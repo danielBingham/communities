@@ -42,7 +42,6 @@ const { lib, cleaning, validation } = require('@communities/shared')
 
 const ControllerError = require('../errors/ControllerError')
 
-
 module.exports = class PostController {
 
     constructor(core) {
