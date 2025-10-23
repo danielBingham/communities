@@ -80,9 +80,24 @@ export const FileSlice = createSlice({
             const objectURL = action.payload.objectURL
 
             if ( width ) {
-                state.cache[fileId][width] = objectURL
+                state.cache[fileId][width] = {
+                    url: objectURL,
+                    timestamp: Date.now()
+                }
             } else {
-                state.cache[fileId]['full'] = objectURL
+                state.cache[fileId]['full'] = {
+                    url: objectURL,
+                    timestamp: Date.now()
+                }
+            }
+        },
+
+        touchCache: (state, action) => {
+            const fileId = action.payload.fileId
+            const width = action.payload.width
+
+            if ( fileId in state.cache && width in state.cache[fileId] ) {
+                state.cache[fileId][width].timestamp = Date.now()
             }
         },
 
@@ -91,8 +106,8 @@ export const FileSlice = createSlice({
 
 
             if ( fileId in state.cache ) {
-                for(const [width, url] of Object.entries(state.cache[fileId]) ) {
-                    URL.revokeObjectURL(url)
+                for(const [width, file] of Object.entries(state.cache[fileId]) ) {
+                    URL.revokeObjectURL(file.url)
                 }
                 delete state.cache[fileId]
             }
@@ -100,6 +115,6 @@ export const FileSlice = createSlice({
     }
 })
 
-export const {  setFilesInDictionary, removeFile, resetFileSlice, setInCache, removeFromCache }  = FileSlice.actions
+export const {  setFilesInDictionary, removeFile, resetFileSlice, setInCache, touchCache, removeFromCache }  = FileSlice.actions
 
 export default FileSlice.reducer
