@@ -23,19 +23,19 @@ module.exports = function(core) {
     const SystemController = require('./controllers/SystemController')
     const systemController = new SystemController(core)
 
-    router.get('/system/initialization', rateLimit(core, 240), function(request, response, next) {
+    router.get('/system/initialization', rateLimit(core, 2400), function(request, response, next) {
         systemController.getInitialization(request, response).catch(function(error) {
             next(error)
         })
     })
 
-    router.post('/system/initialization', rateLimit(core, 240), function(request, response, next) {
+    router.post('/system/initialization', rateLimit(core, 2400), function(request, response, next) {
         systemController.postInitialization(request, response).catch(function(error) {
             next(error)
         })
     })
 
-    router.get('/system/version', rateLimit(core, 240), function(request, response, next) {
+    router.get('/system/version', rateLimit(core, 2400), function(request, response, next) {
         systemController.getVersion(request, response).catch(function(error) {
             next(error)
         })
@@ -47,7 +47,7 @@ module.exports = function(core) {
     const FeatureController = require('./controllers/FeatureController')
     const featureController = new FeatureController(core)
 
-    router.get('/features', rateLimit(core, 240), function(request, response, next) {
+    router.get('/features', rateLimit(core, 2400), function(request, response, next) {
         featureController.getFeatures(request, response).catch(function(error) {
             next(error)
         })
@@ -59,7 +59,7 @@ module.exports = function(core) {
         })
     })
 
-    router.get('/feature/:name', rateLimit(core, 240), function(request, response, next) {
+    router.get('/feature/:name', rateLimit(core, 2400), function(request, response, next) {
         featureController.getFeature(request, response).catch(function(error) {
             next(error)
         })
@@ -77,7 +77,7 @@ module.exports = function(core) {
     const JobController = require('./controllers/JobController')
     const jobController = new JobController(core)
 
-    router.get('/jobs', rateLimit(core, 240), function(request, response, next) {
+    router.get('/jobs', rateLimit(core, 2400), function(request, response, next) {
         jobController.getJobs(request, response).catch(function(error) {
             next(error)
         })
@@ -89,7 +89,7 @@ module.exports = function(core) {
         })
     })
 
-    router.get('/job/:id', rateLimit(core, 240), function(request, response, next) {
+    router.get('/job/:id', rateLimit(core, 2400), function(request, response, next) {
         jobController.getJob(request, response).catch(function(error) {
             next(error)
         })
@@ -121,7 +121,7 @@ module.exports = function(core) {
         })
     })
 
-    router.get('/file/:id', rateLimit(core, 240), function(request, response, next) {
+    router.get('/file/:id', rateLimit(core, 2400), function(request, response, next) {
         fileController.getFile(request, response).catch(function(error) {
             next(error)
         })
@@ -146,7 +146,7 @@ module.exports = function(core) {
     const userController = new UserController(core)
 
     // Get a list of all users.
-    router.get('/users', rateLimit(core, 240), function(request, response, next) {
+    router.get('/users', rateLimit(core, 2400), function(request, response, next) {
         userController.getUsers(request, response).catch(function(error) {
             next(error)
         })
@@ -160,7 +160,7 @@ module.exports = function(core) {
     })
 
     // Get the details of a single user 
-    router.get('/user/:id', rateLimit(core, 240), function(request, response, next) {
+    router.get('/user/:id', rateLimit(core, 2400), function(request, response, next) {
         userController.getUser(request, response).catch(function(error) {
             next(error)
         })
@@ -222,7 +222,7 @@ module.exports = function(core) {
     const GroupController = require('./controllers/GroupController')
     const groupController = new GroupController(core)
 
-    router.get('/groups', rateLimit(core, 240), function(request, response, next) {
+    router.get('/groups', rateLimit(core, 2400), function(request, response, next) {
         groupController.getGroups(request, response).catch(function(error) {
             next(error)
         })
@@ -234,7 +234,7 @@ module.exports = function(core) {
         })
     })
 
-    router.get('/group/:id', rateLimit(core, 240), function(request, response, next) {
+    router.get('/group/:id', rateLimit(core, 2400), function(request, response, next) {
         groupController.getGroup(request, response).catch(function(error) {
             next(error)
         })
@@ -258,7 +258,7 @@ module.exports = function(core) {
     const GroupMemberController = require('./controllers/GroupMemberController')
     const groupMemberController = new GroupMemberController(core)
 
-    router.get('/group/:groupId/members', rateLimit(core, 480), function(request, response, next) {
+    router.get('/group/:groupId/members', rateLimit(core, 4800), function(request, response, next) {
         groupMemberController.getGroupMembers(request, response).catch(function(error) {
             next(error)
         })
@@ -270,7 +270,7 @@ module.exports = function(core) {
         })
     })
 
-    router.get('/group/:groupId/member/:userId', rateLimit(core, 480), function(request, response, next) {
+    router.get('/group/:groupId/member/:userId', rateLimit(core, 4800), function(request, response, next) {
         groupMemberController.getGroupMember(request, response).catch(function(error) {
             next(error)
         })
@@ -294,7 +294,7 @@ module.exports = function(core) {
     const GroupModerationController = require('./controllers/GroupModerationController')
     const groupModerationController = new GroupModerationController(core)
 
-    router.get('/group/:groupId/moderations', rateLimit(core, 240), function(request, response, next) {
+    router.get('/group/:groupId/moderations', rateLimit(core, 2400), function(request, response, next) {
         groupModerationController.getGroupModerations(request, response).catch(function(error) {
             next(error)
         })
@@ -306,7 +306,7 @@ module.exports = function(core) {
         })
     })
 
-    router.get('/group/:groupId/moderation/:id', rateLimit(core, 240), function(request, response, next) {
+    router.get('/group/:groupId/moderation/:id', rateLimit(core, 2400), function(request, response, next) {
         groupModerationController.getGroupModeration(request, response).catch(function(error) {
             next(error)
         })
@@ -330,7 +330,7 @@ module.exports = function(core) {
     const LinkPreviewController = require('./controllers/LinkPreviewController')
     const linkPreviewController = new LinkPreviewController(core)
 
-    router.get('/link-previews', rateLimit(core, 240), function(request, response, next) {
+    router.get('/link-previews', rateLimit(core, 2400), function(request, response, next) {
         linkPreviewController.getLinkPreviews(request, response).catch(function(error) {
             next(error)
         })
@@ -342,7 +342,7 @@ module.exports = function(core) {
         })
     })
 
-    router.get('/link-preview/:id', rateLimit(core, 240), function(request, response, next) {
+    router.get('/link-preview/:id', rateLimit(core, 2400), function(request, response, next) {
         linkPreviewController.getLinkPreview(request, response).catch(function(error) {
             next(error)
         })
@@ -416,7 +416,7 @@ module.exports = function(core) {
     const PostCommentController = require('./controllers/PostCommentController')
     const postCommentController = new PostCommentController(core)
 
-    router.get('/post/:postId/comments', rateLimit(core, 480), function(request, response, next) {
+    router.get('/post/:postId/comments', rateLimit(core, 4800), function(request, response, next) {
         postCommentController.getPostComments(request, response).catch(function(error) {
             next(error)
         })
@@ -428,7 +428,7 @@ module.exports = function(core) {
         })
     })
 
-    router.get('/post/:postId/comment/:id', rateLimit(core, 480), function(request, response, next) {
+    router.get('/post/:postId/comment/:id', rateLimit(core, 4800), function(request, response, next) {
         postCommentController.getPostComment(request, response).catch(function(error) {
             next(error)
         })
@@ -458,7 +458,7 @@ module.exports = function(core) {
         })
     })
 
-    router.get('/post/:postId/subscription', rateLimit(core, 240), function(request, response, next) {
+    router.get('/post/:postId/subscription', rateLimit(core, 2400), function(request, response, next) {
         postSubscriptionController.getPostSubscription(request, response).catch(function(error) {
             next(error)
         })
@@ -476,7 +476,7 @@ module.exports = function(core) {
     const NotificationController = require('./controllers/NotificationController')
     const notificationController = new NotificationController(core)
 
-    router.get('/notifications', rateLimit(core, 240), function(request, response, next) {
+    router.get('/notifications', rateLimit(core, 2400), function(request, response, next) {
         notificationController.getNotifications(request, response).catch(function(error) {
             next(error)
         })
@@ -507,7 +507,7 @@ module.exports = function(core) {
         })
     })
 
-    router.get('/authentication', rateLimit(core, 240), function(request, response, next) {
+    router.get('/authentication', rateLimit(core, 2400), function(request, response, next) {
         authenticationController.getAuthentication(request,response).catch(function(error) {
             next(error)
         })
@@ -554,7 +554,7 @@ module.exports = function(core) {
     const SiteModerationController = require('./controllers/admin/SiteModerationController')
     const siteModerationController = new SiteModerationController(core)
 
-    router.get('/admin/moderations', rateLimit(core, 480), function(request, response, next) {
+    router.get('/admin/moderations', rateLimit(core, 4800), function(request, response, next) {
         siteModerationController.getSiteModerations(request, response).catch(function(error){
             next(error)
         })
@@ -566,7 +566,7 @@ module.exports = function(core) {
         })
     })
 
-    router.get('/admin/moderation/:id', rateLimit(core, 480), function(request, response, next) {
+    router.get('/admin/moderation/:id', rateLimit(core, 4800), function(request, response, next) {
         siteModerationController.getSiteModeration(request, response).catch(function(error) {
             next(error)
         })
@@ -590,7 +590,7 @@ module.exports = function(core) {
     const BlocklistController = require('./controllers/admin/BlocklistController')
     const blocklistController = new BlocklistController(core)
 
-    router.get('/admin/blocklists', rateLimit(core, 240), function(request, response, next) {
+    router.get('/admin/blocklists', rateLimit(core, 2400), function(request, response, next) {
         blocklistController.getBlocklists(request, response).catch(function(error){
             next(error)
         })

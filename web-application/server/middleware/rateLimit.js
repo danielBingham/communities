@@ -26,7 +26,6 @@ const rateLimit = function(core, limit) {
         const route = request.route.path.replaceAll('/', '-')
         const method = request.method
 
-        request.logger.debug(`Limit for ${route} on ${method}:`, limit)
         if ( limit === undefined || limit === null || typeof limit !== 'number' ) {
             next()    
         }
@@ -59,6 +58,7 @@ const rateLimit = function(core, limit) {
         }
         await core.redis.set(`web-application:${route}:${method}:requests:${ipAddress}`, JSON.stringify(previousRequests))
 
+        request.logger.debug(`IP(${ipAddress}) has made ${requestCount} requests to ${method} ${route} against ${limit} in the last ${PERIOD / 1000} seconds.`)
         if ( requestCount > limit ) {
             request.logger.warn(`IP(${request.ip}) is being rate limited.`) 
             response.status(429).json({
@@ -67,7 +67,8 @@ const rateLimit = function(core, limit) {
                     message: `You are submitting too many requests. Only ${limit} per ${PERIOD / 1000} seconds allowed.`
                 }
             })
-        }
+            return
+        } 
 
         next() 
     }
