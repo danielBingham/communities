@@ -80,13 +80,15 @@ module.exports = class FileController {
         const validTypes = [
             // For post and profile images.
             'image/jpeg',
-            'image/png'
+            'image/png',
+            'image/gif'
         ]
 
         // 1. File must be PDF, JPEG, or PNG.
         if ( ! validTypes.includes(type) ) {
             throw new ControllerError(400, 'invalid-type',
-                `User(${request.session.user.id}) attempted to upload an invalid file of type ${type}.`)
+                `User(${request.session.user.id}) attempted to upload an invalid file of type ${type}.`,
+                `Invalid file type '${type}'.  Valid types are ${validTypes.join(', ')}.`)
         }
 
 

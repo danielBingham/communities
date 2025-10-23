@@ -51,7 +51,7 @@ const PostAttachmentControls = function({ postId, groupId, sharedPostId }) {
                     text="Add Image"
                     fileId={draft.fileId} 
                     setFileId={setFileId} 
-                    types={[ 'image/jpeg', 'image/png' ]} 
+                    types={[ 'image/jpeg', 'image/png', 'image/gif' ]} 
                 />
             </div>
         </div>

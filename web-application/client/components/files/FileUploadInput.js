@@ -8,6 +8,7 @@ import { uploadFile } from '/state/File'
 
 import Spinner from '/components/Spinner'
 import Button from '/components/generic/button/Button'
+import { RequestErrorModal } from '/components/errors/RequestError'
 
 import './FileUploadInput.css'
 
@@ -59,10 +60,6 @@ const FileUploadInput = function(props) {
     // Spinner while we wait for requests to process so that we can't start a new request on top of an existing one.
     if ( uploadRequest && uploadRequest.state == 'pending' ) {
         content = ( <Spinner local={true} /> )
-
-    // Request failure - report an error.
-    } else if ( uploadRequest && uploadRequest.state == 'failed' ) {
-        content = (<div className="error"> { uploadRequest.error }</div>)
     } else { 
         let typeErrorView = null
         if ( typeError ) {
@@ -79,6 +76,7 @@ const FileUploadInput = function(props) {
                     ref={hiddenFileInput}
                 />
                 { typeErrorView }
+                <RequestErrorModal message="Attempt to upload file" request={uploadRequest} />
             </div>
         )
     }
