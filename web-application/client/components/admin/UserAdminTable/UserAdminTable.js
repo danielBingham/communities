@@ -1,11 +1,6 @@
-import React, { useEffect } from 'react'
 import { useSelector } from 'react-redux'
 
-import { useSearchParams } from 'react-router-dom'
-
-import { useRequest } from '/lib/hooks/useRequest'
-
-import { getUsers } from '/state/User'
+import { useUserQuery } from '/lib/hooks/User'
 
 import PaginationControls from '/components/PaginationControls'
 import { Table, TableHeader, TableCell } from '/components/ui/Table'
@@ -14,25 +9,12 @@ import Spinner from '/components/Spinner'
 
 import UserAdminTableRow from './UserAdminTableRow'
 
-
 import './UserAdminTable.css'
 
 const UserAdminTable = function() {
 
-    const [ searchParams, setSearchParams ] = useSearchParams()
-
     const dictionary = useSelector((state) => state.User.dictionary)
-    const query = useSelector((state) => 'UserAdmin' in state.User.queries ? state.User.queries['UserAdmin'] : null)
-    const [request, makeRequest] = useRequest()
-
-    useEffect(function() {
-        let page = searchParams.get('page')
-        page = page || 1
-        
-        if ( query === null ) {
-            makeRequest(getUsers('UserAdmin', { page: page, admin: true }))
-        }
-    }, [ query, searchParams ])
+    const [ query, request ] = useUserQuery({ admin: true })
 
     if ( ! query ) {
         return (
