@@ -148,6 +148,43 @@ const RegistrationForm = function(props) {
     }
 
     useEffect(function() {
+        if ( nameValidationError.length > 0 ) {
+            isValid('name')
+        }
+
+    }, [ name, nameValidationError ])
+
+    useEffect(function() {
+        if ( usernameValidationError.length > 0 ) {
+            isValid('username')
+        }
+    }, [ username, usernameValidationError ])
+
+    useEffect(function() {
+        if ( emailValidationError.length > 0 ) {
+            isValid('email')
+        }
+    }, [ email, emailValidationError ])
+
+    useEffect(function() {
+        if ( passwordValidationError.length > 0 ) {
+            isValid('password')
+        }
+    }, [ password, passwordValidationError ])
+
+    useEffect(function() {
+        if ( confirmPasswordValidationError.length > 0 ) {
+            isValid('confirmPassword')
+        }
+    }, [ confirmPassword, confirmPasswordValidationError ])
+
+    useEffect(function() {
+        if ( birthdateValidationError.length > 0 ) {
+            isValid('birthdate')
+        }
+    }, [ birthdate, birthdateValidationError ])
+
+    useEffect(function() {
         if ( request && request.state == 'fulfilled' ) {
             window.location.href = "/email-confirmation"
         }
