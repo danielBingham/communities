@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { Link, NavLink } from 'react-router-dom'
 
-import { QueueListIcon as QueueListIconOutline} from '@heroicons/react/24/outline'
-import { QueueListIcon as QueueListIconSolid, UsersIcon, SparklesIcon, PlusIcon } from '@heroicons/react/24/solid'
+import { QueueListIcon as QueueListIconOutline, MapPinIcon as MapPinIconOutline } from '@heroicons/react/24/outline'
+import { QueueListIcon as QueueListIconSolid, MapPinIcon as MapPinIconSolid, GlobeAltIcon, UsersIcon, SparklesIcon, PlusIcon } from '@heroicons/react/24/solid'
 import { UserGroupIcon as UserGroupIconOutline } from '@heroicons/react/24/outline'
 import { UserGroupIcon as UserGroupIconSolid} from '@heroicons/react/24/solid'
 
@@ -20,6 +20,7 @@ import './FeedMenu.css'
 const FeedMenu = function() {
     const [width, setWidth] = useState(window.innerWidth)
     const [feedsIsOpen, setFeedsIsOpen] = useLocalStorage('FeedMenu.feedsIsOpen', false)
+    const [placesIsOpen, setPlacesIsOpen] = useLocalStorage('FeedMenu.placesIsOpen', false)
     const [groupsIsOpen, setGroupsIsOpen] = useLocalStorage('FeedMenu.feedsIsOpen', false)
     const [groupsPage, setGroupsPage] = useLocalStorage('FeedMenu.groupsPage', 1)
 
@@ -35,13 +36,20 @@ const FeedMenu = function() {
             setFeedsIsOpen(! feedsIsOpen)
         } else if ( menu === 'groups' ) {
             setGroupsIsOpen(! groupsIsOpen)
+        } else if ( menu === 'places' ) {
+            setPlacesIsOpen(! placesIsOpen)
         }
 
         if ( width <= 1220 ) {
             if ( menu === 'feeds' ) {
                 setGroupsIsOpen(false)
+                setPlacesIsOpen(false)
             } else if ( menu === 'groups' ) {
                 setFeedsIsOpen(false)
+                setPlacesIsOpen(false)
+            } else if ( menu === 'places' ) {
+                setFeedsIsOpen(false)
+                setGroupsIsOpen(false)
             }
         }
     }
@@ -104,9 +112,16 @@ const FeedMenu = function() {
         </menu>
     )
 
+    const placesMenu = (
+        <menu className="feed-menu__places">
+            <li><NavLink to="/p/global" onClick={() => closeMenus()}><GlobeAltIcon /> Global</NavLink></li>
+        </menu>
+    )
+
+
     const groupsMenu = (
         <menu className="group-feed-menu__groups">
-            { groupViews }
+            { groupViews.length > 0 ? groupViews : <li>No groups.</li> }
             { groupsQuery?.meta.numberOfPages > 1 && <li>
                 <div className="groups-feed-menu__pages">
                     <a className={groupsPage === 1 ? 'disabled' : ''} href="" onClick={(e) => { e.preventDefault(); pageGroups(groupsPage-1) }}>Prev</a>
@@ -130,6 +145,12 @@ const FeedMenu = function() {
                     </li>
                     <li>
                         <div className="feed-menu__sub-menu">
+                            <a href="" onClick={(e) => { e.preventDefault(); setIsOpen('places')}} className="header">{ feedsIsOpen ? <MapPinIconSolid /> : <MapPinIconOutline /> } <span className="nav-text">Place Feeds</span></a>
+                            { placesIsOpen && placesMenu }
+                        </div>
+                    </li>
+                    <li>
+                        <div className="feed-menu__sub-menu">
                             <a href="" onClick={(e) => { e.preventDefault(); setIsOpen('groups')}} className="header">{ groupsIsOpen ? <UserGroupIconSolid/> : <UserGroupIconOutline/> }<span className="nav-text">Groups Feeds</span></a>
                             { groupsIsOpen && groupsMenu }
                         </div>
@@ -146,11 +167,15 @@ const FeedMenu = function() {
                         <a href="" onClick={(e) => { e.preventDefault(); setIsOpen('feeds')}} className="header">{ feedsIsOpen ? <QueueListIconSolid/> : <QueueListIconOutline/> } <span className="nav-text">Your Feeds</span></a>
                     </li>
                     <li>
+                        <a href="" onClick={(e) => { e.preventDefault(); setIsOpen('places')}} className="header">{ feedsIsOpen ? <MapPinIconSolid /> : <MapPinIconOutline /> } <span className="nav-text">Place Feeds</span></a>
+                    </li>
+                    <li>
                         <a href="" onClick={(e) => { e.preventDefault(); setIsOpen('groups')}} className="header">{ groupsIsOpen ? <UserGroupIconSolid/> : <UserGroupIconOutline/> }<span className="nav-text">Groups Feeds</span></a>
                     </li>
                 </menu>
-                { (feedsIsOpen || groupsIsOpen) && <div className="feed-menu__sub-menu">
+                { (feedsIsOpen || placesIsOpen || groupsIsOpen) && <div className="feed-menu__sub-menu">
                     { feedsIsOpen && feedsMenu }
+                    { placesIsOpen && placesMenu }
                     { groupsIsOpen && groupsMenu }
                 </div> }
             </div>

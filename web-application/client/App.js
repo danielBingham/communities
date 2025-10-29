@@ -216,6 +216,7 @@ const App = function(props) {
                             <Route path="/" element={ <HomePage /> }> 
                                 <Route path="/f/:slug" element={ <Feed type="feed" /> } />
                                 <Route path="/g/:slug" element={ <Feed type="group" /> } />
+                                <Route path="/p/:slug" element={ <Feed type="place" /> } />
                                 <Route index element={ <Feed type="feed" /> } />
                             </Route>
 

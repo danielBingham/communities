@@ -348,6 +348,13 @@ module.exports = class PostController {
             }
         }
 
+        if ( 'place' in request.query ) {
+            if ( request.query.place === 'global' ) {
+                const and = query.params.length > 0 ? ' AND ' : ''
+                query.where += `${and} posts.visibility = 'public'`
+            }
+        }
+
         if ( 'since' in request.query ) {
             const since = request.query.since
             if ( since === 'day' ) {
