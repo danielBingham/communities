@@ -31,6 +31,9 @@ const Feed = function({ type }) {
         const params = {}
         if ( type == 'feed' ) {
             params.feed = slug || 'everything'
+        } else if ( type === 'place' ) {
+            params.place = 'global'
+            params.type = 'feed'
         } else if ( type == 'group') {
             if ( group ) {
                 params.groupId = group.id 
@@ -54,9 +57,10 @@ const Feed = function({ type }) {
     return (
         <div className="feed">
             { (  
-                type === 'feed' 
+                type === 'feed' || type === 'place'
                 || (type === 'user' && currentUser.username === slug) 
                 || (type === 'group' && canCreateGroupPost)) 
+                
                     && <CreatePostButton type="form" groupId={ group ? group.id : null } /> 
             }
             <PostList name={`Feed:${type}`} params={ params } /> 
