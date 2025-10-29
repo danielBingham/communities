@@ -206,6 +206,12 @@ module.exports = class UserRelationshipController {
                 `You are not authorized to create friend requests for that User.`)
         }
 
+        if ( relationId === currentUser.id ) {
+            throw new ControllerError(400, 'invalid',
+                `User attempting to create a relationship to themselves.`,
+                `You may not create a relationship with yourself.`)
+        }
+
         const existingResults = await this.userRelationshipDAO.selectUserRelationships({
             where: `(user_id = $1 AND friend_id = $2) OR (user_id = $2 AND friend_id = $1)`,
             params: [ userId, relationId]
