@@ -51,6 +51,7 @@ import AcceptTermsOfServicePage from '/pages/authentication/AcceptTermsOfService
 import SetContributionPage from '/pages/authentication/SetContributionPage'
 import AgeGate from '/pages/authentication/AgeGate'
 
+import UserFriendsView from '/pages/users/views/UserFriendsView'
 import UserProfilePage from '/pages/users/UserProfilePage'
 
 import UserAccountPage from '/pages/users/UserAccountPage'
@@ -219,6 +220,7 @@ const App = function(props) {
                             </Route>
 
                             <Route path="/:slug" element={ <UserProfilePage /> }>
+                                <Route path="friends" element={ <UserFriendsView /> } />
                                 <Route path=":postId" element={ <PostView /> } />
                                 <Route index element={ <Feed type="user" /> } />
                             </Route>

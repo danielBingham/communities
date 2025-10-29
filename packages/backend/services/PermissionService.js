@@ -238,7 +238,9 @@ module.exports = class PermissionService {
                 return await this.postSubscription.canDeletePostSubscription(user, context)
             }
         } else if ( entity === 'UserRelationship' ) {
-            if ( action === PermissionService.ACTIONS.VIEW ) {
+            if ( action === PermissionService.ACTIONS.QUERY ) {
+                return await this.userRelationship.canQueryUserRelationship(user, context)
+            } else if ( action === PermissionService.ACTIONS.VIEW ) {
                 return await this.userRelationship.canViewUserRelationship(user, context)
             } else if ( action === PermissionService.ACTIONS.CREATE ) {
                 return await this.userRelationship.canCreateUserRelationship(user, context)
