@@ -98,7 +98,6 @@ module.exports = class AuthenticationController {
                 })
             } catch (error) {
                 if ( error.type == 'no-user' ) {
-                    console.log(`<<<<<<<<<<<<<<<<<< Destroying the session.`)
                     request.session.destroy(function(error) {
                         if (error) {
                             console.error(error)
@@ -112,7 +111,6 @@ module.exports = class AuthenticationController {
                 }
             }
         } else {
-            console.log(`<<<<<<<<<<<<<<< Blank response.`)
             response.status(200).json({
                 session: null
             })
@@ -146,6 +144,7 @@ module.exports = class AuthenticationController {
         try {
             let userId = null
             if ( 'email' in credentials) {
+                credentials.email = credentials.email.toLowerCase().trim()
                 userId = await this.auth.authenticateUser(credentials)
             } else if ( 'token' in credentials) {
                 const token = await this.tokenDAO.validateToken(credentials.token, [ 'reset-password', 'email-confirmation', 'invitation'])
