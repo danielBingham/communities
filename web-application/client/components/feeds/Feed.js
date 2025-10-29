@@ -33,6 +33,7 @@ const Feed = function({ type }) {
             params.feed = slug || 'everything'
         } else if ( type === 'place' ) {
             params.place = 'global'
+            params.type = 'feed'
         } else if ( type == 'group') {
             if ( group ) {
                 params.groupId = group.id 
