@@ -177,37 +177,37 @@ const AcceptInvitationForm = function(props) {
             isValid('name')
         }
 
-    }, [ name, nameValidationError ])
+    }, [ name ])
 
     useEffect(function() {
         if ( usernameValidationError.length > 0 ) {
             isValid('username')
         }
-    }, [ username, usernameValidationError ])
+    }, [ username ])
 
     useEffect(function() {
         if ( emailValidationError.length > 0 ) {
             isValid('email')
         }
-    }, [ email, emailValidationError ])
+    }, [ email ])
 
     useEffect(function() {
         if ( passwordValidationError.length > 0 ) {
             isValid('password')
         }
-    }, [ password, passwordValidationError ])
+    }, [ password ])
 
     useEffect(function() {
         if ( confirmPasswordValidationError.length > 0 ) {
             isValid('confirmPassword')
         }
-    }, [ confirmPassword, confirmPasswordValidationError ])
+    }, [ confirmPassword ])
 
     useEffect(function() {
         if ( birthdateValidationError.length > 0 ) {
             isValid('birthdate')
         }
-    }, [ birthdate, birthdateValidationError ])
+    }, [ birthdate ])
 
     useEffect(function() {
         if ( user ) {
@@ -329,7 +329,7 @@ const AcceptInvitationForm = function(props) {
                     name="password"
                     type="password"
                     label="Password"
-                    explanation="The password you will use to log in. Must be at least 16 characters long.  We recommend using the passphrase approach and/or using a password manager."
+                    explanation="The password you will use to log in. Must be at least 12 characters long.  We recommend using the passphrase approach and/or using a password manager."
                     value={password}
                     className="password"
                     onBlur={ (event) => isValid('password') }
