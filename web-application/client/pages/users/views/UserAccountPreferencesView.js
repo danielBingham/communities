@@ -49,6 +49,7 @@ const UserAccountPreferencesView = function() {
 
     const showAnnouncements = 'showAnnouncements' in currentUser.settings ? currentUser.settings.showAnnouncements : true
     const showInfo = 'showInfo' in currentUser.settings ? currentUser.settings.showInfo : true
+    const showFriendsOnProfile = 'showFriendsOnProfile' in currentUser.settings ? currentUser.settings.showFriendsOnProfile : true
 
     return (
         <div className="user-account-preferences-view">
@@ -65,6 +66,15 @@ const UserAccountPreferencesView = function() {
                     explanation="See informational posts.  These can be minor news updates, descriptions of features, how tos, requests for feedback, etc..."
                     toggled={showInfo} 
                     onClick={(e) => setSetting('showInfo', ! showInfo)} />
+            </div>
+            <h2>Privacy</h2>
+            <div className="user-account-preferences-view__section">
+                <p>Do you want to allow your friends to see your full friends list? This can help people find each other as we rebuild our networks on Communities!</p>
+                <Toggle 
+                    label="Show Friends List on Profile"
+                    explanation="Allow your friends to view your full friends list on your profile so they can find other people they may know."
+                    toggled={showFriendsOnProfile} 
+                    onClick={(e) => setSetting('showFriendsOnProfile', ! showFriendsOnProfile)} />
             </div>
             <RequestErrorModal message={'Attempt to update Preferences'} request={request} />
         </div>

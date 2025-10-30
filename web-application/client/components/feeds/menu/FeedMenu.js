@@ -145,13 +145,13 @@ const FeedMenu = function() {
                     </li>
                     <li>
                         <div className="feed-menu__sub-menu">
-                            <a href="" onClick={(e) => { e.preventDefault(); setIsOpen('places')}} className="header">{ feedsIsOpen ? <MapPinIconSolid /> : <MapPinIconOutline /> } <span className="nav-text">Place Feeds</span></a>
+                            <a href="" onClick={(e) => { e.preventDefault(); setIsOpen('places')}} className="header">{ placesIsOpen ? <MapPinIconSolid /> : <MapPinIconOutline /> } <span className="nav-text">Place Feeds</span></a>
                             { placesIsOpen && placesMenu }
                         </div>
                     </li>
                     <li>
                         <div className="feed-menu__sub-menu">
-                            <a href="" onClick={(e) => { e.preventDefault(); setIsOpen('groups')}} className="header">{ groupsIsOpen ? <UserGroupIconSolid/> : <UserGroupIconOutline/> }<span className="nav-text">Groups Feeds</span></a>
+                            <a href="" onClick={(e) => { e.preventDefault(); setIsOpen('groups')}} className="header">{ groupsIsOpen ? <UserGroupIconSolid/> : <UserGroupIconOutline/> }<span className="nav-text">Group Feeds</span></a>
                             { groupsIsOpen && groupsMenu }
                         </div>
                     </li>
@@ -170,7 +170,7 @@ const FeedMenu = function() {
                         <a href="" onClick={(e) => { e.preventDefault(); setIsOpen('places')}} className="header">{ feedsIsOpen ? <MapPinIconSolid /> : <MapPinIconOutline /> } <span className="nav-text">Place Feeds</span></a>
                     </li>
                     <li>
-                        <a href="" onClick={(e) => { e.preventDefault(); setIsOpen('groups')}} className="header">{ groupsIsOpen ? <UserGroupIconSolid/> : <UserGroupIconOutline/> }<span className="nav-text">Groups Feeds</span></a>
+                        <a href="" onClick={(e) => { e.preventDefault(); setIsOpen('groups')}} className="header">{ groupsIsOpen ? <UserGroupIconSolid/> : <UserGroupIconOutline/> }<span className="nav-text">Group Feeds</span></a>
                     </li>
                 </menu>
                 { (feedsIsOpen || placesIsOpen || groupsIsOpen) && <div className="feed-menu__sub-menu">
