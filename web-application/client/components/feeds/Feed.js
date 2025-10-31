@@ -40,7 +40,7 @@ const Feed = function({ type }) {
             } 
         } else if ( type == 'user' ) {
             params.username = slug 
-            params.type = 'feed'
+            params.type = [ 'feed', 'info', 'announcement' ]
         }
         return params
     }, [ type, slug, group ])

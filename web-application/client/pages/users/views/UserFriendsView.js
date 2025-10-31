@@ -18,7 +18,8 @@
  *
  ******************************************************************************/
 
-import { useParams } from 'react-router-dom'
+import { useSelector } from 'react-redux'
+import { useParams, Link } from 'react-router-dom'
 
 import { useUserByUsername } from '/lib/hooks/User'
 
@@ -31,8 +32,8 @@ import './UserFriendsView.css'
 
 const UserFriendsView = function() {
     const { slug } = useParams()
-    console.log(`## UserFriendsView(${slug})`)
 
+    const currentUser = useSelector((state) => state.authentication.currentUser)
     const [user, request] = useUserByUsername(slug)
 
     if ( user === undefined ) {
@@ -41,7 +42,6 @@ const UserFriendsView = function() {
                 <RequestErrorPage id="user-profile-page" message={'Attempt to retrieve User'} request={request} />
             )
         } else {
-            console.log(`Huh?`)
             return (
                 <div className="user-friends-view">
                     <Spinner />
@@ -54,7 +54,14 @@ const UserFriendsView = function() {
         return (<Error404 />)
     }
 
-    console.log(`UserFriendsView:: Render friends list.`)
+    if ( user.id === currentUser.id && 'showFriendsOnProfile' in currentUser.settings && currentUser.settings.showFriendsOnProfile === false) {
+        return (
+            <div className="user-friends-view">
+                <div className="user-friends-view__off">Your friends are not visible on your profile. You can view your friends <Link to="/friends">here</Link>.</div>
+            </div>
+        )
+    }
+
     return (
         <div className="user-friends-view">
             <FriendList userId={user.id} params={{ status: 'confirmed' }} />

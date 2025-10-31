@@ -313,9 +313,16 @@ module.exports = class PostController {
         }
 
         if ( 'type' in request.query ) {
-            const and = query.params.length > 0 ? ' AND ' : ''
-            query.params.push(request.query.type)
-            query.where += `${and}posts.type = $${query.params.length}`
+            if ( Array.isArray(request.query.type) ) {
+                const and = query.params.length > 0 ? ' AND ' : ''
+                query.params.push(request.query.type)
+                query.where += `${and}posts.type = ANY($${query.params.length}::post_type[])`
+            } else { 
+                const and = query.params.length > 0 ? ' AND ' : ''
+                query.params.push(request.query.type)
+                query.where += `${and}posts.type = $${query.params.length}`
+
+            }
         }
 
         if ('feed' in request.query) {

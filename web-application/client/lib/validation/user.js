@@ -49,7 +49,7 @@ export const validateUsername = function(username, required) {
     }         
 
     if ( username.match(/^[a-zA-Z][a-zA-Z0-9\-_]+$/) === null ) {
-        errors.push(`Username must start with a letter and only contain letters, numbers, -, or _.`)
+        errors.push(`Username must start with a letter, be at least 2 characters long, and only contain letters, numbers, -, or _.`)
     }
 
     return errors

@@ -1,8 +1,9 @@
-import React from 'react'
-import { useSelector } from 'react-redux'
+import { useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
+import { resetEntities } from '/state/lib'
 import { postUserRelationships } from '/state/UserRelationship'
 
 import Button from '/components/generic/button/Button'
@@ -15,9 +16,7 @@ const AddFriendButton = function({ userId }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
-    if ( ! currentUser || currentUser.id == userId) {
-        return null
-    }
+    const dispatch = useDispatch()
 
     const addFriend = function() {
         const relationship = {
@@ -27,6 +26,18 @@ const AddFriendButton = function({ userId }) {
         }
 
         makeRequest(postUserRelationships(relationship))
+    }
+
+    useEffect(function() {
+        if ( request?.state === 'failed' && (request?.response.status === 404 || request?.response.status === 403) ) {
+            // TODO There's probably a better way to handle this.
+            // That relationship doesn't exist.  Reset entities to requery.
+            dispatch(resetEntities())
+        }
+    }, [ request ])
+
+    if ( ! currentUser || currentUser.id == userId) {
+        return null
     }
 
     return (

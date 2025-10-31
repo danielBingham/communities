@@ -56,7 +56,7 @@ const validateSlug = function(value, existing, action) {
         .mustBeString()
         .mustNotBeEmpty()
         .mustBeShorterThan(512)
-        .mustMatch(/^[a-zA-Z0-9\.\-_]+$/, `May only include letters, numbers, '.', '-', '_'.`)
+        .mustMatch(/^[a-zA-Z][a-zA-Z0-9\-_]+$/, `Must start with a letter and may only include letters, numbers, '-', '_'.`)
         .getErrors()
     return errors
 }

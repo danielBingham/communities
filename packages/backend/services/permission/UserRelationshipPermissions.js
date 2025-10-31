@@ -154,8 +154,9 @@ module.exports = class UserRelationshipPermissions {
     async canDeleteUserRelationship(user, context) {
         await this.ensureContext(user, context, [ 'relationship' ])
 
+        // The relationship doesn't exist, so allow the deletion.
         if ( context.relationship === null ) {
-            return false
+            return true 
         }
 
         // Only the blocker can delete the blocking relationship.

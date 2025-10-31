@@ -141,7 +141,7 @@ const GroupForm = function() {
 
     const onTitleChange = function(event) {
         let currentSlug = title.toLowerCase().replaceAll(/\s/g, '-')
-        currentSlug = currentSlug.replaceAll(/[^a-zA-Z0-9\.\-_]/g, '')
+        currentSlug = currentSlug.replaceAll(/[^a-zA-Z0-9\-_]/g, '')
 
         // When this is called, `event.target.value` will be the next value of
         // `title` and `title` will be the current value for it.  We only want
@@ -152,7 +152,7 @@ const GroupForm = function() {
         // to change it, because the user already customized it.
         if ( slug == currentSlug) {
             let newSlug = event.target.value.toLowerCase().replaceAll(/\s/g, '-')
-            newSlug = newSlug.replaceAll(/[^a-zA-Z0-9\.\-_]/g, '')
+            newSlug = newSlug.replaceAll(/[^a-zA-Z0-9\-_]/g, '')
             setSlug(newSlug)
         }
 

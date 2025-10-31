@@ -134,7 +134,6 @@ module.exports = class AuthenticationController {
      */
     async postAuthentication(request, response) {
         const credentials = request.body
-        credentials.email = credentials.email.trim().toLowerCase()
 
         /************************************************************
          *  This is the authentication endpoint, so anyone may call it.
@@ -144,7 +143,7 @@ module.exports = class AuthenticationController {
         try {
             let userId = null
             if ( 'email' in credentials) {
-                credentials.email = credentials.email.toLowerCase().trim()
+                credentials.email = credentials.email.trim().toLowerCase()
                 userId = await this.auth.authenticateUser(credentials)
             } else if ( 'token' in credentials) {
                 const token = await this.tokenDAO.validateToken(credentials.token, [ 'reset-password', 'email-confirmation', 'invitation'])

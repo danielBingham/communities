@@ -111,7 +111,7 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
     // Don't show the form if they don't have permission to post in this Group.
     if ((groupId !== undefined && groupId !== null) || (post?.groupId !== undefined && post?.groupId !== null))
     {
-        if ( ! group || ! currentMember ) {
+        if ( group === undefined || currentMember === undefined ) {
             return (
                 <Spinner />
             )
