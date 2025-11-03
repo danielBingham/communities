@@ -104,6 +104,15 @@ module.exports = class PostCommentNotifications {
                return 
             }
 
+            // If the user has lost the ability to view this post, then don't send them a notification.
+            //
+            // For post authors, this might be because the post is in a private
+            // or hidden group that they've left (or been banned from).
+            const canViewPost = await this.permissionService.can(context.postAuthor, 'view', 'Post', { post: context.post })
+            if ( canViewPost !== true ) {
+                return 
+            }
+
             await this.notificationWorker.createNotification(context.postAuthor.id, 'PostComment:create:author', context, options) 
         }
     }

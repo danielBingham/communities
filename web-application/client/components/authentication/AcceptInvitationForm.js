@@ -307,7 +307,7 @@ const AcceptInvitationForm = function(props) {
                 <Input
                     name="username"
                     label="Username"
-                    explanation="The unique username that will be used to link to your profile.  Must start with a letter and can only contain letters, numbers, dash ( - ), or undercore ( _ )"
+                    explanation="The unique username that will be used to link to your profile.  Must start with a letter, be at least two characters long, and can only contain letters, numbers, dash ( - ), or undercore ( _ )"
                     value={username}
                     className="username"
                     onBlur={ onUsernameBlur }

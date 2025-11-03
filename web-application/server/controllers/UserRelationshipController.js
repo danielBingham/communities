@@ -165,7 +165,10 @@ module.exports = class UserRelationshipController {
         }
 
         const user = await this.userDAO.getUserById(userId, 'all')
-        if ( 'showFriendsOnProfile' in user.settings && user.settings.showFriendsOnProfile === false ) {
+        if ( currentUser.id !== userId 
+            && 'showFriendsOnProfile' in user.settings 
+            && user.settings.showFriendsOnProfile === false 
+        ) {
             throw new ControllerError(403, 'not-authorized',
                 `User attempting to query the friend requests of User(${userId}) without permission.`,
                 `You are not authorized to query the friend requests of that User.`)
@@ -411,19 +414,20 @@ module.exports = class UserRelationshipController {
         const userId = request.params.userId
         const relationId = request.params.relationId
 
-        const canUpdateUserRelationship = await this.permissionService.can(currentUser, 'update', 'UserRelationship', { userId: userId, relationId: relationId })
-        if ( canUpdateUserRelationship !== true ) {
-            throw new ControllerError(403, 'not-authorized',
-                `User attempting to update UserRelationship(${userId}, ${relationId}) without authorization.`,
-                `You are not authorized to update that UserRelationship.`)
-        }
-
         const existing = await this.userRelationshipDAO.getUserRelationshipByUserAndRelation(userId, relationId)
         if ( existing === null) {
             throw new ControllerError(404, 'not-found',
                 `No relationship exists between User(${userId}) and User(${relationId}).`,
                 `No relationship exists between those users.  Please create a relationship first using POST.`)
         }
+
+        const canUpdateUserRelationship = await this.permissionService.can(currentUser, 'update', 'UserRelationship', { userId: userId, relationId: relationId, relationship: existing })
+        if ( canUpdateUserRelationship !== true ) {
+            throw new ControllerError(403, 'not-authorized',
+                `User attempting to update UserRelationship(${userId}, ${relationId}) without authorization.`,
+                `You are not authorized to update that UserRelationship.`)
+        }
+
 
         const userRelationship = {
             id: existing.id,

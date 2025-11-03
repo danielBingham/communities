@@ -58,6 +58,7 @@ const FeedMenu = function() {
         if ( width <= 1220 ) {
             setFeedsIsOpen(false)
             setGroupsIsOpen(false)
+            setPlacesIsOpen(false)
         }
     }
 

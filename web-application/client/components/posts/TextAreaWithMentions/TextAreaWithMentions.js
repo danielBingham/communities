@@ -74,7 +74,7 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
                 }
                 makeRequest(getUsers('TextAreaWithMentions', params))
             } 
-        }, 250)
+        }, 150)
     }
 
     const onKeyDown = function(event) {

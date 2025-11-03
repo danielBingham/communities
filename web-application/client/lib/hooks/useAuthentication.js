@@ -20,13 +20,14 @@ export function useAuthentication() {
 
             } else {
                 const birthdate = new Date(currentUser.birthdate)
+
                 const now = new Date() 
 
                 let age = now.getUTCFullYear() - birthdate.getUTCFullYear()
                 const month = now.getUTCMonth() - birthdate.getUTCMonth()
                 const day = now.getUTCDate() - birthdate.getUTCDate()
 
-                if ( month < 0 || day < 0 ) {
+                if ( month < 0 || (month === 0 && day < 0) ) {
                     age = age - 1
                 }
 
