@@ -34,6 +34,11 @@ export const featuresSlice = createSlice({
          */
         setInDictionary: function(state, action) {
             state.dictionary[action.payload.name] = action.payload
+        },
+
+        removeFromDictionary: function(state, action) {
+            const name = action.payload.name
+            delete state.dictionary[name]
         }
     }
 
@@ -97,7 +102,7 @@ export const postFeatures = function(feature) {
  */
 export const getFeature = function(name) {
     return function(dispatch, getState) {
-        const endpoint = `/feature/${name}`
+        const endpoint = `/feature/${encodeURIComponent(name)}`
 
         return dispatch(makeRequest('GET', endpoint, null,
             function(responseBody) {
@@ -121,11 +126,23 @@ export const getFeature = function(name) {
  */
 export const patchFeature = function(feature) {
     return function(dispatch, getState) {
-        const endpoint = `/feature/${feature.name}`
+        const endpoint = `/feature/${encodeURIComponent(feature.name)}`
 
         return dispatch(makeRequest('PATCH', endpoint, feature,
-        function(responseBody) {
+            function(responseBody) {
                 dispatch(featuresSlice.actions.setInDictionary(responseBody))
+            }
+        ))
+    }
+}
+
+export const deleteFeature = function(name) {
+    return function(dispatch, getState) {
+        const endpoint = `/feature/${encodeURIComponent(name)}`
+
+        return dispatch(makeRequest('DELETE', endpoint, null,
+            function(responseBody) {
+                dispatch(featuresSlice.actions.removeFromDictionary({ name: name }))
             }
         ))
     }

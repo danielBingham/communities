@@ -71,6 +71,12 @@ module.exports = function(core) {
         })
     })
 
+    router.delete('/feature/:name', rateLimit(core, 30), function(request, response, next) {
+        featureController.deleteFeature(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
     /**************************************************************************
      * Job REST Routes
      **************************************************************************/

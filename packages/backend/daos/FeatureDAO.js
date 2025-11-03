@@ -120,4 +120,9 @@ module.exports = class FeatureDAO {
         }
     }
 
+    async deleteFeature(name) {
+        await this.database.query(`
+            DELETE FROM features WHERE name = $1
+        `, [ name ])
+    }
 }

@@ -112,8 +112,10 @@ module.exports = class FeatureService {
             }
         } 
 
-        feature.conflictsWith = this.features[name].conflictsWith
-        feature.dependsOn = this.features[name].dependsOn
+        if ( name in this.features ) {
+            feature.conflictsWith = this.features[name].conflictsWith
+            feature.dependsOn = this.features[name].dependsOn
+        }
 
         return feature 
     }
