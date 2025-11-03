@@ -48,6 +48,12 @@ const canViewPost = function(user, context) {
         return true
     }
 
+    // If the post is a Group post, then group permissions override post
+    // permissions. 
+    if ( context.post.groupId ) {
+        return context.canViewGroupPost === true 
+    }
+
     // Users can view their own posts.
     if ( context.post.userId === user.id ) {
         return true
@@ -60,11 +66,6 @@ const canViewPost = function(user, context) {
         }
     }
 
-    // If the post is a Group post, then group permissions override post
-    // permissions. 
-    if ( context.post.groupId ) {
-        return context.canViewGroupPost === true 
-    }
 
     // Anyone can view public posts.
     if ( context.post.visibility === 'public' ) {
