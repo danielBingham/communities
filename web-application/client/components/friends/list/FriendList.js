@@ -16,6 +16,8 @@ import {
 import PaginationControls from '/components/PaginationControls'
 import Button from '/components/ui/Button'
 import Refresher from '/components/ui/Refresher'
+import Error404 from '/components/errors/Error404'
+import { RequestErrorPage } from '/components/errors/RequestError'
 
 import './FriendList.css'
 
@@ -23,13 +25,37 @@ const FriendList = function({ userId, params, noSearch, descriptor }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const relationshipDictionary = useSelector((state) => state.UserRelationship.dictionary)
-    const [query, request, reset] = useUserRelationshipQuery(currentUser.id, params) 
+    const [query, request, reset] = useUserRelationshipQuery(userId, params) 
 
+    console.log(`Query: `, query)
+    console.log(`Request: `, request)
 
     // ======= Render ===============================================
 
-    let content = ( <Spinner local={ true } /> )
+    console.log(`Render.`)
+    let content = ( <Spinner /> )
 
+    if ( query === null && ( request === null || request?.state === 'pending' )) {
+        console.log(`Spin`)
+        return ( <Spinner /> )
+    }
+
+    if ( request?.state === 'failed' && request.error.type === 'not-found' ) {
+        return (<Error404 />)
+    } else if ( request?.state === 'failed' && request.error.type === 'not-authorized' ) {
+        return (
+            <div className="friend-list__no-permission">
+                <div>You don't have permission to view their friends.</div> 
+            </div>
+        )
+    } else if ( request?.state === 'failed' ) {
+        return (
+            <RequestErrorPage id="user-profile-page" message={'Attempt to retrieve relationships'} request={request} />
+        )
+    }
+
+
+    console.log(`Past errors.`)
     if ( query?.list && query?.list.length > 0 ) {
         const userBadges = []
         for( const id of query.list) {
@@ -69,6 +95,7 @@ const FriendList = function({ userId, params, noSearch, descriptor }) {
         explanation = `${pageStart} to ${pageEnd} of ${query.meta.count} ${descriptor}`
     }
 
+    console.log(`Render friends list.`)
     return (
         <List className="friend-list">
             <ListHeader explanation={explanation}>

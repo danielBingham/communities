@@ -83,6 +83,11 @@ const BlockButton = function({ userId }) {
         return null
     }
 
+    // Don't show users the block button to block themselves.
+    if ( currentUser?.id === user?.id ) {
+        return null
+    }
+
     // If you're the blocked user, then you cannot unblock
     if ( relationship?.status === 'blocked' && currentUser.id === relationship?.relationId ) {
         return null

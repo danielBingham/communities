@@ -45,17 +45,55 @@ module.exports = class UserRelationshipPermissions {
 
         if ( (required.includes('relationship') || optional.includes('relationship')) && ! ('relationship' in context) ) {
             context.relationship = await this.userRelationshipDAO.getUserRelationshipByUserAndRelation(context.userId, context.relationId)
-            if ( required.includes('relationship') && context.relationship === null ) {
+            if ( required.includes('relationship') && context.relationship === undefined ) {
                 throw new ServiceError('missing-context', `'relationship' is missing from context.`)
             }
         }
     }
 
+    async canQueryUserRelationship(user, context) {
+        await this.ensureContext(user, context, [ 'relationship'])
+
+        // Users can always view their own relationships.
+        if ( user.id === context.userId && user.id === context.relationId ) {
+            return true
+        }
+
+        // You can only view the relationships of your friends.
+        if ( context.relationship === null ) {
+            return false
+        }
+
+        // If one of the users has blocked the other, then neither may query
+        // the other's relationships. 
+        if ( context.relationship !== null && context.relationship.status === 'blocked' ) {
+            return false 
+        }
+
+        // UserRelationship.userId is the creator of the relationship.
+        // UserRelationship.relationId is the reciever of the relationship request.
+        //
+        // Either User in the relationship may query the UserRelationships of the other.
+        if ( user.id === context.relationship.userId || user.id === context.relationship.relationId) {
+            if ( context.relationship.status === 'confirmed' ) {
+                return true 
+            } else {
+                return false
+            }
+        }
+
+        return false 
+    }
+
     async canViewUserRelationship(user, context) {
         await this.ensureContext(user, context, [ 'relationship'])
 
+        if ( context.relationship === null ) {
+            return false
+        }
+
         // Only the blocker can view the blocking relationship.
-        if ( context.relationship !== null && context.relationship.status === 'blocked' ) {
+        if ( context.relationship.status === 'blocked' ) {
             return user.id === context.relationship.userId
         }
 
@@ -93,8 +131,12 @@ module.exports = class UserRelationshipPermissions {
     async canUpdateUserRelationship(user, context) {
         await this.ensureContext(user, context, [ 'relationship' ])
 
+        if ( context.relationship === null ) {
+            return false
+        }
+
         // A block relationship can't be updated, only deleted.
-        if ( context.relationship !== null && context.relationship.status === 'blocked' ) {
+        if ( context.relationship.status === 'blocked' ) {
             return false
         }
 
@@ -112,8 +154,13 @@ module.exports = class UserRelationshipPermissions {
     async canDeleteUserRelationship(user, context) {
         await this.ensureContext(user, context, [ 'relationship' ])
 
+        // The relationship doesn't exist, so allow the deletion.
+        if ( context.relationship === null ) {
+            return true 
+        }
+
         // Only the blocker can delete the blocking relationship.
-        if ( context.relationship !== null && context.relationship.status === 'blocked' ) {
+        if ( context.relationship.status === 'blocked' ) {
             return user.id === context.relationship.userId
         }
 

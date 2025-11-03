@@ -33,6 +33,7 @@ const validateAndCorrectDraft = function(draft, post, group, sharedPostId) {
         content: post ? post.content : '',
         fileId: post ? post.fileId : null,
         linkPreviewId: post ? post.linkPreviewId : null,
+        ignoredLinks: [],
         sharedPostId: post ? post.sharedPostId : sharedPostId,
         visibility: post ? post.visibility : defaultVisibility,
         type: post ? post.type : defaultType 
@@ -45,7 +46,6 @@ const validateAndCorrectDraft = function(draft, post, group, sharedPostId) {
     if ( has(draft, 'content') 
         && draft.content !== null
         && typeof draft.content === 'string' 
-        && draft.content.length > 0
     ) {
         correctedDraft.content = draft.content
     }
@@ -78,6 +78,14 @@ const validateAndCorrectDraft = function(draft, post, group, sharedPostId) {
         correctedDraft.linkPreviewId = draft.linkPreviewId
     } else if ( has(draft, 'linkPreviewId') && draft.linkPreviewId === null ) {
         correctedDraft.linkPreviewId = null
+    }
+
+    if ( has(draft, 'ignoredLinks')
+        && Array.isArray(draft.ignoredLinks)
+    ) {
+        correctedDraft.ignoredLinks = draft.ignoredLinks
+    } else {
+        correctedDraft.ignoredLinks = []
     }
 
     if ( has(draft, 'visibility')

@@ -57,7 +57,7 @@ module.exports = class JobController {
         jobs.active = await this.queue.getJobs(['active'])
         jobs.completed = await this.queue.getJobs(['completed'])
 
-        if ( request.session.user.permissions == 'admin' || request.session.user.permissions == 'superadmin') {
+        if ( request.session.user.siteRole == 'admin' || request.session.user.siteRole == 'superadmin') {
             return response.status(200).json(jobs)
         }
 
@@ -120,7 +120,7 @@ module.exports = class JobController {
         const job = await this.queue.getJob(jobId)
 
         // 2. User may only get their own job (or must be admin).
-        if ( job.data.session.user.id !== request.session.user.id && request.session.user.permissions != 'admin' && request.session.user.permissions != 'superadmin' ) {
+        if ( job.data.session.user.id !== request.session.user.id && request.session.user.siteRole != 'admin' && request.session.user.siteRole != 'superadmin' ) {
             throw new ControllerError(403, 'not-authorized',
                 `User(${request.session.user.id}) attempted to access Job(${jobId}) which they did not trigger.`)
         }

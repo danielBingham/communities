@@ -238,7 +238,9 @@ module.exports = class PermissionService {
                 return await this.postSubscription.canDeletePostSubscription(user, context)
             }
         } else if ( entity === 'UserRelationship' ) {
-            if ( action === PermissionService.ACTIONS.VIEW ) {
+            if ( action === PermissionService.ACTIONS.QUERY ) {
+                return await this.userRelationship.canQueryUserRelationship(user, context)
+            } else if ( action === PermissionService.ACTIONS.VIEW ) {
                 return await this.userRelationship.canViewUserRelationship(user, context)
             } else if ( action === PermissionService.ACTIONS.CREATE ) {
                 return await this.userRelationship.canCreateUserRelationship(user, context)
@@ -261,27 +263,15 @@ module.exports = class PermissionService {
     }
 
     async canModerateSite(user, context) {
-        if ( this.core.features.has('62-admin-moderation-controls') ) {
             return user.siteRole === 'moderator' || user.siteRole === 'admin' || user.siteRole === 'superadmin'
-        } else {
-            return user.permissions === 'moderator' || user.permissions === 'admin' || user.permissions === 'superadmin'
-        }
     }
 
     async canAdminSite(user, context) {
-        if ( this.core.features.has('62-admin-moderation-controls') ) {
-            return user.siteRole === 'admin' || user.siteRole === 'superadmin'
-        } else {
-            return user.permissions === 'admin' || user.permissions === 'superadmin'
-        }
+        return user.siteRole === 'admin' || user.siteRole === 'superadmin'
     }
 
     async canSudoSite(user, context) {
-        if ( this.core.features.has('62-admin-moderation-controls') ) {
-            return user.siteRole === 'superadmin'
-        } else {
-            return user.permissions === 'superadmin'
-        }
+        return user.siteRole === 'superadmin'
     }
 
 }

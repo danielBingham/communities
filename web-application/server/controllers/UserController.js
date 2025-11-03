@@ -23,7 +23,24 @@
  * Restful routes for manipulating users.
  *
  ******************************************************************************/
-const backend = require('@communities/backend')
+const {
+    AuthenticationService,
+    EmailService,
+    NotificationService,
+    PermissionService,
+    UserService,
+    ValidationService,
+
+    UserDAO,
+    UserRelationshipDAO,
+    GroupMemberDAO,
+    TokenDAO,
+    FileDAO,
+    PostDAO,
+
+    DAOError,
+    ServiceError
+} = require('@communities/backend')
 
 const BaseController = require('./BaseController')
 const ControllerError = require('../errors/ControllerError')
@@ -37,19 +54,19 @@ module.exports = class UserController extends BaseController{
         this.logger = core.logger
         this.config = core.config
 
-        this.auth = new backend.AuthenticationService(core)
-        this.emailService = new backend.EmailService(core)
-        this.notificationService = new backend.NotificationService(core)
-        this.permissionService = new backend.PermissionService(core)
-        this.userService = new backend.UserService(core)
-        this.validationService = new backend.ValidationService(core)
+        this.auth = new AuthenticationService(core)
+        this.emailService = new EmailService(core)
+        this.notificationService = new NotificationService(core)
+        this.permissionService = new PermissionService(core)
+        this.userService = new UserService(core)
+        this.validationService = new ValidationService(core)
 
-        this.userDAO = new backend.UserDAO(core)
-        this.userRelationshipsDAO = new backend.UserRelationshipDAO(core)
-        this.groupMemberDAO = new backend.GroupMemberDAO(core)
-        this.tokenDAO = new backend.TokenDAO(core)
-        this.fileDAO = new backend.FileDAO(core)
-        this.postDAO = new backend.PostDAO(core)
+        this.userDAO = new UserDAO(core)
+        this.userRelationshipsDAO = new UserRelationshipDAO(core)
+        this.groupMemberDAO = new GroupMemberDAO(core)
+        this.tokenDAO = new TokenDAO(core)
+        this.fileDAO = new FileDAO(core)
+        this.postDAO = new PostDAO(core)
     }
 
     async getRelations(currentUser, results, requestedRelations) {
@@ -291,7 +308,7 @@ module.exports = class UserController extends BaseController{
         }
 
         if ( 'admin' in query && query.admin === 'true') {
-            if ( currentUser.permissions === 'admin' || currentUser.permissions === 'superadmin' ) {
+            if ( currentUser.siteRole === 'admin' || currentUser.siteRole === 'superadmin' ) {
                 result.fields = 'all'
             } else {
                 throw new ControllerError(403, 'not-authorized',
@@ -331,13 +348,6 @@ module.exports = class UserController extends BaseController{
      * @returns {Promise}   Resolves to void.
      */
     async getUsers(request, response) {
-        /*************************************************************
-         * Permissions Checking and Input Validation
-         *
-         * Anyone may call this endpoint.
-         * 
-         * **********************************************************/
-
         const query = await this.parseQuery(request.session.user, request.query)
 
         if ( query.emptyResult ) {
@@ -446,12 +456,6 @@ module.exports = class UserController extends BaseController{
      * @returns {Promise}   Resolves to void.
      */
     async getUser(request, response) {
-        /*************************************************************
-         * Permissions Checking and Input Validation
-         *
-         * Anyone may call this endpoint.
-         * 
-         * **********************************************************/
         const currentUser = request.session.user
         const userId = request.params.id
 
@@ -585,7 +589,7 @@ module.exports = class UserController extends BaseController{
             try {
                 token = await this.tokenDAO.validateToken(user.token, [ 'reset-password', 'invitation' ])
             } catch (error ) {
-                if ( error instanceof backend.DAOError ) {
+                if ( error instanceof DAOError ) {
                     throw new ControllerError(403, 'not-authorized', error.message, `Invalid token.`)
                 } else {
                     throw error
@@ -646,7 +650,7 @@ module.exports = class UserController extends BaseController{
                 // They've successfully authenticated with old password.
                 type = 'authenticated-edit'
             } catch (error ) {
-                if ( error instanceof backend.ServiceError ) {
+                if ( error instanceof ServiceError ) {
                     if ( error.type == 'authentication-failed' || error.type == 'no-user' || error.type == 'no-user-password' ) {
                         throw new ControllerError(403, 'not-authorized', error.message)
                     } else if ( error.type == 'multiple-users' ) {
@@ -672,7 +676,7 @@ module.exports = class UserController extends BaseController{
         // - admin-edit
         //
         else if ( currentUser.id !== existingUser.id 
-            && (currentUser.permissions === 'admin' || currentUser.permissions === 'superadmin')) 
+            && (currentUser.siteRole === 'admin' || currentUser.siteRole === 'superadmin')) 
         {
             type = 'admin-edit'
         }

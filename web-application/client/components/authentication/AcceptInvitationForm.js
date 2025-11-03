@@ -146,7 +146,7 @@ const AcceptInvitationForm = function(props) {
 
     const onNameChange = function(event) {
         let currentUsername = name.toLowerCase().replaceAll(/\s/g, '-')
-        currentUsername = currentUsername.replaceAll(/[^a-zA-Z0-9\.\-_]/g, '')
+        currentUsername = currentUsername.replaceAll(/[^a-zA-Z0-9\-_]/g, '')
 
         // When this is called, `event.target.value` will be the next value of
         // `title` and `title` will be the current value for it.  We only want
@@ -157,7 +157,7 @@ const AcceptInvitationForm = function(props) {
         // to change it, because the user already customized it.
         if ( username == currentUsername) {
             let newUsername = event.target.value.toLowerCase().replaceAll(/\s/g, '-')
-            newUsername = newUsername.replaceAll(/[^a-zA-Z0-9\.\-_]/g, '')
+            newUsername = newUsername.replaceAll(/[^a-zA-Z0-9\-_]/g, '')
             setUsername(newUsername)
         }
 
@@ -165,9 +165,49 @@ const AcceptInvitationForm = function(props) {
     }
 
     const onUsernameBlur = function(event) {
-        makeUsernameRequest(getUsers(username, { username: username }))
+        let lowerUsername = username.toLowerCase()
+        setUsername(lowerUsername)
+
+        makeUsernameRequest(getUsers(username, { username: lowerUsername }))
         isValid('username')
     }
+
+    useEffect(function() {
+        if ( nameValidationError.length > 0 ) {
+            isValid('name')
+        }
+
+    }, [ name ])
+
+    useEffect(function() {
+        if ( usernameValidationError.length > 0 ) {
+            isValid('username')
+        }
+    }, [ username ])
+
+    useEffect(function() {
+        if ( emailValidationError.length > 0 ) {
+            isValid('email')
+        }
+    }, [ email ])
+
+    useEffect(function() {
+        if ( passwordValidationError.length > 0 ) {
+            isValid('password')
+        }
+    }, [ password ])
+
+    useEffect(function() {
+        if ( confirmPasswordValidationError.length > 0 ) {
+            isValid('confirmPassword')
+        }
+    }, [ confirmPassword ])
+
+    useEffect(function() {
+        if ( birthdateValidationError.length > 0 ) {
+            isValid('birthdate')
+        }
+    }, [ birthdate ])
 
     useEffect(function() {
         if ( user ) {
@@ -267,7 +307,7 @@ const AcceptInvitationForm = function(props) {
                 <Input
                     name="username"
                     label="Username"
-                    explanation="The unique username that will be used to link to your profile.  Can only contain letters, numbers, period ( . ), dash ( - ), or undercore ( _ )"
+                    explanation="The unique username that will be used to link to your profile.  Must start with a letter, be at least two characters long, and can only contain letters, numbers, dash ( - ), or undercore ( _ )"
                     value={username}
                     className="username"
                     onBlur={ onUsernameBlur }
@@ -289,7 +329,7 @@ const AcceptInvitationForm = function(props) {
                     name="password"
                     type="password"
                     label="Password"
-                    explanation="The password you will use to log in. Must be at least 16 characters long.  We recommend using the passphrase approach and/or using a password manager."
+                    explanation="The password you will use to log in. Must be at least 12 characters long.  We recommend using the passphrase approach and/or using a password manager."
                     value={password}
                     className="password"
                     onBlur={ (event) => isValid('password') }

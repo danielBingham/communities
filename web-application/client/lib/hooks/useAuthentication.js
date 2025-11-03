@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom'
 
 export function useAuthentication() {
     const currentUser = useSelector((state) => state.authentication.currentUser)
-    const features = useSelector((state) => state.system.features)
 
     const navigate = useNavigate()
     useEffect(function() {
@@ -21,13 +20,14 @@ export function useAuthentication() {
 
             } else {
                 const birthdate = new Date(currentUser.birthdate)
+
                 const now = new Date() 
 
                 let age = now.getUTCFullYear() - birthdate.getUTCFullYear()
                 const month = now.getUTCMonth() - birthdate.getUTCMonth()
                 const day = now.getUTCDate() - birthdate.getUTCDate()
 
-                if ( month < 0 || day < 0 ) {
+                if ( month < 0 || (month === 0 && day < 0) ) {
                     age = age - 1
                 }
 
@@ -45,13 +45,13 @@ export function useAuthentication() {
                 navigate("/email-confirmation")
                 return
             } else if ( currentUser.status === 'confirmed' ) {
-                const showTermsNotice = '3-notices' in features && ! currentUser.notices?.termsOfService
+                const showTermsNotice = ! currentUser.notices?.termsOfService
                 if ( showTermsNotice ) {
                     navigate('/accept-terms-of-service')
                     return
                 }
 
-                const showContributionNotice = '3-notices' in features && ! currentUser.notices?.contribution
+                const showContributionNotice = ! currentUser.notices?.contribution
                 if ( showContributionNotice ) {
                     navigate('/set-contribution')
                     return

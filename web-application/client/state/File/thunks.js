@@ -38,6 +38,32 @@ export const loadFile = function(fileId, width) {
     }
 }
 
+export const cleanFileCache = function() {
+    return function(dispatch, getState) {
+        const state = getState()
+
+        const cacheArray = []
+        for(const [fileId, widths] of Object.entries(state.File.cache)) {
+            const cacheItem = { fileId: fileId, timestamp: 0 }
+            for(const [width, cache] of Object.entries(widths)) {
+                if ( cacheItem.timestamp < cache.timestamp ) {
+                    cacheItem.timestamp = cache.timestamp
+                }
+            }
+            cacheArray.push(cacheItem)
+        }
+
+        cacheArray.sort((a,b) => b.timestamp - a.timestamp)
+
+        // Only keep the 120 most recent files.
+        if ( cacheArray.length > 120) {
+            for(let index = 120; index < cacheArray.length; index++) {
+                dispatch(removeFromCache({ fileId: cacheArray[index].fileId }))
+            }
+        }
+    }
+}
+
 /**
  * POST /upload
  *

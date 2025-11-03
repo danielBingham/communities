@@ -7,6 +7,7 @@ import InsertButton from './buttons/InsertButton'
 import InitializeButton from './buttons/InitializeButton'
 import MigrateButton from './buttons/MigrateButton'
 import EnableButton from './buttons/EnableButton'
+import DeleteButton from './buttons/DeleteButton'
 
 import './FeatureRow.css'
 
@@ -23,6 +24,7 @@ const FeatureRow = function(props) {
                 <InitializeButton name={feature.name} />
                 <MigrateButton name={feature.name} />
                 <EnableButton name={feature.name} />
+                <DeleteButton name={feature.name} />
             </TableCell>
         </TableRow>
     )

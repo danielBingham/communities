@@ -35,21 +35,9 @@ CREATE TABLE features (
 /**
  * Insert those features that have already been migrated in the schema.
  */
-INSERT INTO features (name, status, created_date, updated_date)
-    VALUES ('1-notification-settings', 'enabled', now(), now()),
-        ('3-notices', 'enabled', now(), now()),
-        ('5-relationships-own-state', 'enabled', now(), now()),
-        ('13-comment-subscriptions-migration', 'enabled', now(), now()),
-        ('fix-post-activity', 'enabled', now(), now()),
-        ('19-private-groups', 'enabled', now(), now()),
-        ('9-image-transcoding', 'enabled', now(), now()),
-        ('17-public-posts', 'enabled', now(), now()),
-        ('18-post-sharing', 'enabled', now(), now()),
-        ('62-admin-moderation-controls', 'enabled', now(), now()),
-        ('87-site-admins-can-ban-users', 'enabled', now(), now()),
-        ('89-improved-moderation-for-group-posts', 'enabled', now(), now()),
-        ('80-group-moderators-can-ban-users', 'enabled', now(), now());
-
+/*INSERT INTO features (name, status, created_date, updated_date)
+    VALUES 
+        ('80-group-moderators-can-ban-users', 'enabled', now(), now());*/
 
 
 /******************************************************************************

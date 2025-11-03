@@ -74,13 +74,11 @@ module.exports = class PostCommentController {
         relations.postSubscriptions = postSubscriptionResults.dictionary
 
         // -------- SiteModeration --------------------------------------------
-        if ( this.core.features.has('62-admin-moderation-controls') ) {
-            const siteModerationResults = await this.siteModerationDAO.selectSiteModerations({
-                where: `site_moderation.post_comment_id = ANY($1::uuid[])`,
-                params: [ results.list ]
-            })
-            relations.siteModerations = siteModerationResults.dictionary
-        }
+        const siteModerationResults = await this.siteModerationDAO.selectSiteModerations({
+            where: `site_moderation.post_comment_id = ANY($1::uuid[])`,
+            params: [ results.list ]
+        })
+        relations.siteModerations = siteModerationResults.dictionary
 
         return relations
     }

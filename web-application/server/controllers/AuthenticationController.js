@@ -18,9 +18,17 @@
  *
  ******************************************************************************/
 
-const backend = require('@communities/backend')
+const { 
+    AuthenticationService,
+
+    UserDAO,
+    TokenDAO,
+
+    ServiceError
+} = require('@communities/backend')
 
 const ControllerError = require('../errors/ControllerError')
+
 
 /**
  * Controller for the authentication resource.
@@ -37,9 +45,10 @@ module.exports = class AuthenticationController {
         this.logger = core.logger
         this.config = core.config
 
-        this.auth = new backend.AuthenticationService(core)
-        this.userDAO = new backend.UserDAO(core)
-        this.tokenDAO = new backend.TokenDAO(core)
+        this.auth = new AuthenticationService(core)
+
+        this.userDAO = new UserDAO(core)
+        this.tokenDAO = new TokenDAO(core)
     }
 
 
@@ -89,7 +98,6 @@ module.exports = class AuthenticationController {
                 })
             } catch (error) {
                 if ( error.type == 'no-user' ) {
-                    console.log(`<<<<<<<<<<<<<<<<<< Destroying the session.`)
                     request.session.destroy(function(error) {
                         if (error) {
                             console.error(error)
@@ -103,7 +111,6 @@ module.exports = class AuthenticationController {
                 }
             }
         } else {
-            console.log(`<<<<<<<<<<<<<<< Blank response.`)
             response.status(200).json({
                 session: null
             })
@@ -127,7 +134,6 @@ module.exports = class AuthenticationController {
      */
     async postAuthentication(request, response) {
         const credentials = request.body
-        credentials.email = credentials.email.trim().toLowerCase()
 
         /************************************************************
          *  This is the authentication endpoint, so anyone may call it.
@@ -137,6 +143,7 @@ module.exports = class AuthenticationController {
         try {
             let userId = null
             if ( 'email' in credentials) {
+                credentials.email = credentials.email.trim().toLowerCase()
                 userId = await this.auth.authenticateUser(credentials)
             } else if ( 'token' in credentials) {
                 const token = await this.tokenDAO.validateToken(credentials.token, [ 'reset-password', 'email-confirmation', 'invitation'])
@@ -158,7 +165,7 @@ module.exports = class AuthenticationController {
             })
         } catch (error ) {
             request.logger.warn(error)
-            if ( error instanceof backend.ServiceError ) {
+            if ( error instanceof ServiceError ) {
                 if ( error.type == 'no-user' ) {
                     throw new ControllerError(403, 'authentication-failed', error.message)
                 } else if ( error.type == 'multiple-users') {

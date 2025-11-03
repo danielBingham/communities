@@ -21,31 +21,7 @@
 const FeatureDAO = require('../daos/FeatureDAO')
 
 const ExampleMigration = require('../migrations/ExampleMigration')
-const NotificationSettingsMigration = require('../migrations/NotificationSettingsMigration')
-const NoticeMigration = require('../migrations/NoticeMigration')
-const RelationshipsOwnStateMigration = require('../migrations/RelationshipsOwnStateMigration')
-const CommentSubscriptionsMigration = require('../migrations/CommentSubscriptionsMigration')
-const FixActivityMigration = require('../migrations/FixActivityMigration')
-const PrivateGroupsMigration = require('../migrations/PrivateGroupsMigration')
-const ImageResizeMigration = require('../migrations/ImageResizeMigration')
-const PublicPostsMigration = require('../migrations/PublicPostsMigration')
-const PostSharingMigration = require('../migrations/PostSharingMigration')
-const AdminModerationMigration = require('../migrations/AdminModerationMigration')
-const SiteAdminsCanBanUsersMigration = require('../migrations/SiteAdminsCanBanUsersMigration')
-const GroupModerationMigration = require('../migrations/GroupModerationMigration')
-const GroupModeratorsCanBanUsers = require('../migrations/GroupModeratorsCanBanUsers')
-const GroupAdminsCanRestrictPosting = require('../migrations/GroupAdminsCanRestrictPosting')
-const CantDeleteAccountWithOutstandingInvitationsMigration = require('../migrations/CantDeleteAccountWithOutstandingInvitationsMigration')
-const DeleteFileFailsMigration = require('../migrations/DeleteFileFailsMigration')
-const GroupSearchMigration = require('../migrations/GroupSearchMigration')
-const LimitLoginAttemptsMigration = require('../migrations/LimitLoginAttemptsMigration')
-const DownloadCanonicalImageForLinkPreviewsMigration = require('../migrations/DownloadCanonicalImageForLinkPreviewsMigration')
-const DeleteGroupsWithSharedPostsMigration = require('../migrations/DeleteGroupsWithSharedPostsMigration')
-const GroupCreatorsCantDeleteAccountMigration = require('../migrations/GroupCreatorsCantDeleteAccountMigration')
-const NotificationOverhaulMigration = require('../migrations/NotificationOverhaulMigration')
-const AdminAnnouncementsMigration = require('../migrations/AdminAnnouncementsMigration')
-const BetterAgeGateMigration = require('../migrations/BetterAgeGateMigration')
-const BlockMigration = require('../migrations/BlockMigration')
+const UsernameMigration = require('../migrations/UsernameMigration')
 
 const ServiceError = require('../errors/ServiceError')
 const MigrationError = require('../errors/MigrationError')
@@ -83,130 +59,10 @@ module.exports = class FeatureService {
                 conflictsWith: [],
                 migration: new ExampleMigration(core)
             },
-            '1-notification-settings': {
+            'issue-198-auto-generate-link-previews': {
                 dependsOn: [],
                 conflictsWith: [],
-                migration: new NotificationSettingsMigration(core)
-            },
-            '3-notices': {
-                dependsOn: [],
-                conflictsWith: [],
-                migration: new NoticeMigration(core)
-            },
-            '5-relationships-own-state': {
-                dependsOn: [],
-                conflictsWith: [],
-                migration: new RelationshipsOwnStateMigration(core)
-            },
-            '13-comment-subscriptions-migration': {
-                dependsOn: [],
-                conflictsWith: [],
-                migration: new CommentSubscriptionsMigration(core)
-            },
-            'fix-post-activity': {
-                dependsOn: [],
-                conflictsWith: [],
-                migration: new FixActivityMigration(core)
-            },
-            '19-private-groups': {
-                dependsOn: [],
-                conflictsWith: [],
-                migration: new PrivateGroupsMigration(core)
-            },
-            '9-image-transcoding': {
-                dependsOn: [],
-                conflictsWith: [],
-                migration: new ImageResizeMigration(core)
-            },
-            '17-public-posts': {
-                dependsOn:[],
-                conflictsWith: [],
-                migration: new PublicPostsMigration(core)
-            },
-            '18-post-sharing': {
-                dependsOn: ['17-public-posts'],
-                conflictsWith: [],
-                migration: new PostSharingMigration(core)
-            },
-            '62-admin-moderation-controls': {
-                dependsOn: ['18-post-sharing'],
-                conflictsWith: [],
-                migration: new AdminModerationMigration(core)
-            },
-            '87-site-admins-can-ban-users': {
-                dependsOn: ['62-admin-moderation-controls'],
-                conflictsWith: [],
-                migration: new SiteAdminsCanBanUsersMigration(core)
-            },
-            '89-improved-moderation-for-group-posts': {
-                dependsOn: [ '62-admin-moderation-controls' ],
-                conflictsWith: [],
-                migration: new GroupModerationMigration(core)
-            },
-            '80-group-moderators-can-ban-users': {
-                dependsOn: [ '89-improved-moderation-for-group-posts' ],
-                conflictsWith: [],
-                migration: new GroupModeratorsCanBanUsers(core)
-            },
-            '140-group-admins-can-restrict-posting': {
-                dependsOn: [ '80-group-moderators-can-ban-users' ],
-                conflictsWith: [],
-                migration: new GroupAdminsCanRestrictPosting(core)
-            },
-            '76-cant-delete-account-with-outstanding-invitations': {
-                dependsOn: [],
-                conflictsWith: [],
-                migration: new CantDeleteAccountWithOutstandingInvitationsMigration(core)
-            },
-            '152-file-controller-server-error': {
-                dependsOn: [],
-                conflictsWith: [],
-                migration: new DeleteFileFailsMigration(core)
-            },
-            '166-group-search': {
-                dependsOn: [],
-                conflictsWith: [],
-                migration: new GroupSearchMigration(core)
-            },
-            '163-limit-login-attempts': {
-                dependsOn: [],
-                conflictsWith: [],
-                migration: new LimitLoginAttemptsMigration(core)
-            },
-            '171-download-canonical-image-for-link-previews': {
-                dependsOn: [],
-                conflictsWith: [],
-                migration: new DownloadCanonicalImageForLinkPreviewsMigration(core)
-            },
-            '168-delete-groups-with-shared-posts': {
-                dependsOn: [],
-                conflictsWith: [],
-                migration: new DeleteGroupsWithSharedPostsMigration(core)
-            },
-            'group-creators-cant-delete-account': {
-                dependsOn: [],
-                conflictsWith: [],
-                migration: new GroupCreatorsCantDeleteAccountMigration(core)
-            },
-            '177-notification-overhaul': {
-                dependsOn: [],
-                conflictsWith: [],
-                migration: new NotificationOverhaulMigration(core)
-            },
-            '230-admin-announcements': {
-                dependsOn: [],
-                conflictsWith: [],
-                migration: new AdminAnnouncementsMigration(core)
-            },
-            '253-better-age-gate': {
-                dependsOn: [],
-                conflictsWith: [],
-                migration: new BetterAgeGateMigration(core)
-            },
-            '245-block': {
-                dependsOn: [],
-                conflictsWith: [],
-                migration: new BlockMigration(core)
+                migration: new UsernameMigration(core)
             }
         }
     }
@@ -256,8 +112,10 @@ module.exports = class FeatureService {
             }
         } 
 
-        feature.conflictsWith = this.features[name].conflictsWith
-        feature.dependsOn = this.features[name].dependsOn
+        if ( name in this.features ) {
+            feature.conflictsWith = this.features[name].conflictsWith
+            feature.dependsOn = this.features[name].dependsOn
+        }
 
         return feature 
     }

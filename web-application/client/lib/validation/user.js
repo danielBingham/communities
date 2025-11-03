@@ -1,20 +1,18 @@
+import * as shared from '@communities/shared'
+const validation = shared.validation
+
 /**
  * Validate an email.
  */
-export const validateEmail = function(email, required) {
+export const validateEmail = function(email) {
     const errors = []
 
-    if ( required && ( email === null || email === undefined || email.length <= 0 )) {
-        errors.push('Email is required!')
-    } 
-
-    if ( email.length > 512 ) {
-        errors.push('Email is too long.  Limit is 512 characters.')
-    } 
-
-    if ( ! email.includes('@') ) {
-        errors.push('Please enter a valid email.')
-    } 
+    const validationErrors = validation.User.validateEmail(email)
+    if ( validationErrors.length > 0 ) {
+        for(const error of validationErrors) {
+            errors.push(error.message)
+        }
+    }
 
     return errors
 }
@@ -50,8 +48,8 @@ export const validateUsername = function(username, required) {
         errors.push('Username is too long. Limit is 512 characters.')
     }         
 
-    if ( username.match(/^[a-zA-Z0-9\.\-_]+$/) === null ) {
-        errors.push(`Username may only contain letters, numbers, '.', '-', or '_'.`)
+    if ( username.match(/^[a-zA-Z][a-zA-Z0-9\-_]+$/) === null ) {
+        errors.push(`Username must start with a letter, be at least 2 characters long, and only contain letters, numbers, -, or _.`)
     }
 
     return errors

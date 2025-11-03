@@ -58,15 +58,13 @@ module.exports = class PostCommentDAO extends DAO {
                         insert: 'allowed',
                         update: 'allowed',
                         select: 'always',
-                        key: 'siteModerationId',
-                        needsFeature: '89-improved-moderation-for-group-posts'
+                        key: 'siteModerationId'
                     },
                     'group_moderation_id': {
                         insert: 'allowed',
                         update: 'allowed',
                         select: 'alwways',
-                        key: 'groupModerationId',
-                        needsFeature: '89-improved-moderation-for-group-posts'
+                        key: 'groupModerationId'
                     },
                     'created_date': {
                         insert: 'override',

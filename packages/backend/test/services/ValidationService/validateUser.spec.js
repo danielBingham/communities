@@ -188,7 +188,7 @@ describe('ValidationService.validateUser()', function() {
                 status: 'confirmed',
                 email: 'test@test.com',
                 name: 'Valid Name',
-                username: 'valid.username',
+                username: 'valid-username',
                 password: 'PasswordPassword'
 
             }
@@ -237,7 +237,7 @@ describe('ValidationService.validateUser()', function() {
             const user = {
                 email: 'test@test.com',
                 name: 'User Name',
-                username: 'user.name',
+                username: 'user-name',
                 password: 'passwordpassword' 
             }
 
@@ -261,7 +261,7 @@ describe('ValidationService.validateUser()', function() {
                 notices: {},
                 email: 'test@test.com',
                 name: 'Valid Name',
-                username: 'valid.username',
+                username: 'valid-username',
                 password: 'PasswordPassword',
                 status: 'confirmed'
 
@@ -334,7 +334,7 @@ describe('ValidationService.validateUser()', function() {
                 id: '032563a3-1a0d-42f2-ad85-aef588b81ebe',
                 email: 'test@test.com',
                 name: 'User Name',
-                username: 'user.name',
+                username: 'user-name',
                 password: 'passwordpassword' 
             }
 
@@ -417,7 +417,7 @@ describe('ValidationService.validateUser()', function() {
 
             const user = {
                 id: '032563a3-1a0d-42f2-ad85-aef588b81ebe',
-                username: 'valid.username',
+                username: 'valid-username',
                 status: 'confirmed'
             }
 
@@ -433,7 +433,7 @@ describe('ValidationService.validateUser()', function() {
 
             const user = {
                 id: '032563a3-1a0d-42f2-ad85-aef588b81ebe',
-                username: 'valid.username',
+                username: 'valid-username',
                 status: 'confirmed'
             }
 
@@ -508,7 +508,7 @@ describe('ValidationService.validateUser()', function() {
 
             const user = {
                 id: '032563a3-1a0d-42f2-ad85-aef588b81ebe',
-                username: 'valid.username'
+                username: 'valid-username'
             }
 
             const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe'] 
@@ -524,7 +524,7 @@ describe('ValidationService.validateUser()', function() {
 
             const user = {
                 id: '032563a3-1a0d-42f2-ad85-aef588b81ebe',
-                username: 'valid.username'
+                username: 'valid-username'
             }
 
             const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe'] 
@@ -630,7 +630,7 @@ describe('ValidationService.validateUser()', function() {
 
             const user = {
                 id: '032563a3-1a0d-42f2-ad85-aef588b81ebe',
-                username: 'valid.username',
+                username: 'valid-username',
                 email: 'valid@email.com',
                 password: 'passwordpassword',
                 status: 'confirmed'
@@ -648,7 +648,7 @@ describe('ValidationService.validateUser()', function() {
 
             const user = {
                 id: '032563a3-1a0d-42f2-ad85-aef588b81ebe',
-                username: 'valid.username',
+                username: 'valid-username',
                 email: 'valid@email.com',
                 password: 'passwordpassword',
                 status: 'status'
@@ -713,23 +713,6 @@ describe('ValidationService.validateUser()', function() {
 
         })
 
-        it('should error on an email that is too long', async function() {
-            const service = new ValidationService(core)
-
-            const user = { 
-                email: 'tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt@ttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt.cccccccccccccccccccccccccccccccccccccccccccccccccccccccc' 
-            }
-
-            core.database.query.mockReturnValue(undefined)
-                .mockReturnValueOnce({ rowCount: 0, rows: []})
-
-            const errors = await service.validateUser(user, null, 'invitation')
-
-            expect(errors.length).toBe(1)
-            expect(errors[0].type).toBe('email:too-long')
-
-        })
-
         it('should error on an invalid email', async function() {
             const service = new ValidationService(core)
 
@@ -788,7 +771,7 @@ describe('ValidationService.validateUser()', function() {
             const user = {
                 email: 'test@test.com',
                 name: null,
-                username: 'user.name',
+                username: 'user-name',
                 password: 'passwordpassword' 
             }
 
@@ -808,7 +791,7 @@ describe('ValidationService.validateUser()', function() {
             const user = {
                 email: 'test@test.com',
                 name: 10,
-                username: 'user.name',
+                username: 'user-name',
                 password: 'passwordpassword' 
             }
 
@@ -828,7 +811,7 @@ describe('ValidationService.validateUser()', function() {
             const user = {
                 email: 'test@test.com',
                 name: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 
-                username: 'user.name',
+                username: 'user-name',
                 password: 'passwordpassword' 
             }
 
@@ -848,7 +831,7 @@ describe('ValidationService.validateUser()', function() {
             const user = {
                 email: 'test@test.com',
                 name: 'Valid Name',
-                username: 'user.name',
+                username: 'user-name',
                 password: 'passwordpassword' 
             }
 
@@ -969,13 +952,13 @@ describe('ValidationService.validateUser()', function() {
             const user = {
                 email: 'test@test.com',
                 name: 'Valid Name', 
-                username: 'valid.username',
+                username: 'valid-username',
                 password: 'passwordpassword' 
             }
 
             core.database.query.mockReturnValue(undefined)
                 .mockReturnValueOnce({ rowCount: 0, rows: []})
-                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 1, username: 'valid.username' }]})
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 1, username: 'valid-username' }]})
 
             const errors = await service.validateUser(user, null, 'registration')
 
@@ -983,13 +966,73 @@ describe('ValidationService.validateUser()', function() {
             expect(errors[0].type).toBe('username:conflict')
         })
 
-        it('should pass usernames that contain only letters, numbers, and .-_', async function() {
+        it('should reject usernames that start with a hyphen', async function() {
             const service = new ValidationService(core)
 
             const user = {
                 email: 'test@test.com',
                 name: 'Valid Name', 
-                username: 'valid_user-name.',
+                username: '-invalid-username',
+                password: 'passwordpassword' 
+            }
+
+            core.database.query.mockReturnValue(undefined)
+                .mockReturnValueOnce({ rowCount: 0, rows: []})
+                .mockReturnValueOnce({ rowCount: 0, rows: []})
+
+            const errors = await service.validateUser(user, null, 'registration')
+
+            expect(errors.length).toBe(1)
+            expect(errors[0].type).toBe('username:invalid')
+        })
+
+        it('should reject usernames that start with an underscore', async function() {
+            const service = new ValidationService(core)
+
+            const user = {
+                email: 'test@test.com',
+                name: 'Valid Name', 
+                username: '_invalid-username',
+                password: 'passwordpassword' 
+            }
+
+            core.database.query.mockReturnValue(undefined)
+                .mockReturnValueOnce({ rowCount: 0, rows: []})
+                .mockReturnValueOnce({ rowCount: 0, rows: []})
+
+            const errors = await service.validateUser(user, null, 'registration')
+
+            expect(errors.length).toBe(1)
+            expect(errors[0].type).toBe('username:invalid')
+        })
+
+        it('should reject usernames that start with a number', async function() {
+            const service = new ValidationService(core)
+
+            const user = {
+                email: 'test@test.com',
+                name: 'Valid Name', 
+                username: '0invalid-username',
+                password: 'passwordpassword' 
+            }
+
+            core.database.query.mockReturnValue(undefined)
+                .mockReturnValueOnce({ rowCount: 0, rows: []})
+                .mockReturnValueOnce({ rowCount: 0, rows: []})
+
+            const errors = await service.validateUser(user, null, 'registration')
+
+            expect(errors.length).toBe(1)
+            expect(errors[0].type).toBe('username:invalid')
+        })
+
+        it('should pass usernames that start with a letter and contain only letters, numbers, and .-_', async function() {
+            const service = new ValidationService(core)
+
+            const user = {
+                email: 'test@test.com',
+                name: 'Valid Name', 
+                username: 'valid_user-name98',
                 password: 'passwordpassword' 
             }
 
@@ -1010,7 +1053,7 @@ describe('ValidationService.validateUser()', function() {
             const user = {
                 email: 'test@test.com',
                 name: 'Valid Name', 
-                username: 'valid.username',
+                username: 'valid-username',
                 password: null 
             }
 
@@ -1030,7 +1073,7 @@ describe('ValidationService.validateUser()', function() {
             const user = {
                 email: 'test@test.com',
                 name: 'Valid Name', 
-                username: 'valid.username',
+                username: 'valid-username',
                 password: 10 
             }
 
@@ -1050,7 +1093,7 @@ describe('ValidationService.validateUser()', function() {
             const user = {
                 email: 'test@test.com',
                 name: 'Valid Name', 
-                username: 'valid.username',
+                username: 'valid-username',
                 password: 'tooshort' 
             }
 
@@ -1070,7 +1113,7 @@ describe('ValidationService.validateUser()', function() {
             const user = {
                 email: 'test@test.com',
                 name: 'Valid Name', 
-                username: 'valid.username',
+                username: 'valid-username',
                 password: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' 
             }
 
@@ -1090,7 +1133,7 @@ describe('ValidationService.validateUser()', function() {
             const user = {
                 email: 'test@test.com',
                 name: 'Valid Name', 
-                username: 'valid.username',
+                username: 'valid-username',
                 password: 'PasswordPassword'
             }
 

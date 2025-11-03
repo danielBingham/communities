@@ -239,7 +239,7 @@ module.exports = class UserService {
 
         if ( ! ( 'email' in user) ) {
             errors.push({
-                type: 'missing-email',
+                type: 'email:required',
                 log: `User cannot be registered without an email.`,
                 message: `You cannot register without an email.`
             })
@@ -247,6 +247,17 @@ module.exports = class UserService {
         }
 
         user.email = user.email.toLowerCase().trim()
+
+        if ( ! ( 'username' in user) ) {
+            errors.push({
+                type: 'username:required',
+                log: `User cannot be registered without a username.`,
+                message: `You cannot register without a username.`
+            })
+            return [ null, errors ]
+        }
+
+        user.username = user.username.toLowerCase().trim()
 
         let existingUser = await this.userDAO.getUserByEmail(user.email, 'all')
         if ( existingUser && existingUser.status === 'banned' ) {

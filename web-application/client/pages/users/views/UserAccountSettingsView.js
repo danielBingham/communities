@@ -21,9 +21,6 @@ const UserAccountSettingsView = function() {
     const [ request, makeRequest ] = useRequest()
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
-    const features = useSelector((state) => state.system.features)
-
-    const hasNotificationSettings = '1-notification-settings' in features && features['1-notification-settings'].status === 'enabled'
 
     const dispatch = useDispatch()
 
@@ -50,7 +47,7 @@ const UserAccountSettingsView = function() {
 
     return (
         <div className="user-settings">
-            { hasNotificationSettings && <NotificationSettingsSection />}
+            <NotificationSettingsSection />
             <div className="danger-zone">
                 <h2>Danger Zone</h2>
                 <div className="user-settings__delete-your-account">

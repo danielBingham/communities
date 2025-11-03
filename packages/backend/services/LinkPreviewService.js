@@ -40,17 +40,54 @@ module.exports = class LinkPreviewService {
         this.fileService = new S3FileService(core)
     }
 
-    async getPreview(url, userAgent) {
-        const response = await fetch(url, 
-        {
-            method: 'GET',
-            headers: {
-                'User-Agent': userAgent
+    async getPreview(url, headers) {
+        let rootUrl = null
+        try {
+            rootUrl = new URL(url)
+        } catch (error) {
+            throw new ServiceError('invalid-url', `Failed to parse the provided url.`)
+        }
+
+        if ( rootUrl === null ) {
+            throw new ServiceError('invalid-url', `Failed to parse the provided url.`)
+        }
+
+        const scrapeHeaders = {
+            'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'Accept-Encoding':'gzip, deflate, br',
+            'Accept-Language':'en-US,en;q=0.9',
+            'Cache-Control': 'max-age=0',
+            'Sec-Ch-Ua': headers['sec-ch-ua'],
+            'Sec-Ch-Ua-Mobile': headers['sec-ch-ua-mobile'],
+            'Sec-Ch-Ua-Platform': headers['sec-ch-ua-platform'],
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'same-origin',
+            'Sec-Fetch-User':'?1',
+            'Upgrade-Insecure-Requests': '1',
+            'User-Agent': headers['user-agent'],
+        }
+        let response = await fetch(rootUrl.href, 
+            {
+                method: 'GET',
+                headers: scrapeHeaders
             }
-        })
+        )
 
         if ( ! response.ok) {
-            throw new ServiceError('request-failed', `Attempt to retrieve a link preview failed with status: ${response.status}`)
+            this.core.logger.info(`LinkPreviewService:: User-agent failed trying raw retrieval.`)
+            // If it fails with the user agent, try again without.
+            response = await fetch(rootUrl.href)
+
+            if ( ! response.ok) {
+                if ( response.status === 404 ) {
+                    throw new ServiceError('not-found', `Didn't find a site for link: ${rootUrl.href}`)
+                } else if ( response.status === 403 ) {
+                    throw new ServiceError('not-authorized', `Site denied our attempt to scrape: ${rootUrl.href}`)
+                } else {
+                    throw new ServiceError('request-failed', `Attempt to retrieve LinkPreview(${rootUrl.href}) failed with status: ${response.status}`)
+                }
+            }
         }
 
         const data = await response.text()
@@ -87,36 +124,44 @@ module.exports = class LinkPreviewService {
             description = doc.querySelector('meta[name="description"]')?.getAttribute('content') || ''
         }
 
-        const image = doc.querySelector('meta[property="og:image"]')?.getAttribute('content') || ''
+        let image = doc.querySelector('meta[property="og:image"]')?.getAttribute('content') || ''
         let fileId = null
         if ( image !== '' ) {
             fileId = uuidv4()
 
             try {
-                const response = await fetch(image, { heaaders: { 'User-Agent': userAgent }})
+                const imageUrl = new URL(image, rootUrl.protocol + rootUrl.host)
 
-                const contentType = response.headers.get('Content-Type')
-                const extension =  mime.getExtension(contentType)
+                const response = await fetch(imageUrl.href, { heaaders: { 'User-Agent': headers['user-agent'] }})
 
-                const tmpPath = `tmp/${fileId}.${extension}`
-                const filepath = `previews/${fileId}.${extension}`
+                if ( response.ok ) {
+                    image = imageUrl.href
 
-                const blob = await response.blob()
-                const buffer = await blob.arrayBuffer()
-                fs.writeFileSync(tmpPath, Buffer.from(buffer))
+                    const contentType = response.headers.get('Content-Type')
+                    const extension =  mime.getExtension(contentType)
 
-                await this.fileService.uploadFile(tmpPath, filepath)
+                    const tmpPath = `tmp/${fileId}.${extension}`
+                    const filepath = `previews/${fileId}.${extension}`
 
-                this.fileService.removeLocalFile(tmpPath)
+                    const blob = await response.blob()
+                    const buffer = await blob.arrayBuffer()
+                    fs.writeFileSync(tmpPath, Buffer.from(buffer))
 
-                const file = {
-                    id: fileId,
-                    userId: null,
-                    type: contentType,
-                    location: this.core.config.s3.bucket_url,
-                    filepath: filepath
+                    await this.fileService.uploadFile(tmpPath, filepath)
+
+                    this.fileService.removeLocalFile(tmpPath)
+
+                    const file = {
+                        id: fileId,
+                        userId: null,
+                        type: contentType,
+                        location: this.core.config.s3.bucket_url,
+                        filepath: filepath
+                    }
+                    await this.fileDAO.insertFile(file)
+                } else {
+                    image = ''
                 }
-                await this.fileDAO.insertFile(file)
             } catch (error) {
                 // On error cases, just null out the fileId and we'll fall
                 // back.
@@ -151,7 +196,7 @@ module.exports = class LinkPreviewService {
             type: type,
             siteName: siteName,
             description: description,
-            imageUrl: image,
+            imageUrl: image, 
             fileId: fileId
         }
 

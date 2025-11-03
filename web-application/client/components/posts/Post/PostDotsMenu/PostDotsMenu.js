@@ -1,10 +1,4 @@
-import React from 'react'
 import { useSelector } from 'react-redux'
-
-import { useGroupMember } from '/lib/hooks/GroupMember'
-import { useFeature } from '/lib/hooks/feature'
-
-import { EllipsisHorizontalIcon } from '@heroicons/react/24/solid'
 
 import { DotsMenu } from '/components/ui/DotsMenu'
 
@@ -19,8 +13,6 @@ import './PostDotsMenu.css'
 const PostDotsMenu = function({ postId }) {
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const post = useSelector((state) => postId && postId in state.Post.dictionary ? state.Post.dictionary[postId] : null) 
-    const hasAdminModeration = useFeature('62-admin-moderation-controls')
-    const hasGroupModeration = useFeature('89-improved-moderation-for-group-posts')
 
     // Must have a user and a post to show dots menu.
     if ( ! currentUser || post === null ) {
@@ -32,8 +24,8 @@ const PostDotsMenu = function({ postId }) {
     return (
         <DotsMenu className="post-dots-menu">
             { currentUser && <SubscribeToPost postId={postId} /> }
-            { hasAdminModeration && currentUser && <FlagPost postId={postId} /> }
-            { hasGroupModeration && currentUser && post.groupId && <FlagPostForGroup postId={postId} /> }
+            { currentUser && <FlagPost postId={postId} /> }
+            { currentUser && post.groupId && <FlagPostForGroup postId={postId} /> }
             { isAuthor && <EditPost postId={postId} /> }
             { isAuthor && <DeletePost postId={postId} /> }
         </DotsMenu>

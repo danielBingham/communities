@@ -372,15 +372,8 @@ module.exports = class ValidationService {
                     message: `Your email must be a string.`
                 })
             } else {
-                if ( user.email.length > 512 ) {
-                    errors.push({
-                        type: 'email:too-long',
-                        log: `Email is too long: ${user.email.length}`,
-                        message: `Your email is too long. We can only accept emails less than 512 characters.`
-                    })
-                }
-
-                if ( ! user.email.includes('@') ) {
+                const emailValidationErrors = validation.User.validateEmail(user.email)
+                if ( emailValidationErrors.length > 0 ) {
                     errors.push({
                         type: 'email:invalid',
                         log: `Invalid email: ${user.email}`,
@@ -452,11 +445,11 @@ module.exports = class ValidationService {
                     })
                 }
 
-                if ( user.username.match(/^[a-zA-Z0-9\.\-_]+$/) === null ) {
+                if ( user.username.match(/^[a-zA-Z][a-zA-Z0-9\-_]+$/) === null ) {
                     errors.push({
                         type: 'username:invalid',
                         log: `Username is invalid.`,
-                        message: `Username's may only contain letters, numbers, '.', '-', or '_'.`
+                        message: `Username must start with a letter and only contain letters, numbers, '-', or '_'.`
                     })
                 }
 

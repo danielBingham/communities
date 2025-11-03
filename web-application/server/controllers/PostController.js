@@ -42,7 +42,6 @@ const { lib, cleaning, validation } = require('@communities/shared')
 
 const ControllerError = require('../errors/ControllerError')
 
-
 module.exports = class PostController {
 
     constructor(core) {
@@ -145,49 +144,42 @@ module.exports = class PostController {
             where: `link_previews.id = ANY($1::uuid[])`,
             params: [ linkPreviewIds ]
         })
-
         const userResults = await this.userDAO.selectUsers({ where: `users.id = ANY($1::uuid[])`, params: [userIds]})
+
+        // ==== Group ====
+        const groupIds = []
+        for (const postId of results.list) {
+            const post = results.dictionary[postId]
+            groupIds.push(post.groupId)
+        }
+        const groupResults = await this.groupDAO.selectGroups({
+            where: `groups.id = ANY($1::uuid[])`,
+            params: [groupIds]
+        })
+
+        // ==== SiteModeration ====
+        const siteModerationResults = await this.siteModerationDAO.selectSiteModerations({
+            where: `site_moderation.post_id = ANY($1::uuid[]) OR site_moderation.post_comment_id = ANY($2::uuid[])`,
+            params: [ results.list, postCommentResults.list ]
+        })
+
+        // ==== GroupModeration ====
+        const groupModerationResults = await this.groupModerationDAO.selectGroupModerations({
+            where: `group_moderation.post_id = ANY($1::uuid[]) OR group_moderation.post_comment_id = ANY($2::uuid[])`, 
+            params: [ results.list, postCommentResults.list ]
+        })
 
         const relations = {
             files: fileDictionary,
+            groups: groupResults.dictionary,
+            groupModerations: groupModerationResults.dictionary,
             linkPreviews: linkPreviewResults.dictionary,
             posts: sharedPostResults.dictionary,
             postComments: postCommentResults.dictionary,
             postReactions: postReactionResults.dictionary,
             postSubscriptions: postSubscriptionResults.dictionary,
+            siteModerations: siteModerationResults.dictionary,
             users: userResults.dictionary
-        }
-
-        if ( this.core.features.has('19-private-groups') ) {
-            const groupIds = []
-            for (const postId of results.list) {
-                const post = results.dictionary[postId]
-                groupIds.push(post.groupId)
-            }
-            const groupResults = await this.groupDAO.selectGroups({
-                where: `groups.id = ANY($1::uuid[])`,
-                params: [groupIds]
-            })
-
-            relations.groups = groupResults.dictionary
-        }
-
-        if ( this.core.features.has('62-admin-moderation-controls') ) {
-            const siteModerationResults = await this.siteModerationDAO.selectSiteModerations({
-                where: `site_moderation.post_id = ANY($1::uuid[]) OR site_moderation.post_comment_id = ANY($2::uuid[])`,
-                params: [ results.list, postCommentResults.list ]
-            })
-
-            relations.siteModerations = siteModerationResults.dictionary
-        }
-
-        if ( this.core.features.has('89-improved-moderation-for-group-posts') ) {
-            const groupModerationResults = await this.groupModerationDAO.selectGroupModerations({
-                where: `group_moderation.post_id = ANY($1::uuid[]) OR group_moderation.post_comment_id = ANY($2::uuid[])`, 
-                params: [ results.list, postCommentResults.list ]
-            })
-
-            relations.groupModerations = groupModerationResults.dictionary
         }
 
         return relations
@@ -243,23 +235,15 @@ module.exports = class PostController {
             const groupParam = query.params.length
 
             // Permissions control statements, this determines what is visible.
-            if ( this.core.features.has('230-admin-announcements') ) {
-                const showAnnouncements = 'showAnnouncements' in currentUser.settings ? currentUser.settings.showAnnouncements : true
-                const showInfo = 'showInfo' in currentUser.settings ? currentUser.settings.showInfo : true
-                query.where += `(
+            const showAnnouncements = 'showAnnouncements' in currentUser.settings ? currentUser.settings.showAnnouncements : true
+            const showInfo = 'showInfo' in currentUser.settings ? currentUser.settings.showInfo : true
+            query.where += `(
                         (posts.user_id = ANY($${friendParam}::uuid[]) AND posts.type = 'feed') 
                         ${ showAnnouncements ? `OR posts.type = 'announcement'` : ''}
                         ${ showInfo ? `OR posts.type = 'info'` : ''}
                         OR (posts.type = 'group' AND posts.group_id = ANY($${groupParam}::uuid[]) AND posts.user_id != ALL($${blockParam}::uuid[])) 
                         OR (posts.visibility = 'public' AND posts.user_id != ALL($${blockParam}::uuid[]))
                 )`
-            } else {
-                query.where += `(
-                    (posts.user_id = ANY($${friendParam}::uuid[]) AND posts.type = 'feed') 
-                    OR (posts.type = 'group' AND posts.group_id = ANY($${groupParam}::uuid[]) AND posts.user_id != ALL($${blockParam}::uuid[])) 
-                    OR (posts.visibility = 'public' AND posts.user_id != ALL($${blockParam}::uuid[]))
-                )`
-            }
         }
 
         // ====================================================================
@@ -329,9 +313,16 @@ module.exports = class PostController {
         }
 
         if ( 'type' in request.query ) {
-            const and = query.params.length > 0 ? ' AND ' : ''
-            query.params.push(request.query.type)
-            query.where += `${and}posts.type = $${query.params.length}`
+            if ( Array.isArray(request.query.type) ) {
+                const and = query.params.length > 0 ? ' AND ' : ''
+                query.params.push(request.query.type)
+                query.where += `${and}posts.type = ANY($${query.params.length}::post_type[])`
+            } else { 
+                const and = query.params.length > 0 ? ' AND ' : ''
+                query.params.push(request.query.type)
+                query.where += `${and}posts.type = $${query.params.length}`
+
+            }
         }
 
         if ('feed' in request.query) {
@@ -361,6 +352,13 @@ module.exports = class PostController {
                             ${ showInfo ? `OR posts.type = 'info'` : ''}
                             OR (posts.type = 'group' AND posts.group_id = ANY($${query.params.length}::uuid[]))
                     )`
+            }
+        }
+
+        if ( 'place' in request.query ) {
+            if ( request.query.place === 'global' ) {
+                const and = query.params.length > 0 ? ' AND ' : ''
+                query.where += `${and} posts.visibility = 'public'`
             }
         }
 

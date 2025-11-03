@@ -5,7 +5,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 
 import logger from '/logger'
 
-import { loadFile } from '/state/File'
+import { loadFile, touchCache } from '/state/File'
 
 import Spinner from '/components/Spinner'
 
@@ -23,7 +23,7 @@ const FetchImage = function({ id, width, ref, onLoad }) {
         
         if ( id in state.File.cache
             && width in state.File.cache[id]
-            && state.File.cache[id][width] === null ) {
+            && state.File.cache[id][width].url === null ) {
             return true
         }
 
@@ -33,9 +33,9 @@ const FetchImage = function({ id, width, ref, onLoad }) {
     const imageUrl = useSelector((state) => {
         if ( id in state.File.cache ) {
             if ( width && width in state.File.cache[id] ) {
-                return state.File.cache[id][width]
+                return state.File.cache[id][width].url
             } else if ( 'full' in state.File.cache[id] ) {
-                return state.File.cache[id]['full']
+                return state.File.cache[id]['full'].url
             }
         }
 
@@ -43,6 +43,8 @@ const FetchImage = function({ id, width, ref, onLoad }) {
     })
 
     const [ request, makeRequest ] = useRequest()
+
+    const dispatch = useDispatch()
 
     const onLoadInternal = function(event) {
         setIsLoading(false)  
@@ -66,7 +68,9 @@ const FetchImage = function({ id, width, ref, onLoad }) {
 
         if ( imageUrl === null || needToLoad ) {
             makeRequest(loadFile(id, width))
-        } 
+        }  else {
+            dispatch(touchCache({ fileId: id }))
+        }
     }, [ id, width, needToLoad])
 
     if ( ! id ) {

@@ -156,10 +156,22 @@ module.exports = class UserRelationshipController {
 
         const userId = request.params.userId
 
-        if ( currentUser.id !== userId ) {
+        const canQueryUserRelationships = await this.permissionService.can(currentUser, 'query', 'UserRelationship', 
+            { userId: currentUser.id, relationId: userId })
+        if ( canQueryUserRelationships !== true ) {
             throw new ControllerError(403, 'not-authorized',
-                `User(${currentUser.id}) attempting to query relationships for User(${userId}). Denied.`,
-                `You may not query the relationships of another user.`)
+                `User attempting to query the friend requests of User(${userId}) without permission.`,
+                `You are not authorized to query the friend requests of that User.`)
+        }
+
+        const user = await this.userDAO.getUserById(userId, 'all')
+        if ( currentUser.id !== userId 
+            && 'showFriendsOnProfile' in user.settings 
+            && user.settings.showFriendsOnProfile === false 
+        ) {
+            throw new ControllerError(403, 'not-authorized',
+                `User attempting to query the friend requests of User(${userId}) without permission.`,
+                `You are not authorized to query the friend requests of that User.`)
         }
 
         const query = await this.createQuery(currentUser, userId, request.query)
@@ -204,6 +216,12 @@ module.exports = class UserRelationshipController {
             throw new ControllerError(403, 'not-authorized',
                 `User attempting to create a friend request on behalf of User(${userId}) without authorization.`,
                 `You are not authorized to create friend requests for that User.`)
+        }
+
+        if ( relationId === currentUser.id ) {
+            throw new ControllerError(400, 'invalid',
+                `User attempting to create a relationship to themselves.`,
+                `You may not create a relationship with yourself.`)
         }
 
         const existingResults = await this.userRelationshipDAO.selectUserRelationships({
@@ -396,19 +414,20 @@ module.exports = class UserRelationshipController {
         const userId = request.params.userId
         const relationId = request.params.relationId
 
-        const canUpdateUserRelationship = await this.permissionService.can(currentUser, 'update', 'UserRelationship', { userId: userId, relationId: relationId })
-        if ( canUpdateUserRelationship !== true ) {
-            throw new ControllerError(403, 'not-authorized',
-                `User attempting to update UserRelationship(${userId}, ${relationId}) without authorization.`,
-                `You are not authorized to update that UserRelationship.`)
-        }
-
         const existing = await this.userRelationshipDAO.getUserRelationshipByUserAndRelation(userId, relationId)
         if ( existing === null) {
             throw new ControllerError(404, 'not-found',
                 `No relationship exists between User(${userId}) and User(${relationId}).`,
                 `No relationship exists between those users.  Please create a relationship first using POST.`)
         }
+
+        const canUpdateUserRelationship = await this.permissionService.can(currentUser, 'update', 'UserRelationship', { userId: userId, relationId: relationId, relationship: existing })
+        if ( canUpdateUserRelationship !== true ) {
+            throw new ControllerError(403, 'not-authorized',
+                `User attempting to update UserRelationship(${userId}, ${relationId}) without authorization.`,
+                `You are not authorized to update that UserRelationship.`)
+        }
+
 
         const userRelationship = {
             id: existing.id,

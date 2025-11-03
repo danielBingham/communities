@@ -32,8 +32,6 @@ import './Post.css'
 const Post = function({ id, expanded, showLoading, shared }) {
     const [showMore, setShowMore] = useState(expanded) 
 
-    const hasAdminModeration = useFeature('62-admin-moderation-controls')
-
     const [post, request] = usePost(id)
     const [user, userRequest] = useUser(post?.userId)
     const [group, groupRequest] = useGroup(post?.groupId) 
@@ -156,7 +154,7 @@ const Post = function({ id, expanded, showLoading, shared }) {
                     <div><span className="post__visibility">{ postVisibility }</span> &bull; { post.type === 'announcement' || post.type === 'info' ? <span><span className="post__type">{ post.type === 'announcement' ? <MegaphoneIcon /> : <InformationCircleIcon /> }{ post.type }</span> &bull;</span> : ''} <Link to={postLink}><DateTag timestamp={post.createdDate} /></Link> </div>
                 </div>
                 <div className="post__moderation">
-                    { hasAdminModeration && ! shared && <PostModeration postId={post.id} /> }
+                    { ! shared && <PostModeration postId={post.id} /> }
                 </div>
                 <div className="post__controls">
                     { ! shared && <PostDotsMenu postId={post.id} /> }

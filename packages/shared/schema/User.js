@@ -74,7 +74,7 @@ module.exports = class UserSchema extends Schema {
                         .mustBeString()
                         .mustNotBeEmpty()
                         .mustBeShorterThan(512)
-                        .mustMatch(/^[a-zA-Z0-9\.\-_]+$/)
+                        .mustMatch(/^[a-zA-Z][a-zA-Z0-9\-_]+$/)
                         .getErrors()
                     return errors
                 }
@@ -89,7 +89,7 @@ module.exports = class UserSchema extends Schema {
                         .mustBeString()
                         .mustNotBeEmpty()
                         .mustBeShorterThan(512)
-                        .mustMatch(/^.*\@.*$/)
+                        .mustMatch(/^\S+\@\S+$/)
                         .getErrors()
                     return errors
 

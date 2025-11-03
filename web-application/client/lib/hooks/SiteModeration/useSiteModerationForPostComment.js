@@ -7,11 +7,7 @@ import { useFeature } from '/lib/hooks/feature'
 import { getSiteModerations } from '/state/SiteModeration'
 
 export const useSiteModerationForPostComment = function(postId, postCommentId) {
-    const hasAdminModeration = useFeature('62-admin-moderation-controls')
     const moderation = useSelector(function(state) {
-        if ( ! hasAdminModeration ) {
-            return null
-        }
         if ( ! postId || ! (postId in state.SiteModeration.byPostCommentId) ) {
             return null
         }
@@ -24,10 +20,10 @@ export const useSiteModerationForPostComment = function(postId, postCommentId) {
     const [request, makeRequest] = useRequest()
 
     useEffect(() => {
-        if ( hasAdminModeration && postId && postCommentId && ! moderation) {
+        if ( postId && postCommentId && ! moderation) {
             makeRequest(getSiteModerations('useSiteModerationForPostComment', { postId: postId, postCommentId: postCommentId }))
         }
-    }, [ hasAdminModeration, postId, postCommentId, moderation])
+    }, [ postId, postCommentId, moderation])
 
     return [moderation, request]
 }

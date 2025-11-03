@@ -59,15 +59,21 @@ module.exports = class FeatureController {
          * ********************************************************************/
 
         // 1. User is an admin => give them the full list.
-        if (request.session?.user?.permissions == 'admin' || request.session?.user?.permissions == 'superadmin') {
+        if (request.session?.user?.siteRole == 'admin' || request.session?.user?.siteRole == 'superadmin') {
             results = await this.featureDAO.selectFeatures()
 
-            for ( const name in this.featureService.features ) {
+            for ( const [ name, value]  of Object.entries(this.featureService.features) ) {
                  if ( ! results.dictionary[name] ) {
                     results.dictionary[name] = {
                         name: name,
                         status: 'uncreated'
                     }
+                }
+            }
+
+            for( const [name, value] of Object.entries(results.dictionary) ) {
+                if ( ! ( name in this.featureService.features ) ) {
+                    results.dictionary[name].status = 'cleaned'
                 }
             }
         } 
@@ -116,7 +122,7 @@ module.exports = class FeatureController {
         }
 
         // 2. User must be an admin or a superadmin.
-        if ( request.session.user.permissions != 'admin' && request.session.user.permissions != 'superadmin' ) {
+        if ( request.session.user.siteRole != 'admin' && request.session.user.siteRole != 'superadmin' ) {
             throw new ControllerError(403, 'not-authorized',
                 `Attempt to initialize a feature from a non-admin user.`)
         }
@@ -200,7 +206,7 @@ module.exports = class FeatureController {
                 `Unauthenticated user attempt to access non-enabled Feature(${name}).`)
         }
 
-        if ( request.session.user.permissions != 'admin' && request.session.user.permissions != 'superadmin') {
+        if ( request.session.user.siteRole != 'admin' && request.session.user.siteRole != 'superadmin') {
             throw new ControllerError(404, 'no-resource',
                 `Non-admin User(${request.session.user.id}) attempting to access Feature(${name}).`)
         }
@@ -239,13 +245,13 @@ module.exports = class FeatureController {
         // 1. User must be logged in.
         if ( ! request.session.user ) {
             throw new ControllerError(404, 'no-resource',
-                `Unauthenticated user attempt to access non-enabled Feature(${request.params.id}).`)
+                `Unauthenticated user attempt to access non-enabled Feature(${request.params.name}).`)
         }
 
         // 2. User must be an admin or a superadmin.
-        if ( request.session.user.permissions != 'admin' && request.session.user.permissions != 'superadmin') {
+        if ( request.session.user.siteRole != 'admin' && request.session.user.siteRole != 'superadmin') {
             throw new ControllerError(404, 'no-resource',
-                `Non-admin attempting to access Feature(${request.params.id}).`)
+                `Non-admin attempting to access Feature(${request.params.name}).`)
         }
 
         const name = request.params.name
@@ -436,6 +442,49 @@ module.exports = class FeatureController {
         }
 
         return response.status(200).json(after.dictionary[name])
+    }
+
+    async deleteFeature(request, response) {
+        const currentUser = request.session.user
+
+        // 1. User must be logged in.
+        if ( ! currentUser ) {
+            throw new ControllerError(404, 'no-resource',
+                `Unauthenticated user attempt to delete non-enabled Feature(${request.params.id}).`)
+        }
+
+        // 2. User must be an admin or a superadmin.
+        if ( currentUser.siteRole != 'admin' && currentUser.siteRole != 'superadmin') {
+            throw new ControllerError(404, 'no-resource',
+                `Non-admin attempting to delete Feature(${request.params.id}).`)
+        }
+
+        const name = request.params.name
+
+        // 3. :name must exist
+        if ( ! name ) {
+            throw new ControllerError(400, 'no-name',
+                `Attempt to PATCH a feature with out a name.`)
+        }
+
+        const feature = await this.featureService.getFeature(name)
+
+        // 4. Feature(:name) must exist.
+        if ( ! feature ) {
+            throw new ControllerError(404, 'no-resource',
+                `Attempt to update Feature(${request.params.id}) that doesn't exist.`)
+        }
+
+
+        if ( name in this.featureService.features || feature.status !== 'enabled' ) {
+            throw new ControllerError(400, 'not-committed',
+                `User(${currentUser.username}) attempted to delete a feature that wasn't fully committed.`,
+                `You can only delete features that have been fully committed: they are enabled and they've been removed from the code.`)
+        }
+
+        await this.featureDAO.deleteFeature(name)
+
+        response.status(200).json({})
     }
 
 }
