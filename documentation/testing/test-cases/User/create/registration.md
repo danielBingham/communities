@@ -1,4 +1,4 @@
-## [Create User: Invitation](documentation/testing/test-cases/User/create/invitation.md)
+## [Create User: Registration](documentation/testing/test-cases/User/create/registration.md)
 
 Cases covering the User Registration flow.
 
