@@ -19,6 +19,8 @@
  ******************************************************************************/
 const BaseMigration = require('./BaseMigration')
 
+const UUID = require('uuid')
+
 module.exports = class UsernameMigration extends BaseMigration {
 
     constructor(core) {
@@ -49,6 +51,10 @@ module.exports = class UsernameMigration extends BaseMigration {
             username = username.replaceAll(".", "-")
 
             username = username.toLowerCase().trim()
+
+            if ( username.length < 2 ) {
+                username = 'a' + UUID.v4()
+            }
 
             // If the username changed, update it.
             if ( username !== row.username ) {
