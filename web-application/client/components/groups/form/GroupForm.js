@@ -7,6 +7,8 @@ import * as shared from '@communities/shared'
 
 import { useLocalStorage } from '/lib/hooks/useLocalStorage'
 import { useRequest } from '/lib/hooks/useRequest'
+import { useFeature } from '/lib/hooks/feature'
+import { useGroup } from '/lib/hooks/Group'
 
 import { postGroups } from '/state/Group'
 
@@ -22,7 +24,7 @@ import { RequestErrorModal } from '/components/errors/RequestError'
 
 import './GroupForm.css'
 
-const GroupForm = function() {
+const GroupForm = function({ parentId }) {
     const [ title, setTitle ] = useLocalStorage('group.draft.title', '')
     const [ slug, setSlug ] = useLocalStorage('group.draft.slug', '')
     const [ type, setType ] = useLocalStorage('group.draft.type', 'private')
@@ -37,6 +39,8 @@ const GroupForm = function() {
     const [ postPermissionsErrors, setPostPermissionsErrors ] = useState(null)
     const [ aboutErrors, setAboutErrors ] = useState(null)
 
+    const hasSubgroups = useFeature('issue-165-subgroups')
+    const [parentGroup, parentGroupRequest] = useGroup(parentId)
 
     const [request, makeRequest] = useRequest()
     const fileRef = useRef(null)
@@ -93,7 +97,6 @@ const GroupForm = function() {
             }
         }
 
-
         return titleValidationErrors.length === 0 
             && slugValidationErrors.length === 0 
             && aboutValidationErrors.length === 0 
@@ -102,7 +105,7 @@ const GroupForm = function() {
     }
 
     const assembleGroup = function() {
-        return {
+        const group = {
             type: type,
             postPermissions: postPermissions,
             title: title,
@@ -110,6 +113,13 @@ const GroupForm = function() {
             about: about,
             fileId: fileId
         }
+
+        if ( hasSubgroups === true) {
+            group.parentId = parentId
+        }
+
+        return group
+
     }
 
     const onSubmit = function(event) {
@@ -178,6 +188,9 @@ const GroupForm = function() {
     const inProgress = (request && request.state == 'pending') || (fileId && fileState === 'pending') 
     return (
         <form onSubmit={onSubmit} className="group-form">
+            { hasSubgroups && parentGroup && <div className="group-form__parent">
+                <span>Subgroup of { parentGroup.title}</span>
+            </div> }
             <div className="group-form__group-image">
                 <div>
                     { ! fileId && <UserCircleIcon className="placeholder" /> }

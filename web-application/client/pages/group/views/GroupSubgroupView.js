@@ -18,10 +18,24 @@
  *
  ******************************************************************************/
 
-const DeviceSchema = require('./Device')
-const GroupSchema = require('./Group')
+import { PlusIcon } from '@heroicons/react/24/solid'
 
-module.exports = {
-    DeviceSchema: DeviceSchema,
-    GroupSchema: GroupSchema
+import GroupList from '/components/groups/GroupList'
+
+import Button from '/components/ui/Button'
+
+import './GroupSubgroupView.css'
+
+const GroupSubgroupView = function({ groupId }) {
+
+    return (
+        <div className="group-subgroup-view">
+            <div className="group-subgroup-view__controls">
+                <Button type="primary" href={`/groups/create?parentId=${groupId}`}><PlusIcon /> Create Subgroup</Button>
+            </div>
+            <GroupList params={{ parent: groupId }} />
+        </div>
+    )
 }
+
+export default GroupSubgroupView

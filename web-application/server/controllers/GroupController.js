@@ -26,7 +26,7 @@ const {
     PermissionService,
     ValidationService
 }  = require('@communities/backend')
-const { validation } = require('@communities/shared')
+const { schema } = require('@communities/shared')
 const ControllerError = require('../errors/ControllerError')
 
 module.exports = class GroupController {
@@ -41,6 +41,8 @@ module.exports = class GroupController {
 
         this.permissionService = new PermissionService(core)
         this.validationService = new ValidationService(core)
+
+        this.groupSchema = new schema.GroupSchema()
     }
 
     async getRelations(currentUser, results, requestedRelations) {
@@ -118,6 +120,14 @@ module.exports = class GroupController {
             query.order = `SIMILARITY(groups.title, $${query.params.length}) desc`
         }
 
+        if ( this.core.features.has('issue-165-subgroups') ) {
+            if ( 'parent' in request.query ) {
+                query.params.push(request.query.parent)
+                const and = query.params.length > 1 ? ' AND ' : ''
+                query.where += `${and} groups.parent_id = $${query.params.length}`
+            }
+        }
+
         if ( 'page' in request.query && parseInt(request.query.page) > 0 ) {
             query.page = parseInt(request.query.page)
         }
@@ -163,10 +173,10 @@ module.exports = class GroupController {
                 `You are not authorized to create a new Group.`)
         }
 
-        const group = request.body
+        const group = this.groupSchema.clean(request.body)
 
         group.slug = group.slug.toLowerCase()
-        const slugErrors = validation.Group.validateSlug(group.slug)
+        const slugErrors = this.groupSchema.properties.slug.validate(group.slug)
         if ( slugErrors.length > 0 ) {
             throw new ControllerError(400, 'invalid',
                 `User(${currentUser}) submitted a Group with an invalid slug.`,

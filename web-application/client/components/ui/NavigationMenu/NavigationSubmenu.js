@@ -55,6 +55,11 @@ const NavigationSubmenu = function({ id, title, icon, children, className }) {
         }
     }, [ width ])
 
+    if ( ! SolidIcon || ! OutlineIcon ) {
+        throw new Error(`Missing icon! ${icon} does not appear to be a valid icon.`)
+    }
+
+
     return (
         <NavigationMenuItem className={`navigation-menu__sub-menu ${ className ? className : '' }`}>
             <a href="" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsOpen( ! isOpen )}} className="navigation-menu__sub-menu__header">
