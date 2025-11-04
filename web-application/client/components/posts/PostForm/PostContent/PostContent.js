@@ -88,7 +88,6 @@ const PostContent = function({ postId, groupId, sharedPostId }) {
                         continue
                     }
 
-                    console.log(draft)
                     if ( 'ignoredLinks' in draft && draft.ignoredLinks.includes(link.href)) {
                         continue
                     }

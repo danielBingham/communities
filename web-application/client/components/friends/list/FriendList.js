@@ -27,16 +27,11 @@ const FriendList = function({ userId, params, noSearch, descriptor }) {
     const relationshipDictionary = useSelector((state) => state.UserRelationship.dictionary)
     const [query, request, reset] = useUserRelationshipQuery(userId, params) 
 
-    console.log(`Query: `, query)
-    console.log(`Request: `, request)
-
     // ======= Render ===============================================
 
-    console.log(`Render.`)
     let content = ( <Spinner /> )
 
     if ( query === null && ( request === null || request?.state === 'pending' )) {
-        console.log(`Spin`)
         return ( <Spinner /> )
     }
 
@@ -54,8 +49,6 @@ const FriendList = function({ userId, params, noSearch, descriptor }) {
         )
     }
 
-
-    console.log(`Past errors.`)
     if ( query?.list && query?.list.length > 0 ) {
         const userBadges = []
         for( const id of query.list) {
@@ -95,7 +88,6 @@ const FriendList = function({ userId, params, noSearch, descriptor }) {
         explanation = `${pageStart} to ${pageEnd} of ${query.meta.count} ${descriptor}`
     }
 
-    console.log(`Render friends list.`)
     return (
         <List className="friend-list">
             <ListHeader explanation={explanation}>
