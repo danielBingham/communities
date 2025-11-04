@@ -229,6 +229,7 @@ CREATE TABLE groups (
     slug text,
     about text,
 
+    parent_id uuid REFERENCES groups (id) ON DELETE CASCADE DEFAULT NULL,
     file_id uuid REFERENCES files (id) ON DELETE SET NULL DEFAULT NULL,
 
     entrance_questions jsonb DEFAULT '{}'::jsonb,
