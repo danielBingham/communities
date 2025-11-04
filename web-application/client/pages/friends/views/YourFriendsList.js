@@ -25,7 +25,6 @@ import FriendList from '/components/friends/list/FriendList'
 import './YourFriendsList.css'
 
 const YourFriendsList = function() {
-    console.log(`## YourFriendsList`)
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
     return (

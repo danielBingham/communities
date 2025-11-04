@@ -166,7 +166,7 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
                 if ( response.status >= 500 ) {
                     logger.error(`<<< ${method} ${endpoint} :: Failed: `, result)
                 } else {
-                    logger.warn(`<<< ${method} ${endpoint} :: Returned ${response.status}: `, result)
+                    logger.verbose(`<<< ${method} ${endpoint} :: Returned ${response.status}: `, result)
                 }
                 if ( onFailure ) {
                     try {
