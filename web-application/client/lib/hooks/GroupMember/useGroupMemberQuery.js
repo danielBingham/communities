@@ -6,7 +6,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 
 import { getGroupMembers, clearGroupMemberQuery } from '/state/GroupMember'
 
-export const useGroupMemberQuery = function(groupId, queryParameters) {
+export const useGroupMemberQuery = function(groupId, queryParameters, skip) {
     const params = queryParameters ? queryParameters : {}
     const [ searchParams, setSearchParams ] = useSearchParams()
 
@@ -36,6 +36,10 @@ export const useGroupMemberQuery = function(groupId, queryParameters) {
     const dispatch = useDispatch()
 
     useEffect(() => {
+        if ( skip ) {
+            return
+        }
+
         if ( query === null && request === null ) {
             makeRequest(getGroupMembers(groupId, key, params)) 
         }

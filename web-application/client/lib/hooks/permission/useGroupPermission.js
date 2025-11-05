@@ -17,6 +17,10 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
+import { useSelector } from 'react-redux'
+import { useGroup, useGroupQuery } from '/lib/hooks/Group'
+import { useGroupMember, useGroupMemberQuery } from '/lib/hooks/GroupMember'
+
 import * as shared from '@communities/shared'
 
 import { SitePermissions, useSitePermission } from './useSitePermission'
@@ -32,9 +36,6 @@ export const GroupPermissions = {
 
 export const useGroupPermission = function(currentUser, action, context) {
     
-    if ( ! ('group' in context) || ! ( 'userMember' in context) ) {
-        throw new Error('Missing context.')
-    }
 
     context.canModerateSite = useSitePermission(currentUser, SitePermissions.MODERATE)
 

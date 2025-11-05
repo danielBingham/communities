@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react'
+import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
 import { GlobeAltIcon, LockOpenIcon, LockClosedIcon, UserCircleIcon } from '@heroicons/react/24/outline'
@@ -8,7 +9,9 @@ import * as shared from '@communities/shared'
 import { useLocalStorage } from '/lib/hooks/useLocalStorage'
 import { useRequest } from '/lib/hooks/useRequest'
 import { useFeature } from '/lib/hooks/feature'
-import { useGroup } from '/lib/hooks/Group'
+import { useGroup, useGroupQuery } from '/lib/hooks/Group'
+import { useGroupMemberQuery } from '/lib/hooks/GroupMember'
+import { useGroupPermission, GroupPermissions } from '/lib/hooks/permission'
 
 import { postGroups } from '/state/Group'
 
@@ -40,7 +43,18 @@ const GroupForm = function({ parentId }) {
     const [ aboutErrors, setAboutErrors ] = useState(null)
 
     const hasSubgroups = useFeature('issue-165-subgroups')
+
+    const currentUser = useSelector((state) => state.authentication.currentUser)
     const [parentGroup, parentGroupRequest] = useGroup(parentId)
+    const [ancestorQuery, ancestorQueryRequest] = useGroupQuery({ isAncestorOf: parentId }, hasSubgroups && (parentId === null || parentId === undefined))
+    const [ancestorMemberQuery, ancestorMemberQueryRequest] = useGroupMemberQuery({ isAncestorMemberFor: parentId }, hasSubgroups && (parentId === null || parentId === undefined))
+
+    const permissionContext = {
+        parentGroup: parentGroup,
+        ancestors: ancestorQuery?.list,
+        ancestorMembers: ancestorMemberQuery?.list
+    }
+    const canCreateGroup = useGroupPermission(currentUser, GroupPermissions.CREATE, permissionContext)
 
     const [request, makeRequest] = useRequest()
     const fileRef = useRef(null)

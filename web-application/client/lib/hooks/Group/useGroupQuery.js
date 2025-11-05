@@ -6,7 +6,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 
 import { getGroups, clearGroupQuery } from '/state/Group'
 
-export const useGroupQuery = function(queryParameters) {
+export const useGroupQuery = function(queryParameters, skip) {
     const params = queryParameters ? { ...queryParameters } : {}
     const [ searchParams, setSearchParams ] = useSearchParams()
 
@@ -21,19 +21,23 @@ export const useGroupQuery = function(queryParameters) {
     // same.  We'll probably want a solution for this at some point.
     const key = JSON.stringify(params)
 
-    const query = useSelector((state) => key in state.Group.queries ? state.Group.queries[key] : null)
+    const query = useSelector((state) => key in state.Group.queries ? state.Group.queries[key] : undefined)
 
     const [ request, makeRequest, resetRequest ] = useRequest()
 
     const dispatch = useDispatch()
 
     useEffect(() => {
-        if ( query === null && request === null ) {
+        if ( skip ) {
+            return
+        }
+
+        if ( query === undefined && request === null ) {
             makeRequest(getGroups(key, params)) 
         }
 
         return () => {
-            if ( query !== null && request !== null && request.state === 'fulfilled' ) {
+            if ( query !== undefined && request !== null && request.state === 'fulfilled' ) {
                 dispatch(clearGroupQuery({ name: key }))
                 resetRequest()
             }

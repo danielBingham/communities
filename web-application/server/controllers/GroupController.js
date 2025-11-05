@@ -23,6 +23,7 @@ const {
     GroupMemberDAO, 
     UserDAO, 
     FileDAO,
+    GroupService,
     PermissionService,
     ValidationService
 }  = require('@communities/backend')
@@ -39,6 +40,7 @@ module.exports = class GroupController {
         this.userDAO = new UserDAO(core)
         this.fileDAO = new FileDAO(core)
 
+        this.groupService = new GroupService(core)
         this.permissionService = new PermissionService(core)
         this.validationService = new ValidationService(core)
 
@@ -48,19 +50,30 @@ module.exports = class GroupController {
     async getRelations(currentUser, results, requestedRelations) {
         const relations = {}
         if ( requestedRelations && requestedRelations.includes("GroupMembers") ) {
-            const groupsWithVisibleMembers = await this.permissionService.get(currentUser, 'view', 'Group:content')
-
-            const params = [ results.list, groupsWithVisibleMembers ]
+            const params = [ results.list ]
             if ( currentUser ) {
                 params.push(currentUser.id)
             }
+
+            // Only members the user has permission to see.
             const memberResults = await this.groupMemberDAO.selectGroupMembers({
-                where: `group_members.group_id = ANY($1::uuid[]) AND group_members.group_id = ANY($2::uuid[]) AND (group_members.status = 'member' ${ currentUser ? `OR group_members.user_id = $3` : ''})`,
+                where: `
+                    group_members.group_id = ANY($1::uuid[]) 
+                    AND group_members.group_id IN (
+                        SELECT groups.id FROM groups
+                            LEFT OUTER JOIN group_members ON groups.id = group_members.group_id
+                        WHERE groups.type = 'open' 
+                            ${ currentUser ? `OR (groups.type = 'private' AND group_members.user_id = $2 AND group_members.status = 'member')` : ''}
+                            ${ currentUser ? `OR (groups.type = 'hidden' AND group_members.user_id = $2 AND group_members.status = 'member')` : ''}
+                    )
+                    AND (group_members.status = 'member' ${ currentUser ? `OR group_members.user_id = $2` : ''})
+                `, 
                 params: params 
             })
 
             relations['groupMembers'] = memberResults.dictionary
         }
+
         return relations 
     }
 
@@ -83,9 +96,14 @@ module.exports = class GroupController {
         const canModerateSite = await this.permissionService.can(currentUser, 'moderate', 'Site')
         if ( ! canModerateSite ) {
             // Restrict the query to only those groups the currentUser can see.
-            const visibleGroupIds = await this.permissionService.get(currentUser, 'view', 'Group')
-            query.params.push(visibleGroupIds)
-            query.where = `groups.id = ANY($${query.params.length}::uuid[])`
+            query.params.push(currentUser.id)
+            query.where = `groups.id IN (
+                    SELECT groups.id FROM groups
+                        LEFT OUTER JOIN group_members ON groups.id = group_members.group_id AND group_members.user_id = $1
+                    WHERE (groups.type = 'open' AND (group_members.user_id IS NULL OR group_members.status != 'banned'))
+                            OR (groups.type = 'private' AND (group_members.user_id IS NULL OR group_members.status != 'banned'))
+                            OR (groups.type = 'hidden' AND group_members.user_id = $1 AND group_members.status != 'banned')
+            )`
         }
 
         // Get only the groups the currentUser is a member of with 'memberStatus'
@@ -121,10 +139,19 @@ module.exports = class GroupController {
         }
 
         if ( this.core.features.has('issue-165-subgroups') ) {
-            if ( 'parent' in request.query ) {
+            if ( 'parentOf' in request.query ) {
                 query.params.push(request.query.parent)
+
                 const and = query.params.length > 1 ? ' AND ' : ''
                 query.where += `${and} groups.parent_id = $${query.params.length}`
+            }
+
+            if ( 'isAncestorOf' in request.query ) {
+                const parentIds = await this.groupService.getParentIds(request.query.isAncestorOf)
+                query.params.query(parentIds)
+
+                const and = query.params.length > 1 ? ' AND ' : ''
+                query.where += `${and} groups.id = ANY($${query.params.length}::uuid[])`
             }
         }
 
@@ -166,14 +193,14 @@ module.exports = class GroupController {
                 `You must must be authenticated to create a post.`)
         }
 
-        const canCreateGroup = await this.permissionService.can(currentUser, 'create', 'Group')
+        const group = this.groupSchema.clean(request.body)
+
+        const canCreateGroup = await this.permissionService.can(currentUser, 'create', 'Group', { group: group })
         if ( ! canCreateGroup ) {
             throw new ControllerError(403, 'not-authorized',
                 `User(${currentUser.id}) attempting to create a group without permission.`,
                 `You are not authorized to create a new Group.`)
         }
-
-        const group = this.groupSchema.clean(request.body)
 
         group.slug = group.slug.toLowerCase()
         const slugErrors = this.groupSchema.properties.slug.validate(group.slug)
@@ -280,7 +307,7 @@ module.exports = class GroupController {
         }
 
         const groupId = request.params.id
-        const group = request.body
+        const group = this.groupSchema.clean(request.body)
 
         if ( group.id !== groupId ) {
             throw new ControllerError(400, 'invalid', 
@@ -345,12 +372,12 @@ module.exports = class GroupController {
 
         if ( ! currentUser ) {
             throw new ControllerError(401, 'not-authenticated',
-                `User must be authenticated to edit a post.`,
-                `You must must be authenticated to edit a post.`)
+                `User must be authenticated to delete a group.`,
+                `You must must be authenticated to delete a group.`)
         }
 
         const groupId = request.params.id
-        const validationErrors = validation.Group.validateId(groupId) 
+        const validationErrors = this.groupSchema.properties.id.validate(groupId) 
         if ( validationErrors.length > 0 ) {
             const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
             const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
