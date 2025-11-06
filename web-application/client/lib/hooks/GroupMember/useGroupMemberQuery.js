@@ -29,26 +29,17 @@ export const useGroupMemberQuery = function(groupId, queryParameters, skip) {
     // same.  We'll probably want a solution for this at some point.
     const key = JSON.stringify(params)
 
-    const query = useSelector((state) => key in state.GroupMember.queries ? state.GroupMember.queries[key] : null)
+    const query = useSelector((state) => key in state.GroupMember.queries ? state.GroupMember.queries[key] : undefined)
 
     const [ request, makeRequest, resetRequest ] = useRequest()
-
-    const dispatch = useDispatch()
 
     useEffect(() => {
         if ( skip ) {
             return
         }
 
-        if ( query === null && request === null ) {
+        if ( query === undefined && request === null ) {
             makeRequest(getGroupMembers(groupId, key, params)) 
-        }
-
-        return () => {
-            if ( query !== null && request !== null && request.state === 'fulfilled' ) {
-                dispatch(clearGroupMemberQuery({ name: key }))
-                resetRequest()
-            }
         }
     }, [ key, query, request ])
 

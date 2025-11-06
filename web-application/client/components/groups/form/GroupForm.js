@@ -6,12 +6,12 @@ import { GlobeAltIcon, LockOpenIcon, LockClosedIcon, UserCircleIcon } from '@her
 
 import * as shared from '@communities/shared'
 
+import can, { Actions, Entities } from '/lib/permission'
+
 import { useLocalStorage } from '/lib/hooks/useLocalStorage'
 import { useRequest } from '/lib/hooks/useRequest'
 import { useFeature } from '/lib/hooks/feature'
-import { useGroup, useGroupQuery } from '/lib/hooks/Group'
-import { useGroupMemberQuery } from '/lib/hooks/GroupMember'
-import { useGroupPermission, GroupPermissions } from '/lib/hooks/permission'
+import { useGroupPermissionContext } from '/lib/hooks/Group'
 
 import { postGroups } from '/state/Group'
 
@@ -45,16 +45,8 @@ const GroupForm = function({ parentId }) {
     const hasSubgroups = useFeature('issue-165-subgroups')
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
-    const [parentGroup, parentGroupRequest] = useGroup(parentId)
-    const [ancestorQuery, ancestorQueryRequest] = useGroupQuery({ isAncestorOf: parentId }, hasSubgroups && (parentId === null || parentId === undefined))
-    const [ancestorMemberQuery, ancestorMemberQueryRequest] = useGroupMemberQuery({ isAncestorMemberFor: parentId }, hasSubgroups && (parentId === null || parentId === undefined))
-
-    const permissionContext = {
-        parentGroup: parentGroup,
-        ancestors: ancestorQuery?.list,
-        ancestorMembers: ancestorMemberQuery?.list
-    }
-    const canCreateGroup = useGroupPermission(currentUser, GroupPermissions.CREATE, permissionContext)
+    const context = useGroupPermissionContext(currentUser, parentId)
+    const canCreateGroup = can(currentUser, Actions.create, Entities.Group, context)
 
     const [request, makeRequest] = useRequest()
     const fileRef = useRef(null)

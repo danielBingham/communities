@@ -25,8 +25,6 @@ export const useGroupQuery = function(queryParameters, skip) {
 
     const [ request, makeRequest, resetRequest ] = useRequest()
 
-    const dispatch = useDispatch()
-
     useEffect(() => {
         if ( skip ) {
             return
@@ -34,13 +32,6 @@ export const useGroupQuery = function(queryParameters, skip) {
 
         if ( query === undefined && request === null ) {
             makeRequest(getGroups(key, params)) 
-        }
-
-        return () => {
-            if ( query !== undefined && request !== null && request.state === 'fulfilled' ) {
-                dispatch(clearGroupQuery({ name: key }))
-                resetRequest()
-            }
         }
     }, [ key, query, request ])
 

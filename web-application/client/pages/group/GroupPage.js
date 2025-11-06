@@ -13,13 +13,10 @@ import {
 
 import { resetEntities } from '/state/lib'
 
-import { useGroup, useGroupFromSlug } from '/lib/hooks/Group'
+import can, { Actions, Entities } from '/lib/permission'
+
+import { useGroup, useGroupFromSlug, useGroupPermissionContext } from '/lib/hooks/Group'
 import { useGroupMember } from '/lib/hooks/GroupMember'
-import { 
-    GroupPermissions, useGroupPermission, 
-    GroupMemberPermissions, useGroupMemberPermission, 
-    GroupPostPermissions, useGroupPostPermission 
-} from '/lib/hooks/permission'
 import { useFeature } from '/lib/hooks/feature'
 
 import Button from '/components/ui/Button'
@@ -54,19 +51,15 @@ const GroupPage = function() {
     const [currentMember, memberRequest ] = useGroupMember(group?.id, currentUser?.id)
 
     const [parentGroup, parentGroupRequest] = useGroup(group?.parentId)
-
-    const context = {
-        group: group,
-        userMember: currentMember
-    }
+    const context = useGroupPermissionContext(currentUser, group?.id)
 
     const isMember = currentMember?.status === 'member'
-    const canViewGroup = useGroupPermission(currentUser, GroupPermissions.VIEW, context)
-    const canCreateGroupPost = useGroupPostPermission(currentUser, GroupPostPermissions.CREATE, context)
-    const canQueryGroupMember = useGroupMemberPermission(currentUser, GroupMemberPermissions.QUERY, context)
-    const canViewGroupPost = useGroupPostPermission(currentUser, GroupPostPermissions.VIEW, context)
-    const canModerateGroup = useGroupPermission(currentUser, GroupPermissions.MODERATE, context)
-    const canAdminGroup = useGroupPermission(currentUser, GroupPermissions.ADMIN, context)
+    const canViewGroup = can(currentUser, Actions.view, Entities.Group, context)
+    const canCreateGroupPost = can(currentUser, Actions.create, Entities.GroupPost, context)
+    const canQueryGroupMember = can(currentUser, Actions.query, Entities.GroupMember, context)
+    const canViewGroupPost = can(currentUser, Actions.view, Entities.GroupPost, context)
+    const canModerateGroup = can(currentUser, Actions.moderate, Entities.Group, context)
+    const canAdminGroup = can(currentUser, Actions.admin, Entities.Group, context)
 
     const hasSubgroups = useFeature('issue-165-subgroups')
 

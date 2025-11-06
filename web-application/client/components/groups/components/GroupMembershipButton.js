@@ -3,14 +3,13 @@ import { useDispatch, useSelector } from 'react-redux'
 
 import { ArrowLeftStartOnRectangleIcon, ArrowLeftEndOnRectangleIcon } from '@heroicons/react/24/solid'
 
+import can, { Actions, Entities } from '/lib/permission'
+
 import { useRequest } from '/lib/hooks/useRequest'
 import { resetEntities } from '/state/lib'
 
-import { useGroup } from '/lib/hooks/Group'
+import { useGroupPermissionContext } from '/lib/hooks/Group'
 import { useGroupMember } from '/lib/hooks/GroupMember'
-import { 
-    GroupPermissions, useGroupPermission
-} from '/lib/hooks/permission'
 
 import { postGroupMembers, patchGroupMember, deleteGroupMember } from '/state/GroupMember'
 
@@ -27,17 +26,13 @@ const GroupMembershipButton = function({ groupId, userId }) {
     const [request, makeRequest] = useRequest()
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
-    const [ group ] = useGroup(groupId)
+    const context = useGroupPermissionContext(currentUser, groupId)
+    const group = context.group
+    const currentMember = context.userMember
 
-    const [ currentMember ] = useGroupMember(groupId, currentUser?.id)
     const [ member ]  = useGroupMember(groupId, userId)
 
-    const context = {
-        group: group,
-        userMember: currentMember
-    }
-
-    const canModerateGroup = useGroupPermission(currentUser, GroupPermissions.MODERATE, context)
+    const canModerateGroup = can(currentUser, Actions.moderate, Entities.Group, context)
 
     const dispatch = useDispatch()
 

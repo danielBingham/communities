@@ -3,7 +3,7 @@ import * as qs from 'qs'
 import { makeRequest } from '/state/lib/makeRequest'
 import { setRelationsInState } from '/state/lib/relations'
 
-import { setGroupMembersInDictionary, setGroupMembersNull, removeGroupMember, setGroupMemberQueryResults, clearGroupMemberQueries } from './slice'
+import { setGroupMembersInDictionary, setGroupMembersNull, removeGroupMember, setGroupMemberQueryResults, clearGroupMemberQueries, setGroupMemberQueryNull} from './slice'
 
 /**
  * GET /group/:groupId/members or GET /group/:groupId/members?...
@@ -20,6 +20,8 @@ export const getGroupMembers = function(groupId, name, params) {
     return function(dispatch, getState) {
         const endpoint = `/group/${encodeURIComponent(groupId)}/members${( params ? '?' + qs.stringify(params) : '' )}` 
 
+        dispatch(setGroupMemberQueryNull({ name: name }))
+        
         return dispatch(makeRequest('GET', endpoint, null,
             function(response) {
                 dispatch(setGroupMembersInDictionary({ dictionary: response.dictionary}))
@@ -78,6 +80,9 @@ export const postGroupMembers = function(groupId, members) {
  */
 export const getGroupMember = function(groupId, userId) {
     return function(dispatch, getState) {
+
+        dispatch(setGroupMembersNull({ groupId: groupId, userId: userId }))
+
         return dispatch(makeRequest('GET', `/group/${encodeURIComponent(groupId)}/member/${encodeURIComponent(userId)}`, null,
             function(response) {
                 dispatch(setGroupMembersInDictionary({ entity: response.entity}))

@@ -27,6 +27,7 @@ const {
     PostSubscriptionDAO,
     UserDAO,  
 
+    GroupService,
     GroupMemberService,
     NotificationService, 
     PermissionService,
@@ -47,6 +48,7 @@ module.exports = class GroupMemberController extends BaseController {
         this.postSubscriptionDAO = new PostSubscriptionDAO(core)
         this.userDAO = new UserDAO(core)
 
+        this.groupService = new GroupService(core)
         this.notificationService = new NotificationService(core)
         this.permissionService = new PermissionService(core)
         this.validationService = new ValidationService(core)
@@ -102,7 +104,7 @@ module.exports = class GroupMemberController extends BaseController {
         if ( canModerateGroup ) {
 
             if ( 'isAncestorMemberFor' in urlQuery ) {
-                const parentIds = await this.groupService.getParents(context.group.id)
+                const parentIds = await this.groupService.getParentIds(context.group.id)
                 query.params.push(parentIds)
                 const parentIdsParam = query.params.length
                 query.params.push(currentUser.id)
@@ -121,7 +123,7 @@ module.exports = class GroupMemberController extends BaseController {
         else {
 
             if ( 'isAncestorMemberFor' in urlQuery) {
-                const parentIds = await this.groupService.getParents(context.group.id)
+                const parentIds = await this.groupService.getParentIds(context.group.id)
                 query.params.push(parentIds)
                 const parentIdsParam = query.params.length
                 query.params.push(currentUser.id)

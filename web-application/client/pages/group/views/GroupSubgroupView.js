@@ -33,7 +33,7 @@ const GroupSubgroupView = function({ groupId }) {
             <div className="group-subgroup-view__controls">
                 <Button type="primary" href={`/groups/create?parentId=${groupId}`}><PlusIcon /> Create Subgroup</Button>
             </div>
-            <GroupList params={{ parent: groupId }} />
+            <GroupList params={{ isChildOf: groupId }} />
         </div>
     )
 }

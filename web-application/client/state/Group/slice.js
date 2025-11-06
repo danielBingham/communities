@@ -63,7 +63,7 @@ export const GroupSlice = createSlice({
         setGroupNull: (state, action) => {
             const id = action.payload
 
-            if ( id in state.dictionary ) {
+            if ( id in state.dictionary && state.dictionary[id] !== null ) {
                 const entity = state.dictionary[id]
                 state.bySlug[entity.slug] = null
             }

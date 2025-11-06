@@ -17,6 +17,20 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
+const isAdmin = function(member, group) {
+    if ( group === undefined || group === null ) {
+        return false
+    }
+
+    if ( member !== undefined && member !== null 
+        && member.groupId === group.id
+        && member.status === 'member' 
+        && member.role === 'admin') 
+    {
+        return true 
+    }
+}
+
 
 const canAdminGroup = function(user, context) {
     if ( context.group === undefined || context.group === null ) {
@@ -28,6 +42,8 @@ const canAdminGroup = function(user, context) {
     if ( user.siteRole === 'admin' || user.siteRole === 'superadmin' ) {
         return true
     }
+
+    // If they are an admin on a parent group, then they can admin this group.
 
 
     // Always exclude banned members.
@@ -45,6 +61,7 @@ const canAdminGroup = function(user, context) {
     {
         return true 
     }
+    
     return false 
 }
 
@@ -79,6 +96,18 @@ const canModerateGroup = function(user, context) {
 }
 
 const canCreateGroup = function(user, context) {
+    if ( context.group === undefined || context.group === null ) {
+        return false
+    }
+
+    if ( 'parentId' in context.group ) {
+        const parentContext = {
+            group: context.parentGroup,
+            userMember: context.parentMember
+        }
+        return canAdminGroup(user, parentContext)
+    }
+
     return true
 }
 

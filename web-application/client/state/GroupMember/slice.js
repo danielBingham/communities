@@ -4,6 +4,7 @@ import {
     setInDictionary,
     setNull,
     removeEntity,
+    setQueryNull,
     setQueryResults,
     clearQuery,
     clearQueries
@@ -88,6 +89,9 @@ export const GroupMemberSlice = createSlice({
             delete state.byGroupAndUser[action.payload.entity.groupId][action.payload.entity.userId]
         },
         setGroupMemberQueryResults: setQueryResults,
+        setGroupMemberQueryNull: (state, action) => {
+            setQueryNull(state, action)
+        },
         clearGroupMemberQuery: clearQuery,
         clearGroupMemberQueries: clearQueries,
         resetGroupMemberSlice: () => initialState
@@ -96,7 +100,7 @@ export const GroupMemberSlice = createSlice({
 
 export const { 
     setGroupMembersInDictionary, setGroupMembersNull, removeGroupMember, 
-    clearGroupMemberQuery, setGroupMemberQueryResults,
+    clearGroupMemberQuery, setGroupMemberQueryResults, setGroupMemberQueryNull,
     clearGroupMemberQueries, resetGroupMemberSlice
 }  = GroupMemberSlice.actions
 

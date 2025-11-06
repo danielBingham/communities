@@ -139,8 +139,8 @@ module.exports = class GroupController {
         }
 
         if ( this.core.features.has('issue-165-subgroups') ) {
-            if ( 'parentOf' in request.query ) {
-                query.params.push(request.query.parent)
+            if ( 'isChildOf' in request.query ) {
+                query.params.push(request.query.isChildOf)
 
                 const and = query.params.length > 1 ? ' AND ' : ''
                 query.where += `${and} groups.parent_id = $${query.params.length}`
@@ -148,7 +148,7 @@ module.exports = class GroupController {
 
             if ( 'isAncestorOf' in request.query ) {
                 const parentIds = await this.groupService.getParentIds(request.query.isAncestorOf)
-                query.params.query(parentIds)
+                query.params.push(parentIds)
 
                 const and = query.params.length > 1 ? ' AND ' : ''
                 query.where += `${and} groups.id = ANY($${query.params.length}::uuid[])`

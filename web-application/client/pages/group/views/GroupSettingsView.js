@@ -2,10 +2,10 @@ import React, { useState, useLayoutEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
+import can, {Actions, Entities} from '/lib/permission'
+
 import { useRequest } from '/lib/hooks/useRequest'
-import { useGroup } from '/lib/hooks/Group'
-import { useGroupMember } from '/lib/hooks/GroupMember'
-import { GroupPermissions, useGroupPermission } from '/lib/hooks/permission'
+import { useGroup, useGroupPermissionContext } from '/lib/hooks/Group'
 
 import { deleteGroup } from '/state/Group'
 
@@ -28,10 +28,10 @@ const GroupSettingsView = function({ groupId }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
-    const [group, groupRequest] = useGroup(groupId) 
-    const [currentMember, currentMemberRequest] = useGroupMember(groupId, currentUser.id)
+    const context = useGroupPermissionContext(currentUser, groupId)
+    const group = context.group
 
-    const canAdminGroup = useGroupPermission(currentUser, GroupPermissions.ADMIN, { group: group, userMember: currentMember })
+    const canAdminGroup = can(currentUser, Actions.admin, Entities.Group, context)
 
     const navigate = useNavigate()
     const deleteCurrentGroup = function() {

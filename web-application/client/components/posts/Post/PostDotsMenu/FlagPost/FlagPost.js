@@ -4,11 +4,11 @@ import { useSelector } from 'react-redux'
 import { FlagIcon as FlagIconOutline } from '@heroicons/react/24/outline'
 import { CheckCircleIcon, XCircleIcon, FlagIcon as FlagIconSolid } from '@heroicons/react/24/solid'
 
+import can, {Actions, Entities} from '/lib/permission'
+
 import { useRequest } from '/lib/hooks/useRequest'
-import { useFeature } from '/lib/hooks/feature/useFeature'
 import { usePost } from '/lib/hooks/Post'
 import { useSiteModeration } from '/lib/hooks/SiteModeration'
-import { useSitePermission, SitePermissions } from '/lib/hooks/permission'
 
 import { postSiteModerations } from '/state/SiteModeration'
 
@@ -32,7 +32,7 @@ const FlagPost = function({ postId } ) {
     const [post, postRequest] = usePost(postId)
 
     const [siteModeration, siteModerationRequest] = useSiteModeration(post?.siteModerationId)
-    const canModerateSite = useSitePermission(currentUser, SitePermissions.MODERATE)
+    const canModerateSite = can(currentUser, Actions.moderate, Entities.Site)
 
     const [request, makeRequest] = useRequest()
 

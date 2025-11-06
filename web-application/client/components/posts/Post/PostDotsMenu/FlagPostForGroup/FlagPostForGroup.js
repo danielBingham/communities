@@ -4,13 +4,12 @@ import { useSelector } from 'react-redux'
 import { FlagIcon as FlagIconOutline } from '@heroicons/react/24/outline'
 import { CheckCircleIcon, XCircleIcon, FlagIcon as FlagIconSolid, ClockIcon } from '@heroicons/react/24/solid'
 
+import can, { Actions, Entities } from '/lib/permission'
+
 import { useRequest } from '/lib/hooks/useRequest'
 import { usePost } from '/lib/hooks/Post'
-import { useGroup } from '/lib/hooks/Group'
-import { useGroupMember } from '/lib/hooks/GroupMember'
 import { useGroupModeration } from '/lib/hooks/GroupModeration'
-
-import { useGroupPermission, GroupPermissions } from '/lib/hooks/permission'
+import { useGroupPermissionContext } from '/lib/hooks/Group'
 
 import { postGroupModerations } from '/state/GroupModeration'
 
@@ -33,12 +32,11 @@ const FlagPostForGroup = function({ postId } ) {
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const [post, postRequest] = usePost(postId)
 
-    const [group, groupRequest] = useGroup(post?.groupId)
-    const [currentMember, currentMemberRequest] = useGroupMember(group?.id, currentUser.id)
-
     const [groupModeration, groupModerationRequest] = useGroupModeration(post?.groupModerationId)
 
-    const canModerateGroup = useGroupPermission(currentUser, GroupPermissions.MODERATE, { group: group, userMember: currentMember })
+    const context = useGroupPermissionContext(currentUser, post?.groupId)
+
+    const canModerateGroup = can(currentUser, Actions.moderate, Entities.Group, context)
 
     const [request, makeRequest] = useRequest()
 
