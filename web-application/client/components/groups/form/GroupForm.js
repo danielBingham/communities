@@ -46,6 +46,7 @@ const GroupForm = function({ parentId }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const context = useGroupPermissionContext(currentUser, parentId)
+    const parentGroup = context.group
     const canCreateGroup = can(currentUser, Actions.create, Entities.Group, context)
 
     const [request, makeRequest] = useRequest()
@@ -250,33 +251,87 @@ const GroupForm = function({ parentId }) {
                 className="group-form__type" 
                 name="type"
                 title="Visibility" 
-                explanation="Who is this group visible to?"
+                explanation={ ! parentGroup ? "Who is this group visible to?" : "Who is this group visible to? The visibility of Subgroups is determined by the most restricted visibility of its parents.  A subgroup with a hidden ancestor will be hidden from anyone except members of its ancestors below the hidden group."} 
                 error={typeErrors} 
             >
-                <RadioOption
-                    name="type"
-                    label="Public"
-                    value="open"
-                    current={type}
-                    explanation="Anyone may add themselves and all posts in the group are public."
-                    onClick={(e) => setType('open')}
-                />
-                <RadioOption
-                    name="type"
-                    label="Private"
-                    value="private"
-                    current={type}
-                    explanation="Anyone can see that the group exists, its title and description.  People may request to be added or may be invited by admins and moderators. Posts are only visible to approved group members."
-                    onClick={(e) => setType('private')}
+                { ( ! parentGroup || parentGroup.type === 'open') && <>
+                    <RadioOption
+                        name="type"
+                        label="Public"
+                        value="open"
+                        current={type}
+                        explanation="Anyone may add themselves and all posts in the group are public."
+                        onClick={(e) => setType('open')}
+                    /> 
+                    <RadioOption
+                        name="type"
+                        label="Private"
+                        value="private"
+                        current={type}
+                        explanation="Anyone can see that the group exists, its title and description.  People may request to be added or may be invited by admins and moderators. Posts are only visible to approved group members."
+                        onClick={(e) => setType('private')}
+                        />
+                    <RadioOption
+                        name="type"
+                        label="Hidden"
+                        value="hidden"
+                        current={type}
+                        explanation="Only members and invitees can even see that it exists.  All posts are private and visible to members only.  New members must be invited by admins and moderators."
+                        onClick={(e) => setType('hidden')}
                     />
-                <RadioOption
-                    name="type"
-                    label="Hidden"
-                    value="hidden"
-                    current={type}
-                    explanation="Only members and invitees can even see that it exists.  All posts are private and visible to members only.  New members must be invited by admins and moderators."
-                    onClick={(e) => setType('hidden')}
-                />
+                </> }
+                { ( parentGroup?.type === 'private' || parentGroup?.type === 'private-open') && <>
+                    <RadioOption
+                        name="type"
+                        label="Open to Group Members"
+                        value="private-open"
+                        current={type}
+                        explanation="Open for members of parent groups, private for everyone else.  Members from parent groups may add themselves and view all posts.  People who aren't members of a parent group can see that the group exists, its title and description."
+                        onClick={(e) => setType('private-open')}
+                    /> 
+                    <RadioOption
+                        name="type"
+                        label="Private"
+                        value="private"
+                        current={type}
+                        explanation="Anyone can see that the group exists, its title and description.  People may request to be added or may be invited by admins and moderators. Posts are only visible to approved group members."
+                        onClick={(e) => setType('private')}
+                        />
+                    <RadioOption
+                        name="type"
+                        label="Hidden"
+                        value="hidden"
+                        current={type}
+                        explanation="Only members and invitees can even see that it exists.  All posts are private and visible to members only.  New members must be invited by admins and moderators."
+                        onClick={(e) => setType('hidden')}
+                    />
+                </> }
+                {  ( parentGroup?.type === 'hidden' || parentGroup?.type === 'hidden-open' || parentGroup?.type === 'hidden-private' ) && <>
+                    <RadioOption
+                        name="type"
+                        label="Open to Group Members"
+                        value="hidden-open"
+                        current={type}
+                        explanation="Open for members of parent groups, hidden for everyone else. Members from parent groups may add themselves and view all posts.  People who aren't members of a parent group cannot see that the group exists."
+                        onClick={(e) => setType('hidden-open')}
+                    /> 
+                    <RadioOption
+                        name="type"
+                        label="Private to Group Members"
+                        value="hidden-private"
+                        current={type}
+                        explanation="Private for members of parent groups, hidden for everyone else. Members of parent groups can see that the group exists, its title and description.  Parent group members may request to be added or may be invited by admins and moderators. Posts are only visible to approved group members. Non-members cannot see that it exists."
+                        onClick={(e) => setType('hidden-private')}
+                        />
+                    <RadioOption
+                        name="type"
+                        label="Hidden"
+                        value="hidden"
+                        current={type}
+                        explanation="Only members and invitees can even see that it exists.  All posts are private and visible to members only.  New members must be invited by admins and moderators."
+                        onClick={(e) => setType('hidden')}
+                    />
+                </> }
             </Radio>
             <Radio 
                 className="group-form__post-permissions" 

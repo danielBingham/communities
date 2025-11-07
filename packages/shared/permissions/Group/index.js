@@ -22,18 +22,43 @@ const isAdmin = function(member, group) {
         return false
     }
 
-    if ( member !== undefined && member !== null 
-        && member.groupId === group.id
+    if ( member === undefined || member === null ) {
+        return false
+    }
+
+    if ( member.groupId === group.id
         && member.status === 'member' 
         && member.role === 'admin') 
     {
         return true 
     }
+
+    return false
+}
+
+const isModerator = function(member, group) {
+    if ( group === undefined || group === null ) {
+        return false
+    }
+
+    if ( member === undefined || member === null ) {
+        return false
+    }
+
+    if ( member.groupId === group.id
+        && member.status === 'member' 
+        && member.role === 'moderator') 
+    {
+        return true 
+    }
+
+    return false
+
 }
 
 
 const canAdminGroup = function(user, context) {
-    if ( context.group === undefined || context.group === null ) {
+    if ( ! ('group' in context) || context.group === undefined || context.group === null ) {
         return false
     }
 
@@ -43,30 +68,43 @@ const canAdminGroup = function(user, context) {
         return true
     }
 
-    // If they are an admin on a parent group, then they can admin this group.
+    // If we have the ancestors, then check the ancestors.
+    //
+    // If they are an admin on any ancestor group, then they can admin this
+    // group.
+    if ( 'ancestors' in context && 'ancestorMembers' in context ) {
+        for(const ancestor of context.ancestors) {
+            if ( isAdmin(context.ancestorMembers[ancestor.id], ancestor) ) {
+                return true
+            }
+        }
+    }
 
+    // At this point, they can only admin if they are a member.
+    if ( ! ('userMember' in context) || context.userMember === undefined || context.userMember === null ) {
+        return false
+    }
+
+    if ( user.id !== context.userMember.id ) {
+        return false
+    }
 
     // Always exclude banned members.
-    if ( context.userMember !== undefined && context.userMember !== null
-        && context.userMember.groupId === context.group.id
+    if (  context.userMember.groupId === context.group.id
         && context.userMember.status === 'banned' )
     {
         return false
     }
 
-    if ( context.userMember !== undefined && context.userMember !== null 
-        && context.userMember.groupId === context.group.id
-        && context.userMember.status === 'member' 
-        && context.userMember.role === 'admin') 
-    {
-        return true 
+    if ( isAdmin(context.userMember, context.group) === true ) {
+        return true
     }
-    
-    return false 
+
+    return false
 }
 
 const canModerateGroup = function(user, context) {
-    if ( context.group === undefined || context.group === null ) {
+    if ( ! ('group' in context) || context.group === undefined || context.group === null ) {
         return false
     }
 
@@ -76,18 +114,28 @@ const canModerateGroup = function(user, context) {
         return true
     }
 
+    // If they can admin the group, then they can moderate it.
+    if ( canAdminGroup(user, context) === true ) {
+        return true
+    }
+
+    // At this point, they can only moderate if they are a member.
+    if ( ! ('userMember' in context) || context.userMember === undefined || context.userMember === null ) {
+        return false
+    }
+
+    if ( user.id !== context.userMember.id ) {
+        return false
+    }
+
     // Always exclude banned members.
-    if ( context.userMember !== undefined && context.userMember !== null
-        && context.userMember.groupId === context.group.id
+    if ( context.userMember.groupId === context.group.id
         && context.userMember.status === 'banned' )
     {
         return false
     }
 
-    if ( context.userMember !== undefined && context.userMember !== null 
-        && context.userMember.groupId === context.group.id
-        && context.userMember.status === 'member' 
-        && (context.userMember.role === 'moderator' || context.userMember.role === 'admin')) 
+    if ( isModerator(context.userMember, context.group) === true ) 
     {
         return true 
     }
@@ -96,19 +144,14 @@ const canModerateGroup = function(user, context) {
 }
 
 const canCreateGroup = function(user, context) {
-    if ( context.group === undefined || context.group === null ) {
-        return false
+    // If `group` exists, it's the parent group and their ability to create
+    // depends on their permissions in the parent group.  If group is not
+    // present, then this is a new top level group and anyone can create it.
+    if ( ! ('group' in context) || context.group === undefined || context.group === null ) {
+        return true 
     }
 
-    if ( 'parentId' in context.group ) {
-        const parentContext = {
-            group: context.parentGroup,
-            userMember: context.parentMember
-        }
-        return canAdminGroup(user, parentContext)
-    }
-
-    return true
+    return canAdminGroup(user, context)
 }
 
 const canViewGroup = function(user, context) {
@@ -128,12 +171,25 @@ const canViewGroup = function(user, context) {
         return false
     }
 
-
-    if ( context.group.type === 'open' || context.group.type == 'private') {
+    // Anyone can view these groups.
+    if ( context.group.type === 'open' || context.group.type == 'private' || context.group.type === 'private-open') {
         return true
     }
 
-    if ( context.userMember !== undefined && context.userMember !== null 
+    // For `hidden-open` and `hidden-private` groups they can see it if they
+    // are a member of the parent group.
+    if ( context.group.type === 'hidden-open' || context.group.type === 'hidden-private' ) {
+        if ( 'parentMember' in context && context.parentMember !== undefined && context.parentMember !== null
+            && context.parentMember.userId === user.id && context.parentMember.groupId === context.group.parentId
+            && context.parentMember.status !== 'banned' 
+        ) {
+            return true
+        }
+    }
+
+    // At this point, 'hidden' is all that is left and hidden groups can only
+    // be seen by their members and invitees.
+    if ( 'userMember' in context && context.userMember !== undefined && context.userMember !== null 
         && context.userMember.groupId === context.group.id
         && context.userMember.status !== 'banned' ) 
     {

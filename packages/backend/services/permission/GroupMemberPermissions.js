@@ -124,6 +124,8 @@ module.exports = class GroupMemberPermissions {
             context.canModerateSite = await this.permissionService.can(user, 'moderate', 'Site')
         }
 
+        context.canModerateGroup = await this.permissionService.can(user, 'moderate', 'Group', context)
+
         return permissions.GroupMember.canQueryGroupMember(user, context)
     }
 
@@ -134,6 +136,8 @@ module.exports = class GroupMemberPermissions {
             // Site moderators can always view group content.
             context.canModerateSite = await this.permissionService.can(user, 'moderate', 'Site')
         }
+
+        context.canModerateGroup = await this.permissionService.can(user, 'moderate', 'Group', context)
 
         return permissions.GroupMember.canViewGroupMember(user, context)
     }
@@ -150,6 +154,7 @@ module.exports = class GroupMemberPermissions {
         await this.ensureContext(user, context, [ 'groupMember' ])
         
         context.canModerateGroup = await this.permissionService.can(user, 'moderate', 'Group', context)
+        context.canAdminGroup = await this.permissionService.can(user, 'admin', 'Group', context)
 
         return permissions.GroupMember.canUpdateGroupMember(user, context)
     }

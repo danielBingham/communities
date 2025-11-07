@@ -19,9 +19,10 @@
  ******************************************************************************/
 
 const canViewGroupPost = function(user, context) {
-    if ( context.group === undefined || context.group === null 
-        || context.userMember === undefined) 
-    {
+
+    // If we don't have a group, then we can't very well tell if the user has
+    // permission!
+    if ( context.group === undefined || context.group === null ) {
         return false
     }
 
@@ -31,22 +32,38 @@ const canViewGroupPost = function(user, context) {
         return true
     }
 
-    // Banned users cannot see content.
-    if ( context.userMember !== null && context.userMember.groupId === context.group.id
-        && context.userMember.status === 'banned' ) 
-    {
-        return false
+    // If you can moderate the group, then you can always view the posts.
+    if ( context.canModerateGroup === true ) {
+        return true
     }
 
+    // Banned users cannot see content.
+    if ( 'userMember' in context && context.userMember !== undefined && context.userMember !== null 
+        && context.userMember.userId === user.id && context.userMember.groupId === context.group.id
+        && context.userMember.status === 'banned' 
+    ) {
+        return false
+    }
 
     // Anyone can view content of open group.
     if ( context.group.type === 'open' ) {
         return true
     }
 
+    // For these group types, you can view the content if you are a member of
+    // the parent group.
+    if ( context.group.type === 'private-open' || context.group.type === 'hidden-open' ) {
+        if ( 'parentMember' in context && context.parentMember !== undefined && context.parentMember !== null
+            && context.parentMember.userId === user.id && context.parentMember.groupId === context.group.id
+            && context.parentMember.status === 'member'
+        ) {
+            return true
+        }
+    }
+
     // Otherwise they must be a confirmed member of the group.
-    if ( context.userMember !== null 
-        && context.userMember.groupId === context.group.id
+    if ( 'userMember' in context && context.userMember !== undefined && context.userMember !== null 
+        && context.userMember.userId === user.id && context.userMember.groupId === context.group.id
         && context.userMember.status === 'member') 
     {
         return true 
@@ -56,16 +73,15 @@ const canViewGroupPost = function(user, context) {
 }
 
 const canCreateGroupPost = function(user, context) {
-    if ( context.group === undefined || context.group === null 
-        || context.userMember === undefined) 
-    {
+    if ( ! ( 'group' in context) || context.group === undefined || context.group === null ) {
         return false
     }
 
     // Banned users cannot create posts.
-    if ( context.userMember !== null && context.userMember.groupId === context.group.id
-        && context.userMember.status === 'banned' ) 
-    {
+    if ( 'userMember' in context && context.userMember !== undefined && context.userMember !== null 
+        && context.userMember.userId === user.id && context.userMember.groupId === context.group.id
+        && context.userMember.status === 'banned' 
+    ) {
         return false
     }
 
@@ -74,8 +90,8 @@ const canCreateGroupPost = function(user, context) {
         return true
     } else if ( context.group.postPermissions === 'members' ) {
         // Confirmed members may post to the group.
-        if ( context.userMember !== null 
-            && context.userMember.groupId === context.group.id
+        if ( 'userMember' in context && context.userMember !== undefined && context.userMember !== null 
+            && context.userMember.userId === user.id && context.userMember.groupId === context.group.id
             && context.userMember.status === 'member') 
         {
             return true 
@@ -85,8 +101,8 @@ const canCreateGroupPost = function(user, context) {
     } else if ( context.group.postPermissions === 'approval' ) {
         // Confirmed members may post to the group, however their posts will be
         // made 'pending' on the backend.
-        if ( context.userMember !== null 
-            && context.userMember.groupId === context.group.id
+        if ( 'userMember' in context && context.userMember !== undefined && context.userMember !== null 
+            && context.userMember.userId === user.id && context.userMember.groupId === context.group.id
             && context.userMember.status === 'member') 
         {
             return true 
@@ -95,9 +111,9 @@ const canCreateGroupPost = function(user, context) {
         }
     } else if ( context.group.postPermissions === 'restricted' ) {
         // Only admins and moderators may post to the group.
-        if ( context.userMember !== null 
-            && context.userMember.groupId === context.group.id
-            && context.canModerateGroup === true ) 
+        if ( 'userMember' in context && context.userMember !== undefined && context.userMember !== null 
+            && context.userMember.userId === user.id && context.userMember.groupId === context.group.id
+            && context.userMember.status === 'member' && context.canModerateGroup === true ) 
         {
             return true 
         } else {

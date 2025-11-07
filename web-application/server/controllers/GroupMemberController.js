@@ -103,6 +103,7 @@ module.exports = class GroupMemberController extends BaseController {
         // including ones who are still pending.
         if ( canModerateGroup ) {
 
+            // If they are querying for ancestor memberships, then they can only see their own.
             if ( 'isAncestorMemberFor' in urlQuery ) {
                 const parentIds = await this.groupService.getParentIds(context.group.id)
                 query.params.push(parentIds)
@@ -122,6 +123,7 @@ module.exports = class GroupMemberController extends BaseController {
         // membership (pending or not).
         else {
 
+            // If they are querying for ancestor memberships, then they can only see their own.
             if ( 'isAncestorMemberFor' in urlQuery) {
                 const parentIds = await this.groupService.getParentIds(context.group.id)
                 query.params.push(parentIds)

@@ -24,20 +24,27 @@ import { useFeature } from '/lib/hooks/feature'
 
 export const useGroupPermissionContext = function(currentUser, groupId) {
     const context = {}
+    const requests = {}
 
     const hasSubgroups = useFeature('issue-165-subgroups')
 
-    const [group] = useGroup(groupId)
-    const [currentMember] = useGroupMember(groupId, currentUser?.id)
+    const [group, groupRequest] = useGroup(groupId)
+    const [currentMember, currentMemberRequest] = useGroupMember(groupId, currentUser?.id)
 
-    const [ancestorQuery] = useGroupQuery({ isAncestorOf: groupId }, ! hasSubgroups || ( group?.parentId === null || group?.parentId === undefined))
+    const [parentGroup, parentGroupRequest] = useGroup(group?.parentId)
+    const [parentMember, parentMemberRequest] = useGroupMember(group?.parentId, currentUser?.id)
+
+    const [ancestorQuery, ancestorRequest] = useGroupQuery({ isAncestorOf: groupId }, ! hasSubgroups || ( group?.parentId === null || group?.parentId === undefined))
     const groupDictionary = useSelector((state) => state.Group.dictionary)
 
-    const [ancestorMemberQuery] = useGroupMemberQuery(groupId, { isAncestorMemberFor: groupId }, ! hasSubgroups || (group?.parentId === null || group?.parentId === undefined))
+    const [ancestorMemberQuery, ancestorMemberRequest] = useGroupMemberQuery(groupId, { isAncestorMemberFor: groupId }, ! hasSubgroups || (group?.parentId === null || group?.parentId === undefined))
     const groupMemberDictionary = useSelector((state) => state.GroupMember.dictionary)
 
     context.group = group
     context.userMember = currentMember
+
+    context.parentGroup = parentGroup
+    context.parentMember = parentMember
 
     context.ancestors = ancestorQuery ? ancestorQuery.list.map((id) => groupDictionary[id]) : []
     context.ancestorMembers = {}
@@ -47,6 +54,13 @@ export const useGroupPermissionContext = function(currentUser, groupId) {
             context.ancestorMembers[ancestorMember.groupId] = ancestorMember
         }
     }
+
+    requests.group = groupRequest
+    requests.currentMember = currentMemberRequest
+    requests.parentGroup = parentGroupRequest
+    requests.parentMember = parentMemberRequest
+    requests.ancestors = ancestorRequest
+    requests.ancestorMembers = ancestorMemberRequest
 
     return context
 }

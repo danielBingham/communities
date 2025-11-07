@@ -28,12 +28,17 @@ module.exports = class UsernameMigration extends BaseMigration {
     }
 
     async initForward() {
+        await this.core.database.query(`ALTER TYPE group_type ADD VALUE IF NOT EXISTS 'private-open'`, [])
+        await this.core.database.query(`ALTER TYPE group_type ADD VALUE IF NOT EXISTS 'hidden-open'`, [])
+        await this.core.database.query(`ALTER TYPE group_type ADD VALUE IF NOT EXISTS 'hidden-private'`, [])
         await this.core.database.query(`
-            ALTER TABLE groups ADD COLUMN parent_id uuid REFERENCES groups (id) ON DELETE CASCADE DEFAULT NULL
+            ALTER TABLE groups ADD COLUMN IF NOT EXISTS parent_id uuid REFERENCES groups (id) ON DELETE CASCADE DEFAULT NULL
         `, [])
     }
 
-    async initBack() { }
+    async initBack() { 
+
+    }
 
     async migrateForward(targets) {}
 
