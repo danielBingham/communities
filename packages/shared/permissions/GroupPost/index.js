@@ -54,7 +54,7 @@ const canViewGroupPost = function(user, context) {
     // the parent group.
     if ( context.group.type === 'private-open' || context.group.type === 'hidden-open' ) {
         if ( 'parentMember' in context && context.parentMember !== undefined && context.parentMember !== null
-            && context.parentMember.userId === user.id && context.parentMember.groupId === context.group.id
+            && context.parentMember.userId === user.id && context.parentMember.groupId === context.group.parentId
             && context.parentMember.status === 'member'
         ) {
             return true

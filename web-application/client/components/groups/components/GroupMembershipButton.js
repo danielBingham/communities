@@ -203,8 +203,8 @@ const GroupMembershipButton = function({ groupId, userId }) {
         return (
             <div className="group-membership-button"> 
                 { errorView }
-                { group.type == 'open' && <Button type="primary" onClick={() => joinGroup()}><ArrowLeftEndOnRectangleIcon /> <span className="nav-text">Join</span></Button> }
-                { group.type == 'private' && <Button type="primary" onClick={() => requestEntrance()}><ArrowLeftEndOnRectangleIcon /> <span className="nav-text">Request</span></Button> }
+                { ( group.type == 'open' || group.type == 'private-open' || group.type === 'hidden-open' )  && <Button type="primary" onClick={() => joinGroup()}><ArrowLeftEndOnRectangleIcon /> <span className="nav-text">Join</span></Button> }
+                { ( group.type == 'private' || group.type === 'hidden-private') && <Button type="primary" onClick={() => requestEntrance()}><ArrowLeftEndOnRectangleIcon /> <span className="nav-text">Request</span></Button> }
             </div>
         )
     }

@@ -24,13 +24,19 @@ import TextBox from '/components/generic/text-box/TextBox'
 import Spinner from '/components/Spinner'
 import { Radio, RadioOption } from '/components/ui/Radio'
 import { RequestErrorModal } from '/components/errors/RequestError'
+import ErrorCard from '/components/errors/ErrorCard'
 
 import './GroupForm.css'
 
 const GroupForm = function({ parentId }) {
+    const currentUser = useSelector((state) => state.authentication.currentUser)
+    const context = useGroupPermissionContext(currentUser, parentId)
+    const parentGroup = context.group
+    const canCreateGroup = can(currentUser, Actions.create, Entities.Group, context)
+
     const [ title, setTitle ] = useLocalStorage('group.draft.title', '')
     const [ slug, setSlug ] = useLocalStorage('group.draft.slug', '')
-    const [ type, setType ] = useLocalStorage('group.draft.type', 'private')
+    const [ type, setType ] = useLocalStorage('group.draft.type', ( parentGroup?.type === 'hidden' ? 'hidden-private' : 'private'))
     const [ postPermissions, setPostPermissions ] = useLocalStorage('group.draft.postPermissions', 'members')
     const [ about, setAbout ] = useLocalStorage('group.draft.about', '')
     const [ fileId, setFileId] = useLocalStorage('group.draft.fileId', null)
@@ -44,19 +50,15 @@ const GroupForm = function({ parentId }) {
 
     const hasSubgroups = useFeature('issue-165-subgroups')
 
-    const currentUser = useSelector((state) => state.authentication.currentUser)
-    const context = useGroupPermissionContext(currentUser, parentId)
-    const parentGroup = context.group
-    const canCreateGroup = can(currentUser, Actions.create, Entities.Group, context)
-
     const [request, makeRequest] = useRequest()
     const fileRef = useRef(null)
 
     const validate = function(field) {
-
+        
+        const schema = new shared.schema.GroupSchema()
         let titleValidationErrors = []
         if ( ! field || field == 'title' ) {
-            titleValidationErrors = shared.validation.Group.validateTitle(title)
+            titleValidationErrors = schema.properties.title.validate(title)
             if ( titleValidationErrors.length > 0 ) {
                 setTitleErrors(titleValidationErrors.reduce((string, error) => `${string} ${error.message}`, ''))
             } else {
@@ -66,7 +68,7 @@ const GroupForm = function({ parentId }) {
 
         let slugValidationErrors = []
         if ( ! field || field == 'slug' ) {
-            slugValidationErrors = shared.validation.Group.validateSlug(slug)
+            slugValidationErrors = schema.properties.slug.validate(slug)
             if ( slugValidationErrors.length > 0 ) {
                 setSlugErrors(slugValidationErrors.reduce((string, error) => `${string} ${error.message}`, ''))
             } else {
@@ -76,7 +78,7 @@ const GroupForm = function({ parentId }) {
 
         let aboutValidationErrors = []
         if ( ! field || field == 'about' ) {
-            aboutValidationErrors = shared.validation.Group.validateAbout(about)
+            aboutValidationErrors = schema.properties.about.validate(about)
             if ( aboutValidationErrors.length > 0 ) {
                 setAboutErrors(aboutValidationErrors.reduce((string, error) => `${string} ${error.message}`, ''))
             } else {
@@ -86,7 +88,7 @@ const GroupForm = function({ parentId }) {
 
         let typeValidationErrors = []
         if ( ! field || field == 'type' ) {
-            typeValidationErrors = shared.validation.Group.validateType(type)
+            typeValidationErrors = schema.properties.type.validate(type)
             if ( typeValidationErrors.length > 0 ) {
                 setTypeErrors(typeValidationErrors.reduce((string, error) => `${string} ${error.message}`, ''))
             } else {
@@ -96,7 +98,7 @@ const GroupForm = function({ parentId }) {
 
         let postPermissionsValidationErrors = []
         if ( ! field || field === 'postPermissions' ) {
-            postPermissionsValidationErrors = shared.validation.Group.validatePostPermissions(postPermissions)
+            postPermissionsValidationErrors = schema.properties.postPermissions.validate(postPermissions)
             if ( postPermissionsValidationErrors.length > 0 ) {
                 setPostPermissionsErrors(typeValidationErrors.reduce((string, error) => `${string} ${error.message}`, ''))
             } else {
@@ -191,6 +193,17 @@ const GroupForm = function({ parentId }) {
     }, [ request, fileId])
 
     let baseError = null 
+
+    if ( canCreateGroup !== true ) {
+        return (
+            <ErrorCard href={`/group/${parentGroup.slug}`}>
+                <section>
+                    <h1>Not Authorized</h1>
+                    <p>You don't have permission to create a subgroup in that group.</p>
+                </section>
+            </ErrorCard>
+        )
+    }
 
     const inProgress = (request && request.state == 'pending') || (fileId && fileState === 'pending') 
     return (

@@ -71,6 +71,13 @@ module.exports = class GroupPostPermissions {
             }
         } 
 
+        if ( 'group' in context && context.group !== undefined && context.group !== null ) {
+            if ( 'parentId' in context.group && context.group.parentId !== undefined && context.group.parentId !== null ) {
+                context.parentGroup = await this.groupDAO.getGroupById(context.group.parentId)
+                context.parentMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(context.group.parentId, user.id, true)
+            }
+        }
+
         // If we don't have the user's groupMember then load it.
         if ( (required.includes('userMember') || optional.includes('userMember')) 
             && (! util.objectHas(context, 'userMember') || context.userMember === null) ) 

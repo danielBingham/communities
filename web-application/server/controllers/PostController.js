@@ -227,7 +227,13 @@ module.exports = class PostController {
 
             // Posts in groups
             const visibleGroupResults = await this.core.database.query(`
-                    SELECT groups.id FROM groups LEFT OUTER JOIN group_members ON groups.id = group_members.group_id WHERE (group_members.user_id = $1 AND group_members.status = 'member') OR groups.type = 'open'
+                    SELECT groups.id FROM groups
+                        LEFT OUTER JOIN group_members ON groups.id = group_members.group_id AND group_members.user_id = $1
+                        LEFT OUTER JOIN group_members as parent_members ON groups.parent_id = parent_members.group_id AND parent_members.user_id = $1
+                    WHERE (groups.type = 'open' AND (group_members.user_id IS NULL OR group_members.status != 'banned'))
+                            OR ( (groups.type = 'private' OR groups.type = 'private-open') AND (group_members.user_id IS NULL OR group_members.status != 'banned'))
+                            OR ( groups.type = 'hidden' AND group_members.user_id = $1 AND group_members.status != 'banned')
+                            OR ( ( groups.type = 'hidden-open' OR groups.type = 'hidden-private' ) AND ((group_members.user_id = $1 AND group_members.status != 'banned') OR (parent_members.user_id = $1 AND parent_members.status != 'banned')))
                 `, [currentUser.id])
 
             const visibleGroupIds = visibleGroupResults.rows.map((r) => r.id)

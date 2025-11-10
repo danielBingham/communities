@@ -120,11 +120,14 @@ const GroupPage = function() {
     let type = ''
     if ( group.type == 'open' ) {
         type = ( <span><GlobeAltIcon /> Public</span>)
-    } else if ( group.type == 'private' ) {
+    } else if ( group.type == 'private' || group.type === 'hidden-private' ) {
         type = (<span><LockOpenIcon /> Private</span>)
     } else if ( group.type == 'hidden' ) {
         type = (<span><LockClosedIcon /> Hidden</span>)
+    } else if ( group.type == 'private-open' || group.type === 'hidden-open' ) {
+        type = ( <span><GlobeAltIcon /> Open</span>)
     }
+
 
     let postingPermissions = ''
     if ( group.postPermissions === 'anyone' ) {
@@ -153,7 +156,7 @@ const GroupPage = function() {
                         { canModerateGroup && <NavigationSubmenuLink to={`/group/${group.slug}/members/email-invitations`} icon="Envelope" text="Email Invitations" /> }
 
                     </NavigationSubmenu>}
-                    { hasSubgroups && <NavigationMenuLink to={`/group/${group.slug}/subgroups`} icon="UserGroup" text="Subgroups" /> }
+                    { hasSubgroups && canViewGroupPost && <NavigationMenuLink to={`/group/${group.slug}/subgroups`} icon="UserGroup" text="Subgroups" /> }
                     { isMember && <NavigationSubmenu icon="EllipsisHorizontal" title="More">
                         { canModerateGroup === true && <NavigationSubmenuLink to="moderation" icon="Flag" text="Moderation" /> }
                         { canAdminGroup === true && <NavigationSubmenuLink to="settings" icon="Cog6Tooth" text="Settings" /> }

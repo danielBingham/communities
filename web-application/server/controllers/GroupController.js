@@ -100,7 +100,7 @@ module.exports = class GroupController {
             query.where = `groups.id IN (
                     SELECT groups.id FROM groups
                         LEFT OUTER JOIN group_members ON groups.id = group_members.group_id AND group_members.user_id = $1
-                        LEFT OUTER JOIN group_members as parent_members ON groups.parent_id = group_members.group_id AND group_members.user_id = $1
+                        LEFT OUTER JOIN group_members as parent_members ON groups.parent_id = parent_members.group_id AND parent_members.user_id = $1
                     WHERE (groups.type = 'open' AND (group_members.user_id IS NULL OR group_members.status != 'banned'))
                             OR ( (groups.type = 'private' OR groups.type = 'private-open') AND (group_members.user_id IS NULL OR group_members.status != 'banned'))
                             OR ( groups.type = 'hidden' AND group_members.user_id = $1 AND group_members.status != 'banned')

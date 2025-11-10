@@ -48,7 +48,7 @@ module.exports = class GroupSchema extends Schema {
                         .mustNotBeUpdated()
                         .mustNotBeNull()
                         .mustBeString()
-                        .mustBeOneOf(['open', 'private', 'hidden'])
+                        .mustBeOneOf(['open', 'private', 'hidden', 'private-open', 'hidden-open', 'hidden-private'])
                         .getErrors()
                     return errors
                 }

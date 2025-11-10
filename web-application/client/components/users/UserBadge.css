@@ -1,3 +1,8 @@
+.user-badge {
+    border: thin solid var(--main-border-color);
+    background-color: white;
+    border-radius: 7px;
+}
 .user-badge__grid {
     display: grid;
     grid-template-columns: 120px auto;

@@ -17,9 +17,12 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-
+import { useSelector } from 'react-redux'
 import { PlusIcon } from '@heroicons/react/24/solid'
 
+import can, { Actions, Entities } from '/lib/permission'
+
+import { useGroupPermissionContext } from '/lib/hooks/Group'
 import GroupList from '/components/groups/GroupList'
 
 import Button from '/components/ui/Button'
@@ -28,10 +31,15 @@ import './GroupSubgroupView.css'
 
 const GroupSubgroupView = function({ groupId }) {
 
+    const currentUser = useSelector((state) => state.authentication.currentUser)
+    const context = useGroupPermissionContext(currentUser, groupId)
+
+    const canCreateGroup = can(currentUser, Actions.create, Entities.Group, context)
+
     return (
         <div className="group-subgroup-view">
             <div className="group-subgroup-view__controls">
-                <Button type="primary" href={`/groups/create?parentId=${groupId}`}><PlusIcon /> Create Subgroup</Button>
+                { canCreateGroup && <Button type="primary" href={`/groups/create?parentId=${groupId}`}><PlusIcon /> Create Subgroup</Button> }
             </div>
             <GroupList params={{ isChildOf: groupId }} />
         </div>

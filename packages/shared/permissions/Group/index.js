@@ -85,7 +85,7 @@ const canAdminGroup = function(user, context) {
         return false
     }
 
-    if ( user.id !== context.userMember.id ) {
+    if ( user.id !== context.userMember.userId ) {
         return false
     }
 
@@ -124,7 +124,7 @@ const canModerateGroup = function(user, context) {
         return false
     }
 
-    if ( user.id !== context.userMember.id ) {
+    if ( user.id !== context.userMember.userId ) {
         return false
     }
 
