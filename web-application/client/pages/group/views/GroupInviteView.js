@@ -35,7 +35,7 @@ import {
 import PaginationControls from '/components/PaginationControls'
 
 import UserBadge from '/components/users/UserBadge'
-import GroupMembershipButton from '/components/groups/components/GroupMembershipButton'
+import GroupMembershipButton from '/components/groups/GroupMembershipButton'
 import GroupMembersControls from '/components/groups/GroupMembersControls'
 
 import './GroupInviteView.css'

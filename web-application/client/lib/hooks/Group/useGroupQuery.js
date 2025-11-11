@@ -25,6 +25,8 @@ export const useGroupQuery = function(queryParameters, skip) {
 
     const [ request, makeRequest, resetRequest ] = useRequest()
 
+    const dispatch = useDispatch()
+
     useEffect(() => {
         if ( skip ) {
             return
@@ -32,6 +34,17 @@ export const useGroupQuery = function(queryParameters, skip) {
 
         if ( query === undefined && request === null ) {
             makeRequest(getGroups(key, params)) 
+        }
+
+        // If we don't do this, then changing the parameters won't resubmit the
+        // request.  But doing this means that if two sibling components both
+        // call useGroupMemberQuery at the same time with the same parameters,
+        // we can get caught in an infinite loop of queries.
+        return () => {
+            if ( query !== undefined && query !== null && request?.state === 'fulfilled') {
+                dispatch(clearGroupQuery({ name: key }))
+                resetRequest()
+            }
         }
     }, [ key, query, request ])
 

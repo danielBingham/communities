@@ -1,15 +1,25 @@
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media 
+ *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
 import { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { useParams, Routes, Route, Link } from 'react-router-dom'
-
-import {
-    GlobeAltIcon,
-    LockOpenIcon,
-    LockClosedIcon,
-    UserGroupIcon,
-    DocumentCheckIcon,
-    PlusIcon
-} from '@heroicons/react/24/outline'
+import { useParams, Routes, Route } from 'react-router-dom'
 
 import { resetEntities } from '/state/lib'
 
@@ -23,8 +33,8 @@ import Button from '/components/ui/Button'
 
 import PostView from '/pages/posts/views/PostView'
 
-import GroupMembershipButton from '/components/groups/components/GroupMembershipButton'
-import GroupImage from '/components/groups/view/GroupImage'
+import GroupProfile from '/components/groups/GroupProfile'
+import GroupNavigationMenu from '/components/groups/GroupNavigationMenu'
 
 import GroupSubgroupView from '/pages/group/views/GroupSubgroupView'
 import GroupMembersView from '/pages/group/views/GroupMembersView'
@@ -34,7 +44,6 @@ import GroupFeedView from '/pages/group/views/GroupFeedView'
 import GroupModerationView from '/pages/group/views/GroupModerationView'
 import GroupSettingsView from '/pages/group/views/GroupSettingsView'
 
-import { NavigationMenu, NavigationMenuLink, NavigationMenuButton, NavigationSubmenu, NavigationSubmenuLink, NavigationMenuItem} from '/components/ui/NavigationMenu'
 import { Page, PageLeftGutter, PageRightGutter, PageBody } from '/components/generic/Page'
 import Error404 from '/components/errors/Error404'
 import Spinner from '/components/Spinner'
@@ -53,15 +62,7 @@ const GroupPage = function() {
     const [parentGroup, parentGroupRequest] = useGroup(group?.parentId)
     const context = useGroupPermissionContext(currentUser, group?.id)
 
-    const isMember = currentMember?.status === 'member'
     const canViewGroup = can(currentUser, Actions.view, Entities.Group, context)
-    const canCreateGroupPost = can(currentUser, Actions.create, Entities.GroupPost, context)
-    const canQueryGroupMember = can(currentUser, Actions.query, Entities.GroupMember, context)
-    const canViewGroupPost = can(currentUser, Actions.view, Entities.GroupPost, context)
-    const canModerateGroup = can(currentUser, Actions.moderate, Entities.Group, context)
-    const canAdminGroup = can(currentUser, Actions.admin, Entities.Group, context)
-
-    const hasSubgroups = useFeature('issue-165-subgroups')
 
     const dispatch = useDispatch()
     useEffect(() => {
@@ -117,52 +118,10 @@ const GroupPage = function() {
         )
     }
 
-    let type = ''
-    if ( group.type == 'open' ) {
-        type = ( <span><GlobeAltIcon /> Public</span>)
-    } else if ( group.type == 'private' || group.type === 'hidden-private' ) {
-        type = (<span><LockOpenIcon /> Private</span>)
-    } else if ( group.type == 'hidden' ) {
-        type = (<span><LockClosedIcon /> Hidden</span>)
-    } else if ( group.type == 'private-open' || group.type === 'hidden-open' ) {
-        type = ( <span><GlobeAltIcon /> Open</span>)
-    }
-
-
-    let postingPermissions = ''
-    if ( group.postPermissions === 'anyone' ) {
-        postingPermissions = ( <span><GlobeAltIcon /> Anyone may Post</span> )
-    } else if ( group.postPermissions === 'members' ) {
-        postingPermissions = ( <span><UserGroupIcon /> Members may Post</span> )
-    } else if ( group.postPermissions === 'approval' ) {
-        postingPermissions = ( <span><DocumentCheckIcon /> Posts Require Approval</span> )
-    } else if ( group.postPermissions === 'restricted' ) {
-        postingPermissions = ( <span><LockClosedIcon /> Only Moderators may Post</span> )
-    }
-
     return (
         <Page id="group-page">
             <PageLeftGutter>
-                { canViewGroup === true && <NavigationMenu className="group-page__menu">
-                    { ! isMember && <NavigationMenuItem><GroupMembershipButton groupId={group.id} userId={currentUser?.id} /></NavigationMenuItem> }
-                    { canCreateGroupPost === true && <NavigationMenuButton href={`/create?groupId=${group.id}`} icon="Plus" type="primary" text="Create" />  }
-                    { canViewGroupPost === true && <NavigationMenuLink to={`/group/${group.slug}`} icon="QueueList" text="Feed" /> }
-                    { canQueryGroupMember === true && <NavigationSubmenu  icon="Users" title="Members"> 
-                        <NavigationSubmenuLink to={`/group/${group.slug}/members`} icon="Users" text="Members" />
-                        <NavigationSubmenuLink to={`/group/${group.slug}/members/admin`} icon="ExclamationTriangle" text="Administrators" />
-                        { canModerateGroup && <NavigationSubmenuLink to={`/group/${group.slug}/members/invitations`} icon="UserPlus" text="Invitations" /> }
-                        { canModerateGroup && group.type === 'private' && <NavigationSubmenuLink to={`/group/${group.slug}/members/requests`} icon="UserPlus" text="Requests" /> }
-                        { canModerateGroup && <NavigationSubmenuLink to={`/group/${group.slug}/members/banned`} icon="XCircle" text="Banned Users" /> }
-                        { canModerateGroup && <NavigationSubmenuLink to={`/group/${group.slug}/members/email-invitations`} icon="Envelope" text="Email Invitations" /> }
-
-                    </NavigationSubmenu>}
-                    { hasSubgroups && canViewGroupPost && <NavigationMenuLink to={`/group/${group.slug}/subgroups`} icon="UserGroup" text="Subgroups" /> }
-                    { isMember && <NavigationSubmenu icon="EllipsisHorizontal" title="More">
-                        { canModerateGroup === true && <NavigationSubmenuLink to="moderation" icon="Flag" text="Moderation" /> }
-                        { canAdminGroup === true && <NavigationSubmenuLink to="settings" icon="Cog6Tooth" text="Settings" /> }
-                        { isMember && <NavigationMenuItem><GroupMembershipButton groupId={group.id} userId={currentUser?.id} /></NavigationMenuItem> }
-                    </NavigationSubmenu> }
-                </NavigationMenu> }
+                <GroupNavigationMenu groupId={group.id} />
             </PageLeftGutter>
             <PageBody>
                 <div className="group-page__main">
@@ -186,20 +145,7 @@ const GroupPage = function() {
                 </div>
             </PageBody>
             <PageRightGutter>
-                <div className="group-page__header">
-                    <GroupImage groupId={group.id} />
-                    <div className="title">{ group.title}</div>
-                    <div className="types">
-                        <span className="type">{ type }</span>
-                        <span className="post-permissions">{ postingPermissions }</span>
-                    </div>
-                    { parentGroup && <div className="group-page__parent">
-                        Part of <Link to={`/group/${parentGroup.slug}`}>{ parentGroup.title }</Link>
-                    </div> }
-                </div>
-                <div className="details">
-                    <div className="about"> { group.about }</div>
-                </div>
+                <GroupProfile groupId={group.id} />
             </PageRightGutter>
         </Page>
     )

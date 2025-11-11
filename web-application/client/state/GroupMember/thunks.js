@@ -148,7 +148,7 @@ export const deleteGroupMember = function(member) {
                 dispatch(clearGroupMemberQueries())
             },
             function(status, response) {
-                if ( status === 404 || status === 403 ) {
+                if ( status === 404 ) {
                     dispatch(setGroupMembersNull({ groupId: member.groupId, userId: member.userId }))
                     dispatch(clearGroupMemberQueries())
                 }

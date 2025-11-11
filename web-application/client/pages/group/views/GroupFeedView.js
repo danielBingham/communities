@@ -17,8 +17,6 @@ const GroupFeedView = function({ groupId }) {
     const canViewGroup = can(currentUser, Actions.view, Entities.Group, context)
     const canViewGroupPost = can(currentUser, Actions.view, Entities.GroupPost, context)
 
-    console.log(`CanViewGroup: `, canViewGroup, `canViewGroupPost: `, canViewGroupPost)
-
     if ( canViewGroup !== true || canViewGroupPost !== true ) {
         return (<div className="group-feed-view__private">The contents of this group are private.</div>)
     }

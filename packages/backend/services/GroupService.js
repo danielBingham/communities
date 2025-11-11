@@ -46,7 +46,6 @@ module.exports = class GroupService {
             return []
         }
 
-        console.log(results.rows)
         if ( results.rows.length > 1 ) {
             throw new ServiceError('invalid', 'Group has more than one root parent!')
         }
