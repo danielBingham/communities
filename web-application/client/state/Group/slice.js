@@ -41,6 +41,7 @@ const initialState = {
      * }
      */
     queries: {},
+    shouldQuery: {},
 
     bySlug: {}
 }
@@ -75,6 +76,9 @@ export const GroupSlice = createSlice({
 
             delete state.bySlug[action.payload.entity.slug]
         },
+        setGroupShouldQuery: (state, action) => {
+            state.shouldQuery[action.payload.name] = action.payload.value
+        },
         setGroupQueryNull: setQueryNull,
         setGroupQueryResults: setQueryResults,
         clearGroupQuery: clearQuery,
@@ -85,7 +89,7 @@ export const GroupSlice = createSlice({
 
 export const { 
     setGroupsInDictionary, setGroupNull, removeGroup, 
-    clearGroupQuery, setGroupQueryResults, setGroupQueryNull,
+    setGroupShouldQuery, clearGroupQuery, setGroupQueryResults, setGroupQueryNull,
     clearGroupQueries, resetGroupSlice
 }  = GroupSlice.actions
 

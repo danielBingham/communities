@@ -26,7 +26,7 @@ const GroupModerationView = function({ groupId }) {
     const query = useSelector((state) => 'GroupModerationView' in state.GroupModeration.queries ? state.GroupModeration.queries['GroupModerationView']: null)
     const dictionary = useSelector((state) => state.GroupModeration.dictionary)
 
-    const context = useGroupPermissionContext(currentUser, groupId)
+    const [ context, requests] = useGroupPermissionContext(currentUser, groupId)
     const canModerateGroup = can(currentUser, Actions.moderate, Entities.Group, context)
 
     useEffect(function() {

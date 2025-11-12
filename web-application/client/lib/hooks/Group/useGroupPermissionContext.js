@@ -18,49 +18,38 @@
  *
  ******************************************************************************/
 import { useSelector } from 'react-redux'
-import { useGroup, useGroupQuery } from '/lib/hooks/Group'
-import { useGroupMember, useGroupMemberQuery } from '/lib/hooks/GroupMember'
+
+import Requests from '/lib/request/Requests'
+
+import { useGroup } from '/lib/hooks/Group'
+import { useGroupMember } from '/lib/hooks/GroupMember'
 import { useFeature } from '/lib/hooks/feature'
 
 export const useGroupPermissionContext = function(currentUser, groupId) {
     const context = {}
-    const requests = {}
+    const requests = new Requests() 
 
     const hasSubgroups = useFeature('issue-165-subgroups')
 
     const [group, groupRequest] = useGroup(groupId)
+
     const [currentMember, currentMemberRequest] = useGroupMember(groupId, currentUser?.id)
 
     const [parentGroup, parentGroupRequest] = useGroup(group?.parentId)
     const [parentMember, parentMemberRequest] = useGroupMember(group?.parentId, currentUser?.id)
 
-    const [ancestorQuery, ancestorRequest] = useGroupQuery({ isAncestorOf: groupId }, ! hasSubgroups || ( group?.parentId === null || group?.parentId === undefined))
-    const groupDictionary = useSelector((state) => state.Group.dictionary)
-
-    const [ancestorMemberQuery, ancestorMemberRequest] = useGroupMemberQuery(groupId, { isAncestorMemberFor: groupId }, ! hasSubgroups || (group?.parentId === null || group?.parentId === undefined))
-    const groupMemberDictionary = useSelector((state) => state.GroupMember.dictionary)
-
     context.group = group
     context.userMember = currentMember
 
-    context.parentGroup = parentGroup
-    context.parentMember = parentMember
-
-    context.ancestors = ancestorQuery ? ancestorQuery.list.map((id) => groupDictionary[id]) : []
-    context.ancestorMembers = {}
-    if ( ancestorMemberQuery ) {
-        for(const id of ancestorMemberQuery.list) {
-            const ancestorMember = groupMemberDictionary[id]
-            context.ancestorMembers[ancestorMember.groupId] = ancestorMember
-        }
+    if ( hasSubgroups ) {
+        context.parentGroup = parentGroup
+        context.parentMember = parentMember
     }
 
-    requests.group = groupRequest
-    requests.currentMember = currentMemberRequest
-    requests.parentGroup = parentGroupRequest
-    requests.parentMember = parentMemberRequest
-    requests.ancestors = ancestorRequest
-    requests.ancestorMembers = ancestorMemberRequest
+    requests.addRequest(groupRequest)
+    requests.addRequest(currentMemberRequest)
+    requests.addRequest(parentGroupRequest)
+    requests.addRequest(parentMemberRequest)
 
-    return context
+    return [context, requests]
 }

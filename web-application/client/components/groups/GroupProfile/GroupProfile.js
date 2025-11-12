@@ -32,15 +32,24 @@ import { useGroupPermissionContext } from '/lib/hooks/Group'
 
 import GroupImage from '/components/groups/view/GroupImage'
 
+import Spinner from '/components/Spinner'
+
 import './GroupProfile.css'
 
 const GroupProfile = function({ groupId }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
-    const context = useGroupPermissionContext(currentUser, groupId)
+    const [context, requests] = useGroupPermissionContext(currentUser, groupId)
     const group = context?.group
     const parentGroup = context?.parentGroup
-    const currentMember = context?.userMember
+
+    if ( group === undefined || requests.hasPending() ) {
+        return (
+            <div className="group-profile">
+                <Spinner />
+            </div>
+        )
+    }
 
     let type = ''
     if ( group.type == 'open' ) {

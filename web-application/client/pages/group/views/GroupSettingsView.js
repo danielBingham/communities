@@ -28,7 +28,7 @@ const GroupSettingsView = function({ groupId }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
-    const context = useGroupPermissionContext(currentUser, groupId)
+    const [context, requests] = useGroupPermissionContext(currentUser, groupId)
     const group = context.group
 
     const canAdminGroup = can(currentUser, Actions.admin, Entities.Group, context)

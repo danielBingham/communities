@@ -25,11 +25,7 @@ import { resetEntities } from '/state/lib'
 
 import can, { Actions, Entities } from '/lib/permission'
 
-import { useGroup, useGroupFromSlug, useGroupPermissionContext } from '/lib/hooks/Group'
-import { useGroupMember } from '/lib/hooks/GroupMember'
-import { useFeature } from '/lib/hooks/feature'
-
-import Button from '/components/ui/Button'
+import { useGroupFromSlug, useGroupPermissionContext } from '/lib/hooks/Group'
 
 import PostView from '/pages/posts/views/PostView'
 
@@ -51,30 +47,26 @@ import Spinner from '/components/Spinner'
 import './GroupPage.css'
 
 const GroupPage = function() {
-
     const { slug } = useParams()
+    console.log(`## GroupPage(${slug}) === RENDER ===`)
 
+    const [group, groupRequest ] = useGroupFromSlug(slug)
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
-    const [group, request] = useGroupFromSlug(slug)
-    const [currentMember, memberRequest ] = useGroupMember(group?.id, currentUser?.id)
-
-    const [parentGroup, parentGroupRequest] = useGroup(group?.parentId)
-    const context = useGroupPermissionContext(currentUser, group?.id)
+    const [context, requests] = useGroupPermissionContext(currentUser, group?.id)
 
     const canViewGroup = can(currentUser, Actions.view, Entities.Group, context)
+
+    console.log(`## GroupPage(${slug}):: State:\n \tGroup: `, group, `\n \tContext: `, context, `\n \tRequests: `, requests, `\n \tcanViewGroup: `, canViewGroup)
 
     const dispatch = useDispatch()
     useEffect(() => {
         return () => {
             dispatch(resetEntities())
         }
-    }, [])
+    }, [ slug ])
 
-    if (  ( group === undefined || request?.state == 'pending')
-            || ( currentMember === undefined  || memberRequest?.state === 'pending')
-            || ( group?.parentId !== undefined && group?.parentId !== null && ( parentGroup === undefined || parentGroupRequest?.state === 'pending'))
-    ) {
+    if ( group === undefined || groupRequest?.state === 'pending' || requests.hasPending()) {
         return (
             <Page id="group-page">
                 <PageLeftGutter>
@@ -88,7 +80,7 @@ const GroupPage = function() {
         )
     } 
 
-    if ( ! group ) {
+    if ( group === null ) {
         // The request won't be failed, because it's a search request.  So it will
         // just return an empty result.
         return (

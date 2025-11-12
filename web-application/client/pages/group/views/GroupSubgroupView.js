@@ -32,7 +32,7 @@ import './GroupSubgroupView.css'
 const GroupSubgroupView = function({ groupId }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
-    const context = useGroupPermissionContext(currentUser, groupId)
+    const [ context, requests] = useGroupPermissionContext(currentUser, groupId)
 
     const canCreateGroup = can(currentUser, Actions.create, Entities.Group, context)
 

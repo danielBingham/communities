@@ -35,7 +35,7 @@ const FlagPostCommentForGroup = function({ postId, postCommentId} ) {
 
     const [groupModeration, groupModerationRequest] = useGroupModeration(comment?.groupModerationId)
 
-    const context = useGroupPermissionContext(currentUser, post?.groupId)
+    const [context, requests] = useGroupPermissionContext(currentUser, post?.groupId)
 
     const canModerateGroup = can(currentUser, Actions.moderate, Entities.Group, context)
 
@@ -61,6 +61,10 @@ const FlagPostCommentForGroup = function({ postId, postCommentId} ) {
     }
 
     if ( ! post?.groupId ) {
+        return null
+    }
+
+    if ( context?.group === undefined || requests.hasPending() ) {
         return null
     }
 

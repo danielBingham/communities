@@ -30,7 +30,7 @@ import './GroupForm.css'
 
 const GroupForm = function({ parentId }) {
     const currentUser = useSelector((state) => state.authentication.currentUser)
-    const context = useGroupPermissionContext(currentUser, parentId)
+    const [context, requests] = useGroupPermissionContext(currentUser, parentId)
     const parentGroup = context.group
     const canCreateGroup = can(currentUser, Actions.create, Entities.Group, context)
 
@@ -193,6 +193,12 @@ const GroupForm = function({ parentId }) {
     }, [ request, fileId])
 
     let baseError = null 
+
+    if ( parentId !== undefined && (parentGroup === undefined || requests.hasPending() )) {
+        return (
+            <Spinner />
+        )
+    }
 
     if ( canCreateGroup !== true ) {
         return (

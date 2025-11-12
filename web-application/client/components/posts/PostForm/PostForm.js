@@ -38,14 +38,14 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
     const [post, request] = usePost(postId) 
-    const [group, groupRequest] = useGroup(post !== null ? post.groupId : groupId)
-    const [currentMember, currentMemberRequest] = useGroupMember(group?.id, currentUser.id)
+    const [context, groupRequests] = useGroupPermissionContext(currentUser, post !== null ? post.groupId : groupId)
+    const group = context.group
+    const currentMember = context.userMember
 
     const [draft, setDraft] = usePostDraft(postId, groupId, sharedPostId)
 
     // TECHDEBT HACK: Using `group?.id` to prevent multiple requests from multiple calls
     // to `useGroup` and `useGroupMember`.
-    const context = useGroupPermissionContext(currentUser, group?.id)
     const canCreateGroupPost = can(currentUser, Actions.create, Entities.GroupPost, context)
 
     const [postRequest, makePostRequest] = useRequest()
@@ -110,7 +110,7 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
         }
     }, [ patchRequest ])
 
-    if ( request?.state === 'pending' || groupRequest?.state === 'pending' || currentMemberRequest?.state === 'pending' ) {
+    if ( request?.state === 'pending' || groupRequests.hasPending()) {
         return (  <Spinner /> )
     }
 

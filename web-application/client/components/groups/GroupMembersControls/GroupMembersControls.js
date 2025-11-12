@@ -31,10 +31,14 @@ import './GroupMembersControls.css'
 const GroupMembersControls = function({ groupId }) {
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
-    const context = useGroupPermissionContext(currentUser, groupId)
+    const [context, requests] = useGroupPermissionContext(currentUser, groupId)
     const group = context.group
 
     const canModerateGroup = can(currentUser, Actions.moderate, Entities.Group, context)
+
+    if ( group === undefined || requests.hasPending() ) {
+        return null
+    }
 
     if ( ! canModerateGroup ) {
         return null

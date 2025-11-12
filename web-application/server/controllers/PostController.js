@@ -157,6 +157,12 @@ module.exports = class PostController {
             params: [groupIds]
         })
 
+        const groupMemberResults = await this.groupMemberDAO.selectGroupMembers({
+            where: `group_members.group_id = ANY($1::uuid[]) AND group_members.user_id = $2`,
+            params: [groupIds, currentUser.id]
+        })
+
+
         // ==== SiteModeration ====
         const siteModerationResults = await this.siteModerationDAO.selectSiteModerations({
             where: `site_moderation.post_id = ANY($1::uuid[]) OR site_moderation.post_comment_id = ANY($2::uuid[])`,
@@ -172,6 +178,7 @@ module.exports = class PostController {
         const relations = {
             files: fileDictionary,
             groups: groupResults.dictionary,
+            groupMembers: groupMemberResults.dictionary,
             groupModerations: groupModerationResults.dictionary,
             linkPreviews: linkPreviewResults.dictionary,
             posts: sharedPostResults.dictionary,
@@ -180,6 +187,29 @@ module.exports = class PostController {
             postSubscriptions: postSubscriptionResults.dictionary,
             siteModerations: siteModerationResults.dictionary,
             users: userResults.dictionary
+        }
+
+        if ( this.core.features.has('issue-165-subgroups') ) {
+            // ==== Parent Groups ====
+            const parentGroupIds = []
+            for(const [id, group] of Object.entries(groupResults.dictionary)) {
+                if ( group.parentId !== null && group.parentId !== undefined ) {
+                    parentGroupIds.push(group.parentId)
+                }
+            }
+
+            const parentGroupResults = await this.groupDAO.selectGroups({
+                where: `groups.id = ANY($1::uuid[])`,
+                params: [ parentGroupIds]
+            })
+
+            const parentMemberResults = await this.groupMemberDAO.selectGroupMembers({
+                where: `group_members.group_id = ANY($1::uuid[]) AND group_members.user_id = $2`,
+                params: [ parentGroupIds, currentUser.id ]
+            })
+
+            relations.groups = { ...relations.groups, ...parentGroupResults.dictionary }
+            relations.groupMembers = { ...relations.groupMembers, ...parentMemberResults.dictionary }
         }
 
         return relations

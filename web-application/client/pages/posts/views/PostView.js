@@ -38,7 +38,7 @@ const PostView = function({ groupId }) {
     // preventing u`useGroupPermissionContext` from firing a second request.
     //
     // This is very hacky and a major gotcha!
-    const context = useGroupPermissionContext(currentUser, group?.id)
+    const [ context, requests] = useGroupPermissionContext(currentUser, group?.id)
 
     const canViewGroup = can(currentUser, Actions.view, Entities.Group, context)
     const canViewGroupPost = can(currentUser, Actions.view, Entities.Group, context)

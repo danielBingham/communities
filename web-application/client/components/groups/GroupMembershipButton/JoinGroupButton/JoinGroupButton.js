@@ -22,7 +22,7 @@ const JoinGroupButton = function({ groupId, userId }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
-    const context = useGroupPermissionContext(currentUser, groupId)
+    const [context, requests] = useGroupPermissionContext(currentUser, groupId)
     const group = context.group
     const currentMember = context.userMember
 

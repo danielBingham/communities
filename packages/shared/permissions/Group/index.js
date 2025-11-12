@@ -80,6 +80,14 @@ const canAdminGroup = function(user, context) {
         }
     }
 
+    // If we have the parent, then check the parent.  If they are an admin of
+    // the parent, then they can admin this group.
+    if ( 'parent' in context && 'parentMember' in context ) {
+        if ( isAdmin(context.parentMember, context.parent) ) {
+            return true
+        }
+    }
+
     // At this point, they can only admin if they are a member.
     if ( ! ('userMember' in context) || context.userMember === undefined || context.userMember === null ) {
         return false

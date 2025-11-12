@@ -12,7 +12,7 @@ const GroupFeedView = function({ groupId }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
     
-    const context = useGroupPermissionContext(currentUser, groupId)
+    const [context, requests] = useGroupPermissionContext(currentUser, groupId)
 
     const canViewGroup = can(currentUser, Actions.view, Entities.Group, context)
     const canViewGroupPost = can(currentUser, Actions.view, Entities.GroupPost, context)

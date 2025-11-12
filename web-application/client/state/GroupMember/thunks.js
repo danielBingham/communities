@@ -3,7 +3,7 @@ import * as qs from 'qs'
 import { makeRequest } from '/state/lib/makeRequest'
 import { setRelationsInState } from '/state/lib/relations'
 
-import { setGroupMembersInDictionary, setGroupMembersNull, removeGroupMember, setGroupMemberQueryResults, clearGroupMemberQueries, setGroupMemberQueryNull} from './slice'
+import { setGroupMembersInDictionary, setGroupMembersNull, removeGroupMember, setGroupMemberShouldQuery, setGroupMemberQueryResults, clearGroupMemberQueries, setGroupMemberQueryNull} from './slice'
 
 /**
  * GET /group/:groupId/members or GET /group/:groupId/members?...
@@ -18,6 +18,7 @@ import { setGroupMembersInDictionary, setGroupMembersNull, removeGroupMember, se
  */
 export const getGroupMembers = function(groupId, name, params) {
     return function(dispatch, getState) {
+        console.warn(`-- getGroupMembers(${groupId}, ${name}) --- CALL --`)
         const endpoint = `/group/${encodeURIComponent(groupId)}/members${( params ? '?' + qs.stringify(params) : '' )}` 
 
         dispatch(setGroupMemberQueryNull({ name: name }))

@@ -35,27 +35,14 @@ import './GroupMembersView.css'
 const GroupMembersView = function({ groupId, type }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
-
-    const [group, groupRequest] = useGroup(groupId)
-    const [currentMember, currentMemberRequest] = useGroupMember(groupId, currentUser.id)
-
-    // TECHDEBT HACK: Using `group?.id` here is a hack to prevent multiple
-    // requests from being fired and conflicting.
-    //
-    // By using `group?.id`, the useGroup* hooks in useGroupPermissionContext
-    // won't fire until after the `useGroup` above returns.  This ensures that
-    // the `useGroupMember` above at least has time to fire and register that a
-    // request is in progress.  This keeps us from firing double requests.
-    //
-    // Yes, this is extremely hacky.
-    const context = useGroupPermissionContext(currentUser, group?.id)
+    const [ context, requests] = useGroupPermissionContext(currentUser, groupId)
+    const group = context.group
 
     const canViewGroup = can(currentUser, Actions.view, Entities.Group, context)
     const canModerateGroup = can(currentUser, Actions.moderate, Entities.Group, context)
     const canQueryGroupMember = can(currentUser, Actions.query, Entities.GroupMember, context)
 
-    if ( ! group && ( ! groupRequest || groupRequest.state === 'pending' )
-        || (currentMember === undefined || ( currentMemberRequest?.state === 'pending')) ) 
+    if ( group === undefined || requests.hasPending()) 
     {
         return ( <div className="group-members-view"><Spinner /></div> )
     }

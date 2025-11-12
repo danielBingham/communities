@@ -4,7 +4,7 @@ import { useSearchParams } from 'react-router-dom'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { getGroups, clearGroupQuery } from '/state/Group'
+import { getGroups, setGroupShouldQuery, clearGroupQuery } from '/state/Group'
 
 export const useGroupQuery = function(queryParameters, skip) {
     const params = queryParameters ? { ...queryParameters } : {}
@@ -27,26 +27,35 @@ export const useGroupQuery = function(queryParameters, skip) {
 
     const dispatch = useDispatch()
 
+    const reset = function() {
+        dispatch(setGroupShouldQuery({ name: key, value: true }))
+        resetRequest()
+    }
+
     useEffect(() => {
         if ( skip ) {
             return
         }
 
-        if ( query === undefined && request === null ) {
-            makeRequest(getGroups(key, params)) 
-        }
+        makeRequest(getGroups(key, params)) 
 
-        // If we don't do this, then changing the parameters won't resubmit the
-        // request.  But doing this means that if two sibling components both
-        // call useGroupMemberQuery at the same time with the same parameters,
-        // we can get caught in an infinite loop of queries.
         return () => {
-            if ( query !== undefined && query !== null && request?.state === 'fulfilled') {
-                dispatch(clearGroupQuery({ name: key }))
+            if ( request?.state === 'fulfilled') {
                 resetRequest()
+                dispatch(clearGroupQuery({ name: key }))
             }
         }
-    }, [ key, query, request ])
+    }, [ key ])
+
+    useEffect(() => {
+        if ( skip ) {
+            return
+        }
+
+        if ( query === undefined && request?.state === 'fulfilled' ) {
+            makeRequest(getGroups(key, params)) 
+        }
+    }, [ query, request ])
 
     return [query, request, resetRequest]
 }

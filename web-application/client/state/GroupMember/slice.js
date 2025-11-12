@@ -41,6 +41,7 @@ const initialState = {
      * }
      */
     queries: {},
+    shouldQuery: {},
 
     byGroupAndUser: {}
 
@@ -88,6 +89,9 @@ export const GroupMemberSlice = createSlice({
 
             delete state.byGroupAndUser[action.payload.entity.groupId][action.payload.entity.userId]
         },
+        setGroupMemberShouldQuery: (state, action) => {
+            state.shouldQuery[action.payload.name] = action.payload.value
+        },
         setGroupMemberQueryResults: setQueryResults,
         setGroupMemberQueryNull: (state, action) => {
             setQueryNull(state, action)
@@ -100,7 +104,7 @@ export const GroupMemberSlice = createSlice({
 
 export const { 
     setGroupMembersInDictionary, setGroupMembersNull, removeGroupMember, 
-    clearGroupMemberQuery, setGroupMemberQueryResults, setGroupMemberQueryNull,
+    setGroupMemberShouldQuery, clearGroupMemberQuery, setGroupMemberQueryResults, setGroupMemberQueryNull,
     clearGroupMemberQueries, resetGroupMemberSlice
 }  = GroupMemberSlice.actions
 

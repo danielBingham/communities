@@ -26,7 +26,7 @@ const ModerateForGroup = function({ postId, postCommentId }) {
     const [siteModeration, siteModerationRequest] = useSiteModeration(post?.siteModerationId) 
     const [groupModeration, groupModerationRequest] = useGroupModeration(postCommentId ? comment?.groupModerationId : post?.groupModerationId)
 
-    const context = useGroupPermissionContext(currentUser, post?.groupId)
+    const [context, requests] = useGroupPermissionContext(currentUser, post?.groupId)
     const canModerateGroup = can(currentUser, Actions.moderate, Entities.Group, context) 
 
 

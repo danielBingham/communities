@@ -56,7 +56,7 @@ const GroupInviteView = function({ groupId }) {
     // request is in progress.  This keeps us from firing double requests.
     //
     // Yes, this is extremely hacky.
-    const context = useGroupPermissionContext(currentUser, group?.id)
+    const [ context, requests] = useGroupPermissionContext(currentUser, group?.id)
 
     const canViewGroup = can(currentUser, Actions.view, Entities.Group, context)
     const canModerateGroup = can(currentUser, Actions.moderate, Entities.Group, context)

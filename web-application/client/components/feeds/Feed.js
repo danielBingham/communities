@@ -21,7 +21,7 @@ const Feed = function({ type }) {
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const [group, groupRequest] = useGroupFromSlug( type === 'group' ? slug : undefined)
 
-    const context = useGroupPermissionContext(currentUser, group?.id)
+    const [ context, requests] = useGroupPermissionContext(currentUser, group?.id)
 
     const canCreateGroupPost = can(currentUser, Actions.create, Entities.GroupPost, context)
 
