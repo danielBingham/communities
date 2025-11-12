@@ -48,7 +48,6 @@ import './GroupPage.css'
 
 const GroupPage = function() {
     const { slug } = useParams()
-    console.log(`## GroupPage(${slug}) === RENDER ===`)
 
     const [group, groupRequest ] = useGroupFromSlug(slug)
     const currentUser = useSelector((state) => state.authentication.currentUser)
@@ -56,8 +55,6 @@ const GroupPage = function() {
     const [context, requests] = useGroupPermissionContext(currentUser, group?.id)
 
     const canViewGroup = can(currentUser, Actions.view, Entities.Group, context)
-
-    console.log(`## GroupPage(${slug}):: State:\n \tGroup: `, group, `\n \tContext: `, context, `\n \tRequests: `, requests, `\n \tcanViewGroup: `, canViewGroup)
 
     const dispatch = useDispatch()
     useEffect(() => {
