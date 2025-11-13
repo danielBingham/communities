@@ -3,7 +3,7 @@ import * as qs from 'qs'
 import { makeRequest } from '/state/lib/makeRequest'
 import { setRelationsInState } from '/state/lib/relations'
 
-import { setGroupsInDictionary, setGroupNull, removeGroup, setGroupQueryResults, setGroupShouldQuery, setGroupQueryNull, clearGroupQuery, clearGroupQueries } from './slice'
+import { setGroupsInDictionary, setGroupNull, removeGroup, setGroupQueryResults, setGroupQueryNull, clearGroupQuery, clearGroupQueries } from './slice'
 
 /**
  * GET /groups or GET /groups?...

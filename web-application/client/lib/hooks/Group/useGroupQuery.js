@@ -4,7 +4,7 @@ import { useSearchParams } from 'react-router-dom'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { getGroups, setGroupShouldQuery, clearGroupQuery } from '/state/Group'
+import { getGroups, clearGroupQuery } from '/state/Group'
 
 export const useGroupQuery = function(queryParameters, skip) {
     const params = queryParameters ? { ...queryParameters } : {}
