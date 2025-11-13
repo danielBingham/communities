@@ -33,6 +33,7 @@ const GroupMembersControls = function({ groupId }) {
 
     const [context, requests] = useGroupPermissionContext(currentUser, groupId)
     const group = context.group
+    const currentMember = context.userMember
 
     const canModerateGroup = can(currentUser, Actions.moderate, Entities.Group, context)
 
@@ -40,7 +41,7 @@ const GroupMembersControls = function({ groupId }) {
         return null
     }
 
-    if ( ! canModerateGroup ) {
+    if ( ! canModerateGroup || ! currentMember ) {
         return null
     }
 

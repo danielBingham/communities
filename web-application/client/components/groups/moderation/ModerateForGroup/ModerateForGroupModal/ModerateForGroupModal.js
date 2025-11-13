@@ -30,7 +30,9 @@ const ModerateForGroupModal = function({ postId, postCommentId, isVisible, setIs
     const [groupModeration, groupModerationRequest] = useGroupModeration(postCommentId ? comment?.groupModerationId : post?.groupModerationId)
 
     const [ context, requests] = useGroupPermissionContext(currentUser, post?.groupId)
-    const canModerateGroup = can(currentUser, Actions.moderate, Entities/Group, context)
+    const group = context.group
+    const currentMember = context.userMember
+    const canModerateGroup = can(currentUser, Actions.moderate, Entities.Group, context)
 
     const [request, makeRequest] = useRequest()
 
@@ -51,7 +53,7 @@ const ModerateForGroupModal = function({ postId, postCommentId, isVisible, setIs
         makeRequest(patchGroupModeration(patch))
     }
 
-    if ( canModerateGroup !== true ) {
+    if ( canModerateGroup !== true || ! currentMember ) {
         return null
     }
 

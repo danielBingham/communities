@@ -33,13 +33,14 @@ const GroupSubgroupView = function({ groupId }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const [ context, requests] = useGroupPermissionContext(currentUser, groupId)
+    const currentMember = context.userMember
 
     const canCreateGroup = can(currentUser, Actions.create, Entities.Group, context)
 
     return (
         <div className="group-subgroup-view">
             <div className="group-subgroup-view__controls">
-                { canCreateGroup && <Button type="primary" href={`/groups/create?parentId=${groupId}`}><PlusIcon /> Create Subgroup</Button> }
+                { canCreateGroup && currentMember && <Button type="primary" href={`/groups/create?parentId=${groupId}`}><PlusIcon /> Create Subgroup</Button> }
             </div>
             <GroupList params={{ isChildOf: groupId }} />
         </div>

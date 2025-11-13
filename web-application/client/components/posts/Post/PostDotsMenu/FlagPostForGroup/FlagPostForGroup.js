@@ -35,6 +35,7 @@ const FlagPostForGroup = function({ postId } ) {
     const [groupModeration, groupModerationRequest] = useGroupModeration(post?.groupModerationId)
 
     const [context, requests] = useGroupPermissionContext(currentUser, post?.groupId)
+    const currentMember = context.userMember
 
     const canModerateGroup = can(currentUser, Actions.moderate, Entities.Group, context)
 
@@ -95,7 +96,7 @@ const FlagPostForGroup = function({ postId } ) {
 
     if ( groupModeration !== null ) {
         if ( groupModeration.status === 'flagged' ) {
-            if ( canModerateGroup === true ) {
+            if ( canModerateGroup === true && currentMember) {
                 return (
                     <>
                         <DotsMenuItem onClick={(e) => setShowModal(true)} className="flag-post-for-group flag-post-for-group__moderate"><FlagIconSolid /> Moderate for Group</DotsMenuItem>
@@ -109,7 +110,7 @@ const FlagPostForGroup = function({ postId } ) {
                 )
             }
         } else if ( groupModeration.status === 'pending' ) {
-            if ( canModerateGroup === true ) {
+            if ( canModerateGroup === true && currentMember) {
                 return (
                     <>
                         <DotsMenuItem onClick={(e) => setShowModal(true)} className="flag-post-for-group flag-post-for-group__moderate"><ClockIcon /> Moderate for Group</DotsMenuItem>
