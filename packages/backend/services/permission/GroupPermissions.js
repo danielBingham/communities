@@ -71,10 +71,32 @@ module.exports = class GroupPermissions {
             }
         } 
 
-        if ( 'group' in context && context.group !== undefined && context.group !== null ) {
-            if ( 'parentId' in context.group && context.group.parentId !== undefined && context.group.parentId !== null ) {
-                context.parentGroup = await this.groupDAO.getGroupById(context.group.parentId)
-                context.parentMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(context.group.parentId, user.id, true)
+        // If the group has a parent, then we need to pull the parent.
+        if ( util.objectHas(context, 'group') && context.group !== null 
+                && (util.objectHas(context.group, 'parentId') && context.group.parentId !== null)
+        ) {
+            if ( ( required.includes('parentGroup') || optional.includes('parentGroup') ) 
+                && ( ! util.objectHas(context, 'parentGroup') || context.parentGroup === null )
+            ) {
+                if ( context.parentGroup !== null ) {
+                    context.parentGroup = await this.groupDAO.getGroupById(context.group.parentId)
+                }
+
+                if ( required.includes('parentGroup') && context.parentGroup === null ) {
+                    throw new ServiceError('missing-context', `'parentGroup' missing from context.`)
+                }
+            }
+
+            if ( ( required.includes('parentMember') || optional.includes('parentMember') )
+                && ( ! util.objectHas(context, 'parentMember') || context.parentMember === null )
+            ) {
+                if ( context.parentMember !== null ) {
+                    context.parentMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(context.group.parentId, user.id, true)
+                }
+
+                if ( required.includes('parentMember') && context.parentMember === null ) {
+                    throw new ServiceError('missing-context', `'parentMember' missing from context`)
+                }
             }
         }
 
@@ -110,6 +132,22 @@ module.exports = class GroupPermissions {
             } else if ( context.group.id !== groupId ) {
                 throw new ServiceError('context-mismatch', `Context includes elements from different Groups.`)
             }
+
+            if ( util.objectHas(context, 'parentGroup') && context.parentGroup !== null ) {
+                if ( context.group.parentId !== context.parentGroup.id ) {
+                    throw new ServiceError('context-mismatch', `Context includes elements from different Groups.`)
+                }
+            }
+
+            if ( util.objectHas(context, 'parentMember') && context.parentMember !== null ) {
+                if ( context.parentMember.groupId !== context.group.parentId ) {
+                    throw new ServiceError('context-mismatch', `Context includes elements from different Groups.`)
+                }
+
+                if ( context.parentMember.userId !== user.id ) {
+                    throw new ServiceError('context-mismatch', `GroupMember for User in context does not match User.`)
+                }
+            }
         }
 
         if ( util.objectHas(context, 'userMember') && context.userMember !== null ) {
@@ -117,6 +155,10 @@ module.exports = class GroupPermissions {
                 groupId = context.userMember.groupId
             } else if ( context.userMember.groupId !== groupId ) {
                 throw new ServiceError('context-mismatch', `Context includes elements from different Groups.`)
+            }
+
+            if ( context.userMember.userId !== user.id ) {
+                throw new ServiceError('context-mismatch', `GroupMember for User in context does not match User.`)
             }
         }
 
@@ -138,11 +180,16 @@ module.exports = class GroupPermissions {
     }
 
     async canCreateGroup(user, context) {
+        // If `group` exists, it's the parent group and their ability to create
+        // depends on their permissions in the parent group.  If group is not
+        // present, then this is a new top level group and anyone can create it.
+        await this.ensureContext(user, context, [], [ 'group', 'userMember' ])
+
         return permissions.Group.canCreateGroup(user, context)
     }
 
     async canViewGroup(user, context) {
-        await this.ensureContext(user, context, [ 'group' ], [ 'userMember' ])
+        await this.ensureContext(user, context, [ 'group' ], [ 'userMember', 'parentGroup', 'parentMember' ])
 
         // Site moderators can always view groups.
         context.canModerateSite = await this.permissionService.can(user, 'moderate', 'Site') 
@@ -151,13 +198,13 @@ module.exports = class GroupPermissions {
     }
 
     async canUpdateGroup(user, context) {
-        await this.ensureContext(user, context, [ 'group'], [ 'userMember' ])
+        await this.ensureContext(user, context, [ 'group' ], [ 'userMember', 'parentGroup', 'parentMember' ])
 
         return permissions.Group.canUpdateGroup(user, context)
     }
 
     async canDeleteGroup(user, context) {
-        await this.ensureContext(user, context, [ 'group'], [ 'userMember' ])
+        await this.ensureContext(user, context, [ 'group' ], [ 'userMember', 'parentGroup', 'parentMember' ])
 
         return permissions.Group.canDeleteGroup(user, context)
     }
@@ -165,19 +212,19 @@ module.exports = class GroupPermissions {
     async canModerateGroup(user, context) {
         // TECHDEBT We don't actually need the `group` here and it's extra queries.  We just need the groupId, but 
         // I don't want to go down the rabbithole of pulling that off of all the context right now.
-        await this.ensureContext(user, context, [ 'group' ], [ 'userMember' ])
+        await this.ensureContext(user, context, [ 'group' ], [ 'userMember', 'parentGroup', 'parentMember' ])
 
         return permissions.Group.canModerateGroup(user, context)
     }
 
     async canAdminGroup(user, context) {
-        await this.ensureContext(user, context, [ 'group'], [ 'userMember' ])
+        await this.ensureContext(user, context, [ 'group' ], [ 'userMember', 'parentGroup', 'parentMember' ])
 
         return permissions.Group.canAdminGroup(user, context)
     }
 
     async canViewGroupContent(user, context) {
-        await this.ensureContext(user, context, [ 'group' ], [ 'userMember' ])
+        await this.ensureContext(user, context, [ 'group' ], [ 'userMember', 'parentGroup', 'parentMember' ])
 
         // Site moderators can always view group content.
         context.canModerateSite = await this.permissionService.can(user, 'moderate', 'Site')

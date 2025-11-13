@@ -100,9 +100,9 @@ const canViewGroupMember = function(user, context) {
         return true
     }
 
-    // For `hidden-open` and `hidden-private` groups they can see confirmed members if they
+    // For `hidden-open` groups they can see confirmed members if they
     // are a member of the parent group.
-    if ( context.group.type === 'hidden-open' || context.group.type === 'hidden-private' ) {
+    if ( context.group.type === 'hidden-open' ) {
         if ( 'parentMember' in context && context.parentMember !== undefined && context.parentMember !== null
             && context.parentMember.userId === user.id && context.parentMember.groupId === context.group.id
             && context.parentMember.status !== 'banned' 
@@ -133,6 +133,10 @@ const canViewGroupMember = function(user, context) {
 }
 
 const canCreateGroupMember = function(user, context) {
+    if ( context.canAdminGroup ) {
+        return true
+    }
+
     if ( context.group === undefined || context.group === null 
         || context.userMember === undefined // userMember may be null, indicating that they aren't a member of the group yet
         || context.groupMember === undefined || context.groupMember === null ) 

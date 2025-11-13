@@ -82,8 +82,8 @@ const canAdminGroup = function(user, context) {
 
     // If we have the parent, then check the parent.  If they are an admin of
     // the parent, then they can admin this group.
-    if ( 'parent' in context && 'parentMember' in context ) {
-        if ( isAdmin(context.parentMember, context.parent) ) {
+    if ( 'parentGroup' in context && 'parentMember' in context ) {
+        if ( isAdmin(context.parentMember, context.parentGroup) ) {
             return true
         }
     }
@@ -169,6 +169,11 @@ const canViewGroup = function(user, context) {
 
     if ( context.group === undefined || context.group === null ) {
         return false
+    }
+
+    // If they can admin the group, then they can view it.
+    if ( canAdminGroup(user, context) === true ) {
+        return true
     }
 
     // Always exclude banned members.

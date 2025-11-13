@@ -59,7 +59,7 @@ const GroupMembershipButton = function({ groupId, userId }) {
         return (
             <div className="group-membership-button"> 
                 <JoinGroupButton groupId={groupId} userId={userId} />
-                <RequestMembershipButton groupId={groupId} userId={userId} />
+                <RequestMembershipButton groupId={groupId} />
             </div>
         )
     }

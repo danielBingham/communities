@@ -26,7 +26,6 @@ import can, { Actions, Entities } from '/lib/permission'
 import { useRequest } from '/lib/hooks/useRequest'
 
 import { useGroupPermissionContext } from '/lib/hooks/Group'
-import { useGroupMember } from '/lib/hooks/GroupMember'
 
 import { postGroupMembers } from '/state/GroupMember'
 
@@ -35,7 +34,7 @@ import Button from '/components/generic/button/Button'
 
 import './RequestMembershipButton.css'
 
-const RequestMembershipButton = function({ groupId, userId }) {
+const RequestMembershipButton = function({ groupId }) {
     const [request, makeRequest] = useRequest()
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
@@ -43,14 +42,13 @@ const RequestMembershipButton = function({ groupId, userId }) {
     const group = context.group
     const currentMember = context.userMember
 
-    const [ member ]  = useGroupMember(groupId, userId)
-
     const canViewGroup = can(currentUser, Actions.view, Entities.Group, context)
+    const canAdminGroup = can(currentUser, Actions.admin, Entities.Group, context)
 
     const requestEntrance = () => {
         const groupMember = {
             groupId: groupId,
-            userId: userId,
+            userId: currentUser.id,
             status: 'pending-requested',
             role: 'member'
 
@@ -58,11 +56,22 @@ const RequestMembershipButton = function({ groupId, userId }) {
         makeRequest(postGroupMembers(groupId, groupMember))
     }
 
-    if ( ! currentUser || ! group ) {
+
+    if ( ! currentUser || ! group || requests.hasPending() ) {
+        return null
+    }
+
+    if ( currentMember !== null ) {
         return null
     }
 
     if ( canViewGroup !== true ) {
+        return null
+    }
+
+    // Users who are admins by way of being admin in a parent group can simply
+    // add themselves.
+    if ( canAdminGroup === true ) {
         return null
     }
 
@@ -71,19 +80,12 @@ const RequestMembershipButton = function({ groupId, userId }) {
         return null
     }
 
-
-    // The member we're showing is the current user and they aren't a member of
-    // the group yet.
-    if ( ! member && ! currentMember && currentUser.id == userId ) {
-        return (
-            <> 
-                <RequestErrorModal message={`Attempt to request membership in ${group.title}`} request={request} />
-                <Button type="primary" onClick={() => requestEntrance()}><ArrowLeftEndOnRectangleIcon /> <span className="nav-text">Request</span></Button> 
-            </>
-        )
-    } else {
-        return null
-    }
+    return (
+        <> 
+            <RequestErrorModal message={`Attempt to request membership in ${group.title}`} request={request} />
+            <Button type="primary" onClick={() => requestEntrance()}><ArrowLeftEndOnRectangleIcon /> <span className="nav-text">Request</span></Button> 
+        </>
+    )
 }
 
 export default RequestMembershipButton 
