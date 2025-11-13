@@ -1,13 +1,34 @@
-import {  useSelector } from 'react-redux'
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media 
+ *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
+import { useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 
 import { ArrowLeftEndOnRectangleIcon } from '@heroicons/react/24/solid'
 
 import can, { Actions, Entities } from '/lib/permission'
 
+import { resetEntities } from '/state/lib'
+
 import { useRequest } from '/lib/hooks/useRequest'
 
 import { useGroupPermissionContext } from '/lib/hooks/Group'
-import { useGroupMember } from '/lib/hooks/GroupMember'
 
 import { postGroupMembers } from '/state/GroupMember'
 
@@ -29,7 +50,7 @@ const JoinGroupButton = function({ groupId }) {
     const canViewGroup = can(currentUser, Actions.view, Entities.Group, context)
     const canAdminGroup = can(currentUser, Actions.admin, Entities.Group, context)
 
-    /* ==================== When currentUser is user... ======================= */
+    const dispatch = useDispatch()
 
     const joinGroup = () => {
         const groupMember = {
@@ -45,6 +66,33 @@ const JoinGroupButton = function({ groupId }) {
 
         makeRequest(postGroupMembers(groupId, groupMember))
     }
+
+    useEffect(function() {
+        if ( request?.state === 'fulfilled' ) {
+            dispatch(resetEntities())
+        }
+    }, [ request ])
+
+    // TECHDEBT HACK: The JoinGroupButton is currently rendered in the context
+    // of the GroupMembershipButton.  As soon as the request returns, the
+    // GroupMembershipButton stops rendering the JoinGroupButton, which means
+    // our effect above checking for request completion never gets a chance to
+    // fire.  The JoinGroupButton is never rendered with a completed request.
+    // As a hacky workaround for this, we can resetEntities() on component
+    // unmount instead. The only times the JoinGroupButton should be unmounted
+    // are a) when the request has successfully returned or b) when the page is
+    // changing (at which point entities are reset anyway).  The only downside
+    // to this hack is a potential extra reset/requery, but that should be
+    // relatively harmless.
+    useEffect(function() {
+        return () => {
+            dispatch(resetEntities())
+        }
+    }, [])
+
+    // ========================================================================
+    //      Render
+    // ========================================================================
 
     if ( ! currentUser || ! group || requests.hasPending() ) {
         return null
