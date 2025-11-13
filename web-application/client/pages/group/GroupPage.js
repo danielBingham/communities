@@ -56,8 +56,6 @@ const GroupPage = function() {
 
     const canViewGroup = can(currentUser, Actions.view, Entities.Group, context)
 
-    console.log(`## GroupPage(${slug})::\n \tcontext: `, context, `\n \tcanViewGroup: `, canViewGroup)
-
     const dispatch = useDispatch()
     useEffect(() => {
         return () => {
