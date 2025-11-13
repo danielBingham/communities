@@ -14,6 +14,7 @@ import GroupPostPermissionsUpdate from '/components/groups/form/GroupPostPermiss
 import Button from '/components/generic/button/Button'
 import AreYouSure from '/components/AreYouSure'
 import Modal from '/components/generic/modal/Modal'
+import Card from '/components/ui/Card'
 import Error404 from '/components/errors/Error404'
 import { RequestErrorModal } from '/components/errors/RequestError'
 
@@ -30,6 +31,7 @@ const GroupSettingsView = function({ groupId }) {
 
     const [context, requests] = useGroupPermissionContext(currentUser, groupId)
     const group = context.group
+    const currentMember = context.userMember
 
     const canAdminGroup = can(currentUser, Actions.admin, Entities.Group, context)
 
@@ -45,8 +47,30 @@ const GroupSettingsView = function({ groupId }) {
         }
     }, [ request ])
 
-    if ( ! canAdminGroup ) {
-        return ( <Error404 /> ) 
+    if ( ! currentMember ) {
+        if ( canAdminGroup === true ) {
+            return (
+                <div className="group-settings-view">
+                    <Card className="group-settings-view__admin-non-member">
+                        <p>You must join this group before you can administrate it.</p>
+                    </Card>
+                </div>
+            )
+        } else {
+            return ( 
+                <div className="group-settings-view">
+                    <Error404 /> 
+                </div>
+            ) 
+        }
+    }
+
+    if ( canAdminGroup !== true ) {
+            return ( 
+                <div className="group-settings-view">
+                    <Error404 /> 
+                </div>
+            ) 
     }
 
     return (
