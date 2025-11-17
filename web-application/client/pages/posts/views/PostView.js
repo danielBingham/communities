@@ -2,14 +2,11 @@ import React from 'react'
 import { useSelector } from 'react-redux'
 import { useParams, useNavigate } from 'react-router-dom'
 
-import { usePost } from '/lib/hooks/Post'
-import { useGroup } from '/lib/hooks/Group'
-import { useGroupMember } from '/lib/hooks/GroupMember'
+import can, {Actions, Entities} from '/lib/permission'
 
-import { 
-    useGroupPermission, GroupPermissions, 
-    GroupPostPermissions, useGroupPostPermission 
- } from '/lib/hooks/permission'
+import { usePost } from '/lib/hooks/Post'
+import { useGroup, useGroupPermissionContext } from '/lib/hooks/Group'
+import { useGroupMember } from '/lib/hooks/GroupMember'
 
 import Post from '/components/posts/Post'
 
@@ -31,8 +28,20 @@ const PostView = function({ groupId }) {
     const [group, groupRequest] = useGroup(groupId)
     const [currentMember, currentMemberRequest] = useGroupMember(groupId, currentUser.id)
 
-    const canViewGroup = useGroupPermission(currentUser, GroupPermissions.VIEW, { group: group, userMember: currentMember })
-    const canViewGroupPost = useGroupPostPermission(currentUser, GroupPostPermissions.VIEW, { group: group, userMember: currentMember })
+    // TECHDEBT HACK: By using `group?.id` here, we ensure that the `useGroup`
+    // and `useGroupMember` contained in useGroupPermissionContext won't fire
+    // their requests until after the `useGroup` and `useGroupMember` above
+    // have completed at least one render cycle.
+    //
+    // `useGroupMember` won't necessarily have returned, but it will always
+    // have gotten to fire its request and thus set the dictionary to `null`,
+    // preventing u`useGroupPermissionContext` from firing a second request.
+    //
+    // This is very hacky and a major gotcha!
+    const [ context, requests] = useGroupPermissionContext(currentUser, group?.id)
+
+    const canViewGroup = can(currentUser, Actions.view, Entities.Group, context)
+    const canViewGroupPost = can(currentUser, Actions.view, Entities.Group, context)
 
     if ( groupId !== undefined && ( ! group && ( ! groupRequest || groupRequest.state === 'pending' ))) {
         return  ( 

@@ -3,14 +3,13 @@ import { useSelector } from 'react-redux'
 
 import { XCircleIcon, FlagIcon, ClockIcon } from '@heroicons/react/20/solid'
 
+import can, {Actions, Entities} from '/lib/permission'
+
 import { usePost } from '/lib/hooks/Post'
 import { usePostComment } from '/lib/hooks/PostComment'
-import { useGroup } from '/lib/hooks/Group'
-import { useGroupMember } from '/lib/hooks/GroupMember'
+import { useGroupPermissionContext } from '/lib/hooks/Group'
 import { useGroupModeration } from '/lib/hooks/GroupModeration'
 import { useSiteModeration } from '/lib/hooks/SiteModeration'
-
-import { GroupPermissions, useGroupPermission } from '/lib/hooks/permission'
 
 import ModerateForGroupModal from './ModerateForGroupModal'
 
@@ -24,13 +23,11 @@ const ModerateForGroup = function({ postId, postCommentId }) {
     const [post, postRequest] = usePost(postId)
     const [comment, commentRequest ] = usePostComment(postId, postCommentId)
 
-    const [group, groupRequest] = useGroup(post?.groupId)
-    const [currentMember, currentMemberRequest] = useGroupMember(group?.id, currentUser.id)
-
     const [siteModeration, siteModerationRequest] = useSiteModeration(post?.siteModerationId) 
     const [groupModeration, groupModerationRequest] = useGroupModeration(postCommentId ? comment?.groupModerationId : post?.groupModerationId)
 
-    const canModerateGroup = useGroupPermission(currentUser, GroupPermissions.MODERATE, { group: group, userMember: currentMember })
+    const [context, requests] = useGroupPermissionContext(currentUser, post?.groupId)
+    const canModerateGroup = can(currentUser, Actions.moderate, Entities.Group, context) 
 
 
     const target = postCommentId ? 'Comment' : 'Post'

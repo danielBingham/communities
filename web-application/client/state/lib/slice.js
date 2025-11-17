@@ -42,6 +42,12 @@ export const makeQuery = function(state, action) {
     }
 }
 
+export const setQueryNull = function(state, action) {
+    const name = action.payload.name
+
+    state.queries[name] = null
+}
+
 export const setQueryResults = function(state, action) {
     const name = action.payload.name
     const meta = action.payload.meta

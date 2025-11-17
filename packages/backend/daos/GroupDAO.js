@@ -61,6 +61,13 @@ const SCHEMA = {
                 select: DAO.SELECT.ALWAYS,
                 key: 'about'
             },
+            'parent_id': {
+                insert: DAO.INSERT.ALLOW,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.ALWAYS,
+                key: 'parentId',
+                needsFeature: 'issue-165-subgroups'
+            },
             'file_id': {
                 insert: DAO.INSERT.ALLOW,
                 update: DAO.UPDATE.ALLOW,

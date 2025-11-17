@@ -4,9 +4,9 @@ import { useSearchParams } from 'react-router-dom'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { getGroupMembers, clearGroupMemberQuery } from '/state/GroupMember'
+import { getGroupMembers, setGroupMemberShouldQuery, clearGroupMemberQuery } from '/state/GroupMember'
 
-export const useGroupMemberQuery = function(groupId, queryParameters) {
+export const useGroupMemberQuery = function(groupId, queryParameters, skip) {
     const params = queryParameters ? queryParameters : {}
     const [ searchParams, setSearchParams ] = useSearchParams()
 
@@ -29,26 +29,43 @@ export const useGroupMemberQuery = function(groupId, queryParameters) {
     // same.  We'll probably want a solution for this at some point.
     const key = JSON.stringify(params)
 
-    const query = useSelector((state) => key in state.GroupMember.queries ? state.GroupMember.queries[key] : null)
+    const query = useSelector((state) => key in state.GroupMember.queries ? state.GroupMember.queries[key] : undefined)
 
     const [ request, makeRequest, resetRequest ] = useRequest()
 
     const dispatch = useDispatch()
 
+    const reset = function() {
+        dispatch(setGroupMemberShouldQuery({ name: key, value: true }))
+        resetRequest()
+    }
+
     useEffect(() => {
-        if ( query === null && request === null ) {
-            makeRequest(getGroupMembers(groupId, key, params)) 
+        if ( skip ) {
+            return
         }
+
+        makeRequest(getGroupMembers(groupId, key, params)) 
 
         return () => {
-            if ( query !== null && request !== null && request.state === 'fulfilled' ) {
-                dispatch(clearGroupMemberQuery({ name: key }))
+            if ( request?.state === 'fulfilled') {
                 resetRequest()
+                dispatch(clearGroupMemberQuery({ name: key }))
             }
         }
-    }, [ key, query, request ])
+    }, [ key ])
 
-    return [query, request, resetRequest]
+    useEffect(() => {
+        if ( skip ) {
+            return
+        }
+
+        if ( query === undefined && request?.state === 'fulfilled' ) {
+            makeRequest(getGroupMembers(groupId, key, params)) 
+        }
+    }, [ query, request ])
+
+    return [query, request, reset]
 }
 
 

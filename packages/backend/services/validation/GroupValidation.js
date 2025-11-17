@@ -18,7 +18,7 @@
  *
  ******************************************************************************/
 
-const { util, validation } = require('@communities/shared')
+const { util, schema } = require('@communities/shared')
 
 const ServiceError = require('../../errors/ServiceError')
 
@@ -27,6 +27,8 @@ module.exports = class GroupValidation {
     constructor(core, validationService) {
         this.core = core
         this.validationService = validationService
+
+        this.groupSchema = new schema.GroupSchema()
     }
 
     async validateGroup(currentUser, group, existing) {
@@ -38,7 +40,7 @@ module.exports = class GroupValidation {
         }
 
         // Do basic validation the fields.
-        const validationErrors = validation.Group.validate(group, existing)
+        const validationErrors = this.groupSchema.validate(group, existing)
         if ( validationErrors.all.length > 0 ) {
             errors.push(...validationErrors.all)
         }

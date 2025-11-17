@@ -157,6 +157,12 @@ module.exports = class PostController {
             params: [groupIds]
         })
 
+        const groupMemberResults = await this.groupMemberDAO.selectGroupMembers({
+            where: `group_members.group_id = ANY($1::uuid[]) AND group_members.user_id = $2`,
+            params: [groupIds, currentUser.id]
+        })
+
+
         // ==== SiteModeration ====
         const siteModerationResults = await this.siteModerationDAO.selectSiteModerations({
             where: `site_moderation.post_id = ANY($1::uuid[]) OR site_moderation.post_comment_id = ANY($2::uuid[])`,
@@ -172,6 +178,7 @@ module.exports = class PostController {
         const relations = {
             files: fileDictionary,
             groups: groupResults.dictionary,
+            groupMembers: groupMemberResults.dictionary,
             groupModerations: groupModerationResults.dictionary,
             linkPreviews: linkPreviewResults.dictionary,
             posts: sharedPostResults.dictionary,
@@ -180,6 +187,29 @@ module.exports = class PostController {
             postSubscriptions: postSubscriptionResults.dictionary,
             siteModerations: siteModerationResults.dictionary,
             users: userResults.dictionary
+        }
+
+        if ( this.core.features.has('issue-165-subgroups') ) {
+            // ==== Parent Groups ====
+            const parentGroupIds = []
+            for(const [id, group] of Object.entries(groupResults.dictionary)) {
+                if ( group.parentId !== null && group.parentId !== undefined ) {
+                    parentGroupIds.push(group.parentId)
+                }
+            }
+
+            const parentGroupResults = await this.groupDAO.selectGroups({
+                where: `groups.id = ANY($1::uuid[])`,
+                params: [ parentGroupIds]
+            })
+
+            const parentMemberResults = await this.groupMemberDAO.selectGroupMembers({
+                where: `group_members.group_id = ANY($1::uuid[]) AND group_members.user_id = $2`,
+                params: [ parentGroupIds, currentUser.id ]
+            })
+
+            relations.groups = { ...relations.groups, ...parentGroupResults.dictionary }
+            relations.groupMembers = { ...relations.groupMembers, ...parentMemberResults.dictionary }
         }
 
         return relations
@@ -225,12 +255,44 @@ module.exports = class PostController {
             query.params.push(blockIds)
             const blockParam = query.params.length
 
-            // Posts in groups
-            const visibleGroupResults = await this.core.database.query(`
-                    SELECT groups.id FROM groups LEFT OUTER JOIN group_members ON groups.id = group_members.group_id WHERE (group_members.user_id = $1 AND group_members.status = 'member') OR groups.type = 'open'
-                `, [currentUser.id])
+            let visibleGroupIds = []
 
-            const visibleGroupIds = visibleGroupResults.rows.map((r) => r.id)
+            if ( this.core.features.has('issue-165-subgroups') ) {
+                // Posts in groups
+                const visibleGroupResults = await this.core.database.query(`
+                        SELECT groups.id FROM groups
+                            LEFT OUTER JOIN group_members ON groups.id = group_members.group_id AND group_members.user_id = $1
+                            LEFT OUTER JOIN group_members as parent_members ON groups.parent_id = parent_members.group_id AND parent_members.user_id = $1
+                        WHERE 
+                            (groups.type = 'open' AND (group_members.user_id IS NULL OR group_members.status != 'banned'))
+                            OR ( 
+                                (groups.type = 'private' OR groups.type = 'private-open') 
+                                AND (group_members.user_id IS NULL OR group_members.status != 'banned')
+                            )
+                            OR ( 
+                                groups.type = 'hidden' 
+                                AND (
+                                    (group_members.user_id = $1 AND group_members.status != 'banned') 
+                                    OR (parent_members.user_id = $1 AND parent_members.status != 'banned' AND parent_members.role = 'admin')
+                                )
+                            )
+                            OR ( 
+                                ( groups.type = 'hidden-open' OR groups.type = 'hidden-private' ) 
+                                AND (
+                                    (group_members.user_id = $1 AND group_members.status != 'banned') 
+                                    OR (parent_members.user_id = $1 AND parent_members.status != 'banned')
+                                )
+                            )
+                    `, [currentUser.id])
+
+                visibleGroupIds = visibleGroupResults.rows.map((r) => r.id)
+            } else {
+                const visibleGroupResults = await this.core.database.query(`
+                    SELECT groups.id FROM groups LEFT OUTER JOIN group_members ON groups.id = group_members.group_id WHERE (group_members.user_id = $1 AND group_members.status = 'member') OR groups.type = 'open'
+                `, [ currentUser.id ])
+                visibleGroupIds = visibleGroupResults.rows.map((r) => r.id)
+            }
+
             query.params.push(visibleGroupIds)
             const groupParam = query.params.length
 

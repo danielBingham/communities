@@ -3,7 +3,7 @@ import * as qs from 'qs'
 import { makeRequest } from '/state/lib/makeRequest'
 import { setRelationsInState } from '/state/lib/relations'
 
-import { setGroupsInDictionary, setGroupNull, removeGroup, setGroupQueryResults, clearGroupQuery, clearGroupQueries } from './slice'
+import { setGroupsInDictionary, setGroupNull, removeGroup, setGroupQueryResults, setGroupQueryNull, clearGroupQuery, clearGroupQueries } from './slice'
 
 /**
  * GET /groups or GET /groups?...
@@ -20,6 +20,7 @@ export const getGroups = function(name, params) {
     return function(dispatch, getState) {
         const endpoint = `/groups${( params ? '?' + qs.stringify(params) : '' )}`
 
+        dispatch(setGroupQueryNull({ name: name }))
         return dispatch(makeRequest('GET', endpoint, null,
             function(response) {
                 dispatch(setGroupsInDictionary({ dictionary: response.dictionary}))
@@ -73,6 +74,8 @@ export const postGroups = function(group) {
  */
 export const getGroup = function(id) {
     return function(dispatch, getState) {
+        dispatch(setGroupNull(id))
+
         return dispatch(makeRequest('GET', `/group/${encodeURIComponent(id)}`, null,
             function(response) {
                 dispatch(setGroupsInDictionary({ entity: response.entity}))

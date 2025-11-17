@@ -1,13 +1,28 @@
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media 
+ *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
 import { useSelector } from 'react-redux'
 
-import { useGroup } from '/lib/hooks/Group'
+import can, {Actions, Entities} from '/lib/permission'
+
+import { useGroup, useGroupPermissionContext } from '/lib/hooks/Group'
 import { useGroupMember } from '/lib/hooks/GroupMember'
-
-import { 
-    GroupPermissions, useGroupPermission,
-    GroupMemberPermissions, useGroupMemberPermission
-
-} from '/lib/hooks/permission'
 
 import Spinner from '/components/Spinner'
 import Button from '/components/ui/Button'
@@ -20,21 +35,14 @@ import './GroupMembersView.css'
 const GroupMembersView = function({ groupId, type }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
+    const [ context, requests] = useGroupPermissionContext(currentUser, groupId)
+    const group = context.group
 
-    const [group, groupRequest] = useGroup(groupId)
-    const [currentMember, currentMemberRequest] = useGroupMember(groupId, currentUser.id)
+    const canViewGroup = can(currentUser, Actions.view, Entities.Group, context)
+    const canModerateGroup = can(currentUser, Actions.moderate, Entities.Group, context)
+    const canQueryGroupMember = can(currentUser, Actions.query, Entities.GroupMember, context)
 
-    const context = {
-        group: group,
-        userMember: currentMember
-    }
-
-    const canViewGroup = useGroupPermission(currentUser, GroupPermissions.VIEW, context)
-    const canModerateGroup = useGroupPermission(currentUser, GroupPermissions.MODERATE, context)
-    const canQueryGroupMember = useGroupMemberPermission(currentUser, GroupMemberPermissions.QUERY, context)
-
-    if ( ! group && ( ! groupRequest || groupRequest.state === 'pending' )
-        || (currentMember === undefined || ( currentMemberRequest?.state === 'pending')) ) 
+    if ( group === undefined || requests.hasPending()) 
     {
         return ( <div className="group-members-view"><Spinner /></div> )
     }

@@ -4,14 +4,14 @@ import { useNavigate } from 'react-router-dom'
 
 import logger from '/logger'
 
+import can, { Actions, Entities } from '/lib/permission'
+
 import { useRequest } from '/lib/hooks/useRequest'
 import { usePostDraft } from '/lib/hooks/usePostDraft'
 
-import { useGroup } from '/lib/hooks/Group'
+import { useGroup, useGroupPermissionContext } from '/lib/hooks/Group'
 import { useGroupMember } from '/lib/hooks/GroupMember'
 import { usePost } from '/lib/hooks/Post'
-
-import { GroupPostPermissions, useGroupPostPermission } from '/lib/hooks/permission'
 
 import { deleteFile } from '/state/File'
 import { postPosts, patchPost } from '/state/Post'
@@ -37,13 +37,16 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
-    const [post] = usePost(postId) 
-    const [group] = useGroup(post !== null ? post.groupId : groupId)
+    const [post, request] = usePost(postId) 
+    const [context, groupRequests] = useGroupPermissionContext(currentUser, post !== null ? post.groupId : groupId)
+    const group = context.group
+    const currentMember = context.userMember
 
     const [draft, setDraft] = usePostDraft(postId, groupId, sharedPostId)
-    
-    const [currentMember] = useGroupMember(group?.id, currentUser.id)
-    const canCreateGroupPost = useGroupPostPermission(currentUser, GroupPostPermissions.CREATE, { group: group, userMember: currentMember })
+
+    // TECHDEBT HACK: Using `group?.id` to prevent multiple requests from multiple calls
+    // to `useGroup` and `useGroupMember`.
+    const canCreateGroupPost = can(currentUser, Actions.create, Entities.GroupPost, context)
 
     const [postRequest, makePostRequest] = useRequest()
     const [patchRequest, makePatchRequest] = useRequest()
@@ -107,6 +110,9 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
         }
     }, [ patchRequest ])
 
+    if ( request?.state === 'pending' || groupRequests.hasPending()) {
+        return (  <Spinner /> )
+    }
 
     // Don't show the form if they don't have permission to post in this Group.
     if ((groupId !== undefined && groupId !== null) || (post?.groupId !== undefined && post?.groupId !== null))

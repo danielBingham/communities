@@ -31,8 +31,8 @@ const DeletePost = function({ postId } ) {
 
     return (
         <>
-            <DotsMenuItem onClick={(e) => setAreYouSure(true)} className="delete"><TrashIcon /> Delete { request?.state === 'pending' ? <Spinner /> : null }</DotsMenuItem>
-            <AreYouSure isVisible={areYouSure} execute={executeDelete} cancel={() => setAreYouSure(false)} > 
+            <DotsMenuItem onClick={(e) => setAreYouSure(true) } className="delete"><TrashIcon /> Delete { request?.state === 'pending' ? <Spinner /> : null }</DotsMenuItem>
+            <AreYouSure isVisible={areYouSure} execute={executeDelete} cancel={() => setAreYouSure(false) } > 
                 <p>Are you sure you want to delete this post?</p>
             </AreYouSure>
             <RequestErrorModal message="Attempt to delete post" request={request} />

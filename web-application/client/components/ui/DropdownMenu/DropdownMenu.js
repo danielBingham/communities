@@ -32,10 +32,10 @@ export const DropdownMenu = function({ children, className, autoClose, startIsOp
                 setIsOpen(false)
             } 
         }
-        document.body.addEventListener('mousedown', onBodyClick)
+        document.body.addEventListener('click', onBodyClick)
 
         return function cleanup() {
-            document.body.removeEventListener('mousedown', onBodyClick)
+            document.body.removeEventListener('click', onBodyClick)
         }
     }, [ isOpen, menuRef])
 

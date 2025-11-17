@@ -13,6 +13,7 @@ import {
 import PaginationControls from '/components/PaginationControls'
 import Spinner from '/components/Spinner'
 import Refresher from '/components/ui/Refresher'
+import RequestErrorContent from '/components/errors/RequestError/RequestErrorContent'
 
 import './GroupMembersList.css'
 
@@ -21,7 +22,8 @@ const GroupMembersList = function({ groupId, params, descriptor, noSearch }) {
     const dictionary = useSelector((state) => state.GroupMember.dictionary)
     const [ query, request, reset ] = useGroupMemberQuery(groupId, params)
 
-    if ( query === undefined || query === null ) {
+
+    if ( ( query === undefined || query === null ) && ( ! request || request?.state === 'pending')) {
         return (
             <div className="group-members-list">
                 <Spinner />
@@ -29,15 +31,20 @@ const GroupMembersList = function({ groupId, params, descriptor, noSearch }) {
         )
     }
 
-    const memberViews = []
-    for(const id of query.list) {
-        const member = dictionary[id]
+    let memberViews = []
 
-        if ( ! member ) {
-            continue
+    if ( query !== undefined && query !== null ) {
+        for(const id of query.list) {
+            const member = dictionary[id]
+
+            if ( ! member ) {
+                continue
+            }
+
+            memberViews.push(<GroupMemberBadge key={id} groupId={groupId} userId={member.userId} />)
         }
-
-        memberViews.push(<GroupMemberBadge key={id} groupId={groupId} userId={member.userId} />)
+    } else if ( request?.state === 'failed' ) {
+        memberViews = ( <RequestErrorContent message="Attempt to retrieve members" request={request} /> )
     }
 
     descriptor = descriptor ? descriptor : 'Members'
@@ -60,7 +67,7 @@ const GroupMembersList = function({ groupId, params, descriptor, noSearch }) {
             <ListGridContent>
                 {memberViews}        
             </ListGridContent>
-            <PaginationControls meta={query.meta} />
+            <PaginationControls meta={query?.meta} />
         </List>
     )
 

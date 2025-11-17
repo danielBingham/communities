@@ -2,12 +2,10 @@ import React, { useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { useSearchParams } from 'react-router-dom'
 
+import can, {Actions, Entities} from '/lib/permission'
+
 import { useRequest } from '/lib/hooks/useRequest'
-
-import { useGroup } from '/lib/hooks/Group'
-import { useGroupMember } from '/lib/hooks/GroupMember'
-
-import { useGroupPermission, GroupPermissions } from '/lib/hooks/permission'
+import { useGroupPermissionContext } from '/lib/hooks/Group'
 
 import { getGroupModerations } from '/state/GroupModeration'
 
@@ -15,6 +13,7 @@ import Post from '/components/posts/Post'
 import PostCommentAwaitingGroupModeration from '/components/groups/moderation/PostCommentAwaitingGroupModeration'
 import PaginationControls from '/components/PaginationControls'
 import Error404 from '/components/errors/Error404'
+import Card from '/components/ui/Card'
 
 import './GroupModerationView.css'
 
@@ -25,13 +24,15 @@ const GroupModerationView = function({ groupId }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
-    const [group, groupRequest] = useGroup(groupId)
-    const [currentMember, currentMemberRequest] = useGroupMember(groupId, currentUser.id)
-
     const query = useSelector((state) => 'GroupModerationView' in state.GroupModeration.queries ? state.GroupModeration.queries['GroupModerationView']: null)
     const dictionary = useSelector((state) => state.GroupModeration.dictionary)
 
-    const canModerateGroup = useGroupPermission(currentUser, GroupPermissions.MODERATE, { group: group, userMember: currentMember })
+    const [ context, requests] = useGroupPermissionContext(currentUser, groupId)
+    const group = context.group
+    const currentMember = context.userMember
+
+    const canModerateGroup = can(currentUser, Actions.moderate, Entities.Group, context)
+    const canAdminGroup = can(currentUser, Actions.admin, Entities.Group, context)
 
     useEffect(function() {
         let page = searchParams.get('page')
@@ -40,8 +41,22 @@ const GroupModerationView = function({ groupId }) {
         makeRequest(getGroupModerations(groupId, 'GroupModerationView', { status: [ 'flagged', 'pending' ], page: page }))
     }, [])
 
-    if ( canModerateGroup !== true ) {
-        return ( <Error404 /> ) 
+    if ( ! currentMember ) {
+        if ( canAdminGroup === true ) {
+            return (
+                <div className="group-moderation-view">
+                    <Card className="group-moderation-view__admin-non-member">
+                        <p>You must join this group before you can moderate it.</p>
+                    </Card>
+                </div>
+            )
+        } else {
+            return ( 
+                <div className="group-moderation-view">
+                    <Error404 /> 
+                </div>
+            ) 
+        }
     }
 
     if ( query === null || parseInt(query.meta.count) === 0) {

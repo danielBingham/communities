@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
 
+import can, {Actions, Entities} from '/lib/permission'
+
 import { useRequest } from '/lib/hooks/useRequest'
-import { SitePermissions, useSitePermission } from '/lib/hooks/permission'
 
 import { usePost } from '/lib/hooks/Post'
 import { usePostComment } from '/lib/hooks/PostComment'
@@ -25,7 +26,7 @@ const ModerateForSiteModal = function({ postId, postCommentId, isVisible, setIsV
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
     const [siteModeration, siteModerationRequest] = useSiteModeration(comment ? comment?.siteModerationId : post?.siteModerationId)
-    const canModerateSite = useSitePermission(currentUser, SitePermissions.MODERATE)
+    const canModerateSite = can(currentUser, Actions.moderate, Entities.Site)
 
     const [request, makeRequest] = useRequest()
 

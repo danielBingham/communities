@@ -159,10 +159,61 @@ module.exports = class GroupMemberValidation {
 
             const group = await this.groupDAO.getGroupById(groupMember.groupId)
             const userMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(group.id, currentUser.id)
-            const canModerateGroup = await this.permissionService.can(currentUser, 'moderate', 'Group', { group: group, userMember: userMember })
+
+            let parentGroup = null
+            let parentMember = null
+            if ( group.parentId ) {
+                parentGroup = await this.groupDAO.getGroupById(group.parentId)
+                parentMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(group.parentId, currentUser.id)
+            }
+
+            const context = {
+                group: group,
+                userMember: userMember,
+                parentGroup: parentGroup,
+                parentMember: parentMember
+            }
+
+            const canModerateGroup = await this.permissionService.can(currentUser, 'moderate', 'Group', context)
+            const canAdminGroup = await this.permissionService.can(currentUser, 'admin', 'Group', context)
+
             if ( group.type === 'open' ) {
-                if ( userMember === null ) {
-                    // Non members can add themselves in which case role is 'member' and status is 'member'.
+
+                // If you are an admin on a parent group, you can add yourself
+                // to the child groups as an admin.
+                //
+                // Role will be 'admin', status will be 'member', and the user
+                // can only add themselves.
+                if ( userMember === null && parentMember !== null && canAdminGroup === true ) {
+                    if ( groupMember.role !== 'admin' ) {
+                        errors.push({
+                            type: `role:invalid`,
+                            log: `Parent Group admin attempting to add themselves to a group with invalid role '${groupMember.role}'.`,
+                            message: `You my not add yourself with role '${groupMember.role}'.  You are an admin on a parent group, you can only add your self as an 'admin'.`
+                        })
+                    }
+
+                    if ( groupMember.status !== 'member' ) {
+                        errors.push({
+                            type: `status:invalid`,
+                            log: `User attempting to add themselves to a group with invalid status '${groupMember.status}'.`,
+                            message: `You may not add yourself with status '${groupMember.status}'.  You may only add yourself as a 'member'.`
+                        })
+                    }
+
+                    if ( groupMember.userId !== currentUser.id ) {
+                        errors.push({
+                            type: `userId:invalid`,
+                            log: `Non-member user attempting to add User(${groupMember.userId}) to Group(${groupMember.groupId}).`,
+                            message: `You may only request access to a private Group for yourself.`
+                        })
+                    }
+
+                }
+
+                // Non members can add themselves in which case role is
+                // 'member' and status is 'member'.
+                else if ( userMember === null ) {
 
                     if ( groupMember.role !== 'member' ) {
                         errors.push({
@@ -187,8 +238,11 @@ module.exports = class GroupMemberValidation {
                             message: `You may only add yourself to an open Group.`
                         })
                     }
-                } else if ( canModerateGroup === true ) {
-                    // Moderators can invite users in which case role is 'member' and status is 'pending-invited'.
+                } 
+
+                // Moderators can invite users in which case role is 'member'
+                // and status is 'pending-invited'.
+                else if ( userMember !== null && canModerateGroup === true ) {
                     
                     if ( groupMember.role !== 'member' ) {
                         errors.push({
@@ -205,16 +259,49 @@ module.exports = class GroupMemberValidation {
                             message: `You may only invite members to a group.`
                         })
                     }
-                } else {
-                    // Otherwise, it's an existing user who doesn't have moderator permissions.
-                    // We shouldn't ever get here.  We should do permissions checks first.
+                } 
+
+                // Otherwise, it's an existing user who doesn't have moderator
+                // permissions. We shouldn't ever get here.  We should do
+                // permissions checks first.
+                else {
                     throw new ServiceError('invalid-permissions',
                         `Non-moderator member attempting to create a new member.`)
                 }
             } else if ( group.type === 'private' ) {
-                if ( userMember === null ) {
-                    // Non-members can request access in which case role is 'member' and status is 'pending-requested'.
 
+                // If you can admin a group that you are not a member
+                // of, it's because you're an admin of a parent or
+                // ancestor group.  You can only be added as an admin!
+                if ( userMember === null && parentMember !== null && canAdminGroup === true ) {
+                    if ( groupMember.role !== 'admin' ) {
+                        errors.push({
+                            type: `role:invalid`,
+                            log: `Parent Group admin attempting to add themselves to a group with invalid role '${groupMember.role}'.`,
+                            message: `You my not add yourself with role '${groupMember.role}'.  You are an admin on a parent group, you can only add your self as an 'admin'.`
+                        })
+                    }
+
+                    if ( groupMember.status !== 'member' ) {
+                        errors.push({
+                            type: `status:invalid`,
+                            log: `User attempting to add themselves to a group with invalid status '${groupMember.status}'.`,
+                            message: `You may not add yourself with status '${groupMember.status}'.  You may only add yourself as a 'member'.`
+                        })
+                    }
+
+                    if ( groupMember.userId !== currentUser.id ) {
+                        errors.push({
+                            type: `userId:invalid`,
+                            log: `Non-member user attempting to add User(${groupMember.userId}) to Group(${groupMember.groupId}).`,
+                            message: `You may only request access to a private Group for yourself.`
+                        })
+                    }
+                }
+
+                // Non-members can request access in which case role is
+                // 'member' and status is 'pending-requested'.
+                else if ( userMember === null ) {
                     if ( groupMember.role !== 'member' ) {
                         errors.push({
                             type: `role:invalid`,
@@ -238,8 +325,10 @@ module.exports = class GroupMemberValidation {
                             message: `You may only request access to a private Group for yourself.`
                         })
                     }
-                } else if ( canModerateGroup === true ) {
-                    // Moderators can invite users in which case role is 'member' and status is 'pending-invited'.
+                } 
+
+                // Moderators can invite users in which case role is 'member' and status is 'pending-invited'.
+                else if ( userMember !== null && canModerateGroup === true ) {
                     
                     if ( groupMember.role !== 'member' ) {
                         errors.push({
@@ -256,14 +345,52 @@ module.exports = class GroupMemberValidation {
                             message: `You may not add a member with status '${groupMember.status}'.`
                         })
                     }
-                } else {
-                    // We shouldn't be able to get here.
+                } 
+
+                // We shouldn't be able to get here.
+                else {
                     throw new ServiceError('invalid-permissions',
                         `Non-moderator member attempting to create a new member in a private Group.`)
                 }
 
             } else if ( group.type === 'hidden' ) {
-                if ( canModerateGroup === true ) {
+
+                // If the user isn't a member of this group, but is a member of
+                // the parent group and can admin this group, then they can add
+                // themselves as an admin.
+                //
+                // Role will be 'admin' and status 'member'.  They may only add
+                // themselves.
+                if ( userMember === null && parentMember !== null && canAdminGroup === true ) {
+                    if ( groupMember.role !== 'admin' ) {
+                        errors.push({
+                            type: `role:invalid`,
+                            log: `Parent Group admin attempting to add themselves to a group with invalid role '${groupMember.role}'.`,
+                            message: `You my not add yourself with role '${groupMember.role}'. You are an admin on a parent group, you can only add your self as an 'admin'.`
+                        })
+                    }
+
+                    if ( groupMember.status !== 'member' ) {
+                        errors.push({
+                            type: `status:invalid`,
+                            log: `User attempting to add themselves to a group with invalid status '${groupMember.status}'.`,
+                            message: `You may not add yourself with status '${groupMember.status}'.  You may only add yourself as a 'member'.`
+                        })
+                    }
+
+                    if ( groupMember.userId !== currentUser.id ) {
+                        errors.push({
+                            type: `userId:invalid`,
+                            log: `Non-member user attempting to add User(${groupMember.userId}) to Group(${groupMember.groupId}).`,
+                            message: `You may only request access to a private Group for yourself.`
+                        })
+                    }
+                }
+
+                // If the user is a group moderator, then they can invite
+                // people to the group, in which case role is 'member' and
+                // status is 'pending-invited'.
+                else if ( userMember !== null && canModerateGroup === true ) {
                     if ( groupMember.role !== 'member' ) {
                         errors.push({
                             type: `role:invalid`,
@@ -279,12 +406,320 @@ module.exports = class GroupMemberValidation {
                             message: `You may not add a member with status '${groupMember.status}'.`
                         })
                     }
-                } else {
-                    // We shouldn't be able to get here.
+                } 
+
+                // We shouldn't be able to get here.
+                else {
                     throw new ServiceError('invalid-permissions',
                         `Non-moderator member attempting to create a new member in a hidden Group.`)
                 }
-            } 
+            } else if ( group.type === 'private-open' ) {
+
+                // If you are an admin of the parent group and not a member of
+                // this group, you may add yourself to it as an admin.
+                //
+                // Role will be 'admin', status will be 'member' and users can
+                // only add themselves.
+                if ( userMember === null && parentMember !== null && canAdminGroup === true ) {
+                    if ( groupMember.role !== 'admin' ) {
+                        errors.push({
+                            type: `role:invalid`,
+                            log: `Parent Group admin attempting to add themselves to a group with invalid role '${groupMember.role}'.`,
+                            message: `You my not add yourself with role '${groupMember.role}'.  You are an admin on a parent group, you can only add your self as an 'admin'.`
+                        })
+                    }
+
+                    if ( groupMember.status !== 'member' ) {
+                        errors.push({
+                            type: `status:invalid`,
+                            log: `User attempting to add themselves to a group with invalid status '${groupMember.status}'.`,
+                            message: `You may not add yourself with status '${groupMember.status}'.  You may only add yourself as a 'member'.`
+                        })
+                    }
+
+                    if ( groupMember.userId !== currentUser.id ) {
+                        errors.push({
+                            type: `userId:invalid`,
+                            log: `Non-member user attempting to add User(${groupMember.userId}) to Group(${groupMember.groupId}).`,
+                            message: `You may only request access to a private Group for yourself.`
+                        })
+                    }
+                }
+
+                // Non-members of this group who are members of the parent
+                // group can add themselves. 
+                //
+                // In that case, role is 'member' and status is 'member'.
+                else if ( userMember === null && parentMember !== null ) {
+                    if ( groupMember.role !== 'member' ) {
+                        errors.push({
+                            type: `role:invalid`,
+                            log: `User(${currentUser.id}) attempted to create GroupMember with role '${groupMember.role}'.`,
+                            message: `You may not add yourself with role '${groupMember.role}'.`
+                        })
+                    }
+
+                    if ( groupMember.status !== 'member' ) {
+                        errors.push({
+                            type: `status:invalid`,
+                            log: `User attempting to add themselves to a Group with a invalid status '${groupMember.status}'.`,
+                            message: `You may only add yourself to an open group, you may not invite yourself.`
+                        })
+                    }
+
+                    if ( groupMember.userId !== currentUser.id ) {
+                        errors.push({
+                            type: `userId:invalid`,
+                            log: `Non-member user attempting to add User(${groupMember.userId}) to Open Group(${groupMember.groupId}).`,
+                            message: `You may only add yourself to an open Group.`
+                        })
+                    }
+                } 
+
+                // Non-members of this group who are also not members of the
+                // parent group can request access.
+                //
+                // In that case, role will be 'member' and status
+                // 'pending-requested'.
+                else if ( userMember === null && parentMember === null ) {
+                    if ( groupMember.role !== 'member' ) {
+                        errors.push({
+                            type: `role:invalid`,
+                            log: `User attempting to add themselves to a group with invalid role '${groupMember.role}'.`,
+                            message: `You my not add yourself with role '${groupMember.role}'.`
+                        })
+                    } 
+
+                    if ( groupMember.status !== 'pending-requested' ) {
+                        errors.push({
+                            type: `status:invalid`,
+                            log: `User attempting to add themselves to a group with invalid status '${groupMember.status}'.`,
+                            message: `You may not add yourself with status '${groupMember.status}'.`
+                        })
+                    }
+
+                    if ( groupMember.userId !== currentUser.id ) {
+                        errors.push({
+                            type: `userId:invalid`,
+                            log: `Non-member user attempting to add User(${groupMember.userId}) to Group(${groupMember.groupId}).`,
+                            message: `You may only request access to a private Group for yourself.`
+                        })
+                    }
+
+                } 
+
+                // Moderators can invite users in which case role is 'member'
+                // and status is 'pending-invited'.
+                else if ( userMember !== null && canModerateGroup === true ) {
+                    
+                    if ( groupMember.role !== 'member' ) {
+                        errors.push({
+                            type: `role:invalid`,
+                            log: `Attempt to add a user to a Group with invalid role '${groupMember.role}'.`,
+                            message: `You may only invite members to a group.`
+                        })
+                    }
+
+                    if ( groupMember.status !== 'pending-invited' ) {
+                        errors.push({
+                            type: `status:invalid`,
+                            log: `Attempt to add a user to a Group with invalid status '${groupMember.status}'.`,
+                            message: `You may only invite members to a group.`
+                        })
+                    }
+                } 
+
+                // Otherwise, it's an existing user who doesn't have moderator permissions.
+                // We shouldn't ever get here.  We should do permissions checks first.
+                else {
+                    throw new ServiceError('invalid-permissions',
+                        `Non-moderator member attempting to create a new member.`)
+                }
+
+            } else if ( group.type === 'hidden-open' ) {
+
+                // If you are an admin of the parent group and not a member of
+                // this group, you may add yourself to it as an admin.
+                //
+                // Role will be 'admin', status will be 'member' and users can
+                // only add themselves.
+                if ( userMember === null && parentMember !== null && canAdminGroup === true ) {
+                    if ( groupMember.role !== 'admin' ) {
+                        errors.push({
+                            type: `role:invalid`,
+                            log: `Parent Group admin attempting to add themselves to a group with invalid role '${groupMember.role}'.`,
+                            message: `You my not add yourself with role '${groupMember.role}'.  You are an admin on a parent group, you can only add your self as an 'admin'.`
+                        })
+                    }
+
+                    if ( groupMember.status !== 'member' ) {
+                        errors.push({
+                            type: `status:invalid`,
+                            log: `User attempting to add themselves to a group with invalid status '${groupMember.status}'.`,
+                            message: `You may not add yourself with status '${groupMember.status}'.  You may only add yourself as a 'member'.`
+                        })
+                    }
+
+                    if ( groupMember.userId !== currentUser.id ) {
+                        errors.push({
+                            type: `userId:invalid`,
+                            log: `Non-member user attempting to add User(${groupMember.userId}) to Group(${groupMember.groupId}).`,
+                            message: `You may only request access to a private Group for yourself.`
+                        })
+                    }
+                }
+
+                // Non-members of this group who are members of the parent
+                // group can add themselves. 
+                //
+                // In that case, role is 'member' and status is 'member'.
+                else if ( userMember === null && parentMember !== null ) {
+                    if ( groupMember.role !== 'member' ) {
+                        errors.push({
+                            type: `role:invalid`,
+                            log: `User(${currentUser.id}) attempted to create GroupMember with role '${groupMember.role}'.`,
+                            message: `You may not add yourself with role '${groupMember.role}'.`
+                        })
+                    }
+
+                    if ( groupMember.status !== 'member' ) {
+                        errors.push({
+                            type: `status:invalid`,
+                            log: `User attempting to add themselves to a Group with a invalid status '${groupMember.status}'.`,
+                            message: `You may only add yourself to an open group, you may not invite yourself.`
+                        })
+                    }
+
+                    if ( groupMember.userId !== currentUser.id ) {
+                        errors.push({
+                            type: `userId:invalid`,
+                            log: `Non-member user attempting to add User(${groupMember.userId}) to Open Group(${groupMember.groupId}).`,
+                            message: `You may only add yourself to an open Group.`
+                        })
+                    }
+                } 
+
+                // Moderators can invite users in which case role is 'member'
+                // and status is 'pending-invited'.
+                else if ( userMember !== null && canModerateGroup === true ) {
+                    
+                    if ( groupMember.role !== 'member' ) {
+                        errors.push({
+                            type: `role:invalid`,
+                            log: `Attempt to add a user to a Group with invalid role '${groupMember.role}'.`,
+                            message: `You may only invite members to a group.`
+                        })
+                    }
+
+                    if ( groupMember.status !== 'pending-invited' ) {
+                        errors.push({
+                            type: `status:invalid`,
+                            log: `Attempt to add a user to a Group with invalid status '${groupMember.status}'.`,
+                            message: `You may only invite members to a group.`
+                        })
+                    }
+                } 
+
+                // Otherwise, it's an existing user who doesn't have moderator permissions.
+                // We shouldn't ever get here.  We should do permissions checks first.
+                else {
+                    throw new ServiceError('invalid-permissions',
+                        `Non-moderator member attempting to create a new member.`)
+                }
+            } else if ( group.type === 'hidden-private' ) {
+
+                // If you are an admin of the parent group and not a member of
+                // this group, you may add yourself to it as an admin.
+                //
+                // Role will be 'admin', status will be 'member' and users can
+                // only add themselves.
+                if ( userMember === null && parentMember !== null && canAdminGroup === true ) {
+                    if ( groupMember.role !== 'admin' ) {
+                        errors.push({
+                            type: `role:invalid`,
+                            log: `Parent Group admin attempting to add themselves to a group with invalid role '${groupMember.role}'.`,
+                            message: `You my not add yourself with role '${groupMember.role}'.  You are an admin on a parent group, you can only add your self as an 'admin'.`
+                        })
+                    }
+
+                    if ( groupMember.status !== 'member' ) {
+                        errors.push({
+                            type: `status:invalid`,
+                            log: `User attempting to add themselves to a group with invalid status '${groupMember.status}'.`,
+                            message: `You may not add yourself with status '${groupMember.status}'.  You may only add yourself as a 'member'.`
+                        })
+                    }
+
+                    if ( groupMember.userId !== currentUser.id ) {
+                        errors.push({
+                            type: `userId:invalid`,
+                            log: `Non-member user attempting to add User(${groupMember.userId}) to Group(${groupMember.groupId}).`,
+                            message: `You may only request access to a private Group for yourself.`
+                        })
+                    }
+                }
+
+                // Non-members who are members of the parent group can request
+                // access in which case role is 'member' and status is
+                // 'pending-requested'.
+                else if ( userMember === null && parentMember !== null) {
+                    if ( groupMember.role !== 'member' ) {
+                        errors.push({
+                            type: `role:invalid`,
+                            log: `User attempting to add themselves to a group with invalid role '${groupMember.role}'.`,
+                            message: `You my not add yourself with role '${groupMember.role}'.`
+                        })
+                    } 
+
+                    if ( groupMember.status !== 'pending-requested' ) {
+                        errors.push({
+                            type: `status:invalid`,
+                            log: `User attempting to add themselves to a group with invalid status '${groupMember.status}'.`,
+                            message: `You may not add yourself with status '${groupMember.status}'.`
+                        })
+                    }
+
+                    if ( groupMember.userId !== currentUser.id ) {
+                        errors.push({
+                            type: `userId:invalid`,
+                            log: `Non-member user attempting to add User(${groupMember.userId}) to Group(${groupMember.groupId}).`,
+                            message: `You may only request access to a private Group for yourself.`
+                        })
+                    }
+                } 
+
+                // Moderators can invite users in which case role is 'member'
+                // and status is 'pending-invited'.
+                else if ( userMember !== null && canModerateGroup === true ) {
+                    
+                    if ( groupMember.role !== 'member' ) {
+                        errors.push({
+                            type: `role:invalid`,
+                            log: `Moderator attempting to add a member with invalid role '${groupMember.role}'.`,
+                            message: `You may not add a member with role '${groupMember.role}'.`
+                        })
+                    }
+
+                    if ( groupMember.status !== 'pending-invited' ) {
+                        errors.push({
+                            type: `status:invalid`,
+                            log: `Moderator attempting to add a member with invalid status '${groupMember.status}'.`,
+                            message: `You may not add a member with status '${groupMember.status}'.`
+                        })
+                    }
+                } 
+
+                // We shouldn't be able to get here.
+                else {
+                    throw new ServiceError('invalid-permissions',
+                        `Non-moderator member attempting to create a new member in a private Group.`)
+                }
+
+            } else {
+                throw new ServiceError('invalid-group-type',
+                    `Unhandled group type, '${group.type}', encountered.`)
+
+            }
         } else {
             // ============== Editing an existing member. =====================
             const group = await this.groupDAO.getGroupById(existing.groupId)
