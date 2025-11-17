@@ -18,6 +18,8 @@ const UserAccountNotificationsView = function() {
                         'GroupMember:update:role:moderator:member',
                         'GroupMember:update:role:admin:member',
 
+                        'GroupModeration:create:post:moderator',
+                        'GroupModeration:create:comment:moderator',
                         'GroupModeration:update:post:status:rejected:author',
                         'GroupModeration:update:comment:status:rejected:author',
 
@@ -81,8 +83,13 @@ const UserAccountNotificationsView = function() {
                     explanation="When your role in a group changes..." 
                     notifications={[ 'GroupMember:update:role:moderator:member', 'GroupMember:update:role:admin:member' ]} 
                 />
+                <NotificationSetting
+                    label="Group Moderation"
+                    explanation="When a post or comment is flagged in a group you moderate..."
+                    notifications={[ 'GroupModeration:create:post:moderator', 'GroupModeration:create:comment:moderator', ]}
+                />
                 <NotificationSetting 
-                    label="Group Moderation" 
+                    label="Group Post Moderated" 
                     explanation="When one of your posts or comments is removed by a group admin..." 
                     notifications={[ 'GroupModeration:update:post:status:rejected:author', 'GroupModeration:update:comment:status:rejected:author' ]} 
                 />

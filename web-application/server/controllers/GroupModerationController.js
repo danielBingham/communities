@@ -302,6 +302,14 @@ module.exports = class GroupModerationController extends BaseController {
             await this.postCommentDAO.updatePostComment(postCommentUpdate)
         }
 
+        await this.notificationService.sendNotifications(
+            currentUser,
+            'GroupModeration:create',
+            {
+                moderation: entity
+            }
+        )
+
         const relations = await this.getRelations(currentUser, entityResults)
 
         response.status(201).json({
@@ -465,25 +473,13 @@ module.exports = class GroupModerationController extends BaseController {
             throw new Error(`Failed to find GroupModeration(${id}) after update.`)
         }
 
-        if ( entity.status === 'rejected' ) {
-            if ( entity.postId !== null && entity.postCommentId === null) {
-                await this.notificationService.sendNotifications(
-                    currentUser,
-                    'GroupModeration:update:post:status:rejected:author',
-                    {
-                        moderation: entity
-                    }
-                )
-            } else if ( entity.postId !== null && entity.postCommentId !== null ) {
-                await this.notificationService.sendNotifications(
-                    currentUser,
-                    'GroupModeration:update:comment:status:rejected:author',
-                    {
-                        moderation: entity
-                    }
-                )
+        await this.notificationService.sendNotifications(
+            currentUser,
+            'GroupModeration:update',
+            {
+                moderation: entity
             }
-        }
+        )
 
         // Insert the event to track the moderation history.
         await this.groupModerationEventDAO.insertGroupModerationEvents(this.groupModerationEventDAO.createEventFromGroupModeration(entity))
