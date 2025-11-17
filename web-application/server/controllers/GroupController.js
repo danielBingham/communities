@@ -97,32 +97,39 @@ module.exports = class GroupController {
         if ( ! canModerateSite ) {
             // Restrict the query to only those groups the currentUser can see.
             query.params.push(currentUser.id)
-            query.where = `groups.id IN (
-                    SELECT groups.id FROM groups
-                        LEFT OUTER JOIN group_members ON groups.id = group_members.group_id AND group_members.user_id = $1
-                        LEFT OUTER JOIN group_members as parent_members ON groups.parent_id = parent_members.group_id AND parent_members.user_id = $1
-                    WHERE 
-                        (groups.type = 'open' AND (group_members.user_id IS NULL OR group_members.status != 'banned'))
-                        OR ( 
-                            (groups.type = 'private' OR groups.type = 'private-open') 
-                            AND (group_members.user_id IS NULL OR group_members.status != 'banned')
-                        )
-                        OR ( 
-                            groups.type = 'hidden' 
-                            AND (
-                                (group_members.user_id = $1 AND group_members.status != 'banned') 
-                                OR (parent_members.user_id = $1 AND parent_members.status != 'banned' AND parent_members.role = 'admin')
+
+            if ( this.core.features.has('issue-165-subgroups') ) {
+                query.where = `groups.id IN (
+                        SELECT groups.id FROM groups
+                            LEFT OUTER JOIN group_members ON groups.id = group_members.group_id AND group_members.user_id = $1
+                            LEFT OUTER JOIN group_members as parent_members ON groups.parent_id = parent_members.group_id AND parent_members.user_id = $1
+                        WHERE 
+                            (groups.type = 'open' AND (group_members.user_id IS NULL OR group_members.status != 'banned'))
+                            OR ( 
+                                (groups.type = 'private' OR groups.type = 'private-open') 
+                                AND (group_members.user_id IS NULL OR group_members.status != 'banned')
                             )
-                        )
-                        OR ( 
-                            ( groups.type = 'hidden-open' OR groups.type = 'hidden-private' ) 
-                            AND (
-                                (group_members.user_id = $1 AND group_members.status != 'banned') 
-                                OR (parent_members.user_id = $1 AND parent_members.status != 'banned')
+                            OR ( 
+                                groups.type = 'hidden' 
+                                AND (
+                                    (group_members.user_id = $1 AND group_members.status != 'banned') 
+                                    OR (parent_members.user_id = $1 AND parent_members.status != 'banned' AND parent_members.role = 'admin')
+                                )
                             )
-                        )
-                )
-            `
+                            OR ( 
+                                ( groups.type = 'hidden-open' OR groups.type = 'hidden-private' ) 
+                                AND (
+                                    (group_members.user_id = $1 AND group_members.status != 'banned') 
+                                    OR (parent_members.user_id = $1 AND parent_members.status != 'banned')
+                                )
+                            )
+                    )
+                `
+            } else {
+                query.where = `groups.id IN (
+                    SELECT groups.id FROM groups LEFT OUTER JOIN group_members ON groups.id = group_members.group_id WHERE (group_members.user_id = $1 AND group_members.status = 'member') OR groups.type = 'open'
+                )`
+            }
         }
 
         // Get only the groups the currentUser is a member of with 'memberStatus'

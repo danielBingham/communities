@@ -19,8 +19,6 @@
  ******************************************************************************/
 const BaseMigration = require('./BaseMigration')
 
-const UUID = require('uuid')
-
 module.exports = class UsernameMigration extends BaseMigration {
 
     constructor(core) {
@@ -37,7 +35,7 @@ module.exports = class UsernameMigration extends BaseMigration {
     }
 
     async initBack() { 
-
+        await this.core.database.query(`ALTER TABLE groups DROP COLUMN IF EXISTS parent_id`, [])
     }
 
     async migrateForward(targets) {}
