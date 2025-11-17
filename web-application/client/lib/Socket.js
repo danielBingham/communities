@@ -89,17 +89,17 @@ export default class Socket {
             const sent = this.send({ entity: 'Ping' })
             if ( sent === false ) {
                 if ( ! this.isConnecting() && ! this.isOpen() ) {
-                    logger.warn(`Socket :: Connection lost.`)
+                    logger.verbose(`Socket :: Connection lost.`)
                     this.disconnect()
                 }
             }
         } catch (error) {
-            logger.error(error)
+            logger.verbose(error)
             this.disconnect()
         }
 
         this.keepAliveTimeout = setTimeout(() => {
-            logger.warn(`Socket :: Connection lost.`)
+            logger.verbose(`Socket :: Connection lost.`)
             this.disconnect() 
         }, 10000)
     }
@@ -123,7 +123,7 @@ export default class Socket {
             })
 
             this.socket.addEventListener('error', (event) => {
-                logger.error(`Socket :: Error: ${event.message} ::`, event)
+                logger.verbose(`Socket :: Error: ${event.message} ::`, event)
 
                 for(const handler of this.eventHandlers['error']) {
                     handler(event)
@@ -132,7 +132,7 @@ export default class Socket {
             })
 
             this.socket.addEventListener('open', (event) => {
-                logger.info(`Socket :: Connected.`)
+                logger.verbose(`Socket :: Connected.`)
                 if ( this.keepAliveTimeout !== null ) {
                     clearTimeout(this.keepAliveTimeout)
                 }
@@ -150,7 +150,7 @@ export default class Socket {
             })
 
             this.socket.addEventListener('close', (event) => {
-                logger.info(`Socket :: Closed.`)
+                logger.verbose(`Socket :: Closed.`)
                 // Clear any hanging keepAlives
                 clearTimeout(this.keepAliveTimeout)
                 this.keepAliveTimeout = null
@@ -171,7 +171,7 @@ export default class Socket {
     }
 
     async connect(host) {
-        logger.info(`>>> UPGRADE /socket :: BEGIN connection to ${host}...`)
+        logger.verbose(`>>> UPGRADE /socket :: BEGIN connection to ${host}...`)
         const protocols = [ 'wss', 'x-communities-platform', Capacitor.getPlatform() ]
 
         if ( Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android' ) {
@@ -201,7 +201,7 @@ export default class Socket {
                 logger.warn(`>>> UPGRADE /socket :: Attempt to connect a connected socket.`)
             }
         } catch (error) {
-            logger.error(`>>> UPGRADE /socket :: Connection failed: ${error.message}`, error)
+            logger.verbose(`>>> UPGRADE /socket :: Connection failed: ${error.message}`, error)
         }
     }
 
