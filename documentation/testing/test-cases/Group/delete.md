@@ -13,8 +13,10 @@ Cases covering group deletion.
 
 ### Cases
 
-- [ ] Admins can delete groups.
+- [ ] Members with 'admin' role can delete groups.
+
+- [ ] Non-members with 'admin' or 'superadmin' siteRole can delete groups.
 
 - [ ] Deleting a group with content deletes all its content.
 
-- [ ] Deleting a group with subgrousp also deletes its subgroups.
+- [ ] Deleting a group with subgroups also deletes its subgroups.

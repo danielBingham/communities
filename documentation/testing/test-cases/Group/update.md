@@ -1,6 +1,6 @@
-## [Read Group](documentation/testing/test-cases/Group/read.md)
+## [Update Group](documentation/testing/test-cases/Group/update.md)
 
-Cases covering group deletion.
+Cases covering group updates.
 
 ### Pre-requisites
 
@@ -32,3 +32,8 @@ Cases covering group deletion.
 
 ### Cases
 
+- [ ] Members with 'admin' role can update the profile image of a group.
+
+- [ ] Members with 'admin' role can update the description of a group.
+
+- [ ] Members with 'admin' role can update the Posting Permissions of a group.

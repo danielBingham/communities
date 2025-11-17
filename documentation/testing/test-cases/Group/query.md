@@ -1,4 +1,4 @@
-## [Read Group](documentation/testing/test-cases/Group/read.md)
+## [Query Group](documentation/testing/test-cases/Group/query.md)
 
 Cases covering group querying.
 
