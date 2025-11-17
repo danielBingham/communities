@@ -85,6 +85,11 @@ const canCreateGroupPost = function(user, context) {
         return false
     }
 
+    // They have to be able to view group posts in order to create one.
+    if ( canViewGroupPost(user, context) !== true ) {
+        return false
+    }
+
     if ( context.group.postPermissions === 'anyone' ) {
         // Anyone may post to the group.
         return true
