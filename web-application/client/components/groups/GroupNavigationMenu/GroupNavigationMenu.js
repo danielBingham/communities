@@ -70,10 +70,12 @@ const GroupNavigationMenu = function({ groupId }) {
             { canQueryGroupMember === true && <NavigationSubmenu  icon="Users" title="Members"> 
                 <NavigationSubmenuLink to={`/group/${group.slug}/members`} icon="Users" text="Members" />
                 <NavigationSubmenuLink to={`/group/${group.slug}/members/admin`} icon="ExclamationTriangle" text="Administrators" />
-                { canModerateGroup && <NavigationSubmenuLink to={`/group/${group.slug}/members/invitations`} icon="UserPlus" text="Invitations" /> }
-                { canModerateGroup && group.type === 'private' && <NavigationSubmenuLink to={`/group/${group.slug}/members/requests`} icon="UserPlus" text="Requests" /> }
-                { canModerateGroup && <NavigationSubmenuLink to={`/group/${group.slug}/members/banned`} icon="XCircle" text="Banned Users" /> }
-                { canModerateGroup && <NavigationSubmenuLink to={`/group/${group.slug}/members/email-invitations`} icon="Envelope" text="Email Invitations" /> }
+                { isMember && canModerateGroup && <NavigationSubmenuLink to={`/group/${group.slug}/members/invitations`} icon="UserPlus" text="Invitations" /> }
+                { isMember && canModerateGroup 
+                    && ( group.type === 'private' || group.type === 'private-open' || group.type === 'hidden-private' )
+                    && <NavigationSubmenuLink to={`/group/${group.slug}/members/requests`} icon="UserPlus" text="Requests" /> }
+                { isMember && canModerateGroup && <NavigationSubmenuLink to={`/group/${group.slug}/members/banned`} icon="XCircle" text="Banned Users" /> }
+                { isMember && canModerateGroup && <NavigationSubmenuLink to={`/group/${group.slug}/members/email-invitations`} icon="Envelope" text="Email Invitations" /> }
             </NavigationSubmenu>}
             { hasSubgroups && canViewGroupPost && <NavigationMenuLink to={`/group/${group.slug}/subgroups`} icon="UserGroup" text="Subgroups" /> }
             { isMember && <NavigationSubmenu icon="EllipsisHorizontal" title="More">
