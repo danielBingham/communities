@@ -29,6 +29,7 @@ import PostTypeControl from './PostTypeControl'
 
 import ErrorModal from '/components/errors/ErrorModal'
 import ErrorCard from '/components/errors/ErrorCard'
+import Error404 from '/components/errors/Error404'
 
 
 import './PostForm.css'
@@ -117,7 +118,11 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
     // Don't show the form if they don't have permission to post in this Group.
     if ((groupId !== undefined && groupId !== null) || (post?.groupId !== undefined && post?.groupId !== null))
     {
-        if ( group === undefined || currentMember === undefined ) {
+        if ( group === null ) {
+            return (
+                <Error404 />
+            )
+        } else if ( group === undefined || currentMember === undefined ) {
             return (
                 <Spinner />
             )
