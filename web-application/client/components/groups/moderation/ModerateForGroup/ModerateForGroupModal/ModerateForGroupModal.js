@@ -19,6 +19,8 @@ import Spinner from '/components/Spinner'
 import Modal from '/components/generic/modal/Modal'
 import ErrorModal from '/components/errors/ErrorModal'
 
+import './ModerateForGroupModal.css'
+
 const ModerateForGroupModal = function({ postId, postCommentId, isVisible, setIsVisible }) {
     const [reason, setReason] = useState('')
    
@@ -87,8 +89,10 @@ const ModerateForGroupModal = function({ postId, postCommentId, isVisible, setIs
                     value={reason}
                     onChange={(e) => { setReason(e.target.value)}}
                 />
-                <Button type="warn" onClick={() => moderate('rejected')}>Reject</Button>
-                <Button type="success" onClick={() => moderate('approved')}>Approve</Button>
+                <div className="moderate-for-group__controls">
+                    <Button type="warn" onClick={() => moderate('rejected')}>Reject</Button>
+                    <Button type="success" onClick={() => moderate('approved')}>Approve</Button>
+                </div>
                 { error }
             </div>
         </Modal>
