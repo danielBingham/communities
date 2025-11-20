@@ -65,7 +65,7 @@ const GroupNavigationMenu = function({ groupId }) {
     return (
         <NavigationMenu className="group-navigation-menu">
             { ! isMember && <NavigationMenuItem><GroupMembershipButton groupId={group.id} userId={currentUser.id} /></NavigationMenuItem> }
-            { canCreateGroupPost === true && <NavigationMenuButton href={`/create?groupId=${group.id}`} icon="Plus" type="primary" text="Create" />  }
+            { canCreateGroupPost === true && <NavigationMenuButton href={`/create?groupId=${group.id}&origin=${encodeURIComponent(`/group/${group.slug}`)}`} icon="Plus" type="primary" text="Create" />  }
             { canViewGroupPost === true && <NavigationMenuLink to={`/group/${group.slug}`} icon="QueueList" text="Feed" /> }
             { canQueryGroupMember === true && <NavigationSubmenu  icon="Users" title="Members"> 
                 <NavigationSubmenuLink to={`/group/${group.slug}/members`} icon="Users" text="Members" />
