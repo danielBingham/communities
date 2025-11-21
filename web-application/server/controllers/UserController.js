@@ -214,7 +214,22 @@ module.exports = class UserController extends BaseController{
                 const relationships = await this.userRelationshipsDAO.getUserRelationshipsForUser(currentUser.id)
                 const friendIds = relationships.map((r) => r.userId == currentUser.id ? r.relationId : r.userId)
 
-                const userIds = [ ...postUserIds, ...memberUserIds, ...friendIds ]
+                let userIds = [ ...postUserIds, ...memberUserIds, ...friendIds ]
+
+                const blockResults = await this.core.database.query(`
+                    SElECT user_id, friend_id
+                        FROM user_relationships
+                            WHERE (user_id = $1 OR friend_id = $1) AND status = 'blocked'
+                `, [currentUser.id])
+
+                const blockIds = blockResults.rows.map((r) => r.user_id == currentUser.id ? r.friend_id : r.user_id)
+
+                // TECHDEBT O(n^2) :: It would be better to do this filtering
+                // in each of the three SQL queries we're running here, but
+                // that's a problem for future us.  It's going to be a while
+                // before anyone has enough friends and blocks that this is
+                // actually a problem.
+                userIds = userIds.filter((id) => ! blockIds.includes(id))
 
                 const and = result.params.length > 0 ? ' AND ' : ''
                 result.params.push(userIds)
@@ -236,7 +251,22 @@ module.exports = class UserController extends BaseController{
                 const relationships = await this.userRelationshipsDAO.getUserRelationshipsForUser(currentUser.id)
                 const friendIds = relationships.map((r) => r.userId == currentUser.id ? r.relationId : r.userId)
 
-                const userIds = [ ...postUserIds, ...friendIds ]
+               let userIds = [ ...postUserIds, ...friendIds ]
+
+                const blockResults = await this.core.database.query(`
+                    SElECT user_id, friend_id
+                        FROM user_relationships
+                            WHERE (user_id = $1 OR friend_id = $1) AND status = 'blocked'
+                `, [currentUser.id])
+
+                const blockIds = blockResults.rows.map((r) => r.user_id == currentUser.id ? r.friend_id : r.user_id)
+
+                // TECHDEBT O(n^2) :: It would be better to do this filtering
+                // in each of the three SQL queries we're running here, but
+                // that's a problem for future us.  It's going to be a while
+                // before anyone has enough friends and blocks that this is
+                // actually a problem.
+                userIds = userIds.filter((id) => ! blockIds.includes(id))
                 
                 const and = result.params.length > 0 ? ' AND ' : ''
                 result.params.push(userIds)
@@ -254,14 +284,30 @@ module.exports = class UserController extends BaseController{
                 const relationships = await this.userRelationshipsDAO.getUserRelationshipsForUser(currentUser.id)
                 const friendIds = relationships.map((r) => r.userId == currentUser.id ? r.relationId : r.userId)
 
-                const userIds = [ ...friendIds, ...memberUserIds ]
+                let userIds = [ ...friendIds, ...memberUserIds ]
+
+                const blockResults = await this.core.database.query(`
+                    SElECT user_id, friend_id
+                        FROM user_relationships
+                            WHERE (user_id = $1 OR friend_id = $1) AND status = 'blocked'
+                `, [currentUser.id])
+
+                const blockIds = blockResults.rows.map((r) => r.user_id == currentUser.id ? r.friend_id : r.user_id)
+
+                // TECHDEBT O(n^2) :: It would be better to do this filtering
+                // in each of the three SQL queries we're running here, but
+                // that's a problem for future us.  It's going to be a while
+                // before anyone has enough friends and blocks that this is
+                // actually a problem.
+                userIds = userIds.filter((id) => ! blockIds.includes(id))
 
                 const and = result.params.length > 0 ? ' AND ' : ''
                 result.params.push(userIds)
                 result.where += `${and} users.id = ANY($${result.params.length}::uuid[])`
             } else {
                 // Limit the search to their friends.
-                const relationships = await this.userRelationshipsDAO.getUserRelationshipsForUser(currentUser.id)
+                let relationships = await this.userRelationshipsDAO.getUserRelationshipsForUser(currentUser.id)
+                relationships = relationships.filter((r) => r.status !== 'blocked')
                 const friendIds = relationships.map((r) => r.userId == currentUser.id ? r.relationId : r.userId)
 
                 const and = result.params.length > 0 ? ' AND ' : ''

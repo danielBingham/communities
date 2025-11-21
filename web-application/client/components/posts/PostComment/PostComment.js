@@ -32,7 +32,7 @@ const PostComment = function({ postId, id }) {
     //
     // TODO Techdebt Arguably we could put this on the top level App page...
     useEffect(function() {
-        if ( location.hash && location.hash == `#comment-${id}` ) {
+        if ( comment !== null && comment !== undefined && location.hash && location.hash == `#comment-${id}` ) {
             document.querySelector(location.hash).scrollIntoView({
                 block: 'center'
             })
@@ -40,7 +40,7 @@ const PostComment = function({ postId, id }) {
         } else {
             setHighlight(false)
         }
-    }, [ id, location ])
+    }, [ id, location, comment ])
 
     if ( comment == null 
         || ( comment.siteModerationId !== null && siteModeration === null)
