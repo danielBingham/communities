@@ -48,7 +48,6 @@ const PromoteToModerator = function({ groupId, userId }) {
         return null
     }
 
-    // TODO When currentUser === user offer "Step down to Moderator"
     if ( userMember.role === 'moderator' ) {
         if ( currentMember.role === 'admin' || currentUser.id === userMember.userId ) {
             return (

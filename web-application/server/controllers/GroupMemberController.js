@@ -27,6 +27,7 @@ const {
     PostSubscriptionDAO,
     UserDAO,  
 
+    GroupService,
     GroupMemberService,
     NotificationService, 
     PermissionService,
@@ -47,6 +48,7 @@ module.exports = class GroupMemberController extends BaseController {
         this.postSubscriptionDAO = new PostSubscriptionDAO(core)
         this.userDAO = new UserDAO(core)
 
+        this.groupService = new GroupService(core)
         this.notificationService = new NotificationService(core)
         this.permissionService = new PermissionService(core)
         this.validationService = new ValidationService(core)
@@ -100,34 +102,59 @@ module.exports = class GroupMemberController extends BaseController {
         // If they are a moderator or admin, they can view all group members,
         // including ones who are still pending.
         if ( canModerateGroup ) {
-            // Group moderators can see all users, even if they are blocked.
-            query.params.push(context.group.id)
-            query.where = `group_members.group_id = $${query.params.length}`
+
+            // If they are querying for ancestor memberships, then they can only see their own.
+            if ( 'isAncestorMemberFor' in urlQuery ) {
+                const parentIds = await this.groupService.getParentIds(context.group.id)
+                query.params.push(parentIds)
+                const parentIdsParam = query.params.length
+                query.params.push(currentUser.id)
+                const currentUserParam = query.params.length
+                query.where = `group_members.group_id = ANY($${parentIdsParam}::uuid[]) AND group_members.user_id = $${currentUserParam}`
+
+            } else {
+                // Group moderators can see all users, even if they are blocked.
+                query.params.push(context.group.id)
+                query.where = `group_members.group_id = $${query.params.length}`
+            }
         } 
 
         // Otherwise they can only view confirmed group members and their own
         // membership (pending or not).
         else {
-            const blockResults = await this.core.database.query(`
-                SElECT user_id, friend_id
-                    FROM user_relationships
-                        WHERE (friend_id = $1) AND status = 'blocked'
-            `, [currentUser.id])
-            const blockIds = blockResults.rows.map((r) => r.user_id == currentUser.id ? r.friend_id : r.user_id)
 
-            // You can't see users who have blocked you.
-            query.params.push(blockIds)
-            const blockParam = query.params.length
-            query.params.push(context.group.id)
-            const groupParam = query.params.length
-            query.params.push(currentUser.id)
-            const currentUserParam = query.params.length
+            // If they are querying for ancestor memberships, then they can only see their own.
+            if ( 'isAncestorMemberFor' in urlQuery) {
+                const parentIds = await this.groupService.getParentIds(context.group.id)
+                query.params.push(parentIds)
+                const parentIdsParam = query.params.length
+                query.params.push(currentUser.id)
+                const currentUserParam = query.params.length
+                query.where = `
+                    group_members.group_id = ANY($${parentIdsParam}::uuid[]) AND group_members.user_id = $${currentUserParam}`
 
-            query.where = `group_members.group_id = $${groupParam} 
-                AND (
-                    group_members.status = 'member' 
-                    OR (group_members.user_id = $${currentUserParam} AND group_members.user_id != ALL($${blockParam}::uuid[]))
-                )`
+            } else {
+                const blockResults = await this.core.database.query(`
+                    SElECT user_id, friend_id
+                        FROM user_relationships
+                            WHERE (friend_id = $1) AND status = 'blocked'
+                `, [currentUser.id])
+                const blockIds = blockResults.rows.map((r) => r.user_id == currentUser.id ? r.friend_id : r.user_id)
+
+                // You can't see users who have blocked you.
+                query.params.push(blockIds)
+                const blockParam = query.params.length
+                query.params.push(context.group.id)
+                const groupParam = query.params.length
+                query.params.push(currentUser.id)
+                const currentUserParam = query.params.length
+
+                query.where = `group_members.group_id = $${groupParam} 
+                    AND (
+                        group_members.status = 'member' 
+                        OR (group_members.user_id = $${currentUserParam} AND group_members.user_id != ALL($${blockParam}::uuid[]))
+                    )`
+            }
 
         }
 

@@ -2,10 +2,10 @@ import React, { useState, useLayoutEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
+import can, {Actions, Entities} from '/lib/permission'
+
 import { useRequest } from '/lib/hooks/useRequest'
-import { useGroup } from '/lib/hooks/Group'
-import { useGroupMember } from '/lib/hooks/GroupMember'
-import { GroupPermissions, useGroupPermission } from '/lib/hooks/permission'
+import { useGroup, useGroupPermissionContext } from '/lib/hooks/Group'
 
 import { deleteGroup } from '/state/Group'
 
@@ -14,6 +14,7 @@ import GroupPostPermissionsUpdate from '/components/groups/form/GroupPostPermiss
 import Button from '/components/generic/button/Button'
 import AreYouSure from '/components/AreYouSure'
 import Modal from '/components/generic/modal/Modal'
+import Card from '/components/ui/Card'
 import Error404 from '/components/errors/Error404'
 import { RequestErrorModal } from '/components/errors/RequestError'
 
@@ -28,10 +29,12 @@ const GroupSettingsView = function({ groupId }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
-    const [group, groupRequest] = useGroup(groupId) 
-    const [currentMember, currentMemberRequest] = useGroupMember(groupId, currentUser.id)
+    const [context, requests] = useGroupPermissionContext(currentUser, groupId)
+    const group = context.group
+    const currentMember = context.userMember
 
-    const canAdminGroup = useGroupPermission(currentUser, GroupPermissions.ADMIN, { group: group, userMember: currentMember })
+    const canAdminGroup = can(currentUser, Actions.admin, Entities.Group, context)
+    const canAdminSite = can(currentUser, Actions.admin, Entities.Site, context)
 
     const navigate = useNavigate()
     const deleteCurrentGroup = function() {
@@ -45,8 +48,30 @@ const GroupSettingsView = function({ groupId }) {
         }
     }, [ request ])
 
-    if ( ! canAdminGroup ) {
-        return ( <Error404 /> ) 
+    if ( ! currentMember ) {
+        if ( canAdminGroup === true && canAdminSite !== true) {
+            return (
+                <div className="group-settings-view">
+                    <Card className="group-settings-view__admin-non-member">
+                        <p>You must join this group before you can administrate it.</p>
+                    </Card>
+                </div>
+            )
+        } else if ( canAdminGroup !== true ) {
+            return ( 
+                <div className="group-settings-view">
+                    <Error404 /> 
+                </div>
+            ) 
+        }
+    }
+
+    if ( canAdminGroup !== true ) {
+            return ( 
+                <div className="group-settings-view">
+                    <Error404 /> 
+                </div>
+            ) 
     }
 
     return (

@@ -1,0 +1,46 @@
+a.navigation-menu__action svg {
+    width: 22px;
+    margin-right: 5px;
+    margin-bottom: -5px;
+    color: var(--icon-color);
+}
+
+a.navigation-menu__action {
+    display: block;
+    padding: 10px;
+    color: var(--primary-color-darkest);
+}
+a.navigation-menu__action:hover {
+    background-color: var(--primary-color-light);
+    color: var(--primary-color-darkest);
+    border-radius: 10px;
+}
+
+
+/* The `.active` class comes from `NavLink`. */
+a.navigation-menu__action.active  {
+    font-weight: bold;
+}
+
+/* Outline icons are shown unless they are active. */
+a.navigation-menu__action .outline { 
+    display: inline-block;
+}
+a.navigation-menu__action.active .outline { 
+    display: none;
+}
+
+/* Solid icons are hidden unless they are active. */
+a.navigation-menu__action .solid {
+    display: none;
+}
+a.navigation-menu__action.active .solid {
+    display: inline-block;
+}
+
+@media ( width <= 1220px) {
+    a.navigation-menu__action .nav-text {
+        display: block;
+        font-size: 10px;
+    }
+}

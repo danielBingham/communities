@@ -35,3 +35,6 @@ Cases covering the user updating their profile.
     2. Toggle Announcement posts to "on"
     3. Return to your feed.
     4. Confirm Announcement posts *are* shown.
+
+- [ ] Show Friends can be turned off.
+- [ ] Show Friends can be turned back on.

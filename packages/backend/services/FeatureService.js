@@ -22,6 +22,7 @@ const FeatureDAO = require('../daos/FeatureDAO')
 
 const ExampleMigration = require('../migrations/ExampleMigration')
 const UsernameMigration = require('../migrations/UsernameMigration')
+const SubgroupMigration = require('../migrations/SubgroupMigration')
 
 const ServiceError = require('../errors/ServiceError')
 const MigrationError = require('../errors/MigrationError')
@@ -63,6 +64,11 @@ module.exports = class FeatureService {
                 dependsOn: [],
                 conflictsWith: [],
                 migration: new UsernameMigration(core)
+            },
+            'issue-165-subgroups': {
+                dependsOn: [],
+                conflictsWith: [],
+                migration: new SubgroupMigration(core)
             }
         }
     }

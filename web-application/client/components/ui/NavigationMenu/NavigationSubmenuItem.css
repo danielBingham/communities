@@ -1,0 +1,19 @@
+.navigation-menu__item.navigation-submenu__item svg {
+    width: 18px;
+    margin-right: 3px;
+    margin-bottom: -3px;
+}
+.navigation-menu__item.navigation-submenu__item {
+    padding: 7px;
+    font-size: 14px;
+}
+
+@media ( width <= 1220px) {
+    .navigation-menu__sub-menu .navigation-menu__item {
+        white-space: nowrap;
+    }
+    .navigation-menu__sub-menu .navigation-menu__item .nav-text {
+        display: inline-block;
+        font-size: 14px;
+    }
+}

@@ -1,3 +1,9 @@
+.group-badge {
+    border: thin solid var(--main-border-color);
+    border-radius: 7px;
+    background-color: white;
+}
+
 .group-badge__grid {
     display: grid;
     grid-template-columns: 120px auto;

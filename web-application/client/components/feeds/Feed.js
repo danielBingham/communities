@@ -1,13 +1,12 @@
-import React, { useEffect, useMemo }  from 'react'
+import  { useMemo }  from 'react'
 import { useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
 
-import { useRequest } from '/lib/hooks/useRequest'
-import { useGroupFromSlug } from '/lib/hooks/Group'
-import { useGroupMember } from '/lib/hooks/GroupMember'
-import { GroupPostPermissions, useGroupPostPermission } from '/lib/hooks/permission'
+import can, { Actions, Entities} from '/lib/permission'
 
-import { getGroups } from '/state/Group'
+import { useGroupFromSlug } from '/lib/hooks/Group'
+import { useGroupPermissionContext } from '/lib/hooks/Group'
+
 
 import PostList from '/components/posts/PostList'
 import PostForm, { CreatePostButton } from '/components/posts/PostForm'
@@ -19,13 +18,12 @@ import './Feed.css'
 const Feed = function({ type }) {
     const { slug } = useParams()
 
-    const [request, makeRequest] = useRequest()
-
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const [group, groupRequest] = useGroupFromSlug( type === 'group' ? slug : undefined)
-    const [currentMember, memberRequest ] = useGroupMember(group?.id, currentUser?.id)
 
-    const canCreateGroupPost = useGroupPostPermission(currentUser, GroupPostPermissions.CREATE, { group: group, userMember: currentMember })
+    const [ context, requests] = useGroupPermissionContext(currentUser, group?.id)
+
+    const canCreateGroupPost = can(currentUser, Actions.create, Entities.GroupPost, context)
 
     const params = useMemo(() => {
         const params = {}

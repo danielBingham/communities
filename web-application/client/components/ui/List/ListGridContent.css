@@ -1,7 +1,7 @@
 .list__grid-content {
     margin: 0 auto;
     width: 100%;
-    max-width: 720px;
+    max-width: 760px;
     min-width: 360px;
 
 }
@@ -9,6 +9,8 @@
     margin: 0 auto;
     display: grid;
     grid-template-columns: repeat(auto-fit, 360px);
+    column-gap: 20px;
+    row-gap: 20px;
     justify-content: center;
     align-items: center;
     justify-items: center;

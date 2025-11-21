@@ -1,0 +1,47 @@
+.group-profile__header {
+    text-align: center;
+}
+.group-profile__header .group-image {
+    display: block;
+    margin: 0 auto 20px auto;
+    max-width: 200px;
+    height: 200px;
+}
+.group-profile__header .title {
+    font-size: 2em;
+    margin: 0.5em auto;
+}
+.group-profile__header .types {
+    font-size: 1.2em;
+    color: var(--primary-color-dark);
+    margin: 0.5em auto;
+}
+.group-profile__header .types span {
+    display: inline-block;
+    margin: 0 5px;
+}
+.group-profile__header .types svg {
+    width: 1.2em;
+    height: 1.2em;
+    margin-bottom: -0.2em;
+}
+
+.group-profile__details {
+    font-size: 16px;
+    max-width: 400px;
+    margin: 0 auto;
+    text-align: center;
+}
+.group-profile__details .group-profile__about {
+    font-size: 14px;
+    padding: 12px;
+    white-space: pre-line;
+    word-wrap: break-word;
+    text-align: left;
+}
+
+.group-profile__private {
+    margin: 50px auto;
+    text-align: center;
+    font-size: 20px;
+}

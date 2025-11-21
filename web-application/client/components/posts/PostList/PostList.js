@@ -12,6 +12,7 @@ import PostListSinceControl from './PostListSinceControl'
 
 import Button from '/components/ui/Button'
 import Refresher from '/components/ui/Refresher'
+import RequestErrorContent from '/components/errors/RequestError/RequestErrorContent'
 
 import './PostList.css'
 
@@ -35,9 +36,15 @@ const PostList = function({ name, params }) {
             explanation = `${pageStart} to ${pageEnd} of ${query.meta.count} Posts`
         }
     } else {
-        explanation = 'Loading posts...'
-        postViews = ( <Spinner /> )
+        if ( ! request || request?.state === 'pending' ) {
+            explanation = 'Loading posts...'
+            postViews = ( <Spinner /> )
+        } else if ( request?.state === 'failed' ) {
+            postViews = ( <RequestErrorContent message="Attempt to retrieve posts" request={request} /> )
+        }
     }
+
+
 
     return (
         <div className="post-list">

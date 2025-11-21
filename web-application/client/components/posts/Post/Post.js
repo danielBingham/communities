@@ -1,4 +1,24 @@
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media 
+ *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
 import { useState } from 'react'
+import { useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 
 import { UsersIcon, UserGroupIcon, GlobeAltIcon, MegaphoneIcon } from '@heroicons/react/24/solid'
@@ -7,7 +27,7 @@ import { InformationCircleIcon } from '@heroicons/react/16/solid'
 import { useFeature } from '/lib/hooks/feature'
 import { usePost } from '/lib/hooks/Post'
 import { useUser } from '/lib/hooks/User'
-import { useGroup } from '/lib/hooks/Group'
+import { useGroup, useGroupPermissionContext } from '/lib/hooks/Group'
 import { useSiteModeration } from '/lib/hooks/SiteModeration'
 import { useGroupModeration } from '/lib/hooks/GroupModeration'
 
@@ -32,9 +52,12 @@ import './Post.css'
 const Post = function({ id, expanded, showLoading, shared }) {
     const [showMore, setShowMore] = useState(expanded) 
 
+    const currentUser = useSelector((state) => state.authentication.currentUser)
+
     const [post, request] = usePost(id)
     const [user, userRequest] = useUser(post?.userId)
-    const [group, groupRequest] = useGroup(post?.groupId) 
+    const [context, requests] = useGroupPermissionContext(currentUser, post?.groupId) 
+    const group = context.group
     const [groupModeration, groupModerationRequest] = useGroupModeration(post?.groupModerationId)
     const [siteModeration, siteModerationRequest] = useSiteModeration(post?.siteModerationId)
 
@@ -58,7 +81,7 @@ const Post = function({ id, expanded, showLoading, shared }) {
         && (
             (request && request.state == 'pending' ) 
             || (userRequest && userRequest.state === 'pending') 
-            || (groupRequest && groupRequest.state === 'pending')
+            || (post?.groupId !== undefined && post?.groupId !== null && ( context.group === undefined || requests.hasPending()) )
             || (groupModerationRequest && groupModerationRequest.state === 'pending')
             || (siteModerationRequest && siteModerationRequest.state === 'pending')
         ) ) 

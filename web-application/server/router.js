@@ -258,6 +258,18 @@ module.exports = function(core) {
         })
     })
 
+    router.get('/group/:id/parents', rateLimit(2400), function(request, response, next) {
+        groupController.getParents(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.get('/group/:id/parents/members/:userId', rateLimit(2400), function(request, response, next) {
+        groupController.getParentMembers(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
     /**************************************************************************
      * GroupMembers REST routes
      **************************************************************************/

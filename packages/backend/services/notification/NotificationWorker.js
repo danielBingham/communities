@@ -134,7 +134,9 @@ module.exports = class NotificationWorker {
                 return await this.groupMemberNotifications.update(currentUser, type, context, options)
             }
         } else if ( entity === 'GroupModeration' ) {
-            if ( action === 'update' ) {
+            if ( action === 'create' ) {
+                return await this.groupModerationNotifications.create(currentUser, type, context, options)
+            } else if ( action === 'update' ) {
                 return await this.groupModerationNotifications.update(currentUser, type, context, options)
             }
         }

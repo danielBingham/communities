@@ -4,15 +4,14 @@ import { useSelector } from 'react-redux'
 import { FlagIcon as FlagIconOutline } from '@heroicons/react/24/outline'
 import { CheckCircleIcon, XCircleIcon, FlagIcon as FlagIconSolid } from '@heroicons/react/24/solid'
 
+import can, { Actions, Entities } from '/lib/permission'
+
 import { useRequest } from '/lib/hooks/useRequest'
 
 import { usePost } from '/lib/hooks/Post'
 import { usePostComment } from '/lib/hooks/PostComment'
-import { useGroup } from '/lib/hooks/Group'
-import { useGroupMember } from '/lib/hooks/GroupMember'
 import { useGroupModeration } from '/lib/hooks/GroupModeration'
-
-import { useGroupPermission, GroupPermissions } from '/lib/hooks/permission'
+import { useGroupPermissionContext } from '/lib/hooks/Group'
 
 import { postGroupModerations } from '/state/GroupModeration'
 
@@ -34,12 +33,11 @@ const FlagPostCommentForGroup = function({ postId, postCommentId} ) {
     const [post, postRequest] = usePost(postId)
     const [comment, commentRequest] = usePostComment(postId, postCommentId)
 
-    const [group, groupRequest] = useGroup(post?.groupId)
-    const [currentMember, currentMemberRequest] = useGroupMember(group?.id, currentUser.id)
-
     const [groupModeration, groupModerationRequest] = useGroupModeration(comment?.groupModerationId)
 
-    const canModerateGroup = useGroupPermission(currentUser, GroupPermissions.MODERATE, { group: group, userMember: currentMember })
+    const [context, requests] = useGroupPermissionContext(currentUser, post?.groupId)
+
+    const canModerateGroup = can(currentUser, Actions.moderate, Entities.Group, context)
 
     const [request, makeRequest] = useRequest()
 
@@ -63,6 +61,10 @@ const FlagPostCommentForGroup = function({ postId, postCommentId} ) {
     }
 
     if ( ! post?.groupId ) {
+        return null
+    }
+
+    if ( context?.group === undefined || requests.hasPending() ) {
         return null
     }
 

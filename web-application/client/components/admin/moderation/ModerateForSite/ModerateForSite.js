@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux'
 
 import { XCircleIcon, FlagIcon } from '@heroicons/react/20/solid'
 
-import { SitePermissions, useSitePermission } from '/lib/hooks/permission'
+import can, {Actions, Entities} from '/lib/permission'
 
 import { usePost } from '/lib/hooks/Post'
 import { usePostComment } from '/lib/hooks/PostComment'
@@ -22,7 +22,7 @@ const ModerateForSite = function({ postId, postCommentId }) {
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
     const [siteModeration, siteModerationRequest] = useSiteModeration(comment ? comment?.siteModerationId : post?.siteModerationId) 
-    const canModerateSite = useSitePermission(currentUser, SitePermissions.MODERATE)
+    const canModerateSite = can(currentUser, Actions.moderate, Entities.Site)
 
     if ( siteModeration === null ) {
         return null

@@ -19,7 +19,9 @@
  ******************************************************************************/
 
 const DeviceSchema = require('./Device')
+const GroupSchema = require('./Group')
 
 module.exports = {
-    DeviceSchema: DeviceSchema
+    DeviceSchema: DeviceSchema,
+    GroupSchema: GroupSchema
 }

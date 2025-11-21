@@ -14,7 +14,7 @@ const GroupList = function({ params }) {
 
     let groupViews = []
     let explanation = ''
-    if ( query !== null ) {
+    if ( query !== null && query !== undefined ) {
         for(const id of query.list) {
             groupViews.push(<GroupBadge key={id} id={id} />)
         }

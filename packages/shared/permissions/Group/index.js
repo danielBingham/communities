@@ -17,39 +17,48 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-
-const canAdminGroup = function(user, context) {
-    if ( context.group === undefined || context.group === null ) {
+const isAdmin = function(member, group) {
+    if ( group === undefined || group === null ) {
         return false
     }
 
-    // TODO This is a really blunt tool.  Lets create something more granular in the future.
-    // SiteModerators can admin groups in order to remove.
-    if ( user.siteRole === 'admin' || user.siteRole === 'superadmin' ) {
-        return true
-    }
-
-
-    // Always exclude banned members.
-    if ( context.userMember !== undefined && context.userMember !== null
-        && context.userMember.groupId === context.group.id
-        && context.userMember.status === 'banned' )
-    {
+    if ( member === undefined || member === null ) {
         return false
     }
 
-    if ( context.userMember !== undefined && context.userMember !== null 
-        && context.userMember.groupId === context.group.id
-        && context.userMember.status === 'member' 
-        && context.userMember.role === 'admin') 
+    if ( member.groupId === group.id
+        && member.status === 'member' 
+        && member.role === 'admin') 
     {
         return true 
     }
-    return false 
+
+    return false
 }
 
-const canModerateGroup = function(user, context) {
-    if ( context.group === undefined || context.group === null ) {
+const isModerator = function(member, group) {
+    if ( group === undefined || group === null ) {
+        return false
+    }
+
+    if ( member === undefined || member === null ) {
+        return false
+    }
+
+    if ( member.groupId === group.id
+        && member.status === 'member' 
+        && member.role === 'moderator') 
+    {
+        return true 
+    }
+
+    return false
+
+}
+
+
+const canAdminGroup = function(user, context) {
+    if ( ! ('group' in context) || context.group === undefined || context.group === null ) {
         return false
     }
 
@@ -59,18 +68,82 @@ const canModerateGroup = function(user, context) {
         return true
     }
 
+    // If we have the ancestors, then check the ancestors.
+    //
+    // If they are an admin on any ancestor group, then they can admin this
+    // group.
+    if ( 'ancestors' in context && 'ancestorMembers' in context ) {
+        for(const ancestor of context.ancestors) {
+            if ( isAdmin(context.ancestorMembers[ancestor.id], ancestor) ) {
+                return true
+            }
+        }
+    }
+
+    // If we have the parent, then check the parent.  If they are an admin of
+    // the parent, then they can admin this group.
+    if ( 'parentGroup' in context && 'parentMember' in context ) {
+        if ( isAdmin(context.parentMember, context.parentGroup) ) {
+            return true
+        }
+    }
+
+    // At this point, they can only admin if they are a member.
+    if ( ! ('userMember' in context) || context.userMember === undefined || context.userMember === null ) {
+        return false
+    }
+
+    if ( user.id !== context.userMember.userId ) {
+        return false
+    }
+
     // Always exclude banned members.
-    if ( context.userMember !== undefined && context.userMember !== null
-        && context.userMember.groupId === context.group.id
+    if (  context.userMember.groupId === context.group.id
         && context.userMember.status === 'banned' )
     {
         return false
     }
 
-    if ( context.userMember !== undefined && context.userMember !== null 
-        && context.userMember.groupId === context.group.id
-        && context.userMember.status === 'member' 
-        && (context.userMember.role === 'moderator' || context.userMember.role === 'admin')) 
+    if ( isAdmin(context.userMember, context.group) === true ) {
+        return true
+    }
+
+    return false
+}
+
+const canModerateGroup = function(user, context) {
+    if ( ! ('group' in context) || context.group === undefined || context.group === null ) {
+        return false
+    }
+
+    // TODO This is a really blunt tool.  Lets create something more granular in the future.
+    // SiteModerators can admin groups in order to remove.
+    if ( user.siteRole === 'admin' || user.siteRole === 'superadmin' ) {
+        return true
+    }
+
+    // If they can admin the group, then they can moderate it.
+    if ( canAdminGroup(user, context) === true ) {
+        return true
+    }
+
+    // At this point, they can only moderate if they are a member.
+    if ( ! ('userMember' in context) || context.userMember === undefined || context.userMember === null ) {
+        return false
+    }
+
+    if ( user.id !== context.userMember.userId ) {
+        return false
+    }
+
+    // Always exclude banned members.
+    if ( context.userMember.groupId === context.group.id
+        && context.userMember.status === 'banned' )
+    {
+        return false
+    }
+
+    if ( isModerator(context.userMember, context.group) === true ) 
     {
         return true 
     }
@@ -79,7 +152,14 @@ const canModerateGroup = function(user, context) {
 }
 
 const canCreateGroup = function(user, context) {
-    return true
+    // If `group` exists, it's the parent group and their ability to create
+    // depends on their permissions in the parent group.  If group is not
+    // present, then this is a new top level group and anyone can create it.
+    if ( ! ('group' in context) || context.group === undefined || context.group === null ) {
+        return true 
+    }
+
+    return canAdminGroup(user, context)
 }
 
 const canViewGroup = function(user, context) {
@@ -91,6 +171,11 @@ const canViewGroup = function(user, context) {
         return false
     }
 
+    // If they can admin the group, then they can view it.
+    if ( canAdminGroup(user, context) === true ) {
+        return true
+    }
+
     // Always exclude banned members.
     if ( context.userMember !== undefined && context.userMember !== null
         && context.userMember.groupId === context.group.id
@@ -99,12 +184,25 @@ const canViewGroup = function(user, context) {
         return false
     }
 
-
-    if ( context.group.type === 'open' || context.group.type == 'private') {
+    // Anyone can view these groups.
+    if ( context.group.type === 'open' || context.group.type == 'private' || context.group.type === 'private-open') {
         return true
     }
 
-    if ( context.userMember !== undefined && context.userMember !== null 
+    // For `hidden-open` and `hidden-private` groups they can see it if they
+    // are a member of the parent group.
+    if ( context.group.type === 'hidden-open' || context.group.type === 'hidden-private' ) {
+        if ( 'parentMember' in context && context.parentMember !== undefined && context.parentMember !== null
+            && context.parentMember.userId === user.id && context.parentMember.groupId === context.group.parentId
+            && context.parentMember.status === 'member' 
+        ) {
+            return true
+        }
+    }
+
+    // At this point, 'hidden' is all that is left and hidden groups can only
+    // be seen by their members and invitees.
+    if ( 'userMember' in context && context.userMember !== undefined && context.userMember !== null 
         && context.userMember.groupId === context.group.id
         && context.userMember.status !== 'banned' ) 
     {

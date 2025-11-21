@@ -33,3 +33,10 @@
     text-align: left;
     padding-left: 7px;
 }
+
+.group-moderation-view__admin-non-member {
+    width: 100%;
+    max-width: 650px;
+    margin: 10px auto;
+    text-align: center;
+}

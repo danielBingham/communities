@@ -3,8 +3,9 @@ import { useSelector } from 'react-redux'
 
 import { QueueListIcon, InformationCircleIcon, MegaphoneIcon } from '@heroicons/react/24/solid'
 
+import can, {Actions, Entities} from '/lib/permission'
+
 import { usePostDraft } from '/lib/hooks/usePostDraft'
-import { useSitePermission, SitePermissions } from '/lib/hooks/permission'
 
 import { DropdownMenu, DropdownMenuBody, DropdownMenuTrigger, DropdownMenuItem } from '/components/ui/DropdownMenu'
 
@@ -15,7 +16,7 @@ const PostTypeControl = function({ postId, groupId, sharedPostId }) {
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
     const [draft, setDraft ] = usePostDraft(postId, groupId, sharedPostId)
-    const canAdminSite = useSitePermission(currentUser, SitePermissions.ADMIN)
+    const canAdminSite = can(currentUser, Actions.admin, Entities.Site)
 
     const setType = function(type) {
         const newDraft = { ...draft }

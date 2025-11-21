@@ -8,7 +8,7 @@ import { useGroupMember } from '/lib/hooks/GroupMember'
 import { getUser } from '/state/User'
 
 import UserProfileImage from '/components/users/UserProfileImage'
-import GroupMembershipButton from '/components/groups/components/GroupMembershipButton'
+import GroupMembershipButton from '/components/groups/GroupMembershipButton'
 import GroupMemberDotsMenu from './GroupMemberDotsMenu'
 
 import { ListGridContentItem } from '/components/ui/List'

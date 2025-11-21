@@ -1,15 +1,15 @@
 import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
 
+import can, {Actions, Entities} from '/lib/permission'
+
 import { useRequest } from '/lib/hooks/useRequest'
 
 import { usePost } from '/lib/hooks/Post'
 import { usePostComment } from '/lib/hooks/PostComment'
-import { useGroup } from '/lib/hooks/Group'
+import { useGroupPermissionContext } from '/lib/hooks/Group'
 import { useGroupMember } from '/lib/hooks/GroupMember'
 import { useGroupModeration } from '/lib/hooks/GroupModeration'
-
-import { GroupPermissions, useGroupPermission } from '/lib/hooks/permission'
 
 import { patchGroupModeration } from '/state/GroupModeration'
 
@@ -19,6 +19,8 @@ import Spinner from '/components/Spinner'
 import Modal from '/components/generic/modal/Modal'
 import ErrorModal from '/components/errors/ErrorModal'
 
+import './ModerateForGroupModal.css'
+
 const ModerateForGroupModal = function({ postId, postCommentId, isVisible, setIsVisible }) {
     const [reason, setReason] = useState('')
    
@@ -27,12 +29,12 @@ const ModerateForGroupModal = function({ postId, postCommentId, isVisible, setIs
     const [post, postRequest] = usePost(postId)
     const [comment, commentRequest ] = usePostComment(postId, postCommentId)
 
-    const [group, groupRequest] = useGroup(post?.groupId)
-    const [currentMember, currentMemberRequest] = useGroupMember(group?.id, currentUser.id)
-
     const [groupModeration, groupModerationRequest] = useGroupModeration(postCommentId ? comment?.groupModerationId : post?.groupModerationId)
 
-    const canModerateGroup = useGroupPermission(currentUser, GroupPermissions.MODERATE, { group: group, userMember: currentMember })
+    const [ context, requests] = useGroupPermissionContext(currentUser, post?.groupId)
+    const group = context.group
+    const currentMember = context.userMember
+    const canModerateGroup = can(currentUser, Actions.moderate, Entities.Group, context)
 
     const [request, makeRequest] = useRequest()
 
@@ -53,7 +55,7 @@ const ModerateForGroupModal = function({ postId, postCommentId, isVisible, setIs
         makeRequest(patchGroupModeration(patch))
     }
 
-    if ( canModerateGroup !== true ) {
+    if ( canModerateGroup !== true || ! currentMember ) {
         return null
     }
 
@@ -87,8 +89,10 @@ const ModerateForGroupModal = function({ postId, postCommentId, isVisible, setIs
                     value={reason}
                     onChange={(e) => { setReason(e.target.value)}}
                 />
-                <Button type="warn" onClick={() => moderate('rejected')}>Reject</Button>
-                <Button type="success" onClick={() => moderate('approved')}>Approve</Button>
+                <div className="moderate-for-group__controls">
+                    <Button type="warn" onClick={() => moderate('rejected')}>Reject</Button>
+                    <Button type="success" onClick={() => moderate('approved')}>Approve</Button>
+                </div>
                 { error }
             </div>
         </Modal>

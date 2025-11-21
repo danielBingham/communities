@@ -1,33 +1,38 @@
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media 
+ *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
 import { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useParams, Routes, Route } from 'react-router-dom'
 
-import {
-    GlobeAltIcon,
-    LockOpenIcon,
-    LockClosedIcon,
-    UserGroupIcon,
-    DocumentCheckIcon,
-    PlusIcon
-} from '@heroicons/react/24/outline'
-
 import { resetEntities } from '/state/lib'
 
-import { useGroupFromSlug } from '/lib/hooks/Group'
-import { useGroupMember } from '/lib/hooks/GroupMember'
-import { 
-    GroupPermissions, useGroupPermission, 
-    GroupMemberPermissions, useGroupMemberPermission, 
-    GroupPostPermissions, useGroupPostPermission 
-} from '/lib/hooks/permission'
+import can, { Actions, Entities } from '/lib/permission'
 
-import Button from '/components/ui/Button'
+import { useGroupFromSlug, useGroupPermissionContext } from '/lib/hooks/Group'
 
 import PostView from '/pages/posts/views/PostView'
 
-import GroupMembershipButton from '/components/groups/components/GroupMembershipButton'
-import GroupImage from '/components/groups/view/GroupImage'
+import GroupProfile from '/components/groups/GroupProfile'
+import GroupNavigationMenu from '/components/groups/GroupNavigationMenu'
 
+import GroupSubgroupView from '/pages/group/views/GroupSubgroupView'
 import GroupMembersView from '/pages/group/views/GroupMembersView'
 import GroupInviteView from '/pages/group/views/GroupInviteView'
 import GroupEmailInviteView from '/pages/group/views/GroupEmailInviteView'
@@ -35,7 +40,6 @@ import GroupFeedView from '/pages/group/views/GroupFeedView'
 import GroupModerationView from '/pages/group/views/GroupModerationView'
 import GroupSettingsView from '/pages/group/views/GroupSettingsView'
 
-import { NavigationMenu, NavigationMenuLink, NavigationMenuButton, NavigationSubmenu, NavigationSubmenuLink, NavigationMenuItem} from '/components/ui/NavigationMenu'
 import { Page, PageLeftGutter, PageRightGutter, PageBody } from '/components/generic/Page'
 import Error404 from '/components/errors/Error404'
 import Spinner from '/components/Spinner'
@@ -43,36 +47,23 @@ import Spinner from '/components/Spinner'
 import './GroupPage.css'
 
 const GroupPage = function() {
-
     const { slug } = useParams()
 
+    const [group, groupRequest ] = useGroupFromSlug(slug)
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
-    const [group, request] = useGroupFromSlug(slug)
-    const [currentMember, memberRequest ] = useGroupMember(group?.id, currentUser?.id)
+    const [context, requests] = useGroupPermissionContext(currentUser, group?.id)
 
-    const context = {
-        group: group,
-        userMember: currentMember
-    }
-
-    const canViewGroup = useGroupPermission(currentUser, GroupPermissions.VIEW, context)
-    const canCreateGroupPost = useGroupPostPermission(currentUser, GroupPostPermissions.CREATE, context)
-    const canQueryGroupMember = useGroupMemberPermission(currentUser, GroupMemberPermissions.QUERY, context)
-    const canViewGroupPost = useGroupPostPermission(currentUser, GroupPostPermissions.VIEW, context)
-    const canModerateGroup = useGroupPermission(currentUser, GroupPermissions.MODERATE, context)
-    const canAdminGroup = useGroupPermission(currentUser, GroupPermissions.ADMIN, context)
+    const canViewGroup = can(currentUser, Actions.view, Entities.Group, context)
 
     const dispatch = useDispatch()
     useEffect(() => {
         return () => {
             dispatch(resetEntities())
         }
-    }, [])
+    }, [ slug ])
 
-    if (  ( group === undefined || request?.state == 'pending')
-            || ( currentMember === undefined  || memberRequest?.state === 'pending'))
-    {
+    if ( group === undefined || groupRequest?.state === 'pending' || requests.hasPending()) {
         return (
             <Page id="group-page">
                 <PageLeftGutter>
@@ -86,7 +77,7 @@ const GroupPage = function() {
         )
     } 
 
-    if ( ! group ) {
+    if ( group === null ) {
         // The request won't be failed, because it's a search request.  So it will
         // just return an empty result.
         return (
@@ -116,45 +107,10 @@ const GroupPage = function() {
         )
     }
 
-    let type = ''
-    if ( group.type == 'open' ) {
-        type = ( <span><GlobeAltIcon /> Public</span>)
-    } else if ( group.type == 'private' ) {
-        type = (<span><LockOpenIcon /> Private</span>)
-    } else if ( group.type == 'hidden' ) {
-        type = (<span><LockClosedIcon /> Hidden</span>)
-    }
-
-    let postingPermissions = ''
-    if ( group.postPermissions === 'anyone' ) {
-        postingPermissions = ( <span><GlobeAltIcon /> Anyone may Post</span> )
-    } else if ( group.postPermissions === 'members' ) {
-        postingPermissions = ( <span><UserGroupIcon /> Members may Post</span> )
-    } else if ( group.postPermissions === 'approval' ) {
-        postingPermissions = ( <span><DocumentCheckIcon /> Posts Require Approval</span> )
-    } else if ( group.postPermissions === 'restricted' ) {
-        postingPermissions = ( <span><LockClosedIcon /> Only Moderators may Post</span> )
-    }
-
     return (
         <Page id="group-page">
             <PageLeftGutter>
-                { canViewGroup === true && <NavigationMenu className="group-page__menu">
-                    { canCreateGroupPost === true && <NavigationMenuButton href={`/create?groupId=${group.id}`} icon="Plus" type="primary" text="Create" />  }
-                    { canViewGroupPost === true && <NavigationMenuLink to={`/group/${group.slug}`} icon="QueueList" text="Feed" /> }
-                    { canQueryGroupMember === true && <NavigationSubmenu  icon="UserGroup" title="Members"> 
-                        <NavigationSubmenuLink to={`/group/${group.slug}/members`} icon="UserGroup" text="Members" />
-                        <NavigationSubmenuLink to={`/group/${group.slug}/members/admin`} icon="ExclamationTriangle" text="Administrators" />
-                        { canModerateGroup && <NavigationSubmenuLink to={`/group/${group.slug}/members/invitations`} icon="UserPlus" text="Invitations" /> }
-                        { canModerateGroup && group.type === 'private' && <NavigationSubmenuLink to={`/group/${group.slug}/members/requests`} icon="UserPlus" text="Requests" /> }
-                        { canModerateGroup && <NavigationSubmenuLink to={`/group/${group.slug}/members/banned`} icon="XCircle" text="Banned Users" /> }
-                        { canModerateGroup && <NavigationSubmenuLink to={`/group/${group.slug}/members/email-invitations`} icon="Envelope" text="Email Invitations" /> }
-
-                    </NavigationSubmenu>}
-                    { canModerateGroup === true && <NavigationMenuLink to="moderation" icon="Flag" text="Moderation" /> }
-                    { canAdminGroup === true && <NavigationMenuLink to="settings" icon="Cog6Tooth" text="Settings" /> }
-                    <NavigationMenuItem><GroupMembershipButton groupId={group.id} userId={currentUser?.id} /></NavigationMenuItem>
-                </NavigationMenu> }
+                <GroupNavigationMenu groupId={group.id} />
             </PageLeftGutter>
             <PageBody>
                 <div className="group-page__main">
@@ -167,6 +123,7 @@ const GroupPage = function() {
                             <Route path="email-invitations" element={ <GroupMembersView groupId={group.id} type="email-invitations" /> } />
                             <Route index element={ <GroupMembersView groupId={group.id} type="member" /> } />
                         </Route>
+                        <Route path="subgroups" element={ <GroupSubgroupView groupId={group.id} /> } />
                         <Route path="invite" element={ <GroupInviteView groupId={group.id} /> } />
                         <Route path="email-invite" element={ <GroupEmailInviteView groupId={group.id} /> } />
                         <Route path="moderation" element={ <GroupModerationView groupId={group.id} /> } />
@@ -177,17 +134,7 @@ const GroupPage = function() {
                 </div>
             </PageBody>
             <PageRightGutter>
-                <div className="group-page__header">
-                    <GroupImage groupId={group.id} />
-                    <div className="title">{ group.title}</div>
-                    <div className="types">
-                        <span className="type">{ type }</span>
-                        <span className="post-permissions">{ postingPermissions }</span>
-                    </div>
-                </div>
-                <div className="details">
-                    <div className="about"> { group.about }</div>
-                </div>
+                <GroupProfile groupId={group.id} />
             </PageRightGutter>
         </Page>
     )
