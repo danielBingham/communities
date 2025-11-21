@@ -30,7 +30,7 @@
 		74530B882E6A26A900A5F70A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 504EC30B1FED79650016851F /* Main.storyboard */; };
 		74530B892E6A26A900A5F70A /* config.xml in Resources */ = {isa = PBXBuildFile; fileRef = 2FAD9762203C412B000D30F8 /* config.xml */; };
 		99935013D7810175C0489F67 /* Pods_App_Local.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1C38C3DF5566CF966E23D4B4 /* Pods_App_Local.framework */; };
-		A084ECDBA7D38E1E42DFC39D /* BuildFile in Frameworks */ = {isa = PBXBuildFile; };
+		A084ECDBA7D38E1E42DFC39D /* (null) in Frameworks */ = {isa = PBXBuildFile; };
 		ACE3A653828BAC8EADCFE644 /* Pods_App_Staging.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4E313860579D72FEE4548EF8 /* Pods_App_Staging.framework */; };
 /* End PBXBuildFile section */
 
@@ -65,7 +65,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A084ECDBA7D38E1E42DFC39D /* BuildFile in Frameworks */,
+				A084ECDBA7D38E1E42DFC39D /* (null) in Frameworks */,
 				70C3ACA78B422F922242F85B /* Pods_App.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -137,7 +137,6 @@
 				CADD0FC43D13A640ACAE06F3 /* Pods-App Staging.debug.xcconfig */,
 				0937B9109CB5C60A5C5FEAE6 /* Pods-App Staging.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -572,13 +571,13 @@
 				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Distribution: Communities Social, LLC (GAK47A8S5M)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = GAK47A8S5M;
 				INFOPLIST_FILE = App/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 0.7.5;
+				MARKETING_VERSION = 0.9.0;
 				OTHER_SWIFT_FLAGS = "$(inherited) \"-D\" \"COCOAPODS\" \"-DDEBUG\"";
 				PRODUCT_BUNDLE_IDENTIFIER = social.communities;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -598,14 +597,14 @@
 				CODE_SIGN_IDENTITY = "iPhone Distribution: Communities Social, LLC (GAK47A8S5M)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Communities Social, LLC (GAK47A8S5M)";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = GAK47A8S5M;
 				INFOPLIST_FILE = App/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 0.7.5;
+				MARKETING_VERSION = 0.9.0;
 				PRODUCT_BUNDLE_IDENTIFIER = social.communities;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -623,13 +622,13 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = GAK47A8S5M;
 				INFOPLIST_FILE = "App Staging-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Communities -- Staging";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 0.7.5;
+				MARKETING_VERSION = 0.9.0;
 				OTHER_SWIFT_FLAGS = "$(inherited) \"-D\" \"COCOAPODS\" \"-DDEBUG\"";
 				PRODUCT_BUNDLE_IDENTIFIER = social.communities.staging;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -646,13 +645,13 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = GAK47A8S5M;
 				INFOPLIST_FILE = "App Staging-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Communities -- Staging";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 0.7.5;
+				MARKETING_VERSION = 0.9.0;
 				PRODUCT_BUNDLE_IDENTIFIER = social.communities.staging;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";
@@ -668,13 +667,13 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = GAK47A8S5M;
 				INFOPLIST_FILE = "App Local-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Communities - Local";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 0.7.5;
+				MARKETING_VERSION = 0.9.0;
 				OTHER_SWIFT_FLAGS = "$(inherited) \"-D\" \"COCOAPODS\" \"-DDEBUG\"";
 				PRODUCT_BUNDLE_IDENTIFIER = social.communities.local;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -691,13 +690,13 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = GAK47A8S5M;
 				INFOPLIST_FILE = "App Local-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Communities - Local";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 0.7.5;
+				MARKETING_VERSION = 0.9.0;
 				PRODUCT_BUNDLE_IDENTIFIER = social.communities.local;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";
