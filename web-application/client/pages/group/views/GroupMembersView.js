@@ -67,7 +67,9 @@ const GroupMembersView = function({ groupId, type }) {
     } else if ( type === 'invitations' ) {
         descriptor = 'Invitations'
         params = { status: 'pending-invited', user: { status: 'confirmed' }}
-    } else if ( type === 'requests' && group.type === 'private' ) {
+    } else if ( type === 'requests' && 
+        ( group.type === 'private' || group.type === 'private-open' || group.type === 'hidden-private' )
+    ) {
         descriptor = 'Requests'
         params = { status: 'pending-requested' } 
     } else if ( type === 'banned' ) {

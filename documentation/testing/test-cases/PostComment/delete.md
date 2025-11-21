@@ -1,6 +1,6 @@
 ## [Delete PostComment](documentation/testing/test-cases/PostComment/update.md)
 
-Cases covering making comments on posts.
+Cases covering deleting comments on posts.
 
 ### Pre-requisites
 
@@ -10,14 +10,17 @@ Cases covering making comments on posts.
 
 ### Cases
 
-- [ ] As User2, comment on User1's post.
-    - [ ] As User2, delete the comment.
-    - [ ] Confirm the comment is removed.
+- [ ] Users can delete their comments.
+    1. As User2, comment on User1's post.
+        1. Delete the comment.
+        2. Confirm the comment is removed.
 
-- [ ] As User2, comment on User1's post.
-    - [ ] As User1, check the dots menu for User2's comment.
-        - [ ] Confirm "delete" is not shown.
+- [ ] Users should not be able to delete other user's comments.
+    1. As User2, comment on User1's post.
+    2. As User1, check the dots menu for User2's comment.
+        1. Confirm "delete" is not shown.
 
-- [ ] As User2, comment on User1's post, mentioning User1.
-    - [ ] As User2, delete the comment.
-    - [ ] As User1, click on the mention notification. Confirm is shows the post, but comment is gone.
+- [ ] Users mentioned in comments should still be able to view the post from the notification, but not the comment.
+    1. As User2, comment on User1's post, mentioning User1.
+        1. Delete the comment.
+    2. As User1, click on the mention notification. Confirm is shows the post, but comment is gone.

@@ -68,11 +68,19 @@ module.exports = class PostController {
 
     async getRelations(currentUser, results, requestedRelations) {
 
+        const blockResults = await this.core.database.query(`
+            SElECT user_id, friend_id
+                FROM user_relationships
+                    WHERE (user_id = $1 OR friend_id = $1) AND status = 'blocked'
+        `, [currentUser.id])
+
+        const blockIds = blockResults.rows.map((r) => r.user_id == currentUser.id ? r.friend_id : r.user_id)
+
         // We only need these for the initial posts.  These are not displayed on Shared Posts.
         //
         const postCommentResults = await this.postCommentDAO.selectPostComments({
-            where: `post_comments.post_id = ANY($1::uuid[])`,
-            params: [results.list]
+            where: `post_comments.post_id = ANY($1::uuid[]) AND post_comments.user_id != ALL($2::uuid[])`,
+            params: [results.list, blockIds]
         })
 
         const postReactionResults = await this.postReactionDAO.selectPostReactions({
@@ -280,7 +288,7 @@ module.exports = class PostController {
                                 ( groups.type = 'hidden-open' OR groups.type = 'hidden-private' ) 
                                 AND (
                                     (group_members.user_id = $1 AND group_members.status != 'banned') 
-                                    OR (parent_members.user_id = $1 AND parent_members.status != 'banned')
+                                    OR (parent_members.user_id = $1 AND parent_members.status = 'member')
                                 )
                             )
                     `, [currentUser.id])

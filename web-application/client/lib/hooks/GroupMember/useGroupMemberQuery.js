@@ -36,8 +36,7 @@ export const useGroupMemberQuery = function(groupId, queryParameters, skip) {
     const dispatch = useDispatch()
 
     const reset = function() {
-        dispatch(setGroupMemberShouldQuery({ name: key, value: true }))
-        resetRequest()
+        dispatch(clearGroupMemberQuery({ name: key }))
     }
 
     useEffect(() => {

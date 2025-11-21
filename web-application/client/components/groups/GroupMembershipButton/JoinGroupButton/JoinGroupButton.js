@@ -46,6 +46,7 @@ const JoinGroupButton = function({ groupId }) {
     const [context, requests] = useGroupPermissionContext(currentUser, groupId)
     const group = context.group
     const currentMember = context.userMember
+    const parentMember = context.parentMember
 
     const canViewGroup = can(currentUser, Actions.view, Entities.Group, context)
     const canAdminGroup = can(currentUser, Actions.admin, Entities.Group, context)
@@ -102,12 +103,25 @@ const JoinGroupButton = function({ groupId }) {
         return null
     }
 
-    // You can only join open groups, unless you are an admin by way of being an admin of a parent group.
-    if ( canAdminGroup !== true && group.type !== 'open' && group.type !== 'private-open' && group.type !== 'hidden-open' ) {
+    if ( currentMember !== null && currentMember !== undefined ) {
         return null
     }
 
-    if ( currentMember !== null && currentMember !== undefined ) {
+    // You can join a group if:
+    // - You can admin the group.  This means you're an admin of a parent group.
+    // - If the group is 'open'.
+    // - If the group is 'private-open' and you are a member of the parent group.
+    // - If the group is 'hidden-open' and you are a member of the parent group.
+    //
+    // Easier to define this as the opposite of the specific cases we want to let through.
+    if (  
+        ! (
+            canAdminGroup === true
+            || ( group.type === 'open' ) 
+            || ( group.type === 'private-open' && parentMember !== undefined && parentMember !== null )
+            || ( group.type === 'hidden-open' && parentMember !== undefined && parentMember !== null )
+        )
+    ) {
         return null
     }
 

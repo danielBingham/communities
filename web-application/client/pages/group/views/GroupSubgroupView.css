@@ -1,3 +1,12 @@
 .group-subgroup-view__controls {
+    width: 800px;
+    margin: 0 auto;
     text-align: right;
+}
+
+@media ( width < 800px ) {
+    .group-subgroup-view__controls {
+        width: 100%;
+        max-width: 100vw;
+    }
 }

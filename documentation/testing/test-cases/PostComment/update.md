@@ -11,40 +11,58 @@ Cases covering making comments on posts.
 
 ### Cases
 
-- [ ] As User2, comment on User1's post.
-    - [ ] As User2, edit comment.
-    - [ ] As User2, write edit text.
-    - [ ] As User2, post the edit. Confirm comment shows the edit.
+- [ ] Users should be able to edit their comments.
+    1. As User2, comment on User1's post.
+        1. Edit comment.
+        2. Write edit text.
+        3. Post the edit. 
+        4. Confirm comment shows the edit.
 
-- [ ] As User2, comment on User1's post.
-    - [ ] As User2, edit the comment.  Write some edit text.
-    - [ ] As User2, cancel the edit.  Confirm comment shows original text.
+- [ ] Users should be able to cancel edits on their comments.
+    1. As User2, comment on User1's post.
+        1. Edit the comment.
+        2. Write some edit text.
+        3. Cancel the edit.
+        4. Confirm comment shows original text.
 
 #### Mentions
 
-- [ ] As User2, comment on User1's post and mention User3.
-    - [ ] As User3, confirm mention notification.
-    - [ ] As User2, edit the comment.  Confirm User3 is not notified again.
+- [ ] Users mentioned in comments should not be notified again when those comments are editted.
+    1. As User2, comment on User1's post and mention User3.
+    2. As User3, confirm mention notification.
+    3. As User2, edit the comment.
+        1. Confirm User3 is not notified again.
 
-
-- [ ] As User2, comment on User1's post. NOTE: This case covers a current bug.
-    - [ ] As User2, edit the comment and add a mention of User3.
-    - [ ] As User3, confirm notification.
+- [ ] Users newly mentioned during a comment edit should be notified. NOTE: This case covers a current bug.
+    1. As User2, comment on User1's post. 
+        1. Edit the comment and add a mention of User3.
+    2. As User3, confirm notification.
 
 #### Drafts
 
-- [ ] As User2, comment on User1's post.
-    - [ ] As User2, edit the comment.  Write some new text.
-    - [ ] Reload the browser, confirm new text remains.
-    - [ ] Navigate away from the page and back, confirm new text remains.
-    - [ ] As User1, view the comment.  Confirm new text is absent.
-    - [ ] As User2, post the comment.  Confirm edit shows up properly.
+- [ ] Users can draft edits of their comments and have them saved.
+    1. As User2, comment on User1's post.
+        1. Edit the comment.
+        2. Write some new text.
+        3. Reload the browser, confirm new text remains.
+        4. Navigate away from the page and back, confirm new text remains.
+    2. As User1, view the comment.
+        1. Confirm new text is absent.
+    3. As User2, post the comment.
+        1. Confirm edit shows up properly.
 
-- [ ] As User2, comment on User1's post.
-    - [ ] As User2, edit the comment.  Write some new text.
-    - [ ] As User2, log out and log back in.  Confirm text is gone.
+- [ ] User's comment edit drafts are deleted when they log out.
+    1. As User2, comment on User1's post.
+        1. Edit the comment.
+        2. Write some new text.
+        3. Log out and log back in.
+        4. Confirm text is gone.
 
-- [ ] As User2, comment on User1's post.
-    - [ ] As User2, edit the comment. Write some new text.
-    - [ ] As User2, reload the browser.  Confirm text remains.
-    - [ ] As User2, cancel the edit.  Confirm previous text is restored.
+- [ ] Users can cancel comment edits and the drafts will be deleted.
+    1. As User2, comment on User1's post.
+        1. Edit the comment. 
+        2. Write some new text.
+        3. Reload the browser.
+        4. Confirm text remains.
+        5. Cancel the edit.
+        6. Confirm previous text is restored.

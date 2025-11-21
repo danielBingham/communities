@@ -34,6 +34,7 @@ const GroupSettingsView = function({ groupId }) {
     const currentMember = context.userMember
 
     const canAdminGroup = can(currentUser, Actions.admin, Entities.Group, context)
+    const canAdminSite = can(currentUser, Actions.admin, Entities.Site, context)
 
     const navigate = useNavigate()
     const deleteCurrentGroup = function() {
@@ -48,7 +49,7 @@ const GroupSettingsView = function({ groupId }) {
     }, [ request ])
 
     if ( ! currentMember ) {
-        if ( canAdminGroup === true ) {
+        if ( canAdminGroup === true && canAdminSite !== true) {
             return (
                 <div className="group-settings-view">
                     <Card className="group-settings-view__admin-non-member">
@@ -56,7 +57,7 @@ const GroupSettingsView = function({ groupId }) {
                     </Card>
                 </div>
             )
-        } else {
+        } else if ( canAdminGroup !== true ) {
             return ( 
                 <div className="group-settings-view">
                     <Error404 /> 

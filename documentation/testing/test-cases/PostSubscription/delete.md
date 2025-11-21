@@ -11,23 +11,23 @@ Cases covering unsubscribing from posts.
 ### Cases
 
 - [ ] When a user unsubscribes from a post they created, they should no longer be notified of comments. 
-    - [ ] As User1, create a post.
-    - [ ] As User1, unsubscribe from post. 
-    - [ ] As User2, comment on User1's post.
-    - [ ] As User1, confirm not notified.
+    1. As User1, create a post.
+        1. Unsubscribe from post. 
+    2. As User2, comment on User1's post.
+    3. As User1, confirm not notified.
 
 - [ ] When a user unsubscribes from a post they commented on, they should no longer be notified of comments. 
-    - [ ] As User1, create a post.
-    - [ ] As User2, comment on User1's post.
-    - [ ] As User2, unsubscribe from User1's post. 
-    - [ ] As User1, comment on User1's post.
-    - [ ] As User2, confirm not notified.
+    1. As User1, create a post.
+    2. As User2, comment on User1's post.
+        1. Unsubscribe from User1's post. 
+    3. As User1, comment on User1's post.
+    4. As User2, confirm not notified.
 
 - [ ] When a user unsubscribes from a post they subscribed to, they should not longer be notified of comments. 
-    - [ ] As User1, create a public post.
-    - [ ] As User3, subscribe to User1's post.
-    - [ ] As User2, comment on User1's post.
-    - [ ] As User3, confirm notification.
-    - [ ] As User3, unsubscribe from User1's post.
-    - [ ] As User2 comment on User1's post.
-    - [ ] As User3, confirm no notification.
+    1. As User1, create a public post.
+    2. As User3, subscribe to User1's post.
+    3. As User2, comment on User1's post.
+    4. As User3, confirm notification.
+        1. Unsubscribe from User1's post.
+    5. As User2 comment on User1's post.
+    6. As User3, confirm no notification.
