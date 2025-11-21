@@ -8,6 +8,7 @@ import { patchUser } from '/state/User'
 
 import Input from '/components/ui/Input'
 import Spinner from '/components/Spinner'
+import { RequestErrorModal } from '/components/errors/RequestError'
 
 import './ChangeEmailForm.css'
 
@@ -102,15 +103,6 @@ const ChangeEmailForm = function(props) {
         submit = ( <input type="submit" name="submit" value="Change Email" /> )
     }
 
-    let errors = [] 
-    if ( request && request.state == 'failed' ) {
-        errors.push(
-            <div key="request-failed" className="request-failed">
-                { request.errorMessage && <span>{request.errorMessage}</span>}
-                { ! request.errorMessage && <span>Something went wrong with the request: { request.error }.</span>}
-            </div>
-        )
-    }
 
     let result = null
     if ( request && request.state == 'fulfilled' ) {
@@ -147,9 +139,9 @@ const ChangeEmailForm = function(props) {
                     onChange={(event) => setPassword(event.target.value)}
                     error={passwordError}
                 />
-                <div className="error"> { errors } </div>
                 <div className="result"> { result } </div>
                 <div className="submit"> { submit } </div>
+                <RequestErrorModal message="Attempt to change email" request={request} />
             </form>
         </div>
 

@@ -652,7 +652,9 @@ module.exports = class UserController extends BaseController{
             } catch (error ) {
                 if ( error instanceof ServiceError ) {
                     if ( error.type == 'authentication-failed' || error.type == 'no-user' || error.type == 'no-user-password' ) {
-                        throw new ControllerError(403, 'not-authorized', error.message)
+                        throw new ControllerError(403, 'not-authorized', 
+                            error.message, 
+                            'Your password was incorrect.')
                     } else if ( error.type == 'multiple-users' ) {
                         throw new ControllerError(500, 'server-error', 
                             error.message,
