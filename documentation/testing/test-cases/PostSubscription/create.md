@@ -11,27 +11,27 @@ Cases covering subscribing to posts.
 ### Cases
 
 - [ ] When a user creates a post they should be subscribed to the post and notified of comments.
-    - [ ] As User1, create a post.
-    - [ ] As User1, confirm subscribed.
-    - [ ] As User2, comment on User1's post.
-    - [ ] As User1, confirm notified.
+    1. As User1, create a post.
+        1. Confirm subscribed.
+    2. As User2, comment on User1's post.
+    3. As User1, confirm notified.
 
 - [ ] When a user comments on a post, they should be subscribed to the post and notified of comments.
-    - [ ] As User1, create a post.
-    - [ ] As User2, comment on User1's post.
-    - [ ] As User2, confirm subscribed.
-    - [ ] As User1, comment on User1's post.
-    - [ ] As User2, confirm notified.
+    1. As User1, create a post.
+    2. As User2, comment on User1's post.
+        1. Confirm subscribed.
+    3. As User1, comment on User1's post.
+    4. As User2, confirm notified.
 
 - [ ] When a user subscribes to a post, they should be notified of comments.
-    - [ ] As User1, create a public post.
-    - [ ] As User3, subscribe to User1's post.
-    - [ ] As User2, comment on User1's post.
-    - [ ] As User3, confirm notification.
+    1. As User1, create a public post.
+    2. As User3, subscribe to User1's post.
+    3. As User2, comment on User1's post.
+    4. As User3, confirm notification.
 
 - [ ] When a user loses the ability to view a subscribed post they should no longer be notified of comments.
-    - [ ] As User1, create a public post.
-    - [ ] As User3, subscribe to User1's post.
-    - [ ] As User1, change visibility of post to private.
-    - [ ] As User2, comment on User1's post.
-    - [ ] As User3, confirm no notification.
+    1. As User1, create a public post.
+    2. As User3, subscribe to User1's post.
+    3. As User1, change visibility of post to private.
+    4. As User2, comment on User1's post.
+    5. As User3, confirm no notification.
