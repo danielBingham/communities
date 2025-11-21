@@ -28,8 +28,7 @@ export const useGroupQuery = function(queryParameters, skip) {
     const dispatch = useDispatch()
 
     const reset = function() {
-        dispatch(setGroupShouldQuery({ name: key, value: true }))
-        resetRequest()
+        dispatch(clearGroupQuery({ name: key }))
     }
 
     useEffect(() => {
@@ -57,7 +56,7 @@ export const useGroupQuery = function(queryParameters, skip) {
         }
     }, [ query, request ])
 
-    return [query, request, resetRequest]
+    return [query, request, reset]
 }
 
 

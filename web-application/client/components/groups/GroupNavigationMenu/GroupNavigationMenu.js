@@ -65,15 +65,17 @@ const GroupNavigationMenu = function({ groupId }) {
     return (
         <NavigationMenu className="group-navigation-menu">
             { ! isMember && <NavigationMenuItem><GroupMembershipButton groupId={group.id} userId={currentUser.id} /></NavigationMenuItem> }
-            { canCreateGroupPost === true && <NavigationMenuButton href={`/create?groupId=${group.id}`} icon="Plus" type="primary" text="Create" />  }
+            { canCreateGroupPost === true && <NavigationMenuButton href={`/create?groupId=${group.id}&origin=${encodeURIComponent(`/group/${group.slug}`)}`} icon="Plus" type="primary" text="Create" />  }
             { canViewGroupPost === true && <NavigationMenuLink to={`/group/${group.slug}`} icon="QueueList" text="Feed" /> }
             { canQueryGroupMember === true && <NavigationSubmenu  icon="Users" title="Members"> 
                 <NavigationSubmenuLink to={`/group/${group.slug}/members`} icon="Users" text="Members" />
                 <NavigationSubmenuLink to={`/group/${group.slug}/members/admin`} icon="ExclamationTriangle" text="Administrators" />
-                { canModerateGroup && <NavigationSubmenuLink to={`/group/${group.slug}/members/invitations`} icon="UserPlus" text="Invitations" /> }
-                { canModerateGroup && group.type === 'private' && <NavigationSubmenuLink to={`/group/${group.slug}/members/requests`} icon="UserPlus" text="Requests" /> }
-                { canModerateGroup && <NavigationSubmenuLink to={`/group/${group.slug}/members/banned`} icon="XCircle" text="Banned Users" /> }
-                { canModerateGroup && <NavigationSubmenuLink to={`/group/${group.slug}/members/email-invitations`} icon="Envelope" text="Email Invitations" /> }
+                { isMember && canModerateGroup && <NavigationSubmenuLink to={`/group/${group.slug}/members/invitations`} icon="UserPlus" text="Invitations" /> }
+                { isMember && canModerateGroup 
+                    && ( group.type === 'private' || group.type === 'private-open' || group.type === 'hidden-private' )
+                    && <NavigationSubmenuLink to={`/group/${group.slug}/members/requests`} icon="UserPlus" text="Requests" /> }
+                { isMember && canModerateGroup && <NavigationSubmenuLink to={`/group/${group.slug}/members/banned`} icon="XCircle" text="Banned Users" /> }
+                { isMember && canModerateGroup && <NavigationSubmenuLink to={`/group/${group.slug}/members/email-invitations`} icon="Envelope" text="Email Invitations" /> }
             </NavigationSubmenu>}
             { hasSubgroups && canViewGroupPost && <NavigationMenuLink to={`/group/${group.slug}/subgroups`} icon="UserGroup" text="Subgroups" /> }
             { isMember && <NavigationSubmenu icon="EllipsisHorizontal" title="More">

@@ -41,6 +41,7 @@ const RequestMembershipButton = function({ groupId }) {
     const [context, requests] = useGroupPermissionContext(currentUser, groupId)
     const group = context.group
     const currentMember = context.userMember
+    const parentMember = context.parentMember
 
     const canViewGroup = can(currentUser, Actions.view, Entities.Group, context)
     const canAdminGroup = can(currentUser, Actions.admin, Entities.Group, context)
@@ -61,7 +62,7 @@ const RequestMembershipButton = function({ groupId }) {
         return null
     }
 
-    if ( currentMember !== null ) {
+    if ( currentMember !== null && currentMember !== undefined) {
         return null
     }
 
@@ -69,14 +70,25 @@ const RequestMembershipButton = function({ groupId }) {
         return null
     }
 
-    // Users who are admins by way of being admin in a parent group can simply
-    // add themselves.
+    // If you can admin the group, then you can simply join it.  You don't have
+    // to request membership.
     if ( canAdminGroup === true ) {
         return null
     }
 
-    // You can only request membership in private groups.
-    if ( group.type !== 'private' && group.type !== 'hidden-private' ) {
+    // You can request membership in a a group if:
+    // - If the group is 'private'.
+    // - If the group is 'private-open' and you are *not* a member of the parent group. 
+    // - If the group is 'hidden-open' and you are a member of the parent group.
+    //
+    // Easier to define this as the opposite of the specific cases we want to let through.
+    if (  
+        ! (
+            ( group.type === 'private' ) 
+            || ( group.type === 'private-open'  && (parentMember === undefined || parentMember === null ))
+            || ( group.type === 'hidden-private' && parentMember !== undefined && parentMember !== null )
+        )
+    ) {
         return null
     }
 

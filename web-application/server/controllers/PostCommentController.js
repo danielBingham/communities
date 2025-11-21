@@ -107,14 +107,23 @@ module.exports = class PostCommentController {
                 `Either that post doesn't exist or you don't have permission to view it.`)
         }
 
+        const blockResults = await this.core.database.query(`
+            SElECT user_id, friend_id
+                FROM user_relationships
+                    WHERE (user_id = $1 OR friend_id = $1) AND status = 'blocked'
+        `, [currentUser.id])
+
+        const blockIds = blockResults.rows.map((r) => r.user_id == currentUser.id ? r.friend_id : r.user_id)
+
+
         const commentResults = await this.postCommentDAO.selectPostComments({
-            where: `post_comments.post_id = $1`,
-            params: [ postId ]
+            where: `post_comments.post_id = $1 AND post_comments.user_id != ALL($2::uuid[])`,
+            params: [ postId, blockIds ]
         })
 
         const meta = await this.postCommentDAO.selectPostComments({
-            where: `post_commens.post_id = $1`,
-            params: [ postId ]
+            where: `post_commens.post_id = $1 AND post_comments.user_id != ALL($2::uuid[])`,
+            params: [ postId, blockIds ]
         })
 
         const relations = await this.getRelations(currentUser, commentResults)

@@ -76,33 +76,35 @@ const PostContent = function({ postId, groupId, sharedPostId }) {
             return
         }
 
-        timeoutId.current = setTimeout(() => {
-            const links = linkify.find(draft.content)
-            if ( links.length > 0 ) {
-                for(const link of links ) {
-                    if ( link.type !== 'url' ) {
-                        continue
-                    }
+        if ( request?.state !== 'pending' ) {
+            timeoutId.current = setTimeout(() => {
+                const links = linkify.find(draft.content)
+                if ( links.length > 0 ) {
+                    for(const link of links ) {
+                        if ( link.type !== 'url' ) {
+                            continue
+                        }
 
-                    if ( failedLinks.includes(link.href) ) {
-                        continue
-                    }
+                        if ( failedLinks.includes(link.href) ) {
+                            continue
+                        }
 
-                    if ( 'ignoredLinks' in draft && draft.ignoredLinks.includes(link.href)) {
-                        continue
-                    }
+                        if ( 'ignoredLinks' in draft && draft.ignoredLinks.includes(link.href)) {
+                            continue
+                        }
 
-                    setUrl(link.href)
-                    const preview = {
-                        url: link.href
+                        setUrl(link.href)
+                        const preview = {
+                            url: link.href
+                        }
+                        makeRequest(postLinkPreviews(preview))
+                        break
                     }
-                    makeRequest(postLinkPreviews(preview))
-                    break
+                } else if ( draft.linkPreviewId !== null ) {
+                    setLinkPreviewId(null)
                 }
-            } else if ( draft.linkPreviewId !== null ) {
-                setLinkPreviewId(null)
-            }
-        }, 500)
+            }, 500)
+        }
     }, [ draft ])
 
     useEffect(function() {

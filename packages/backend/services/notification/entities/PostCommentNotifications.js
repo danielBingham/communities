@@ -113,6 +113,11 @@ module.exports = class PostCommentNotifications {
                 return 
             }
 
+            const canViewPostComment = await this.permissionService.can(context.postAuthor, 'view', 'PostComment', { post: context.post, postComment: context.comment})
+            if ( canViewPostComment !== true ) {
+                return
+            }
+
             await this.notificationWorker.createNotification(context.postAuthor.id, 'PostComment:create:author', context, options) 
         }
     }
@@ -145,6 +150,11 @@ module.exports = class PostCommentNotifications {
                 const canViewPost = await this.permissionService.can(subscribers.dictionary[subscription.userId], 'view', 'Post', { post: context.post })
                 if ( canViewPost !== true ) {
                     continue
+                }
+
+                const canViewPostComment = await this.permissionService.can(subscribers.dictionary[subscription.userId], 'view', 'PostComment', { post: context.post, postComment: context.comment })
+                if ( canViewPostComment !== true ) {
+                    return
                 }
 
                 const subscriberContext = { ...context, subscriber: subscribers.dictionary[subscription.userId] }
@@ -181,6 +191,11 @@ module.exports = class PostCommentNotifications {
             const canViewPost = await this.permissionService.can(userResults.dictionary[userId], 'view', 'Post', { post: context.post })
             if ( canViewPost !== true ) {
                 continue
+            }
+
+            const canViewPostComment = await this.permissionService.can(userResults.dictionary[userId], 'view', 'PostComment', { post: context.post, postComment: context.comment })
+            if ( canViewPostComment !== true ) {
+                return
             }
 
             const mentionContext = { ...context, mentioned: userResults.dictionary[userId] }

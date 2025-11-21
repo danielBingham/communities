@@ -1,6 +1,6 @@
 ## [Delete Post](documentation/testing/test-cases/Post/delete.md)
 
-Test cases related to editing posts.
+Test cases related to deleting posts.
 
 ### Pre-requisites
 
@@ -9,18 +9,32 @@ Test cases related to editing posts.
 
 ### Cases
 
-- [ ] As User1, create a private post with text and an image.
-    - [ ] As User1, delete the post.
-    - [ ] As User1, attempt to view the post. Confirm its gone.
-    - [ ] As User2, attempt to view the post. Confirm its gone.
+- [ ] Users can delete private posts with images.
+    1. As User1, create a private post with an image.
+    2. As User2, comment and react to the post.
+    3. As User1, delete the post.
+    4. As User1, attempt to view the post. Confirm its gone.
+    5. As User2, attempt to view the post. Confirm its gone.
 
-- [ ] As User1, create a private post with text and a link.
-    - [ ] As User1, delete the post.
-    - [ ] As User1, attempt to view the post. Confirm its gone.
-    - [ ] As User2, attempt to view the post. Confirm its gone.
+- [ ] Users can delete private posts with links. 
+    1. As User1, create a private post with a link.
+    2. As User2, comment and react to the post.
+    3. As User1, delete the post.
+    4. As User1, attempt to view the post. Confirm its gone.
+    5. As User2, attempt to view the post. Confirm its gone.
 
-- [ ] As User1, create a public post with text and a link.
-    - [ ] As User2, share the post.
-    - [ ] As User1, delete the post.
-    - [ ] As User1, attempt to view the post.  Confirm its gone.
-    - [ ] As User2, view the share. Confirm original post is gone but share remains.
+- [ ] Users can delete public posts with images that have been shared. 
+    1. As User1, create a public post with an image.
+    2. As User2, comment and react to the post.
+    3. As User2, share the post.
+    4. As User1, delete the post.
+    5. As User1, attempt to view the post. Confirm its gone.
+    6. As User2, attempt to view the post. Confirm its gone.
+
+- [ ] Users can delete public posts with links that have been shared. 
+    1. As User1, create a public post with a link.
+    2. As User2, comment and react to the post.
+    3. As User2, share the post.
+    4. As User1, delete the post.
+    5. As User1, attempt to view the post. Confirm its gone.
+    6. As User2, attempt to view the post. Confirm its gone.

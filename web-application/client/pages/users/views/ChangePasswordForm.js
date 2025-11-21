@@ -8,6 +8,7 @@ import { patchUser } from '/state/User'
 
 import Input from '/components/ui/Input'
 import Spinner from '/components/Spinner'
+import { RequestErrorModal } from '/components/errors/RequestError'
 
 import './ChangePasswordForm.css'
 
@@ -113,14 +114,7 @@ const ChangePasswordForm = function(props) {
                 Password successfully updated!
             </div>
         )
-    } else if ( request && request.state == 'failed' ) {
-        result = (
-            <div className="request-failure">
-                Something went wrong with the attempt to update your password.  Please try again.<br />
-                If the error persists, please report a bug.
-            </div>
-        )
-    }
+    } 
 
     return (
         <div className="change-password-form">
@@ -157,6 +151,7 @@ const ChangePasswordForm = function(props) {
                     onChange={(event) => setOldPassword(event.target.value)}
                     error={oldPasswordError}
                 />
+                <RequestErrorModal message="Attempt to change your password" request={request} />
                 <div className="result">
                     { result }
                 </div>

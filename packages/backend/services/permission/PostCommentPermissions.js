@@ -78,6 +78,18 @@ module.exports = class GroupMemberPermissions {
             }
         }
 
+        if ( ( required?.includes('userRelationship') || optional?.includes('userRelationship'))
+            && ( ! util.objectHas(context, 'userRelationship') || context.userRelationship === null ))
+        {
+            if ( context.userRelationship !== null ) {
+                context.userRelationship = await this.userRelationshipDAO.getUserRelationshipByUserAndRelation(user.id, context.postComment.userId)
+            }
+
+            if ( required?.includes('userRelationship') && context.userRelationship === null ) {
+                throw new ServiceError('missing-context', `'userRelationship' missing from context.`)
+            }
+        }
+
         let postId = null
         if ( util.objectHas(context, 'postId') && context.postId !== null ) {
             postId = context.postId
@@ -101,9 +113,12 @@ module.exports = class GroupMemberPermissions {
     }
 
     async canViewPostComment(user, context) {
+        await this.ensureContext(user, context, [ 'postComment'], ['userRelationship' ])
 
-        // We're not going to test post visibility, but if you can see the
-        // post, you can view a comment (for now).
+        if ( context.userRelationship?.status === 'blocked' ) {
+            return false
+        }
+
         return true
     }
 

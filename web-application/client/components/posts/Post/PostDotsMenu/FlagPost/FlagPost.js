@@ -126,15 +126,17 @@ const FlagPost = function({ postId } ) {
                         removed from the site. Content appropriate to flag:
                     </p>
                     <ul>
-                        <li>Direct incitement to violence against an individual or group of people.</li>
-                        <li>Explicit hate.</li>
-                        <li>Direct harrassment.</li>
+                        <li>Harrassment.</li>
+                        <li>Incitement to violence against an individual or group of people.</li>
+                        <li>Psychological, Emotional, or Physical Abuse.</li>
+                        <li>Hate speach or denial of basic humanity.</li>
+                        <li>Sexually or graphically explicit content.</li>
                         <li>Other forms of content that can cause immediate, direct harm.</li>
                     </ul>
                     <p>
                         If you think it should be moderated but it doesn't rise to
                         the level of "needing urgent response" because it could
-                        cause "immediate, direct harm", then please 'demote' it
+                        cause "immediate harm", then please 'demote' it
                         instead.
                     </p>
                 </div>
