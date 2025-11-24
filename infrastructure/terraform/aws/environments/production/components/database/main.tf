@@ -12,6 +12,17 @@
  *
  ******************************************************************************/
 
+data "terraform_remote_state" "network" {
+  backend = "s3"
+
+  config = {
+    bucket = "communities-social-terraform-state"
+    key = "production/components/network"
+    region = "us-east-1"
+    use_lockfile = true
+  }
+}
+
 module "database" {
   source = "../../../../modules/rds"
 
@@ -19,11 +30,11 @@ module "database" {
   password = var.password
 
   # These come from the output of components/network.
-  vpc_id = var.vpc_id 
-  subnet_ids = var.subnet_ids 
+  vpc_id = data.terraform_remote_state.network.outputs.vpc_id 
+  subnet_ids = data.terraform_remote_state.network.outputs.private_subnet_ids 
 
   instance_class = "db.t4g.medium"
-  engine_version = "16.6"
+  engine_version = "16.8"
 
   application = "communities" 
   environment = "production" 

@@ -72,7 +72,7 @@ resource "aws_db_subnet_group" "this" {
  */
 resource "aws_rds_cluster" "this" {
   cluster_identifier      = "${var.application}-${var.environment}-${var.service}-cluster"
-  availability_zones      = [ "us-east-1a", "us-east-1c" ]
+  availability_zones      = [ "us-east-1a", "us-east-1c", "us-east-1d" ]
 
   engine = "aurora-postgresql"
   engine_version         = var.engine_version 

@@ -1,12 +1,6 @@
 variable "alarm_email" {
   description = "The email to send alarms to."
 }
-variable "database_id" {
-  description = "The id of the database instance we want to watch."
-}
-variable "eks_node_group_resources" {
-  description = "The list of resources created by our AWS EKS Node Group."
-}
 
 variable "aws_config" {
   description = "Path to the AWS config file we want to use."
@@ -30,11 +24,14 @@ variable "aws_profile" {
  */
 variable "application" {
   description = "The name of the application this module is supporting. eg. peer-review"
+  default = "communities"
 }
 variable "environment" {
   description = "The name of the environment this module is supporting. eg. production, staging, etc"
+  default = "production"
 }
 variable "service" {
   description = "The name of the service this module is supporting. eg. networking, database, storage, etc" 
+  default = "monitoring"
 }
 

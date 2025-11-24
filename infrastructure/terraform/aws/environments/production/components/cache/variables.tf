@@ -10,12 +10,3 @@ variable "aws_profile" {
   description = "AWS profile we want to use."
   default = "terraform"
 }
-
-variable "vpc_id" {
-  description = "Id of the VPC you want to launch the database into."
-}
-
-variable "subnet_ids" {
-  description = "Subnet ids to launch the database into."
-  type = list(any)
-}

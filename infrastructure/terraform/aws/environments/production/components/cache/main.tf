@@ -12,12 +12,24 @@
  *
  * ******************************************************************/
 
+data "terraform_remote_state" "network" {
+  backend = "s3"
+
+  config = {
+    bucket = "communities-social-terraform-state"
+    key = "production/components/network"
+    region = "us-east-1"
+    use_lockfile = true
+  }
+}
+
+
 module "elasticache" {
   source = "../../../../modules/elasticache"
 
   # These come from the output of components/network.
-  vpc_id = var.vpc_id 
-  subnet_ids = var.subnet_ids 
+  vpc_id = data.terraform_remote_state.network.outputs.vpc_id 
+  subnet_ids = data.terraform_remote_state.network.outputs.private_subnet_ids 
 
   engine_version = "7.0"
   parameter_group_name = "default.redis7"

@@ -1,3 +1,25 @@
+data "terraform_remote_state" "database" {
+  backend = "s3"
+
+  config = {
+    bucket = "communities-social-terraform-state"
+    key = "production/components/database"
+    region = "us-east-1"
+    use_lockfile = true
+  }
+}
+
+data "terraform_remote_state" "cluster" {
+  backend = "s3"
+
+  config = {
+    bucket = "communities-social-terraform-state"
+    key = "production/components/cluster"
+    region = "us-east-1"
+    use_lockfile = true
+  }
+}
+
 module "sns" {
   source = "../../../../modules/sns"
 
@@ -20,14 +42,14 @@ resource "aws_cloudwatch_metric_alarm" "database_cpu_utilization" {
   alarm_description = "Monitors average CPU utilization for the database."
 
   dimensions = {
-    DBInstanceIdentifier = var.database_id
+    DBInstanceIdentifier = data.terraform_remote_state.database.outputs.cluster_primary_instance_id
   }
 
   alarm_actions = [ module.sns.sns_alarms_arn ]
 }
 
 resource "aws_cloudwatch_metric_alarm" "eks_cpu_utilization" {
-  for_each = toset(flatten([for resource in var.eks_node_group_resources : [
+  for_each = toset(flatten([for resource in data.terraform_remote_state.cluster.outputs.webapp_node_group_resources : [
       for group in resource.autoscaling_groups : group.name
     ]
   ]))

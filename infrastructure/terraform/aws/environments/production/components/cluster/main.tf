@@ -13,12 +13,23 @@
  *
  ******************************************************************************/
 
+data "terraform_remote_state" "network" {
+  backend = "s3"
+
+  config = {
+    bucket = "communities-social-terraform-state"
+    key = "production/components/network"
+    region = "us-east-1"
+    use_lockfile = true
+  }
+}
+
 module "cluster" {
   source = "../../../../modules/eks"
 
-  vpc_id = var.vpc_id
-  private_subnet_ids = var.private_subnet_ids
-  public_subnet_ids = var.public_subnet_ids
+  vpc_id = data.terraform_remote_state.network.outputs.vpc_id 
+  private_subnet_ids = data.terraform_remote_state.network.outputs.private_subnet_ids
+  public_subnet_ids = data.terraform_remote_state.network.outputs.public_subnet_ids
 
   control_plane_version = "1.31"
   node_group_version = "1.31"
