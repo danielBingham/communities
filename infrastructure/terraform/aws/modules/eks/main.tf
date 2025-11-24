@@ -473,7 +473,7 @@ module "node_group" {
   vpc_id = var.vpc_id
   subnet_ids = var.private_subnet_ids
 
-  ami_type = "AL2_x86_64"
+  ami_type = "AL2023_x86_64_STANDARD"
   capacity_type = "ON_DEMAND"
   disk_size = 20
   instance_types = ["t3a.small"]
