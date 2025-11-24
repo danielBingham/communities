@@ -1,4 +1,11 @@
 terraform {
+  backend "s3" {
+    bucket = "communities-social-terraform-state"
+    key = "production/components/storage"
+    region = "us-east-1"
+    use_lockfile = true
+  }
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
