@@ -31,8 +31,8 @@ module "cluster" {
   private_subnet_ids = data.terraform_remote_state.network.outputs.private_subnet_ids
   public_subnet_ids = data.terraform_remote_state.network.outputs.public_subnet_ids
 
-  control_plane_version = "1.31"
-  node_group_version = "1.31"
+  control_plane_version = "1.33"
+  node_group_version = "1.33"
 
   application = "communities" 
   environment = "production" 
