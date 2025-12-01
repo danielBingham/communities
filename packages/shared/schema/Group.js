@@ -110,6 +110,30 @@ module.exports = class GroupSchema extends Schema {
                     return errors
                 }
             },
+            shortDescription: {
+                clean: (value) => { return stringCleaner(value) },
+                validate: (value, existing, action) => {
+                    const validator = new StringValidator('shortDescription', value, existing, action)
+                    const errors = validator
+                        .mustNotBeNull()
+                        .mustBeString()
+                        .mustBeShorterThan(150)
+                        .getErrors()
+                    return errors
+                }
+            },
+            rules: {
+                clean: (value) => { return stringCleaner(value) },
+                validate: (value, existing, action) => {
+                    const validator = new StringValidator('rules', value, existing, action)
+                    const errors = validator
+                        .mustNotBeNull()
+                        .mustBeString()
+                        .mustBeShorterThan(10000)
+                        .getErrors()
+                    return errors
+                }
+            },
             parentId: {
                 clean: (value) => { return cleanUuid(value) },
                 validate: (value, existing, action) => {

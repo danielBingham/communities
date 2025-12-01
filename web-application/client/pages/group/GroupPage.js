@@ -32,6 +32,7 @@ import PostView from '/pages/posts/views/PostView'
 import GroupProfile from '/components/groups/GroupProfile'
 import GroupNavigationMenu from '/components/groups/GroupNavigationMenu'
 
+import GroupAboutView from '/pages/group/views/GroupAboutView'
 import GroupSubgroupView from '/pages/group/views/GroupSubgroupView'
 import GroupMembersView from '/pages/group/views/GroupMembersView'
 import GroupInviteView from '/pages/group/views/GroupInviteView'
@@ -123,6 +124,7 @@ const GroupPage = function() {
                             <Route path="email-invitations" element={ <GroupMembersView groupId={group.id} type="email-invitations" /> } />
                             <Route index element={ <GroupMembersView groupId={group.id} type="member" /> } />
                         </Route>
+                        <Route path="about" element={ <GroupAboutView groupId={group.id} /> } />
                         <Route path="subgroups" element={ <GroupSubgroupView groupId={group.id} /> } />
                         <Route path="invite" element={ <GroupInviteView groupId={group.id} /> } />
                         <Route path="email-invite" element={ <GroupEmailInviteView groupId={group.id} /> } />
