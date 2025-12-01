@@ -48,7 +48,7 @@ module.exports = class Issue330GroupShortDescriptionAndRulesMigration extends Ba
         if ( groupResults.rows.length > 0 ) {
             for(const row of groupResults.rows) {
                 const id = row.id
-                const shortDescription = row.about.substring(0, 250)
+                const shortDescription = row.about.substring(0, 150)
                 await this.core.database.query(`
                     UPDATE groups SET short_description = $1 WHERE id = $2
                 `, [ shortDescription, id ])

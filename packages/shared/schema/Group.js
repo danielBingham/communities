@@ -117,7 +117,7 @@ module.exports = class GroupSchema extends Schema {
                     const errors = validator
                         .mustNotBeNull()
                         .mustBeString()
-                        .mustBeShorterThan(250)
+                        .mustBeShorterThan(150)
                         .getErrors()
                     return errors
                 }

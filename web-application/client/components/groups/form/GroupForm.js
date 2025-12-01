@@ -28,6 +28,8 @@ import ErrorCard from '/components/errors/ErrorCard'
 
 import './GroupForm.css'
 
+const schema = new shared.schema.GroupSchema()
+
 const GroupForm = function({ parentId }) {
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const [context, requests] = useGroupPermissionContext(currentUser, parentId)
@@ -58,9 +60,19 @@ const GroupForm = function({ parentId }) {
     const [request, makeRequest] = useRequest()
     const fileRef = useRef(null)
 
+    const validateShortDescription = function(value) {
+        const shortDescriptionValidationErrors = schema.properties.shortDescription.validate(shortDescription)
+        if ( shortDescriptionValidationErrors.length > 0 ) {
+            setShortDescriptionErrors(shortDescriptionValidationErrors.reduce((string, error) => `${string} ${error.message}`, ''))
+        } else {
+            setShortDescriptionErrors(null)
+        }
+        return shortDescriptionValidationErrors
+
+    }
+
     const validate = function(field) {
         
-        const schema = new shared.schema.GroupSchema()
         let titleValidationErrors = []
         if ( ! field || field == 'title' ) {
             titleValidationErrors = schema.properties.title.validate(title)
@@ -93,12 +105,7 @@ const GroupForm = function({ parentId }) {
 
         let shortDescriptionValidationErrors = []
         if ( ! field || field === 'shortDescription' ) {
-            shortDescriptionValidationErrors = schema.properties.shortDescription.validate(shortDescription)
-            if ( shortDescriptionValidationErrors.length > 0 ) {
-                setShortDescriptionErrors(shortDescriptionValidationErrors.reduce((string, error) => `${string} ${error.message}`, ''))
-            } else {
-                setShortDescriptionErrors(null)
-            }
+            shortDescriptionValidationErrors = validateShortDescription(shortDescription)
         }
 
         let rulesValidationErrors = []
@@ -186,6 +193,8 @@ const GroupForm = function({ parentId }) {
         setPostPermissions(null)
         setSlug(null)
         setAbout(null)
+        setShortDescription(null)
+        setRules(null)
         setFileId(null)
 
         navigate('/groups')
@@ -219,6 +228,8 @@ const GroupForm = function({ parentId }) {
             setPostPermissions(null)
             setSlug(null)
             setAbout(null)
+            setShortDescription(null)
+            setRules(null)
             setFileId(null)
    
             navigate(`/group/${encodeURIComponent(request.response.body.entity.slug)}`)
@@ -295,9 +306,10 @@ const GroupForm = function({ parentId }) {
                     name="shortDescription"
                     className="short-description"
                     label="Short Description"
-                    explanation={`Enter a short description for the group no longer than 250 characters.  This description will be used in the Group Badge on the search page and on the Group Profile Page.`}
+                    explanation={`Enter a short description for the group no longer than 150 characters.  This description will be used in the Group Badge on the search page and on the Group Profile Page.`}
                     value={shortDescription}
-                    onChange={(event) => setShortDescription(event.target.value)}
+                    onBlur={ (event) => validate('shortDescription') }
+                    onChange={(event) => { setShortDescription(event.target.value); validate('shortDescription') }}
                     error={shortDescriptionErrors}
                 />
             }
@@ -307,6 +319,7 @@ const GroupForm = function({ parentId }) {
                 label="About"
                 explanation={`Enter the full description of this group.  This should include a description of the group's purpose and what sort of content is appropriate for it. You can outline the group's rules in a separate field below.`}
                 value={about}
+                onBlur={ (event) => validate('about') }
                 onChange={(event) => setAbout(event.target.value)}
                 error={aboutErrors}
             />
@@ -317,6 +330,7 @@ const GroupForm = function({ parentId }) {
                     label="Rules"
                     explanation={`Enter the rules for this group. The rules should clearly describe the content and behavior that are not allowed and will be moderated.`}
                     value={rules}
+                    onBlur={ (event) => validate('rules') }
                     onChange={(event) => setRules(event.target.value)}
                     error={rulesErrors}
                 />

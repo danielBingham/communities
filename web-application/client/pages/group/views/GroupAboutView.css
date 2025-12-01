@@ -1,0 +1,10 @@
+.group-about-view {
+    box-sizing: border-box;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 650px;
+    padding: 20px;
+}
+.group-about-view section {
+    white-space: pre-line;
+}
