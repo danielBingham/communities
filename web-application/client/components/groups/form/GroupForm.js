@@ -39,6 +39,8 @@ const GroupForm = function({ parentId }) {
     const [ type, setType ] = useLocalStorage('group.draft.type', ( parentGroup?.type === 'hidden' ? 'hidden-private' : 'private'))
     const [ postPermissions, setPostPermissions ] = useLocalStorage('group.draft.postPermissions', 'members')
     const [ about, setAbout ] = useLocalStorage('group.draft.about', '')
+    const [ shortDescription, setShortDescription ] = useLocalStorage('group.draft.shortDescription', '')
+    const [ rules, setRules ] = useLocalStorage('group.draft.rules', '')
     const [ fileId, setFileId] = useLocalStorage('group.draft.fileId', null)
     const [ fileState, setFileState] = useState(null)
 
@@ -47,8 +49,11 @@ const GroupForm = function({ parentId }) {
     const [ typeErrors, setTypeErrors ] = useState(null)
     const [ postPermissionsErrors, setPostPermissionsErrors ] = useState(null)
     const [ aboutErrors, setAboutErrors ] = useState(null)
+    const [ shortDescriptionErrors, setShortDescriptionErrors ] = useState(null)
+    const [ rulesErrors, setRulesErrors ] = useState(null)
 
     const hasSubgroups = useFeature('issue-165-subgroups')
+    const hasRules = useFeature('issue-330-group-short-description-and-rules')
 
     const [request, makeRequest] = useRequest()
     const fileRef = useRef(null)
@@ -86,6 +91,27 @@ const GroupForm = function({ parentId }) {
             }
         }
 
+        let shortDescriptionValidationErrors = []
+        if ( ! field || field === 'shortDescription' ) {
+            shortDescriptionValidationErrors = schema.properties.shortDescription.validate(shortDescription)
+            if ( shortDescriptionValidationErrors.length > 0 ) {
+                setShortDescriptionErrors(shortDescriptionValidationErrors.reduce((string, error) => `${string} ${error.message}`, ''))
+            } else {
+                setShortDescriptionErrors(null)
+            }
+        }
+
+        let rulesValidationErrors = []
+        if ( ! field || field === 'rules' ) {
+            rulesValidationErrors = schema.properties.rules.validate(rules)
+            if ( rulesValidationErrors.length > 0 ) {
+                setRulesErrors(rulesValidationErrors.reduce((string, error) => `${string} ${error.message}`, ''))
+            } else {
+                setRulesErrors(null)
+            }
+        }
+
+
         let typeValidationErrors = []
         if ( ! field || field == 'type' ) {
             typeValidationErrors = schema.properties.type.validate(type)
@@ -109,6 +135,8 @@ const GroupForm = function({ parentId }) {
         return titleValidationErrors.length === 0 
             && slugValidationErrors.length === 0 
             && aboutValidationErrors.length === 0 
+            && shortDescriptionValidationErrors.length === 0
+            && rulesValidationErrors.length === 0
             && typeValidationErrors.length === 0
             && postPermissionsValidationErrors.length === 0
     }
@@ -125,6 +153,11 @@ const GroupForm = function({ parentId }) {
 
         if ( hasSubgroups === true) {
             group.parentId = parentId
+        }
+
+        if ( hasRules === true ) {
+            group.shortDescription = shortDescription
+            group.rules = rules
         }
 
         return group
@@ -257,15 +290,37 @@ const GroupForm = function({ parentId }) {
                 onChange={ (event) => setSlug(event.target.value) } 
                 error={slugErrors}
             />
+            { hasRules && 
+                <TextBox
+                    name="shortDescription"
+                    className="short-description"
+                    label="Short Description"
+                    explanation={`Enter a short description for the group no longer than 250 characters.  This description will be used in the Group Badge on the search page and on the Group Profile Page.`}
+                    value={shortDescription}
+                    onChange={(event) => setShortDescription(event.target.value)}
+                    error={shortDescriptionErrors}
+                />
+            }
             <TextBox
                 name="about"
                 className="about"
                 label="About"
-                explanation={`Enter a description of this group.  This should include a description of the group's purpose, it's rules, and what sort of content is appropriate for this group.`}
+                explanation={`Enter the full description of this group.  This should include a description of the group's purpose and what sort of content is appropriate for it. You can outline the group's rules in a separate field below.`}
                 value={about}
                 onChange={(event) => setAbout(event.target.value)}
                 error={aboutErrors}
             />
+            { hasRules && 
+                <TextBox
+                    name="rules"
+                    className="rules"
+                    label="Rules"
+                    explanation={`Enter the rules for this group. The rules should clearly describe the content and behavior that are not allowed and will be moderated.`}
+                    value={rules}
+                    onChange={(event) => setRules(event.target.value)}
+                    error={rulesErrors}
+                />
+            }
             <Radio 
                 className="group-form__type" 
                 name="type"
