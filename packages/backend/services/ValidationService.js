@@ -311,10 +311,8 @@ module.exports = class ValidationService {
                     }
                 }
             } else if ( type === 'admin-edit' ) {
-                // With password authentication, they are allowed to change any
-                // of the editable fields and not required to change any of
-                // them.  `username` is not editable and can only be set at
-                // user creation.
+                // Admins are allowed to edit status in order to, for instance,
+                // ban a user.
                 const disallowedFields = [ 'username' ]
 
                 for(const disallowedField of disallowedFields ) {
@@ -499,6 +497,11 @@ module.exports = class ValidationService {
                     })
                 }
             }
+        }
+
+        if ( this.has(user, 'birthdate') ) {
+            const birthdateErrors = validation.User.validateBirthdate(user.birthdate, existing?.birthdate, existing ? 'update' : 'create')
+            errors.push(...birthdateErrors)
         }
 
         if ( this.has(user, 'about') ) {
