@@ -6,7 +6,7 @@
     padding: 20px 0;
 }
 .post.shared {
-    max-width: 630px;
+    max-width: min(100vw, 630px);
     width: 100%;
     margin: 10px auto;
     box-shadow: none;
