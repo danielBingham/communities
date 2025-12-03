@@ -58,7 +58,7 @@ const ResetPasswordForm = function(props) {
             if ( ! newPassword || newPassword.length == 0 ) {
                 passwordErrors.push('New password is required!')
                 error = true
-            } else if ( newPassword.length < 16 ) {
+            } else if ( newPassword.length < 12 ) {
                 passwordErrors.push('Your new password must be at least 16 characters in length.')
                 error = true
             } else if ( newPassword.length > 256 ) {
