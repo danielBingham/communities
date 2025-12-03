@@ -66,7 +66,7 @@ const validateBirthdate = function(value, existing, action) {
     const validator = new DateValidator('birthdate', value, existing, action)
     const errors = validator
         .isRequiredToCreate()
-        .mustNotBeNull()
+        .mustNotBeNullOnCreate()
         .mustBeString()
         .mustNotBeEmpty()
         .mustBeValidDate()

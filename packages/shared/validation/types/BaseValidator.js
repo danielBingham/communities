@@ -77,5 +77,17 @@ module.exports = class BaseValidator {
         }
         return this
     }
+
+    mustNotBeNullOnCreate() {
+        if ( this.action === BaseValidator.ACTIONS.CREATE && this.value === null ) {
+            this.errors.push({
+                type: `${this.name}:null`,
+                log: `${this.name} may not be null.`,
+                message: `${this.name} may not be null.`
+            })
+        }
+
+        return this
+    }
 }
 

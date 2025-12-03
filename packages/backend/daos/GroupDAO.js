@@ -61,6 +61,20 @@ const SCHEMA = {
                 select: DAO.SELECT.ALWAYS,
                 key: 'about'
             },
+            'short_description': {
+                insert: DAO.INSERT.ALLOW,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.ALWAYS,
+                key: 'shortDescription',
+                needsFeature: 'issue-330-group-short-description-and-rules'
+            },
+            'rules': {
+                insert: DAO.INSERT.ALLOW,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.ALWAYS,
+                key: 'rules',
+                needsFeature: 'issue-330-group-short-description-and-rules'
+            },
             'parent_id': {
                 insert: DAO.INSERT.ALLOW,
                 update: DAO.UPDATE.ALLOW,

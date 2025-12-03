@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 
 import { useRequest } from '/lib/hooks/useRequest'
+import { useFeature } from '/lib/hooks/feature'
 
 import { getGroup } from '/state/Group'
 
@@ -14,6 +15,8 @@ import './GroupBadge.css'
 
 const GroupBadge = function({ id }) {
     
+    const hasRules = useFeature('issue-330-group-short-description-and-rules')
+
     // ======= Request Tracking =====================================
    
     const [request, makeRequest] = useRequest()
@@ -42,7 +45,8 @@ const GroupBadge = function({ id }) {
                     <GroupImage groupId={group.id} />
                     <div className="group-badge__details" >
                         <div className="group-badge__title"><Link to={ `/group/${group.slug}` }>{group.title}</Link></div>
-                        <div className="group-badge__about">{ group.about?.length > 100 ? group.about.substring(0,100).trim()+'...' : group.about }</div>
+                        { ! hasRules && <div className="group-badge__about">{ group.about?.length > 100 ? group.about.substring(0,100).trim()+'...' : group.about }</div> }
+                        { hasRules && <div className="group-badge__about">{ group.shortDescription }</div> }
                     </div> 
                 </div>
             </ListGridContentItem>

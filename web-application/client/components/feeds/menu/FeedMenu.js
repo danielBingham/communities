@@ -168,7 +168,7 @@ const FeedMenu = function() {
                         <a href="" onClick={(e) => { e.preventDefault(); setIsOpen('feeds')}} className="header">{ feedsIsOpen ? <QueueListIconSolid/> : <QueueListIconOutline/> } <span className="nav-text">Your Feeds</span></a>
                     </li>
                     <li>
-                        <a href="" onClick={(e) => { e.preventDefault(); setIsOpen('places')}} className="header">{ feedsIsOpen ? <MapPinIconSolid /> : <MapPinIconOutline /> } <span className="nav-text">Place Feeds</span></a>
+                        <a href="" onClick={(e) => { e.preventDefault(); setIsOpen('places')}} className="header">{ placesIsOpen ? <MapPinIconSolid /> : <MapPinIconOutline /> } <span className="nav-text">Place Feeds</span></a>
                     </li>
                     <li>
                         <a href="" onClick={(e) => { e.preventDefault(); setIsOpen('groups')}} className="header">{ groupsIsOpen ? <UserGroupIconSolid/> : <UserGroupIconOutline/> }<span className="nav-text">Group Feeds</span></a>

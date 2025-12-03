@@ -28,6 +28,8 @@ import {
     DocumentCheckIcon,
 } from '@heroicons/react/24/outline'
 
+import { useFeature } from '/lib/hooks/feature'
+
 import { useGroupPermissionContext } from '/lib/hooks/Group'
 
 import GroupImage from '/components/groups/view/GroupImage'
@@ -37,6 +39,8 @@ import Spinner from '/components/Spinner'
 import './GroupProfile.css'
 
 const GroupProfile = function({ groupId }) {
+
+    const hasRules = useFeature('issue-330-group-short-description-and-rules')
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const [context, requests] = useGroupPermissionContext(currentUser, groupId)
@@ -88,7 +92,8 @@ const GroupProfile = function({ groupId }) {
                 </div> }
             </div>
             <div className="group-profile__details">
-                <div className="group-profile__about"> { group.about }</div>
+                { ! hasRules && <div className="group-profile__about"> { group.about }</div> }
+                { hasRules && <div className="group-profile__short-description"> { group.shortDescription } <Link to={`/group/${group.slug}/about`}>Learn more.</Link></div> }
             </div>
         </div>
     )

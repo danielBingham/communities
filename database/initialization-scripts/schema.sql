@@ -227,7 +227,9 @@ CREATE TABLE groups (
     type group_type,
     title text,
     slug text,
+    short_description text,
     about text,
+    rules text,
 
     parent_id uuid REFERENCES groups (id) ON DELETE CASCADE DEFAULT NULL,
     file_id uuid REFERENCES files (id) ON DELETE SET NULL DEFAULT NULL,
