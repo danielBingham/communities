@@ -5,6 +5,7 @@
     display: block;
     margin: 0 auto;
     width: 200px;
+    text-align: center;
 }
 .group-edit-form .group-edit-form__group-image svg.placeholder {
     display: block;
