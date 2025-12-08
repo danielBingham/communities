@@ -18,7 +18,7 @@ COPY .npmrc .npmrc
 #
 # Setting NODE_ENV=production automatically sets --production=true, so we have
 # to override here to ensure the dev dependencies install.
-RUN --mount=type=secret,id=CODEARTIFACT_AUTH_TOKEN CODEARTIFACT_AUTH_TOKEN=$(cat /run/secrets/CODEARTIFACT_AUTH_TOKEN) npm install --production=false
+RUN --mount=type=secret,id=CODEARTIFACT_AUTH_TOKEN CODEARTIFACT_AUTH_TOKEN=$(cat /run/secrets/CODEARTIFACT_AUTH_TOKEN) npm ci --production=false
 
 # Copy only the files and directories we need, one per command, from least
 # likely to change to most likely to change.  This maximizes layer caching in
