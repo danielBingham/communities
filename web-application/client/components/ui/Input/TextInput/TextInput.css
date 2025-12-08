@@ -25,6 +25,12 @@
 .text-input input {
     outline-color: var(--input-highlight-color) !important;
 }
+.text-input input::placeholder {
+    color: var(--primary-color-grey);
+}
+.text-input input:focus::placeholder {
+    color: transparent;
+}
 .text-input .text-input-error {
     padding: 5px;
     color: var(--danger-color-main);

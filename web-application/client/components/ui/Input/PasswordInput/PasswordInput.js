@@ -4,7 +4,7 @@ import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/solid'
 
 import TextInput from '../TextInput'
 
-const PasswordInput = function({ name, label, explanation, className, value, error, onChange, onKeyDown, onBlur, onFocus }) {
+const PasswordInput = function({ name, label, explanation, placeholder, className, value, error, onChange, onKeyDown, onBlur, onFocus }) {
     const [isPasswordVisible, setIsPasswordVisible] = useState(false)
 
     const ref = useRef(null)
@@ -35,6 +35,7 @@ const PasswordInput = function({ name, label, explanation, className, value, err
             explanation={explanation}
             className={className}
             value={value}
+            placeHolder={placeholder}
             ref={ref}
             onChange={onChange}
             onKeyDown={onKeyDown}

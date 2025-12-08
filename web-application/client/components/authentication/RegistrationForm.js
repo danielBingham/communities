@@ -147,6 +147,12 @@ const RegistrationForm = function(props) {
         isValid('username')
     }
 
+    const onBirthdateChange = function(event) {
+        let value = event.target.value
+        value = shared.lib.date.coerceDateFormat(value, birthdate)
+        setBirthdate(value)
+    }
+
     useEffect(function() {
         if ( nameValidationError.length > 0 ) {
             isValid('name')
@@ -229,6 +235,7 @@ const RegistrationForm = function(props) {
                     label="Full Name"
                     explanation="The name people will see on your profile.  We encourage you to use your real, full name so that people can find you, but we don't enforce that."
                     value={name}
+                    placeholder="John Doe"
                     className="name"
                     onBlur={ (event) => isValid('name') }
                     onChange={onNameChange} 
@@ -239,6 +246,7 @@ const RegistrationForm = function(props) {
                     label="Username"
                     explanation="The unique username that will be used to link to your profile.  Must start with a letter, be at least two characters long, and can only contain letters, numbers, dash ( - ), or undercore ( _ )"
                     value={username}
+                    placeholder="john-doe"
                     className="username"
                     onBlur={ onUsernameBlur }
                     onChange={ (event) => setUsername(event.target.value) } 
@@ -249,6 +257,7 @@ const RegistrationForm = function(props) {
                     label="Email"
                     explanation="The email you will use to log in.  Will also receive notifications and will be used to reset your password if you forget it."
                     value={email}
+                    placeholder="john-doe@example.com"
                     className="email"
                     onBlur={ (event) => isValid('email') }
                     onChange={ (event) => setEmail(event.target.value) } 
@@ -279,13 +288,14 @@ const RegistrationForm = function(props) {
                 />
                 <Input
                     name="birthdate"
-                    type="date"
+                    type="text"
                     label="Date of Birth"
-                    explanation="Please enter your date of birth.  This is required by state laws that mandate social media platforms enforce age limits on their users."
+                    explanation="Please enter your date of birth using the format 'YYYY-MM-DD', eg. '1933-08-07'.  This is required by state laws that mandate social media platforms enforce age limits on their users. We will delete your birthdate once we have verified your age."
                     value={birthdate}
                     className="date-of-birth"
+                    placeholder="YYYY-MM-DD"
                     onBlur={ (event) => isValid('birthdate') }
-                    onChange={ (event) => setBirthdate(event.target.value) }
+                    onChange={onBirthdateChange}
                     error={birthdateError}
                 />
 
