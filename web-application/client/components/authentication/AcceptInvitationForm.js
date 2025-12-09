@@ -251,7 +251,11 @@ const AcceptInvitationForm = function(props) {
     useEffect(function() {
         if ( request && request.state == 'fulfilled' ) {
             window.location.href = "/"
-        } 
+        } else if ( request && request.state === 'failed' ) {
+            if ( 'type' in request.error && request.error.type === 'underage' ) {
+                window.location.href = "/age-gate"
+            }
+        }
     }, [ request ])
 
     useEffect(function() {

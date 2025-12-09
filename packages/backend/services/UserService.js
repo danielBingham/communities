@@ -327,12 +327,9 @@ module.exports = class UserService {
 
         const age = shared.lib.date.getAgeFromDate(user.birthdate)
         if ( age < 18 ) {
-            errors.push({
-                type: 'underage',
-                log: `User(${user.email}) is under age (${user.birthdate}).`,
-                message: `You must be 18 years of age to use Communities.`
-            })
-            return [null, errors]
+            // TODO Techdebt, this is really a user error, but we want to
+            // handle it differently from our other errors right now.
+            throw new ServiceError('underage', 'User is underage.')
         }
 
         // ================== Register ========================================
