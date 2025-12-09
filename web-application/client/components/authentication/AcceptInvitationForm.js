@@ -29,7 +29,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 import { validateEmail, validateName, validateUsername, validatePassword } from '/lib/validation/user'
 
 import { validateToken } from '/state/tokens'
-import { patchUser, getUsers } from '/state/User'
+import { patchUser, postUsers, getUsers } from '/state/User'
 
 import Input from '/components/ui/Input'
 import { Checkbox } from '/components/ui/Checkbox'
@@ -146,21 +146,21 @@ const AcceptInvitationForm = function(props) {
             return 
         }
 
-        if ( ! user ) {
-            setTokenValidationError(['You must have a valid token to register.'])
-        }
-
-        const userPatch = {
-            id: user.id,
+        const newUser = {
             name: name,
             username: username,
             email: email,
             password: password,
             birthdate: birthdate,
-            token: token
         }
 
-        makeRequest(patchUser(userPatch))
+        if ( user === null || user === undefined ) {
+            makeRequest(postUsers(newUser))
+        } else {
+            newUser.id = user.id
+            newUser.token = token
+            makeRequest(patchUser(newUser))
+        }
     }
 
     const onNameChange = function(event) {
