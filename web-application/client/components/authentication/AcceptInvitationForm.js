@@ -306,7 +306,9 @@ const AcceptInvitationForm = function(props) {
     } 
 
     if ( request && request.state == 'failed' ) {
-        baseError = (<div className="error">{ request.error.message }</div>)
+        if ( request.error?.type !== 'underage' ) {
+            baseError = (<div className="error">{ request.error.message }</div>)
+        }
     }
 
     return (

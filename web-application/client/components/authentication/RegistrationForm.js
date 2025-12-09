@@ -243,14 +243,16 @@ const RegistrationForm = function(props) {
     let birthdateError = birthdateValidationError.join(' ')
 
     if ( request && request.state == 'failed' ) {
-        if ( 'message' in request.error ) {
-            baseError = (<div className="error">{ request.error.message }</div>)
-        } else if ( 'all' in request.error ) {
-            let message = ''
-            for(const error of request.error.all) {
-                message = message + error.message
+        if ( request.error?.type !== 'underage' ) {
+            if ( 'message' in request.error ) {
+                baseError = (<div className="error">{ request.error.message }</div>)
+            } else if ( 'all' in request.error ) {
+                let message = ''
+                for(const error of request.error.all) {
+                    message = message + error.message
+                }
+                baseError = (<div className="error">{ message }</div>)
             }
-            baseError = (<div className="error">{ message }</div>)
         }
     }
 

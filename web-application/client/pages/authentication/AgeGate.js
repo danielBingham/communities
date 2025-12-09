@@ -71,6 +71,7 @@ const AgeGate = function() {
                 <div className="logo"><CommunitiesLogo /></div>
                 <p>You must be at least 18 years of age to use Communities.</p>
                 <p>Your data has been deleted. You may recreate your account when you turn 18.</p>
+                <p><Button type="primary" href="/">Back to Home</Button></p>
             </div>
         )
     }
