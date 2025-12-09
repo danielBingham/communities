@@ -242,7 +242,6 @@ const RegistrationForm = function(props) {
     let confirmPasswordError = confirmPasswordValidationError.join(' ')
     let birthdateError = birthdateValidationError.join(' ')
 
-    console.log(`request: `, request)
     if ( request && request.state == 'failed' ) {
         if ( 'message' in request.error ) {
             baseError = (<div className="error">{ request.error.message }</div>)
@@ -319,7 +318,7 @@ const RegistrationForm = function(props) {
                     name="birthdate"
                     type="text"
                     label="Date of Birth"
-                    explanation="Please enter your date of birth using the format 'YYYY-MM-DD', eg. '1933-08-07'.  This is required by state laws that mandate social media platforms enforce age limits on their users. We will delete your birthdate once we have verified your age."
+                    explanation="Please enter your date of birth using the format 'YYYY-MM-DD', eg. '1933-04-22'.  This is required by state laws that mandate social media platforms enforce age limits on their users. We will delete your birthdate once we have verified your age."
                     value={birthdate}
                     className="date-of-birth"
                     placeholder="YYYY-MM-DD"

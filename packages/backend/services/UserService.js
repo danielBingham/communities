@@ -18,6 +18,8 @@
  *
  ******************************************************************************/
 
+const shared = require('@communities/shared')
+
 const TokenDAO = require('../daos/TokenDAO')
 const UserDAO = require('../daos/UserDAO')
 const UserRelationshipDAO = require('../daos/UserRelationshipDAO')
@@ -321,6 +323,16 @@ module.exports = class UserService {
         if ( validationErrors.length > 0 ) {
             errors.push(...validationErrors)
             return [ null, errors ]
+        }
+
+        const age = shared.lib.date.getAgeFromDate(user.birthdate)
+        if ( age < 18 ) {
+            errors.push({
+                type: 'underage',
+                log: `User(${user.email}) is under age (${user.birthdate}).`,
+                message: `You must be 18 years of age to use Communities.`
+            })
+            return [null, errors]
         }
 
         // ================== Register ========================================

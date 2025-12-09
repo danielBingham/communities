@@ -42,6 +42,8 @@ const {
     ServiceError
 } = require('@communities/backend')
 
+const shared = require('@communities/shared')
+
 const BaseController = require('./BaseController')
 const ControllerError = require('../errors/ControllerError')
 

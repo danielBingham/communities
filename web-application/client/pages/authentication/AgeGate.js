@@ -18,11 +18,12 @@
  *
  ******************************************************************************/
 import { useEffect } from 'react'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 
 import logger from '/logger'
 
 import { deleteUser } from '/state/User'
+import { reset } from '/state/system'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
@@ -35,6 +36,8 @@ const AgeGate = function() {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const [request, makeRequest] = useRequest()
+
+    const dispatch = useDispatch()
 
     useEffect(function() {
         if ( request && request.state == 'fulfilled') {
@@ -57,9 +60,17 @@ const AgeGate = function() {
             <div id="age-gate">
                 <div className="logo"><CommunitiesLogo /></div>
                 <p>You must be at least 18 years of age to use Communities.</p>
-                <p>When you turn 18 years old, you will be about to use your account.</p>
-                <p>If you are older than 18 years old, please <a href="/about/contact">contact support</a>.</p>
-                <p><Button type='warn' onClick={() => logout()}>Delete Account</Button></p>
+                <p>Your account will become available at that time. If you would like to delete your account, you can do so below.</p>
+                <p>If you are older than 18 years old, please contact support by emailing contact@communities.social.</p>
+                <p><Button type='warn' onClick={() => makeRequest(deleteUser(currentUser))}>Delete Account</Button></p>
+            </div>
+        )
+    } else {
+        return (
+            <div id="age-gate">
+                <div className="logo"><CommunitiesLogo /></div>
+                <p>You must be at least 18 years of age to use Communities.</p>
+                <p>Your data has been deleted. You may recreate your account when you turn 18.</p>
             </div>
         )
     }
