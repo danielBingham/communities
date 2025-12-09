@@ -1,3 +1,10 @@
+footer .footer__bottom {
+    margin-top: 60px;
+    font-size: 12px;
+}
+footer .footer_explanation {
+    padding: 0 15px;
+}
 footer .explanation {
     line-height: 1.6em;
     margin-bottom: 2em;
@@ -14,6 +21,16 @@ footer a:hover {
     padding-bottom: 40px;
 }
 
+.footer__store-badges a {
+    padding: 0 5px;
+}
+.footer__google-store img {
+    width: 150px;
+}
+.footer__apple-store img {
+    height: 44px;
+}
+
 @media (800px <= width) {
     footer {
         padding: 50px 0;
@@ -22,7 +39,7 @@ footer a:hover {
         color: var(--header-text-color);
         font-style: italic;
     }
-    footer .wrapper {
+    footer .footer__grid {
         margin: 0 auto;
         max-width: 1200px;
         width: 100%;
@@ -31,6 +48,12 @@ footer a:hover {
         display: grid;
         grid-template-columns: 400px auto auto;
 
+    }
+    footer .footer__bottom {
+        display: grid;
+        grid-template-columns: 1fr 90px 1fr;
+        align-items: center;
+        justify-items: center;
     }
 }
 
@@ -42,13 +65,21 @@ footer a:hover {
         color: var(--header-text-color);
         font-style: italic;
     }
-    footer .wrapper {
+    footer .footer__grid {
         margin: 0 auto;
         width: 100%;
         text-align: center; 
     }
 
     footer .footer__block {
+        padding: 10px 0;
+    }
+
+    footer .footer__bottom {
+        display: block;
+        text-align: center;
+    }
+    footer .footer__bottom div {
         padding: 10px 0;
     }
 }

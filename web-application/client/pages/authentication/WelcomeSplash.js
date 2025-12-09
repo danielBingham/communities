@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom'
 
 import LoginForm from '/components/authentication/LoginForm'
 
-import GoogleBadge from './get-it-on-google-play.png'
-import AppleBadge from './download-from-app-store.svg'
+import GoogleBadge from '/assets/get-it-on-google-play.png'
+import AppleBadge from '/assets/download-from-app-store.svg'
 
 import './WelcomeSplash.css'
 
