@@ -758,6 +758,13 @@ module.exports = class UserController extends BaseController{
                 `User submitted an invalid user: ${logString}`,
                 errorString)
         }
+       
+        const age = shared.lib.date.getAgeFromDate(user.birthdate)
+        if ( age < 18 ) {
+            throw new ControllerError(430, 'underage',
+                `User(${user.email}) is under age (${user.birthdate}).`,
+                `You must be 18 years of age to use Communities.  You are underage.`)
+        }
 
         // ================== Update ==========================================
         // Execute the update, making any changes to the PATCH that we need to.

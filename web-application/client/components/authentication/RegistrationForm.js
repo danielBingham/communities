@@ -172,6 +172,8 @@ const RegistrationForm = function(props) {
         setBirthdate(value)
     }
 
+    // ============ Validation ==================
+    
     useEffect(function() {
         if ( nameValidationError.length > 0 ) {
             isValid('name')
@@ -209,9 +211,16 @@ const RegistrationForm = function(props) {
         }
     }, [ birthdate ])
 
+    // ============ END Validation ==================
+
     useEffect(function() {
         if ( request && request.state == 'fulfilled' ) {
             window.location.href = "/email-confirmation"
+        } else if ( request && request.state === 'failed' ) {
+            console.log(request)
+            if ( 'type' in request.error && request.error.type === 'underage' ) {
+                window.location.href = "/age-gate"
+            }
         }
     }, [ request ])
 
@@ -233,6 +242,7 @@ const RegistrationForm = function(props) {
     let confirmPasswordError = confirmPasswordValidationError.join(' ')
     let birthdateError = birthdateValidationError.join(' ')
 
+    console.log(`request: `, request)
     if ( request && request.state == 'failed' ) {
         if ( 'message' in request.error ) {
             baseError = (<div className="error">{ request.error.message }</div>)

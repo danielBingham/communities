@@ -17,9 +17,12 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
+import { useEffect } from 'react'
+import { useSelector } from 'react-redux'
+
 import logger from '/logger'
 
-import { deleteAuthentication } from '/state/authentication'
+import { deleteUser } from '/state/User'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
@@ -29,24 +32,37 @@ import Button from '/components/ui/Button'
 import './AgeGate.css'
 
 const AgeGate = function() {
+
+    const currentUser = useSelector((state) => state.authentication.currentUser)
     const [request, makeRequest] = useRequest()
 
-    const logout = function() {
-        // Clear local storage so their drafts don't carry over to another
-        // login session.
-        localStorage.clear()
+    useEffect(function() {
+        if ( request && request.state == 'fulfilled') {
 
-        makeRequest(deleteAuthentication())
+            // Clear local storage so their drafts don't carry over to another
+            // login session.
+            localStorage.clear()
+
+            dispatch(reset())
+
+            // As soon as we reset the redux store, we need to redirect to
+            // the home page.  We don't want to go through anymore render
+            // cycles because that could have undefined impacts.
+            window.location.href = "/"
+        }
+    }, [ request ])
+
+    if ( currentUser ) {
+        return (
+            <div id="age-gate">
+                <div className="logo"><CommunitiesLogo /></div>
+                <p>You must be at least 18 years of age to use Communities.</p>
+                <p>When you turn 18 years old, you will be about to use your account.</p>
+                <p>If you are older than 18 years old, please <a href="/about/contact">contact support</a>.</p>
+                <p><Button type='warn' onClick={() => logout()}>Delete Account</Button></p>
+            </div>
+        )
     }
-
-    return (
-        <div id="age-gate">
-            <div className="logo"><CommunitiesLogo /></div>
-            <p>You must be at least 18 years of age to use Communities.</p>
-            <p>When you turn 18 years old, you will be able to use your Communities account.</p>
-            <p><Button type='warn' onClick={() => logout()}>Log out</Button></p>
-        </div>
-    )
 
 }
 
