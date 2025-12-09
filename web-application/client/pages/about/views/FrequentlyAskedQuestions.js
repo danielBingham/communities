@@ -8,13 +8,11 @@ const FrequentlyAskedQuestions = function({}) {
         <article className="faq">
             <h1>Frequently Asked Questions</h1>
             <section id="non-profit">
-                <h2>What do you mean "non-profit"?</h2>
-                <p>We aren't building this to make a profit. It just needs
-                    to be sustainable.</p>
-                <p>That means we need to cover the
-                    infrastructure costs and support a good living for those who
-                    dedicate themselves to building and maintaining it full
-                time.</p> 
+                <h2>What do you mean "nonprofit"?</h2>
+                <p>We aren't building this to make a profit. It just needs to be sustainable.</p>
+                <p>That means we need to cover the infrastructure costs and
+                    support a good living for those who dedicate themselves to
+                building and maintaining it full time.</p> 
                 <p>We're in the early bootstrapping period, so we haven't
                     formed the cooperative structure yet, but the goal is to
                     form it as one of the 501(c) non-profits when we do.</p>

@@ -7,9 +7,10 @@ const About = function({}) {
     return (
         <article className="about-view">
             <h1>Welcome to Communities!</h1>
-            <p>Communities is a user-supported social media platform that will be a
-                non-profit, multi-stakeholder cooperative.</p>
-            <p className="beta">Communities is currently in Open Beta.  You're
+            <p>Communities is a user-supported social media platform that is
+                working towards becoming a non-profit, multi-stakeholder
+            cooperative.</p>
+            <p className="beta">Communities is currently in <a href="/about/faq#beta">Open Beta</a>.  You're
             welcome to use it, but it's not finished and there will still be
             some bugs.</p>
             <h2>Social, Not Parasocial</h2>
