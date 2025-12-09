@@ -3,7 +3,7 @@ import TextInput from '../TextInput'
 
 import './DateInput.css'
 
-const DateInput = function({ name, label, explanation, className, value, error, onChange, onKeyDown, onBlur, onFocus }) {
+const DateInput = function({ name, label, explanation, className, value, error, placeholder, onChange, onKeyDown, onBlur, onFocus }) {
 
     return (
         <TextInput
@@ -13,6 +13,7 @@ const DateInput = function({ name, label, explanation, className, value, error, 
             explanation={explanation}
             className={className}
             value={value}
+            placeHolder={placeholder}
             error={error}
             onChange={onChange}
             onKeyDown={onKeyDown}

@@ -17,9 +17,13 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
+import { useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+
 import logger from '/logger'
 
-import { deleteAuthentication } from '/state/authentication'
+import { deleteUser } from '/state/User'
+import { reset } from '/state/system'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
@@ -29,24 +33,48 @@ import Button from '/components/ui/Button'
 import './AgeGate.css'
 
 const AgeGate = function() {
+
+    const currentUser = useSelector((state) => state.authentication.currentUser)
     const [request, makeRequest] = useRequest()
 
-    const logout = function() {
-        // Clear local storage so their drafts don't carry over to another
-        // login session.
-        localStorage.clear()
+    const dispatch = useDispatch()
 
-        makeRequest(deleteAuthentication())
+    useEffect(function() {
+        if ( request && request.state == 'fulfilled') {
+
+            // Clear local storage so their drafts don't carry over to another
+            // login session.
+            localStorage.clear()
+
+            dispatch(reset())
+
+            // As soon as we reset the redux store, we need to redirect to
+            // the home page.  We don't want to go through anymore render
+            // cycles because that could have undefined impacts.
+            window.location.href = "/"
+        }
+    }, [ request ])
+
+    if ( currentUser ) {
+        return (
+            <div id="age-gate">
+                <div className="logo"><CommunitiesLogo /></div>
+                <p>You must be at least 18 years of age to use Communities.</p>
+                <p>Your account will become available at that time. If you would like to delete your account, you can do so below.</p>
+                <p>If you are older than 18 years old, please contact support by emailing contact@communities.social.</p>
+                <p><Button type='warn' onClick={() => makeRequest(deleteUser(currentUser))}>Delete Account</Button></p>
+            </div>
+        )
+    } else {
+        return (
+            <div id="age-gate">
+                <div className="logo"><CommunitiesLogo /></div>
+                <p>You must be at least 18 years of age to use Communities.</p>
+                <p>Your data has been deleted. You may recreate your account when you turn 18.</p>
+                <p><Button type="primary" href="/">Back to Home</Button></p>
+            </div>
+        )
     }
-
-    return (
-        <div id="age-gate">
-            <div className="logo"><CommunitiesLogo /></div>
-            <p>You must be at least 18 years of age to use Communities.</p>
-            <p>When you turn 18 years old, you will be able to use your Communities account.</p>
-            <p><Button type='warn' onClick={() => logout()}>Log out</Button></p>
-        </div>
-    )
 
 }
 

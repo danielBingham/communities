@@ -42,6 +42,8 @@ const {
     ServiceError
 } = require('@communities/backend')
 
+const shared = require('@communities/shared')
+
 const BaseController = require('./BaseController')
 const ControllerError = require('../errors/ControllerError')
 
@@ -461,13 +463,27 @@ module.exports = class UserController extends BaseController{
         } 
         // This is a registration.
         else {
-            const [registeredUser, errors] = await this.userService.registerUser(request.body)
-            if ( errors.length > 0 ) {
-                userErrors.push(...errors)
-            } 
-            if ( registeredUser !== null ) {
-                resultingUsers.push(registeredUser)
-                request.session.user = registeredUser
+            try { 
+                const [registeredUser, errors] = await this.userService.registerUser(request.body)
+                if ( errors.length > 0 ) {
+                    userErrors.push(...errors)
+                } 
+                if ( registeredUser !== null ) {
+                    resultingUsers.push(registeredUser)
+                    request.session.user = registeredUser
+                }
+            } catch (error) {
+                if ( error instanceof ServiceError ) {
+                    if ( error.type === 'underage' ) {
+                        throw new ControllerError(430, 'underage',
+                            `User is under age.`,
+                            `You must be 18 years of age to use Communities.`)
+                    } else {
+                        throw error
+                    }
+                } else {
+                    throw error
+                }
             }
         }
 
@@ -757,6 +773,21 @@ module.exports = class UserController extends BaseController{
             throw new ControllerError(400, 'invalid',
                 `User submitted an invalid user: ${logString}`,
                 errorString)
+        }
+       
+        const age = shared.lib.date.getAgeFromDate(user.birthdate)
+        if ( age < 18 ) {
+            // If the user is a pending invitation, then we need to delete
+            // their data.  We don't want to delete their data *unless* it's a
+            // pending invitation, because we don't want to delete them if they
+            // hit this through a bug somehow.
+            if ( existingUser.status === 'invited' ) {
+                await this.userDAO.deleteUser(existingUser)
+            }
+
+            throw new ControllerError(430, 'underage',
+                `User(${user.email}) is under age (${user.birthdate}).`,
+                `You must be 18 years of age to use Communities.`)
         }
 
         // ================== Update ==========================================

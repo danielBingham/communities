@@ -6,7 +6,7 @@ import TextInput from './TextInput'
 
 import './Input.css'
 
-const Input = function({ name, type, label, explanation, className, value, onChange, onKeyDown, onBlur, onFocus, error }) {
+const Input = function({ name, type, label, explanation, placeholder, className, value, onChange, onKeyDown, onBlur, onFocus, error }) {
 
     if ( type === 'password' ) {
         return ( 
@@ -15,6 +15,7 @@ const Input = function({ name, type, label, explanation, className, value, onCha
                 label={label}
                 explanation={explanation}
                 className={className}
+                placeholder={placeholder}
                 value={value}
                 onChange={onChange}
                 onKeyDown={onKeyDown}
@@ -31,6 +32,7 @@ const Input = function({ name, type, label, explanation, className, value, onCha
                 explanation={explanation}
                 className={className}
                 value={value}
+                placeholder={placeholder}
                 onChange={onChange}
                 onKeyDown={onKeyDown}
                 onBlur={onBlur}
@@ -47,6 +49,7 @@ const Input = function({ name, type, label, explanation, className, value, onCha
                 explanation={explanation}
                 className={className}
                 value={value}
+                placeholder={placeholder}
                 onChange={onChange}
                 onKeyDown={onKeyDown}
                 onBlur={onBlur}
