@@ -17,7 +17,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-
+// 2007--
 // Enforce the correct format on each segment of a date.
 const coerceDateSegmentFormat = function(segment, length, shouldPad, minValue, maxValue) {
     if ( segment === undefined || segment === null ) {
@@ -122,11 +122,11 @@ const coerceDateFormat = function(value, oldValue) {
     // For each segment, take the ceorced segment and override the current
     // segment.  Take the extra and pre-pend it to the next segment before
     // ceorcing it.
-    let [newYear, monthExtra] = coerceDateSegmentFormat(year, 4, month !== undefined)
+    let [newYear, monthExtra] = coerceDateSegmentFormat(year, 4, month !== undefined && month !== '')
     year = newYear
     month = monthExtra + month
 
-    let [newMonth, dayExtra] = coerceDateSegmentFormat(month, 2, day !== undefined, 1, 12)
+    let [newMonth, dayExtra] = coerceDateSegmentFormat(month, 2, day !== undefined && day !== '', 1, 12)
     month = newMonth
     day = dayExtra + day
 
@@ -152,10 +152,26 @@ const coerceDateFormat = function(value, oldValue) {
     return newValue
 }
 
+const getAgeFromDate = function(dateString) {
+    const date = new Date(dateString)
+    const now = new Date() 
+
+    let age = now.getUTCFullYear() - date.getUTCFullYear()
+    const month = now.getUTCMonth() - date.getUTCMonth()
+    const day = now.getUTCDate() - date.getUTCDate()
+
+    if ( month < 0 || (month === 0 && day < 0) ) {
+        age = age - 1
+    }
+
+    return age
+}
+
 module.exports = {
     coerceDateFormat: coerceDateFormat,
     coerceDateSegmentFormat: coerceDateSegmentFormat,
     isLeapYear: isLeapYear,
-    getDaysInMonth: getDaysInMonth
+    getDaysInMonth: getDaysInMonth,
+    getAgeFromDate: getAgeFromDate
 }
 
