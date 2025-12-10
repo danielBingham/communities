@@ -160,7 +160,7 @@ module.exports = class GroupController {
         if ( request.query.title && request.query.title.length > 0 ) {
             query.params.push(request.query.title)
             const and = query.params.length > 1 ? ' AND ' : ''
-            query.where += `${and} SIMILARITY(groups.title, $${query.params.length}) > 0`
+            query.where += `${and} SIMILARITY(groups.title, $${query.params.length}) > 0.05`
             query.order = `SIMILARITY(groups.title, $${query.params.length}) desc`
         }
 
