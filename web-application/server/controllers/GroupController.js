@@ -24,6 +24,7 @@ const {
     UserDAO, 
     FileDAO,
     GroupService,
+    NotificationService,
     PermissionService,
     ValidationService
 }  = require('@communities/backend')
@@ -41,6 +42,7 @@ module.exports = class GroupController {
         this.fileDAO = new FileDAO(core)
 
         this.groupService = new GroupService(core)
+        this.notificationService = new NotificationService(core)
         this.permissionService = new PermissionService(core)
         this.validationService = new ValidationService(core)
 
@@ -389,6 +391,16 @@ module.exports = class GroupController {
                 `Failed to find Group(${groupId}) after update.`,
                 `We hit an error in the server we were unable to recover from.  Please report as a bug!`)
         }
+
+
+        await this.notificationService.sendNotifications(
+            currentUser, 
+            'Group:update', 
+            {
+                previousGroup: existing,
+                group: entity
+            }
+        )
 
         const relations = this.getRelations(currentUser, results)
 

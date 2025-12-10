@@ -72,7 +72,6 @@ module.exports = class GroupSchema extends Schema {
                     const validator = new StringValidator('title', value, existing, action)
                     const errors = validator
                         .isRequiredToCreate()
-                        .mustNotBeUpdated()
                         .mustNotBeNull()
                         .mustBeString()
                         .mustNotBeEmpty()
