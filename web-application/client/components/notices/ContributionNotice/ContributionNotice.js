@@ -8,7 +8,7 @@ import { patchUser } from '/state/User'
 
 import ContributionCard from '/components/contribution/ContributionCard'
 import CommunitiesLogo from '/components/header/CommunitiesLogo'
-import Button from '/components/generic/button/Button'
+import Button from '/components/ui/Button'
 
 import './ContributionNotice.css'
 
@@ -53,10 +53,12 @@ const ContributionNotice = function({}) {
         <div className="contribution-notice">
             <div className="contribution-notice__logo"><CommunitiesLogo /></div>
             <article className="contribution-notice__explanation">
-                <p>Communities uses a "pay what you can", sliding scale subscription model.</p>
-                <p>We're not taking venture capital, not showing you ads, and not selling your data.</p>
-                <p>Developing, maintaining, and moderating this platform all cost money. We need users to contribute for this to work.</p>
-                <p>We're asking you to contribute $10 / month, or whatever you can. If you can't afford to contribute, you can still use the platform.  But if you can contribute, please do!</p>
+                <p>Developing, maintaining, and moderating this platform all cost money.</p>
+                <p>We're not taking venture capital, not showing you ads, not
+                    selling your data, and <strong>not paywalling the platform</strong>.</p>
+                <p>We need users to contribute for this to work.</p>
+                <p>Communities uses a "pay what you can" monthly subscription.</p>
+                <p>We're asking you to contribute $10 / month, or whatever you can. <strong>You can use the platform without contributing.</strong>  But if you can contribute, please do!</p>
             </article>
             <div className="contribution-grid">
                 <ContributionCard amount={5} onClick={() => setContribution(5)} explanation={"Cost of a cup of coffee."} />
@@ -70,10 +72,11 @@ const ContributionNotice = function({}) {
             <div className="contribution-grid" style={{ display: ( showMore ? 'grid' : 'none' ) }}>
                 <ContributionCard amount={20} onClick={() => setContribution(20)} explanation={"Cover one other person's contribution."} />
                 <ContributionCard amount={50} onClick={() => setContribution(50)} explanation={"Cover four other people's contributions."} />
-                <ContributionCard amount={100} onClick={() => setContribution(100)} explanation={"Cover nine other person's contribution."} />
+                <ContributionCard amount={100} onClick={() => setContribution(100)} explanation={"Cover nine other people's contributions."} />
             </div>
             <div className="contribution-notice__skip">
-                <Button onClick={(e) => setContribution(0)}>Skip for Now</Button>
+                <Button href="https://donate.stripe.com/3cIfZ8cvIeDo8hwakogUM0a" external={true} onClick={() => setContribution(0)}>Make a One Time Contribution</Button>
+                <Button onClick={() => setContribution(0)}>Skip for Now</Button>
             </div>
         </div>
     )
