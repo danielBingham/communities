@@ -1,4 +1,14 @@
-.moderate-for-group__flag svg {
+.moderate-for-group__status {
+    display: flex;
+    align-items: center;
+    justify-items: center;
+
+    font-size: 10px;
+    color: var(--secondary-color-main);
+}
+a.moderate-for-group__status:link,
+a.moderate-for-group__status:visited,
+a.moderate-for-group__status:active {
     color: var(--secondary-color-main);
 }
 .moderate-for-group__rejected svg {

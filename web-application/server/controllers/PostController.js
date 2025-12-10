@@ -561,6 +561,20 @@ module.exports = class PostController {
                 await this.groupModerationDAO.insertGroupModerations(moderation)
                 await this.groupModerationEventDAO.insertGroupModerationEvents(this.groupModerationEventDAO.createEventFromGroupModeration(moderation))
 
+                const moderationEntityResults = await this.groupModerationDAO.selectGroupModerations({
+                    where: `group_moderation.id = $1`,
+                    params: [ moderation.id ]
+                })
+                const moderationEntity = moderationEntityResults.dictionary[moderationEntityResults.list[0]]
+
+                await this.notificationService.sendNotifications(
+                    currentUser,
+                    'GroupModeration:create',
+                    {
+                        moderation: moderationEntity 
+                    }
+                )
+
                 const postPatch = {
                     id: entity.id,
                     groupModerationId: moderation.id

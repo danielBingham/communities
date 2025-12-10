@@ -14,6 +14,7 @@ import PostCommentAwaitingGroupModeration from '/components/groups/moderation/Po
 import PaginationControls from '/components/PaginationControls'
 import Error404 from '/components/errors/Error404'
 import Card from '/components/ui/Card'
+import Refresher from '/components/ui/Refresher'
 
 import './GroupModerationView.css'
 
@@ -59,13 +60,17 @@ const GroupModerationView = function({ groupId }) {
         }
     }
 
-    if ( query === null || parseInt(query.meta.count) === 0) {
+    if ( query === null) {
         return (
             <div className="group-moderation-view">
-                <div className="group-moderation-view__empty-wrapper">
-                    <div className="group_moderation-view__empty">
-                        Nothing to moderate.
+                <div className="group-moderation-view__list">
+                    <div className="group-moderation-view__header">
+                        <div className="admin-moderation-view__header__explanation">Showing 0 posts</div>
+                        <div className="admin-moderation-view__header__controls">
+                            <Refresher onRefresh={() => reset()} />
+                        </div>
                     </div>
+                    <PaginationControls meta={query?.meta} />
                 </div>
             </div>
         )
