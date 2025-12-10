@@ -22,16 +22,16 @@ const Handlebars = require('handlebars')
 const fs = require('fs')
 const path = require('path')
 
-const emailBodyTemplate = fs.readFileSync(path.resolve(__dirname, './moderator.hbs'), 'utf8')
+const emailBodyTemplate = fs.readFileSync(path.resolve(__dirname, './author.hbs'), 'utf8')
 
 module.exports = {
-    type: 'GroupModeration:create:post:moderator',
+    type: 'GroupModeration:update:post:status:approved:author',
     email: {
-        subject: Handlebars.compile('[Communities] A post in {{{ group.title }}} is awaiting moderation.'), 
+        subject: Handlebars.compile('[Communities] Your post was approved by moderator of {{{group.title}}}. '), 
         body: Handlebars.compile(emailBodyTemplate)
     },
     web: {
-        text: Handlebars.compile(`A post in {{{ group.title }}} is awaiting moderation.`),
+        text: Handlebars.compile(`Moderators of {{{group.title}}} approved your post.`),
         path: Handlebars.compile(`{{{ path }}}`) 
     }
 }

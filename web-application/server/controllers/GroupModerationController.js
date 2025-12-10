@@ -477,6 +477,7 @@ module.exports = class GroupModerationController extends BaseController {
             currentUser,
             'GroupModeration:update',
             {
+                previousModeration: existing,
                 moderation: entity
             }
         )
