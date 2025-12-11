@@ -22,7 +22,9 @@ const {
     EmailService, 
 
     TokenDAO,
-    UserDAO
+    UserDAO,
+
+    DAOError
 } = require('@communities/backend')
 const { validation } = require('@communities/shared')
 
@@ -114,7 +116,7 @@ module.exports = class TokenController extends BaseController {
             // 4. Token(:token) must have type equal to request.query.type 
             token = await this.tokenDAO.validateToken(request.params.token, [ request.query.type ])
         } catch (error) {
-            if ( error instanceof backend.DAOError ) {
+            if ( error instanceof DAOError ) {
                 throw new ControllerError(403, 'not-authorized', 
                     error.message,
                     `Your token is invalid.`)
