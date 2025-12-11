@@ -33,7 +33,9 @@ export const loadFile = function(fileId, width) {
             function(response) {
                 dispatch(setInCache({ fileId: fileId, width: width, objectURL: response.fileURL }))
             }, 
-        null,
+            function(response) {
+                dispatch(setInCache({ fileId: fileId, width: width, objectURL: false }))
+            },
         { isFile: true }))
     }
 }

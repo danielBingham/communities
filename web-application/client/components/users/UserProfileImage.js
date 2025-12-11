@@ -41,12 +41,12 @@ const UserProfileImage = function({ userId, className, noLink, width }) {
     if ( user && user.fileId ) {
         if ( noLink === true ) {
             content = (
-                <Image id={user.fileId} width={200} />
+                <Image id={user.fileId} width={200} fallbackIcon={'UserCircle'} />
             )
 
         } else {
             content = (
-                <Link to={`/${user.username}`}><Image id={user.fileId} width={200} /></Link>
+                <Link to={`/${user.username}`}><Image id={user.fileId} width={200} fallbackIcon={'UserCircle'} /></Link>
             )
         }
     } 

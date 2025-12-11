@@ -5,12 +5,12 @@ import HtmlImage from './HtmlImage/HtmlImage'
 
 import './Image.css'
 
-const Image = function({ id, src, width, ref, onLoad }) {
+const Image = function({ id, src, altText, fallbackIcon, width, ref, onLoad }) {
 
     if ( id ) {
-        return ( <FetchImage id={id}  width={width} ref={ref} onLoad={onLoad} /> )
+        return ( <FetchImage id={id}  width={width} ref={ref} onLoad={onLoad} fallbackIcon={fallbackIcon} /> )
     } else if ( src ) {
-        return ( <HtmlImage src={src} width={width} ref={ref} onLoad={onLoad} /> )
+        return ( <HtmlImage src={src} width={width} ref={ref} onLoad={onLoad} fallbackIcon={fallbackIcon} /> )
     }
 
     /*if ( Capacitor.getPlatform() === 'web' || Capacitor.getPlatform() === 'android' ) {
