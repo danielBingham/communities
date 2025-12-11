@@ -24,6 +24,7 @@ const UserAccountNotificationsView = function() {
                         'GroupModeration:create:comment:moderator',
                         'GroupModeration:update:post:status:rejected:author',
                         'GroupModeration:update:comment:status:rejected:author',
+                        'GroupModeration:update:post:status:approved:author',
 
                         'Post:create:mention',
 
