@@ -4,6 +4,7 @@ import { useUserQuery } from '/lib/hooks/User'
 
 import PaginationControls from '/components/PaginationControls'
 import { Table, TableHeader, TableCell } from '/components/ui/Table'
+import { SearchControl } from '/components/ui/List'
 import { RequestErrorModal } from '/components/errors/RequestError'
 import Spinner from '/components/Spinner'
 
@@ -45,7 +46,10 @@ const UserAdminTable = function() {
     return (
         <div className="user-admin-table">
             <div className="user-admin-header">
-                {explanation} 
+                <div className="user-admin-header__explanation">{explanation}</div>
+                <div className="user-admin-header__controls">
+                    <div> <SearchControl entity="People" /></div>
+                </div>
             </div>
             <Table className="user-admin-table__table">
                 <TableHeader className="user-admin-table__header">
