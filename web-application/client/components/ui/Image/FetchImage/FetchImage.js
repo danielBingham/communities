@@ -21,6 +21,7 @@ const FetchImage = function({ id, width, ref, onLoad, fallbackIcon }) {
     const [isLoading, setIsLoading] = useState(true)
     const [haveError, setHaveError] = useState(false)
 
+
     const needToLoad = useSelector((state) => { 
         if ( ! (id in state.File.cache ) ) {
             return true
@@ -33,7 +34,7 @@ const FetchImage = function({ id, width, ref, onLoad, fallbackIcon }) {
         if ( id in state.File.cache
             && width in state.File.cache[id]
             && state.File.cache[id][width].url === null ) {
-            return true
+            return false 
         }
 
         return false
@@ -78,7 +79,7 @@ const FetchImage = function({ id, width, ref, onLoad, fallbackIcon }) {
             return 
         }
 
-        if ( imageUrl === null || needToLoad ) {
+        if ( needToLoad ) {
             makeRequest(loadFile(id, width))
         }  else {
             dispatch(touchCache({ fileId: id }))
