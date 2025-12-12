@@ -27,7 +27,7 @@ const emailBodyTemplate = fs.readFileSync(path.resolve(__dirname, './author.hbs'
 module.exports = {
     type: 'GroupModeration:update:post:status:rejected:author',
     email: {
-        subject: Handlebars.compile('[Communities] Your post, "{{{postIntro}}}...", was removed by moderator of {{{group.title}}}. '), 
+        subject: Handlebars.compile('[Communities] Your post was removed by moderator of {{{group.title}}}. '), 
         body: Handlebars.compile(emailBodyTemplate)
     },
     web: {

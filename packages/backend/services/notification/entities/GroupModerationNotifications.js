@@ -60,6 +60,7 @@ module.exports = class GroupModerationNotifications {
         }
 
         context.post = await this.postDAO.getPostById(context.moderation.postId)
+        context.postIntro = context.post.content.substring(0, 100)
 
         context.postAuthor = await this.userDAO.getUserById(context.post.userId, ['status']) 
 
