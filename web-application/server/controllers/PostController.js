@@ -68,13 +68,18 @@ module.exports = class PostController {
 
     async getRelations(currentUser, results, requestedRelations) {
 
-        const blockResults = await this.core.database.query(`
-            SElECT user_id, friend_id
-                FROM user_relationships
-                    WHERE (user_id = $1 OR friend_id = $1) AND status = 'blocked'
-        `, [currentUser.id])
+        let blockIds = []
+        const canModerateSite = await this.permissionService.can(currentUser, 'moderate', 'Site')
 
-        const blockIds = blockResults.rows.map((r) => r.user_id == currentUser.id ? r.friend_id : r.user_id)
+        if ( canModerateSite !== true ) {
+            const blockResults = await this.core.database.query(`
+                SElECT user_id, friend_id
+                    FROM user_relationships
+                        WHERE (user_id = $1 OR friend_id = $1) AND status = 'blocked'
+            `, [currentUser.id])
+
+            blockIds = blockResults.rows.map((r) => r.user_id == currentUser.id ? r.friend_id : r.user_id)
+        }
 
         // We only need these for the initial posts.  These are not displayed on Shared Posts.
         //

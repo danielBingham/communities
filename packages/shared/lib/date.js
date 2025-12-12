@@ -114,11 +114,6 @@ const coerceDateFormat = function(value, oldValue) {
         areDeleting = value.length < oldValue.length
     }
 
-    console.log(`oldValue: `, oldValue)
-    console.log(`Value: `, value)
-    console.log(`areDeleting: `, areDeleting)
-    console.log(`Year: `, year, `Month: `, month, `Day: `, day)
-
     // For each segment, take the ceorced segment and override the current
     // segment.  Take the extra and pre-pend it to the next segment before
     // ceorcing it.
@@ -133,7 +128,6 @@ const coerceDateFormat = function(value, oldValue) {
     let [newDay, extra] = coerceDateSegmentFormat(day, 2, false, 1, getDaysInMonth(month, year))
     day = newDay
 
-    console.log(`After coersion:: Year: `, year, `Month: `, month, `Day: `, day)
     // Now reassemble the new date value from our coerced segments.
     let newValue = ''
 

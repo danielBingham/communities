@@ -217,7 +217,6 @@ const RegistrationForm = function(props) {
         if ( request && request.state == 'fulfilled' ) {
             window.location.href = "/email-confirmation"
         } else if ( request && request.state === 'failed' ) {
-            console.log(request)
             if ( 'type' in request.error && request.error.type === 'underage' ) {
                 window.location.href = "/age-gate"
             }

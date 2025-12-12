@@ -33,7 +33,6 @@ const GroupAboutView = function({ groupId }) {
 
     const canViewGroup = can(currentUser, Actions.view, Entities.Group, context)
 
-    console.log(canViewGroup)
     if ( canViewGroup !== true ) {
         return null
     }

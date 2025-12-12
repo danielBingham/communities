@@ -152,10 +152,14 @@ module.exports = class UserController extends BaseController{
             requestedRelations: query.relations ? query.relations : []
         }
 
+        const canModerateSite = await this.permissionService.can(currentUser, 'moderate', 'Site')
         // ====================================================================
         // Permissions
         // ====================================================================
-        if ( currentUser ) {
+        // For anyone except Site Moderators, don't allow them to see users
+        // who've blocked them. You can't block Site Moderators, however, since
+        // they need to moderate the site.
+        if ( currentUser && canModerateSite !== true) {
             const blockResults = await this.core.database.query(`
                 SElECT user_id 
                     FROM user_relationships
@@ -521,7 +525,8 @@ module.exports = class UserController extends BaseController{
         const currentUser = request.session.user
         const userId = request.params.id
 
-        if ( currentUser && currentUser.id !== userId) {
+        const canModerateSite = await this.permissionService.can(currentUser, 'moderate', 'Site')
+        if ( currentUser && currentUser.id !== userId && canModerateSite !== true) {
             const relationship = await this.userRelationshipsDAO.getUserRelationshipByUserAndRelation(currentUser.id, userId)
             if ( relationship?.status === 'blocked' && currentUser.id === relationship?.relationId) {
                 throw new ControllerError(404, 'not-found', 
