@@ -152,7 +152,10 @@ module.exports = class UserController extends BaseController{
             requestedRelations: query.relations ? query.relations : []
         }
 
-        const canModerateSite = await this.permissionService.can(currentUser, 'moderate', 'Site')
+        let canModerateSite = false
+        if ( currentUser ) {
+            canModerateSite = await this.permissionService.can(currentUser, 'moderate', 'Site')
+        }
         // ====================================================================
         // Permissions
         // ====================================================================
