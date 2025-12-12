@@ -14,6 +14,7 @@
 }
 .contribute-view__one-time {
     max-width: 650px;
+    padding: 10px;
     margin: 0 auto;
 }
 .contribute-view__one-time__button {

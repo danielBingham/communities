@@ -11,6 +11,7 @@
     font-size: 20px;
     line-height: 1.7em;
     max-width: 650px;
+    padding: 10px;
 }
 .contribution-notice .contribution-grid {
     display: grid;
@@ -22,6 +23,7 @@
 }
 .contribution-notice .additional-contributions {
     margin: 20px auto;
+    padding: 10px;
     text-align: center;
 }
 .contribution-notice .contribution-notice__skip {
