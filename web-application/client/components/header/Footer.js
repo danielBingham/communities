@@ -40,8 +40,8 @@ const Footer = function() {
          </div>
          <div className="footer__bottom">
              <div className="footer__store-badges">
-                 <a href="https://play.google.com/store/apps/details?id=social.communities" className="footer__google-store"><img src={GoogleBadge} /></a>
-                 <a href="https://apps.apple.com/app/communities-social/id6751424847" className="footer__apple-store"><img src={AppleBadge} /></a>
+                 <a href="https://play.google.com/store/apps/details?id=social.communities" target="_blank" className="footer__google-store"><img src={GoogleBadge} /></a>
+                 <a href="https://apps.apple.com/app/communities-social/id6751424847" target="_blank" className="footer__apple-store"><img src={AppleBadge} /></a>
              </div>
              <div>Version: { clientVersion === serverVersion ? `${clientVersion}` : `${clientVersion}/${serverVersion}` }</div>
              <div>Site text and design (c) Communities Social, LLC 2024 - 2025</div>
