@@ -21,20 +21,51 @@ const FetchImage = function({ id, width, ref, onLoad, fallbackIcon }) {
     const [isLoading, setIsLoading] = useState(true)
     const [haveError, setHaveError] = useState(false)
 
-
     const needToLoad = useSelector((state) => { 
+
+        // If the id is not already in the cache, then we need to load it.
         if ( ! (id in state.File.cache ) ) {
             return true
         }
 
-        if ( id in state.File.cache && width && ! (width in state.File.cache[id]) ) {
+        // If the id is in the cache, but the width isn't in the cache, then we
+        // need to load. 
+        if ( 
+            id in state.File.cache 
+                && width !== undefined && width !== null 
+                && ! (width in state.File.cache[id]) 
+        ) {
+            return true
+        } 
+    
+        // If the id is in the cache, but we don't have a width, then we're
+        // using 'full' instead of the width.  If full isn't in the cache, then
+        // we need to load it.
+        else if ( 
+            id in state.File.cache 
+                && ( width === undefined || width === null )
+                && ! ( 'full' in state.File.cache[id]) 
+        ) {
             return true
         }
-        
-        if ( id in state.File.cache
-            && width in state.File.cache[id]
-            && state.File.cache[id][width].url === null ) {
+       
+        // If the id and width we're using are in the cache, but the URL is set
+        // to 'null', then we're already loading this image into the cache
+        // (possibly in annother instance of this component).  We shouldn't
+        // load it again.
+        if ( 
+            id in state.File.cache
+                && width !== undefined && width !==  null
+                && width in state.File.cache[id]
+                && state.File.cache[id][width].url === null 
+        ) {
             return false 
+        } else if ( 
+            id in state.File.cache
+                && 'full' in state.File.cache[id]
+                && state.File.cache[id]['full'].url === null 
+        ) {
+            return false
         }
 
         return false
