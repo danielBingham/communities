@@ -30,6 +30,7 @@ const NotificationDAO = require('../../daos/NotificationDAO')
 const EmailService = require('../EmailService')
 const PermissionService = require('../PermissionService')
 
+const GroupNotifications = require('./entities/GroupNotifications')
 const GroupMemberNotifications = require('./entities/GroupMemberNotifications')
 const GroupModerationNotifications = require('./entities/GroupModerationNotifications')
 const PostNotifications = require('./entities/PostNotifications')
@@ -43,6 +44,7 @@ const AndroidNotifications = require('./AndroidNotifications')
 // ================== Load Notification Definitions =================================
 
 const notifications = [
+    ...GroupNotifications.notifications,
     ...GroupMemberNotifications.notifications,
     ...GroupModerationNotifications.notifications,
     ...PostNotifications.notifications,
@@ -66,6 +68,7 @@ module.exports = class NotificationWorker {
         this.emailService = new EmailService(core)
         this.permissionService = new PermissionService(core)
 
+        this.groupNotifications = new GroupNotifications(core, this)
         this.groupMemberNotifications = new GroupMemberNotifications(core, this)
         this.groupModerationNotifications = new GroupModerationNotifications(core, this)
         this.postNotifications = new PostNotifications(core, this)
@@ -126,6 +129,10 @@ module.exports = class NotificationWorker {
                 return await this.userRelationshipNotifications.create(currentUser, type, context, options)
             } else if ( action === 'update' ) {
                 return await this.userRelationshipNotifications.update(currentUser, type, context, options)
+            }
+        } else if ( entity === 'Group' ) {
+            if ( action === 'update' ) {
+                return await this.groupNotifications.update(currentUser, type, context, options)
             }
         } else if ( entity === 'GroupMember' ) {
             if ( action === 'create' ) {

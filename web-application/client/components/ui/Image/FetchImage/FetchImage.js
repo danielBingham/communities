@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
+import * as HeroIconsSolid from '@heroicons/react/24/solid'
+
 import { useRequest } from '/lib/hooks/useRequest'
 
 import logger from '/logger'
@@ -9,27 +11,69 @@ import { loadFile, touchCache } from '/state/File'
 
 import Spinner from '/components/Spinner'
 
-const FetchImage = function({ id, width, ref, onLoad }) {
+import './FetchImage.css'
+
+const FetchImage = function({ id, width, ref, onLoad, fallbackIcon }) {
+
+    let icon = fallbackIcon || 'Photo'
+    const Fallback = HeroIconsSolid[`${icon}Icon`]
+
     const [isLoading, setIsLoading] = useState(true)
+    const [haveError, setHaveError] = useState(false)
 
     const needToLoad = useSelector((state) => { 
+
+        // If the id is not already in the cache, then we need to load it.
         if ( ! (id in state.File.cache ) ) {
             return true
         }
 
-        if ( id in state.File.cache && width && ! (width in state.File.cache[id]) ) {
+        // If the id is in the cache, but the width isn't in the cache, then we
+        // need to load. 
+        if ( 
+            id in state.File.cache 
+                && width !== undefined && width !== null 
+                && ! (width in state.File.cache[id]) 
+        ) {
+            return true
+        } 
+    
+        // If the id is in the cache, but we don't have a width, then we're
+        // using 'full' instead of the width.  If full isn't in the cache, then
+        // we need to load it.
+        else if ( 
+            id in state.File.cache 
+                && ( width === undefined || width === null )
+                && ! ( 'full' in state.File.cache[id]) 
+        ) {
             return true
         }
-        
-        if ( id in state.File.cache
-            && width in state.File.cache[id]
-            && state.File.cache[id][width].url === null ) {
-            return true
+       
+        // If the id and width we're using are in the cache, but the URL is set
+        // to 'null', then we're already loading this image into the cache
+        // (possibly in annother instance of this component).  We shouldn't
+        // load it again.
+        if ( 
+            id in state.File.cache
+                && width !== undefined && width !==  null
+                && width in state.File.cache[id]
+                && state.File.cache[id][width].url === null 
+        ) {
+            return false 
+        } else if ( 
+            id in state.File.cache
+                && 'full' in state.File.cache[id]
+                && state.File.cache[id]['full'].url === null 
+        ) {
+            return false
         }
 
         return false
     })
-            
+    
+    // This will be null if the image is loading, false if it failed to load,
+    // and a string with the full url to the image object blob if the image has
+    // successfully lioaded.
     const imageUrl = useSelector((state) => {
         if ( id in state.File.cache ) {
             if ( width && width in state.File.cache[id] ) {
@@ -66,31 +110,52 @@ const FetchImage = function({ id, width, ref, onLoad }) {
             return 
         }
 
-        if ( imageUrl === null || needToLoad ) {
+        if ( needToLoad ) {
             makeRequest(loadFile(id, width))
         }  else {
             dispatch(touchCache({ fileId: id }))
         }
     }, [ id, width, needToLoad])
 
+    useEffect(function() {
+        if ( request?.state === 'failed' ) {
+            setIsLoading(false)
+            setHaveError(true)
+            logger.error(`### FetchImage :: Image(${id}, ${width}) failed to load: `, request)
+        }
+    }, [ request ])
+
     if ( ! id ) {
         logger.error(new Error(`'props.id' is required!`))
         return null
     }
 
-    return (
-        <>
-            { imageUrl !== null && <img 
+
+    if ( haveError !== true && imageUrl !== null && imageUrl !== false) {
+        return (
+            <img 
                 ref={ref}
                 onLoad={onLoadInternal} 
                 onError={onErrorInternal}
                 src={`${imageUrl}`} 
-            /> }
-            { isLoading && <div className="image__loading">
+            />
+        )
+    } else if ( haveError === true || imageUrl === false ) {
+        return (
+            <div className="image__error"> <Fallback className='fetch-image__fallback' /></div>
+        )
+
+    } else if ( isLoading === true ) {
+        return (
+            <div className="image__loading">
                 <Spinner /> 
-            </div> }
-        </>
-    ) 
+            </div>
+        )
+    } else {
+        return (
+            <div className="image__error"> <Fallback className='fetch-image__fallback' /></div>
+        )
+    }
 }
 
 export default FetchImage 

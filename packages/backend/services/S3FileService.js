@@ -96,7 +96,7 @@ module.exports = class S3FileService {
             if ( error.$metadata?.httpStatusCode === 404 ) {
                 return false
             } else if ( error.$metadata?.httpStatusCode === 403) {
-                this.core.logger.error('Got 403 from S3.  Likely bad permissions.')
+                this.core.logger.error(`403 - Bad Permissions Suspected.\n  \tBucket: ${params.Bucket}\n \tKey: ${path}`)
                 this.core.logger.error(error)
                 return false
             } else {

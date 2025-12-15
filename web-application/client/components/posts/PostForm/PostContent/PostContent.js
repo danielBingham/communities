@@ -103,7 +103,7 @@ const PostContent = function({ postId, groupId, sharedPostId }) {
                 } else if ( draft.linkPreviewId !== null ) {
                     setLinkPreviewId(null)
                 }
-            }, 500)
+            }, 250)
         }
     }, [ draft ])
 

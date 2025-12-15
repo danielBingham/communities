@@ -122,13 +122,12 @@ describe('ValidationService.validateGroup()', function() {
             expect.hasAssertions()
         })
 
-        it('Should return one error for each disallowed field included (type, title, slug) that does not match existing', async function() {
+        it('Should return one error for each disallowed field included (type, slug) that does not match existing', async function() {
             const service = new ValidationService(core)
 
             const group = { 
                 id: 'd3d5d52e-8c9b-427e-9823-9b9c5af77a6a',
                 type: 'open',
-                title: 'A Test Group',
                 slug: 'a-test-group'
             }
 
@@ -138,13 +137,12 @@ describe('ValidationService.validateGroup()', function() {
             const existing = {
                 id: 'd3d5d52e-8c9b-427e-9823-9b9c5af77a6a',
                 type: 'private',
-                title: 'A Private Group',
                 slug: 'a-private-group'
             }
 
             const errors = await service.validateGroup(currentUser, group, existing)
 
-            expect(errors.length).toBe(3)
+            expect(errors.length).toBe(2)
         })
     })
 

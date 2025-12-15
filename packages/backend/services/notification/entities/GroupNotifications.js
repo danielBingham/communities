@@ -1,7 +1,6 @@
 /******************************************************************************
  *
  *  Communities -- Non-profit, cooperative social media 
- *
  *  Copyright (C) 2022 - 2024 Daniel Bingham 
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -19,19 +18,22 @@
  *
  ******************************************************************************/
 
+const path = require('path')
+
 const { lib } = require('@communities/shared')
 
 const GroupDAO = require('../../../daos/GroupDAO')
+const GroupMemberDAO = require('../../../daos/GroupMemberDAO')
 const PostCommentDAO = require('../../../daos/PostCommentDAO')
 const PostSubscriptionDAO = require('../../../daos/PostSubscriptionDAO')
 const UserDAO = require('../../../daos/UserDAO')
 
 const PermissionService = require('../../PermissionService')
 
-module.exports = class UserRelationshipNotifications {
+module.exports = class GroupNotifications {
+
     static notifications = [
-        'UserRelationship:create:relation',
-        'UserRelationship:update:user'
+            'Group:update:title:changed:member',
     ]
 
     constructor(core, notificationWorker) {
@@ -39,6 +41,7 @@ module.exports = class UserRelationshipNotifications {
         this.notificationWorker = notificationWorker
 
         this.groupDAO = new GroupDAO(core)
+        this.groupMemberDAO = new GroupMemberDAO(core)
         this.postCommentDAO = new PostCommentDAO(core)
         this.postSubscriptionDAO = new PostSubscriptionDAO(core)
         this.userDAO = new UserDAO(core)
@@ -46,32 +49,33 @@ module.exports = class UserRelationshipNotifications {
         this.permissionService = new PermissionService(core)
     }
 
-    async ensureContext(currentUser, type, context, options) {
-        const userResults = await this.userDAO.selectUsers({
-            where: `users.id = ANY($1::uuid[])`,
-            params: [  [ context.userId, context.relationId ] ]
-        })
-
-        context.friend = userResults.dictionary[context.relationId]
-        context.requester = userResults.dictionary[context.userId]
-    }
-
-    async create(currentUser, type, context, options) {
-        await this.ensureContext(currentUser, type, context, options)
-
-        context.path = `/${context.requester.username}`
-        context.link = new URL(context.path, this.core.config.host).href
-
-        await this.notificationWorker.createNotification(context.relationId, 'UserRelationship:create:relation', context, options)
+    async ensureContext(currentUser, type, context) {
+        context.path = `/group/${context.group.slug}`
+        context.link = new URL(context.path, this.core.config.host)
     }
 
     async update(currentUser, type, context, options) {
-        await this.ensureContext(currentUser, type, context, options)
+        await this.ensureContext(currentUser, type, context)
 
-        context.path = `/${context.friend.username}`
-        context.link = new URL(context.path, this.core.config.host).href
-
-        await this.notificationWorker.createNotification(context.userId, 'UserRelationship:update:user', context, options)
+        if ( context.previousGroup.title !== context.group.title ) {
+            const memberQuery = await this.core.database.query(`SELECT user_id FROM group_members WHERE group_id = $1`, [ context.group.id])
+            for(const row of memberQuery.rows) {
+                // Don't notify the user who performed the update.
+                if ( row.user_id === currentUser.id ) {
+                    continue
+                }
+                const user = await this.userDAO.getUserById(row.user_id)
+                const newContext = {
+                    ...context,
+                    user: user
+                }
+                await this.notificationWorker.createNotification(
+                    user.id,
+                    'Group:update:title:changed:member',
+                    newContext,
+                    options
+                )
+            }
+        }
     }
-
 }

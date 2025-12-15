@@ -1,4 +1,23 @@
-import React, { useState, useRef, useEffect } from 'react'
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media 
+ *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
+import { useState, useRef, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { useSearchParams } from 'react-router-dom'
 
@@ -10,7 +29,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 import { validateEmail, validateName, validateUsername, validatePassword } from '/lib/validation/user'
 
 import { validateToken } from '/state/tokens'
-import { patchUser, getUsers } from '/state/User'
+import { patchUser, postUsers, getUsers } from '/state/User'
 
 import Input from '/components/ui/Input'
 import { Checkbox } from '/components/ui/Checkbox'
@@ -127,21 +146,21 @@ const AcceptInvitationForm = function(props) {
             return 
         }
 
-        if ( ! user ) {
-            setTokenValidationError(['You must have a valid token to register.'])
-        }
-
-        const userPatch = {
-            id: user.id,
+        const newUser = {
             name: name,
             username: username,
             email: email,
             password: password,
             birthdate: birthdate,
-            token: token
         }
 
-        makeRequest(patchUser(userPatch))
+        if ( user === null || user === undefined ) {
+            makeRequest(postUsers(newUser))
+        } else {
+            newUser.id = user.id
+            newUser.token = token
+            makeRequest(patchUser(newUser))
+        }
     }
 
     const onNameChange = function(event) {
@@ -170,6 +189,12 @@ const AcceptInvitationForm = function(props) {
 
         makeUsernameRequest(getUsers(username, { username: lowerUsername }))
         isValid('username')
+    }
+
+    const onBirthdateChange = function(event) {
+        let value = event.target.value
+        value = shared.lib.date.coerceDateFormat(value, birthdate)
+        setBirthdate(value)
     }
 
     useEffect(function() {
@@ -226,7 +251,11 @@ const AcceptInvitationForm = function(props) {
     useEffect(function() {
         if ( request && request.state == 'fulfilled' ) {
             window.location.href = "/"
-        } 
+        } else if ( request && request.state === 'failed' ) {
+            if ( 'type' in request.error && request.error.type === 'underage' ) {
+                window.location.href = "/age-gate"
+            }
+        }
     }, [ request ])
 
     useEffect(function() {
@@ -277,7 +306,9 @@ const AcceptInvitationForm = function(props) {
     } 
 
     if ( request && request.state == 'failed' ) {
-        baseError = (<div className="error">{ request.error.message }</div>)
+        if ( request.error?.type !== 'underage' ) {
+            baseError = (<div className="error">{ request.error.message }</div>)
+        }
     }
 
     return (
@@ -300,6 +331,7 @@ const AcceptInvitationForm = function(props) {
                     explanation="The name people will see on your profile.  We encourage you to use your real, full name so that people can find you, but we don't enforce that."
                     value={name}
                     className="name"
+                    placeholder="John Doe"
                     onBlur={ (event) => isValid('name') }
                     onChange={onNameChange} 
                     error={nameError}
@@ -310,6 +342,7 @@ const AcceptInvitationForm = function(props) {
                     explanation="The unique username that will be used to link to your profile.  Must start with a letter, be at least two characters long, and can only contain letters, numbers, dash ( - ), or undercore ( _ )"
                     value={username}
                     className="username"
+                    placeholder="john-doe"
                     onBlur={ onUsernameBlur }
                     onChange={ (event) => setUsername(event.target.value) } 
                     error={usernameError}
@@ -349,13 +382,14 @@ const AcceptInvitationForm = function(props) {
                 />
                 <Input
                     name="birthdate"
-                    type="date"
+                    type="text"
                     label="Date of Birth"
-                    explanation="Please enter your date of birth.  This is required by state laws that mandate social media platforms enforce age limits on their users."
+                    explanation="Please enter your date of birth using the format 'YYYY-MM-DD', eg. '1915-04-22'.  This is required by state laws that mandate social media platforms enforce age limits on their users. We will delete your birthdate once we have verified your age."
                     value={birthdate}
                     className="date-of-birth"
+                    placeholder="YYYY-MM-DD"
                     onBlur={ (event) => isValid('birthdate') }
-                    onChange={ (event) => setBirthdate(event.target.value) }
+                    onChange={onBirthdateChange}
                     error={birthdateError}
                 />
                 <div className="base-error">

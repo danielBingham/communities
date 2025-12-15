@@ -107,7 +107,7 @@ module.exports = class UserRelationshipController {
                         FROM users
                             LEFT JOIN user_relationships ON users.id = user_relationships.user_id OR users.id = user_relationships.friend_id
                             LEFT JOIN users relation ON user_relationships.user_id = relation.id OR user_relationships.friend_id = relation.id
-                        WHERE users.id = $1 AND SIMILARITY(relation.name, $2) > 0.15
+                        WHERE users.id = $1 AND SIMILARITY(relation.name, $2) > 0.05
                         ORDER BY SIMILARITY(relation.name, $2) desc
             `, [ userId, userQuery.name])
 

@@ -25,13 +25,13 @@ const path = require('path')
 const emailBodyTemplate = fs.readFileSync(path.resolve(__dirname, './author.hbs'), 'utf8')
 
 module.exports = {
-    type: 'GroupModeration:update:post:status:rejected:author',
+    type: 'GroupModeration:update:post:status:approved:author',
     email: {
-        subject: Handlebars.compile('[Communities] Your post was removed by moderator of {{{group.title}}}. '), 
+        subject: Handlebars.compile('[Communities] Your post was approved by moderator of {{{group.title}}}. '), 
         body: Handlebars.compile(emailBodyTemplate)
     },
     web: {
-        text: Handlebars.compile(`Moderators of {{{group.title}}} removed your post, "{{{postIntro}}}..."`),
+        text: Handlebars.compile(`Moderators of {{{group.title}}} approved your post.`),
         path: Handlebars.compile(`{{{ path }}}`) 
     }
 }

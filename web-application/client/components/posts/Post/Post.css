@@ -27,7 +27,7 @@
     font-size: 14px;
     padding: 10px;
     display: grid;
-    grid-template-columns: 40px auto 48px 24px;
+    grid-template-columns: 40px auto 60px 24px;
 }
 .post .post__header .post__poster-image .profile-image {
     width: 100%;
@@ -49,7 +49,7 @@
 }
 .post .post__header .post__controls {
     text-align: right;
-    padding-top: 3px;
+    padding-top: 5px;
     padding-right: 10px;
 }
 

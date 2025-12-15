@@ -1,3 +1,22 @@
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media 
+ *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
 import { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 
@@ -147,6 +166,14 @@ const RegistrationForm = function(props) {
         isValid('username')
     }
 
+    const onBirthdateChange = function(event) {
+        let value = event.target.value
+        value = shared.lib.date.coerceDateFormat(value, birthdate)
+        setBirthdate(value)
+    }
+
+    // ============ Validation ==================
+    
     useEffect(function() {
         if ( nameValidationError.length > 0 ) {
             isValid('name')
@@ -184,9 +211,15 @@ const RegistrationForm = function(props) {
         }
     }, [ birthdate ])
 
+    // ============ END Validation ==================
+
     useEffect(function() {
         if ( request && request.state == 'fulfilled' ) {
             window.location.href = "/email-confirmation"
+        } else if ( request && request.state === 'failed' ) {
+            if ( 'type' in request.error && request.error.type === 'underage' ) {
+                window.location.href = "/age-gate"
+            }
         }
     }, [ request ])
 
@@ -209,14 +242,16 @@ const RegistrationForm = function(props) {
     let birthdateError = birthdateValidationError.join(' ')
 
     if ( request && request.state == 'failed' ) {
-        if ( 'message' in request.error ) {
-            baseError = (<div className="error">{ request.error.message }</div>)
-        } else if ( 'all' in request.error ) {
-            let message = ''
-            for(const error of request.error.all) {
-                message = message + error.message
+        if ( request.error?.type !== 'underage' ) {
+            if ( 'message' in request.error ) {
+                baseError = (<div className="error">{ request.error.message }</div>)
+            } else if ( 'all' in request.error ) {
+                let message = ''
+                for(const error of request.error.all) {
+                    message = message + error.message
+                }
+                baseError = (<div className="error">{ message }</div>)
             }
-            baseError = (<div className="error">{ message }</div>)
         }
     }
 
@@ -229,6 +264,7 @@ const RegistrationForm = function(props) {
                     label="Full Name"
                     explanation="The name people will see on your profile.  We encourage you to use your real, full name so that people can find you, but we don't enforce that."
                     value={name}
+                    placeholder="John Doe"
                     className="name"
                     onBlur={ (event) => isValid('name') }
                     onChange={onNameChange} 
@@ -239,6 +275,7 @@ const RegistrationForm = function(props) {
                     label="Username"
                     explanation="The unique username that will be used to link to your profile.  Must start with a letter, be at least two characters long, and can only contain letters, numbers, dash ( - ), or undercore ( _ )"
                     value={username}
+                    placeholder="john-doe"
                     className="username"
                     onBlur={ onUsernameBlur }
                     onChange={ (event) => setUsername(event.target.value) } 
@@ -249,6 +286,7 @@ const RegistrationForm = function(props) {
                     label="Email"
                     explanation="The email you will use to log in.  Will also receive notifications and will be used to reset your password if you forget it."
                     value={email}
+                    placeholder="john-doe@example.com"
                     className="email"
                     onBlur={ (event) => isValid('email') }
                     onChange={ (event) => setEmail(event.target.value) } 
@@ -279,13 +317,14 @@ const RegistrationForm = function(props) {
                 />
                 <Input
                     name="birthdate"
-                    type="date"
+                    type="text"
                     label="Date of Birth"
-                    explanation="Please enter your date of birth.  This is required by state laws that mandate social media platforms enforce age limits on their users."
+                    explanation="Please enter your date of birth using the format 'YYYY-MM-DD', eg. '1933-04-22'.  This is required by state laws that mandate social media platforms enforce age limits on their users. We will delete your birthdate once we have verified your age."
                     value={birthdate}
                     className="date-of-birth"
+                    placeholder="YYYY-MM-DD"
                     onBlur={ (event) => isValid('birthdate') }
-                    onChange={ (event) => setBirthdate(event.target.value) }
+                    onChange={onBirthdateChange}
                     error={birthdateError}
                 />
 

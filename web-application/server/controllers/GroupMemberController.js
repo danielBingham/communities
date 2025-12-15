@@ -185,7 +185,7 @@ module.exports = class GroupMemberController extends BaseController {
                     SELECT group_members.id 
                         FROM group_members
                             LEFT OUTER JOIN users ON group_members.user_id = users.id
-                        WHERE group_members.group_id = $1 AND SIMILARITY(users.name, $2) > 0.15
+                        WHERE group_members.group_id = $1 AND SIMILARITY(users.name, $2) > 0.05
                         ORDER BY SIMILARITY(users.name, $2) DESC
                 `, [ context.group.id, userQuery.name ])
 

@@ -18,6 +18,7 @@ import FileUploadInput from '/components/files/FileUploadInput'
 
 import Button from '/components/generic/button/Button'
 import TextBox from '/components/generic/text-box/TextBox'
+import Input from '/components/ui/Input'
 import Spinner from '/components/Spinner'
 
 import './GroupEditForm.css'
@@ -29,13 +30,15 @@ const GroupEditForm = function({ groupId }) {
 
     const [group] = useGroup(groupId)
 
+    const [ title, setTitle ] = useLocalStorage('group.draft.title', ( group?.title ? group.title : ''))
     const [ about, setAbout ] = useLocalStorage('group.draft.about', ( group?.about ? group.about : ''))
     const [ shortDescription, setShortDescription ] = useLocalStorage('group.draft.shortDescription', (group?.shortDescription ? group.shortDescription: ''))
     const [ rules, setRules ] = useLocalStorage('group.draft.rules', (group?.rules ? group.rules : ''))
     const [ fileId, setFileId] = useLocalStorage('group.draft.fileId', ( group?.fileId ? group.fileId : null))
     const [fileState, setFileState] = useState(null) 
 
-    const [ aboutErrors, setAboutErrors ] = useState([])
+    const [ titleErrors, setTitleErrors ] = useState(null)
+    const [ aboutErrors, setAboutErrors ] = useState(null)
     const [ shortDescriptionErrors, setShortDescriptionErrors ] = useState(null)
     const [ rulesErrors, setRulesErrors ] = useState(null)
 
@@ -57,6 +60,16 @@ const GroupEditForm = function({ groupId }) {
     }
 
     const validate = function(field) {
+
+        let titleValidationErrors = []
+        if ( ! field || field === 'title' ) {
+            titleValidationErrors = schema.properties.title.validate(title)
+            if ( titleValidationErrors.length > 0 ) {
+                setTitleErrors(titleValidationErrors.reduce((string, error) => `${string} ${error.message}`, ''))
+            } else {
+                setTitleErrors(null)
+            }
+        }
 
         let aboutValidationErrors = []
         if ( ! field || field == 'about' ) {
@@ -91,6 +104,7 @@ const GroupEditForm = function({ groupId }) {
     const assembleGroup = function() {
         const newGroup = {
             id: groupId,
+            title: title,
             about: about,
             fileId: fileId
         }
@@ -118,6 +132,7 @@ const GroupEditForm = function({ groupId }) {
     }
 
     const cancel = function(event) {
+        setTitle(null)
         setAbout(null)
         setShortDescription(null)
         setRules(null)
@@ -130,6 +145,7 @@ const GroupEditForm = function({ groupId }) {
         if ( fileId !== null && fileState == 'fulfilled' && ! request ) {
             makeRequest(patchGroup(assembleGroup()))
         } else if ( (fileState == 'fulfilled') && (request && request.state == 'fulfilled')) {
+            setTitle(null)
             setAbout(null)
             setShortDescription(null)
             setRules(null)
@@ -137,6 +153,7 @@ const GroupEditForm = function({ groupId }) {
    
             navigate(`/group/${request.response.body.entity.slug}`)
         } else if ( fileId === null && (request && request.state == 'fulfilled')) {
+            setTitle(null)
             setAbout(null)
             setShortDescription(null)
             setRules(null)
@@ -175,12 +192,22 @@ const GroupEditForm = function({ groupId }) {
                     /> }
                 </div>
             </div>
+            <Input
+                name="title"
+                label="Title"
+                explanation="Update this group's title. Members will be notified of the change."
+                value={title}
+                className="title"
+                onBlur={ (event) => validate('title') }
+                onChange={(e) => setTitle(e.target.value)} 
+                error={titleErrors}
+            />
             { hasRules && 
                 <TextBox
                     name="shortDescription"
                     className="short-description"
                     label="Short Description"
-                    explanation={`Enter a short description for the group no longer than 150 characters.  This description will be used in the Group Badge on the search page and on the Group Profile Page.`}
+                    explanation={`Update the short description for the group. Must be no longer than 150 characters.  This description will be used in the Group Badge on the search page and on the Group Profile Page.`}
                     value={shortDescription}
                     onBlur={ (event) => validate('shortDescription') }
                     onChange={(event) => { setShortDescription(event.target.value); validate('shortDescription') }}
@@ -191,7 +218,7 @@ const GroupEditForm = function({ groupId }) {
                 name="about"
                 className="about"
                 label="About"
-                explanation={`Enter the full description of this group.  This should include a description of the group's purpose and what sort of content is appropriate for it. You can outline the group's rules in a separate field below.`}
+                explanation={`Update the full description of this group.  This should include a description of the group's purpose and what sort of content is appropriate for it. You can outline the group's rules in a separate field below.`}
                 value={about}
                 onChange={(event) => setAbout(event.target.value)}
                 error={aboutErrors}
@@ -201,7 +228,7 @@ const GroupEditForm = function({ groupId }) {
                     name="rules"
                     className="rules"
                     label="Rules"
-                    explanation={`Enter the rules for this group. The rules should clearly describe the content and behavior that are not allowed and will be moderated.`}
+                    explanation={`Update the rules for this group. The rules should clearly describe the content and behavior that are not allowed and will be moderated.`}
                     value={rules}
                     onBlur={ (event) => validate('rules') }
                     onChange={(event) => setRules(event.target.value)}

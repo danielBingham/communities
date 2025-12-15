@@ -49,12 +49,12 @@ const ModerateForGroup = function({ postId, postCommentId }) {
     // If we get here, status === 'flagged'
     if ( canModerateGroup !== true ) {
         return (
-            <span className="moderate-for-group__flag" title={`Group ${target} Moderation`}>{ statusIcon }</span>
+            <span className="moderate-for-group__status" title={`Group ${target} Moderation`}>{ statusIcon } <span className="moderate-for-group__text">{ groupModeration.status }</span></span>
         )
     } else {
         return (
             <>
-                <a href="" className="moderate-for-group__flag" title={`Moderate ${target} for Group`} onClick={(e) => { e.preventDefault(); setShowModal(true) }}>{ statusIcon }</a>
+                <a href="" className="moderate-for-group__status" title={`Moderate ${target} for Group`} onClick={(e) => { e.preventDefault(); setShowModal(true) }}>{ statusIcon }<span className="moderate-for-group__text">{ groupModeration.status }</span></a>
                 <ModerateForGroupModal postId={postId} postCommentId={postCommentId} isVisible={showModal} setIsVisible={setShowModal} />
             </>
         )

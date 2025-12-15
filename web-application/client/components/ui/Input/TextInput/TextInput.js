@@ -2,7 +2,7 @@ import logger from '/logger'
 
 import './TextInput.css'
 
-const TextInput = function({ name, type, label, explanation, className, value, ref, onChange, onKeyDown, onBlur, onFocus, error, children }) {
+const TextInput = function({ name, type, label, explanation, className, value, placeholder, ref, onChange, onKeyDown, onBlur, onFocus, error, children }) {
 
     const onChangeInternal = function(event) {
         if ( onChange && typeof onChange === "function") {
@@ -50,6 +50,7 @@ const TextInput = function({ name, type, label, explanation, className, value, r
                     type={type} 
                     name={name} 
                     value={value} 
+                    placeholder={placeholder}
                     onKeyDown={onKeyDownInternal}
                     onChange={onChangeInternal} 
                     onBlur={onBlurInternal} 

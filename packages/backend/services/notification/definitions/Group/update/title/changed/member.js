@@ -22,16 +22,16 @@ const Handlebars = require('handlebars')
 const fs = require('fs')
 const path = require('path')
 
-const emailBodyTemplate = fs.readFileSync(path.resolve(__dirname, './author.hbs'), 'utf8')
+const emailBodyTemplate = fs.readFileSync(path.resolve(__dirname, './member.hbs'), 'utf8')
 
 module.exports = {
-    type: 'GroupModeration:update:post:status:rejected:author',
+    type: 'Group:update:title:changed:member',
     email: {
-        subject: Handlebars.compile('[Communities] Your post was removed by moderator of {{{group.title}}}. '), 
+        subject: Handlebars.compile('[Communities] An admin has change the title of group {{{previousGroup.title}}} to {{{ group.title }}}.'),
         body: Handlebars.compile(emailBodyTemplate)
     },
     web: {
-        text: Handlebars.compile(`Moderators of {{{group.title}}} removed your post, "{{{postIntro}}}..."`),
-        path: Handlebars.compile(`{{{ path }}}`) 
+        text: Handlebars.compile(`An admin has change the title of group {{{previousGroup.title}}} to {{{ group.title }}}.`),
+        path: Handlebars.compile(`{{{ path }}}`)
     }
 }

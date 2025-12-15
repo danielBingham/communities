@@ -5,16 +5,29 @@
 }
 .contribution-view .intro{
     margin: 0 auto;
-    font-size: 20px;
+    max-width: 650px;
+    padding: 10px;
+    font-size: 16px;
     line-height: 1.7em;
 }
 .contribution-view .contribution-grid {
     display: grid;
     margin: 50px auto 0 auto;
-    grid-template-columns: repeat(auto-fit, 260px);
-
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    align-items: center;
+    justify-items: center;
 }
 .contribution-view .additional-contributions {
     margin: 20px auto;
+    text-align: center;
+}
+.contribution-view__one-time {
+    max-width: 650px;
+    margin: 50px auto;
+    padding: 10px;
+    font-size: 16px;
+    line-height: 1.7em;
+}
+.contribution-view__one-time__button {
     text-align: center;
 }

@@ -3,6 +3,8 @@ import { useSelector } from 'react-redux'
 
 import ContributionCard from '/components/contribution/ContributionCard'
 
+import Button from '/components/ui/Button'
+
 import './Contribute.css'
 
 const Contribute = function() {
@@ -14,11 +16,12 @@ const Contribute = function() {
         <div className="contribute-view">
             <article className="contribute-view__intro">
                 <h1>Pay What You Can</h1>
-                Communities is a social network that will be a <strong>non-profit cooperative</strong>.  We're not taking
-                venture capital, not showing you ads, and not selling your
-                    data.<br />  
-                <p>We <strong>need user contributions</strong> for this to work.  
-                Please contribute if you can!</p>
+                <p>Developing, maintaining, and moderating this platform all cost money.</p>
+                <p>We're not taking venture capital, not showing you ads, not
+                    selling your data, and <strong>not paywalling the platform</strong>.</p>
+                <p>We need users to contribute for this to work.</p>
+                <p>Communities uses a "pay what you can" monthly subscription.</p>
+                <p>We're asking you to contribute $10 / month, or whatever you can. <strong>You can use the platform without contributing.</strong>  But if you can contribute, please do!</p>
                 <p><strong>Beta:</strong> If you've already set up a contribution, <a href={portalURI}>click here</a> to manage it. If you have any issues, please reach out to <a href="mailto:contact@communities.social">contact@communities.social</a>.</p>
             </article>
             <div className="contribution-grid">
@@ -33,7 +36,13 @@ const Contribute = function() {
             <div className="contribution-grid" style={{ display: ( showMore ? 'grid' : 'none' ) }}>
                 <ContributionCard amount={20} explanation={"Cover one other person's contribution."} />
                 <ContributionCard amount={50} explanation={"Cover three other people's contributions."} />
-                <ContributionCard amount={100} explanation={"Cover nine other person's contribution."} />
+                <ContributionCard amount={100} explanation={"Cover nine other people's contributions."} />
+            </div>
+            <div className="contribute-view__one-time">
+                <p>If you can't make a monthly commitment, but would still like to contribute, you can make a one time contribution here.</p>
+                <div className="contribute-view__one-time__button">
+                    <Button href="https://donate.stripe.com/3cIfZ8cvIeDo8hwakogUM0a" external={true}>Make a One Time Contribution</Button>
+                </div>
             </div>
         </div>
     )

@@ -42,6 +42,8 @@ const {
     ServiceError
 } = require('@communities/backend')
 
+const shared = require('@communities/shared')
+
 const BaseController = require('./BaseController')
 const ControllerError = require('../errors/ControllerError')
 
@@ -150,10 +152,17 @@ module.exports = class UserController extends BaseController{
             requestedRelations: query.relations ? query.relations : []
         }
 
+        let canModerateSite = false
+        if ( currentUser ) {
+            canModerateSite = await this.permissionService.can(currentUser, 'moderate', 'Site')
+        }
         // ====================================================================
         // Permissions
         // ====================================================================
-        if ( currentUser ) {
+        // For anyone except Site Moderators, don't allow them to see users
+        // who've blocked them. You can't block Site Moderators, however, since
+        // they need to moderate the site.
+        if ( currentUser && canModerateSite !== true) {
             const blockResults = await this.core.database.query(`
                 SElECT user_id 
                     FROM user_relationships
@@ -173,7 +182,7 @@ module.exports = class UserController extends BaseController{
         if ( 'name' in query && query.name.length > 0) {
             const and = result.params.length > 0 ? ' AND ' : ''
             result.params.push(query.name)
-            result.where += `${and} SIMILARITY(users.name, $${result.params.length}) > 0.15`
+            result.where += `${and} SIMILARITY(users.name, $${result.params.length}) > 0.05`
             result.order = `SIMILARITY(users.name, $${result.params.length}) desc`
         }
 
@@ -186,7 +195,7 @@ module.exports = class UserController extends BaseController{
         if ( 'mention' in query && query.mention.length > 0 ) {
             const and = result.params.length > 0 ? ' AND ' : ''
             result.params.push(query.mention)
-            result.where += `${and} SIMILARITY(users.name, $${result.params.length}) > 0.15`
+            result.where += `${and} SIMILARITY(users.name, $${result.params.length}) > 0.05`
             result.order = `SIMILARITY(users.name, $${result.params.length}) desc`
 
             if ( 'postId' in query && 'groupId' in query) {
@@ -461,13 +470,27 @@ module.exports = class UserController extends BaseController{
         } 
         // This is a registration.
         else {
-            const [registeredUser, errors] = await this.userService.registerUser(request.body)
-            if ( errors.length > 0 ) {
-                userErrors.push(...errors)
-            } 
-            if ( registeredUser !== null ) {
-                resultingUsers.push(registeredUser)
-                request.session.user = registeredUser
+            try { 
+                const [registeredUser, errors] = await this.userService.registerUser(request.body)
+                if ( errors.length > 0 ) {
+                    userErrors.push(...errors)
+                } 
+                if ( registeredUser !== null ) {
+                    resultingUsers.push(registeredUser)
+                    request.session.user = registeredUser
+                }
+            } catch (error) {
+                if ( error instanceof ServiceError ) {
+                    if ( error.type === 'underage' ) {
+                        throw new ControllerError(430, 'underage',
+                            `User is under age.`,
+                            `You must be 18 years of age to use Communities.`)
+                    } else {
+                        throw error
+                    }
+                } else {
+                    throw error
+                }
             }
         }
 
@@ -505,7 +528,8 @@ module.exports = class UserController extends BaseController{
         const currentUser = request.session.user
         const userId = request.params.id
 
-        if ( currentUser && currentUser.id !== userId) {
+        const canModerateSite = await this.permissionService.can(currentUser, 'moderate', 'Site')
+        if ( currentUser && currentUser.id !== userId && canModerateSite !== true) {
             const relationship = await this.userRelationshipsDAO.getUserRelationshipByUserAndRelation(currentUser.id, userId)
             if ( relationship?.status === 'blocked' && currentUser.id === relationship?.relationId) {
                 throw new ControllerError(404, 'not-found', 
@@ -757,6 +781,21 @@ module.exports = class UserController extends BaseController{
             throw new ControllerError(400, 'invalid',
                 `User submitted an invalid user: ${logString}`,
                 errorString)
+        }
+       
+        const age = shared.lib.date.getAgeFromDate(user.birthdate)
+        if ( age < 18 ) {
+            // If the user is a pending invitation, then we need to delete
+            // their data.  We don't want to delete their data *unless* it's a
+            // pending invitation, because we don't want to delete them if they
+            // hit this through a bug somehow.
+            if ( existingUser.status === 'invited' ) {
+                await this.userDAO.deleteUser(existingUser)
+            }
+
+            throw new ControllerError(430, 'underage',
+                `User(${user.email}) is under age (${user.birthdate}).`,
+                `You must be 18 years of age to use Communities.`)
         }
 
         // ================== Update ==========================================

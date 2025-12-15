@@ -27,11 +27,11 @@ const emailBodyTemplate = fs.readFileSync(path.resolve(__dirname, './moderator.h
 module.exports = {
     type: 'GroupModeration:create:post:moderator',
     email: {
-        subject: Handlebars.compile('[Communities] A post in {{{ group.title }}} has been flagged.'), 
+        subject: Handlebars.compile('[Communities] A post in {{{ group.title }}} is awaiting moderation.'), 
         body: Handlebars.compile(emailBodyTemplate)
     },
     web: {
-        text: Handlebars.compile(`A post in {{{ group.title }}} has been flagged.`),
+        text: Handlebars.compile(`A post in {{{ group.title }}} is awaiting moderation.`),
         path: Handlebars.compile(`{{{ path }}}`) 
     }
 }

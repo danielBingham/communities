@@ -68,13 +68,18 @@ module.exports = class PostController {
 
     async getRelations(currentUser, results, requestedRelations) {
 
-        const blockResults = await this.core.database.query(`
-            SElECT user_id, friend_id
-                FROM user_relationships
-                    WHERE (user_id = $1 OR friend_id = $1) AND status = 'blocked'
-        `, [currentUser.id])
+        let blockIds = []
+        const canModerateSite = await this.permissionService.can(currentUser, 'moderate', 'Site')
 
-        const blockIds = blockResults.rows.map((r) => r.user_id == currentUser.id ? r.friend_id : r.user_id)
+        if ( canModerateSite !== true ) {
+            const blockResults = await this.core.database.query(`
+                SElECT user_id, friend_id
+                    FROM user_relationships
+                        WHERE (user_id = $1 OR friend_id = $1) AND status = 'blocked'
+            `, [currentUser.id])
+
+            blockIds = blockResults.rows.map((r) => r.user_id == currentUser.id ? r.friend_id : r.user_id)
+        }
 
         // We only need these for the initial posts.  These are not displayed on Shared Posts.
         //
@@ -560,6 +565,20 @@ module.exports = class PostController {
 
                 await this.groupModerationDAO.insertGroupModerations(moderation)
                 await this.groupModerationEventDAO.insertGroupModerationEvents(this.groupModerationEventDAO.createEventFromGroupModeration(moderation))
+
+                const moderationEntityResults = await this.groupModerationDAO.selectGroupModerations({
+                    where: `group_moderation.id = $1`,
+                    params: [ moderation.id ]
+                })
+                const moderationEntity = moderationEntityResults.dictionary[moderationEntityResults.list[0]]
+
+                await this.notificationService.sendNotifications(
+                    currentUser,
+                    'GroupModeration:create',
+                    {
+                        moderation: moderationEntity 
+                    }
+                )
 
                 const postPatch = {
                     id: entity.id,

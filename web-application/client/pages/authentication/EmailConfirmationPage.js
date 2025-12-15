@@ -73,7 +73,7 @@ const EmailConfirmationPage = function(props) {
                 new email if needed. If you need help, don't hesitate to reach out to <a
                 href="mailto:contact@communities.social">contact@communities.social</a>.</p>
                 <Button type="warn" onClick={() => logout()}>Cancel</Button> <Button type="primary" onClick={(e) => requestNewConfirmationEmail()}>Resend Confirmation Email</Button>
-                { createTokenRequest && createTokenRequest.state == 'fulfilled' && <p>Confirmation request sent!</p> }
+                { createTokenRequest && createTokenRequest.state == 'fulfilled' && <p className="email-confirmation-page__sent">Confirmation request sent!</p> }
             </div>
         )
 
@@ -98,7 +98,7 @@ const EmailConfirmationPage = function(props) {
                 new email if needed. If you need help, don't hesitate to reach out to <a
                 href="mailto:contact@communities.social">contact@communities.social</a>.</p>
                 <Button type="warn" onClick={() => logout()}>Cancel</Button> <Button type="primary" onClick={(e) => requestNewConfirmationEmail()}>Resend Confirmation Email</Button>
-                { createTokenRequest && createTokenRequest.state == 'fulfilled' && <p>Confirmation request sent!</p> }
+                { createTokenRequest && createTokenRequest.state == 'fulfilled' && <p className="email-confirmation-page__sent">Confirmation request sent!</p> }
             </div>
         )
     }

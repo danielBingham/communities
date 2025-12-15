@@ -1,5 +1,7 @@
 import { useSelector } from 'react-redux'
 
+import GoogleBadge from '/assets/get-it-on-google-play.png'
+import AppleBadge from '/assets/download-from-app-store.svg'
 
 import './Footer.css'
 
@@ -16,12 +18,10 @@ const Footer = function() {
     
     return (
      <footer>
-         <div className="wrapper">
-            <div className="explanation-copyright footer__block">
-                <p className="explanation">Communities is user-supported social media site working towards not for profit<sup><a href="/about/tos#llc">1</a></sup> <sup><a href="/about/faq#non-profit">2</a></sup>, cooperative governance. It is designed to help people build community, connect, and organize. It is funded and will be governed by its users.</p>
+         <div className="footer__grid">
+            <div className="footer_explanation footer__block">
+                <p className="explanation">Communities is user-supported social media site working towards not for profit, cooperative governance. It is designed to help people build community, connect, and organize. It is funded and will be governed by its users.</p>
                 <p className="explanation">Communities is <a href="https://github.com/danielbingham/communities">open source</a> under the <a href="https://github.com/danielBingham/communities?tab=AGPL-3.0-1-ov-file">AGPL 3.0 license</a> and it's currently in <a href="/about/faq#beta">Public Beta</a>.</p>
-                <p>Version: { clientVersion === serverVersion ? `${clientVersion}` : `${clientVersion}/${serverVersion}` }</p>
-                <p>Site text and design (c) Communities Social, LLC 2024 - 2025</p>
             </div>
             <div className="about-links footer__block">
                 <p><a href="/about">about</a></p>
@@ -37,6 +37,14 @@ const Footer = function() {
                 <p><a href="/friends">friends</a></p>
                 <p><a href="/groups">groups</a></p>
             </div>
+         </div>
+         <div className="footer__bottom">
+             <div className="footer__store-badges">
+                 <a href="https://play.google.com/store/apps/details?id=social.communities" target="_blank" className="footer__google-store"><img src={GoogleBadge} /></a>
+                 <a href="https://apps.apple.com/app/communities-social/id6751424847" target="_blank" className="footer__apple-store"><img src={AppleBadge} /></a>
+             </div>
+             <div>Version: { clientVersion === serverVersion ? `${clientVersion}` : `${clientVersion}/${serverVersion}` }</div>
+             <div>Site text and design (c) Communities Social, LLC 2024 - 2025</div>
          </div>
     </footer>
     )

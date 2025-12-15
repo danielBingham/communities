@@ -146,7 +146,7 @@ module.exports = class UserRelationshipDAO extends DAO {
         })
 
         if ( results.list.length <= 0 ) {
-            return null
+            return [] 
         }
 
         return results.list.map((id) => results.dictionary[id])

@@ -18,6 +18,8 @@
  *
  ******************************************************************************/
 
+const shared = require('@communities/shared')
+
 const TokenDAO = require('../daos/TokenDAO')
 const UserDAO = require('../daos/UserDAO')
 const UserRelationshipDAO = require('../daos/UserRelationshipDAO')
@@ -321,6 +323,13 @@ module.exports = class UserService {
         if ( validationErrors.length > 0 ) {
             errors.push(...validationErrors)
             return [ null, errors ]
+        }
+
+        const age = shared.lib.date.getAgeFromDate(user.birthdate)
+        if ( age < 18 ) {
+            // TODO Techdebt, this is really a user error, but we want to
+            // handle it differently from our other errors right now.
+            throw new ServiceError('underage', 'User is underage.')
         }
 
         // ================== Register ========================================

@@ -1,3 +1,13 @@
+.email-confirmation-page__sent {
+    border: thin solid var(--success-color-main);
+    background-color: var(--success-color-main);
+    font-size: 16px;
+    color: white;
+    margin: 20px auto;
+    padding: 10px;
+    border-radius: 7px;
+}
+
 
 @media (width > 700px) {
         #email-confirmation-page {
