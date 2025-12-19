@@ -68,6 +68,7 @@ exports.NotificationWorker = require('./services/notification/NotificationWorker
 exports.Logger = require('./logger')
 exports.FeatureFlags = require('./features')
 exports.Core = require('./core')
+exports.Config = require('./config')
 
 exports.DatabaseFixtures = require('./test/fixtures/database')
 exports.EntityFixtures = require('./test/fixtures/entities')

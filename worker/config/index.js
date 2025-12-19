@@ -11,46 +11,47 @@ if ( process.env.NODE_ENV == 'development' ) {
 }
 
 module.exports = {
-    host: process.env.HOST,
-    wsHost: process.env.WS_HOST,
+    host: 'aws-ssm-parameter:/host', 
+    wsHost: 'aws-ssm-parameter:/ws-host',
     environment: process.env.NODE_ENV,
+    environmentName: process.env.ENVIRONMENT_NAME, 
     log_level: process.env.LOG_LEVEL,
     // Database configuration
     database: {
-        host: process.env.DATABASE_HOST,
-        port: process.env.DATABASE_PORT,
-        user: process.env.DATABASE_USER,
-        password: process.env.DATABASE_PASSWORD,
-        name: 'communities' 
+        host: 'aws-ssm-parameter:/database/host',
+        port: 'aws-ssm-parameter:/database/port',
+        user: 'aws-ssm-parameter:/database/user',
+        password: 'aws-ssm-parameter:/database/password',
+        name: 'aws-ssm-parameter:/database/name' 
     },
     redis: {
-        host: process.env.REDIS_HOST,
-        port: process.env.REDIS_PORT 
+        host: 'aws-ssm-parameter:/redis/host',
+        port: 'aws-ssm-parameter:/redis/port'
     },
     session: {
-        cookieName: 'communities_id',
-        headerName: 'X-Communities-Auth',
-        platformHeader: 'X-Communities-Platform',
-        secret: process.env.SESSION_SECRET
+        cookieName: 'aws-ssm-parameter:/session/cookie-name',
+        headerName: 'aws-ssm-parameter:/session/header-name',
+        platformHeader: 'aws-ssm-parameter:/session/platform-header',
+        secret: 'aws-ssm-parameter:/session/secret' 
     },
     s3: {
-        bucket_url: process.env.S3_BUCKET_URL,
-        bucket: process.env.S3_BUCKET,
-        access_id: process.env.S3_ACCESS_ID,
-        access_key: process.env.S3_ACCESS_KEY
+        bucket_url: 'aws-ssm-parameter:/storage/s3/bucket-url',
+        bucket: 'aws-ssm-parameter:/storage/s3/bucket',
+        access_id: 'aws-ssm-parameter:/storage/s3/access-id',
+        access_key: 'aws-ssm-parameter:/storage/s3/access-key' 
     },
     postmark: {
-        api_token: process.env.POSTMARK_API_TOKEN
+        api_token: 'aws-ssm-parameter:/postmark/api-token' 
     },
     notifications: {
         ios: {
-            privateCert: process.env.NOTIFICATIONS_IOS_PRIVATE_CERT_PATH,
-            publicCert: process.env.NOTIFICATIONS_IOS_PUBLIC_CERT_PATH,
-            applicationBundleID: process.env.NOTIFICATIONS_IOS_APPLICATION_BUNDLE_ID,
-            endpoint: process.env.NOTIFICATIONS_IOS_ENDPOINT
+            privateCert: 'aws-ssm-parameter:/notifications/ios/apns-private-key-pem',
+            publicCert: 'aws-ssm-parameter:/notifications/ios/apns-public-cert-pem', 
+            applicationBundleID: 'aws-ssm-parameter:/notifications/ios/application-bundle-id',
+            endpoint: 'aws-ssm-parameter:/notifications/ios/endpoint' 
         },
         android: {
-            firebaseServiceAccount: process.env.NOTIFICATIONS_FIREBASE_SERVICE_ACCOUNT_PATH 
+            firebaseServiceAccount: 'aws-ssm-parameter:/notifications/android/firebase-service-account-json' 
         }
-    },
-};
+    }
+}
