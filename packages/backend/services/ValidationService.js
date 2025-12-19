@@ -34,6 +34,7 @@ const BlocklistValidation = require('./validation/BlocklistValidation')
 const GroupValidation = require('./validation/GroupValidation')
 const GroupMemberValidation = require('./validation/GroupMemberValidation')
 const GroupModerationValidation = require('./validation/GroupModerationValidation')
+const GroupSubscriptionValidation = require('./validation/GorupSubscriptionValidation')
 const LinkPreviewValidation = require('./validation/LinkPreviewValidation')
 const PostValidation = require('./validation/PostValidation')
 const PostCommentValidation = require('./validation/PostCommentValidation')
@@ -79,6 +80,10 @@ module.exports = class ValidationService {
 
     async validateGroupModeration(currentUser, groupModeration, existing) {
         return await this.groupModeration.validateGroupModeration(currentUser, groupModeration, existing)
+    }
+
+    async validateGroupSubscription(currentUser, groupSubscription, existing) {
+        return await this.groupSubscription.validateGroupSubscription(currentUser, groupSubscription, existing)
     }
     
     async validateLinkPreview(currentUser, linkPreview, existing) {

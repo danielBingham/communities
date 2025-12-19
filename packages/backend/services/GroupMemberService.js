@@ -20,6 +20,7 @@
 
 const GroupDAO = require('../daos/GroupDAO')
 const GroupMemberDAO = require('../daos/GroupMemberDAO')
+const GroupSubscriptionDAO = require('../daos/GroupSubscriptionDAO')
 
 const NotificationService = require('./NotificationService')
 const PermissionService = require('./PermissionService')
@@ -34,6 +35,7 @@ module.exports = class GroupMemberService {
 
         this.groupDAO = new GroupDAO(core)
         this.groupMemberDAO = new GroupMemberDAO(core)
+        this.groupSubscriptionDAO = new GroupSubscriptionDAO(core)
 
         this.notificationService = new NotificationService(core)
         this.permissionService = new PermissionService(core)
@@ -118,6 +120,13 @@ module.exports = class GroupMemberService {
         }
 
         const entity = results.dictionary[results.list[0]]
+        
+        if ( entity.status === 'member' ) {
+            await this.groupSubscriptionDAO.insertGroupSubscription({
+                groupId: entity.groupId,
+                userId: entity.userId
+            })
+        }
 
         await this.notificationService.sendNotifications(
             currentUser, 

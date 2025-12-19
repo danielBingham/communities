@@ -24,6 +24,7 @@ const {
     FileDAO,
     GroupDAO, 
     GroupMemberDAO, 
+    GroupSubscriptionDAO,
     PostSubscriptionDAO,
     UserDAO,  
 
@@ -45,6 +46,7 @@ module.exports = class GroupMemberController extends BaseController {
         this.fileDAO = new FileDAO(core)
         this.groupDAO = new GroupDAO(core)
         this.groupMemberDAO = new GroupMemberDAO(core)
+        this.groupSubscriptionDAO = new GroupSubscriptionDAO(core)
         this.postSubscriptionDAO = new PostSubscriptionDAO(core)
         this.userDAO = new UserDAO(core)
 
@@ -475,6 +477,18 @@ module.exports = class GroupMemberController extends BaseController {
         }
 
         const entity = results.dictionary[results.list[0]]
+
+        if ( entity.status === 'member' ) {
+            // If they are a member, they should have a group subscription.  If
+            // they don't, create one for them.
+            const subscription = await this.groupSubscriptionDAO.getGroupSubscriptionByGroupAndUser(entity.groupId, entity.userId)
+            if ( subscription === null ) {
+                await this.groupSubscriptionDAO.insertGroupSubscription({
+                    groupId: entity.groupId,
+                    userId: entity.userId
+                })
+            }
+        }
 
         const relations = await this.getRelations(currentUser, results)
 
