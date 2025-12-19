@@ -20,6 +20,7 @@
 
 const { 
     Core, 
+    Config,
     Logger,
     FeatureFlags,
 
@@ -31,11 +32,21 @@ const {
 
 } = require('@communities/backend')
 
-const config = require('./config')
-
-const core = new Core('worker', config)
+const configDefinition = require('./config')
 
 async function initialize() {
+
+    const environmentName = process.env.ENVIRONMENT_NAME
+    const region = process.env.AWS_REGION
+    const credentials = {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+    }
+
+    const configLoader = new Config(environmentName, region, credentials)
+    const config = await configLoader.loadConfig(configDefinition)
+
+    const core = new Core('worker', config)
 
     await core.initialize()
 

@@ -26,6 +26,10 @@ const Handlebars = require('handlebars')
  * A service to handle logic related to Server Side Rendering.  For now, it's
  * just handling rendering the metadata into the page <head> tag.  That include
  * social sharing metadata as well as standard SEO metadata.
+ *
+ * @DEPRECATED We've changed how we're handling server side rendering (we're
+ * not really doing it) and we've changed how we're handling
+ * `config.environment` (`development` is no longer a valid value).
  */
 module.exports = class ServerSideRenderingService {
 
@@ -35,6 +39,7 @@ module.exports = class ServerSideRenderingService {
         this.config = core.config
 
         this.indexTemplatePath = null
+        // @DEPRECATED 'development' is no longer a valid value of `config\.environment`
         if ( this.config.environment == 'development' ) {
             this.indexTemplatePath = 'server/views/index.html'
         } else {

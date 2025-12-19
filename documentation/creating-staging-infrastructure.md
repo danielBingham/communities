@@ -174,6 +174,22 @@ stringData:
   api_token: <api-token-from-postmark> 
 ```
 
+The Push Notification Secrets: `infrastructure/kubernetes/staging/secrets/push-notification-secrets.yaml`
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: communities-push-notification-secrets
+type: Opaque
+stringData:
+  apns-public.crt.pem: |
+    <apns-public-cert>
+  apns-private.key.pem: |
+    <apns-private-key>
+  firebase-service-account.json: |
+    <apns-service-account>
+```
 
 Then use `kubectl apply -f <file>` to push the each of the secrets to the
 cluster in turn.

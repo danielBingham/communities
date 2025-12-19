@@ -18,16 +18,31 @@
  *
  ******************************************************************************/
 
-const { Core } = require('@communities/backend')
+const { Core, Config } = require('@communities/backend')
 
 /**********************************************************************
  * Load Configuration
  **********************************************************************/
-const config = require('./config') 
+const configDefinition = require('./config') 
+
 
 const createCore = async function(name) {
+
+    const environmentName = process.env.ENVIRONMENT_NAME
+    const region = process.env.AWS_REGION
+    const credentials = {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+    }
+
+    const configLoader = new Config(environmentName, region, credentials)
+    const config = await configLoader.loadConfig(configDefinition)
+
+    console.log('Configuration successfully loaded...')
+
     const core = new Core(name, config)
     await core.initialize()
+
     return core
 }
 
