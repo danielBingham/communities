@@ -168,7 +168,7 @@ module.exports = class GroupSubscriptionController {
                     groupId: groupId
                 })
 
-                existing = await this.groupSubscriptonDAO.getGroupSubscriptionByGroupAndUser(groupId, currentUser.id)
+                existing = await this.groupSubscriptionDAO.getGroupSubscriptionByGroupAndUser(groupId, currentUser.id)
                 if ( existing === null ) {
                     throw new ControllerError(500, 'server-error',
                         `GroupSubscription doesn't exist after creation.  Something is wrong.`,
@@ -182,7 +182,16 @@ module.exports = class GroupSubscriptionController {
             }
         }
 
-        const subscription = request.params.subscription
+        const subscription = this.schema.clean(request.body)
+        if ( subscription === null || subscription === undefined ) {
+            throw new ControllerError(400, 'invalid', 
+                `User(${currentUser.id}) provided an empty patch for GroupSubscription.`,
+                `You must provide a body to PATCH a subscription.`)
+        }
+
+        if ( ! ( 'id' in subscription ) ) {
+            subscription.id = existing.id
+        }
 
         const validationErrors = this.validationService.validateGroupSubscription(currentUser, subscription, existing)
         if ( validationErrors.length > 0 ) {

@@ -122,7 +122,7 @@ module.exports = class GroupMemberService {
         const entity = results.dictionary[results.list[0]]
         
         if ( entity.status === 'member' ) {
-            await this.groupSubscriptionDAO.insertGroupSubscription({
+            await this.groupSubscriptionDAO.insertGroupSubscriptions({
                 groupId: entity.groupId,
                 userId: entity.userId
             })

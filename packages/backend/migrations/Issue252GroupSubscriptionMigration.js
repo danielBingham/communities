@@ -34,7 +34,7 @@ module.exports = class Issue252GroupSubscriptionMigration extends BaseMigration 
             CREATE TABLE IF NOT EXISTS group_subscriptions (
                 id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
                 user_id uuid REFERENCES users (id) ON DELETE CASCADE NOT NULL,
-                group_id uuid REFERENCES posts (id) ON DELETE CASCADE NOT NULL,
+                group_id uuid REFERENCES groups (id) ON DELETE CASCADE NOT NULL,
                 status group_subscription_status DEFAULT 'mentions',
 
                 created_date timestamptz,
