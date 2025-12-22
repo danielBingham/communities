@@ -30,7 +30,8 @@ const PermissionService = require('../../PermissionService')
 
 module.exports = class PostNotifications {
     static notifications = [
-        'Post:create:mention'
+        'Post:create:mention',
+        'Post:create:type:group:subscriber'
     ]
 
     constructor(core, notificationWorker) {
@@ -53,8 +54,8 @@ module.exports = class PostNotifications {
         context.postAuthor = await this.userDAO.getUserById(context.post.userId, ['status']) 
 
         if ( context.post.groupId ) {
-            const group = await this.groupDAO.getGroupById(context.post.groupId)
-            context.path = `group/${group.slug}/${context.post.id}`
+            context.group = await this.groupDAO.getGroupById(context.post.groupId)
+            context.path = `group/${context.group.slug}/${context.post.id}`
             context.link = new URL(context.path, this.core.config.host).href
         } else {
             context.path = `${context.postAuthor.username}/${context.post.id}`
@@ -126,6 +127,11 @@ module.exports = class PostNotifications {
 
             for(const subscription of subscriptions) {
 
+                // Don't notify authors of their own posts.
+                if ( subscription.userId === context.post.userId ) {
+                    continue
+                }
+
                 // If the user has lost the ability to view this post, then
                 // don't send them a notification.
                 const canViewPost = await this.permissionService.can(userResults.dictionary[subscription.userId], 
@@ -139,7 +145,7 @@ module.exports = class PostNotifications {
                     continue
                 }
 
-                const subscriptionContext= { ...context, subscriber: userDictionary[subscription.userId] }
+                const subscriptionContext = { ...context, subscriber: userResults.dictionary[subscription.userId] }
                 await this.notificationWorker.createNotification(subscription.userId, 
                     'Post:create:type:group:subscriber', subscriptionContext, options)
 

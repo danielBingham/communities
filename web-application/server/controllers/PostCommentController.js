@@ -25,11 +25,12 @@ const {
     PermissionService, 
     ValidationService,
 
+    GroupSubscriptionDAO,
     PostDAO, 
-    UserRelationshipDAO, 
     PostCommentDAO, 
     PostSubscriptionDAO,
-    SiteModerationDAO
+    SiteModerationDAO,
+    UserRelationshipDAO 
 
 } = require('@communities/backend')
 
@@ -40,11 +41,12 @@ module.exports = class PostCommentController {
     constructor(core) {
         this.core = core
 
+        this.groupSubscriptionDAO = new GroupSubscriptionDAO(core)
         this.postDAO = new PostDAO(core)
         this.postCommentDAO = new PostCommentDAO(core)
-        this.userRelationshipDAO = new UserRelationshipDAO(core)
         this.postSubscriptionDAO = new PostSubscriptionDAO(core)
         this.siteModerationDAO = new SiteModerationDAO(core)
+        this.userRelationshipDAO = new UserRelationshipDAO(core)
 
         this.notificationService = new NotificationService(core)
         this.permissionService = new PermissionService(core)

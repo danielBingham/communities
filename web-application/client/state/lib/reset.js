@@ -20,6 +20,7 @@ export const resetEntities = function() {
         dispatch(resetGroupSlice())
         dispatch(resetGroupMemberSlice())
         dispatch(resetGroupModerationSlice())
+        dispatch(resetGroupSubscriptionSlice())
         dispatch(resetLinkPreviewSlice())
         dispatch(resetPostSlice())
         dispatch(resetPostCommentSlice())

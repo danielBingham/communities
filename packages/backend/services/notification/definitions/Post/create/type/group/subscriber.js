@@ -22,7 +22,7 @@ const Handlebars = require('handlebars')
 const fs = require('fs')
 const path = require('path')
 
-const emailBodyTemplate = fs.readFileSync(path.resolve(__dirname, './mention.hbs'), 'utf8')
+const emailBodyTemplate = fs.readFileSync(path.resolve(__dirname, './subscriber.hbs'), 'utf8')
 
 module.exports = {
     type: 'Post:create:type:group:subscriber',

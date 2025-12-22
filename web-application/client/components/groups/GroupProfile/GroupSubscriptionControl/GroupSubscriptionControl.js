@@ -17,11 +17,13 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import { useSelector } from 'react-redux'
+import { useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 
 import { BellIcon, BellAlertIcon, BellSlashIcon } from '@heroicons/react/24/outline'
 
 import { patchGroupSubscription } from '/state/GroupSubscription'
+import { resetPostSubscriptionSlice } from '/state/PostSubscription'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
@@ -36,6 +38,8 @@ const GroupSubscriptionControl = function({ groupId }) {
 
     const [request, makeRequest] = useRequest()
 
+    const dispatch = useDispatch()
+
     const changeStatus = function(status) {
         const subscriptionPatch = {
             groupId: groupId,
@@ -45,6 +49,12 @@ const GroupSubscriptionControl = function({ groupId }) {
 
         makeRequest(patchGroupSubscription(subscriptionPatch))
     }
+
+    useEffect(function() {
+        if ( subscription.status === 'unsubscribed' && request?.state === 'fulfilled' ) {
+            dispatch(resetPostSubscriptionSlice())
+        }
+    }, [ request, subscription ])
 
     if ( subscription === null || subscription === undefined ) {
         return null
@@ -68,7 +78,7 @@ const GroupSubscriptionControl = function({ groupId }) {
                     </div>
                 </DropdownMenuItem>
                 <DropdownMenuItem className="group-subscription-control__status" onClick={(e) => changeStatus('mentions')}>
-                    <div><BellIcon /> Mentions</div>
+                    <div><BellIcon /> Mentions and Replies</div>
                     <div className="group-subscription-control__status__explanation">
                         Notify when you are mentioned or replied to.
                     </div>

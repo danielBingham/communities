@@ -568,6 +568,12 @@ module.exports = class GroupMemberController extends BaseController {
 
         await this.groupMemberDAO.deleteGroupMember(existing)
 
+        // Delete their GroupSubscription.
+        await this.core.database.query(
+            `DELETE FROM group_subscriptions WHERE group_id = $1 AND user_id = $2`, 
+            [ groupId, memberId ]
+        )
+
         // If they lose permission to view the group's content by leaving the
         // group, then remove any subscriptions they have to posts in the
         // group.

@@ -217,6 +217,14 @@ module.exports = class GroupSubscriptionController {
 
         const entity = entityResults.dictionary[entityResults.list[0]]
 
+        // If they've unsubscribed, we need to delete their PostSubscriptions
+        // for all posts in the group.
+        if ( existing.status !== 'unsubscribed' && entity.status === 'unsubscribed' ) {
+            const postResults = await this.core.database.query(`SELECT id FROM posts WHERE group_id = $1`, [ entity.groupId ])
+            const postIds = postResults.rows.map((r) => r.id)
+            await this.core.database.query(`DELETE FROM post_subscriptions WHERE user_id = $1 AND post_id = ANY($2::uuid[])`, [ entity.userId, postIds ])
+        }
+
         const relations = await this.getRelations(entityResults)
 
         response.status(200).json({
