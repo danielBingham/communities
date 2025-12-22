@@ -220,10 +220,24 @@ module.exports = class PostCommentController {
         const subscription = await this.postSubscriptionDAO.getPostSubscriptionByPostAndUser(postId, currentUser.id)
 
         if ( subscription === null ) {
-            await this.postSubscriptionDAO.insertPostSubscriptions({
-                postId: postId,
-                userId: currentUser.id
-            })
+            let createSubscription = true
+
+            // If this post is in a group and the user has unsubscribed from
+            // the group, then we shouldn't subscribe them to this post when
+            // they comment.
+            if ( post.type === 'group' && post.groupId !== null && post.groupId !== undefined ) {
+                const groupSubscription = await this.groupSubscriptionDAO.getGroupSubscriptionByGroupAndUser(post.groupId, currentUser.id)
+                if ( groupSubscription.status === 'unsubscribed' ) {
+                    createSubscription = false
+                }
+            }
+
+            if ( createSubscription === true ) {
+                await this.postSubscriptionDAO.insertPostSubscriptions({
+                    postId: postId,
+                    userId: currentUser.id
+                })
+            }
         }
 
         const relations = await this.getRelations(currentUser, results)
