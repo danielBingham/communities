@@ -51,7 +51,7 @@ const GroupSubscriptionControl = function({ groupId }) {
     }
 
     useEffect(function() {
-        if ( subscription.status === 'unsubscribed' && request?.state === 'fulfilled' ) {
+        if ( subscription?.status === 'unsubscribed' && request?.state === 'fulfilled' ) {
             dispatch(resetPostSubscriptionSlice())
         }
     }, [ request, subscription ])

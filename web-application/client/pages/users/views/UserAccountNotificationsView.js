@@ -27,6 +27,7 @@ const UserAccountNotificationsView = function() {
                         'GroupModeration:update:post:status:approved:author',
 
                         'Post:create:mention',
+                        'Post:create:type:group:subscriber',
 
                         'PostComment:create:author',
                         'PostComment:create:subscriber',
@@ -71,6 +72,11 @@ const UserAccountNotificationsView = function() {
             </div>
             <h2>Groups</h2>
             <div className="user-settings__notification-settings__section">
+                <NotificationSetting 
+                    label="Posts in a Group" 
+                    explanation="When someone posts in a group you subscribe to..." 
+                    notifications={[ 'Post:create:type:group:subscriber' ]} 
+                />
                 <NotificationSetting 
                     label="Invitations to Groups" 
                     explanation="When someone invites you to join a group..." 

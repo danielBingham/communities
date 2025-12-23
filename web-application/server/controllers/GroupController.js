@@ -294,6 +294,12 @@ module.exports = class GroupController {
         }
         await this.groupMemberDAO.insertGroupMembers(groupMember)
 
+        const groupSubscription = {
+            groupId: entity.id,
+            userId: currentUser.id
+        }
+        await this.groupSubscriptionDAO.insertGroupSubscriptions(groupSubscription)
+
         const relations = await this.getRelations(currentUser, entityResults)
 
         response.status(201).json({

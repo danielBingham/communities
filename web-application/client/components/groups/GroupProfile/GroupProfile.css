@@ -32,17 +32,21 @@
     height: 1.2em;
     margin-bottom: -0.2em;
 }
+.group-profile__parent {
+    padding: 10px 0;
+}
 
 .group-profile__details {
     font-size: 16px;
     max-width: 400px;
     margin: 0 auto;
     text-align: center;
+    padding: 20px;
 }
 .group-profile__details .group-profile__about {
     font-size: 14px;
-    padding: 12px;
     white-space: pre-line;
+    padding: 12px;
     word-wrap: break-word;
     text-align: left;
 }

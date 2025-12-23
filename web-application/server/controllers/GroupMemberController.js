@@ -483,7 +483,7 @@ module.exports = class GroupMemberController extends BaseController {
             // they don't, create one for them.
             const subscription = await this.groupSubscriptionDAO.getGroupSubscriptionByGroupAndUser(entity.groupId, entity.userId)
             if ( subscription === null ) {
-                await this.groupSubscriptionDAO.insertGroupSubscription({
+                await this.groupSubscriptionDAO.insertGroupSubscriptions({
                     groupId: entity.groupId,
                     userId: entity.userId
                 })
