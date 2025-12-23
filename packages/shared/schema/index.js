@@ -20,8 +20,10 @@
 
 const DeviceSchema = require('./Device')
 const GroupSchema = require('./Group')
+const GroupSubscriptionSchema = require('./GroupSubscription')
 
 module.exports = {
     DeviceSchema: DeviceSchema,
-    GroupSchema: GroupSchema
+    GroupSchema: GroupSchema,
+    GroupSubscriptionSchema: GroupSubscriptionSchema
 }

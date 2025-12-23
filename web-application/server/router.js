@@ -343,6 +343,24 @@ module.exports = function(core) {
     })
 
     /**************************************************************************
+     * GroupSubscription REST routes
+     **************************************************************************/
+    const GroupSubscriptionController = require('./controllers/GroupSubscriptionController')
+    const groupSubscriptionController = new GroupSubscriptionController(core)
+
+    router.get('/group/:groupId/subscription', rateLimit(core, 240), function(request, response, next) {
+        groupSubscriptionController.getGroupSubscriptions(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.patch('/group/:groupId/subscription', rateLimit(core, 60), function(request, response, next) {
+        groupSubscriptionController.patchGroupSubscription(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    /**************************************************************************
      * Link Preview REST Routes
      **************************************************************************/
     const LinkPreviewController = require('./controllers/LinkPreviewController')

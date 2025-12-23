@@ -260,6 +260,20 @@ CREATE TABLE group_members (
 CREATE INDEX group_members__group_id ON group_members (group_id);
 CREATE INDEX group_members__user_id ON group_members (user_id);
 
+CREATE TYPE group_subscription_status AS ENUM('unsubscribed', 'mentions', 'posts');
+CREATE TABLE group_subscriptions (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id uuid REFERENCES users (id) ON DELETE CASCADE NOT NULL,
+    group_id uuid REFERENCES posts (id) ON DELETE CASCADE NOT NULL,
+    status group_subscription_status DEFAULT 'mentions',
+
+    created_date timestamptz,
+    updated_date timestamptz
+);
+CREATE INDEX group_subscriptions__user_id ON group_subscriptions (user_id);
+CREATE INDEX group_subscriptions__group_id ON group_subscriptions (group_id);
+
+
 /******************************************************************************
  * Tags 
  *****************************************************************************/

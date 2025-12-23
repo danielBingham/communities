@@ -32,9 +32,11 @@ import { useFeature } from '/lib/hooks/feature'
 
 import { useGroupPermissionContext } from '/lib/hooks/Group'
 
+import Spinner from '/components/Spinner'
+
 import GroupImage from '/components/groups/view/GroupImage'
 
-import Spinner from '/components/Spinner'
+import GroupSubscriptionControl from './GroupSubscriptionControl'
 
 import './GroupProfile.css'
 
@@ -82,10 +84,11 @@ const GroupProfile = function({ groupId }) {
         <div className="group-profile">
             <div className="group-profile__header">
                 <GroupImage groupId={group.id} />
-                <div className="title">{ group.title}</div>
-                <div className="types">
-                    <span className="type">{ type }</span>
-                    <span className="post-permissions">{ postingPermissions }</span>
+                <div className="group-profile__title">{ group.title}</div>
+                <div className="group-profile__types">
+                    <div className="type">{ type }</div>
+                    <div className="post-permissions">{ postingPermissions }</div>
+                    <GroupSubscriptionControl groupId={groupId} />
                 </div>
                 { parentGroup && <div className="group-profile__parent">
                     Part of <Link to={`/group/${parentGroup.slug}`}>{ parentGroup.title }</Link>

@@ -24,6 +24,7 @@ const {
     FileDAO,
     GroupDAO, 
     GroupMemberDAO, 
+    GroupSubscriptionDAO,
     PostSubscriptionDAO,
     UserDAO,  
 
@@ -45,6 +46,7 @@ module.exports = class GroupMemberController extends BaseController {
         this.fileDAO = new FileDAO(core)
         this.groupDAO = new GroupDAO(core)
         this.groupMemberDAO = new GroupMemberDAO(core)
+        this.groupSubscriptionDAO = new GroupSubscriptionDAO(core)
         this.postSubscriptionDAO = new PostSubscriptionDAO(core)
         this.userDAO = new UserDAO(core)
 
@@ -476,6 +478,18 @@ module.exports = class GroupMemberController extends BaseController {
 
         const entity = results.dictionary[results.list[0]]
 
+        if ( entity.status === 'member' ) {
+            // If they are a member, they should have a group subscription.  If
+            // they don't, create one for them.
+            const subscription = await this.groupSubscriptionDAO.getGroupSubscriptionByGroupAndUser(entity.groupId, entity.userId)
+            if ( subscription === null ) {
+                await this.groupSubscriptionDAO.insertGroupSubscriptions({
+                    groupId: entity.groupId,
+                    userId: entity.userId
+                })
+            }
+        }
+
         const relations = await this.getRelations(currentUser, results)
 
         await this.notificationService.sendNotifications(
@@ -553,6 +567,12 @@ module.exports = class GroupMemberController extends BaseController {
         }
 
         await this.groupMemberDAO.deleteGroupMember(existing)
+
+        // Delete their GroupSubscription.
+        await this.core.database.query(
+            `DELETE FROM group_subscriptions WHERE group_id = $1 AND user_id = $2`, 
+            [ groupId, memberId ]
+        )
 
         // If they lose permission to view the group's content by leaving the
         // group, then remove any subscriptions they have to posts in the

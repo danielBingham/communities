@@ -24,6 +24,7 @@ const ExampleMigration = require('../migrations/ExampleMigration')
 const UsernameMigration = require('../migrations/UsernameMigration')
 const SubgroupMigration = require('../migrations/SubgroupMigration')
 const Issue330GroupShortDescriptionAndRulesMigration = require('../migrations/Issue330GroupShortDescriptionAndRulesMigration')
+const Issue252GroupSubscriptionMigration = require('../migrations/Issue252GroupSubscriptionMigration')
 
 const ServiceError = require('../errors/ServiceError')
 const MigrationError = require('../errors/MigrationError')
@@ -75,6 +76,11 @@ module.exports = class FeatureService {
                 dependsOn: [],
                 conflictsWith: [],
                 migration: new Issue330GroupShortDescriptionAndRulesMigration(core)
+            },
+            'issue-252-group-subscriptions': {
+                dependsOn: [],
+                conflictWith: [],
+                migration: new Issue252GroupSubscriptionMigration(core)
             }
         }
     }

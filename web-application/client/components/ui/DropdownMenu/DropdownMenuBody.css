@@ -9,4 +9,5 @@
     padding: 5px 0;
     z-index: 10;
     border-radius: 7px;
+    max-width: 340px;
 }

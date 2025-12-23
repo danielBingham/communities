@@ -136,7 +136,7 @@ module.exports = class GroupSchema extends Schema {
             parentId: {
                 clean: (value) => { return cleanUuid(value) },
                 validate: (value, existing, action) => {
-                    const validator = new UUIDValidator('fileId', value, existing, action)
+                    const validator = new UUIDValidator('parentId', value, existing, action)
 
                     // parentId may be null.
                     const errors = validator
