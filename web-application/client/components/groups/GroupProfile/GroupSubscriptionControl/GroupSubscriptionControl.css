@@ -1,0 +1,26 @@
+.group-subscription-control__trigger {
+    background-color: var(--primary-color-main);
+    color: white;
+    border: thin solid var(--primary-color-main);
+    border-radius: 7px;
+    padding: 10px;
+}
+.group-subscription-control .group-subscription-control__trigger svg.group-subscription-control__trigger__icon {
+    color: white;
+    width: 24px;
+    height: 24px;
+}
+.group-subscription-control__status {
+    padding-top: 15px;
+    padding-bottom: 10px;
+}
+.group-subscription-control__status__explanation {
+    font-size: 14px;
+    color: var(--primary-color-dark);
+    padding: 5px;
+    white-space: normal;
+    min-width: 300px;
+}
+.group-subscription-control__status:hover .group-subscription-control__status__explanation {
+    color: white;
+}

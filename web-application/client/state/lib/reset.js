@@ -3,6 +3,7 @@ import { cleanFileCache } from '/state/File'
 import { resetGroupSlice } from '/state/Group'
 import { resetGroupMemberSlice } from '/state/GroupMember'
 import { resetGroupModerationSlice } from '/state/GroupModeration'
+import { resetGroupSubscriptionSlice } from '/state/GroupSubscription'
 import { resetLinkPreviewSlice } from '/state/LinkPreview'
 import { resetPostSlice } from '/state/Post'
 import { resetPostCommentSlice } from '/state/PostComment'
@@ -19,6 +20,7 @@ export const resetEntities = function() {
         dispatch(resetGroupSlice())
         dispatch(resetGroupMemberSlice())
         dispatch(resetGroupModerationSlice())
+        dispatch(resetGroupSubscriptionSlice())
         dispatch(resetLinkPreviewSlice())
         dispatch(resetPostSlice())
         dispatch(resetPostCommentSlice())

@@ -22,22 +22,33 @@ import { useSelector } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { getPost } from '/state/Post'
+import { getPostSubscription } from '/state/PostSubscription'
 
-export const usePost = function(postId) {
-    const post = useSelector((state) => postId && postId in state.Post.dictionary ? state.Post.dictionary[postId] : null)
+export const usePostSubscription = function(postId) {
+    const subscription = useSelector((state) => {
+        if ( ! postId ) {
+            return null 
+        }
+
+        if ( ! (postId in state.PostSubscription.byPostId ) ) {
+            return undefined
+        }
+
+        return state.PostSubscription.byPostId[postId] 
+    })
 
     const [request, makeRequest, resetRequest ] = useRequest()
 
     const refresh = function() {
-        makeRequest(getPost(postId))
+        makeRequest(getPostSubscription(postId))
     }
 
     useEffect(() => {
-        if ( postId && post === null && request === null ) {
-            makeRequest(getPost(postId))
+        if ( postId && subscription === undefined && request?.state !== 'pending') {
+            makeRequest(getPostSubscription(postId))
         }
-    }, [ postId, post, request ])
+    }, [ postId, subscription, request ])
 
-    return [post, request, refresh]
+    return [subscription, request, refresh]
 }
+

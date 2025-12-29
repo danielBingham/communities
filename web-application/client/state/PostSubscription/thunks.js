@@ -3,6 +3,7 @@ import { setRelationsInState } from '/state/lib/relations'
 
 import { 
     setPostSubscriptionsInDictionary, removePostSubscription, 
+    setPostSubscriptionNull, setPostSubscriptionNullByPostId,
     clearPostSubscriptionQuery, setPostSubscriptionQueryResults,
     clearPostSubscriptionQueries
 } from './slice'
@@ -50,6 +51,11 @@ export const getPostSubscription = function(postId) {
             function(response) {
                 dispatch(setPostSubscriptionsInDictionary({ entity: response.entity}))
                 dispatch(setRelationsInState(response.relations))
+            }, 
+            function(status, response) {
+                if ( status === 404 || status === 403 ) {
+                    dispatch(setPostSubscriptionNullByPostId(postId))
+                }
             }
         ))
     }

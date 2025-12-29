@@ -21,6 +21,7 @@
 const { 
     GroupDAO, 
     GroupMemberDAO, 
+    GroupSubscriptionDAO,
     UserDAO, 
     FileDAO,
     GroupService,
@@ -38,6 +39,7 @@ module.exports = class GroupController {
 
         this.groupDAO = new GroupDAO(core)
         this.groupMemberDAO = new GroupMemberDAO(core)
+        this.groupSubscriptionDAO = new GroupSubscriptionDAO(core)
         this.userDAO = new UserDAO(core)
         this.fileDAO = new FileDAO(core)
 
@@ -51,6 +53,16 @@ module.exports = class GroupController {
 
     async getRelations(currentUser, results, requestedRelations) {
         const relations = {}
+
+        if ( this.core.features.has('issue-252-group-subscriptions') ) {
+            const groupSubscriptions = await this.groupSubscriptionDAO.selectGroupSubscriptions({
+                where: 'group_subscriptions.group_id = ANY($1::uuid[]) AND group_subscriptions.user_id = $2',
+                params: [ results.list, currentUser.id ]
+            })
+
+            relations['groupSubscriptions'] = groupSubscriptions.dictionary
+        }
+
         if ( requestedRelations && requestedRelations.includes("GroupMembers") ) {
             const params = [ results.list ]
             if ( currentUser ) {
@@ -281,6 +293,12 @@ module.exports = class GroupController {
             role: 'admin'
         }
         await this.groupMemberDAO.insertGroupMembers(groupMember)
+
+        const groupSubscription = {
+            groupId: entity.id,
+            userId: currentUser.id
+        }
+        await this.groupSubscriptionDAO.insertGroupSubscriptions(groupSubscription)
 
         const relations = await this.getRelations(currentUser, entityResults)
 

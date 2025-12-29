@@ -21,6 +21,8 @@
 const { lib } = require('@communities/shared')
 
 const GroupDAO = require('../../../daos/GroupDAO')
+const GroupModerationDAO = require('../../../daos/GroupModerationDAO')
+const GroupSubscriptionDAO = require('../../../daos/GroupSubscriptionDAO')
 const PostCommentDAO = require('../../../daos/PostCommentDAO')
 const PostSubscriptionDAO = require('../../../daos/PostSubscriptionDAO')
 const UserDAO = require('../../../daos/UserDAO')
@@ -29,7 +31,8 @@ const PermissionService = require('../../PermissionService')
 
 module.exports = class PostNotifications {
     static notifications = [
-        'Post:create:mention'
+        'Post:create:mention',
+        'Post:create:type:group:subscriber'
     ]
 
     constructor(core, notificationWorker) {
@@ -37,6 +40,8 @@ module.exports = class PostNotifications {
         this.notificationWorker = notificationWorker
 
         this.groupDAO = new GroupDAO(core)
+        this.groupModerationDAO = new GroupModerationDAO(core)
+        this.groupSubscriptionDAO = new GroupSubscriptionDAO(core)
         this.postCommentDAO = new PostCommentDAO(core)
         this.postSubscriptionDAO = new PostSubscriptionDAO(core)
         this.userDAO = new UserDAO(core)
@@ -51,9 +56,10 @@ module.exports = class PostNotifications {
         context.postAuthor = await this.userDAO.getUserById(context.post.userId, ['status']) 
 
         if ( context.post.groupId ) {
-            const group = await this.groupDAO.getGroupById(context.post.groupId)
-            context.path = `group/${group.slug}/${context.post.id}`
+            context.group = await this.groupDAO.getGroupById(context.post.groupId)
+            context.path = `group/${context.group.slug}/${context.post.id}`
             context.link = new URL(context.path, this.core.config.host).href
+            context.groupModeration = await this.groupModerationDAO.getGroupModerationByPostId(context.post.id)
         } else {
             context.path = `${context.postAuthor.username}/${context.post.id}`
             context.link = new URL(context.path, this.core.config.host).href
@@ -64,28 +70,97 @@ module.exports = class PostNotifications {
     async create(currentUser, type, context, options) {
         await this.ensureContext(currentUser, type, context)
 
-        const userResults = await this.userDAO.selectUsers({
-            where: `users.username = ANY($1::text[])`,
-            params: [ context.mentionedUsernames ],
-            fields: ['status']
-        })
-
-        // None of the mentions referred to real users.
-        if ( userResults.list.length <= 0 ) {
-            return
+        if ( 'groupModeration' in context && context.groupModeration !== null && context.groupModeration !== undefined ) {
+            // Don't send any 'Post:create' notifications for pending posts.
+            // Those will be sent when the post is approved.
+            if ( context.groupModeration.status === 'pending' ) {
+                return
+            }
         }
 
-        for(const userId of userResults.list ) {
-            // If the user has lost the ability to view this post, then don't send them a notification.
-            const canViewPost = await this.permissionService.can(userResults.dictionary[userId], 
-                'view', 'Post', { post: context.post })
-            if ( canViewPost !== true ) {
-                continue
+        // If this is a post in a group, then we need to respect their
+        // group subscription.  If they've unsubscribed from the group,
+        // then we shouldn't notify them.
+        let subscriptionMap = {}
+        let subscriptions = []
+        if ( context.post.type === 'group' && context.post.groupId !== null && context.post.groupId !== undefined ) {
+            subscriptions = await this.groupSubscriptionDAO.getSubscriptionsByGroup(context.post.groupId)
+            for(const subscription of subscriptions) {
+                subscriptionMap[subscription.userId] = subscription
+            }
+        }
+
+        // Mentions
+        if ( 'mentionedUsernames' in context && context.mentionedUsernames !== null 
+            && context.mentionedUsernames !== undefined && context.mentionedUsernames.length > 0 
+        ) {
+            const userResults = await this.userDAO.selectUsers({
+                where: `users.username = ANY($1::text[])`,
+                params: [ context.mentionedUsernames ],
+                fields: ['status']
+            })
+
+            // None of the mentions referred to real users.
+            if ( userResults.list.length <= 0 ) {
+                return
             }
 
-            const mentionContext = { ...context, mentioned: userResults.dictionary[userId] }
-            await this.notificationWorker.createNotification(userId, 
-                'Post:create:mention', mentionContext, options)
+            for(const userId of userResults.list ) {
+                // If the user has lost the ability to view this post, then don't send them a notification.
+                const canViewPost = await this.permissionService.can(userResults.dictionary[userId], 
+                    'view', 'Post', { post: context.post })
+                if ( canViewPost !== true ) {
+                    continue
+                }
+
+                if ( context.post.groupId !== null && context.post.groupId !== undefined && userId in subscriptionMap ) {
+                    const subscription = subscriptionMap[userId] 
+                    if ( subscription.status === 'unsubscribed' ) {
+                        continue
+                    }
+                }
+
+                const mentionContext = { ...context, mentioned: userResults.dictionary[userId] }
+                await this.notificationWorker.createNotification(userId, 
+                    'Post:create:mention', mentionContext, options)
+            }
+        }
+
+        // Group subscriptions
+
+        if ( context.post.groupId !== undefined && context.post.groupId !== null ) {
+            const userIds = subscriptions.map((subscription) => subscription.userId)
+            const userResults = await this.userDAO.selectUsers({
+                where: `users.id = ANY($1::uuid[])`,
+                params: [ userIds ],
+                fields: [ 'status' ]
+            })
+
+            for(const subscription of subscriptions) {
+
+                // Don't notify authors of their own posts.
+                if ( subscription.userId === context.post.userId ) {
+                    continue
+                }
+
+                // If they have unsubscribed, don't send them a notification.
+                if ( subscription.status !== 'posts' ) {
+                    continue
+                }
+
+                // If the user has lost the ability to view this post, then
+                // don't send them a notification.
+                const canViewPost = await this.permissionService.can(userResults.dictionary[subscription.userId], 
+                    'view', 'Post', { post: context.post })
+                if ( canViewPost !== true ) {
+                    continue
+                }
+
+                const subscriptionContext = { ...context, subscriber: userResults.dictionary[subscription.userId] }
+                await this.notificationWorker.createNotification(subscription.userId, 
+                    'Post:create:type:group:subscriber', subscriptionContext, options)
+
+            }
         }
     }
 }

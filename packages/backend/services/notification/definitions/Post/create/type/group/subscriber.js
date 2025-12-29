@@ -17,27 +17,21 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import { useEffect } from 'react'
-import { useSelector } from 'react-redux'
 
-import { useRequest } from '/lib/hooks/useRequest'
+const Handlebars = require('handlebars')
+const fs = require('fs')
+const path = require('path')
 
-import { getPost } from '/state/Post'
+const emailBodyTemplate = fs.readFileSync(path.resolve(__dirname, './subscriber.hbs'), 'utf8')
 
-export const usePost = function(postId) {
-    const post = useSelector((state) => postId && postId in state.Post.dictionary ? state.Post.dictionary[postId] : null)
-
-    const [request, makeRequest, resetRequest ] = useRequest()
-
-    const refresh = function() {
-        makeRequest(getPost(postId))
+module.exports = {
+    type: 'Post:create:type:group:subscriber',
+    email: {
+        subject: Handlebars.compile(`[Communities] There's a new post in {{{ group.title }}}`), 
+        body: Handlebars.compile(emailBodyTemplate)
+    },
+    web: {
+        text: Handlebars.compile(`There's a new post in {{{ group.title }}}`),
+        path: Handlebars.compile(`{{{ path }}}`) 
     }
-
-    useEffect(() => {
-        if ( postId && post === null && request === null ) {
-            makeRequest(getPost(postId))
-        }
-    }, [ postId, post, request ])
-
-    return [post, request, refresh]
 }

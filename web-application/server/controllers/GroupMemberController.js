@@ -24,6 +24,7 @@ const {
     FileDAO,
     GroupDAO, 
     GroupMemberDAO, 
+    GroupSubscriptionDAO,
     PostSubscriptionDAO,
     UserDAO,  
 
@@ -45,6 +46,7 @@ module.exports = class GroupMemberController extends BaseController {
         this.fileDAO = new FileDAO(core)
         this.groupDAO = new GroupDAO(core)
         this.groupMemberDAO = new GroupMemberDAO(core)
+        this.groupSubscriptionDAO = new GroupSubscriptionDAO(core)
         this.postSubscriptionDAO = new PostSubscriptionDAO(core)
         this.userDAO = new UserDAO(core)
 
@@ -55,6 +57,9 @@ module.exports = class GroupMemberController extends BaseController {
     }
 
     async getRelations(currentUser, results, requestedRelations, context) {
+        const relations = {}
+
+        const currentMemberGroupIds = []
         const memberUserIds = []
         const pendingUserIds = []
         for(const groupMemberId of results.list) {
@@ -63,6 +68,20 @@ module.exports = class GroupMemberController extends BaseController {
                 memberUserIds.push(member.userId)
             } else {
                 pendingUserIds.push(member.userId)
+            }
+
+            if ( member.userId === currentUser.id ) {
+                currentMemberGroupIds.push(member.groupId)
+            }
+        }
+
+        if ( this.core.features.has('issue-252-group-subscriptions') ) {
+            if ( currentMemberGroupIds.length > 0 ) {
+                const subscriptionResults = await this.groupSubscriptionDAO.selectGroupSubscriptions({
+                    where: `group_subscriptions.group_id = ANY($1::uuid[]) AND group_subscriptions.user_id = $2`,
+                    params: [ currentMemberGroupIds, currentUser.id ]
+                })
+                relations.groupSubscriptions = subscriptionResults.dictionary
             }
         }
 
@@ -82,10 +101,9 @@ module.exports = class GroupMemberController extends BaseController {
             const memberUsers = await this.userDAO.selectUsers({ where: `users.id = ANY($1::uuid[])`, params: [memberUserIds] })
             userDictionary = memberUsers.dictionary
         }
+        relations.users = userDictionary
 
-        return { 
-            users: userDictionary 
-        }
+        return relations
     }
 
     async createQuery(currentUser, urlQuery, context) {
@@ -476,6 +494,18 @@ module.exports = class GroupMemberController extends BaseController {
 
         const entity = results.dictionary[results.list[0]]
 
+        if ( entity.status === 'member' ) {
+            // If they are a member, they should have a group subscription.  If
+            // they don't, create one for them.
+            const subscription = await this.groupSubscriptionDAO.getGroupSubscriptionByGroupAndUser(entity.groupId, entity.userId)
+            if ( subscription === null ) {
+                await this.groupSubscriptionDAO.insertGroupSubscriptions({
+                    groupId: entity.groupId,
+                    userId: entity.userId
+                })
+            }
+        }
+
         const relations = await this.getRelations(currentUser, results)
 
         await this.notificationService.sendNotifications(
@@ -553,6 +583,12 @@ module.exports = class GroupMemberController extends BaseController {
         }
 
         await this.groupMemberDAO.deleteGroupMember(existing)
+
+        // Delete their GroupSubscription.
+        await this.core.database.query(
+            `DELETE FROM group_subscriptions WHERE group_id = $1 AND user_id = $2`, 
+            [ groupId, memberId ]
+        )
 
         // If they lose permission to view the group's content by leaving the
         // group, then remove any subscriptions they have to posts in the

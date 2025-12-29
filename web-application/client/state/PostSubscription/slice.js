@@ -3,6 +3,7 @@ import { createSlice } from '@reduxjs/toolkit'
 import {
     setInDictionary,
     removeEntity,
+    setNull,
     setQueryResults,
     clearQuery,
     clearQueries
@@ -56,6 +57,22 @@ export const PostSubscriptionSlice = createSlice({
                 state.byPostId[entity.postId] = entity
             }
         },
+        setPostSubscriptionNull: function(state, action) {
+            const id = action.payload
+
+            if ( id in state.dictionary && state.dictionary[id] !== null ) {
+                const entity = state.dictionary[id]
+                state.byPostId[entity.postId] = null
+            }
+
+            setNull(state, action)
+
+        },
+        setPostSubscriptionNullByPostId: function(state, action) {
+            const postId = action.payload
+
+            state.byPostId[postId] = null
+        },
         removePostSubscription: function(state, action) {
             removeEntity(state, action)
 
@@ -71,6 +88,7 @@ export const PostSubscriptionSlice = createSlice({
 
 export const { 
     setPostSubscriptionsInDictionary, removePostSubscription, 
+    setPostSubscriptionNull, setPostSubscriptionNullByPostId,
     clearPostSubscriptionQuery, setPostSubscriptionQueryResults,
     clearPostSubscriptionQueries, resetPostSubscriptionSlice
 } = PostSubscriptionSlice.actions
