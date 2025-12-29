@@ -6,16 +6,16 @@ import { useFeature } from '/lib/hooks/feature'
 
 import { getGroupModeration } from '/state/GroupModeration'
 
-export const useGroupModeration = function(id) {
+export const useGroupModeration = function(groupId, id) {
     const moderation = useSelector((state) => id && id in state.GroupModeration.dictionary ? state.GroupModeration.dictionary[id] : null)
 
     const [request, makeRequest] = useRequest()
 
     useEffect(() => {
-        if ( id && moderation === null) {
-            makeRequest(getGroupModeration(id))
+        if ( groupId && id && moderation === null) {
+            makeRequest(getGroupModeration(groupId, id))
         }
-    }, [ id, moderation])
+    }, [ groupId, id, moderation])
 
     return [moderation, request]
 }

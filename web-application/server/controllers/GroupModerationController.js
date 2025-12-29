@@ -359,7 +359,7 @@ module.exports = class GroupModerationController extends BaseController {
         }
 
         const results = await this.groupModerationDAO.selectGroupModerations({
-            where: `groupModerations.id = $1`,
+            where: `group_moderation.id = $1`,
             params: [ id ]
         })
 
