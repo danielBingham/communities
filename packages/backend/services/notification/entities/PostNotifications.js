@@ -21,6 +21,7 @@
 const { lib } = require('@communities/shared')
 
 const GroupDAO = require('../../../daos/GroupDAO')
+const GroupModerationDAO = require('../../../daos/GroupModerationDAO')
 const GroupSubscriptionDAO = require('../../../daos/GroupSubscriptionDAO')
 const PostCommentDAO = require('../../../daos/PostCommentDAO')
 const PostSubscriptionDAO = require('../../../daos/PostSubscriptionDAO')
@@ -39,6 +40,7 @@ module.exports = class PostNotifications {
         this.notificationWorker = notificationWorker
 
         this.groupDAO = new GroupDAO(core)
+        this.groupModerationDAO = new GroupModerationDAO(core)
         this.groupSubscriptionDAO = new GroupSubscriptionDAO(core)
         this.postCommentDAO = new PostCommentDAO(core)
         this.postSubscriptionDAO = new PostSubscriptionDAO(core)
@@ -57,6 +59,8 @@ module.exports = class PostNotifications {
             context.group = await this.groupDAO.getGroupById(context.post.groupId)
             context.path = `group/${context.group.slug}/${context.post.id}`
             context.link = new URL(context.path, this.core.config.host).href
+            context.moderation = await this.groupModerationDAO.
+
         } else {
             context.path = `${context.postAuthor.username}/${context.post.id}`
             context.link = new URL(context.path, this.core.config.host).href

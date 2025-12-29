@@ -57,6 +57,9 @@ module.exports = class GroupMemberController extends BaseController {
     }
 
     async getRelations(currentUser, results, requestedRelations, context) {
+        const relations = {}
+
+        const currentMemberGroupIds = []
         const memberUserIds = []
         const pendingUserIds = []
         for(const groupMemberId of results.list) {
@@ -65,6 +68,20 @@ module.exports = class GroupMemberController extends BaseController {
                 memberUserIds.push(member.userId)
             } else {
                 pendingUserIds.push(member.userId)
+            }
+
+            if ( member.userId === currentUser.id ) {
+                currentMemberGroupIds.push(member.groupId)
+            }
+        }
+
+        if ( this.core.features.has('issue-252-group-subscriptions') ) {
+            if ( currentMemberGroupIds.length > 0 ) {
+                const subscriptionResults = await this.groupSubscriptionDAO.selectGroupSubscriptions({
+                    where: `group_subscriptions.group_id = ANY($1::uuid[]) AND group_subscriptions.user_id = $2`,
+                    params: [ currentMemberGroupIds, currentUser.id ]
+                })
+                relations.groupSubscriptions = subscriptionResults.dictionary
             }
         }
 
@@ -84,10 +101,9 @@ module.exports = class GroupMemberController extends BaseController {
             const memberUsers = await this.userDAO.selectUsers({ where: `users.id = ANY($1::uuid[])`, params: [memberUserIds] })
             userDictionary = memberUsers.dictionary
         }
+        relations.users = userDictionary
 
-        return { 
-            users: userDictionary 
-        }
+        return relations
     }
 
     async createQuery(currentUser, urlQuery, context) {

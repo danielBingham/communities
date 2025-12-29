@@ -84,7 +84,7 @@ module.exports = class GroupModerationNotifications {
 
         const moderatorIds = moderatorResults.rows.map((row) => row.user_id)
 
-        // A post is being flagged.
+        // A post is being flagged or is pending.
         if (context.moderation.postId !== null && context.moderation.postCommentId === null ) {
             for(const userId of moderatorIds) {
                 await this.notificationWorker.createNotification(userId, 'GroupModeration:create:post:moderator', context, options) 
