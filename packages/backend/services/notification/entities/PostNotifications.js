@@ -59,8 +59,7 @@ module.exports = class PostNotifications {
             context.group = await this.groupDAO.getGroupById(context.post.groupId)
             context.path = `group/${context.group.slug}/${context.post.id}`
             context.link = new URL(context.path, this.core.config.host).href
-            context.moderation = await this.groupModerationDAO.
-
+            context.groupModeration = await this.groupModerationDAO.getGroupModerationByPostId(context.post.id)
         } else {
             context.path = `${context.postAuthor.username}/${context.post.id}`
             context.link = new URL(context.path, this.core.config.host).href
@@ -70,6 +69,14 @@ module.exports = class PostNotifications {
 
     async create(currentUser, type, context, options) {
         await this.ensureContext(currentUser, type, context)
+
+        if ( 'groupModeration' in context && context.groupModeration !== null && context.groupModeration !== undefined ) {
+            // Don't send any 'Post:create' notifications for pending posts.
+            // Those will be sent when the post is approved.
+            if ( context.groupModeration.status === 'pending' ) {
+                return
+            }
+        }
 
         // If this is a post in a group, then we need to respect their
         // group subscription.  If they've unsubscribed from the group,
@@ -136,16 +143,16 @@ module.exports = class PostNotifications {
                     continue
                 }
 
+                // If they have unsubscribed, don't send them a notification.
+                if ( subscription.status !== 'posts' ) {
+                    continue
+                }
+
                 // If the user has lost the ability to view this post, then
                 // don't send them a notification.
                 const canViewPost = await this.permissionService.can(userResults.dictionary[subscription.userId], 
                     'view', 'Post', { post: context.post })
                 if ( canViewPost !== true ) {
-                    continue
-                }
-
-                // If they have unsubscribed, don't send them a notification.
-                if ( subscription.status !== 'posts' ) {
                     continue
                 }
 

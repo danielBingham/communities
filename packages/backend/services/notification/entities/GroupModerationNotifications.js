@@ -104,29 +104,11 @@ module.exports = class GroupModerationNotifications {
         if ( context.moderation.status === 'rejected' ) {
             // We're moderating a post.
             if ( context.moderation.postId !== null && context.moderation.postCommentId === null ) {
-                // Don't send notifications to users who have lost the right to view
-                // their post.
-                const canViewPost = await this.permissionService.can(context.postAuthor, 'view', 'Post', { post: context.post, group: context.group })
-                if ( canViewPost !== true ) {
-                    return
-                }
-
-                await this.notificationWorker.createNotification(context.postAuthor.id, 
-                    'GroupModeration:update:post:status:rejected:author', context, options) 
+                await this.notifyPostAuthorOfPostRejection(currentUser, type, context, options)
             }
 
             // We're moderating a comment.
             else if ( context.moderation.postId !== null && context.moderation.postCommentId !== null ) {
-                // Don't send notifications to users who have lost the right to view
-                // their post.
-                const canViewPost = await this.permissionService.can(context.commentAuthor, 'view', 'Post', { post: context.post, group: context.group })
-                if ( canViewPost !== true ) {
-                    return
-                }
-
-                await this.notificationWorker.createNotification(context.comment.userId, 
-                    'GroupModeration:update:comment:status:rejected:author', context, options) 
-
             }
         } 
         // Notify users when their pending posts to groups that require
@@ -134,16 +116,53 @@ module.exports = class GroupModerationNotifications {
         else if ( 'previousModeration' in context && context.previousModeration.status === 'pending' && context.moderation.status === 'approved' ) {
             // We're moderating a post.
             if ( context.moderation.postId !== null && context.moderation.postCommentId === null ) {
-                // Don't send notifications to users who have lost the right to view
-                // their post.
-                const canViewPost = await this.permissionService.can(context.postAuthor, 'view', 'Post', { post: context.post, group: context.group })
-                if ( canViewPost !== true ) {
-                    return
-                }
+                await this.notifyPostAuthorOfPostApproval(currentUser, type, context, options)
 
-                await this.notificationWorker.createNotification(context.postAuthor.id, 
-                    'GroupModeration:update:post:status:approved:author', context, options) 
+                // We skipped these notifications when it was pending.  Send
+                // them now.
+                //
+                // TODO This seems a bit TECHDEBTY.  It could potentially bite
+                // us in the ass in some way.  Come back to this later and
+                // reconsider.
+                await this.notificationWorker.processNotification(currentUser, 'Post:create', { post: context.post }, options)
             }
         }
+    }
+
+    async notifyPostAuthorOfPostApproval(currentUser, type, context, options) {
+        // Don't send notifications to users who have lost the right to view
+        // their post.
+        const canViewPost = await this.permissionService.can(context.postAuthor, 'view', 'Post', { post: context.post, group: context.group })
+        if ( canViewPost !== true ) {
+            return
+        }
+
+        await this.notificationWorker.createNotification(context.postAuthor.id, 
+            'GroupModeration:update:post:status:approved:author', context, options) 
+    }
+
+    async notifyPostAuthorOfPostRejection(currentUser, type, context, options) {
+        // Don't send notifications to users who have lost the right to view
+        // their post.
+        const canViewPost = await this.permissionService.can(context.postAuthor, 'view', 'Post', { post: context.post, group: context.group })
+        if ( canViewPost !== true ) {
+            return
+        }
+
+        await this.notificationWorker.createNotification(context.postAuthor.id, 
+            'GroupModeration:update:post:status:rejected:author', context, options) 
+
+    }
+
+    async notifyPostCommentAuthorOfCommentRejection(currentUser, type, context, options) {
+        // Don't send notifications to users who have lost the right to view
+        // their post.
+        const canViewPost = await this.permissionService.can(context.commentAuthor, 'view', 'Post', { post: context.post, group: context.group })
+        if ( canViewPost !== true ) {
+            return
+        }
+
+        await this.notificationWorker.createNotification(context.comment.userId, 
+            'GroupModeration:update:comment:status:rejected:author', context, options) 
     }
 }
