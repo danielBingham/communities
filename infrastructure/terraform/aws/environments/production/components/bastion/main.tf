@@ -1,11 +1,22 @@
 
+data "terraform_remote_state" "network" {
+  backend = "s3"
+
+  config = {
+    bucket = "communities-social-terraform-state"
+    key = "production/components/network"
+    region = "us-east-1"
+    use_lockfile = true
+  }
+}
+
 module "bastion" {
-  count = length(var.subnet_ids)
+  count = length(data.terraform_remote_state.network.outputs.public_subnet_ids)
   
   source = "../../../../modules/bastion"
 
-  vpc_id = var.vpc_id
-  subnet_id = var.subnet_ids[count.index]
+  vpc_id = data.terraform_remote_state.network.outputs.vpc_id 
+  subnet_id = data.terraform_remote_state.network.outputs.public_subnet_ids[count.index]
   public_key_path = var.public_key_path
 
   application = "communities" 
