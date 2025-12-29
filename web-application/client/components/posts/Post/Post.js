@@ -58,7 +58,7 @@ const Post = function({ id, expanded, showLoading, shared }) {
     const [user, userRequest] = useUser(post?.userId)
     const [context, requests] = useGroupPermissionContext(currentUser, post?.groupId) 
     const group = context.group
-    const [groupModeration, groupModerationRequest] = useGroupModeration(post?.groupModerationId)
+    const [groupModeration, groupModerationRequest] = useGroupModeration(post?.groupId, post?.groupModerationId)
     const [siteModeration, siteModerationRequest] = useSiteModeration(post?.siteModerationId)
 
     if ( (request !== null && request.state == 'failed' && ( ! post || ! user ))) {
