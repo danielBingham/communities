@@ -127,6 +127,12 @@ module.exports = function(core) {
         })
     })
 
+    router.get('/file/:id/source', rateLimit(core, 2400), function(request, response, next) {
+        fileController.getFileSource(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
     router.get('/file/:id', rateLimit(core, 2400), function(request, response, next) {
         fileController.getFile(request, response).catch(function(error) {
             next(error)

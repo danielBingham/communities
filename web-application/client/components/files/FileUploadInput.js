@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import {  PhotoIcon } from '@heroicons/react/24/solid'
+import {  PhotoIcon, VideoCameraIcon } from '@heroicons/react/24/solid'
 
 import { uploadFile } from '/state/File'
 
@@ -62,15 +62,22 @@ const FileUploadInput = function(props) {
 
     // Request failure - report an error.
     } else if ( uploadRequest && uploadRequest.state == 'failed' ) {
+        logger.error(`Upload failed: `, uploadRequest.error)
         content = (<div className="error"> { uploadRequest.error }</div>)
     } else { 
         let typeErrorView = null
         if ( typeError ) {
             typeErrorView = ( <div className="error">Invalid-type selected.  Supported types are: { props.types.join(',') }.</div> )
         }
+   
+        let icon = ( <PhotoIcon /> )
+        if ( props.type === 'video' ) {
+            icon = ( <VideoCameraIcon /> )
+        }
+
         content = (
             <div className="upload-input">
-                <Button type="primary" onClick={(e) => hiddenFileInput.current.click()}><PhotoIcon /><span className="file-upload-button-text"> { props.text ? props.text : 'Upload Image' }</span></Button>
+                <Button type="primary" onClick={(e) => hiddenFileInput.current.click()}>{ icon } <span className="file-upload-button-text"> { props.text ? props.text : 'Upload Image' }</span></Button>
                 <input type="file"
                     name="file"
                     accept={props.types.join(',')}

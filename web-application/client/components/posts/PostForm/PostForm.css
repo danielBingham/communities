@@ -32,6 +32,7 @@
     color: var(--danger-color-main);
 }
 .post-form .post-form__controls .attachment-controls .post-form__image,
+.post-form .post-form__controls .attachment-controls .post-form__video,
 .post-form .post-form__controls .attachment-controls .post-form__link {
     display: inline-block;
 }
@@ -41,6 +42,10 @@
 }
 .post-form .attachments .attachment .attached {
     display: inline-block;
+}
+.post-file-attachment__video {
+    width: 100%;
+    max-width: 650px;
 }
 .post-form .attachments .link-preview {
     position: relative;

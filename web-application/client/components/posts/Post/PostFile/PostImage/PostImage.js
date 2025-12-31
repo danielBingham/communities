@@ -17,45 +17,31 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import { useRequest } from '/lib/hooks/useRequest'
-
-import { deleteFile } from '/state/File'
-import { XCircleIcon } from '@heroicons/react/24/solid'
+import { useSelector } from 'react-redux'
 
 import Image from '/components/ui/Image'
 
-import "./DraftImageFile.css"
+import './PostImage.css'
 
-const DraftImageFile = function({ fileId, setFileId, width, deleteOnRemove }) {
-  
-    const [request, makeRequest] = useRequest()
+const PostImage = function({ id, className }) {
+    
+    const post = useSelector((state) => id && id in state.Post.dictionary ? state.Post.dictionary[id] : null) 
+    const configuration = useSelector((state) => state.system.configuration)
 
-    const remove = function() {
-        setFileId(null)
-
-        if ( deleteOnRemove !== false ) {
-            makeRequest(deleteFile(fileId))
-        }
+    if ( ! id || ! post ) {
+        console.error(new Error(`'props.id' and 'post' are both required for PostImage.`))
+        return null
     }
 
-    // ============ Render ====================================================
-    
-    let content = null
-    if ( fileId) {
-        let renderWidth = width ? width : 650
-        content = (
-            <div className="file">
-                <a className="remove" href="" onClick={(e) => { e.preventDefault(); remove() }}><XCircleIcon /></a>
-                <Image id={fileId} width={renderWidth}  />
-            </div>
-        )
+    if ( ! post.fileId ) {
+        return null
     }
 
     return (
-        <div className="draft-image-file">
-            { content }
+        <div className={ className ? `post-image ${className}` : "post-image"}>
+            <Image id={post.fileId} width={650} fallbackIcon={'Photo'} />
         </div>
     )
 }
 
-export default DraftImageFile
+export default PostImage

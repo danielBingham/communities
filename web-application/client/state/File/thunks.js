@@ -21,7 +21,7 @@ export const loadFile = function(fileId, width) {
 
         dispatch(setInCache({ fileId: fileId, width: width, objectURL: null }))
 
-        const path = `./file/${encodeURIComponent(fileId)}`
+        const path = `./file/${encodeURIComponent(fileId)}/source`
         const params = { fileId: fileId }
         if ( width ) {
             params.width = width
@@ -86,6 +86,18 @@ export const uploadFile = function(file) {
         return dispatch(makeRequest('POST', `/upload`, formData,
             function(response) {
                 dispatch(setFilesInDictionary({ entity: response.entity }))
+
+                dispatch(setRelationsInState(response.relations))
+            }
+        ))
+    }
+}
+
+export const getFile = function(fileId) {
+    return function(dispatch, getState) {
+        return dispatch(makeRequest('GET', `/file/${encodeURIComponent(fileId)}`, null,
+            function(response) {
+                dispatch(setFilesInDictionary({ entity: response.entity}))
 
                 dispatch(setRelationsInState(response.relations))
             }

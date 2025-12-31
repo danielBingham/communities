@@ -24,14 +24,6 @@ const PostAttachmentControls = function({ postId, groupId, sharedPostId }) {
 
     const [draft, setDraft] = usePostDraft(postId, groupId, sharedPostId)
 
-    const setLinkPreviewId = function(linkPreviewId) {
-        const newDraft = { ...draft }
-        newDraft.linkPreviewId = linkPreviewId
-        newDraft.fileId = null
-        newDraft.sharedPostId = null
-        setDraft(newDraft)
-    }
-
     const setFileId = function(fileId) {
         const newDraft = { ...draft }
         newDraft.linkPreviewId = null 
@@ -51,7 +43,17 @@ const PostAttachmentControls = function({ postId, groupId, sharedPostId }) {
                     text="Add Image"
                     fileId={draft.fileId} 
                     setFileId={setFileId} 
+                    type='image'
                     types={[ 'image/jpeg', 'image/png' ]} 
+                />
+            </div>
+            <div className="post-form__video">
+                <FileUploadInput
+                    text="Add Video"
+                    fileId={draft.fileId}
+                    setFileId={setFileId}
+                    type='video'
+                    types={[ 'video/mp4' ]}
                 />
             </div>
         </div>

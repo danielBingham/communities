@@ -14,7 +14,7 @@
     "start": "node ./server/bin/www",
     "build": "(rm ./public/dist/* || true) && webpack --mode production && (cd ./public/dist && zip -r dist.zip *)",
     "build-dev": "(rm ./public/dist/* || true) && export NODE_ENV=development  && webpack --mode development && (cd ./public/dist && zip -r dist.zip *)",
-    "client": "webpack serve --mode development --devtool inline-source-map --no-open",
+    "client": "webpack serve --mode development --devtool inline-source-map --no-open --no-hot --no-live-reload",
     "server": "nodemon ./server/bin/www",
     "dev": "export NODE_ENV=development && concurrently \"npm run server\" \"npm run client\"",
     "jest": "jest",

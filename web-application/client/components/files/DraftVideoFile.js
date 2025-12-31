@@ -22,11 +22,11 @@ import { useRequest } from '/lib/hooks/useRequest'
 import { deleteFile } from '/state/File'
 import { XCircleIcon } from '@heroicons/react/24/solid'
 
-import Image from '/components/ui/Image'
+import Video from '/components/ui/Video'
 
-import "./DraftImageFile.css"
+import "./DraftVideoFile.css"
 
-const DraftImageFile = function({ fileId, setFileId, width, deleteOnRemove }) {
+const DraftVideoFile = function({ fileId, setFileId, width, deleteOnRemove }) {
   
     const [request, makeRequest] = useRequest()
 
@@ -46,16 +46,16 @@ const DraftImageFile = function({ fileId, setFileId, width, deleteOnRemove }) {
         content = (
             <div className="file">
                 <a className="remove" href="" onClick={(e) => { e.preventDefault(); remove() }}><XCircleIcon /></a>
-                <Image id={fileId} width={renderWidth}  />
+                <Video id={fileId} width={renderWidth}  />
             </div>
         )
     }
 
     return (
-        <div className="draft-image-file">
+        <div className="draft-video-file">
             { content }
         </div>
     )
 }
 
-export default DraftImageFile
+export default DraftVideoFile

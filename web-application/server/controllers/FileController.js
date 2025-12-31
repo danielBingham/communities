@@ -75,18 +75,21 @@ module.exports = class FileController {
          * Validation
          **********************************************************************/
 
-        const type = request.file.mimetype 
+        const mimetype = request.file.mimetype 
         // Define which file types are valid.
         const validTypes = [
             // For post and profile images.
             'image/jpeg',
-            'image/png'
+            'image/png',
+            
+            // For Post videos
+            'video/mp4'
         ]
 
         // 1. File must be PDF, JPEG, or PNG.
-        if ( ! validTypes.includes(type) ) {
+        if ( ! validTypes.includes(mimetype) ) {
             throw new ControllerError(400, 'invalid-type',
-                `User(${request.session.user.id}) attempted to upload an invalid file of type ${type}.`)
+                `User(${request.session.user.id}) attempted to upload an invalid file of type ${mimetype}.`)
         }
 
 
@@ -98,14 +101,14 @@ module.exports = class FileController {
         const currentPath = request.file.path
 
         const id = uuidv4()
-        const filepath = `files/${id}.${mime.getExtension(type)}`
+        const filepath = `files/${id}.${mime.getExtension(mimetype)}`
 
         await this.fileService.uploadFile(currentPath, filepath)
 
         const file = {
             id: id,
             userId: request.session.user.id,
-            type: type,
+            type: mimetype,
             location: this.config.s3.bucket_url,
             filepath: filepath
         }
@@ -119,7 +122,10 @@ module.exports = class FileController {
 
         this.fileService.removeLocalFile(currentPath)
 
-        await this.core.queue.add('resize-image', { session: { user: currentUser }, file: file })
+        const type = mimetype.split('/')[0]
+        if ( type === 'image' ) {
+            await this.core.queue.add('resize-image', { session: { user: currentUser }, file: file })
+        }
 
         response.status(200).json({
             entity: files[0],
@@ -128,9 +134,9 @@ module.exports = class FileController {
     }
 
     /**
-     * GET /file/:id
+     * GET /file/:id/src
      *
-     * Get a file.
+     * Get the raw file source for display.
      *
      * @param {Object} request  Standard Express request object.
      * @param {int} request.params.id   The database id of the file we wish to get.
@@ -138,8 +144,7 @@ module.exports = class FileController {
      *
      * @returns {Promise}   Resolves to void.
      */
-    async getFile(request, response) {
-
+    async getFileSource(request, response) {
         const currentUser = request.session.user
         if ( ! currentUser ) {
             throw new ControllerError(401, 'not-authenticated',
@@ -169,22 +174,38 @@ module.exports = class FileController {
         const url = await this.fileService.getSignedUrl(path)
 
         response.redirect(302, url)
+    }
 
-        // Everyone has permissions to get files right now.  We may add
-        // stricter permissions in the future.
+    /**
+     * GET /file/:id
+     *
+     * Get a file.
+     *
+     * @param {Object} request  Standard Express request object.
+     * @param {int} request.params.id   The database id of the file we wish to get.
+     * @param {Object} response Standard Express response object.
+     *
+     * @returns {Promise}   Resolves to void.
+     */
+    async getFile(request, response) {
 
-        /*const id = request.params.id
+        const currentUser = request.session.user
+        if ( ! currentUser ) {
+            throw new ControllerError(401, 'not-authenticated',
+                `User must be authenticated to view a file.`,
+                `You must be authenticated to view a file.`)
+        }
 
+        const id = request.params.id
 
         const files = await this.fileDAO.selectFiles('WHERE files.id = $1', [ id ])
         if ( files.length <= 0) {
-            throw new ControllerError(404, 'not-found', `Failed find file ${id}.`)
+            throw new ControllerError(404, 'not-found', `Failed to find file ${id}.`)
         }
-
         return response.status(200).json({
             entity: files[0],
             relations: {}
-        })*/
+        })
     }
 
     async patchFile(request, response) {

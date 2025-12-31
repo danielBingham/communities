@@ -17,45 +17,43 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import { useRequest } from '/lib/hooks/useRequest'
 
-import { deleteFile } from '/state/File'
-import { XCircleIcon } from '@heroicons/react/24/solid'
+import { usePost } from '/lib/hooks/Post'
+import { useFile } from '/lib/hooks/File'
 
 import Image from '/components/ui/Image'
+import Video from '/components/ui/Video'
 
-import "./DraftImageFile.css"
+import './PostFile.css'
 
-const DraftImageFile = function({ fileId, setFileId, width, deleteOnRemove }) {
-  
-    const [request, makeRequest] = useRequest()
+const PostFile = function({ id, className }) {
+    
+    const [post, request] = usePost(id) 
+    const [file, fileRequest] = useFile(post?.fileId)
 
-    const remove = function() {
-        setFileId(null)
+    console.log(`File: `, file)
 
-        if ( deleteOnRemove !== false ) {
-            makeRequest(deleteFile(fileId))
-        }
+    if ( post === null || post === undefined ) {
+        return null
     }
 
-    // ============ Render ====================================================
-    
-    let content = null
-    if ( fileId) {
-        let renderWidth = width ? width : 650
-        content = (
-            <div className="file">
-                <a className="remove" href="" onClick={(e) => { e.preventDefault(); remove() }}><XCircleIcon /></a>
-                <Image id={fileId} width={renderWidth}  />
+    if ( post.fileId === undefined || post.fileId === null ) {
+        return null
+    }
+
+    if ( file.type.split('/')[0] === 'video' ) {
+        return (
+            <div className={ className ? `post-video ${className}` : "post-video"}>
+                <Video id={post.fileId} />
+            </div>
+        )
+    } else {
+        return (
+            <div className={ className ? `post-image ${className}` : "post-image"}>
+                <Image id={post.fileId} width={650} fallbackIcon={'Photo'} />
             </div>
         )
     }
-
-    return (
-        <div className="draft-image-file">
-            { content }
-        </div>
-    )
 }
 
-export default DraftImageFile
+export default PostFile

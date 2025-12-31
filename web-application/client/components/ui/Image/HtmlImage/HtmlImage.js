@@ -5,7 +5,7 @@ import Spinner from '/components/Spinner'
 
 const HtmlImage = function({ id, src, width, ref, onLoad }) {
     const [isLoading, setIsLoading] = useState(true)
-    const configuration = useSelector((state) => state.system.configuration)
+    const api = useSelector((state) => state.system.api)
 
     const onLoadInternal = function(event) {
         setIsLoading(false)  
@@ -24,7 +24,7 @@ const HtmlImage = function({ id, src, width, ref, onLoad }) {
     if ( src !== undefined && src !== null ) {
         url = src
     } else if ( id !== undefined && id !== null ) {
-        url = `${configuration.backend}/file/${id}`
+        url = `${api}/file/${id}/source`
     }
 
     const style = isLoading ? { position: 'absolute', top: '-10000px', left: '-10000px' } : {}
