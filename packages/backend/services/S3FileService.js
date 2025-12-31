@@ -115,6 +115,17 @@ module.exports = class S3FileService {
         return await response.Body.transformToByteArray()
     }
 
+    async downloadFile(path, localPath) {
+        const params = {
+            Bucket: this.config.s3.bucket,
+            Key: path
+        }
+
+        const response = await this.s3Client.send(new GetObjectCommand(params))
+        const stream = response.Body.pipe(fs.createWriteStream(localPath))
+        await once(stream, 'finish')
+    }
+
     async getSignedUrl(path) {
         const params = {
             Bucket: this.config.s3.bucket,

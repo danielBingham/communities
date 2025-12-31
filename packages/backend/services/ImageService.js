@@ -26,6 +26,13 @@ const ServiceError = require('../errors/ServiceError')
 
 module.exports = class ImageService {
 
+    SUPPORTED_MIMETYPES = [
+        'image/jpeg',
+        'image/png'
+    ]
+
+    SUPPORTED_EXTENSIONS = [ '.jpg', '.jpeg', '.png' ]
+
     constructor(core) {
         this.core = core
 

@@ -63,6 +63,7 @@ exports.TokenService = require('./services/TokenService')
 exports.UserService = require('./services/UserService')
 exports.ValidationService = require('./services/ValidationService')
 exports.WebSocketService = require('./services/WebSocketService')
+exports.VideoService = require('./services/VideoService')
 
 exports.NotificationWorker = require('./services/notification/NotificationWorker')
 

@@ -83,6 +83,10 @@ async function initialize() {
         }
     })
 
+    core.queue.process('resize-video', async function(job, done) {
+
+    })
+
     core.queue.process('send-notifications', async function(job, done) {
         const logger = new Logger(core.logger.level, `send-notifications: ${job.id}`)
         logger.info(`Beginning job 'send-notifications' of '${job.data.type}' for User(${job.data.currentUser.id}).`)

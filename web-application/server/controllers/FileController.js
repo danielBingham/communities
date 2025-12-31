@@ -17,10 +17,12 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
+const path = require('node:path')
+
 const mime = require('mime')
 const { v4: uuidv4 } = require('uuid')
 
-const backend = require('@communities/backend')
+const { ImageService, VideoService, S3FileService, FileDAO }= require('@communities/backend')
 
 const ControllerError = require('../errors/ControllerError')
 
@@ -33,41 +35,23 @@ module.exports = class FileController {
         this.logger = core.logger
         this.config = core.config
 
-        this.imageService = new backend.ImageService(core)
-        this.fileService = new backend.S3FileService(core)
-        this.fileDAO = new backend.FileDAO(core)
+        this.videoService = new VideoService(core)
+        this.imageService = new ImageService(core)
+        this.fileService = new S3FileService(core)
+        this.fileDAO = new FileDAO(core)
     }
 
-    /**
-     * POST /upload
-     *
-     * Allows the user to upload a file, which can then be used by other
-     * entities.
-     *
-     * @param {Object} request  Standard Express request object.
-     * @param {Object} request.file The file information, defined by multer.
-     * @param {Object} response Standard Express response object.
-     *
-     * @returns {Promise}   Resolves to void.
-     */
-    async upload(request, response) {
-        /**********************************************************************
-         * Permissions Checking and Input Validation
-         *
-         * Permissions:
-         *
-         * 1. User must be logged in.
-         *
-         * Validation:
-         *
-         * 1. File must be PDF, JPEG, or PNG.
-         * 
-         * ********************************************************************/
+    async uploadVideo(request, response) {
+        const logger = request.logger ? request.logger : this.core.logger
+
+        const currentPath = request.file.path
+
+        logger.info(`Processing video upload: ${currentPath}`)
 
         const currentUser = request.session.user 
 
-        // 1. User must be logged in.
         if ( ! currentUser ) {
+            this.fileService.removeLocalFile(currentPath)
             throw new ControllerError(403, 'not-authorized', `Must have a logged in user to upload a file.`)
         }
 
@@ -76,29 +60,25 @@ module.exports = class FileController {
          **********************************************************************/
 
         const mimetype = request.file.mimetype 
-        // Define which file types are valid.
-        const validTypes = [
-            // For post and profile images.
-            'image/jpeg',
-            'image/png',
-            
-            // For Post videos
-            'video/mp4'
-        ]
-
-        // 1. File must be PDF, JPEG, or PNG.
-        if ( ! validTypes.includes(mimetype) ) {
+        if ( ! VideoService.SUPPORTED_TYPES.includes(mimetype) ) {
+            this.fileService.removeLocalFile(currentPath)
             throw new ControllerError(400, 'invalid-type',
-                `User(${request.session.user.id}) attempted to upload an invalid file of type ${mimetype}.`)
+                `User(${request.session.user.id}) attempted to upload an invalid video file of type ${mimetype}.`,
+                `Unsupported video type.  Supported types are: ${VideoService.SUPPORTED_TYPES.join(',')}`)
         }
 
+        const fileExtension = path.extname(request.file.originalname).toLowerCase()
+        if ( ! VideoService.SUPPORTED_EXTENSIONS.includes(fileExtension) ) {
+            this.fileService.removeLocalFile(currentPath)
+            throw new ControllerError(400, 'invalid-type',
+                `User(${request.session.user.id}) attempted to upload an invalid video file of type ${mimetype}.`,
+                `Unsupported video extension.  Supported extensions are: ${VideoService.SUPPORTED_EXTENSIONS.join(',')}`)
+        }
 
         /**********************************************************************
          * Permissions and Validation checks complete.
          *      Upload the file.
          **********************************************************************/
-
-        const currentPath = request.file.path
 
         const id = uuidv4()
         const filepath = `files/${id}.${mime.getExtension(mimetype)}`
@@ -117,15 +97,96 @@ module.exports = class FileController {
 
         const files = await this.fileDAO.selectFiles('WHERE files.id = $1', [ id ])
         if ( files.length <= 0) {
+            this.fileService.removeLocalFile(currentPath)
             throw new ControllerError(500, 'insertion-failure', `Failed to select newly inserted file ${id}.`)
         }
 
         this.fileService.removeLocalFile(currentPath)
 
-        const type = mimetype.split('/')[0]
-        if ( type === 'image' ) {
-            await this.core.queue.add('resize-image', { session: { user: currentUser }, file: file })
+        // await this.core.queue.add('resize-image', { session: { user: currentUser }, file: file })
+
+        response.status(200).json({
+            entity: files[0],
+            relations: {}
+        })
+
+    }
+
+    /**
+     * POST /upload
+     *
+     * Allows the user to upload a file, which can then be used by other
+     * entities.
+     *
+     * @param {Object} request  Standard Express request object.
+     * @param {Object} request.file The file information, defined by multer.
+     * @param {Object} response Standard Express response object.
+     *
+     * @returns {Promise}   Resolves to void.
+     */
+    async uploadImage(request, response) {
+        const logger = request.logger ? request.logger : this.core.logger
+
+        const currentPath = request.file.path
+
+        logger.info(`Processing image upload: ${currentPath}`)
+
+        const currentUser = request.session.user 
+
+        if ( ! currentUser ) {
+            this.fileService.removeLocalFile(currentPath)
+            throw new ControllerError(403, 'not-authorized', `Must have a logged in user to upload a file.`)
         }
+
+        /**********************************************************************
+         * Validation
+         **********************************************************************/
+
+        const mimetype = request.file.mimetype 
+        if ( ! ImageService.SUPPORTED_TYPES.includes(mimetype) ) {
+            this.fileService.removeLocalFile(currentPath)
+            throw new ControllerError(400, 'invalid-type',
+                `User(${request.session.user.id}) attempted to upload an invalid file of type ${mimetype}.`,
+                `Unsupported file type.  Supported types are: ${ImageService.SUPPORTED_TYPES.join(',')}`)
+        }
+
+        const fileExtension = path.extname(request.file.originalname).toLowerCase()
+        if ( ! ImageService.SUPPORTED_EXTENSIONS.includes(fileExtension) ) {
+            this.fileService.removeLocalFile(currentPath)
+            throw new ControllerError(400, 'invalid-type',
+                `User(${request.session.user.id}) attempted to upload an invalid file of type ${mimetype}.`,
+                `Unsupported file extension.  Supported extensions are: ${ImageService.SUPPORTED_EXTENSIONS.join(',')}`)
+        }
+
+        /**********************************************************************
+         * Permissions and Validation checks complete.
+         *      Upload the file.
+         **********************************************************************/
+
+        const id = uuidv4()
+        const filepath = `files/${id}.${mime.getExtension(mimetype)}`
+
+        await this.fileService.uploadFile(currentPath, filepath)
+
+        const file = {
+            id: id,
+            userId: request.session.user.id,
+            type: mimetype,
+            location: this.config.s3.bucket_url,
+            filepath: filepath
+        }
+
+        await this.fileDAO.insertFile(file)
+
+        const files = await this.fileDAO.selectFiles('WHERE files.id = $1', [ id ])
+        if ( files.length <= 0) {
+            this.fileService.removeLocalFile(currentPath)
+            throw new ControllerError(500, 'insertion-failure', `Failed to select newly inserted file ${id}.`)
+        }
+
+        this.fileService.removeLocalFile(currentPath)
+
+        await this.core.queue.add('resize-image', { session: { user: currentUser }, file: file })
 
         response.status(200).json({
             entity: files[0],
