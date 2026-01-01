@@ -197,7 +197,7 @@ module.exports = class FileController {
 
         this.fileService.removeLocalFile(currentPath)
 
-        const job = await this.core.queue.add('reformat-video', { session: { user: currentUser }, file: file })
+        const job = await this.core.queue.add('process-video', { session: { user: currentUser }, file: file })
 
         const jobs = {}
         jobs[jobs.id] = job
@@ -208,7 +208,6 @@ module.exports = class FileController {
                 jobs: jobs 
             }
         })
-
     }
 
 

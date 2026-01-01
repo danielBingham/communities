@@ -28,8 +28,7 @@ const {
 
 const getResizeImageJob = require('./jobs/resizeImage')
 const getSendNotificationsJob = require('./jobs/sendNotifications')
-const getReformatVideoJob = require('./jobs/reformatVideo')
-const getResizeVideoJob = require('./jobs/resizeVideo')
+const getProcessVideoJob = require('./jobs/processVideo')
 
 const configDefinition = require('./config')
 
@@ -54,8 +53,7 @@ async function initialize() {
     core.features = new FeatureFlags(features)
  
     core.queue.process('resize-image', getResizeImageJob(core))
-    core.queue.process('reformat-video', getReformatVideoJob(core))
-    core.queue.process('resize-video', getResizeVideoJob(core))
+    core.queue.process('process-video', getProcessVideoJob(core))
     core.queue.process('send-notifications', getSendNotificationsJob(core))
 
     core.logger.info('Initialized and listening...')

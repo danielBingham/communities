@@ -18,10 +18,30 @@
  *
  ******************************************************************************/
 
-const getResizeVideoJob = function(core) {
-    return async function(job, done) {
+const { VideoService } = require('@communities/backend')
 
+const getProcessVideoJob = function(core) {
+    return async function(job, done) {
+        core.logger.id = `Process Video: ${job.id}`
+        core.logger.info(`Beginning job 'process-video' for user ${job.data.session.user.id} and file ${job.data.file.id}.`)
+
+        try {
+            job.progress({ step: 'initializing', stepDescription: `Initializing...`, progress: 0 })
+
+            const videoService = new VideoService(core)
+
+            await videoService.process(job.data.file)
+            job.progress({ step: 'complete', stepDescription: `Complete!`, progress: 100 })
+
+            core.logger.info(`Finished job 'process-video' for user ${job.data.session.user.id}.`)
+            core.logger.id = 'core' 
+            done(null)
+        } catch (error) {
+            core.logger.error(error)
+            done(error)
+        }
+        
     }
 }
 
-module.exports = getResizeVideoJob
+module.exports = getProcessVideoJob

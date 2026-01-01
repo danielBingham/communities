@@ -65,7 +65,7 @@ module.exports = class VideoService {
     }
 
 
-    async reformat(file) {
+    async process(file) {
         const originalFilename= `${file.id}.original.${mime.getExtension(file.type)}`
         const newFilename = `${file.id}.mp4`
 
@@ -78,22 +78,43 @@ module.exports = class VideoService {
         this.core.logger.info(`Downloading file "${originalPath}"...`)
         await this.fileService.downloadFile(originalPath, localOriginalFile)
 
-        const ffmpegArgs = [
-            '-i', localOriginalFile,
-            '-c:v', 'libx264',
-            '-preset', 'medium',
-            '-profile:v', 'high',
-            '-level:v', '4.0',
-            '-crf', '23',
-            '-c:a', 'aac',
-            '-b:a', '128k',
-            '-movflags', '+faststart',
-            localNewFile,
-        ]
-
         try { 
+            const ffmpegArgs = [
+                '-i', localOriginalFile,
+                '-c:v', 'libx264',
+                '-preset', 'medium',
+                '-profile:v', 'high',
+                '-level:v', '4.0',
+                '-crf', '23',
+                '-c:a', 'aac',
+                '-b:a', '128k',
+                '-movflags', '+faststart',
+                '-vf', 'scale=650:-1',
+                localNewFile,
+            ]
             this.core.logger.info(`Reformatting file "${localOriginalFile}" to "${localNewFile}"...`)
             await this.processService.run('ffmpeg', ffmpegArgs)
+
+            this.core.logger.info(`Uploading the newly formatted file...`)
+            await this.fileService.uploadFile(localNewFile, targetPath)
+
+            // Update File in the database with the new filename and mimetype
+            const filePatch = {
+                id: file.id,
+                userId: file.userId,
+                location: file.location,
+                filepath: targetPath,
+                type: mime.getType('mp4')
+            }
+
+            await this.fileDAO.updateFile(filePatch)
+
+            this.core.logger.info(`Deleting the original...`)
+            // Once we've updated the file to point to the newly formatted
+            // file, delete the original to save space.  We're not going to use
+            // it once we've reformatted it.
+            await this.fileService.removeFile(originalPath)
+
         } catch (error ) {
             try {
                 if ( this.fileService.localFileExists(localOriginalFile) ) {
@@ -114,28 +135,9 @@ module.exports = class VideoService {
             this.core.logger.error(`Attempt to reformat file failed: `, error)
             throw error
         }
-
-        this.core.logger.info(`Uploading the newly formatted file...`)
-        await this.fileService.uploadFile(localNewFile, targetPath)
-
-        // Update File in the database with the new filename and mimetype
-        const filePatch = {
-            id: file.id,
-            userId: file.userId,
-            location: file.location,
-            filepath: targetPath,
-            type: mime.getType('mp4')
-        }
-
-        await this.fileDAO.updateFile(filePatch)
         
         // Remove both newFilename and originalFilename from local files
         this.fileService.removeLocalFile(localOriginalFile)
         this.fileService.removeLocalFile(localNewFile)
     }
-
-    resize(file) {
-
-    }
-
 }

@@ -53,7 +53,7 @@ const createVideoUploadMiddleware = function() {
             }
         },
         limits: {
-            fileSize: 300 * 1024 * 1024 // 300MB filesize limit
+            fileSize: 500 * 1024 * 1024 // 500MB filesize limit (It's going to shrink a lot after we process it)
         }
     }).single('file')
 }
