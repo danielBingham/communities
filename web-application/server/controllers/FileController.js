@@ -103,6 +103,7 @@ module.exports = class FileController {
 
         this.fileService.removeLocalFile(currentPath)
 
+        await this.core.query.add('reformat-video', { session: { user: currentUser }, file: file })
         // await this.core.queue.add('resize-image', { session: { user: currentUser }, file: file })
 
         response.status(200).json({

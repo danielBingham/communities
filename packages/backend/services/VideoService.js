@@ -20,9 +20,27 @@
 
 const path = require('node:path')
 
+const FileDAO = require('../FileDAO')
+
 const ProcessService = require('./ProcessService')
 const S3FileService = require('./S3FileService')
 const ServiceError = require('../errors/ServiceError')
+
+class ProgressTracker {
+    constructor() {
+        this.listeners = []
+    }
+
+    triggerProgress(percent) {
+        for(const listener of listeners) {
+            listener(percent)
+        }
+    }
+
+    onProgress(listener) {
+        this.listeners.push(listener)
+    }
+}
 
 module.exports = class VideoService {
 
@@ -39,19 +57,27 @@ module.exports = class VideoService {
     constructor(core) {
         this.core = core
 
+        this.fileDAO = new FileDAO(core)
+
         this.processService = new ProcessService(core)
         this.fileService = new S3FileService(core)
     }
 
-    async reformat(file) {
-        const fileName = `${file.id}.${mime.getExtension(file.type)}`
-        const mp4FileName = `${file.id}.mp4`
 
-        const localFile = path.join('tmp/', fileName)
-        await this.fileService.downloadFile(file.filepath, localFile)
+    async reformat(file) {
+        const originalFilename= `${file.id}.${mime.getExtension(file.type)}`
+        const newFilename = `${file.id}.mp4`
+
+        const localOriginalFile = path.join('tmp/', originalFilename)
+        const localNewFile = path.join('tmp/', newFilename)
+       
+        const originalPath = file.filepath
+        const targetPath = path.join('files/', newFilename)
+
+        await this.fileService.downloadFile(originalPath, localOriginalFile)
 
         const ffmpegArgs = [
-            '-i', fileName,
+            '-i', localOriginalFile,
             '-c:v', 'libx264',
             '-preset', 'medium',
             '-profile:v', 'high',
@@ -60,30 +86,43 @@ module.exports = class VideoService {
             '-c:a', 'aac',
             '-b:a', '128k',
             '-movflags', '+faststart',
-            mp4FileName,
+            localNewFile,
         ]
 
         try { 
             await this.processService.run('ffmpeg', ffmpegArgs)
         } catch (error ) {
             try {
-                this.fileService.removeLocalFile(localFile)
+                this.fileService.removeLocalFile(localOriginalFile)
             } catch (inputError) {}
 
             try {
-                this.fileService.removeLocalFile(mp4FileName)
+                this.fileService.removeLocalFile(localNewFile)
             } catch (outputError) {}
 
             throw error
         }
 
-        // Need to either record the original mimetype separately from the
-        // final mimetype or need to update the mimetype to match the new type
-        // and remove the original file.
-        //
-        // I think it probably makes sense to update the file to match the new
-        // type and to remove the original file after we've confirmed new file
-        // upload was successful.
+        // Upload newFilename to s3
+        await this.fileService.uploadFile(localNewFile, targetPath)
+
+        // Update File in the database with the new filename and mimetype
+        const filePatch = {
+            id: file.id,
+            userId: file.userId,
+            location: file.location,
+            filepath: targetPath,
+            type: mime.getType('mp4')
+        }
+
+        await this.fileDAO.updateFile(filePatch)
+
+        // Remove originalFilename from S3
+        await this.fileService.removeFile(originalPath)
+        
+        // Remove both newFilename and originalFilename from local files
+        this.fileService.removeLocalFile(localOriginalFile)
+        this.fileService.removeLocalFile(localNewFile)
     }
 
     resize(file) {

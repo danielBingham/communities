@@ -21,16 +21,15 @@
 const { 
     Core, 
     Config,
-    Logger,
     FeatureFlags,
 
     FeatureService,
-    ImageService,
-    NotificationService,
-
-    NotificationWorker
-
 } = require('@communities/backend')
+
+const getResizeImageJob = require('./jobs/resizeImage')
+const getSendNotificationsJob = require('./jobs/sendNotifications')
+const getReformatVideoJob = require('./jobs/reformatVideo')
+const getResizeVideoJob = require('./jobs/resizeVideo')
 
 const configDefinition = require('./config')
 
@@ -54,73 +53,25 @@ async function initialize() {
     const features = await featureService.getEnabledFeatures()
     core.features = new FeatureFlags(features)
  
-    core.queue.process('resize-image', async function(job, done) {
-        core.logger.id = `Image resize: ${job.id}`
-        core.logger.info(`Beginning job 'resize-image' for user ${job.data.session.user.id} and file ${job.data.file.id}.`)
-
-        try {
-
-            job.progress({ step: 'initializing', stepDescription: `Initializing...`, progress: 0 })
-
-            const imageService = new ImageService(core)
-
-            let progress = 0
-            for (const size of imageService.imageSizes) {
-                await imageService.resize(job.data.file, size)
-
-                progress += 20
-                job.progress({ step: 'resizing', stepDescription: `Resizing...`, progress: progress })
-            }
-
-            job.progress({ step: 'complete', stepDescription: `Complete!`, progress: 100 })
-
-            core.logger.info(`Finished job 'resize-image' for user ${job.data.session.user.id}.`)
-            core.logger.id = 'core' 
-            done(null)
-        } catch (error) {
-            core.logger.error(error)
-            done(error)
-        }
-    })
-
-    core.queue.process('resize-video', async function(job, done) {
-
-    })
-
-    core.queue.process('send-notifications', async function(job, done) {
-        const logger = new Logger(core.logger.level, `send-notifications: ${job.id}`)
-        logger.info(`Beginning job 'send-notifications' of '${job.data.type}' for User(${job.data.currentUser.id}).`)
-        logger.verbose(`Data: `, job.data)
-
-        try {
-            job.progress({ step: 'initializing', stepDescription: `Initializing...`, progress: 0 })
-
-            const notificationWorker = new NotificationWorker(core, logger)
-            
-            await notificationWorker.processNotification(job.data.currentUser, job.data.type, job.data.context, job.data.options)
-
-            job.progress({ step: 'complete', stepDescription: `Complete!`, progress: 100 })
-
-            core.logger.info(`Finished job 'send-notifications' of '${job.data.type}' for user ${job.data.currentUser.id}.`)
-            core.logger.id = 'core' 
-            done(null)
-        } catch (error) {
-            core.logger.error(error)
-            done(error)
-        }
-    })
+    core.queue.process('resize-image', getResizeImageJob(core))
+    core.queue.process('reformat-video', getReformatVideoJob(core))
+    core.queue.process('resize-video', getResizeVideoJob(core))
+    core.queue.process('send-notifications', getSendNotificationsJob(core))
 
     core.logger.info('Initialized and listening...')
+
+    return core
 }
 
-initialize()
+initialize().then(function(core) {
+    const shutdown = async function() {
+        core.logger.info('Attempting a graceful shutdown...')
+        await core.shutdown() 
+        process.exit(0)
+    }
 
-const shutdown = async function() {
-    core.logger.info('Attempting a graceful shutdown...')
-    await core.shutdown() 
-    process.exit(0)
-}
+    // We've gotten the termination signal, attempt a graceful shutdown.
+    process.on('SIGTERM', shutdown)
+    process.on('SIGINT', shutdown)
+})
 
-// We've gotten the termination signal, attempt a graceful shutdown.
-process.on('SIGTERM', shutdown)
-process.on('SIGINT', shutdown)

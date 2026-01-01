@@ -30,7 +30,7 @@ module.exports = class ProcessService {
         this.core = core
     }
 
-    run(command, commandArgs) {
+    async run(command, commandArgs) {
         return new Promise((resolve, reject) => {
             const process = spawn(command, commandArgs)        
 
@@ -60,5 +60,9 @@ module.exports = class ProcessService {
                 }
             })
         })
+    }
+
+    runRaw(command, commandArgs) {
+        return spawn(command, commandArgs)        
     }
 }
