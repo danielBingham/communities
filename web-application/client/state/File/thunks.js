@@ -93,6 +93,62 @@ export const uploadFile = function(file) {
     }
 }
 
+/**
+ * POST /upload/image
+ *
+ * Upload a new image.
+ *  
+ * Makes the request asynchronously and returns a id that can be used to track
+ * the request and retreive the results from the state slice.
+ *
+ * @param {object} file - A populated file object.
+ *
+ * @returns {string} A uuid requestId that can be used to track this request.
+ */
+export const uploadImage = function(file) {
+    return function(dispatch, getState) {
+        const formData = new FormData()
+        formData.append('file', file)
+
+        return dispatch(makeRequest('POST', `/upload/image`, formData,
+            function(response) {
+                dispatch(setFilesInDictionary({ entity: response.entity }))
+
+                dispatch(setRelationsInState(response.relations))
+            }
+        ))
+    }
+}
+
+/**
+ * POST /upload/video
+ *
+ * Upload a new video.
+ *  
+ * Makes the request asynchronously and returns a id that can be used to track
+ * the request and retreive the results from the state slice.
+ *
+ * @param {object} file - A populated file object.
+ *
+ * @returns {string} A uuid requestId that can be used to track this request.
+ */
+export const uploadVideo = function(file) {
+    return function(dispatch, getState) {
+        const formData = new FormData()
+        formData.append('file', file)
+
+        return dispatch(makeRequest('POST', `/upload/video`, formData,
+            function(response) {
+                dispatch(setFilesInDictionary({ entity: response.entity }))
+
+                dispatch(setRelationsInState(response.relations))
+            }
+        ))
+    }
+}
+
+
+
 export const getFile = function(fileId) {
     return function(dispatch, getState) {
         return dispatch(makeRequest('GET', `/file/${encodeURIComponent(fileId)}`, null,

@@ -17,7 +17,8 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-const fs = require('fs')
+const fs = require('node:fs')
+const { once } = require('node:events')
 
 const { S3 } = require('@aws-sdk/client-s3')
 const { HeadObjectCommand, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, CopyObjectCommand } = require('@aws-sdk/client-s3')
@@ -71,7 +72,7 @@ module.exports = class S3FileService {
     async copyFile(currentPath, newPath) {
         const params = {
             Bucket: this.config.s3.bucket,
-            CopySource:this. config.s3.bucket + '/' + currentPath,
+            CopySource: this.config.s3.bucket + '/' + currentPath,
             Key: newPath
         }
 
@@ -144,6 +145,10 @@ module.exports = class S3FileService {
         }
 
         await this.s3Client.send(new DeleteObjectCommand(params))
+    }
+
+    localFileExists(path) {
+        return fs.existsSync(path)
     }
 
     removeLocalFile(path) {

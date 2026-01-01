@@ -19,8 +19,9 @@
  ******************************************************************************/
 
 const path = require('node:path')
+const mime = require('mime')
 
-const FileDAO = require('../FileDAO')
+const FileDAO = require('../daos/FileDAO')
 
 const ProcessService = require('./ProcessService')
 const S3FileService = require('./S3FileService')
@@ -44,7 +45,7 @@ class ProgressTracker {
 
 module.exports = class VideoService {
 
-    SUPPORTED_MIMETYPES = [ 
+    static SUPPORTED_MIMETYPES = [ 
         'video/mp4', // mp4
         'video/quicktime', // mov
         'video/x-msvideo', // avi
@@ -52,7 +53,7 @@ module.exports = class VideoService {
 
     ]
 
-    SUPPORTED_EXTENSIONS = [ '.mp4', '.mov', '.avi', '.webm' ]
+    static SUPPORTED_EXTENSIONS = [ '.mp4', '.mov', '.avi', '.webm' ]
 
     constructor(core) {
         this.core = core
@@ -65,15 +66,16 @@ module.exports = class VideoService {
 
 
     async reformat(file) {
-        const originalFilename= `${file.id}.${mime.getExtension(file.type)}`
+        const originalFilename= `${file.id}.original.${mime.getExtension(file.type)}`
         const newFilename = `${file.id}.mp4`
 
         const localOriginalFile = path.join('tmp/', originalFilename)
-        const localNewFile = path.join('tmp/', newFilename)
+        const localNewFile = path.join('tmp/', `${newFilename}`)
        
         const originalPath = file.filepath
         const targetPath = path.join('files/', newFilename)
 
+        this.core.logger.info(`Downloading file "${originalPath}"...`)
         await this.fileService.downloadFile(originalPath, localOriginalFile)
 
         const ffmpegArgs = [
@@ -90,20 +92,30 @@ module.exports = class VideoService {
         ]
 
         try { 
+            this.core.logger.info(`Reformatting file "${localOriginalFile}" to "${localNewFile}"...`)
             await this.processService.run('ffmpeg', ffmpegArgs)
         } catch (error ) {
             try {
-                this.fileService.removeLocalFile(localOriginalFile)
-            } catch (inputError) {}
+                if ( this.fileService.localFileExists(localOriginalFile) ) {
+                    this.fileService.removeLocalFile(localOriginalFile)
+                }
+            } catch (inputError) {
+                this.core.logger.error(`Failed to clean up local original file: `, inputError)
+            }
 
             try {
-                this.fileService.removeLocalFile(localNewFile)
-            } catch (outputError) {}
+                if ( this.fileService.localFileExists(localNewFile) ) {
+                    this.fileService.removeLocalFile(localNewFile)
+                }
+            } catch (outputError) {
+                this.core.logger.error(`Failed to clean up local new file: `, outputError)
+            }
 
+            this.core.logger.error(`Attempt to reformat file failed: `, error)
             throw error
         }
 
-        // Upload newFilename to s3
+        this.core.logger.info(`Uploading the newly formatted file...`)
         await this.fileService.uploadFile(localNewFile, targetPath)
 
         // Update File in the database with the new filename and mimetype
@@ -116,9 +128,6 @@ module.exports = class VideoService {
         }
 
         await this.fileDAO.updateFile(filePatch)
-
-        // Remove originalFilename from S3
-        await this.fileService.removeFile(originalPath)
         
         // Remove both newFilename and originalFilename from local files
         this.fileService.removeLocalFile(localOriginalFile)

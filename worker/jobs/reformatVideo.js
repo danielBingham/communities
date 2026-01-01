@@ -30,17 +30,10 @@ const getReformatVideoJob = function(core) {
 
             const videoService = new VideoService(core)
 
-            let progress = 0
-            for (const size of videoService.videoSizes) {
-                await videoService.reformat(job.data.file)
-
-                progress += 20
-                job.progress({ step: 'resizing', stepDescription: `Resizing...`, progress: progress })
-            }
-
+            await videoService.reformat(job.data.file)
             job.progress({ step: 'complete', stepDescription: `Complete!`, progress: 100 })
 
-            core.logger.info(`Finished job 'resize-video' for user ${job.data.session.user.id}.`)
+            core.logger.info(`Finished job 'reformat-video' for user ${job.data.session.user.id}.`)
             core.logger.id = 'core' 
             done(null)
         } catch (error) {

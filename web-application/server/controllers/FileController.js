@@ -41,82 +41,10 @@ module.exports = class FileController {
         this.fileDAO = new FileDAO(core)
     }
 
-    async uploadVideo(request, response) {
-        const logger = request.logger ? request.logger : this.core.logger
-
-        const currentPath = request.file.path
-
-        logger.info(`Processing video upload: ${currentPath}`)
-
-        const currentUser = request.session.user 
-
-        if ( ! currentUser ) {
-            this.fileService.removeLocalFile(currentPath)
-            throw new ControllerError(403, 'not-authorized', `Must have a logged in user to upload a file.`)
-        }
-
-        /**********************************************************************
-         * Validation
-         **********************************************************************/
-
-        const mimetype = request.file.mimetype 
-        if ( ! VideoService.SUPPORTED_TYPES.includes(mimetype) ) {
-            this.fileService.removeLocalFile(currentPath)
-            throw new ControllerError(400, 'invalid-type',
-                `User(${request.session.user.id}) attempted to upload an invalid video file of type ${mimetype}.`,
-                `Unsupported video type.  Supported types are: ${VideoService.SUPPORTED_TYPES.join(',')}`)
-        }
-
-        const fileExtension = path.extname(request.file.originalname).toLowerCase()
-        if ( ! VideoService.SUPPORTED_EXTENSIONS.includes(fileExtension) ) {
-            this.fileService.removeLocalFile(currentPath)
-            throw new ControllerError(400, 'invalid-type',
-                `User(${request.session.user.id}) attempted to upload an invalid video file of type ${mimetype}.`,
-                `Unsupported video extension.  Supported extensions are: ${VideoService.SUPPORTED_EXTENSIONS.join(',')}`)
-        }
-
-        /**********************************************************************
-         * Permissions and Validation checks complete.
-         *      Upload the file.
-         **********************************************************************/
-
-        const id = uuidv4()
-        const filepath = `files/${id}.${mime.getExtension(mimetype)}`
-
-        await this.fileService.uploadFile(currentPath, filepath)
-
-        const file = {
-            id: id,
-            userId: request.session.user.id,
-            type: mimetype,
-            location: this.config.s3.bucket_url,
-            filepath: filepath
-        }
-
-        await this.fileDAO.insertFile(file)
-
-        const files = await this.fileDAO.selectFiles('WHERE files.id = $1', [ id ])
-        if ( files.length <= 0) {
-            this.fileService.removeLocalFile(currentPath)
-            throw new ControllerError(500, 'insertion-failure', `Failed to select newly inserted file ${id}.`)
-        }
-
-        this.fileService.removeLocalFile(currentPath)
-
-        await this.core.query.add('reformat-video', { session: { user: currentUser }, file: file })
-        // await this.core.queue.add('resize-image', { session: { user: currentUser }, file: file })
-
-        response.status(200).json({
-            entity: files[0],
-            relations: {}
-        })
-
-    }
-
     /**
-     * POST /upload
+     * POST /upload/image
      *
-     * Allows the user to upload a file, which can then be used by other
+     * Allows the user to upload an image, which can then be used by other
      * entities.
      *
      * @param {Object} request  Standard Express request object.
@@ -144,7 +72,7 @@ module.exports = class FileController {
          **********************************************************************/
 
         const mimetype = request.file.mimetype 
-        if ( ! ImageService.SUPPORTED_TYPES.includes(mimetype) ) {
+        if ( ! ImageService.SUPPORTED_MIMETYPES.includes(mimetype) ) {
             this.fileService.removeLocalFile(currentPath)
             throw new ControllerError(400, 'invalid-type',
                 `User(${request.session.user.id}) attempted to upload an invalid file of type ${mimetype}.`,
@@ -194,6 +122,95 @@ module.exports = class FileController {
             relations: {}
         })
     }
+
+    /**
+     * POST /upload/video
+     *
+     * Allows the user to upload a video, which can then be used by other
+     * entities.
+     *
+     * @param {Object} request  Standard Express request object.
+     * @param {Object} request.file The file information, defined by multer.
+     * @param {Object} response Standard Express response object.
+     *
+     * @returns {Promise}   Resolves to void.
+     */
+    async uploadVideo(request, response) {
+        const logger = request.logger ? request.logger : this.core.logger
+
+        const currentPath = request.file.path
+
+        logger.info(`Processing video upload: ${currentPath}`)
+
+        const currentUser = request.session.user 
+
+        if ( ! currentUser ) {
+            this.fileService.removeLocalFile(currentPath)
+            throw new ControllerError(403, 'not-authorized', `Must have a logged in user to upload a file.`)
+        }
+
+        /**********************************************************************
+         * Validation
+         **********************************************************************/
+
+        const mimetype = request.file.mimetype 
+        if ( ! VideoService.SUPPORTED_MIMETYPES.includes(mimetype) ) {
+            this.fileService.removeLocalFile(currentPath)
+            throw new ControllerError(400, 'invalid-type',
+                `User(${request.session.user.id}) attempted to upload an invalid video file of type ${mimetype}.`,
+                `Unsupported video type.  Supported types are: ${VideoService.SUPPORTED_TYPES.join(',')}`)
+        }
+
+        const fileExtension = path.extname(request.file.originalname).toLowerCase()
+        if ( ! VideoService.SUPPORTED_EXTENSIONS.includes(fileExtension) ) {
+            this.fileService.removeLocalFile(currentPath)
+            throw new ControllerError(400, 'invalid-type',
+                `User(${request.session.user.id}) attempted to upload an invalid video file of type ${mimetype}.`,
+                `Unsupported video extension.  Supported extensions are: ${VideoService.SUPPORTED_EXTENSIONS.join(',')}`)
+        }
+
+        /**********************************************************************
+         * Permissions and Validation checks complete.
+         *      Upload the file.
+         **********************************************************************/
+
+        const id = uuidv4()
+        const filepath = `files/${id}.original.${mime.getExtension(mimetype)}`
+
+        await this.fileService.uploadFile(currentPath, filepath)
+
+        const file = {
+            id: id,
+            userId: request.session.user.id,
+            type: mimetype,
+            location: this.config.s3.bucket_url,
+            filepath: filepath
+        }
+
+        await this.fileDAO.insertFile(file)
+
+        const files = await this.fileDAO.selectFiles('WHERE files.id = $1', [ id ])
+        if ( files.length <= 0) {
+            this.fileService.removeLocalFile(currentPath)
+            throw new ControllerError(500, 'insertion-failure', `Failed to select newly inserted file ${id}.`)
+        }
+
+        this.fileService.removeLocalFile(currentPath)
+
+        const job = await this.core.queue.add('reformat-video', { session: { user: currentUser }, file: file })
+
+        const jobs = {}
+        jobs[jobs.id] = job
+
+        response.status(200).json({
+            entity: files[0],
+            relations: {
+                jobs: jobs 
+            }
+        })
+
+    }
+
 
     /**
      * GET /file/:id/src

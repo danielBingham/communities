@@ -60,9 +60,11 @@ const createVideoUploadMiddleware = function() {
 
 const createImageUploadMiddleware = function() {
     return new multer({
-        storage,
+        storage: storage,
         fileFilter: (request, file, callback) => {
             const fileExtension = path.extname(file.originalname).toLowerCase()
+            console.log(`mime: `, ImageService.SUPPORTED_MIMETYPES)
+            console.log(`extensions: `, ImageService.SUPPORTED_EXTENSIONS)
             if ( ImageService.SUPPORTED_MIMETYPES.includes(file.mimetype) && ImageService.SUPPORTED_EXTENSIONS.includes(fileExtension) ) {
                 callback(null, true)
             } else {
