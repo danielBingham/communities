@@ -1,45 +1,38 @@
-import { useState } from 'react'
-import { useSelector } from 'react-redux'
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media 
+ *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
 
-import Spinner from '/components/Spinner'
+const HtmlImage = function({ src, ref, onLoad }) {
 
-const HtmlImage = function({ id, src, width, ref, onLoad }) {
-    const [isLoading, setIsLoading] = useState(true)
-    const api = useSelector((state) => state.system.api)
-
-    const onLoadInternal = function(event) {
-        setIsLoading(false)  
-
-        if ( onLoad ) {
-            onLoad(event)
-        }
-    }
-
-    if ( ! id && ! src) {
-        console.error(new Error(`One of 'props.src' or 'props.id' is required!`))
+    if ( ! src) {
+        console.error(new Error(`'src' is required.`))
         return null
     }
 
-    let url = ''
-    if ( src !== undefined && src !== null ) {
-        url = src
-    } else if ( id !== undefined && id !== null ) {
-        url = `${api}/file/${id}/source`
-    }
-
-    const style = isLoading ? { position: 'absolute', top: '-10000px', left: '-10000px' } : {}
-    const widthSelector = width ? `?width=${width}` : ''
     return (
         <div>
             <img 
                 ref={ref}
-                onLoad={onLoadInternal} 
-                style={style}
-                src={`${url}${widthSelector}`} 
+                src={src} 
+                onLoad={onLoad}
+                crossOrigin="anonymous"
             />
-            { isLoading && <div className="image__loading">
-                <Spinner /> 
-            </div> }
         </div>
     )
 }

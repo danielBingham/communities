@@ -276,6 +276,7 @@ const GroupForm = function({ parentId }) {
                     { ! fileId && <FileUploadInput 
                         fileId={fileId}
                         setFileId={setFileId} 
+                        type="image"
                         types={[ 'image/jpeg', 'image/png' ]} 
                     /> }
                 </div>

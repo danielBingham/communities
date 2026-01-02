@@ -188,6 +188,7 @@ const GroupEditForm = function({ groupId }) {
                     { ! fileId && <FileUploadInput 
                         fileId={fileId}
                         setFileId={setFileId} 
+                        type="image"
                         types={[ 'image/jpeg', 'image/png' ]} 
                     /> }
                 </div>

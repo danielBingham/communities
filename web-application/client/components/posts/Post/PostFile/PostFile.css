@@ -1,18 +1,13 @@
-.post-image {
+.post-file {
     width: 100%;
     margin: 0;
     padding: 5px 0 0 0;
 }
-.post-image img {
+.post-file img {
     display: block;
     width: 100%;
 }
-.post-video {
-    width: 100%;
-    margin: 0;
-    padding: 5px 0 0 0;
-}
-.post-video video {
+.post-file video {
     display: block;
     width: 100%;
 }

@@ -191,7 +191,7 @@ module.exports = class PostController {
         })
 
         const relations = {
-            files: fileDictionary,
+         //   files: fileDictionary,
             groups: groupResults.dictionary,
             groupMembers: groupMemberResults.dictionary,
             groupModerations: groupModerationResults.dictionary,

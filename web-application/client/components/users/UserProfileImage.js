@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 
 import { UserCircleIcon } from '@heroicons/react/24/solid'
 
+import File from '/components/files/File'
 import Image from '/components/ui/Image'
 
 import './UserProfileImage.css'
@@ -41,12 +42,12 @@ const UserProfileImage = function({ userId, className, noLink, width }) {
     if ( user && user.fileId ) {
         if ( noLink === true ) {
             content = (
-                <Image id={user.fileId} width={200} fallbackIcon={'UserCircle'} />
+                <File id={user.fileId} width={200} type="image" fallback={'UserCircle'} />
             )
 
         } else {
             content = (
-                <Link to={`/${user.username}`}><Image id={user.fileId} width={200} fallbackIcon={'UserCircle'} /></Link>
+                <Link to={`/${user.username}`}><File id={user.fileId} width={200} type="image" fallback={'UserCircle'} /></Link>
             )
         }
     } 

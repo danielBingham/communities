@@ -5,6 +5,7 @@ import logger from '/logger'
 
 import { useLinkPreview } from '/lib/hooks/LinkPreview'
 
+import File from '/components/files/File'
 import Image from '/components/ui/Image'
 import Spinner from '/components/Spinner'
 
@@ -63,7 +64,7 @@ const LinkPreview = function({ id }) {
     return (
         <div className="link-preview">
             <a target="_blank" href={linkPreview.url}>
-                { linkPreview.fileId !== null && <Image id={linkPreview.fileId} width={650} /> }
+                { linkPreview.fileId !== null && <File id={linkPreview.fileId} width={650} type="image" /> }
                 { linkPreview.fileId === null && <Image src={linkPreview.imageUrl} /> }
                 <div className="link-preview__details">
                     <div className="link-preview__site">{linkPreview.siteName}</div>

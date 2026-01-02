@@ -1,2 +1,2 @@
-export { default, setFilesInDictionary, removeFile, resetFileSlice, touchCache } from './slice'
-export { uploadImage, uploadVideo, uploadFile, getFile, patchFile, deleteFile, loadFile, cleanFileCache } from './thunks'
+export { default, setFilesInDictionary, removeFile, resetFileSlice } from './slice'
+export { uploadImage, uploadVideo, getFile, getFileSource, patchFile, deleteFile } from './thunks'

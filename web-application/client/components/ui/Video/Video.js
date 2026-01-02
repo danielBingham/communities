@@ -17,18 +17,27 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import FetchVideo from './FetchVideo/FetchVideo'
-import HtmlVideo from './HtmlVideo/HtmlVideo'
-
 import './Video.css'
 
-const Video = function({ id, src, altText, fallbackIcon, width, ref, onLoad }) {
+const Video = function({ className, src, altText, ref, onLoad, onError }) {
 
-    /*if ( id ) {
-        return ( <FetchVideo id={id}  width={width} ref={ref} onLoad={onLoad} fallbackIcon={fallbackIcon} /> )
-    } else if ( src ) {*/
-    return ( <HtmlVideo id={id} src={src} width={width} ref={ref} onLoad={onLoad} fallbackIcon={fallbackIcon} /> )
-    //}
+    if ( ! src) {
+        console.error(new Error(`'src' is required!`))
+        return null
+    }
+
+    return (
+        <video
+            ref={ref}
+            className={`video ${className ? className : ''}`}
+            preload="metadata"
+            src={src} 
+            onLoad={onLoad}
+            onError={onError}
+            controls
+            crossOrigin="anonymous"
+        />
+    )
 }
 
 export default Video 

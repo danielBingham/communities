@@ -231,7 +231,7 @@ module.exports = class FileController {
         }
 
         const id = request.params.id
-        const width = request.query?.width
+        let width = request.query?.width
 
         const files = await this.fileDAO.selectFiles('WHERE files.id = $1', [ id ])
         if ( files.length <= 0) {
@@ -242,16 +242,22 @@ module.exports = class FileController {
         let path = file.filepath
         if (  width ) {
             path = `files/${id}.${width}.${mime.getExtension(file.type)}`
-            const hasFile = await this.fileService.hasFile(path)
-            if ( ! hasFile ) {
-                request.logger.warn(`Missing width "${width}" for File(${id}).`)
-                path = file.filepath
-            }
+        }
+
+        const hasFile = await this.fileService.hasFile(path)
+        if ( ! hasFile ) {
+            throw new ControllerError(404, 'not-found', `Failed to find file ${id}.`)
         }
 
         const url = await this.fileService.getSignedUrl(path)
 
-        response.redirect(302, url)
+        return response.status(200).json({
+            entity: file,
+            sources: {
+                [width]: url
+            },
+            relations: {}
+        })
     }
 
     /**
@@ -280,8 +286,16 @@ module.exports = class FileController {
         if ( files.length <= 0) {
             throw new ControllerError(404, 'not-found', `Failed to find file ${id}.`)
         }
+
+        const file = files[0]
+
+        const url = await this.fileService.getSignedUrl(file.filepath)
+
         return response.status(200).json({
-            entity: files[0],
+            entity: file,
+            sources: {
+                ['full']: url
+            },
             relations: {}
         })
     }
@@ -377,8 +391,13 @@ module.exports = class FileController {
 
         await this.core.queue.add('resize-image', { session: { user: currentUser }, file: file })
 
-        response.status(200).json({
+        const url = await this.fileService.getSignedUrl(file.filepath)
+
+        return response.status(200).json({
             entity: file,
+            sources: {
+                ['full']: url
+            },
             relations: {}
         })
     }

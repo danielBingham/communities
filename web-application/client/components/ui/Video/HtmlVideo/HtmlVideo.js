@@ -40,6 +40,7 @@ const HtmlVideo = function({ id, src, width, ref, onLoad }) {
             preload="metadata"
             src={`${url}`} 
             controls
+            crossOrigin="anonymous"
         />
     )
 }

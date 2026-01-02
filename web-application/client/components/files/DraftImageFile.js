@@ -22,7 +22,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 import { deleteFile } from '/state/File'
 import { XCircleIcon } from '@heroicons/react/24/solid'
 
-import Image from '/components/ui/Image'
+import File from '/components/files/File'
 
 import "./DraftImageFile.css"
 
@@ -46,7 +46,7 @@ const DraftImageFile = function({ fileId, setFileId, width, deleteOnRemove }) {
         content = (
             <div className="file">
                 <a className="remove" href="" onClick={(e) => { e.preventDefault(); remove() }}><XCircleIcon /></a>
-                <Image id={fileId} width={renderWidth}  />
+                <File id={fileId} width={renderWidth} type="image"  />
             </div>
         )
     }

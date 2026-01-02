@@ -21,17 +21,13 @@
 import { usePost } from '/lib/hooks/Post'
 import { useFile } from '/lib/hooks/File'
 
-import Image from '/components/ui/Image'
-import Video from '/components/ui/Video'
+import File from '/components/files/File'
 
 import './PostFile.css'
 
 const PostFile = function({ id, className }) {
     
     const [post, request] = usePost(id) 
-    const [file, fileRequest] = useFile(post?.fileId)
-
-    console.log(`File: `, file)
 
     if ( post === null || post === undefined ) {
         return null
@@ -41,19 +37,12 @@ const PostFile = function({ id, className }) {
         return null
     }
 
-    if ( file.type.split('/')[0] === 'video' ) {
-        return (
-            <div className={ className ? `post-video ${className}` : "post-video"}>
-                <Video id={post.fileId} />
-            </div>
-        )
-    } else {
-        return (
-            <div className={ className ? `post-image ${className}` : "post-image"}>
-                <Image id={post.fileId} width={650} fallbackIcon={'Photo'} />
-            </div>
-        )
-    }
+
+    return (
+        <div className={`post-file ${className ? className : ''}`}>
+            <File id={post.fileId} width={650} />
+        </div>
+    )
 }
 
 export default PostFile

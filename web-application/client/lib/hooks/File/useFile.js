@@ -20,12 +20,24 @@
 import { useEffect } from 'react'
 import { useSelector } from 'react-redux'
 
+import logger from '/logger'
+
 import { useRequest } from '/lib/hooks/useRequest'
 
 import { getFile } from '/state/File'
 
 export const useFile = function(fileId) {
-    const file = useSelector((state) => fileId && fileId in state.File.dictionary ? state.File.dictionary[fileId] : null)
+    const file = useSelector((state) => {
+        if ( fileId === undefined || fileId === null ) {
+            return null
+        }
+
+        if ( ! ( fileId in state.File.dictionary ) ) {
+            return undefined
+        }
+
+        return state.File.dictionary[fileId]
+    })
 
     const [request, makeRequest, resetRequest ] = useRequest()
 
@@ -34,7 +46,14 @@ export const useFile = function(fileId) {
     }
 
     useEffect(() => {
-        if ( fileId && file === null && request === null ) {
+        if ( fileId !== undefined && fileId !== null && file === undefined && request?.state !== 'pending') {
+            // If the failure is unknown or frontend-error, then we're in potential loop territory.  
+            if ( request?.state === 'failed' 
+                && (request?.error?.type === 'unknown' || request?.error?.type === 'frontend-error' ) )
+            {
+                logger.error(new Error(`Aborting request due to error.`))
+                return
+            }
             makeRequest(getFile(fileId))
         }
     }, [ fileId, file, request ])
