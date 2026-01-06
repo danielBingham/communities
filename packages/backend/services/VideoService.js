@@ -98,6 +98,23 @@ module.exports = class VideoService {
             this.core.logger.info(`Uploading the newly formatted file...`)
             await this.fileService.uploadFile(localNewFile, targetPath)
 
+            const thumbnailLocalFile = `tmp/${file.id}.thumb.jpg`
+            const thumbnailPath = `files/${file.id}.thumb.jpg`
+
+            const ffmpegThumbnailArgs = [
+                '-ss', timestamp, // Seek before input for accuracy
+                '-i', localOriginalFile,
+                '-vframes', '1', // Extract exactly one frame
+                '-q:v', '2', // Output quality (JPEG quality, 1-31, lower is better)
+                '-f', 'image2', // Force image2 format
+               thumbnailLocalFile 
+            ]
+            this.core.logger.info(`Generating thumbnail...`)
+            await this.processService.run('ffmpeg', ffmpegThumbnailArgs)
+
+            this.core.logger.info(`Uploading the thumbnail...`)
+            await this.fileService.uploadFile(thumbnailLocalFile, thumbnailPath)
+
             // Update File in the database with the new filename and mimetype
             const filePatch = {
                 id: file.id,

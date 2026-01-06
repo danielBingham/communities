@@ -80,7 +80,6 @@ export const uploadVideo = function(file) {
 
 export const getFileSource = function(fileId, width) {
     return function(dispatch, getState) {
-        console.log(`== getFileSource(${fileId}, ${width})`)
         let path = `/file/${encodeURIComponent(fileId)}/source`
         if ( width !== null && width !== undefined ) {
             path += `?width=${encodeURIComponent(width)}`
@@ -88,18 +87,13 @@ export const getFileSource = function(fileId, width) {
 
         return dispatch(makeRequest('GET', path, null,
             function(response) {
-                console.log(`== getFileSource(${fileId}, ${width}):: SUCCESS`, 
-                    `\nresponse: `, response)
                 let actualWidth = width || 'full'
                 dispatch(setFilesInDictionary({ entity: response.entity}))
-                dispatch(setSource({ fileId: fileId, width: width, url: response.sources[width] }))
+                dispatch(setSource({ fileId: fileId, width: actualWidth, url: response.sources[width] }))
 
                 dispatch(setRelationsInState(response.relations))
             }, 
             function(status, response) {
-                console.log(`== getFileSource(${fileId}, ${width})::  FAILURE`, 
-                    `\nstatus: `, status,
-                    `\nresponse: `, response)
                 let actualWidth = width || 'full'
                 if ( status === 404 || status === 403 || status === 429 ) {
                     dispatch(setSource({ fileId: fileId, width: actualWidth, url: null }))

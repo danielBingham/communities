@@ -134,7 +134,7 @@ module.exports = class S3FileService {
         }
 
         const command = new GetObjectCommand(params)
-        return getSignedUrl(this.s3Client, command, { expiresIn: 60*60*24 })
+        return getSignedUrl(this.s3Client, command, { expiresIn: 60*60*24*7 })
     }
 
 

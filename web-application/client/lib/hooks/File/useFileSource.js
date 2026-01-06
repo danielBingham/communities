@@ -27,11 +27,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 import { getFileSource } from '/state/File'
 
 export const useFileSource = function(fileId, width) {
-    console.log(`== useFileSource(${fileId}, ${width})`)
     const url = useSelector((state) => {
-        console.log(`== useFileSource(${fileId}, ${width})::`,
-            `\ndictionary: `, state.File.dictionary,
-            `\nsources: `, state.File.sources)
         // If we don't have a fileId, then we don't want to query a source.
         //
         // We don't have to worry about width, because if we don't have one
@@ -85,7 +81,11 @@ export const useFileSource = function(fileId, width) {
     const [request, makeRequest, resetRequest ] = useRequest()
 
     const refresh = function() {
-        makeRequest(getFileSource(fileId, width))
+        if ( request?.state === 'fulfilled' ) {
+            makeRequest(getFileSource(fileId, width))
+        } else if ( request?.state === 'failed' ) {
+            makeRequest(getFileSource(fileId))
+        }
     }
 
     useEffect(() => {

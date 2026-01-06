@@ -31,11 +31,18 @@ import Spinner from '/components/Spinner'
 
 const File = function({ id, width, type, fallback, className, onLoad, onError, ref }) {
     const [file, fileRequest] = useFile(id)
-    const [url, sourceRequest] = useFileSource(id, width)
+    const [url, sourceRequest, refreshFileSource] = useFileSource(id, width)
 
-    console.log(`## File(${id}, ${width}):: `,
-        `\nFile: `, file, 
-        `\nUrl: `, url)
+    const onErrorInternal = function(event) {
+        if ( 'error' in event.target && event.target.error.code === 2 ) {
+            refreshFileSource()
+        }
+
+        if ( onError !== undefined && onError !== null ) {
+            onError(event)
+        }
+    }
+
     if ( file === undefined || url === undefined) {
         return ( <Spinner /> )
     }
@@ -58,10 +65,10 @@ const File = function({ id, width, type, fallback, className, onLoad, onError, r
     }
 
     if ( filetype === 'video' ) {
-        return ( <Video className={`file ${className ? className : ''}`} src={url} onLoad={onLoad} onError={onError} ref={ref} />)
+        return ( <Video className={`file ${className ? className : ''}`} src={`${url}#t=0.1`} onLoad={onLoad} onError={onErrorInternal} ref={ref} />)
     }
 
-    return ( <Image className={`file ${className ? className : ''}`} src={url} onLoad={onLoad} onError={onError} ref={ref} /> )
+    return ( <Image className={`file ${className ? className : ''}`} src={url} onLoad={onLoad} onError={onErrorInternal} ref={ref} /> )
 }
 
 export default File
