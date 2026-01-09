@@ -116,6 +116,26 @@ module.exports = class FileSchema extends Schema {
                     return errors
                 }
             }, 
+            location: {
+                clean: (value) => { return stringCleaner(value) },
+                validate: (value, existing, action) => {
+                    const validator = new StringValidator('location', value, existing, action)
+                    const errors = validator
+                        .mustNotBeSet()
+                        .getErrors()
+                    return errors
+                }
+            }, 
+            filepath: {
+                clean: (value) => { return stringCleaner(value) },
+                validate: (value, existing, action) => {
+                    const validator = new StringValidator('filepath', value, existing, action)
+                    const errors = validator
+                        .mustNotBeSet()
+                        .getErrors()
+                    return errors
+                }
+            }, 
             createdDate: {
                 clean: (value) => { return value },
                 validate: (value, existing, action) => {

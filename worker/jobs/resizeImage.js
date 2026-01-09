@@ -22,7 +22,7 @@ const { ImageService, FileDAO } = require('@communities/backend')
 const getResizeImageJob = function(core) {
     return async function(job, done) {
         core.logger.id = `Image resize: ${job.id}`
-        core.logger.info(`Beginning job 'resize-image' for user ${job.data.session.user.id} and file ${job.data.file.id}.`)
+        core.logger.info(`Beginning job 'resize-image' for user ${job.data.session.user.id} and file ${job.data.fileId}.`)
 
         try {
 
@@ -38,6 +38,8 @@ const getResizeImageJob = function(core) {
                 job.progress({ step: 'resizing', stepDescription: `Resizing...`, progress: progress })
             }
 
+            const fileDAO = new FileDAO(core)
+            await fileDAO.updateFile({ id: job.data.fileId, state: 'ready' })
 
             job.progress({ step: 'complete', stepDescription: `Complete!`, progress: 100 })
 

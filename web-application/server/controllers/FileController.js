@@ -22,7 +22,7 @@ const path = require('node:path')
 const mime = require('mime')
 const { v4: uuidv4 } = require('uuid')
 
-const { FileService, ImageService, VideoService, LocalFileService, S3FileService, FileDAO } = require('@communities/backend')
+const { FileService, ImageService, VideoService, LocalFileService, S3FileService, ValidationService, FileDAO } = require('@communities/backend')
 
 const { schema } = require('@communities/shared')
 
@@ -46,6 +46,8 @@ module.exports = class FileController {
 
         this.videoService = new VideoService(core)
         this.imageService = new ImageService(core)
+
+        this.validationService = new ValidationService(core)
 
         this.schema = new schema.FileSchema()
     }
@@ -280,14 +282,21 @@ module.exports = class FileController {
      * @returns {Promise}   Resolves to void.
      */
     async postFiles(request, response) {
-        const file = this.schema.clean(request.body)
-
         const currentUser = request.session.user
         if ( ! currentUser ) {
             throw new ControllerError(401, 'not-authenticated',
                 `User must be authenticated to view a file.`,
                 `You must be authenticated to view a file.`)
         }
+
+        const file = this.schema.clean(request.body)
+        console.log(`file: `, file)
+        if ( file === undefined || file === null ) {
+            throw new ControllerError(400, 'invalid',
+                `File must be provided.`,
+                `File must be provided.`)
+        }
+
 
         // Users may only upload their own files.  They may not upload the file
         // of another user.
@@ -297,7 +306,8 @@ module.exports = class FileController {
                 `You may not create a file for another user.`)
         }
 
-        const validationErrors = this.validationService.validateFile(file)
+        console.log(`File: `, file)
+        const validationErrors = this.validationService.validateFile(currentUser, file)
         if ( validationErrors.length > 0 ) {
             const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
             const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')

@@ -38,7 +38,7 @@ module.exports = class Issue67VideoUploadsMigration extends BaseMigration {
         await this.core.database.query(`CREATE TYPE supported_file_types as ENUM('image', 'video')`, [])
 
         await this.core.database.query(`ALTER TABLE files ADD COLUMN IF NOT EXISTS state file_state DEFAULT 'pending'`, [])
-        await this.core.database.query(`ALTER TABLE files ADD COLUMN IF NOT EXISTS job_id uuid DEFAULT NULL`, [])
+        await this.core.database.query(`ALTER TABLE files ADD COLUMN IF NOT EXISTS job_id int DEFAULT NULL`, [])
         await this.core.database.query(`ALTER TABLE files ADD COLUMN IF NOT EXISTS variants text[]`, [])
 
         await this.core.database.query(`ALTER TABLE files ADD COLUMN IF NOT EXISTS kind supported_file_types`, [])
@@ -55,7 +55,6 @@ module.exports = class Issue67VideoUploadsMigration extends BaseMigration {
 
         await this.core.database.query(`DROP TYPE IF EXISTS supported_file_types`, [])
         await this.core.database.query(`DROP TYPE IF EXISTS file_state`, [])
-
     }
 
     async migrateForward(targets) { 
@@ -65,6 +64,11 @@ module.exports = class Issue67VideoUploadsMigration extends BaseMigration {
         for(const fileId of results.list) {
             const file = results.dictionary[fileId]
             this.core.logger.info(`Processing file: `, file.id)
+
+            if ( file.filepath === null ) {
+                this.core.logger.info(`File(${file.id}) appears invalid: `, file)
+                continue
+            }
 
             const isPreview = file.filepath.split('/')[0] === 'previews'
             if ( isPreview === true ) {

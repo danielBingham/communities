@@ -169,7 +169,7 @@ CREATE TABLE files (
     user_id uuid REFERENCES users(id) ON DELETE CASCADE,
 
     state file_state DEFAULT 'pending',
-    job_id uuid DEFAULT NULL,
+    job_id int DEFAULT NULL,
     variants text[],
 
     kind supported_file_types,

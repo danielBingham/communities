@@ -119,14 +119,20 @@ module.exports = function(core) {
     const FileController = require('./controllers/FileController')
     const fileController = new FileController(core)
 
-    router.post('/upload/image', rateLimit(core, 30), createImageUploadMiddleware(), function(request, response, next) {
+    router.post('/upload/:id/image', rateLimit(core, 30), createImageUploadMiddleware(), function(request, response, next) {
         fileController.uploadImage(request, response).catch(function(error) {
             next(error)
         })
     })
 
-    router.post('/upload/video', rateLimit(core, 30), createVideoUploadMiddleware(), function(request, response, next) {
+    router.post('/upload/:id/video', rateLimit(core, 30), createVideoUploadMiddleware(), function(request, response, next) {
         fileController.uploadVideo(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.post('/files', rateLimit(core, 30), function(request, response, next) {
+        fileController.postFiles(request, response).catch(function(error) {
             next(error)
         })
     })

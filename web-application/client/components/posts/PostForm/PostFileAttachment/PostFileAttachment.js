@@ -53,6 +53,11 @@ const PostFileAttachment = function({ postId, groupId, sharedPostId }) {
         return null
     }
 
+    // This is a pending or processing file, not a ready one.
+    if ( file.state !== 'ready' || file.filepath === '' ) {
+        return null
+    }
+
     const type = file.type.split('/')[0]
     let content = (<DraftImageFile fileId={draft.fileId} setFileId={setFileId} width={650} deleteOnRemove={ ! post || post.fileId != draft.fileId } />)
     if ( type === 'video' ) {

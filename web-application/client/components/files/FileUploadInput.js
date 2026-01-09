@@ -18,12 +18,15 @@
  *
  ******************************************************************************/
 import { useState, useEffect, useRef } from 'react'
+import { useSelector } from 'react-redux'
 
 import {  PhotoIcon, VideoCameraIcon } from '@heroicons/react/24/solid'
 
-import { uploadImage, uploadVideo } from '/state/File'
+import { uploadImage, uploadVideo, postFiles } from '/state/File'
 
 import { useRequest } from '/lib/hooks/useRequest'
+import { useFeature } from '/lib/hooks/feature'
+import { useFile } from '/lib/hooks/File'
 
 import { RequestErrorModal } from '/components/errors/RequestError'
 import Spinner from '/components/Spinner'
@@ -36,74 +39,101 @@ import './FileUploadInput.css'
  * chosen, that file is left hanging in the database and on disk.  It's
  * effectively orphaned.  We should fix that.
  */
-const FileUploadInput = function(props) {
-    // ============ Render State ====================================
+const FileUploadInput = function({ text, fileId, setFileId, type, types, onChange }) {
+    const currentUser = useSelector((state) => state.authentication.currentUser)
+    const [file] = useFile(fileId)
+
     const [ typeError, setTypeError ] = useState(null)
+    const [uploadedFile, setUploadedFile] = useState(null)
+    
+    const hasVideoUploads = useFeature('issue-67-video-uploads')
 
     const hiddenFileInput = useRef(null)
 
-    // ============ Request Tracking ================================
-
+    const [postRequest, makePostRequest] = useRequest()
     const [uploadRequest, makeUploadRequest] = useRequest()
-
-    // ============ Actions and Event Handling ======================
-    //
-    //
     
-    const onChange = function(event) {
+    const onChangeInternal = function(event) {
         const uploadedFileData = event.target.files[0]
-        if ( ! props.types.includes(uploadedFileData.type) ) {
+        if ( ! types.includes(uploadedFileData.type) ) {
             setTypeError('invalid-type')
             return
         }
 
-        if ( props.type === 'image' ) {
-            makeUploadRequest(uploadImage(uploadedFileData))
-        } else if ( props.type === 'video' ) {
-            makeUploadRequest(uploadVideo(uploadedFileData))
-        } else {
-            throw new Error(`Invalid file type: ${props.type}.`)
+        setUploadedFile(uploadedFileData)
+
+        const newFile = {
+            userId: currentUser.id,
+            type: uploadedFileData.type
         }
+
+        if ( hasVideoUploads === true ) {
+            newFile.kind = type
+            newFile.state = 'pending'
+            newFile.mimetype = uploadedFileData.type
+        }
+
+        makePostRequest(postFiles(newFile))
     }
 
-    // ============ Effect Handling ==================================
-
     useEffect(function() {
-        if ( uploadRequest && uploadRequest.state == 'fulfilled') {
-            const uploadedFile = uploadRequest.response.body.entity
+        if ( postRequest?.state === 'fulfilled' ) {
+            const createdFile = postRequest.response.body.entity
+            setFileId(createdFile.id)
 
-            props.setFileId(uploadedFile.id)
+            if ( type === 'image' ) {
+                makeUploadRequest(uploadImage(createdFile.id, uploadedFile))
+            } else if ( type === 'video' ) {
+                makeUploadRequest(uploadVideo(createdFile.id, uploadedFile))
+            } 
 
-            if ( props.onChange ) {
-                props.onChange(uploadedFile.id)
+            if ( onChange ) {
+                onChange(uploadedFile.id)
             }
         }
-    }, [ uploadRequest ])
+    }, [ postRequest ])
 
     // ============ Render ==========================================
-    //
+
+    if ( type !== 'image' && type !== 'video' ) {
+        throw new Error(`Invalid FileUpload type, '${type}'.`)
+    }
+
+    console.log(`File: `, file, 
+        `\npostRequest: `, postRequest,
+        `\nuploadRequest: `, uploadRequest)
     let content = null
+    // Spinner while we create the file.
+    if ( postRequest?.state === 'pending' ) {
+        content = ( <><Spinner local={true} /> <span>Preparing the upload...</span></> )
+    } 
+    else if ( postRequest?.state === 'fulfilled' && ! uploadRequest )  {
+        content = ( <><Spinner local={true} /> <span>Upload prepared. Upload will begin shortly...</span></> )
+    }
     // Spinner while we wait for requests to process so that we can't start a new request on top of an existing one.
-    if ( uploadRequest && uploadRequest.state == 'pending' ) {
+    else if ( uploadRequest?.state == 'pending' ) {
         content = ( <><Spinner local={true} /> <span>Uploading.  This might take a while...</span></> )
+    }
+    else if ( file?.state === 'processing' ) {
+        content = ( <><Spinner local={true} /> <span>Processing.  This might take a while...</span></> )
     } else { 
         let typeErrorView = null
         if ( typeError ) {
-            typeErrorView = ( <div className="error">Invalid-type selected.  Supported types are: { props.types.join(',') }.</div> )
+            typeErrorView = ( <div className="error">Invalid-type selected.  Supported types are: { types.join(',') }.</div> )
         }
    
         let icon = ( <PhotoIcon /> )
-        if ( props.type === 'video' ) {
+        if ( type === 'video' ) {
             icon = ( <VideoCameraIcon /> )
         }
 
         content = (
             <div className="upload-input">
-                <Button type="primary" onClick={(e) => hiddenFileInput.current.click()}>{ icon } <span className="file-upload-button-text"> { props.text ? props.text : 'Upload Image' }</span></Button>
+                <Button type="primary" onClick={(e) => hiddenFileInput.current.click()}>{ icon } <span className="file-upload-button-text"> { text ? text : 'Upload Image' }</span></Button>
                 <input type="file"
                     name="file"
-                    accept={props.types.join(',')}
-                    onChange={onChange} 
+                    accept={types.join(',')}
+                    onChange={onChangeInternal} 
                     style={{ display: 'none' }}
                     ref={hiddenFileInput}
                 />
@@ -116,7 +146,6 @@ const FileUploadInput = function(props) {
     return (
         <div className="file-upload">
             { content }
-            { props.error && <div className="error">{ props.error }</div> }
             <RequestErrorModal message="Attempt to upload file" request={uploadRequest} />
         </div>
     )
