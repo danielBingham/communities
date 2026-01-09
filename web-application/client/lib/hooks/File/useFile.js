@@ -26,7 +26,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 
 import { getFile } from '/state/File'
 
-export const useFile = function(fileId) {
+export const useFile = function(fileId, variant) {
     const file = useSelector((state) => {
         if ( fileId === undefined || fileId === null ) {
             return null
@@ -42,19 +42,14 @@ export const useFile = function(fileId) {
     const [request, makeRequest, resetRequest ] = useRequest()
 
     const refresh = function() {
-        makeRequest(getFile(fileId))
+        makeRequest(getFile(fileId, variant))
     }
 
     useEffect(() => {
-        if ( fileId !== undefined && fileId !== null && file === undefined && request?.state !== 'pending') {
-            // If the failure is unknown or frontend-error, then we're in potential loop territory.  
-            if ( request?.state === 'failed' 
-                && (request?.error?.type === 'unknown' || request?.error?.type === 'frontend-error' ) )
-            {
-                logger.error(new Error(`Aborting request due to error.`))
-                return
-            }
-            makeRequest(getFile(fileId))
+        if ( fileId !== undefined && fileId !== null && file === undefined 
+            && ( request?.state !== 'pending' && request?.state !== 'failed' )) 
+        {
+            makeRequest(getFile(fileId, variant))
         }
     }, [ fileId, file, request ])
 

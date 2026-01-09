@@ -162,13 +162,22 @@ CREATE INDEX tokens__token ON tokens (token);
  * Files 
  *****************************************************************************/
 
+CREATE TYPE file_state as ENUM('pending', 'processing', 'error', 'ready');
+CREATE TYPE supported_file_types as ENUM('image', 'video');
 CREATE TABLE files (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id uuid REFERENCES users(id) ON DELETE CASCADE,
 
+    state file_state DEFAULT 'pending',
+    job_id uuid DEFAULT NULL,
+    variants text[],
+
+    kind supported_file_types,
+    mimetype text,
+    type text, /* Deprecated.  Use mimetype instead. */
+
     location text, /* This is the S3/Spaces bucket URL. */
     filepath text,
-    type text,
 
     created_date timestamptz,
     updated_date timestamptz

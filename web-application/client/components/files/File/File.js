@@ -17,7 +17,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import * as Icons from '@heroicons/react/24/solid'
+import { PhotoIcon, VideoCameraIcon } from '@heroicons/react/24/solid'
 
 import logger from '/logger'
 
@@ -28,13 +28,32 @@ import Video from '/components/ui/Video'
 
 import Spinner from '/components/Spinner'
 
+import './File.css'
 
 const File = function({ id, width, type, fallback, className, onLoad, onError, ref }) {
-    const [file, fileRequest] = useFile(id)
-    const [url, sourceRequest, refreshFileSource] = useFileSource(id, width)
+    const [file, fileRequest] = useFile(id, width)
+
+    // TECHDEBT HACK: Need to reference the id through the file to ensure that we retrieve the
+    // file first and only retrieve the source URL if we actually successfully
+    // retreive the file.
+    // 
+    // We should probably handle this better in useFileSource.  Right now
+    // there's a case, where you can generate an error by calling useFileSource
+    // without first calling the file.
+    const [url, sourceRequest, refreshFileSource] = useFileSource(file?.id, width)
+
+    // If we fail to load the requested variant URL, then fall back on the full URL.
+    const [rootUrl, rootRequest, refreshRoot] = useFileSource(url === null ? file?.id : null, 'full')
+
+    if ( type === 'video') {
+        console.log(`== File(${id}, ${width})::`,
+            `\nfile: `, file,
+            `\nurl: `, url)
+    }
 
     const onErrorInternal = function(event) {
         if ( 'error' in event.target && event.target.error.code === 2 ) {
+            console.log(`== File(${id}, ${width}, ${type}):: onErrorInternal() :: Loading failed.  Refreshing.`)
             refreshFileSource()
         }
 
@@ -43,16 +62,22 @@ const File = function({ id, width, type, fallback, className, onLoad, onError, r
         }
     }
 
-    if ( file === undefined || url === undefined) {
+    if ( file === undefined 
+        || ( url === undefined 
+            || (url === null && rootUrl === undefined)
+        )
+    ) {
         return ( <Spinner /> )
     }
 
-    if ( file === null || url === null ) {
-        if ( fallback !== undefined || fallback !== null ) {
-            if ( `${fallback}Icon` in Icons ) {
-                const FallbackIcon = Icons[`${fallback}Icon`]
-                return (<FallbackIcon className={`file ${ className ? className : ''}`} />)
-            }
+    if ( file === null ||  ( url === null && rootUrl === null ) ) {
+        if ( fallback === true ) {
+            return (
+                <div className="file__fallback">
+                    <div className="file__fallback__icon"> { type && type === 'video' ? <VideoCameraIcon /> : <PhotoIcon /> }</div>
+                    <p>Failed to load { type && type === 'video' ? 'video' : 'image' }.  If the error persists while you have a good connection, please report as a bug!</p>
+                </div>
+            )
         }
 
         return null
@@ -64,11 +89,19 @@ const File = function({ id, width, type, fallback, className, onLoad, onError, r
         return null
     }
 
-    if ( filetype === 'video' ) {
-        return ( <Video className={`file ${className ? className : ''}`} src={`${url}#t=0.1`} onLoad={onLoad} onError={onErrorInternal} ref={ref} />)
-    }
+    if ( url !== null ) {
+        if ( filetype === 'video' ) {
+            return ( <Video className={`file ${className ? className : ''}`} src={`${url}#t=0.1`} onLoad={onLoad} onError={onErrorInternal} ref={ref} />)
+        }
 
-    return ( <Image className={`file ${className ? className : ''}`} src={url} onLoad={onLoad} onError={onErrorInternal} ref={ref} /> )
+        return ( <Image className={`file ${className ? className : ''}`} src={url} onLoad={onLoad} onError={onErrorInternal} ref={ref} /> )
+    } else if ( url === null && rootUrl !== null ) {
+        if ( filetype === 'video' ) {
+            return ( <Video className={`file ${className ? className : ''}`} src={`${rootUrl}#t=0.1`} onLoad={onLoad} onError={onErrorInternal} ref={ref} />)
+        }
+
+        return ( <Image className={`file ${className ? className : ''}`} src={rootUrl} onLoad={onLoad} onError={onErrorInternal} ref={ref} /> )
+    }
 }
 
 export default File

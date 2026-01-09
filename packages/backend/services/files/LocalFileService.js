@@ -17,32 +17,45 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
+const fs = require('fs')
 
-import { usePost } from '/lib/hooks/Post'
-import { useFile } from '/lib/hooks/File'
+module.exports = class LocalFileService {
 
-import File from '/components/files/File'
-
-import './PostFile.css'
-
-const PostFile = function({ id, className }) {
-    
-    const [post, request] = usePost(id) 
-
-    if ( post === null || post === undefined ) {
-        return null
+    constructor(core) {
+        this.base = '/public'
     }
 
-    if ( post.fileId === undefined || post.fileId === null ) {
-        return null
+    withBase(path) {
+        // public/...
+        if ( path.substring(0, this.base.length-1) == this.base.substring(1)) {
+            return process.cwd() + '/' + path
+        // We need to add /public to the front
+        } else if ( path.substring(0, this.base.length) !== this.base) { 
+            return process.cwd() + this.base + path
+        // /public, we don't need to do anything
+        } else {
+            return process.cwd() + path
+        }
     }
 
+    copyFile(currentPath, newPath) {
+        fs.copyFileSync(currentPath, newPath) 
+    }
 
-    return (
-        <div className={`post-file ${className ? className : ''}`}>
-            <File id={post.fileId} width={650} fallback={true} />
-        </div>
-    )
+    moveFile(currentPath, newPath) {
+        fs.copyFileSync(currentPath, newPath) 
+        fs.rmSync(currentPath)
+    }
+
+    fileExists(path) {
+        return fs.existsSync(path)
+    }
+
+    removeFile(path) {
+        fs.rmSync(path)
+    }
+
+    readFile(path) {
+        return fs.readFileSync(path)
+    }
 }
-
-export default PostFile

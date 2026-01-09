@@ -22,6 +22,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 import { deleteFile } from '/state/File'
 import { XCircleIcon } from '@heroicons/react/24/solid'
 
+import File from '/components/files/File'
 import Video from '/components/ui/Video'
 
 import "./DraftVideoFile.css"
@@ -46,7 +47,7 @@ const DraftVideoFile = function({ fileId, setFileId, width, deleteOnRemove }) {
         content = (
             <div className="file">
                 <a className="remove" href="" onClick={(e) => { e.preventDefault(); remove() }}><XCircleIcon /></a>
-                <Video id={fileId} width={renderWidth}  />
+                <File id={fileId} width={renderWidth} type="video"  />
             </div>
         )
     }

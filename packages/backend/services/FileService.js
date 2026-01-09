@@ -17,41 +17,82 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-const fs = require('fs')
+
+const mime = require('mime')
+
+const path = require('node:path')
+
+const S3FileService = require('./files/S3FileService')
 
 module.exports = class FileService {
 
     constructor(core) {
-        this.base = '/public'
+        this.core = core
+
+        this.s3 = new S3FileService(core)
+
+        // Default variants
+        this.defaultVariants = [ 30, 200, 325, 450, 650 ] 
     }
 
-    withBase(path) {
-        // public/...
-        if ( path.substring(0, this.base.length-1) == this.base.substring(1)) {
-            return process.cwd() + '/' + path
-        // We need to add /public to the front
-        } else if ( path.substring(0, this.base.length) !== this.base) { 
-            return process.cwd() + this.base + path
-        // /public, we don't need to do anything
+    /**
+     * Get the filename for a file, optional variant, and optional mimetype.
+     *
+     * @param {object} file     A File object.
+     * @param {string} variant  (Optional) A variant name.
+     * @param {string} mimetype (Optional) A mimetype.
+     */
+    getFilename(file, variant, mimetype) {
+        // Filenames are of the format:
+        //
+        // <id>.[variant.]<extension>
+        //
+        // Eg. <uuid>.200.jpg OR <uuid>.jpg
+        //
+        let segments = []
+        segments.push(file.id)
+
+        // The 'full' variant is the root file path, skip this segment in that case.
+        if ( variant !== undefined && variant !== null && variant !== 'full' ) {
+            segments.push(variant)
+        }
+
+        if ( mimetype === undefined || mimetype === null ) {
+            if ( this.core.features.has('issue-67-video-uploads') ) {
+                segments.push(mime.getExtension(file.mimetype))
+            } else {
+                segments.push(mime.getExtension(file.type))
+            }
         } else {
-            return process.cwd() + path
+            segments.push(mime.getExtension(mimetype))
+        }
+
+        return segments.join('.')
+    }
+
+    getPath(file, variant, mimetype) {
+        // For now all files live at the `files/` path.
+        return path.join('files/', this.getFilename(file, variant, mimetype))
+    }
+
+    async deleteVariants(file) {
+        if ( this.core.features.has('issue-67-video-uploads') ) {
+            for(const variant of file.variants) {
+                const filepath = this.getPath(file, variant) 
+                const hasFile = await this.s3.hasFile(filepath)
+                if ( hasFile ) {
+                    this.s3.removeFile(filepath)
+                }
+            }
+        } else {
+            for(const size of this.defaultVariants) {
+                const filepath = this.getPath(file, size) 
+                const hasFile = await this.s3.hasFile(filepath)
+                if ( hasFile ) {
+                    this.s3.removeFile(filepath)
+                }
+            }
         }
     }
 
-    copyFile(currentPath, newPath) {
-        fs.copyFileSync(this.withBase(currentPath), this.withBase(newPath)) 
-    }
-
-    moveFile(currentPath, newPath) {
-        fs.copyFileSync(this.withBase(currentPath), this.withBase(newPath)) 
-        fs.rmSync(this.withBase(currentPath))
-    }
-
-    removeFile(path) {
-        fs.rmSync(this.withBase(path))
-    }
-
-    readFile(path) {
-        return fs.readFileSync(this.withBase(path))
-    }
 }

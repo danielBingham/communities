@@ -1,5 +1,10 @@
 import { createSlice } from '@reduxjs/toolkit'
 
+import {
+    setInDictionary,
+    removeEntity
+} from '/state/lib/slice'
+
 import { makeRequest } from '/state/lib/makeRequest'
 
 export const jobsSlice = createSlice({
@@ -20,21 +25,8 @@ export const jobsSlice = createSlice({
          * @param {Object}  action.payload  The dictionary of jobs we got
          * from the backend.
          */ 
-        setDictionary: function(state, action) {
-            state.dictionary = action.payload
-        },
-
-        /**
-         * Set a single item in the dictionary.
-         *
-         * @param {Object}  state   The redux state slice.
-         * @param {Object}  action  The redux action.
-         * @param {Object}  action.payload  The job object to add to the
-         * dictionary, overriding any set on its `name` key.
-         */
-        setInDictionary: function(state, action) {
-            state.dictionary[action.payload.name] = action.payload
-        }
+        setJobsInDictionary: setInDictionary,
+        removeJob: removeEntity
     }
 
 })
@@ -54,7 +46,7 @@ export const getJobs = function() {
 
         return dispatch(makeRequest('GET', endpoint, null,
             function(responseBody) {
-                dispatch(jobsSlice.actions.setDictionary(responseBody))
+                dispatch(jobsSlice.actions.setJobsInDictionary(responseBody))
             }
         ))
     }
@@ -77,7 +69,7 @@ export const postJobs = function(name, data) {
 
         return dispatch(makeRequest('POST', endpoint, { name: name, data: data },
             function(responseBody) {
-                dispatch(jobsSlice.actions.setInDictionary(responseBody))
+                dispatch(jobsSlice.actions.setJobsInDictionary(responseBody))
             }
         ))
     }
@@ -101,10 +93,11 @@ export const getJob = function(id) {
 
         return dispatch(makeRequest('GET', endpoint, null,
             function(responseBody) {
-                dispatch(jobsSlice.actions.setInDictionary(responseBody))
+                dispatch(jobsSlice.actions.setJobsInDictionary(responseBody))
             }
         ))
     }
 }
 
+export const { setJobsInDictionary, removeJob } = jobsSlice.actions
 export default jobsSlice.reducer

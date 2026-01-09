@@ -19,6 +19,8 @@
  ******************************************************************************/
 import { createSlice } from '@reduxjs/toolkit'
 
+import logger from '/logger'
+
 import {
     setInDictionary,
     removeEntity,
@@ -86,18 +88,43 @@ export const FileSlice = createSlice({
 
         setSource: (state, action ) => {
             const fileId = action.payload.fileId
-            const width = action.payload.width
+            const variant = action.payload.variant
 
             if ( ! ( fileId in state.sources) ) {
                 state.sources[fileId] = {}
             }
 
+            // We failed to retrieve the file, but we're somehow trying to set a source on it.
+            // Log an error and bail out.
+            if ( state.sources[fileId] === null ) {
+                logger.error(`== File::setSource() :: Attempting to set a source on a null file.`)
+                return
+            }
+
             const url = action.payload.url
 
-            if ( width ) {
-                state.sources[fileId][width] = url
+            if ( variant ) {
+                state.sources[fileId][variant] = url
             } else {
                 state.sources[fileId]['full'] = url
+            }
+        },
+
+        setSources: (state, action) => {
+            const fileId = action.payload.fileId
+            if ( ! ( fileId in state.sources) ) {
+                state.sources[fileId] = {}
+            }
+
+            // We failed to retrieve the file, but we're somehow trying to set a source on it.
+            // Log an error and bail out.
+            if ( state.sources[fileId] === null ) {
+                logger.error(`== File::setSource() :: Attempting to set a source on a null file.`)
+                return
+            }
+
+            for(const [variant, source] of Object.entries(action.payload.sources)) {
+                state.sources[fileId][variant] = source
             }
         },
 
@@ -111,6 +138,6 @@ export const FileSlice = createSlice({
     }
 })
 
-export const {  setFilesInDictionary, removeFile, resetFileSlice, setSource, removeSource }  = FileSlice.actions
+export const {  setFilesInDictionary, removeFile, setFileNull, resetFileSlice, setSource, setSources, removeSource }  = FileSlice.actions
 
 export default FileSlice.reducer

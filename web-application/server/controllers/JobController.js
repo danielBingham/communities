@@ -130,32 +130,7 @@ module.exports = class JobController {
     }
 
     async postJob(request, response) {
-        const name = request.body.name
-
-        /**********************************************************************
-         * Permissions Checking and Input Validation
-         *
-         * Permissions:
-         *
-         * 1. User must be logged in.
-         *
-         * Validation:
-         *
-         * 1. body.name must be set and be a valid job.
-         * 
-         * ********************************************************************/
-       
-        // Permissions: 1. User must be logged in.
-        if ( ! request.session.user ) {
-            throw new ControllerError(401, 'not-authenticated', 
-                `Unauthenticated user attempted start a job.`)
-        }
-
-        let job = null 
-        throw new ControllerError(400, 'invalid-job',
-            `Attempt to trigger invalid job '${name}'.`)
-
-        return response.status(200).json(job.toJSON())
+        throw new ControllerError(503, 'not-implemented', '')
     }
 
     async patchJob(request, response) {

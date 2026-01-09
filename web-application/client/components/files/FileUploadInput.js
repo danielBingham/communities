@@ -48,6 +48,7 @@ const FileUploadInput = function(props) {
 
     // ============ Actions and Event Handling ======================
     //
+    //
     
     const onChange = function(event) {
         const uploadedFileData = event.target.files[0]
@@ -84,7 +85,7 @@ const FileUploadInput = function(props) {
     let content = null
     // Spinner while we wait for requests to process so that we can't start a new request on top of an existing one.
     if ( uploadRequest && uploadRequest.state == 'pending' ) {
-        content = ( <Spinner local={true} /> )
+        content = ( <><Spinner local={true} /> <span>Uploading.  This might take a while...</span></> )
     } else { 
         let typeErrorView = null
         if ( typeError ) {

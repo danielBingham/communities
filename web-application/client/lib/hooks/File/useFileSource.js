@@ -26,13 +26,41 @@ import { useRequest } from '/lib/hooks/useRequest'
 
 import { getFileSource } from '/state/File'
 
-export const useFileSource = function(fileId, width) {
+const hasVariant = function(file, variant) {
+    if ( variant === undefined || variant === null ) {
+        return true
+    }
+
+    // Files always have the root variant.
+    if ( variant === 'full' ) {
+        return true
+    }
+
+    if ( file.variants === null ) {
+        return true
+    }
+
+    if ( Array.isArray(file.variants) ) {
+        const v = file.variants.find((v) => v == variant)
+        if ( v === undefined ) {
+            return false
+        } else {
+            return v == variant
+        }
+    }
+}
+
+export const useFileSource = function(fileId, variant) {
+
+    const file = useSelector((state) => fileId && fileId in state.File.dictionary ? state.File.dictionary[fileId] : null)
     const url = useSelector((state) => {
         // If we don't have a fileId, then we don't want to query a source.
-        //
-        // We don't have to worry about width, because if we don't have one
-        // then getFileSource will just ignore it and query for the full file.
-        if ( fileId === undefined || fileId === null ) {
+        if ( fileId === undefined || fileId === null || file === null ) {
+            return null
+        }
+
+        // If we don't have a variant, then don't query.
+        if ( variant === undefined || variant === null ) {
             return null
         }
 
@@ -47,60 +75,34 @@ export const useFileSource = function(fileId, width) {
             return null
         }
 
-        // If the width doesn't exist in sources, then we need to query for it.
-        if ( width !== null && width !== undefined && ! ( width in state.File.sources[fileId] ) ) {
-            return undefined
-
-        }
-
-        // If we have a width...
-        if ( width !== null && width !== undefined ) {
-
-            // If the width is null, then we queried for it and didn't find it.
-            // Attempt to return full.
-            if ( state.File.sources[fileId][width] === null ) {
-                if ( 'full' in state.File.sources[fileId] ) {
-                    return state.File.sources[fileId]['full']
-                } else {
-                    return null
-                }
-            }
-
-            // Otherwise, return the width link.
-            return state.File.sources[fileId][width]
-        }
-
-        // Finally, attempt to return full.
-        if ( 'full' in state.File.sources[fileId] ) {
-            return state.File.sources[fileId]['full']
-        } else {
+        // If the file doesn't have that variant, then we don't want to query
+        // for it.
+        if ( ! hasVariant(file, variant) ) {
             return null
         }
-    })
+
+        // If the variant doesn't exist in sources, then we need to query for it.
+        if ( ! ( variant in state.File.sources[fileId] ) ) {
+            return undefined
+        }
+
+        // Otherwise, return the variant link.
+        return state.File.sources[fileId][variant]
+    })  
 
     const [request, makeRequest, resetRequest ] = useRequest()
 
     const refresh = function() {
-        if ( request?.state === 'fulfilled' ) {
-            makeRequest(getFileSource(fileId, width))
-        } else if ( request?.state === 'failed' ) {
-            makeRequest(getFileSource(fileId))
-        }
-    }
+        makeRequest(getFileSource(fileId, variant))
+    }  
 
     useEffect(() => {
-        if ( fileId !== null && fileId !== undefined && url === undefined && request?.state !== 'pending') {
-            // If the failure is unknown or frontend-error, then we're in potential loop territory.  
-            if ( request?.state === 'failed' 
-                && (request.error.type === 'unknown' || request.error.type === 'frontend-error' ) )
-            {
-                logger.error(new Error(`Aborting request due to error.`))
-                return
-            }
-            console.log(`== useFileSource(${fileId},${width}):: querying`)
-            makeRequest(getFileSource(fileId, width))
+        if ( fileId !== null && fileId !== undefined && url === undefined 
+            && (request?.state !== 'pending' && request?.state !== 'failed')  
+        ) {
+            makeRequest(getFileSource(fileId, variant))
         }
-    }, [ fileId, width, url, request ])
+    }, [ fileId, variant, url, request ])
 
     return [url, request, refresh]
 }

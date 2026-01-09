@@ -41,7 +41,7 @@ const storage = multer.diskStorage({
 
 const createVideoUploadMiddleware = function() {
     return new multer({
-        storage,
+        storage: storage,
         fileFilter: (request, file, callback) => {
             const fileExtension = path.extname(file.originalname).toLowerCase()
             if ( VideoService.SUPPORTED_MIMETYPES.includes(file.mimetype) && VideoService.SUPPORTED_EXTENSIONS.includes(fileExtension) ) {
@@ -80,5 +80,5 @@ const createImageUploadMiddleware = function() {
 
 module.exports = {
     createVideoUploadMiddleware: createVideoUploadMiddleware,
-    createImageUploadMiddleware: createImageUploadMiddleware
+    createImageUploadMiddleware: createImageUploadMiddleware,
 }

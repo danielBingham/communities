@@ -21,11 +21,13 @@
 const path = require('node:path')
 const mime = require('mime')
 
-const FileDAO = require('../daos/FileDAO')
+const FileDAO = require('../../daos/FileDAO')
 
-const ProcessService = require('./ProcessService')
+const ProcessService = require('../ProcessService')
+const FileService = require('../FileService')
+const LocalFileService = require('./LocalFileService')
 const S3FileService = require('./S3FileService')
-const ServiceError = require('../errors/ServiceError')
+const ServiceError = require('../../errors/ServiceError')
 
 class ProgressTracker {
     constructor() {
@@ -61,22 +63,26 @@ module.exports = class VideoService {
         this.fileDAO = new FileDAO(core)
 
         this.processService = new ProcessService(core)
-        this.fileService = new S3FileService(core)
+
+        this.fileService = new FileService(core)
+
+        this.local = new LocalFileService(core)
+        this.s3 = new S3FileService(core)
     }
 
 
     async process(file) {
-        const originalFilename= `${file.id}.original.${mime.getExtension(file.type)}`
-        const newFilename = `${file.id}.mp4`
+        const originalFilename = this.fileService.getFilename(file, 'original') 
+        const newFilename = this.fileService.getFilename(file, undefined, 'video/mp4') 
 
         const localOriginalFile = path.join('tmp/', originalFilename)
-        const localNewFile = path.join('tmp/', `${newFilename}`)
+        const localNewFile = path.join('tmp/', newFilename)
        
         const originalPath = file.filepath
-        const targetPath = path.join('files/', newFilename)
+        const targetPath = this.fileService.getPath(file, undefined, 'video/mp4') 
 
         this.core.logger.info(`Downloading file "${originalPath}"...`)
-        await this.fileService.downloadFile(originalPath, localOriginalFile)
+        await this.s3.downloadFile(originalPath, localOriginalFile)
 
         try { 
             const ffmpegArgs = [
@@ -96,10 +102,10 @@ module.exports = class VideoService {
             await this.processService.run('ffmpeg', ffmpegArgs)
 
             this.core.logger.info(`Uploading the newly formatted file...`)
-            await this.fileService.uploadFile(localNewFile, targetPath)
+            await this.s3.uploadFile(localNewFile, targetPath)
 
-            const thumbnailLocalFile = `tmp/${file.id}.thumb.jpg`
-            const thumbnailPath = `files/${file.id}.thumb.jpg`
+            const thumbnailLocalFile = path.join('tmp/', this.fileService.getFilename(file, 'thumb', 'image/jpeg'))
+            const thumbnailPath = this.fileService.getPath(file, 'thumb', 'image/jpeg') 
 
             const ffmpegThumbnailArgs = [
                 '-ss', timestamp, // Seek before input for accuracy
@@ -113,7 +119,7 @@ module.exports = class VideoService {
             await this.processService.run('ffmpeg', ffmpegThumbnailArgs)
 
             this.core.logger.info(`Uploading the thumbnail...`)
-            await this.fileService.uploadFile(thumbnailLocalFile, thumbnailPath)
+            await this.s3.uploadFile(thumbnailLocalFile, thumbnailPath)
 
             // Update File in the database with the new filename and mimetype
             const filePatch = {
@@ -130,20 +136,20 @@ module.exports = class VideoService {
             // Once we've updated the file to point to the newly formatted
             // file, delete the original to save space.  We're not going to use
             // it once we've reformatted it.
-            await this.fileService.removeFile(originalPath)
+            await this.s3.removeFile(originalPath)
 
         } catch (error ) {
             try {
-                if ( this.fileService.localFileExists(localOriginalFile) ) {
-                    this.fileService.removeLocalFile(localOriginalFile)
+                if ( this.local.fileExists(localOriginalFile) ) {
+                    this.local.removeFile(localOriginalFile)
                 }
             } catch (inputError) {
                 this.core.logger.error(`Failed to clean up local original file: `, inputError)
             }
 
             try {
-                if ( this.fileService.localFileExists(localNewFile) ) {
-                    this.fileService.removeLocalFile(localNewFile)
+                if ( this.local.fileExists(localNewFile) ) {
+                    this.local.removeFile(localNewFile)
                 }
             } catch (outputError) {
                 this.core.logger.error(`Failed to clean up local new file: `, outputError)
@@ -154,7 +160,7 @@ module.exports = class VideoService {
         }
         
         // Remove both newFilename and originalFilename from local files
-        this.fileService.removeLocalFile(localOriginalFile)
-        this.fileService.removeLocalFile(localNewFile)
+        this.local.removeFile(localOriginalFile)
+        this.local.removeFile(localNewFile)
     }
 }

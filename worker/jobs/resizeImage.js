@@ -17,7 +17,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-const { ImageService } = require('@communities/backend')
+const { ImageService, FileDAO } = require('@communities/backend')
 
 const getResizeImageJob = function(core) {
     return async function(job, done) {
@@ -32,11 +32,12 @@ const getResizeImageJob = function(core) {
 
             let progress = 0
             for (const size of imageService.imageSizes) {
-                await imageService.resize(job.data.file, size)
+                await imageService.resize(job.data.fileId, size)
 
                 progress += 20
                 job.progress({ step: 'resizing', stepDescription: `Resizing...`, progress: progress })
             }
+
 
             job.progress({ step: 'complete', stepDescription: `Complete!`, progress: 100 })
 

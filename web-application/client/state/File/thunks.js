@@ -22,7 +22,23 @@ import logger from '/logger'
 import { makeRequest } from '/state/lib/makeRequest'
 import { setRelationsInState }  from '/state/lib/relations'
 
-import { setFilesInDictionary, removeFile, setSource } from './slice'
+import { setFilesInDictionary, removeFile, setSource, setSources, setFileNull } from './slice'
+
+const uploadFile = function(type, file) {
+    return function(dispatch, getState) {
+        const formData = new FormData()
+        formData.append('file', file)
+
+        return dispatch(makeRequest('POST', `/upload/${type}`, formData,
+            function(response) {
+                dispatch(setFilesInDictionary({ entity: response.entity }))
+
+                dispatch(setRelationsInState(response.relations))
+            }
+        ))
+    }
+
+}
 
 /**
  * POST /upload/image
@@ -37,18 +53,7 @@ import { setFilesInDictionary, removeFile, setSource } from './slice'
  * @returns {string} A uuid requestId that can be used to track this request.
  */
 export const uploadImage = function(file) {
-    return function(dispatch, getState) {
-        const formData = new FormData()
-        formData.append('file', file)
-
-        return dispatch(makeRequest('POST', `/upload/image`, formData,
-            function(response) {
-                dispatch(setFilesInDictionary({ entity: response.entity }))
-
-                dispatch(setRelationsInState(response.relations))
-            }
-        ))
-    }
+    return uploadFile('image', file)
 }
 
 /**
@@ -64,59 +69,51 @@ export const uploadImage = function(file) {
  * @returns {string} A uuid requestId that can be used to track this request.
  */
 export const uploadVideo = function(file) {
-    return function(dispatch, getState) {
-        const formData = new FormData()
-        formData.append('file', file)
-
-        return dispatch(makeRequest('POST', `/upload/video`, formData,
-            function(response) {
-                dispatch(setFilesInDictionary({ entity: response.entity }))
-
-                dispatch(setRelationsInState(response.relations))
-            }
-        ))
-    }
+    return uploadFile('video', file)
 }
 
-export const getFileSource = function(fileId, width) {
+export const getFileSource = function(fileId, variant) {
     return function(dispatch, getState) {
         let path = `/file/${encodeURIComponent(fileId)}/source`
-        if ( width !== null && width !== undefined ) {
-            path += `?width=${encodeURIComponent(width)}`
+        if ( variant !== null && variant !== undefined ) {
+            path += `?variant=${encodeURIComponent(variant)}`
         }
 
         return dispatch(makeRequest('GET', path, null,
             function(response) {
-                let actualWidth = width || 'full'
                 dispatch(setFilesInDictionary({ entity: response.entity}))
-                dispatch(setSource({ fileId: fileId, width: actualWidth, url: response.sources[width] }))
+                dispatch(setSources({ fileId: fileId, sources: response.sources }))
 
                 dispatch(setRelationsInState(response.relations))
             }, 
             function(status, response) {
-                let actualWidth = width || 'full'
-                if ( status === 404 || status === 403 || status === 429 ) {
-                    dispatch(setSource({ fileId: fileId, width: actualWidth, url: null }))
-                }
+                let actualVariant = variant || 'full'
+                dispatch(setSource({ fileId: fileId, variant: actualVariant, url: null }))
             }
         ))
     }
 }
 
 
-export const getFile = function(fileId) {
+export const getFile = function(fileId, variant) {
     return function(dispatch, getState) {
-        return dispatch(makeRequest('GET', `/file/${encodeURIComponent(fileId)}`, null,
+        let path = `/file/${encodeURIComponent(fileId)}`
+        if ( variant !== null && variant !== undefined ) {
+            path += `?variant=${encodeURIComponent(variant)}`
+        }
+
+        return dispatch(makeRequest('GET', path, null,
             function(response) {
                 dispatch(setFilesInDictionary({ entity: response.entity}))
-                dispatch(setSource({ fileId: fileId, width: 'full', url: response.sources['full'] }))
+                dispatch(setSources({ fileId: fileId, sources: response.sources }))
 
                 dispatch(setRelationsInState(response.relations))
             },
             function(status, response) {
-                if ( status === 404 || status === 403 || status === 429 ) {
-                    dispatch(setFileNull(fileId))
-                }
+                dispatch(setFileNull(fileId))
+
+                let actualVariant = variant || 'full'
+                dispatch(setSource({ fileId: fileId, variant: actualVariant, url: null }))
             }
         ))
     }
@@ -127,7 +124,7 @@ export const patchFile = function(fileId, patch) {
         return dispatch(makeRequest('PATCH', `/file/${encodeURIComponent(fileId)}`, patch,
             function(response) {
                 dispatch(setFilesInDictionary({ entity: response.entity}))
-                dispatch(setSource({ fileId: fileId, width: 'full', url: response.sources['full'] }))
+                dispatch(setSource({ fileId: fileId, variant: 'full', url: response.sources['full'] }))
 
                 dispatch(setRelationsInState(response.relations))
             }
@@ -151,7 +148,6 @@ export const deleteFile = function(fileId) {
     return function(dispatch, getState) {
         return dispatch(makeRequest('DELETE', `/file/${encodeURIComponent(fileId)}`, null,
             function(response) {
-                dispatch(removeFromCache({ fileId: fileId }))
                 dispatch(removeFile({ entity: response.entity }))
             }
         ))

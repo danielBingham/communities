@@ -50,6 +50,9 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
             if ((method == 'POST' || method == 'PATCH') && body ) {
                 if ( body instanceof FormData ) {
                     fetchOptions.body = body
+                } else if ( body instanceof ReadableStream ) {
+                    fetchOptions.body = body
+                    fetchOptions.duplex = 'half'
                 } else {
                     fetchOptions.body = JSON.stringify(body)
                     fetchOptions.headers['Content-Type'] = 'application/json'

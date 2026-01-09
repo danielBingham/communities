@@ -21,8 +21,12 @@ const mime = require('mime')
 const sharp = require('sharp')
 const { imageSize } = require('image-size')
 
+const FileDAO = require('../../daos/FileDAO')
+
+const FileService = require('../FileService')
+const LocalFileService = require('./LocalFileService')
 const S3FileService = require('./S3FileService')
-const ServiceError = require('../errors/ServiceError')
+const ServiceError = require('../../errors/ServiceError')
 
 module.exports = class ImageService {
 
@@ -36,30 +40,51 @@ module.exports = class ImageService {
     constructor(core) {
         this.core = core
 
-        this.fileService = new S3FileService(core)
+        this.fileDAO = new FileDAO(core)
+
+        this.fileService = new FileService(core)
+
+        this.local = new LocalFileService(core)
+        this.s3 = new S3FileService(core)
 
         this.imageSizes = [ 30, 200, 325, 450, 650 ] 
     }
 
-    async resize(file, size) {
-        const fileName = `${file.id}.${size}.${mime.getExtension(file.type)}`
+    async resize(fileId, size) {
+        const file = await this.fileDAO.getFileById(fileId)
+        if ( file === null ) {
+            throw new ServiceError('file-not-found', `File(${fileId}) not found.`)
+        }
+        
+        const fileName = this.fileService.getFilename(file, size) 
         const tmpPath = `tmp/${fileName}`
-        const targetPath = `files/${fileName}`
+        const targetPath = this.fileService.getPath(file, size) 
 
-        const fileContents = await this.fileService.getFile(file.filepath)
+        const fileContents = await this.s3.getFile(file.filepath)
 
         await sharp(fileContents)
             .rotate()
             .resize({ width: size })
             .toFile(tmpPath)
 
-        await this.fileService.uploadFile(tmpPath, targetPath)
-        this.fileService.removeLocalFile(tmpPath)
+        await this.s3.uploadFile(tmpPath, targetPath)
+        this.local.removeFile(tmpPath)
+
+        if ( this.core.features.has('issue-67-video-uploads') ) {
+            const hasFile = this.s3.hasFile(targetPath)
+            if ( hasFile === true ) {
+                const filePatch = {
+                    id: file.id,
+                    variants: [ ...file.variants, size ]
+                }
+                await this.fileDAO.updateFile(filePatch)
+            }
+        }
     }
 
     async crop(file, crop, renderedDimensions) {
         // Load the original file into memory.
-        const fileContents = await this.fileService.getFile(file.filepath)
+        const fileContents = await this.s3.getFile(file.filepath)
 
         let orientedContents = null
         try {
@@ -121,14 +146,14 @@ module.exports = class ImageService {
         }
 
         // Keep the uncropped file by moving it to `files/id.orig.ext`
-        const originalPath = `files/${file.id}.orig.${mime.getExtension(file.type)}`
-        await this.fileService.moveFile(file.filepath, originalPath)
-        await this.deleteImageSizes(file)
+        const originalPath = this.fileService.getPath(file, 'orig')
+        await this.s3.moveFile(file.filepath, originalPath)
+        await this.fileService.deleteVariants(file)
 
         // Crop the file and upload the cropped file to the original path.
-        const filename = `${file.id}.${mime.getExtension(file.type)}`
+        const filename = this.fileService.getFilename(file) 
         const tmpPath = `tmp/${filename}`
-        const targetPath = `files/${filename}`
+        const targetPath = this.fileService.getPath(file) 
 
         try { 
             await sharp(orientedContents)
@@ -146,14 +171,7 @@ module.exports = class ImageService {
             throw error 
         }
 
-        await this.fileService.uploadFile(tmpPath, targetPath)
-        this.fileService.removeLocalFile(tmpPath)
-    }
-
-    async deleteImageSizes(file) {
-        for(const size of this.imageSizes) {
-            const filepath = `files/${file.id}.${size}.${mime.getExtension(file.type)}`
-            this.fileService.removeFile(filepath)
-        }
+        await this.s3.uploadFile(tmpPath, targetPath)
+        this.local.removeFile(tmpPath)
     }
 }

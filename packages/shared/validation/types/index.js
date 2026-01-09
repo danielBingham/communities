@@ -1,3 +1,4 @@
+const ArrayValidator = require('./ArrayValidator')
 const BooleanValidator = require('./BooleanValidator')
 const DateValidator = require('./DateValidator')
 const EmailValidator = require('./EmailValidator')
@@ -10,6 +11,7 @@ const UrlValidator = require('./UrlValidator')
 
 
 module.exports = {
+    ArrayValidator: ArrayValidator,
     BooleanValidator: BooleanValidator,
     DateValidator: DateValidator,
     EmailValidator: EmailValidator,

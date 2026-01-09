@@ -146,12 +146,4 @@ module.exports = class S3FileService {
 
         await this.s3Client.send(new DeleteObjectCommand(params))
     }
-
-    localFileExists(path) {
-        return fs.existsSync(path)
-    }
-
-    removeLocalFile(path) {
-        fs.rmSync(path)
-    }
 }

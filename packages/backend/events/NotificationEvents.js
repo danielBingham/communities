@@ -52,6 +52,9 @@ module.exports = class NotificationEvents {
         }
     }
 
+    /**
+     * Subscribe a user and connection to a Notification event.
+     */
     subscribe(event) {
         const subscriptions = this.core.events.getSubscriptions('Notification')
 
