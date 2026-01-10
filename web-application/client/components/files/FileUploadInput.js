@@ -50,11 +50,11 @@ const FileUploadInput = function({ text, fileId, setFileId, type, types, onChang
 
     const job = useSelector((state) => file && file.jobId && file.jobId in state.jobs.dictionary ? state.jobs.dictionary[file.jobId] : null)
     const [ typeError, setTypeError ] = useState(null)
-    const [uploadedFile, setUploadedFile] = useState(null)
     
     const hasVideoUploads = useFeature('issue-67-video-uploads')
 
     const hiddenFileInput = useRef(null)
+    console.log(`FileInput: `, hiddenFileInput)
 
     const [postRequest, makePostRequest] = useRequest()
     const [uploadRequest, makeUploadRequest] = useRequest('FileUploadInput')
@@ -67,8 +67,6 @@ const FileUploadInput = function({ text, fileId, setFileId, type, types, onChang
             setTypeError('invalid-type')
             return
         }
-
-        setUploadedFile(uploadedFileData)
 
         const newFile = {
             userId: currentUser.id,
@@ -85,21 +83,30 @@ const FileUploadInput = function({ text, fileId, setFileId, type, types, onChang
     }
 
     useEffect(function() {
+        console.log(`## FileUploadInput(${type}):: MOUNT`)
+        return function() {
+            console.log(`## FileUploadInput(${type}):: UNMOUNT`)
+        }
+    }, [])
+
+    useEffect(function() {
         if ( postRequest?.state === 'fulfilled' ) {
             console.log(`Post request complete!`)
             const createdFile = postRequest.response.body.entity
             setFileId(createdFile.id)
 
+            console.log(`fileInput: `, hiddenFileInput)
+            const fileData = hiddenFileInput.current.files[0]
             if ( type === 'image' ) {
                 console.log(`Uploading image: `, 
                     `\nfile: `, createdFile,
-                    `\nuploadedFile: `, uploadedFile)
-                makeUploadRequest(uploadImage(createdFile.id, uploadedFile))
+                    `\nuploadedFile: `, fileData)
+                makeUploadRequest(uploadImage(createdFile.id, fileData))
             } else if ( type === 'video' ) {
                 console.log(`Uploading video:`,
                     `\nFile: `, createdFile,
-                    `\nuploadedFile: `, uploadedFile)
-                makeUploadRequest(uploadVideo(createdFile.id, uploadedFile))
+                    `\nuploadedFile: `, fileData)
+                makeUploadRequest(uploadVideo(createdFile.id, fileData))
             } 
 
             if ( onChange ) {
@@ -155,13 +162,6 @@ const FileUploadInput = function({ text, fileId, setFileId, type, types, onChang
         content = (
             <div className="upload-input">
                 <Button type="primary" onClick={(e) => hiddenFileInput.current.click()}>{ icon } <span className="file-upload-button-text"> { text ? text : 'Upload Image' }</span></Button>
-                <input type="file"
-                    name="file"
-                    accept={types.join(',')}
-                    onChange={onChangeInternal} 
-                    style={{ display: 'none' }}
-                    ref={hiddenFileInput}
-                />
                 { typeErrorView }
             </div>
         )
@@ -171,6 +171,13 @@ const FileUploadInput = function({ text, fileId, setFileId, type, types, onChang
     return (
         <div className="file-upload">
             { content }
+            <input type="file"
+                name="file"
+                accept={types.join(',')}
+                onChange={onChangeInternal} 
+                style={{ display: 'none' }}
+                ref={hiddenFileInput}
+            />
             <RequestErrorModal message="Attempt to upload file" request={uploadRequest} />
         </div>
     )

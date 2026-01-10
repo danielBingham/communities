@@ -55,53 +55,23 @@ const PostAttachmentControls = function({ postId, groupId, sharedPostId }) {
     if ( draft.fileId !== undefined && draft.fileId !== null ) {
         if ( file === undefined || file === null ) {
             return ( <Spinner /> ) 
-        } else if ( file.state !== 'ready' || file.filepath === '') {
-            if ( file.kind === 'video' ) {
-                return (
-                    <div className="attachment-controls">
-                        <div className="post-form__video">
-                            <FileUploadInput
-                                text="Add Video"
-                                fileId={draft.fileId}
-                                setFileId={setFileId}
-                                type='video'
-                                types={[ 'video/mp4' ]}
-                            />
-                        </div>
-                    </div>
-                )
-            } else {
-                return (
-                    <div className="attachment-controls">
-                        <div className="post-form__image">
-                            <FileUploadInput 
-                                text="Add Image"
-                                fileId={draft.fileId} 
-                                setFileId={setFileId} 
-                                type='image'
-                                types={[ 'image/jpeg', 'image/png' ]} 
-                            />
-                        </div>
-                    </div>
-                )
-            } 
-        } else {
+        } else if ( file.state === 'ready' ) {
             return null
         }
     }
 
     return (
         <div className="attachment-controls">
-            <div className="post-form__image">
-                <FileUploadInput 
+            { ( file === undefined || file === null || (file?.kind === 'image' && file?.state !== 'ready')) && <div className="post-form__image">
+                 <FileUploadInput 
                     text="Add Image"
                     fileId={draft.fileId} 
                     setFileId={setFileId} 
                     type='image'
                     types={[ 'image/jpeg', 'image/png' ]} 
-                />
-            </div>
-            <div className="post-form__video">
+                /> 
+            </div> } 
+        { ( file === undefined || file === null || ( file?.kind === 'video' && file?.state !== 'ready' )) && <div className="post-form__video">
                 <FileUploadInput
                     text="Add Video"
                     fileId={draft.fileId}
@@ -109,7 +79,7 @@ const PostAttachmentControls = function({ postId, groupId, sharedPostId }) {
                     type='video'
                     types={[ 'video/mp4' ]}
                 />
-            </div>
+            </div> }
         </div>
     )
 

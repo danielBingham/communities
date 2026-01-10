@@ -187,7 +187,7 @@ const GroupEditForm = function({ groupId }) {
                         width={200} 
                         deleteOnRemove={false} 
                     /> }
-                    { ! fileId && file?.state !== 'ready' && <FileUploadInput 
+                    { ( ! fileId || file?.state !== 'ready') && <FileUploadInput 
                         fileId={fileId}
                         setFileId={setFileId} 
                         type="image"
