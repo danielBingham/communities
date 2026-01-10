@@ -11,7 +11,7 @@ export const jobsSlice = createSlice({
     name: 'jobs',
     initialState: {
         /**
-         * A dictionary of job keyed by the job's name.
+         * A dictionary of job keyed by the job's id.
          */
         dictionary: {}
     },
@@ -30,6 +30,19 @@ export const jobsSlice = createSlice({
     }
 
 })
+
+export const handleJobEvent = function(event) {
+    return function(dispatch, getState) {
+        if ( event.action === 'update' ) {
+            if ( 'entity' in event.context ) {
+                dispatch(jobsSlice.actions.setJobsInDictionary({ entity: event.context.entity }))
+            } else if ( 'dictionary' in event.context ) {
+                dispatch(jobsSlice.actions.setJobsInDictionary({ dictionary: event.context.dictionary }))
+            }
+        }
+    }
+}
+
 
 /**
  * GET /jobs

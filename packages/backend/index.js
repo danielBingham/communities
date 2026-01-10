@@ -43,6 +43,7 @@ exports.DAOError = require('./errors/DAOError')
 exports.ServiceError = require('./errors/ServiceError')
 exports.UserErrors = require('./errors/UserErrors')
 
+exports.JobEvents = require('./events/JobEvents')
 exports.NotificationEvents = require('./events/NotificationEvents')
 
 exports.AuthenticationService = require('./services/AuthenticationService')

@@ -24,9 +24,11 @@ import {  PhotoIcon, VideoCameraIcon } from '@heroicons/react/24/solid'
 
 import { uploadImage, uploadVideo, postFiles } from '/state/File'
 
+
 import { useRequest } from '/lib/hooks/useRequest'
 import { useFeature } from '/lib/hooks/feature'
 import { useFile } from '/lib/hooks/File'
+import { useEventSubscription } from '/lib/hooks/useEventSubscription'
 
 import { RequestErrorModal } from '/components/errors/RequestError'
 import Spinner from '/components/Spinner'
@@ -41,8 +43,11 @@ import './FileUploadInput.css'
  */
 const FileUploadInput = function({ text, fileId, setFileId, type, types, onChange }) {
     const currentUser = useSelector((state) => state.authentication.currentUser)
-    const [file] = useFile(fileId)
+    const [file, fileRequest, refreshFile] = useFile(fileId)
 
+    useEventSubscription('Job', 'update', { jobId: file?.jobId }, { skip: ! file?.jobId })
+
+    const job = useSelector((state) => file && file.jobId && file.jobId in state.jobs.dictionary ? state.jobs.dictionary[file.jobId] : null)
     const [ typeError, setTypeError ] = useState(null)
     const [uploadedFile, setUploadedFile] = useState(null)
     
@@ -93,6 +98,12 @@ const FileUploadInput = function({ text, fileId, setFileId, type, types, onChang
         }
     }, [ postRequest ])
 
+    useEffect(function() {
+        if ( job && job.finishedOn !== null ) { 
+            refreshFile()
+        }
+    }, [ job ])
+
     // ============ Render ==========================================
 
     if ( type !== 'image' && type !== 'video' ) {
@@ -115,7 +126,7 @@ const FileUploadInput = function({ text, fileId, setFileId, type, types, onChang
         content = ( <><Spinner local={true} /> <span>Uploading.  This might take a while...</span></> )
     }
     else if ( file?.state === 'processing' ) {
-        content = ( <><Spinner local={true} /> <span>Processing.  This might take a while...</span></> )
+        content = ( <><Spinner local={true} /> <span>Processing. { job ? `${job.progress.progress}% complete.` : '' }  This might take a while...</span></> )
     } else { 
         let typeErrorView = null
         if ( typeError ) {
