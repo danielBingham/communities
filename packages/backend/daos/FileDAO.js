@@ -77,6 +77,12 @@ const SCHEMA = {
                 select: DAO.SELECT.ALWAYS,
                 key: 'type'
             },
+            'thumb_id': {
+                insert: DAO.INSERT.ALLOW,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.ALWAYS,
+                key: 'thumbId'
+            },
             'location': {
                 insert: DAO.INSERT.ALLOW,
                 update: DAO.UPDATE.ALLOW,

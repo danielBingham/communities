@@ -20,6 +20,7 @@
 
 const path = require('node:path')
 const mime = require('mime')
+const uuid = require('uuid')
 
 const FileDAO = require('../../daos/FileDAO')
 
@@ -71,7 +72,7 @@ module.exports = class VideoService {
     }
 
 
-    async process(fileId) {
+    async process(currentUser, fileId) {
         const file = await this.fileDAO.getFileById(fileId)
 
         const originalFilename = this.fileService.getFilename(file, 'original') 
@@ -106,8 +107,18 @@ module.exports = class VideoService {
             this.core.logger.info(`Uploading the newly formatted file...`)
             await this.s3.uploadFile(localNewFile, targetPath)
 
-            const thumbnailLocalFile = path.join('tmp/', this.fileService.getFilename(file, 'thumb', 'image/jpeg'))
-            const thumbnailPath = this.fileService.getPath(file, 'thumb', 'image/jpeg') 
+            const thumbId = uuid.v4()
+            await this.fileDAO.insertFiles({
+                id: uuid.v4(),
+                userId: file.userId,
+                type: 'image/jpeg',
+                kind: 'image',
+                mimetype: 'image/jpeg'
+            })
+            const thumbFile = await this.fileDAO.getFileById(thumbId)
+
+            const thumbnailLocalFile = path.join('tmp/', this.fileService.getFilename(thumbFile))
+            const thumbnailPath = this.fileService.getPath(file) 
 
             const ffmpegThumbnailArgs = [
                 '-ss', '00:00:01.000', // Seek before input for accuracy
@@ -123,14 +134,23 @@ module.exports = class VideoService {
             this.core.logger.info(`Uploading the thumbnail...`)
             await this.s3.uploadFile(thumbnailLocalFile, thumbnailPath)
 
+            const thumbPatch = {
+                id: thumbId,
+                filepath: thumbnailPath,
+                location: this.config.s3.bucket_url
+            }
+            await this.fileDAO.updateFile(thumbPatch)
+
+            const job = await this.core.queue.add('resize-image', { session: { user: currentUser }, fileId: thumbId })
+
             // Update File in the database with the new filename and mimetype
             const filePatch = {
                 id: file.id,
                 filepath: targetPath,
                 mimetype: mime.getType('mp4'),
-                type: mime.getType('mp4')
+                type: mime.getType('mp4'),
+                thumbId: thumbId
             }
-
             await this.fileDAO.updateFile(filePatch)
 
             if ( targetPath !== originalPath ) {

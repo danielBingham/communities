@@ -32,6 +32,7 @@ import './File.css'
 
 const File = function({ id, width, type, fallback, className, onLoad, onError, ref }) {
     const [file, fileRequest] = useFile(id, width)
+    const [thumbnail, thumbnailRequest] = useFile( file?.kind === 'video' && file?.thumbId ? file.thumbId : undefined, width)
 
     // TECHDEBT HACK: Need to reference the id through the file to ensure that we retrieve the
     // file first and only retrieve the source URL if we actually successfully
@@ -41,9 +42,11 @@ const File = function({ id, width, type, fallback, className, onLoad, onError, r
     // there's a case, where you can generate an error by calling useFileSource
     // without first calling the file.
     const [url, sourceRequest, refreshFileSource] = useFileSource(file?.id, width)
+    const [ thumbnailUrl, thumnailUrlRequest] = useFileSource(thumbnail?.id, width)
 
     // If we fail to load the requested variant URL, then fall back on the full URL.
     const [rootUrl, rootRequest, refreshRoot] = useFileSource(url === null ? file?.id : null, 'full')
+    const [rootThumbnailUrl, rootThumbnailUrlRequest] = useFileSource(thumbnailUrl === null ? thumbnail?.id : null, 'full')
 
     const onErrorInternal = function(event) {
         if ( 'error' in event.target && event.target.error.code === 2 ) {
@@ -59,6 +62,12 @@ const File = function({ id, width, type, fallback, className, onLoad, onError, r
         || ( url === undefined 
             || (url === null && rootUrl === undefined)
         )
+    ) {
+        return ( <Spinner /> )
+    }
+
+    if ( file?.kind === 'video' && 
+        ( thumbnail === undefined || thumbnailUrl === undefined || (thumbnailUrl === null && rootThumbnailUrl === undefined))
     ) {
         return ( <Spinner /> )
     }

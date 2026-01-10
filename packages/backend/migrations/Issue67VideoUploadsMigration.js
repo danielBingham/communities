@@ -43,6 +43,8 @@ module.exports = class Issue67VideoUploadsMigration extends BaseMigration {
 
         await this.core.database.query(`ALTER TABLE files ADD COLUMN IF NOT EXISTS kind supported_file_types`, [])
         await this.core.database.query(`ALTER TABLE files ADD COLUMN IF NOT EXISTS mimetype text`, [])
+
+        await this.core.database.query(`ALTER TABLE files ADD COLUMN IF NOT EXISTS thumb_id uuid REFERENCES files(id) ON DELETE SET NULL DEFAULT NULL`, [])
     }
 
     async initBack() { 
@@ -52,6 +54,8 @@ module.exports = class Issue67VideoUploadsMigration extends BaseMigration {
 
         await this.core.database.query(`ALTER TABLE files DROP COLUMN IF EXISTS kind`, [])
         await this.core.database.query(`ALTER TABLE files DROP COLUMN IF EXISTS mimetype`, [])
+
+        await this.core.database.query(`ALTER TABLE files DROP COLUMN IF EXISTS thumb_id`, [])
 
         await this.core.database.query(`DROP TYPE IF EXISTS supported_file_types`, [])
         await this.core.database.query(`DROP TYPE IF EXISTS file_state`, [])

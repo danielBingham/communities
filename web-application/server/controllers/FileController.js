@@ -235,7 +235,8 @@ module.exports = class FileController {
             kind: mimetype.split('/')[0],
             mimetype: mimetype,
             type: mimetype,
-            filepath: filepath
+            filepath: filepath,
+            location: this.config.s3.bucket_url
         })
 
         const job = await this.core.queue.add('process-video', { session: { user: currentUser }, fileId: id})

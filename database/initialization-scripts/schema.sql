@@ -170,11 +170,13 @@ CREATE TABLE files (
 
     state file_state DEFAULT 'pending',
     job_id int DEFAULT NULL,
-    variants text[],
+    variants text[] DEFAULT '{}',
 
     kind supported_file_types,
     mimetype text,
     type text, /* Deprecated.  Use mimetype instead. */
+
+    thumb_id uuid REFERENCES files(id) ON DELETE SET NULL DEFAULT NULL,
 
     location text, /* This is the S3/Spaces bucket URL. */
     filepath text,

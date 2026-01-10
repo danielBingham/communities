@@ -116,6 +116,16 @@ module.exports = class FileSchema extends Schema {
                     return errors
                 }
             }, 
+            thumbId: {
+                clean: (value) => { return cleanUuid(value) },
+                validate: (value, existing, action) => {
+                    const validator = new UUIDValidator('thumbId', value, existing, action)
+                    const errors = validator
+                        .mustNotBeSet()
+                        .getErrors()
+                    return errors
+                }
+            },
             location: {
                 clean: (value) => { return stringCleaner(value) },
                 validate: (value, existing, action) => {
