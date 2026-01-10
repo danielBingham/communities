@@ -83,15 +83,12 @@ export const createSocketMiddleware = function(socket) {
 
                     socket.on('message', (event) => {
                         if ( event.action === 'confirmSubscription' ) {
-                            console.log(`Got subscription confirmation: `, event)
                             dispatch(confirmSubscription({ entity: event.entity, action: event.context.action }))
                         } else if ( event.action === 'confirmUnsubscription' ) {
                             dispatch(confirmUnsubscription({ entity: event.entity, action: event.context.action }))
                         } else if ( event.entity === 'Notification' ) {
                             dispatch(handleNotificationEvent(event))
                         } else if ( event.entity === 'Job' ) {
-                            console.log(`Got Job event: `, 
-                                `\nevent: `, event)
                             dispatch(handleJobEvent(event))
                         }
                     })

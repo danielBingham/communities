@@ -71,7 +71,7 @@ module.exports = class ImageService {
         this.local.removeFile(tmpPath)
 
         if ( this.core.features.has('issue-67-video-uploads') ) {
-            const hasFile = this.s3.hasFile(targetPath)
+            const hasFile = await this.s3.hasFile(targetPath)
             if ( hasFile === true ) {
                 const filePatch = {
                     id: file.id,

@@ -182,18 +182,19 @@ module.exports = class FileController {
                 `Video Uploads are not currently supported.`)
         }
 
-        const logger = request.logger ? request.logger : this.core.logger
-
-        const currentPath = request.file.path
-
-        logger.info(`Processing video upload: ${currentPath}`)
-
         const currentUser = request.session.user 
-
         if ( ! currentUser ) {
             this.local.removeFile(currentPath)
             throw new ControllerError(403, 'not-authorized', `Must have a logged in user to upload a file.`)
         }
+
+        const logger = request.logger ? request.logger : this.core.logger
+
+        const currentPath = request.file.path
+        const id = this.schema.properties.id.clean(request.params.id)
+
+        logger.info(`Processing video upload: ${currentPath}`)
+
 
         const mimetype = request.file.mimetype 
         if ( ! VideoService.SUPPORTED_MIMETYPES.includes(mimetype) ) {
@@ -228,30 +229,28 @@ module.exports = class FileController {
 
         await this.s3.uploadFile(currentPath, filepath)
 
-        const file = {
-            ...existing,
+        await this.fileDAO.updateFile({
+            id: id,
             state: 'processing',
             kind: mimetype.split('/')[0],
             mimetype: mimetype,
-            variants: [ ],
             type: mimetype,
-            location: this.config.s3.bucket_url,
             filepath: filepath
-        }
+        })
 
-        const job = await this.core.queue.add('process-video', { session: { user: currentUser }, file: file })
+        const job = await this.core.queue.add('process-video', { session: { user: currentUser }, fileId: id})
 
-        const filePatch = {
-            id: file.id,
+        await this.fileDAO.updateFile({
+            id: id,
             jobId: job.id
-        }
-        await this.fileDAO.updateFile(filePatch)
+        })
 
         const entityResults = await this.fileDAO.selectFiles({ 
             where: 'files.id = $1', 
             params: [ id ]
         })
 
+        console.log(`EntityResults: `, entityResults)
         const entity = entityResults.dictionary[id]
         if ( ! entity ) {
             this.local.removeFile(currentPath)
@@ -290,7 +289,6 @@ module.exports = class FileController {
         }
 
         const file = this.schema.clean(request.body)
-        console.log(`file: `, file)
         if ( file === undefined || file === null ) {
             throw new ControllerError(400, 'invalid',
                 `File must be provided.`,
@@ -306,7 +304,6 @@ module.exports = class FileController {
                 `You may not create a file for another user.`)
         }
 
-        console.log(`File: `, file)
         const validationErrors = this.validationService.validateFile(currentUser, file)
         if ( validationErrors.length > 0 ) {
             const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
@@ -316,6 +313,8 @@ module.exports = class FileController {
                 errorString)
 
         }
+
+        file.variants = []
 
         await this.fileDAO.insertFile(file)
 
@@ -377,11 +376,7 @@ module.exports = class FileController {
             }
         }
 
-        console.log(`File: `, file,
-            `\nvariant: `, variant)
-
         const path = this.fileService.getPath(file, variant)
-        console.log(`path: `, path)
         const hasFile = await this.s3.hasFile(path)
         if ( ! hasFile ) {
             throw new ControllerError(404, 'not-found', 
@@ -423,15 +418,12 @@ module.exports = class FileController {
 
         const id = this.schema.properties.id.clean(request.params.id)
 
-        console.log(`Id: `, id)
         const results = await this.fileDAO.selectFiles({
             where: 'files.id = $1', 
             params: [ id ]
         })
-        console.log(`File Results: `, results)
 
         const file = results.dictionary[id]
-        console.log(`file: `, file)
         if ( file === undefined || file === null ) {
             throw new ControllerError(404, 'not-found', 
                 `Failed to find File(${id}).`,
@@ -461,7 +453,7 @@ module.exports = class FileController {
     async patchFile(request, response) {
         const currentUser = request.session.user
         const fileId = this.schema.properties.id.clean(request.params.id)
-        const filePatch = this.schema.clean(request.body)
+        const filePatch = request.body
 
         if ( ! currentUser ) {
             throw new ControllerError(403, 'not-authorized', 
@@ -530,19 +522,19 @@ module.exports = class FileController {
 
         await this.imageService.crop(file, crop, dimensions)
 
-        const job = await this.core.queue.add('resize-image', { session: { user: currentUser }, file: file })
+        const job = await this.core.queue.add('resize-image', { session: { user: currentUser }, fileId: file.id })
 
-        if ( this.core.features.has('issue-67-video-uploads') ) {
-            const featurePatch = {
+        /*if ( this.core.features.has('issue-67-video-uploads') ) {
+            const patch = {
                 id: fileId,
                 state: 'processing',
                 jobId: job.id
             }
-            await this.fileDAO.updateFile(featurePatch)
-        }
+            await this.fileDAO.updateFile(patch)
+        }*/
 
         const entityResults = await this.fileDAO.selectFiles({
-            where: `file.id = $1`, 
+            where: `files.id = $1`, 
             params: [ file.id ]
         })
 

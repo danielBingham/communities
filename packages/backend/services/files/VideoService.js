@@ -71,7 +71,9 @@ module.exports = class VideoService {
     }
 
 
-    async process(file) {
+    async process(fileId) {
+        const file = await this.fileDAO.getFileById(fileId)
+
         const originalFilename = this.fileService.getFilename(file, 'original') 
         const newFilename = this.fileService.getFilename(file, undefined, 'video/mp4') 
 
@@ -108,7 +110,7 @@ module.exports = class VideoService {
             const thumbnailPath = this.fileService.getPath(file, 'thumb', 'image/jpeg') 
 
             const ffmpegThumbnailArgs = [
-                '-ss', timestamp, // Seek before input for accuracy
+                '-ss', '00:00:01.000', // Seek before input for accuracy
                 '-i', localOriginalFile,
                 '-vframes', '1', // Extract exactly one frame
                 '-q:v', '2', // Output quality (JPEG quality, 1-31, lower is better)
@@ -124,20 +126,20 @@ module.exports = class VideoService {
             // Update File in the database with the new filename and mimetype
             const filePatch = {
                 id: file.id,
-                userId: file.userId,
-                location: file.location,
                 filepath: targetPath,
+                mimetype: mime.getType('mp4'),
                 type: mime.getType('mp4')
             }
 
             await this.fileDAO.updateFile(filePatch)
 
-            this.core.logger.info(`Deleting the original...`)
-            // Once we've updated the file to point to the newly formatted
-            // file, delete the original to save space.  We're not going to use
-            // it once we've reformatted it.
-            await this.s3.removeFile(originalPath)
-
+            if ( targetPath !== originalPath ) {
+                this.core.logger.info(`Deleting the original...`)
+                // Once we've updated the file to point to the newly formatted
+                // file, delete the original to save space.  We're not going to use
+                // it once we've reformatted it.
+                await this.s3.removeFile(originalPath)
+            }
         } catch (error ) {
             try {
                 if ( this.local.fileExists(localOriginalFile) ) {

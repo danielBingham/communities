@@ -5,6 +5,8 @@ web-application/public/uploads/*
 web-application/public/dist
 web-application/security/*
 worker/security/*
+worker/tmp
+worker/tmp/*
 *.tfstate
 *.tfstate.*
 *.tfvars

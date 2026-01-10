@@ -9,9 +9,6 @@ export const useEventSubscription = function(entity, action, context, options) {
 
     const dispatch = useDispatch()
     useEffect(function() {
-        console.log(`== useEventSubscription(${entity}, ${action}):: `,
-            `\ncontext: `, context,
-            `\noptions: `, options)
         // Ignore this subscription when skip is `true`
         if ( options?.skip === true ) {
             return

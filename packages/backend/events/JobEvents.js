@@ -52,8 +52,8 @@ module.exports = class JobEvents {
         })
 
         this.core.queue.on('global:completed', async (jobId, result) => {
-            const job = this.core.queue.getJob(jobId)
-            const audience = await job.data?.session?.user?.id || 'all'
+            const job = await this.core.queue.getJob(jobId)
+            const audience = job.data?.session?.user?.id || 'all'
             this.core.events.trigger(audience, 'Job', 'update', { 
                 type: 'completed',
                 jobId: jobId,
@@ -108,8 +108,6 @@ module.exports = class JobEvents {
      * Subscribe a user and connection to a Notification event.
      */
     subscribe(event) {
-        console.log(`JobEvents::subscribe():: `,
-            `event: `, event)
         const subscriptions = this.core.events.getSubscriptions('Job')
 
         const action = event.context.action
@@ -167,20 +165,10 @@ module.exports = class JobEvents {
         const jobId = event.context.jobId
         const audience = event.audience
         
-        console.log(`JobEvents:update()::`,
-            `\nevent: `, event,
-            `\nsubscriptions: `, subscriptions,
-            `\njobId: `, jobId,
-            `\naudience: `, audience)
-
         if ( jobId in subscriptions ) {
-            console.log(`jobId: `, jobId)
             for(const userId of Object.keys(subscriptions[jobId]) ) {
-                console.log(`userId: `, userId)
                 if ( audience === userId || audience === 'all') {
                     for(const connectionId of Object.keys(subscriptions[jobId][userId]) ) {
-                        console.log(`connectionId: `, connectionId)
-                        
                         this.core.events.sendEventToUserConnection(userId, connectionId, event)
                     }
                 }

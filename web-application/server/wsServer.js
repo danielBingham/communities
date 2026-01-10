@@ -98,7 +98,6 @@ const createWebSocketServer = function(core, sessionParser, httpServer) {
     })
 
     core.events.registerConnection(currentUser.id, connectionId, (event) => {
-      console.log(`Connection firing: `, event)
       socket.send(JSON.stringify(event))
     })
 

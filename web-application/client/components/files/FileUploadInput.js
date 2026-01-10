@@ -42,6 +42,7 @@ import './FileUploadInput.css'
  * effectively orphaned.  We should fix that.
  */
 const FileUploadInput = function({ text, fileId, setFileId, type, types, onChange }) {
+    console.log(`## FileUploadInput(${type})`)
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const [file, fileRequest, refreshFile] = useFile(fileId)
 
@@ -56,7 +57,9 @@ const FileUploadInput = function({ text, fileId, setFileId, type, types, onChang
     const hiddenFileInput = useRef(null)
 
     const [postRequest, makePostRequest] = useRequest()
-    const [uploadRequest, makeUploadRequest] = useRequest()
+    const [uploadRequest, makeUploadRequest] = useRequest('FileUploadInput')
+    console.log(`postReuest: `, postRequest)
+    console.log(`uploadRequest: `, uploadRequest)
     
     const onChangeInternal = function(event) {
         const uploadedFileData = event.target.files[0]
@@ -83,23 +86,30 @@ const FileUploadInput = function({ text, fileId, setFileId, type, types, onChang
 
     useEffect(function() {
         if ( postRequest?.state === 'fulfilled' ) {
+            console.log(`Post request complete!`)
             const createdFile = postRequest.response.body.entity
             setFileId(createdFile.id)
 
             if ( type === 'image' ) {
+                console.log(`Uploading image: `, 
+                    `\nfile: `, createdFile,
+                    `\nuploadedFile: `, uploadedFile)
                 makeUploadRequest(uploadImage(createdFile.id, uploadedFile))
             } else if ( type === 'video' ) {
+                console.log(`Uploading video:`,
+                    `\nFile: `, createdFile,
+                    `\nuploadedFile: `, uploadedFile)
                 makeUploadRequest(uploadVideo(createdFile.id, uploadedFile))
             } 
 
             if ( onChange ) {
-                onChange(uploadedFile.id)
+                onChange(createdFile.id)
             }
         }
     }, [ postRequest ])
 
     useEffect(function() {
-        if ( job && job.finishedOn !== null ) { 
+        if ( job && job.progress.step === 'complete') { 
             refreshFile()
         }
     }, [ job ])
@@ -113,6 +123,7 @@ const FileUploadInput = function({ text, fileId, setFileId, type, types, onChang
     console.log(`File: `, file, 
         `\npostRequest: `, postRequest,
         `\nuploadRequest: `, uploadRequest)
+
     let content = null
     // Spinner while we create the file.
     if ( postRequest?.state === 'pending' ) {
@@ -122,7 +133,10 @@ const FileUploadInput = function({ text, fileId, setFileId, type, types, onChang
         content = ( <><Spinner local={true} /> <span>Upload prepared. Upload will begin shortly...</span></> )
     }
     // Spinner while we wait for requests to process so that we can't start a new request on top of an existing one.
-    else if ( uploadRequest?.state == 'pending' ) {
+    else if ( uploadRequest?.state === 'pending' ) {
+        content = ( <><Spinner local={true} /> <span>Uploading.  This might take a while...</span></> )
+    }
+    else if ( file?.state === 'pending' ) {
         content = ( <><Spinner local={true} /> <span>Uploading.  This might take a while...</span></> )
     }
     else if ( file?.state === 'processing' ) {

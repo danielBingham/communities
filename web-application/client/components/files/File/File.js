@@ -45,15 +45,8 @@ const File = function({ id, width, type, fallback, className, onLoad, onError, r
     // If we fail to load the requested variant URL, then fall back on the full URL.
     const [rootUrl, rootRequest, refreshRoot] = useFileSource(url === null ? file?.id : null, 'full')
 
-    if ( type === 'video') {
-        console.log(`== File(${id}, ${width})::`,
-            `\nfile: `, file,
-            `\nurl: `, url)
-    }
-
     const onErrorInternal = function(event) {
         if ( 'error' in event.target && event.target.error.code === 2 ) {
-            console.log(`== File(${id}, ${width}, ${type}):: onErrorInternal() :: Loading failed.  Refreshing.`)
             refreshFileSource()
         }
 

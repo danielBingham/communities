@@ -3,23 +3,33 @@ import { useDispatch } from 'react-redux'
 
 import logger from '/logger'
 
-export function useRequest() {
+export function useRequest(debug) {
     const [request, setRequest] = useState(null)
     const abortController = useRef(null)
     const dispatch = useDispatch()
 
     const makeRequest = function(reduxThunk) {
+        if ( debug === 'FileUploadInput') {
+            console.log(`Make Request!`)
+        }
         if ( request?.state === 'pending' && abortController.current !== null ) {
             abortController.current.abort()
             abortController.current = null
         }
 
+        if ( debug === 'FileUploadInput') {
+            console.log(`Set pending.`)
+        }
         setRequest({
             state: 'pending',
             request: null,
             response: null, 
             error: null,
         })
+
+        if ( debug === 'FileUploadInput') {
+            console.log(`Request set to pending.`)
+        }
 
         const [promise, controller] = dispatch(reduxThunk)
         abortController.current = controller
@@ -60,5 +70,8 @@ export function useRequest() {
         }
     },[])
 
+    if ( debug === 'FileUploadInput') {
+        console.log(`Returning request: `, request)
+    }
     return [ request, makeRequest, resetRequest ]
 }

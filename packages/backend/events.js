@@ -225,7 +225,6 @@ module.exports = class Events {
         const confirmEvent = { ...event }
         confirmEvent.action = 'confirmSubscription'
 
-        console.log(`Confirm event: `, confirmEvent)
         this.sendEventToUserConnection(userId, connectionId, confirmEvent)
     }
 
@@ -307,8 +306,6 @@ module.exports = class Events {
             options: options
         }
 
-        console.log(`Events:trigger():: `, 
-            `\nevent: `, event)
         await this.redis.publish('communities:events', JSON.stringify(event))
     }
 }

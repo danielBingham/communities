@@ -18,19 +18,25 @@
  *
  ******************************************************************************/
 
-const { VideoService } = require('@communities/backend')
+const { VideoService, FileDAO } = require('@communities/backend')
 
 const getProcessVideoJob = function(core) {
     return async function(job, done) {
         core.logger.id = `Process Video: ${job.id}`
-        core.logger.info(`Beginning job 'process-video' for user ${job.data.session.user.id} and file ${job.data.file.id}.`)
+        core.logger.info(`Beginning job 'process-video' for user ${job.data.session.user.id} and file ${job.data.fileId}.`)
 
         try {
             job.progress({ step: 'initializing', stepDescription: `Initializing...`, progress: 0 })
 
             const videoService = new VideoService(core)
+            await videoService.process(job.data.fileId)
 
-            await videoService.process(job.data.file)
+            const fileDAO = new FileDAO(core)
+            await fileDAO.updateFile({
+                id: job.data.fileId,
+                state: 'ready'
+            })
+
             job.progress({ step: 'complete', stepDescription: `Complete!`, progress: 100 })
 
             core.logger.info(`Finished job 'process-video' for user ${job.data.session.user.id}.`)

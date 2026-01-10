@@ -26,6 +26,9 @@ import { setFilesInDictionary, removeFile, setSource, setSources, setFileNull } 
 
 const uploadFile = function(type, id, fileData) {
     return function(dispatch, getState) {
+        console.log(`UploadFile: `, type,
+            `\nid: `, id,
+            `\nfileData: `, fileData)
         const formData = new FormData()
         formData.append('file', fileData)
 
@@ -69,7 +72,21 @@ export const uploadImage = function(id, fileData) {
  * @returns {string} A uuid requestId that can be used to track this request.
  */
 export const uploadVideo = function(id, fileData) {
-    return uploadFile('video', id, fileData)
+    return function(dispatch, getState) {
+        console.log(`UploadFile: `, 
+            `\nid: `, id,
+            `\nfileData: `, fileData)
+        const formData = new FormData()
+        formData.append('file', fileData)
+
+        return dispatch(makeRequest('POST', `/upload/${encodeURIComponent(id)}/video`, formData,
+            function(response) {
+                dispatch(setFilesInDictionary({ entity: response.entity }))
+
+                dispatch(setRelationsInState(response.relations))
+            }
+        ))
+    }
 }
 
 export const postFiles = function(file) {
