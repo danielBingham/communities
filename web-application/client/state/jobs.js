@@ -2,7 +2,8 @@ import { createSlice } from '@reduxjs/toolkit'
 
 import {
     setInDictionary,
-    removeEntity
+    removeEntity,
+    setNull
 } from '/state/lib/slice'
 
 import { makeRequest } from '/state/lib/makeRequest'
@@ -26,7 +27,8 @@ export const jobsSlice = createSlice({
          * from the backend.
          */ 
         setJobsInDictionary: setInDictionary,
-        removeJob: removeEntity
+        removeJob: removeEntity,
+        setJobNull: setNull
     }
 
 })
@@ -54,15 +56,16 @@ export const handleJobEvent = function(event) {
  * request.
  */
 export const getJobs = function() {
-    return function(dispatch, getState) {
+    throw new Error('Not implemented.')
+    /*return function(dispatch, getState) {
         const endpoint = '/jobs'
 
         return dispatch(makeRequest('GET', endpoint, null,
             function(responseBody) {
-                dispatch(jobsSlice.actions.setJobsInDictionary(responseBody))
+                dispatch(jobsSlice.actions.setJobsInDictionary({ dictionary: responseBody }))
             }
         ))
-    }
+    }*/
 }
 
 /**
@@ -82,7 +85,7 @@ export const postJobs = function(name, data) {
 
         return dispatch(makeRequest('POST', endpoint, { name: name, data: data },
             function(responseBody) {
-                dispatch(jobsSlice.actions.setJobsInDictionary(responseBody))
+                dispatch(jobsSlice.actions.setJobsInDictionary({ entity: responseBody }))
             }
         ))
     }
@@ -102,11 +105,14 @@ export const postJobs = function(name, data) {
  */
 export const getJob = function(id) {
     return function(dispatch, getState) {
-        const endpoint = `/job/${encodeUriComponent(id)}`
+        const endpoint = `/job/${encodeURIComponent(id)}`
 
         return dispatch(makeRequest('GET', endpoint, null,
             function(responseBody) {
-                dispatch(jobsSlice.actions.setJobsInDictionary(responseBody))
+                dispatch(jobsSlice.actions.setJobsInDictionary({ entity: responseBody }))
+            },
+            function(status, response) {
+                dispatch(jobsSlice.actions.setJobNull(id))
             }
         ))
     }

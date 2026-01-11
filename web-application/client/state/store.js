@@ -100,10 +100,6 @@ export const createSocketMiddleware = function(socket) {
 
                 } else if ( action.type === subscribe.type ) {
                     if ( socket.isOpen() ) {
-                        console.log(`Got subscription: `,
-                            `\npayload: `, action.payload,
-                            `\nentity: `, action.payload.entity,
-                            `\naction: `, action.payload.action)
                         const event = {
                             entity: action.payload.entity,
                             audience: currentUser?.id,

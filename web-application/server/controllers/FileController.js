@@ -251,7 +251,6 @@ module.exports = class FileController {
             params: [ id ]
         })
 
-        console.log(`EntityResults: `, entityResults)
         const entity = entityResults.dictionary[id]
         if ( ! entity ) {
             this.local.removeFile(currentPath)

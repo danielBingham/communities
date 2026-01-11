@@ -194,8 +194,6 @@ module.exports = class Events {
      */
     subscribe(userId, connectionId, event) {
 
-        console.log(`Events::subscribe(${userId}, ${connectionId})::`,
-            `\nevent: `, event)
         if ( ! (userId in this.connections )) {
             this.logger.error(`Attempt to subscribe a user who isn't listening!`)
             return

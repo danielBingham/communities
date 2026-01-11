@@ -28,9 +28,12 @@ import { uploadImage, uploadVideo, postFiles } from '/state/File'
 import { useRequest } from '/lib/hooks/useRequest'
 import { useFeature } from '/lib/hooks/feature'
 import { useFile } from '/lib/hooks/File'
+import { useJob } from '/lib/hooks/Job'
 import { useEventSubscription } from '/lib/hooks/useEventSubscription'
 
 import { RequestErrorModal } from '/components/errors/RequestError'
+import JobError from '/components/errors/JobError'
+
 import Spinner from '/components/Spinner'
 import Button from '/components/generic/button/Button'
 
@@ -45,21 +48,19 @@ const FileUploadInput = function({ text, fileId, setFileId, type, types, onChang
     console.log(`## FileUploadInput(${type})`)
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const [file, fileRequest, refreshFile] = useFile(fileId)
+    const [job, jobRequest] = useJob(file?.jobId)
 
     useEventSubscription('Job', 'update', { jobId: file?.jobId }, { skip: ! file?.jobId })
 
-    const job = useSelector((state) => file && file.jobId && file.jobId in state.jobs.dictionary ? state.jobs.dictionary[file.jobId] : null)
+    const [ jobError, setJobError ] = useState(null)
     const [ typeError, setTypeError ] = useState(null)
     
     const hasVideoUploads = useFeature('issue-67-video-uploads')
 
     const hiddenFileInput = useRef(null)
-    console.log(`FileInput: `, hiddenFileInput)
 
     const [postRequest, makePostRequest] = useRequest()
     const [uploadRequest, makeUploadRequest] = useRequest('FileUploadInput')
-    console.log(`postReuest: `, postRequest)
-    console.log(`uploadRequest: `, uploadRequest)
     
     const onChangeInternal = function(event) {
         const uploadedFileData = event.target.files[0]
@@ -80,6 +81,10 @@ const FileUploadInput = function({ text, fileId, setFileId, type, types, onChang
         }
 
         makePostRequest(postFiles(newFile))
+    }
+
+    const onError = function() {
+        setFileId(null)
     }
 
     useEffect(function() {
@@ -117,7 +122,13 @@ const FileUploadInput = function({ text, fileId, setFileId, type, types, onChang
 
     useEffect(function() {
         if ( job && job.progress.step === 'complete') { 
-            refreshFile()
+            if ( job.progress.step === 'complete' ) {
+                refreshFile()
+            } else if ( job.finishedOn !== null ) {
+                refreshFile()
+            } else if ( job.failedReason !== null ) {
+                setJobError('Attempt to process file failed with an error.')
+            }
         }
     }, [ job ])
 
@@ -127,50 +138,61 @@ const FileUploadInput = function({ text, fileId, setFileId, type, types, onChang
         throw new Error(`Invalid FileUpload type, '${type}'.`)
     }
 
-    console.log(`File: `, file, 
-        `\npostRequest: `, postRequest,
-        `\nuploadRequest: `, uploadRequest)
+    console.log(`## FileUploadInput(${type}:: `,
+        `\n\tFile: `, file, 
+        `\n\tpostRequest: `, postRequest,
+        `\n\tuploadRequest: `, uploadRequest,
+        `\n\tjob: `, job)
 
-    let content = null
-    // Spinner while we create the file.
+
+    const State = {
+        isPreparingUpload: 'isPreparingUpload',
+        isPendingUpload: 'isPendingUpload',
+        isUploading: 'isUploading',
+        isProcessing: 'isProcessing',
+        isAwaitingFile: 'isAwaitingFile'
+    }
+
+    let state = State.isAwaitingFile
+   
     if ( postRequest?.state === 'pending' ) {
-        content = ( <><Spinner local={true} /> <span>Preparing the upload...</span></> )
+        state = State.isPreparingUpload
     } 
     else if ( postRequest?.state === 'fulfilled' && ! uploadRequest )  {
-        content = ( <><Spinner local={true} /> <span>Upload prepared. Upload will begin shortly...</span></> )
+        state = State.isPendingUpload
     }
-    // Spinner while we wait for requests to process so that we can't start a new request on top of an existing one.
     else if ( uploadRequest?.state === 'pending' ) {
-        content = ( <><Spinner local={true} /> <span>Uploading.  This might take a while...</span></> )
+        state = State.isUploading
     }
     else if ( file?.state === 'pending' ) {
-        content = ( <><Spinner local={true} /> <span>Uploading.  This might take a while...</span></> )
+        state = State.isUploading
     }
     else if ( file?.state === 'processing' ) {
-        content = ( <><Spinner local={true} /> <span>Processing. { job ? `${job.progress.progress}% complete.` : '' }  This might take a while...</span></> )
-    } else { 
-        let typeErrorView = null
-        if ( typeError ) {
-            typeErrorView = ( <div className="error">Invalid-type selected.  Supported types are: { types.join(',') }.</div> )
-        }
-   
-        let icon = ( <PhotoIcon /> )
-        if ( type === 'video' ) {
-            icon = ( <VideoCameraIcon /> )
-        }
+        state = State.isProcessing
+    } 
 
-        content = (
-            <div className="upload-input">
-                <Button type="primary" onClick={(e) => hiddenFileInput.current.click()}>{ icon } <span className="file-upload-button-text"> { text ? text : 'Upload Image' }</span></Button>
-                { typeErrorView }
-            </div>
-        )
+    let typeErrorView = null
+    if ( typeError ) {
+        typeErrorView = ( <div className="error">Invalid-type selected.  Supported types are: { types.join(',') }.</div> )
     }
+
+    let icon = ( <PhotoIcon /> )
+    if ( type === 'video' ) {
+        icon = ( <VideoCameraIcon /> )
+    }
+
 
     // Perform the render.
     return (
         <div className="file-upload">
-            { content }
+            { state === State.isPreparingUpload && <div><Spinner local={true} /> <span>Preparing the upload...</span></div> }
+            { state === State.isPendingUpload && <div><Spinner local={true} /> <span>Upload prepared. Upload will begin shortly...</span></div> }
+            { state === State.isUploading && <div><Spinner local={true} /> <span>Uploading.  This might take a while...</span></div> }
+            { state === State.isProcessing && <div><Spinner local={true} /> <span>Processing. { job ? `${job.progress.progress}% complete.` : '' }  This might take a while...</span></div> }
+            { state === State.isAwaitingFile && <div className="upload-input">
+                <Button type="primary" onClick={(e) => hiddenFileInput.current.click()}>{ icon } <span className="file-upload-button-text"> { text ? text : 'Upload Image' }</span></Button>
+                { typeErrorView }
+            </div> }
             <input type="file"
                 name="file"
                 accept={types.join(',')}
@@ -178,7 +200,9 @@ const FileUploadInput = function({ text, fileId, setFileId, type, types, onChang
                 style={{ display: 'none' }}
                 ref={hiddenFileInput}
             />
-            <RequestErrorModal message="Attempt to upload file" request={uploadRequest} />
+            <RequestErrorModal message="Attempt to initialize upload" request={postRequest} onContinue={onError} />
+            <RequestErrorModal message="Attempt to upload file" request={uploadRequest} onContinue={onError} />
+            <JobError message="Attempt to process file" job={job} onContinue={onError} />
         </div>
     )
 }

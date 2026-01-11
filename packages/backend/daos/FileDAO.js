@@ -81,7 +81,8 @@ const SCHEMA = {
                 insert: DAO.INSERT.ALLOW,
                 update: DAO.UPDATE.ALLOW,
                 select: DAO.SELECT.ALWAYS,
-                key: 'thumbId'
+                key: 'thumbId',
+                needsFeature: 'issue-67-video-uploads'
             },
             'location': {
                 insert: DAO.INSERT.ALLOW,
@@ -187,8 +188,8 @@ module.exports = class FilesDAO extends DAO {
         return this.hydrateFiles(results.rows)
     }
 
-    async insertFile(files) {
-        await this.insert('File', files)
+    async insertFile(file) {
+        await this.insert('File', file)
     }
 
     async updateFile(file) {

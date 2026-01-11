@@ -26,9 +26,6 @@ import { setFilesInDictionary, removeFile, setSource, setSources, setFileNull } 
 
 const uploadFile = function(type, id, fileData) {
     return function(dispatch, getState) {
-        console.log(`UploadFile: `, type,
-            `\nid: `, id,
-            `\nfileData: `, fileData)
         const formData = new FormData()
         formData.append('file', fileData)
 
@@ -73,9 +70,6 @@ export const uploadImage = function(id, fileData) {
  */
 export const uploadVideo = function(id, fileData) {
     return function(dispatch, getState) {
-        console.log(`UploadFile: `, 
-            `\nid: `, id,
-            `\nfileData: `, fileData)
         const formData = new FormData()
         formData.append('file', fileData)
 

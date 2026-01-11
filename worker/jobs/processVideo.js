@@ -47,6 +47,15 @@ const getProcessVideoJob = function(core) {
             done(null)
         } catch (error) {
             core.logger.error(error)
+            try {
+                job.progress({ step: 'failed', stepDescription: `Job failed due to error.`, progress: 100 })
+                await this.fileDAO.updateFile({
+                    id: job.data.fileId,
+                    state: 'error'
+                })
+            } catch (updateError) {
+                core.logger.error(`Failed to update file or job state to 'failed': `, updateError)
+            }
             done(error)
         }
         
