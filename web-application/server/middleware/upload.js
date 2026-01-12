@@ -68,7 +68,7 @@ const createImageUploadMiddleware = function() {
             } else {
                 callback(new ControllerError(400, 'invalid',
                     `Attempt to upload an image with an unsupported type: '${file.mimetype}'.`,
-                    `Unsupported image type or extension.  Supported types are: .jpg, .jpeg, .png`), false)
+                    `Unsupported image type or extension.  Supported types are: .jpg, .png`), false)
             }
         },
         limits: {
