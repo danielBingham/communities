@@ -62,14 +62,6 @@ const File = function({ id, width, type, fallback, className, onLoad, onError, r
     // ========================================================================
     //      RENDER
     // ========================================================================
-    
-    console.log(`## File(${id}, ${width}, ${type})::`,
-        `\n\tfile: `, file,
-        `\n\tthumbnail: `, thumbnail,
-        `\n\turl: `, url,
-        `\n\tthumbnailUrl: `, thumbnailUrl,
-        `\n\trootUrl: `, rootUrl,
-        `\n\trootThumbnailUrl: `, rootThumbnailUrl)
 
     if ( file === undefined 
         || ( url === undefined 
@@ -109,18 +101,14 @@ const File = function({ id, width, type, fallback, className, onLoad, onError, r
         thumb = rootThumbnailUrl
     }
 
-    console.log(`thumb: `, thumb)
-
     if ( url !== null ) {
         if ( filetype === 'video' ) {
-            console.log(`Loading video from URL: `, url)
             return ( <Video className={`file ${className ? className : ''}`} src={url} poster={thumb}  onLoad={onLoad} onError={onErrorInternal} ref={ref} />)
         }
 
         return ( <Image className={`file ${className ? className : ''}`} src={url} onLoad={onLoad} onError={onErrorInternal} ref={ref} /> )
     } else if ( url === null && rootUrl !== null ) {
         if ( filetype === 'video' ) {
-            console.log(`Loading video from rootUrl: `, rootUrl)
             return ( <Video className={`file ${className ? className : ''}`} src={rootUrl} poster={thumb} onLoad={onLoad} onError={onErrorInternal} ref={ref} />)
         }
 

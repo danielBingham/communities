@@ -45,7 +45,6 @@ import './FileUploadInput.css'
  * effectively orphaned.  We should fix that.
  */
 const FileUploadInput = function({ text, fileId, setFileId, type, types, onChange }) {
-    console.log(`## FileUploadInput(${type})`)
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const [file, fileRequest, refreshFile] = useFile(fileId)
     const [job, jobRequest] = useJob(file?.jobId)
@@ -92,29 +91,19 @@ const FileUploadInput = function({ text, fileId, setFileId, type, types, onChang
     }
 
     useEffect(function() {
-        console.log(`## FileUploadInput(${type}):: MOUNT`)
         return function() {
-            console.log(`## FileUploadInput(${type}):: UNMOUNT`)
         }
     }, [])
 
     useEffect(function() {
         if ( postRequest?.state === 'fulfilled' ) {
-            console.log(`Post request complete!`)
             const createdFile = postRequest.response.body.entity
             setFileId(createdFile.id)
 
-            console.log(`fileInput: `, hiddenFileInput)
             const fileData = hiddenFileInput.current.files[0]
             if ( type === 'image' ) {
-                console.log(`Uploading image: `, 
-                    `\nfile: `, createdFile,
-                    `\nuploadedFile: `, fileData)
                 makeUploadRequest(uploadImage(createdFile.id, fileData))
             } else if ( type === 'video' ) {
-                console.log(`Uploading video:`,
-                    `\nFile: `, createdFile,
-                    `\nuploadedFile: `, fileData)
                 makeUploadRequest(uploadVideo(createdFile.id, fileData))
             } 
 
@@ -141,13 +130,6 @@ const FileUploadInput = function({ text, fileId, setFileId, type, types, onChang
     if ( type !== 'image' && type !== 'video' ) {
         throw new Error(`Invalid FileUpload type, '${type}'.`)
     }
-
-    console.log(`## FileUploadInput(${type}:: `,
-        `\n\tFile: `, file, 
-        `\n\tpostRequest: `, postRequest,
-        `\n\tuploadRequest: `, uploadRequest,
-        `\n\tjob: `, job)
-
 
     const State = {
         isPreparingUpload: 'isPreparingUpload',
