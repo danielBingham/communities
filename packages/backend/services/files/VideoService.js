@@ -81,11 +81,18 @@ module.exports = class VideoService {
         const localOriginalFile = path.join('tmp/', originalFilename)
         const localNewFile = path.join('tmp/', newFilename)
        
-        const originalPath = file.filepath
+        let originalPath = file.filepath
         const targetPath = this.fileService.getPath(file, undefined, 'video/mp4') 
+
 
         this.core.logger.info(`Downloading file "${originalPath}"...`)
         await this.s3.downloadFile(originalPath, localOriginalFile)
+
+        if ( originalPath === targetPath ) {
+            originalPath = this.fileService.getPath(file, 'original')
+            this.core.logger.info(`Backing up original file to ${originalPath}...`)
+            await this.s3.moveFile(file.filepath, originalPath)
+        }
 
         try { 
             const ffmpegArgs = [
@@ -108,17 +115,18 @@ module.exports = class VideoService {
             await this.s3.uploadFile(localNewFile, targetPath)
 
             const thumbId = uuid.v4()
-            await this.fileDAO.insertFiles({
-                id: uuid.v4(),
+            await this.fileDAO.insertFile({
+                id: thumbId,
                 userId: file.userId,
                 type: 'image/jpeg',
                 kind: 'image',
-                mimetype: 'image/jpeg'
+                mimetype: 'image/jpeg',
+                variants: []
             })
             const thumbFile = await this.fileDAO.getFileById(thumbId)
 
             const thumbnailLocalFile = path.join('tmp/', this.fileService.getFilename(thumbFile))
-            const thumbnailPath = this.fileService.getPath(file) 
+            const thumbnailPath = this.fileService.getPath(thumbFile) 
 
             const ffmpegThumbnailArgs = [
                 '-ss', '00:00:01.000', // Seek before input for accuracy
@@ -137,7 +145,7 @@ module.exports = class VideoService {
             const thumbPatch = {
                 id: thumbId,
                 filepath: thumbnailPath,
-                location: this.config.s3.bucket_url
+                location: this.core.config.s3.bucket_url
             }
             await this.fileDAO.updateFile(thumbPatch)
 
@@ -153,13 +161,11 @@ module.exports = class VideoService {
             }
             await this.fileDAO.updateFile(filePatch)
 
-            if ( targetPath !== originalPath ) {
-                this.core.logger.info(`Deleting the original...`)
-                // Once we've updated the file to point to the newly formatted
-                // file, delete the original to save space.  We're not going to use
-                // it once we've reformatted it.
-                await this.s3.removeFile(originalPath)
-            }
+            this.core.logger.info(`Deleting original file from path '${originalPath}'...`)
+            // Once we've updated the file to point to the newly formatted
+            // file, delete the original to save space.  We're not going to use
+            // it once we've reformatted it.
+            await this.s3.removeFile(originalPath)
         } catch (error ) {
             try {
                 if ( this.local.fileExists(localOriginalFile) ) {

@@ -19,7 +19,7 @@
  ******************************************************************************/
 import './Video.css'
 
-const Video = function({ className, src, altText, ref, onLoad, onError }) {
+const Video = function({ className, src, poster, altText, ref, onLoad, onError }) {
 
     if ( ! src) {
         console.error(new Error(`'src' is required!`))
@@ -32,6 +32,7 @@ const Video = function({ className, src, altText, ref, onLoad, onError }) {
             className={`video ${className ? className : ''}`}
             preload="metadata"
             src={src} 
+            poster={poster}
             onLoad={onLoad}
             onError={onError}
             controls

@@ -27,14 +27,14 @@ const getProcessVideoJob = function(core) {
         const currentUser = job.data.session.user
         core.logger.info(`Beginning job 'process-video' for User(${currentUser.id}) and File(${job.data.fileId}).`)
 
+        let fileDAO = null
         try {
             job.progress({ step: 'initializing', stepDescription: `Initializing...`, progress: 0 })
-
+            fileDAO = new FileDAO(core)
 
             const videoService = new VideoService(core)
             await videoService.process(currentUser, job.data.fileId)
 
-            const fileDAO = new FileDAO(core)
             await fileDAO.updateFile({
                 id: job.data.fileId,
                 state: 'ready'
@@ -49,7 +49,7 @@ const getProcessVideoJob = function(core) {
             core.logger.error(error)
             try {
                 job.progress({ step: 'failed', stepDescription: `Job failed due to error.`, progress: 100 })
-                await this.fileDAO.updateFile({
+                await fileDAO?.updateFile({
                     id: job.data.fileId,
                     state: 'error'
                 })

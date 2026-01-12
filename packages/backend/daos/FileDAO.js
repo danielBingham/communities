@@ -180,11 +180,6 @@ module.exports = class FilesDAO extends DAO {
         `
 
         const results = await this.database.query(sql, params)
-
-        if ( results.rows.length <= 0 ) {
-            return []
-        }
-
         return this.hydrateFiles(results.rows)
     }
 

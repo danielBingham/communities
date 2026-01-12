@@ -63,6 +63,10 @@ const FileUploadInput = function({ text, fileId, setFileId, type, types, onChang
     const [uploadRequest, makeUploadRequest] = useRequest('FileUploadInput')
     
     const onChangeInternal = function(event) {
+        if ( event.target.files.length <= 0 ) {
+            return
+        }
+
         const uploadedFileData = event.target.files[0]
         if ( ! types.includes(uploadedFileData.type) ) {
             setTypeError('invalid-type')
