@@ -106,13 +106,13 @@ const File = function({ id, width, type, fallback, className, onLoad, onError, r
             return ( <Video className={`file ${className ? className : ''}`} src={url} poster={thumb}  onLoad={onLoad} onError={onErrorInternal} ref={ref} />)
         }
 
-        return ( <Image className={`file ${className ? className : ''}`} src={url} onLoad={onLoad} onError={onErrorInternal} ref={ref} /> )
+        return ( <Image className={`file ${className ? className : ''}`} src={url} onLoad={onLoad} onError={onErrorInternal} crossOrigin={true} ref={ref} /> )
     } else if ( url === null && rootUrl !== null ) {
         if ( filetype === 'video' ) {
             return ( <Video className={`file ${className ? className : ''}`} src={rootUrl} poster={thumb} onLoad={onLoad} onError={onErrorInternal} ref={ref} />)
         }
 
-        return ( <Image className={`file ${className ? className : ''}`} src={rootUrl} onLoad={onLoad} onError={onErrorInternal} ref={ref} /> )
+        return ( <Image className={`file ${className ? className : ''}`} src={rootUrl} onLoad={onLoad} onError={onErrorInternal} crossOrigin={true} ref={ref} /> )
     }
 }
 

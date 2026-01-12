@@ -20,7 +20,7 @@
 
 import './Image.css'
 
-const Image = function({ className, src, altText, ref, onLoad, onError }) {
+const Image = function({ className, src, altText, ref, crossOrigin, onLoad, onError }) {
     if ( ! src) {
         console.error(new Error(`'src' is required.`))
         return null
@@ -33,7 +33,7 @@ const Image = function({ className, src, altText, ref, onLoad, onError }) {
             className={`image ${className ? className : ''}`}
             onLoad={onLoad}
             onError={onError}
-            crossOrigin="anonymous"
+            crossOrigin={ crossOrigin === true ? "anonymous" : undefined }
         />
     )
 }

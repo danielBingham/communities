@@ -29,6 +29,7 @@ const { v4: uuidv4 } = require('uuid')
 
 const FileDAO = require('../daos/FileDAO')
 
+const LocalFileService = require('./files/LocalFileService')
 const S3FileService = require('./files/S3FileService')
 
 module.exports = class LinkPreviewService {
@@ -37,7 +38,8 @@ module.exports = class LinkPreviewService {
 
         this.fileDAO = new FileDAO(core)
 
-        this.fileService = new S3FileService(core)
+        this.s3 = new S3FileService(core)
+        this.local = new LocalFileService(core)
     }
 
     async getPreview(url, headers) {
@@ -147,9 +149,9 @@ module.exports = class LinkPreviewService {
                     const buffer = await blob.arrayBuffer()
                     fs.writeFileSync(tmpPath, Buffer.from(buffer))
 
-                    await this.fileService.uploadFile(tmpPath, filepath)
+                    await this.s3.uploadFile(tmpPath, filepath)
 
-                    this.fileService.removeLocalFile(tmpPath)
+                    this.local.removeFile(tmpPath)
 
                     const file = {
                         id: fileId,

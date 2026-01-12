@@ -39,7 +39,7 @@ const PostImage = function({ id, className }) {
 
     return (
         <div className={ className ? `post-image ${className}` : "post-image"}>
-            <Image id={post.fileId} width={650} fallbackIcon={'Photo'} />
+            <Image id={post.fileId} width={650} fallbackIcon={'Photo'} crossOrigin={true} />
         </div>
     )
 }

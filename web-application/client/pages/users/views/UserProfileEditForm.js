@@ -32,6 +32,8 @@ import { patchUser } from '/state/User'
 import DraftProfileImage from '/components/files/DraftProfileImage'
 import FileUploadInput from '/components/files/FileUploadInput'
 
+import { RequestErrorModal } from '/components/errors/RequestError'
+
 import Input from '/components/ui/Input'
 import TextBox from '/components/generic/text-box/TextBox'
 import Button from '/components/generic/button/Button'
