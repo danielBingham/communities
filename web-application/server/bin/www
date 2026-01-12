@@ -7,6 +7,7 @@ const { createSessionParser } = require('../session')
 const { createExpressApp } = require('../app')
 const { createHTTPServer } = require('../httpServer')
 const { createWebSocketServer } = require('../wsServer')
+const { createEventHandlers } = require('../events')
 
 /**
  * Normalize a port into a number, string, or false.
@@ -32,6 +33,7 @@ createCore('web-application').then(function(core) {
   const app = createExpressApp(core, sessionParser)
   const server = createHTTPServer(core, app)
   const webSocketServer = createWebSocketServer(core, sessionParser, server)
+  const eventHandlers = createEventHandlers(core)
 
   /**
    * Handle server shutdown

@@ -17,10 +17,14 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
+const path = require('node:path')
+
 const mime = require('mime')
 const { v4: uuidv4 } = require('uuid')
 
-const backend = require('@communities/backend')
+const { FileService, ImageService, VideoService, LocalFileService, S3FileService, ValidationService, FileDAO } = require('@communities/backend')
+
+const { schema } = require('@communities/shared')
 
 const ControllerError = require('../errors/ControllerError')
 
@@ -33,15 +37,29 @@ module.exports = class FileController {
         this.logger = core.logger
         this.config = core.config
 
-        this.imageService = new backend.ImageService(core)
-        this.fileService = new backend.S3FileService(core)
-        this.fileDAO = new backend.FileDAO(core)
+        this.fileDAO = new FileDAO(core)
+
+        this.fileService = new FileService(core)
+
+        this.s3 = new S3FileService(core)
+        this.local = new LocalFileService(core)
+
+        this.videoService = new VideoService(core)
+        this.imageService = new ImageService(core)
+
+        this.validationService = new ValidationService(core)
+
+        this.schema = new schema.FileSchema()
+    }
+
+    async getRelations(currentUser, results, requestedRelations) {
+        return {}
     }
 
     /**
-     * POST /upload
+     * POST /upload/image
      *
-     * Allows the user to upload a file, which can then be used by other
+     * Allows the user to upload an image, which can then be used by other
      * entities.
      *
      * @param {Object} request  Standard Express request object.
@@ -50,80 +68,332 @@ module.exports = class FileController {
      *
      * @returns {Promise}   Resolves to void.
      */
-    async upload(request, response) {
-        /**********************************************************************
-         * Permissions Checking and Input Validation
-         *
-         * Permissions:
-         *
-         * 1. User must be logged in.
-         *
-         * Validation:
-         *
-         * 1. File must be PDF, JPEG, or PNG.
-         * 
-         * ********************************************************************/
+    async uploadImage(request, response) {
+        const logger = request.logger ? request.logger : this.core.logger
+
+        const currentPath = request.file.path
+        const id = this.schema.properties.id.clean(request.params.id)
+
+        logger.info(`Processing image upload: ${currentPath}`)
 
         const currentUser = request.session.user 
-
-        // 1. User must be logged in.
         if ( ! currentUser ) {
+            this.local.removeFile(currentPath)
             throw new ControllerError(403, 'not-authorized', `Must have a logged in user to upload a file.`)
         }
 
-        /**********************************************************************
-         * Validation
-         **********************************************************************/
-
-        const type = request.file.mimetype 
-        // Define which file types are valid.
-        const validTypes = [
-            // For post and profile images.
-            'image/jpeg',
-            'image/png'
-        ]
-
-        // 1. File must be PDF, JPEG, or PNG.
-        if ( ! validTypes.includes(type) ) {
+        const mimetype = request.file.mimetype 
+        if ( ! ImageService.SUPPORTED_MIMETYPES.includes(mimetype) ) {
+            this.local.removeFile(currentPath)
             throw new ControllerError(400, 'invalid-type',
-                `User(${request.session.user.id}) attempted to upload an invalid file of type ${type}.`)
+                `User(${request.session.user.id}) attempted to upload an invalid file of type ${mimetype}.`,
+                `Unsupported file type.  Supported types are: ${ImageService.SUPPORTED_TYPES.join(',')}`)
         }
 
+        const fileExtension = path.extname(request.file.originalname).toLowerCase()
+        if ( ! ImageService.SUPPORTED_EXTENSIONS.includes(fileExtension) ) {
+            this.local.removeFile(currentPath)
+            throw new ControllerError(400, 'invalid-type',
+                `User(${request.session.user.id}) attempted to upload an invalid file of type ${mimetype}.`,
+                `Unsupported file extension.  Supported extensions are: ${ImageService.SUPPORTED_EXTENSIONS.join(',')}`)
+        }
 
-        /**********************************************************************
-         * Permissions and Validation checks complete.
-         *      Upload the file.
-         **********************************************************************/
+        const existing = await this.fileDAO.getFileById(id)
+        if ( existing === null ) {
+            throw new ControllerError(404, 'not-found',
+                `Attempt to upload to a File(${id}) that doesn't exist.`,
+                `You attempted to upload to a File(${id}) that didn't exist.  Please create a pending file with 'POST /files' before attempting an upload.`)
+        }
 
-        const currentPath = request.file.path
+        if ( existing.userId !== currentUser.id ) {
+            throw new ControllerError(403, 'not-authorized',
+                `User(${currentUser.id}) attempting to upload File(${existing.id}) belonging to User(${existing.userId}).`,
+                `You may not upload to another user's file.`)
+        }
 
-        const id = uuidv4()
-        const filepath = `files/${id}.${mime.getExtension(type)}`
+        const filepath = this.fileService.getPath(existing) 
 
-        await this.fileService.uploadFile(currentPath, filepath)
+        await this.s3.uploadFile(currentPath, filepath)
 
         const file = {
-            id: id,
-            userId: request.session.user.id,
-            type: type,
+            ...existing,
+            type: mimetype,
             location: this.config.s3.bucket_url,
             filepath: filepath
         }
 
-        await this.fileDAO.insertFile(file)
-
-        const files = await this.fileDAO.selectFiles('WHERE files.id = $1', [ id ])
-        if ( files.length <= 0) {
-            throw new ControllerError(500, 'insertion-failure', `Failed to select newly inserted file ${id}.`)
+        // Add the new fields that come with video uploads.
+        if ( this.core.features.has('issue-67-video-uploads') ) {
+            file.state  = 'processing'
+            file.kind = mimetype.split('/')[0]
+            file.mimetype = mimetype
+            file.variants = [ ]
         }
 
-        this.fileService.removeLocalFile(currentPath)
+        await this.fileDAO.updateFile(file)
 
-        await this.core.queue.add('resize-image', { session: { user: currentUser }, file: file })
+        const job = await this.core.queue.add('resize-image', { session: { user: currentUser }, fileId: file.id })
+
+        if ( this.core.features.has('issue-67-video-uploads') ) {
+            const filePatch = {
+                id: file.id,
+                jobId: job.id
+            }
+            await this.fileDAO.updateFile(filePatch)
+        }
+
+        const entityResults = await this.fileDAO.selectFiles({ 
+            where: 'files.id = $1', 
+            params: [ id ]
+        })
+
+        const entity = entityResults.dictionary[id]
+        if ( ! entity ) {
+            this.local.removeFile(currentPath)
+            throw new ControllerError(500, 'not-found', `Failed to select updated file ${id}.`)
+        }
+
+        this.local.removeFile(currentPath)
+
+        const relations = await this.getRelations(currentUser, entityResults)
 
         response.status(200).json({
-            entity: files[0],
-            relations: {}
+            entity: entity,
+            relations: relations 
+        })
+    }
+
+    /**
+     * POST /upload/video
+     *
+     * Allows the user to upload a video, which can then be used by other
+     * entities.
+     *
+     * @param {Object} request  Standard Express request object.
+     * @param {Object} request.file The file information, defined by multer.
+     * @param {Object} response Standard Express response object.
+     *
+     * @returns {Promise}   Resolves to void.
+     */
+    async uploadVideo(request, response) {
+        if ( ! this.core.features.has('issue-67-video-uploads') ) {
+            throw new ControllerError(503, 'unsupported',
+                `Video Uploads are not currently supported.`,
+                `Video Uploads are not currently supported.`)
+        }
+
+        const currentUser = request.session.user 
+        if ( ! currentUser ) {
+            this.local.removeFile(currentPath)
+            throw new ControllerError(403, 'not-authorized', `Must have a logged in user to upload a file.`)
+        }
+
+        const logger = request.logger ? request.logger : this.core.logger
+
+        const currentPath = request.file.path
+        const id = this.schema.properties.id.clean(request.params.id)
+
+        logger.info(`Processing video upload: ${currentPath}`)
+
+
+        const mimetype = request.file.mimetype 
+        if ( ! VideoService.SUPPORTED_MIMETYPES.includes(mimetype) ) {
+            this.local.removeFile(currentPath)
+            throw new ControllerError(400, 'invalid-type',
+                `User(${request.session.user.id}) attempted to upload an invalid video file of type ${mimetype}.`,
+                `Unsupported video type.  Supported types are: ${VideoService.SUPPORTED_TYPES.join(',')}`)
+        }
+
+        const fileExtension = path.extname(request.file.originalname).toLowerCase()
+        if ( ! VideoService.SUPPORTED_EXTENSIONS.includes(fileExtension) ) {
+            this.local.removeFile(currentPath)
+            throw new ControllerError(400, 'invalid-type',
+                `User(${request.session.user.id}) attempted to upload an invalid video file of type ${mimetype}.`,
+                `Unsupported video extension.  Supported extensions are: ${VideoService.SUPPORTED_EXTENSIONS.join(',')}`)
+        }
+
+        const existing = await this.fileDAO.getFileById(id)
+        if ( existing === null ) {
+            throw new ControllerError(404, 'not-found',
+                `Attempt to upload to a File(${id}) that doesn't exist.`,
+                `You attempted to upload to a File(${id}) that didn't exist.  Please create a pending file with 'POST /files' before attempting an upload.`)
+        }
+
+        if ( existing.userId !== currentUser.id ) {
+            throw new ControllerError(403, 'not-authorized',
+                `User(${currentUser.id}) attempting to upload File(${existing.id}) belonging to User(${existing.userId}).`,
+                `You may not upload to another user's file.`)
+        }
+
+        const filepath = this.fileService.getPath(existing) 
+
+        await this.s3.uploadFile(currentPath, filepath)
+
+        await this.fileDAO.updateFile({
+            id: id,
+            state: 'processing',
+            kind: mimetype.split('/')[0],
+            mimetype: mimetype,
+            type: mimetype,
+            filepath: filepath,
+            location: this.config.s3.bucket_url
+        })
+
+        const job = await this.core.queue.add('process-video', { session: { user: currentUser }, fileId: id})
+
+        await this.fileDAO.updateFile({
+            id: id,
+            jobId: job.id
+        })
+
+        const entityResults = await this.fileDAO.selectFiles({ 
+            where: 'files.id = $1', 
+            params: [ id ]
+        })
+
+        const entity = entityResults.dictionary[id]
+        if ( ! entity ) {
+            this.local.removeFile(currentPath)
+            throw new ControllerError(500, 'not-found', `Failed to select newly inserted file ${id}.`)
+        }
+
+        this.local.removeFile(currentPath)
+
+        const relations = await this.getRelations(currentUser, entityResults)
+
+        response.status(200).json({
+            entity: entity,
+            relations: relations 
+        })
+    }
+
+
+
+    /**
+     * POST /files
+     *
+     * Create an initial file to prepare for upload.  Used to create a file in
+     * the pending state before begining the uploading and processing process.
+     *
+     * @param {Object} request  Standard Express request object.
+     * @param {Object} response Standard Express response object.
+     *
+     * @returns {Promise}   Resolves to void.
+     */
+    async postFiles(request, response) {
+        const currentUser = request.session.user
+        if ( ! currentUser ) {
+            throw new ControllerError(401, 'not-authenticated',
+                `User must be authenticated to view a file.`,
+                `You must be authenticated to view a file.`)
+        }
+
+        const file = this.schema.clean(request.body)
+        if ( file === undefined || file === null ) {
+            throw new ControllerError(400, 'invalid',
+                `File must be provided.`,
+                `File must be provided.`)
+        }
+
+
+        // Users may only upload their own files.  They may not upload the file
+        // of another user.
+        if ( file.userId !== currentUser.id ) {
+            throw new ControllerError(403, 'not-authorized',
+                `User(${currentUser.id}) attempting to create a File belonging to User(${file.userId}).`,
+                `You may not create a file for another user.`)
+        }
+
+        const validationErrors = this.validationService.validateFile(currentUser, file)
+        if ( validationErrors.length > 0 ) {
+            const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
+            const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
+            throw new ControllerError(400, 'invalid',
+                `User submitted an invalid file: ${logString}`,
+                errorString)
+
+        }
+
+        file.variants = []
+
+        await this.fileDAO.insertFile(file)
+
+        const entityResults = await this.fileDAO.selectFiles({ where: 'files.id = $1', params: [ file.id ] })
+
+        const entity = entityResults.dictionary[file.id]
+        if ( entity === undefined || entity === null || entityResults.list.length <= 0 ) {
+            throw new ControllerError(500, 'insertion-failure', `Failed to select newly inserted file ${file.id}.`)
+        }
+
+        const relations = await this.getRelations(currentUser, entityResults)
+
+        response.status(200).json({
+            entity: entity,
+            relations: relations
+        })
+    }
+
+    /**
+     * GET /file/:id/src
+     *
+     * Get the raw file source for display.
+     *
+     * @param {Object} request  Standard Express request object.
+     * @param {int} request.params.id   The database id of the file we wish to get.
+     * @param {Object} response Standard Express response object.
+     *
+     * @returns {Promise}   Resolves to void.
+     */
+    async getFileSource(request, response) {
+        const currentUser = request.session.user
+        if ( ! currentUser ) {
+            throw new ControllerError(401, 'not-authenticated',
+                `User must be authenticated to view a file.`,
+                `You must be authenticated to view a file.`)
+        }
+
+        const id = this.schema.properties.id.clean(request.params.id)
+        let variant = request.query?.variant  // We don't need to clean this
+        // because we're going to check it against a cleaned array.
+
+        const results = await this.fileDAO.selectFiles({
+            where: 'files.id = $1', 
+            params: [ id ]
+        })
+
+        const file = results.dictionary[id]
+        if ( file === undefined || file === null ) {
+            throw new ControllerError(404, 'not-found', 
+                `Failed to find File(${id}).`,
+                `Failed to find File(${id}).`)
+        } 
+
+        if ( this.core.features.has('issue-67-video-uploads') ) {
+            if ( variant !== undefined && variant !== null && variant !== 'full' && ! file.variants.includes(variant) ) {
+                throw new ControllerError(404, 'not-found', 
+                    `Failed to find variant, '${variant}', of File(${id}).`,
+                    `Failed to find variant, '${variant}', of File(${id}).`)
+            }
+        }
+
+        const path = this.fileService.getPath(file, variant)
+        const hasFile = await this.s3.hasFile(path)
+        if ( ! hasFile ) {
+            throw new ControllerError(404, 'not-found', 
+                `Failed to find File(${id}) at path '${path}'.`,
+                `Failed to find File(${id}) at path '${path}'.`)
+        }
+
+        const url = await this.s3.getSignedUrl(path)
+
+        const relations = await this.getRelations(currentUser, results)
+
+        response.status(200).json({
+            entity: file,
+            sources: {
+                [variant]: url
+            },
+            relations: relations 
         })
     }
 
@@ -139,7 +409,6 @@ module.exports = class FileController {
      * @returns {Promise}   Resolves to void.
      */
     async getFile(request, response) {
-
         const currentUser = request.session.user
         if ( ! currentUser ) {
             throw new ControllerError(401, 'not-authenticated',
@@ -147,66 +416,45 @@ module.exports = class FileController {
                 `You must be authenticated to view a file.`)
         }
 
-        const id = request.params.id
-        const width = request.query?.width
+        const id = this.schema.properties.id.clean(request.params.id)
 
-        const files = await this.fileDAO.selectFiles('WHERE files.id = $1', [ id ])
-        if ( files.length <= 0) {
-            throw new ControllerError(404, 'not-found', `Failed to find file ${id}.`)
+        const results = await this.fileDAO.selectFiles({
+            where: 'files.id = $1', 
+            params: [ id ]
+        })
+
+        const file = results.dictionary[id]
+        if ( file === undefined || file === null ) {
+            throw new ControllerError(404, 'not-found', 
+                `Failed to find File(${id}).`,
+                `File(${id}) not found.`)
         }
-        const file = files[0]
 
-        let path = file.filepath
-        if (  width ) {
-            path = `files/${id}.${width}.${mime.getExtension(file.type)}`
-            const hasFile = await this.fileService.hasFile(path)
-            if ( ! hasFile ) {
-                request.logger.warn(`Missing width "${width}" for File(${id}).`)
-                path = file.filepath
+        const sources = {}
+        sources['full'] = await this.s3.getSignedUrl(file.filepath)
+
+        if ( this.core.features.has('issue-67-video-uploads') ) {
+            const variant = request.query?.variant
+
+            if ( variant !== undefined && variant !== null && variant !== 'full' && file.variants.includes(variant) ) {
+                 sources[variant] = await this.s3.getSignedUrl(this.fileService.getPath(file, variant))
             }
         }
 
-        const url = await this.fileService.getSignedUrl(path)
+        const relations = await this.getRelations(currentUser, results)
 
-        response.redirect(302, url)
-
-        // Everyone has permissions to get files right now.  We may add
-        // stricter permissions in the future.
-
-        /*const id = request.params.id
-
-
-        const files = await this.fileDAO.selectFiles('WHERE files.id = $1', [ id ])
-        if ( files.length <= 0) {
-            throw new ControllerError(404, 'not-found', `Failed find file ${id}.`)
-        }
-
-        return response.status(200).json({
-            entity: files[0],
-            relations: {}
-        })*/
+        response.status(200).json({
+            entity: file,
+            sources: sources,
+            relations: relations 
+        })
     }
 
     async patchFile(request, response) {
-        /**********************************************************************
-         * Permissions Checking and Input Validation
-         *
-         * Permissions:
-         *
-         * 1. User must be logged in.
-         * 2. User must be owner of File(:id)
-         *
-         * Validation:
-         *
-         * 1. File(:id) must exist.
-         * 
-         * ********************************************************************/
-
         const currentUser = request.session.user
-        const fileId = request.params.id
+        const fileId = this.schema.properties.id.clean(request.params.id)
         const filePatch = request.body
 
-        // Permissions: 1. User must be logged in.
         if ( ! currentUser ) {
             throw new ControllerError(403, 'not-authorized', 
                 `Must have a logged in user to patch a file.`,
@@ -219,16 +467,14 @@ module.exports = class FileController {
                 `You must include the file.id in the resource route.`)
         }
 
-        const files = await this.fileDAO.selectFiles('WHERE files.id = $1', [ fileId ])
+        const file = await this.fileDAO.getFileById(fileId) 
 
         // Validation: 1. File(:id) must exist.
-        if ( files.length <= 0 ) {
+        if ( file === null || file === undefined ) {
             throw new ControllerError(404, 'not-found', 
                 `File(${fileId}) not found!`,
                 `File(${fileId}) was not found.`)
         } 
-
-        const file = files[0]
 
         // TODO TECHDEBT We need a better way to do this.  Right now, Groups
         // are the only objects where people who aren't the file's uploader can
@@ -241,7 +487,7 @@ module.exports = class FileController {
             SELECT file_id FROM groups WHERE file_id = $1
         `, [ file.id ])
 
-        // Permissions: 2. User must be owner of File(:id), unless file is group profile.
+        // User must be owner of File(:id), unless file is group profile.
         if ( file.userId !== currentUser.id && groupFileResults.rows.length <= 0 ) {
             throw new ControllerError(403, 'not-authorized', 
                 `User(${currentUser.id}) attempting to PATCH File(${file.id}, which they don't own.`,
@@ -276,11 +522,39 @@ module.exports = class FileController {
 
         await this.imageService.crop(file, crop, dimensions)
 
-        await this.core.queue.add('resize-image', { session: { user: currentUser }, file: file })
+        const job = await this.core.queue.add('resize-image', { session: { user: currentUser }, fileId: file.id })
+
+        /*if ( this.core.features.has('issue-67-video-uploads') ) {
+            const patch = {
+                id: fileId,
+                state: 'processing',
+                jobId: job.id
+            }
+            await this.fileDAO.updateFile(patch)
+        }*/
+
+        const entityResults = await this.fileDAO.selectFiles({
+            where: `files.id = $1`, 
+            params: [ file.id ]
+        })
+
+        const entity = entityResults.dictionary[file.id]
+        if ( entity === undefined || entity === null ) {
+            throw new ControllerError(500, 'not-found',
+                `File(${file.id}) not found after update.`,
+                `Something went wrong on the backend.`)
+        }
+
+        const url = await this.s3.getSignedUrl(file.filepath)
+
+        const relations = await this.getRelations(currentUser, entityResults)
 
         response.status(200).json({
-            entity: file,
-            relations: {}
+            entity: entity,
+            sources: {
+                ['full']: url
+            },
+            relations: relations 
         })
     }
 
@@ -297,55 +571,38 @@ module.exports = class FileController {
      * @returns {Promise}   Resolves to void.
      */
     async deleteFile(request, response) {
-        /**********************************************************************
-         * Permissions Checking and Input Validation
-         *
-         * Permissions:
-         *
-         * 1. User must be logged in.
-         * 2. User must be owner of File(:id)
-         *
-         * Validation:
-         *
-         * 1. File(:id) must exist.
-         * 
-         * ********************************************************************/
+        const currentUser = request.session.user
 
-        // Permissions: 1. User must be logged in.
-        if ( ! request.session || ! request.session.user ) {
+        if ( ! currentUser ) {
             throw new ControllerError(403, 'not-authorized', `Must have a logged in user to delete a file.`)
         }
 
-        const files = await this.fileDAO.selectFiles('WHERE files.id = $1', [ request.params.id ])
+        const id = this.schema.properties.id.clean(request.params.id)
 
-        // Validation: 1. File(:id) must exist.
-        if ( files.length <= 0 ) {
+        const existing = await this.fileDAO.getFileById(id)
+        if ( existing === null || existing === undefined ) {
             throw new ControllerError(404, 'not-found', `File ${request.params.id} not found!`)
         } 
 
-        // Permissions: 2. User must be owner of File(:id)
-        if ( files[0].userId !== request.session.user.id ) {
+        if ( existing.userId !== currentUser.id ) {
             // TODO Admin and moderator permissions.
-            throw new ControllerError(403, 'not-authorized', `User(${request.session.user.id}) attempting to delete file(${files[0].id}, which they don't own.`)
+            throw new ControllerError(403, 'not-authorized', 
+                `User(${request.session.user.id}) attempting to delete file(${files[0].id}, which they don't own.`
+                `You are not allowed to delete a file you don't own.`)
         }
 
         // NOTE: We don't need to worry about files in use as profile images,
         // because the database constraint will simply set the users.file_id
         // field to null when the file is deleted.
 
-        /**********************************************************************
-         * Permissions and Validation checks complete.
-         *      Delete the file.
-         **********************************************************************/
-
-        await this.fileService.removeFile(files[0].filepath)
+        await this.fileService.deleteVariants(existing)
+        await this.s3.removeFile(existing.filepath)
 
         // Database constraints should handle any cascading here.
-        const fileId = request.params.id
-        await this.fileDAO.deleteFile(fileId)
+        await this.fileDAO.deleteFile(id)
         return response.status(200).json({ 
             entity: { 
-                id: fileId 
+                id: id 
             },
             relations: {}
         })

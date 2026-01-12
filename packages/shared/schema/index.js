@@ -19,11 +19,13 @@
  ******************************************************************************/
 
 const DeviceSchema = require('./Device')
+const FileSchema = require('./File')
 const GroupSchema = require('./Group')
 const GroupSubscriptionSchema = require('./GroupSubscription')
 
 module.exports = {
     DeviceSchema: DeviceSchema,
+    FileSchema: FileSchema,
     GroupSchema: GroupSchema,
     GroupSubscriptionSchema: GroupSubscriptionSchema
 }

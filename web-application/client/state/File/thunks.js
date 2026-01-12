@@ -1,75 +1,49 @@
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media 
+ *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
 import logger from '/logger'
 
 import { makeRequest } from '/state/lib/makeRequest'
 import { setRelationsInState }  from '/state/lib/relations'
 
-import { setFilesInDictionary, removeFile, setInCache, removeFromCache } from './slice'
+import { setFilesInDictionary, removeFile, setSource, setSources, setFileNull } from './slice'
 
-export const loadFile = function(fileId, width) {
+const uploadFile = function(type, id, fileData) {
     return function(dispatch, getState) {
-        const state = getState()
+        const formData = new FormData()
+        formData.append('file', fileData)
 
-        if ( fileId in state.File.cache && width in state.File.cache[fileId] ) {
-            const promise = new Promise((resolve, reject) => resolve({ 
-                success: true,
-                request: null,
-                response: null,
-                error: null
-            }))
-            return [ promise, null ] 
-        }
-
-        dispatch(setInCache({ fileId: fileId, width: width, objectURL: null }))
-
-        const path = `./file/${encodeURIComponent(fileId)}`
-        const params = { fileId: fileId }
-        if ( width ) {
-            params.width = width
-        }
-        const query = new URLSearchParams(params)
-        const url = new URL(path, state.system.api).href + '?' + query
-
-        return dispatch(makeRequest('GET', url, null,
+        return dispatch(makeRequest('POST', `/upload/${encodeURIComponent(id)}/${type}`, formData,
             function(response) {
-                dispatch(setInCache({ fileId: fileId, width: width, objectURL: response.fileURL }))
-            }, 
-            function(response) {
-                dispatch(setInCache({ fileId: fileId, width: width, objectURL: false }))
-            },
-        { isFile: true }))
-    }
-}
+                dispatch(setFilesInDictionary({ entity: response.entity }))
 
-export const cleanFileCache = function() {
-    return function(dispatch, getState) {
-        const state = getState()
-
-        const cacheArray = []
-        for(const [fileId, widths] of Object.entries(state.File.cache)) {
-            const cacheItem = { fileId: fileId, timestamp: 0 }
-            for(const [width, cache] of Object.entries(widths)) {
-                if ( cacheItem.timestamp < cache.timestamp ) {
-                    cacheItem.timestamp = cache.timestamp
-                }
+                dispatch(setRelationsInState(response.relations))
             }
-            cacheArray.push(cacheItem)
-        }
-
-        cacheArray.sort((a,b) => b.timestamp - a.timestamp)
-
-        // Only keep the 120 most recent files.
-        if ( cacheArray.length > 120) {
-            for(let index = 120; index < cacheArray.length; index++) {
-                dispatch(removeFromCache({ fileId: cacheArray[index].fileId }))
-            }
-        }
+        ))
     }
+
 }
 
 /**
- * POST /upload
+ * POST /upload/image
  *
- * Upload a new file.
+ * Upload a new image.
  *  
  * Makes the request asynchronously and returns a id that can be used to track
  * the request and retreive the results from the state slice.
@@ -78,12 +52,28 @@ export const cleanFileCache = function() {
  *
  * @returns {string} A uuid requestId that can be used to track this request.
  */
-export const uploadFile = function(file) {
+export const uploadImage = function(id, fileData) {
+    return uploadFile('image', id, fileData)
+}
+
+/**
+ * POST /upload/video
+ *
+ * Upload a new video.
+ *  
+ * Makes the request asynchronously and returns a id that can be used to track
+ * the request and retreive the results from the state slice.
+ *
+ * @param {object} file - A populated file object.
+ *
+ * @returns {string} A uuid requestId that can be used to track this request.
+ */
+export const uploadVideo = function(id, fileData) {
     return function(dispatch, getState) {
         const formData = new FormData()
-        formData.append('file', file)
+        formData.append('file', fileData)
 
-        return dispatch(makeRequest('POST', `/upload`, formData,
+        return dispatch(makeRequest('POST', `/upload/${encodeURIComponent(id)}/video`, formData,
             function(response) {
                 dispatch(setFilesInDictionary({ entity: response.entity }))
 
@@ -93,12 +83,72 @@ export const uploadFile = function(file) {
     }
 }
 
+export const postFiles = function(file) {
+    return function(dispatch, getState) {
+        return dispatch(makeRequest('POST', `/files`, file,
+            function(response) {
+                dispatch(setFilesInDictionary({ entity: response.entity}))
+
+                dispatch(setRelationsInState(response.relations))
+            }
+        ))
+    }
+
+}
+
+export const getFileSource = function(fileId, variant) {
+    return function(dispatch, getState) {
+        let path = `/file/${encodeURIComponent(fileId)}/source`
+        if ( variant !== null && variant !== undefined ) {
+            path += `?variant=${encodeURIComponent(variant)}`
+        }
+
+        return dispatch(makeRequest('GET', path, null,
+            function(response) {
+                dispatch(setFilesInDictionary({ entity: response.entity}))
+                dispatch(setSources({ fileId: fileId, sources: response.sources }))
+
+                dispatch(setRelationsInState(response.relations))
+            }, 
+            function(status, response) {
+                let actualVariant = variant || 'full'
+                dispatch(setSource({ fileId: fileId, variant: actualVariant, url: null }))
+            }
+        ))
+    }
+}
+
+
+export const getFile = function(fileId, variant) {
+    return function(dispatch, getState) {
+        let path = `/file/${encodeURIComponent(fileId)}`
+        if ( variant !== null && variant !== undefined ) {
+            path += `?variant=${encodeURIComponent(variant)}`
+        }
+
+        return dispatch(makeRequest('GET', path, null,
+            function(response) {
+                dispatch(setFilesInDictionary({ entity: response.entity}))
+                dispatch(setSources({ fileId: fileId, sources: response.sources }))
+
+                dispatch(setRelationsInState(response.relations))
+            },
+            function(status, response) {
+                dispatch(setFileNull(fileId))
+
+                let actualVariant = variant || 'full'
+                dispatch(setSource({ fileId: fileId, variant: actualVariant, url: null }))
+            }
+        ))
+    }
+}
+
 export const patchFile = function(fileId, patch) {
     return function(dispatch, getState) {
         return dispatch(makeRequest('PATCH', `/file/${encodeURIComponent(fileId)}`, patch,
             function(response) {
-                dispatch(removeFromCache({ fileId: fileId }))
                 dispatch(setFilesInDictionary({ entity: response.entity}))
+                dispatch(setSource({ fileId: fileId, variant: 'full', url: response.sources['full'] }))
 
                 dispatch(setRelationsInState(response.relations))
             }
@@ -122,7 +172,6 @@ export const deleteFile = function(fileId) {
     return function(dispatch, getState) {
         return dispatch(makeRequest('DELETE', `/file/${encodeURIComponent(fileId)}`, null,
             function(response) {
-                dispatch(removeFromCache({ fileId: fileId }))
                 dispatch(removeFile({ entity: response.entity }))
             }
         ))

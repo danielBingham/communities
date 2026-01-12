@@ -29,7 +29,7 @@ const { v4: uuidv4 } = require('uuid')
 
 const FileDAO = require('../daos/FileDAO')
 
-const S3FileService = require('./S3FileService')
+const S3FileService = require('./files/S3FileService')
 
 module.exports = class LinkPreviewService {
     constructor(core) {

@@ -31,6 +31,7 @@ const PostDAO = require('../daos/PostDAO')
 const PermissionService = require('./PermissionService')
 
 const BlocklistValidation = require('./validation/BlocklistValidation')
+const FileValidation = require('./validation/FileValidation')
 const GroupValidation = require('./validation/GroupValidation')
 const GroupMemberValidation = require('./validation/GroupMemberValidation')
 const GroupModerationValidation = require('./validation/GroupModerationValidation')
@@ -52,6 +53,7 @@ module.exports = class ValidationService {
         this.permissionService = new PermissionService(core)
 
         this.blocklist = new BlocklistValidation(core, this)
+        this.file = new FileValidation(core, this)
         this.group = new GroupValidation(core, this)
         this.groupMember = new GroupMemberValidation(core, this)
         this.groupModeration = new GroupModerationValidation(core, this)
@@ -69,6 +71,10 @@ module.exports = class ValidationService {
 
     async validateBlocklist(currentUser, blocklist, existing) {
         return await this.blocklist.validateBlocklist(currentUser, blocklist, existing)
+    }
+
+    async validateFile(currentUser, file, existing) {
+        return await this.file.validateFile(currentUser, file, existing)
     }
 
     async validateGroup(currentUser, group, existing) {

@@ -72,6 +72,9 @@ module.exports = class Events {
         })
     }
 
+    /**
+     * Get subscriptions for an entity and action.
+     */
     getSubscriptions(entity, action) {
         if ( ! (entity in this.subscriptions ) ) {
             throw new Error(`Missing subscriptions for '${entity}'.  Did you remember to register the handler?`)
@@ -88,6 +91,29 @@ module.exports = class Events {
         return this.subscriptions[entity][action]
     }
 
+    /**
+     * Register an event handler to handle any events recieved over the Pub/Sub
+     * connection. 
+     *
+     * The handlers have the responsibility of performing any actions necessary
+     * on this instance for the connections registered on this instance.
+     * (Sessions are shared across instances through database backing, but web
+     * socket connections are not.)
+     *
+     * The handler also has the responsibility of parsing the `action` out of
+     * the event and directing it appropriately.
+     *
+     * @param {string} entity       The entity to register a handler for (eg.
+     *  Notification)
+     * @param {string[]} actions    An array containing one more or actions
+     *  that handler supports.  All events for the entity will be sent to the
+     *  handler, and it's up to the handler to parse out the actions.
+     *  However, we want to know what actions are supported so that we can
+     *  register subscriptions appropriately.
+     * @param {function} handler    The handler function for the event,
+     *  responsible for directing and dispatching the event in this instance and
+     *  to this instance's registered connections.
+     */
     registerHandler(entity, actions, handler) {
         this.handlers[entity] = handler
 
@@ -97,6 +123,19 @@ module.exports = class Events {
         }
     }
 
+    /**
+     * Send an event to a particular user frontend session through a particular
+     * websocket connection.
+     *
+     * Each connectionId corresponds to a single socket connection which
+     * corresponds to a single user device or browser session. This sends an
+     * event to that device or browser.
+     *
+     * @param {uuid} userId     The User.id of the user we want to send the event to.
+     * @param {uuid} connectionId The uuid of the socket connection we're
+     *  sending the event to.
+     * @param {object} event    The event we're sending over the connection.
+     */
     sendEventToUserConnection(userId, connectionId, event) {
         if ( ! (userId in this.connections ) ) {
             this.logger.error(`Attempt to send an event to a user with no connections.`)
@@ -117,7 +156,18 @@ module.exports = class Events {
             options: event.options
         })
     }
-    
+   
+    /**
+     * Forward an event to its Entity's handler.
+     *
+     * Events are primarily handled by their Entity's handlers, since they
+     * might need to organize subscriptions in ways specific to that entity.
+     *
+     * This method is linked directly to the Pub/Sub subscription to handle
+     * events as they come out of Pub/Sub.
+     *
+     * @param {object} event    The event that needs to be handled.
+     **/
     handleEvent(event) {
         if ( event.entity in this.handlers ) {
             if ( event.entity in this.subscriptions ) {
@@ -131,7 +181,19 @@ module.exports = class Events {
         }
     }
 
+    /**
+     * Subscribe a user and connection to an event. Mostly forwards the
+     * subscription to the handler for the Event's Entity which then handles
+     * the subscription.  This is because different Entities will need to
+     * organize their subscriptions in different ways.
+     *
+     * @param {uuid} userId         The id of the user we're subscribing.
+     * @param {uuid} connectionId   The id of the websocket connection.
+     * @param {object} event        The subscription event, which contains the
+     *  action being subscribed to in context.
+     */
     subscribe(userId, connectionId, event) {
+
         if ( ! (userId in this.connections )) {
             this.logger.error(`Attempt to subscribe a user who isn't listening!`)
             return
@@ -160,6 +222,7 @@ module.exports = class Events {
 
         const confirmEvent = { ...event }
         confirmEvent.action = 'confirmSubscription'
+
         this.sendEventToUserConnection(userId, connectionId, confirmEvent)
     }
 

@@ -1,8 +1,30 @@
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media 
+ *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
 import { createSlice } from '@reduxjs/toolkit'
+
+import logger from '/logger'
 
 import {
     setInDictionary,
     removeEntity,
+    setNull,
     setQueryResults,
     clearQuery,
     clearQueries
@@ -40,8 +62,7 @@ const initialState = {
      */
     queries: {},
 
-    cache: {}
-
+    sources: {}
 }
 
 export const FileSlice = createSlice({
@@ -54,67 +75,69 @@ export const FileSlice = createSlice({
 
         setFilesInDictionary: setInDictionary,
         removeFile: removeEntity,
+        setFileNull: function(state, action) {
+            const fileId = action.payload
+            state.sources[fileId] = null
+
+            setNull(state, action)
+        }, 
         setFileQueryResults: setQueryResults,
         clearFileQuery: clearQuery,
         clearFileQueries: clearQueries,
-        resetFileSlice: (state, action) => {
-            // Make sure we revoke all the URLs in the cache so that we
-            // don't leak memory.
-            for(const [fileId, widths] of Object.entries(state.cache)) {
-                for(const [width, url] of Object.entries(widths)) {
-                    URL.revokeObjectURL(url)
-                }
-            }
+        resetFileSlice: (state, action) => initialState,
 
-            return initialState
-        },
-
-        setInCache: (state, action ) => {
+        setSource: (state, action ) => {
             const fileId = action.payload.fileId
-            const width = action.payload.width
+            const variant = action.payload.variant
 
-            if ( ! ( fileId in state.cache) ) {
-                state.cache[fileId] = {}
+            if ( ! ( fileId in state.sources) ) {
+                state.sources[fileId] = {}
             }
 
-            const objectURL = action.payload.objectURL
+            // We failed to retrieve the file, but we're somehow trying to set a source on it.
+            // Log an error and bail out.
+            if ( state.sources[fileId] === null ) {
+                logger.error(`== File::setSource() :: Attempting to set a source on a null file.`)
+                return
+            }
 
-            if ( width ) {
-                state.cache[fileId][width] = {
-                    url: objectURL,
-                    timestamp: Date.now()
-                }
+            const url = action.payload.url
+
+            if ( variant ) {
+                state.sources[fileId][variant] = url
             } else {
-                state.cache[fileId]['full'] = {
-                    url: objectURL,
-                    timestamp: Date.now()
-                }
+                state.sources[fileId]['full'] = url
             }
         },
 
-        touchCache: (state, action) => {
+        setSources: (state, action) => {
             const fileId = action.payload.fileId
-            const width = action.payload.width
+            if ( ! ( fileId in state.sources) ) {
+                state.sources[fileId] = {}
+            }
 
-            if ( fileId in state.cache && width in state.cache[fileId] ) {
-                state.cache[fileId][width].timestamp = Date.now()
+            // We failed to retrieve the file, but we're somehow trying to set a source on it.
+            // Log an error and bail out.
+            if ( state.sources[fileId] === null ) {
+                logger.error(`== File::setSource() :: Attempting to set a source on a null file.`)
+                return
+            }
+
+            for(const [variant, source] of Object.entries(action.payload.sources)) {
+                state.sources[fileId][variant] = source
             }
         },
 
-        removeFromCache: (state, action) => {
+        removeSource: (state, action) => {
             const fileId = action.payload.fileId
 
-
-            if ( fileId in state.cache ) {
-                for(const [width, file] of Object.entries(state.cache[fileId]) ) {
-                    URL.revokeObjectURL(file.url)
-                }
-                delete state.cache[fileId]
+            if ( fileId in state.sources) {
+                delete state.sources[fileId]
             }
         }
     }
 })
 
-export const {  setFilesInDictionary, removeFile, resetFileSlice, setInCache, touchCache, removeFromCache }  = FileSlice.actions
+export const {  setFilesInDictionary, removeFile, setFileNull, resetFileSlice, setSource, setSources, removeSource }  = FileSlice.actions
 
 export default FileSlice.reducer

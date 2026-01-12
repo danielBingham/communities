@@ -70,7 +70,9 @@ module.exports = class AuthenticationController {
          * returns what it finds.
          * 
          * **********************************************************/
+
         if ('user' in request.session && request.session.user !== null && request.session.user !== undefined) {
+
             try { 
                 const session = await this.auth.getSessionForUserId(request.session.user.id)
 
@@ -92,7 +94,6 @@ module.exports = class AuthenticationController {
                 request.session.user = session.user
                 request.session.file = session.file
 
-
                 response.status(200).json({
                     session:  session
                 })
@@ -108,6 +109,8 @@ module.exports = class AuthenticationController {
                             })
                         }
                     })
+                } else {
+                    throw error
                 }
             }
         } else {

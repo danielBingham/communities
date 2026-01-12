@@ -17,7 +17,8 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-const fs = require('fs')
+const fs = require('node:fs')
+const { once } = require('node:events')
 
 const { S3 } = require('@aws-sdk/client-s3')
 const { HeadObjectCommand, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, CopyObjectCommand } = require('@aws-sdk/client-s3')
@@ -71,7 +72,7 @@ module.exports = class S3FileService {
     async copyFile(currentPath, newPath) {
         const params = {
             Bucket: this.config.s3.bucket,
-            CopySource:this. config.s3.bucket + '/' + currentPath,
+            CopySource: this.config.s3.bucket + '/' + currentPath,
             Key: newPath
         }
 
@@ -115,6 +116,17 @@ module.exports = class S3FileService {
         return await response.Body.transformToByteArray()
     }
 
+    async downloadFile(path, localPath) {
+        const params = {
+            Bucket: this.config.s3.bucket,
+            Key: path
+        }
+
+        const response = await this.s3Client.send(new GetObjectCommand(params))
+        const stream = response.Body.pipe(fs.createWriteStream(localPath))
+        await once(stream, 'finish')
+    }
+
     async getSignedUrl(path) {
         const params = {
             Bucket: this.config.s3.bucket,
@@ -122,7 +134,7 @@ module.exports = class S3FileService {
         }
 
         const command = new GetObjectCommand(params)
-        return getSignedUrl(this.s3Client, command, { expiresIn: 60*60*24 })
+        return getSignedUrl(this.s3Client, command, { expiresIn: 60*60*24*7 })
     }
 
 
@@ -133,9 +145,5 @@ module.exports = class S3FileService {
         }
 
         await this.s3Client.send(new DeleteObjectCommand(params))
-    }
-
-    removeLocalFile(path) {
-        fs.rmSync(path)
     }
 }

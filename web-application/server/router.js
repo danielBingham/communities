@@ -9,9 +9,9 @@
  **************************************************************************************************/
 module.exports = function(core) {
     const express = require('express')
-    const multer = require('multer')
     
     const rateLimit = require('./middleware/rateLimit')
+    const { createVideoUploadMiddleware, createImageUploadMiddleware } = require('./middleware/upload')
 
     const ControllerError = require('./errors/ControllerError')
 
@@ -119,10 +119,26 @@ module.exports = function(core) {
     const FileController = require('./controllers/FileController')
     const fileController = new FileController(core)
 
-    const upload = new multer({ dest: 'public/uploads/tmp' })
+    router.post('/upload/:id/image', rateLimit(core, 30), createImageUploadMiddleware(), function(request, response, next) {
+        fileController.uploadImage(request, response).catch(function(error) {
+            next(error)
+        })
+    })
 
-    router.post('/upload', rateLimit(core, 30), upload.single('file'), function(request, response, next) {
-        fileController.upload(request, response).catch(function(error) {
+    router.post('/upload/:id/video', rateLimit(core, 30), createVideoUploadMiddleware(), function(request, response, next) {
+        fileController.uploadVideo(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.post('/files', rateLimit(core, 30), function(request, response, next) {
+        fileController.postFiles(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.get('/file/:id/source', rateLimit(core, 2400), function(request, response, next) {
+        fileController.getFileSource(request, response).catch(function(error) {
             next(error)
         })
     })

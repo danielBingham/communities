@@ -1,12 +1,18 @@
 import { createSlice } from '@reduxjs/toolkit'
 
+import {
+    setInDictionary,
+    removeEntity,
+    setNull
+} from '/state/lib/slice'
+
 import { makeRequest } from '/state/lib/makeRequest'
 
 export const jobsSlice = createSlice({
     name: 'jobs',
     initialState: {
         /**
-         * A dictionary of job keyed by the job's name.
+         * A dictionary of job keyed by the job's id.
          */
         dictionary: {}
     },
@@ -20,24 +26,25 @@ export const jobsSlice = createSlice({
          * @param {Object}  action.payload  The dictionary of jobs we got
          * from the backend.
          */ 
-        setDictionary: function(state, action) {
-            state.dictionary = action.payload
-        },
-
-        /**
-         * Set a single item in the dictionary.
-         *
-         * @param {Object}  state   The redux state slice.
-         * @param {Object}  action  The redux action.
-         * @param {Object}  action.payload  The job object to add to the
-         * dictionary, overriding any set on its `name` key.
-         */
-        setInDictionary: function(state, action) {
-            state.dictionary[action.payload.name] = action.payload
-        }
+        setJobsInDictionary: setInDictionary,
+        removeJob: removeEntity,
+        setJobNull: setNull
     }
 
 })
+
+export const handleJobEvent = function(event) {
+    return function(dispatch, getState) {
+        if ( event.action === 'update' ) {
+            if ( 'entity' in event.context ) {
+                dispatch(jobsSlice.actions.setJobsInDictionary({ entity: event.context.entity }))
+            } else if ( 'dictionary' in event.context ) {
+                dispatch(jobsSlice.actions.setJobsInDictionary({ dictionary: event.context.dictionary }))
+            }
+        }
+    }
+}
+
 
 /**
  * GET /jobs
@@ -49,15 +56,16 @@ export const jobsSlice = createSlice({
  * request.
  */
 export const getJobs = function() {
-    return function(dispatch, getState) {
+    throw new Error('Not implemented.')
+    /*return function(dispatch, getState) {
         const endpoint = '/jobs'
 
         return dispatch(makeRequest('GET', endpoint, null,
             function(responseBody) {
-                dispatch(jobsSlice.actions.setDictionary(responseBody))
+                dispatch(jobsSlice.actions.setJobsInDictionary({ dictionary: responseBody }))
             }
         ))
-    }
+    }*/
 }
 
 /**
@@ -77,7 +85,7 @@ export const postJobs = function(name, data) {
 
         return dispatch(makeRequest('POST', endpoint, { name: name, data: data },
             function(responseBody) {
-                dispatch(jobsSlice.actions.setInDictionary(responseBody))
+                dispatch(jobsSlice.actions.setJobsInDictionary({ entity: responseBody }))
             }
         ))
     }
@@ -97,14 +105,18 @@ export const postJobs = function(name, data) {
  */
 export const getJob = function(id) {
     return function(dispatch, getState) {
-        const endpoint = `/job/${encodeUriComponent(id)}`
+        const endpoint = `/job/${encodeURIComponent(id)}`
 
         return dispatch(makeRequest('GET', endpoint, null,
             function(responseBody) {
-                dispatch(jobsSlice.actions.setInDictionary(responseBody))
+                dispatch(jobsSlice.actions.setJobsInDictionary({ entity: responseBody }))
+            },
+            function(status, response) {
+                dispatch(jobsSlice.actions.setJobNull(id))
             }
         ))
     }
 }
 
+export const { setJobsInDictionary, removeJob } = jobsSlice.actions
 export default jobsSlice.reducer

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef }  from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
+import { useFile } from '/lib/hooks/File'
 import { validateName, validateAbout } from '/lib/validation/user'
 
 import { UserCircleIcon } from '@heroicons/react/24/outline'
@@ -25,6 +26,8 @@ const UserProfileEditForm = function(props) {
 
     const [fileId, setFileId] = useState(null)
     const [fileState, setFileState] = useState(null)
+
+    const [file, fileRequest, fileReset] = useFile(fileId)
 
     const [name, setName] = useState('')
     const [about, setAbout] = useState('')
@@ -188,7 +191,7 @@ const UserProfileEditForm = function(props) {
                 <div className="user-profile-edit-form__profile-image">
                     <div>
                         { ! fileId && <UserCircleIcon className="user-profile-edit-form__placeholder" /> }
-                        { fileId && <DraftProfileImage
+                        { fileId && file && file.state === 'ready' && <DraftProfileImage
                                         ref={fileRef}
                                         fileId={fileId} 
                                         setFileId={setFileId} 
@@ -197,9 +200,10 @@ const UserProfileEditForm = function(props) {
                                         width={200} 
                                         deleteOnRemove={false} 
                         /> }
-                        { ! fileId && <FileUploadInput 
+                        { ( ! fileId || file?.state !== 'ready') && <FileUploadInput 
                             fileId={fileId}
                             setFileId={setFileId} 
+                            type="image"
                             types={[ 'image/jpeg', 'image/png' ]} 
                         /> }
                     </div>

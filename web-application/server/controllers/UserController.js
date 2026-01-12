@@ -79,11 +79,10 @@ module.exports = class UserController extends BaseController{
             const user = results.dictionary[userId]
             fileIds.push(user.fileId)
         }
-        const fileResults = await this.fileDAO.selectFiles(`WHERE files.id = ANY($1::uuid[])`, [ fileIds ])
-        const fileDictionary = {}
-        for(const file of fileResults) {
-            fileDictionary[file.id] = file
-        }
+        const fileResults = await this.fileDAO.selectFiles({ 
+            where: `files.id = ANY($1::uuid[])`, 
+            params: [ fileIds ]
+        })
 
         // Relationships
         let userRelationshipDictionary = {}
@@ -97,7 +96,7 @@ module.exports = class UserController extends BaseController{
         }
 
         return {
-            files: fileDictionary,
+            files: fileResults.dictionary,
             userRelationships: userRelationshipDictionary
         }
     }

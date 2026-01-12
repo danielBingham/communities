@@ -10,6 +10,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 import { useFeature } from '/lib/hooks/feature'
 
 import { useGroup } from '/lib/hooks/Group'
+import { useFile } from '/lib/hooks/File'
 
 import { patchGroup } from '/state/Group'
 
@@ -36,6 +37,7 @@ const GroupEditForm = function({ groupId }) {
     const [ rules, setRules ] = useLocalStorage('group.draft.rules', (group?.rules ? group.rules : ''))
     const [ fileId, setFileId] = useLocalStorage('group.draft.fileId', ( group?.fileId ? group.fileId : null))
     const [fileState, setFileState] = useState(null) 
+    const [file] = useFile(fileId)
 
     const [ titleErrors, setTitleErrors ] = useState(null)
     const [ aboutErrors, setAboutErrors ] = useState(null)
@@ -176,7 +178,7 @@ const GroupEditForm = function({ groupId }) {
             <div className="group-edit-form__group-image">
                 <div>
                     { ! fileId && <UserCircleIcon className="placeholder" /> }
-                    { fileId && <DraftProfileImage 
+                    { fileId && file?.state === 'ready' && <DraftProfileImage 
                         ref={fileRef}
                         fileId={fileId} 
                         setFileId={setFileId} 
@@ -185,9 +187,10 @@ const GroupEditForm = function({ groupId }) {
                         width={200} 
                         deleteOnRemove={false} 
                     /> }
-                    { ! fileId && <FileUploadInput 
+                    { ( ! fileId || file?.state !== 'ready') && <FileUploadInput 
                         fileId={fileId}
                         setFileId={setFileId} 
+                        type="image"
                         types={[ 'image/jpeg', 'image/png' ]} 
                     /> }
                 </div>

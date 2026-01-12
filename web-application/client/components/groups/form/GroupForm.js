@@ -12,6 +12,7 @@ import { useLocalStorage } from '/lib/hooks/useLocalStorage'
 import { useRequest } from '/lib/hooks/useRequest'
 import { useFeature } from '/lib/hooks/feature'
 import { useGroupPermissionContext } from '/lib/hooks/Group'
+import { useFile } from '/lib/hooks/File'
 
 import { postGroups } from '/state/Group'
 
@@ -45,6 +46,7 @@ const GroupForm = function({ parentId }) {
     const [ rules, setRules ] = useLocalStorage('group.draft.rules', '')
     const [ fileId, setFileId] = useLocalStorage('group.draft.fileId', null)
     const [ fileState, setFileState] = useState(null)
+    const [file] = useFile(fileId)
 
     const [ titleErrors, setTitleErrors ] = useState(null) 
     const [ slugErrors, setSlugErrors ] = useState(null)
@@ -264,7 +266,7 @@ const GroupForm = function({ parentId }) {
             <div className="group-form__group-image">
                 <div>
                     { ! fileId && <UserCircleIcon className="placeholder" /> }
-                    { fileId && <DraftProfileImage 
+                    { fileId && file?.state === 'ready' && <DraftProfileImage 
                         ref={fileRef}
                         fileId={fileId} 
                         setFileId={setFileId} 
@@ -273,9 +275,10 @@ const GroupForm = function({ parentId }) {
                         width={200} 
                         deleteOnRemove={false} 
                     /> }
-                    { ! fileId && <FileUploadInput 
+                    { ( ! fileId || file?.state !== 'ready') && <FileUploadInput 
                         fileId={fileId}
                         setFileId={setFileId} 
+                        type="image"
                         types={[ 'image/jpeg', 'image/png' ]} 
                     /> }
                 </div>

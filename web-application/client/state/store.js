@@ -12,7 +12,7 @@ import GroupReducer from './Group'
 import GroupMemberReducer from './GroupMember'
 import GroupModerationReducer from './GroupModeration'
 import GroupSubscriptionReducer from './GroupSubscription'
-import jobsReducer from './jobs'
+import jobsReducer, { handleJobEvent } from './jobs'
 import notificationsReducer, { handleNotificationEvent } from './notifications'
 import LinkPreviewReducer from './LinkPreview'
 import PostReducer from './Post'
@@ -88,6 +88,8 @@ export const createSocketMiddleware = function(socket) {
                             dispatch(confirmUnsubscription({ entity: event.entity, action: event.context.action }))
                         } else if ( event.entity === 'Notification' ) {
                             dispatch(handleNotificationEvent(event))
+                        } else if ( event.entity === 'Job' ) {
+                            dispatch(handleJobEvent(event))
                         }
                     })
 
@@ -103,7 +105,9 @@ export const createSocketMiddleware = function(socket) {
                             audience: currentUser?.id,
                             action: 'subscribe',
                             context: {
+                                ...action.payload.context,
                                 action: action.payload.action
+
                             }
                         }
                         socket.send(event)

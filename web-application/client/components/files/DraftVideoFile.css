@@ -1,0 +1,18 @@
+.file {
+    position: relative;
+}
+.file video {
+    width: 100%;
+}
+.file .remove {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 9;
+}
+.file .remove svg {
+    width: 30px;
+    height: 30px;
+    color: var(--primary-color-lightest);
+    filter: drop-shadow(0px 0px 1px black);
+}

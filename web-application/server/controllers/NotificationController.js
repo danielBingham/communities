@@ -17,7 +17,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-const { NotificationDAO, NotificationEvents } = require('@communities/backend')
+const { NotificationDAO } = require('@communities/backend')
 
 const ControllerError = require('../errors/ControllerError')
 
@@ -27,12 +27,6 @@ module.exports = class NotificationController {
         this.core = core
 
         this.notificationDAO = new NotificationDAO(core)
-
-        this.notificationEvents = new NotificationEvents(core)
-        this.core.events.registerHandler('Notification', [ 'create' ], (event) => {
-            return this.notificationEvents.handle(event)
-        })
-
     }
 
     /**

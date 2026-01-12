@@ -1,10 +1,11 @@
 import logger from '/logger'
 
 import { setFilesInDictionary, removeFile } from '/state/File/slice'
-import { setGroupsInDictionary, removeGroup } from '/state/Group'
+import { setGroupsInDictionary, removeGroup } from '/state/Group/slice'
 import { setGroupMembersInDictionary, removeGroupMember } from '/state/GroupMember/slice'
 import { setGroupModerationsInDictionary, removeGroupModeration } from '/state/GroupModeration/slice'
 import { setGroupSubscriptionsInDictionary, removeGroupSubscription } from '/state/GroupSubscription/slice'
+import { setJobsInDictionary, removeJob } from '/state/jobs'
 import { setLinkPreviewsInDictionary, removeLinkPreview } from '/state/LinkPreview/slice'
 import { setPostsInDictionary, removePost } from '/state/Post/slice'
 import { setPostCommentsInDictionary, removePostComment } from '/state/PostComment/slice'
@@ -20,6 +21,7 @@ const entityMap = {
     groupMembers: { set: setGroupMembersInDictionary, remove: removeGroupMember },
     groupModerations: { set: setGroupModerationsInDictionary, remove: removeGroupModeration },
     groupSubscriptions: { set: setGroupSubscriptionsInDictionary, remove: removeGroupSubscription },
+    jobs: { set: setJobsInDictionary, remove: removeJob },
     linkPreviews: { set: setLinkPreviewsInDictionary, remove: removeLinkPreview },
     posts: { set: setPostsInDictionary, remove: removePost },
     postComments: { set: setPostCommentsInDictionary, remove: removePostComment },

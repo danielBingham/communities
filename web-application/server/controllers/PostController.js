@@ -139,8 +139,10 @@ module.exports = class PostController {
                 fileIds.push(post.fileId)
             }
         }
-        const postFileResults = await this.fileDAO.selectFiles(`WHERE files.id = ANY($1::uuid[])`, [fileIds])
-        const fileDictionary = postFileResults.reduce((dictionary, file) => { dictionary[file.id] = file; return dictionary }, {})
+        const postFileResults = await this.fileDAO.selectFiles({
+            where: `files.id = ANY($1::uuid[])`, 
+            params: [fileIds]
+        })
 
         const linkPreviewIds = []
         for(const postId of results.list) {
@@ -191,7 +193,7 @@ module.exports = class PostController {
         })
 
         const relations = {
-            files: fileDictionary,
+         //   files: fileDictionary,
             groups: groupResults.dictionary,
             groupMembers: groupMemberResults.dictionary,
             groupModerations: groupModerationResults.dictionary,

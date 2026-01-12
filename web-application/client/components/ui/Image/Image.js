@@ -1,25 +1,41 @@
-import { Capacitor } from '@capacitor/core'
-
-import FetchImage from './FetchImage/FetchImage'
-import HtmlImage from './HtmlImage/HtmlImage'
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media 
+ *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
 
 import './Image.css'
 
-const Image = function({ id, src, altText, fallbackIcon, width, ref, onLoad }) {
-
-    if ( id ) {
-        return ( <FetchImage id={id}  width={width} ref={ref} onLoad={onLoad} fallbackIcon={fallbackIcon} /> )
-    } else if ( src ) {
-        return ( <HtmlImage src={src} width={width} ref={ref} onLoad={onLoad} fallbackIcon={fallbackIcon} /> )
+const Image = function({ className, src, altText, ref, onLoad, onError }) {
+    if ( ! src) {
+        console.error(new Error(`'src' is required.`))
+        return null
     }
 
-    /*if ( Capacitor.getPlatform() === 'web' || Capacitor.getPlatform() === 'android' ) {
-    } else if ( Capacitor.getPlatform() === 'ios' ) {
-        return ( <FetchImage id={id} src={src} width={width} ref={ref} onLoad={onLoad} /> )
-    } else {
-        logger.error(`Unhandled Platform(${Capacitor.getPlatform()}) in Image.`) 
-        return null
-    }*/
+    return (
+        <img 
+            ref={ref}
+            src={src} 
+            className={`image ${className ? className : ''}`}
+            onLoad={onLoad}
+            onError={onError}
+            crossOrigin="anonymous"
+        />
+    )
 }
 
 export default Image 

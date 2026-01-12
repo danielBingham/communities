@@ -25,6 +25,7 @@ const UsernameMigration = require('../migrations/UsernameMigration')
 const SubgroupMigration = require('../migrations/SubgroupMigration')
 const Issue330GroupShortDescriptionAndRulesMigration = require('../migrations/Issue330GroupShortDescriptionAndRulesMigration')
 const Issue252GroupSubscriptionMigration = require('../migrations/Issue252GroupSubscriptionMigration')
+const Issue67VideoUploadsMigration = require('../migrations/Issue67VideoUploadsMigration')
 
 const ServiceError = require('../errors/ServiceError')
 const MigrationError = require('../errors/MigrationError')
@@ -58,30 +59,24 @@ module.exports = class FeatureService {
          */
         this.features = {
             'example':  {
-                dependsOn: [],
-                conflictsWith: [],
                 migration: new ExampleMigration(core)
             },
             'issue-198-auto-generate-link-previews': {
-                dependsOn: [],
-                conflictsWith: [],
                 migration: new UsernameMigration(core)
             },
             'issue-165-subgroups': {
-                dependsOn: [],
-                conflictsWith: [],
                 migration: new SubgroupMigration(core)
             },
             'issue-330-group-short-description-and-rules': {
-                dependsOn: [],
-                conflictsWith: [],
                 migration: new Issue330GroupShortDescriptionAndRulesMigration(core)
             },
             'issue-252-group-subscriptions': {
-                dependsOn: [],
-                conflictWith: [],
                 migration: new Issue252GroupSubscriptionMigration(core)
-            }
+            },
+            'issue-67-video-uploads': {
+                migration: new Issue67VideoUploadsMigration(core)
+            },
+            'video-uploads': {}
         }
     }
 
@@ -130,11 +125,6 @@ module.exports = class FeatureService {
             }
         } 
 
-        if ( name in this.features ) {
-            feature.conflictsWith = this.features[name].conflictsWith
-            feature.dependsOn = this.features[name].dependsOn
-        }
-
         return feature 
     }
 
@@ -160,7 +150,9 @@ module.exports = class FeatureService {
         await this.updateFeatureStatus(name, 'initializing')
 
         try {
-            await this.features[name].migration.initialize()
+            if ( 'migration' in this.features[name] ) {
+                await this.features[name].migration.initialize()
+            }
         } catch (error) {
             // If we get a migration error and the status is 'rolled-back',
             // that means the migration was safely able to catch its own error
@@ -194,7 +186,9 @@ module.exports = class FeatureService {
         await this.updateFeatureStatus(name, 'migrating')
 
         try {
-            await this.features[name].migration.up()
+            if ( 'migration' in this.features[name] ) {
+                await this.features[name].migration.up()
+            }
         } catch (error) {
             // See comment on initialize()
             if ( error instanceof MigrationError && error.status == 'rolled-back') {
@@ -233,7 +227,9 @@ module.exports = class FeatureService {
         await this.updateFeatureStatus(name, 'rolling-back')
 
         try {
-            await this.features[name].migration.down()
+            if ( 'migration' in this.features[name] ) {
+                await this.features[name].migration.down()
+            }
         } catch (error) {
             // See comment on initialize()
             if ( error instanceof MigrationError && error.status == 'rolled-back') {
@@ -254,7 +250,9 @@ module.exports = class FeatureService {
         await this.updateFeatureStatus(name, 'uninitializing')
 
         try {
-            await this.features[name].migration.uninitialize()
+            if ( 'migration' in this.features[name] ) {
+                await this.features[name].migration.uninitialize()
+            }
         } catch (error) {
             // See comment on initialize()
             if ( error instanceof MigrationError && error.status == 'rolled-back') {
