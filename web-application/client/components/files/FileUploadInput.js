@@ -88,12 +88,10 @@ const FileUploadInput = function({ text, fileId, setFileId, type, types, onChang
 
     const onError = function() {
         setFileId(null)
-    }
-
-    useEffect(function() {
-        return function() {
+        if ( hiddenFileInput.current !== null && hiddenFileInput.current !== undefined) {
+            hiddenFileInput.current.value = null
         }
-    }, [])
+    }
 
     useEffect(function() {
         if ( postRequest?.state === 'fulfilled' ) {

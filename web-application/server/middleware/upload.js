@@ -72,7 +72,7 @@ const createImageUploadMiddleware = function() {
             }
         },
         limits: {
-            fileSize: 10 * 1024 * 1024 // 10MB filesize limit
+            fileSize: 20 * 1024 * 1024 // 20MB filesize limit
         }
     }).single('file')
 
