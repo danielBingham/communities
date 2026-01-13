@@ -36,6 +36,7 @@ const JobError = function({ message, job, onContinue }) {
                 state = State.UnknownFailure 
             }
 
+            console.log(job)
             return (
                 <ErrorModal onContinue={onContinue}>
                     { state === State.UnknownFailure && <p>{ message } failed.</p> }

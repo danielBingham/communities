@@ -48,6 +48,7 @@ const getResizeImageJob = function(core) {
             done(null)
         } catch (error) {
             core.logger.error(error)
+            job.progress({ step: 'failed', stepDescription: error.message, progress: 100 })
             done(error)
         }
     }

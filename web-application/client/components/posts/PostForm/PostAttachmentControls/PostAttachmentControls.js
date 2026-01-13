@@ -77,7 +77,7 @@ const PostAttachmentControls = function({ postId, groupId, sharedPostId }) {
                     fileId={draft.fileId}
                     setFileId={setFileId}
                     type='video'
-                    types={[ 'video/mp4' ]}
+                    types={[ 'video/mp4', 'video/quicktime' ]}
                 />
             </div> }
         </div>

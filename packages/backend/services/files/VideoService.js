@@ -51,12 +51,12 @@ module.exports = class VideoService {
     static SUPPORTED_MIMETYPES = [ 
         'video/mp4', // mp4
         'video/quicktime', // mov
-        'video/x-msvideo', // avi
-        'video/webm' // webm
+        //'video/x-msvideo', // avi
+        //'video/webm' // webm
 
     ]
 
-    static SUPPORTED_EXTENSIONS = [ '.mp4', '.mov', '.avi', '.webm' ]
+    static SUPPORTED_EXTENSIONS = [ '.mp4', '.mov', /*'.avi', '.webm'*/ ]
 
     constructor(core) {
         this.core = core
