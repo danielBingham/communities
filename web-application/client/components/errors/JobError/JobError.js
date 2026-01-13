@@ -38,7 +38,8 @@ const JobError = function({ message, job, onContinue }) {
 
             return (
                 <ErrorModal onContinue={onContinue}>
-                    { state === State.UnknownFailure && <div>{ message } failed.</div> }
+                    { state === State.UnknownFailure && <p>{ message } failed.</p> }
+                    { 'progress' in job && 'stepDescription' in job?.progress && <p>{ job.progress.stepDescription }</p> }
                 </ErrorModal>
             )
         }

@@ -18,7 +18,7 @@
  *
  ******************************************************************************/
 
-const { VideoService, FileDAO } = require('@communities/backend')
+const { VideoService, FileDAO, ServiceError } = require('@communities/backend')
 
 const getProcessVideoJob = function(core) {
     return async function(job, done) {
@@ -48,7 +48,16 @@ const getProcessVideoJob = function(core) {
         } catch (error) {
             core.logger.error(error)
             try {
-                job.progress({ step: 'failed', stepDescription: `Job failed due to error.`, progress: 100 })
+                if ( error instanceof ServiceError ) {
+                    if ( error.type === 'processed-file-too-large' ) {
+                        job.progress({ step: 'failed', stepDescription: `Your file was too large after processing.  This can happen if you upload a pre-optimized file.  Files must be no larger than 70 MB after processing.`, progress: 100})
+                    } else {
+                        job.progress({ step: 'failed', stepDescription: `File failed to process. This could be because the file was corrupted or invalid in some way.`, progress: 100 })
+                    }
+                } else {
+                    job.progress({ step: 'failed', stepDescription: `File failed to process. This could be because the file was corrupted or invalid in some way.`, progress: 100 })
+                }
+
                 await fileDAO?.updateFile({
                     id: job.data.fileId,
                     state: 'error'
