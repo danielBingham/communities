@@ -239,6 +239,9 @@ const GroupForm = function({ parentId }) {
     }, [ request, fileId])
 
     let baseError = null 
+    if ( titleErrors !== null || slugErrors !== null || typeErrors !== null || postPermissionsErrors !== null || aboutErrors !== null || shortDescriptionErrors !== null || rulesErrors !== null ) {
+        baseError = (<span>One or more fields has an invalid value.  Please fix the error and try again!</span>)
+    }
 
     if ( parentId !== undefined && (parentGroup === undefined || requests.hasPending() )) {
         return (

@@ -24,4 +24,8 @@
 .group-form .group-form__controls {
     text-align: center;
 }
-
+.group-form__errors {
+    padding: 10px;
+    text-align: center;
+    color: var(--danger-color-main);
+}
