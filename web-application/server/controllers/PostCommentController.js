@@ -229,7 +229,9 @@ module.exports = class PostCommentController {
             // they comment.
             if ( post.type === 'group' && post.groupId !== null && post.groupId !== undefined ) {
                 const groupSubscription = await this.groupSubscriptionDAO.getGroupSubscriptionByGroupAndUser(post.groupId, currentUser.id)
-                if ( groupSubscription.status === 'unsubscribed' ) {
+                // If they are commenting on a public post in a group, then
+                // they won't have a group subscription.
+                if ( groupSubscription?.status === 'unsubscribed' ) {
                     createSubscription = false
                 }
             }
