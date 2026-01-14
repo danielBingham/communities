@@ -37,9 +37,14 @@ const GroupForm = function({ parentId }) {
     const parentGroup = context.group
     const canCreateGroup = can(currentUser, Actions.create, Entities.Group, context)
 
+    let defaultType = 'private'
+    if ( parentGroup?.type === 'hidden' || parentGroup?.type === 'hidden-private' || parentGroup?.type === 'hidden-open' ) {
+        defaultType = 'hidden-private'
+    }
+
     const [ title, setTitle ] = useLocalStorage('group.draft.title', '')
     const [ slug, setSlug ] = useLocalStorage('group.draft.slug', '')
-    const [ type, setType ] = useLocalStorage('group.draft.type', ( parentGroup?.type === 'hidden' ? 'hidden-private' : 'private'))
+    const [ type, setType ] = useLocalStorage('group.draft.type', defaultType)
     const [ postPermissions, setPostPermissions ] = useLocalStorage('group.draft.postPermissions', 'members')
     const [ about, setAbout ] = useLocalStorage('group.draft.about', '')
     const [ shortDescription, setShortDescription ] = useLocalStorage('group.draft.shortDescription', '')
