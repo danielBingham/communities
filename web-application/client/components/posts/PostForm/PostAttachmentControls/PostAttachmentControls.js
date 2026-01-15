@@ -24,6 +24,7 @@ import { useFile } from '/lib/hooks/File'
 import { useGroup } from '/lib/hooks/Group'
 import { usePost } from '/lib/hooks/Post'
 import { usePostDraft } from '/lib/hooks/usePostDraft'
+import { useFeature } from '/lib/hooks/feature/useFeature'
 
 import FileUploadInput from '/components/files/FileUploadInput'
 import Spinner from '/components/Spinner'
@@ -35,6 +36,9 @@ const PostAttachmentControls = function({ postId, groupId, sharedPostId }) {
 
     const [post] = usePost(postId) 
     const [group] = useGroup(post !== null ? post.groupId : groupId)
+    
+    const hasVideoUploads = useFeature('issue-67-video-uploads')
+    const videoUploadsEnabled = useFeature('video-uploads')
 
     const [draft, setDraft] = usePostDraft(postId, groupId, sharedPostId)
 
@@ -71,7 +75,7 @@ const PostAttachmentControls = function({ postId, groupId, sharedPostId }) {
                     types={[ 'image/jpeg', 'image/png' ]} 
                 /> 
             </div> } 
-        { ( file === undefined || file === null || ( file?.kind === 'video' && file?.state !== 'ready' )) && <div className="post-form__video">
+        { ( file === undefined || file === null || ( file?.kind === 'video' && file?.state !== 'ready' )) && ( hasVideoUploads === true && videoUploadsEnabled === true ) && <div className="post-form__video">
                 <FileUploadInput
                     text="Add Video"
                     fileId={draft.fileId}
