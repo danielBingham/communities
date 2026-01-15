@@ -33,7 +33,7 @@ const FlagPostCommentForGroup = function({ postId, postCommentId} ) {
     const [post, postRequest] = usePost(postId)
     const [comment, commentRequest] = usePostComment(postId, postCommentId)
 
-    const [groupModeration, groupModerationRequest] = useGroupModeration(comment?.groupModerationId)
+    const [groupModeration, groupModerationRequest] = useGroupModeration(post?.groupId, comment?.groupModerationId)
 
     const [context, requests] = useGroupPermissionContext(currentUser, post?.groupId)
 

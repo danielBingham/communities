@@ -21,10 +21,12 @@ import './PostComment.css'
 const PostComment = function({ postId, id }) {
     const [highlight, setHighlight] = useState(false)
 
+    const [post, postRequest] = usePost(postId)
     const [comment, request] = usePostComment(postId, id)
     const [siteModeration, siteModerationRequest] = useSiteModeration(comment?.siteModerationId)
-    const [groupModeration, groupModerationRequest] = useGroupModeration(comment?.groupModerationId)
-    
+    const [groupModeration, groupModerationRequest] = useGroupModeration(post?.groupId, comment?.groupModerationId)
+   
+    // usePostLink doesn't query, so this won't double query.
     const postLink = usePostLink(postId)
 
     const location = useLocation()

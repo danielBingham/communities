@@ -7,9 +7,9 @@ import PostComment from '/components/posts/PostComment'
 
 import './PostCommentAwaitingGroupModeration.css'
 
-const PostCommentAwaitingGroupModeration = function({ id }) {
+const PostCommentAwaitingGroupModeration = function({ groupId, id }) {
 
-    const [moderation] = useGroupModeration(id)
+    const [moderation] = useGroupModeration(groupId, id)
     const [post] = usePost(moderation?.postId)
     const link = usePostLink(post?.id)
 

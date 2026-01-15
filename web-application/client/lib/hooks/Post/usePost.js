@@ -24,17 +24,21 @@ import { useRequest } from '/lib/hooks/useRequest'
 
 import { getPost } from '/state/Post'
 
-export const usePost = function(postId) {
+export const usePost = function(postId, options) {
     const post = useSelector((state) => postId && postId in state.Post.dictionary ? state.Post.dictionary[postId] : null)
 
     const [request, makeRequest, resetRequest ] = useRequest()
 
     const refresh = function() {
-        makeRequest(getPost(postId))
+        if ( options?.noQuery !== true ) {
+            makeRequest(getPost(postId))
+        }
     }
 
     useEffect(() => {
-        if ( postId && post === null && request === null ) {
+        if ( postId && post === null && request === null 
+            && options?.noQuery !== true && options?.skip !== true
+        ) {
             makeRequest(getPost(postId))
         }
     }, [ postId, post, request ])
