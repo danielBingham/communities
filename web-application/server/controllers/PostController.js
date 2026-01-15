@@ -613,7 +613,7 @@ module.exports = class PostController {
         let shouldSubscribe = true
         if ( entity.type === 'group' && entity.groupId !== null && entity.groupId !== undefined ) {
             const subscription = await this.groupSubscriptionDAO.getGroupSubscriptionByGroupAndUser(post.groupId, currentUser.id)
-            if ( subscription.status === 'unsubscribed' ) {
+            if ( subscription?.status === 'unsubscribed' ) {
                 shouldSubscribe = false
             }
         }
