@@ -56,7 +56,7 @@ CREATE TABLE users (
 
     email text NOT NULL,
     password text,
-    birthday text DEFAULT '',
+    birthdate text DEFAULT '',
 
     status user_status DEFAULT 'unconfirmed',
     permissions user_permissions DEFAULT 'user',
