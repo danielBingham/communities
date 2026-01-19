@@ -95,6 +95,7 @@ module.exports = class VideoService {
         }
 
         try { 
+            // ffmpeg -i <file> -c:v libx264 -preset medium -profile:v high -level:v 4.0 -crf 23 -c:a aac -b:a 128k -movflags +faststart -vf scale=650:-1 <file>
             const ffmpegArgs = [
                 '-i', localOriginalFile,
                 '-c:v', 'libx264',
