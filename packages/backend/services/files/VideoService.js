@@ -51,12 +51,12 @@ module.exports = class VideoService {
     static SUPPORTED_MIMETYPES = [ 
         'video/mp4', // mp4
         'video/quicktime', // mov
-        'video/x-msvideo', // avi
-        'video/webm' // webm
+        //'video/x-msvideo', // avi
+        //'video/webm' // webm
 
     ]
 
-    static SUPPORTED_EXTENSIONS = [ '.mp4', '.mov', '.avi', '.webm' ]
+    static SUPPORTED_EXTENSIONS = [ '.mp4', '.mov', /*'.avi', '.webm'*/ ]
 
     constructor(core) {
         this.core = core
@@ -110,6 +110,13 @@ module.exports = class VideoService {
             ]
             this.core.logger.info(`Reformatting file "${localOriginalFile}" to "${localNewFile}"...`)
             await this.processService.run('ffmpeg', ffmpegArgs)
+
+            this.core.logger.info(`Checking size of the processed file...`)
+            const size = this.local.getFileSize(localNewFile)
+            // If the processed size is greater than 100 MB, error.
+            if ( size > 70 * 1024 * 1024 ) {
+                throw new ServiceError('processed-file-too-large', 'Processed files can be no larger than 70 MB.')
+            }
 
             this.core.logger.info(`Uploading the newly formatted file...`)
             await this.s3.uploadFile(localNewFile, targetPath)

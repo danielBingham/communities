@@ -369,7 +369,7 @@ module.exports = class FileController {
         } 
 
         if ( this.core.features.has('issue-67-video-uploads') ) {
-            if ( variant !== undefined && variant !== null && variant !== 'full' && ! file.variants.includes(variant) ) {
+            if ( variant !== undefined && variant !== null && variant !== 'full' && ! file.variants?.includes(variant) ) {
                 throw new ControllerError(404, 'not-found', 
                     `Failed to find variant, '${variant}', of File(${id}).`,
                     `Failed to find variant, '${variant}', of File(${id}).`)
@@ -436,7 +436,7 @@ module.exports = class FileController {
         if ( this.core.features.has('issue-67-video-uploads') ) {
             const variant = request.query?.variant
 
-            if ( variant !== undefined && variant !== null && variant !== 'full' && file.variants.includes(variant) ) {
+            if ( variant !== undefined && variant !== null && variant !== 'full' && file.variants?.includes(variant) ) {
                  sources[variant] = await this.s3.getSignedUrl(this.fileService.getPath(file, variant))
             }
         }

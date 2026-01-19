@@ -1,5 +1,25 @@
-import React, { useState, useEffect, useRef }  from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media 
+ *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
+import { useState, useEffect, useRef }  from 'react'
+import { useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 
 import { useRequest } from '/lib/hooks/useRequest'
 import { useFile } from '/lib/hooks/File'
@@ -9,9 +29,10 @@ import { UserCircleIcon } from '@heroicons/react/24/outline'
 
 import { patchUser } from '/state/User'
 
-import UserProfileImage from '/components/users/UserProfileImage'
 import DraftProfileImage from '/components/files/DraftProfileImage'
 import FileUploadInput from '/components/files/FileUploadInput'
+
+import { RequestErrorModal } from '/components/errors/RequestError'
 
 import Input from '/components/ui/Input'
 import TextBox from '/components/generic/text-box/TextBox'
@@ -21,8 +42,6 @@ import Spinner from '/components/Spinner'
 import './UserProfileEditForm.css'
 
 const UserProfileEditForm = function(props) {
-
-    // ======= Render State =========================================
 
     const [fileId, setFileId] = useState(null)
     const [fileState, setFileState] = useState(null)
@@ -37,17 +56,13 @@ const UserProfileEditForm = function(props) {
     
     const fileRef = useRef(null)
 
-    // ======= Request Tracking =====================================
-
     const [ request, makeRequest, resetRequest ] = useRequest()
-
-    // ======= Redux State ==========================================
 
     const currentUser = useSelector((state) =>  state.authentication.currentUser)
 
     const madeChange = fileId != currentUser.fileId || name != currentUser.name || about != currentUser.about
 
-    // ======= Actions and Event Handling ===========================
+    const navigate = useNavigate()
 
     const isValid = function(field) {
         let error = false
@@ -126,6 +141,8 @@ const UserProfileEditForm = function(props) {
         } else {
             setFileId(currentUser.fileId)
         }
+        
+        navigate(`/${currentUser.username}`)
     }
 
     // ======= Effect Handling ======================================

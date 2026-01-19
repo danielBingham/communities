@@ -58,4 +58,9 @@ module.exports = class LocalFileService {
     readFile(path) {
         return fs.readFileSync(path)
     }
+
+    getFileSize(path) {
+        const stats = fs.statSync(path)
+        return stats?.size
+    }
 }

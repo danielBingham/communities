@@ -22,6 +22,7 @@ import { PhotoIcon, VideoCameraIcon } from '@heroicons/react/24/solid'
 import logger from '/logger'
 
 import { useFile, useFileSource } from '/lib/hooks/File'
+import { useFeature } from '/lib/hooks/feature/useFeature'
 
 import Image from '/components/ui/Image'
 import Video from '/components/ui/Video'
@@ -48,6 +49,9 @@ const File = function({ id, width, type, fallback, className, onLoad, onError, r
     const [rootUrl, rootRequest, refreshRoot] = useFileSource(url === null ? file?.id : null, 'full')
     const [rootThumbnailUrl, rootThumbnailUrlRequest] = useFileSource(thumbnailUrl === null ? thumbnail?.id : null, 'full')
 
+    const hasVideoUploads = useFeature('issue-67-video-uploads')
+    const videoUploadsEnabled = useFeature('video-uploads')
+
     const onErrorInternal = function(event) {
         logger.error(`Failed to load file with errror: `, event.target.error) 
         if ( 'error' in event.target && event.target.error.code === 2 ) {
@@ -70,6 +74,7 @@ const File = function({ id, width, type, fallback, className, onLoad, onError, r
     ) {
         return ( <Spinner /> )
     }
+
 
     if ( file?.kind === 'video' && 
         ( thumbnail === undefined || thumbnailUrl === undefined || (thumbnailUrl === null && rootThumbnailUrl === undefined))
@@ -96,6 +101,10 @@ const File = function({ id, width, type, fallback, className, onLoad, onError, r
         return null
     }
 
+    if ( filetype === 'video' && (hasVideoUploads !== true || videoUploadsEnabled !== true) ) {
+        return null
+    }
+
     let thumb = thumbnailUrl
     if ( thumb === null || thumb === undefined ) {
         thumb = rootThumbnailUrl
@@ -106,13 +115,13 @@ const File = function({ id, width, type, fallback, className, onLoad, onError, r
             return ( <Video className={`file ${className ? className : ''}`} src={url} poster={thumb}  onLoad={onLoad} onError={onErrorInternal} ref={ref} />)
         }
 
-        return ( <Image className={`file ${className ? className : ''}`} src={url} onLoad={onLoad} onError={onErrorInternal} ref={ref} /> )
+        return ( <Image className={`file ${className ? className : ''}`} src={url} onLoad={onLoad} onError={onErrorInternal} crossOrigin={true} ref={ref} /> )
     } else if ( url === null && rootUrl !== null ) {
         if ( filetype === 'video' ) {
             return ( <Video className={`file ${className ? className : ''}`} src={rootUrl} poster={thumb} onLoad={onLoad} onError={onErrorInternal} ref={ref} />)
         }
 
-        return ( <Image className={`file ${className ? className : ''}`} src={rootUrl} onLoad={onLoad} onError={onErrorInternal} ref={ref} /> )
+        return ( <Image className={`file ${className ? className : ''}`} src={rootUrl} onLoad={onLoad} onError={onErrorInternal} crossOrigin={true} ref={ref} /> )
     }
 }
 

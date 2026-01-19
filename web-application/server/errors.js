@@ -17,7 +17,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-
+const multer = require('multer') 
 const ControllerError = require('./errors/ControllerError')
 
 const createErrorsMiddleware = function(core) {
@@ -43,6 +43,22 @@ const createErrorsMiddleware = function(core) {
                     }
                 })
                 return 
+            } else if ( error instanceof multer.MulterError ) {
+                if ( error.code === 'LIMIT_FILE_SIZE' ) {
+                    response.status(400).json({
+                        error: {
+                            type: 'upload-error',
+                            message: 'Your file was too large.  Images must be under 10 MB and Videos under 700 MB.' 
+                        }
+                    })
+                } else {
+                    response.status(400).json({
+                        error: {
+                            type: 'upload-error',
+                            message: error.message
+                        }
+                    })
+                }
             } else { 
                 response.status(500).json({ 
                     error: {

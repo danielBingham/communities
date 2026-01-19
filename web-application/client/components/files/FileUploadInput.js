@@ -88,12 +88,10 @@ const FileUploadInput = function({ text, fileId, setFileId, type, types, onChang
 
     const onError = function() {
         setFileId(null)
-    }
-
-    useEffect(function() {
-        return function() {
+        if ( hiddenFileInput.current !== null && hiddenFileInput.current !== undefined) {
+            hiddenFileInput.current.value = null
         }
-    }, [])
+    }
 
     useEffect(function() {
         if ( postRequest?.state === 'fulfilled' ) {
@@ -174,7 +172,8 @@ const FileUploadInput = function({ text, fileId, setFileId, type, types, onChang
             { state === State.isPreparingUpload && <div><Spinner local={true} /> <span>Preparing the upload...</span></div> }
             { state === State.isPendingUpload && <div><Spinner local={true} /> <span>Upload prepared. Upload will begin shortly...</span></div> }
             { state === State.isUploading && <div><Spinner local={true} /> <span>Uploading.  This might take a while...</span></div> }
-            { state === State.isProcessing && <div><Spinner local={true} /> <span>Processing. { job ? `${job.progress.progress}% complete.` : '' }  This might take a while...</span></div> }
+            { state === State.isProcessing && type === 'image' && <div><Spinner local={true} /> <span>Processing. { job ? `${job.progress.progress}% complete.` : '' }  This might take a while...</span></div> }
+            { state === State.isProcessing && type === 'video' && <div><Spinner local={true} /> <span>Processing. This might take a while...</span></div> }
             { state === State.isAwaitingFile && <div className="upload-input">
                 <Button type="primary" onClick={(e) => hiddenFileInput.current.click()}>{ icon } <span className="file-upload-button-text"> { text ? text : 'Upload Image' }</span></Button>
                 { typeErrorView }

@@ -53,7 +53,7 @@ const createVideoUploadMiddleware = function() {
             }
         },
         limits: {
-            fileSize: 500 * 1024 * 1024 // 500MB filesize limit (It's going to shrink a lot after we process it)
+            fileSize: 700 * 1024 * 1024 // 700MB filesize limit (It's going to shrink a lot after we process it)
         }
     }).single('file')
 }
@@ -68,11 +68,11 @@ const createImageUploadMiddleware = function() {
             } else {
                 callback(new ControllerError(400, 'invalid',
                     `Attempt to upload an image with an unsupported type: '${file.mimetype}'.`,
-                    `Unsupported image type or extension.  Supported types are: .jpg, .jpeg, .png`), false)
+                    `Unsupported image type or extension.  Supported types are: .jpg, .png`), false)
             }
         },
         limits: {
-            fileSize: 10 * 1024 * 1024 // 10MB filesize limit
+            fileSize: 20 * 1024 * 1024 // 20MB filesize limit
         }
     }).single('file')
 

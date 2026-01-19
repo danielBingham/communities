@@ -13,6 +13,7 @@
 .card.terms-of-service-notice__terms-card {
     max-width: 600px;
     padding: 20px;
+    background-color: white;
 }
 .terms-of-service-notice__close {
     padding: 10px;
