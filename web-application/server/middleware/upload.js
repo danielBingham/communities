@@ -29,7 +29,7 @@ const ControllerError = require('../errors/ControllerError')
 
 const storage = multer.diskStorage({
     destination: (request, file, callback) => {
-        callback(null, 'public/uploads/tmp')
+        callback(null, 'tmp')
     },
     filename: (request, file, callback) => {
         // Generate a secure, unique filename to prevent collisions and path traversal
