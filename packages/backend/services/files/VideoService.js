@@ -106,7 +106,7 @@ module.exports = class VideoService {
                 '-c:a', 'aac',
                 '-b:a', '128k',
                 '-movflags', '+faststart',
-                '-vf', 'scale=650:-1',
+                '-vf', 'scale=650:-2',
                 localNewFile,
             ]
             this.core.logger.info(`Reformatting file "${localOriginalFile}" to "${localNewFile}"...`)
