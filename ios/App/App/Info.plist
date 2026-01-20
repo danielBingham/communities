@@ -51,7 +51,9 @@
         <true/>
     </dict>
 	<key>NSCameraUsageDescription</key>
-	<string>You can take photos to upload to posts.</string>
+	<string>You can take photos and record videos to upload to posts.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>You can record audio while recording video to upload to posts.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>You can upload newly added photos to your posts.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
