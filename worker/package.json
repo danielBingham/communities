@@ -1,6 +1,6 @@
 {
   "name": "@communities/worker",
-  "version": "0.10.0-rc5",
+  "version": "0.10.0-rc6",
   "private": true,
   "main": "index.js",
   "repository": {},
@@ -12,8 +12,8 @@
     "dev": "export NODE_ENV=development && nodemon --trace-deprecation ./index.js"
   },
   "dependencies": {
-    "@communities/backend": "^0.10.0-rc5",
-    "@communities/shared": "^0.10.0-rc5"
+    "@communities/backend": "^0.10.0-rc6",
+    "@communities/shared": "^0.10.0-rc6"
   },
   "devDependencies": {
     "dotenv": "16.6.1",
