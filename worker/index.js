@@ -52,9 +52,9 @@ async function initialize() {
     const features = await featureService.getEnabledFeatures()
     core.features = new FeatureFlags(features)
  
-    core.queue.process('resize-image', getResizeImageJob(core))
-    core.queue.process('process-video', getProcessVideoJob(core))
-    core.queue.process('send-notifications', getSendNotificationsJob(core))
+    core.queue.process('resize-image', 0, getResizeImageJob(core))
+    core.queue.process('process-video', 0, getProcessVideoJob(core))
+    core.queue.process('send-notifications', 0, getSendNotificationsJob(core))
 
     core.logger.info('Initialized and listening...')
 
