@@ -230,7 +230,7 @@ CREATE INDEX tags__name_trgm ON tags USING GIN (name gin_trgm_ops);
  * Groups
  ******************************************************************************/
 
-CREATE TYPE group_type as ENUM('open', 'private', 'hidden');
+CREATE TYPE group_type as ENUM('open', 'private', 'hidden', 'private-open', 'hidden-open', 'hidden-private');
 CREATE TYPE group_post_permissions as ENUM('anyone', 'members', 'approval', 'restricted');
 CREATE TABLE groups (
     id uuid primary key DEFAULT gen_random_uuid(),
