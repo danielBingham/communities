@@ -27,49 +27,66 @@ module.exports = class JobEvents {
             return this.handle(event)
         })
 
-        this.core.queue.on('error', (error) => {
+        this.listen('process-video')
+        this.listen('resize-image')
+        this.listen('send-notifications')
+    }
+
+    listen(name) {
+        if ( ! ( name in this.core.queues) ) {
+            throw new Error(`Invalid queue named '${name}'.`)
+        }
+
+        const queue = this.core.queues[name]
+
+        queue.on('error', (error) => {
             this.core.logger.error(error)
         })
 
-        this.core.queue.on('global:active', async (jobId, jobPromise) => {
-            const job = await this.core.queue.getJob(jobId)
+        queue.on('global:active', async (jobId, jobPromise) => {
+            const job = await queue.getJob(jobId)
             const audience = job.data?.session?.user?.id || 'all'
             this.core.events.trigger(audience, 'Job', 'update', { 
                 type: 'active',
+                queue: name,
                 jobId: jobId,
                 entity: job 
             })
         })
 
-        this.core.queue.on('global:progress', async (jobId, progress) => {
-            const job = await this.core.queue.getJob(jobId)
+        queue.on('global:progress', async (jobId, progress) => {
+            const job = await queue.getJob(jobId)
             const audience = job.data?.session?.user?.id || 'all'
             this.core.events.trigger(audience, 'Job', 'update', { 
                 type: 'progress',
+                queue: name,
                 jobId: jobId,
                 entity: job 
             })
         })
 
-        this.core.queue.on('global:completed', async (jobId, result) => {
-            const job = await this.core.queue.getJob(jobId)
+        queue.on('global:completed', async (jobId, result) => {
+            const job = await queue.getJob(jobId)
             const audience = job.data?.session?.user?.id || 'all'
             this.core.events.trigger(audience, 'Job', 'update', { 
                 type: 'completed',
+                queue: name,
                 jobId: jobId,
                 entity: job 
             })
         })
 
-        this.core.queue.on('global:failed', async (jobId, err) => {
-            const job = await this.core.queue.getJob(jobId)
+        queue.on('global:failed', async (jobId, err) => {
+            const job = await queue.getJob(jobId)
             const audience = job.data?.session?.user?.id || 'all'
             this.core.events.trigger(audience, 'Job', 'update', { 
                 type: 'failed',
+                queue: name,
                 jobId: jobId,
                 entity: job 
             })
         })
+
     }
 
     handle(event) {

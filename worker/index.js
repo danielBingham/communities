@@ -32,6 +32,8 @@ const getProcessVideoJob = require('./jobs/processVideo')
 
 const configDefinition = require('./config')
 
+const queue = process.argv[2]
+
 async function initialize() {
 
     const environmentName = process.env.ENVIRONMENT_NAME
@@ -51,12 +53,20 @@ async function initialize() {
     const featureService = new FeatureService(core)
     const features = await featureService.getEnabledFeatures()
     core.features = new FeatureFlags(features)
- 
-    core.queue.process('resize-image', 0, getResizeImageJob(core))
-    core.queue.process('process-video', 0, getProcessVideoJob(core))
-    core.queue.process('send-notifications', 0, getSendNotificationsJob(core))
 
-    core.logger.info('Initialized and listening...')
+    if ( queue === 'resize-image' ) {
+        core.queues['resize-image'].process(getResizeImageJob(core))
+    } else if ( queue === 'process-video' ) {
+        core.queues['process-video'].process(getProcessVideoJob(core))
+    } else if ( queue === 'send-notifications' ) {
+        core.queues['send-notifications'].process(100, getSendNotificationsJob(core))
+    } else {
+        core.queues['send-notifications'].process(100, getSendNotificationsJob(core))
+        core.queues['process-video'].process(getProcessVideoJob(core))
+        core.queues['resize-image'].process(getResizeImageJob(core))
+    }
+
+    core.logger.info(`Initialized and listening to queue '${queue}'...`)
 
     return core
 }
@@ -71,5 +81,8 @@ initialize().then(function(core) {
     // We've gotten the termination signal, attempt a graceful shutdown.
     process.on('SIGTERM', shutdown)
     process.on('SIGINT', shutdown)
+}).catch(function(error) {
+    console.error(error)
+    process.exit(1)
 })
 

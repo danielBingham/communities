@@ -83,31 +83,31 @@ module.exports = function(core) {
     const JobController = require('./controllers/JobController')
     const jobController = new JobController(core)
 
-    router.get('/jobs', rateLimit(core, 2400), function(request, response, next) {
+    router.get('/queue/:queue/jobs', rateLimit(core, 2400), function(request, response, next) {
         jobController.getJobs(request, response).catch(function(error) {
             next(error)
         })
     })
 
-    router.post('/jobs', rateLimit(core, 30), function(request, response, next) {
+    router.post('/queue/:queue/jobs', rateLimit(core, 30), function(request, response, next) {
         jobController.postJob(request, response).catch(function(error) {
             next(error)
         })
     })
 
-    router.get('/job/:id', rateLimit(core, 2400), function(request, response, next) {
+    router.get('/queue/:queue/job/:id', rateLimit(core, 2400), function(request, response, next) {
         jobController.getJob(request, response).catch(function(error) {
             next(error)
         })
     })
 
-    router.patch('/job/:id', rateLimit(core, 30), function(request, response, next) {
+    router.patch('/queue/:queue/job/:id', rateLimit(core, 30), function(request, response, next) {
         jobController.patchJob(request, response).catch(function(error) {
             next(error)
         })
     })
 
-    router.delete('/job/:id', rateLimit(core, 30), function(request, response, next) {
+    router.delete('/queue/:queue/job/:id', rateLimit(core, 30), function(request, response, next) {
         jobController.deleteJob(request, response).catch(function(error) {
             next(error)
         })
