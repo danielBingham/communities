@@ -132,7 +132,7 @@ module.exports = class FileController {
 
         await this.fileDAO.updateFile(file)
 
-        const job = await this.core.queue.add('resize-image', { session: { user: currentUser }, fileId: file.id })
+        const job = await this.core.queues['resize-image'].add({ session: { user: currentUser }, fileId: file.id }, { attempts: 2 })
 
         if ( this.core.features.has('issue-67-video-uploads') ) {
             const filePatch = {
@@ -239,7 +239,7 @@ module.exports = class FileController {
             location: this.config.s3.bucket_url
         })
 
-        const job = await this.core.queue.add('process-video', { session: { user: currentUser }, fileId: id})
+        const job = await this.core.queues['process-video'].add({ session: { user: currentUser }, fileId: id}, { attempts: 3 })
 
         await this.fileDAO.updateFile({
             id: id,
@@ -522,7 +522,7 @@ module.exports = class FileController {
 
         await this.imageService.crop(file, crop, dimensions)
 
-        const job = await this.core.queue.add('resize-image', { session: { user: currentUser }, fileId: file.id })
+        const job = await this.core.queues['resize-image'].add({ session: { user: currentUser }, fileId: file.id }, { attempts: 3 })
 
         if ( this.core.features.has('issue-67-video-uploads') ) {
             const patch = {

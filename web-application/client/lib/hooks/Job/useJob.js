@@ -26,30 +26,34 @@ import { useRequest } from '/lib/hooks/useRequest'
 
 import { getJob } from '/state/jobs'
 
-export const useJob = function(jobId) {
+export const useJob = function(queue, jobId) {
     const job = useSelector((state) => {
         if ( jobId === undefined || jobId === null ) {
             return null
         }
 
-        if ( ! ( jobId in state.jobs.dictionary ) ) {
+        if ( ! ( queue in state.jobs.dictionary ) ) {
+            return null
+        }
+
+        if ( ! ( jobId in state.jobs.dictionary[queue] ) ) {
             return undefined
         }
 
-        return state.jobs.dictionary[jobId]
+        return state.jobs.dictionary[queue][jobId]
     })
 
     const [request, makeRequest, resetRequest ] = useRequest()
 
     const refresh = function() {
-        makeRequest(getJob(jobId))
+        makeRequest(getJob(queue, jobId))
     }
 
     useEffect(() => {
-        if ( jobId !== undefined && jobId !== null && job === undefined 
+        if ( queue !== undefined && queue !== null && jobId !== undefined && jobId !== null && job === undefined 
             && ( request?.state !== 'pending' && request?.state !== 'failed' )) 
         {
-            makeRequest(getJob(jobId))
+            makeRequest(getJob(queue, jobId))
         }
     }, [ jobId, job, request ])
 

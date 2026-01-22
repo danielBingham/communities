@@ -27,49 +27,67 @@ module.exports = class JobEvents {
             return this.handle(event)
         })
 
-        this.core.queue.on('error', (error) => {
+        this.listen('process-video')
+        this.listen('resize-image')
+        this.listen('send-notifications')
+    }
+
+    listen(name) {
+        if ( ! ( name in this.core.queues) ) {
+            throw new Error(`Invalid queue named '${name}'.`)
+        }
+
+        const queue = this.core.queues[name]
+
+        queue.on('error', (error) => {
             this.core.logger.error(error)
         })
 
-        this.core.queue.on('global:active', async (jobId, jobPromise) => {
-            const job = await this.core.queue.getJob(jobId)
+        queue.on('global:active', async (jobId, jobPromise) => {
+            const job = await queue.getJob(jobId)
             const audience = job.data?.session?.user?.id || 'all'
             this.core.events.trigger(audience, 'Job', 'update', { 
                 type: 'active',
+                queue: name,
                 jobId: jobId,
                 entity: job 
             })
         })
 
-        this.core.queue.on('global:progress', async (jobId, progress) => {
-            const job = await this.core.queue.getJob(jobId)
+        queue.on('global:progress', async (jobId, progress) => {
+            const job = await queue.getJob(jobId)
             const audience = job.data?.session?.user?.id || 'all'
+
             this.core.events.trigger(audience, 'Job', 'update', { 
                 type: 'progress',
+                queue: name,
                 jobId: jobId,
                 entity: job 
             })
         })
 
-        this.core.queue.on('global:completed', async (jobId, result) => {
-            const job = await this.core.queue.getJob(jobId)
+        queue.on('global:completed', async (jobId, result) => {
+            const job = await queue.getJob(jobId)
             const audience = job.data?.session?.user?.id || 'all'
             this.core.events.trigger(audience, 'Job', 'update', { 
                 type: 'completed',
+                queue: name,
                 jobId: jobId,
                 entity: job 
             })
         })
 
-        this.core.queue.on('global:failed', async (jobId, err) => {
-            const job = await this.core.queue.getJob(jobId)
+        queue.on('global:failed', async (jobId, err) => {
+            const job = await queue.getJob(jobId)
             const audience = job.data?.session?.user?.id || 'all'
             this.core.events.trigger(audience, 'Job', 'update', { 
                 type: 'failed',
+                queue: name,
                 jobId: jobId,
                 entity: job 
             })
         })
+
     }
 
     handle(event) {
@@ -111,6 +129,7 @@ module.exports = class JobEvents {
         const subscriptions = this.core.events.getSubscriptions('Job')
 
         const action = event.context.action
+        const queue = event.context.queue
         const jobId = event.context.jobId
         const userId = event.context.userId
         const connectionId = event.context.connectionId
@@ -119,17 +138,21 @@ module.exports = class JobEvents {
         if ( ! (action in subscriptions ) ) {
             subscriptions[action] = {}
         }
-
-        if ( ! ( jobId in subscriptions[action] ) ) {
-            subscriptions[action][jobId] = {} 
+        
+        if ( ! ( queue in subscriptions[action] ) ) {
+            subscriptions[action][queue] = {}
         }
 
-        if ( ! (userId in subscriptions[action][jobId] ) ) {
-            subscriptions[action][jobId][userId] = {} 
+        if ( ! ( jobId in subscriptions[action][queue] ) ) {
+            subscriptions[action][queue][jobId] = {} 
         }
 
-        if ( ! ( connectionId in subscriptions[action][jobId][userId] ) ) {
-            subscriptions[action][jobId][userId][connectionId] = true
+        if ( ! (userId in subscriptions[action][queue][jobId] ) ) {
+            subscriptions[action][queue][jobId][userId] = {} 
+        }
+
+        if ( ! ( connectionId in subscriptions[action][queue][jobId][userId] ) ) {
+            subscriptions[action][queue][jobId][userId][connectionId] = true
         }
     }
 
@@ -137,15 +160,18 @@ module.exports = class JobEvents {
         const subscriptions = this.core.events.getSubscriptions('Job')
 
         const action = event.context.action
+        const queue = event.context.queue
         const jobId = event.context.jobId
         const userId = event.context.userId
         const connectionId = event.context.connectionId
 
         if ( action in subscriptions) {
-            if ( jobId in subscriptions[action]) {
-                if ( userId in subscriptions[action][jobId] ) {
-                    if ( connectionId in subscriptions[action][jobId][userId] ) {
-                        delete subscriptions[action][jobId][userId][connectionId]
+            if ( queue in subscriptions[action] ) {
+                if ( jobId in subscriptions[action][queue]) {
+                    if ( userId in subscriptions[action][queue][jobId] ) {
+                        if ( connectionId in subscriptions[action][queue][jobId][userId] ) {
+                            delete subscriptions[action][queue][jobId][userId][connectionId]
+                        }
                     }
                 }
             }
@@ -162,14 +188,17 @@ module.exports = class JobEvents {
      */
     update(event) {
         const subscriptions = this.core.events.getSubscriptions('Job','update')
+        const queue = event.context.queue
         const jobId = event.context.jobId
         const audience = event.audience
-        
-        if ( jobId in subscriptions ) {
-            for(const userId of Object.keys(subscriptions[jobId]) ) {
-                if ( audience === userId || audience === 'all') {
-                    for(const connectionId of Object.keys(subscriptions[jobId][userId]) ) {
-                        this.core.events.sendEventToUserConnection(userId, connectionId, event)
+       
+        if ( queue in subscriptions ) {
+            if ( jobId in subscriptions[queue] ) {
+                for(const userId of Object.keys(subscriptions[queue][jobId]) ) {
+                    if ( audience === userId || audience === 'all') {
+                        for(const connectionId of Object.keys(subscriptions[queue][jobId][userId]) ) {
+                            this.core.events.sendEventToUserConnection(userId, connectionId, event)
+                        }
                     }
                 }
             }

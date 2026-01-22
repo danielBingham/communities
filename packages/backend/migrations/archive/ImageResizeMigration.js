@@ -93,7 +93,7 @@ module.exports = class ImageResizeMigration {
         this.logger.info(`Preparing to migrate ${files.length} files...`)
         for(const file of files) {
             this.logger.info(`Queueing resize for file ${file.id}...`)
-            await this.core.queue.add('resize-image', { session: { user: { id: 'resize-migration' }}, file: file })
+            await this.core.queues['resize-image'].add({ session: { user: { id: 'resize-migration' }}, file: file }, { attempts: 3 })
         }
     }
 

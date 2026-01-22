@@ -157,7 +157,7 @@ module.exports = class VideoService {
             }
             await this.fileDAO.updateFile(thumbPatch)
 
-            const job = await this.core.queue.add('resize-image', { session: { user: currentUser }, fileId: thumbId })
+            const job = await this.core.queues['resize-image'].add({ session: { user: currentUser }, fileId: thumbId }, { attempts: 3 })
 
             // Update File in the database with the new filename and mimetype
             const filePatch = {

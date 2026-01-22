@@ -59,7 +59,7 @@ module.exports = class Core {
          * An instance of of a bull queue that we'll use to queue up long
          * running jobs for pickup by the workers.
          */
-        this.queue = null
+        this.queues = {} 
 
         /**
          * Our Postmark server client for sending emails to using the Postmark
@@ -131,7 +131,9 @@ module.exports = class Core {
         this.events = new Events(this.redis, this.logger)
         await this.events.initialize()
 
-        this.queue = new BullQueue('communities', { redis: this.config.redis })
+        this.queues['process-video'] = new BullQueue('process-video', { redis: this.config.redis })
+        this.queues['resize-image'] = new BullQueue('resize-image', { redis: this.config.redis })
+        this.queues['send-notifications'] = new BullQueue('send-notifications', { redis: this.config.redis })
 
         this.postmarkClient = new Postmark.ServerClient(this.config.postmark.api_token)
     }
@@ -151,9 +153,13 @@ module.exports = class Core {
         this.logger.info('Connection pool closed.')
 
         this.logger.info('Closing the redis queue connection.')
-        await this.redis.destroy()
-        await this.queue.close()
-        this.queue = null
+
+        await this.queues['process-video'].close()
+        await this.queues['resize-image'].close()
+        await this.queues['send-notifications'].close()
+
+        this.queues = {}
+
         this.logger.info('Redis queue closed.')
     }
 }

@@ -4,6 +4,8 @@ node_modules/
 web-application/public/uploads/*
 web-application/public/dist
 web-application/security/*
+web-application/tmp
+web-application/tmp/*
 worker/security/*
 worker/tmp
 worker/tmp/*

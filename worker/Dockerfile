@@ -33,4 +33,4 @@ COPY config config
 COPY jobs jobs
 COPY index.js index.js
 
-ENTRYPOINT [ "node", "./index.js" ]
+ENTRYPOINT [ "npm", "start" ]
