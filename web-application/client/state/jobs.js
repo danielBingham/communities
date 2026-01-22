@@ -72,7 +72,6 @@ export const jobsSlice = createSlice({
 export const handleJobEvent = function(event) {
     return function(dispatch, getState) {
         if ( event.action === 'update' ) {
-            console.log(`Job event: `, event)
             if ( 'entity' in event.context ) {
                 dispatch(jobsSlice.actions.setJobsInDictionary({ name: event.context.queue, entity: event.context.entity }))
             } else if ( 'dictionary' in event.context ) {

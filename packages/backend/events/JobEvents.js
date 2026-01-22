@@ -57,6 +57,7 @@ module.exports = class JobEvents {
         queue.on('global:progress', async (jobId, progress) => {
             const job = await queue.getJob(jobId)
             const audience = job.data?.session?.user?.id || 'all'
+
             this.core.events.trigger(audience, 'Job', 'update', { 
                 type: 'progress',
                 queue: name,
@@ -187,14 +188,17 @@ module.exports = class JobEvents {
      */
     update(event) {
         const subscriptions = this.core.events.getSubscriptions('Job','update')
+        const queue = event.context.queue
         const jobId = event.context.jobId
         const audience = event.audience
-        
-        if ( jobId in subscriptions ) {
-            for(const userId of Object.keys(subscriptions[jobId]) ) {
-                if ( audience === userId || audience === 'all') {
-                    for(const connectionId of Object.keys(subscriptions[jobId][userId]) ) {
-                        this.core.events.sendEventToUserConnection(userId, connectionId, event)
+       
+        if ( queue in subscriptions ) {
+            if ( jobId in subscriptions[queue] ) {
+                for(const userId of Object.keys(subscriptions[queue][jobId]) ) {
+                    if ( audience === userId || audience === 'all') {
+                        for(const connectionId of Object.keys(subscriptions[queue][jobId][userId]) ) {
+                            this.core.events.sendEventToUserConnection(userId, connectionId, event)
+                        }
                     }
                 }
             }
