@@ -47,9 +47,14 @@ import './FileUploadInput.css'
 const FileUploadInput = function({ text, fileId, setFileId, type, types, onChange }) {
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const [file, fileRequest, refreshFile] = useFile(fileId)
-    const [job, jobRequest] = useJob(file?.jobId)
 
-    useEventSubscription('Job', 'update', { jobId: file?.jobId }, { skip: ! file?.jobId })
+    let queue = 'resize-image'
+    if ( type === 'video' || ( type !== 'image' && file?.kind === 'video')) {
+        queue = 'process-video'
+    }
+
+    const [job, jobRequest] = useJob(queue, file?.jobId)
+    useEventSubscription('Job', 'update', { queue: queue, jobId: file?.jobId }, { skip: ! file?.jobId })
 
     const [ jobError, setJobError ] = useState(null)
     const [ typeError, setTypeError ] = useState(null)

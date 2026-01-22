@@ -128,6 +128,7 @@ module.exports = class JobEvents {
         const subscriptions = this.core.events.getSubscriptions('Job')
 
         const action = event.context.action
+        const queue = event.context.queue
         const jobId = event.context.jobId
         const userId = event.context.userId
         const connectionId = event.context.connectionId
@@ -136,17 +137,21 @@ module.exports = class JobEvents {
         if ( ! (action in subscriptions ) ) {
             subscriptions[action] = {}
         }
-
-        if ( ! ( jobId in subscriptions[action] ) ) {
-            subscriptions[action][jobId] = {} 
+        
+        if ( ! ( queue in subscriptions[action] ) ) {
+            subscriptions[action][queue] = {}
         }
 
-        if ( ! (userId in subscriptions[action][jobId] ) ) {
-            subscriptions[action][jobId][userId] = {} 
+        if ( ! ( jobId in subscriptions[action][queue] ) ) {
+            subscriptions[action][queue][jobId] = {} 
         }
 
-        if ( ! ( connectionId in subscriptions[action][jobId][userId] ) ) {
-            subscriptions[action][jobId][userId][connectionId] = true
+        if ( ! (userId in subscriptions[action][queue][jobId] ) ) {
+            subscriptions[action][queue][jobId][userId] = {} 
+        }
+
+        if ( ! ( connectionId in subscriptions[action][queue][jobId][userId] ) ) {
+            subscriptions[action][queue][jobId][userId][connectionId] = true
         }
     }
 
@@ -154,15 +159,18 @@ module.exports = class JobEvents {
         const subscriptions = this.core.events.getSubscriptions('Job')
 
         const action = event.context.action
+        const queue = event.context.queue
         const jobId = event.context.jobId
         const userId = event.context.userId
         const connectionId = event.context.connectionId
 
         if ( action in subscriptions) {
-            if ( jobId in subscriptions[action]) {
-                if ( userId in subscriptions[action][jobId] ) {
-                    if ( connectionId in subscriptions[action][jobId][userId] ) {
-                        delete subscriptions[action][jobId][userId][connectionId]
+            if ( queue in subscriptions[action] ) {
+                if ( jobId in subscriptions[action][queue]) {
+                    if ( userId in subscriptions[action][queue][jobId] ) {
+                        if ( connectionId in subscriptions[action][queue][jobId][userId] ) {
+                            delete subscriptions[action][queue][jobId][userId][connectionId]
+                        }
                     }
                 }
             }

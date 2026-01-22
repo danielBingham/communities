@@ -32,7 +32,10 @@ const getProcessVideoJob = require('./jobs/processVideo')
 
 const configDefinition = require('./config')
 
-const queue = process.argv[2]
+let queue = 'general'
+if ( process.argv.length >= 3 ) {
+    queue = process.argv[2]
+}
 
 async function initialize() {
 
