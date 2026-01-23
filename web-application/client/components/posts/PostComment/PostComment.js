@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux'
 import { useLocation } from 'react-router-dom'
 
 import { useFeature } from '/lib/hooks/feature'
+import { usePost } from '/lib/hooks/Post'
 import { usePostComment } from '/lib/hooks/PostComment'
 import { useSiteModeration } from '/lib/hooks/SiteModeration'
 import { useGroupModeration } from '/lib/hooks/GroupModeration'
