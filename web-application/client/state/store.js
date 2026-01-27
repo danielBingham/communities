@@ -11,7 +11,8 @@ import FileReducer from './File'
 import GroupReducer from './Group'
 import GroupMemberReducer from './GroupMember'
 import GroupModerationReducer from './GroupModeration'
-import jobsReducer from './jobs'
+import GroupSubscriptionReducer from './GroupSubscription'
+import jobsReducer, { handleJobEvent } from './jobs'
 import notificationsReducer, { handleNotificationEvent } from './notifications'
 import LinkPreviewReducer from './LinkPreview'
 import PostReducer from './Post'
@@ -36,6 +37,7 @@ const reducers = combineReducers({
     Group: GroupReducer,
     GroupMember: GroupMemberReducer,
     GroupModeration: GroupModerationReducer,
+    GroupSubscription: GroupSubscriptionReducer,
     jobs: jobsReducer,
     notifications: notificationsReducer,
     LinkPreview: LinkPreviewReducer,
@@ -86,6 +88,8 @@ export const createSocketMiddleware = function(socket) {
                             dispatch(confirmUnsubscription({ entity: event.entity, action: event.context.action }))
                         } else if ( event.entity === 'Notification' ) {
                             dispatch(handleNotificationEvent(event))
+                        } else if ( event.entity === 'Job' ) {
+                            dispatch(handleJobEvent(event))
                         }
                     })
 
@@ -101,7 +105,9 @@ export const createSocketMiddleware = function(socket) {
                             audience: currentUser?.id,
                             action: 'subscribe',
                             context: {
+                                ...action.payload.context,
                                 action: action.payload.action
+
                             }
                         }
                         socket.send(event)

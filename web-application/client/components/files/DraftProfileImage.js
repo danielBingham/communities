@@ -11,6 +11,7 @@ import ErrorModal from '/components/errors/ErrorModal'
 import Button from '/components/generic/button/Button'
 import Spinner from '/components/Spinner'
 import Image from '/components/ui/Image'
+import File from '/components/files/File'
 
 import "react-image-crop/dist/ReactCrop.css"
 import "./DraftProfileImage.css"
@@ -168,7 +169,7 @@ const DraftProfileImage = forwardRef(function({
                     minHeight={10}
                     circularCrop={true}
                 >
-                    <Image ref={imageRef} onLoad={onLoad} id={fileId} />
+                    <File ref={imageRef} onLoad={onLoad} id={fileId} type="image" />
                 </ReactCrop>
             </div>
                 { ! isLoaded && <Spinner /> }

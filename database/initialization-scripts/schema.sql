@@ -56,7 +56,7 @@ CREATE TABLE users (
 
     email text NOT NULL,
     password text,
-    birthday text DEFAULT '',
+    birthdate text DEFAULT '',
 
     status user_status DEFAULT 'unconfirmed',
     permissions user_permissions DEFAULT 'user',
@@ -162,13 +162,24 @@ CREATE INDEX tokens__token ON tokens (token);
  * Files 
  *****************************************************************************/
 
+CREATE TYPE file_state as ENUM('pending', 'processing', 'error', 'ready');
+CREATE TYPE supported_file_types as ENUM('image', 'video');
 CREATE TABLE files (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id uuid REFERENCES users(id) ON DELETE CASCADE,
 
+    state file_state DEFAULT 'pending',
+    job_id int DEFAULT NULL,
+    variants text[] DEFAULT '{}',
+
+    kind supported_file_types,
+    mimetype text,
+    type text, /* Deprecated.  Use mimetype instead. */
+
+    thumb_id uuid REFERENCES files(id) ON DELETE SET NULL DEFAULT NULL,
+
     location text, /* This is the S3/Spaces bucket URL. */
     filepath text,
-    type text,
 
     created_date timestamptz,
     updated_date timestamptz
@@ -219,7 +230,7 @@ CREATE INDEX tags__name_trgm ON tags USING GIN (name gin_trgm_ops);
  * Groups
  ******************************************************************************/
 
-CREATE TYPE group_type as ENUM('open', 'private', 'hidden');
+CREATE TYPE group_type as ENUM('open', 'private', 'hidden', 'private-open', 'hidden-open', 'hidden-private');
 CREATE TYPE group_post_permissions as ENUM('anyone', 'members', 'approval', 'restricted');
 CREATE TABLE groups (
     id uuid primary key DEFAULT gen_random_uuid(),
@@ -259,6 +270,20 @@ CREATE TABLE group_members (
 );
 CREATE INDEX group_members__group_id ON group_members (group_id);
 CREATE INDEX group_members__user_id ON group_members (user_id);
+
+CREATE TYPE group_subscription_status AS ENUM('unsubscribed', 'mentions', 'posts');
+CREATE TABLE IF NOT EXISTS group_subscriptions (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id uuid REFERENCES users (id) ON DELETE CASCADE NOT NULL,
+    group_id uuid REFERENCES groups (id) ON DELETE CASCADE NOT NULL,
+    status group_subscription_status DEFAULT 'mentions',
+
+    created_date timestamptz,
+    updated_date timestamptz
+);
+CREATE INDEX group_subscriptions__user_id ON group_subscriptions (user_id);
+CREATE INDEX group_subscriptions__group_id ON group_subscriptions (group_id);
+
 
 /******************************************************************************
  * Tags 

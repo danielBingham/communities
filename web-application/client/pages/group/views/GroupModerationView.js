@@ -91,7 +91,7 @@ const GroupModerationView = function({ groupId }) {
                     </div>
                 )
             } else if ( moderation.postId !== null && moderation.postCommentId !== null ) {
-                moderationViews.push(<PostCommentAwaitingGroupModeration key={moderation.id} id={moderation.id} />)
+                moderationViews.push(<PostCommentAwaitingGroupModeration key={moderation.id} groupId={groupId} id={moderation.id} />)
             }
         }
     }

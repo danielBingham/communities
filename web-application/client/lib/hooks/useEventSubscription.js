@@ -3,20 +3,33 @@ import { useSelector, useDispatch } from 'react-redux'
 
 import { subscribe, unsubscribe } from '/state/events'
 
-export const useEventSubscription = function(entity, action, context) {
+export const useEventSubscription = function(entity, action, context, options) {
 
     const isConnected = useSelector((state) => state.socket.isConnected)
 
     const dispatch = useDispatch()
     useEffect(function() {
+        // Ignore this subscription when skip is `true`
+        if ( options?.skip === true ) {
+            return
+        }
+
         dispatch(subscribe({ entity: entity, action: action, context: context }))
 
         return () => {
+            if ( options?.skip === true ) {
+                return
+            }
+
             dispatch(unsubscribe({ entity: entity, action: action, context: context }))
         }
-    }, [])
+    }, [ options?.skip ])
 
     useEffect(function() {
+        if ( options?.skip === true ) {
+            return
+        }
+
         dispatch(subscribe({ entity: entity, action: action, context: context }))
-    }, [ isConnected])
+    }, [ isConnected, options?.skip ])
 }

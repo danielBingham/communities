@@ -55,15 +55,12 @@ module.exports = class IOSNotifications {
     }
 
     getCredentials() {
-        const keyPath = path.join(process.cwd(), this.core.config.notifications.ios.privateCert) 
-        const certPath = path.join(process.cwd(), this.core.config.notifications.ios.publicCert)
-
-        const key = fs.readFileSync(keyPath)
-        const cert = fs.readFileSync(certPath)
+        const key = this.core.config.notifications.ios.privateCert
+        const cert = this.core.config.notifications.ios.publicCert
 
         return {
             key: key,
-            cert: cert
+            cert: cert 
         }
     }
 
@@ -250,6 +247,7 @@ module.exports = class IOSNotifications {
                 this.logger.error(`=== IOS Notifications:: FrameError ===\n type: ${type}, code: ${code}, id: ${id}.`)
             })
             clientStream.on("response", (responseHeaders, flags) => {
+                this.logger.verbose(`=== IOS Notifications:: Response:\n `, responseHeaders, `\n flags: `, flags)
                 if ( responseHeaders[':status'] !== 200 ) {
                     requestError = true
                     this.logger.error(`=== IOS Notifications:: Failed Request ===`)

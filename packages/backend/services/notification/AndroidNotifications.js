@@ -35,7 +35,7 @@ module.exports = class AndroidNotifications {
 
         this.app = null
         if ( getApps().length <= 0 ) {
-            const serviceAccount = JSON.parse(fs.readFileSync(path.join(process.cwd(), this.core.config.notifications.android.firebaseServiceAccount)))
+            const serviceAccount = JSON.parse(this.core.config.notifications.android.firebaseServiceAccount)
             this.app = initializeApp({
                 credential: cert(serviceAccount)
             }, 'communities')

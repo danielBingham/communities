@@ -29,6 +29,7 @@ const {
     GroupMemberDAO,
     GroupModerationDAO,
     GroupModerationEventDAO,
+    GroupSubscriptionDAO,
     LinkPreviewDAO,
     PostDAO,
     PostCommentDAO,
@@ -52,6 +53,7 @@ module.exports = class PostController {
         this.groupMemberDAO = new GroupMemberDAO(core)
         this.groupModerationDAO = new GroupModerationDAO(core)
         this.groupModerationEventDAO = new GroupModerationEventDAO(core)
+        this.groupSubscriptionDAO = new GroupSubscriptionDAO(core)
         this.linkPreviewDAO = new LinkPreviewDAO(core)
         this.postDAO = new PostDAO(core)
         this.postCommentDAO = new PostCommentDAO(core)
@@ -137,8 +139,10 @@ module.exports = class PostController {
                 fileIds.push(post.fileId)
             }
         }
-        const postFileResults = await this.fileDAO.selectFiles(`WHERE files.id = ANY($1::uuid[])`, [fileIds])
-        const fileDictionary = postFileResults.reduce((dictionary, file) => { dictionary[file.id] = file; return dictionary }, {})
+        const postFileResults = await this.fileDAO.selectFiles({
+            where: `files.id = ANY($1::uuid[])`, 
+            params: [fileIds]
+        })
 
         const linkPreviewIds = []
         for(const postId of results.list) {
@@ -189,7 +193,7 @@ module.exports = class PostController {
         })
 
         const relations = {
-            files: fileDictionary,
+         //   files: fileDictionary,
             groups: groupResults.dictionary,
             groupMembers: groupMemberResults.dictionary,
             groupModerations: groupModerationResults.dictionary,
@@ -604,11 +608,22 @@ module.exports = class PostController {
         }
         await this.postDAO.insertPostVersions(postVersion)
 
-        // Subscribe the author to their post.
-        await this.postSubscriptionDAO.insertPostSubscriptions({
-            postId: entity.id,
-            userId: currentUser.id
-        })
+        // Subscribe the author to their post, unless they are posting in a
+        // group they have unsubscribed from.
+        let shouldSubscribe = true
+        if ( entity.type === 'group' && entity.groupId !== null && entity.groupId !== undefined ) {
+            const subscription = await this.groupSubscriptionDAO.getGroupSubscriptionByGroupAndUser(post.groupId, currentUser.id)
+            if ( subscription?.status === 'unsubscribed' ) {
+                shouldSubscribe = false
+            }
+        }
+
+        if ( shouldSubscribe === true ) {
+            await this.postSubscriptionDAO.insertPostSubscriptions({
+                postId: entity.id,
+                userId: currentUser.id
+            })
+        }
 
         const relations = await this.getRelations(currentUser, results)
 

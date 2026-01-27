@@ -17,143 +17,183 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
+const DAO = require('./DAO')
 const DAOError = require('../errors/DAOError')
 
+const SCHEMA = {
+    'File': {
+        table: 'files',
+        fields: {
+            'id': {
+                insert: DAO.INSERT.PRIMARY,
+                update: DAO.UPDATE.PRIMARY,
+                select: DAO.SELECT.ALWAYS,
+                key: 'id'
+            },
+            'user_id': {
+                insert: DAO.INSERT.REQUIRE,
+                update: DAO.UPDATE.DENY,
+                select: DAO.SELECT.ALWAYS,
+                key: 'userId'
+            },
+            'state': {
+                insert: DAO.INSERT.ALLOW,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.ALWAYS,
+                key: 'state',
+                needsFeature: 'issue-67-video-uploads'
+            },
+            'job_id': {
+                insert: DAO.INSERT.ALLOW,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.ALWAYS,
+                key: 'jobId',
+                needsFeature: 'issue-67-video-uploads'
+            },
+            'variants': {
+                insert: DAO.INSERT.ALLOW,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.ALWAYS,
+                key: 'variants',
+                needsFeature: 'issue-67-video-uploads'
+            },
+            'kind': {
+                insert: DAO.INSERT.ALLOW,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.ALWAYS,
+                key: 'kind',
+                needsFeature: 'issue-67-video-uploads'
+            },
+            'mimetype': {
+                insert: DAO.INSERT.ALLOW,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.ALWAYS,
+                key: 'mimetype',
+                needsFeature: 'issue-67-video-uploads'
+            },
+            'type': {
+                insert: DAO.INSERT.ALLOW,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.ALWAYS,
+                key: 'type'
+            },
+            'thumb_id': {
+                insert: DAO.INSERT.ALLOW,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.ALWAYS,
+                key: 'thumbId',
+                needsFeature: 'issue-67-video-uploads'
+            },
+            'location': {
+                insert: DAO.INSERT.ALLOW,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.ALWAYS,
+                key: 'location'
+            },
+            'filepath': {
+                insert: DAO.INSERT.ALLOW,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.ALWAYS,
+                key: 'filepath'
+            },
+            'created_date': {
+                insert: DAO.INSERT.OVERRIDE,
+                insertOverride: 'now()',
+                update: DAO.INSERT.DENY,
+                select: DAO.SELECT.ALWAYS,
+                key: 'createdDate'
+            },
+            'updated_date': {
+                insert: DAO.INSERT.OVERRIDE,
+                insertOverride: 'now()',
+                update: DAO.INSERT.OVERRIDE,
+                updateOverride: 'now()',
+                select: DAO.SELECT.ALWAYS,
+                key: 'updatedDate'
+            }
+        }
+    }
+}
 
-module.exports = class FilesDAO {
+
+module.exports = class FilesDAO extends DAO {
 
     constructor(core) {
+        super(core)
+
+        this.core = core
+
+        this.entityMaps = SCHEMA
+
         this.database = core.database
         this.logger = core.logger
     }
 
+    getFileSelectionString() {
+        return this.getSelectionString('File')
+    }
+
     hydrateFile(row) {
-        return {
-            id: row.file_id,
-            userId: row.file_userId,
-            location: row.file_location,
-            filepath: row.file_filepath,
-            type: row.file_type,
-            createdDate: row.file_createdDate,
-            updatedDate: row.file_updatedDate
-        }
+        return this.hydrate('File', row)
     }
 
     hydrateFiles(rows) {
-        const files = {}
+        const dictionary = {}
         const list = []
 
         for(const row of rows) {
-            const file = this.hydrateFile(row)
-            if ( ! files[file.id] ) {
-                files[file.id] = file
-                list.push(file)
+            if ( ! ( row.File_id in dictionary) ) {
+                dictionary[row.File_id] = this.hydrateFile(row)
+                list.push(row.File_id)
             }
         }
 
-        return list 
+        return { dictionary: dictionary, list: list }
     }
 
-    getFilesSelectionString() {
-        return `files.id as file_id, files.user_id as "file_userId", files.location as file_location, files.filepath as file_filepath, files.type as file_type,
-            files.created_date as "file_createdDate", files.updated_date as "file_updatedDate"` 
-    }
+    async getFileById(id) {
+        const results = await this.selectFiles({
+            where: 'files.id = $1',
+            params: [ id ]
+        })
 
-    async selectFiles(where, params) {
-        if ( ! where ) {
-            where = ''
-            params = []
+        if ( results.list.length <= 0 ) {
+            return null
         }
+
+        if ( ! ( id in results.dictionary ) ) {
+            return null
+        }
+
+        return results.dictionary[id]
+    }
+
+    async selectFiles(query) {
+        let where = query?.where ? `WHERE ${query.where}` : ''
+        let params = query?.params ? [ ...query.params ] : []
+
         const sql = `
             SELECT 
-                ${ this.getFilesSelectionString() } 
+                ${ this.getFileSelectionString() } 
                 FROM files 
                 ${where}
         `
 
         const results = await this.database.query(sql, params)
-
-        if ( results.rows.length <= 0 ) {
-            return []
-        }
-
         return this.hydrateFiles(results.rows)
     }
 
     async insertFile(file) {
-        const results = await this.database.query(`
-            INSERT INTO files (id, user_id, location, filepath, type, created_date, updated_date)
-                VALUES ($1, $2, $3, $4, $5, now(), now())
-        `, [ file.id, file.userId, file.location, file.filepath, file.type ])
-
-        if ( results.rowCount == 0) {
-            throw new DAOError('failed-insert', `Failed to insert file ${file.id}.`)
-        }
+        await this.insert('File', file)
     }
 
     async updateFile(file) {
-        const results = await this.database.query(`
-            UPDATE files SET user_id = $1, location=$2, filepath=$3, type=$4, updated_date=now()
-                WHERE id=$5
-        `, [ file.userId, file.location, file.filepath, file.type, file.id ])
-
-        if ( results.rowCount == 0) {
-            throw new DAOError('failed-update', `Filed to update file ${file.id}.`)
-        }
+        await this.update('File', file)
     }
 
-    async updatePartialFile(file) {
-        if ( ! file.id ) {
-            throw new DAOError('missing-id', `Can't update a file with out an Id.`)
-        }
-
-        let sql = 'UPDATE files SET '
-        let params = []
-        let count = 1
-        const ignored = [ 'id', 'createdDate', 'updatedDate' ] 
-        for(let key in file) {
-            if (ignored.includes(key)) {
-                continue
-            }
-
-            if ( key == 'userId' ) {
-                sql += `user_id = $${count}, `
-            } else {
-                sql += `${key} = $${count}, `
-            }
-
-
-            params.push(file[key])
-            count = count + 1
-        }
-        sql += 'updated_date = now() WHERE id = $' + count
-        params.push(file.id)
-
-        const results = await this.database.query(sql, params)
-
-        if ( results.rowCount <= 0) {
-            throw new DAOError('failed-update', `Failed to update files ${file.id}.`)
-        }
-    }
-
-    async deleteFile(fileId) {
-        const pathResults = await this.database.query(`
-            SELECT filepath FROM files WHERE id = $1
-        `, [ fileId ])
-
-        if ( pathResults.rows.length <= 0) {
-            throw new DAOError('not-found', `File ${fileId} doesn't seem to exist!`)
-        }
-
-        const filepath = pathResults.rows[0].filepath
-
-        const results = await this.database.query(`
+    async deleteFile(file) {
+        await this.database.query(`
             DELETE FROM files WHERE id = $1
-        `, [ fileId])
-
-        if ( results.rowCount !== 1 ) {
-            throw new DAOError('failed-delete', `Failed to delete file ${fileId}`)
-        }
+        `, [ file.id ])
     }
-
 }

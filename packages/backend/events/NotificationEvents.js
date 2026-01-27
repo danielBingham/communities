@@ -22,6 +22,10 @@ module.exports = class NotificationEvents {
 
     constructor(core) {
         this.core = core
+
+        this.core.events.registerHandler('Notification', [ 'create' ], (event) => {
+            return this.handle(event)
+        })
     }
 
     handle(event) {
@@ -52,6 +56,9 @@ module.exports = class NotificationEvents {
         }
     }
 
+    /**
+     * Subscribe a user and connection to a Notification event.
+     */
     subscribe(event) {
         const subscriptions = this.core.events.getSubscriptions('Notification')
 

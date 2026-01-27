@@ -25,11 +25,12 @@ const {
     PermissionService, 
     ValidationService,
 
+    GroupSubscriptionDAO,
     PostDAO, 
-    UserRelationshipDAO, 
     PostCommentDAO, 
     PostSubscriptionDAO,
-    SiteModerationDAO
+    SiteModerationDAO,
+    UserRelationshipDAO 
 
 } = require('@communities/backend')
 
@@ -40,11 +41,12 @@ module.exports = class PostCommentController {
     constructor(core) {
         this.core = core
 
+        this.groupSubscriptionDAO = new GroupSubscriptionDAO(core)
         this.postDAO = new PostDAO(core)
         this.postCommentDAO = new PostCommentDAO(core)
-        this.userRelationshipDAO = new UserRelationshipDAO(core)
         this.postSubscriptionDAO = new PostSubscriptionDAO(core)
         this.siteModerationDAO = new SiteModerationDAO(core)
+        this.userRelationshipDAO = new UserRelationshipDAO(core)
 
         this.notificationService = new NotificationService(core)
         this.permissionService = new PermissionService(core)
@@ -220,10 +222,26 @@ module.exports = class PostCommentController {
         const subscription = await this.postSubscriptionDAO.getPostSubscriptionByPostAndUser(postId, currentUser.id)
 
         if ( subscription === null ) {
-            await this.postSubscriptionDAO.insertPostSubscriptions({
-                postId: postId,
-                userId: currentUser.id
-            })
+            let createSubscription = true
+
+            // If this post is in a group and the user has unsubscribed from
+            // the group, then we shouldn't subscribe them to this post when
+            // they comment.
+            if ( post.type === 'group' && post.groupId !== null && post.groupId !== undefined ) {
+                const groupSubscription = await this.groupSubscriptionDAO.getGroupSubscriptionByGroupAndUser(post.groupId, currentUser.id)
+                // If they are commenting on a public post in a group, then
+                // they won't have a group subscription.
+                if ( groupSubscription?.status === 'unsubscribed' ) {
+                    createSubscription = false
+                }
+            }
+
+            if ( createSubscription === true ) {
+                await this.postSubscriptionDAO.insertPostSubscriptions({
+                    postId: postId,
+                    userId: currentUser.id
+                })
+            }
         }
 
         const relations = await this.getRelations(currentUser, results)

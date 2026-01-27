@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux'
 import { useLocation } from 'react-router-dom'
 
 import { useFeature } from '/lib/hooks/feature'
+import { usePost } from '/lib/hooks/Post'
 import { usePostComment } from '/lib/hooks/PostComment'
 import { useSiteModeration } from '/lib/hooks/SiteModeration'
 import { useGroupModeration } from '/lib/hooks/GroupModeration'
@@ -21,10 +22,12 @@ import './PostComment.css'
 const PostComment = function({ postId, id }) {
     const [highlight, setHighlight] = useState(false)
 
+    const [post, postRequest] = usePost(postId)
     const [comment, request] = usePostComment(postId, id)
     const [siteModeration, siteModerationRequest] = useSiteModeration(comment?.siteModerationId)
-    const [groupModeration, groupModerationRequest] = useGroupModeration(comment?.groupModerationId)
-    
+    const [groupModeration, groupModerationRequest] = useGroupModeration(post?.groupId, comment?.groupModerationId)
+   
+    // usePostLink doesn't query, so this won't double query.
     const postLink = usePostLink(postId)
 
     const location = useLocation()

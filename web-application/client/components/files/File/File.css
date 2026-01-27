@@ -1,0 +1,16 @@
+
+.file__fallback {
+    padding: 20px;
+    border-top: thin solid var(--main-border-color);
+    border-bottom: thin solid var(--main-border-color);
+}
+.file__fallback__icon {
+    text-align: center;
+    padding: 20px;
+}
+.file__fallback__icon svg {
+    width: 92px;
+    height: 92px;
+    color: var(--primary-color-light);
+}
+

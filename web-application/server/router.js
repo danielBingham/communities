@@ -9,9 +9,9 @@
  **************************************************************************************************/
 module.exports = function(core) {
     const express = require('express')
-    const multer = require('multer')
     
     const rateLimit = require('./middleware/rateLimit')
+    const { createVideoUploadMiddleware, createImageUploadMiddleware } = require('./middleware/upload')
 
     const ControllerError = require('./errors/ControllerError')
 
@@ -83,31 +83,31 @@ module.exports = function(core) {
     const JobController = require('./controllers/JobController')
     const jobController = new JobController(core)
 
-    router.get('/jobs', rateLimit(core, 2400), function(request, response, next) {
+    router.get('/queue/:queue/jobs', rateLimit(core, 2400), function(request, response, next) {
         jobController.getJobs(request, response).catch(function(error) {
             next(error)
         })
     })
 
-    router.post('/jobs', rateLimit(core, 30), function(request, response, next) {
+    router.post('/queue/:queue/jobs', rateLimit(core, 30), function(request, response, next) {
         jobController.postJob(request, response).catch(function(error) {
             next(error)
         })
     })
 
-    router.get('/job/:id', rateLimit(core, 2400), function(request, response, next) {
+    router.get('/queue/:queue/job/:id', rateLimit(core, 2400), function(request, response, next) {
         jobController.getJob(request, response).catch(function(error) {
             next(error)
         })
     })
 
-    router.patch('/job/:id', rateLimit(core, 30), function(request, response, next) {
+    router.patch('/queue/:queue/job/:id', rateLimit(core, 30), function(request, response, next) {
         jobController.patchJob(request, response).catch(function(error) {
             next(error)
         })
     })
 
-    router.delete('/job/:id', rateLimit(core, 30), function(request, response, next) {
+    router.delete('/queue/:queue/job/:id', rateLimit(core, 30), function(request, response, next) {
         jobController.deleteJob(request, response).catch(function(error) {
             next(error)
         })
@@ -119,10 +119,26 @@ module.exports = function(core) {
     const FileController = require('./controllers/FileController')
     const fileController = new FileController(core)
 
-    const upload = new multer({ dest: 'public/uploads/tmp' })
+    router.post('/upload/:id/image', rateLimit(core, 30), createImageUploadMiddleware(), function(request, response, next) {
+        fileController.uploadImage(request, response).catch(function(error) {
+            next(error)
+        })
+    })
 
-    router.post('/upload', rateLimit(core, 30), upload.single('file'), function(request, response, next) {
-        fileController.upload(request, response).catch(function(error) {
+    router.post('/upload/:id/video', rateLimit(core, 30), createVideoUploadMiddleware(), function(request, response, next) {
+        fileController.uploadVideo(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.post('/files', rateLimit(core, 30), function(request, response, next) {
+        fileController.postFiles(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.get('/file/:id/source', rateLimit(core, 2400), function(request, response, next) {
+        fileController.getFileSource(request, response).catch(function(error) {
             next(error)
         })
     })
@@ -338,6 +354,24 @@ module.exports = function(core) {
 
     router.delete('/group/:groupId/moderation/:id', rateLimit(core, 120), function(request, response, next) {
         groupModerationController.deleteGroupModeration(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    /**************************************************************************
+     * GroupSubscription REST routes
+     **************************************************************************/
+    const GroupSubscriptionController = require('./controllers/GroupSubscriptionController')
+    const groupSubscriptionController = new GroupSubscriptionController(core)
+
+    router.get('/group/:groupId/subscription', rateLimit(core, 240), function(request, response, next) {
+        groupSubscriptionController.getGroupSubscriptions(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.patch('/group/:groupId/subscription', rateLimit(core, 60), function(request, response, next) {
+        groupSubscriptionController.patchGroupSubscription(request, response).catch(function(error) {
             next(error)
         })
     })

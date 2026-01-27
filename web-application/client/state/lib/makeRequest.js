@@ -50,6 +50,9 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
             if ((method == 'POST' || method == 'PATCH') && body ) {
                 if ( body instanceof FormData ) {
                     fetchOptions.body = body
+                } else if ( body instanceof ReadableStream ) {
+                    fetchOptions.body = body
+                    fetchOptions.duplex = 'half'
                 } else {
                     fetchOptions.body = JSON.stringify(body)
                     fetchOptions.headers['Content-Type'] = 'application/json'
@@ -89,13 +92,13 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
             //
 
             logger.verbose(`<<< ${method} ${endpoint} :: Sending ${method} ${fullEndpoint}.`)
-            //logger.verbose(`<<< ${method} ${endpoint} :: With options: ${JSON.stringify(fetchOptions)}`)
+            logger.verbose(`<<< ${method} ${endpoint} :: With options: ${JSON.stringify(fetchOptions)}`)
             const response = await fetch(fullEndpoint, fetchOptions)
             logger.verbose(`>>> ${method} ${endpoint} ::  Got ${response.status}.`)
-            /*for(const [header, value] of response.headers) {
+            for(const [header, value] of response.headers) {
                 logger.verbose(`>>> ${method} ${endpoint} :: Header::  ${header}=${value}`)
             }
-            logger.verbose(`>>> ${method} ${fullEndpoint} :: End Headers`)*/
+            logger.verbose(`>>> ${method} ${fullEndpoint} :: End Headers`)
 
             // If they've been logged out, send them to the home page, which will
             // let them log back in again.

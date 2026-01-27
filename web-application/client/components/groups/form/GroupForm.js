@@ -12,6 +12,7 @@ import { useLocalStorage } from '/lib/hooks/useLocalStorage'
 import { useRequest } from '/lib/hooks/useRequest'
 import { useFeature } from '/lib/hooks/feature'
 import { useGroupPermissionContext } from '/lib/hooks/Group'
+import { useFile } from '/lib/hooks/File'
 
 import { postGroups } from '/state/Group'
 
@@ -36,15 +37,21 @@ const GroupForm = function({ parentId }) {
     const parentGroup = context.group
     const canCreateGroup = can(currentUser, Actions.create, Entities.Group, context)
 
+    let defaultType = 'private'
+    if ( parentGroup?.type === 'hidden' || parentGroup?.type === 'hidden-private' || parentGroup?.type === 'hidden-open' ) {
+        defaultType = 'hidden-private'
+    }
+
     const [ title, setTitle ] = useLocalStorage('group.draft.title', '')
     const [ slug, setSlug ] = useLocalStorage('group.draft.slug', '')
-    const [ type, setType ] = useLocalStorage('group.draft.type', ( parentGroup?.type === 'hidden' ? 'hidden-private' : 'private'))
+    const [ type, setType ] = useLocalStorage('group.draft.type', defaultType)
     const [ postPermissions, setPostPermissions ] = useLocalStorage('group.draft.postPermissions', 'members')
     const [ about, setAbout ] = useLocalStorage('group.draft.about', '')
     const [ shortDescription, setShortDescription ] = useLocalStorage('group.draft.shortDescription', '')
     const [ rules, setRules ] = useLocalStorage('group.draft.rules', '')
     const [ fileId, setFileId] = useLocalStorage('group.draft.fileId', null)
     const [ fileState, setFileState] = useState(null)
+    const [file] = useFile(fileId)
 
     const [ titleErrors, setTitleErrors ] = useState(null) 
     const [ slugErrors, setSlugErrors ] = useState(null)
@@ -237,6 +244,9 @@ const GroupForm = function({ parentId }) {
     }, [ request, fileId])
 
     let baseError = null 
+    if ( titleErrors !== null || slugErrors !== null || typeErrors !== null || postPermissionsErrors !== null || aboutErrors !== null || shortDescriptionErrors !== null || rulesErrors !== null ) {
+        baseError = (<span>One or more fields has an invalid value.  Please fix the error and try again!</span>)
+    }
 
     if ( parentId !== undefined && (parentGroup === undefined || requests.hasPending() )) {
         return (
@@ -264,7 +274,7 @@ const GroupForm = function({ parentId }) {
             <div className="group-form__group-image">
                 <div>
                     { ! fileId && <UserCircleIcon className="placeholder" /> }
-                    { fileId && <DraftProfileImage 
+                    { fileId && file?.state === 'ready' && <DraftProfileImage 
                         ref={fileRef}
                         fileId={fileId} 
                         setFileId={setFileId} 
@@ -273,9 +283,10 @@ const GroupForm = function({ parentId }) {
                         width={200} 
                         deleteOnRemove={false} 
                     /> }
-                    { ! fileId && <FileUploadInput 
+                    { ( ! fileId || file?.state !== 'ready') && <FileUploadInput 
                         fileId={fileId}
                         setFileId={setFileId} 
+                        type="image"
                         types={[ 'image/jpeg', 'image/png' ]} 
                     /> }
                 </div>

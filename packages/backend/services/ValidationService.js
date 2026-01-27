@@ -31,9 +31,11 @@ const PostDAO = require('../daos/PostDAO')
 const PermissionService = require('./PermissionService')
 
 const BlocklistValidation = require('./validation/BlocklistValidation')
+const FileValidation = require('./validation/FileValidation')
 const GroupValidation = require('./validation/GroupValidation')
 const GroupMemberValidation = require('./validation/GroupMemberValidation')
 const GroupModerationValidation = require('./validation/GroupModerationValidation')
+const GroupSubscriptionValidation = require('./validation/GroupSubscriptionValidation')
 const LinkPreviewValidation = require('./validation/LinkPreviewValidation')
 const PostValidation = require('./validation/PostValidation')
 const PostCommentValidation = require('./validation/PostCommentValidation')
@@ -51,9 +53,11 @@ module.exports = class ValidationService {
         this.permissionService = new PermissionService(core)
 
         this.blocklist = new BlocklistValidation(core, this)
+        this.file = new FileValidation(core, this)
         this.group = new GroupValidation(core, this)
         this.groupMember = new GroupMemberValidation(core, this)
         this.groupModeration = new GroupModerationValidation(core, this)
+        this.groupSubscription = new GroupSubscriptionValidation(core, this)
         this.linkPreview = new LinkPreviewValidation(core, this)
         this.post = new PostValidation(core, this)
         this.postComment = new PostCommentValidation(core, this)
@@ -69,6 +73,10 @@ module.exports = class ValidationService {
         return await this.blocklist.validateBlocklist(currentUser, blocklist, existing)
     }
 
+    async validateFile(currentUser, file, existing) {
+        return await this.file.validateFile(currentUser, file, existing)
+    }
+
     async validateGroup(currentUser, group, existing) {
         return await this.group.validateGroup(currentUser, group, existing)
     }
@@ -79,6 +87,10 @@ module.exports = class ValidationService {
 
     async validateGroupModeration(currentUser, groupModeration, existing) {
         return await this.groupModeration.validateGroupModeration(currentUser, groupModeration, existing)
+    }
+
+    async validateGroupSubscription(currentUser, groupSubscription, existing) {
+        return await this.groupSubscription.validateGroupSubscription(currentUser, groupSubscription, existing)
     }
     
     async validateLinkPreview(currentUser, linkPreview, existing) {

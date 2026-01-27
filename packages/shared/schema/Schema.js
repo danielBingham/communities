@@ -26,6 +26,10 @@ module.exports = class Schema {
     }
 
     clean(entity) {
+        if ( entity === undefined || entity === null ) {
+            return entity
+        }
+
         const cleanedEntity = {}
         for( const [property, handlers] of Object.entries(this.properties)) {
             const cleaner = handlers.clean

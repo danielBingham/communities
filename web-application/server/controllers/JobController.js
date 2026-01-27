@@ -17,15 +17,16 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-const backend = require('@communities/backend')
+const { JobEvents } = require('@communities/backend')
 
 const ControllerError = require('../errors/ControllerError')
 
 module.exports = class JobController {
 
     constructor(core) {
+        this.core = core
+
         this.database = core.database
-        this.queue = core.queue 
         this.logger = core.logger
         this.config = core.config
     }
@@ -47,15 +48,17 @@ module.exports = class JobController {
                 `Unauthenticated user attempted retrieve jobs.`)
         }
 
+        const name = request.params.queue
+
         const jobs = {
             waiting: [],
             active: [],
             completed: []
         }
         
-        jobs.waiting = await this.queue.getJobs(['waiting'])
-        jobs.active = await this.queue.getJobs(['active'])
-        jobs.completed = await this.queue.getJobs(['completed'])
+        jobs.waiting = await this.core.queues[name].getJobs(['waiting'])
+        jobs.active = await this.core.queues[name].getJobs(['active'])
+        jobs.completed = await this.core.queues[name].getJobs(['completed'])
 
         if ( request.session.user.siteRole == 'admin' || request.session.user.siteRole == 'superadmin') {
             return response.status(200).json(jobs)
@@ -103,6 +106,7 @@ module.exports = class JobController {
          * 
          * ********************************************************************/
 
+        const name = request.params.queue
         const jobId = request.params.id
 
         // Validation: 1. :id must be set
@@ -117,7 +121,7 @@ module.exports = class JobController {
                 `Unauthenticated user attempted to get Job(${jobId}).`)
         }
         
-        const job = await this.queue.getJob(jobId)
+        const job = await this.core.queues[name].getJob(jobId)
 
         // 2. User may only get their own job (or must be admin).
         if ( job.data.session.user.id !== request.session.user.id && request.session.user.siteRole != 'admin' && request.session.user.siteRole != 'superadmin' ) {
@@ -130,32 +134,7 @@ module.exports = class JobController {
     }
 
     async postJob(request, response) {
-        const name = request.body.name
-
-        /**********************************************************************
-         * Permissions Checking and Input Validation
-         *
-         * Permissions:
-         *
-         * 1. User must be logged in.
-         *
-         * Validation:
-         *
-         * 1. body.name must be set and be a valid job.
-         * 
-         * ********************************************************************/
-       
-        // Permissions: 1. User must be logged in.
-        if ( ! request.session.user ) {
-            throw new ControllerError(401, 'not-authenticated', 
-                `Unauthenticated user attempted start a job.`)
-        }
-
-        let job = null 
-        throw new ControllerError(400, 'invalid-job',
-            `Attempt to trigger invalid job '${name}'.`)
-
-        return response.status(200).json(job.toJSON())
+        throw new ControllerError(503, 'not-implemented', '')
     }
 
     async patchJob(request, response) {

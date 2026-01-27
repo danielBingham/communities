@@ -41,7 +41,7 @@ import GroupTag from '/components/groups/view/GroupTag'
 
 import PostDotsMenu from './PostDotsMenu'
 import PostModeration from './PostModeration'
-import PostImage from './PostImage'
+import PostFile from './PostFile'
 import PostReactions from './PostReactions'
 import PostComments from './PostComments'
 
@@ -58,7 +58,7 @@ const Post = function({ id, expanded, showLoading, shared }) {
     const [user, userRequest] = useUser(post?.userId)
     const [context, requests] = useGroupPermissionContext(currentUser, post?.groupId) 
     const group = context.group
-    const [groupModeration, groupModerationRequest] = useGroupModeration(post?.groupModerationId)
+    const [groupModeration, groupModerationRequest] = useGroupModeration(post?.groupId, post?.groupModerationId)
     const [siteModeration, siteModerationRequest] = useSiteModeration(post?.siteModerationId)
 
     if ( (request !== null && request.state == 'failed' && ( ! post || ! user ))) {
@@ -192,7 +192,7 @@ const Post = function({ id, expanded, showLoading, shared }) {
                 { post.content.substring(0,1000) }...
                 <div className="post__show-more"><a href="" onClick={(e) => { e.preventDefault(); setShowMore(true) }}>Show More.</a></div>
             </div> }
-            <PostImage id={id} />
+            { post.fileId && <PostFile id={id} /> }
             { post.linkPreviewId && <LinkPreview id={post.linkPreviewId} /> }
             { post.sharedPostId && <Post id={post.sharedPostId} shared={true} showLoading={true} /> }
             { ! shared && <PostReactions postId={id} /> }

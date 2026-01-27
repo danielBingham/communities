@@ -25,12 +25,12 @@ module.exports = class NotificationService {
     }
 
     async sendNotifications(currentUser, type, context, options) {
-        await this.core.queue.add('send-notifications', { 
+        await this.core.queues['send-notifications'].add({ 
             currentUser: currentUser,
             type: type,
             context: context,
             options: options
-        })
+        }, { attempts: 3 })
     }
 
 }

@@ -32,7 +32,7 @@ const FlagPostForGroup = function({ postId } ) {
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const [post, postRequest] = usePost(postId)
 
-    const [groupModeration, groupModerationRequest] = useGroupModeration(post?.groupModerationId)
+    const [groupModeration, groupModerationRequest] = useGroupModeration(post?.groupId, post?.groupModerationId)
 
     const [context, requests] = useGroupPermissionContext(currentUser, post?.groupId)
     const currentMember = context.userMember
