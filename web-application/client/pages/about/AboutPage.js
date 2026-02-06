@@ -21,6 +21,7 @@ const AboutPage = function() {
                     <NavigationSubmenu id="AboutLegal" icon="ClipboardDocumentList" title="Legal">
                         <NavigationSubmenuLink to="/about/tos" icon="ClipboardDocumentCheck" text="Terms" />
                         <NavigationSubmenuLink to="/about/privacy" icon="ShieldCheck" text="Privacy" />
+                        <NavigationSubmenuLink to="/about/operating-agreement" icon="ClipboardDocumentList" text="Operating Agreement" />
                     </NavigationSubmenu>
                     <NavigationMenuLink to="/about/contact" icon="Envelope" text="Contact" />
                 </NavigationMenu>

@@ -41,6 +41,7 @@ import Roadmap from '/pages/about/views/Roadmap'
 import Contribute from '/pages/about/views/Contribute'
 import TermsOfServiceView from '/pages/about/views/TermsOfServiceView'
 import Privacy from '/pages/about/views/Privacy'
+import OperatingAgreement from '/pages/about/views/OperatingAgreement'
 import Contact from '/pages/about/views/Contact'
 
 import LoginPage from '/pages/authentication/LoginPage'
@@ -179,6 +180,7 @@ const App = function(props) {
                                 <Route path="contribute" element={ <Contribute /> } />
                                 <Route path="tos" element={ <TermsOfServiceView /> } />
                                 <Route path="privacy" element={ <Privacy /> } />
+                                <Route path="operating-agreement" element={ <OperatingAgreement /> } />
                                 <Route path="contact" element={ <Contact /> } />
                                 <Route index element={ <About />} />
                             </Route>
