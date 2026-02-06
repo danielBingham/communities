@@ -32,7 +32,7 @@ export const SubmenuCloseContext = createContext(null)
 export const SubmenuIsMobileContext = createContext(false)
 
 const NavigationSubmenu = function({ id, title, icon, children, className }) {
-    const [isOpen, setIsOpen] = useLocalStorage(`NavigationSubmenu.${id}.isOpen`, false)
+    const [isOpen, setIsOpen] = useLocalStorage(`NavigationSubmenu.${id}.isOpen`, true)
     const [width, setWidth] = useState(window.innerWidth)
 
     const menuRef = useRef(null)
