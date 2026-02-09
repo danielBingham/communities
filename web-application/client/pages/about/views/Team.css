@@ -1,0 +1,68 @@
+.team-view {
+    box-sizing: border-box;
+    max-width: 700px;
+    min-width: 340px;
+    width: 100%;
+
+    font-size: 16px;
+    line-height: 1.7em;
+    margin: 0 auto;
+}
+.team-view h1 {
+    text-align: center;
+}
+.team-view h2 {
+    margin-top: 2em;
+}
+.team-view h3 {
+    margin-top: 1.5em;
+}
+.team-view h4 {
+    margin-top: 1em;
+}
+.team-view li {
+    padding: 0.25em 0;
+}
+
+.team-view .beta {
+    font-size: 14px;
+    font-style: italic;
+}
+
+.team-view h2 a:link, .team-view h2 a:active, .team-view h2 a:visited {
+    color: #333;
+    text-decoration: none;
+}
+.team-view h2 a:hover {
+    color: #666;
+    text-decoration: none;
+}
+.team-view__team-member {
+    margin-top: 2em;
+    clear: both;
+}
+.team-view__team-member__profile {
+    float: left;
+    width: 200px;
+    margin-right: 20px;
+    border-radius: 10px;
+}
+h2.team-view__team-member__name {
+    display: inline-block;
+    margin: 0;
+}
+.team-view__team-member__title {
+    display: inline-block;
+    font-size: 14px;
+    font-style: italic;
+    color: var(--primary-color-dark);
+    padding: 0 0 0 10px;
+    margin: 0;
+}
+.team-view__team-member__socials span {
+    display: inline-block;
+    padding-right: 7px;
+}
+.team-view__team-member__socials__logo {
+    height: 20px;
+}

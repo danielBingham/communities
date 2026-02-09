@@ -39,7 +39,6 @@
     .navigation-menu__sub-menu__menu {
         position: absolute;
         top: 2.6em;
-        right: 0;
         text-align: left;
         background-color: white; 
         border: thin solid var(--floating-menu-border-color);
@@ -47,5 +46,11 @@
         padding: 5px 0;
         z-index: 10;
         border-radius: 7px;
+    }
+    .navigation-menu__sub-menu__menu.navigation-menu__sub-menu__pin-left {
+        left: 0;
+    }
+    .navigation-menu__sub-menu__menu.navigation-menu__sub-menu__pin-right {
+        right: 0;
     }
 }

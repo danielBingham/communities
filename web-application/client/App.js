@@ -34,11 +34,14 @@ import CreatePostPage from '/pages/posts/CreatePostPage'
 
 import AboutPage from '/pages/about/AboutPage'
 import About from '/pages/about/views/About'
+import News from '/pages/about/views/News'
+import Team from '/pages/about/views/Team'
 import FrequentlyAskedQuestions from '/pages/about/views/FrequentlyAskedQuestions'
 import Roadmap from '/pages/about/views/Roadmap'
 import Contribute from '/pages/about/views/Contribute'
 import TermsOfServiceView from '/pages/about/views/TermsOfServiceView'
 import Privacy from '/pages/about/views/Privacy'
+import OperatingAgreement from '/pages/about/views/OperatingAgreement'
 import Contact from '/pages/about/views/Contact'
 
 import LoginPage from '/pages/authentication/LoginPage'
@@ -170,11 +173,14 @@ const App = function(props) {
                             <Route path="/register" element={ <RegistrationPage /> } />
 
                             <Route path="/about" element={ <AboutPage /> } >
+                                <Route path="news/:url?" element={ <News /> } />
+                                <Route path="team" element={ <Team /> } />
                                 <Route path="faq" element={ <FrequentlyAskedQuestions /> } />
                                 <Route path="roadmap" element={ <Roadmap /> } />
                                 <Route path="contribute" element={ <Contribute /> } />
                                 <Route path="tos" element={ <TermsOfServiceView /> } />
                                 <Route path="privacy" element={ <Privacy /> } />
+                                <Route path="operating-agreement" element={ <OperatingAgreement /> } />
                                 <Route path="contact" element={ <Contact /> } />
                                 <Route index element={ <About />} />
                             </Route>
