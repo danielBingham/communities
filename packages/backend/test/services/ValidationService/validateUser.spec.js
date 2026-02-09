@@ -1280,7 +1280,7 @@ describe('ValidationService.validateUser()', function() {
             expect(errors[0].type).toBe('status:invalid')
         })
 
-        it("Should return an error when existing.status is not 'banned' or 'confirmed'", async function() {
+        it("Should return an error when existing.status is not 'banned', 'unconfirmed', or 'confirmed'", async function() {
             const service = new ValidationService(core)
 
             const user = {
@@ -1289,7 +1289,7 @@ describe('ValidationService.validateUser()', function() {
             }
 
             const existing = { ...entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']  }
-            existing.status = 'unconfirmed'
+            existing.status = 'invited'
 
             const errors = await service.validateUser(user, existing, 'admin-edit')
 
