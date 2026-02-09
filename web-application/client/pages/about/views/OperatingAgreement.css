@@ -1,0 +1,38 @@
+.operating-agreement {
+    box-sizing: border-box;
+    max-width: 800px;
+    min-width: 340px;
+    width: 100%;
+
+    font-size: 14px;
+    line-height: 1.7em;
+    margin: 0 auto;
+}
+.operating-agreement h1 {
+    text-align: center;
+}
+.operating-agreement h2 {
+    margin-top: 2em;
+}
+.operating-agreement h3 {
+    margin-top: 1.5em;
+}
+.operating-agreement h4 {
+    margin-top: 1em;
+}
+.operating-agreement li {
+    padding: 0.25em 0;
+}
+
+
+.operating-agreement h2 a:link, .operating-agreement h2 a:active, .operating-agreement h2 a:visited {
+    color: #333;
+    text-decoration: none;
+}
+.operating-agreement h2 a:hover {
+    color: #666;
+    text-decoration: none;
+}
+.operating-agreement__subsection {
+    margin-left: 50px;
+}

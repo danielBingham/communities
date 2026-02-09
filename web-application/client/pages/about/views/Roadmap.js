@@ -27,14 +27,15 @@ const Roadmap = function({}) {
                 <li><strong>Site Moderation Controls</strong> -- Moderation controls to allow site administrators and moderators to moderate the site.</li>
                 <li><strong>Group Moderation Controls</strong> -- Improved moderation controls for group administrators and moderators.</li>
                 <li><strong>Subgroups</strong> -- The ability to create subgroups in groups in order to better organize large groups.</li>
+                <li><strong>Video Uploads</strong> -- You can upload videos to your Posts.</li>
             </ul>
             <h2>Towards 1.0</h2>
             <p>These are things we need to build or do before we can consider the platform 1.0.</p>
             <ul>
-                <li><strong>Video Uploads</strong> -- You can upload videos to your Posts.</li>
-                <li><strong>Post Image Galleries</strong> -- You can share galleries of images on Posts.</li>
                 <li><strong>Location Based Feeds</strong> -- You can add your location and have feeds of public posts generated for your neighborhood, city, county, state/region, and nation.</li>
                 <li><strong>Events</strong> -- You can create events to gather with your communities in the real world.</li>
+                <li><strong>More Profile Information</strong> -- You can add more information to your profile: contact, socials, a longer about, schooling, etc and control who can see what.</li>
+                <li><strong>Post Image Galleries</strong> -- You can share galleries of images on Posts.</li>
                 <li><strong>Multi-factor Authentication</strong> -- Multi-factor authentication to protect user's accounts.</li>
                 <li><strong>Accessibility</strong> -- We need to make sure the platform and apps are fully accessible.</li>
                 <li><strong>Security Audit</strong> -- We need to get a security audit to ensure the platform is fully secure.</li>
@@ -46,6 +47,8 @@ const Roadmap = function({}) {
                 <li><strong>Post Tagging</strong> -- You can add up to 5 Tags to a post.  You can browse feeds of posts for each Tag.  Tagging a post places it in the appropriate feed.</li>
                 <li><strong>Friend Lists</strong> -- You can organize your friends into private lists.</li>
                 <li><strong>Custom Feeds</strong> -- You can create custom feeds by combining and filtering all of the above elements: Friend Lists, Groups, Events, Location, and Tags.</li>
+                <li><strong>Externally Public, Private and Hidden Profiles</strong> -- The ability to set your profile's visibility.</li>
+                <li><strong>Organization Profiles</strong> -- Profile pages for governments, nonprofits, institutions, and local businesses.</li>
             </ul>
         </article>
     )

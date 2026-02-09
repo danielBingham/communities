@@ -1,0 +1,10 @@
+.news-view {
+    box-sizing: border-box;
+    max-width: 700px;
+    min-width: 340px;
+    width: 100%;
+
+    font-size: 16px;
+    line-height: 1.7em;
+    margin: 0 auto;
+}
