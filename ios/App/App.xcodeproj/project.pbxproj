@@ -48,6 +48,7 @@
 		504EC3111FED79650016851F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		504EC3131FED79650016851F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		50B271D01FEDC1A000F3C39B /* public */ = {isa = PBXFileReference; lastKnownFileType = folder; path = public; sourceTree = "<group>"; };
+		743A7F302F3A69CF00210C15 /* App LocalRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "App LocalRelease.entitlements"; sourceTree = "<group>"; };
 		74530B7B2E6A0EA400A5F70A /* App Staging.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "App Staging.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		74530B7C2E6A0EA400A5F70A /* App Staging-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "App Staging-Info.plist"; path = "/Users/danielbingham/src/danielbingham/communities/ios/App/App Staging-Info.plist"; sourceTree = "<absolute>"; };
 		74530B8E2E6A26A900A5F70A /* App Local.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "App Local.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -92,6 +93,7 @@
 		504EC2FB1FED79650016851F = {
 			isa = PBXGroup;
 			children = (
+				743A7F302F3A69CF00210C15 /* App LocalRelease.entitlements */,
 				504EC3061FED79650016851F /* App */,
 				504EC3051FED79650016851F /* Products */,
 				74530B7C2E6A0EA400A5F70A /* App Staging-Info.plist */,
@@ -626,7 +628,7 @@
 				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = GAK47A8S5M;
 				INFOPLIST_FILE = "App Staging-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Communities -- Staging";
+				INFOPLIST_KEY_CFBundleDisplayName = staging.Communities;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MARKETING_VERSION = 0.9.0;
@@ -650,7 +652,7 @@
 				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = GAK47A8S5M;
 				INFOPLIST_FILE = "App Staging-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Communities -- Staging";
+				INFOPLIST_KEY_CFBundleDisplayName = staging.Communities;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MARKETING_VERSION = 0.9.0;
@@ -669,13 +671,13 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 10;
 				DEVELOPMENT_TEAM = GAK47A8S5M;
 				INFOPLIST_FILE = "App Local-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Communities - Local";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				INFOPLIST_KEY_CFBundleDisplayName = local.Communities;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 0.9.0;
+				MARKETING_VERSION = 0.10.0;
 				OTHER_SWIFT_FLAGS = "$(inherited) \"-D\" \"COCOAPODS\" \"-DDEBUG\"";
 				PRODUCT_BUNDLE_IDENTIFIER = social.communities.local;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -690,15 +692,15 @@
 			baseConfigurationReference = ECF265CA5305D21062C1437C /* Pods-App Local.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "App LocalRelease.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 10;
 				DEVELOPMENT_TEAM = GAK47A8S5M;
 				INFOPLIST_FILE = "App Local-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Communities - Local";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				INFOPLIST_KEY_CFBundleDisplayName = local.Communities;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 0.9.0;
+				MARKETING_VERSION = 0.10.0;
 				PRODUCT_BUNDLE_IDENTIFIER = social.communities.local;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";
