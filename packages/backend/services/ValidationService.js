@@ -573,11 +573,11 @@ module.exports = class ValidationService {
                     })
                 }
 
-                if ( existing.status !== 'banned' && existing.status !== 'confirmed' ) {
+                if ( existing.status !== 'banned' && existing.status !== 'unconfirmed' && existing.status !== 'confirmed' ) {
                     errors.push({
                         type: `status:not-authorized`,
                         log: `User attempting to update status for unconfirmed user.`,
-                        message: `You may only update status to ban confirmed users or unban previously banned users.`
+                        message: `You may only update status to ban confirmed users, unban previously banned users, or manually confirm unconfirmed users.`
                     })
                 }
             }
