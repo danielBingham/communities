@@ -170,6 +170,12 @@ module.exports = class TokenController extends BaseController {
                 user: session.user,
                 file: session.file
             })
+        } else {
+            throw new ControllerError(403, 'not-authorized',
+                `Invalid token state!`,
+                `Your token is not valid.`
+            )
+    
         }
     }
 
