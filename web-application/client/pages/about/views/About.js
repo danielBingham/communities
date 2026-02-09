@@ -37,17 +37,14 @@ const About = function({}) {
             </p>
             <h2>Back to the Beginning</h2>
             <p>
-                Remember the olden days of social media? It used to be a
-                powerful tool for connecting. You could keep up with your
-                friends, stay in touch with acquaintances, and find people you
-                otherwise would have lost touch with. It allowed you to build
-                connection with far more people than you would have been able
-                to without it.
+                Social media used to be a powerful tool for connecting. You
+                could keep up with your friends, stay in touch with
+                acquaintances, and find people you had lost touch with. 
             </p>
             <p> 
-                Because it allowed us to connect to each other it was also a
-                powerful tool for organizing social movements. People used it
-                to organize for social and economic justice during the Occupy
+                Because it helped us stay connected, it was also a powerful
+                tool for organizing social movements. People used it to
+                organize for social and economic justice during the Occupy
                 movement. They used it to organize for democracy and human
                 rights during the Arab Spring. It helped pro-democracy,
                 anti-authoritarian, and social justice movements the world
@@ -70,24 +67,26 @@ const About = function({}) {
             </p>
             <h2>Social, Not Parasocial</h2>
             <p>
-                Communities is designed to enable real, social connection. It's
+                Communities is designed to enable real relationships. It's
                 built around two-way connections, using a Friend model rather
-                than a follower model. We've already built Groups, so you can
-                gather with like minded people and organize, and we're working
-                on Events, so that you can gather in the real world. 
+                than a Follower model.
+            </p>
+            <p> 
+                We're building tools to help you communicate, collaborate, and
+                organize. We've already built Groups, so you can gather with
+                like minded people and organize, and we're working on Events,
+                so that you can gather in the real world. 
             </p>
             <p>
-                We're building a platform where you can organize, communicate, and
-                collaborate. Our goal is to help people build community, not
-                audiences.           
+                 Our goal is to help people build community, not audiences.           
             </p>
             <h2>Governed, Not Owned</h2>
             <p>
                 We're working towards making Communities a nonprofit,
                 multi-stakeholder cooperative. What does that mean?  It means
-                no one will own it, and we will all govern it together. Workers
-                and users will collaborate to build and steward the platform so
-                that it stays a healthy, useful commons for all of us.
+                it won't be owned, it will be governed. Workers and users will
+                collaborate to build and steward the platform so that it stays
+                a healthy, useful commons for all of us.
             </p>
             <p>
                 We're still working out the exact structure.  The current
@@ -115,8 +114,8 @@ const About = function({}) {
                 data.
             </p>
             <p>
-                Communities is not funded by the oligarchs.  It's funded by
-                directly you, and so you will be in control. 
+                Communities is not funded by the oligarchs.  It's funded
+                directly by you, and so you will be in control. 
             </p>
             <p>
                 It's supported by users through a "Pay what you can" sliding
@@ -135,13 +134,18 @@ const About = function({}) {
             </p>
             <h2>Built in Support of Democracy</h2>
             <p>
-                We stated building Communities in order to build a platform to
-                help people organize in defense of democracy.  We used a
-                Friend model, because movements are build around real social
-                connections.  We implemented Groups first, because they are a
-                critical tool movements have used to organize for a decade and
-                a half.  We're working on Events next, to help people gather in
-                the real world.
+                We stated building Communities because people needed somewhere
+                to organize in defense of democracy.
+            </p>
+            <p>
+                We used a Friend model, because movements are build around real
+                social connections. We implemented Groups first, because they
+                are a critical tool movements have used to organize for a
+                decade and a half. We're working on Events next, to help
+                people gather in the real world.
+            </p>
+            <p>
+                There's still a lot more we can do.
             </p>
             <p>
                 We're thinking hard about how to prevent the spread of

@@ -10,7 +10,7 @@ const AboutPage = function() {
         <Page id="about-page">
             <PageLeftGutter>
                 <NavigationMenu className="about-page__menu">
-                    <NavigationSubmenu id="About" icon="InformationCircle" title="About">
+                    <NavigationSubmenu id="About" icon="InformationCircle" title="About" pinLeft={true}>
                         <NavigationSubmenuLink to="/about" icon="InformationCircle" text="About" />
                         <NavigationSubmenuLink to="/about/news" icon="Newspaper" text="News" />
                         <NavigationSubmenuLink to="/about/faq" icon="QuestionMarkCircle" text="FAQ" />

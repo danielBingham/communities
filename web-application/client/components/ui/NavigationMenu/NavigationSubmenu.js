@@ -31,7 +31,7 @@ import './NavigationSubmenu.css'
 export const SubmenuCloseContext = createContext(null)
 export const SubmenuIsMobileContext = createContext(false)
 
-const NavigationSubmenu = function({ id, title, icon, children, className }) {
+const NavigationSubmenu = function({ id, title, icon, pinLeft, children, className }) {
     const [isOpen, setIsOpen] = useLocalStorage(`NavigationSubmenu.${id}.isOpen`, true)
     const [width, setWidth] = useState(window.innerWidth)
 
@@ -80,11 +80,11 @@ const NavigationSubmenu = function({ id, title, icon, children, className }) {
 
 
     return (
-        <NavigationMenuItem className={`navigation-menu__sub-menu ${ className ? className : '' }`}>
+        <NavigationMenuItem className={`navigation-menu__sub-menu ${ className ? className : '' } `}>
             <a href="" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsOpen( ! isOpen )}} className="navigation-menu__sub-menu__header">
                 { isOpen ? <SolidIcon /> : <OutlineIcon /> } <span className="nav-text">{ title }</span>
             </a>
-            { isOpen && <menu ref={menuRef} className="navigation-menu__sub-menu__menu">
+            { isOpen && <menu ref={menuRef} className={`navigation-menu__sub-menu__menu ${ pinLeft ? `navigation-menu__sub-menu__pin-left` : 'navigation-menu__sub-menu__pin-right' }`}>
                 <SubmenuCloseContext.Provider value={closeMenu}>
                     <SubmenuIsMobileContext.Provider value={width <= 1220}>
                         { children }

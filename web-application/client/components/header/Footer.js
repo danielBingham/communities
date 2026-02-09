@@ -25,11 +25,14 @@ const Footer = function() {
             </div>
             <div className="about-links footer__block">
                 <p><a href="/about">about</a></p>
+                <p><a href="/about/news">news</a></p>
                 <p><a href="/about/faq">faq</a></p>
+                <p><a href="/about/team">team</a></p>
                 <p><a href="/about/roadmap">roadmap</a></p>
                 <p><a href="/about/contribute">contribute</a></p>
                 <p><a href="/about/tos">terms of service</a></p>
                 <p><a href="/about/privacy">privacy policy</a></p>
+                <p><a href="/about/operating-agreement">operating agreement</a></p>
                 <p><a href="/about/contact">contact</a></p>
             </div>
             <div className="content-links footer__block">
