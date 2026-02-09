@@ -33,7 +33,7 @@ const Team = function({}) {
     return (
         <article className="team-view">
             <h1>Team</h1>
-            <p>Communities is being built on a shoestring budget, so our team is very small.  It's composed of one full time developer (our founder) and a handful of very part time freelancers and volunteers.</p>
+            <p>Our team is currently composed of one full time developer (our founder) and a handful of very part time freelancers and volunteers.</p>
             <section id="daniel-bingham" className="team-view__team-member">
                 <img src={danielBinghamProfile} className="team-view__team-member__profile" />
                 <h2 className="team-view__team-member__name">Daniel Bingham</h2>

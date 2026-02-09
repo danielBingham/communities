@@ -132,7 +132,7 @@ const About = function({}) {
                 we can potentially make the platform work with a significantly
                 lower level of contributions.  
             </p>
-            <h2>Built in Support of Democracy</h2>
+            <h2>Built for Democracy</h2>
             <p>
                 We stated building Communities because people needed somewhere
                 to organize in defense of democracy.

@@ -302,22 +302,22 @@ const posts = {
                 <p>
                     If you want to see what’s on the roadmap, you can see the
                     high level outline here:
-                    https://communities.social/about/roadmap
+                    <a href="https://communities.social/about/roadmap">https://communities.social/about/roadmap</a>
                 </p>
                 <p>
                     If you want to see the nitty gritty details, we’re developing
                     in the open, so you can watch it happening in real time on
                     our Github Repository here:
-                    https://github.com/danielBingham/communities
+                    <a href="https://github.com/danielBingham/communities">https://github.com/danielBingham/communities</a>
                 </p>
                 <p>
-                    Here’s the Github project we use to actively manage the detailed roadmap: https://github.com/users/danielBingham/projects/11/views/3
+                    Here’s the Github project we use to actively manage the detailed roadmap: <a href="https://github.com/users/danielBingham/projects/11/views/3">https://github.com/users/danielBingham/projects/11/views/3</a>
                 </p>
                 <p>
                     What about the cooperative conversion? I wrote a detailed
                     post laying out the current plan for how to approach that
                     here:
-                    https://communities.social/about/news/11-21-2025-the-cooperative-conversion-plan
+                    <a href="https://communities.social/about/news/11-21-2025-the-cooperative-conversion-plan">https://communities.social/about/news/11-21-2025-the-cooperative-conversion-plan</a>
                 </p>
             </>
         )
