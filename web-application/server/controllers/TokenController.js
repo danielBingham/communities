@@ -90,7 +90,18 @@ module.exports = class TokenController extends BaseController {
         if ( ! ( 'type' in request.query) || request.query.type === undefined || request.query.type === null ) {
             throw new ControllerError(403, 'not-authorized',
                 `User failed to specify a type when attempting to redeem a token.`,
-                `Your token is invalid.`)
+                `Your token is invalid. Please request a new one and try again.`)
+        }
+
+        // If they are trying to confirm their email, and they have already
+        // done so, just report success.
+        if ( request.query.type === 'email-confirmation' && currentUser && currentUser?.status === 'confirmed' ) {
+            const session = await this.authenticationService.getSessionForUserId(currentUser.id)
+
+            response.status(200).json({
+                session: session
+            })
+            return
         }
         
         const tokenErrors = validation.Token.validateToken(request.params.token)
@@ -98,7 +109,7 @@ module.exports = class TokenController extends BaseController {
             const logString = tokenErrors.reduce((string, error) => `${string}\n${error.log}`, '')
             throw new ControllerError(403, 'not-authorized',
                 `Invalid token: ${ logString }`,
-                `Your token is invalid.`)
+                `Your token is invalid. Please request a new one and try again.`)
         }
 
         const typeErrors = validation.Token.validateType(request.query.type)
@@ -106,7 +117,7 @@ module.exports = class TokenController extends BaseController {
             const logString = typeErrors.reduce((string, error) => `${string}\n${error.log}`, '')
             throw new ControllerError(403, 'not-authorized',
                 `Invalid token: ${ logString }`,
-                `Your token is invalid.`)
+                `Your token is invalid. Please request a new one and try again.`)
         }
 
         let token = null
@@ -119,7 +130,7 @@ module.exports = class TokenController extends BaseController {
             if ( error instanceof DAOError ) {
                 throw new ControllerError(403, 'not-authorized', 
                     error.message,
-                    `Your token is invalid.`)
+                    `Your token is invalid. Please request a new one and try again.`)
             } else {
                 throw error
             }
@@ -128,7 +139,7 @@ module.exports = class TokenController extends BaseController {
         if ( token === null ) {
             throw new ControllerError(403, 'not-authorized',
                 `Invalid token not found.`,
-                `Your token is invalid.`)
+                `Your token is invalid. Please request a new one and try again.`)
         }
 
         if ( currentUser && token.userId !== currentUser.id ) {
@@ -170,6 +181,12 @@ module.exports = class TokenController extends BaseController {
                 user: session.user,
                 file: session.file
             })
+        } else {
+            throw new ControllerError(403, 'not-authorized',
+                `Invalid token state!`,
+                `Your token is not valid. Please request a new one and try again.`
+            )
+    
         }
     }
 
@@ -246,10 +263,10 @@ module.exports = class TokenController extends BaseController {
         } else if (tokenParams.type == 'email-confirmation' ) {
             const currentUser = request.session.user
 
-            if ( ! currentUser ) {
-                throw new ControllerError(401, 'not-authenticated',
-                    `An unauthenticated user is attempting to request an email confirmation token.`,
-                    `You must be authenticated to do that.`)
+            if ( currentUser && currentUser.email !== tokenParams.email ) {
+                throw new ControllerError(403, 'not-authorized',
+                    `User(${currentUser.id}) attempting to require email confirmation for User(${tokenParams.email}).`,
+                    `You may only request an email confirmation for yourself.`)
             }
 
             const userResults = await this.userDAO.selectUsers({ where: 'email=$1', params: [ tokenParams.email ], fields: 'all' })
@@ -259,16 +276,22 @@ module.exports = class TokenController extends BaseController {
             }
             const user = userResults.dictionary[userResults.list[0]]
 
-            if ( user.id !== currentUser.id ) {
+            if ( currentUser && user.id !== currentUser.id ) {
                 throw new ControllerError(403, 'not-authorized',
                     `User(${currentUser.id}) attempting to require email confirmation for User(${user.id}).`,
                     `You may only request an email confirmation for yourself.`)
             }
 
-            if ( user.status != 'unconfirmed' ) {
+            if ( user.status === 'confirmed' ) {
                 throw new ControllerError(403, 'not-authorized',
                     `User(${user.id}) attempting to send new email confirmation when they are confirmed.`,
-                    `You are already confirmed!`)
+                    `You are already confirmed! Try refreshing the page or closing and reopening your app.`)
+            }
+
+            if ( user.status !== 'unconfirmed' ) {
+                throw new ControllerError(403, 'not-authorized',
+                    `User(${user.id}) with status "${user.status}" attempting to send new email confirmation.`,
+                    `You are not awaiting email confirmation.  You may not request a confirmation email.`)
             }
 
             const token = this.tokenDAO.createToken('email-confirmation')

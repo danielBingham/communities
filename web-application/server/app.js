@@ -36,7 +36,7 @@ const {
     FeatureService, 
 } = require('@communities/backend')
 
-const { createLogMiddleware, createLogIdMiddleware } = require('./log')
+const { createLogMiddleware } = require('./log')
 const { createCSRFMiddleware } = require('./csrf')
 const { createErrorsMiddleware } = require('./errors')
 
@@ -58,8 +58,6 @@ const createExpressApp = function(core, sessionParser) {
     app.use(express.json({ limit: "50mb" }))
     app.use(express.urlencoded({ limit: "50mb", extended: false }))
 
-    // Request and log initialization middleware
-    app.use(createLogMiddleware(core))
 
     app.use(cors({
         origin: [ core.config.host, 'capacitor://localhost', 'https://localhost' ],
@@ -87,9 +85,8 @@ const createExpressApp = function(core, sessionParser) {
         sessionParser(request, response, next)
     })
 
-    // Assign an ID to the request logger if we have a session.  The ID will
-    // follow the requests around.
-    app.use('/api', createLogIdMiddleware(core))
+    // Request and log initialization middleware
+    app.use(createLogMiddleware(core))
 
 
     // Set the feature flags on each request, so that they are always up to date.

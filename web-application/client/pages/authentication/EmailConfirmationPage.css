@@ -1,19 +1,9 @@
-.email-confirmation-page__sent {
-    border: thin solid var(--success-color-main);
-    background-color: var(--success-color-main);
-    font-size: 16px;
-    color: white;
-    margin: 20px auto;
-    padding: 10px;
-    border-radius: 7px;
-}
-
 
 @media (width > 700px) {
         #email-confirmation-page {
                 box-sizing: border-box;
                 display: block;
-                margin: 40px auto;
+                margin: 100px auto;
                 padding: 30px;
                 width: 600px;
                 border: thin solid var(--main-border-color);
@@ -27,7 +17,7 @@
     #email-confirmation-page {
         box-sizing: border-box;
         display: block;
-        margin: 20px auto;
+        margin: 100px auto;
         padding: 10px;
         width: 100%;
         border-top: thin solid var(--main-border-color);
