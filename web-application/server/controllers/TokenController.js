@@ -78,6 +78,7 @@ module.exports = class TokenController extends BaseController {
          * 
          * **********************************************************/
         const currentUser = request.session.user
+    
 
         // 1. :token must be included.
         if ( ! ('token' in request.params) || request.params.token === undefined || request.params.token === null ) {
@@ -90,7 +91,18 @@ module.exports = class TokenController extends BaseController {
         if ( ! ( 'type' in request.query) || request.query.type === undefined || request.query.type === null ) {
             throw new ControllerError(403, 'not-authorized',
                 `User failed to specify a type when attempting to redeem a token.`,
-                `Your token is invalid.`)
+                `Your token is invalid. Please request a new one and try again.`)
+        }
+
+        // If they are trying to confirm their email, and they have already
+        // done so, just report success.
+        if ( request.query.type === 'email-confirmation' && currentUser.status === 'confirmed' ) {
+            const session = await this.authenticationService.getSessionForUserId(currentUser.id)
+
+            response.status(200).json({
+                session: session
+            })
+            return
         }
         
         const tokenErrors = validation.Token.validateToken(request.params.token)
@@ -98,7 +110,7 @@ module.exports = class TokenController extends BaseController {
             const logString = tokenErrors.reduce((string, error) => `${string}\n${error.log}`, '')
             throw new ControllerError(403, 'not-authorized',
                 `Invalid token: ${ logString }`,
-                `Your token is invalid.`)
+                `Your token is invalid. Please request a new one and try again.`)
         }
 
         const typeErrors = validation.Token.validateType(request.query.type)
@@ -106,7 +118,7 @@ module.exports = class TokenController extends BaseController {
             const logString = typeErrors.reduce((string, error) => `${string}\n${error.log}`, '')
             throw new ControllerError(403, 'not-authorized',
                 `Invalid token: ${ logString }`,
-                `Your token is invalid.`)
+                `Your token is invalid. Please request a new one and try again.`)
         }
 
         let token = null
@@ -119,7 +131,7 @@ module.exports = class TokenController extends BaseController {
             if ( error instanceof DAOError ) {
                 throw new ControllerError(403, 'not-authorized', 
                     error.message,
-                    `Your token is invalid.`)
+                    `Your token is invalid. Please request a new one and try again.`)
             } else {
                 throw error
             }
@@ -128,7 +140,7 @@ module.exports = class TokenController extends BaseController {
         if ( token === null ) {
             throw new ControllerError(403, 'not-authorized',
                 `Invalid token not found.`,
-                `Your token is invalid.`)
+                `Your token is invalid. Please request a new one and try again.`)
         }
 
         if ( currentUser && token.userId !== currentUser.id ) {
@@ -173,7 +185,7 @@ module.exports = class TokenController extends BaseController {
         } else {
             throw new ControllerError(403, 'not-authorized',
                 `Invalid token state!`,
-                `Your token is not valid.`
+                `Your token is not valid. Please request a new one and try again.`
             )
     
         }
@@ -274,7 +286,7 @@ module.exports = class TokenController extends BaseController {
             if ( user.status != 'unconfirmed' ) {
                 throw new ControllerError(403, 'not-authorized',
                     `User(${user.id}) attempting to send new email confirmation when they are confirmed.`,
-                    `You are already confirmed!`)
+                    `You are already confirmed! Try refreshing the page or closing and reopening your app.`)
             }
 
             const token = this.tokenDAO.createToken('email-confirmation')

@@ -1,0 +1,35 @@
+.alert {
+    position: fixed;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    padding: 16px;
+    max-width: 80vw;
+
+    border-radius: 7px;
+    z-index: 100;
+}
+
+.alert.success {
+    color: white;
+    background-color: var(--success-color-main);
+    border: thin solid var(--success-color-main);
+}
+.alert.info {
+    color: white;
+    background-color: var(--primary-color-main);
+    border: thin solid var(--primary-color-main);
+}
+.alert.warn {
+    color: white;
+    background-color: var(--secondary-color-main);
+    border: thin solid var(--secondary-color-main);
+}
+.alert.error {
+    color: white;
+    background-color: var(--danger-color-main);
+    border: thin solid var(--danger-color-main);
+}
+
+

@@ -58,7 +58,9 @@ module.exports = class EmailService {
 <body>
 <div>
 <p>Hello ${user.name}!</p>
-<p>Please confirm your email address by following this link: <a href="${confirmationLink}">Confirm Email</a></p>
+<p>Your confirmation token is:</p>
+<p>${token.token}</p>
+<p>You can confirm your email address by following this link: <a href="${confirmationLink}">Confirm Email</a></p>
 <p>Cheers,</p>
 <p>The Communities Team</p>
 </div>
