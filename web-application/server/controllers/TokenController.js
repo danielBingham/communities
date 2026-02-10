@@ -78,7 +78,6 @@ module.exports = class TokenController extends BaseController {
          * 
          * **********************************************************/
         const currentUser = request.session.user
-    
 
         // 1. :token must be included.
         if ( ! ('token' in request.params) || request.params.token === undefined || request.params.token === null ) {
@@ -96,7 +95,7 @@ module.exports = class TokenController extends BaseController {
 
         // If they are trying to confirm their email, and they have already
         // done so, just report success.
-        if ( request.query.type === 'email-confirmation' && currentUser.status === 'confirmed' ) {
+        if ( request.query.type === 'email-confirmation' && currentUser && currentUser?.status === 'confirmed' ) {
             const session = await this.authenticationService.getSessionForUserId(currentUser.id)
 
             response.status(200).json({

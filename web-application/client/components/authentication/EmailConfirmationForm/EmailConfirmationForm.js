@@ -56,7 +56,7 @@ const EmailConfirmationForm = function({ initialToken }) {
             { error && <Alert type="error" timeout={5000}>That token was invalid.  Please enter a valid token.</Alert> }
             <div className="email-confirmation-form__instructions">
                 <p>
-                    Please check your email, "{ currentUser.email }", for a
+                    Please check your email { currentUser ? `, "${ currentUser.email }",` : '' } for a
                     confirmation request and follow the link within to confirm
                     your address.
                 </p>
