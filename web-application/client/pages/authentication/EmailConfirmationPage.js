@@ -1,18 +1,35 @@
-import React, { useState, useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media 
+ *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
+import { useEffect } from 'react'
+import { useSelector } from 'react-redux'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 
-import { createToken, validateToken } from '/state/tokens'
-import { deleteAuthentication } from '/state/authentication'
+import { validateToken } from '/state/tokens'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
 import CommunitiesLogo from '/components/header/CommunitiesLogo'
-
 import Spinner from '/components/Spinner'
-import Button from '/components/generic/button/Button'
+import { RequestErrorModal } from '/components/errors/RequestError'
 
-import LoginForm from '/components/authentication/LoginForm'
+import EmailConfirmationForm from '/components/authentication/EmailConfirmationForm'
 
 import './EmailConfirmationPage.css'
 
@@ -21,24 +38,10 @@ const EmailConfirmationPage = function(props) {
     const token = searchParams.get('token')
 
     const [ request, makeRequest ] = useRequest()
-    const [ createTokenRequest, makeCreateTokenRequest ] = useRequest()
-    const [ logoutRequest, makeLogoutRequest ] = useRequest()
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
     const navigate = useNavigate()
-
-    const requestNewConfirmationEmail = function() {
-        makeCreateTokenRequest(createToken({ type: 'email-confirmation', email: currentUser.email}))
-    }
-
-    const logout = function() {
-        // Clear local storage so their drafts don't carry over to another
-        // login session.
-        localStorage.clear()
-
-        makeRequest(deleteAuthentication())
-    }
 
     useEffect(function() {
         if ( token ) {
@@ -47,41 +50,28 @@ const EmailConfirmationPage = function(props) {
     }, [ token ])
 
     useEffect(function() {
-        // If they don't have a token and aren't logged in, just show the login
-        // form.
-        if ( ! token && ! currentUser || (currentUser && currentUser.status != 'unconfirmed')) {
+        if ( 
+             ( ! token && ! currentUser ) // No token and they aren't logged in. Just show the splash page.
+                || (currentUser && currentUser.status != 'unconfirmed') // They are logged in, but they've already confirmed or haven't finished registering.
+        ) {
             navigate('/')
         }
     }, [ currentUser, token ])
 
-    let content = ( <Spinner /> )
-
-    // If they don't have a token and aren't logged in, just show the login
-    // form.
-    if ( ! token && ! currentUser || (currentUser && currentUser.status == 'invited')) {
+    if (  
+        ( ! token && ! currentUser ) // No token and they aren't logged in, show a spinner until they are navigated away.
+        || (currentUser && currentUser.status !== 'unconfirmed') // They are logged in, but aren't unconfirmed.  Ditto.
+    ) {
         return (
             <Spinner />
         )
     }
 
-    else if ( ! token && currentUser && currentUser.status == 'unconfirmed' ) {
-        content = (
-            <div className="email-confirmation-page__instructions">
-                <p>Please check your email, "{ currentUser.email }", for a confirmation request and follow
-                    the link within to confirm your address.</p>
-                <p> You can use the button below to send a
-                new email if needed. If you need help, don't hesitate to reach out to <a
-                href="mailto:contact@communities.social">contact@communities.social</a>.</p>
-                <Button type="warn" onClick={() => logout()}>Cancel</Button> <Button type="primary" onClick={(e) => requestNewConfirmationEmail()}>Resend Confirmation Email</Button>
-                { createTokenRequest && createTokenRequest.state == 'fulfilled' && <p className="email-confirmation-page__sent">Confirmation request sent!</p> }
-            </div>
-        )
-
-    }
-
-    // If the request succeeded.
-    else if ( currentUser && currentUser.status == 'confirmed' ) {
-        content = (
+    // If the request succeeded.  They successfully confirmed!  They should be
+    // navigated away, but just in case, give them a way to navigate
+    // themselves.
+    if ( currentUser && currentUser.status === 'confirmed' ) {
+        return (
             <div className="email-confirmation-page__success">
                 <p>Thanks for confirming your email!</p>
                 <p>You can return to the home page <a href="/">here</a></p>
@@ -89,27 +79,14 @@ const EmailConfirmationPage = function(props) {
         )
     }
 
-    // If the request failed, handle errors.
-    else if (request && request.state == 'failed' ) {
-        content = (
-            <div className="email-confirmation-page__failure">
-                <p> We were unable to confirm you email.  The token you used may have been invalid or may have expired.</p>
-                <p> You can use the button below to send a
-                new email if needed. If you need help, don't hesitate to reach out to <a
-                href="mailto:contact@communities.social">contact@communities.social</a>.</p>
-                <Button type="warn" onClick={() => logout()}>Cancel</Button> <Button type="primary" onClick={(e) => requestNewConfirmationEmail()}>Resend Confirmation Email</Button>
-                { createTokenRequest && createTokenRequest.state == 'fulfilled' && <p className="email-confirmation-page__sent">Confirmation request sent!</p> }
-            </div>
-        )
-    }
     
     return (
         <div id="email-confirmation-page">
             <div className="logo"><CommunitiesLogo /></div>
-                { content }
+            <EmailConfirmationForm initialToken={token} />
+            <RequestErrorModal message="Attempt to confirm email" request={request} />
         </div>
     )
-
 }
 
 export default EmailConfirmationPage

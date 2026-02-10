@@ -1,0 +1,6 @@
+.resend-token-action__email-form {
+    display: flex;
+}
+.resend-token-action__email-form input {
+    flex-grow: 1;
+}

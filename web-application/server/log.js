@@ -23,9 +23,26 @@ const { Logger } = require('@communities/backend')
 
 const createLogMiddleware = function(core) {
     return function(request, response, next) {
-        request.logger = new Logger(core.logger.level, Uuid.v4(), request.method, request.originalUrl)
+        let id = Uuid.v4()
+        if ( 'session' in request ) {
+            if ( 'user' in request.session ) {
+                id = request.session.user.username
 
-        // Don't both logging the health requests.
+                if ( 'logId' in request.session ) {
+                    core.logger.info(`${request.session.logId} -> ${id}`)
+                    delete request.session.logId
+                }
+            }  else if ( 'logId' in request.session ) {
+                id = request.session.logId
+            } else if ( ! ( 'logId' in request.session ) ) {
+                request.session.logId = id
+            }
+        } 
+
+        // Create the request logger.
+        request.logger = new Logger(core.logger.level, id, request.method, request.originalUrl)
+
+        // Don't bother logging the health requests.
         if ( request.url !== '/health' ) {
             // Log start and end of the request.
             const startTime = Date.now()
@@ -48,34 +65,7 @@ const createLogMiddleware = function(core) {
     }
 }
 
-const createLogIdMiddleware = function(core) {
-    return (request, response, next) => {
-        if ( ! ( 'logger' in request ) ) {
-            core.logger.warn(`No logger found in request!`)
-            next()
-            return
-        }
-
-        const oldId = request.logger.id
-        // Set the id the logger will use to identify the session.  We don't want to
-        // use the actual session id, since that value is considered sensitive.  So
-        // instead we'll just use a uuid.
-        if ( 'session' in request ) {
-            if ( 'user' in request.session ) {
-                request.logger.setId(request.session.user.username)
-            }  else if ( 'logId' in request.session ) {
-                request.logger.setId(request.session.logId)
-            } else if ( ! ( 'logId' in request.session ) ) {
-                request.session.logId = request.logger.id
-            }
-            request.logger.info(`${oldId} -> ${request.logger.id}`)
-            request.logger.verbose(`Session: `, request.session)
-        } 
-        next()
-    }
-}
 
 module.exports = {
     createLogMiddleware: createLogMiddleware,
-    createLogIdMiddleware: createLogIdMiddleware
 }
