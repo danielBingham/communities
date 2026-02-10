@@ -19,6 +19,7 @@
  ******************************************************************************/
 import { useState } from 'react'
 import { useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 
 import { CheckCircleIcon } from '@heroicons/react/24/outline'
 
@@ -40,6 +41,7 @@ const EmailConfirmationForm = function({ initialToken }) {
     const [error, setError] = useState(false)
 
     const [ request, makeRequest ] = useRequest()
+    const navigate = useNavigate()
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
@@ -79,7 +81,7 @@ const EmailConfirmationForm = function({ initialToken }) {
                     />
 
                 </p>
-                <LogoutAction type="button" /> <ResendTokenAction /> <Button type="primary" onClick={() => validate()}><CheckCircleIcon /> Confirm Email</Button>
+                { currentUser && <LogoutAction type="button" /> } <ResendTokenAction /> <Button type="primary" onClick={() => validate()}><CheckCircleIcon /> Confirm Email</Button>
                 <p>
                     If you need help, don't hesitate to reach out to <a href="mailto:contact@communities.social">contact@communities.social</a>.
                 </p>

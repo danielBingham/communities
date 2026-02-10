@@ -17,7 +17,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-
+import { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 
 import { ArrowPathIcon } from '@heroicons/react/24/outline'
@@ -28,22 +28,57 @@ import { useRequest } from '/lib/hooks/useRequest'
 
 import { RequestErrorModal } from '/components/errors/RequestError'
 
+import Modal from '/components/generic/modal/Modal'
 import Alert from '/components/ui/Alert'
 import Button from '/components/ui/Button'
 
-const ResendTokenAction = function({}) {
-    const [ request, makeRequest ] = useRequest()
+import './ResendTokenAction.css'
 
+const ResendTokenAction = function({}) {
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
+    const [email, setEmail] = useState(currentUser ? currentUser.email : '')
+    const [needEmail, setNeedEmail] = useState(false)
+
+    const [ request, makeRequest ] = useRequest()
+
+
     const requestNewConfirmationEmail = function() {
-        makeRequest(createToken({ type: 'email-confirmation', email: currentUser.email}))
+        if ( email !== '' ) {
+            setNeedEmail(false)
+            makeRequest(createToken({ type: 'email-confirmation', email: email}))
+        } else {
+            setNeedEmail(true)
+        }
     }
+
+    useEffect(function() {
+        if ( ( request?.state === 'failed' || request?.state === 'fulfilled' ) && ! currentUser ) {
+            // Reset the email after the request completes to let them try again.
+            if ( currentUser ) {
+                setEmail(currentUser.email)
+            } else {
+                setEmail('')
+            }
+        }
+    }, [ request ])
 
     return (
         <>
             { request?.state === 'fulfilled' && <Alert type="success" timeout={5000}>Confirmation email sent!</Alert> }
             <Button onClick={(e) => requestNewConfirmationEmail()}><ArrowPathIcon /> Resend</Button>
+            <Modal isVisible={needEmail} setIsVisible={setNeedEmail} noClose={true} hideX={true}>
+                <p>Please enter the email you registered with to recieve a new confirmation token.</p>
+                <div className="resend-token-action__email-form">
+                    <input
+                        type="text"
+                        name="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                    />
+                    <Button type="primary" onClick={() => requestNewConfirmationEmail()}><ArrowPathIcon /> Resend</Button>
+                </div>
+            </Modal>
             <RequestErrorModal message="Attempt to send new token" request={request} />
         </>
     )
