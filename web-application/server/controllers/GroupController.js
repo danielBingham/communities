@@ -172,9 +172,12 @@ module.exports = class GroupController {
         }
 
         if ( request.query.title && request.query.title.length > 0 ) {
+            const and = query.params.length > 0 ? ' AND ' : ''
+            query.params.push(`%${request.query.title}%`)
+            const likeParam = query.params.length
             query.params.push(request.query.title)
-            const and = query.params.length > 1 ? ' AND ' : ''
-            query.where += `${and} SIMILARITY(groups.title, $${query.params.length}) > 0.05`
+            const similarityParam = query.params.length
+            query.where += `${and} (groups.title ILIKE $${likeParam} OR SIMILARITY(groups.title, $${similarityParam}) > 0.1)`
             query.order = `SIMILARITY(groups.title, $${query.params.length}) desc`
         }
 
