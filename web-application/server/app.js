@@ -196,15 +196,7 @@ const createExpressApp = function(core, sessionParser) {
         response.json(json)
     })
 
-    /**
-     * Favicons live on the public path.
-     */
-    app.get('/favicon-32x32.png', function(request, response) {
-        const filepath = path.join(process.cwd(), 'public/', request.originalUrl)
-        response.sendFile(filepath)
-    })
-
-    app.get('/favicon.ico', function(request, response) {
+    app.get('/favicon.svg', function(request, response) {
         const filepath = path.join(process.cwd(), 'public/', request.originalUrl)
         response.sendFile(filepath)
     })
