@@ -1,52 +1,22 @@
 # Communities 
 
-A non-profit, cooperative social media platform that aims to build communities
-of geography and interests.
+Communities is a user-supported social media platform that is working towards
+becoming a non-profit, multi-stakeholder cooperative. It's a democratically
+governed social network build to support democracy.
 
-## Deploy
+Communities is currently in Open Beta. You're welcome to use it, but it's not
+finished and there will still be some bugs.
 
-Log in to CodeArtifact:
+Platform: https://communities.social
 
-```
-export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-```
+## Contributing
 
-Login to ECR:
+Communities is not currently well setup to accept contributions.  Our local is
+highly coupled with our cloud infrastructure and we don't have the bandwidth to
+de-couple it just now. 
 
-```
-aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 843012963492.dkr.ecr.us-east-1.amazonaws.com
-```
+However, if you are interest in contributing, there are two projects you could
+work on that would be really helpful:
 
-### Build the Web Application
-
-Build the image:
-```
-docker build --secret id=CODEARTIFACT_AUTH_TOKEN -t web-application:[version] web-application 
-```
-
-Tag the image with the repository:
-```
-docker tag web-application:[version] 843012963492.dkr.ecr.us-east-1.amazonaws.com/communities/web-application:[version]
-```
-
-Push the image:
-```
-docker push 843012963492.dkr.ecr.us-east-1.amazonaws.com/communities/web-application:[version]
-```
-
-### Build the Worker
-
-Build the image:
-```
-docker build --secret id=CODEARTIFACT_AUTH_TOKEN -t worker:[version] worker 
-```
-
-Tag the image with the repository:
-```
-docker tag worker:[version] 843012963492.dkr.ecr.us-east-1.amazonaws.com/communities/worker:[version]
-```
-
-Push the image:
-```
-docker push 843012963492.dkr.ecr.us-east-1.amazonaws.com/communities/worker:[version]
-```
+* Decouple the local from our cloud infrastructure in a configurable way.
+* Review and audit the code for security issues.  If you find any, open an issue or PR!
