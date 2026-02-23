@@ -180,8 +180,11 @@ module.exports = class UserController extends BaseController{
 
         if ( 'name' in query && query.name.length > 0) {
             const and = result.params.length > 0 ? ' AND ' : ''
+            result.params.push(`%${query.name}%`)
+            const likeParam = result.params.length
             result.params.push(query.name)
-            result.where += `${and} SIMILARITY(users.name, $${result.params.length}) > 0.05`
+            const similarityParam = result.params.length
+            result.where += `${and} ( users.name ILIKE $${likeParam} OR SIMILARITY(users.name, $${similarityParam}) > 0.1)`
             result.order = `SIMILARITY(users.name, $${result.params.length}) desc`
         }
 
@@ -193,8 +196,11 @@ module.exports = class UserController extends BaseController{
 
         if ( 'mention' in query && query.mention.length > 0 ) {
             const and = result.params.length > 0 ? ' AND ' : ''
+            result.params.push(`%${query.mention}%`)
+            const likeParam = result.params.length
             result.params.push(query.mention)
-            result.where += `${and} SIMILARITY(users.name, $${result.params.length}) > 0.05`
+            const similarityParam = result.params.length
+            result.where += `${and} ( users.name ILIKE $${likeParam} OR SIMILARITY(users.name, $${similarityParam}) > 0.1)`
             result.order = `SIMILARITY(users.name, $${result.params.length}) desc`
 
             if ( 'postId' in query && 'groupId' in query) {

@@ -4,6 +4,14 @@
      * Color Palette
      *************************************************************************/
 
+    /*--primary-color-lightest: #fcfcfc; /* Hue: 204, Saturation: 1, Brightness: 99  -- Off the pattern for a more grey hue. *
+    --primary-color-light: #e4e4f1; /* Saturation: 30, Lightness: 92 *
+    --primary-color-grey: #7d7d82;
+    --primary-color-main: #0F0F7F;
+    --primary-color-main-highlight: #1616b6;
+    --primary-color-dark: #494950; /* Saturation: 5, Lightness: 30 *
+    --primary-color-darkest: #18181b;  /* Saturation: 5, Lightness: 10 */
+
 
     --primary-color-lightest: #FAFBFC; /* Hue: 204, Saturation: 1, Brightness: 99  -- Off the pattern for a more grey hue. */
     --primary-color-light: #e6ecf2;

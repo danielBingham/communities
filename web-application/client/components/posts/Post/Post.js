@@ -185,11 +185,9 @@ const Post = function({ id, expanded, showLoading, shared }) {
             </div>
             { post.content && post.content.length > 0 && (post.content.length <= 1000 || showMore) && <div className="post__content">
                 <TextWithMentions text={ post.content } />
-                {/*{ post.content.length >= 1000 && showMore && <div className="show-more">
-                    <a href="" onClick={(e) => { e.preventDefault(); setShowMore(false) }}>Hide More.</a></div> */}
             </div> } 
             { post.content && post.content.length > 0 && post.content.length > 1000 && ! showMore && <div className="post__content">
-                { post.content.substring(0,1000) }...
+                <TextWithMentions text={`${post.content.substring(0,1000)}...` } />
                 <div className="post__show-more"><a href="" onClick={(e) => { e.preventDefault(); setShowMore(true) }}>Show More.</a></div>
             </div> }
             { post.fileId && <PostFile id={id} /> }

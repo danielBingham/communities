@@ -31,12 +31,12 @@ android {
         staging {
             dimension "environment"
             applicationIdSuffix ".staging"
-            manifestPlaceholders = [displayName:"Communities - Staging", domain: "staging.communities.social"]
+            manifestPlaceholders = [displayName:"staging.Communities", domain: "staging.communities.social"]
         }
         local {
             dimension "environment"
             applicationIdSuffix ".local"
-            manifestPlaceholders = [displayName:"Communities - Local", domain: "localhost:3000"]
+            manifestPlaceholders = [displayName:"local.Communities", domain: "localhost:3000"]
         }
     }
 }

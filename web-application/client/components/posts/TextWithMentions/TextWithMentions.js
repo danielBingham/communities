@@ -1,3 +1,25 @@
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media 
+ *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
+import { useSelector } from 'react-redux'
+import { Link } from 'react-router-dom'
+
 import * as linkify from 'linkifyjs'
 import "linkify-plugin-mention"
 
@@ -6,6 +28,8 @@ import logger from '/logger'
 import UserMention from '/components/users/UserMention'
 
 const TextWithMentions = function({ text }) {
+    const host = useSelector((state) => state.system.host)
+
     const links = linkify.find(text)
 
     const views = []
@@ -24,7 +48,12 @@ const TextWithMentions = function({ text }) {
             if ( link.type === 'mention' ) {
                 views.push(<UserMention key={link.start} username={link.value.substring(1).trim()} />)
             } else if ( link.type === 'url' ) {
-                views.push(<a target="_blank" key={link.start} href={link.href}>{ link.value }</a>)
+                const url = new URL(link.value)
+                if ( url.origin === host ) {
+                    views.push(<Link key={link.start} to={`${url.pathname}${url.search}${url.hash}`}>{ link.value }</Link>)
+                } else {
+                    views.push(<a target="_blank" key={link.start} href={link.href}>{ link.value }</a>)
+                }
             } else {
                 views.push(<span key={link.start}>{ link.value }</span>)
                 logger.error(`Invalid link type detected: ${link.type}.`)

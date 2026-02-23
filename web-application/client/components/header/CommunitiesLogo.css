@@ -12,15 +12,11 @@
 }
 .communities-logo__logo {
     display: inline-block;
-    width: 32px;
-    height: 32px;
-    margin-right: 2px;
-    margin-bottom: -6px;
-    border-radius: 4px;
-    
-    background-image: url(icon-1024x1024.png);
-    background-size: cover;
-    background-position: center;
+    height: 22px;
+}
+.communities-logo__marque {
+    display: none;
+    height: 30px;
 }
 .communities-logo a:link, .communities-logo a:active, .communities-logo a:visited {
     color: var(--header-text-color);
@@ -28,4 +24,15 @@
 
 .communities-logo a:hover {
     color: var(--header-text-highlight-color);
+}
+
+
+
+@media (width <= 1000px) {
+    .communities-logo__logo {
+        display: none;
+    }
+    .communities-logo__marque {
+        display: inline-block;
+    }
 }
