@@ -36,6 +36,7 @@ Cases covering making posts in all their forms and with all their attachments.
 
 - [ ] As User1, make a post with a link in the body. Confirm highlighted.
 - [ ] As User1, make a post with a link with a long string in the body.  Confirm it doesn't expand the view on mobile.
+- [ ] As User1, make a post with an incomplete link (www.refseek.com, refseek.com).  Confirm highlighted.
 
 #### Images
 

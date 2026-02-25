@@ -30,6 +30,8 @@ import UserMention from '/components/users/UserMention'
 const TextWithMentions = function({ text }) {
     const host = useSelector((state) => state.system.host)
 
+    // We need to wrap this in a try/catch because if an error is thrown from
+    // here (by linkify or by url) it will break the whole feed.
     try {
         const links = linkify.find(text)
 
@@ -49,15 +51,16 @@ const TextWithMentions = function({ text }) {
                 if ( link.type === 'mention' ) {
                     views.push(<UserMention key={link.start} username={link.value.substring(1).trim()} />)
                 } else if ( link.type === 'url' ) {
-                    const url = new URL(link.value)
-                    if ( url.origin === host ) {
+                    const url = new URL(link.href)
+                    const hostUrl = new URL(host)
+                    if ( url.hostname === hostUrl.hostname) {
                         views.push(<Link key={link.start} to={`${url.pathname}${url.search}${url.hash}`}>{ link.value }</Link>)
                     } else {
                         views.push(<a target="_blank" key={link.start} href={link.href}>{ link.value }</a>)
                     }
                 } else {
                     views.push(<span key={link.start}>{ link.value }</span>)
-                    logger.error(`Invalid link type detected: ${link.type}.`)
+                    logger.warn(`Invalid link type detected: ${link.type}.`)
                 }
             }
 
