@@ -36,6 +36,7 @@ import JobError from '/components/errors/JobError'
 
 import Spinner from '/components/Spinner'
 import Button from '/components/generic/button/Button'
+import Alert from '/components/ui/Alert'
 
 import './FileUploadInput.css'
 
@@ -57,7 +58,7 @@ const FileUploadInput = function({ text, fileId, setFileId, type, types, onChang
     useEventSubscription('Job', 'update', { queue: queue, jobId: file?.jobId }, { skip: ! file?.jobId })
 
     const [ jobError, setJobError ] = useState(null)
-    const [ typeError, setTypeError ] = useState(null)
+    const [ fileError, setFileError ] = useState(null)
     
     const hasVideoUploads = useFeature('issue-67-video-uploads')
 
@@ -73,7 +74,12 @@ const FileUploadInput = function({ text, fileId, setFileId, type, types, onChang
 
         const uploadedFileData = event.target.files[0]
         if ( ! types.includes(uploadedFileData.type) ) {
-            setTypeError('invalid-type')
+            setFileError('invalid-type')
+            return
+        }
+
+        if ( uploadedFileData.size <= 0 ) {
+            setFileError('empty-file')
             return
         }
 
@@ -160,9 +166,11 @@ const FileUploadInput = function({ text, fileId, setFileId, type, types, onChang
         state = State.isProcessing
     } 
 
-    let typeErrorView = null
-    if ( typeError ) {
-        typeErrorView = ( <div className="error">Invalid-type selected.  Supported types are: { types.join(',') }.</div> )
+    let fileErrorView = null
+    if ( fileError === 'invalid-type' ) {
+        fileErrorView = ( <Alert type="error" timeout={5000}>Invalid-type selected.  Supported types are: { types.join(',') }.</Alert> )
+    } else if ( fileError === 'empty-file' ) {
+        fileErrorView = ( <Alert type="error" timeout={5000}>Uploaded file was empty.</Alert>)
     }
 
     let icon = ( <PhotoIcon /> )
@@ -181,7 +189,6 @@ const FileUploadInput = function({ text, fileId, setFileId, type, types, onChang
             { state === State.isProcessing && type === 'video' && <div><Spinner local={true} /> <span>Processing. Do not navigate away. This might take several minutes...</span></div> }
             { state === State.isAwaitingFile && <div className="upload-input">
                 <Button type="primary" onClick={(e) => hiddenFileInput.current.click()}>{ icon } <span className="file-upload-button-text"> { text ? text : 'Upload Image' }</span></Button>
-                { typeErrorView }
             </div> }
             <input type="file"
                 name="file"
@@ -193,6 +200,7 @@ const FileUploadInput = function({ text, fileId, setFileId, type, types, onChang
             <RequestErrorModal message="Attempt to initialize upload" request={postRequest} onContinue={onError} />
             <RequestErrorModal message="Attempt to upload file" request={uploadRequest} onContinue={onError} />
             <JobError message="Attempt to process file" job={job} onContinue={onError} />
+            { fileErrorView }
         </div>
     )
 }
