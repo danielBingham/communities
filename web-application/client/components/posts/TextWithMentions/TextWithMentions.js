@@ -52,7 +52,8 @@ const TextWithMentions = function({ text }) {
                     views.push(<UserMention key={link.start} username={link.value.substring(1).trim()} />)
                 } else if ( link.type === 'url' ) {
                     const url = new URL(link.href)
-                    if ( url.origin === host ) {
+                    const hostUrl = new URL(host)
+                    if ( url.hostname === hostUrl.hostname) {
                         views.push(<Link key={link.start} to={`${url.pathname}${url.search}${url.hash}`}>{ link.value }</Link>)
                     } else {
                         views.push(<a target="_blank" key={link.start} href={link.href}>{ link.value }</a>)
