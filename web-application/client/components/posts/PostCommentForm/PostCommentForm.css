@@ -26,10 +26,10 @@ a.create-comment {
 a.create-comment:link,
 a.create-comment:visited,
 a.create-comment:active {
-    color: var(--primary-color-dark);
-    background-color: var(--primary-color-lightest);
+    color: var(--post-comment-create-button-text-color);
+    background-color: var(--post-comment-create-button-background-color);
 }
 a.create-comment:hover {
-    color: var(--primary-color-darkest);
-    background-color: white;
+    color: var(--post-comment-create-button-highlight-text-color);
+    background-color: var(--post-comment-create-button-highlight-background-color);
 }

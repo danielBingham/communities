@@ -1,6 +1,6 @@
 import { useSearchParams } from 'react-router-dom'
 
-import Button from '/components/generic/button/Button'
+import Button from '/components/ui/Button'
 
 import './PaginationControls.css'
 

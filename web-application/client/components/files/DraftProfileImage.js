@@ -8,7 +8,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 import {  patchFile, deleteFile } from '/state/File'
 
 import ErrorModal from '/components/errors/ErrorModal'
-import Button from '/components/generic/button/Button'
+import Button from '/components/ui/Button'
 import Spinner from '/components/Spinner'
 import Image from '/components/ui/Image'
 import File from '/components/files/File'

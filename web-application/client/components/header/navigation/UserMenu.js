@@ -18,9 +18,7 @@
  *
  ******************************************************************************/
 import { useSelector } from 'react-redux'
-import { Link } from 'react-router-dom'
-
-import { useRequest } from '/lib/hooks/useRequest'
+import { Link, useNavigate } from 'react-router-dom'
 
 import { 
     UserCircleIcon,
@@ -37,26 +35,27 @@ import {
 
 import { deleteAuthentication } from '/state/authentication'
 
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuSection, DropdownMenuItem } from '/components/ui/DropdownMenu'
+import { useRequest } from '/lib/hooks/useRequest'
+
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuBody, DropdownMenuSection, DropdownMenuItem } from '/components/ui/DropdownMenu'
+import Button from '/components/ui/Button'
+
+import UserProfileImage from '/components/users/UserProfileImage'
 
 import './UserMenu.css'
 
 /**
- * Provide a user controls navigation block to be used in navigation menus.
+ * Provides an Authentication component to be used in navigation menus.  
  *
- * @param {object} props    The standard React props object - empty.
+ * @param {object} props    Standard React props object - empty.
  */
 const UserMenu = function(props) {
 
-    // ======= Request Tracking =====================================
+    const currentUser = useSelector((state) => state.authentication.currentUser)
 
     const [request, makeRequest] = useRequest()
 
-    // ======= Redux State ==========================================
-
-    const currentUser = useSelector((state) => state.authentication.currentUser)
-
-    // ======= Actions and Event Handling ===========================
+    const navigate = useNavigate()
 
     /**
      * Handle a Logout request by dispatching the appropriate action.
@@ -76,36 +75,55 @@ const UserMenu = function(props) {
         makeRequest(deleteAuthentication())
     }
 
-    // ======= Effect Handling ======================================
+    const clickLogin = function(event) {
+        navigate('login')
+    }
 
-    // ======= Render ===============================================
-
-    const isAdmin = currentUser.siteRole == 'admin' || currentUser.siteRole == 'superadmin'
-    return (
-        <div id="user-menu" className="floating-menu" style={{ display: ( props.visible ? 'block' : 'none' ) }} >
-            <div className="menu-section">
-                <div className="menu-item" onClick={props.toggleMenu}><Link to={`/${currentUser.username}`}><UserCircleIcon />My Profile</Link></div>
+    // ============= Render =======================
+    
+    if ( currentUser ) {
+        const isAdmin = currentUser.siteRole == 'admin' || currentUser.siteRole == 'superadmin'
+        return (
+            <DropdownMenu className="user-menu user-menu__authenticated" autoClose={true} >
+                <DropdownMenuTrigger className="user-menu__trigger logged-in-user">
+                    <UserProfileImage userId={currentUser.id} noLink={true} />
+                    <span className="navigation-text">{ currentUser.name }</span>
+                </DropdownMenuTrigger>
+                <DropdownMenuBody className="user-menu__body">
+                    <DropdownMenuSection>
+                        <DropdownMenuItem href={`/${currentUser.username}`}><UserCircleIcon />My Profile</DropdownMenuItem>
+                    </DropdownMenuSection>
+                    <DropdownMenuSection>
+                        <DropdownMenuItem href="/account/profile"><PencilIcon/>Edit Profile</DropdownMenuItem>
+                        <DropdownMenuItem href="/account/change-email"><EnvelopeIcon />Change Email</DropdownMenuItem>
+                        <DropdownMenuItem href="/account/change-password"><LockClosedIcon />Change Password</DropdownMenuItem>
+                    </DropdownMenuSection>
+                    <DropdownMenuSection>
+                        <DropdownMenuItem href="/account/preferences"><AdjustmentsHorizontalIcon /> Preferences</DropdownMenuItem>
+                        <DropdownMenuItem href="/account/notifications"><BellIcon />Notifications</DropdownMenuItem>
+                        <DropdownMenuItem href="/account/danger-zone"><ExclamationTriangleIcon /> Danger Zone</DropdownMenuItem>
+                    </DropdownMenuSection>
+                    { isAdmin && <DropdownMenuSection className="admin">
+                        <DropdownMenuItem href="/admin"><AdjustmentsHorizontalIcon/>Admin</DropdownMenuItem>
+                    </DropdownMenuSection> }
+                    <DropdownMenuSection>
+                        <DropdownMenuItem href="/account/contribute"><CreditCardIcon /> Contribute</DropdownMenuItem>
+                        <DropdownMenuItem href="/group/communities-feedback-and-discussion"><MegaphoneIcon /> Give Feedback</DropdownMenuItem>
+                    </DropdownMenuSection>
+                    <DropdownMenuSection last={true}> 
+                        <DropdownMenuItem className="logout" onClick={handleLogout}><ArrowRightOnRectangleIcon/>Log Out</DropdownMenuItem>
+                    </DropdownMenuSection>
+                </DropdownMenuBody>
+            </DropdownMenu>
+        )
+    } else {
+        return (
+            <div className="user-menu user-menu__not-authenticated">
+                <Button type="primary" onClick={clickLogin}>Log In</Button>
+                <Button type="success" onClick={(e) => navigate('register')}>Sign Up</Button>
             </div>
-            <div className="menu-section">
-                <div className="menu-item" onClick={props.toggleMenu}><Link to="/account/profile"><PencilIcon/>Edit Profile</Link></div>
-                <div className="menu-item" onClick={props.toggleMenu}><Link to="/account/change-email"><EnvelopeIcon />Change Email</Link></div>
-                <div className="menu-item" onClick={props.toggleMenu}><Link to="/account/change-password"><LockClosedIcon />Change Password</Link></div>
-                <div className="menu-item" onClick={props.toggleMenu}><Link to="/account/contribute"><CreditCardIcon /> Contribute</Link></div>
-                <div className="menu-item" onClick={props.toggleMenu}><Link to="/account/preferences"><AdjustmentsHorizontalIcon /> Preferences</Link></div>
-                <div className="menu-item" onClick={props.toggleMenu}><Link to="/account/notifications"><BellIcon />Notifications</Link></div>
-                <div className="menu-item" onClick={props.toggleMenu}><Link to="/account/danger-zone"><ExclamationTriangleIcon /> Danger Zone</Link></div>
-            </div>
-            { isAdmin && <div className="menu-section admin">
-                <div className="menu-item" onClick={props.toggleMenu}><Link to="/admin"><AdjustmentsHorizontalIcon/>Admin</Link></div>
-            </div> }
-            <div className="menu-section">
-                <div className="menu-item" onClick={props.toggleMenu}><Link to="/group/communities-feedback-and-discussion"><MegaphoneIcon /> Give Feedback</Link></div>
-            </div>
-            <div className="menu-section bottom"> 
-                <div className="menu-item" onClick={props.toggleMenu}><a href="" className="logout" onClick={handleLogout} ><ArrowRightOnRectangleIcon/>Log Out</a></div>
-            </div>
-        </div>
-    )
+        )
+    }
 
 }
 

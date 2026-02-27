@@ -16,7 +16,7 @@ import { usePost } from '/lib/hooks/Post'
 import { deleteFile } from '/state/File'
 import { postPosts, patchPost } from '/state/Post'
 
-import Button from '/components/generic/button/Button'
+import Button from '/components/ui/Button'
 import Spinner from '/components/Spinner'
 
 import PostContent from './PostContent'

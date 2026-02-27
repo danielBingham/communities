@@ -9,7 +9,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 import { postLinkPreviews } from '/state/LinkPreview'
 
 import ErrorModal from '/components/errors/ErrorModal'
-import Button from '/components/generic/button/Button'
+import Button from '/components/ui/Button'
 import Spinner from '/components/Spinner'
 
 import './LinkForm.css'

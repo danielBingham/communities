@@ -34,7 +34,7 @@ import {  deleteGroupMember } from '/state/GroupMember'
 
 import AreYouSure from '/components/AreYouSure'
 import { RequestErrorModal } from '/components/errors/RequestError'
-import Button from '/components/generic/button/Button'
+import Button from '/components/ui/Button'
 
 
 import './LeaveGroupButton.css'

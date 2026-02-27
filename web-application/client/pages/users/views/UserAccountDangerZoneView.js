@@ -6,7 +6,7 @@ import { deleteUser } from '/state/User'
 import { reset } from '/state/system'
 
 import AreYouSure from '/components/AreYouSure'
-import Button from '/components/generic/button/Button'
+import Button from '/components/ui/Button'
 import { RequestErrorModal } from '/components/errors/RequestError'
 
 import './UserAccountDangerZoneView.css'

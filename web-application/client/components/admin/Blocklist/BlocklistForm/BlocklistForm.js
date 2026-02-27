@@ -7,7 +7,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 
 import { postBlocklists } from '/state/Blocklist'
 
-import Button from '/components/generic/button/Button'
+import Button from '/components/ui/Button'
 import Input from '/components/ui/Input'
 import TextBox from '/components/generic/text-box/TextBox'
 import ErrorModal from '/components/errors/ErrorModal'

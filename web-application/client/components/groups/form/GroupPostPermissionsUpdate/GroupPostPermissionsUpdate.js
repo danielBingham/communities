@@ -11,7 +11,7 @@ import { useGroup } from '/lib/hooks/Group'
 
 import Spinner from '/components/Spinner'
 import { Radio, RadioOption } from '/components/ui/Radio'
-import Button from '/components/generic/button/Button'
+import Button from '/components/ui/Button'
 import { RequestErrorModal } from '/components/errors/RequestError'
 
 import './GroupPostPermissionsUpdate.css'

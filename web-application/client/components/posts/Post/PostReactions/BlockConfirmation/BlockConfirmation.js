@@ -1,7 +1,7 @@
 import React from 'react'
 import { createPortal } from 'react-dom'
 
-import Button from '/components/generic/button/Button'
+import Button from '/components/ui/Button'
 
 import './BlockConfirmation.css'
 

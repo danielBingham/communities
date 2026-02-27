@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-import Button from '/components/generic/button/Button'
+import Button from '/components/ui/Button'
 import Modal from '/components/generic/modal/Modal'
 
 import { BlocklistForm } from '/components/admin/Blocklist'

@@ -24,28 +24,28 @@ button.button:disabled {
 
 
 .button.default {
-    background-color: var(--primary-color-light);
+    background-color: var(--button-color);
     border: none;
-    color: var(--primary-color-dark);
+    color: var(--button-text-color);
 }
 .button.default:hover{
-    filter: brightness(95%);
+    color: var(--primary-highlight-color);
 }
 .button.primary {
-    background-color: var(--primary-color-main);
-    border: thin solid var(--primary-color-main);
-    color: white;
+    background-color: var(--button-primary-color);
+    border: thin solid var(--button-primary-color);
+    color: var(--button-primary-text-color);
 }
 .button.success {
-    background-color: var(--success-color-main);
-    border: thin solid var(--success-color-main);
-    color: white;
+    background-color: var(--button-success-color);
+    border: thin solid var(--button-success-color);
+    color: var(-button-success-text-color);
 }
 .button.warn {
-    background-color: var(--danger-color-main);
-    border: thin solid var(--danger-color-main);
-    color: white;
+    background-color: var(--button-warn-color);
+    border: thin solid var(--button-warn-color);
+    color: var(--button-warn-text-color);
 }
 .button.warn svg {
-    color: white !important;
+    color: var(--button-warn-text-color) !important;
 }

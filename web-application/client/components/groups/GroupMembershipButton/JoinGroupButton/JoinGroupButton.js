@@ -33,7 +33,7 @@ import { useGroupPermissionContext } from '/lib/hooks/Group'
 import { postGroupMembers } from '/state/GroupMember'
 
 import { RequestErrorModal } from '/components/errors/RequestError'
-import Button from '/components/generic/button/Button'
+import Button from '/components/ui/Button'
 
 import './JoinGroupButton.css'
 
