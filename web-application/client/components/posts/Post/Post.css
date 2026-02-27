@@ -1,5 +1,5 @@
 .post {
-    background-color: white;
+    background-color: var(--card-background-color);
     font-size: 18px;
 }
 .post .post__loading {
