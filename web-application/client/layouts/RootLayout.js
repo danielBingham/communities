@@ -13,7 +13,7 @@ const RootLayout = function() {
     useScrollRestoration()
 
     return (
-        <div className="root-layout">
+        <div className="root-layout ">
             <Outlet />
         </div>
     )
