@@ -77,7 +77,7 @@
 .post .reactions .reactions__controls .group.block a:visited,
 .post .reactions .reactions__controls .group.block a:active,
 .post .reactions .reactions__controls .group.block svg {
-    color: var(--primary-color-dark);
+    color: var(--main-text-color-dim);
 }
 .post .reactions .reactions__controls .group.block a:hover,
 .post .reactions .reactions__controls .group.block a:hover svg {

@@ -55,6 +55,7 @@
     --main-background-color: var(--primary-color-lightest);
     --main-border-color: var(--primary-color-light);
     --main-text-color: var(--primary-color-darkest);
+    --main-text-color-dim: var(--primary-color-dark);
 
     --menu-background-color: white;
     --menu-border-color: var(--primary-color-light);
@@ -82,6 +83,13 @@
     --post-moderation-background: var(--danger-color-lightest);
     --post-moderation-border: var(--danger-color-light);
 
+    --post-show-comments-highlight-background: white;
+
+    --post-comment-background-color: var(--primary-color-lightest);
+    --post-comment-text-color: var(--primary-color-darkest);
+    --post-comment-moderated-background: var(--danger-color-lightest);
+    --post-comment-moderated-border: var(--danger-color-light);
+
     --post-create-button-text-color: var(--primary-color-dark);
     --post-create-button-background-color: var(--primary-color-lightest);
     --post-create-button-highlight-background-color: white;
@@ -92,6 +100,11 @@
     --post-comment-create-button-highlight-background-color: white;
     --post-comment-create-button-highlight-text-color: var(--primary-color-darkest);
 
+    --link-preview-background: var(--primary-color-lightest);
+    --link-preview-site-text-color: var(--primary-color-dark);
+    --link-preview-title-text-color: var(--primary-color-darkest);
+    --link-preview-description-text-color: var(--primary-color-dark);
+
     --modal-background-color: white;
     --modal-border-color: var(--primary-color-light);
 
@@ -99,6 +112,7 @@
     --input-focus-background-color: white;
     --input-border-color: var(--primary-color-light);
     --input-highlight-color: var(--primary-color-main);
+    --input-placeholder-color: var(--primary-color-grey);
 
     --link-color: var(--primary-color-main);
     --link-highlight-color: var(--primary-color-main-highlight);
@@ -136,6 +150,7 @@
         --main-background-color: var(--primary-color-darkest);
         --main-border-color: var(--primary-color-darker);
         --main-text-color: var(--primary-color-lightest);
+        --main-text-color-dim: var(--primary-color-light);
 
         --menu-background-color: var(--primary-color-dark);
         --menu-border-color: var(--primary-color-darker);
@@ -163,6 +178,13 @@
         --post-moderation-background: var(--danger-color-darkest);
         --post-moderation-border: var(--danger-color-dark);
 
+        --post-show-comments-highlight-background: var(--primary-color-darker);
+
+        --post-comment-background-color: var(--primary-color-darker);
+        --post-comment-text-color: var(--primary-color-lightest);
+        --post-comment-moderated-background: var(--danger-color-darkest);
+        --post-comment-moderated-border: var(--danger-color-dark);
+
         --post-create-button-text-color: var(--primary-color-light);
         --post-create-button-background-color: var(--primary-color-darker);
         --post-create-button-highlight-background-color: var(--primary-color-darkest);
@@ -173,13 +195,19 @@
         --post-comment-create-button-highlight-background-color: var(--primary-color-darkest);
         --post-comment-create-button-highlight-text-color: var(--primary-color-lightest);
 
+        --link-preview-background: var(--primary-color-darker);
+        --link-preview-site-text-color: var(--primary-color-light);
+        --link-preview-title-text-color: var(--primary-color-lightest);
+        --link-preview-description-text-color: var(--primary-color-light);
+
         --modal-background-color: var(--primary-color-dark);
         --modal-border-color: var(--primary-color-darker);
 
-        --input-background-color: var(--primary-color-darkest);
+        --input-background-color: var(--primary-color-dark);
         --input-focus-background-color: var(--primary-color-dark);
         --input-border-color: var(--primary-color-darker);
         --input-highlight-color: var(--primary-color-main);
+        --input-placeholder-color: var(--primary-color-light);
 
         --link-color: var(--primary-color-main);
         --link-highlight-color: var(--primary-color-main-highlight);
@@ -219,6 +247,7 @@ body {
     font-weight: 400;
     font-style: normal;
     background-color: var(--main-background-color);
+    color: var(--main-text-color);
 
     overflow-y: auto;
     overflow-wrap: break-word;
@@ -240,6 +269,7 @@ a:hover {
 input[type="text"], input[type="password"], textarea {
     box-sizing: border-box;
     padding: 7px;
+    background-color: var(--input-background-color);
     border: thin solid var(--input-border-color);
     border-radius: 7px;
     font-family: Roboto, Arial, sans-serif; 
@@ -249,6 +279,7 @@ input[type="text"], input[type="password"], textarea {
 input::placeholder, textarea::placeholder {
     font-family: Roboto, Arial, sans-serif; 
     font-size: 14px;
+    color: var(--input-placeholder-color);
 }
 
 input[type="submit"] {

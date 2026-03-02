@@ -7,9 +7,9 @@
     max-width: 650px;
     min-width: 340px;
     width: 100%;
-    border: thin solid var(--main-border-color);
+    border: thin solid var(--modal-border-color);
     border-radius: 10px;
-    background-color: white;
+    background-color: var(--modal-background-color);
     z-index: 1000;
 }
 .block-confirmation .content {

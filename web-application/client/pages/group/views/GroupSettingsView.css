@@ -6,9 +6,9 @@
 }
 .group-settings-view__edit {
     padding: 20px;
-    border: thin solid var(--primary-color-light);
+    border: thin solid var(--card-border-color);
     border-radius: 10px;
-    background-color: white;
+    background-color: var(--card-background-color);
 }
 .group-settings-view__delete-your-account {
     margin: 10px auto;

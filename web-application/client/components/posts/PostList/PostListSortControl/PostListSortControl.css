@@ -4,9 +4,9 @@
     margin: 5px;
     border-radius: 5px;
 
-    border: thin solid var(--primary-color-light);
-    color: var(--primary-color-dark);
-    background-color: var(--primary-color-light);
+    border: thin solid var(--button-color);
+    color: var(--button-text-color);
+    background-color: var(--button-color);
 }
 .post-list-sort-control__button svg {
     width: 1.2em;

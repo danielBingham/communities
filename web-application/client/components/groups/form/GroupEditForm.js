@@ -198,6 +198,7 @@ const GroupEditForm = function({ groupId }) {
             <Input
                 name="title"
                 label="Title"
+                type="text"
                 explanation="Update this group's title. Members will be notified of the change."
                 value={title}
                 className="title"
