@@ -18,7 +18,7 @@ import {
 } from '@heroicons/react/24/solid'
 
 import CommunitiesLogo from '/components/header/CommunitiesLogo'
-import AuthenticationNavigation from './navigation/AuthenticationNavigation'
+import UserMenu from './navigation/UserMenu'
 import NotificationMenu from '/components/notifications/NotificationMenu'
 
 import { IosBuffer, AndroidBuffer } from '/components/ui/DeviceTweaks'
@@ -45,7 +45,7 @@ const Header = function(props) {
                 <div className="unauthenticated-grid">
                     <CommunitiesLogo />
                     <Link className="nav-link" to="/about">{ location.pathname.startsWith('/about') ? <InformationCircleIconSolid /> : <InformationCircleIconOutline /> }<span className="nav-text">About</span></Link>
-                    <AuthenticationNavigation  />
+                    <UserMenu  />
                 </div>
             </header>
         )
@@ -59,7 +59,7 @@ const Header = function(props) {
                     <NavLink className="nav-link" to="/friends"><UsersIconSolid className="solid" /><UsersIconOutline className="outline" /> <span className="nav-text">Friends</span></NavLink> 
                     <NavLink className="nav-link" to="/groups"><UserGroupIconOutline className="outline" /><UserGroupIconSolid className="solid" /> <span className="nav-text">Groups</span></NavLink>
                     <NotificationMenu /> 
-                    <AuthenticationNavigation  />
+                    <UserMenu  />
                 </div>
             </header>
         )

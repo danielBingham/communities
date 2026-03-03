@@ -1,6 +1,7 @@
 .error-modal .modal {
-    border: thin solid var(--danger-color-light);
-    color: var(--danger-color-dark);
+    border: thin solid var(--danger-zone-border-color);
+    background-color: var(--danger-zone-background-color);
+    color: var(--main-text-color);
     z-index: 2000;
 }
 .error-modal .modal .modal__close svg {
@@ -15,7 +16,7 @@
     color: var(--danger-color-main);
 }
 .error-modal .error-modal__wrapper a:hover {
-    color: var(--danger-color-main-highlight);
+    color: var(--danger-color-main-light);
 }
 .error-modal .error-modal__button {
     text-align: center;

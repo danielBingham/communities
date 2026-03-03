@@ -22,5 +22,5 @@
     color: var(--secondary-color-main);
 }
 .warning-modal .warning-modal__wrapper a:hover {
-    color: var(--secondary-color-main-highlight);
+    color: var(--secondary-color-main-light);
 }

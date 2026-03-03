@@ -120,6 +120,7 @@ const ChangeEmailForm = function(props) {
             <form onSubmit={onSubmit}>
                 <Input
                     name="email"
+                    type="text"
                     label="New Email"
                     explanation="What is your new email?"
                     value={email}

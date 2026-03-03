@@ -15,7 +15,7 @@
     max-width: 340px;
 
     font-size: 1.2em;
-    color: var(--primary-color-dark);
+    color: var(--main-text-color-dim);
     margin: 0.5em auto;
 
     display: grid;

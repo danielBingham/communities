@@ -17,7 +17,7 @@ svg.user-profile-edit-form__placeholder {
     display: block;
     width: 200px;
     margin: 10px auto;
-    color: var(--main-icon-color);
+    color: var(--profile-icon-color);
 }
 .user-profile-edit-form .submit {
     text-align: center;

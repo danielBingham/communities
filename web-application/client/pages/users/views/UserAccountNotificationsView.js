@@ -1,3 +1,23 @@
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media 
+ *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
+import Card from '/components/ui/Card'
 import NotificationSetting from '/components/notifications/NotificationSetting'
 
 import './UserAccountNotificationsView.css'
@@ -7,7 +27,7 @@ const UserAccountNotificationsView = function() {
     return (
         <div className="user-notification-settings">
             <h2>Everything</h2>
-            <div className="user-settings__notification-settings__section">
+            <Card className="user-settings__notification-settings__section">
                 <NotificationSetting 
                     label="All Notifications" 
                     explanation="When something would trigger a notification..." 
@@ -40,25 +60,25 @@ const UserAccountNotificationsView = function() {
                         'UserRelationship:update:user'
                     ]} 
                 />
-            </div>
+            </Card>
             <h2>Friends</h2>
-            <div className="user-settings__notification-settings__section">
+            <Card className="user-settings__notification-settings__section">
                 <NotificationSetting 
                     label="Friend Requests" 
                     explanation="When someone sends you a friend request or accepts a friend request you sent..." 
                     notifications={[ 'UserRelationship:create:relation', 'UserRelationship:update:user' ]} 
                 />
-            </div>
+            </Card>
             <h2>Posts</h2>
-            <div className="user-settings__notification-settings__section">
+            <Card className="user-settings__notification-settings__section">
                 <NotificationSetting 
                     label="Mentions in Posts" 
                     explanation="When someone mentions you in a post..." 
                     notifications={[ 'Post:create:mention' ]} 
                 />
-            </div>
+            </Card>
             <h2>Post Comments</h2>
-            <div className="user-settings__notification-settings__section">
+            <Card className="user-settings__notification-settings__section">
                 <NotificationSetting 
                     label="Comments on Subscribed Posts" 
                     explanation="When someone comments on a post you subscribe to..." 
@@ -69,9 +89,9 @@ const UserAccountNotificationsView = function() {
                     explanation="When someone mentions you in a comment on a post..." 
                     notifications={[ 'PostComment:create:mention' ]} 
                 />
-            </div>
+            </Card>
             <h2>Groups</h2>
-            <div className="user-settings__notification-settings__section">
+            <Card className="user-settings__notification-settings__section">
                 <NotificationSetting 
                     label="Posts in a Group" 
                     explanation="When someone posts in a group you subscribe to..." 
@@ -111,15 +131,15 @@ const UserAccountNotificationsView = function() {
                         'GroupModeration:update:post:status:approved:author' 
                     ]} 
                 />
-            </div>
+            </Card>
             <h2>Moderation</h2>
-            <div className="user-settings__notification-settings__section">
+            <Card className="user-settings__notification-settings__section">
                 <NotificationSetting 
                     label="Moderation" 
                     explanation="When one of your posts or comments is removed by a site admin..." 
                     notifications={[ 'SiteModeration:update:post:status:rejected:author', 'SiteModeration:update:comment:status:rejected:author' ]} 
                 />
-            </div>
+            </Card>
         </div>
     )
 

@@ -36,7 +36,7 @@ import { RequestErrorModal } from '/components/errors/RequestError'
 
 import Input from '/components/ui/Input'
 import TextBox from '/components/generic/text-box/TextBox'
-import Button from '/components/generic/button/Button'
+import Button from '/components/ui/Button'
 import Spinner from '/components/Spinner'
 
 import './UserProfileEditForm.css'
@@ -227,6 +227,7 @@ const UserProfileEditForm = function(props) {
                 </div>
                 <Input
                     name="name"
+                    type="text"
                     label="Name"
                     explanation={`Your display name. We strongly encourage you
                     to use your real name, but we don't enforce this.`}

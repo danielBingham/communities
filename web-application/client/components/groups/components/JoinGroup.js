@@ -8,7 +8,7 @@ import { useGroupMember } from '/lib/hooks/GroupMember'
 
 import { postGroupMembers } from '/state/GroupMember'
 
-import Button from '/components/generic/button/Button'
+import Button from '/components/ui/Button'
 
 import './JoinGroup.css'
 

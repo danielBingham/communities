@@ -2,18 +2,18 @@ a.navigation-menu__link svg {
     width: 22px;
     margin-right: 5px;
     margin-bottom: -5px;
-    color: var(--icon-color);
+    color: var(--navigation-menu-item-text-color);
 }
 
 a.navigation-menu__link:link,
 a.navigation-menu__link:visited,
 a.navigation-menu__link:active {
     display: block;
-    color: var(--primary-color-darkest);
+    color: var(--navigation-menu-item-text-color);
     padding: 10px;
 }
 a.navigation-menu__link:hover {
-    background-color: var(--primary-color-light);
+    background-color: var(--navigation-menu-item-highlight-background-color);
     border-radius: 10px;
 }
 

@@ -11,9 +11,9 @@
 
     text-align: center;
     padding: 20px;
-    border: thin solid var(--main-border-color);
+    background-color: var(--card-background-color);
+    border: thin solid var(--card-border-color);
     border-radius: 10px;
-    background-color: white;
     z-index: 1000;
 }
 .modal-overlay {

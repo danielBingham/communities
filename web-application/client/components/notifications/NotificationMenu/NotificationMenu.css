@@ -22,9 +22,9 @@
 }
 .notification-menu .notification-trigger svg {
     color: var(--header-text-color);
-    width: 24px;
-    height: 24px;
-    margin-bottom: -6px;
+    width: 28px;
+    height: 28px;
+    /*margin-bottom: -4px;*/
     padding: 0;
 }
 .notification-menu .empty-list {
@@ -66,12 +66,12 @@
 .notification-menu .notification-header {
     padding: 0px 10px 5px 10px;
     text-align: right;
-    border-bottom: thin solid var(--floating-menu-border-color);
+    border-bottom: thin solid var(--menu-border-color);
 }
 .notification-menu .notification-header a:link, 
 .notification-menu .notification-header a:active,
 .notification-menu .notification-header a:visited {
-    color: black; 
+    color: var(--menu-text-color); 
     font-size: 12px;
 }
 

@@ -5,8 +5,8 @@
 }
 .danger-zone-view__delete-your-account {
     padding: 20px;
-    border: thin solid var(--danger-color-light);
-    background-color: var(--danger-color-lightest);
+    border: thin solid var(--danger-zone-border-color);
+    background-color: var(--danger-zone-background-color);
     border-radius: 10px;
 }
 .danger-zone-view__explanation {

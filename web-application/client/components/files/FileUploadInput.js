@@ -35,7 +35,7 @@ import { RequestErrorModal } from '/components/errors/RequestError'
 import JobError from '/components/errors/JobError'
 
 import Spinner from '/components/Spinner'
-import Button from '/components/generic/button/Button'
+import Button from '/components/ui/Button'
 import Alert from '/components/ui/Alert'
 
 import './FileUploadInput.css'

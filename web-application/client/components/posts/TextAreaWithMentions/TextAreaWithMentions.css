@@ -5,8 +5,8 @@
 .text-area-with-mentions .text-area-with-mentions__autocomplete {
     position: absolute;
     text-align: left;
-    background-color: white; 
-    border: thin solid var(--floating-menu-border-color);
+    background-color: var(--menu-background-color); 
+    border: thin solid var(--menu-border-color);
     box-shadow: 0px 0px 5px -3px rgba(0,0,0,0.25);
     padding: 5px 0;
     z-index: 1000;
@@ -21,8 +21,8 @@
 .text-area-with-mentions .text-area-with-mentions__suggestions {
     position: absolute;
     text-align: left;
-    background-color: white; 
-    border: thin solid var(--floating-menu-border-color);
+    background-color: var(--menu-background-color); 
+    border: thin solid var(--menu-border-color);
     box-shadow: 0px 0px 5px -3px rgba(0,0,0,0.25);
     padding: 5px 0;
     z-index: 1000;
@@ -30,14 +30,14 @@
 }
 .text-area-with-mentions .text-area-with-mentions__suggestions a {
     display: block;
-    color: var(--primary-color-darkest);
+    color: var(--menu-text-color);
     padding: 5px;
 }
 .text-area-with-mentions .text-area-with-mentions__suggestions a:hover {
-    background-color: var(--primary-color-main);
-    color: white;
+    background-color: var(--menu-background-highlight-color);
+    color: var(--menu-text-highlight-color);
 }
 .text-area-with-mentions .text-area-with-mentions__suggestions a.highlight {
-    background-color: var(--primary-color-main);
-    color: white;
+    background-color: var(--menu-background-highlight-color);
+    color: var(--menu-text-highlight-color);
 }
