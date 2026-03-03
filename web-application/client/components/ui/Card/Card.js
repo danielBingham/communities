@@ -19,9 +19,9 @@
  ******************************************************************************/
 import './Card.css'
 
-const Card = function({ className, children }) {
+const Card = function({ id, className, children }) {
     return (
-        <div className={`card ${className ? className : ''}`}>
+        <div id={id} className={`card ${className ? className : ''}`}>
             { children }
         </div>
     )

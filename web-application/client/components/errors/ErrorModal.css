@@ -1,6 +1,7 @@
 .error-modal .modal {
-    border: thin solid var(--danger-color-light);
-    color: var(--danger-color-dark);
+    border: thin solid var(--danger-zone-border-color);
+    background-color: var(--danger-zone-background-color);
+    color: var(--main-text-color);
     z-index: 2000;
 }
 .error-modal .modal .modal__close svg {

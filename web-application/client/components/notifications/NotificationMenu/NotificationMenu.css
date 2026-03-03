@@ -71,7 +71,7 @@
 .notification-menu .notification-header a:link, 
 .notification-menu .notification-header a:active,
 .notification-menu .notification-header a:visited {
-    color: black; 
+    color: var(--menu-text-color); 
     font-size: 12px;
 }
 

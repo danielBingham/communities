@@ -227,6 +227,7 @@ const UserProfileEditForm = function(props) {
                 </div>
                 <Input
                     name="name"
+                    type="text"
                     label="Name"
                     explanation={`Your display name. We strongly encourage you
                     to use your real name, but we don't enforce this.`}

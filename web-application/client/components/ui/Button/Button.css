@@ -39,7 +39,7 @@ button.button:disabled {
 .button.success {
     background-color: var(--button-success-color);
     border: thin solid var(--button-success-color);
-    color: var(-button-success-text-color);
+    color: var(--button-success-text-color);
 }
 .button.warn {
     background-color: var(--button-warn-color);

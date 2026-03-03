@@ -6,10 +6,6 @@
                 margin: 100px auto;
                 padding: 30px;
                 width: 600px;
-                border: thin solid var(--main-border-color);
-                background-color: white;
-                border-radius: 10px;
-                box-shadow: 0 0 7px -5px rgba(0,0,0,0.25);
                 text-align: center;
         }
 }
@@ -20,9 +16,6 @@
         margin: 100px auto;
         padding: 10px;
         width: 100%;
-        border-top: thin solid var(--main-border-color);
-        border-bottom: thin solid var(--main-border-color);
-        background-color: white;
         text-align: center;
     }
 }

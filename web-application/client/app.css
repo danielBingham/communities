@@ -114,6 +114,7 @@
     --post-show-comments-highlight-background: white;
 
     --post-comment-background-color: var(--primary-color-lightest);
+    --post-comment-background-highlight-color: var(--secondary-color-light);
     --post-comment-text-color: var(--primary-color-darkest);
     --post-comment-moderated-background: var(--danger-color-lightest);
     --post-comment-moderated-border: var(--danger-color-light);
@@ -136,7 +137,7 @@
     --modal-background-color: white;
     --modal-border-color: var(--primary-color-light);
 
-    --input-background-color: var(--primary-color-lightest);
+    --input-background-color: white;
     --input-focus-background-color: white;
     --input-border-color: var(--primary-color-light);
     --input-highlight-color: var(--primary-color-main);
@@ -207,15 +208,16 @@
         --danger-zone-border-color: var(--danger-color-darker);
 
         --post-info-text-color: var(--primary-color-light);
-        --post-moderation-background: var(--danger-color-darkest);
-        --post-moderation-border: var(--danger-color-dark);
+        --post-moderation-background: var(--danger-color-dark);
+        --post-moderation-border: var(--danger-color-darker);
 
         --post-show-comments-highlight-background: var(--primary-color-darker);
 
         --post-comment-background-color: var(--primary-color-darker);
+        --post-comment-background-highlight-color: var(--secondary-color-dark);
         --post-comment-text-color: var(--primary-color-lightest);
-        --post-comment-moderated-background: var(--danger-color-darkest);
-        --post-comment-moderated-border: var(--danger-color-dark);
+        --post-comment-moderated-background: var(--danger-color-dark);
+        --post-comment-moderated-border: var(--danger-color-darker);
 
         --post-create-button-text-color: var(--primary-color-light);
         --post-create-button-background-color: var(--primary-color-darker);

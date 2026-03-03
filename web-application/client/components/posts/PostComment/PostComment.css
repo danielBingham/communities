@@ -1,9 +1,9 @@
 @keyframes highlight {
     0% {
-        background-color: var(--secondary-color-light);
+        background-color: var(--post-comment-background-highlight-color);
     }
     100% {
-        background-color: var(--primary-color-lightest);
+        background-color: var(--post-comment-background-color);
     }
 }
 
@@ -16,7 +16,7 @@
     max-width: 100%;
 }
 .post-comment.highlight {
-    animation-duration: 0.75s;
+    animation-duration: 1.00s;
     animation-direction: forwards;
     animation-timing-function: ease-out;
     animation-name: highlight;

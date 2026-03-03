@@ -160,7 +160,7 @@ menu.feed-menu__menu li.view-more {
         font-size: 18px;
         line-height: 1.7em;
 
-        background-color: white;
+        background-color: var(--menu-background-color);
         border-top: thin solid var(--main-border-color);
         border-bottom: thin solid var(--main-border-color);
     }

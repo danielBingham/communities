@@ -11,8 +11,8 @@ a.navigation-menu__action {
     color: var(--navigation-menu-item-text-color);
 }
 a.navigation-menu__action:hover {
-    background-color: var(--navigation-menu-item-text-color);
-    color: var(--navigation-menu-item-highlight-background-color);
+    color: var(--navigation-menu-item-text-color);
+    background-color: var(--navigation-menu-item-highlight-background-color);
     border-radius: 10px;
 }
 
