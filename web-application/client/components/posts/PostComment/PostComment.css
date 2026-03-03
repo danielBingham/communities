@@ -1,21 +1,22 @@
 @keyframes highlight {
     0% {
-        background-color: var(--secondary-color-light);
+        background-color: var(--post-comment-background-highlight-color);
     }
     100% {
-        background-color: var(--primary-color-lightest);
+        background-color: var(--post-comment-background-color);
     }
 }
 
 .post-comment {
     margin: 10px auto;
     font-size: 16px;
-    background-color: var(--primary-color-lightest);
+    background-color: var(--post-comment-background-color);
+    color: var(--post-comment-text-color);
     border-radius: 10px;
     max-width: 100%;
 }
 .post-comment.highlight {
-    animation-duration: 0.75s;
+    animation-duration: 1.00s;
     animation-direction: forwards;
     animation-timing-function: ease-out;
     animation-name: highlight;
@@ -39,6 +40,6 @@
     font-size: 14px;
     padding: 7px;
     border-radius: 7px;
-    background-color: var(--danger-color-lightest);
-    border: thin solid var(--danger-color-light);
+    background-color: var(--post-comment-moderated-background);
+    border: thin solid var(--post-comment-moderated-border);
 }

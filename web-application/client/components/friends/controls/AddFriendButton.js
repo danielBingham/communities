@@ -6,7 +6,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 import { resetEntities } from '/state/lib'
 import { postUserRelationships } from '/state/UserRelationship'
 
-import Button from '/components/generic/button/Button'
+import Button from '/components/ui/Button'
 
 import './AddFriendButton.css'
 

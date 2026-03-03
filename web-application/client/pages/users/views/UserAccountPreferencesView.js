@@ -24,7 +24,9 @@ import { useRequest } from '/lib/hooks/useRequest'
 import { patchUser } from '/state/User'
 
 import Toggle from '/components/generic/toggle/Toggle'
+import Card from '/components/ui/Card'
 import { RequestErrorModal } from '/components/errors/RequestError'
+
 
 import './UserAccountPreferencesView.css'
 
@@ -47,14 +49,33 @@ const UserAccountPreferencesView = function() {
 
     }
 
+    const darkMode = 'darkMode' in currentUser.settings ? currentUser.settings.darkMode : false
+    const showFriendsOnProfile = 'showFriendsOnProfile' in currentUser.settings ? currentUser.settings.showFriendsOnProfile : true
     const showAnnouncements = 'showAnnouncements' in currentUser.settings ? currentUser.settings.showAnnouncements : true
     const showInfo = 'showInfo' in currentUser.settings ? currentUser.settings.showInfo : true
-    const showFriendsOnProfile = 'showFriendsOnProfile' in currentUser.settings ? currentUser.settings.showFriendsOnProfile : true
 
     return (
         <div className="user-account-preferences-view">
+            <h2>Appearance</h2>
+            <Card className="user-account-preferences-view__section">
+                <p>Do you want to enable Dark Mode?  This changes the platform theme to one appropriate for low light.</p>
+                <Toggle 
+                    label="Dark Mode"
+                    explanation="Switch to a low light appropriate theme."
+                    toggled={darkMode} 
+                    onClick={(e) => setSetting('darkMode', ! darkMode)} />
+            </Card>
+            <h2>Privacy</h2>
+            <Card className="user-account-preferences-view__section">
+                <p>Do you want to allow your friends to see your full friends list? This can help people find each other as we rebuild our networks on Communities!</p>
+                <Toggle 
+                    label="Show Friends List on Profile"
+                    explanation="Allow your friends to view your full friends list on your profile so they can find other people they may know."
+                    toggled={showFriendsOnProfile} 
+                    onClick={(e) => setSetting('showFriendsOnProfile', ! showFriendsOnProfile)} />
+            </Card>
             <h2>Platform Administrative Posts</h2>
-            <div className="user-account-preferences-view__section">
+            <Card className="user-account-preferences-view__section">
                 <p>Do you want to see informational and administrative posts shared by site administrators in your feed?</p>
                 <Toggle 
                     label="Announcements"
@@ -66,16 +87,7 @@ const UserAccountPreferencesView = function() {
                     explanation="See informational posts.  These can be minor news updates, descriptions of features, how tos, requests for feedback, etc..."
                     toggled={showInfo} 
                     onClick={(e) => setSetting('showInfo', ! showInfo)} />
-            </div>
-            <h2>Privacy</h2>
-            <div className="user-account-preferences-view__section">
-                <p>Do you want to allow your friends to see your full friends list? This can help people find each other as we rebuild our networks on Communities!</p>
-                <Toggle 
-                    label="Show Friends List on Profile"
-                    explanation="Allow your friends to view your full friends list on your profile so they can find other people they may know."
-                    toggled={showFriendsOnProfile} 
-                    onClick={(e) => setSetting('showFriendsOnProfile', ! showFriendsOnProfile)} />
-            </div>
+            </Card>
             <RequestErrorModal message={'Attempt to update Preferences'} request={request} />
         </div>
     )

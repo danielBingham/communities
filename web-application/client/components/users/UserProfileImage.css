@@ -13,5 +13,5 @@
 .profile-image svg {
     height: 100%;
     max-width: 100%;
-    color: var(--main-icon-color);
+    color: var(--profile-icon-color);
 }

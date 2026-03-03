@@ -1,6 +1,6 @@
 .group-member-badge {
-    border: thin solid var(--main-border-color);
-    background-color: white;
+    border: thin solid var(--card-border-color);
+    background-color: var(--card-background-color);
     border-radius: 7px;
 }
 

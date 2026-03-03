@@ -13,7 +13,7 @@ import Post from '/components/posts/Post'
 import './PostView.css'
 
 import Error404 from '/components/errors/Error404'
-import Button from '/components/generic/button/Button'
+import Button from '/components/ui/Button'
 import Spinner from '/components/Spinner'
 import Refresher from '/components/ui/Refresher'
 

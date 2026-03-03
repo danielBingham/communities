@@ -17,7 +17,7 @@ import { patchGroup } from '/state/Group'
 import DraftProfileImage from '/components/files/DraftProfileImage'
 import FileUploadInput from '/components/files/FileUploadInput'
 
-import Button from '/components/generic/button/Button'
+import Button from '/components/ui/Button'
 import TextBox from '/components/generic/text-box/TextBox'
 import Input from '/components/ui/Input'
 import Spinner from '/components/Spinner'
@@ -198,6 +198,7 @@ const GroupEditForm = function({ groupId }) {
             <Input
                 name="title"
                 label="Title"
+                type="text"
                 explanation="Update this group's title. Members will be notified of the change."
                 value={title}
                 className="title"

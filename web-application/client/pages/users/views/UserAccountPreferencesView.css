@@ -5,7 +5,4 @@
 }
 .user-account-preferences-view__section {
     padding: 20px;
-    border: thin solid var(--main-border-color);
-    border-radius: 10px;
-    background-color: white;
 }

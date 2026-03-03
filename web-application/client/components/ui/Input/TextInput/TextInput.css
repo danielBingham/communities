@@ -26,7 +26,7 @@
     outline-color: var(--input-highlight-color) !important;
 }
 .text-input input::placeholder {
-    color: var(--primary-color-grey);
+    color: var(--input-placeholder-color);
 }
 .text-input input:focus::placeholder {
     color: transparent;

@@ -4,8 +4,8 @@
 }
 
 .page .page-body {
-    background-color: var(--page-background-color);
-    color: var(--page-text-color);
+    background-color: var(--main-background-color);
+    color: var(--main-text-color);
     width: 100%;
 }
 .page-left-gutter { padding: 5px 0; }

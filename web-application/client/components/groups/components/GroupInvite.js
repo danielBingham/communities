@@ -6,7 +6,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 import { getUsers, postUsers, clearUserQuery } from '/state/User'
 import { postGroupMembers } from '/state/GroupMember'
 
-import Button from '/components/generic/button/Button'
+import Button from '/components/ui/Button'
 import Spinner from '/components/Spinner'
 
 import './GroupInvite.css'

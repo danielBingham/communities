@@ -12,7 +12,7 @@ import { useSiteModeration } from '/lib/hooks/SiteModeration'
 import { patchSiteModeration } from '/state/SiteModeration'
 
 import TextBox from '/components/generic/text-box/TextBox'
-import Button from '/components/generic/button/Button'
+import Button from '/components/ui/Button'
 import Spinner from '/components/Spinner'
 import Modal from '/components/generic/modal/Modal'
 import ErrorModal from '/components/errors/ErrorModal'

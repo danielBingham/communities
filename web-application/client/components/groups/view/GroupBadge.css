@@ -1,7 +1,7 @@
 .group-badge {
-    border: thin solid var(--main-border-color);
+    border: thin solid var(--card-border-color);
     border-radius: 7px;
-    background-color: white;
+    background-color: var(--card-background-color);
 }
 
 .group-badge__grid {

@@ -2,17 +2,17 @@ a.navigation-menu__action svg {
     width: 22px;
     margin-right: 5px;
     margin-bottom: -5px;
-    color: var(--icon-color);
+    color: var(--navigation-menu-item-text-color);
 }
 
 a.navigation-menu__action {
     display: block;
     padding: 10px;
-    color: var(--primary-color-darkest);
+    color: var(--navigation-menu-item-text-color);
 }
 a.navigation-menu__action:hover {
-    background-color: var(--primary-color-light);
-    color: var(--primary-color-darkest);
+    color: var(--navigation-menu-item-text-color);
+    background-color: var(--navigation-menu-item-highlight-background-color);
     border-radius: 10px;
 }
 

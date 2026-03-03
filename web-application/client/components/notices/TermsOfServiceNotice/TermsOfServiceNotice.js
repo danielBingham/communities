@@ -10,7 +10,7 @@ import TermsOfService from '/components/about/TermsOfService'
 
 import CommunitiesLogo from '/components/header/CommunitiesLogo'
 import Card from '/components/ui/Card'
-import Button from '/components/generic/button/Button'
+import Button from '/components/ui/Button'
 
 import './TermsOfServiceNotice.css'
 

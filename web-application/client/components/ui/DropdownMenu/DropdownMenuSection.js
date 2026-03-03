@@ -17,14 +17,14 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import './Card.css'
 
-const Card = function({ id, className, children }) {
+import './DropdownMenuSection.css'
+
+export const DropdownMenuSection = function({ last, className, children })  {
+
     return (
-        <div id={id} className={`card ${className ? className : ''}`}>
+        <div className={`dropdown-menu__section ${ last ? 'dropdown-menu__section__last' : '' } ${ className ? className : '' }`}>
             { children }
         </div>
     )
 }
-
-export default Card

@@ -11,7 +11,7 @@ import { deleteGroup } from '/state/Group'
 
 import GroupEditForm from '/components/groups/form/GroupEditForm'
 import GroupPostPermissionsUpdate from '/components/groups/form/GroupPostPermissionsUpdate'
-import Button from '/components/generic/button/Button'
+import Button from '/components/ui/Button'
 import AreYouSure from '/components/AreYouSure'
 import Modal from '/components/generic/modal/Modal'
 import Card from '/components/ui/Card'

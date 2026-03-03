@@ -21,16 +21,18 @@
     width: 250px;
     padding: 20px;
     font-size: 14px;
-    background-color: white;
-    border-bottom: thin solid var(--main-border-color);
+    background-color: var(--menu-background-color);
+    border-bottom: thin solid var(--menu-border-color);
+    color: var(--menu-text-color);
     font-weight: bold;
     white-space: normal;
 }
 .dropdown-menu__item.notification.read {
-    background-color: var(--page-header-background-color);
+    background-color: var(--menu-background-color);
+    color: var(--menu-text-color);
     font-weight: normal;
 }
 .dropdown-menu__item.notification:hover, .dropdown-menu__item.notification.read:hover {
-    background-color: var(--input-highlight-color);
-    color: white;
+    background-color: var(--menu-background-highlight-color);
+    color: var(--menu-text-highlight-color);
 }

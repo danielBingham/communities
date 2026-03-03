@@ -19,6 +19,7 @@
  ******************************************************************************/
 import { useSelector } from 'react-redux'
 
+import Card from '/components/ui/Card'
 import Button from '/components/ui/Button'
 
 import './ContributionCard.css'
@@ -38,11 +39,11 @@ const ContributionCard = function({ amount, explanation, onClick }) {
 
     return (
         <div className="contribution">
-            <div className="card">
+            <Card>
                 <h2>Contribute { contribution } / month</h2>
                 <div className="explanation">{ explanation }</div>
                 <Button type="primary" href={`${links[amount]}${postFix}`} external={true} onClick={onClick}>Contribute</Button>
-            </div>
+            </Card>
         </div>
     )
 }

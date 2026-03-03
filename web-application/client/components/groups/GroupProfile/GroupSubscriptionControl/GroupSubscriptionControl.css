@@ -16,7 +16,7 @@
 }
 .group-subscription-control__status__explanation {
     font-size: 14px;
-    color: var(--primary-color-dark);
+    color: var(--main-text-color-dim);
     padding: 5px;
     white-space: normal;
     min-width: 300px;

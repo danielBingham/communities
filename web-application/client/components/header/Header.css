@@ -39,14 +39,6 @@ header .communities-logo {
     justify-self: left;
 }
 
-header .floating-menu .menu-item:hover {
-    color: white;
-    background-color: var(--header-menu-background-highlight-color);
-}
-header .floating-menu .menu-item a:hover {
-    color: white;
-}
-
 header a:link, header a:active, header a:visited {
     color: var(--header-text-color);
 }
