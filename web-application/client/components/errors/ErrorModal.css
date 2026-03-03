@@ -15,7 +15,7 @@
     color: var(--danger-color-main);
 }
 .error-modal .error-modal__wrapper a:hover {
-    color: var(--danger-color-main-highlight);
+    color: var(--danger-color-main-light);
 }
 .error-modal .error-modal__button {
     text-align: center;

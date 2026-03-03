@@ -60,4 +60,4 @@ const Input = function({ name, type, label, explanation, placeholder, className,
     }
 }
 
-oxport default Input
+export default Input

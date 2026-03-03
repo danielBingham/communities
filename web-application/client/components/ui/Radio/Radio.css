@@ -17,9 +17,10 @@
 .radio-button__wrapper {
     box-sizing: border-box;
     padding: 20px;
-    background-color: white;
     border-radius: 7px;
-    border: thin solid var(--main-border-color);
+    
+    background-color: var(--card-background-color);
+    border: thin solid var(--card-border-color);
 }
 .radio-option {
     display: grid;

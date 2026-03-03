@@ -3,38 +3,62 @@
     /**************************************************************************
      * Color Palette
      *************************************************************************/
+
+    /* PRIMARY */
     --primary-color-lightest: #FAFBFC; /* Hue: 204, Saturation: 1, Value: 99  -- Off the pattern for a more grey hue. */
     --primary-color-lighter: #f2f6f9; /* Hue: 210, Saturation: 3, Value: 98 */
     --primary-color-light: #e6ecf2; /* Hue: 210, Saturation: 5, Value: 95 */
     --primary-color-grey: #797c7f;
-    --primary-color-main-light: #6daff2;
-    --primary-color-main: #398fe5;
-    --primary-color-main-dark: #1162b2;
-    --primary-color-main-highlight: #67a6e5;
+
+    --primary-color-main-light: #6daff2; /* Hue: 210, Saturation: 55, Value: 95 */
+    --primary-color-main: #398fe5; /* Hue: 210, Saturation: 75, Value: 90 */
+    --primary-color-main-dark: #1162b2; /* Hue: 210, Saturation: 90, Value: 70 */
+
     --primary-color-dark: #44484c; /* Hue: 210, Saturation: 11, Value: 30 */
     --primary-color-darker: #2c2f33; /* Hue: 210, Saturation: 12, Value: 20 */
     --primary-color-darkest: #161719; /* Hue: 210, Saturation: 12, Value: 10 */
 
-    --secondary-color-lightest: #FFFCFA; 
-    --secondary-color-light: #F2E5DA;
-    --secondary-color-main: #FB994C;
-    --secondary-color-main-highlight: #fab37d;
-    --secondary-color-dark: #4d4845;
-    --secondary-color-darkest: #1a1919;
 
-    --success-color-lightest: #FAFFFA;
-    --success-color-light: #DBF2DA;
-    --success-color-main: #45CB3E;
-    --success-color-main-highlight: #6dcc68;
-    --success-color-dark: #454d45;
-    --success-color-darkest: #191a19;
+    /* SECONDARY */
+    --secondary-color-lightest: #fffbf9; /* Hue: 23, Saturation: 2, Value: 100 */
+    --secondary-color-lighter: #f9f5f2; /* Hue: 23, Saturation: 3, Value: 98 */
+    --secondary-color-light: #f2e3da; /* Hue: 23, Saturation: 10, Value: 95 */
 
-    --danger-color-lightest: #FFFAFA;
-    --danger-color-light: #F2DADB;
-    --danger-color-main: #bc0309;
-    --danger-color-main-highlight: #d3565a; 
-    --danger-color-dark: #4d4545;
-    --danger-color-darkest: #1a1919;
+    --secondary-color-main-light: #f2a06d; /* Hue: 23, Saturation: 55, Value: 95 */
+    --secondary-color-main: #f98e4a; /* Hue: 23, Saturation: 70, Value: 98 */
+    --secondary-color-main-dark: #b24f11; /* Hue: 23, Saturation: 90, Value: 70 */
+
+    --secondary-color-dark: #4d4845; /* Hue: 23, Saturation: 10, Value: 30 */
+    --secondary-color-darker: #332f2c; /* Hue: 23, Saturation: 12, Value: 20 */ 
+    --secondary-color-darkest: #191716; /* Hue: 23, Saturation: 12, Value: 10 */
+
+
+    /* SUCCESS */
+    --success-color-lightest: #FAFFFA; /* Hue: 120, Saturation: 2, Value: 100 */
+    --success-color-lighter: #f2f9f2; /* Hue: 120, Saturation: 3, Value: 98 */
+    --success-color-light: #daf2da; /* Hue: 120, Saturation: 10, Value: 95 */
+
+    --success-color-main-light: #6df26d; /* Hue: 120, Saturation: 55, Value: 95 */ 
+    --success-color-main: #3fcc3f; /* Hue: 120, Saturation: 69, Value: 80 */
+    --success-color-main-dark: #11b211; /* Hue: 120, Saturation: 90, Value: 70 */
+
+    --success-color-dark: #454d45; /* Hue: 120, Saturation: 10, Value: 30 */
+    --success-color-darker: #2d332d; /* Hue: 120, Saturation: 10, Value: 20 */ 
+    --success-color-darkest: #191a19; /* Hue: 120, Saturation: 4, Value: 10 */
+
+
+    /* DANGER */
+    --danger-color-lightest: #FFFAFA; /* Hue: 0, Saturation: 2, Value: 100 */
+    --danger-color-lighter: #f9f2f2; /* Hue: 0, Saturation: 3, Value: 98 */ 
+    --danger-color-light: #f2dada; /* Hue: 0, Saturation: 10, Value: 95 */
+
+    --danger-color-main-light: #f26d6d; /* Hue: 0, Saturation: 55, Value: 95 */ 
+    --danger-color-main: #bc0303; /* Hue: 0, Saturation: 98, Value: 74 */
+    --danger-color-main-dark: #b21111; /* Hue: 0, Saturation: 0, Value: 70 */
+
+    --danger-color-dark: #4d4545; /* Hue: 0, Saturation: 10, Value: 30 */
+    --danger-color-darker: #332d2d; /* Hue: 0, Saturation: 10, Value: 20 */ 
+    --danger-color-darkest: #1a1919; /* Hue: 0, Saturation: 4, Value: 10 */
 
     /**************************************************************************
      * End Color Palette
@@ -62,6 +86,7 @@
     --menu-trigger-text-color: var(--primary-color-darkest);
     --menu-trigger-text-highlight-color: var(--primary-color-dark);
     --menu-text-color: var(--primary-color-darkest);
+    --menu-text-color-dim: var(--primary-color-dark);
     --menu-text-highlight-color: white;
     --menu-background-highlight-color: var(--primary-color-main);
     --menu-disabled-text-color: var(--primary-color-light);
@@ -78,6 +103,9 @@
     --card-border-color: var(--primary-color-light);
     --card-background-color: white;
     --card-shadow-color: rgba(0,0,0,0.25);
+
+    --danger-zone-background-color: var(--danger-color-lightest);
+    --danger-zone-border-color: var(--danger-color-light);
 
     --post-info-text-color: var(--primary-color-dark);
     --post-moderation-background: var(--danger-color-lightest);
@@ -115,7 +143,7 @@
     --input-placeholder-color: var(--primary-color-grey);
 
     --link-color: var(--primary-color-main);
-    --link-highlight-color: var(--primary-color-main-highlight);
+    --link-highlight-color: var(--primary-color-main-light);
 
     --button-color: var(--primary-color-light);
     --button-highlight-color: var(--primary-color-lightest);
@@ -157,7 +185,8 @@
         --menu-trigger-text-color: var(--primary-color-lightest);
         --menu-trigger-text-highlight-color: var(--primary-color-light);
         --menu-text-color: var(--primary-color-lightest);
-        --menu-text-highlight-color: var(--primary-color-dark);
+        --menu-text-color-dim: var(--primary-color-light);
+        --menu-text-highlight-color: var(--primary-color-lightest);
         --menu-background-highlight-color: var(--primary-color-main);
         --menu-disabled-text-color: var(--primary-color-darker);
         --menu-shadow-color: rgba(0,0,0,0.25);
@@ -173,6 +202,9 @@
         --card-border-color: var(--primary-color-darker);
         --card-background-color: var(--primary-color-dark);
         --card-shadow-color: rgba(255,255,255,0.25);
+
+        --danger-zone-background-color: var(--danger-color-dark);
+        --danger-zone-border-color: var(--danger-color-darker);
 
         --post-info-text-color: var(--primary-color-light);
         --post-moderation-background: var(--danger-color-darkest);
@@ -210,7 +242,7 @@
         --input-placeholder-color: var(--primary-color-light);
 
         --link-color: var(--primary-color-main);
-        --link-highlight-color: var(--primary-color-main-highlight);
+        --link-highlight-color: var(--primary-color-main-light);
 
         --button-color: var(--primary-color-darker);
         --button-highlight-color: var(--primary-color-darkest);

@@ -118,7 +118,7 @@ const GroupPostPermissionsUpdate = function({ groupId, onSubmit, onCancel }) {
                 <Button onClick={(e) => cancel()}>Cancel</Button> 
                 <input type="submit" name="submit" value="Submit" />
             </div> }
-            <RequestErrorModal request={request} message={"Create Group"} />
+            <RequestErrorModal request={request} message={"Attempt to update group permissions"} />
         </form>
     )
 
