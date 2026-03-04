@@ -1,0 +1,17 @@
+.user-list__page {
+    display: inline-block;
+    padding-right: 5px;
+}
+
+@media (width <= 700px) {
+    .user-list__page {
+        display: block;
+        padding: 0;
+        margin: 0;
+    }
+    .user-list__total {
+        display: block;
+        padding: 0;
+        margin: 0
+    }
+}

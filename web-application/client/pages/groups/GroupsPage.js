@@ -30,7 +30,7 @@ const GroupsPage = function() {
                         icon="Plus"
                         text="Create Group" />
                     <NavigationMenuLink to="/groups" icon="UserGroup" text="Your Groups" />
-                    <NavigationMenuLink to="/groups/find" icon="MagnifyingGlass" text="Find Groups" />
+                    <NavigationMenuLink to="/groups/find" icon="MagnifyingGlass" text="Discover Groups" />
                 </NavigationMenu>
             </PageLeftGutter>
             <PageBody>
