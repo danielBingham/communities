@@ -1,5 +1,10 @@
 .root-layout {
+    box-sizing: border-box;
+    max-width: 100vw;
     color: var(--main-text-color);
     background-color: var(--main-background-color);
+}
 
+.android .root-layout, .ios .root-layout {
+    padding-top: 40px;
 }
