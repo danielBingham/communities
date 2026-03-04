@@ -22,10 +22,10 @@ import marque from '/assets/communities-marque.svg'
 
 import './CommunitiesLogo.css'
 
-const CommunitiesLogo = function() {
+const CommunitiesLogo = function({ alwaysFull }) {
 
     return (
-        <div className="communities-logo">
+        <div className={`communities-logo ${ alwaysFull ? 'communities-logo__full' : ''}`}>
             <a href="/"><img className="communities-logo__logo" src={logo} /><img className="communities-logo__marque" src={marque} /></a>
         </div> 
     )
