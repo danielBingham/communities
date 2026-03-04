@@ -106,10 +106,10 @@ No pre-requisites.
 
 #### Error cases
 
-- [ ] Users are shown an error when they follow a link with an invalid token.
-- [ ] Users are shown an error when they manually enter an invalid token.
-- [ ] Users are shown an error when they attempt to request a new confirmation while already confirmed.
-- [ ] Users are simply forwarded to TOS when they attempt to re-confirm after already confirming.
+- [x] Users are shown an error when they follow a link with an invalid token.
+- [x] Users are shown an error when they manually enter an invalid token.
+- [x] Users are shown an error when they attempt to request a new confirmation while already confirmed.
+- [x] Users are simply forwarded to TOS when they attempt to re-confirm after already confirming.
 
 ## [Update User: Profile](documentation/testing/test-cases/User/update/profile.md)
 
@@ -121,13 +121,13 @@ Cases covering the user updating their profile.
 
 ### Cases
 
-- [ ] User can upload a profile image.
+- [x] User can upload a profile image.
     1. As User1:
         1. Select "Edit Profile" from the User Menu.
         2. Click Upload Image and choose a profile image. Submit.
         3. Confirm image successfully uploaded.
 
-- [ ] User can crop an uploaded profile image.
+- [x] User can crop an uploaded profile image.
     1. As User1:
         1. Select "Edit Profile" from the User Menu.
         2. Click Upload Image and choose a profile image that does not have a 1:1 aspect ratio. 
@@ -135,7 +135,7 @@ Cases covering the user updating their profile.
         4. Drag the crop box to an appropriate crop.  Submit the profile form. 
         5. Confirm the image is cropped to the chose crop box.
 
-- [ ] User can remove an uploaded profile image.
+- [x] User can remove an uploaded profile image.
     1. As User1:
         1. Select "Edit Profile" from the User Menu.
         2. Click "Remove Image" under your profile image.  Confirm image removed.
