@@ -34,7 +34,7 @@ const Alert = function({ type, timeout, className, children }) {
             }, timeout)
         }
 
-        if ( typeof timeout !== 'number' ) {
+        if ( timeout !== undefined && timeout!== null &&  typeof timeout !== 'number' ) {
             throw new Error('Invalid timeout.  Must supply a number.')
         }
 
@@ -53,9 +53,18 @@ const Alert = function({ type, timeout, className, children }) {
         return null
     }
 
+    let typeClass = 'alert__info'
+    if ( type === 'success' ) {
+        typeClass = 'alert__success'
+    } else if ( type === 'warn' ) {
+        typeClass = 'alert__warn'
+    } else if ( type === 'error' ) {
+        typeClass = 'alert__error'
+    }
+
     return (
         <div 
-            className={`alert ${type} ${ className ? className : ''}`} 
+            className={`alert ${typeClass} ${ className ? className : ''}`} 
             onClick={(e) => setVisible(false)}
         >
             { children }
