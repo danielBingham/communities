@@ -11,10 +11,10 @@ h1.news-post__title {
     margin: 0;
     font-size: 14px;
     font-style: italics;
-    color: var(--primary-color-dark);
+    color: var(--main-text-color-dim);
 }
 .news-post h1 a:link, .news-post h1 a:active, .news-post h1 a:visited {
-    color: #333;
+    color: var(--main-text-color-dim);
     text-decoration: none;
 }
 .news-post h1 a:hover {
