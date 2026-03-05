@@ -103,7 +103,12 @@ const FriendList = function({ userId, params, noSearch, descriptor }) {
         const pageStart = ( query.meta.page-1) * query.meta.pageSize + 1
         const pageEnd = query.meta.count - (query.meta.page-1) * query.meta.pageSize > query.meta.pageSize ? ( query.meta.page * query.meta.pageSize ) : query.meta.count 
 
-        explanation = `${pageStart} to ${pageEnd} of ${query.meta.count} ${descriptor}`
+        explanation = (
+            <span>
+                <span className="friend-list__page">{pageStart} to {pageEnd}</span>
+                <span className="friend-list__total">of {query.meta.count} {descriptor}</span>
+            </span>
+        )
     }
 
     return (
