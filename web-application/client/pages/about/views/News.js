@@ -25,6 +25,49 @@ import NewsPost from '/components/about/NewsPost'
 import './News.css'
 
 const posts = {
+    '3-6-2026-release-0-11-0': {
+        title: 'Release 0.11.0',
+        date: '03/06/2026',
+        author: 'Daniel Bingham',
+        content: (
+            <>
+                <p>
+                    Release 0.11.0 has been deployed!
+                </p>
+                <p>
+                    This release includes Dark Mode, as well as a few bug
+                    fixes.
+                </p>
+                <p>
+                    You can turn on Dark Mode in your preferences.  You
+                    will need to manually turn it on for the time being, making
+                    Dark Mode follow your system preferences is on the todo
+                    list for a future release.
+                </p>
+                <p>
+                    As usual, this is just the first iteration of Dark Mode. We
+                    may have missed some spots (let us know if you find one)
+                    and we'll probably need to tweak it as we go. Let us know
+                    what you think!
+                </p>
+                <p>
+                    The bug fixes included improvements to error reporting when
+                    uploading files (you will now see an error if you upload an
+                    empty file) and fixes for the styling on very small screens
+                    (there were some places on the list views that caused
+                    horizontal scrolling on screens less than 400px wide). 
+                </p>
+                <p>
+                    Next up we're going to address the issues with iOS's lack
+                    of a back button.  We'll probably try to squeeze some other
+                    small UX fixes and bug fixes in to the release too.
+                </p>
+                <p>
+                    Then we're back on the path to Events.
+                </p>
+            </>
+        )
+    },
     '1-28-2026-release-0-10-0': {
         title: 'Release 0.10.0',
         date: '01/28/2026',
