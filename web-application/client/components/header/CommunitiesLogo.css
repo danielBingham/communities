@@ -29,10 +29,16 @@
 
 
 @media (width <= 1000px) {
-    .communities-logo__logo {
+    .communities-logo .communities-logo__logo {
         display: none;
     }
-    .communities-logo__marque {
+    .communities-logo .communities-logo__marque {
         display: inline-block;
+    }
+    .communities-logo.communities-logo__full .communities-logo__logo {
+        display: inline-block;
+    }
+    .communities-logo.communities-logo__full .communities-logo__marque {
+        display: none;
     }
 }

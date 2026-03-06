@@ -25,6 +25,7 @@ import { validateToken } from '/state/tokens'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
+import Card from '/components/ui/Card'
 import CommunitiesLogo from '/components/header/CommunitiesLogo'
 import Spinner from '/components/Spinner'
 import { RequestErrorModal } from '/components/errors/RequestError'
@@ -81,11 +82,11 @@ const EmailConfirmationPage = function(props) {
 
     
     return (
-        <div id="email-confirmation-page">
-            <div className="logo"><CommunitiesLogo /></div>
+        <Card id="email-confirmation-page">
+            <div className="logo"><CommunitiesLogo alwaysFull={true} /></div>
             <EmailConfirmationForm initialToken={token} />
             <RequestErrorModal message="Attempt to confirm email" request={request} />
-        </div>
+        </Card>
     )
 }
 

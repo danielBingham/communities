@@ -588,6 +588,16 @@ module.exports = class UserController extends BaseController{
         const user = request.body
         const id = request.params.id
 
+        // We need to leave this here, because iPhones will auto-capitalize
+        // form inputs and, since we force lower case elsewhere, this can
+        // result in a situation where the user changes their email, it gets
+        // capitalized, and then they cannot log in.
+        //
+        // TECHDEBT In the long run, this should be handled by Schema.clean()
+        if ( 'email' in user ) {
+            user.email = user.email.toLowerCase().trim()
+        }
+
         /*************************************************************
          * Permissions Checking and Input Validation
          *

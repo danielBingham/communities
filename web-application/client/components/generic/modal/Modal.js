@@ -19,6 +19,7 @@ const Modal = function({ isVisible, setIsVisible, className, children, noClose, 
         }
     }
 
+    const container = document.getElementById('root-layout')
     return isVisible ? createPortal(
             <div className={`modal-wrapper ${className ? className : ''}`} >
                 <div className="modal__overlay" onClick={overlayClicked}></div>
@@ -27,7 +28,7 @@ const Modal = function({ isVisible, setIsVisible, className, children, noClose, 
                     { children }
                 </div>
             </div>,
-            document.body
+            container 
         ) : null 
 }
 

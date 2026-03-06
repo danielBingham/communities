@@ -3,6 +3,7 @@ main#headerless {
     width: 100%;
     max-width: 1400px;
     min-width: 375px;
+    min-height: 100vh;
     margin: auto auto;
     color: var(--main-text-color);
     background-color: var(--main-background-color);

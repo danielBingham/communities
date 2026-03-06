@@ -3,16 +3,21 @@
     position: fixed;
     top: 0%;
     left: 50%;
-    width: 24px;
-    height: 24px;
-    padding: 20px;
+    width: 16px;
+    height: 16px;
+    padding: 8px;
     transform: translateX(-50%);
-    border: thin solid var(--primary-color-light);
+    border: thin solid var(--card-border-color);
     border-radius: 64px; 
-    background-color: white;
+    background-color: var(--card-background-color);
+    color: var(--main-text-color);
     z-index: 9;
-    box-shadow: 0px 0px 6px 0px rgba(0,0,0,0.25);
+    box-shadow: 0px 0px 6px 0px var(--card-shadow-color);
     transition: transform 0.1s linear 0;
     transition: display 0.5s linear 0;
+}
+.refresher svg {
+    height: 16px;
+    width: 16px;
 }
 

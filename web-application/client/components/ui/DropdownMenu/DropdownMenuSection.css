@@ -1,0 +1,7 @@
+.dropdown-menu__section {
+    padding: 5px 0;
+    border-bottom: thin solid var(--menu-border-color);
+}
+.dropdown-menu__section.dropdown-menu__section__last {
+    border-bottom: none;
+}

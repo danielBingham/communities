@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import Modal from '/components/generic/modal/Modal'
-import Button from '/components/generic/button/Button'
+import Button from '/components/ui/Button'
 
 import './ErrorModal.css'
 

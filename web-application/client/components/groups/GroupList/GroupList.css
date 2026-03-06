@@ -1,0 +1,17 @@
+.group-list__page {
+    display: inline-block;
+    padding-right: 5px;
+}
+
+@media (width <= 700px) {
+    .group-list__page {
+        display: block;
+        padding: 0;
+        margin: 0;
+    }
+    .group-list__total {
+        display: block;
+        padding: 0;
+        margin: 0
+    }
+}

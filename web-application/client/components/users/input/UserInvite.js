@@ -6,7 +6,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 import { postUsers } from '/state/User'
 
 import Spinner from '/components/Spinner'
-import Button from '/components/generic/button/Button'
+import Button from '/components/ui/Button'
 
 import './UserInvite.css'
 

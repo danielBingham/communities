@@ -3,11 +3,10 @@
     cursor: pointer;
 }
 .dropdown-menu__trigger a:link {
-    color: var(--main-text-color);
+    color: var(--menu-trigger-text-color);
 }
 .dropdown-menu__trigger a:active,
 .dropdown-menu__trigger a:hover,
 .dropdown-menu__trigger a:visited {
-    color: var(--main-text-color);
-    filter: brightness(90%);
+    color: var(--menu-trigger-text-highlight-color);
 }

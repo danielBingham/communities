@@ -7,7 +7,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 
 import { postPostComments, patchPostComment, finishPostCommentEdit } from '/state/PostComment'
 
-import Button from '/components/generic/button/Button'
+import Button from '/components/ui/Button'
 import Spinner from '/components/Spinner'
 
 import TextAreaWithMentions from '/components/posts/TextAreaWithMentions'

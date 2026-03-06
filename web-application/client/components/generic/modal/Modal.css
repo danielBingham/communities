@@ -11,7 +11,7 @@
 
     padding: 16px;
     border-radius: 7px;
-    background-color: white;
+    background-color: var(--modal-background-color);
     z-index: 100;
     overflow-y: auto;
 }

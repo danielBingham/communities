@@ -44,7 +44,12 @@ const UserListView = function({ params }) {
         const pageStart = ( query.meta.page-1) * query.meta.pageSize + 1
         const pageEnd = query.meta.count - (query.meta.page-1) * query.meta.pageSize > query.meta.pageSize ? ( query.meta.page * query.meta.pageSize ) : query.meta.count 
 
-        explanation = `${pageStart} to ${pageEnd} of ${query.meta.count} People`
+        explanation = (
+            <span>
+                <span className="user-list__page">{pageStart} to {pageEnd}</span>
+                <span className="user-list__total">of {query.meta.count} People</span>
+            </span>
+        )
     }
 
 

@@ -5,23 +5,23 @@
 }
 a.dropdown-menu__item:link, 
 a.dropdown-menu__item:visited {
-    color: var(--main-text-color);
+    color: var(--menu-text-color);
 }
 
 a.dropdown-menu__item:active,
 a.dropdown-menu__item:hover {
-    color: white;
-    background-color: var(--primary-highlight-color);
+    color: var(--menu-text-highlight-color);
+    background-color: var(--menu-background-highlight-color);
 }
 .dropdown-menu__item a:active,
 .dropdown-menu__item a:hover {
-    color: white;
+    color: var(--menu-text-highlight-color);
 }
 
 .dropdown-menu__item.dropdown-menu__item__disabled {
     display: block;
     white-space: nowrap;
     padding-left: 20px;
-    color: var(--primary-color-light);
+    color: var(--menu-text-disabled-color);
 }
 

@@ -4,125 +4,265 @@
      * Color Palette
      *************************************************************************/
 
-    /*--primary-color-lightest: #fcfcfc; /* Hue: 204, Saturation: 1, Brightness: 99  -- Off the pattern for a more grey hue. *
-    --primary-color-light: #e4e4f1; /* Saturation: 30, Lightness: 92 *
-    --primary-color-grey: #7d7d82;
-    --primary-color-main: #0F0F7F;
-    --primary-color-main-highlight: #1616b6;
-    --primary-color-dark: #494950; /* Saturation: 5, Lightness: 30 *
-    --primary-color-darkest: #18181b;  /* Saturation: 5, Lightness: 10 */
+    /* PRIMARY */
+    --primary-color-lightest: #FAFBFC; /* Hue: 204, Saturation: 1, Value: 99  -- Off the pattern for a more grey hue. */
+    --primary-color-lighter: #f2f6f9; /* Hue: 210, Saturation: 3, Value: 98 */
+    --primary-color-light: #e6ecf2; /* Hue: 210, Saturation: 5, Value: 95 */
+    --primary-color-grey: #797c7f;
+
+    --primary-color-main-light: #6daff2; /* Hue: 210, Saturation: 55, Value: 95 */
+    --primary-color-main: #398fe5; /* Hue: 210, Saturation: 75, Value: 90 */
+    --primary-color-main-dark: #1162b2; /* Hue: 210, Saturation: 90, Value: 70 */
+
+    --primary-color-dark: #44484c; /* Hue: 210, Saturation: 11, Value: 30 */
+    --primary-color-darker: #2c2f33; /* Hue: 210, Saturation: 12, Value: 20 */
+    --primary-color-darkest: #161719; /* Hue: 210, Saturation: 12, Value: 10 */
 
 
-    --primary-color-lightest: #FAFBFC; /* Hue: 204, Saturation: 1, Brightness: 99  -- Off the pattern for a more grey hue. */
-    --primary-color-light: #e6ecf2;
-    --primary-color-grey: #797c80;
-    --primary-color-main: #398fe5;
-    --primary-color-main-highlight: #67a6e5;
-    --primary-color-dark: #44484c;
-    --primary-color-darkest: #161819; 
+    /* SECONDARY */
+    --secondary-color-lightest: #fffbf9; /* Hue: 23, Saturation: 2, Value: 100 */
+    --secondary-color-lighter: #f9f5f2; /* Hue: 23, Saturation: 3, Value: 98 */
+    --secondary-color-light: #f2e3da; /* Hue: 23, Saturation: 10, Value: 95 */
 
-    --secondary-color-lightest: #FFFCFA; 
-    --secondary-color-light: #F2E5DA;
-    --secondary-color-main: #FB994C;
-    --secondary-color-main-highlight: #fab37d;
-    --secondary-color-dark: #4d4845;
-    --secondary-color-darkest: #1a1919;
+    --secondary-color-main-light: #f2a06d; /* Hue: 23, Saturation: 55, Value: 95 */
+    --secondary-color-main: #f98e4a; /* Hue: 23, Saturation: 70, Value: 98 */
+    --secondary-color-main-dark: #b24f11; /* Hue: 23, Saturation: 90, Value: 70 */
 
-    --success-color-lightest: #FAFFFA;
-    --success-color-light: #DBF2DA;
-    --success-color-main: #45CB3E;
-    --success-color-main-highlight: #6dcc68;
-    --success-color-dark: #454d45;
-    --success-color-darkest: #191a19;
+    --secondary-color-dark: #4d4845; /* Hue: 23, Saturation: 10, Value: 30 */
+    --secondary-color-darker: #332f2c; /* Hue: 23, Saturation: 12, Value: 20 */ 
+    --secondary-color-darkest: #191716; /* Hue: 23, Saturation: 12, Value: 10 */
 
-    --danger-color-lightest: #FFFAFA;
-    --danger-color-light: #F2DADB;
-    --danger-color-main: #bc0309;
-    --danger-color-main-highlight: #d3565a; 
-    --danger-color-dark: #4d4545;
-    --danger-color-darkest: #1a1919;
+
+    /* SUCCESS */
+    --success-color-lightest: #FAFFFA; /* Hue: 120, Saturation: 2, Value: 100 */
+    --success-color-lighter: #f2f9f2; /* Hue: 120, Saturation: 3, Value: 98 */
+    --success-color-light: #daf2da; /* Hue: 120, Saturation: 10, Value: 95 */
+
+    --success-color-main-light: #6df26d; /* Hue: 120, Saturation: 55, Value: 95 */ 
+    --success-color-main: #3fcc3f; /* Hue: 120, Saturation: 69, Value: 80 */
+    --success-color-main-dark: #11b211; /* Hue: 120, Saturation: 90, Value: 70 */
+
+    --success-color-dark: #454d45; /* Hue: 120, Saturation: 10, Value: 30 */
+    --success-color-darker: #2d332d; /* Hue: 120, Saturation: 10, Value: 20 */ 
+    --success-color-darkest: #191a19; /* Hue: 120, Saturation: 4, Value: 10 */
+
+
+    /* DANGER */
+    --danger-color-lightest: #FFFAFA; /* Hue: 0, Saturation: 2, Value: 100 */
+    --danger-color-lighter: #f9f2f2; /* Hue: 0, Saturation: 3, Value: 98 */ 
+    --danger-color-light: #f2dada; /* Hue: 0, Saturation: 10, Value: 95 */
+
+    --danger-color-main-light: #f26d6d; /* Hue: 0, Saturation: 55, Value: 95 */ 
+    --danger-color-main: #bc0303; /* Hue: 0, Saturation: 98, Value: 74 */
+    --danger-color-main-dark: #b21111; /* Hue: 0, Saturation: 0, Value: 70 */
+
+    --danger-color-dark: #4d4545; /* Hue: 0, Saturation: 10, Value: 30 */
+    --danger-color-darker: #332d2d; /* Hue: 0, Saturation: 10, Value: 20 */ 
+    --danger-color-darkest: #1a1919; /* Hue: 0, Saturation: 4, Value: 10 */
 
     /**************************************************************************
      * End Color Palette
      *************************************************************************/
-
-    /**
-     * Highlight colors
-     *
-     * Used to highlight menu selections.
-     **/
     --primary-highlight-color: var(--primary-color-main);
     --success-highlight-color: var(--success-color-main);
     --warn-highlight-color: var(--danger-color-dark);
 
-    /** Header colors **/
     --header-background-color: white;
     --header-border-color: var(--primary-color-light);
     --header-text-color: var(--primary-color-darkest);
     --header-text-highlight-color: var(--primary-color-dark);
-    --header-spacer-color: var(--primary-color-light);
 
-    /** Footer colors **/
-    --footer-background-color: var(--primary-color-lightest);
+    --footer-background-color: white;
     --footer-border-color: var(--primary-color-light);
     --footer-text-color: var(--primary-color-darkest);
 
-    /** Header menu colors **/ 
-    --header-menu-background-color: var(--primary-color-lightest);
-    --header-menu-border-color: var(--primary-color-light);
-    --header-menu-spacer-color: var(--primary-color-light);
-    --header-menu-text-color: var(--primary-color-darkest);
-    --header-menu-text-highlight-color: var(--primary-color-dark);
-    --header-menu-background-highlight-color: var(--primary-color-main);
-
-
-    /** Page Header **/
-    --page-header-background-color: var(--primary-color-lightest);
-
-    /** Page **/
-    --page-background-color: var(--primary-color-lightest);
-    --page-text-color: var(--primary-color-darkest);
-    --page-border-color: none;
-
-    /** Page Tab Bar **/
-    --tab-bar-background-color: var(--primary-color-lightest);
-    --tab-bar-border-color: var(--primary-color-light);
-    --tab-bar-text-color: var(--primary-color-darkest);
-    --tab-bar-icon-color: var(--primary-color-darkest);
-
-    /** Main **/
     --main-background-color: var(--primary-color-lightest);
     --main-border-color: var(--primary-color-light);
     --main-text-color: var(--primary-color-darkest);
-    --main-icon-color: var(--primary-color-light);
-    --main-icon-highlight-color: var(--primary-color-main);
+    --main-text-color-dim: var(--primary-color-dark);
 
+    --menu-background-color: white;
+    --menu-border-color: var(--primary-color-light);
+    --menu-trigger-text-color: var(--primary-color-darkest);
+    --menu-trigger-text-highlight-color: var(--primary-color-dark);
+    --menu-text-color: var(--primary-color-darkest);
+    --menu-text-color-dim: var(--primary-color-dark);
+    --menu-text-highlight-color: white;
+    --menu-background-highlight-color: var(--primary-color-main);
+    --menu-disabled-text-color: var(--primary-color-light);
+    --menu-shadow-color: rgba(0,0,0,0.25);
+
+    --navigation-menu-item-text-color: var(--primary-color-darkest);
+    --navigation-menu-item-highlight-text-color: var(--primary-color-dark);
+    --navigation-menu-item-highlight-background-color: var(--primary-color-light);
+
+    --profile-icon-color: var(--primary-color-light);
     --icon-color: var(--primary-color-darkest);
-
-    --floating-menu-border-color: var(--primary-color-light);
-    --floating-menu-icon-color: var(--primary-color-light);
 
     --card-header-background-color: var(--primary-color-lightest);
     --card-border-color: var(--primary-color-light);
-    --dots-menu-color: var(--primary-color-light);
+    --card-background-color: white;
+    --card-shadow-color: rgba(0,0,0,0.25);
 
-    --input-background-color: var(--primary-color-lightest);
+    --danger-zone-background-color: var(--danger-color-lightest);
+    --danger-zone-border-color: var(--danger-color-light);
+
+    --post-info-text-color: var(--primary-color-dark);
+    --post-moderation-background: var(--danger-color-lightest);
+    --post-moderation-border: var(--danger-color-light);
+
+    --post-show-comments-highlight-background: white;
+
+    --post-comment-background-color: var(--primary-color-lightest);
+    --post-comment-background-highlight-color: var(--secondary-color-light);
+    --post-comment-text-color: var(--primary-color-darkest);
+    --post-comment-moderated-background: var(--danger-color-lightest);
+    --post-comment-moderated-border: var(--danger-color-light);
+
+    --post-create-button-text-color: var(--primary-color-dark);
+    --post-create-button-background-color: var(--primary-color-lightest);
+    --post-create-button-highlight-background-color: white;
+    --post-create-button-highlight-text-color: var(--primary-color-darkest);
+
+    --post-comment-create-button-text-color: var(--primary-color-dark);
+    --post-comment-create-button-background-color: var(--primary-color-lightest);
+    --post-comment-create-button-highlight-background-color: white;
+    --post-comment-create-button-highlight-text-color: var(--primary-color-darkest);
+
+    --link-preview-background: var(--primary-color-lightest);
+    --link-preview-site-text-color: var(--primary-color-dark);
+    --link-preview-title-text-color: var(--primary-color-darkest);
+    --link-preview-description-text-color: var(--primary-color-dark);
+
+    --modal-background-color: white;
+    --modal-border-color: var(--primary-color-light);
+
+    --input-background-color: white;
     --input-focus-background-color: white;
     --input-border-color: var(--primary-color-light);
     --input-highlight-color: var(--primary-color-main);
+    --input-placeholder-color: var(--primary-color-grey);
 
     --link-color: var(--primary-color-main);
-    --link-highlight-color: var(--primary-color-main-highlight);
+    --link-highlight-color: var(--primary-color-main-light);
 
-    --button-color: var(--primary-color-lightest);
-    --button-border-color: var(--primary-color-light);
+    --button-color: var(--primary-color-light);
+    --button-highlight-color: var(--primary-color-lightest);
+    --button-text-color: var(--primary-color-dark);
 
     --button-primary-color: var(--primary-color-main);
-    --button-highlight-color: var(--primary-color-main-highlight);
-    --button-warn-color: var(--danger-color-main);
+    --button-primary-highlight-color: var(--primary-color-main-light);
+    --button-primary-text-color: white;
 
-    --tag-background-color: white;
-    --tag-border-color: var(--primary-color-light);
+    --button-success-color: var(--success-color-main);
+    --button-success-highlight-color: var(--success-color-main-light);
+    --button-success-text-color: white;
+
+    --button-warn-color: var(--danger-color-main);
+    --button-warn-highlight-color: var(--danger-color-main-light);
+    --button-warn-text-color: white;
+
+    .dark {
+        --primary-highlight-color: var(--primary-color-main);
+        --success-highlight-color: var(--success-color-main);
+        --warn-highlight-color: var(--danger-color-light);
+
+        --header-background-color: var(--primary-color-dark);
+        --header-border-color: var(--primary-color-darker);
+        --header-text-color: var(--primary-color-lightest);
+        --header-text-highlight-color: var(--primary-color-light);
+
+        --footer-background-color: var(--primary-color-dark);
+        --footer-border-color: var(--primary-color-darker);
+        --footer-text-color: var(--primary-color-lightest);
+
+        --main-background-color: var(--primary-color-darkest);
+        --main-border-color: var(--primary-color-darker);
+        --main-text-color: var(--primary-color-lightest);
+        --main-text-color-dim: var(--primary-color-light);
+
+        --menu-background-color: var(--primary-color-dark);
+        --menu-border-color: var(--primary-color-darker);
+        --menu-trigger-text-color: var(--primary-color-lightest);
+        --menu-trigger-text-highlight-color: var(--primary-color-light);
+        --menu-text-color: var(--primary-color-lightest);
+        --menu-text-color-dim: var(--primary-color-light);
+        --menu-text-highlight-color: var(--primary-color-lightest);
+        --menu-background-highlight-color: var(--primary-color-main);
+        --menu-disabled-text-color: var(--primary-color-darker);
+        --menu-shadow-color: rgba(0,0,0,0.25);
+
+        --navigation-menu-item-text-color: var(--primary-color-lightest);
+        --navigation-menu-item-highlight-text-color: var(--primary-color-light);
+        --navigation-menu-item-highlight-background-color: var(--primary-color-darker);
+
+        --profile-icon-color: var(--primary-color-light);
+        --icon-color: var(--primary-color-lightest);
+
+        --card-header-background-color: var(--primary-color-darkest);
+        --card-border-color: var(--primary-color-darker);
+        --card-background-color: var(--primary-color-dark);
+        --card-shadow-color: rgba(255,255,255,0.25);
+
+        --danger-zone-background-color: var(--danger-color-dark);
+        --danger-zone-border-color: var(--danger-color-darker);
+
+        --post-info-text-color: var(--primary-color-light);
+        --post-moderation-background: var(--danger-color-dark);
+        --post-moderation-border: var(--danger-color-darker);
+
+        --post-show-comments-highlight-background: var(--primary-color-darker);
+
+        --post-comment-background-color: var(--primary-color-darker);
+        --post-comment-background-highlight-color: var(--secondary-color-dark);
+        --post-comment-text-color: var(--primary-color-lightest);
+        --post-comment-moderated-background: var(--danger-color-dark);
+        --post-comment-moderated-border: var(--danger-color-darker);
+
+        --post-create-button-text-color: var(--primary-color-light);
+        --post-create-button-background-color: var(--primary-color-darker);
+        --post-create-button-highlight-background-color: var(--primary-color-darkest);
+        --post-create-button-highlight-text-color: var(--primary-color-lightest);
+
+        --post-comment-create-button-text-color: var(--primary-color-light);
+        --post-comment-create-button-background-color: var(--primary-color-darker);
+        --post-comment-create-button-highlight-background-color: var(--primary-color-darkest);
+        --post-comment-create-button-highlight-text-color: var(--primary-color-lightest);
+
+        --link-preview-background: var(--primary-color-darker);
+        --link-preview-site-text-color: var(--primary-color-light);
+        --link-preview-title-text-color: var(--primary-color-lightest);
+        --link-preview-description-text-color: var(--primary-color-light);
+
+        --modal-background-color: var(--primary-color-dark);
+        --modal-border-color: var(--primary-color-darker);
+
+        --input-background-color: var(--primary-color-dark);
+        --input-focus-background-color: var(--primary-color-dark);
+        --input-border-color: var(--primary-color-darker);
+        --input-highlight-color: var(--primary-color-main);
+        --input-placeholder-color: var(--primary-color-light);
+
+        --link-color: var(--primary-color-main);
+        --link-highlight-color: var(--primary-color-main-light);
+
+        --button-color: var(--primary-color-darker);
+        --button-highlight-color: var(--primary-color-darkest);
+        --button-text-color: var(--primary-color-lightest);
+
+        --button-primary-color: var(--primary-color-main);
+        --button-primary-highlight-color: var(--primary-color-main-light);
+        --button-primary-text-color: white;
+
+        --button-success-color: var(--success-color-main);
+        --button-success-highlight-color: var(--success-color-main-light);
+        --button-success-text-color: white;
+
+        --button-warn-color: var(--danger-color-main);
+        --button-warn-highlight-color: var(--danger-color-main-light);
+        --button-warn-text-color: white;
+
+    }
 }
 
 html {
@@ -141,12 +281,10 @@ body {
     font-weight: 400;
     font-style: normal;
     background-color: var(--main-background-color);
+    color: var(--main-text-color);
 
     overflow-y: auto;
     overflow-wrap: break-word;
-}
-body.android, body.ios {
-    padding-top: 40px;
 }
 
 a:link, a:active, a:visited {
@@ -162,6 +300,7 @@ a:hover {
 input[type="text"], input[type="password"], textarea {
     box-sizing: border-box;
     padding: 7px;
+    background-color: var(--input-background-color);
     border: thin solid var(--input-border-color);
     border-radius: 7px;
     font-family: Roboto, Arial, sans-serif; 
@@ -171,6 +310,7 @@ input[type="text"], input[type="password"], textarea {
 input::placeholder, textarea::placeholder {
     font-family: Roboto, Arial, sans-serif; 
     font-size: 14px;
+    color: var(--input-placeholder-color);
 }
 
 input[type="submit"] {

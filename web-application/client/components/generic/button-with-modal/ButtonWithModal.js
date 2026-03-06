@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useContext, createContext } from 'react'
 
-import Button from '/components/generic/button/Button'
+import Button from '/components/ui/Button'
 
 import './ButtonWithModal.css'
 

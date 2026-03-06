@@ -28,7 +28,7 @@ const FriendsPage = function() {
                         <NavigationSubmenuLink to="/friends/requests" icon="UserPlus" text="Requests" />
                         <NavigationSubmenuLink to="/friends/invited" icon="Envelope" text="Invitations" />
                     </NavigationSubmenu>
-                    <NavigationMenuLink to="/friends/find" icon="MagnifyingGlass" text="Find Friends" /> 
+                    <NavigationMenuLink to="/friends/find" icon="MagnifyingGlass" text="Discover Friends" /> 
                 </NavigationMenu>
             </PageLeftGutter>
             <PageBody>

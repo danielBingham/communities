@@ -19,7 +19,7 @@
  ******************************************************************************/
 
 import { useRef, useEffect, useState } from 'react'
-import { ArrowPathIcon } from '@heroicons/react/24/solid'
+import { ArrowPathIcon } from '@heroicons/react/16/solid'
 
 import { Capacitor } from '@capacitor/core'
 

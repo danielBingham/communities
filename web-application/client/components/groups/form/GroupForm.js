@@ -19,7 +19,7 @@ import { postGroups } from '/state/Group'
 import DraftProfileImage from '/components/files/DraftProfileImage'
 import FileUploadInput from '/components/files/FileUploadInput'
 
-import Button from '/components/generic/button/Button'
+import Button from '/components/ui/Button'
 import Input from '/components/ui/Input'
 import TextBox from '/components/generic/text-box/TextBox'
 import Spinner from '/components/Spinner'
@@ -293,6 +293,7 @@ const GroupForm = function({ parentId }) {
             </div>
             <Input
                 name="title"
+                type="text"
                 label="Title"
                 explanation="Give this group a title."
                 value={title}
@@ -304,6 +305,7 @@ const GroupForm = function({ parentId }) {
 
             <Input
                 name="slug"
+                type="text"
                 label="URL"
                 explanation="Give this group a URL.  This will be used to access the group page and should match the group title. Must be composed of letters, numbers, '.', '_', and '-'."
                 value={slug}

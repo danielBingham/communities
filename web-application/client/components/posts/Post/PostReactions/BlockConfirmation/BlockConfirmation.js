@@ -1,12 +1,13 @@
 import React from 'react'
 import { createPortal } from 'react-dom'
 
-import Button from '/components/generic/button/Button'
+import Button from '/components/ui/Button'
 
 import './BlockConfirmation.css'
 
 const BlockConfirmation = function({ isVisible, cancel, execute  }) {
 
+    const container = document.getElementById('root-layout')
     return isVisible ? createPortal(
             <div className="modal-wrapper">
                 <div className="modal-overlay" onClick={(e) => cancel()}></div>
@@ -39,7 +40,7 @@ const BlockConfirmation = function({ isVisible, cancel, execute  }) {
                     </div>
                 </div>
             </div>,
-            document.body
+            container 
         ) : null 
 }
 

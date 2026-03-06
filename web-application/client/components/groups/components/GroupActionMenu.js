@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { Cog6ToothIcon } from '@heroicons/react/24/solid'
 
 import GroupMembershipButton from '/components/groups/GroupMembershipButton'
-import Button from '/components/generic/button/Button'
+import Button from '/components/ui/Button'
 
 import './GroupActionMenu.css'
 
