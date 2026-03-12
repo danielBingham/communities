@@ -1,0 +1,8 @@
+.back-button {
+    margin-left: 5px;
+}
+.back-button svg {
+    width: 1em;
+    height: 1em;
+    margin-bottom: -2px;
+}
