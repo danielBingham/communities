@@ -24,16 +24,19 @@ a.navigation-button:hover {
     display: inline-block;
 }
 
-@media (width > 700px ) {
+@media (width > 800px ) {
     .navigation-button {
         display: grid;
         grid-template-columns: auto auto;
         align-items: center;
         justify-items: center;
     }
+    .navigation-button .navigation-button__text {
+        padding-left: 5px;
+    }
 }
 
-@media (width <= 700px) {
+@media (width <= 800px) {
     .navigation-button {
         display: grid;
         grid-template-columns: auto;

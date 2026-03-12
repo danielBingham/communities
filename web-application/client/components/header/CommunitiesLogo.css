@@ -22,7 +22,7 @@
 }
 
 
-@media (width > 700px ) {
+@media (width > 800px ) {
     /* Responsive logo */
     .communities-logo.communities-logo__responsive .communities-logo__logo {
         display: inline-block;
@@ -33,7 +33,7 @@
 
 }
 
-@media (width <= 700px) {
+@media (width <= 800px) {
     /* Responsive logo */
     .communities-logo.communities-logo__responsive .communities-logo__logo {
         display: none;
@@ -43,6 +43,3 @@
     }
 }
 
-@media (width <= 450px) {
-
-}

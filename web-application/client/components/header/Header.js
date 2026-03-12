@@ -41,7 +41,7 @@ const Header = function(props) {
         return (
             <header>
                 <div className="header__unauthenticated">
-                    <CommunitiesLogo />
+                    <CommunitiesLogo className="header__logo" />
                     <NavigationButton to="/about" icon="InformationCircle" text="About" />
                     <UserMenu />
                 </div>
@@ -52,18 +52,12 @@ const Header = function(props) {
         return (
             <header>
                 <div className="header__authenticated">
-                    <div className="header__authenticated__upper">
-                        <NavigationButton to="-1" icon="ArrowLeft" text="Back" />
-                        <CommunitiesLogo className="header__logo" />
-                        <NavigationButton to="/search" icon="MagnifyingGlass" text="Search" />
-                    </div>
-                    <div className="header__authenticated__lower">
-                        <NavigationButton to="/" icon="QueueList" text="Feeds" />
-                        <NavigationButton to="/friends" icon="Users" text="Friends" />
-                        <NavigationButton to="/groups" icon="UserGroup" text="Groups" />
-                        <NotificationMenu /> 
-                        <UserMenu />
-                    </div>
+                    <CommunitiesLogo className="header__logo" />
+                    <NavigationButton to="/" icon="QueueList" text="Feeds" />
+                    <NavigationButton to="/friends" icon="Users" text="Friends" />
+                    <NavigationButton to="/groups" icon="UserGroup" text="Groups" />
+                    <NotificationMenu /> 
+                    <UserMenu />
                 </div>
             </header>
         )
