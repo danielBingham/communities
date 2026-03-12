@@ -17,26 +17,22 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import logo from '/assets/communities-logo.svg'
-import marque from '/assets/communities-marque.svg'
+import { NavLink } from 'react-router-dom'
+import * as HeroIconsSolid from '@heroicons/react/24/solid'
+import * as HeroIconsOutline from '@heroicons/react/24/outline' 
 
-import './CommunitiesLogo.css'
+import './NavigationButton.css'
 
-const CommunitiesLogo = function({ type, className }) {
-
-    let typeClass = 'communities-logo__responsive'
-    if ( type === 'logo' ) {
-        typeClass = 'communities-logo__always-logo'
-    } else if ( type === 'marque' ) {
-        typeClass = 'communities-logo__always-marque'
-    }
+const NavigationButton = function({ className, to, icon, text }) {
+    const SolidIcon = HeroIconsSolid[`${icon}Icon`]
+    const OutlineIcon = HeroIconsOutline[`${icon}Icon`]
 
     return (
-        <a className={`communities-logo ${ typeClass } ${ className ? className : ''}`} href="/">
-            <img className="communities-logo__logo" src={logo} /><img className="communities-logo__marque" src={marque} />
-        </a>
+        <NavLink className={`navigation-button ${ className ? className : ''}`} to={to}>
+            <SolidIcon className="navigation-button__solid" /><OutlineIcon className="navigation-button__outline" /> <span className="navigation-button__text">{ text }</span>
+        </NavLink>
     )
 
 }
 
-export default CommunitiesLogo
+export default NavigationButton
