@@ -42,6 +42,7 @@ import GroupModerationView from '/pages/group/views/GroupModerationView'
 import GroupSettingsView from '/pages/group/views/GroupSettingsView'
 
 import { Page, PageLeftGutter, PageRightGutter, PageBody } from '/components/generic/Page'
+import Breadcrumbs from '/components/ui/Breadcrumbs'
 import Error404 from '/components/errors/Error404'
 import Spinner from '/components/Spinner'
 
@@ -109,36 +110,39 @@ const GroupPage = function() {
     }
 
     return (
-        <Page id="group-page">
-            <PageLeftGutter>
-                <GroupNavigationMenu groupId={group.id} />
-            </PageLeftGutter>
-            <PageBody>
-                <div className="group-page__main">
-                    <Routes>
-                        <Route path="members">
-                            <Route path="admin" element={ <GroupMembersView groupId={group.id} type="admin" /> } />
-                            <Route path="invitations" element={ <GroupMembersView groupId={group.id} type="invitations" /> } />
-                            <Route path="requests" element={ <GroupMembersView groupId={group.id} type="requests" /> } />
-                            <Route path="banned" element={ <GroupMembersView groupId={group.id} type="banned" /> } />
-                            <Route path="email-invitations" element={ <GroupMembersView groupId={group.id} type="email-invitations" /> } />
-                            <Route index element={ <GroupMembersView groupId={group.id} type="member" /> } />
-                        </Route>
-                        <Route path="about" element={ <GroupAboutView groupId={group.id} /> } />
-                        <Route path="subgroups" element={ <GroupSubgroupView groupId={group.id} /> } />
-                        <Route path="invite" element={ <GroupInviteView groupId={group.id} /> } />
-                        <Route path="email-invite" element={ <GroupEmailInviteView groupId={group.id} /> } />
-                        <Route path="moderation" element={ <GroupModerationView groupId={group.id} /> } />
-                        <Route path="settings" element={<GroupSettingsView groupId={group.id} /> } />
-                        <Route path=":postId" element={ <PostView groupId={group.id} /> } />
-                        <Route index element={<GroupFeedView groupId={group.id} />} />
-                    </Routes> 
-                </div>
-            </PageBody>
-            <PageRightGutter>
-                <GroupProfile groupId={group.id} />
-            </PageRightGutter>
-        </Page>
+        <>
+            <Breadcrumbs crumbs={[{ to: '/groups', name: 'Groups' }, { to: `/group/${group.slug}`, name: group.title }]} />
+            <Page id="group-page">
+                <PageLeftGutter>
+                    <GroupNavigationMenu groupId={group.id} />
+                </PageLeftGutter>
+                <PageBody>
+                    <div className="group-page__main">
+                        <Routes>
+                            <Route path="members">
+                                <Route path="admin" element={ <GroupMembersView groupId={group.id} type="admin" /> } />
+                                <Route path="invitations" element={ <GroupMembersView groupId={group.id} type="invitations" /> } />
+                                <Route path="requests" element={ <GroupMembersView groupId={group.id} type="requests" /> } />
+                                <Route path="banned" element={ <GroupMembersView groupId={group.id} type="banned" /> } />
+                                <Route path="email-invitations" element={ <GroupMembersView groupId={group.id} type="email-invitations" /> } />
+                                <Route index element={ <GroupMembersView groupId={group.id} type="member" /> } />
+                            </Route>
+                            <Route path="about" element={ <GroupAboutView groupId={group.id} /> } />
+                            <Route path="subgroups" element={ <GroupSubgroupView groupId={group.id} /> } />
+                            <Route path="invite" element={ <GroupInviteView groupId={group.id} /> } />
+                            <Route path="email-invite" element={ <GroupEmailInviteView groupId={group.id} /> } />
+                            <Route path="moderation" element={ <GroupModerationView groupId={group.id} /> } />
+                            <Route path="settings" element={<GroupSettingsView groupId={group.id} /> } />
+                            <Route path=":postId" element={ <PostView groupId={group.id} /> } />
+                            <Route index element={<GroupFeedView groupId={group.id} />} />
+                        </Routes> 
+                    </div>
+                </PageBody>
+                <PageRightGutter>
+                    <GroupProfile groupId={group.id} />
+                </PageRightGutter>
+            </Page>
+        </>
     )
 }
 
