@@ -2,7 +2,7 @@
     main#authenticated {
         box-sizing: border-box;
 
-        margin: 65px auto 0 auto; /** push us below the header **/
+        margin: 0px auto 0 auto; /** push us below the header **/
         min-width: 360px;
         width: 100%;
         min-height: calc(100vh - 436px);
@@ -16,7 +16,7 @@
     main#authenticated {
         box-sizing: border-box;
 
-        margin: 65px auto 0 auto; /** push us below the header **/
+        margin: 0px auto 0 auto; /** push us below the header **/
         min-width: 360px;
         width: 100%;
         min-height: calc(100vh - 436px);
@@ -29,7 +29,7 @@
     main#authenticated {
         box-sizing: border-box;
 
-        margin: 65px auto 0 auto; /** push us below the header **/
+        margin: 0px auto 0 auto; /** push us below the header **/
         min-width: 360px;
         width: 100%;
         min-height: calc(100vh - 436px);
