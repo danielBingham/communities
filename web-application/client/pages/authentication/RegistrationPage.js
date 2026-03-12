@@ -9,7 +9,7 @@ import './RegistrationPage.css'
 const RegistrationPage = function(props) {
     return (
         <div id="registration-page">
-            <div className="logo"><CommunitiesLogo alwaysFull={true} /></div>
+            <div className="logo"><CommunitiesLogo type="logo" /></div>
             <RegistrationForm />
         </div>
     )
