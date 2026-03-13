@@ -16,7 +16,7 @@ import { resetUserRelationshipSlice } from '/state/UserRelationship'
 export const resetEntities = function() {
     return function(dispatch, getState) {
         dispatch(resetBlocklistSlice())
-        //dispatch(resetFileSlice())
+        dispatch(resetFileSlice())
         dispatch(resetGroupSlice())
         dispatch(resetGroupMemberSlice())
         dispatch(resetGroupModerationSlice())
