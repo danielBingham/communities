@@ -25,6 +25,8 @@ import { ArrowLeftIcon } from '@heroicons/react/24/solid'
 
 import { pop } from '/state/history'
 
+import Button from '/components/ui/Button'
+
 import './BackButton.css'
 
 const BackButton = function() {
@@ -47,7 +49,7 @@ const BackButton = function() {
     }
 
     return (
-        <a href="" className="back-button" onClick={goBack}><ArrowLeftIcon /> Back</a> 
+        <Button className="back-button" onClick={goBack}><ArrowLeftIcon /> Back</Button> 
     )
 
 }

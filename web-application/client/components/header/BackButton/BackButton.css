@@ -1,11 +1,15 @@
-a.back-button:link, a.back-button:active, a.back-button:visited {
-    color: var(--header-text-color);
-}
+button.back-button {
+    border: none;
+    padding: 0;
+    margin: 0;
 
-a.back-button:hover {
-    color: var(--header-text-highlight-color);
+    background-color: var(--main-background-color);
+    color: var(--main-text-color);
 }
-.back-button svg {
+button.back-button:hover {
+    color: var(--main-text-highlight-color);
+}
+button.back-button svg {
     display: inline-block;
     width: 18px;
     height: 18px;
