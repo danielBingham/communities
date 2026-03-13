@@ -38,13 +38,16 @@ const BackButton = function() {
 
     const goBack = function(event) {
         event.preventDefault()
-        if ( stack.length > 0 ) {
+
+        // The initial page load will add the current location to the stack. So
+        // there's only somewhere to go back to when the stack is at least 2. 
+        if ( stack.length > 1 ) {
             dispatch(pop())
             navigate(-1)
         }
     }
 
-    if ( stack.length === 0 ) {
+    if ( stack.length <= 1 ) {
         return null
     }
 

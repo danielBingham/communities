@@ -26,9 +26,11 @@ import { push } from '/state/history'
 export const useHistoryTracking = function() {
     const location = useLocation()
     const stack = useSelector((state) => state.history.stack)
-    console.log(`stack: `, stack)
 
     const dispatch = useDispatch()
+    
+    // We only want this hook to fire when the location actually changes, not
+    // when the stack changes (since this hook changes the stack itself).
     useEffect(() => {
         // We only want to add the current location to the stack if we didn't
         // just come back to it.
