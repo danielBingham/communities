@@ -18,23 +18,31 @@
  *
  ******************************************************************************/
 
+import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid'
+
+import { pop } from '/state/history'
 
 import './BackButton.css'
 
 const BackButton = function() {
 
+    const stack = useSelector((state) => state.history.stack)
+
     const navigate = useNavigate()
+    const dispatch = useDispatch()
+
     const goBack = function(event) {
         event.preventDefault()
-        if ( window.history.length > 1 ) {
+        if ( stack.length > 0 ) {
+            dispatch(pop())
             navigate(-1)
         }
     }
 
-    if ( window.history.length <= 1 ) {
+    if ( stack.length === 0 ) {
         return null
     }
 

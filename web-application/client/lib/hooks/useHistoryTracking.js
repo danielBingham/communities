@@ -17,26 +17,25 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import { Link } from 'react-router-dom'
-import { Capacitor } from '@capacitor/core'
+import { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { useLocation } from 'react-router-dom'
 
-import BackButton from './BackButton'
+import { push } from '/state/history'
 
-import './Breadcrumbs.css'
+export const useHistoryTracking = function() {
+    const location = useLocation()
+    const stack = useSelector((state) => state.history.stack)
+    console.log(`stack: `, stack)
 
-const Breadcrumbs = function({ crumbs }) {
-    if ( Capacitor.getPlatform() === 'web' ) {
-        return <div className="breadcrumbs"></div> 
-    }
+    const dispatch = useDispatch()
+    useEffect(() => {
+        // We only want to add the current location to the stack if we didn't
+        // just come back to it.
+        if ( stack.length === 0 || stack[stack.length-1].key !== location.key ) {
+            dispatch(push(location))
+        }
+    }, [ location ])
 
-    return (
-        <div className="breadcrumbs">
-            <div className="breadcrumbs__back">
-                <BackButton /> 
-            </div>
-            <div className="breadcrumbs__crumbs">{ crumbs.map((c, index) => <span key={index}><Link to={c.to}>{ c.name }</Link> { index < crumbs.length-1 && <span> &gt; </span>}</span>) }</div>
-        </div>
-    )
+    return null 
 }
-
-export default Breadcrumbs
