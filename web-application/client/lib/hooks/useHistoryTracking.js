@@ -17,33 +17,27 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import { useSelector } from 'react-redux'
-import { Outlet } from 'react-router-dom'
+import { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { useLocation } from 'react-router-dom'
 
-import { useNativeDeepLinks } from '/lib/hooks/useNativeDeepLinks'
-import { useAppState } from '/lib/hooks/useAppState'
-import { useVersion } from '/lib/hooks/useVersion'
-import { useScrollRestoration } from '/lib/hooks/useScrollRestoration'
-import { useHistoryTracking } from '/lib/hooks/useHistoryTracking'
+import { push } from '/state/history'
 
-import "./RootLayout.css"
+export const useHistoryTracking = function() {
+    const location = useLocation()
+    const stack = useSelector((state) => state.history.stack)
 
-const RootLayout = function() {
-
-    const currentUser = useSelector((state) => state.authentication.currentUser)
-    const darkMode = currentUser?.settings?.darkMode === true
+    const dispatch = useDispatch()
     
-    useNativeDeepLinks()
-    useAppState()
-    useVersion()
-    useScrollRestoration()
-    useHistoryTracking()
+    // We only want this hook to fire when the location actually changes, not
+    // when the stack changes (since this hook changes the stack itself).
+    useEffect(() => {
+        // We only want to add the current location to the stack if we didn't
+        // just come back to it.
+        if ( stack.length === 0 || stack[stack.length-1].key !== location.key ) {
+            dispatch(push(location))
+        }
+    }, [ location ])
 
-    return (
-        <div id="root-layout" className={`root-layout ${ darkMode ? 'dark' : '' }`}>
-            <Outlet />
-        </div>
-    )
+    return null 
 }
-
-export default RootLayout 

@@ -12,6 +12,7 @@ import GroupReducer from './Group'
 import GroupMemberReducer from './GroupMember'
 import GroupModerationReducer from './GroupModeration'
 import GroupSubscriptionReducer from './GroupSubscription'
+import historyReducer from './history'
 import jobsReducer, { handleJobEvent } from './jobs'
 import notificationsReducer, { handleNotificationEvent } from './notifications'
 import LinkPreviewReducer from './LinkPreview'
@@ -38,6 +39,7 @@ const reducers = combineReducers({
     GroupMember: GroupMemberReducer,
     GroupModeration: GroupModerationReducer,
     GroupSubscription: GroupSubscriptionReducer,
+    history: historyReducer,
     jobs: jobsReducer,
     notifications: notificationsReducer,
     LinkPreview: LinkPreviewReducer,

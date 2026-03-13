@@ -48,7 +48,7 @@ const TermsOfServiceNotice = function({}) {
 
     return (
         <div className="terms-of-service-notice">
-            <div className="terms-of-service-notice__logo"><CommunitiesLogo /></div>
+            <div className="terms-of-service-notice__logo"><CommunitiesLogo type="logo" /></div>
             <div className="terms-of-service-notice__instructions">
                 <p>Before continuing, please read and accept our Terms of Service.
                 You must accept the Terms to use the site.</p>

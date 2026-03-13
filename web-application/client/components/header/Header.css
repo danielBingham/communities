@@ -1,79 +1,75 @@
 header {
     box-sizing: border-box;
     max-width: 100vw;
+
     position: fixed;
     left: 0;
     right: 0;
     top: 0;
+
+    z-index: 10;
     margin: 0;
+    padding: 0;
+
     border-bottom: thin solid var(--header-border-color);
     background-color: var(--header-background-color);
     color: var(--header-text-color);
     box-shadow: 0px 0px 6px -3px rgba(0,0,0,0.25);
-    z-index: 10;
+
     font-size: 18px;
-    padding: 0 25px;
 }
 .ios header {
-    padding-top: 50px;
+    padding-top: 60px;
 }
 .android header {
     padding-top: 40px;
 }
-header .authenticated-grid {
-    box-sizing: border-box;
-    display: grid;
-    grid-template-columns: auto 120px 120px 120px 120px max-content;
-    align-items: center;
-    justify-items: center;
-}
-header .unauthenticated-grid {
-    box-sizing: border-box;
-    display: grid;
-    grid-template-columns: auto 120px max-content;
-    align-items: center;
-    justify-items: center;
-}
 
-header .communities-logo {
-    justify-self: left;
-}
 
-header a:link, header a:active, header a:visited {
-    color: var(--header-text-color);
-}
-
-header a:hover {
-    color: var(--header-text-highlight-color);
-}
-header svg {
-    display: inline-block;
-    width: 18px;
-    height: 18px;
-    margin-right: 6px;
-    margin-bottom: -2px;
-}
-
-header .outline {
-    display: inline-block;
-}
-header .active .outline {
-    display: none;
-}
-header .solid {
-    display: none;
-}
-header .active .solid {
-    display: inline-block;
-}
-
-@media (width <= 1000px) {
+@media (width > 800px ) {
     header {
-        padding: 0 10px;
+        padding: 10px 25px;
     }
 
-    header .authenticated-grid {
+    .header__authenticated {
+        box-sizing: border-box;
+        display: grid;
+        grid-template-columns: auto 120px 120px 120px 120px max-content;
+        align-items: center;
+        justify-items: center;
+    }
+    .header__authenticated .header__logo {
+        justify-self: left;
+    }
+
+    .header__unauthenticated {
+        box-sizing: border-box;
+        display: grid;
+        grid-template-columns: auto 120px max-content;
+        align-items: center;
+        justify-items: center;
+    }
+    .header__unauthenticated .header__logo {
+        justify-self: left;
+    }
+}
+
+@media (width <= 800px) {
+    header {
+        padding: 10px;
+    }
+    .header__authenticated {
+        box-sizing: border-box;
+        display: grid;
         grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+        align-items: center;
+        justify-items: center;
+    }
+    .header__unauthenticated {
+        display: grid;
+        grid-template-columns: 1fr 1fr max-content;
+        align-items: center;
+        justify-items: center;
     }
 
 
@@ -93,14 +89,3 @@ header .active .solid {
         display: none;
     }
 }
-
-@media (width <= 450px) {
-    header .communities-logo {
-        justify-self: center;
-    }
-
-    header .unauthenticated-grid {
-        grid-template-columns: 1fr 1fr max-content;
-    }
-}
-
