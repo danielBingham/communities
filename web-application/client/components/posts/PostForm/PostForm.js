@@ -1,4 +1,23 @@
-import { useEffect } from 'react'
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media 
+ *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
+import { useState, useEffect } from 'react'
 import { useSelector, useDispatch} from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
@@ -18,6 +37,7 @@ import { postPosts, patchPost } from '/state/Post'
 
 import Button from '/components/ui/Button'
 import Spinner from '/components/Spinner'
+import AreYouSure from '/components/AreYouSure'
 
 import PostContent from './PostContent'
 import SharedPostAttachment from './SharedPostAttachment'
@@ -52,6 +72,8 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
     const [postRequest, makePostRequest] = useRequest()
     const [patchRequest, makePatchRequest] = useRequest()
     const [deleteFileRequest, makeDeleteFileRequest] = useRequest()
+
+    const [ areYouSure, setAreYouSure ] = useState(false)
 
     const dispatch = useDispatch()
     const navigate = useNavigate()
@@ -89,6 +111,7 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
             makeDeleteFileRequest(deleteFile(draft.fileId))
         }
 
+        setAreYouSure(false)
         setDraft(null) 
         navigate(origin)
     }
@@ -158,9 +181,12 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
                 </div>
             </div>
             <div className="buttons">
-                <Button onClick={(e) => cancel()}>Cancel</Button>
+                <Button onClick={(e) => setAreYouSure(true)}>Cancel</Button>
                 <Button type="primary" onClick={(e) => submit()}>Post</Button>
             </div>
+            <AreYouSure isVisible={areYouSure} execute={cancel} cancel={() => setAreYouSure(false)}>
+                <p>Are you sure you want to cancel? Your draft will be lost.</p>
+            </AreYouSure>
         </div>
     )
 }
