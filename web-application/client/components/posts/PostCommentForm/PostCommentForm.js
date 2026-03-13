@@ -92,6 +92,7 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
     const cancel = function() {
         localStorage.removeItem(getDraftKey())
 
+        setAreYouSure(false)
         setContent('')
         setError('')
         setShowForm(false)

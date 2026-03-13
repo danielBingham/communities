@@ -111,6 +111,7 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
             makeDeleteFileRequest(deleteFile(draft.fileId))
         }
 
+        setAreYouSure(false)
         setDraft(null) 
         navigate(origin)
     }
