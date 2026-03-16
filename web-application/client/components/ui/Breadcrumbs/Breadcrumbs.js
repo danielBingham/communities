@@ -17,33 +17,26 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import { useSelector } from 'react-redux'
-import { Outlet } from 'react-router-dom'
+import { Link } from 'react-router-dom'
+import { Capacitor } from '@capacitor/core'
 
-import { useNativeDeepLinks } from '/lib/hooks/useNativeDeepLinks'
-import { useAppState } from '/lib/hooks/useAppState'
-import { useVersion } from '/lib/hooks/useVersion'
-import { useScrollRestoration } from '/lib/hooks/useScrollRestoration'
-import { useHistoryTracking } from '/lib/hooks/useHistoryTracking'
+import BackButton from './BackButton'
 
-import "./RootLayout.css"
+import './Breadcrumbs.css'
 
-const RootLayout = function() {
-
-    const currentUser = useSelector((state) => state.authentication.currentUser)
-    const darkMode = currentUser?.settings?.darkMode === true
-    
-    useNativeDeepLinks()
-    useAppState()
-    useVersion()
-    useScrollRestoration()
-    useHistoryTracking()
+const Breadcrumbs = function({ crumbs }) {
+    if ( Capacitor.getPlatform() === 'web' ) {
+        return <div className="breadcrumbs"></div> 
+    }
 
     return (
-        <div id="root-layout" className={`root-layout ${ darkMode ? 'dark' : '' }`}>
-            <Outlet />
+        <div className="breadcrumbs">
+            <div className="breadcrumbs__back">
+                <BackButton /> 
+            </div>
+            <div className="breadcrumbs__crumbs">{ crumbs.map((c, index) => <span key={index}><Link to={c.to}>{ c.name }</Link> { index < crumbs.length-1 && <span> &gt; </span>}</span>) }</div>
         </div>
     )
 }
 
-export default RootLayout 
+export default Breadcrumbs

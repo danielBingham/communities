@@ -5,6 +5,9 @@
     background-color: var(--main-background-color);
 }
 
-.android .root-layout, .ios .root-layout {
+.ios .root-layout { 
+    padding-top: 50px;
+}
+.android .root-layout {
     padding-top: 40px;
 }

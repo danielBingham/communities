@@ -12,6 +12,7 @@ import Spinner from '/components/Spinner'
 import UserView from '/components/users/UserView'
 import Feed from '/components/feeds/Feed'
 
+import Breadcrumbs from '/components/ui/Breadcrumbs'
 import { Page, PageBody, PageLeftGutter, PageRightGutter } from '/components/generic/Page'
 import { NavigationMenu, NavigationMenuLink, NavigationMenuButton, NavigationSubmenu, NavigationSubmenuLink, NavigationMenuItem} from '/components/ui/NavigationMenu'
 
@@ -56,21 +57,24 @@ const UserProfilePage = function(props) {
     }
 
     return (
-        <Page id="user-profile-page">
-            <PageLeftGutter>
-                <NavigationMenu className="user-profile-page__menu">
-                    <NavigationMenuLink to={`/${user.username}`} icon="QueueList" text="Feed" /> 
-                    <NavigationMenuLink to={`/${user.username}/friends`} icon="Users" text="Friends" /> 
+        <>
+            <Breadcrumbs crumbs={[{ to: '/friends', name: 'Friends' }, { to: `/${user.username}`, name: user.name}]} />
+            <Page id="user-profile-page">
+                <PageLeftGutter>
+                    <NavigationMenu className="user-profile-page__menu">
+                        <NavigationMenuLink to={`/${user.username}`} icon="QueueList" text="Feed" /> 
+                        <NavigationMenuLink to={`/${user.username}/friends`} icon="Users" text="Friends" /> 
 
-                </NavigationMenu>
-            </PageLeftGutter>
-            <PageBody>
-                <Outlet /> 
-            </PageBody>
-            <PageRightGutter>
-                <UserView id={user.id} />
-            </PageRightGutter>
-        </Page>
+                    </NavigationMenu>
+                </PageLeftGutter>
+                <PageBody>
+                    <Outlet /> 
+                </PageBody>
+                <PageRightGutter>
+                    <UserView id={user.id} />
+                </PageRightGutter>
+            </Page>
+        </>
     )
 }
 

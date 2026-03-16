@@ -17,33 +17,44 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import { useSelector } from 'react-redux'
-import { Outlet } from 'react-router-dom'
 
-import { useNativeDeepLinks } from '/lib/hooks/useNativeDeepLinks'
-import { useAppState } from '/lib/hooks/useAppState'
-import { useVersion } from '/lib/hooks/useVersion'
-import { useScrollRestoration } from '/lib/hooks/useScrollRestoration'
-import { useHistoryTracking } from '/lib/hooks/useHistoryTracking'
+import { useDispatch, useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 
-import "./RootLayout.css"
+import { ArrowLeftIcon } from '@heroicons/react/24/solid'
 
-const RootLayout = function() {
+import { pop } from '/state/history'
 
-    const currentUser = useSelector((state) => state.authentication.currentUser)
-    const darkMode = currentUser?.settings?.darkMode === true
-    
-    useNativeDeepLinks()
-    useAppState()
-    useVersion()
-    useScrollRestoration()
-    useHistoryTracking()
+import Button from '/components/ui/Button'
+
+import './BackButton.css'
+
+const BackButton = function() {
+
+    const stack = useSelector((state) => state.history.stack)
+
+    const navigate = useNavigate()
+    const dispatch = useDispatch()
+
+    const goBack = function(event) {
+        event.preventDefault()
+
+        // The initial page load will add the current location to the stack. So
+        // there's only somewhere to go back to when the stack is at least 2. 
+        if ( stack.length > 1 ) {
+            dispatch(pop())
+            navigate(-1)
+        }
+    }
+
+    if ( stack.length <= 1 ) {
+        return null
+    }
 
     return (
-        <div id="root-layout" className={`root-layout ${ darkMode ? 'dark' : '' }`}>
-            <Outlet />
-        </div>
+        <Button className="back-button" onClick={goBack}><ArrowLeftIcon /> Back</Button> 
     )
+
 }
 
-export default RootLayout 
+export default BackButton
