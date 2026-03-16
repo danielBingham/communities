@@ -106,6 +106,9 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
         }
     }
 
+    /**
+     * Execute the canceling of the edit.
+     */
     const cancel = function() {
         if ( draft.fileId !== null && post?.fileId !== draft.fileId ) {
             makeDeleteFileRequest(deleteFile(draft.fileId))
@@ -114,6 +117,55 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
         setAreYouSure(false)
         setDraft(null) 
         navigate(origin)
+    }
+
+    /**
+     * Determine whether user has changed any content in this post (or added
+     * any content to this new post). 
+     */
+    const isDirty = function() {
+        if ( postId ) {
+            if ( draft.content !== post?.content ) {
+                return true
+            } else if ( draft.type !== post?.type ) {
+                return true
+            } else if ( draft.visibility !== post?.visibility ) {
+                return true
+            } else if ( draft.fileId !== post?.fileId ) {
+                return true
+            } else if ( draft.linkPreviewId !== post?.linkPreviewId ) {
+                return true
+            } else if ( draft.sharedPostId !== post?.sharedPostId ) {
+                return true
+            }
+        } else {
+            if ( draft.content.length > 0 ) {
+                return true
+            } else if ( draft.type !== 'feed' ) {
+                return true
+            } else if ( draft.visibility !== 'private' ) {
+                return true
+            } else if ( draft.fileId !== null ) {
+                return true
+            } else if ( draft.linkPreviewId !== null ) {
+                return true
+            } else if ( draft.sharedPostId !== null ) {
+                return true
+            }
+        }
+
+        return false
+    }
+
+    /**
+     * Handle the cancel button being pressed.
+     */
+    const handleCancel = function() {
+        if ( isDirty() ) {
+            setAreYouSure(true)
+        } else {
+            cancel()
+        }
     }
 
     useEffect(function() {
@@ -181,8 +233,8 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
                 </div>
             </div>
             <div className="buttons">
-                <Button onClick={(e) => setAreYouSure(true)}>Cancel</Button>
-                <Button type="primary" onClick={(e) => submit()}>{ postId ? 'Edit Post' : 'Post' }</Button>
+                <Button onClick={() => handleCancel()}>Cancel</Button>
+                <Button type="primary" onClick={() => submit()}>{ postId ? 'Edit Post' : 'Post' }</Button>
             </div>
             <AreYouSure 
                 isVisible={areYouSure} 
