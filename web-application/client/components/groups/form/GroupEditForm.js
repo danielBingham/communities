@@ -17,6 +17,7 @@ import { patchGroup } from '/state/Group'
 import DraftProfileImage from '/components/files/DraftProfileImage'
 import FileUploadInput from '/components/files/FileUploadInput'
 
+import AreYouSure from '/components/AreYouSure'
 import Button from '/components/ui/Button'
 import TextBox from '/components/generic/text-box/TextBox'
 import Input from '/components/ui/Input'
@@ -30,6 +31,8 @@ const GroupEditForm = function({ groupId }) {
     const hasRules = useFeature('issue-330-group-short-description-and-rules')
 
     const [group] = useGroup(groupId)
+
+    const [areYouSure, setAreYouSure] = useState(false)
 
     const [ title, setTitle ] = useLocalStorage('group.draft.title', ( group?.title ? group.title : ''))
     const [ about, setAbout ] = useLocalStorage('group.draft.about', ( group?.about ? group.about : ''))
@@ -140,6 +143,8 @@ const GroupEditForm = function({ groupId }) {
         setRules(null)
         setFileId(null)
 
+        setAreYouSure(false)
+
         navigate(`/group/${group.slug}`)
     }
 
@@ -242,10 +247,13 @@ const GroupEditForm = function({ groupId }) {
             <div className="group-edit-form__controls">
                 { inProgress && <Spinner /> }
                 { ! inProgress && <div className="buttons">
-                    <Button onClick={(e) => cancel()}>Cancel</Button> 
+                    <Button onClick={(e) => setAreYouSure(true)}>Cancel</Button> 
                     <input type="submit" name="submit" value="Submit" />
                 </div> }
             </div>
+            <AreYouSure isVisible={areYouSure} execute={cancel} cancel={() => setAreYouSure(false)}>
+                <p>Are you sure you want to cancel? Your draft will be lost.</p>
+            </AreYouSure>
         </form>
     )
 

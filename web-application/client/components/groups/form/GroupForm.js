@@ -1,4 +1,23 @@
-import React, { useRef, useState, useEffect } from 'react'
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media 
+ *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
+import { useRef, useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
@@ -19,6 +38,7 @@ import { postGroups } from '/state/Group'
 import DraftProfileImage from '/components/files/DraftProfileImage'
 import FileUploadInput from '/components/files/FileUploadInput'
 
+import AreYouSure from '/components/AreYouSure'
 import Button from '/components/ui/Button'
 import Input from '/components/ui/Input'
 import TextBox from '/components/generic/text-box/TextBox'
@@ -41,6 +61,8 @@ const GroupForm = function({ parentId }) {
     if ( parentGroup?.type === 'hidden' || parentGroup?.type === 'hidden-private' || parentGroup?.type === 'hidden-open' ) {
         defaultType = 'hidden-private'
     }
+
+    const [areYouSure, setAreYouSure] = useState(false)
 
     const [ title, setTitle ] = useLocalStorage('group.draft.title', '')
     const [ slug, setSlug ] = useLocalStorage('group.draft.slug', '')
@@ -203,6 +225,8 @@ const GroupForm = function({ parentId }) {
         setShortDescription(null)
         setRules(null)
         setFileId(null)
+
+        setAreYouSure(false)
 
         navigate('/groups')
     }
@@ -477,9 +501,12 @@ const GroupForm = function({ parentId }) {
             <div className="group-form__errors">{ baseError }</div>
             { inProgress && <Spinner /> }
             { ! inProgress && <div className="group-form__controls">
-                <Button onClick={(e) => cancel()}>Cancel</Button> 
+                <Button onClick={(e) => setAreYouSure(true)}>Cancel</Button> 
                 <input type="submit" name="submit" value="Submit" />
             </div> }
+            <AreYouSure isVisible={areYouSure} execute={cancel} cancel={() => setAreYouSure(false)}>
+                <p>Are you sure you want to cancel? Your draft will be lost.</p>
+            </AreYouSure>
             <RequestErrorModal request={request} message={"Create Group"} />
         </form>
     )

@@ -322,6 +322,9 @@ input[type="submit"] {
     margin: 5px;
     cursor: pointer;
 
+    font-family: Roboto, Arial, sans-serif; 
+    font-size: 14px;
+
     background-color: var(--primary-color-main);
     border: thin solid var(--primary-color-main);
     color: white;

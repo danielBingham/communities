@@ -34,6 +34,7 @@ import FileUploadInput from '/components/files/FileUploadInput'
 
 import { RequestErrorModal } from '/components/errors/RequestError'
 
+import AreYouSure from '/components/AreYouSure'
 import Input from '/components/ui/Input'
 import TextBox from '/components/generic/text-box/TextBox'
 import Button from '/components/ui/Button'
@@ -42,6 +43,8 @@ import Spinner from '/components/Spinner'
 import './UserProfileEditForm.css'
 
 const UserProfileEditForm = function(props) {
+
+    const [areYouSure, setAreYouSure] = useState(false)
 
     const [fileId, setFileId] = useState(null)
     const [fileState, setFileState] = useState(null)
@@ -141,6 +144,8 @@ const UserProfileEditForm = function(props) {
         } else {
             setFileId(currentUser.fileId)
         }
+
+        setAreYouSure(false)
         
         navigate(`/${currentUser.username}`)
     }
@@ -197,11 +202,7 @@ const UserProfileEditForm = function(props) {
         )
     }
 
-    let submit = ( <><Button onClick={(e) => cancel()}>Cancel</Button> <input type="submit" name="submit" value="Submit" /></> )
-    if ( (request && request.state == 'pending' ) || ( fileId && fileState == 'pending' )) {
-        submit = ( <Spinner /> )
-    }
-
+    const isPending = (request && request.state == 'pending' ) || ( fileId && fileState == 'pending' )
     return (
         <div className='user-profile-edit-form'>
             <form onSubmit={onSubmit}>
@@ -251,9 +252,13 @@ const UserProfileEditForm = function(props) {
                     {result}
                 </div>
                 <div className="form-submit submit">
-                    { submit }
+                    { ! isPending && <span><Button onClick={(e) => setAreYouSure(true)}>Cancel</Button> <input type="submit" name="submit" value="Submit" /></span> }
+                    { isPending && <Spinner /> }
                 </div>
             </form>
+            <AreYouSure isVisible={areYouSure} execute={cancel} cancel={() => setAreYouSure(false)}>
+                <p>Are you sure you want to cancel? Your draft will be lost.</p>
+            </AreYouSure>
         </div>
     )
 }
