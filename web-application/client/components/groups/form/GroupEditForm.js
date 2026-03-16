@@ -22,6 +22,7 @@ import Button from '/components/ui/Button'
 import TextBox from '/components/generic/text-box/TextBox'
 import Input from '/components/ui/Input'
 import Spinner from '/components/Spinner'
+import { RequestErrorModal } from '/components/errors/RequestError'
 
 import './GroupEditForm.css'
 
@@ -178,83 +179,86 @@ const GroupEditForm = function({ groupId }) {
 
     const inProgress = (request && request.state == 'pending') || (fileId && fileState == 'pending')
     return (
-        <form onSubmit={onSubmit} className="group-edit-form">
-            <div className="group-edit-form__errors">{ baseError }</div>
-            <div className="group-edit-form__group-image">
-                <div>
-                    { ! fileId && <UserCircleIcon className="placeholder" /> }
-                    { fileId && file?.state === 'ready' && <DraftProfileImage 
-                        ref={fileRef}
-                        fileId={fileId} 
-                        setFileId={setFileId} 
-                        state={fileState}
-                        setState={setFileState}
-                        width={200} 
-                        deleteOnRemove={false} 
-                    /> }
-                    { ( ! fileId || file?.state !== 'ready') && <FileUploadInput 
-                        fileId={fileId}
-                        setFileId={setFileId} 
-                        type="image"
-                        types={[ 'image/jpeg', 'image/png' ]} 
-                    /> }
+        <div className="group-edit-form">
+            <form onSubmit={onSubmit} >
+                <div className="group-edit-form__errors">{ baseError }</div>
+                <div className="group-edit-form__group-image">
+                    <div>
+                        { ! fileId && <UserCircleIcon className="placeholder" /> }
+                        { fileId && file?.state === 'ready' && <DraftProfileImage 
+                            ref={fileRef}
+                            fileId={fileId} 
+                            setFileId={setFileId} 
+                            state={fileState}
+                            setState={setFileState}
+                            width={200} 
+                            deleteOnRemove={false} 
+                        /> }
+                        { ( ! fileId || file?.state !== 'ready') && <FileUploadInput 
+                            fileId={fileId}
+                            setFileId={setFileId} 
+                            type="image"
+                            types={[ 'image/jpeg', 'image/png' ]} 
+                        /> }
+                    </div>
                 </div>
-            </div>
-            <Input
-                name="title"
-                label="Title"
-                type="text"
-                explanation="Update this group's title. Members will be notified of the change."
-                value={title}
-                className="title"
-                onBlur={ (event) => validate('title') }
-                onChange={(e) => setTitle(e.target.value)} 
-                error={titleErrors}
-            />
-            { hasRules && 
-                <TextBox
-                    name="shortDescription"
-                    className="short-description"
-                    label="Short Description"
-                    explanation={`Update the short description for the group. Must be no longer than 150 characters.  This description will be used in the Group Badge on the search page and on the Group Profile Page.`}
-                    value={shortDescription}
-                    onBlur={ (event) => validate('shortDescription') }
-                    onChange={(event) => { setShortDescription(event.target.value); validate('shortDescription') }}
-                    error={shortDescriptionErrors}
+                <Input
+                    name="title"
+                    label="Title"
+                    type="text"
+                    explanation="Update this group's title. Members will be notified of the change."
+                    value={title}
+                    className="title"
+                    onBlur={ (event) => validate('title') }
+                    onChange={(e) => setTitle(e.target.value)} 
+                    error={titleErrors}
                 />
-            }
-            <TextBox
-                name="about"
-                className="about"
-                label="About"
-                explanation={`Update the full description of this group.  This should include a description of the group's purpose and what sort of content is appropriate for it. You can outline the group's rules in a separate field below.`}
-                value={about}
-                onChange={(event) => setAbout(event.target.value)}
-                error={aboutErrors}
-            />
-            { hasRules && 
+                { hasRules && 
+                    <TextBox
+                        name="shortDescription"
+                        className="short-description"
+                        label="Short Description"
+                        explanation={`Update the short description for the group. Must be no longer than 150 characters.  This description will be used in the Group Badge on the search page and on the Group Profile Page.`}
+                        value={shortDescription}
+                        onBlur={ (event) => validate('shortDescription') }
+                        onChange={(event) => { setShortDescription(event.target.value); validate('shortDescription') }}
+                        error={shortDescriptionErrors}
+                    />
+                }
                 <TextBox
-                    name="rules"
-                    className="rules"
-                    label="Rules"
-                    explanation={`Update the rules for this group. The rules should clearly describe the content and behavior that are not allowed and will be moderated.`}
-                    value={rules}
-                    onBlur={ (event) => validate('rules') }
-                    onChange={(event) => setRules(event.target.value)}
-                    error={rulesErrors}
+                    name="about"
+                    className="about"
+                    label="About"
+                    explanation={`Update the full description of this group.  This should include a description of the group's purpose and what sort of content is appropriate for it. You can outline the group's rules in a separate field below.`}
+                    value={about}
+                    onChange={(event) => setAbout(event.target.value)}
+                    error={aboutErrors}
                 />
-            }
-            <div className="group-edit-form__controls">
-                { inProgress && <Spinner /> }
-                { ! inProgress && <div className="buttons">
-                    <Button onClick={(e) => setAreYouSure(true)}>Cancel</Button> 
-                    <input type="submit" name="submit" value="Submit" />
-                </div> }
-            </div>
+                { hasRules && 
+                    <TextBox
+                        name="rules"
+                        className="rules"
+                        label="Rules"
+                        explanation={`Update the rules for this group. The rules should clearly describe the content and behavior that are not allowed and will be moderated.`}
+                        value={rules}
+                        onBlur={ (event) => validate('rules') }
+                        onChange={(event) => setRules(event.target.value)}
+                        error={rulesErrors}
+                    />
+                }
+                <div className="group-edit-form__controls">
+                    { inProgress && <Spinner /> }
+                    { ! inProgress && <div className="buttons">
+                        <Button onClick={(e) => setAreYouSure(true)}>Cancel</Button> 
+                        <input type="submit" name="submit" value="Submit" />
+                    </div> }
+                </div>
+            </form>
             <AreYouSure isVisible={areYouSure} execute={cancel} cancel={() => setAreYouSure(false)}>
                 <p>Are you sure you want to cancel? Your draft will be lost.</p>
             </AreYouSure>
-        </form>
+            <RequestErrorModal request={request} message={"Edit Group"} />
+        </div>
     )
 
 }

@@ -291,224 +291,226 @@ const GroupForm = function({ parentId }) {
 
     const inProgress = (request && request.state == 'pending') || (fileId && fileState === 'pending') 
     return (
-        <form onSubmit={onSubmit} className="group-form">
-            { hasSubgroups && parentGroup && <div className="group-form__parent">
-                <span>Subgroup of { parentGroup.title}</span>
-            </div> }
-            <div className="group-form__group-image">
-                <div>
-                    { ! fileId && <UserCircleIcon className="placeholder" /> }
-                    { fileId && file?.state === 'ready' && <DraftProfileImage 
-                        ref={fileRef}
-                        fileId={fileId} 
-                        setFileId={setFileId} 
-                        state={fileState}
-                        setState={setFileState}
-                        width={200} 
-                        deleteOnRemove={false} 
-                    /> }
-                    { ( ! fileId || file?.state !== 'ready') && <FileUploadInput 
-                        fileId={fileId}
-                        setFileId={setFileId} 
-                        type="image"
-                        types={[ 'image/jpeg', 'image/png' ]} 
-                    /> }
+        <div className="group-form">
+            <form onSubmit={onSubmit}>
+                { hasSubgroups && parentGroup && <div className="group-form__parent">
+                    <span>Subgroup of { parentGroup.title}</span>
+                </div> }
+                <div className="group-form__group-image">
+                    <div>
+                        { ! fileId && <UserCircleIcon className="placeholder" /> }
+                        { fileId && file?.state === 'ready' && <DraftProfileImage 
+                            ref={fileRef}
+                            fileId={fileId} 
+                            setFileId={setFileId} 
+                            state={fileState}
+                            setState={setFileState}
+                            width={200} 
+                            deleteOnRemove={false} 
+                        /> }
+                        { ( ! fileId || file?.state !== 'ready') && <FileUploadInput 
+                            fileId={fileId}
+                            setFileId={setFileId} 
+                            type="image"
+                            types={[ 'image/jpeg', 'image/png' ]} 
+                        /> }
+                    </div>
                 </div>
-            </div>
-            <Input
-                name="title"
-                type="text"
-                label="Title"
-                explanation="Give this group a title."
-                value={title}
-                className="title"
-                onBlur={ (event) => validate('title') }
-                onChange={onTitleChange} 
-                error={titleErrors}
-            />
+                <Input
+                    name="title"
+                    type="text"
+                    label="Title"
+                    explanation="Give this group a title."
+                    value={title}
+                    className="title"
+                    onBlur={ (event) => validate('title') }
+                    onChange={onTitleChange} 
+                    error={titleErrors}
+                />
 
-            <Input
-                name="slug"
-                type="text"
-                label="URL"
-                explanation="Give this group a URL.  This will be used to access the group page and should match the group title. Must be composed of letters, numbers, '.', '_', and '-'."
-                value={slug}
-                className="slug"
-                onBlur={ (event) => validate('slug') }
-                onChange={ (event) => setSlug(event.target.value) } 
-                error={slugErrors}
-            />
-            { hasRules && 
+                <Input
+                    name="slug"
+                    type="text"
+                    label="URL"
+                    explanation="Give this group a URL.  This will be used to access the group page and should match the group title. Must be composed of letters, numbers, '.', '_', and '-'."
+                    value={slug}
+                    className="slug"
+                    onBlur={ (event) => validate('slug') }
+                    onChange={ (event) => setSlug(event.target.value) } 
+                    error={slugErrors}
+                />
+                { hasRules && 
+                    <TextBox
+                        name="shortDescription"
+                        className="short-description"
+                        label="Short Description"
+                        explanation={`Enter a short description for the group no longer than 150 characters.  This description will be used in the Group Badge on the search page and on the Group Profile Page.`}
+                        value={shortDescription}
+                        onBlur={ (event) => validate('shortDescription') }
+                        onChange={(event) => { setShortDescription(event.target.value); validate('shortDescription') }}
+                        error={shortDescriptionErrors}
+                    />
+                }
                 <TextBox
-                    name="shortDescription"
-                    className="short-description"
-                    label="Short Description"
-                    explanation={`Enter a short description for the group no longer than 150 characters.  This description will be used in the Group Badge on the search page and on the Group Profile Page.`}
-                    value={shortDescription}
-                    onBlur={ (event) => validate('shortDescription') }
-                    onChange={(event) => { setShortDescription(event.target.value); validate('shortDescription') }}
-                    error={shortDescriptionErrors}
+                    name="about"
+                    className="about"
+                    label="About"
+                    explanation={`Enter the full description of this group.  This should include a description of the group's purpose and what sort of content is appropriate for it. You can outline the group's rules in a separate field below.`}
+                    value={about}
+                    onBlur={ (event) => validate('about') }
+                    onChange={(event) => setAbout(event.target.value)}
+                    error={aboutErrors}
                 />
-            }
-            <TextBox
-                name="about"
-                className="about"
-                label="About"
-                explanation={`Enter the full description of this group.  This should include a description of the group's purpose and what sort of content is appropriate for it. You can outline the group's rules in a separate field below.`}
-                value={about}
-                onBlur={ (event) => validate('about') }
-                onChange={(event) => setAbout(event.target.value)}
-                error={aboutErrors}
-            />
-            { hasRules && 
-                <TextBox
-                    name="rules"
-                    className="rules"
-                    label="Rules"
-                    explanation={`Enter the rules for this group. The rules should clearly describe the content and behavior that are not allowed and will be moderated.`}
-                    value={rules}
-                    onBlur={ (event) => validate('rules') }
-                    onChange={(event) => setRules(event.target.value)}
-                    error={rulesErrors}
-                />
-            }
-            <Radio 
-                className="group-form__type" 
-                name="type"
-                title="Visibility" 
-                explanation={ ! parentGroup ? "Who is this group visible to?" : "Who is this group visible to? The visibility of Subgroups is determined by the most restricted visibility of its parents.  A subgroup with a hidden ancestor will be hidden from anyone except members of its ancestors below the hidden group."} 
-                error={typeErrors} 
-            >
-                { ( ! parentGroup || parentGroup.type === 'open') && <>
+                { hasRules && 
+                    <TextBox
+                        name="rules"
+                        className="rules"
+                        label="Rules"
+                        explanation={`Enter the rules for this group. The rules should clearly describe the content and behavior that are not allowed and will be moderated.`}
+                        value={rules}
+                        onBlur={ (event) => validate('rules') }
+                        onChange={(event) => setRules(event.target.value)}
+                        error={rulesErrors}
+                    />
+                }
+                <Radio 
+                    className="group-form__type" 
+                    name="type"
+                    title="Visibility" 
+                    explanation={ ! parentGroup ? "Who is this group visible to?" : "Who is this group visible to? The visibility of Subgroups is determined by the most restricted visibility of its parents.  A subgroup with a hidden ancestor will be hidden from anyone except members of its ancestors below the hidden group."} 
+                    error={typeErrors} 
+                >
+                    { ( ! parentGroup || parentGroup.type === 'open') && <>
+                        <RadioOption
+                            name="type"
+                            label="Public"
+                            value="open"
+                            current={type}
+                            explanation="Anyone may add themselves and all posts in the group are public."
+                            onClick={(e) => setType('open')}
+                        /> 
+                        <RadioOption
+                            name="type"
+                            label="Private"
+                            value="private"
+                            current={type}
+                            explanation="Anyone can see that the group exists, its title and description.  People may request to be added or may be invited by admins and moderators. Posts are only visible to approved group members."
+                            onClick={(e) => setType('private')}
+                            />
+                        <RadioOption
+                            name="type"
+                            label="Hidden"
+                            value="hidden"
+                            current={type}
+                            explanation="Only members and invitees can even see that it exists.  All posts are private and visible to members only.  New members must be invited by admins and moderators."
+                            onClick={(e) => setType('hidden')}
+                        />
+                    </> }
+                    { ( parentGroup?.type === 'private' || parentGroup?.type === 'private-open') && <>
+                        <RadioOption
+                            name="type"
+                            label="Open to Group Members"
+                            value="private-open"
+                            current={type}
+                            explanation="Open for members of parent groups, private for everyone else.  Members from parent groups may add themselves and view all posts.  People who aren't members of a parent group can see that the group exists, its title and description."
+                            onClick={(e) => setType('private-open')}
+                        /> 
+                        <RadioOption
+                            name="type"
+                            label="Private"
+                            value="private"
+                            current={type}
+                            explanation="Anyone can see that the group exists, its title and description.  People may request to be added or may be invited by admins and moderators. Posts are only visible to approved group members."
+                            onClick={(e) => setType('private')}
+                            />
+                        <RadioOption
+                            name="type"
+                            label="Hidden"
+                            value="hidden"
+                            current={type}
+                            explanation="Only members and invitees can even see that it exists.  All posts are private and visible to members only.  New members must be invited by admins and moderators."
+                            onClick={(e) => setType('hidden')}
+                        />
+                    </> }
+                    {  ( parentGroup?.type === 'hidden' || parentGroup?.type === 'hidden-open' || parentGroup?.type === 'hidden-private' ) && <>
+                        <RadioOption
+                            name="type"
+                            label="Open to Group Members"
+                            value="hidden-open"
+                            current={type}
+                            explanation="Open for members of parent groups, hidden for everyone else. Members from parent groups may add themselves and view all posts.  People who aren't members of a parent group cannot see that the group exists."
+                            onClick={(e) => setType('hidden-open')}
+                        /> 
+                        <RadioOption
+                            name="type"
+                            label="Private to Group Members"
+                            value="hidden-private"
+                            current={type}
+                            explanation="Private for members of parent groups, hidden for everyone else. Members of parent groups can see that the group exists, its title and description.  Parent group members may request to be added or may be invited by admins and moderators. Posts are only visible to approved group members. Non-members cannot see that it exists."
+                            onClick={(e) => setType('hidden-private')}
+                            />
+                        <RadioOption
+                            name="type"
+                            label="Hidden"
+                            value="hidden"
+                            current={type}
+                            explanation="Only members and invitees can even see that it exists.  All posts are private and visible to members only.  New members must be invited by admins and moderators."
+                            onClick={(e) => setType('hidden')}
+                        />
+                    </> }
+                </Radio>
+                <Radio 
+                    className="group-form__post-permissions" 
+                    name="postPermissions"
+                    title="Posting Permissions" 
+                    explanation="Who can post in this group?"
+                    error={postPermissionsErrors} 
+                >
                     <RadioOption
-                        name="type"
-                        label="Public"
-                        value="open"
-                        current={type}
-                        explanation="Anyone may add themselves and all posts in the group are public."
-                        onClick={(e) => setType('open')}
-                    /> 
+                        name="postPermissions"
+                        label="Anyone"
+                        value="anyone"
+                        current={postPermissions}
+                        explanation="Anyone who can see the group and its content may post in it, whether they are members or not."
+                        onClick={(e) => setPostPermissions('anyone')}
+                    />
                     <RadioOption
-                        name="type"
-                        label="Private"
-                        value="private"
-                        current={type}
-                        explanation="Anyone can see that the group exists, its title and description.  People may request to be added or may be invited by admins and moderators. Posts are only visible to approved group members."
-                        onClick={(e) => setType('private')}
+                        name="postPermissions"
+                        label="Members"
+                        value="members"
+                        current={postPermissions}
+                        explanation="Only group members may post in the group."
+                        onClick={(e) => setPostPermissions('members')}
                         />
                     <RadioOption
-                        name="type"
-                        label="Hidden"
-                        value="hidden"
-                        current={type}
-                        explanation="Only members and invitees can even see that it exists.  All posts are private and visible to members only.  New members must be invited by admins and moderators."
-                        onClick={(e) => setType('hidden')}
+                        name="postPermissions"
+                        label="Require Approval"
+                        value="approval"
+                        current={postPermissions}
+                        explanation="Group moderators must approval all posts before they are posted to the group."
+                        onClick={(e) => setPostPermissions('approval')}
                     />
-                </> }
-                { ( parentGroup?.type === 'private' || parentGroup?.type === 'private-open') && <>
                     <RadioOption
-                        name="type"
-                        label="Open to Group Members"
-                        value="private-open"
-                        current={type}
-                        explanation="Open for members of parent groups, private for everyone else.  Members from parent groups may add themselves and view all posts.  People who aren't members of a parent group can see that the group exists, its title and description."
-                        onClick={(e) => setType('private-open')}
-                    /> 
-                    <RadioOption
-                        name="type"
-                        label="Private"
-                        value="private"
-                        current={type}
-                        explanation="Anyone can see that the group exists, its title and description.  People may request to be added or may be invited by admins and moderators. Posts are only visible to approved group members."
-                        onClick={(e) => setType('private')}
-                        />
-                    <RadioOption
-                        name="type"
-                        label="Hidden"
-                        value="hidden"
-                        current={type}
-                        explanation="Only members and invitees can even see that it exists.  All posts are private and visible to members only.  New members must be invited by admins and moderators."
-                        onClick={(e) => setType('hidden')}
+                        name="postPermissions"
+                        label="Restricted"
+                        value="restricted"
+                        current={postPermissions}
+                        explanation="Only group moderators and admins may post in the group."
+                        onClick={(e) => setPostPermissions('restricted')}
                     />
-                </> }
-                {  ( parentGroup?.type === 'hidden' || parentGroup?.type === 'hidden-open' || parentGroup?.type === 'hidden-private' ) && <>
-                    <RadioOption
-                        name="type"
-                        label="Open to Group Members"
-                        value="hidden-open"
-                        current={type}
-                        explanation="Open for members of parent groups, hidden for everyone else. Members from parent groups may add themselves and view all posts.  People who aren't members of a parent group cannot see that the group exists."
-                        onClick={(e) => setType('hidden-open')}
-                    /> 
-                    <RadioOption
-                        name="type"
-                        label="Private to Group Members"
-                        value="hidden-private"
-                        current={type}
-                        explanation="Private for members of parent groups, hidden for everyone else. Members of parent groups can see that the group exists, its title and description.  Parent group members may request to be added or may be invited by admins and moderators. Posts are only visible to approved group members. Non-members cannot see that it exists."
-                        onClick={(e) => setType('hidden-private')}
-                        />
-                    <RadioOption
-                        name="type"
-                        label="Hidden"
-                        value="hidden"
-                        current={type}
-                        explanation="Only members and invitees can even see that it exists.  All posts are private and visible to members only.  New members must be invited by admins and moderators."
-                        onClick={(e) => setType('hidden')}
-                    />
-                </> }
-            </Radio>
-            <Radio 
-                className="group-form__post-permissions" 
-                name="postPermissions"
-                title="Posting Permissions" 
-                explanation="Who can post in this group?"
-                error={postPermissionsErrors} 
-            >
-                <RadioOption
-                    name="postPermissions"
-                    label="Anyone"
-                    value="anyone"
-                    current={postPermissions}
-                    explanation="Anyone who can see the group and its content may post in it, whether they are members or not."
-                    onClick={(e) => setPostPermissions('anyone')}
-                />
-                <RadioOption
-                    name="postPermissions"
-                    label="Members"
-                    value="members"
-                    current={postPermissions}
-                    explanation="Only group members may post in the group."
-                    onClick={(e) => setPostPermissions('members')}
-                    />
-                <RadioOption
-                    name="postPermissions"
-                    label="Require Approval"
-                    value="approval"
-                    current={postPermissions}
-                    explanation="Group moderators must approval all posts before they are posted to the group."
-                    onClick={(e) => setPostPermissions('approval')}
-                />
-                <RadioOption
-                    name="postPermissions"
-                    label="Restricted"
-                    value="restricted"
-                    current={postPermissions}
-                    explanation="Only group moderators and admins may post in the group."
-                    onClick={(e) => setPostPermissions('restricted')}
-                />
-            </Radio>
-            <div className="group-form__errors">{ baseError }</div>
-            { inProgress && <Spinner /> }
-            { ! inProgress && <div className="group-form__controls">
-                <Button onClick={(e) => setAreYouSure(true)}>Cancel</Button> 
-                <input type="submit" name="submit" value="Submit" />
-            </div> }
+                </Radio>
+                <div className="group-form__errors">{ baseError }</div>
+                { inProgress && <Spinner /> }
+                { ! inProgress && <div className="group-form__controls">
+                    <Button onClick={(e) => setAreYouSure(true)}>Cancel</Button> 
+                    <input type="submit" name="submit" value="Submit" />
+                </div> }
+            </form>
             <AreYouSure isVisible={areYouSure} execute={cancel} cancel={() => setAreYouSure(false)}>
                 <p>Are you sure you want to cancel? Your draft will be lost.</p>
             </AreYouSure>
             <RequestErrorModal request={request} message={"Create Group"} />
-        </form>
+        </div>
     )
 
 }
