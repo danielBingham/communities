@@ -66,6 +66,20 @@ const GroupForm = function({ parentId }) {
 
     const [ title, setTitle ] = useLocalStorage('group.draft.title', '')
     const [ slug, setSlug ] = useLocalStorage('group.draft.slug', '')
+
+    // TODO TECHDEBT There's a race condition that can result in defaultType
+    // being set to an invalid type when this group is being created as a
+    // subgroup of one of the `hidden` group types (`hidden`, `hidden-open`,
+    // `hidden-private`).  Basically, when you create a subgroup and then
+    // refresh the subgroup form, parentGroup will be unloaded.
+    // `useLocalStorage` will be called with `defaultType` set to `private`
+    // before `parentGroup` can load and ensure it is set correctly.  When
+    // `parentGroup` loads, `useLocalStorage has already been called and it
+    // won't be called again. 
+    //
+    // We implemented a temporary fix for this by checking for the valid type
+    // in `validate()` below and throwing an error if the type is invalid. In
+    // the long run, we should fix the race condition.
     const [ type, setType ] = useLocalStorage('group.draft.type', defaultType)
     const [ postPermissions, setPostPermissions ] = useLocalStorage('group.draft.postPermissions', 'members')
     const [ about, setAbout ] = useLocalStorage('group.draft.about', '')
@@ -179,6 +193,15 @@ const GroupForm = function({ parentId }) {
             if ( typeValidationErrors.length > 0 ) {
                 setTypeErrors(typeValidationErrors.reduce((string, error) => `${string} ${error.message}`, ''))
             } else {
+              
+                // TODO TECHDEBT This is a safety valve to protect against the potential race condition identified above.
+                if ( parentGroup?.type === 'hidden' || parentGroup?.type === 'hidden-private' || parentGroup?.type === 'hidden-open' ) {
+                    if ( ! [ 'hidden-open', 'hidden-private', 'hidden' ].includes(type) ) {
+                        setTypeErrors(`Invalid type.  Please choose one of the available types.`)
+                        return
+                    }
+                } 
+
                 setTypeErrors(null)
             }
         }
@@ -289,6 +312,17 @@ const GroupForm = function({ parentId }) {
 
         setTitle(event.target.value)
     }
+
+    useEffect(() => {
+        if ( parentGroup !== undefined && parentGroup !== null ) {
+            let defaultType = 'private'
+            if ( parentGroup?.type === 'hidden' || parentGroup?.type === 'hidden-private' || parentGroup?.type === 'hidden-open' ) {
+                defaultType = 'hidden-private'
+            }
+
+            setType(defaultType)
+        }
+    }, [ parentGroup ])
 
     const navigate = useNavigate()
     useEffect(() => {

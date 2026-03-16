@@ -81,6 +81,8 @@
     --main-text-color: var(--primary-color-darkest);
     --main-text-color-dim: var(--primary-color-dark);
 
+    --error-text-color: var(--danger-color-main);
+
     --menu-background-color: white;
     --menu-border-color: var(--primary-color-light);
     --menu-trigger-text-color: var(--primary-color-darkest);
