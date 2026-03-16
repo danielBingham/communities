@@ -78,6 +78,53 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
     const dispatch = useDispatch()
     const navigate = useNavigate()
 
+    /**
+     * Determine whether user has changed any content in this post (or added
+     * any content to this new post). 
+     */
+    const isDirty = function() {
+        if ( postId ) {
+            if ( draft.content !== post?.content ) {
+                return true
+            } else if ( draft.type !== post?.type ) {
+                return true
+            } else if ( draft.visibility !== post?.visibility ) {
+                return true
+            } else if ( draft.fileId !== post?.fileId ) {
+                return true
+            } else if ( draft.linkPreviewId !== post?.linkPreviewId ) {
+                return true
+            } else if ( draft.sharedPostId !== post?.sharedPostId ) {
+                return true
+            }
+        } else {
+            let defaultType = 'feed'
+            let defaultVisibility = 'private'
+            if ( group !== undefined && group !== null ) {
+                defaultType = 'group'
+                if ( group.type = 'open' ) {
+                    defaultVisibility = 'public'
+                }
+            }
+
+            if ( draft.content.length > 0 ) {
+                return true
+            } else if ( draft.type !== defaultType ) {
+                return true
+            } else if ( draft.visibility !== defaultVisibility ) {
+                return true
+            } else if ( draft.fileId !== null ) {
+                return true
+            } else if ( draft.linkPreviewId !== null ) {
+                return true
+            } else if ( draft.sharedPostId !== null ) {
+                return true
+            }
+        }
+
+        return false
+    }
+
     const submit = function() {
         const newPost = {
             type: draft.type, 
@@ -119,43 +166,6 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
         navigate(origin)
     }
 
-    /**
-     * Determine whether user has changed any content in this post (or added
-     * any content to this new post). 
-     */
-    const isDirty = function() {
-        if ( postId ) {
-            if ( draft.content !== post?.content ) {
-                return true
-            } else if ( draft.type !== post?.type ) {
-                return true
-            } else if ( draft.visibility !== post?.visibility ) {
-                return true
-            } else if ( draft.fileId !== post?.fileId ) {
-                return true
-            } else if ( draft.linkPreviewId !== post?.linkPreviewId ) {
-                return true
-            } else if ( draft.sharedPostId !== post?.sharedPostId ) {
-                return true
-            }
-        } else {
-            if ( draft.content.length > 0 ) {
-                return true
-            } else if ( draft.type !== 'feed' ) {
-                return true
-            } else if ( draft.visibility !== 'private' ) {
-                return true
-            } else if ( draft.fileId !== null ) {
-                return true
-            } else if ( draft.linkPreviewId !== null ) {
-                return true
-            } else if ( draft.sharedPostId !== null ) {
-                return true
-            }
-        }
-
-        return false
-    }
 
     /**
      * Handle the cancel button being pressed.
