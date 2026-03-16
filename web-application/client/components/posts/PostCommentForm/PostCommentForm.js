@@ -89,6 +89,9 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
         }
     }
 
+    /**
+     * Cancel the comment and wipe out any drafts.
+     */
     const cancel = function() {
         localStorage.removeItem(getDraftKey())
 
@@ -99,6 +102,38 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
 
         if ( commentId ) {
             dispatch(finishPostCommentEdit(commentId))
+        }
+    }
+
+    /**
+     * Determine whether the user has made any changes to this form.
+     */
+    const isDirty = function() {
+        // For edits, check to see if they've actually made any changes.  If
+        // they have, then the form is dirty.
+        if ( commentId && ( content !== comment?.content ) ) {
+            return true 
+        } 
+
+        // For new comment drafts, if there's any content, then the form is dirty.
+        else if ( ! commentId && content.length > 0 ) {
+            return true
+        } 
+
+        return false
+    }
+
+    /**
+     * Handles the 'cancel' event that occurs when the user clicks the 'cancel'
+     * button.
+     */
+    const handleCancel = function() {
+        // If the form is dirty, then we want to confirm discarding the draft.
+        if ( isDirty() ) {
+            setAreYouSure(true)
+        } 
+        else {
+            cancel()
         }
     }
 
@@ -176,8 +211,8 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
                 { errorView }
                 { inProgress && <div className="buttons"><Spinner /></div> }
                 { ! inProgress && <div className="buttons">
-                    <Button onClick={(e) => setAreYouSure(true)}>Cancel</Button>
-                    <Button type="primary" onClick={(e) => submit()}>{ commentId ? 'Save Edit' : 'Comment' }</Button>
+                    <Button onClick={() => handleCancel()}>Cancel</Button>
+                    <Button type="primary" onClick={() => submit()}>{ commentId ? 'Save Edit' : 'Comment' }</Button>
                 </div> }
                 <AreYouSure 
                     isVisible={areYouSure} 
