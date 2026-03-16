@@ -14,6 +14,9 @@ const SearchControl = function({ entity, className, onSubmit, onFocus }) {
 
     const executeSearch = function() {
         searchParams.set('q', search)
+
+        // When we execute a new search, go back to the first page.
+        searchParams.delete('page')
         setSearchParams(searchParams)
     }
 
