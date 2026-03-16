@@ -54,6 +54,27 @@ const GroupEditForm = function({ groupId }) {
 
     const navigate = useNavigate()
 
+    const isDirty = function() {
+        // If the group hasn't loaded yet, then we're not dirty yet.
+        if ( ! group ) {
+            return false
+        }
+
+        if ( title !== group.title ) {
+            return true
+        }  else if ( about !== group.about ) {
+            return true
+        } else if ( shortDescription !== group.shortDescription ) {
+            return true
+        } else if ( rules !== group.rules ) {
+            return true
+        } else if ( fileId !== group.fileId ) {
+            return true
+        }
+
+        return false
+    }
+
     const validateShortDescription = function(value) {
         const shortDescriptionValidationErrors = schema.properties.shortDescription.validate(shortDescription)
         if ( shortDescriptionValidationErrors.length > 0 ) {
@@ -137,6 +158,9 @@ const GroupEditForm = function({ groupId }) {
         }
     }
 
+    /**
+     * Execute the cancelling of this Group edit and clear the form.
+     */
     const cancel = function(event) {
         setTitle(null)
         setAbout(null)
@@ -147,6 +171,17 @@ const GroupEditForm = function({ groupId }) {
         setAreYouSure(false)
 
         navigate(`/group/${group.slug}`)
+    }
+
+    /**
+     * Handle the triggering of the 'cancel' action.
+     */
+    const handleCancel = function() {
+        if ( isDirty() ) {
+            setAreYouSure(true)
+        } else {
+            cancel()
+        }
     }
 
     useEffect(() => {
@@ -249,7 +284,7 @@ const GroupEditForm = function({ groupId }) {
                 <div className="group-edit-form__controls">
                     { inProgress && <Spinner /> }
                     { ! inProgress && <div className="buttons">
-                        <Button onClick={(e) => setAreYouSure(true)}>Cancel</Button> 
+                        <Button onClick={() => handleCancel()}>Cancel</Button> 
                         <input type="submit" name="submit" value="Submit" />
                     </div> }
                 </div>
