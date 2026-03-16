@@ -182,10 +182,16 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
             </div>
             <div className="buttons">
                 <Button onClick={(e) => setAreYouSure(true)}>Cancel</Button>
-                <Button type="primary" onClick={(e) => submit()}>Post</Button>
+                <Button type="primary" onClick={(e) => submit()}>{ postId ? 'Edit Post' : 'Post' }</Button>
             </div>
-            <AreYouSure isVisible={areYouSure} execute={cancel} cancel={() => setAreYouSure(false)}>
-                <p>Are you sure you want to cancel? Your draft will be lost.</p>
+            <AreYouSure 
+                isVisible={areYouSure} 
+                cancelLabel="Keep Editing"
+                executeLabel={ postId ? "Discard Edits" : "Discard Post" }
+                execute={cancel} 
+                cancel={() => setAreYouSure(false)}
+            >
+                <p>Are you sure you want to discard your { postId ? "edits" : "post" }?</p>
             </AreYouSure>
         </div>
     )

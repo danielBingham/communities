@@ -179,8 +179,14 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
                     <Button onClick={(e) => setAreYouSure(true)}>Cancel</Button>
                     <Button type="primary" onClick={(e) => submit()}>{ commentId ? 'Save Edit' : 'Comment' }</Button>
                 </div> }
-                <AreYouSure isVisible={areYouSure} execute={cancel} cancel={() => setAreYouSure(false)}>
-                    <p>Are you sure you want to cancel? Your draft will be lost.</p>
+                <AreYouSure 
+                    isVisible={areYouSure} 
+                    cancelLabel="Keep Editing"
+                    executeLabel={ commentId ? "Discard Edits" : "Discard Comment" }
+                    execute={cancel} 
+                    cancel={() => setAreYouSure(false)}
+                >
+                    <p>Are you sure you want to discard your { commentId ? "edits" : "comment" }?</p>
                 </AreYouSure>
             </div>
         )

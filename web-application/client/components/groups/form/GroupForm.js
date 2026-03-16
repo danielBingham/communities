@@ -506,8 +506,14 @@ const GroupForm = function({ parentId }) {
                     <input type="submit" name="submit" value="Submit" />
                 </div> }
             </form>
-            <AreYouSure isVisible={areYouSure} execute={cancel} cancel={() => setAreYouSure(false)}>
-                <p>Are you sure you want to cancel? Your draft will be lost.</p>
+            <AreYouSure 
+                isVisible={areYouSure} 
+                cancelLabel="Keep Editing"
+                executeLabel="Discard Group"
+                execute={cancel} 
+                cancel={() => setAreYouSure(false)}
+            >
+                <p>Are you sure you want to discard your group?</p>
             </AreYouSure>
             <RequestErrorModal request={request} message={"Create Group"} />
         </div>

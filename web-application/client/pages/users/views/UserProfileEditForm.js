@@ -256,8 +256,14 @@ const UserProfileEditForm = function(props) {
                     { isPending && <Spinner /> }
                 </div>
             </form>
-            <AreYouSure isVisible={areYouSure} execute={cancel} cancel={() => setAreYouSure(false)}>
-                <p>Are you sure you want to cancel? Your draft will be lost.</p>
+            <AreYouSure 
+                isVisible={areYouSure} 
+                cancelLabel="Keep Editing"
+                executeLabel="Discard Changes"
+                execute={cancel} 
+                cancel={() => setAreYouSure(false)}
+            >
+                <p>Are you sure you want to discard your changes?</p>
             </AreYouSure>
         </div>
     )
