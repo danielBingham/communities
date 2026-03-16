@@ -102,7 +102,7 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
             let defaultVisibility = 'private'
             if ( group !== undefined && group !== null ) {
                 defaultType = 'group'
-                if ( group.type = 'open' ) {
+                if ( group.type === 'open' ) {
                     defaultVisibility = 'public'
                 }
             }
