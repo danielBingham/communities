@@ -66,6 +66,23 @@ const UserProfileEditForm = function(props) {
     const madeChange = fileId != currentUser.fileId || name != currentUser.name || about != currentUser.about
 
     const navigate = useNavigate()
+    
+    const isDirty = function() {
+        if ( ! currentUser ) {
+            return false
+        }
+
+        if ( fileId !== currentUser.fileId ) {
+            return true
+        } else if ( name !== currentUser.name ) { 
+            return true
+        } else if ( about !== currentUser.about ) {
+            return true
+        }
+
+        return false
+    }
+
 
     const isValid = function(field) {
         let error = false
@@ -126,6 +143,9 @@ const UserProfileEditForm = function(props) {
         makeRequest(patchUser(assembleUser()))
     }
 
+    /**
+     * Execute the cancelation of this user profile edit and clear the form.
+     */
     const cancel = function() {
         if ( ! currentUser.name ) {
             setName('')
@@ -148,6 +168,17 @@ const UserProfileEditForm = function(props) {
         setAreYouSure(false)
         
         navigate(`/${currentUser.username}`)
+    }
+
+    /**
+     * Handle the 'cancel' user action.
+     */
+    const handleCancel = function() {
+        if ( isDirty() ) {
+            setAreYouSure(true)
+        } else {
+            cancel()
+        }
     }
 
     // ======= Effect Handling ======================================
@@ -252,7 +283,7 @@ const UserProfileEditForm = function(props) {
                     {result}
                 </div>
                 <div className="form-submit submit">
-                    { ! isPending && <span><Button onClick={(e) => setAreYouSure(true)}>Cancel</Button> <input type="submit" name="submit" value="Submit" /></span> }
+                    { ! isPending && <span><Button onClick={(e) => handleCancel()}>Cancel</Button> <input type="submit" name="submit" value="Submit" /></span> }
                     { isPending && <Spinner /> }
                 </div>
             </form>
