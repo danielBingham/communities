@@ -89,6 +89,31 @@ const GroupForm = function({ parentId }) {
     const [request, makeRequest] = useRequest()
     const fileRef = useRef(null)
 
+    /**
+     * Determine whether any of the form's data has been changed.
+     */
+    const isDirty = function() {
+        if ( title !== '' ) {
+            return true
+        } else if ( slug !== '' ) {
+            return true
+        } else if ( type !== defaultType ) {
+            return true
+        } else if ( postPermissions !== 'members' ) {
+            return true
+        } else if ( about !== '' ) {
+            return true
+        } else if ( shortDescription !== '' ) {
+            return true
+        } else if ( rules !== '' ) {
+            return true
+        } else if ( fileId !== null ) {
+            return true
+        }
+
+        return false
+    }
+
     const validateShortDescription = function(value) {
         const shortDescriptionValidationErrors = schema.properties.shortDescription.validate(shortDescription)
         if ( shortDescriptionValidationErrors.length > 0 ) {
@@ -216,6 +241,9 @@ const GroupForm = function({ parentId }) {
         makeRequest(postGroups(assembleGroup()))
     }
 
+    /**
+     * Cancel the creation of the group and clear the form's draft state.
+     */
     const cancel = function(event) {
         setTitle(null)
         setType(null)
@@ -229,6 +257,17 @@ const GroupForm = function({ parentId }) {
         setAreYouSure(false)
 
         navigate('/groups')
+    }
+
+    /**
+     * Handle the 'cancel' action.
+     */
+    const handleCancel = function() {
+        if ( isDirty() ) {
+            setAreYouSure(true)
+        } else {
+            cancel()
+        }
     }
 
     const onTitleChange = function(event) {
@@ -502,7 +541,7 @@ const GroupForm = function({ parentId }) {
                 <div className="group-form__errors">{ baseError }</div>
                 { inProgress && <Spinner /> }
                 { ! inProgress && <div className="group-form__controls">
-                    <Button onClick={(e) => setAreYouSure(true)}>Cancel</Button> 
+                    <Button onClick={(e) => handleCancel()}>Cancel</Button> 
                     <input type="submit" name="submit" value="Submit" />
                 </div> }
             </form>
