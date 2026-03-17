@@ -203,10 +203,10 @@ module.exports = class UserController extends BaseController{
             result.where += `${and} ( users.name ILIKE $${likeParam} OR SIMILARITY(users.name, $${similarityParam}) > 0.1)`
             result.order = `SIMILARITY(users.name, $${result.params.length}) desc`
 
+            // If they are commenting on a group post, limit the search to
+            // their friends, people who've interacted with the post, and group
+            // members.
             if ( 'postId' in query && 'groupId' in query) {
-                // If they are commenting on a group post, limit the search to
-                // their friends, people who've interacted with the post, and
-                // group members.
                 let postUserIds = []
                 const post = await this.postDAO.getPostById(query.postId)
                 const canViewPost = await this.permissionService.can(currentUser, 'view', 'Post', { post: post })
@@ -225,7 +225,7 @@ module.exports = class UserController extends BaseController{
                     memberUserIds = groupMembers.map((member) => member.userId)
                 }
 
-                const relationships = await this.userRelationshipsDAO.getUserRelationshipsForUser(currentUser.id)
+                const relationships = await this.userRelationshipsDAO.getUserRelationshipsForUserWithStatus(currentUser.id, 'confirmed')
                 const friendIds = relationships.map((r) => r.userId == currentUser.id ? r.relationId : r.userId)
 
                 let userIds = [ ...postUserIds, ...memberUserIds, ...friendIds ]
@@ -248,9 +248,11 @@ module.exports = class UserController extends BaseController{
                 const and = result.params.length > 0 ? ' AND ' : ''
                 result.params.push(userIds)
                 result.where += `${and} users.id = ANY($${result.params.length}::uuid[])`
-            } else if ( 'postId' in query ) {
-                // If they are commenting in a post, limit the search to their
-                // friends and people who've interacted with the post.
+            } 
+
+            // If they are commenting in a post, limit the search to their
+            // friends and people who've interacted with the post.
+            else if ( 'postId' in query ) {
                 let postUserIds = [] 
                 const post = await this.postDAO.getPostById(query.postId)
                 const canViewPost = await this.permissionService.can(currentUser, 'view', 'Post', { post: post })
@@ -262,7 +264,7 @@ module.exports = class UserController extends BaseController{
                     postUserIds.push(post.userId)
                 }
 
-                const relationships = await this.userRelationshipsDAO.getUserRelationshipsForUser(currentUser.id)
+                const relationships = await this.userRelationshipsDAO.getUserRelationshipsForUserWithStatus(currentUser.id, 'confirmed')
                 const friendIds = relationships.map((r) => r.userId == currentUser.id ? r.relationId : r.userId)
 
                let userIds = [ ...postUserIds, ...friendIds ]
@@ -285,9 +287,11 @@ module.exports = class UserController extends BaseController{
                 const and = result.params.length > 0 ? ' AND ' : ''
                 result.params.push(userIds)
                 result.where += `${and} users.id = ANY($${result.params.length}::uuid[])`
-            } else if ( 'groupId' in query ) {
-                // If they are posting in a group, limit the search to group
-                // members and their friends.
+            } 
+
+            // If they are posting in a group, limit the search to group
+            // members and their friends.
+            else if ( 'groupId' in query ) {
                 let memberUserIds = [] 
                 const canViewGroup = await this.permissionService.can(currentUser, 'view', 'Group', { groupId: query.groupId})
                 if ( canViewGroup === true ) {
@@ -295,7 +299,7 @@ module.exports = class UserController extends BaseController{
                     memberUserIds = groupMembers.map((member) => member.userId)
                 }
 
-                const relationships = await this.userRelationshipsDAO.getUserRelationshipsForUser(currentUser.id)
+                const relationships = await this.userRelationshipsDAO.getUserRelationshipsForUserWithStatus(currentUser.id, 'confirmed')
                 const friendIds = relationships.map((r) => r.userId == currentUser.id ? r.relationId : r.userId)
 
                 let userIds = [ ...friendIds, ...memberUserIds ]
@@ -318,10 +322,11 @@ module.exports = class UserController extends BaseController{
                 const and = result.params.length > 0 ? ' AND ' : ''
                 result.params.push(userIds)
                 result.where += `${and} users.id = ANY($${result.params.length}::uuid[])`
-            } else {
-                // Limit the search to their friends.
-                let relationships = await this.userRelationshipsDAO.getUserRelationshipsForUser(currentUser.id)
-                relationships = relationships.filter((r) => r.status !== 'blocked')
+            } 
+
+            // Limit the search to their friends.
+            else {
+                let relationships = await this.userRelationshipsDAO.getUserRelationshipsForUserWithStatus(currentUser.id, 'confirmed')
                 const friendIds = relationships.map((r) => r.userId == currentUser.id ? r.relationId : r.userId)
 
                 const and = result.params.length > 0 ? ' AND ' : ''
