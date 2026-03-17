@@ -24,13 +24,6 @@
 .user-view__username a:hover {
     color: var(--main-text-color-dim);
 }
-
-.user-view__username svg {
-    height: 1em;
-    width: 1em;
-    margin-bottom: -4px;
-    margin-right: 5px;
-}
 .user-view__details .user-view__relationship {
     padding: 10px;
 }
