@@ -210,7 +210,26 @@ module.exports = class UserService {
             token.creatorId = currentUser.id
             token.id = await this.tokenDAO.insertToken(token)
 
-            await this.emailService.sendInvitation(currentUser, createdUser, token)
+            try {
+                await this.emailService.sendInvitation(currentUser, createdUser, token)
+            } catch (error) {
+                if ( error instanceof ServiceError ) {
+                    if ( error.type === 'invalid-email' ) {
+                        errors.push({
+                            type: 'email:invalid',
+                            log: `Couldn't send confirmation email.  Email invalid.`,
+                            message: `We weren't able to send the confirmation email because that email isn't valid.`,
+                            context: {
+                                email: createdUser.email
+                            }
+                        })
+                    } else {
+                        throw error
+                    }
+                } else {
+                    throw error
+                }
+            }
 
             // Since the user exists, go ahead and insert the friend
             // relationship.
@@ -356,7 +375,26 @@ module.exports = class UserService {
         token.creatorId = createdUser.id
         token.id = await this.tokenDAO.insertToken(token)
 
-        await this.emailService.sendEmailConfirmation(createdUser, token)
+        try {
+            await this.emailService.sendEmailConfirmation(createdUser, token)
+        } catch (error) {
+            if ( error instanceof ServiceError ) {
+                if ( error.type === 'invalid-email' ) {
+                    errors.push({
+                        type: 'email:invalid',
+                        log: `Couldn't send confirmation email.  Email invalid.`,
+                        message: `We weren't able to send the confirmation email because that email isn't valid.`,
+                        context: {
+                            email: createdUser.email
+                        }
+                    })
+                } else {
+                    throw error
+                }
+            } else {
+                throw error
+            }
+        }
 
         return [ createdUser, errors ]
     }
