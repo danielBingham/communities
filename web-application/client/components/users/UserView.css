@@ -8,19 +8,33 @@
     max-width: 200px;
     height: 200px;
 }
-.user-view .details {
+.user-view__details {
     min-height: 150px;
     font-size: 16px;
     max-width: 400px;
     margin: 0 auto;
     word-wrap: break-word;
 }
-.user-view .details .bio {
-    font-size: 14px;
-}
-.user-view .details div {
-    padding: 12px;
-}
-.user-view .name {
+.user-view__name {
     font-size: 2em;
+}
+.user-view__username a:link, 
+.user-view__username a:visited, 
+.user-view__username a:active,
+.user-view__username a:hover {
+    color: var(--main-text-color-dim);
+}
+
+.user-view__username svg {
+    height: 1em;
+    width: 1em;
+    margin-bottom: -4px;
+    margin-right: 5px;
+}
+.user-view__details .user-view__relationship {
+    padding: 10px;
+}
+.user-view__details .user-view__about {
+    padding: 14px;
+    font-size: 14px;
 }
