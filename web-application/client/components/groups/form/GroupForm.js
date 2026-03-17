@@ -316,11 +316,24 @@ const GroupForm = function({ parentId }) {
     useEffect(() => {
         if ( parentGroup !== undefined && parentGroup !== null ) {
             let defaultType = 'private'
-            if ( parentGroup?.type === 'hidden' || parentGroup?.type === 'hidden-private' || parentGroup?.type === 'hidden-open' ) {
+            let validTypes = [ 'open', 'private', 'hidden' ]
+            if ( parentGroup?.type === 'open' ) {
+                defaultType = 'private'
+                validTypes = ['open', 'private', 'hidden']
+            } else if ( parentGroup?.type === 'private' || parentGroup?.type === 'private-open' ) {
+                defaultType = 'private'
+                validTypes = ['private-open', 'private', 'hidden']
+            } else if ( parentGroup?.type === 'hidden' || parentGroup?.type === 'hidden-private' || parentGroup?.type === 'hidden-open' ) {
                 defaultType = 'hidden-private'
+                validTypes = ['hidden-open', 'hidden-private', 'hidden']
             }
 
-            setType(defaultType)
+            // Only reset the type to the default type if it is currently set
+            // to an invalid type. This should prevent any user drafts from
+            // being overwritten.
+            if ( ! validTypes.includes(type) ) {
+                setType(defaultType)
+            }
         }
     }, [ parentGroup ])
 
