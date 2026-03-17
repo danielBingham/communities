@@ -230,6 +230,8 @@ module.exports = class UserController extends BaseController{
 
                 let userIds = [ ...postUserIds, ...memberUserIds, ...friendIds ]
 
+                // This is still necessary because blocked users could be found
+                // in the post results and the group results.
                 const blockResults = await this.core.database.query(`
                     SElECT user_id, friend_id
                         FROM user_relationships
@@ -267,6 +269,8 @@ module.exports = class UserController extends BaseController{
 
                let userIds = [ ...postUserIds, ...friendIds ]
 
+                // This is still necessary because blocked users could be found
+                // in the post results.
                 const blockResults = await this.core.database.query(`
                     SElECT user_id, friend_id
                         FROM user_relationships
@@ -300,6 +304,8 @@ module.exports = class UserController extends BaseController{
 
                 let userIds = [ ...friendIds, ...memberUserIds ]
 
+                // This is still necessary because blocked users could be found
+                // in the group results.
                 const blockResults = await this.core.database.query(`
                     SElECT user_id, friend_id
                         FROM user_relationships
