@@ -59,6 +59,7 @@ const Button = function({ type, href, external, disabled, className, onClick, ch
                 style={{ display: 'none' }}
             >{ href }</a> }
             <button
+                type="button"
                 className={`button ${ type ? type : 'default' } ${ className ? className : '' }`} 
                 onClick={onClickInternal}
                 disabled={disabled}

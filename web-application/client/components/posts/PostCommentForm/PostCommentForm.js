@@ -1,4 +1,23 @@
-import React, {useState, useEffect } from 'react'
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media 
+ *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
+import {useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
 import logger from '/logger'
@@ -9,6 +28,7 @@ import { postPostComments, patchPostComment, finishPostCommentEdit } from '/stat
 
 import Button from '/components/ui/Button'
 import Spinner from '/components/Spinner'
+import AreYouSure from '/components/AreYouSure'
 
 import TextAreaWithMentions from '/components/posts/TextAreaWithMentions'
 
@@ -20,6 +40,7 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
     const [ content, setContent ] = useState('')
 
     const [ error, setError ] = useState('')
+    const [ areYouSure, setAreYouSure ] = useState(false)
 
     const [postRequest, makePostRequest] = useRequest()
     const [patchRequest, makePatchRequest] = useRequest()
@@ -68,15 +89,51 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
         }
     }
 
+    /**
+     * Cancel the comment and wipe out any drafts.
+     */
     const cancel = function() {
         localStorage.removeItem(getDraftKey())
 
+        setAreYouSure(false)
         setContent('')
         setError('')
         setShowForm(false)
 
         if ( commentId ) {
             dispatch(finishPostCommentEdit(commentId))
+        }
+    }
+
+    /**
+     * Determine whether the user has made any changes to this form.
+     */
+    const isDirty = function() {
+        // For edits, check to see if they've actually made any changes.  If
+        // they have, then the form is dirty.
+        if ( commentId && ( content !== comment?.content ) ) {
+            return true 
+        } 
+
+        // For new comment drafts, if there's any content, then the form is dirty.
+        else if ( ! commentId && content.length > 0 ) {
+            return true
+        } 
+
+        return false
+    }
+
+    /**
+     * Handles the 'cancel' event that occurs when the user clicks the 'cancel'
+     * button.
+     */
+    const handleCancel = function() {
+        // If the form is dirty, then we want to confirm discarding the draft.
+        if ( isDirty() ) {
+            setAreYouSure(true)
+        } 
+        else {
+            cancel()
         }
     }
 
@@ -154,9 +211,18 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
                 { errorView }
                 { inProgress && <div className="buttons"><Spinner /></div> }
                 { ! inProgress && <div className="buttons">
-                    <Button onClick={(e) => cancel()}>Cancel</Button>
-                    <Button type="primary" onClick={(e) => submit()}>{ commentId ? 'Save Edit' : 'Comment' }</Button>
+                    <Button onClick={() => handleCancel()}>Cancel</Button>
+                    <Button type="primary" onClick={() => submit()}>{ commentId ? 'Save Edit' : 'Comment' }</Button>
                 </div> }
+                <AreYouSure 
+                    isVisible={areYouSure} 
+                    cancelLabel="Keep Editing"
+                    executeLabel={ commentId ? "Discard Edits" : "Discard Comment" }
+                    execute={cancel} 
+                    cancel={() => setAreYouSure(false)}
+                >
+                    <p>Are you sure you want to discard your { commentId ? "edits" : "comment" }?</p>
+                </AreYouSure>
             </div>
         )
     }

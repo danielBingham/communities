@@ -1,4 +1,23 @@
-import { useEffect } from 'react'
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media 
+ *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
+import { useState, useEffect } from 'react'
 import { useSelector, useDispatch} from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
@@ -18,6 +37,7 @@ import { postPosts, patchPost } from '/state/Post'
 
 import Button from '/components/ui/Button'
 import Spinner from '/components/Spinner'
+import AreYouSure from '/components/AreYouSure'
 
 import PostContent from './PostContent'
 import SharedPostAttachment from './SharedPostAttachment'
@@ -53,8 +73,57 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
     const [patchRequest, makePatchRequest] = useRequest()
     const [deleteFileRequest, makeDeleteFileRequest] = useRequest()
 
+    const [ areYouSure, setAreYouSure ] = useState(false)
+
     const dispatch = useDispatch()
     const navigate = useNavigate()
+
+    /**
+     * Determine whether user has changed any content in this post (or added
+     * any content to this new post). 
+     */
+    const isDirty = function() {
+        if ( postId ) {
+            if ( draft.content !== post?.content ) {
+                return true
+            } else if ( draft.type !== post?.type ) {
+                return true
+            } else if ( draft.visibility !== post?.visibility ) {
+                return true
+            } else if ( draft.fileId !== post?.fileId ) {
+                return true
+            } else if ( draft.linkPreviewId !== post?.linkPreviewId ) {
+                return true
+            } else if ( draft.sharedPostId !== post?.sharedPostId ) {
+                return true
+            }
+        } else {
+            let defaultType = 'feed'
+            let defaultVisibility = 'private'
+            if ( group !== undefined && group !== null ) {
+                defaultType = 'group'
+                if ( group.type === 'open' ) {
+                    defaultVisibility = 'public'
+                }
+            }
+
+            if ( draft.content.length > 0 ) {
+                return true
+            } else if ( draft.type !== defaultType ) {
+                return true
+            } else if ( draft.visibility !== defaultVisibility ) {
+                return true
+            } else if ( draft.fileId !== null ) {
+                return true
+            } else if ( draft.linkPreviewId !== null ) {
+                return true
+            } else if ( draft.sharedPostId !== null ) {
+                return true
+            }
+        }
+
+        return false
+    }
 
     const submit = function() {
         const newPost = {
@@ -84,13 +153,29 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
         }
     }
 
+    /**
+     * Execute the canceling of the edit.
+     */
     const cancel = function() {
         if ( draft.fileId !== null && post?.fileId !== draft.fileId ) {
             makeDeleteFileRequest(deleteFile(draft.fileId))
         }
 
+        setAreYouSure(false)
         setDraft(null) 
         navigate(origin)
+    }
+
+
+    /**
+     * Handle the cancel button being pressed.
+     */
+    const handleCancel = function() {
+        if ( isDirty() ) {
+            setAreYouSure(true)
+        } else {
+            cancel()
+        }
     }
 
     useEffect(function() {
@@ -158,9 +243,18 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
                 </div>
             </div>
             <div className="buttons">
-                <Button onClick={(e) => cancel()}>Cancel</Button>
-                <Button type="primary" onClick={(e) => submit()}>Post</Button>
+                <Button onClick={() => handleCancel()}>Cancel</Button>
+                <Button type="primary" onClick={() => submit()}>{ postId ? 'Edit Post' : 'Post' }</Button>
             </div>
+            <AreYouSure 
+                isVisible={areYouSure} 
+                cancelLabel="Keep Editing"
+                executeLabel={ postId ? "Discard Edits" : "Discard Post" }
+                execute={cancel} 
+                cancel={() => setAreYouSure(false)}
+            >
+                <p>Are you sure you want to discard your { postId ? "edits" : "post" }?</p>
+            </AreYouSure>
         </div>
     )
 }
