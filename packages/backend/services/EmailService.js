@@ -30,8 +30,7 @@ module.exports = class EmailService {
 
     async sendEmail(data) {
         try {
-            const response = await this.core.postmarkClient.sendEmail(data)
-            console.log(response)
+            await this.core.postmarkClient.sendEmail(data)
         } catch (error) {
             this.logger.error(error)
 

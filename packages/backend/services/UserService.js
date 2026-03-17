@@ -151,7 +151,24 @@ module.exports = class UserService {
                 token.creatorId = currentUser.id
                 token.id = await this.tokenDAO.insertToken(token)
 
-                await this.emailService.sendInvitation(currentUser, existingUser, token)
+                try {
+                    await this.emailService.sendInvitation(currentUser, existingUser, token)
+                } catch (error) {
+                    if ( error instanceof ServiceError ) {
+                        if ( error.type === 'invalid-email' ) {
+                            errors.push({
+                                type: 'email:invalid',
+                                log: `Couldn't send invitation email.  Email invalid.`,
+                                message: `We weren't able to send the invitation email because that email isn't valid.`
+                            })
+                            return [null, errors]
+                        } else {
+                            throw error
+                        }
+                    } else {
+                        throw error
+                    }
+                }
             } 
 
             // If we haven't already added them as a friend, send them a friend
@@ -223,6 +240,7 @@ module.exports = class UserService {
                                 email: createdUser.email
                             }
                         })
+                        return [null, errors]
                     } else {
                         throw error
                     }
