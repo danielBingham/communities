@@ -320,7 +320,7 @@ module.exports = class TokenController extends BaseController {
                     if ( error.type === 'invalid-email' ) {
                         throw new ControllerError(400, 'invalid-email',
                             `User(${user.id}) registered with an invalid email.  Confirmation email bounced.`,
-                            `Confirmation email bounced.  Did you enter the correct email?`)
+                            `Confirmation email bounced.  You may have registered with an invalid or incorrect email.  Please reach out to support: contact@communities.social`)
                     } else {
                         throw error
                     }
