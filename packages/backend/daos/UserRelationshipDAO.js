@@ -152,7 +152,7 @@ module.exports = class UserRelationshipDAO extends DAO {
         return results.list.map((id) => results.dictionary[id])
     }
 
-    async getUserRelationshipsforUserWithStatus(userId, status) {
+    async getUserRelationshipsForUserWithStatus(userId, status) {
         const results = await this.selectUserRelationships({
             where: `user_relationships.status = $1::user_relationship_status AND (user_relationships.user_id = $2 OR user_relationships.friend_id = $2)`,
             params: [ status, userId]

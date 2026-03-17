@@ -206,6 +206,8 @@ module.exports = class UserController extends BaseController{
             // If they are commenting on a group post, limit the search to
             // their friends, people who've interacted with the post, and group
             // members.
+            //
+            // TODO We shouldn't include friends who can't see the group here.
             if ( 'postId' in query && 'groupId' in query) {
                 let postUserIds = []
                 const post = await this.postDAO.getPostById(query.postId)
@@ -291,6 +293,9 @@ module.exports = class UserController extends BaseController{
 
             // If they are posting in a group, limit the search to group
             // members and their friends.
+            //
+            // TODO We probably shouldn't include friends who can't see the
+            // group here.
             else if ( 'groupId' in query ) {
                 let memberUserIds = [] 
                 const canViewGroup = await this.permissionService.can(currentUser, 'view', 'Group', { groupId: query.groupId})
