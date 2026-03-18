@@ -205,35 +205,48 @@ module.exports = class UserController extends BaseController{
             result.where += `${and} ( users.name ILIKE $${likeParam} OR SIMILARITY(users.name, $${similarityParam}) > 0.1)`
             result.order = `SIMILARITY(users.name, $${result.params.length}) desc`
 
-            // If they are commenting on a group post, limit the search to
+            // If they are commenting on a post in a group, limit the search to
             // their friends, people who've interacted with the post, and group
             // members.
-            //
-            // TODO We shouldn't include friends who can't see the group here.
             if ( 'postId' in query && 'groupId' in query) {
-                let postUserIds = []
                 const post = await this.postDAO.getPostById(query.postId)
+                if ( post === null || post === undefined ) {
+                    this.core.logger.warn(`Post(${query.postId}) in Group(${query.groupId}) not found when attempting to query mentions.`)
+                    return { emptyResult: true }
+                }
+
                 const group = await this.groupDAO.getGroupById(query.groupId)
+                if ( group === null || group === undefined ) {
+                    this.core.logger.warn(`Group(${query.groupId}) not found when attempting to query mentions for Post(${query.postId}).`)
+                    return { emptyResult: true }
+                }
 
                 const canViewPost = await this.permissionService.can(currentUser, 'view', 'Post', { post: post, group: group })
-                if ( canViewPost === true ) {
-                    const postResults = await this.core.database.query(`
-                        SELECT user_id FROM post_comments WHERE post_id = $1
-                    `, [ query.postId ])
-                    postUserIds = postResults.rows.map((row) => row.user_id)
-                    postUserIds.push(post.userId)
+                if ( canViewPost !== true ) {
+                    this.core.logger.warn(`User attempting to mention in comment on Post(${query.postId}) that they don't have permission to view.`)
+                    return { emptyResult: true }
                 }
 
-                let memberUserIds = []
-                const canViewGroup = await this.permissionService.can(currentUser, 'view', 'Group', { groupId: query.groupId})
-                if ( canViewGroup === true ) {
-                    const groupMembers = await this.groupMemberDAO.getGroupMembers(query.groupId)
-                    memberUserIds = groupMembers.map((member) => member.userId)
+                const canQueryGroupMembers = await this.permissionService.can(currentUser, 'query', 'GroupMember', { group: group })
+                if ( canQueryGroupMembers !== true ) {
+                    this.core.logger.warn(`User attempting to mention in comment on Post(${query.postId}) in Group(${query.groupId}) that they don't have permission to view.`)
+                    return { emptyResult: true }
                 }
+
+                const postResults = await this.core.database.query(`
+                    SELECT user_id FROM post_comments WHERE post_id = $1
+                `, [ query.postId ])
+                let postUserIds = postResults.rows.map((row) => row.user_id)
+                postUserIds.push(post.userId)
+
+                const groupMembers = await this.groupMemberDAO.getGroupMembers(query.groupId)
+                const memberUserIds = groupMembers.map((member) => member.userId)
 
                 let userIds = [ ...postUserIds, ...memberUserIds ]
               
                 // For 'open' type groups, we may be able to mention some or all of our friends.
+                //
+                // NOTE: If you update this logic, update the logic in the Group post branch below.
                 if ( group.type === 'open' || group.type === 'private-open' || group.type === 'hidden-open' ) {
                     const relationships = await this.userRelationshipsDAO.getUserRelationshipsForUserWithStatus(currentUser.id, 'confirmed')
                     const friendIds = relationships.map((r) => r.userId == currentUser.id ? r.relationId : r.userId)
@@ -286,17 +299,21 @@ module.exports = class UserController extends BaseController{
             // If they are commenting in a post, limit the search to their
             // friends and people who've interacted with the post.
             else if ( 'postId' in query ) {
-                let postUserIds = [] 
                 const post = await this.postDAO.getPostById(query.postId)
                 const canViewPost = await this.permissionService.can(currentUser, 'view', 'Post', { post: post })
-                if ( canViewPost === true ) {
-                    const postResults = await this.core.database.query(`
-                        SELECT user_id FROM post_comments WHERE post_id = $1
-                    `, [ query.postId ])
-                    postUserIds = postResults.rows.map((row) => row.user_id)
-                    postUserIds.push(post.userId)
+                if ( canViewPost !== true ) {
+                    this.core.logger.warn(`User attempting to mention in comment on Post(${query.postId}) that they don't have permission to view.`)
+                    return { emptyResult: true }
                 }
 
+                const postResults = await this.core.database.query(`
+                    SELECT user_id FROM post_comments WHERE post_id = $1
+                `, [ query.postId ])
+                let postUserIds = postResults.rows.map((row) => row.user_id)
+                postUserIds.push(post.userId)
+
+                // TODO We should probably only include friends who can view
+                // that particular post here.
                 const relationships = await this.userRelationshipsDAO.getUserRelationshipsForUserWithStatus(currentUser.id, 'confirmed')
                 const friendIds = relationships.map((r) => r.userId == currentUser.id ? r.relationId : r.userId)
 
@@ -326,22 +343,28 @@ module.exports = class UserController extends BaseController{
 
             // If they are posting in a group, limit the search to group
             // members and their friends.
-            //
-            // TODO We probably shouldn't include friends who can't see the
-            // group here.
             else if ( 'groupId' in query ) {
-                let memberUserIds = [] 
-
                 const group = await this.groupDAO.getGroupById(query.groupId)
-                const canViewGroup = await this.permissionService.can(currentUser, 'view', 'Group', { group: group })
-                if ( canViewGroup === true ) {
-                    const groupMembers = await this.groupMemberDAO.getGroupMembers(query.groupId)
-                    memberUserIds = groupMembers.map((member) => member.userId)
+                if ( group === null || group === undefined ) {
+                    this.core.logger.warn(`Group(${query.groupId}) not found when attempting to query mentions.`)
+                    return { emptyResult: true }
                 }
+
+                const canQueryGroupMembers = await this.permissionService.can(currentUser, 'query', 'GroupMember', { group: group })
+                if ( canQueryGroupMembers !== true ) {
+                    this.core.logger.warn(`User attempting to query GroupMembers for Group(${query.groupId}) without permission.`)
+                    return { emptyResult: true }
+                }
+
+                const groupMembers = await this.groupMemberDAO.getGroupMembers(query.groupId)
+                let memberUserIds = groupMembers.map((member) => member.userId)
 
                 let userIds = [ ...memberUserIds ]
 
                 // For 'open' type groups, we may be able to mention some or all of our friends.
+                //
+                // NOTE: If you update this logic, update the logic in the
+                // group comment branch above.
                 if ( group.type === 'open' || group.type === 'private-open' || group.type === 'hidden-open' ) {
                     const relationships = await this.userRelationshipsDAO.getUserRelationshipsForUserWithStatus(currentUser.id, 'confirmed')
                     const friendIds = relationships.map((r) => r.userId == currentUser.id ? r.relationId : r.userId)
