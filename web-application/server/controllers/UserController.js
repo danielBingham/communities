@@ -221,6 +221,11 @@ module.exports = class UserController extends BaseController{
                     return { emptyResult: true }
                 }
 
+                if ( post.groupId !== group.id ) {
+                    this.core.logger.warn(`Post(${query.postId}) does not belong to Group(${query.groupId}).`)
+                    return { emptyResult: true }
+                }
+
                 const canViewPost = await this.permissionService.can(currentUser, 'view', 'Post', { post: post, group: group })
                 if ( canViewPost !== true ) {
                     this.core.logger.warn(`User attempting to mention in comment on Post(${query.postId}) that they don't have permission to view.`)
