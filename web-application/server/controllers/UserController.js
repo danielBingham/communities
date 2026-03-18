@@ -33,6 +33,7 @@ const {
 
     UserDAO,
     UserRelationshipDAO,
+    GroupDAO,
     GroupMemberDAO,
     TokenDAO,
     FileDAO,
@@ -65,6 +66,7 @@ module.exports = class UserController extends BaseController{
 
         this.userDAO = new UserDAO(core)
         this.userRelationshipsDAO = new UserRelationshipDAO(core)
+        this.groupDAO = new GroupDAO(core)
         this.groupMemberDAO = new GroupMemberDAO(core)
         this.tokenDAO = new TokenDAO(core)
         this.fileDAO = new FileDAO(core)
@@ -211,7 +213,9 @@ module.exports = class UserController extends BaseController{
             if ( 'postId' in query && 'groupId' in query) {
                 let postUserIds = []
                 const post = await this.postDAO.getPostById(query.postId)
-                const canViewPost = await this.permissionService.can(currentUser, 'view', 'Post', { post: post })
+                const group = await this.groupDAO.getGroupById(query.groupId)
+
+                const canViewPost = await this.permissionService.can(currentUser, 'view', 'Post', { post: post, group: group })
                 if ( canViewPost === true ) {
                     const postResults = await this.core.database.query(`
                         SELECT user_id FROM post_comments WHERE post_id = $1
@@ -227,10 +231,35 @@ module.exports = class UserController extends BaseController{
                     memberUserIds = groupMembers.map((member) => member.userId)
                 }
 
-                const relationships = await this.userRelationshipsDAO.getUserRelationshipsForUserWithStatus(currentUser.id, 'confirmed')
-                const friendIds = relationships.map((r) => r.userId == currentUser.id ? r.relationId : r.userId)
+                let userIds = [ ...postUserIds, ...memberUserIds ]
+              
+                // For 'open' type groups, we may be able to mention some or all of our friends.
+                if ( group.type === 'open' || group.type === 'private-open' || group.type === 'hidden-open' ) {
+                    const relationships = await this.userRelationshipsDAO.getUserRelationshipsForUserWithStatus(currentUser.id, 'confirmed')
+                    const friendIds = relationships.map((r) => r.userId == currentUser.id ? r.relationId : r.userId)
+                    
+                    // For open Groups, you can mention your friends.
+                    if ( group.type === 'open' ) {
+                        userIds.push(...friendIds)
+                    }
 
-                let userIds = [ ...postUserIds, ...memberUserIds, ...friendIds ]
+                    // For private-open and hidden-open groups, you can only
+                    // mention your friends if they are also members of the group
+                    // or the parent group. 
+                    else if ( group.type === 'private-open' || group.type === 'hidden-open' ) {
+                        const results = await this.core.database.query(`
+                            SELECT user_id FROM group_members 
+                                WHERE (group_members.group_id = $1 OR group_members.group_id = $2) AND group_members.user_id = ANY($3::uuid[])
+                        `, [ group.id, group.parentId, friendIds ])
+
+                        // This may include duplicate ids with the member query
+                        // above, but that's okay because the SQL statement
+                        // below handles it.
+                        const friendsInGroupOrParentGroup = results.rows.map((r) => r.user_id)
+                        userIds.push(...friendsInGroupOrParentGroup)
+                    }
+                } 
+
 
                 // This is still necessary because blocked users could be found
                 // in the post results and the group results.
@@ -302,16 +331,42 @@ module.exports = class UserController extends BaseController{
             // group here.
             else if ( 'groupId' in query ) {
                 let memberUserIds = [] 
-                const canViewGroup = await this.permissionService.can(currentUser, 'view', 'Group', { groupId: query.groupId})
+
+                const group = await this.groupDAO.getGroupById(query.groupId)
+                const canViewGroup = await this.permissionService.can(currentUser, 'view', 'Group', { group: group })
                 if ( canViewGroup === true ) {
                     const groupMembers = await this.groupMemberDAO.getGroupMembers(query.groupId)
                     memberUserIds = groupMembers.map((member) => member.userId)
                 }
 
-                const relationships = await this.userRelationshipsDAO.getUserRelationshipsForUserWithStatus(currentUser.id, 'confirmed')
-                const friendIds = relationships.map((r) => r.userId == currentUser.id ? r.relationId : r.userId)
+                let userIds = [ ...memberUserIds ]
 
-                let userIds = [ ...friendIds, ...memberUserIds ]
+                // For 'open' type groups, we may be able to mention some or all of our friends.
+                if ( group.type === 'open' || group.type === 'private-open' || group.type === 'hidden-open' ) {
+                    const relationships = await this.userRelationshipsDAO.getUserRelationshipsForUserWithStatus(currentUser.id, 'confirmed')
+                    const friendIds = relationships.map((r) => r.userId == currentUser.id ? r.relationId : r.userId)
+                    
+                    // For open Groups, you can mention your friends.
+                    if ( group.type === 'open' ) {
+                        userIds.push(...friendIds)
+                    }
+
+                    // For private-open and hidden-open groups, you can only
+                    // mention your friends if they are also members of the group
+                    // or the parent group. 
+                    else if ( group.type === 'private-open' || group.type === 'hidden-open' ) {
+                        const results = await this.core.database.query(`
+                            SELECT user_id FROM group_members 
+                                WHERE (group_members.group_id = $1 OR group_members.group_id = $2) AND group_members.user_id = ANY($3::uuid[])
+                        `, [ group.id, group.parentId, friendIds ])
+
+                        // This may include duplicate ids with the member query
+                        // above, but that's okay because the SQL statement
+                        // below handles it.
+                        const friendsInGroupOrParentGroup = results.rows.map((r) => r.user_id)
+                        userIds.push(...friendsInGroupOrParentGroup)
+                    }
+                } 
 
                 // This is still necessary because blocked users could be found
                 // in the group results.
