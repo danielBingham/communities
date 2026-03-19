@@ -23,22 +23,19 @@ import { useDispatch, useSelector } from 'react-redux'
 import { setBack } from '/state/history'
 
 export const useBackPoint = function(path) {
-    const location = useLocation()
-    const stack = useSelector((state) => state.history.stack) 
+    const previous = useSelector(
+        (state) => state.history.stack.length > 0 ? state.history.stack[state.history.stack.length-1] : null,
+        (a,b) => a?.key === b?.key
+    ) 
 
     const dispatch = useDispatch()
     useEffect(() => {
-        const previous = stack.length > 0 ? stack[stack.length-1] : null
         if ( previous !== null && ! previous.pathname.startsWith(path)) {
             dispatch(setBack(previous))
         }
 
-        return () => {
-            // We don't want to clear the backpoint until we leave the current
-            // path.
-            if ( ! location.pathname.startsWith(path) ) {
-                dispatch(clearBack())
-            }
-        }
-    }, [path, location, stack])
+        // TODO TECHDEBT We never clean up the backpoint.  This is okay because
+        // of that way we're currently using it -- it will get reset before
+        // it's used against. But is a potential issue to fix in teh future.
+    }, [path, previous])
 }
