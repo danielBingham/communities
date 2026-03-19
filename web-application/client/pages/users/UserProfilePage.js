@@ -19,10 +19,9 @@
  ******************************************************************************/
 import { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { useParams, Outlet } from 'react-router-dom'
+import { useParams, Outlet, useLocation } from 'react-router-dom'
 
-import { setBack, clearBack } from '/state/history'
-
+import { useBackPoint } from '/lib/hooks/useBackPoint'
 import { useUserByUsername } from '/lib/hooks/User'
 import { resetEntities } from '/state/lib'
 
@@ -40,10 +39,11 @@ import { NavigationMenu, NavigationMenuLink, NavigationMenuButton, NavigationSub
 import './UserProfilePage.css'
 
 const UserProfilePage = function(props) {
+    console.log(`## UserProfilePage`)
     const { slug } = useParams()
-    const stack = useSelector((state) => state.history.stack)
-
     const [user, request] = useUserByUsername(slug)
+
+    useBackPoint(`/${slug}`)
 
     const dispatch = useDispatch()
     useEffect(() => {
@@ -51,24 +51,6 @@ const UserProfilePage = function(props) {
             dispatch(resetEntities())
         }
     }, [])
-
-    useEffect(() => {
-        if ( slug === undefined || slug === null ) {
-            return
-        }
-
-        // Because useHistoryTracking is in the RootLayout, it's effect will be
-        // called last and the current location won't be pushed to the stack
-        // until after this effect runs.
-        const previous = stack.length >= 1 ? stack[stack.length-1] : null
-        if ( previous !== null && ! previous.pathname.startsWith(`/${slug}`)) {
-            dispatch(setBack(previous))
-        }
-
-        return () => {
-            dispatch(clearBack())
-        }
-    }, [slug])
 
     // ======= Render ===============================================
 

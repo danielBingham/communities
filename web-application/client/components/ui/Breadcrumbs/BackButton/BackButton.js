@@ -19,7 +19,9 @@
  ******************************************************************************/
 
 import { useDispatch, useSelector } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
+
+import { Capacitor } from '@capacitor/core'
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid'
 
@@ -30,14 +32,33 @@ import Button from '/components/ui/Button'
 import './BackButton.css'
 
 const BackButton = function() {
+    const previous = useSelector((state) => {
+        const length = state.history.stack.length
 
-    const previous = useSelector((state) => state.history.stack.length > 0 ? state.history.stack[state.history.stack.length-1] : null)
+        // If length is 0, we don't have anything on the stack yet. This is the
+        // first render and there are no previous pages. 
+        if ( length === 0  ) {
+            return null
+        } 
+
+        // Otherwise, the last item on the stack is the previous page.
+        else {
+            return state.history.stack[length-1]
+        }
+    })
     const backLocation = useSelector((state) => {
+        // If we have a back location, use that.
         if ( state.history.back !== null ) {
             return state.history.back
-        } else if ( state.history.stack.length > 1 ) {
+        } 
+
+        // Otherwise, if we have a previous page, use that.
+        else if ( state.history.stack.length > 0 ) {
             return state.history.stack[state.history.stack.length-1]
-        } else {
+        } 
+
+        // Otherwise, we don't have anywhere to go back to.
+        else {
             return null
         }
     })
@@ -51,16 +72,25 @@ const BackButton = function() {
         // The initial page load will add the current location to the stack. So
         // there's only somewhere to go back to when the stack is at least 2. 
         if ( backLocation !== null ) {
+            // If we're going right back to where we just were, then pop the
+            // history stack.
             if ( previous !== null && previous.key === backLocation.key) { 
                 dispatch(pop())
                 navigate(-1)
             } else {
+                // Otherwise navigate to the new back page.
                 navigate(backLocation)
             }
         }
     }
 
-    if ( previous === null ) {
+    // Only render the back button on mobile.  On web, the user can use their
+    // native back button.
+    if ( Capacitor.getPlatform() !== 'ios' && Capacitor.getPlatform() !== 'android' ) {
+        return null
+    }
+
+    if ( backLocation === null ) {
         return null
     }
 

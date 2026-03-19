@@ -21,26 +21,25 @@ import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useLocation } from 'react-router-dom'
 
-import { push } from '/state/history'
+import { setBack, clearBack } from '/state/history'
 
-export const useHistoryTracking = function() {
+export const useBackPoint = function(path) {
     const location = useLocation()
-    const stack = useSelector((state) => state.history.stack)
+    const stack = useSelector((state) => state.history.stack) 
 
     const dispatch = useDispatch()
-    
-    // We only want this hook to fire when the location actually changes, not
-    // when the stack changes (since this hook changes the stack itself).
     useEffect(() => {
-        // We only add the current location to the history stack on unmount.
-        // That way the last item on the stack will always be the previous
-        // page.
+        const previous = stack.length > 0 ? stack[stack.length-1] : null
+        if ( previous !== null && ! previous.pathname.startsWith(path)) {
+            dispatch(setBack(previous))
+        }
+
         return () => {
-            // We only want to add the current location to the stack if we didn't
-            // just come back to it.
-            if ( stack.length === 0 || stack[stack.length-1].key !== location.key ) {
-                dispatch(push(location))
+            // We don't want to clear the backpoint until we leave the current
+            // path.
+            if ( ! location.pathname.startsWith(path) ) {
+                dispatch(clearBack())
             }
         }
-    }, [ location ])
+    }, [path, location, stack])
 }
