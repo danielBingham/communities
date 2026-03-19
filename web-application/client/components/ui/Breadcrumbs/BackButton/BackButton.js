@@ -79,7 +79,7 @@ const BackButton = function() {
                 navigate(-1)
             } else {
                 // Otherwise navigate to the new back page.
-                navigate(backLocation)
+                navigate(backLocation, { replace: true })
             }
         }
     }
