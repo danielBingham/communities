@@ -18,8 +18,8 @@
  *
  ******************************************************************************/
 import { useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
-import { useParams, Outlet, useLocation } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
+import { useParams, Outlet } from 'react-router-dom'
 
 import { useBackPoint } from '/lib/hooks/useBackPoint'
 import { useUserByUsername } from '/lib/hooks/User'
@@ -30,7 +30,6 @@ import { RequestErrorPage } from '/components/errors/RequestError'
 import Spinner from '/components/Spinner'
 
 import UserView from '/components/users/UserView'
-import Feed from '/components/feeds/Feed'
 
 import Breadcrumbs from '/components/ui/Breadcrumbs'
 import { Page, PageBody, PageLeftGutter, PageRightGutter } from '/components/generic/Page'

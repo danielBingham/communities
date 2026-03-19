@@ -19,9 +19,8 @@
  ******************************************************************************/
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { useLocation } from 'react-router-dom'
 
-import { setBack, clearBack } from '/state/history'
+import { setBack } from '/state/history'
 
 export const useBackPoint = function(path) {
     const location = useLocation()
