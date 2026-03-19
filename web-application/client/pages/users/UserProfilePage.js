@@ -38,7 +38,6 @@ import { NavigationMenu, NavigationMenuLink, NavigationMenuButton, NavigationSub
 import './UserProfilePage.css'
 
 const UserProfilePage = function(props) {
-    console.log(`## UserProfilePage`)
     const { slug } = useParams()
     const [user, request] = useUserByUsername(slug)
 
