@@ -29,7 +29,6 @@ import { useHistoryTracking } from '/lib/hooks/useHistoryTracking'
 import "./RootLayout.css"
 
 const RootLayout = function() {
-
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const darkMode = currentUser?.settings?.darkMode === true
     

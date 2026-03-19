@@ -31,7 +31,16 @@ import './BackButton.css'
 
 const BackButton = function() {
 
-    const stack = useSelector((state) => state.history.stack)
+    const previous = useSelector((state) => state.history.stack.length > 0 ? state.history.stack[state.history.stack.length-1] : null)
+    const backLocation = useSelector((state) => {
+        if ( state.history.back !== null ) {
+            return state.history.back
+        } else if ( state.history.stack.length > 1 ) {
+            return state.history.stack[state.history.stack.length-1]
+        } else {
+            return null
+        }
+    })
 
     const navigate = useNavigate()
     const dispatch = useDispatch()
@@ -41,13 +50,17 @@ const BackButton = function() {
 
         // The initial page load will add the current location to the stack. So
         // there's only somewhere to go back to when the stack is at least 2. 
-        if ( stack.length > 1 ) {
-            dispatch(pop())
-            navigate(-1)
+        if ( backLocation !== null ) {
+            if ( previous !== null && previous.key === backLocation.key) { 
+                dispatch(pop())
+                navigate(-1)
+            } else {
+                navigate(backLocation)
+            }
         }
     }
 
-    if ( stack.length <= 1 ) {
+    if ( previous === null ) {
         return null
     }
 

@@ -21,6 +21,8 @@ import { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useParams, Routes, Route } from 'react-router-dom'
 
+import { setBack, clearBack } from '/state/history'
+
 import { resetEntities } from '/state/lib'
 
 import can, { Actions, Entities } from '/lib/permission'
@@ -49,7 +51,9 @@ import Spinner from '/components/Spinner'
 import './GroupPage.css'
 
 const GroupPage = function() {
+    console.log(`## GroupPage`)
     const { slug } = useParams()
+    const stack = useSelector((state) => state.history.stack)
 
     const [group, groupRequest ] = useGroupFromSlug(slug)
     const currentUser = useSelector((state) => state.authentication.currentUser)
@@ -64,6 +68,24 @@ const GroupPage = function() {
             dispatch(resetEntities())
         }
     }, [ slug ])
+
+    useEffect(() => {
+        if ( slug === undefined || slug === null ) {
+            return
+        }
+
+        // Because useHistoryTracking is in the RootLayout, it's effect will be
+        // called last and the current location won't be pushed to the stack
+        // until after this effect runs.
+        const previous = stack.length >= 1 ? stack[stack.length-1] : null
+        if ( previous !== null && ! previous.pathname.startsWith(`/group/${slug}`)) {
+            dispatch(setBack(previous))
+        }
+
+        return () => {
+            dispatch(clearBack())
+        }
+    }, [slug])
 
     if ( group === undefined || groupRequest?.state === 'pending' || requests.hasPending()) {
         return (

@@ -1,6 +1,27 @@
-import React, { useEffect } from 'react'
-import { useDispatch } from 'react-redux'
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media 
+ *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
+import { useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 import { useParams, Outlet } from 'react-router-dom'
+
+import { setBack, clearBack } from '/state/history'
 
 import { useUserByUsername } from '/lib/hooks/User'
 import { resetEntities } from '/state/lib'
@@ -20,6 +41,7 @@ import './UserProfilePage.css'
 
 const UserProfilePage = function(props) {
     const { slug } = useParams()
+    const stack = useSelector((state) => state.history.stack)
 
     const [user, request] = useUserByUsername(slug)
 
@@ -29,6 +51,24 @@ const UserProfilePage = function(props) {
             dispatch(resetEntities())
         }
     }, [])
+
+    useEffect(() => {
+        if ( slug === undefined || slug === null ) {
+            return
+        }
+
+        // Because useHistoryTracking is in the RootLayout, it's effect will be
+        // called last and the current location won't be pushed to the stack
+        // until after this effect runs.
+        const previous = stack.length >= 1 ? stack[stack.length-1] : null
+        if ( previous !== null && ! previous.pathname.startsWith(`/${slug}`)) {
+            dispatch(setBack(previous))
+        }
+
+        return () => {
+            dispatch(clearBack())
+        }
+    }, [slug])
 
     // ======= Render ===============================================
 

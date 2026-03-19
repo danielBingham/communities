@@ -3,7 +3,8 @@ import { createSlice } from '@reduxjs/toolkit'
 const historySlice = createSlice({
     name: 'history',
     initialState: {
-        stack: []
+        stack: [],
+        back: null 
     },
     reducers: {
         push: (state, action) => {
@@ -13,6 +14,7 @@ const historySlice = createSlice({
             if ( state.stack.length > 100 ) {
                 state.stack.shift()
             }
+
             state.stack.push(action.payload)
         },
         pop: (state, action) => {
@@ -20,10 +22,16 @@ const historySlice = createSlice({
         },
         clear: (state, action) => {
             state.stack = []
+        },
+        setBack: (state, action) => {
+            state.back = action.payload
+        },
+        clearBack: (state, action) => {
+            state.back = null
         }
     }
 })
 
 
-export const { push, pop, clear } = historySlice.actions
+export const { push, pop, clear, setBack, clearBack } = historySlice.actions
 export default historySlice.reducer
