@@ -20,7 +20,7 @@
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { setBack } from '/state/history'
+import { pushBackPoint, popBackPoint } from '/state/history'
 
 export const useBackPoint = function(path) {
     const previous = useSelector(
@@ -28,14 +28,19 @@ export const useBackPoint = function(path) {
         (a,b) => a?.key === b?.key
     ) 
 
+    const lastBackPoint = useSelector(
+        (state) => state.history.backPoints.length > 0 ? state.history.backPoints[state.history.backPoints.length-1] : null,
+        (a,b) => a?.location.key === b?.location.key
+    )
+
     const dispatch = useDispatch()
     useEffect(() => {
-        if ( previous !== null && ! previous.pathname.startsWith(path)) {
-            dispatch(setBack(previous))
+        if ( previous !== null && ! previous.pathname.startsWith(path) && lastBackPoint?.path !== path) {
+            dispatch(pushBackPoint({ path: path, location: previous }))
         }
 
         // TODO TECHDEBT We never clean up the backpoint.  This is okay because
         // of that way we're currently using it -- it will get reset before
         // it's used against. But is a potential issue to fix in teh future.
-    }, [path, previous])
+    }, [path, previous, lastBackPoint])
 }

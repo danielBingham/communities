@@ -25,7 +25,7 @@ import { Capacitor } from '@capacitor/core'
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid'
 
-import { pop } from '/state/history'
+import { popBackPoint } from '/state/history'
 
 import Button from '/components/ui/Button'
 
@@ -45,11 +45,12 @@ const BackButton = function() {
         else {
             return state.history.stack[length-1]
         }
-    })
+    }, (a,b) => a?.key === b?.key)
+
     const backLocation = useSelector((state) => {
         // If we have a back location, use that.
-        if ( state.history.back !== null ) {
-            return state.history.back
+        if ( state.history.backPoints.length > 0) {
+            return state.history.backPoints[state.history.backPoints-1]
         } 
 
         // Otherwise, if we have a previous page, use that.
@@ -61,7 +62,8 @@ const BackButton = function() {
         else {
             return null
         }
-    })
+    },
+    (a,b) => a?.key === b?.key)
 
     const navigate = useNavigate()
     const dispatch = useDispatch()
@@ -69,24 +71,15 @@ const BackButton = function() {
     const goBack = function(event) {
         event.preventDefault()
 
-        // The initial page load will add the current location to the stack. So
-        // there's only somewhere to go back to when the stack is at least 2. 
         if ( backLocation !== null ) {
-            // If we're going right back to where we just were, then pop the
-            // history stack.
-            if ( previous !== null && previous.key === backLocation.key) { 
-                dispatch(pop())
-                navigate(-1)
-            } else {
-                // Otherwise navigate to the new back page.
-                navigate(backLocation, { replace: true })
-            }
+            dispatch(popBackPoint())
+            navigate(backLocation, { replace: true })
         }
     }
 
     // Only render the back button on mobile.  On web, the user can use their
     // native back button.
-    if ( Capacitor.getPlatform() !== 'ios' && Capacitor.getPlatform() !== 'android' ) {
+    if ( Capacitor.getPlatform() === 'web' ) {
         return null
     }
 

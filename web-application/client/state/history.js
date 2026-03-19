@@ -4,7 +4,7 @@ const historySlice = createSlice({
     name: 'history',
     initialState: {
         stack: [],
-        back: null 
+        backPoints: [] 
     },
     reducers: {
         push: (state, action) => {
@@ -23,15 +23,22 @@ const historySlice = createSlice({
         clear: (state, action) => {
             state.stack = []
         },
-        setBack: (state, action) => {
-            state.back = action.payload
+        pushBackPoint: (state, action) => {
+            const backPoint = action.payload
+            if ( state.backPoints.length > 100) {
+                state.backPoints.shift()
+            }
+            state.backPoints.push(action.payload)
         },
-        clearBack: (state, action) => {
-            state.back = null
+        popBackPoint: (state, action) => {
+            state.backPoints.pop() 
+        },
+        clearBackPoints: (state, action) => {
+            state.backPoints = []
         }
     }
 })
 
 
-export const { push, pop, clear, setBack, clearBack } = historySlice.actions
+export const { push, pop, clear, pushBackPoint, popBackPoint} = historySlice.actions
 export default historySlice.reducer
