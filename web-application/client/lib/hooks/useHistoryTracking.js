@@ -29,11 +29,9 @@ export const useHistoryTracking = function() {
         (state) => state.history.stack.length > 0 ? state.history.stack[state.history.stack.length-1] : null,
         (a,b) => a?.key === b?.key
     ) 
-
-    const lastBackPoint = useSelector(
-        (state) => state.history.backPoints.length > 0 ? state.history.backPoints[state.history.backPoints.length-1] : null,
-        (a,b) => a?.location.key === b?.location.key
-    )
+    console.log(`== useHistoryTracking::`,
+        `location: `, location,
+        `previous: `, previous)
 
     const dispatch = useDispatch()
     
@@ -46,18 +44,9 @@ export const useHistoryTracking = function() {
         return () => {
             // We only want to add the current location to the stack if we didn't
             // just come back to it.
-            if ( previous !== null && previous.key !== location.key ) {
+            if ( previous === null || previous.key !== location.key ) {
                 dispatch(push(location))
             }
         }
     }, [ location ])
-
-    useEffect(() => {
-
-        // If we've navigated away from the last backpoint
-        if ( ! location.pathname.startsWith(lastBackPoint.path) ) {
-
-        }
-
-    }, [ location, lastBackPoint ])
 }

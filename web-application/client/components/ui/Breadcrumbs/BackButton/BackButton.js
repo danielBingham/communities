@@ -25,32 +25,18 @@ import { Capacitor } from '@capacitor/core'
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid'
 
-import { popBackPoint } from '/state/history'
+import { popBackPoint, pop } from '/state/history'
 
 import Button from '/components/ui/Button'
 
 import './BackButton.css'
 
 const BackButton = function() {
-    const previous = useSelector((state) => {
-        const length = state.history.stack.length
-
-        // If length is 0, we don't have anything on the stack yet. This is the
-        // first render and there are no previous pages. 
-        if ( length === 0  ) {
-            return null
-        } 
-
-        // Otherwise, the last item on the stack is the previous page.
-        else {
-            return state.history.stack[length-1]
-        }
-    }, (a,b) => a?.key === b?.key)
 
     const backLocation = useSelector((state) => {
         // If we have a back location, use that.
         if ( state.history.backPoints.length > 0) {
-            return state.history.backPoints[state.history.backPoints-1]
+            return state.history.backPoints[state.history.backPoints.length-1]
         } 
 
         // Otherwise, if we have a previous page, use that.
@@ -65,6 +51,8 @@ const BackButton = function() {
     },
     (a,b) => a?.key === b?.key)
 
+    console.log(`backLocation: `, JSON.stringify(backLocation))
+
     const navigate = useNavigate()
     const dispatch = useDispatch()
 
@@ -72,6 +60,7 @@ const BackButton = function() {
         event.preventDefault()
 
         if ( backLocation !== null ) {
+            dispatch(pop())
             dispatch(popBackPoint())
             navigate(backLocation, { replace: true })
         }

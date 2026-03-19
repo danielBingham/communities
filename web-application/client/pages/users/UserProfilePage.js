@@ -78,7 +78,7 @@ const UserProfilePage = function(props) {
 
     return (
         <>
-            <Breadcrumbs crumbs={[{ to: '/friends', name: 'Friends' }, { to: `/${user.username}`, name: user.name}]} />
+            <Breadcrumbs />
             <Page id="user-profile-page">
                 <PageLeftGutter>
                     <NavigationMenu className="user-profile-page__menu">

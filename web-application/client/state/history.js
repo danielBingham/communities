@@ -24,7 +24,6 @@ const historySlice = createSlice({
             state.stack = []
         },
         pushBackPoint: (state, action) => {
-            const backPoint = action.payload
             if ( state.backPoints.length > 100) {
                 state.backPoints.shift()
             }

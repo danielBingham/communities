@@ -115,7 +115,7 @@ const GroupPage = function() {
 
     return (
         <>
-            <Breadcrumbs crumbs={[{ to: '/groups', name: 'Groups' }, { to: `/group/${group.slug}`, name: group.title }]} />
+            <Breadcrumbs  />
             <Page id="group-page">
                 <PageLeftGutter>
                     <GroupNavigationMenu groupId={group.id} />
