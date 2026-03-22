@@ -19,28 +19,41 @@
  ******************************************************************************/
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { useLocation } from 'react-router-dom'
 
 import { pushBackPoint } from '/state/history'
 
 export const useBackPoint = function(path) {
-    const previous = useSelector(
+    const location = useLocation()
+    const current = useSelector(
         (state) => state.history.stack.length > 0 ? state.history.stack[state.history.stack.length-1] : null,
+        (a,b) => a?.key === b?.key
+    )
+    const previous = useSelector(
+        (state) => state.history.stack.length > 1 ? state.history.stack[state.history.stack.length-2] : null,
         (a,b) => a?.key === b?.key
     ) 
 
-    const lastBackPoint = useSelector(
-        (state) => state.history.backPoints.length > 0 ? state.history.backPoints[state.history.backPoints.length-1] : null,
-        (a,b) => a?.key === b?.key
-    )
+
+    console.log(`== useBackPoint:: `,
+        `\nlocation: `, location,
+        `\ncurrent: `, current,
+        `\nprevious: `, previous)
 
     const dispatch = useDispatch()
     useEffect(() => {
+        // If we haven't tracked the current location yet, then we can't make
+        // good assumptions about the state of the history stack.  Bailout.
+        if ( location?.key !== current?.key ) {
+            return
+        }
+
         if ( previous !== null && ! previous.pathname.startsWith(path)) {
-            dispatch(pushBackPoint(previous))
+            dispatch(pushBackPoint({ path: path, location: previous }))
         }
 
         // TODO TECHDEBT We never clean up the backpoint.  This is okay because
         // of that way we're currently using it -- it will get reset before
         // it's used against. But is a potential issue to fix in teh future.
-    }, [path, previous, lastBackPoint])
+    }, [path, previous, location, current ])
 }

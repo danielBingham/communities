@@ -25,7 +25,7 @@ import { Capacitor } from '@capacitor/core'
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid'
 
-import { popBackPoint, pop } from '/state/history'
+import { goToLastBackPoint } from '/state/history'
 
 import Button from '/components/ui/Button'
 
@@ -36,12 +36,7 @@ const BackButton = function() {
     const backLocation = useSelector((state) => {
         // If we have a back location, use that.
         if ( state.history.backPoints.length > 0) {
-            return state.history.backPoints[state.history.backPoints.length-1]
-        } 
-
-        // Otherwise, if we have a previous page, use that.
-        else if ( state.history.stack.length > 0 ) {
-            return state.history.stack[state.history.stack.length-1]
+            return state.history.backPoints[state.history.backPoints.length-1].location
         } 
 
         // Otherwise, we don't have anywhere to go back to.
@@ -51,7 +46,7 @@ const BackButton = function() {
     },
     (a,b) => a?.key === b?.key)
 
-    console.log(`backLocation: `, JSON.stringify(backLocation))
+    console.log(`backLocation: `, backLocation)
 
     const navigate = useNavigate()
     const dispatch = useDispatch()
@@ -60,17 +55,18 @@ const BackButton = function() {
         event.preventDefault()
 
         if ( backLocation !== null ) {
-            dispatch(pop())
-            dispatch(popBackPoint())
+            console.log(`\n\nGO BACK :: `,
+                `backLocation: `, backLocation, '\n\n')
+            dispatch(goToLastBackPoint())
             navigate(backLocation, { replace: true })
         }
     }
 
     // Only render the back button on mobile.  On web, the user can use their
     // native back button.
-    if ( Capacitor.getPlatform() === 'web' ) {
+    /*if ( Capacitor.getPlatform() === 'web' ) {
         return null
-    }
+    }*/
 
     if ( backLocation === null ) {
         return null
