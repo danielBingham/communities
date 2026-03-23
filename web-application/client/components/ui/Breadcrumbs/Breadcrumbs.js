@@ -17,30 +17,26 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import { useSelector } from 'react-redux'
-import { Outlet } from 'react-router-dom'
+import { Link } from 'react-router-dom'
+import { Capacitor } from '@capacitor/core'
 
-import { useNativeDeepLinks } from '/lib/hooks/useNativeDeepLinks'
-import { useAppState } from '/lib/hooks/useAppState'
-import { useVersion } from '/lib/hooks/useVersion'
-import { useScrollRestoration } from '/lib/hooks/useScrollRestoration'
+import BackButton from './BackButton'
 
-import "./RootLayout.css"
+import './Breadcrumbs.css'
 
-const RootLayout = function() {
-    const currentUser = useSelector((state) => state.authentication.currentUser)
-    const darkMode = currentUser?.settings?.darkMode === true
-    
-    useNativeDeepLinks()
-    useAppState()
-    useVersion()
-    useScrollRestoration()
+const Breadcrumbs = function() {
+    if ( Capacitor.getPlatform() === 'web' ) {
+        return <div className="breadcrumbs"></div> 
+    }
 
     return (
-        <div id="root-layout" className={`root-layout ${ darkMode ? 'dark' : '' }`}>
-            <Outlet />
+        <div className="breadcrumbs">
+            <div className="breadcrumbs__back">
+                <BackButton /> 
+            </div>
+            <div className="breadcrumbs__crumbs"></div>
         </div>
     )
 }
 
-export default RootLayout 
+export default Breadcrumbs

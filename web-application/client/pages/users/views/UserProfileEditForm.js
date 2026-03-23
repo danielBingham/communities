@@ -34,6 +34,7 @@ import FileUploadInput from '/components/files/FileUploadInput'
 
 import { RequestErrorModal } from '/components/errors/RequestError'
 
+import AreYouSure from '/components/AreYouSure'
 import Input from '/components/ui/Input'
 import TextBox from '/components/generic/text-box/TextBox'
 import Button from '/components/ui/Button'
@@ -42,6 +43,8 @@ import Spinner from '/components/Spinner'
 import './UserProfileEditForm.css'
 
 const UserProfileEditForm = function(props) {
+
+    const [areYouSure, setAreYouSure] = useState(false)
 
     const [fileId, setFileId] = useState(null)
     const [fileState, setFileState] = useState(null)
@@ -63,6 +66,23 @@ const UserProfileEditForm = function(props) {
     const madeChange = fileId != currentUser.fileId || name != currentUser.name || about != currentUser.about
 
     const navigate = useNavigate()
+    
+    const isDirty = function() {
+        if ( ! currentUser ) {
+            return false
+        }
+
+        if ( fileId !== currentUser.fileId ) {
+            return true
+        } else if ( name !== currentUser.name ) { 
+            return true
+        } else if ( about !== currentUser.about ) {
+            return true
+        }
+
+        return false
+    }
+
 
     const isValid = function(field) {
         let error = false
@@ -123,6 +143,9 @@ const UserProfileEditForm = function(props) {
         makeRequest(patchUser(assembleUser()))
     }
 
+    /**
+     * Execute the cancelation of this user profile edit and clear the form.
+     */
     const cancel = function() {
         if ( ! currentUser.name ) {
             setName('')
@@ -141,8 +164,21 @@ const UserProfileEditForm = function(props) {
         } else {
             setFileId(currentUser.fileId)
         }
+
+        setAreYouSure(false)
         
         navigate(`/${currentUser.username}`)
+    }
+
+    /**
+     * Handle the 'cancel' user action.
+     */
+    const handleCancel = function() {
+        if ( isDirty() ) {
+            setAreYouSure(true)
+        } else {
+            cancel()
+        }
     }
 
     // ======= Effect Handling ======================================
@@ -197,11 +233,7 @@ const UserProfileEditForm = function(props) {
         )
     }
 
-    let submit = ( <><Button onClick={(e) => cancel()}>Cancel</Button> <input type="submit" name="submit" value="Submit" /></> )
-    if ( (request && request.state == 'pending' ) || ( fileId && fileState == 'pending' )) {
-        submit = ( <Spinner /> )
-    }
-
+    const isPending = (request && request.state == 'pending' ) || ( fileId && fileState == 'pending' )
     return (
         <div className='user-profile-edit-form'>
             <form onSubmit={onSubmit}>
@@ -251,9 +283,19 @@ const UserProfileEditForm = function(props) {
                     {result}
                 </div>
                 <div className="form-submit submit">
-                    { submit }
+                    { ! isPending && <span><Button onClick={(e) => handleCancel()}>Cancel</Button> <input type="submit" name="submit" value="Submit" /></span> }
+                    { isPending && <Spinner /> }
                 </div>
             </form>
+            <AreYouSure 
+                isVisible={areYouSure} 
+                cancelLabel="Keep Editing"
+                executeLabel="Discard Changes"
+                execute={cancel} 
+                cancel={() => setAreYouSure(false)}
+            >
+                <p>Are you sure you want to discard your changes?</p>
+            </AreYouSure>
         </div>
     )
 }

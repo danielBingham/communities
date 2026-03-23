@@ -17,30 +17,22 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import { useSelector } from 'react-redux'
-import { Outlet } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
+import * as HeroIconsSolid from '@heroicons/react/24/solid'
+import * as HeroIconsOutline from '@heroicons/react/24/outline' 
 
-import { useNativeDeepLinks } from '/lib/hooks/useNativeDeepLinks'
-import { useAppState } from '/lib/hooks/useAppState'
-import { useVersion } from '/lib/hooks/useVersion'
-import { useScrollRestoration } from '/lib/hooks/useScrollRestoration'
+import './NavigationButton.css'
 
-import "./RootLayout.css"
-
-const RootLayout = function() {
-    const currentUser = useSelector((state) => state.authentication.currentUser)
-    const darkMode = currentUser?.settings?.darkMode === true
-    
-    useNativeDeepLinks()
-    useAppState()
-    useVersion()
-    useScrollRestoration()
+const NavigationButton = function({ className, to, icon, text }) {
+    const SolidIcon = HeroIconsSolid[`${icon}Icon`]
+    const OutlineIcon = HeroIconsOutline[`${icon}Icon`]
 
     return (
-        <div id="root-layout" className={`root-layout ${ darkMode ? 'dark' : '' }`}>
-            <Outlet />
-        </div>
+        <NavLink className={`navigation-button ${ className ? className : ''}`} to={to}>
+            <SolidIcon className="navigation-button__solid" /><OutlineIcon className="navigation-button__outline" /> <span className="navigation-button__text">{ text }</span>
+        </NavLink>
     )
+
 }
 
-export default RootLayout 
+export default NavigationButton
