@@ -24,12 +24,10 @@ import { useNativeDeepLinks } from '/lib/hooks/useNativeDeepLinks'
 import { useAppState } from '/lib/hooks/useAppState'
 import { useVersion } from '/lib/hooks/useVersion'
 import { useScrollRestoration } from '/lib/hooks/useScrollRestoration'
-import { useHistoryTracking } from '/lib/hooks/useHistoryTracking'
 
 import "./RootLayout.css"
 
 const RootLayout = function() {
-
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const darkMode = currentUser?.settings?.darkMode === true
     
@@ -37,7 +35,6 @@ const RootLayout = function() {
     useAppState()
     useVersion()
     useScrollRestoration()
-    useHistoryTracking()
 
     return (
         <div id="root-layout" className={`root-layout ${ darkMode ? 'dark' : '' }`}>

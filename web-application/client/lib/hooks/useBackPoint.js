@@ -17,13 +17,13 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import { useLayoutEffect } from 'react'
+import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useLocation } from 'react-router-dom'
 
-import { push } from '/state/history'
+import { pushBackPoint } from '/state/history'
 
-export const useHistoryTracking = function() {
+export const useBackPoint = function(path) {
     const location = useLocation()
     const current = useSelector(
         (state) => state.history.stack.length > 0 ? state.history.stack[state.history.stack.length-1] : null,
@@ -34,17 +34,21 @@ export const useHistoryTracking = function() {
         (a,b) => a?.key === b?.key
     ) 
 
-    const dispatch = useDispatch()
-    
-    // We only want this hook to fire when the location actually changes, not
-    // when the stack changes (since this hook changes the stack itself).
-    useLayoutEffect(() => {
-        // We only want to add the current location to the stack if we didn't
-        // just come back to it.
-        if ( previous === null || previous.key !== location.key ) {
-            dispatch(push(location))
-        }
-    }, [ location ])
 
-    return location?.key === current?.key 
+    const dispatch = useDispatch()
+    useEffect(() => {
+        // If we haven't tracked the current location yet, then we can't make
+        // good assumptions about the state of the history stack.  Bailout.
+        if ( location?.key !== current?.key ) {
+            return
+        }
+
+        if ( previous !== null && ! previous.pathname.startsWith(path)) {
+            dispatch(pushBackPoint({ path: path, location: previous }))
+        }
+
+        // TODO TECHDEBT We never clean up the backpoint.  This is okay because
+        // of that way we're currently using it -- it will get reset before
+        // it's used against. But is a potential issue to fix in teh future.
+    }, [path, previous, location, current ])
 }

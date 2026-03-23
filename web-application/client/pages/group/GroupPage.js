@@ -23,6 +23,8 @@ import { useParams, Routes, Route } from 'react-router-dom'
 
 import { resetEntities } from '/state/lib'
 
+import { useBackPoint } from '/lib/hooks/useBackPoint'
+
 import can, { Actions, Entities } from '/lib/permission'
 
 import { useGroupFromSlug, useGroupPermissionContext } from '/lib/hooks/Group'
@@ -57,6 +59,8 @@ const GroupPage = function() {
     const [context, requests] = useGroupPermissionContext(currentUser, group?.id)
 
     const canViewGroup = can(currentUser, Actions.view, Entities.Group, context)
+
+    useBackPoint(`/group/${slug}`)
 
     const dispatch = useDispatch()
     useEffect(() => {
@@ -111,7 +115,7 @@ const GroupPage = function() {
 
     return (
         <>
-            <Breadcrumbs crumbs={[{ to: '/groups', name: 'Groups' }, { to: `/group/${group.slug}`, name: group.title }]} />
+            <Breadcrumbs  />
             <Page id="group-page">
                 <PageLeftGutter>
                     <GroupNavigationMenu groupId={group.id} />

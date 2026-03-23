@@ -24,7 +24,7 @@ import BackButton from './BackButton'
 
 import './Breadcrumbs.css'
 
-const Breadcrumbs = function({ crumbs }) {
+const Breadcrumbs = function() {
     if ( Capacitor.getPlatform() === 'web' ) {
         return <div className="breadcrumbs"></div> 
     }
@@ -34,7 +34,7 @@ const Breadcrumbs = function({ crumbs }) {
             <div className="breadcrumbs__back">
                 <BackButton /> 
             </div>
-            <div className="breadcrumbs__crumbs">{ crumbs.map((c, index) => <span key={index}><Link to={c.to}>{ c.name }</Link> { index < crumbs.length-1 && <span> &gt; </span>}</span>) }</div>
+            <div className="breadcrumbs__crumbs"></div>
         </div>
     )
 }

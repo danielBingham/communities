@@ -21,9 +21,11 @@
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
+import { Capacitor } from '@capacitor/core'
+
 import { ArrowLeftIcon } from '@heroicons/react/24/solid'
 
-import { pop } from '/state/history'
+import { goToLastBackPoint } from '/state/history'
 
 import Button from '/components/ui/Button'
 
@@ -31,7 +33,18 @@ import './BackButton.css'
 
 const BackButton = function() {
 
-    const stack = useSelector((state) => state.history.stack)
+    const backLocation = useSelector((state) => {
+        // If we have a back location, use that.
+        if ( state.history.backPoints.length > 0) {
+            return state.history.backPoints[state.history.backPoints.length-1].location
+        } 
+
+        // Otherwise, we don't have anywhere to go back to.
+        else {
+            return null
+        }
+    },
+    (a,b) => a?.key === b?.key)
 
     const navigate = useNavigate()
     const dispatch = useDispatch()
@@ -39,15 +52,19 @@ const BackButton = function() {
     const goBack = function(event) {
         event.preventDefault()
 
-        // The initial page load will add the current location to the stack. So
-        // there's only somewhere to go back to when the stack is at least 2. 
-        if ( stack.length > 1 ) {
-            dispatch(pop())
-            navigate(-1)
+        if ( backLocation !== null ) {
+            dispatch(goToLastBackPoint())
+            navigate(backLocation, { replace: true })
         }
     }
 
-    if ( stack.length <= 1 ) {
+    // Only render the back button on mobile.  On web, the user can use their
+    // native back button.
+    if ( Capacitor.getPlatform() === 'web' ) {
+        return null
+    }
+
+    if ( backLocation === null ) {
         return null
     }
 
