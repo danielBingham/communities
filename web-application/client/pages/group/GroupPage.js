@@ -52,7 +52,6 @@ import './GroupPage.css'
 
 const GroupPage = function() {
     const { slug } = useParams()
-    console.log(`## GroupPage(${slug})`)
 
     const [group, groupRequest ] = useGroupFromSlug(slug)
     const currentUser = useSelector((state) => state.authentication.currentUser)

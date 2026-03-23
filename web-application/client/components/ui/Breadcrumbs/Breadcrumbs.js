@@ -25,9 +25,9 @@ import BackButton from './BackButton'
 import './Breadcrumbs.css'
 
 const Breadcrumbs = function() {
-/*    if ( Capacitor.getPlatform() === 'web' ) {
+    if ( Capacitor.getPlatform() === 'web' ) {
         return <div className="breadcrumbs"></div> 
-    }*/
+    }
 
     return (
         <div className="breadcrumbs">

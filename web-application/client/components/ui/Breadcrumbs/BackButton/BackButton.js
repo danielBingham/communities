@@ -46,8 +46,6 @@ const BackButton = function() {
     },
     (a,b) => a?.key === b?.key)
 
-    console.log(`backLocation: `, backLocation)
-
     const navigate = useNavigate()
     const dispatch = useDispatch()
 
@@ -55,8 +53,6 @@ const BackButton = function() {
         event.preventDefault()
 
         if ( backLocation !== null ) {
-            console.log(`\n\nGO BACK :: `,
-                `backLocation: `, backLocation, '\n\n')
             dispatch(goToLastBackPoint())
             navigate(backLocation, { replace: true })
         }
@@ -64,9 +60,9 @@ const BackButton = function() {
 
     // Only render the back button on mobile.  On web, the user can use their
     // native back button.
-    /*if ( Capacitor.getPlatform() === 'web' ) {
+    if ( Capacitor.getPlatform() === 'web' ) {
         return null
-    }*/
+    }
 
     if ( backLocation === null ) {
         return null

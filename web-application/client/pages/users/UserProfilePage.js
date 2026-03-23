@@ -39,7 +39,6 @@ import './UserProfilePage.css'
 
 const UserProfilePage = function(props) {
     const { slug } = useParams()
-    console.log(`## UserProfilePage(${slug})`)
 
     const [user, request] = useUserByUsername(slug)
 

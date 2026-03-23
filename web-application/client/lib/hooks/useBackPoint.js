@@ -35,11 +35,6 @@ export const useBackPoint = function(path) {
     ) 
 
 
-    console.log(`== useBackPoint:: `,
-        `\nlocation: `, location,
-        `\ncurrent: `, current,
-        `\nprevious: `, previous)
-
     const dispatch = useDispatch()
     useEffect(() => {
         // If we haven't tracked the current location yet, then we can't make

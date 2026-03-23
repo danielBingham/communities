@@ -33,13 +33,6 @@ export const useHistoryTracking = function() {
         (state) => state.history.stack.length > 1 ? state.history.stack[state.history.stack.length-2] : null,
         (a,b) => a?.key === b?.key
     ) 
-    if ( location?.key !== current?.key ) {
-        console.log(`\n\nLOCATION CHANGED\n\n`)
-    }
-    console.log(`== useHistoryTracking::`,
-        `\nlocation: `, location,
-        `\ncurrent: `, current,
-        `\nprevious: `, previous)
 
     const dispatch = useDispatch()
     

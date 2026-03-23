@@ -8,9 +8,6 @@ const historySlice = createSlice({
     },
     reducers: {
         push: (state, action) => {
-            console.log(`state/history:: push: `, 
-                `\nstate.stack: `, current(state.stack),
-                `\nlocation: `, action.payload)
             // Only keep the last 100 locations, we're unlikely to need to go
             // back further than that. If we don't do this, we could slowly
             // leak memory on mobile devices.
@@ -37,9 +34,6 @@ const historySlice = createSlice({
             state.stack = []
         },
         pushBackPoint: (state, action) => {
-            console.log(`state/history:: pushBackPoint: `, 
-                `\nstate.backPoints: `, current(state.backPoints),
-                `\nbackpoint: `, action.payload)
             if ( state.backPoints.length > 100) {
                 state.backPoints.shift()
             }
