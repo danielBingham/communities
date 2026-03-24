@@ -20,6 +20,8 @@
 import { createSlice } from '@reduxjs/toolkit'
 import * as qs from 'qs'
 
+import logger from '/logger'
+
 import { makeRequest } from '/state/lib/makeRequest'
 import { setRelationsInState } from '/state/lib/relations'
 
@@ -121,41 +123,22 @@ export const handleNotificationEvent = function(event) {
             desktop: true,
             mobile: true
         }
-        
+       
         if ( event.action === 'create' ) {
             if ( 'entity' in event.context ) {
                 dispatch(notificationsSlice.actions.setNotificationsInDictionary({ entity: event.context.entity }))
                 dispatch(notificationsSlice.actions.prependToQuery({ name: 'NotificationMenu', list: [ event.context.entity.id ] }))
 
-                if ( device.platform === 'web' && "Notification" in window && Notification.permission === 'granted') {
-                    const entity = event.context.entity
-                    const notificationSetting = settings && entity.type in settings ? settings[entity.type] : defaultNotificationSettings
-                    if ( notificationSetting.desktop === true ) {
-                        const notification = new Notification("Communities", 
-                            { 
-                                body: entity.description, 
-                                icon: `${host}/assets/icon-1024x1024.png`,
-                                image: `${host}/assets/icon-1024x1024.png`
-                            }
-                        )
-                        notification.addEventListener('click', (event) => {
-                            window.location.href = entity.path
-                        })
-                    }
-                }
-            } else if ( 'dictionary' in event.context ) {
-                dispatch(notificationsSlice.actions.setNotificationsInDictionary({ dictionary: event.context.dictionary }))
-                dispatch(notificationsSlice.actions.prependToQuery({ name: 'NotificationMenu', list: Object.values(event.context.dictionary).map((notification) => notification.id) }))
-                if ( device.platform === 'web' && "Notification" in window && Notification.permission === 'granted' ) {
-                    for(const [id, entity] of Object.entries(event.context.dictionary)) { 
+                try {
+                    if ( device.platform === 'web' && "Notification" in window && Notification.permission === 'granted') {
+                        const entity = event.context.entity
                         const notificationSetting = settings && entity.type in settings ? settings[entity.type] : defaultNotificationSettings
-                        if ( notificationSetting.desktop === true ) { 
+                        if ( notificationSetting.desktop === true ) {
                             const notification = new Notification("Communities", 
                                 { 
                                     body: entity.description, 
                                     icon: `${host}/assets/icon-1024x1024.png`,
                                     image: `${host}/assets/icon-1024x1024.png`
-
                                 }
                             )
                             notification.addEventListener('click', (event) => {
@@ -163,6 +146,34 @@ export const handleNotificationEvent = function(event) {
                             })
                         }
                     }
+                } catch (error) {
+                    logger.error(`First Error in state/notifications: `, error)
+                }
+            } else if ( 'dictionary' in event.context ) {
+                dispatch(notificationsSlice.actions.setNotificationsInDictionary({ dictionary: event.context.dictionary }))
+                dispatch(notificationsSlice.actions.prependToQuery({ name: 'NotificationMenu', list: Object.values(event.context.dictionary).map((notification) => notification.id) }))
+
+                try {
+                    if ( device.platform === 'web' && "Notification" in window && Notification.permission === 'granted' ) {
+                        for(const [id, entity] of Object.entries(event.context.dictionary)) { 
+                            const notificationSetting = settings && entity.type in settings ? settings[entity.type] : defaultNotificationSettings
+                            if ( notificationSetting.desktop === true ) { 
+                                const notification = new Notification("Communities", 
+                                    { 
+                                        body: entity.description, 
+                                        icon: `${host}/assets/icon-1024x1024.png`,
+                                        image: `${host}/assets/icon-1024x1024.png`
+
+                                    }
+                                )
+                                notification.addEventListener('click', (event) => {
+                                    window.location.href = entity.path
+                                })
+                            }
+                        }
+                    }
+                } catch (error) {
+                    logger.error(`Second error in state/notifications: `, error)
                 }
             }
         }

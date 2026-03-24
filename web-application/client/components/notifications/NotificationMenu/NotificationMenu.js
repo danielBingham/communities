@@ -25,6 +25,8 @@ import { App } from '@capacitor/app'
 
 import { BellIcon } from '@heroicons/react/24/outline'
 
+import logger from '/logger'
+
 import { useRequest } from '/lib/hooks/useRequest'
 import { useEventSubscription } from '/lib/hooks/useEventSubscription'
 
@@ -73,9 +75,14 @@ const NotificationMenu = function({ }) {
     }
 
     const requestNotificationPermissions = function(event) {
-        Notification.requestPermission().then((permission) => {
-            makePatchDeviceRequest(patchDevice({ notificationPermission: permission }))
-        })
+        try { 
+            Notification.requestPermission().then((permission) => {
+                makePatchDeviceRequest(patchDevice({ notificationPermission: permission }))
+            })
+        } catch (error) {
+            logger.error(`First error in NotificationMenu: `, error)
+        }
+            
     }
 
     useEffect(function() {
@@ -100,10 +107,14 @@ const NotificationMenu = function({ }) {
 
     let needToRequestPermission = false
     if ( device !== null && device.platform === 'web' ) {
-        if ( ! ( "notificationPermission" in device ) || ( device.notificationPermission !== Notification.permission && device.notificationPermission !== 'denied')) {
-            if ( "Notification" in window && Notification.permission !== 'granted' && Notification.permission !== 'denied' ) {
-                needToRequestPermission = true
+        try { 
+            if ( ! ( "notificationPermission" in device ) || ( device.notificationPermission !== Notification.permission && device.notificationPermission !== 'denied')) {
+                if ( "Notification" in window && Notification.permission !== 'granted' && Notification.permission !== 'denied' ) {
+                    needToRequestPermission = true
+                }
             }
+        } catch (error) {
+            logger.error(`Second error in NotificationMenu: `, error)
         }
     }
 

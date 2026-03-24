@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom'
 import { App } from '@capacitor/app'
 import { PushNotifications } from '@capacitor/push-notifications'
 
-
 import logger from '/logger'
 
 import { useRequest } from '/lib/hooks/useRequest'
@@ -73,25 +72,31 @@ export const useNotifications = function() {
     }, [ platform ])
 
     useEffect(function() {
-        if ( currentUser !== null && device !== null ) {
-            if ( ! request && (device.platform === 'ios' || device.platform === 'android' )) {
-                listenForPushNotifications().then(function() {
-                    registerPushNotifications().catch(function(error) {
-                        logger.error(error)
+        try { 
+            if ( currentUser !== null && device !== null ) {
+                if ( ! request && (device.platform === 'ios' || device.platform === 'android' )) {
+                    listenForPushNotifications().then(function() {
+                        registerPushNotifications().catch(function(error) {
+                            logger.error(error)
+                        })
+                    }).catch(function(error) {
+                        logger.error(`First Error in useNotifications: `, error)
                     })
-                }).catch(function(error) {
-                    logger.error(error)
-                })
-            }  else if ( device.platform === 'web' ) {
-                if ( ! ("notificationPermission" in device) && "Notification" in window ) {
-                    if ( Notification.permission === 'granted' || Notification.permission === 'denied' ) {
-                        if ( ! request ) {
-                            makeRequest(patchDevice({ notificationPermission: Notification.permission }))
+                }  else if ( device.platform === 'web' ) {
+                    if ( ! ("notificationPermission" in device) && "Notification" in window ) {
+                        if ( Notification.permission === 'granted' || Notification.permission === 'denied' ) {
+                            if ( ! request ) {
+                                makeRequest(patchDevice({ notificationPermission: Notification.permission }))
+                            }
                         }
                     }
                 }
             }
+        } catch (error) {
+            logger.error(`Second Error in useNotifications: `, error)
         }
+            
+
     }, [ currentUser, device, request ])
 
 }
