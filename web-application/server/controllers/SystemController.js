@@ -64,4 +64,9 @@ module.exports = class SystemController extends BaseController {
             version: process.env.npm_package_version,
         })
     }
+
+    async postLog(request, response) {
+       request.logger.forward(request.body) 
+       response.status(201).json({})
+    }
 }

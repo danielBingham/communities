@@ -41,6 +41,12 @@ module.exports = function(core) {
         })
     })
 
+    router.post('/system/log', rateLimit(core, 2400), function(request, response, next) {
+        systemController.postLog(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
     /******************************************************************************
      * Feature Flag Management and Migration Rest Routes
      *****************************************************************************/
