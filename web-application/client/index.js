@@ -22,6 +22,7 @@ if ( Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android' 
     let environment = document.querySelector('meta[name="communities-environment"]').content
     let version = document.querySelector('meta[name="communities-version"]').content
 
+    logger.setStore(store)
     logger.info(`Communities startup with::\n 
       environment: "${environment}"\n
       host: "${host}"\n
@@ -55,6 +56,7 @@ else {
   let environment = document.querySelector('meta[name="communities-environment"]').content
   let version = document.querySelector('meta[name="communities-version"]').content
 
+  logger.setStore(store)
   logger.info(`Communities startup with::\n 
     environment: "${environment}"\n
     host: "${host}"\n

@@ -18,23 +18,24 @@
  *
  ******************************************************************************/
 
-import * as Sentry from "@sentry/react";
-import { Capacitor } from '@capacitor/core'
+import { forwardLog } from '/state/system'
 
 export class Logger  {
     /**
      * Use NPM's logging levels.
      */
     static levels = {
-        error: 0,
-        warn: 1,
-        info: 2,
-        debug: 3,
-        verbose: 4,
-        silly: 5
+        critical: 0,
+        error: 1,
+        warn: 2,
+        info: 3,
+        debug: 4,
+        verbose: 5,
+        silly: 6
     }
 
     static levelDescriptions = [
+        'critical',
         'error',
         'warn',
         'info',
@@ -44,7 +45,12 @@ export class Logger  {
     ]
 
     constructor(level) {
+        this.store = null
         this.setLevel(level)
+    }
+    
+    setStore(store) {
+        this.store = store
     }
 
     setLevel(level) {
@@ -69,35 +75,104 @@ export class Logger  {
         return `${first}` 
     }
 
+    forwardLog(level, message, ...args) {
+        if ( this.store === null || this.store === undefined ) {
+            return
+        }
+
+        let parsedMessage = message 
+        if ( args !== undefined && args !== null && args.length > 0 ) {
+            try { 
+                for(const arg of args) {
+                    if ( typeof arg === 'string' ) {
+                        parsedMessage += arg
+                    } else if ( typeof arg === 'number' ) {
+                        parsedMessage += arg
+                    } else {
+                        parsedMessage += JSON.stringify(arg)
+                    }
+                }
+            } catch (error) {
+                console.error(`Failed to parse log args: `, error)
+            }
+        }
+
+        const errors = []
+        if ( args !== undefined && args !== null && args.length > 0) {
+            for(const arg of args) {
+                if ( arg instanceof Error) {
+                    try {
+                        const e = {
+                            message: arg.message,
+                            stack: '' 
+                        }
+                        if ( 'stack' in arg ) {
+                            e.stack = arg.stack
+                        }
+                        errors.push(e)
+                    } catch (error) {
+                        console.error(`Failed to capture stack trace for error:`, error)
+                    }
+                }
+            }
+        }
+
+        // Truncate the message so that we don't lose all of it.
+        if ( parsedMessage.length > 10000 ) {
+            parsedMessage = parsedMessage.substring(0,9999)
+        }
+
+
+        const now = new Date()
+        const forwardedLog = {
+            timestamp: now.toISOString(),
+            level: level,
+            message: parsedMessage,
+            errors: errors 
+        }
+
+        this.store.dispatch(forwardLog(forwardedLog))
+    }
+
     log(level, message, ...args) {
         // We don't need to log anything. 
         if ( level > this.level ) {
             return
         }
 
+        this.forwardLog(level, message, ...args)
+
         let logPrefix = this.getPrefix(level) 
         if ( typeof message === 'string' ) {
             const prefixedMessage = logPrefix + message
-            if ( level === Logger.levels.error ) {
+            if ( level === Logger.levels.critical ) {
                 console.error(prefixedMessage, ...args)
-                Sentry.captureException(new Error(message))
+            } else if ( level === Logger.levels.error ) {
+                console.error(prefixedMessage, ...args)
             } else if ( level === Logger.levels.warn ) {
                 console.warn(prefixedMessage, ...args)
-                Sentry.captureException(new Error(message))
             } else {
                 console.log(prefixedMessage, ...args)
             }
         } else {
-            if ( level === Logger.levels.error ) {
+            if ( level === Logger.levels.critical ) {
                 console.error(logPrefix, message, ...args)
-                Sentry.captureException(message)
+            } else if ( level === Logger.levels.error ) {
+                console.error(logPrefix, message, ...args)
             } else if ( level === Logger.levels.warn ) {
                 console.warn(logPrefix, message, ...args)
-                Sentry.captureException(message)
             } else {
                 console.log(logPrefix, message, ...args)
             }
         }
+    }
+
+    critical(error) {
+        if ( this.level < Logger.levels.critical) {
+            return
+        }
+
+        this.log(Logger.levels.critical, "### Critical Error ###", error)
     }
 
     error(message, ...args) {
