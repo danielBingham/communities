@@ -117,6 +117,11 @@ export class Logger  {
             }
         }
 
+        // Truncate the message so that we don't lose all of it.
+        if ( parsedMessage.length > 10000 ) {
+            parsedMessage = parsedMessage.substring(0,9999)
+        }
+
 
         const now = new Date()
         const forwardedLog = {

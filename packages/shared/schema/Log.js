@@ -66,7 +66,7 @@ module.exports = class LogSchema extends Schema {
                         .mustNotBeNull()
                         .mustBeString()
                         .mustNotBeEmpty()
-                        .mustBeShorterThan(4098)
+                        .mustBeShorterThan(10001)
                         .getErrors()
                     return errors
                 }

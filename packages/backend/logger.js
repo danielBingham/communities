@@ -129,8 +129,6 @@ module.exports = class Logger  {
                 } else {
                     console.warn('Unlogged error stack.  Stack was not a string.')
                 }
-
-                
             }
         }
 
