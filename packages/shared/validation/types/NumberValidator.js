@@ -55,5 +55,65 @@ module.exports = class NumberValidator extends BaseValidator {
         }
         return this
     }
+
+    mustBeGreaterThan(value) {
+        if ( this.shortCircuit() ) {
+            return this
+        }
+
+        if ( ! ( this.value > value ) ) {
+            this.errors.push({
+                type: `${this.name}:invalid-value`,
+                log: `${this.value} is not greater than ${value}.`,
+                message: `${this.value} is not greater than ${value}.`
+            })
+        }
+        return this
+    }
+
+    mustBeGreaterThanOrEqualTo(value) {
+        if ( this.shortCircuit() ) {
+            return this
+        }
+
+        if ( ! ( this.value >= value ) ) {
+            this.errors.push({
+                type: `${this.name}:invalid-value`,
+                log: `${this.value} is not greater than or equal to ${value}.`,
+                message: `${this.value} is not greater than or equal to ${value}.`
+            })
+        }
+        return this
+    }
+
+    mustBeLessThan(value) {
+        if ( this.shortCircuit() ) {
+            return this
+        }
+
+        if ( ! ( this.value < value ) ) {
+            this.errors.push({
+                type: `${this.name}:invalid-value`,
+                log: `${this.value} is not less than ${value}.`,
+                message: `${this.value} is not less than ${value}.`
+            })
+        }
+        return this
+    }
+
+    mustBeLessThanOrEqualTo(value) {
+        if ( this.shortCircuit() ) {
+            return this
+        }
+
+        if ( ! ( this.value <= value ) ) {
+            this.errors.push({
+                type: `${this.name}:invalid-value`,
+                log: `${this.value} is not less than or equal to ${value}.`,
+                message: `${this.value} is not less than or equal to ${value}.`
+            })
+        }
+        return this
+    }
 }
 

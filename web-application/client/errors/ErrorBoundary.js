@@ -1,4 +1,24 @@
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media 
+ *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
 import React from 'react'
+import * as Sentry from "@sentry/react";
 
 import logger from '/logger'
 
@@ -35,7 +55,27 @@ export default class ErrorBoundary extends React.Component {
     // Used for logging error information.  For now we're not going to use
     // this.
     componentDidCatch(error, errorInfo) {
-        logger.error(error.message, errorInfo)
+        try {
+            // If we're on the production environment, forward the error to Sentry.
+            let environment = document.querySelector('meta[name="communities-environment"]').content
+            if ( environment === 'production' ) {
+                Sentry.captureException(error)
+            }
+
+            if ( 'stack' in error ) {
+                logger.critical(error)
+            } else {
+                error.stack = errorInfo.componentStack
+                logger.critical(error)
+            }
+        } catch (logError) {
+            try {
+                logger.error(logError)
+            } catch (secondLogError) {
+                console.error(logError)
+                console.error(secondLogError)
+            }
+        }
     }
 
     // Render the error UI.

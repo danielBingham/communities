@@ -95,6 +95,20 @@ export const getInitialization = function() {
     }
 }
 
+export const forwardLog = function(message) {
+    return function(dispatch, getState) {
+        const state = getState()
+        // Don't forward any logs until we've loaded the CSRF token.
+        if ( state.system.csrf === null ) {
+            return
+        }
+
+        return dispatch(makeRequest('POST', '/system/log', message,
+            function(requestBody) {
+            }
+        ))
+    }
+}
 
 export const { reset, setHost, setAPI, setConfiguration, setFeatures, setIsActive } = systemSlice.actions
 export default systemSlice.reducer

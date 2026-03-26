@@ -20,12 +20,17 @@
 
 const { TokenService } = require('@communities/backend')
 
+const { schema } = require('@communities/shared')
+const ControllerError = require('../errors/ControllerError')
+
 const BaseController = require('./BaseController')
 
 module.exports = class SystemController extends BaseController {
 
     constructor(core) {
         super(core)
+
+        this.logSchema = new schema.LogSchema()
     }
 
     async getInitialization(request, response) {
@@ -63,5 +68,21 @@ module.exports = class SystemController extends BaseController {
         response.status(200).json({
             version: process.env.npm_package_version,
         })
+    }
+
+    async postLog(request, response) {
+        const logMessage = this.logSchema.clean(request.body)
+
+        const validationErrors = this.logSchema.validate(logMessage)
+        if ( validationErrors.all.length > 0 ) {
+            const errorString = validationErrors.all.reduce((string, error) => `${string}\n${error.message}`, '')
+            const logString = validationErrors.all.reduce((string, error) => `${string}\n${error.log}`, '')
+            throw new ControllerError(400, 'invalid',
+                `User submitted an invalid log: ${logString}`,
+                errorString)
+        }
+
+        request.logger.forward(logMessage) 
+        response.status(201).json({})
     }
 }

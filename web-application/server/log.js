@@ -42,8 +42,8 @@ const createLogMiddleware = function(core) {
         // Create the request logger.
         request.logger = new Logger(core.logger.level, id, request.method, request.originalUrl)
 
-        // Don't bother logging the health requests.
-        if ( request.url !== '/health' ) {
+        // Don't bother logging the health requests or log requests.
+        if ( request.url !== '/health' && ! request.url.endsWith('system/log') ) {
             // Log start and end of the request.
             const startTime = Date.now()
             request.logger.info(`BEGIN`)
