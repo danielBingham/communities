@@ -61,7 +61,7 @@ module.exports = class NumberValidator extends BaseValidator {
             return this
         }
 
-        if ( this.value > value ) {
+        if ( ! ( this.value > value ) ) {
             this.errors.push({
                 type: `${this.name}:invalid-value`,
                 log: `${this.value} is not greater than ${value}.`,
@@ -76,7 +76,7 @@ module.exports = class NumberValidator extends BaseValidator {
             return this
         }
 
-        if ( this.value >= value ) {
+        if ( ! ( this.value >= value ) ) {
             this.errors.push({
                 type: `${this.name}:invalid-value`,
                 log: `${this.value} is not greater than or equal to ${value}.`,
@@ -91,7 +91,7 @@ module.exports = class NumberValidator extends BaseValidator {
             return this
         }
 
-        if ( this.value < value ) {
+        if ( ! ( this.value < value ) ) {
             this.errors.push({
                 type: `${this.name}:invalid-value`,
                 log: `${this.value} is not less than ${value}.`,
@@ -106,7 +106,7 @@ module.exports = class NumberValidator extends BaseValidator {
             return this
         }
 
-        if ( this.value <= value ) {
+        if ( ! ( this.value <= value ) ) {
             this.errors.push({
                 type: `${this.name}:invalid-value`,
                 log: `${this.value} is not less than or equal to ${value}.`,

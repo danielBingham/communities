@@ -53,6 +53,7 @@ module.exports = class LogSchema extends Schema {
                         .mustBeInteger()
                         .mustBeGreaterThanOrEqualTo(0)
                         .mustBeLessThan(7)
+                        .getErrors()
                     return errors
                 }
             },

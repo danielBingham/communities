@@ -65,7 +65,7 @@ export default class ErrorBoundary extends React.Component {
             if ( 'stack' in error ) {
                 logger.critical(error)
             } else {
-                error.stack = errorInfo
+                error.stack = errorInfo.componentStack
                 logger.critical(error)
             }
         } catch (logError) {

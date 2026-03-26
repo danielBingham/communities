@@ -109,8 +109,9 @@ module.exports = class Logger  {
         formattedMessage += 'frontend :: ' + message.message
         if ( 'errors' in message && message.errors.length > 0 ) {
             for(const error of message.errors ) {
-                formattedMessage += `\nError Message: ` + error.message + '\nStack: ' + error.stack + '\nArgs: '
+                formattedMessage += `\nError Message: ` + error.message + '\nStack: ' + error.stack 
             }
+            formattedMessage += '\nArgs: '
         }
 
         console.log(formattedMessage, ...message.args)
