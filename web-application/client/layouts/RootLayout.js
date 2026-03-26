@@ -20,6 +20,8 @@
 import { useSelector } from 'react-redux'
 import { Outlet } from 'react-router-dom'
 
+import logger from '/logger'
+
 import { useNativeDeepLinks } from '/lib/hooks/useNativeDeepLinks'
 import { useAppState } from '/lib/hooks/useAppState'
 import { useVersion } from '/lib/hooks/useVersion'

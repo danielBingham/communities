@@ -66,20 +66,7 @@ module.exports = class LogSchema extends Schema {
                         .mustNotBeNull()
                         .mustBeString()
                         .mustNotBeEmpty()
-                        .mustBeShorterThan(2048)
-                        .getErrors()
-                    return errors
-                }
-            },
-            args: {
-                clean: (value) => { return Array.isArray(value) ? value : [] },
-                validate: (value, existing, action) => {
-                    const validator = new ArrayValidator('args', value, existing, action)
-                    const errors = validator
-                        .isRequiredToCreate()
-                        .mustNotBeNull()
-                        .mustBeArray()
-                        .mustBeShorterThan(100)
+                        .mustBeShorterThan(4098)
                         .getErrors()
                     return errors
                 }

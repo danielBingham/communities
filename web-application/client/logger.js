@@ -80,16 +80,25 @@ export class Logger  {
             return
         }
 
-        const now = new Date()
-        const forwardedLog = {
-            timestamp: now.toISOString(),
-            level: level,
-            message: message,
-            args: args || [],
-            errors: []
+        let parsedMessage = message 
+        if ( args !== undefined && args !== null && args.length > 0 ) {
+            try { 
+                for(const arg of args) {
+                    if ( typeof arg === 'string' ) {
+                        parsedMessage += arg
+                    } else if ( typeof arg === 'number' ) {
+                        parsedMessage += arg
+                    } else {
+                        parsedMessage += JSON.stringify(arg)
+                    }
+                }
+            } catch (error) {
+                console.error(`Failed to parse log args: `, error)
+            }
         }
 
-        if ( args !== undefined && args !== null ) {
+        const errors = []
+        if ( args !== undefined && args !== null && args.length > 0) {
             for(const arg of args) {
                 if ( arg instanceof Error) {
                     try {
@@ -100,12 +109,21 @@ export class Logger  {
                         if ( 'stack' in arg ) {
                             e.stack = arg.stack
                         }
-                        forwardedLog.errors.push(e)
+                        errors.push(e)
                     } catch (error) {
                         console.error(`Failed to capture stack trace for error:`, error)
                     }
                 }
             }
+        }
+
+
+        const now = new Date()
+        const forwardedLog = {
+            timestamp: now.toISOString(),
+            level: level,
+            message: parsedMessage,
+            errors: errors 
         }
 
         this.store.dispatch(forwardLog(forwardedLog))

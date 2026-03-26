@@ -109,12 +109,38 @@ module.exports = class Logger  {
         formattedMessage += 'frontend :: ' + message.message
         if ( 'errors' in message && message.errors.length > 0 ) {
             for(const error of message.errors ) {
-                formattedMessage += `\nError Message: ` + error.message + '\nStack: ' + error.stack 
+                if ('message' in error && typeof error.message === 'string' ) {
+                    if ( error.message.length > 10000 ) {
+                        formattedMessage += `\nError Message: ${error.message.substring(0, 10000)}`
+                    } else {
+                        formattedMessage += `\nError Message: ${error.message}`
+                    }
+                } else {
+                    console.warn('Unlogged error message.  Message was not a string.')
+                }
+
+
+                if ( 'stack' in error && typeof error.stack === 'string' ) {
+                    if ( error.stack.length > 10000 ) {
+                        formattedMessage += `\nStack: ${error.stack.substring(0,10000)}`
+                    } else {
+                        formattedMessage += `\nStack: ${error.stack}`
+                    }
+                } else {
+                    console.warn('Unlogged error stack.  Stack was not a string.')
+                }
+
+                
             }
-            formattedMessage += '\nArgs: '
         }
 
-        console.log(formattedMessage, ...message.args)
+        if ( message.level === Logger.levels.critical || message.level === Logger.levels.error ) {
+            console.error(formattedMessage)
+        } else if ( message.level === Logger.levels.warn ) {
+            console.warn(formattedMessage)
+        } else {
+            console.log(formattedMessage)
+        }
     }
 
     log(level, message, ...args) {
@@ -127,7 +153,7 @@ module.exports = class Logger  {
 
         if ( typeof message === 'string' ) {
             const prefixedMessage = logPrefix + message
-            if ( level === Logger.levels.error ) {
+            if ( level === Logger.levels.error  || level === Logger.levels.critical) {
                 console.error(prefixedMessage, ...args)
             } else if ( level === Logger.levels.warn ) {
                 console.warn(prefixedMessage, ...args)
@@ -135,7 +161,7 @@ module.exports = class Logger  {
                 console.log(prefixedMessage, ...args)
             }
         } else {
-            if ( level === Logger.levels.error ) {
+            if ( level === Logger.levels.error || level === Logger.levels.critical) {
                 console.error(logPrefix, message, ...args)
             } else if ( level === Logger.levels.warn ) {
                 console.warn(logPrefix, message, ...args)
