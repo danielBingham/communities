@@ -22,15 +22,17 @@ module.exports = class Logger  {
      * Use NPM's logging levels.
      */
     static levels = {
-        error: 0,
-        warn: 1,
-        info: 2,
-        debug: 3,
-        verbose: 4,
-        silly: 5
+        critical: 0,
+        error: 1,
+        warn: 2,
+        info: 3,
+        debug: 4,
+        verbose: 5,
+        silly: 6
     }
 
     static levelDescriptions = [
+        'critical',
         'error',
         'warn',
         'info',
@@ -95,6 +97,23 @@ module.exports = class Logger  {
         }
         
         return `${first}${second}` 
+    }
+
+    forward(message) {
+        let formattedMessage = `${message.timestamp} ${Logger.levelDescriptions[message.level]} :: `
+
+        if ( this.id !== '' ) {
+            formattedMessage += this.id + ' '
+        }
+        
+        formattedMessage += 'frontend :: ' + message.message
+        if ( 'errors' in message && message.errors.length > 0 ) {
+            for(const error of message.errors ) {
+                formattedMessage += `\nError Message: ` + error.message + '\nStack: ' + error.stack + '\nArgs: '
+            }
+        }
+
+        console.log(formattedMessage, ...message.args)
     }
 
     log(level, message, ...args) {

@@ -85,23 +85,25 @@ export class Logger  {
             timestamp: now.toISOString(),
             level: level,
             message: message,
-            args: args,
+            args: args || [],
             errors: []
         }
 
-        for(const arg of args) {
-            if ( arg instanceof Error) {
-                try {
-                    const e = {
-                        message: arg.message,
-                        stack: '' 
+        if ( args !== undefined && args !== null ) {
+            for(const arg of args) {
+                if ( arg instanceof Error) {
+                    try {
+                        const e = {
+                            message: arg.message,
+                            stack: '' 
+                        }
+                        if ( 'stack' in arg ) {
+                            e.stack = arg.stack
+                        }
+                        forwardedLog.errors.push(e)
+                    } catch (error) {
+                        console.error(`Failed to capture stack trace for error:`, error)
                     }
-                    if ( 'stack' in arg ) {
-                        e.stack = arg.stack
-                    }
-                    forwardedLog.errors.push(e)
-                } catch (error) {
-                    console.error(`Failed to capture stack trace for error:`, error)
                 }
             }
         }
