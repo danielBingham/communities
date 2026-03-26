@@ -145,7 +145,7 @@ export class Logger  {
     }
 
     critical(error) {
-        if ( this.level < Logger.levels.error ) {
+        if ( this.level < Logger.levels.critical) {
             return
         }
 

@@ -95,10 +95,6 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
             logger.verbose(`<<< ${method} ${endpoint} :: With options: ${JSON.stringify(fetchOptions)}`)
             const response = await fetch(fullEndpoint, fetchOptions)
             logger.verbose(`>>> ${method} ${endpoint} ::  Got ${response.status}.`)
-            for(const [header, value] of response.headers) {
-                logger.verbose(`>>> ${method} ${endpoint} :: Header::  ${header}=${value}`)
-            }
-            logger.verbose(`>>> ${method} ${fullEndpoint} :: End Headers`)
 
             // If they've been logged out, send them to the home page, which will
             // let them log back in again.
@@ -120,10 +116,26 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
           
             let responseBody = {}
             if ( options?.isFile === true ) {
-                const blob = await response.blob()
-                responseBody.fileURL = URL.createObjectURL(blob)
+                try { 
+                    const blob = await response.blob()
+                    responseBody.fileURL = URL.createObjectURL(blob)
+                } catch (error) {
+                    responseBody.error = {
+                        type: 'invalid-body',
+                        message: 'Failed to read response body as blob.'
+                    }
+                    console.error('Failed to read response body as blob: ', error)
+                }
             } else {
-                responseBody = await response.json()
+                try { 
+                    responseBody = await response.json()
+                } catch (error) {
+                    responseBody.error = {
+                        type: 'invalid-body',
+                        message: 'Failed to read response body as json.'
+                    }
+                    console.error(`Failed to read response body as json: `, error)
+                }
             }
 
             const result = {
@@ -152,7 +164,7 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
                         result.error.all = [{
                             type: responseBody.error.type,
                             message: responseBody.error.message,
-                            context: responseBody.error.context
+                            context: 'context' in responseBody.error ? responseBody.error.context : {}
                         }]
                     }
                 }  else {
@@ -166,16 +178,15 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
                     window.location.reload()
                 }
 
-                if ( response.status >= 500 ) {
-                    console.error(`<<< ${method} ${endpoint} :: Failed: `, result)
-                } else {
-                    logger.verbose(`<<< ${method} ${endpoint} :: Returned ${response.status}: `, result)
-                }
                 if ( onFailure ) {
                     try {
                         onFailure(response.status, responseBody)
                     } catch (error) {
-                        logger.error(`<<< ${method} ${endpoint} :: Error handling request failure: `, error)
+                        if ( endpoint.endsWith('system/log') ) {
+                            console.error(`<<< ${method} ${endpoint} :: Error handling request failure: `, error)
+                        } else {
+                            logger.error(`<<< ${method} ${endpoint} :: Error handling request failure: `, error)
+                        }
                     }
                 } 
                 return result
@@ -185,7 +196,12 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
                 try {
                     onSuccess(responseBody)
                 } catch (error) {
-                    logger.error(`<<< ${method} ${endpoint} :: Error handling request success: `, error)
+                    if ( endpoint.endsWith('system/log') ) {
+                        console.error(`<<< ${method} ${endpoint} :: Error handling request success: `, error)
+                    } else {
+                        logger.error(`<<< ${method} ${endpoint} :: Error handling request success: `, error)
+                    }
+
                     result.success = false
                     result.error = {
                         type: 'frontend-error',

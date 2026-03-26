@@ -21,6 +21,7 @@
 const { TokenService } = require('@communities/backend')
 
 const { schema } = require('@communities/shared')
+const ControllerError = require('../errors/ControllerError')
 
 const BaseController = require('./BaseController')
 

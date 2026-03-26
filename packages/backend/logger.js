@@ -144,6 +144,14 @@ module.exports = class Logger  {
         }
     }
 
+    critical(message, ...args) {
+        if ( this.level < Logger.levels.critical) {
+            return
+        }
+
+        this.log(Logger.levels.critical, message, ...args)    
+    }
+
     error(message, ...args) {
         if ( this.level < Logger.levels.error ) {
             return

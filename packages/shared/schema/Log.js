@@ -22,7 +22,7 @@ const { StringValidator, ArrayValidator, NumberValidator } = require('../validat
 
 const Schema = require('./Schema')
 
-module.exports = class GroupSchema extends Schema {
+module.exports = class LogSchema extends Schema {
     constructor() {
         super()
 
@@ -51,6 +51,8 @@ module.exports = class GroupSchema extends Schema {
                         .mustBeNumber()
                         .mustNotBeNaN()
                         .mustBeInteger()
+                        .mustBeGreaterThanOrEqualTo(0)
+                        .mustBeLessThan(7)
                     return errors
                 }
             },
@@ -76,6 +78,7 @@ module.exports = class GroupSchema extends Schema {
                         .isRequiredToCreate()
                         .mustNotBeNull()
                         .mustBeArray()
+                        .mustBeShorterThan(100)
                         .getErrors()
                     return errors
                 }
@@ -88,6 +91,7 @@ module.exports = class GroupSchema extends Schema {
                         .isRequiredToCreate()
                         .mustNotBeNull()
                         .mustBeArray()
+                        .mustBeShorterThan(100)
                         .getErrors()
                     return errors
                 }
