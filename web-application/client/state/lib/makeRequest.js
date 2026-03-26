@@ -25,8 +25,6 @@ import logger from '/logger'
 
 export const makeRequest = function(method, endpoint, body, onSuccess, onFailure, options) {
     return function(dispatch, getState) {
-        logger.verbose(`>>> ${method} ${endpoint} >>>`)
-
         const system = getState().system
         const abortController = new AbortController()
 
@@ -91,10 +89,7 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
             // ==================== Make the Request ==========================
             //
 
-            logger.verbose(`<<< ${method} ${endpoint} :: Sending ${method} ${fullEndpoint}.`)
-            logger.verbose(`<<< ${method} ${endpoint} :: With options: ${JSON.stringify(fetchOptions)}`)
             const response = await fetch(fullEndpoint, fetchOptions)
-            logger.verbose(`>>> ${method} ${endpoint} ::  Got ${response.status}.`)
 
             // If they've been logged out, send them to the home page, which will
             // let them log back in again.
@@ -211,7 +206,6 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
                 }
             }
 
-            logger.verbose(`<<< ${method} ${endpoint} <<<`)
             return result 
         }
 
