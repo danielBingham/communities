@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
 import { App } from '@capacitor/app'
@@ -9,6 +9,9 @@ import logger from '/logger'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
+import { removeDeliveredNotificationById, updateBadgeCount } from '/lib/pushNotificationUtils'
+
+import { patchNotification } from '/state/notifications'
 import { patchDevice } from '/state/authentication'
 
 
@@ -20,6 +23,7 @@ export const useNotifications = function() {
     const [request, makeRequest, resetRequest] = useRequest()
 
     const navigate = useNavigate()
+    const dispatch = useDispatch()
 
     const listenForPushNotifications = async function() {
         await PushNotifications.addListener('registration', (token) => {
@@ -37,9 +41,32 @@ export const useNotifications = function() {
         })
 
         await PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
-            // Navigate to the notification path.
             if ( action.actionId === 'tap' ) {
-                navigate(action.notification.data.path)
+                const notificationData = action.notification.data
+                const notificationId = notificationData?.notificationId
+                const path = notificationData?.path
+
+                // Navigate to the notification's target path.
+                if ( path ) {
+                    navigate(path)
+                }
+
+                // Mark the notification as read in the Communities database.
+                if ( notificationId && currentUser ) {
+                    try {
+                        const [promise] = dispatch(patchNotification({
+                            id: notificationId,
+                            userId: currentUser.id,
+                            isRead: true
+                        }))
+                        promise.catch((error) => logger.error(`Failed to mark notification as read: `, error))
+                    } catch(error) {
+                        logger.error(`Failed to dispatch patchNotification: `, error)
+                    }
+                }
+
+                // Update the app icon badge count.
+                updateBadgeCount()
             }
         })
     } 

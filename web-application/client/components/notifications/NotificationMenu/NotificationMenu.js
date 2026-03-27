@@ -33,6 +33,8 @@ import { useEventSubscription } from '/lib/hooks/useEventSubscription'
 import { getNotifications, patchNotifications } from '/state/notifications'
 import { patchDevice } from '/state/authentication'
 
+import { clearAllDeliveredNotifications } from '/lib/pushNotificationUtils'
+
 import { 
     DropdownMenu, 
     DropdownMenuHeader, 
@@ -72,6 +74,10 @@ const NotificationMenu = function({ }) {
         }
 
         makeMarkReadRequest(patchNotifications(notifications))  
+
+        // Clear all delivered push notifications from the device notification
+        // center and reset the badge to 0.
+        clearAllDeliveredNotifications()
     }
 
     const requestNotificationPermissions = function(event) {

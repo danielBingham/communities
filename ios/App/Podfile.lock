@@ -15,6 +15,8 @@ PODS:
     - SwiftKeychainWrapper
   - CapacitorStatusBar (7.0.3):
     - Capacitor
+  - CapawesomeCapacitorBadge (7.0.1):
+    - Capacitor
   - CapgoCapacitorUpdater (7.8.7):
     - Alamofire (= 5.10.2)
     - BigInt (= 5.2.0)
@@ -33,6 +35,7 @@ DEPENDENCIES:
   - "CapacitorPushNotifications (from `../../node_modules/@capacitor/push-notifications`)"
   - CapacitorSecureStoragePlugin (from `../../node_modules/capacitor-secure-storage-plugin`)
   - "CapacitorStatusBar (from `../../node_modules/@capacitor/status-bar`)"
+  - "CapawesomeCapacitorBadge (from `../../node_modules/@capawesome/capacitor-badge`)"
   - "CapgoCapacitorUpdater (from `../../node_modules/@capgo/capacitor-updater`)"
 
 SPEC REPOS:
@@ -58,6 +61,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/capacitor-secure-storage-plugin"
   CapacitorStatusBar:
     :path: "../../node_modules/@capacitor/status-bar"
+  CapawesomeCapacitorBadge:
+    :path: "../../node_modules/@capawesome/capacitor-badge"
   CapgoCapacitorUpdater:
     :path: "../../node_modules/@capgo/capacitor-updater"
 
@@ -71,11 +76,12 @@ SPEC CHECKSUMS:
   CapacitorPushNotifications: 7c0659b349b149ee3936a682da31a9d269de9582
   CapacitorSecureStoragePlugin: 450d402026ee3bcc018fa206504d9c0572fee78d
   CapacitorStatusBar: 0659ddc7b1713764a05831463d215b177a15d054
+  CapawesomeCapacitorBadge: 7fc1fa00c920b88eabb8451ddc92bdc75da2cffa
   CapgoCapacitorUpdater: 90b09b7c3c23c02f1b0dfe42db51d0abaf1910f3
   SSZipArchive: fe6a26b2a54d5a0890f2567b5cc6de5caa600aef
   SwiftKeychainWrapper: 807ba1d63c33a7d0613288512399cd1eda1e470c
   Version: de5907f2c5d0f3cf21708db7801d1d5401139486
 
-PODFILE CHECKSUM: c96e8fb171e36e81bb077a91ef0e47bc8af125ae
+PODFILE CHECKSUM: 9dc3bd0e77fe5d83aead4e138620f0ddac4d62b4
 
 COCOAPODS: 1.16.2
