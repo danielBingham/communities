@@ -173,9 +173,25 @@ module.exports = class IOSNotifications {
         }
     }
 
+    async getUnreadNotificationCount(userId) {
+        try {
+            const results = await this.core.database.query(`
+                SELECT COUNT(*) as count FROM notifications
+                WHERE user_id = $1 AND is_read = false
+            `, [ userId ])
+            return parseInt(results.rows[0].count, 10)
+        } catch (error) {
+            this.logger.error(`=== IOS Notifications:: Failed to get unread count for User(${userId}): `, error)
+            return 0
+        }
+    }
+
     async sendNotificationToUser(userId, notification) {
         const sessions = await this.sessionService.getSessions(userId)
         const devices = {}
+
+        const unreadCount = await this.getUnreadNotificationCount(userId)
+
         for(const session of sessions) {
             if ( ! ('device' in session.data ) ) {
                 continue
@@ -214,7 +230,9 @@ module.exports = class IOSNotifications {
                     alert: {
                         title: "You have a new notification on Communities",
                         body: notification.description
-                    }
+                    },
+                    badge: unreadCount,
+                    sound: "default"
                 },
                 path: notification.path,
                 notificationId: notification.id
@@ -224,6 +242,7 @@ module.exports = class IOSNotifications {
                 ":method": "POST",
                 "apns-topic": this.core.config.notifications.ios.applicationBundleID,
                 "apns-push-type": "alert",
+                "apns-priority": "10",
                 ":scheme": "https",
                 ":path": path
             }
