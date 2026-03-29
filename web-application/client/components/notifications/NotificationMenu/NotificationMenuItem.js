@@ -50,7 +50,6 @@ const NotificationMenu = function({ notificationId }) {
             // Remove the corresponding delivered push notification from the
             // device notification center and update the badge count.
             removeDeliveredNotificationById(notification.id)
-                .then(() => updateBadgeCount())
         }
 
         dispatch(resetEntities())

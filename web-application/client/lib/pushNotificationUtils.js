@@ -26,12 +26,13 @@ export async function removeDeliveredNotificationById(notificationId) {
 
     try {
         const delivered = await PushNotifications.getDeliveredNotifications()
-        const matching = delivered.notifications.filter(
-            (n) => n.data?.notificationId === notificationId
-        )
+        const matching = delivered.notifications.filter((n) => n.data?.notificationId === notificationId)
 
         if ( matching.length > 0 ) {
             await PushNotifications.removeDeliveredNotifications({ notifications: matching })
+
+            const count = delivered.notifications.length - matching.length
+            await Badge.set(count)
         }
     } catch (error) {
         logger.error(`Failed to remove delivered notification: `, error)
@@ -66,7 +67,7 @@ export async function updateBadgeCount() {
 
     try {
         const delivered = await PushNotifications.getDeliveredNotifications()
-        await Badge.set({ count: delivered.notifications.length })
+        await Badge.set(delivered.notifications.length)
     } catch (error) {
         logger.error(`Failed to update badge count: `, error)
     }
