@@ -26,6 +26,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 
 import { postPostComments, patchPostComment, finishPostCommentEdit } from '/state/PostComment'
 
+import { RequestErrorModal } from '/components/errors/RequestError'
 import Button from '/components/ui/Button'
 import Spinner from '/components/Spinner'
 import AreYouSure from '/components/AreYouSure'
@@ -46,11 +47,6 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
     const [patchRequest, makePatchRequest] = useRequest()
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
-
-    if ( ! currentUser ) {
-        logger.error(new Error('Attempt to load PostCommentForm without logged in user.'))
-        return null
-    }
 
     const comment = useSelector((state) => commentId && commentId in state.PostComment.dictionary ? state.PostComment.dictionary[commentId] : null) 
     
@@ -185,6 +181,10 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
         }
     }, [ commentId, postRequest, patchRequest])
 
+    if ( ! currentUser ) {
+        logger.error(new Error('Attempt to load PostCommentForm without logged in user.'))
+        return null
+    }
 
     let errorView = null
     if ( error == 'length' ) {
@@ -223,6 +223,8 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
                 >
                     <p>Are you sure you want to discard your { commentId ? "edits" : "comment" }?</p>
                 </AreYouSure>
+                <RequestErrorModal message="Attempt to create comment" request={postRequest} />
+                <RequestErrorModal message="Attempt to edit comment" request={patchRequest} />
             </div>
         )
     }

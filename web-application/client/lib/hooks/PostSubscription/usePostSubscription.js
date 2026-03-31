@@ -44,7 +44,7 @@ export const usePostSubscription = function(postId) {
     }
 
     useEffect(() => {
-        if ( postId && subscription === undefined && request?.state !== 'pending') {
+        if ( postId && subscription === undefined && request === null ) {
             makeRequest(getPostSubscription(postId))
         }
     }, [ postId, subscription, request ])
