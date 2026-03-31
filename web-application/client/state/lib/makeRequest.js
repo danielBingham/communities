@@ -220,7 +220,10 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
                         endpoint: endpoint,
                         method: method
                     },
-                    response: {},
+                    response: {
+                        status: 0,
+                        body: {}
+                    },
                     error: {
                         type: 'request-error',
                         message: error.message 
