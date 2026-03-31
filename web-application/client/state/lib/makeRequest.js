@@ -89,124 +89,147 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
             // ==================== Make the Request ==========================
             //
 
-            const response = await fetch(fullEndpoint, fetchOptions)
+            try {
+                const response = await fetch(fullEndpoint, fetchOptions)
 
-            // If they've been logged out, send them to the home page, which will
-            // let them log back in again.
-            if ( response.status === 401 ) {
-                if ( Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android' ) {
-                    await SecureStoragePlugin.clear()
-                }
-                window.location.href = "/"
-            }
-
-            // For Android and IOS we need to check the request header for an
-            // authentication token and save it in secure storage if we find
-            // one. This is the Session ID.  
-            if ( Capacitor.getPlatform() === 'android' || Capacitor.getPlatform() === 'ios' ) {
-                if ( response.headers.has('X-Communities-Auth') ) {
-                    await SecureStoragePlugin.set({ key: 'auth-token', value: response.headers.get('X-Communities-Auth') })
-                }
-            }
-          
-            let responseBody = {}
-            if ( options?.isFile === true ) {
-                try { 
-                    const blob = await response.blob()
-                    responseBody.fileURL = URL.createObjectURL(blob)
-                } catch (error) {
-                    responseBody.error = {
-                        type: 'invalid-body',
-                        message: 'Failed to read response body as blob.'
+                // If they've been logged out, send them to the home page, which will
+                // let them log back in again.
+                if ( response.status === 401 ) {
+                    if ( Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android' ) {
+                        await SecureStoragePlugin.clear()
                     }
-                    console.error('Failed to read response body as blob: ', error)
+                    window.location.href = "/"
                 }
-            } else {
-                try { 
-                    responseBody = await response.json()
-                } catch (error) {
-                    responseBody.error = {
-                        type: 'invalid-body',
-                        message: 'Failed to read response body as json.'
-                    }
-                    console.error(`Failed to read response body as json: `, error)
-                }
-            }
 
-            const result = {
-                success: response.ok,
-                request: {
-                    endpoint: endpoint,
-                    method: method
-                },
-                response: {
-                    status:  response.status,
-                    body: responseBody
-                },
-                error: null
-            }
-
-            if ( ! response.ok ) {
-                if ( 'error' in responseBody ) {
-                    result.error = {
-                        type: responseBody.error.type
-                    }
-
-                    if ( 'all' in responseBody.error && Array.isArray(responseBody.error.all) ) {
-                        result.error.all = responseBody.error.all
-                    } else {
-                        result.error.message = responseBody.error.message
-                        result.error.all = [{
-                            type: responseBody.error.type,
-                            message: responseBody.error.message,
-                            context: 'context' in responseBody.error ? responseBody.error.context : {}
-                        }]
-                    }
-                }  else {
-                    result.error = {
-                        type: 'unknown'
+                // For Android and IOS we need to check the request header for an
+                // authentication token and save it in secure storage if we find
+                // one. This is the Session ID.  
+                if ( Capacitor.getPlatform() === 'android' || Capacitor.getPlatform() === 'ios' ) {
+                    if ( response.headers.has('X-Communities-Auth') ) {
+                        await SecureStoragePlugin.set({ key: 'auth-token', value: response.headers.get('X-Communities-Auth') })
                     }
                 }
-
-                // Invalid CSRF.  Refresh the page.
-                if ( response.status === 452 )  {
-                    window.location.reload()
-                }
-
-                if ( onFailure ) {
-                    try {
-                        onFailure(response.status, responseBody)
+              
+                let responseBody = {}
+                if ( options?.isFile === true ) {
+                    try { 
+                        const blob = await response.blob()
+                        responseBody.fileURL = URL.createObjectURL(blob)
                     } catch (error) {
-                        if ( endpoint.endsWith('system/log') ) {
-                            console.error(`<<< ${method} ${endpoint} :: Error handling request failure: `, error)
+                        responseBody.error = {
+                            type: 'invalid-body',
+                            message: 'Failed to read response body as blob.'
+                        }
+                        console.error('Failed to read response body as blob: ', error)
+                    }
+                } else {
+                    try { 
+                        responseBody = await response.json()
+                    } catch (error) {
+                        responseBody.error = {
+                            type: 'invalid-body',
+                            message: 'Failed to read response body as json.'
+                        }
+                        console.error(`Failed to read response body as json: `, error)
+                    }
+                }
+
+                const result = {
+                    success: response.ok,
+                    request: {
+                        endpoint: endpoint,
+                        method: method
+                    },
+                    response: {
+                        status:  response.status,
+                        body: responseBody
+                    },
+                    error: null
+                }
+
+                if ( ! response.ok ) {
+                    if ( 'error' in responseBody ) {
+                        result.error = {
+                            type: responseBody.error.type
+                        }
+
+                        if ( 'all' in responseBody.error && Array.isArray(responseBody.error.all) ) {
+                            result.error.all = responseBody.error.all
                         } else {
-                            logger.error(`<<< ${method} ${endpoint} :: Error handling request failure: `, error)
+                            result.error.message = responseBody.error.message
+                            result.error.all = [{
+                                type: responseBody.error.type,
+                                message: responseBody.error.message,
+                                context: 'context' in responseBody.error ? responseBody.error.context : {}
+                            }]
+                        }
+                    }  else {
+                        result.error = {
+                            type: 'unknown'
                         }
                     }
-                } 
-                return result
-            }
 
-            if ( onSuccess ) {
-                try {
-                    onSuccess(responseBody)
-                } catch (error) {
-                    if ( endpoint.endsWith('system/log') ) {
-                        console.error(`<<< ${method} ${endpoint} :: Error handling request success: `, error)
-                    } else {
-                        logger.error(`<<< ${method} ${endpoint} :: Error handling request success: `, error)
+                    // Invalid CSRF.  Refresh the page.
+                    if ( response.status === 452 )  {
+                        window.location.reload()
                     }
 
-                    result.success = false
-                    result.error = {
-                        type: 'frontend-error',
-                        message: `Failed to process response: ${error.message}.`
-                    }
+                    if ( onFailure ) {
+                        try {
+                            onFailure(response.status, responseBody)
+                        } catch (error) {
+                            if ( endpoint.endsWith('system/log') ) {
+                                console.error(`<<< ${method} ${endpoint} :: Error handling request failure: `, error)
+                            } else {
+                                logger.error(`<<< ${method} ${endpoint} :: Error handling request failure: `, error)
+                            }
+                        }
+                    } 
                     return result
                 }
-            }
 
-            return result 
+                if ( onSuccess ) {
+                    try {
+                        onSuccess(responseBody)
+                    } catch (error) {
+                        if ( endpoint.endsWith('system/log') ) {
+                            console.error(`<<< ${method} ${endpoint} :: Error handling request success: `, error)
+                        } else {
+                            logger.error(`<<< ${method} ${endpoint} :: Error handling request success: `, error)
+                        }
+
+                        result.success = false
+                        result.error = {
+                            type: 'frontend-error',
+                            message: `Failed to process response: ${error.message}.`
+                        }
+                        return result
+                    }
+                }
+
+                return result 
+            } catch (error ) {
+                // TODO In the future, we need to track these failures, figure
+                // out the causes and figure out how to better handle them. For
+                // now, we're just going to silence them.
+                console.error(`<<< ${method} ${endpoint} :: Error making request: `, error)
+
+                return {
+                    success: false,
+                    request: {
+                        endpoint: endpoint,
+                        method: method
+                    },
+                    response: {
+                        status: 0,
+                        body: {}
+                    },
+                    error: {
+                        type: 'request-error',
+                        message: error.message 
+                    }
+                }
+            }
         }
 
         const promise = request()
