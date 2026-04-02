@@ -53,10 +53,12 @@ export default class ComponentErrorBoundary extends React.Component {
     // this.
     componentDidCatch(error, errorInfo) {
         try {
-            if ( 'stack' in error ) {
+            if ( error !== undefined && error !== null && typeof error === 'object' && 'stack' in error ) {
+                logger.error(error)
+            } else if ( errorInfo !== undefined && errorInfo !== null && typeof errorInfo === 'object' && 'componentStack' in errorInfo ) {
+                error.stack = errorInfo.componentStack
                 logger.error(error)
             } else {
-                error.stack = errorInfo.componentStack
                 logger.error(error)
             }
         } catch (logError) {
