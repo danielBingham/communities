@@ -1,0 +1,19 @@
+.admin-dashboard__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 300px);
+    column-gap: 10px;
+    row-gap: 10px;
+}
+.admin-dashboard__header {
+    padding: 7px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.admin-dashboard__row{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    justify-items: center;
+    padding: 3px;
+}
