@@ -18,12 +18,16 @@
  *
  ******************************************************************************/
 
+const { PermissionService }  = require('@communities/backend')
+
 const ControllerError = require('../../errors/ControllerError')
 
 module.exports = class StatsController {
 
     constructor(core) {
         this.core = core
+
+        this.permissionService = new PermissionService(core)
     }
 
     async getStats(request, response) {
@@ -35,7 +39,8 @@ module.exports = class StatsController {
                 `You may not access that page while unauthenticated.`)
         }
 
-        if ( currentUser.siteRole !== 'admin' && currentUser.siteRole !== 'superadmin' ) {
+        const canAdminSite = await this.permissionService.can(currentUser, 'admin', 'Site')
+        if ( ! canAdminSite ) {
             throw new ControllerError(403, 'not-authorized',
                 `User(${currentUser.username}) attempting to access admin pages without authorization.`,
                 `You're not authorized to administrate the site.`)
@@ -49,11 +54,11 @@ module.exports = class StatsController {
             moderationsPerMonth: [] 
         }
 
-        // Users Per Month
-        const userGrowthResults = await this.core.database.query(`
-            SELECT count(*) as stat, date_trunc('month', created_date) as month FROM users GROUP BY month ORDER BY month DESC
-        `, [])
-
+        const [ userGrowthResults, postsPerMonthResults, moderationsPerMonthResults ] = await Promise.all([
+            this.core.database.query(`SELECT count(*) as stat, date_trunc('month', created_date) as month FROM users GROUP BY month ORDER BY month DESC LIMIT 24`, []),
+            this.core.database.query(`SELECT count(*) as stat, date_trunc('month', created_date) as month FROM posts GROUP BY month ORDER BY month DESC LIMIT 24`, []),
+            this.core.database.query(`SELECT count(*) as stat, date_trunc('month', created_date) as month FROM site_moderation GROUP BY month ORDER BY month DESC LIMIT 24`, [])
+        ])
 
         if ( userGrowthResults.rows.length > 0 ) {
             for(const row of userGrowthResults.rows) {
@@ -64,12 +69,6 @@ module.exports = class StatsController {
             }
         }
 
-        // Posts Per Month
-        const postsPerMonthResults = await this.core.database.query(`
-            SELECT count(*) as stat, date_trunc('month', created_date) as month FROM posts GROUP BY month ORDER BY month DESC
-        `, [])
-
-
         if ( postsPerMonthResults.rows.length > 0 ) {
             for(const row of postsPerMonthResults.rows) {
                 stats.postsPerMonth.push({
@@ -78,12 +77,6 @@ module.exports = class StatsController {
                 })
             }
         }
-
-        // Moderation Requests per Month  
-        const moderationsPerMonthResults = await this.core.database.query(`
-            SELECT count(*) as stat, date_trunc('month', created_date) as month FROM site_moderation GROUP BY month ORDER BY month DESC
-        `, [])
-
 
         if ( moderationsPerMonthResults.rows.length > 0 ) {
             for(const row of moderationsPerMonthResults.rows) {

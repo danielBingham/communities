@@ -20,8 +20,6 @@
 import { useEffect } from 'react'
 import { useSelector } from 'react-redux'
 
-import logger from '/logger'
-
 import { getStats } from '/state/admin'
 
 import { useRequest } from '/lib/hooks/useRequest'
@@ -68,10 +66,16 @@ const AdminDashboard = function() {
         makeRequest(getStats())
     }, [])
 
-    if ( request?.state !== 'fulfilled') {
+    if ( ! request || request?.state === 'pending') {
         return (
             <div className="admin-dashboard">
                 <Spinner />
+            </div>
+        )
+    } else if ( request?.state === 'failed' ) {
+        return (
+            <div className="admin-dashboard">
+                Request failed.  Try refreshing to reload.
             </div>
         )
     }
