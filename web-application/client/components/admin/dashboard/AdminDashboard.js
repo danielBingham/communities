@@ -28,112 +28,68 @@ import { useRequest } from '/lib/hooks/useRequest'
 
 import Card from '/components/ui/Card'
 import Spinner from '/components/Spinner'
+import ComponentErrorBoundary from '/components/errors/ComponentErrorBoundary'
 
 import './AdminDashboard.css'
 
-const AdminDashboard = function() {
-    try {
-        const stats = useSelector((state) => state.admin.stats)
-        const [ request, makeRequest ] = useRequest()
+const AdminDashboardElement = function({ className, title, stats }) {
 
-        useEffect(() => {
-            makeRequest(getStats())
-        }, [])
-
-        if ( request?.state !== 'fulfilled') {
-            return (
-                <div className="admin-dashboard">
-                    <Spinner />
+    const views = []
+    if ( stats !== undefined && stats !== null && stats.length > 0 ) {
+        for(const row of stats ) {
+            views.push(
+                <div key={row.month} className="admin-dashboard-element__row">
+                    <div>
+                        { new Date(row.month).toLocaleString('default', { timeZone: "UTC", month: 'long', year: 'numeric' }) }
+                    </div>
+                    <div>{ row.stat}</div>
                 </div>
             )
         }
+    }
 
-        const usersPerMonth = [] 
-        if ( 'usersPerMonth' in stats && stats.usersPerMonth.length > 0 ) {
-            for(const month of stats.usersPerMonth) {
-                usersPerMonth.push(
-                    <div key={month.month} className="admin-dashboard__row">
-                        <div className="admin-dashboard__users-per-month__month">
-                            { new Date(month.month).toLocaleString('default', { timeZone: "UTC", month: 'long', year: 'numeric' }) }
-                        </div>
-                        <div className="admin-dashboard__users-per-month__users">{ month.users }</div>
-                    </div>
-                )
-            }
-        }
-
-        const postsPerMonth = [] 
-        if ( 'postsPerMonth' in stats && stats.postsPerMonth.length > 0 ) {
-            for(const month of stats.postsPerMonth) {
-                postsPerMonth.push(
-                    <div key={month.month} className="admin-dashboard__row">
-                        <div className="admin-dashboard__posts-per-month__month">
-                            { new Date(month.month).toLocaleString('default', { timeZone: "UTC", month: 'long', year: 'numeric' }) }
-                        </div>
-                        <div className="admin-dashboard__posts-per-month__posts">{ month.posts}</div>
-                    </div>
-                )
-            }
-        }
-
-        const moderationsPerMonth = [] 
-        if ( 'moderationsPerMonth' in stats && stats.moderationsPerMonth.length > 0 ) {
-            for(const month of stats.moderationsPerMonth) {
-                moderationsPerMonth.push(
-                    <div key={month.month} className="admin-dashboard__row">
-                        <div className="admin-dashboard__moderations-per-month__month">
-                            { new Date(month.month).toLocaleString('default', { timeZone: "UTC", month: 'long', year: 'numeric' }) }
-                        </div>
-                        <div className="admin-dashboard__moderations-per-month__posts">{ month.moderations}</div>
-                    </div>
-                )
-            }
-        }
-
-        return (
-            <div className="admin-dashboard">
-                <h2>Dashboard</h2>
-                <div className="admin-dashboard__grid">
-                    <Card className="admin-dashboard__users-per-month">
-                        <div className="admin-dashboard__header">New Users Per Month</div>
-                        <div className="admin-dashboard__body">
-                            { usersPerMonth }
-                        </div>
-                    </Card>
-                    <Card className="admin-dashboard__daily-active-users">
-                        <div className="admin-dashboard__header">Daily Active Users</div>
-                        <div className="admin-dashboard__body">
-                        </div>
-                    </Card>
-                    <Card className="admin-dashboard__monthly-active-users">
-                        <div className="admin-dashboard__header">Monthly Active Users</div>
-                        <div className="admin-dashboard__body">
-                        </div>
-                    </Card>
-                    <Card className="admin-dashboard__posts-per-month">
-                        <div className="admin-dashboard__header">Posts per Month</div>
-                        <div className="admin-dashboard__body">
-                            { postsPerMonth }
-                        </div>
-                    </Card>
-                    <Card className="admin-dashboard__moderation-requests-per-month">
-                        <div className="admin-dashboard__header">Moderation Requests per Month</div>
-                        <div className="admin-dashboard__body">
-                            { moderationsPerMonth }
-                        </div>
-                    </Card>
+    return (
+        <ComponentErrorBoundary fallback={<Card className={className}>Failed to load { title }</Card>}>
+            <Card className={className}>
+                <div className="admin-dashboard-element__header">{ title }</div>
+                <div className="admin-dashboard-element__body">
+                    { views }
                 </div>
-            </div>
-        )
-    } catch (error) {
-        logger.error(error)
+            </Card>
+        </ComponentErrorBoundary>
+    )
+}
+
+const AdminDashboard = function() {
+    const stats = useSelector((state) => state.admin.stats)
+    const [ request, makeRequest ] = useRequest()
+
+    useEffect(() => {
+        makeRequest(getStats())
+    }, [])
+
+    if ( request?.state !== 'fulfilled') {
         return (
             <div className="admin-dashboard">
-                <h2>Dashboard</h2>
-                <p>Failed to load admin dashboard due to uncaught error: { error.message }</p>
+                <Spinner />
             </div>
         )
     }
+
+    return (
+        <ComponentErrorBoundary fallback={<div className="admin-dashboard">Dashboard failed to load.</div>}>
+            <div className="admin-dashboard">
+                <h2>Dashboard</h2>
+                <div className="admin-dashboard__grid">
+                    <AdminDashboardElement title="Users per Month" stats={stats.usersPerMonth} />
+                    <AdminDashboardElement title="Daily Active Users" />
+                    <AdminDashboardElement title="Monthly Active Users" />
+                    <AdminDashboardElement title="Posts Per Month" stats={stats.postsPerMonth} />
+                    <AdminDashboardElement title="Moderation Requests per Month" stats={stats.moderationsPerMonth} />
+                </div>
+            </div>
+        </ComponentErrorBoundary>
+    )
 }
 
 export default AdminDashboard

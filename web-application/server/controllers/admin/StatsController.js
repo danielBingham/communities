@@ -51,14 +51,14 @@ module.exports = class StatsController {
 
         // Users Per Month
         const userGrowthResults = await this.core.database.query(`
-            SELECT count(*) as users_per_month, date_trunc('month', created_date) as month FROM users GROUP BY month ORDER BY month DESC
+            SELECT count(*) as stat, date_trunc('month', created_date) as month FROM users GROUP BY month ORDER BY month DESC
         `, [])
 
 
         if ( userGrowthResults.rows.length > 0 ) {
             for(const row of userGrowthResults.rows) {
                 stats.usersPerMonth.push({
-                    users: row.users_per_month,
+                    stat: row.stat,
                     month: row.month
                 })
             }
@@ -66,14 +66,14 @@ module.exports = class StatsController {
 
         // Posts Per Month
         const postsPerMonthResults = await this.core.database.query(`
-            SELECT count(*) as posts, date_trunc('month', created_date) as month FROM posts GROUP BY month ORDER BY month DESC
+            SELECT count(*) as stat, date_trunc('month', created_date) as month FROM posts GROUP BY month ORDER BY month DESC
         `, [])
 
 
         if ( postsPerMonthResults.rows.length > 0 ) {
             for(const row of postsPerMonthResults.rows) {
                 stats.postsPerMonth.push({
-                    posts: row.posts,
+                    stat: row.stat,
                     month: row.month
                 })
             }
@@ -81,14 +81,14 @@ module.exports = class StatsController {
 
         // Moderation Requests per Month  
         const moderationsPerMonthResults = await this.core.database.query(`
-            SELECT count(*) as moderations, date_trunc('month', created_date) as month FROM site_moderation GROUP BY month ORDER BY month DESC
+            SELECT count(*) as stat, date_trunc('month', created_date) as month FROM site_moderation GROUP BY month ORDER BY month DESC
         `, [])
 
 
         if ( moderationsPerMonthResults.rows.length > 0 ) {
             for(const row of moderationsPerMonthResults.rows) {
                 stats.moderationsPerMonth.push({
-                    moderations: row.moderations,
+                    stat: row.stat,
                     month: row.month
                 })
             }
