@@ -49,7 +49,7 @@ const AdminDashboard = function() {
         }
 
         const usersPerMonth = [] 
-        if ( 'usersPerMonth' in stats && stats.postsPerMonth.length > 0 ) {
+        if ( 'usersPerMonth' in stats && stats.usersPerMonth.length > 0 ) {
             for(const month of stats.usersPerMonth) {
                 usersPerMonth.push(
                     <div key={month.month} className="admin-dashboard__row">
