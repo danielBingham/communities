@@ -62,11 +62,15 @@ export default class ErrorBoundary extends React.Component {
                 Sentry.captureException(error)
             }
 
-            if ( error !== undefined && error !== null && typeof error === 'object' && 'stack' in error ) {
-                logger.critical(error)
+            if ( error !== undefined && error !== null && typeof error === 'object' ) {
+                if ( 'stack' in error ) {
+                    logger.critical(error)
+                } else if ( errorInfo !== undefined && errorInfo !== null && typeof errorInfo === 'object' && 'componentStack' in errorInfo ) {
+                    error.stack = errorInfo.componentStack
+                    logger.critical(error)
+                }
             } else if ( errorInfo !== undefined && errorInfo !== null && typeof errorInfo === 'object' && 'componentStack' in errorInfo ) {
-                error.stack = errorInfo.componentStack
-                logger.critical(error)
+                logger.critical(errorInfo)
             } else {
                 logger.critical(error)
             }
