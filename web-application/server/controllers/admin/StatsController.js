@@ -40,7 +40,7 @@ module.exports = class StatsController {
         }
 
         const canAdminSite = await this.permissionService.can(currentUser, 'admin', 'Site')
-        if ( ! canAdminSite ) {
+        if ( canAdminSite !== true ) {
             throw new ControllerError(403, 'not-authorized',
                 `User(${currentUser.username}) attempting to access admin pages without authorization.`,
                 `You're not authorized to administrate the site.`)
