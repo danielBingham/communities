@@ -3,6 +3,7 @@ import { combineReducers } from 'redux'
 
 import logger from '/logger'
 
+import adminReducer from './admin'
 import authenticationReducer from './authentication'
 import BlocklistReducer from './Blocklist'
 import eventsSliceReducer, { subscribe, unsubscribe, confirmSubscription, confirmUnsubscription, clearSubscriptions } from './events'
@@ -30,6 +31,7 @@ import UserRelationshipReducer from './UserRelationship'
 import Socket, { SocketError } from '/lib/Socket' 
 
 const reducers = combineReducers({
+    admin: adminReducer,
     authentication: authenticationReducer,
     Blocklist: BlocklistReducer,
     events: eventsSliceReducer,
