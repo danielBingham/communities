@@ -1,10 +1,12 @@
-.admin-dashboard__grid {
+.admin-dashboard-data {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+.admin-dashboard-data__grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, 360px);
     column-gap: 10px;
     row-gap: 10px;
-    max-width: 1100px;
-    margin: 0 auto;
 }
 .admin-dashboard-element__header {
     padding: 7px;

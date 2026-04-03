@@ -17,8 +17,10 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
+
+import logger from '/logger'
 
 import { getStats } from '/state/admin'
 
@@ -30,8 +32,7 @@ import ComponentErrorBoundary from '/components/errors/ComponentErrorBoundary'
 
 import './AdminDashboard.css'
 
-const AdminDashboardElement = function({ className, title, stats }) {
-
+const AdminDashboardElementData = function({ stats }) {
     const views = []
     if ( stats !== undefined && stats !== null && stats.length > 0 ) {
         for(const row of stats ) {
@@ -47,52 +48,79 @@ const AdminDashboardElement = function({ className, title, stats }) {
     }
 
     return (
-        <ComponentErrorBoundary fallback={<Card className={className}>Failed to load { title }</Card>}>
-            <Card className={className}>
-                <div className="admin-dashboard-element__header">{ title }</div>
-                <div className="admin-dashboard-element__body">
-                    { views }
-                </div>
-            </Card>
-        </ComponentErrorBoundary>
+        <div className="admin-dashboard-element__data">
+            { views }
+        </div>
+
     )
 }
 
-const AdminDashboard = function() {
+const AdminDashboardElement = function({ className, title, stats }) {
+    return (
+        <Card className={className}>
+            <ComponentErrorBoundary fallback={<span>Failed to load { title }</span>}>
+                <div className="admin-dashboard-element__header">{ title }</div>
+                <AdminDashboardElementData stats={stats} />
+            </ComponentErrorBoundary>
+        </Card>
+    )
+}
+
+const AdminDashboardData = function() {
     const stats = useSelector((state) => state.admin.stats)
     const [ request, makeRequest ] = useRequest()
+    const [ error, setError ] = useState(false)
 
     useEffect(() => {
-        makeRequest(getStats())
+        try {
+            makeRequest(getStats())
+        } catch (error) {
+            setError(true)
+            logger.error(error)
+        }
     }, [])
+
+    if ( error ) {
+        return (
+            <div className="admin-dashboard-data">
+                Error occurred while loading stats.
+            </div>
+        )
+    }
 
     if ( ! request || request?.state === 'pending') {
         return (
-            <div className="admin-dashboard">
+            <div className="admin-dashboard-data">
                 <Spinner />
             </div>
         )
     } else if ( request?.state === 'failed' ) {
         return (
-            <div className="admin-dashboard">
+            <div className="admin-dashboard-data">
                 Request failed.  Try refreshing to reload.
             </div>
         )
     }
 
     return (
-        <ComponentErrorBoundary fallback={<div className="admin-dashboard">Dashboard failed to load.</div>}>
-            <div className="admin-dashboard">
-                <h2>Dashboard</h2>
-                <div className="admin-dashboard__grid">
-                    <AdminDashboardElement title="Users per Month" stats={stats.usersPerMonth} />
-                    <AdminDashboardElement title="Daily Active Users" />
-                    <AdminDashboardElement title="Monthly Active Users" />
-                    <AdminDashboardElement title="Posts Per Month" stats={stats.postsPerMonth} />
-                    <AdminDashboardElement title="Moderation Requests per Month" stats={stats.moderationsPerMonth} />
-                </div>
-            </div>
-        </ComponentErrorBoundary>
+        <div className="admin-dashboard-data admin-dashboard-data__grid">
+            <AdminDashboardElement title="Users per Month" stats={stats.usersPerMonth} />
+            <AdminDashboardElement title="Daily Active Users" />
+            <AdminDashboardElement title="Monthly Active Users" />
+            <AdminDashboardElement title="Posts Per Month" stats={stats.postsPerMonth} />
+            <AdminDashboardElement title="Moderation Requests per Month" stats={stats.moderationsPerMonth} />
+        </div>
+    )
+}
+
+const AdminDashboard = function() {
+    return (
+        <div className="admin-dashboard">
+            <h2>Dashboard</h2>
+            <ComponentErrorBoundary fallback={<span>Dashboard failed to load.</span>}>
+                <AdminDashboardData />
+            </ComponentErrorBoundary>
+        </div>
     )
 }
 
