@@ -17,10 +17,8 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useSelector } from 'react-redux'
-
-import logger from '/logger'
 
 import { getStats } from '/state/admin'
 
@@ -69,24 +67,10 @@ const AdminDashboardElement = function({ className, title, stats }) {
 const AdminDashboardData = function() {
     const stats = useSelector((state) => state.admin.stats)
     const [ request, makeRequest ] = useRequest()
-    const [ error, setError ] = useState(false)
 
     useEffect(() => {
-        try {
-            makeRequest(getStats())
-        } catch (error) {
-            setError(true)
-            logger.error(error)
-        }
+        makeRequest(getStats())
     }, [])
-
-    if ( error ) {
-        return (
-            <div className="admin-dashboard-data">
-                Error occurred while loading stats.
-            </div>
-        )
-    }
 
     if ( ! request || request?.state === 'pending') {
         return (
