@@ -27,11 +27,15 @@ const rateLimit = function(core, limit) {
         const method = request.method
 
         if ( limit === undefined || limit === null || typeof limit !== 'number' ) {
+            core.logger.error(new Error(`rateLimit :: limit is undefined`))
             next()    
+            return
         }
 
         if ( route === undefined || route === null || method === undefined || method === null) {
+            core.logger.error(new Error(`rateLimit :: route or method is empty`))
             next()    
+            return
         }
 
         const ipAddress = request.ip

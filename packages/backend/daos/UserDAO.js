@@ -138,6 +138,13 @@ const SCHEMA = {
                 select: DAO.SELECT.REQUEST,
                 key: 'lastAuthenticationAttemptDate'
             },
+            'activity_date': {
+                insert: DAO.INSERT.DENY,
+                update: DAO.UPDATE.DENY,
+                select: DAO.SELECT.REQUEST,
+                key: 'activityDate',
+                needsFeature: 'feat-292-track-user-activity'
+            },
             'created_date': {
                 insert: DAO.INSERT.OVERRIDE,
                 insertOverride: 'now()',

@@ -48,17 +48,28 @@ module.exports = class StatsController {
         
         const stats =  {
             usersPerMonth: [],
-            dau: null,
-            mau: null,
+            dau: [],
+            wau: [],
+            mau: [],
             postsPerMonth: [],
             moderationsPerMonth: [] 
         }
 
-        const [ userGrowthResults, postsPerMonthResults, moderationsPerMonthResults ] = await Promise.all([
+        const [ mauResults, userGrowthResults, postsPerMonthResults, moderationsPerMonthResults ] = await Promise.all([
+            this.core.database.query(`SELECT count(*) as stat, date_trunc('month', activity_date) as month FROM users GROUP BY month ORDER BY month DESC LIMIT 24`, []),
             this.core.database.query(`SELECT count(*) as stat, date_trunc('month', created_date) as month FROM users GROUP BY month ORDER BY month DESC LIMIT 24`, []),
             this.core.database.query(`SELECT count(*) as stat, date_trunc('month', created_date) as month FROM posts GROUP BY month ORDER BY month DESC LIMIT 24`, []),
             this.core.database.query(`SELECT count(*) as stat, date_trunc('month', created_date) as month FROM site_moderation GROUP BY month ORDER BY month DESC LIMIT 24`, [])
         ])
+
+        if ( mauResults.rows.length > 0 ) {
+            for(const row of mauResults.rows) {
+                stats.mau.push({
+                    stat: row.stat,
+                    month: row.month
+                })
+            }
+        }
 
         if ( userGrowthResults.rows.length > 0 ) {
             for(const row of userGrowthResults.rows) {

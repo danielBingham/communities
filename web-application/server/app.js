@@ -39,6 +39,7 @@ const {
 const { createLogMiddleware } = require('./log')
 const { createCSRFMiddleware } = require('./csrf')
 const { createErrorsMiddleware } = require('./errors')
+const { createUserTrackingMiddleware } = require('./middleware/tracking')
 
 const createRouter = require('./router')
 
@@ -88,7 +89,6 @@ const createExpressApp = function(core, sessionParser) {
     // Request and log initialization middleware
     app.use(createLogMiddleware(core))
 
-
     // Set the feature flags on each request, so that they are always up to date.
     // This means we can't use feature flags in Controller, Service, and DAO
     // constructors, since those are called at startup time.
@@ -108,6 +108,8 @@ const createExpressApp = function(core, sessionParser) {
             next()
         })
     })
+
+    app.use(createUserTrackingMiddleware(core))
 
     // Perform the CSRF check, checking the token provided in the header
     // against the one stored in the session.

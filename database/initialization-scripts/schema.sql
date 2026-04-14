@@ -4,6 +4,31 @@
 CREATE EXTENSION pg_trgm;
 CREATE EXTENSION postgis;
 
+
+/*****************************************************************************
+ * Platform usage statistics
+ *****************************************************************************/
+
+CREATE TABLE daily_active_users (
+    year int,
+    month int,
+    day int,
+    users int
+);
+
+CREATE TABLE weekly_active_users (
+    year int,
+    week int,
+    users int
+);
+
+CREATE TABLE monthly_active_users (
+    year int,
+    month int,
+    users int
+);
+
+
 /*****************************************************************************
  * Feature Flags
  *****************************************************************************/
@@ -74,6 +99,7 @@ CREATE TABLE users (
     failed_authentication_attempts int DEFAULT 0,
     last_authentication_attempt_date timestamptz,
 
+    activity_date timestamptz,
     created_date timestamptz,
     updated_date timestamptz 
 );

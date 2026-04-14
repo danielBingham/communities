@@ -88,9 +88,10 @@ const AdminDashboardData = function() {
 
     return (
         <div className="admin-dashboard-data admin-dashboard-data__grid">
-            <AdminDashboardElement title="Users per Month" stats={stats.usersPerMonth} />
             <AdminDashboardElement title="Daily Active Users" />
-            <AdminDashboardElement title="Monthly Active Users" />
+            <AdminDashboardElement title="Weekly Active Users" />
+            <AdminDashboardElement title="Monthly Active Users" stats={stats.mau} />
+            <AdminDashboardElement title="Users per Month" stats={stats.usersPerMonth} />
             <AdminDashboardElement title="Posts Per Month" stats={stats.postsPerMonth} />
             <AdminDashboardElement title="Moderation Requests per Month" stats={stats.moderationsPerMonth} />
         </div>
