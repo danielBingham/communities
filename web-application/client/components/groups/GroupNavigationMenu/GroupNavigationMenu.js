@@ -48,6 +48,8 @@ const GroupNavigationMenu = function({ groupId }) {
     const canModerateGroup = can(currentUser, Actions.moderate, Entities.Group, context)
     const canAdminGroup = can(currentUser, Actions.admin, Entities.Group, context)
 
+    const canAdminSite = can(currentUser, Actions.admin, Entities.Site)
+
     const hasSubgroups = useFeature('issue-165-subgroups')
 
     // ========================================================================
@@ -70,15 +72,15 @@ const GroupNavigationMenu = function({ groupId }) {
             { canQueryGroupMember === true && <NavigationSubmenu  icon="Users" title="Members"> 
                 <NavigationSubmenuLink to={`/group/${group.slug}/members`} icon="Users" text="Members" />
                 <NavigationSubmenuLink to={`/group/${group.slug}/members/admin`} icon="ExclamationTriangle" text="Administrators" />
-                { isMember && canModerateGroup && <NavigationSubmenuLink to={`/group/${group.slug}/members/invitations`} icon="UserPlus" text="Invitations" /> }
-                { isMember && canModerateGroup 
+                { isMember && canModerateGroup === true && <NavigationSubmenuLink to={`/group/${group.slug}/members/invitations`} icon="UserPlus" text="Invitations" /> }
+                { isMember && canModerateGroup === true
                     && ( group.type === 'private' || group.type === 'private-open' || group.type === 'hidden-private' )
                     && <NavigationSubmenuLink to={`/group/${group.slug}/members/requests`} icon="UserPlus" text="Requests" /> }
-                { isMember && canModerateGroup && <NavigationSubmenuLink to={`/group/${group.slug}/members/banned`} icon="XCircle" text="Banned Users" /> }
-                { isMember && canModerateGroup && <NavigationSubmenuLink to={`/group/${group.slug}/members/email-invitations`} icon="Envelope" text="Email Invitations" /> }
+                { isMember && canModerateGroup === true && <NavigationSubmenuLink to={`/group/${group.slug}/members/banned`} icon="XCircle" text="Banned Users" /> }
+                { isMember && canModerateGroup === true && <NavigationSubmenuLink to={`/group/${group.slug}/members/email-invitations`} icon="Envelope" text="Email Invitations" /> }
             </NavigationSubmenu>}
-            { hasSubgroups && canViewGroupPost && <NavigationMenuLink to={`/group/${group.slug}/subgroups`} icon="UserGroup" text="Subgroups" /> }
-            { isMember && <NavigationSubmenu icon="EllipsisHorizontal" title="More">
+            { hasSubgroups && canViewGroupPost === true && <NavigationMenuLink to={`/group/${group.slug}/subgroups`} icon="UserGroup" text="Subgroups" /> }
+            { ( isMember === true || canAdminSite === true) && <NavigationSubmenu icon="EllipsisHorizontal" title="More">
                 <NavigationSubmenuLink to={`/group/${group.slug}/about`} icon="QuestionMarkCircle" text="About" />
                 { canModerateGroup === true && <NavigationSubmenuLink to="moderation" icon="Flag" text="Moderation" /> }
                 { canAdminGroup === true && <NavigationSubmenuLink to="settings" icon="Cog6Tooth" text="Settings" /> }
