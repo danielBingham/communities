@@ -122,22 +122,26 @@ const FlagPost = function({ postId } ) {
                 <p><strong>Are you sure you want to flag this post for Site moderators?</strong></p>
                 <div className="flag-post__explanation">
                     <p>
-                        Flagging is intended for content that needs to be urgently
-                        removed from the site. Content appropriate to flag:
+                        Flagging is for content that violates our Terms of
+                        Service and our Content Policies. It marks this post
+                        for site moderators to examine and consider for
+                        removal. Content appropriate for flagging:
                     </p>
                     <ul>
-                        <li>Harrassment.</li>
-                        <li>Incitement to violence against an individual or group of people.</li>
-                        <li>Psychological, Emotional, or Physical Abuse.</li>
-                        <li>Hate speach or denial of basic humanity.</li>
-                        <li>Sexually or graphically explicit content.</li>
-                        <li>Other forms of content that can cause immediate, direct harm.</li>
+                        <li>Violates the Paradox of Tolerance by:
+                            <ul>
+                                <li>Denying someone's basic humanity and right to existence.</li>
+                                <li>Targetting individuals or groups based on race, ethnicity, religion, gender, sexual orientation, disability, national origin, or other protected characteristics.</li>
+                            </ul>
+                        </li>
+                        <li>Propagates misinformation, disinformation, or propaganda.</li>
+                        <li>Is Spam or AI Slop.</li>
+                        <li>Is psychologically, emotionally, or physically abusive.</li>
+                        <li>Is sexually explicit or graphic.</li>
                     </ul>
                     <p>
-                        If you think it should be moderated but it doesn't rise to
-                        the level of "needing urgent response" because it could
-                        cause "immediate harm", then please 'demote' it
-                        instead.
+                        Once the post is flagged, it goes into the moderation
+                        queue and we'll get to it as quickly as we can.
                     </p>
                 </div>
             </AreYouSure>
