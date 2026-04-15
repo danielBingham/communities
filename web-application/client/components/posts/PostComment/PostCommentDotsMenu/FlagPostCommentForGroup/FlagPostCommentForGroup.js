@@ -146,7 +146,7 @@ const FlagPostCommentForGroup = function({ postId, postCommentId} ) {
                         then you can select Flag for Site Moderators instead to
                         bring it to the attention of Communities moderators.
                     </p>
-                    <p>Does this post violate this Group's rules?</p>
+                    <p>Does this comment violate this Group's rules?</p>
                 </div>
             </AreYouSure>
         </>
