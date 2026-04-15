@@ -133,21 +133,20 @@ const FlagPostCommentForGroup = function({ postId, postCommentId} ) {
                 execute={flagForGroup}
                 cancel={() => setAreYouSureGroup(false)}
             >
-                <p><strong>Are you sure you want to flag this post for Group moderators?</strong></p>
+                <p><strong>Are you sure you want to flag this comment for Group moderators?</strong></p>
                 <div className="flag-post-comment-for-group__explanation">
                     <p>
-                        Flagging is intended for content that needs to be
-                        urgently removed from the Group.
+                        Flag this comment to bring it to the attention of this
+                        Group's moderators. Please only flag comments that
+                        violate this group's rules.  
                     </p>
-                    <p>If this post doesn't need a group moderator's urgent
-                        attention, but you still believe it violates the group's
-                        rules, then please demote it to vote for its removal
-                        from the group.</p>
-                    <p>Remember, group moderators are volunteers and moderating
-                        a group is hard work.  Please be respectful of their time,
-                        energy, and bandwidth and only flag posts that really need
-                        it.</p>
-                    <p>Are you sure this post urgently requires a moderator's attention?</p>
+                    <p>
+                        If you believe this comment is in violation of
+                        Communities' Terms of Service and Content Policies,
+                        then you can select Flag for Site Moderators instead to
+                        bring it to the attention of Communities moderators.
+                    </p>
+                    <p>Does this post violate this Group's rules?</p>
                 </div>
             </AreYouSure>
         </>

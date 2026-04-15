@@ -1,4 +1,23 @@
-import React, { useState, useEffect, useContext } from 'react'
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media 
+ *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
+import { useState, useEffect, useContext } from 'react'
 import { useSelector } from 'react-redux'
 
 import { FlagIcon as FlagIconOutline } from '@heroicons/react/24/outline'
@@ -123,19 +142,18 @@ const FlagPost = function({ postId } ) {
                 <div className="flag-post__explanation">
                     <p>
                         Flagging is for content that violates our Terms of
-                        Service and our Content Policies. It marks this post
-                        for site moderators to examine and consider for
-                        removal. Content appropriate for flagging:
+                        Service and our Content Policies. Content appropriate
+                        for flagging:
                     </p>
                     <ul>
                         <li>Violates the Paradox of Tolerance by:
                             <ul>
                                 <li>Denying someone's basic humanity and right to existence.</li>
-                                <li>Targetting individuals or groups based on race, ethnicity, religion, gender, sexual orientation, disability, national origin, or other protected characteristics.</li>
+                                <li>Targeting individuals or groups based on protected characteristics.</li>
                             </ul>
                         </li>
                         <li>Propagates misinformation, disinformation, or propaganda.</li>
-                        <li>Is Spam or AI Slop.</li>
+                        <li>Is spam or AI slop.</li>
                         <li>Is psychologically, emotionally, or physically abusive.</li>
                         <li>Is sexually explicit or graphic.</li>
                     </ul>
