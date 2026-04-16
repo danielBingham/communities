@@ -39,7 +39,7 @@ const validateReaction = function(reaction, existing, action) {
         .isRequiredToUpdate()
         .mustNotBeNull()
         .mustBeString()
-        .mustBeOneOf([ 'like', 'dislike', 'block' ])
+        .mustBeOneOf([ 'like', 'dislike' ])
         .getErrors()
     return errors
 }

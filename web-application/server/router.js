@@ -605,6 +605,17 @@ module.exports = function(core) {
             next(error)
         })
     })
+    /**************************************************************************
+     *      Stats REST Routes
+     * ************************************************************************/
+    const StatsController = require('./controllers/admin/StatsController')
+    const statsController = new StatsController(core)
+
+    router.get('/admin/stats', rateLimit(core, 2400), function(request, response, next) {
+        statsController.getStats(request, response).catch(function(error) {
+            next(error)
+        })
+    })
 
     /**************************************************************************
      *      Moderation REST Routes
