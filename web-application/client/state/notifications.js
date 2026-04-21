@@ -72,9 +72,7 @@ export const notificationsSlice = createSlice({
          */
         queries: {},
 
-        isRegisteredMobile: false,
-
-        isRegisteredDesktop: false
+        isRegisteredMobile: false
 
         // ======== Specific State ============================================
 
