@@ -28,7 +28,6 @@ import logger from '/logger'
 import { makeRequest } from '/state/lib/makeRequest'
 import { setRelationsInState } from '/state/lib/relations'
 
-import { isNativePlatform } from '/lib/native'
 import { updateBadgeCount } from '/lib/notification'
 
 import {
@@ -131,9 +130,9 @@ export const notificationsSlice = createSlice({
  * notification type.
  */
 const desktopNotificationsAreEnabled = function(settings, entity) {
-    try { 
-        const defaultValue = true
+    const defaultValue = true
 
+    try { 
         // Settings will be blank until they are updated, so we need to check
         // for the missing setting at multiple points and just use the default
         // value if we don't find it.
@@ -297,7 +296,7 @@ export const syncDeliveredNotifications = function() {
 
             const state = getState()
 
-            // If we have registered notifications yet, then we need to skip.
+            // If we have not registered notifications yet, then we need to skip.
             if ( state.notifications.isRegisteredMobile !== true ) {
                 return
             }
@@ -338,7 +337,7 @@ export const clearDeliveredNotifications = function() {
         try { 
             const state = getState()
 
-            // If we have registered notifications yet, then we need to skip.
+            // If we have not registered notifications yet, then we need to skip.
             if ( state.notifications.isRegisteredMobile !== true ) {
                 return
             }

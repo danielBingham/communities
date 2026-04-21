@@ -19,6 +19,8 @@
  ******************************************************************************/
 import { Capacitor } from '@capacitor/core'
 
+import logger from '/logger'
+
 /**
  * Check if we're running on a native mobile platform (ios or android).
  */

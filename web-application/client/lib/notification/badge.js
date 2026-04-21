@@ -38,7 +38,7 @@ export async function updateBadgeCount(count) {
         // Build 15 or version 0.15.0 of the app is required to use the Badge
         // plugin.
         const appInfo = await App.getInfo()
-        if ( appInfo.build < 15 ) {
+        if ( parseInt(appInfo.build, 10) < 15 ) {
             return
         }
 
@@ -62,7 +62,7 @@ export async function clearBadgeCount() {
         // Build 15 or version 0.15.0 of the app is required to use the Badge
         // plugin.
         const appInfo = await App.getInfo()
-        if ( appInfo.build < 15 ) {
+        if ( parseInt(appInfo.build, 10) < 15 ) {
             return
         }
 

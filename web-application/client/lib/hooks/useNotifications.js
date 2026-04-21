@@ -21,13 +21,13 @@ import { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
+import { Capacitor } from '@capacitor/core'
 import { PushNotifications } from '@capacitor/push-notifications'
 
 import logger from '/logger'
 
 import { useRequest } from '/lib/hooks/useRequest'
 import { resetEntities } from '/state/lib'
-
 import { patchNotification, setIsRegisteredMobile, syncDeliveredNotifications, clearDeliveredNotifications } from '/state/notifications'
 import { patchDevice } from '/state/authentication'
 
@@ -44,29 +44,37 @@ export const useNotifications = function() {
 
     const listenForPushNotifications = async function() {
         await PushNotifications.addListener('registration', (token) => {
-            if ( ! request ) {
-                makeRequest(patchDevice({ deviceToken: token.value }))
-                dispatch(setIsRegisteredMobile(true))
+            try { 
+                if ( ! request ) {
+                    makeRequest(patchDevice({ deviceToken: token.value }))
+                    dispatch(setIsRegisteredMobile(true))
 
-                // On iOS, the getNotifications() call will sync
-                // the delivered notifications with the backend's
-                // notifications.  
-                //
-                // On Android, the custom data isn't passed so we
-                // can't match a delivered notification to its
-                // backend notification. Instead, we just clear
-                // them whenever the user opens the app.
-                if ( Capacitor.getPlatform() === 'ios' ) {
-                    dispatch(syncDeliveredNotifications())
-                } else if ( Capacitor.getPlatform() === 'android' ) {
-                    dispatch(clearDeliveredNotifications())
+                    // On iOS, the getNotifications() call will sync
+                    // the delivered notifications with the backend's
+                    // notifications.  
+                    //
+                    // On Android, the custom data isn't passed so we
+                    // can't match a delivered notification to its
+                    // backend notification. Instead, we just clear
+                    // them whenever the user opens the app.
+                    if ( Capacitor.getPlatform() === 'ios' ) {
+                        dispatch(syncDeliveredNotifications())
+                    } else if ( Capacitor.getPlatform() === 'android' ) {
+                        dispatch(clearDeliveredNotifications())
+                    }
                 }
+            } catch (error) {
+                logger.error(`Failed responding to registration: `, error)
             }
         })
 
         await PushNotifications.addListener('registrationError', (error) => {
-            dispatch(setIsRegisteredMobile(false))
-            logger.error(`Push Notification Registration failed:: `, error)
+            try { 
+                dispatch(setIsRegisteredMobile(false))
+                logger.error(`Push Notification Registration failed:: `, error)
+            } catch (error) {
+                logger.error(`Failed registrationError handling: `, error)
+            }
         })
 
         await PushNotifications.addListener('pushNotificationReceived', (notification) => {
@@ -100,25 +108,43 @@ export const useNotifications = function() {
                         navigate(path)
                     }
                 } catch (error) {
-                    logger.error(error)
+                    logger.error(`Failed to handle push notification action: `, error)
                 }
             }
         })
     } 
 
     const registerPushNotifications = async function() {
-        let status = await PushNotifications.checkPermissions()
+        try { 
+            let status = await PushNotifications.checkPermissions()
 
-        if ( status.receive === 'prompt' ) {
-            status = await PushNotifications.requestPermissions()
-        }
+            if ( status.receive === 'prompt' ) {
+                status = await PushNotifications.requestPermissions()
+            }
 
-        if ( status.receive !== 'granted' ) {
-            console.error(`Push Notification Registration:: Permission Denied.`)
-        } else {
-            await PushNotifications.register()
+            if ( status.receive !== 'granted' ) {
+                console.error(`Push Notification Registration:: Permission Denied.`)
+            } else {
+                await PushNotifications.register()
+            }
+        } catch (error) {
+            logger.error(`Failed to register push notifications: `, error)
         }
     }
+
+    useEffect(() => {
+        return () => {
+            try { 
+                if ( Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android' ) {
+                    PushNotifications.removeAllListeners().catch((error) => {
+                        logger.error(`Failed to remove push notification listeners: `, error)
+                    })
+                }
+            } catch (error) {
+                logger.error(`Failed to remove push notification listeners: `, error)
+            }
+        }
+    }, [])
 
     useEffect(function() {
         try { 
@@ -144,8 +170,6 @@ export const useNotifications = function() {
         } catch (error) {
             logger.error(`Second Error in useNotifications: `, error)
         }
-            
-
     }, [ currentUser, device, request ])
 
 }
