@@ -26,6 +26,7 @@ import { PushNotifications } from '@capacitor/push-notifications'
 import logger from '/logger'
 
 import { useRequest } from '/lib/hooks/useRequest'
+import { resetEntities } from '/state/lib'
 
 import { patchNotification, setIsRegisteredMobile, syncDeliveredNotifications, clearDeliveredNotifications } from '/state/notifications'
 import { patchDevice } from '/state/authentication'
@@ -91,6 +92,8 @@ export const useNotifications = function() {
                             logger.error(`Failed to dispatch patchNotification: `, error)
                         }
                     }
+
+                    dispatch(resetEntities())
 
                     // Navigate to the notification's target path.
                     if ( path ) {
