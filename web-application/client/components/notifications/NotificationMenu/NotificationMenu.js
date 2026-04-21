@@ -61,26 +61,94 @@ const NotificationMenu = function({ }) {
     useEventSubscription('Notification', 'create')
 
     const markAllRead = function(event) {
-        event.preventDefault()
-        
-        const notifications = []
-        for(const id of unreadNotifications) {
-            notifications.push({
-                ...notificationDictionary[id],
-                isRead: true
-            })
-        }
+        try { 
+            event.preventDefault()
+            
+            const notifications = []
+            for(const id of unreadNotifications) {
+                notifications.push({
+                    ...notificationDictionary[id],
+                    isRead: true
+                })
+            }
 
-        makeMarkReadRequest(patchNotifications(notifications))  
+            makeMarkReadRequest(patchNotifications(notifications))  
+        } catch (error) {
+            logger.error(`Failed to mark all notifications as read: `, error)
+        }
     }
 
-    const requestNotificationPermissions = function(event) {
+    /**
+     * Determine if we need to request permission to send Desktop notifications.
+     */
+    const needToRequestDesktopNotificationPermissions = function() {
         try { 
+            if ( device === null || device === undefined ) {
+                return false
+            }
+
+            // Desktop notifications are only relevant on the web platform.
+            if ( Capacitor.getPlatform() !== 'web' ) {
+                return false
+            }
+
+            // If the session record of the device and the actual device type are
+            // out of sync, log it.
+            if ( device.platform !== Capacitor.getPlatform() ) {
+                logger.warn(`Device (${Capacitor.getPlatform()}) and out of sync with session (${device.platform}).`)
+            }
+
+            // We're on macOs in Lockdown mode.  The Notification API is not
+            // available.
+            if ( ! ( "Notification" in window ) ) {
+                return false
+            }
+
+            // If we've recorded the notification permission and it's not
+            // 'denied' that means we've either cleared it because they turned
+            // Desktop notifications back on OR it was previously granted and
+            // somehow we lost permission on the frontend.  We need to request
+            // permission again.
+            if ( "notificationPermission" in device && device.notificationPermission !== 'denied' && Notification.permission !== 'granted' ) {
+                return true 
+            }
+
+            if ( Notification.permission !== 'granted' && Notification.permission !== 'denied' ) {
+                return true
+            }
+
+            return false
+        } catch (error) {
+            logger.error(`Failed to determine if we need to request desktop notification permission: `, error)
+            return false
+        }
+    }
+
+    /**
+     * Request permission to send Desktop notifications.
+     */
+    const requestDesktopNotificationPermissions = function(event) {
+        try { 
+            // The Notification api in this case is only relevant to desktop
+            // notifications.  We should only be requesting permissions when
+            // we're on web.
+            if ( Capacitor.getPlatform() !== 'web' ) {
+                return
+            }
+
+            // On macOs devices in Lockdown mode, the Notification Api will be
+            // missing.
+            if ( ! ( "Notification" in window ) ) {
+                return 
+            }
+
             Notification.requestPermission().then((permission) => {
                 makePatchDeviceRequest(patchDevice({ notificationPermission: permission }))
+            }).catch(function(error) {
+                logger.error(`Failed to request permission to send desktop notifications: `, error)
             })
         } catch (error) {
-            logger.error(`First error in NotificationMenu: `, error)
+            logger.error(`Failed to request permission to send desktop notifications: `, error)
         }
             
     }
@@ -105,19 +173,7 @@ const NotificationMenu = function({ }) {
         )
     }
 
-    let needToRequestPermission = false
-    if ( device !== null && device.platform === 'web' ) {
-        try { 
-            if ( ! ( "notificationPermission" in device ) || ( device.notificationPermission !== Notification.permission && device.notificationPermission !== 'denied')) {
-                if ( "Notification" in window && Notification.permission !== 'granted' && Notification.permission !== 'denied' ) {
-                    needToRequestPermission = true
-                }
-            }
-        } catch (error) {
-            logger.error(`Second error in NotificationMenu: `, error)
-        }
-    }
-
+    let needToRequestPermission = needToRequestDesktopNotificationPermissions() 
     const unread = unreadNotifications.length
     return (
         <DropdownMenu className="notification-menu" autoClose={true}>
@@ -127,7 +183,7 @@ const NotificationMenu = function({ }) {
             </DropdownMenuTrigger>
             { needToRequestPermission && <DropdownMenuModal className="notification-permissions">
                 <p>Show desktop notifications?</p>
-                <p><Button onClick={(e) => makePatchDeviceRequest(patchDevice({ notificationPermission: 'denied'}))}>No</Button><Button onClick={requestNotificationPermissions} type="primary">Yes</Button></p>
+                <p><Button onClick={(e) => makePatchDeviceRequest(patchDevice({ notificationPermission: 'denied'}))}>No</Button><Button onClick={requestDesktopNotificationPermissions} type="primary">Yes</Button></p>
             </DropdownMenuModal> }
             <DropdownMenuBody className="notification-body">
                 <DropdownMenuHeader className="notification-header">
