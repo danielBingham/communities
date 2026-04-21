@@ -291,7 +291,7 @@ const AcceptInvitationForm = function(props) {
                 <p>Invalid token. {tokenError}</p>
                 <p>If you did get here following a valid invitation, please
                         reach out to us at <a
-                            href="mailto:contact@communities.social">contact@communties.social</a>,
+                            href="mailto:contact@communities.social">contact@communities.social</a>,
                         so we can figure out what went wrong and get you a new
                     invitation.</p>
                 </div>)
