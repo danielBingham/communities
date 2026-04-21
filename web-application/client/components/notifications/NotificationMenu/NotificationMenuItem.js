@@ -27,8 +27,6 @@ import { DropdownMenuItem } from '/components/ui/DropdownMenu'
 
 import { patchNotification } from '/state/notifications'
 
-import { removeDeliveredNotificationById, updateBadgeCount } from '/lib/pushNotificationUtils'
-
 import './NotificationMenuItem.css'
 
 const NotificationMenu = function({ notificationId }) {
@@ -41,15 +39,11 @@ const NotificationMenu = function({ notificationId }) {
     const dispatch = useDispatch()
 
     const notificationClicked = function(notification) {
-        if ( notification.isRead == false ) {
+        if ( notification.isRead === false ) {
             const patchedNotification = { ...notification }
             patchedNotification.isRead = true
 
             makeRequest(patchNotification(patchedNotification))
-
-            // Remove the corresponding delivered push notification from the
-            // device notification center and update the badge count.
-            removeDeliveredNotificationById(notification.id)
         }
 
         dispatch(resetEntities())

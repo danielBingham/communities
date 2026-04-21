@@ -1,26 +1,42 @@
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media 
+ *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
 import { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
-import { App } from '@capacitor/app'
 import { PushNotifications } from '@capacitor/push-notifications'
 
 import logger from '/logger'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { removeDeliveredNotificationById, updateBadgeCount } from '/lib/pushNotificationUtils'
-
-import { patchNotification } from '/state/notifications'
+import { patchNotification, setIsRegisteredMobile, syncDeliveredNotifications, clearDeliveredNotifications } from '/state/notifications'
 import { patchDevice } from '/state/authentication'
 
 
 export const useNotifications = function() {
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const device = useSelector((state) => state.authentication.device)
-    const platform = device?.platform
    
     const [request, makeRequest, resetRequest] = useRequest()
+    const [notificationRequest, makeNotificationRequest] = useRequest()
 
     const navigate = useNavigate()
     const dispatch = useDispatch()
@@ -29,10 +45,26 @@ export const useNotifications = function() {
         await PushNotifications.addListener('registration', (token) => {
             if ( ! request ) {
                 makeRequest(patchDevice({ deviceToken: token.value }))
+                dispatch(setIsRegisteredMobile(true))
+
+                // On iOS, the getNotifications() call will sync
+                // the delivered notifications with the backend's
+                // notifications.  
+                //
+                // On Android, the custom data isn't passed so we
+                // can't match a delivered notification to its
+                // backend notification. Instead, we just clear
+                // them whenever the user opens the app.
+                if ( Capacitor.getPlatform() === 'ios' ) {
+                    dispatch(syncDeliveredNotifications())
+                } else if ( Capacitor.getPlatform() === 'android' ) {
+                    dispatch(clearDeliveredNotifications())
+                }
             }
         })
 
         await PushNotifications.addListener('registrationError', (error) => {
+            dispatch(setIsRegisteredMobile(false))
             logger.error(`Push Notification Registration failed:: `, error)
         })
 
@@ -42,31 +74,31 @@ export const useNotifications = function() {
 
         await PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
             if ( action.actionId === 'tap' ) {
-                const notificationData = action.notification.data
-                const notificationId = notificationData?.notificationId
-                const path = notificationData?.path
+                try { 
+                    const notificationData = action.notification.data
+                    const notificationId = notificationData?.notificationId
+                    const path = notificationData?.path
 
-                // Navigate to the notification's target path.
-                if ( path ) {
-                    navigate(path)
-                }
-
-                // Mark the notification as read in the Communities database.
-                if ( notificationId && currentUser ) {
-                    try {
-                        const [promise] = dispatch(patchNotification({
-                            id: notificationId,
-                            userId: currentUser.id,
-                            isRead: true
-                        }))
-                        promise.catch((error) => logger.error(`Failed to mark notification as read: `, error))
-                    } catch(error) {
-                        logger.error(`Failed to dispatch patchNotification: `, error)
+                    // Mark the notification as read in the Communities database.
+                    if ( notificationId && currentUser ) {
+                        try {
+                            makeNotificationRequest(patchNotification({
+                                id: notificationId,
+                                userId: currentUser.id,
+                                isRead: true
+                            }))
+                        } catch(error) {
+                            logger.error(`Failed to dispatch patchNotification: `, error)
+                        }
                     }
-                }
 
-                // Update the app icon badge count.
-                updateBadgeCount()
+                    // Navigate to the notification's target path.
+                    if ( path ) {
+                        navigate(path)
+                    }
+                } catch (error) {
+                    logger.error(error)
+                }
             }
         })
     } 
@@ -84,19 +116,6 @@ export const useNotifications = function() {
             await PushNotifications.register()
         }
     }
-
-    // TODO TECHDEBT We should separate the notification settings from the
-    // device so they can be updated separately without triggering effect
-    // loops.
-    useEffect(function() {
-        return () => {
-            if ( platform !== undefined && platform !== null) {
-                if ( platform === 'ios' || platform === 'android' ) {
-                    PushNotifications.removeAllListeners()
-                }
-            }
-        }
-    }, [ platform ])
 
     useEffect(function() {
         try { 

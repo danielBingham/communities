@@ -8,7 +8,7 @@ PODS:
   - CapacitorCordova (7.4.3)
   - CapacitorDevice (7.0.2):
     - Capacitor
-  - CapacitorPushNotifications (7.0.2):
+  - CapacitorPushNotifications (7.0.6):
     - Capacitor
   - CapacitorSecureStoragePlugin (0.11.0):
     - Capacitor
@@ -73,7 +73,7 @@ SPEC CHECKSUMS:
   CapacitorApp: 26587c2ce485d88ddb39adb21cac64f8e481afe3
   CapacitorCordova: 435121e81a2df4d0034f0fb11fcefab5104cfdb5
   CapacitorDevice: 81ae78d5d1942707caad79276badd458bf6ec603
-  CapacitorPushNotifications: 7c0659b349b149ee3936a682da31a9d269de9582
+  CapacitorPushNotifications: b8e30637549ce91468b8c4dddbef2657be831f4c
   CapacitorSecureStoragePlugin: 450d402026ee3bcc018fa206504d9c0572fee78d
   CapacitorStatusBar: 0659ddc7b1713764a05831463d215b177a15d054
   CapawesomeCapacitorBadge: 7fc1fa00c920b88eabb8451ddc92bdc75da2cffa
