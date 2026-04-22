@@ -39,7 +39,7 @@ const NotificationMenu = function({ notificationId }) {
     const dispatch = useDispatch()
 
     const notificationClicked = function(notification) {
-        if ( notification.isRead == false ) {
+        if ( notification.isRead === false ) {
             const patchedNotification = { ...notification }
             patchedNotification.isRead = true
 

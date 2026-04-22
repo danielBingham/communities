@@ -7,7 +7,7 @@ import { App } from '@capacitor/app'
 import logger from '/logger'
 
 import { getAuthentication } from '/state/authentication'
-import { getNotifications } from '/state/notifications'
+import { getNotifications, clearDeliveredNotifications } from '/state/notifications'
 import { setIsActive } from '/state/system'
 
 import { useRequest } from '/lib/hooks/useRequest'
@@ -28,16 +28,32 @@ export const useAppState = function() {
         // brought back to the foreground.
         if ( Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android' ) {
             App.addListener('appStateChange', (event) => {
-                logger.debug(`App state change: `, event.isActive)
-                dispatch(setIsActive(event.isActive))
-                if ( event.isActive ) {
-                    // Refresh the currentUser
-                    makeAuthenticationRequest(getAuthentication())
+                try { 
+                    dispatch(setIsActive(event.isActive))
+                    if ( event.isActive ) {
+                        // Refresh the currentUser
+                        makeAuthenticationRequest(getAuthentication())
 
-                    // Refresh our notifications.
-                    if ( currentUser ) {
-                        makeNotificationRequest(getNotifications('NotificationMenu'))
+                        // Refresh our notifications.
+                        if ( currentUser ) {
+                            makeNotificationRequest(getNotifications('NotificationMenu'))
+
+                            // On iOS, the getNotifications() call will sync
+                            // the delivered notifications with the backend's
+                            // notifications.  
+                            //
+                            // On Android, the custom data isn't passed so we
+                            // can't match a delivered notification to its
+                            // backend notification. Instead, we just clear
+                            // them whenever the user opens the app.
+                            if ( Capacitor.getPlatform() === 'android' ) {
+                                dispatch(clearDeliveredNotifications())
+                            }
+                        }
+
                     }
+                } catch ( error ) {
+                    logger.error(`Error handling app state change: `, error)
                 }
             })
         }
