@@ -128,20 +128,25 @@ const FlagPostComment = function({ postId, id } ) {
                 <p><strong>Are you sure you want to flag this comment for Site moderators?</strong></p>
                 <div className="flag-post-comment__explanation">
                     <p>
-                        Flagging is intended for content that needs to be urgently
-                        removed from the site. Content appropriate to flag:
+                        Flagging is for content that violates our Terms of
+                        Service and our Content Policies. Content appropriate
+                        for flagging:
                     </p>
                     <ul>
-                        <li>Direct incitement to violence against an individual or group of people.</li>
-                        <li>Explicit hate.</li>
-                        <li>Direct harrassment.</li>
-                        <li>Other forms of content that can cause immediate, direct harm.</li>
+                        <li>Violates the Paradox of Tolerance by:
+                            <ul>
+                                <li>Denying someone's basic humanity and right to existence.</li>
+                                <li>Targeting individuals or groups based on protected characteristics.</li>
+                            </ul>
+                        </li>
+                        <li>Propagates misinformation, disinformation, or propaganda.</li>
+                        <li>Is spam or AI slop.</li>
+                        <li>Is psychologically, emotionally, or physically abusive.</li>
+                        <li>Is sexually explicit or graphic.</li>
                     </ul>
                     <p>
-                        If you think it should be moderated but it doesn't rise to
-                        the level of "needing urgent response" because it could
-                        cause "immediate, direct harm", then please 'demote' it
-                        instead.
+                        Once the comment is flagged, it goes into the moderation
+                        queue and we'll get to it as quickly as we can.
                     </p>
                 </div>
             </AreYouSure>
