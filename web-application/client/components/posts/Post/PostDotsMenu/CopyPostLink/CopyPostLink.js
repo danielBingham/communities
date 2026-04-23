@@ -17,26 +17,19 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-//import { Capacitor } from '@capacitor/core'
-import { Clipboard } from '@capacitor/clipboard'
-
-import { LinkIcon } from '@heroicons/react/24/solid'
 
 import { usePostLink } from '/lib/hooks/Post'
 
-import { DotsMenuItem } from '/components/ui/DotsMenu'
+import CopyLink from '/components/ui/CopyLink'
+
+import './CopyPostLink.css'
+
 
 const CopyPostLink = function({ postId }) {
     const link = usePostLink(postId)
 
-    const executeCopy = function() {
-        Clipboard.write({
-            url: link
-        })
-    }
-
     return (
-        <DotsMenuItem onClick={(e) => executeCopy()} className="copy-post-link"><LinkIcon /> Copy Link</DotsMenuItem>
+        <CopyLink link={link} /> 
     )
 }
 

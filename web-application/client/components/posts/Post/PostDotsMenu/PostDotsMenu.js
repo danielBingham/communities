@@ -2,6 +2,7 @@ import { useSelector } from 'react-redux'
 
 import { DotsMenu } from '/components/ui/DotsMenu'
 
+import CopyPostLink from './CopyPostLink'
 import SubscribeToPost from './SubscribeToPost/SubscribeToPost'
 import EditPost from './EditPost/EditPost'
 import DeletePost from './DeletePost/DeletePost'
@@ -23,6 +24,7 @@ const PostDotsMenu = function({ postId }) {
 
     return (
         <DotsMenu className="post-dots-menu">
+            { currentUser && <CopyPostLink postId={postId} /> }
             { currentUser && <SubscribeToPost postId={postId} /> }
             { currentUser && <FlagPost postId={postId} /> }
             { currentUser && post.groupId && <FlagPostForGroup postId={postId} /> }
