@@ -5,6 +5,7 @@ import { usePostComment } from '/lib/hooks/PostComment'
 
 import { DotsMenu } from '/components/ui/DotsMenu'
 
+import CopyPostCommentLink from './CopyPostCommentLink'
 import EditPostComment from './EditPostComment'
 import DeletePostComment from './DeletePostComment'
 import FlagPostComment from './FlagPostComment'
@@ -25,6 +26,7 @@ const PostCommentDotsMenu = function({ postId, id }) {
 
     return (
         <DotsMenu className="post-comment-dots-menu">
+            <CopyPostCommentLink postId={postId} id={id} />
             <FlagPostComment postId={postId} id={id} />
             <FlagPostCommentForGroup postId={postId} postCommentId={id} />
             { currentUser.id === comment.userId && <EditPostComment postId={postId} id={id} /> }
