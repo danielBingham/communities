@@ -39,7 +39,7 @@ const {
 const { createLogMiddleware } = require('./log')
 const { createCSRFMiddleware } = require('./csrf')
 const { createErrorsMiddleware } = require('./errors')
-const { createUserTrackingMiddleware } = require('./middleware/tracking')
+const { createUserVisitTrackingMiddleware } = require('./middleware/tracking')
 
 const createRouter = require('./router')
 
@@ -109,7 +109,7 @@ const createExpressApp = function(core, sessionParser) {
         })
     })
 
-    app.use(createUserTrackingMiddleware(core))
+    app.use(createUserVisitTrackingMiddleware(core))
 
     // Perform the CSRF check, checking the token provided in the header
     // against the one stored in the session.

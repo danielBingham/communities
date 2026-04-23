@@ -1,5 +1,5 @@
 
-const createUserTrackingMiddleware = function(core) {
+const createUserVisitTrackingMiddleware = function(core) {
     return async function(request, response, next) {
         try { 
             if ( ! core.features.has('feat-292-track-user-activity') ) {
@@ -35,5 +35,5 @@ const createUserTrackingMiddleware = function(core) {
 }
 
 module.exports = {
-    createUserTrackingMiddleware: createUserTrackingMiddleware
+    createUserVisitTrackingMiddleware: createUserVisitTrackingMiddleware
 }
