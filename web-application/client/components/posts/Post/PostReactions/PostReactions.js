@@ -1,3 +1,22 @@
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media 
+ *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
 import { useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate, useLocation } from 'react-router-dom'
@@ -15,7 +34,6 @@ import {
 
 
 import UserTag from '/components/users/UserTag'
-import BlockConfirmation from './BlockConfirmation'
 
 import Modal from '/components/generic/modal/Modal'
 
@@ -24,7 +42,6 @@ import './PostReactions.css'
 const PostReactions = function({ postId }) {
 
     const [showReactions, setShowReactions] = useState(false)
-    const [blockConfirmation, setBlockConfirmation] = useState(false)
 
     const [request, makeRequest] = useRequest()
 
@@ -123,24 +140,6 @@ const PostReactions = function({ postId }) {
                 { (post.visibility === 'public' || post.sharedPostId) && <div className="group share">
                     <a href="" onClick={(e) => { e.preventDefault(); sharePost() }} ><ArrowPathRoundedSquareIcon /> Share</a>
                 </div> }
-                <div className="group block">
-                    { userReaction?.reaction != 'block' && <>
-                        <a href=""
-                            className={`${ userReaction?.reaction == 'block' ? 'reacted' : ''} block`}
-                            onClick={(e) => { e.preventDefault(); setBlockConfirmation(true) }} 
-                        ><NoSymbolIcon/> Demote</a>
-                        <BlockConfirmation
-                            isVisible={blockConfirmation} 
-                            execute={() => { setBlockConfirmation(false); react('block') }} 
-                            cancel={() => setBlockConfirmation(false)} 
-                        />
-                    </>}
-                    { userReaction?.reaction == 'block' && 
-                        <a href=""
-                            className={`${ userReaction?.reaction == 'block' ? 'reacted' : ''} block`}
-                            onClick={(e) => { e.preventDefault(); react('block') }} 
-                        ><NoSymbolIcon/> Demote</a>}
-                </div>
             </div>
         </div>
     )

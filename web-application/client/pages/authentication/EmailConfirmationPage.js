@@ -83,7 +83,7 @@ const EmailConfirmationPage = function(props) {
     
     return (
         <Card id="email-confirmation-page">
-            <div className="logo"><CommunitiesLogo alwaysFull={true} /></div>
+            <div className="logo"><CommunitiesLogo type="logo" /></div>
             <EmailConfirmationForm initialToken={token} />
             <RequestErrorModal message="Attempt to confirm email" request={request} />
         </Card>

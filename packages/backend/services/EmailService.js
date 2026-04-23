@@ -32,9 +32,17 @@ module.exports = class EmailService {
         try {
             await this.core.postmarkClient.sendEmail(data)
         } catch (error) {
-            console.error(error)
-            throw new ServiceError('email-failed', 
-                `Attempt to send an email failed with message: ${error.message}.`)
+            this.logger.error(error)
+
+            // Inactive recipients error.  The message bounced because that
+            // email address doesn't exist or isn't valid.
+            if ( error.code === 406 ) {
+                throw new ServiceError('invalid-email',
+                    `Message bounced.  That email doesn't exist or isn't valid.`)
+            } else {
+                throw new ServiceError('email-failed', 
+                    `Attempt to send an email failed with message: ${error.message}.`)
+            }
         }
     }
 

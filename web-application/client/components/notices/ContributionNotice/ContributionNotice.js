@@ -51,7 +51,7 @@ const ContributionNotice = function({}) {
 
     return (
         <div className="contribution-notice">
-            <div className="contribution-notice__logo"><CommunitiesLogo /></div>
+            <div className="contribution-notice__logo"><CommunitiesLogo type="logo" /></div>
             <article className="contribution-notice__explanation">
                 <p>Developing, maintaining, and moderating this platform all cost money.</p>
                 <p>We're not taking venture capital, not showing you ads, not

@@ -43,6 +43,10 @@
     width: 40px;
     height: 20px;
 }
+.radio-button__errors {
+    color: var(--error-text-color);
+    padding: 5px;
+}
 
 @media ( width < 700px ) {
     .radio-button label.radio-button__label {

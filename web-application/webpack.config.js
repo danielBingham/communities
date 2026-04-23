@@ -92,7 +92,9 @@ module.exports = {
         sentryWebpackPlugin({
             authToken: process.env.SENTRY_AUTH_TOKEN,
             org: "communities",
-            project: "frontend"
+            project: "frontend",
+            telemetry: false
+
         })
     ],
     devtool: "source-map"

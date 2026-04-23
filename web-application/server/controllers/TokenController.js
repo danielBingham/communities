@@ -24,6 +24,7 @@ const {
     TokenDAO,
     UserDAO,
 
+    ServiceError,
     DAOError
 } = require('@communities/backend')
 const { validation } = require('@communities/shared')
@@ -257,7 +258,21 @@ module.exports = class TokenController extends BaseController {
             token.creatorId = null
             token.id = await this.tokenDAO.insertToken(token)
 
-            await this.emailService.sendPasswordReset(user, token)
+            try {
+                await this.emailService.sendPasswordReset(user, token)
+            } catch (error) {
+                if ( error instanceof ServiceError ) {
+                    if ( error.type === 'invalid-email' ) {
+                        throw new ControllerError(400, 'invalid-email',
+                            `User(${user.id}) registered with an invalid email.  Reset email bounced.`,
+                            `Reset email bounced.  You may have registered with an invalid email.  Please reach out to support: contact@communities.social`)
+                    } else {
+                        throw error
+                    }
+                } else {
+                    throw error
+                }
+            }
 
             response.status(200).json(null)
         } else if (tokenParams.type == 'email-confirmation' ) {
@@ -298,7 +313,21 @@ module.exports = class TokenController extends BaseController {
             token.userId = user.id
             token.id = await this.tokenDAO.insertToken(token)
 
-            await this.emailService.sendEmailConfirmation(user, token)
+            try {
+                await this.emailService.sendEmailConfirmation(user, token)
+            } catch (error) {
+                if ( error instanceof ServiceError ) {
+                    if ( error.type === 'invalid-email' ) {
+                        throw new ControllerError(400, 'invalid-email',
+                            `User(${user.id}) registered with an invalid email.  Confirmation email bounced.`,
+                            `Confirmation email bounced.  You may have registered with an invalid or incorrect email.  Please reach out to support: contact@communities.social`)
+                    } else {
+                        throw error
+                    }
+                } else {
+                    throw error
+                }
+            }
             response.status(200).json(null)
         } else {
             throw new ControllerError(400, 'invalid-token',

@@ -41,6 +41,12 @@ module.exports = function(core) {
         })
     })
 
+    router.post('/system/log', rateLimit(core, 2400), function(request, response, next) {
+        systemController.postLog(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
     /******************************************************************************
      * Feature Flag Management and Migration Rest Routes
      *****************************************************************************/
@@ -596,6 +602,17 @@ module.exports = function(core) {
 
     router.post('/tokens', rateLimit(core, 20), function(request, response, next) {
         tokenController.postToken(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+    /**************************************************************************
+     *      Stats REST Routes
+     * ************************************************************************/
+    const StatsController = require('./controllers/admin/StatsController')
+    const statsController = new StatsController(core)
+
+    router.get('/admin/stats', rateLimit(core, 2400), function(request, response, next) {
+        statsController.getStats(request, response).catch(function(error) {
             next(error)
         })
     })

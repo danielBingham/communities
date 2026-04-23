@@ -95,7 +95,7 @@ const ResetPasswordRequestPage = function(props) {
 
     return (
         <div id="reset-password-request">
-            <div className="logo"><CommunitiesLogo /></div>
+            <div className="logo"><CommunitiesLogo type="logo" /></div>
             { content }
         </div>
     )

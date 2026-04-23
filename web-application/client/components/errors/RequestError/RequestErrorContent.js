@@ -51,8 +51,16 @@ const RequestErrorContent = function({ message, request, ignore404 }) {
             return (
                 <div className="frontend-error">
                     <p>{ contextMessage } succeeded, but we failed to process the response.</p>
-                    <p>Refreshing your browser should clear this message.  Please report this as a bug.</p>
+                    <p>Please report this as a bug.</p>
                     <p>{ request.error.message }</p>
+                </div>
+            )
+        } else if ( request.error?.type === 'request-error' ) {
+            return (
+                <div className="request-error">
+                    <p>{ contextMessage} failed.  This is probably a network error.</p>
+                    <p>If you have a stable connection and the error persists, please report this as a bug!</p>
+                    <p>When you report the bug, share this message: { request.error?.message }</p>
                 </div>
             )
         } else {
@@ -60,8 +68,8 @@ const RequestErrorContent = function({ message, request, ignore404 }) {
             return (
                 <div className="request-error">
                     <p>{ contextMessage } failed for unknown reason.</p>
-                    <p>Please report bug.</p>
-                    <p>{ request.error?.message }</p>
+                    <p>Please report this as a bug.</p>
+                    <p>When you report the bug, share this message: { request.error?.message }</p>
                 </div>
             )
         }

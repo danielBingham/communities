@@ -22,10 +22,12 @@ const DeviceSchema = require('./Device')
 const FileSchema = require('./File')
 const GroupSchema = require('./Group')
 const GroupSubscriptionSchema = require('./GroupSubscription')
+const LogSchema = require('./Log')
 
 module.exports = {
     DeviceSchema: DeviceSchema,
     FileSchema: FileSchema,
     GroupSchema: GroupSchema,
-    GroupSubscriptionSchema: GroupSubscriptionSchema
+    GroupSubscriptionSchema: GroupSubscriptionSchema,
+    LogSchema: LogSchema
 }

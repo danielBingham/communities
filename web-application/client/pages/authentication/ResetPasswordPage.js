@@ -23,7 +23,7 @@ const ResetPasswordPage = function() {
 
     return (
         <div id="reset-password">
-            <div className="logo"><CommunitiesLogo /></div>
+            <div className="logo"><CommunitiesLogo type="logo" /></div>
             <ResetPasswordForm />
         </div>
     )

@@ -108,6 +108,8 @@ const LoginForm = function(props) {
             } else {
                 errorMessage = "Login failed."
             }
+        } else if ( request.error?.type === 'request-error' ) {
+            errorMessage = "We failed to send the request.  This was probably a network error.  Check your network connection and try again.  If the error persists and you have a stable connection, please report it as a bug!"
         } else {
             errorMessage = "Something went wrong on the backend. Since this is an authentication error, we can't share any details (security). Please report a bug and we'll try to figure out it out from server logs."
         }

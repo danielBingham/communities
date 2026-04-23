@@ -106,10 +106,13 @@ describe('validateReaction', function() {
         expect(errors.length).toBe(0)
     })
 
-    it("Should pass when 'block'", function() {
+    // We ripped block out of the UX, but preserved most of the server side
+    // code. This test confirms that 'block' reactions will not pass validation
+    // so that new blocks cannot be created.
+    it("Should fail when 'block'", function() {
         const value = 'block'
         const errors = validation.PostReaction.validateReaction(value)
 
-        expect(errors.length).toBe(0)
+        expect(errors.length).toBe(1)
     })
 })

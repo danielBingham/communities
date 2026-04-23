@@ -17,16 +17,11 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-
-import React, { useEffect } from 'react'
-import { useSelector } from 'react-redux'
+import { Link } from 'react-router-dom'
 
 import can, { Actions, Entities } from '/lib/permission'
 
-import { useRequest } from '/lib/hooks/useRequest'
 import { useUser } from '/lib/hooks/User'
-
-import { getUser } from '/state/User'
 
 import UserProfileImage from '/components/users/UserProfileImage'
 import FriendButton from '/components/friends/FriendButton'
@@ -73,13 +68,14 @@ const UserView = function(props) {
     return (
         <article id={ user.id } className='user-view'>
             <UserProfileImage userId={user.id} /> 
-            <div className="details">
-                <div className="name"> { user.name }</div>
-                <div className="relationship">
+            <div className="user-view__details">
+                <div className="user-view__name"> { user.name }</div>
+                <div className="user-view__username"><Link to={`/${user.username}`}>@{ user.username }</Link></div>
+                <div className="user-view__relationship">
                     <FriendButton userId={user.id} />
                     { canModerateSite !== true && <BlockButton userId={user.id} /> }
                 </div>
-                <div className="about"> { user.about }</div>
+                <div className="user-view__about"> { user.about }</div>
             </div>
         </article>
     )

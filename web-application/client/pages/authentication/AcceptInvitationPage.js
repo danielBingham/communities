@@ -9,7 +9,7 @@ import './AcceptInvitationPage.css'
 const AcceptInvitationPage = function(props) {
     return (
         <div id="accept-invitation-page">
-            <div className="logo"><CommunitiesLogo /></div>
+            <div className="logo"><CommunitiesLogo type="logo" /></div>
             <AcceptInvitationForm />
         </div>
     )

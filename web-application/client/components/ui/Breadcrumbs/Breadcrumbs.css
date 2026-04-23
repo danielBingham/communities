@@ -1,0 +1,19 @@
+.breadcrumbs {
+    display: grid;
+    grid-template-columns: auto auto;
+    padding: 5px 10px 20px 10px;
+
+    font-size: 16px;
+}
+.breadcrumbs__back {
+    align-self: center;
+    justify-self: left;
+}
+.breadcrumbs__crumbs {
+    align-self: center;
+    justify-self: right;
+    max-width: 200px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}

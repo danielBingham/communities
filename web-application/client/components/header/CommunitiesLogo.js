@@ -22,12 +22,19 @@ import marque from '/assets/communities-marque.svg'
 
 import './CommunitiesLogo.css'
 
-const CommunitiesLogo = function({ alwaysFull }) {
+const CommunitiesLogo = function({ type, className }) {
+
+    let typeClass = 'communities-logo__responsive'
+    if ( type === 'logo' ) {
+        typeClass = 'communities-logo__always-logo'
+    } else if ( type === 'marque' ) {
+        typeClass = 'communities-logo__always-marque'
+    }
 
     return (
-        <div className={`communities-logo ${ alwaysFull ? 'communities-logo__full' : ''}`}>
-            <a href="/"><img className="communities-logo__logo" src={logo} /><img className="communities-logo__marque" src={marque} /></a>
-        </div> 
+        <a className={`communities-logo ${ typeClass } ${ className ? className : ''}`} href="/">
+            <img className="communities-logo__logo" src={logo} /><img className="communities-logo__marque" src={marque} />
+        </a>
     )
 
 }

@@ -1,44 +1,45 @@
-.communities-logo {
-    display: inline-block;
-    font-family: "Nunito", sans-serif;
-    font-size: 30px;
-    line-height: 1em;
-    font-weight: 300;
-    height: 30px;
-
-    padding: 17px 0;
-
-    text-align: left;
-}
 .communities-logo__logo {
-    display: inline-block;
     height: 22px;
 }
 .communities-logo__marque {
-    display: none;
     height: 30px;
 }
-.communities-logo a:link, .communities-logo a:active, .communities-logo a:visited {
-    color: var(--header-text-color);
+
+/** Always display the logo, not the marque **/
+.communities-logo.communities-logo__always-logo .communities-logo__logo {
+    display: inline-block;
+}
+.communities-logo.communities-logo__always-logo .communities-logo__marque {
+    display: none;
 }
 
-.communities-logo a:hover {
-    color: var(--header-text-highlight-color);
+/** Always display the marque, not the logo. **/
+.communities-logo.communities-logo__always-marque .communities-logo__logo {
+    display: none;
+}
+.communities-logo.communities-logo__always-marque .communities-logo__marque {
+    display: inline-block;
 }
 
 
-
-@media (width <= 1000px) {
-    .communities-logo .communities-logo__logo {
-        display: none;
-    }
-    .communities-logo .communities-logo__marque {
+@media (width > 800px ) {
+    /* Responsive logo */
+    .communities-logo.communities-logo__responsive .communities-logo__logo {
         display: inline-block;
     }
-    .communities-logo.communities-logo__full .communities-logo__logo {
-        display: inline-block;
-    }
-    .communities-logo.communities-logo__full .communities-logo__marque {
+    .communities-logo.communities-logo__responsive .communities-logo__marque {
         display: none;
     }
+
 }
+
+@media (width <= 800px) {
+    /* Responsive logo */
+    .communities-logo.communities-logo__responsive .communities-logo__logo {
+        display: none;
+    }
+    .communities-logo.communities-logo__responsive .communities-logo__marque {
+        display: inline-block;
+    }
+}
+

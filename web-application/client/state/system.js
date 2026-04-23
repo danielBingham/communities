@@ -28,6 +28,8 @@ const systemSlice = createSlice({
         features: {},
         clientVersion: clientVersion,
         serverVersion: null,
+        appVersion: "0.0.0",
+        appBuild: 0,
         isActive: true
     },
     reducers: {
@@ -59,6 +61,14 @@ const systemSlice = createSlice({
 
         setServerVersion: function(state, action) {
             state.serverVersion = action.payload
+        },
+
+        setAppVersion: function(state, action) {
+            state.appVersion = action.payload
+        },
+        
+        setAppBuild: function(state, action) {
+            state.appBuild = action.payload
         },
 
         setIsActive: function(state, action) {
@@ -95,6 +105,20 @@ export const getInitialization = function() {
     }
 }
 
+export const forwardLog = function(message) {
+    return function(dispatch, getState) {
+        const state = getState()
+        // Don't forward any logs until we've loaded the CSRF token.
+        if ( state.system.csrf === null ) {
+            return
+        }
 
-export const { reset, setHost, setAPI, setConfiguration, setFeatures, setIsActive } = systemSlice.actions
+        return dispatch(makeRequest('POST', '/system/log', message,
+            function(requestBody) {
+            }
+        ))
+    }
+}
+
+export const { reset, setHost, setAPI, setConfiguration, setFeatures, setAppVersion, setAppBuild, setIsActive } = systemSlice.actions
 export default systemSlice.reducer

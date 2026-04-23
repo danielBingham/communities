@@ -135,7 +135,7 @@ const App = function(props) {
         } else if (getInitializationRequest && getInitializationRequest.state == 'failed' && retries >= 5 ) {
             return (<div className="error">Failed to connect to the backend.  Try refreshing.</div>)
         } else if (authenticationRequest && authenticationRequest.state == 'failed' ) {
-            return (<div className="error">Authentication request failed with error: {authenticationRequest.error}.</div>)
+            return (<div className="error">Authentication request failed with error: {authenticationRequest.error?.message}</div>)
         }
 
         return (

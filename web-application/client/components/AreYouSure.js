@@ -22,14 +22,14 @@ import Spinner from '/components/Spinner'
 
 import './AreYouSure.css'
 
-const AreYouSure = function({ isVisible, isPending, cancel, execute, className, children }) {
+const AreYouSure = function({ isVisible, isPending, cancelLabel = 'Cancel', executeLabel = 'Yes', cancel, execute, className, children }) {
 
     return isVisible ?
             <div className="modal-wrapper">
                 <div className="modal-overlay" onClick={(e) => cancel()}></div>
                 <div className={className ? `are-you-sure ${className}` : 'are-you-sure'}>
                     <div className="are-you-sure__question">{ children }</div>
-                    <Button onClick={(e) =>{ e.stopPropagation(); cancel() }}>Cancel</Button> <Button type="warn" onClick={(e) => { e.stopPropagation(); execute() }}>{ isPending === true ? <Spinner /> : 'Yes' }</Button>
+                    <Button onClick={(e) =>{ e.stopPropagation(); cancel() }}>{ cancelLabel }</Button> <Button type="warn" onClick={(e) => { e.stopPropagation(); execute() }}>{ isPending === true ? <Spinner /> : executeLabel }</Button>
                 </div>
             </div>
          : null 
