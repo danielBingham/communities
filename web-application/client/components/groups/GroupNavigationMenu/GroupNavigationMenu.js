@@ -29,6 +29,7 @@ import { NavigationMenu, NavigationMenuLink, NavigationMenuButton, NavigationSub
 
 import GroupMembershipButton from '/components/groups/GroupMembershipButton'
 
+import CopyGroupLink from './CopyGroupLink'
 import LeaveGroupAction from './LeaveGroupAction'
 
 const GroupNavigationMenu = function({ groupId }) {
@@ -80,12 +81,13 @@ const GroupNavigationMenu = function({ groupId }) {
                 { isMember && canModerateGroup === true && <NavigationSubmenuLink to={`/group/${group.slug}/members/email-invitations`} icon="Envelope" text="Email Invitations" /> }
             </NavigationSubmenu>}
             { hasSubgroups && canViewGroupPost === true && <NavigationMenuLink to={`/group/${group.slug}/subgroups`} icon="UserGroup" text="Subgroups" /> }
-            { ( isMember === true || canAdminSite === true) && <NavigationSubmenu icon="EllipsisHorizontal" title="More">
+            <NavigationSubmenu icon="EllipsisHorizontal" title="More">
                 <NavigationSubmenuLink to={`/group/${group.slug}/about`} icon="QuestionMarkCircle" text="About" />
+                <CopyGroupLink groupId={group.id} />
                 { canModerateGroup === true && <NavigationSubmenuLink to="moderation" icon="Flag" text="Moderation" /> }
                 { canAdminGroup === true && <NavigationSubmenuLink to="settings" icon="Cog6Tooth" text="Settings" /> }
-                <LeaveGroupAction groupId={group.id} />
-            </NavigationSubmenu> }
+                { isMember && <LeaveGroupAction groupId={group.id} /> }
+            </NavigationSubmenu> 
         </NavigationMenu> 
     )
 }

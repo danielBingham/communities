@@ -18,20 +18,23 @@
  *
  ******************************************************************************/
 
-import { usePostLink } from '/lib/hooks/Post'
+import { useGroup } from '/lib/hooks/Group'
 
-import { CopyLink } from '/components/ui/DotsMenu'
+import { CopyLink } from '/components/ui/NavigationMenu'
 
-import './CopyPostCommentLink.css'
+import './CopyGroupLink.css'
 
 
-const CopyPostCommentLink = function({ postId, id}) {
-    const postLink = usePostLink(postId)
-    const link = `${postLink}#comment-${id}`
+const CopyGroupLink = function({ groupId }) {
+    const [ group ] = useGroup(groupId)
+
+    if ( ! group ) {
+        return null
+    }
 
     return (
-        <CopyLink link={link} /> 
+        <CopyLink link={`/group/${group.slug}`} /> 
     )
 }
 
-export default CopyPostCommentLink
+export default CopyGroupLink

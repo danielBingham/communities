@@ -20,7 +20,7 @@
 
 import { usePostLink } from '/lib/hooks/Post'
 
-import CopyLink from '/components/ui/CopyLink'
+import { CopyLink } from '/components/ui/DotsMenu'
 
 import './CopyPostLink.css'
 
