@@ -18,7 +18,7 @@
  *
  ******************************************************************************/
 import { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import { useParams, Outlet } from 'react-router-dom'
 
 import { useBackPoint } from '/lib/hooks/useBackPoint'
@@ -86,7 +86,7 @@ const UserProfilePage = function(props) {
                         <NavigationMenuLink to={`/${user.username}`} icon="QueueList" text="Feed" /> 
                         <NavigationMenuLink to={`/${user.username}/friends`} icon="Users" text="Friends" /> 
                         <NavigationSubmenu icon="EllipsisHorizontal" title="More">
-                            <CopyLink link={user.username} />
+                            <CopyLink link={`/${user.username}`} />
                         </NavigationSubmenu> 
 
                     </NavigationMenu>

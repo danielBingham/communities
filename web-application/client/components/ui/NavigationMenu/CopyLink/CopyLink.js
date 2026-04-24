@@ -41,19 +41,23 @@ const CopyLink = function({ link }) {
 
     const host = useSelector((state) => state.system.host)
 
-    const executeCopy = function() {
+    const executeCopy = async function() {
         try { 
             const url = new URL(link, host)
             
-            Clipboard.write({
+            await Clipboard.write({
                 url: url.href
             })
 
             setStatus(STATUS.SUCCESS)
         } catch (error) {
-            logger.error(`Failed to write post link to clipboard: `, error)
+            logger.error(`Failed to write link to clipboard: `, error)
             setStatus(STATUS.ERROR)
         }
+    }
+
+    if ( link === undefined || link === null || link === '' ) {
+        return null
     }
 
     const container = document.getElementById('root-layout')

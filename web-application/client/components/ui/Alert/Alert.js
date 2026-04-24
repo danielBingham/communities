@@ -32,10 +32,7 @@ const Alert = function({ type, timeout, onClear, className, children }) {
     useEffect(() => {
         if ( timeout !== undefined && timeout !== null && typeof timeout === 'number' ) {
             timeoutRef.current = setTimeout(() => {
-                setVisible(false)
-                if ( onClear && typeof onClear === 'function' ) {
-                    onClear()
-                }
+                clearAlert()
             }, timeout)
         }
 
@@ -49,6 +46,13 @@ const Alert = function({ type, timeout, onClear, className, children }) {
             }
         }
     }, [ type, timeout ])
+
+    const clearAlert = function() {
+        setVisible(false)
+        if ( onClear && typeof onClear === 'function' ) {
+            onClear()
+        }
+    }
 
     if ( type !== "success" && type !== "info" && type !== "warn" && type !== "error" ) {
         throw new Error(`Invalid Alert type: "${type}".`)
@@ -70,7 +74,7 @@ const Alert = function({ type, timeout, onClear, className, children }) {
     return (
         <div 
             className={`alert ${typeClass} ${ className ? className : ''}`} 
-            onClick={(e) => setVisible(false)}
+            onClick={(e) => clearAlert()}
         >
             { children }
         </div>
