@@ -46,7 +46,7 @@ const CopyLink = function({ link }) {
             const url = new URL(link, host)
             
             await Clipboard.write({
-                url: url.href
+                string: url.href
             })
 
             setStatus(STATUS.SUCCESS)
