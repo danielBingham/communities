@@ -18,7 +18,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import { useState } from 'react'
+import { useState, useEffect, useContext } from 'react'
 import { createPortal } from 'react-dom'
 import { useSelector } from 'react-redux'
 import { Clipboard } from '@capacitor/clipboard'
@@ -26,7 +26,7 @@ import { Clipboard } from '@capacitor/clipboard'
 import logger from '/logger'
 
 import Alert from '/components/ui/Alert'
-import { NavigationSubmenuAction } from '/components/ui/NavigationMenu'
+import { NavigationSubmenuAction, SubmenuCloseContext, SubmenuIsMobileContext  } from '/components/ui/NavigationMenu'
 
 import './CopyLink.css'
 
@@ -40,6 +40,8 @@ const CopyLink = function({ link }) {
     const [status, setStatus] = useState(STATUS.PENDING)
 
     const host = useSelector((state) => state.system.host)
+    const closeMenu = useContext(SubmenuCloseContext)
+    const isMobile = useContext(SubmenuIsMobileContext)
 
     const executeCopy = async function() {
         try { 
@@ -55,6 +57,14 @@ const CopyLink = function({ link }) {
             setStatus(STATUS.ERROR)
         }
     }
+
+    useEffect(() => {
+        if ( status === STATUS.SUCCESS ) {
+            if ( isMobile ) {
+                closeMenu()
+            }
+        }
+    }, [ status ])
 
     if ( link === undefined || link === null || link === '' ) {
         return null
