@@ -1,0 +1,11 @@
+.mobile-welcome-splash__logo {
+    margin: 0px auto;
+    padding-top: 60px;
+    text-align: center;
+}
+.mobile-welcome-splash__login {
+    position: absolute;
+    top: 50vh;
+    transform: translateY(-50%);
+    width: 100vw;
+}

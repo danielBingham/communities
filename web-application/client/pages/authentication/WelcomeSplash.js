@@ -2,6 +2,7 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 
 import LoginForm from '/components/authentication/LoginForm'
+import Card from '/components/ui/Card'
 
 import GoogleBadge from '/assets/get-it-on-google-play.png'
 import AppleBadge from '/assets/download-from-app-store.svg'
@@ -28,7 +29,9 @@ const WelcomeSplash = function() {
             </div>
             <div className="welcome-splash__login">
                 <div className="welcome-splash__login-wrapper">
-                    <LoginForm /> 
+                    <Card className="welcome-splash__login-card">
+                        <LoginForm /> 
+                    </Card>
                 </div>
                 <div className="welcome-splash__store-badges">
                     <div className="welcome-splash__store-badge-grid">
