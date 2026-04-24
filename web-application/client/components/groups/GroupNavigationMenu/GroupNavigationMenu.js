@@ -21,6 +21,7 @@
 import { useSelector } from 'react-redux'
 
 import can, { Actions, Entities } from '/lib/permission'
+import { isNativePlatform } from '/lib/native'
 
 import { useGroupPermissionContext } from '/lib/hooks/Group'
 import { useFeature } from '/lib/hooks/feature'
@@ -34,7 +35,8 @@ import LeaveGroupAction from './LeaveGroupAction'
 
 const GroupNavigationMenu = function({ groupId }) {
 
-    
+    const appBuild = useSelector((state) => state.system.appBuild)
+
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const [context, requests] = useGroupPermissionContext(currentUser, groupId)
 
@@ -83,7 +85,7 @@ const GroupNavigationMenu = function({ groupId }) {
             { hasSubgroups && canViewGroupPost === true && <NavigationMenuLink to={`/group/${group.slug}/subgroups`} icon="UserGroup" text="Subgroups" /> }
             <NavigationSubmenu icon="EllipsisHorizontal" title="More">
                 <NavigationSubmenuLink to={`/group/${group.slug}/about`} icon="QuestionMarkCircle" text="About" />
-                <CopyGroupLink groupId={group.id} />
+                { ( ! isNativePlatform() || appBuild >= 15 ) && <CopyGroupLink groupId={group.id} /> }
                 { canModerateGroup === true && <NavigationSubmenuLink to="moderation" icon="Flag" text="Moderation" /> }
                 { canAdminGroup === true && <NavigationSubmenuLink to="settings" icon="Cog6Tooth" text="Settings" /> }
                 { isMember && <LeaveGroupAction groupId={group.id} /> }
