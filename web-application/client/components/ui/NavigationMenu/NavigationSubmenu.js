@@ -84,13 +84,17 @@ const NavigationSubmenu = function({ id, title, icon, pinLeft, children, classNa
             <a href="" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsOpen( ! isOpen )}} className="navigation-menu__sub-menu__header">
                 { isOpen ? <SolidIcon /> : <OutlineIcon /> } <span className="nav-text">{ title }</span>
             </a>
-            { isOpen && <menu ref={menuRef} className={`navigation-menu__sub-menu__menu ${ pinLeft ? `navigation-menu__sub-menu__pin-left` : 'navigation-menu__sub-menu__pin-right' }`}>
+            <menu 
+                ref={menuRef} 
+                className={`navigation-menu__sub-menu__menu ${ pinLeft ? `navigation-menu__sub-menu__pin-left` : 'navigation-menu__sub-menu__pin-right' }`}
+                style={{ display: ( isOpen ? 'block' : 'none' ) }}
+            >
                 <SubmenuCloseContext.Provider value={closeMenu}>
                     <SubmenuIsMobileContext.Provider value={width <= 1220}>
                         { children }
                     </SubmenuIsMobileContext.Provider>
                 </SubmenuCloseContext.Provider>
-            </menu> }
+            </menu> 
         </NavigationMenuItem>
     )
 }

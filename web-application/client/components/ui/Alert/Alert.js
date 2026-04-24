@@ -20,22 +20,32 @@
 
 import { useEffect, useState, useRef } from 'react'
 
+import logger from '/logger'
+
 import './Alert.css'
 
-const Alert = function({ type, timeout, className, children }) {
+const Alert = function({ type, timeout, onClear, className, children }) {
     const [ visible, setVisible ] = useState(true)
 
     const timeoutRef = useRef(null)
 
+    const clearAlert = function() {
+        setVisible(false)
+        if ( onClear && typeof onClear === 'function' ) {
+            onClear()
+        }
+    }
+
+
     useEffect(() => {
         if ( timeout !== undefined && timeout !== null && typeof timeout === 'number' ) {
             timeoutRef.current = setTimeout(() => {
-                setVisible(false)
+                clearAlert()
             }, timeout)
         }
 
         if ( timeout !== undefined && timeout!== null &&  typeof timeout !== 'number' ) {
-            throw new Error('Invalid timeout.  Must supply a number.')
+            logger.error(new Error('Invalid timeout.  Must supply a number.'))
         }
 
         return () => {
@@ -65,7 +75,7 @@ const Alert = function({ type, timeout, className, children }) {
     return (
         <div 
             className={`alert ${typeClass} ${ className ? className : ''}`} 
-            onClick={(e) => setVisible(false)}
+            onClick={(e) => clearAlert()}
         >
             { children }
         </div>

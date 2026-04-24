@@ -18,12 +18,13 @@
  *
  ******************************************************************************/
 import { useEffect } from 'react'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { useParams, Outlet } from 'react-router-dom'
 
 import { useBackPoint } from '/lib/hooks/useBackPoint'
 import { useUserByUsername } from '/lib/hooks/User'
 import { resetEntities } from '/state/lib'
+import { isNativePlatform } from '/lib/native'
 
 import Error404 from '/components/errors/Error404'
 import { RequestErrorPage } from '/components/errors/RequestError'
@@ -33,13 +34,14 @@ import UserView from '/components/users/UserView'
 
 import Breadcrumbs from '/components/ui/Breadcrumbs'
 import { Page, PageBody, PageLeftGutter, PageRightGutter } from '/components/generic/Page'
-import { NavigationMenu, NavigationMenuLink, NavigationMenuButton, NavigationSubmenu, NavigationSubmenuLink, NavigationMenuItem} from '/components/ui/NavigationMenu'
+import { NavigationMenu, NavigationMenuLink, CopyLink, NavigationSubmenu } from '/components/ui/NavigationMenu'
 
 import './UserProfilePage.css'
 
 const UserProfilePage = function(props) {
     const { slug } = useParams()
 
+    const appBuild = useSelector((state) => state.system.appBuild)
     const [user, request] = useUserByUsername(slug)
 
     useBackPoint(`/${slug}`)
@@ -85,6 +87,9 @@ const UserProfilePage = function(props) {
                     <NavigationMenu className="user-profile-page__menu">
                         <NavigationMenuLink to={`/${user.username}`} icon="QueueList" text="Feed" /> 
                         <NavigationMenuLink to={`/${user.username}/friends`} icon="Users" text="Friends" /> 
+                        { ( ! isNativePlatform() || appBuild >= 15 ) && <NavigationSubmenu icon="EllipsisHorizontal" title="More">
+                            <CopyLink link={`/${user.username}`} />
+                        </NavigationSubmenu> }
 
                     </NavigationMenu>
                 </PageLeftGutter>

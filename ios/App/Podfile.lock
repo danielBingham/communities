@@ -5,6 +5,8 @@ PODS:
     - CapacitorCordova
   - CapacitorApp (7.1.0):
     - Capacitor
+  - CapacitorClipboard (7.0.4):
+    - Capacitor
   - CapacitorCordova (7.4.3)
   - CapacitorDevice (7.0.2):
     - Capacitor
@@ -30,6 +32,7 @@ PODS:
 DEPENDENCIES:
   - "Capacitor (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorApp (from `../../node_modules/@capacitor/app`)"
+  - "CapacitorClipboard (from `../../node_modules/@capacitor/clipboard`)"
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorDevice (from `../../node_modules/@capacitor/device`)"
   - "CapacitorPushNotifications (from `../../node_modules/@capacitor/push-notifications`)"
@@ -51,6 +54,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/ios"
   CapacitorApp:
     :path: "../../node_modules/@capacitor/app"
+  CapacitorClipboard:
+    :path: "../../node_modules/@capacitor/clipboard"
   CapacitorCordova:
     :path: "../../node_modules/@capacitor/ios"
   CapacitorDevice:
@@ -71,6 +76,7 @@ SPEC CHECKSUMS:
   BigInt: f668a80089607f521586bbe29513d708491ef2f7
   Capacitor: 28d6c01026a9a3f7156529498ec1f389a2a28dbc
   CapacitorApp: 26587c2ce485d88ddb39adb21cac64f8e481afe3
+  CapacitorClipboard: d1f123674cf413125db816a45e8f70e8770972fc
   CapacitorCordova: 435121e81a2df4d0034f0fb11fcefab5104cfdb5
   CapacitorDevice: 81ae78d5d1942707caad79276badd458bf6ec603
   CapacitorPushNotifications: b8e30637549ce91468b8c4dddbef2657be831f4c
@@ -82,6 +88,6 @@ SPEC CHECKSUMS:
   SwiftKeychainWrapper: 807ba1d63c33a7d0613288512399cd1eda1e470c
   Version: de5907f2c5d0f3cf21708db7801d1d5401139486
 
-PODFILE CHECKSUM: 9dc3bd0e77fe5d83aead4e138620f0ddac4d62b4
+PODFILE CHECKSUM: 6a4a8036cbddafd13ab11e24e37da4934a6e00ac
 
 COCOAPODS: 1.16.2

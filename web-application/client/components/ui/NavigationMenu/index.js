@@ -7,4 +7,5 @@ export { default as NavigationSubmenu, SubmenuCloseContext, SubmenuIsMobileConte
 export { default as NavigationSubmenuLink } from './NavigationSubmenuLink'
 export { default as NavigationSubmenuItem } from './NavigationSubmenuItem'
 export { default as NavigationSubmenuAction } from './NavigationSubmenuAction'
+export { default as CopyLink } from './CopyLink'
 
