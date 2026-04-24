@@ -121,7 +121,6 @@ const LoginForm = function(props) {
     if ( isLoading ) {
         return (
             <div className="login-form">
-                <h2>Login</h2>
                 <Spinner />
             </div>
         )

@@ -26,12 +26,13 @@ import "./MobileWelcomeSplash.css"
 const MobileWelcomeSplash = function() {
 
     return (
-        <>
+        <div className="mobile-welcome-splash">
             <div className="mobile-welcome-splash__logo"><CommunitiesLogo type="logo" /></div>
             <div className="mobile-welcome-splash__login">
                 <LoginForm />
             </div>
-        </>
+            <div></div>
+        </div>
 
     )
 

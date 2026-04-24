@@ -1,4 +1,19 @@
+.mobile-welcome-splash {
+    display: grid;
+    grid-template-rows: 1fr 1fr 1fr;
+    align-items: center;
+    justify-items: center;
+    height: calc(100vh - 60px);
+    width: 100vw;
+}
 .mobile-welcome-splash__logo {
+    text-align: center;
+}
+.mobile-welcome-splash__login {
+    width: 80vw;
+}
+
+/*.mobile-welcome-splash__logo {
     margin: 0px auto;
     padding-top: 60px;
     text-align: center;
@@ -8,4 +23,4 @@
     top: 50vh;
     transform: translateY(-50%);
     width: 100vw;
-}
+}*/
