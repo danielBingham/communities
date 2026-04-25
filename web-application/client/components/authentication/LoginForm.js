@@ -121,7 +121,6 @@ const LoginForm = function(props) {
     if ( isLoading ) {
         return (
             <div className="login-form">
-                <h2>Login</h2>
                 <Spinner />
             </div>
         )
@@ -129,13 +128,12 @@ const LoginForm = function(props) {
 
     return (
         <div className='login-form'>
-            <h2>Log In</h2>
             <form onSubmit={onSubmit}>
+                <h2>Log in to Communities</h2>
                 <div className="error"> { errorView } </div>
                 <Input
                     name="email"
-                    label="Email"
-                    /*explanation="Enter the email you used to register." */
+                    placeholder="email"
                     value={email}
                     className="email"
                     error={emailError}
@@ -145,8 +143,7 @@ const LoginForm = function(props) {
                 <Input
                     name="password"
                     type="password"
-                    label="Password"
-                    /*explanation="Enter your password."*/
+                    placeholder="password"
                     value={password}
                     className="password"
                     error={passwordError}
