@@ -38,16 +38,7 @@ const AuthenticatedLayout = function() {
     useNotifications()
     useHistoryTracking()
 
-    if ( ! currentUser && Capacitor.getPlatform() === 'web' ) {
-        return (
-            <>
-            <Header />
-            <main id="footerless">
-                <WelcomeSplash />
-            </main>
-            </>
-        )
-    } else if ( ! currentUser &&  ( Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android' ) ) {
+    if ( ! currentUser && Capacitor.isNativePlatform() ) {
         return (
             <>
                 <main>
@@ -56,6 +47,15 @@ const AuthenticatedLayout = function() {
             </>
         )
 
+    } else if ( ! currentUser ) {
+        return (
+            <>
+            <Header />
+            <main id="footerless">
+                <WelcomeSplash />
+            </main>
+            </>
+        )
     }
 
     return (
