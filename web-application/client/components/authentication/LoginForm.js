@@ -133,7 +133,8 @@ const LoginForm = function(props) {
                 <div className="error"> { errorView } </div>
                 <Input
                     name="email"
-                    placeholder="email"
+                    label="Email"
+                    placeholder="john-doe@example.com"
                     value={email}
                     className="email"
                     error={emailError}
@@ -143,7 +144,8 @@ const LoginForm = function(props) {
                 <Input
                     name="password"
                     type="password"
-                    placeholder="password"
+                    label="Password"
+                    placeholder="enter your password"
                     value={password}
                     className="password"
                     error={passwordError}
