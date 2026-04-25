@@ -1,3 +1,7 @@
 #login-page {
     padding-top: 40px;
 }
+.login-page__card {
+    max-width: 500px;
+    margin: 0 auto;
+}
