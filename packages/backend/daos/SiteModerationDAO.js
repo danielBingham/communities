@@ -61,6 +61,20 @@ const SCHEMA = {
                 select: 'always',
                 key: 'postCommentId'
             },
+            'group_id': {
+                insert: 'allow',
+                update: 'allow',
+                select: 'always',
+                key: 'groupId',
+                needsFeature: 'feat-408-flag-users-and-groups'
+            },
+            'user_profile_id': {
+                insert: 'allow',
+                update: 'allow',
+                select: 'always',
+                key: 'userProfileId',
+                needsFeature: 'feat-408-flag-users-and-groups'
+            },
             'created_date': {
                 insert: 'override',
                 insertOverride: 'now()',

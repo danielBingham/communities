@@ -26,6 +26,7 @@ const SubgroupMigration = require('../migrations/SubgroupMigration')
 const Issue330GroupShortDescriptionAndRulesMigration = require('../migrations/Issue330GroupShortDescriptionAndRulesMigration')
 const Issue252GroupSubscriptionMigration = require('../migrations/Issue252GroupSubscriptionMigration')
 const Issue67VideoUploadsMigration = require('../migrations/Issue67VideoUploadsMigration')
+const Feat408FlagUsersAndGroupsMigration = require('../migrations/Feat408FlagUsersAndGroupsMigration')
 
 const ServiceError = require('../errors/ServiceError')
 const MigrationError = require('../errors/MigrationError')
@@ -75,6 +76,9 @@ module.exports = class FeatureService {
             },
             'issue-67-video-uploads': {
                 migration: new Issue67VideoUploadsMigration(core)
+            },
+            'feat-408-flag-users-and-groups': {
+                migration: new Feat408FlagUsersAndGroupsMigration(core)
             },
             'video-uploads': {}
         }

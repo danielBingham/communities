@@ -462,6 +462,8 @@ CREATE TABLE site_moderation (
 
     post_id uuid REFERENCES posts (id) ON DELETE CASCADE DEFAULT NULL ,
     post_comment_id uuid REFERENCES post_comments (id) ON DELETE CASCADE DEFAULT NULL, 
+    group_id uuid REFERENCES groups (id) ON DELETE CASCADE DEFAULT NULL,
+    user_profile_id uuid REFERENCES users (id) ON DELETE CASCADE DEFAULT NULL,
 
     created_date timestamptz, 
     updated_date timestamptz
@@ -480,6 +482,8 @@ CREATE TABLE site_moderation_events (
 
     post_id uuid REFERENCES posts(id) ON DELETE CASCADE DEFAULT NULL,
     post_comment_id uuid REFERENCES post_comments(id) ON DELETE CASCADE DEFAULT NULL,
+    group_id uuid REFERENCES groups (id) ON DELETE CASCADE DEFAULT NULL,
+    user_profile_id uuid REFERENCES users (id) ON DELETE CASCADE DEFAULT NULL,
 
     created_date timestamptz
 );
