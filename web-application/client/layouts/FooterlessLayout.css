@@ -6,7 +6,7 @@
     main#footerless {
         box-sizing: border-box;
 
-        margin: 65px auto 0 auto; /** push us below the header **/
+        margin: 60px auto 0 auto; /** push us below the header **/
         min-width: 360px;
         width: 100%;
         min-height: 600px;
@@ -20,7 +20,7 @@
     main#footerless {
         box-sizing: border-box;
 
-        margin: 65px auto 0 auto; /** push us below the header **/
+        margin: 60px auto 0 auto; /** push us below the header **/
         min-width: 360px;
         width: 100%;
         min-height: 600px;
@@ -33,7 +33,7 @@
     main#footerless {
         box-sizing: border-box;
 
-        margin: 65px auto 0 auto; /** push us below the header **/
+        margin: 60px auto 0 auto; /** push us below the header **/
         min-width: 360px;
         width: 100%;
         min-height: 600px;

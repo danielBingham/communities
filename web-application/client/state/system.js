@@ -28,6 +28,8 @@ const systemSlice = createSlice({
         features: {},
         clientVersion: clientVersion,
         serverVersion: null,
+        appVersion: "0.0.0",
+        appBuild: 0,
         isActive: true
     },
     reducers: {
@@ -59,6 +61,14 @@ const systemSlice = createSlice({
 
         setServerVersion: function(state, action) {
             state.serverVersion = action.payload
+        },
+
+        setAppVersion: function(state, action) {
+            state.appVersion = action.payload
+        },
+        
+        setAppBuild: function(state, action) {
+            state.appBuild = action.payload
         },
 
         setIsActive: function(state, action) {
@@ -110,5 +120,5 @@ export const forwardLog = function(message) {
     }
 }
 
-export const { reset, setHost, setAPI, setConfiguration, setFeatures, setIsActive } = systemSlice.actions
+export const { reset, setHost, setAPI, setConfiguration, setFeatures, setAppVersion, setAppBuild, setIsActive } = systemSlice.actions
 export default systemSlice.reducer

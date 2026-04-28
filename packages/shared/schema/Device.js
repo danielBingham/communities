@@ -175,6 +175,47 @@ module.exports = class DeviceSchema extends Schema {
                         .getErrors()
                     return errors
                 }
+            },
+            appBuild: {
+                clean: (value) => { return cleanNumber(value) },
+                validate: (value, existing, action) => {
+                    const validator = new NumberValidator('appBuild', value, existing, action)
+                    const errors = validator
+                        .mustBeNumber()
+                        .mustNotBeNaN()
+                        .getErrors()
+                    return errors
+                }
+            },
+            appName: {
+                clean: (value) => { return stringCleaner(value) },
+                validate: (value, existing, action) => {
+                    const validator = new StringValidator('appName', value, existing, action)
+                    const errors = validator
+                        .mustBeString()
+                        .getErrors()
+                    return errors
+                }
+            },
+            appVersion: {
+                clean: (value) => { return stringCleaner(value) },
+                validate: (value, existing, action) => {
+                    const validator = new StringValidator('appVersion', value, existing, action)
+                    const errors = validator
+                        .mustBeString()
+                        .getErrors()
+                    return errors
+                }
+            },
+            appId: {
+                clean: (value) => { return stringCleaner(value) },
+                validate: (value, existing, action) => {
+                    const validator = new StringValidator('appId', value, existing, action)
+                    const errors = validator
+                        .mustBeString()
+                        .getErrors()
+                    return errors
+                }
             }
         }
     }
