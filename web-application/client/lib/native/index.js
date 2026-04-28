@@ -26,8 +26,7 @@ import logger from '/logger'
  */
 export function isNativePlatform() {
     try { 
-        const platform = Capacitor.getPlatform()
-        return platform === 'ios' || platform === 'android'
+        return Capacitor.isNativePlatform() 
     } catch (error) {
         logger.error(`Failed to detect native platform: `, error)
         return false
