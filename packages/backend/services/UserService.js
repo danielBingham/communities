@@ -380,7 +380,35 @@ module.exports = class UserService {
         if ( type === 'invitation-overwrite' ) {
             await this.userDAO.updateUser(user)
         } else {
-            await this.userDAO.insertUsers(user)
+            try { 
+                await this.userDAO.insertUsers(user)
+            } catch (error ) {
+                if ( 'constraint' in error ) {
+                    if ( error.constraint === 'users_email_unique' ) {
+                        errors.push({
+                            type: 'conflict',
+                            log: `User is already registered with that email.`,
+                            message: `A User is already registered with that email.  Please log in.`,
+                            context: {
+                                email: user.email
+                            }
+                        })
+                        return [ null, errors ]
+                    } else if ( error.constraint === 'users_username_unique' ) {
+                        errors.push({
+                            type: 'conflict',
+                            log: `User is already registered with that username.`,
+                            message: `A User is already registered with that username.  Please log in.`,
+                            context: {
+                                username: user.username
+                            }
+                        })
+                        return [ null, errors ]
+                    }
+                } else {
+                    throw error
+                }
+            }
         }
 
         const createdUser = await this.userDAO.getUserByEmail(user.email, [ 'email', 'status' ])

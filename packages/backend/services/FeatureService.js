@@ -26,6 +26,7 @@ const SubgroupMigration = require('../migrations/SubgroupMigration')
 const Issue330GroupShortDescriptionAndRulesMigration = require('../migrations/Issue330GroupShortDescriptionAndRulesMigration')
 const Issue252GroupSubscriptionMigration = require('../migrations/Issue252GroupSubscriptionMigration')
 const Issue67VideoUploadsMigration = require('../migrations/Issue67VideoUploadsMigration')
+const Fix486UniqueConstraintMigration = require('../migrations/Fix486UniqueConstraintMigration')
 
 const ServiceError = require('../errors/ServiceError')
 const MigrationError = require('../errors/MigrationError')
@@ -75,6 +76,9 @@ module.exports = class FeatureService {
             },
             'issue-67-video-uploads': {
                 migration: new Issue67VideoUploadsMigration(core)
+            },
+            'fix-486-unique-constraint': {
+                migration: new Fix486UniqueConstraintMigration(core)
             },
             'video-uploads': {}
         }
