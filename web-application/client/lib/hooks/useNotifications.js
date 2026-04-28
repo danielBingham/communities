@@ -180,7 +180,7 @@ export const useNotifications = function() {
                 }
             }
         } catch ( error ) {
-            logger.error(`Failed to updaate device notification permission: `, error)
+            logger.error(`Failed to update device notification permission: `, error)
         }
     }, [ currentUser, device, request ])
 
