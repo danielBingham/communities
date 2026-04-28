@@ -223,7 +223,7 @@ module.exports = class UserService {
                         errors.push({
                             type: 'conflict',
                             log: `User is already registered with that email.`,
-                            message: `A User is already registered with that email.  Please log in.`,
+                            message: `A User is already registered with that email.`,
                             context: {
                                 email: user.email
                             }
