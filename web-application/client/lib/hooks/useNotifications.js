@@ -27,6 +27,8 @@ import { PushNotifications } from '@capacitor/push-notifications'
 import logger from '/logger'
 
 import { useRequest } from '/lib/hooks/useRequest'
+import { isNativePlatform } from '/lib/native'
+
 import { resetEntities } from '/state/lib'
 import { patchNotification, setIsRegisteredMobile, syncDeliveredNotifications, clearDeliveredNotifications } from '/state/notifications'
 import { patchDevice } from '/state/authentication'
@@ -132,44 +134,55 @@ export const useNotifications = function() {
         }
     }
 
-    useEffect(() => {
+
+    // Listen for Push Notification events and then register with the mobile
+    // Push Notification provider.
+    useEffect(function() {
+        try { 
+            if ( currentUser !== null && isNativePlatform() ) {
+                listenForPushNotifications().then(function() {
+                    registerPushNotifications().catch(function(error) {
+                        logger.error(`Failed to register Mobile Push Notifications: `, error)
+                    })
+                }).catch(function(error) {
+                    logger.error(`Failed to listen for Mobile Push Notifications: `, error)
+                })
+            }
+        } catch (error) {
+            logger.error(`Failed to determine if we should listen for Mobile Push Notifications: `, error)
+        }
+
+        // Cleanup the listeners
         return () => {
             try { 
-                if ( Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android' ) {
+                if ( isNativePlatform() ) {
                     PushNotifications.removeAllListeners().catch((error) => {
                         logger.error(`Failed to remove push notification listeners: `, error)
                     })
                 }
             } catch (error) {
-                logger.error(`Failed to remove push notification listeners: `, error)
+                logger.error(`Failed to determine if we should remove push notification listeners: `, error)
             }
         }
-    }, [])
+    }, [ currentUser ])
 
-    useEffect(function() {
+    // Update our device record with the status of our desktop notification
+    // permissions
+    useEffect(() => {
         try { 
-            if ( currentUser !== null && device !== null ) {
-                if ( ! request && (device.platform === 'ios' || device.platform === 'android' )) {
-                    listenForPushNotifications().then(function() {
-                        registerPushNotifications().catch(function(error) {
-                            logger.error(error)
-                        })
-                    }).catch(function(error) {
-                        logger.error(`First Error in useNotifications: `, error)
-                    })
-                }  else if ( device.platform === 'web' ) {
-                    if ( ! ("notificationPermission" in device) && "Notification" in window ) {
-                        if ( Notification.permission === 'granted' || Notification.permission === 'denied' ) {
-                            if ( ! request ) {
-                                makeRequest(patchDevice({ notificationPermission: Notification.permission }))
-                            }
+            if ( currentUser !== null && ! isNativePlatform() ) {
+                if ( ! ("notificationPermission" in device) && "Notification" in window ) {
+                    if ( Notification.permission === 'granted' || Notification.permission === 'denied' ) {
+                        if ( ! request ) {
+                            makeRequest(patchDevice({ notificationPermission: Notification.permission }))
                         }
                     }
                 }
             }
-        } catch (error) {
-            logger.error(`Second Error in useNotifications: `, error)
+        } catch ( error ) {
+            logger.error(`Failed to updaate device notification permission: `, error)
         }
     }, [ currentUser, device, request ])
+
 
 }
