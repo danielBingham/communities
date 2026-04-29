@@ -333,6 +333,10 @@ export const syncDeliveredNotifications = function() {
 export const clearDeliveredNotifications = function() {
     return async function(dispatch, getState) {
         try { 
+            if ( ! Capacitor.isNativePlatform() ) {
+                return
+            }
+
             const state = getState()
 
             // If we have not registered notifications yet, then we need to skip.

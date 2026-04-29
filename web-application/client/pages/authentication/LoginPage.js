@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
 import { Page, PageLeftGutter, PageRightGutter, PageBody } from '/components/generic/Page'
+import Card from '/components/ui/Card'
 
 import LoginForm from '/components/authentication/LoginForm'
 
@@ -24,7 +25,9 @@ const LoginPage = function(props) {
         <Page id="login-page">
             <PageLeftGutter></PageLeftGutter>
             <PageBody>
-                <LoginForm /> 
+                <Card className="login-page__card">
+                    <LoginForm /> 
+                </Card>
            </PageBody>
             <PageRightGutter></PageRightGutter>
         </Page>

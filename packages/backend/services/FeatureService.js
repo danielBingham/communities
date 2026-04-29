@@ -27,6 +27,7 @@ const Issue330GroupShortDescriptionAndRulesMigration = require('../migrations/Is
 const Issue252GroupSubscriptionMigration = require('../migrations/Issue252GroupSubscriptionMigration')
 const Issue67VideoUploadsMigration = require('../migrations/Issue67VideoUploadsMigration')
 const Feat408FlagUsersAndGroupsMigration = require('../migrations/Feat408FlagUsersAndGroupsMigration')
+const Fix486UniqueConstraintMigration = require('../migrations/Fix486UniqueConstraintMigration')
 
 const ServiceError = require('../errors/ServiceError')
 const MigrationError = require('../errors/MigrationError')
@@ -79,6 +80,9 @@ module.exports = class FeatureService {
             },
             'feat-408-flag-users-and-groups': {
                 migration: new Feat408FlagUsersAndGroupsMigration(core)
+            },
+            'fix-486-unique-constraint': {
+                migration: new Fix486UniqueConstraintMigration(core)
             },
             'video-uploads': {}
         }

@@ -18,13 +18,12 @@
  *
  ******************************************************************************/
 import { Outlet } from 'react-router-dom'
-import { Capacitor } from '@capacitor/core'
 
 import { useAuthentication } from '/lib/hooks/useAuthentication'
 import { useNotifications } from '/lib/hooks/useNotifications'
 import { useHistoryTracking } from '/lib/hooks/useHistoryTracking'
+import { isNativePlatform } from '/lib/native'
 
-import CommunitiesLogo from '/components/header/CommunitiesLogo'
 import Header from '/components/header/Header'
 import Footer from '/components/header/Footer'
 
@@ -38,16 +37,7 @@ const AuthenticatedLayout = function() {
     useNotifications()
     useHistoryTracking()
 
-    if ( ! currentUser && Capacitor.getPlatform() === 'web' ) {
-        return (
-            <>
-            <Header />
-            <main id="footerless">
-                <WelcomeSplash />
-            </main>
-            </>
-        )
-    } else if ( ! currentUser &&  ( Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android' ) ) {
+    if ( ! currentUser && isNativePlatform() ) {
         return (
             <>
                 <main>
@@ -56,6 +46,15 @@ const AuthenticatedLayout = function() {
             </>
         )
 
+    } else if ( ! currentUser ) {
+        return (
+            <>
+            <Header />
+            <main id="footerless">
+                <WelcomeSplash />
+            </main>
+            </>
+        )
     }
 
     return (

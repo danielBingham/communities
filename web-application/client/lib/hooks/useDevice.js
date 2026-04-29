@@ -53,7 +53,11 @@ export const useDevice = function() {
                 }
 
                 dispatch(setAppVersion(appInfo.version))
-                dispatch(setAppBuild(appInfo.build))
+                try { 
+                    dispatch(setAppBuild(parseInt(appInfo.build, 10)))
+                } catch (error) {
+                    logger.error(`Failed to parse build number: `, error)
+                }
             }
 
 

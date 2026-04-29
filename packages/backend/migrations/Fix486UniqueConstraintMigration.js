@@ -17,18 +17,25 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import { Capacitor } from '@capacitor/core'
+const BaseMigration = require('./BaseMigration')
 
-import logger from '/logger'
+module.exports = class Fix486UniqueConstraintMigration extends BaseMigration {
 
-/**
- * Check if we're running on a native mobile platform (ios or android).
- */
-export function isNativePlatform() {
-    try { 
-        return Capacitor.isNativePlatform() 
-    } catch (error) {
-        logger.error(`Failed to detect native platform: `, error)
-        return false
+    constructor(core) {
+        super(core)
     }
+
+    async initForward() {
+        await this.core.database.query(`ALTER TABLE users ADD CONSTRAINT users_email_unique UNIQUE ( email )`, [])
+        await this.core.database.query(`ALTER TABLE users ADD CONSTRAINT users_username_unique UNIQUE ( username )`, [])
+    }
+
+    async initBack() { 
+        await this.core.database.query(`ALTER TABLE users DROP CONSTRAINT IF EXISTS users_email_unique`, [])
+        await this.core.database.query(`ALTER TABLE users DROP CONSTRAINT IF EXISTS users_username_unique`, [])
+    }
+
+    async migrateForward(targets) { }
+
+    async migrateBack(targets) { }
 }
