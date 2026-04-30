@@ -70,19 +70,6 @@ module.exports = class SiteModerationValidation {
         // We're editing a moderation.
         else {
 
-            // You need at least one of these when editing a SiteModeration
-            if ( ( ! util.objectHas(siteModeration, 'postId') ||  siteModeration.postId === null )
-                && ( ! util.objectHas(siteModeration, 'postCommentId') || siteModeration.postCommentId === null )
-                && ( ! util.objectHas(siteModeration, 'groupId') || siteModeration.groupId === null )
-                && ( ! util.objectHas(siteModeration, 'userProfileId') || siteModeration.userProfileId === null ))
-            {
-                errors.push({
-                    type: `entityId:missing`,
-                    log: `SiteModeration missing ID of moderated entity.`,
-                    message: `ID of the entity being moderated is required.  Please include either 'postId' or 'postCommentId'.`
-                })
-            }
-
             if ( util.objectHas(siteModeration, 'postId') && siteModeration.postId !== existing.postId ) {
                 errors.push({
                     type: `postId:not-allowed`,

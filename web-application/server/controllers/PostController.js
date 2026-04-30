@@ -325,14 +325,20 @@ module.exports = class PostController {
                 )`
         }
 
-        // ====================================================================
-        // END Post Visibility and Permissions
-        // ====================================================================
-
+        // Handle moderated posts.
         const and = query.params.length > 0 ? ' AND ' : ''
         query.params.push(currentUser.id)
         query.where += `${and} (group_moderation.status IS NULL OR (group_moderation.status != 'rejected' AND group_moderation.status != 'pending') OR posts.user_id = $${query.params.length}) 
             AND (site_moderation.status IS NULL OR site_moderation.status != 'rejected' OR posts.user_id = $${query.params.length})`
+
+        if ( this.core.features.has('feat-408-flag-users-and-groups') ) {
+            query.where += `AND ( posts.group_id IS NULL OR posts.group_id NOT IN ( SELECT site_moderation.group_id FROM site_moderation WHERE site_moderation.group_id IS NOT NULL AND site_moderation.status = 'rejected' ) )`
+        }
+        
+        // ====================================================================
+        // END Post Visibility and Permissions
+        // ====================================================================
+
 
 
         if ('userId' in request.query) {

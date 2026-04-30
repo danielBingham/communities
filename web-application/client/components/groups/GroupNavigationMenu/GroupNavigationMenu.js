@@ -86,8 +86,8 @@ const GroupNavigationMenu = function({ groupId }) {
             { hasSubgroups && canViewGroupPost === true && <NavigationMenuLink to={`/group/${group.slug}/subgroups`} icon="UserGroup" text="Subgroups" /> }
             <NavigationSubmenu icon="EllipsisHorizontal" title="More">
                 <NavigationSubmenuLink to={`/group/${group.slug}/about`} icon="QuestionMarkCircle" text="About" />
-                { ( ! isNativePlatform() || appBuild >= 15 ) && <CopyGroupLink groupId={group.id} /> }
                 <FlagGroupAction groupId={group.id} />
+                { ( ! isNativePlatform() || appBuild >= 15 ) && <CopyGroupLink groupId={group.id} /> }
                 { canModerateGroup === true && <NavigationSubmenuLink to="moderation" icon="Flag" text="Moderation" /> }
                 { canAdminGroup === true && <NavigationSubmenuLink to="settings" icon="Cog6Tooth" text="Settings" /> }
                 { isMember && <LeaveGroupAction groupId={group.id} /> }

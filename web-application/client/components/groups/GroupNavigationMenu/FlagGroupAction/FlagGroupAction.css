@@ -1,0 +1,21 @@
+.flag-group svg {
+    width: 18px;
+    height: 18px;
+    margin-bottom: -4px;
+}
+.flag-group.are-you-sure {
+    max-width: 600px;
+}
+.flag-group.are-you-sure .flag-group__explanation {
+    text-align: left;
+}
+.flag-group.flag-group__flagged, .flag-group.flag-group__rejected, 
+.flag-group.flag-group__flagged svg, .flag-group.flag-group__rejected svg {
+    color: var(--danger-color-main) !important;
+}
+.flag-group.flag-group__approved, .flag-group.flag-group__approved svg {
+    color: var(--success-color-main) !important;
+}
+.flag-group__choose .flag-group__choose__explanation {
+    text-align: left;
+}

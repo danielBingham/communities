@@ -6,6 +6,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 
 import { getSiteModerations } from '/state/SiteModeration'
 
+import GroupAwaitingModeration from '/components/admin/GroupAwaitingModeration'
 import PostCommentAwaitingAdminModeration from '/components/admin/moderation/PostCommentAwaitingAdminModeration'
 import Post from '/components/posts/Post'
 import PaginationControls from '/components/PaginationControls'
@@ -44,6 +45,12 @@ const AdminModerationView = function({}) {
                 )
             } else if ( moderation.postId !== null && moderation.postCommentId !== null ) {
                 moderationViews.push(<PostCommentAwaitingAdminModeration id={moderation.id} />)
+            } else if ( moderation.groupId !== null ) {
+                moderationViews.push(
+                    <div key={moderation.id}>
+                        <GroupAwaitingModeration siteModerationId={moderation.id} />
+                    </div>
+                )
             }
         }
     }

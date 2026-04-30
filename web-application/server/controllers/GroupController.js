@@ -146,6 +146,11 @@ module.exports = class GroupController {
             }
         }
 
+        if ( this.core.features.has('feat-408-flag-users-and-groups') ) {
+            query.params.push('rejected')
+            query.where += ` ${ ! canModerateSite ? `AND` : '' } groups.site_moderation_id NOT IN ( SELECT site_moderation.id FROM site_moderation WHERE site_moderation.group_id = groups.id AND site_moderation.status = $${query.params.length} )`
+        }
+
         // Get only the groups the currentUser is a member of with 'memberStatus'
         if ( 'memberStatus' in request.query ) {
 

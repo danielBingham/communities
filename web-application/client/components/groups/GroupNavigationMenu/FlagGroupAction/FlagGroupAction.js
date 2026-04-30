@@ -103,23 +103,23 @@ const FlagGroupAction = function({ groupId }) {
             if ( canModerateSite === true ) {
                 return (
                     <>
-                        <DotsMenuItem className="flag-group flag-group__moderate" onClick={(e)=>setShowModal(true)}><FlagIconSolid /> Moderate for Site</DotsMenuItem>
+                        <NavigationSubmenuAction className="flag-group flag-group__moderate" onClick={(e)=>setShowModal(true)} icon="Flag" text="Moderate for Site" />
                         <ModerateForSiteModal siteModerationId={group?.siteModerationId} isVisible={showModal} setIsVisible={setShowModal} />
                     </>
 
                 )
             } else {
                 return (
-                    <DotsMenuItem disabled={true} className="flag-group flag-group__flagged"><FlagIconSolid /> Flagged</DotsMenuItem>
+                    <NavigationSubmenuAction disabled={true} className="flag-group flag-group__flagged" icon="Flag" text="Flagged" />
                 )
             }
         } else if ( siteModeration.status === 'approved' ) {
             return (
-                <DotsMenuItem disabled={true} className="flag-group flag-group__approved"><CheckCircleIcon /> Approved</DotsMenuItem>
+                <NavigationSubmenuAction disabled={true} className="flag-group flag-group__approved" icon="CheckCircle" text="Approved" />
             )
         } else if ( siteModeration.status === 'rejected' ) {
             return (
-                <DotsMenuItem disabled={true} className="flag-group flag-group__rejected"><XCircleIcon /> Removed</DotsMenuItem>
+                <NavigationSubmenuAction disabled={true} className="flag-group flag-group__rejected" icon="XCircle" text="Removed" />
             )
         }
     }
