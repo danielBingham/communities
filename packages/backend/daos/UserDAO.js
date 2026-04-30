@@ -130,6 +130,13 @@ const SCHEMA = {
                 select: DAO.SELECT.REQUEST,
                 key: 'invitations'
             },
+            'site_moderation_id': {
+                insert: DAO.INSERT.ALLOW,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.ALWAYS,
+                key: 'siteModerationId',
+                needsFeature: 'feat-408-flag-users-and-groups'
+            },
             'last_authentication_attempt_date': {
                 insert: DAO.INSERT.OVERRIDE,
                 insertOverride: 'now()',

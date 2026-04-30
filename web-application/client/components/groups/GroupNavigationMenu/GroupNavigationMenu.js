@@ -32,6 +32,7 @@ import GroupMembershipButton from '/components/groups/GroupMembershipButton'
 
 import CopyGroupLink from './CopyGroupLink'
 import LeaveGroupAction from './LeaveGroupAction'
+import FlagGroupAction from './FlagGroupAction'
 
 const GroupNavigationMenu = function({ groupId }) {
 
@@ -86,6 +87,7 @@ const GroupNavigationMenu = function({ groupId }) {
             <NavigationSubmenu icon="EllipsisHorizontal" title="More">
                 <NavigationSubmenuLink to={`/group/${group.slug}/about`} icon="QuestionMarkCircle" text="About" />
                 { ( ! isNativePlatform() || appBuild >= 15 ) && <CopyGroupLink groupId={group.id} /> }
+                <FlagGroupAction groupId={group.id} />
                 { canModerateGroup === true && <NavigationSubmenuLink to="moderation" icon="Flag" text="Moderation" /> }
                 { canAdminGroup === true && <NavigationSubmenuLink to="settings" icon="Cog6Tooth" text="Settings" /> }
                 { isMember && <LeaveGroupAction groupId={group.id} /> }

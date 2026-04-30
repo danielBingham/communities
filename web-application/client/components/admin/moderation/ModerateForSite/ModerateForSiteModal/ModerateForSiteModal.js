@@ -1,12 +1,29 @@
-import React, { useState } from 'react'
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media 
+ *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
+import { useState } from 'react'
 import { useSelector } from 'react-redux'
 
 import can, {Actions, Entities} from '/lib/permission'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { usePost } from '/lib/hooks/Post'
-import { usePostComment } from '/lib/hooks/PostComment'
 import { useSiteModeration } from '/lib/hooks/SiteModeration'
 
 import { patchSiteModeration } from '/state/SiteModeration'
@@ -17,15 +34,12 @@ import Spinner from '/components/Spinner'
 import Modal from '/components/generic/modal/Modal'
 import ErrorModal from '/components/errors/ErrorModal'
 
-const ModerateForSiteModal = function({ postId, postCommentId, isVisible, setIsVisible }) {
+const ModerateForSiteModal = function({ siteModerationId, isVisible, setIsVisible }) {
     const [reason, setReason] = useState('')
-   
-    const [post, postRequest] = usePost(postId)
-    const [comment, commentRequest] = usePostComment(postId, postCommentId)
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
-    const [siteModeration, siteModerationRequest] = useSiteModeration(comment ? comment?.siteModerationId : post?.siteModerationId)
+    const [siteModeration, siteModerationRequest] = useSiteModeration(siteModerationId)
     const canModerateSite = can(currentUser, Actions.moderate, Entities.Site)
 
     const [request, makeRequest] = useRequest()
@@ -36,11 +50,8 @@ const ModerateForSiteModal = function({ postId, postCommentId, isVisible, setIsV
                 userId: currentUser.id,
                 status: status,
                 reason: reason,
-                postId: postId
             }
-            if ( postCommentId ) {
-                patch.postCommentId = postCommentId
-            }
+        
             makeRequest(patchSiteModeration(patch))
     }
 
@@ -58,13 +69,11 @@ const ModerateForSiteModal = function({ postId, postCommentId, isVisible, setIsV
         )
     }
 
-    const target = postCommentId ? 'Comment' : 'Post'
-
     let error = null
     if ( request && request.state === 'failed' ) {
         error = (
             <ErrorModal>
-                Attempt to moderate { target } failed on the backend.  Please report as a bug!
+                Attempt to moderate failed on the backend.  Please report as a bug!
             </ErrorModal>
         )
     }
@@ -72,7 +81,7 @@ const ModerateForSiteModal = function({ postId, postCommentId, isVisible, setIsV
     return (
         <Modal isVisible={isVisible} setIsVisible={setIsVisible}>
             <div className="moderate-for-site">
-                <h2>Moderate { target } for Site</h2>
+                <h2>Moderate for Site</h2>
                 <TextBox
                     name="reason"
                     className="reason"

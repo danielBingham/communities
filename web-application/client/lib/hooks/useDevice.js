@@ -42,7 +42,7 @@ export const useDevice = function() {
         try { 
             let deviceInfo = {}
 
-            if ( Capacitor.isPluginAvailable('App') ) {
+            if ( Capacitor.isNativePlatform() && Capacitor.isPluginAvailable('App') ) {
                 const appInfo = await App.getInfo()
                 deviceInfo = {
                     ...deviceInfo,

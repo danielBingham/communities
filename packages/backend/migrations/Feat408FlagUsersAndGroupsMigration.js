@@ -26,6 +26,8 @@ module.exports = class Feat408FlagProfilesAndGroups extends BaseMigration {
     }
 
     async initForward() {
+
+        // ========= Add group_id and user_profile_id to the site_moderation table. =====
         await this.core.database.query(
             `ALTER TABLE site_moderation 
                 ADD COLUMN IF NOT EXISTS group_id uuid 
@@ -38,6 +40,10 @@ module.exports = class Feat408FlagProfilesAndGroups extends BaseMigration {
                     REFERENCES users (id) ON DELETE CASCADE DEFAULT NULL`
         , [])
 
+        await this.core.database.query(`CREATE INDEX IF NOT EXISTS site_moderation__group_id ON site_moderation (group_id)`, [])
+        await this.core.database.query(`CREATE INDEX IF NOT EXISTS site_moderation__user_profile_id ON site_moderation (user_profile_id)`, [])
+
+        // ======== Add group_id and user_profile_id to the site_moderation_events table. =====
         await this.core.database.query(
             `ALTER TABLE site_moderation_events
                 ADD COLUMN IF NOT EXISTS group_id uuid 
@@ -49,14 +55,40 @@ module.exports = class Feat408FlagProfilesAndGroups extends BaseMigration {
                 ADD COLUMN IF NOT EXISTS user_profile_id uuid 
                     REFERENCES users (id) ON DELETE CASCADE DEFAULT NULL`
         , [])
+
+        await this.core.database.query(`CREATE INDEX IF NOT EXISTS site_moderation_events__group_id ON site_moderation_events (group_id)`, [])
+        await this.core.database.query(`CREATE INDEX IF NOT EXISTS site_moderation_events__user_profile_id ON site_moderation_events (user_profile_id)`, [])
+
+        // ============= Add site_moderation_id to the groups table. ===============
+        await this.core.database.query(`
+            ALTER TABLE groups
+                ADD COLUMN IF NOT EXISTS site_moderation_id uuid
+                    REFERENCES site_moderation (id) ON DELETE SET NULL DEFAULT NULL
+        ` , [])
+
+        // ============== Add site_moderation_id to the users table. ==============
+        await this.core.database.query(`
+            ALTER TABLE users
+                ADD COLUMN IF NOT EXISTS site_moderation_id uuid
+                    REFERENCES site_moderation (id) ON DELETE SET NULL DEFAULT NULL
+        `, [])
     }
 
     async initBack() { 
+        await this.core.database.query(`DROP INDEX IF EXISTS site_moderation__group_id`, [])
+        await this.core.database.query(`DROP INDEX IF EXISTS site_moderation__user_profile_id`, [])
+
         await this.core.database.query(`ALTER TABLE site_moderation DROP COLUMN IF EXISTS group_id`, [])
         await this.core.database.query(`ALTER TABLE site_moderation DROP COLUMN IF EXISTS user_profile_id`, [])
 
+        await this.core.database.query(`DROP INDEX IF EXISTS site_moderation_events__group_id`, [])
+        await this.core.database.query(`DROP INDEX IF EXISTS site_moderation_events__user_profile_id`, [])
+
         await this.core.database.query(`ALTER TABLE site_moderation_events DROP COLUMN IF EXISTS group_id`, [])
         await this.core.database.query(`ALTER TABLE site_moderation_events DROP COLUMN IF EXISTS user_profile_id`, [])
+
+        await this.core.database.query(`ALTER TABLE groups DROP COLUMN IF EXISTS site_moderation_id`, [])
+        await this.core.database.query(`ALTER TABLE users DROP COLUMN IF EXISTS site_moderation_id`, [])
     }
 
     async migrateForward(targets) { }

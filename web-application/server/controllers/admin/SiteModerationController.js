@@ -23,11 +23,14 @@ const {
     PermissionService,
     NotificationService,
 
+    GroupDAO,
     PostDAO,
     PostCommentDAO,
     SiteModerationDAO, 
-    SiteModerationEventDAO
+    SiteModerationEventDAO,
+    UserDAO
 }  = require('@communities/backend')
+const { schema } = require('@communities/shared')
 const ControllerError = require('../../errors/ControllerError')
 
 module.exports = class SiteModerationController {
@@ -35,14 +38,18 @@ module.exports = class SiteModerationController {
     constructor(core) {
         this.core = core
 
+        this.groupDAO = new GroupDAO(core)
         this.postDAO = new PostDAO(core)
         this.postCommentDAO = new PostCommentDAO(core)
         this.siteModerationDAO = new SiteModerationDAO(core)
         this.siteModerationEventDAO = new SiteModerationEventDAO(core)
+        this.userDAO = new UserDAO(core)
 
         this.notificationService = new NotificationService(core)
         this.permissionService = new PermissionService(core)
         this.validationService = new ValidationService(core)
+
+        this.siteModerationSchema = new schema.SiteModerationSchema()
     }
 
     async getRelations(currentUser, results, requestedRelations) {
@@ -129,8 +136,12 @@ module.exports = class SiteModerationController {
                 `You must must be authenticated to create a post.`)
         }
 
-        const moderation = request.body
+        const moderation = this.siteModerationSchema.clean(request.body)
 
+        // TODO This allows a moderator to bypass flagging and directly create
+        // a 'rejected' or 'approved' moderation.  This would be fine except we
+        // only notify the owner of the moderator object on patch.  We should
+        // probably notify here too or restrict post to 'flagged' state.
         const canModerateSite = await this.permissionService.can(currentUser, 'moderate', 'Site')
         if ( moderation.status !== 'flagged' && ! canModerateSite ) {
             throw new ControllerError(403, 'not-authorized',
@@ -143,6 +154,10 @@ module.exports = class SiteModerationController {
             existing = await this.siteModerationDAO.getSiteModerationByPostId(moderation.postId)
         } else if ( moderation.postCommentId ) {
             existing = await this.siteModerationDAO.getSiteModerationByPostCommentId(moderation.postCommentId)
+        } else if ( moderation.groupId ) {
+            existing = await this.siteModerationDAO.getSiteModerationByGroupId(moderation.groupId)
+        } else if ( moderation.userProfileId ) {
+            existing = await this.siteModerationDAO.getSiteModerationByUserProfileId(moderation.userProfileId)
         } else {
             throw new ControllerError(400, 'invalid',
                 `User(${currentUser.id}) posted an invalid moderation, nothing being moderated.`,
@@ -194,6 +209,18 @@ module.exports = class SiteModerationController {
                 siteModerationId: entity.id
             }
             await this.postCommentDAO.updatePostComment(postCommentUpdate)
+        } else if ( entity.groupId ) {
+            const groupUpdate = {
+                id: entity.groupId,
+                siteModerationId: entity.id
+            }
+            await this.groupDAO.updateGroup(groupUpdate)
+        } else if ( entity.userProfileId ) {
+            const userProfileUpdate = {
+                id: entity.userProfileId,
+                siteModerationId: entity.id,
+            }
+            await this.userDAO.updateUser(userProfileUpdate)
         }
 
         const relations = await this.getRelations(currentUser, entityResults)
@@ -246,7 +273,7 @@ module.exports = class SiteModerationController {
         }
 
         const siteModerationId = request.params.id
-        const siteModeration = request.body
+        const siteModeration = this.siteModerationSchema.clean(request.body)
 
         if ( siteModeration.id !== siteModerationId ) {
             throw new ControllerError(400, 'invalid', 
@@ -309,6 +336,7 @@ module.exports = class SiteModerationController {
                     }
                 )
             }
+            // TODO:feat-408 Notify user and/or group admins.
         }
 
         // Insert the event to track the moderation history.

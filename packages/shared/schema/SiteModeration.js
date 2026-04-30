@@ -53,7 +53,7 @@ module.exports = class SiteModerationSchema extends Schema {
             },
             status: {
                 clean: (value) => { return stringCleaner(value) },
-                validator: (value, existing, action) => {
+                validate: (value, existing, action) => {
                     const validator = new StringValidator('status', value, existing, action)
                     const errors = validator
                         .isRequiredToCreate()
@@ -67,7 +67,7 @@ module.exports = class SiteModerationSchema extends Schema {
             },
             reason: {
                 clean: (value) => { return stringCleaner(value) },
-                validator: (value, existing, action) => {
+                validate: (value, existing, action) => {
                     const validator = new StringValidator('reason', value, existing, action)
                     const errors = validator
                         .mustBeString()
@@ -76,9 +76,46 @@ module.exports = class SiteModerationSchema extends Schema {
                     return errors
                 }
             },
-
-            // TODO
-
+            postId: {
+                clean: (value) => { return cleanUuid(value) },
+                validate: (value, existing, action) => {
+                    const validator = new UUIDValidator('postId', value, existing, action)
+                    const errors = validator
+                        .mustBeUUID()
+                        .getErrors()
+                    return errors
+                }
+            },
+            postCommentId: {
+                clean: (value) => { return cleanUuid(value) },
+                validate: (value, existing, action) => {
+                    const validator = new UUIDValidator('postCommentId', value, existing, action)
+                    const errors = validator
+                        .mustBeUUID()
+                        .getErrors()
+                    return errors
+                }
+            },
+            groupId: {
+                clean: (value) => { return cleanUuid(value) },
+                validate: (value, existing, action) => {
+                    const validator = new UUIDValidator('groupId', value, existing, action)
+                    const errors = validator
+                        .mustBeUUID()
+                        .getErrors()
+                    return errors
+                }
+            },
+            userProfileId: {
+                clean: (value) => { return cleanUuid(value) },
+                validate: (value, existing, action) => {
+                    const validator = new UUIDValidator('userProfileId', value, existing, action)
+                    const errors = validator
+                        .mustBeUUID()
+                        .getErrors()
+                    return errors
+                }
+            },
             createdDate: {
                 clean: (value) => { return value },
                 validate: (value, existing, action) => {

@@ -167,6 +167,32 @@ module.exports = class SiteModerationDAO extends DAO {
         return results.dictionary[results.list[0]]
     }
 
+    async getSiteModerationByGroupId(groupId) {
+        const results = await this.selectSiteModerations({
+            where: `site_moderation.group_id = $1`,
+            params: [ groupId ] 
+        })
+
+        if ( results.list.length <= 0 ) {
+            return null
+        }
+
+        return results.dictionary[results.list[0]]
+    }
+
+    async getSiteModerationByUserProfileId(userProfileId) {
+        const results = await this.selectSiteModerations({
+            where: `site_moderation.user_profile_id = $1`,
+            params: [ userProfileId ]
+        })
+
+        if ( results.list.length <= 0 ) {
+            return null
+        }
+
+        return results.dictionary[results.list[0]]
+    }
+
     async selectSiteModerations(query) {
         let where = query.where ? `WHERE ${query.where}` : ''
         let params = query.params ? [ ...query.params ] : []
