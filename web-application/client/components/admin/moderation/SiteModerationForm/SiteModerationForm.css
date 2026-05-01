@@ -1,0 +1,9 @@
+.site-moderation-form {
+    padding: 10px;
+}
+.site-moderation-form__reason.text-box textarea {
+    height: 100px;
+}
+.site-moderation-form__buttons {
+    text-align: right;
+}

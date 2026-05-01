@@ -662,6 +662,35 @@ module.exports = class PostController {
                 `That post either doesn't exist or you don't have permission to access it.`)
         }
 
+        // Users can always view their own posts.  Even when they've been removed by moderators.
+        if ( post.userId !== currentUser.id && post.siteModerationId !== undefined && post.siteModerationId !== null ) {
+            const moderation = await this.siteModerationDAO.getSiteModerationById(post.siteModerationId)
+            if ( moderation === null ) {
+                request.logger.error(`SiteModeration(${post.siteModerationId}) not found.`)
+            }
+
+            if ( moderation.status === 'rejected' ) {
+                const canModerateSite = await this.permissionService.can(currentUser, 'moderate', 'Site')
+                if ( canModerateSite !== true ) {
+                    throw new ControllerError(403, 'not-authorized',
+                        `User(${currentUser.id}) attempting to access rejected Post(${post.id}).`,
+                        `That post has been removed by site moderators.`)
+                }
+            }
+        }
+
+        if ( post.userId !== currentUser.id && post.groupId !== undefined && post.groupId !== null ) {
+            const moderation = await this.siteModerationDAO.getSiteModerationByGroupId(post.groupId)
+            if ( moderation !== null && moderation.status === 'rejected' ) {
+                const canModerateSite = await this.permissionService.can(currentUser, 'moderate', 'Site')
+                if ( canModerateSite !== true ) {
+                    throw new ControllerError(403, 'not-authorized',
+                        `User(${currentUser.id}) attempting to access rejected Post(${post.id}).`,
+                        `That group has been removed by site moderators.`)
+                }
+            }
+        }
+
         const canViewPost = await this.permissionService.can(currentUser, 'view', 'Post', { post: post })
         if (canViewPost !== true ) {
             throw new ControllerError(404, 'not-found',

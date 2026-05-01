@@ -109,7 +109,7 @@ const FlagPost = function({ postId } ) {
                 return (
                     <>
                         <DotsMenuItem className="flag-post flag-post__moderate" onClick={(e)=>setShowModal(true)}><FlagIconSolid /> Moderate for Site</DotsMenuItem>
-                        <ModerateForSiteModal postId={postId} isVisible={showModal} setIsVisible={setShowModal} />
+                        <ModerateForSiteModal siteModerationId={siteModeration.id} isVisible={showModal} setIsVisible={setShowModal} />
                     </>
 
                 )

@@ -24,6 +24,7 @@ const {
     GroupSubscriptionDAO,
     UserDAO, 
     FileDAO,
+    SiteModerationDAO,
     GroupService,
     NotificationService,
     PermissionService,
@@ -42,6 +43,7 @@ module.exports = class GroupController {
         this.groupSubscriptionDAO = new GroupSubscriptionDAO(core)
         this.userDAO = new UserDAO(core)
         this.fileDAO = new FileDAO(core)
+        this.siteModerationDAO = new SiteModerationDAO(core)
 
         this.groupService = new GroupService(core)
         this.notificationService = new NotificationService(core)
@@ -339,6 +341,22 @@ module.exports = class GroupController {
         }
 
         const group = results.dictionary[groupId]
+
+        if ( group.siteModerationId !== undefined && group.siteModerationId !== null ) {
+            const moderation = await this.siteModerationDAO.getSiteModerationById(group.siteModerationId)
+            if ( moderation === null ) {
+                request.logger.error(`SiteModeration(${group.siteModerationId}) not found.`)
+            }
+
+            if ( moderation.status === 'rejected' ) {
+                const canModerateSite = await this.permissionService.can(currentUser, 'moderate', 'Site')
+                if ( canModerateSite !== true ) {
+                    throw new ControllerError(403, 'not-authorized',
+                        `User(${currentUser.id}) attempting to access rejected Group(${group.id}).`,
+                        `That group has been removed by site moderators.`)
+                }
+            }
+        }
 
         const canViewGroup = await this.permissionService.can(currentUser, 'view', 'Group', { group: group })
         if ( ! canViewGroup ) {

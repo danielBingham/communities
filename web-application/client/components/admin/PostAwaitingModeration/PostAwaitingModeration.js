@@ -20,44 +20,48 @@
 import { useSelector } from 'react-redux'
 import can, {Actions, Entities} from '/lib/permission'
 
-import { useGroup } from '/lib/hooks/Group'
+import { usePostLink } from '/lib/hooks/Post'
 import { useSiteModeration } from '/lib/hooks/SiteModeration'
 
-import GroupProfile from '/components/groups/GroupProfile'
+import Post from '/components/posts/Post'
 import SiteModerationForm from '/components/admin/moderation/SiteModerationForm'
 
 import Card from '/components/ui/Card'
 import Button from '/components/ui/Button'
 
-import './GroupAwaitingModeration.css'
+import './PostAwaitingModeration.css'
 
-const GroupAwaitingModeration = function({ siteModerationId }) {
+const PostAwaitingModeration = function({ siteModerationId }) {
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
     const [moderation, siteModerationRequest, reloadSiteModeration] = useSiteModeration(siteModerationId)
     const canModerateSite = can(currentUser, Actions.moderate, Entities.Site)
 
-    const [group, groupRequest, reloadGroup] = useGroup(moderation?.groupId)
+    const link = usePostLink(moderation?.postId)
 
+    // The user doesn't have permission to moderation the site.
     if ( canModerateSite !== true ) {
         return null
     }
 
+    // We weren't given a SiteModeration.id.
     if ( siteModerationId === undefined || siteModerationId === null ) { 
         return null 
     }
 
+    // We haven't loaded the SiteModeration yet.  We haven't started to load it
+    // yet, or we're in the process of loading it.
     if ( ( moderation === undefined || moderation === null ) 
         && ( siteModerationRequest === null || siteModerationRequest?.state === 'pending') 
     ) {
         return null
     }
 
-
+    // We failed to load the SiteModeration.  Try again?
     if ( moderation === undefined || moderation === null ) {
         return (
-            <div className="group-awaiting-moderation">
-                <div className="group-awaiting-moderation__not-found">
+            <div className="post-awaiting-moderation">
+                <div className="post-awaiting-moderation__not-found">
                     <p>404 Moderation Not Found</p>
                     <Button type="warning" onClick={() => reloadSiteModeration()}>Retry</Button>
                 </div>
@@ -66,30 +70,20 @@ const GroupAwaitingModeration = function({ siteModerationId }) {
 
     }
 
-    if ( group === undefined || group === null ) {
-        return (
-            <div className="group-awaiting-moderation">
-                <div className="group-awaiting-moderation__not-found">
-                    <p>404 Group Not Found</p>
-                    <Button type="warning" onClick={() => reloadGroup()}>Retry</Button>
-                </div>
-            </div>
-        )
-    }
-
     return (
-        <Card className="group-awaiting-moderation">
+        <Card className="post-awaiting-moderation">
             <div className="group-awaiting-moderation__context">
-                <a href={`/group/${group.slug}`}>View Context</a>
+                <a href={`${link}`}>View Context</a>
             </div>
-            <div className="group-awaiting-moderation__profile">
-                <GroupProfile groupId={moderation.groupId} />
+            <div className="post-awaiting-moderation__profile">
+                <Post id={moderation.postId} shared={true} />
             </div>
-            <div className="group-awaiting-moderation__form">
+            <div className="post-awaiting-moderation__form">
                 <SiteModerationForm siteModerationId={siteModerationId} />
             </div>
         </Card>
     )
+
 }
 
-export default GroupAwaitingModeration
+export default PostAwaitingModeration
