@@ -332,13 +332,18 @@ module.exports = class PostController {
             AND (site_moderation.status IS NULL OR site_moderation.status != 'rejected' OR posts.user_id = $${query.params.length})`
 
         if ( this.core.features.has('feat-408-flag-users-and-groups') ) {
-            query.where += `AND ( posts.group_id IS NULL OR posts.group_id NOT IN ( SELECT site_moderation.group_id FROM site_moderation WHERE site_moderation.group_id IS NOT NULL AND site_moderation.status = 'rejected' ) )`
+            let and = query.params.length > 0 ? ' AND ' : ''
+            query.params.push('rejected')
+            query.where += `${and} ( posts.group_id IS NULL OR posts.group_id NOT IN ( SELECT site_moderation.group_id FROM site_moderation WHERE site_moderation.group_id IS NOT NULL AND site_moderation.status = $${query.params.length} ) )`
+
+            and = query.params.length > 0 ? ' AND ' : ''
+            query.params.push('rejected')
+            query.where += `${and} ( posts.user_id NOT IN ( SELECT site_moderation.user_profile_id FROM site_moderation WHERE site_moderation.user_profile_id IS NOT NULL AND site_moderation.status = $${query.params.length} ) )`
         }
         
         // ====================================================================
         // END Post Visibility and Permissions
         // ====================================================================
-
 
 
         if ('userId' in request.query) {

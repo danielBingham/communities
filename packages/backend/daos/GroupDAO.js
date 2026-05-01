@@ -240,7 +240,6 @@ module.exports = class GroupDAO extends DAO {
             ${paging}
         `
 
-        console.log(sql)
         const results = await this.core.database.query(sql, params)
 
         if ( results.rows.length <= 0 ) {

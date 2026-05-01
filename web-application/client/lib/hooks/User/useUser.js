@@ -37,6 +37,10 @@ export const useUser = function(id, options) {
 
     const [request, makeRequest ] = useRequest()
 
+    const reload = function() {
+        makeRequest(getUser(id))
+    }
+
     useEffect(() => {
         if ( id && user === undefined && request?.state !== 'pending' 
             && options?.noQuery !== true && options?.skip !== true
@@ -45,5 +49,5 @@ export const useUser = function(id, options) {
         }
     }, [ id, user, request])
 
-    return [user, request]
+    return [user, request, reload]
 }

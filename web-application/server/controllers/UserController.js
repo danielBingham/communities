@@ -38,6 +38,7 @@ const {
     TokenDAO,
     FileDAO,
     PostDAO,
+    SiteModerationDAO,
 
     DAOError,
     ServiceError
@@ -71,6 +72,7 @@ module.exports = class UserController extends BaseController{
         this.tokenDAO = new TokenDAO(core)
         this.fileDAO = new FileDAO(core)
         this.postDAO = new PostDAO(core)
+        this.siteModerationDAO = new SiteModerationDAO(core)
     }
 
     async getRelations(currentUser, results, requestedRelations) {
@@ -175,10 +177,16 @@ module.exports = class UserController extends BaseController{
             result.params.push(blockIds)
             result.where += `users.id != ALL($${result.params.length}::uuid[])`
         }
+
+        if ( this.core.features.has('feat-408-flag-users-and-groups') ) {
+            const and = result.params.length > 0 ? ' AND ' : ''
+            result.params.push('rejected')
+            result.where += `${and} users.site_moderation_id NOT IN ( SELECT site_moderation.id FROM site_moderation WHERE site_moderation.user_profile_id = users.id AND site_moderation.status = $${result.params.length} )`
+        }
+
         // ====================================================================
         // END Permissions
         // ====================================================================
-
 
         if ( 'name' in query && query.name.length > 0) {
             const and = result.params.length > 0 ? ' AND ' : ''
@@ -651,6 +659,21 @@ module.exports = class UserController extends BaseController{
 
         if ( ! results.dictionary[userId] ) {
             throw new ControllerError(404, 'not-found', `User(${userId}) not found.`)
+        }
+
+        const user = results.dictionary[userId]
+
+        if ( user.siteModerationId !== undefined && user.siteModerationId !== null ) {
+            const moderation = await this.siteModerationDAO.getSiteModerationById(user.siteModerationId)
+            if ( moderation === null ) {
+                request.logger.error(`SiteModeration(${user.siteModerationId}) not found.`)
+            }
+
+            if ( moderation.status === 'rejected' && canModerateSite !== true ) {
+                throw new ControllerError(403, 'not-authorized',
+                    `User(${currentUser.id}) attempting to access rejected User(${user.id}).`,
+                    `That user has been removed by site moderators.`)
+            }
         }
 
         const relations = await this.getRelations(currentUser, results)

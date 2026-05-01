@@ -28,6 +28,7 @@ import { getSiteModerations } from '/state/SiteModeration'
 import GroupAwaitingModeration from '/components/admin/GroupAwaitingModeration'
 import PostAwaitingModeration from '/components/admin/PostAwaitingModeration'
 import PostCommentAwaitingAdminModeration from '/components/admin/moderation/PostCommentAwaitingAdminModeration'
+import UserAwaitingModeration from '/components/admin/UserAwaitingModeration'
 
 import PaginationControls from '/components/PaginationControls'
 
@@ -56,19 +57,16 @@ const AdminModerationView = function({}) {
             if ( moderation.status !== 'flagged' ) {
                 continue
             }
+            console.log(`moderation: `, moderation)
 
             if ( moderation.postId !== null && moderation.postCommentId === null) {
-                moderationViews.push(
-                    <PostAwaitingModeration key={moderation.id} siteModerationId={moderation.id} />
-                )
+                moderationViews.push(<PostAwaitingModeration key={moderation.id} siteModerationId={moderation.id} />)
             } else if ( moderation.postId !== null && moderation.postCommentId !== null ) {
                 moderationViews.push(<PostCommentAwaitingAdminModeration key={moderation.id} siteModerationId={moderation.id} />)
             } else if ( moderation.groupId !== null ) {
-                moderationViews.push(
-                    <div key={moderation.id}>
-                        <GroupAwaitingModeration siteModerationId={moderation.id} />
-                    </div>
-                )
+                moderationViews.push(<GroupAwaitingModeration key={moderation.id} siteModerationId={moderation.id} />)
+            } else if ( moderation.userProfileId !== null ) {
+                moderationViews.push(<UserAwaitingModeration key={moderation.id} siteModerationId={moderation.id} />)
             }
         }
     }

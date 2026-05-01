@@ -9,7 +9,7 @@
     min-width: 340px;
     max-height: 75vh;
 
-    overflow: scroll;
+    overflow-y: auto;
     overscroll-behavior: none;
 
     padding: 16px;

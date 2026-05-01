@@ -44,8 +44,6 @@ const SiteModerationForm = function({ siteModerationId }) {
 
     const [request, makeRequest] = useRequest()
 
-    console.log(`id: `, siteModerationId)
-    console.log(`moderation: `, moderation)
     const moderate = function(status) {
             const patch = {
                 id: moderation.id,
