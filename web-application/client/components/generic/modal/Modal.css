@@ -9,11 +9,14 @@
     min-width: 340px;
     max-height: 75vh;
 
+    overflow: scroll;
+    overscroll-behavior: none;
+
     padding: 16px;
-    border-radius: 7px;
-    background-color: var(--modal-background-color);
+    border-radius: 10px;
+    background-color: var(--card-background-color);
+    border: thin solid var(--card-border-color);
     z-index: 100;
-    overflow-y: auto;
 }
 .modal .dropdown-menu__body {
     z-index: 101;
