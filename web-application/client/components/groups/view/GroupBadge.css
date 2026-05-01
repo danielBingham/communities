@@ -28,6 +28,23 @@
     font-size: 12px;
 }
 
+.group-badge__stats {
+    /*display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    color: var(--main-text-color-dim);
+    align-items: center;
+    justify-items: center;*/
+
+    box-sizing: border-box;
+    padding: 10px;
+}
+.group-badge__stats__stat svg {
+    width: 18px;
+    height: 18px;
+    margin-bottom: -3px;
+    margin-right: 5px;
+}
+
 @media ( width < 400px ) {
     .group-badge {
         max-width: 360px;

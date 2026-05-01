@@ -15,16 +15,18 @@ const DateTag = function({ timestamp, type }) {
 
     let content = null
     if ( diff <= 60 ) {
-        content = `${diff} second${diff == 1 ? '' : 's'} ago`
+        content = `${diff} second${diff == 1 ? '' : 's'} ${ type !== 'short' ? 'ago' : ''}`
     } else if ( Math.floor(diff/60) < 60 ) {
-        content = `${Math.floor(diff/60)} minute${Math.floor(diff/60) == 1 ? '' : 's'} ago`
+        content = `${Math.floor(diff/60)} minute${Math.floor(diff/60) == 1 ? '' : 's'} ${ type !== 'short' ? 'ago' : ''}`
     } else if ( Math.floor(diff / (60*60)) < 24 ) {
-        content = `${Math.floor(diff/(60*60))} hour${Math.floor(diff/(60*60)) == 1 ? '' : 's'} ago`
+        content = `${Math.floor(diff/(60*60))} hour${Math.floor(diff/(60*60)) == 1 ? '' : 's'} ${ type !== 'short' ? 'ago' : ''}`
     } else if ( Math.floor(diff / (24*60*60)) < 30 ) {
-        content = `${Math.floor(diff / (24*60*60))} day${Math.floor(diff / (24*60*60)) == 1 ? '' : 's'} ago`
+        content = `${Math.floor(diff / (24*60*60))} day${Math.floor(diff / (24*60*60)) == 1 ? '' : 's'} ${ type !== 'short' ? 'ago' : ''}`
     } else {
         if ( type == 'full' ) {
             content = `at ${date.toLocaleTimeString('en-us')} on ${date.toLocaleDateString('en-us')}`
+        } else if ( type === 'short' ) {
+            content = date.toLocaleDateString('en-us')
         } else if ( type == 'date' ) {
             content = `on ${date.toLocaleDateString('en-us')}`
         } else if ( type == 'time' ) {

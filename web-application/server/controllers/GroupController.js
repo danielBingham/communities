@@ -202,6 +202,10 @@ module.exports = class GroupController {
             query.page = parseInt(request.query.page)
         }
 
+        if ( this.core.features.has('feat-484-find-active-groups') ) {
+            query.order = 'groups.most_recent_post_date desc nulls last'
+        }
+
         return query
     }
 

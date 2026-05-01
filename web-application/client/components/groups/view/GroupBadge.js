@@ -1,6 +1,27 @@
-import React, { useEffect } from 'react'
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media 
+ *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
+import { useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
+
+import { UsersIcon, QueueListIcon, ClockIcon } from '@heroicons/react/16/solid'
 
 import { useRequest } from '/lib/hooks/useRequest'
 import { useFeature } from '/lib/hooks/feature'
@@ -10,12 +31,14 @@ import { getGroup } from '/state/Group'
 import GroupImage from '/components/groups/view/GroupImage'
 
 import { ListGridContentItem } from '/components/ui/List'
+import DateTag from '/components/DateTag'
 
 import './GroupBadge.css'
 
 const GroupBadge = function({ id }) {
     
     const hasRules = useFeature('issue-330-group-short-description-and-rules')
+    const hasActiveStats = useFeature('feat-484-find-active-groups')
 
     // ======= Request Tracking =====================================
    
@@ -49,6 +72,15 @@ const GroupBadge = function({ id }) {
                         { hasRules && <div className="group-badge__about">{ group.shortDescription }</div> }
                     </div> 
                 </div>
+                { hasActiveStats && <div className="group-badge__stats">
+                    <span>{ group.type } * { group.totalMembers} members * { group.totalPosts } posts * </span>
+                    {/*<div className="group-badge__stats__stat group-badge__stats__members"><UsersIcon /> { group.totalMembers}</div>
+                    <div className="group-badge__stats__stat group-badge__stats__posts"><QueueListIcon /> { group.totalPosts}</div>
+                    <div className="group-badge__stats__stat group-badge__stats__recent">
+                        { group.mostRecentPostDate !== null && <><ClockIcon /> <DateTag timestamp={group.mostRecentPostDate} type="short" /></> }
+                        { group.mostRecentPostDate === null && <><ClockIcon /> <span>Never</span></> }
+                    </div>*/}
+                </div> }
             </ListGridContentItem>
         )
     } else {
