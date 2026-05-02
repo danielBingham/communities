@@ -342,6 +342,9 @@ module.exports = class GroupMemberController extends BaseController {
             params: [ memberIds ]
         })
 
+        // Update the number of members.
+        await this.core.database.query(`UPDATE groups SET total_members = total_members+$1 WHERE id = $2`, [ memberIds.length, groupId ])
+
         const relations = await this.getRelations(currentUser, results)
 
         response.status(201).json({
@@ -583,6 +586,9 @@ module.exports = class GroupMemberController extends BaseController {
         }
 
         await this.groupMemberDAO.deleteGroupMember(existing)
+
+        // Update the group's tracking numbers.
+        await this.core.database.query(`UPDATE groups SET total_members = total_members-1 WHERE id = $1`, [ groupId ])
 
         // Delete their GroupSubscription.
         await this.core.database.query(

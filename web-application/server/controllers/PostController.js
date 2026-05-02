@@ -559,6 +559,9 @@ module.exports = class PostController {
         if ( entity.groupId ) {
             const group = await this.groupDAO.getGroupById(entity.groupId) 
 
+            // Update the group's tracking stats.
+            await this.core.database.query(`UPDATE groups SET total_posts = total_posts+1, most_recent_post_date = now() WHERE id = $1`, [ entity.groupId ])
+
             if ( group.postPermissions === 'approval' ) {
                 const moderation = {
                     userId: currentUser.id,
@@ -769,6 +772,11 @@ module.exports = class PostController {
         }
 
         await this.postDAO.deletePost(existing)
+
+        // If this was a post in a group, decrement the group post count.
+        if ( existing.groupId ) {
+            await this.core.database.query(`UPDATE groups SET total_posts = total_posts-1 WHERE id = $1`, [ existing.groupId ])
+        }
 
         response.status(201).json({})
     }

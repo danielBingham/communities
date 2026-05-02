@@ -36,7 +36,8 @@
     justify-items: center;*/
 
     box-sizing: border-box;
-    padding: 10px;
+    padding: 20px 10px 10px 10px;
+    text-align: center;
 }
 .group-badge__stats__stat svg {
     width: 18px;

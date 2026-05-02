@@ -57,8 +57,18 @@ const GroupBadge = function({ id }) {
     }, [ group ])
 
     // ======= Render ===============================================
+    
     if( ! group && ( ! request || request.status == 'pending' )) {
         return null 
+    }
+
+    const groupTypes = {
+        open: 'Public',
+        private: 'Private',
+        hidden: 'Hidden',
+        'private-open': 'Open',
+        'hidden-open': 'Open',
+        'hidden-private': 'Private'
     }
 
     if ( group ) {
@@ -73,7 +83,7 @@ const GroupBadge = function({ id }) {
                     </div> 
                 </div>
                 { hasActiveStats && <div className="group-badge__stats">
-                    <span>{ group.type } * { group.totalMembers} members * { group.totalPosts } posts * </span>
+                    <span>{ groupTypes[group.type] } &bull; { group.totalMembers} members &bull; { group.totalPosts } posts &bull; <span><DateTag timestamp={group.mostRecentPostDate} type="short" /></span></span>
                     {/*<div className="group-badge__stats__stat group-badge__stats__members"><UsersIcon /> { group.totalMembers}</div>
                     <div className="group-badge__stats__stat group-badge__stats__posts"><QueueListIcon /> { group.totalPosts}</div>
                     <div className="group-badge__stats__stat group-badge__stats__recent">

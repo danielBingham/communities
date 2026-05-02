@@ -203,7 +203,22 @@ module.exports = class GroupController {
         }
 
         if ( this.core.features.has('feat-484-find-active-groups') ) {
-            query.order = 'groups.most_recent_post_date desc nulls last'
+            if ( 'sort' in request.query ) {
+                if ( request.query.sort === 'recent' ) {
+                    query.order = 'groups.most_recent_post_date desc nulls last'
+                } else if ( request.query.sort === 'active' ) {
+                    query.order = 'groups.total_posts desc'
+                } else if ( request.query.sort === 'biggest' ) {
+                    query.order = 'groups.total_members desc'
+                } else if ( request.query.sort === 'newest' ) {
+                    query.order = 'groups.created_date desc'
+                } else {
+                    query.order = 'groups.most_recent_post_date desc nulls last'
+                }
+            } else {
+                query.order = 'groups.most_recent_post_date desc nulls last'
+            }
+
         }
 
         return query

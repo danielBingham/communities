@@ -26,6 +26,8 @@ import PaginationControls from '/components/PaginationControls'
 import Spinner from '/components/Spinner'
 import Refresher from '/components/ui/Refresher'
 
+import GroupListSortControl from './GroupListSortControl'
+
 import "./GroupList.css"
 
 const GroupList = function({ params }) {
@@ -46,8 +48,7 @@ const GroupList = function({ params }) {
 
             explanation = (
                 <span>
-                    <span className="group-list__page">{pageStart} to {pageEnd}</span>
-                    <span className="group-list__total">of {query.meta.count} Groups</span>
+                    {pageStart} to {pageEnd} of {query.meta.count} Groups
                 </span>
             )
         }
@@ -59,7 +60,8 @@ const GroupList = function({ params }) {
     return (
         <List className="group-list">
             <Refresher onRefresh={() => reset()} />
-            <ListHeader explanation={explanation}><SearchControl entity="Groups" /></ListHeader>
+            <SearchControl entity="Groups" />
+            <ListHeader explanation={explanation}><GroupListSortControl /></ListHeader>
             <ListGridContent>
                 { groupViews }
             </ListGridContent>
