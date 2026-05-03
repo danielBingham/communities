@@ -35,6 +35,7 @@ const {
     UserRelationshipDAO,
     GroupDAO,
     GroupMemberDAO,
+    MutualsDAO,
     TokenDAO,
     FileDAO,
     PostDAO,
@@ -68,6 +69,7 @@ module.exports = class UserController extends BaseController{
         this.userRelationshipsDAO = new UserRelationshipDAO(core)
         this.groupDAO = new GroupDAO(core)
         this.groupMemberDAO = new GroupMemberDAO(core)
+        this.mutualsDAO = new MutualsDAO(core)
         this.tokenDAO = new TokenDAO(core)
         this.fileDAO = new FileDAO(core)
         this.postDAO = new PostDAO(core)
@@ -97,8 +99,19 @@ module.exports = class UserController extends BaseController{
             userRelationshipDictionary = userRelationshipResults.dictionary
         }
 
+        let mutualsDictionary = {}
+        if ( currentUser ) {
+            const mutualsResults = await this.mutualsDAO.selectMutuals(currentUser, {
+                where: `users.id = ANY($2::uuid[])`,
+                params: [ results.list ]
+            })
+
+            mutualsDictionary = mutualsResults.dictionary
+        }
+
         return {
             files: fileResults.dictionary,
+            mutuals: mutualsDictionary,
             userRelationships: userRelationshipDictionary
         }
     }
@@ -139,10 +152,6 @@ module.exports = class UserController extends BaseController{
             ignorePage: false
         }
 
-        if ( ! query) {
-            return
-        }
-
         const result = {
             where: ``,
             params: [],
@@ -150,7 +159,11 @@ module.exports = class UserController extends BaseController{
             order: '',
             fields: [],
             emptyResult: false,
-            requestedRelations: query.relations ? query.relations : []
+            requestedRelations: query?.relations ? query.relations : []
+        }
+
+        if ( ! query) {
+            return result
         }
 
         let canModerateSite = false

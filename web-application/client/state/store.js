@@ -17,6 +17,7 @@ import historyReducer from './history'
 import jobsReducer, { handleJobEvent } from './jobs'
 import notificationsReducer, { handleNotificationEvent } from './notifications'
 import LinkPreviewReducer from './LinkPreview'
+import MutualsReducer from './Mutuals'
 import PostReducer from './Post'
 import PostCommentReducer from './PostComment'
 import PostReactionReducer from './PostReaction'
@@ -45,6 +46,7 @@ const reducers = combineReducers({
     jobs: jobsReducer,
     notifications: notificationsReducer,
     LinkPreview: LinkPreviewReducer,
+    Mutuals: MutualsReducer,
     Post: PostReducer,
     PostComment: PostCommentReducer,
     PostReaction: PostReactionReducer,

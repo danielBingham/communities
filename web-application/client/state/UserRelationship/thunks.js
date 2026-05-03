@@ -6,7 +6,7 @@ import { setRelationsInState } from '/state/lib/relations'
 import {
     setUserRelationshipsInDictionary, setUserRelationshipNull, removeUserRelationship, 
     setUserRelationshipQueryResults, clearUserRelationshipQuery,
-    clearUserRelationshipQueries
+    clearUserRelationshipQueries, setMutuals
 } from './slice'
 
 /**

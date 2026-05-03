@@ -15,6 +15,7 @@ import './UserBadge.css'
 const UserBadge = function({ id, children }) {
 
     const [user, request] = useUser(id)
+    const mutuals = useSelector((state) => id in state.Mutuals.dictionary ? state.Mutuals.dictionary[id] : [])
 
     // ======= Render ===============================================
     if( ! user && ( ! request || request.status == 'pending' )) {
@@ -32,16 +33,23 @@ const UserBadge = function({ id, children }) {
     if ( user ) {
         return (
             <ListGridContentItem className="user-badge">
-                <div className="user-badge__grid">
+                <div className="user-badge__top__grid">
                     <UserProfileImage userId={user.id} />
                     <div className="user-badge__details" >
                         { user.username !== null && <div className="user-badge__name"><Link to={ `/${user.username}` }>{user.name}</Link></div>}
                         { user.username === null && user.email !== null && <div className="user-badge__name">{ user.email }</div> }
-                        <div className="user-badge__about">{ user.about?.length > 100 ? user.about.substring(0,100).trim()+'...' : user.about }</div>
-                        <div className="controls">
+                        <div className="user-badge__about">{ user.about?.length > 100 ? user.about.substring(0,180).trim()+'...' : user.about }</div>
+                    </div> 
+                </div>
+                <div className="user-badge__bottom-grid">
+                    <div className="user-badge__mutuals">
+                        <span>{ mutuals.length} mutual friend{ mutuals.length > 1 || mutuals.length === 0 ? 's' : '' }</span>
+                    </div>
+                    <div className="user-badge__controls">
+                        <div>
                             { children }
                         </div>
-                    </div> 
+                    </div>
                 </div>
             </ListGridContentItem>
         )

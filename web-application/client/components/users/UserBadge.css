@@ -3,7 +3,7 @@
     background-color: var(--card-background-color);
     border-radius: 7px;
 }
-.user-badge__grid {
+.user-badge__top__grid {
     display: grid;
     grid-template-columns: 120px auto;
 } 
@@ -23,9 +23,28 @@
 .user-badge__name {
     font-size: 18px;
     overflow-wrap: break-word;
+    text-align: center;
+    padding: 0 0 5px 0;
 }
 .user-badge__about {
     font-size: 12px;
+}
+
+.user-badge__bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    justify-items: center;
+
+    padding: 5px;
+}
+.user-badge__mutuals {
+    font-size: 12px;
+    color: var(--main-text-color-dim);
+    padding: 7px 0;
+}
+.user-badge__controls { 
+    text-align: center;
 }
 
 @media ( width < 400px ) {
