@@ -492,6 +492,19 @@ module.exports = class UserController extends BaseController{
             result.where += `${and} users.status != 'banned' AND users.status != 'invited'`
         }
 
+        if ( 'sort' in query ) {
+            if ( query.sort === 'newest' ) {
+                result.order = 'users.created_date desc'
+            } else if ( query.sort === 'oldest' ) {
+                result.order = 'users.created_date asc'
+            } else if ( query.sort === 'relevance' ) {
+                // Skip.  We'll have set the order above and we don't want to
+                // override it.
+            } else {
+                result.order = 'users.created_date desc'
+            }
+        }
+
         if ( query.page && ! options.ignorePage ) {
             result.page = query.page
         } else if ( ! options.ignorePage ) {

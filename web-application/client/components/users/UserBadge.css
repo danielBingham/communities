@@ -32,7 +32,7 @@
 
 .user-badge__bottom-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 110px auto;
     align-items: center;
     justify-items: center;
 

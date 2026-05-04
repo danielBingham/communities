@@ -15,7 +15,8 @@ import './UserBadge.css'
 const UserBadge = function({ id, children }) {
 
     const [user, request] = useUser(id)
-    const mutuals = useSelector((state) => id in state.Mutuals.dictionary ? state.Mutuals.dictionary[id] : [])
+    const mutualsArray = []
+    const mutuals = useSelector((state) => id in state.Mutuals.dictionary ? state.Mutuals.dictionary[id] : mutualsArray)
 
     // ======= Render ===============================================
     if( ! user && ( ! request || request.status == 'pending' )) {
@@ -43,7 +44,7 @@ const UserBadge = function({ id, children }) {
                 </div>
                 <div className="user-badge__bottom-grid">
                     <div className="user-badge__mutuals">
-                        <span>{ mutuals.length} mutual friend{ mutuals.length > 1 || mutuals.length === 0 ? 's' : '' }</span>
+                        { mutuals.length > 0 && <span>{ mutuals.length} mutual friend{ mutuals.length > 1 || mutuals.length === 0 ? 's' : '' }</span> }
                     </div>
                     <div className="user-badge__controls">
                         <div>
