@@ -164,16 +164,6 @@ module.exports = class UserRelationshipController {
                 `You are not authorized to query the friend requests of that User.`)
         }
 
-        const user = await this.userDAO.getUserById(userId, 'all')
-        if ( currentUser.id !== userId 
-            && 'showFriendsOnProfile' in user.settings 
-            && user.settings.showFriendsOnProfile === false 
-        ) {
-            throw new ControllerError(403, 'not-authorized',
-                `User attempting to query the friend requests of User(${userId}) without permission.`,
-                `You are not authorized to query the friend requests of that User.`)
-        }
-
         const query = await this.createQuery(currentUser, userId, request.query)
 
         const results = await this.userRelationshipDAO.selectUserRelationships(query)

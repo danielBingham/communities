@@ -24,6 +24,7 @@ import {
     UserCircleIcon,
     EnvelopeIcon,
     LockClosedIcon,
+    LockOpenIcon,
     CreditCardIcon,
     BellIcon,
     ExclamationTriangleIcon,
@@ -100,6 +101,7 @@ const UserMenu = function(props) {
                     </DropdownMenuSection>
                     <DropdownMenuSection>
                         <DropdownMenuItem href="/account/preferences"><AdjustmentsHorizontalIcon /> Preferences</DropdownMenuItem>
+                        <DropdownMenuItem href="/account/privacy"><LockOpenIcon /> Privacy</DropdownMenuItem>
                         <DropdownMenuItem href="/account/notifications"><BellIcon />Notifications</DropdownMenuItem>
                         <DropdownMenuItem href="/account/danger-zone"><ExclamationTriangleIcon /> Danger Zone</DropdownMenuItem>
                     </DropdownMenuSection>

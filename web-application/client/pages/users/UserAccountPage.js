@@ -27,6 +27,7 @@ const UserAccountPage = function(props) {
                     <NavigationMenuLink to="/account/contribute" icon="CreditCard" text="Contribution" />
                     <NavigationSubmenu id="UserAccountPage" title="Settings" icon="Cog8Tooth"> 
                         <NavigationSubmenuLink to="/account/preferences" icon="AdjustmentsHorizontal" text="Preferences" />
+                        <NavigationSubmenuLink to="/account/privacy" icon="LockOpen" text="Privacy" />
                         <NavigationSubmenuLink to="/account/notifications" icon="Bell" text="Notifications" />
                         <NavigationSubmenuLink to="/account/danger-zone" icon="ExclamationTriangle" text="Danger Zone" />
                     </NavigationSubmenu>

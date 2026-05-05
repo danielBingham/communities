@@ -51,8 +51,11 @@ module.exports = class MutualsDAO {
         const params = query.params ? [ currentUser.id, ...query.params ] : []
 
         const results = await this.core.database.query(`
-            SELECT users.id, mutuals.current_user_id, mutuals.current_friend_id 
+            SELECT users.id, count(user_relationships.*) as is_friend, mutuals.current_user_id, mutuals.current_friend_id 
                 FROM users, 
+                JOIN user_relationships ON 
+                    user_relationships.user_id = $1 AND user_relationships.friend_id = users.id
+                    OR user_relationships.user_id = users.id AND user_relationships.friend_id = $1
                 LATERAL (
                     SELECT current.user_id as current_user_id, current.friend_id as current_friend_id FROM user_relationships current
                         JOIN user_relationships target
@@ -64,6 +67,24 @@ module.exports = class MutualsDAO {
                         ) as mutuals
                 ${where}
         `, params)
+
+        /*
+         SELECT users.id, count(user_relationships.*) as is_friend, count(mutuals.*) as mutual_friends 
+                FROM users
+                    LEFT OUTER JOIN user_relationships ON
+                        user_relationships.user_id = '759e284a-50ee-4c85-a27c-a32061e91009' AND user_relationships.friend_id = users.id
+                        OR user_relationships.user_id = users.id AND user_relationships.friend_id = '759e284a-50ee-4c85-a27c-a32061e91009',
+                LATERAL (
+                    SELECT current.user_id as current_user_id, current.friend_id as current_friend_id FROM user_relationships current
+                        JOIN user_relationships target
+                            ON (current.user_id = '759e284a-50ee-4c85-a27c-a32061e91009' AND current.friend_id = target.user_id AND target.friend_id = users.id)
+                                OR (current.user_id = '759e284a-50ee-4c85-a27c-a32061e91009' AND current.friend_id = target.friend_id AND target.user_id = users.id)
+                                OR (current.friend_id = '759e284a-50ee-4c85-a27c-a32061e91009' AND current.user_id = target.user_id AND target.friend_id = users.id)
+                                OR (current.friend_id = '759e284a-50ee-4c85-a27c-a32061e91009' AND current.user_id = target.friend_id AND target.user_id = users.id)
+
+                        ) as mutuals
+                GROUP BY users.id;
+         */
 
         if ( results.rows.length <= 0 ) {
             return { dictionary: {} }

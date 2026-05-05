@@ -1,22 +1,37 @@
-import React, { useState, useEffect, Children } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media 
+ *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
 import { Link } from 'react-router-dom'
 
-import { useRequest } from '/lib/hooks/useRequest'
 import { useUser } from '/lib/hooks/User'
 
 import UserProfileImage from '/components/users/UserProfileImage'
-import FriendButton from '/components/friends/FriendButton'
 
 import { ListGridContentItem } from '/components/ui/List'
+
+import MutualsTag from '/components/Mutuals/MutualsTag'
 
 import './UserBadge.css'
 
 const UserBadge = function({ id, children }) {
 
     const [user, request] = useUser(id)
-    const mutualsArray = []
-    const mutuals = useSelector((state) => id in state.Mutuals.dictionary ? state.Mutuals.dictionary[id] : mutualsArray)
 
     // ======= Render ===============================================
     if( ! user && ( ! request || request.status == 'pending' )) {
@@ -44,7 +59,7 @@ const UserBadge = function({ id, children }) {
                 </div>
                 <div className="user-badge__bottom-grid">
                     <div className="user-badge__mutuals">
-                        { mutuals.length > 0 && <span>{ mutuals.length} mutual friend{ mutuals.length > 1 || mutuals.length === 0 ? 's' : '' }</span> }
+                        <MutualsTag id={id} />
                     </div>
                     <div className="user-badge__controls">
                         <div>

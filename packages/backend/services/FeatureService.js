@@ -27,6 +27,7 @@ const Issue330GroupShortDescriptionAndRulesMigration = require('../migrations/Is
 const Issue252GroupSubscriptionMigration = require('../migrations/Issue252GroupSubscriptionMigration')
 const Issue67VideoUploadsMigration = require('../migrations/Issue67VideoUploadsMigration')
 const Fix486UniqueConstraintMigration = require('../migrations/Fix486UniqueConstraintMigration')
+const Feat491MutualFriendsMigration = require('../migrations/Feat491MutualFriendsMigration')
 
 const ServiceError = require('../errors/ServiceError')
 const MigrationError = require('../errors/MigrationError')
@@ -79,6 +80,9 @@ module.exports = class FeatureService {
             },
             'fix-486-unique-constraint': {
                 migration: new Fix486UniqueConstraintMigration(core)
+            },
+            'feat-491-mutual-friends': {
+                migration: new Feat491MutualFriendsMigration(core)
             },
             'video-uploads': {}
         }

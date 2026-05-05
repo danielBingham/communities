@@ -2,6 +2,7 @@
     border: thin solid var(--card-border-color);
     background-color: var(--card-background-color);
     border-radius: 7px;
+    min-height: 195px;
 }
 .user-badge__top__grid {
     display: grid;
@@ -36,7 +37,7 @@
     align-items: center;
     justify-items: center;
 
-    padding: 5px;
+    padding: 3px;
 }
 .user-badge__mutuals {
     font-size: 12px;
