@@ -20,6 +20,8 @@
 import { useState } from 'react'
 import { useSelector } from 'react-redux'
 
+import { useFeature } from '/lib/hooks/feature'
+
 import Modal from '/components/generic/modal/Modal'
 
 import UserTag from '/components/users/UserTag'
@@ -29,6 +31,12 @@ import './MutualsTag.css'
 const MutualsTag = function({ id }) {
     const [showList, setShowList] = useState(false)
     const mutuals = useSelector((state) => id in state.Mutuals.dictionary ? state.Mutuals.dictionary[id] : null)
+
+    const hasMutualFriends = useFeature('feat-491-mutual-friends')
+
+    if ( hasMutualFriends !== true ) {
+        return null
+    }
 
     if ( mutuals === undefined || mutuals === null || ! Array.isArray(mutuals)) {
         return null

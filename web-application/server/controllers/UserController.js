@@ -100,8 +100,10 @@ module.exports = class UserController extends BaseController{
         }
 
         let mutualsDictionary = {}
-        if ( currentUser ) {
-            mutualsDictionary = await this.mutualsService.getMutualsForCurrentUserAndList(currentUser, results.list) 
+        if ( this.core.features.has('feat-491-mutual-friends' ) ) {
+            if ( currentUser ) {
+                mutualsDictionary = await this.mutualsService.getMutualsForCurrentUserAndList(currentUser, results.list) 
+            }
         }
 
         return {

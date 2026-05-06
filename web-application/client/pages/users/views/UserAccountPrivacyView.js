@@ -20,6 +20,7 @@
 import { useSelector } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
+import { useFeature } from '/lib/hooks/feature'
 
 import { patchUser } from '/state/User'
 
@@ -32,6 +33,7 @@ import './UserAccountPreferencesView.css'
 
 const UserAccountPreferencesView = function() {
     const [request, makeRequest] = useRequest()
+    const hasMutualFriends = useFeature('feat-491-mutual-friends')
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
@@ -51,6 +53,10 @@ const UserAccountPreferencesView = function() {
         }
 
         makeRequest(patchUser(userPatch))
+    }
+
+    if ( hasMutualFriends !== true ) {
+        return null 
     }
 
     return (
