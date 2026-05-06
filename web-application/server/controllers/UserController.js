@@ -27,6 +27,7 @@ const {
     AuthenticationService,
     EmailService,
     NotificationService,
+    MutualsService,
     PermissionService,
     UserService,
     ValidationService,
@@ -35,7 +36,6 @@ const {
     UserRelationshipDAO,
     GroupDAO,
     GroupMemberDAO,
-    MutualsDAO,
     TokenDAO,
     FileDAO,
     PostDAO,
@@ -61,6 +61,7 @@ module.exports = class UserController extends BaseController{
         this.auth = new AuthenticationService(core)
         this.emailService = new EmailService(core)
         this.notificationService = new NotificationService(core)
+        this.mutualsService = new MutualsService(core)
         this.permissionService = new PermissionService(core)
         this.userService = new UserService(core)
         this.validationService = new ValidationService(core)
@@ -69,7 +70,6 @@ module.exports = class UserController extends BaseController{
         this.userRelationshipsDAO = new UserRelationshipDAO(core)
         this.groupDAO = new GroupDAO(core)
         this.groupMemberDAO = new GroupMemberDAO(core)
-        this.mutualsDAO = new MutualsDAO(core)
         this.tokenDAO = new TokenDAO(core)
         this.fileDAO = new FileDAO(core)
         this.postDAO = new PostDAO(core)
@@ -101,27 +101,8 @@ module.exports = class UserController extends BaseController{
 
         let mutualsDictionary = {}
         if ( currentUser ) {
-            const mutualsResults = await this.mutualsDAO.selectMutuals({
-                where: `
-                    mutuals.current_id = $1 
-                    AND mutuals.target_id = ANY($2::uuid[]) 
-                    AND ( 
-                        (
-                            mutuals.target_privacy__view_mutual_friends = 'public'
-                            OR ( mutuals.target_privacy__view_mutual_friends = 'friends' AND mutuals.target_is_friend = TRUE )
-                            OR (mutuals.target_privacy__view_mutual_friends = 'friends-of-friends' )
-                        )
-                        AND mutuals.mutual_privacy__view_mutual_friends != 'me'
-                    )
-                `,
-                params: [ currentUser.id, results.list ]
-            })
-
-            if ( currentUser.id in mutualsResults.dictionary ) {
-                mutualsDictionary = mutualsResults.dictionary[currentUser.id]
-            } 
+            mutualsDictionary = await this.mutualsService.getMutualsForCurrentUserAndList(currentUser, results.list) 
         }
-
 
         return {
             files: fileResults.dictionary,

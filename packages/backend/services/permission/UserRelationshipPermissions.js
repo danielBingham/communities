@@ -18,9 +18,10 @@
  *
  ******************************************************************************/
 
-const MutualsDAO = require('../../daos/MutualsDAO')
 const UserDAO = require('../../daos/UserDAO')
 const UserRelationshipDAO = require('../../daos/UserRelationshipDAO')
+
+const MutualsService = require('../MutualsService')
 
 
 const { util } = require('@communities/shared')
@@ -34,9 +35,10 @@ module.exports = class UserRelationshipPermissions {
 
         this.permissionService = permissionService 
 
-        this.mutualsDAO = new MutualsDAO(core)
         this.userDAO = new UserDAO(core)
         this.userRelationshipDAO = new UserRelationshipDAO(core)
+
+        this.mutualsService = new MutualsService(core)
     }
 
     async ensureContext(user, context, required, optional) { 
@@ -109,20 +111,10 @@ module.exports = class UserRelationshipPermissions {
                     return false
                 }
             } else if ( context.relatedUser.privacyViewFriends === 'friends-of-friends' ) {
-                const mutualsResults = await this.mutualsDAO.selectMutuals(user, {
-                    where: `users.id = $2`,
-                    params: [ context.relationId ]
-                })
-
-                if ( ! (context.relationId in mutualsResults.dictionary) ) {
-                    return false
-                }
-
-                if ( mutualsResults.dictionary[context.relationId].length > 0 ) {
-                    return true 
-                } else {
-                    return false
-                }
+                // They can only view the relationships if they have mutual
+                // friends.
+                const hasMutuals = await this.mutualsService.hasMutuals(user, context.relationId)
+                return hasMutuals === true
             } else if ( context.relatedUser.privacyViewFriends === 'public' ) {
                 return true
             }
