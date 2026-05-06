@@ -43,44 +43,7 @@ module.exports = class Feat491MutualFriendsMigration extends BaseMigration {
         await this.core.database.query(`UPDATE users SET privacy__view_friends = 'friends' WHERE (users.settings#>>'{showFriendsOnProfile}')::boolean = TRUE`, [])
         await this.core.database.query(`UPDATE users SET privacy__view_friends = 'friends' WHERE (users.settings#>>'{showFriendsOnProfile}')::boolean IS NULL`, [])
         await this.core.database.query(`UPDATE users SET privacy__view_friends = 'me' WHERE (users.settings#>>'{showFriendsOnProfile}')::boolean = FALSE`, [])
-
-        // Initialize the materialized view of mutual friends.
-        await this.core.database.query(`
- CREATE TABLE IF NOT EXISTS mutuals AS SELECT 
-        current.id as current_id, 
-        current.privacy__view_mutual_friends as current_privacy__view_mutual_friends, 
-        target.id as target_id, 
-        target.privacy__view_mutual_friends as target_privacy__view_mutual_friends,
-        target_relationship.is_friend as target_is_friend, 
-        mutuals.id as mutual_id,
-        mutual.privacy__view_mutual_friends as mutual_privacy__view_mutual_friends
-    FROM users current,
-    users target,
-    LATERAL (
-        SELECT count(*) > 0 as is_friend
-            FROM user_relationships
-                WHERE (user_id = current.id AND friend_id = target.id) OR (user_id = current.id AND friend_id = target.id)
-    ) as target_relationship,
-    LATERAL (
-        SELECT CASE 
-                    WHEN c.user_id = current.id THEN c.friend_id
-                    WHEN c.friend_id = current.id THEN c.user_id
-                END as id
-            FROM user_relationships c 
-            JOIN user_relationships t 
-                ON (c.user_id = current.id AND c.friend_id = t.user_id AND t.friend_id = target.id)
-                    OR (c.user_id = current.id AND c.friend_id = t.friend_id AND t.user_id = target.id)
-                    OR (c.friend_id = current.id AND c.user_id = t.user_id AND t.friend_id = target.id)
-                    OR (c.friend_id = current.id AND c.user_id = t.friend_id AND t.user_id = target.id)
-            WHERE c.status = 'confirmed' AND t.status = 'confirmed'
-    ) as mutuals
-    JOIN users mutual ON mutuals.id = mutual.id
-        `, [])
-
     }
 
-    async migrateBack(targets) { 
-        await this.core.database.query(`DROP TABLE IF EXISTS mutuals`, [])
-
-    }
+    async migrateBack(targets) { }
 }
