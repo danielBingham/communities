@@ -101,13 +101,27 @@ module.exports = class UserController extends BaseController{
 
         let mutualsDictionary = {}
         if ( currentUser ) {
-            const mutualsResults = await this.mutualsDAO.selectMutuals(currentUser, {
-                where: `users.id = ANY($2::uuid[])`,
-                params: [ results.list ]
+            const mutualsResults = await this.mutualsDAO.selectMutuals({
+                where: `
+                    mutuals.current_id = $1 
+                    AND mutuals.target_id = ANY($2::uuid[]) 
+                    AND ( 
+                        (
+                            mutuals.target_privacy__view_mutual_friends = 'public'
+                            OR ( mutuals.target_privacy__view_mutual_friends = 'friends' AND mutuals.target_is_friend = TRUE )
+                            OR (mutuals.target_privacy__view_mutual_friends = 'friends-of-friends' )
+                        )
+                        AND mutuals.mutual_privacy__view_mutual_friends != 'me'
+                    )
+                `,
+                params: [ currentUser.id, results.list ]
             })
 
-            mutualsDictionary = mutualsResults.dictionary
+            if ( currentUser.id in mutualsResults.dictionary ) {
+                mutualsDictionary = mutualsResults.dictionary[currentUser.id]
+            } 
         }
+
 
         return {
             files: fileResults.dictionary,

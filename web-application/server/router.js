@@ -245,18 +245,6 @@ module.exports = function(core) {
     })
 
     /**************************************************************************
-     *          Mutuals REST Routes
-     **************************************************************************/
-    const MutualsController = require('./controllers/MutualsController')
-    const mutualsController = new MutualsController(core)
-
-    router.get('/mutuals', rateLimit(core, 1200), function(request, response, next) {
-        mutualsController.getMutuals(request, response).catch(function(error) {
-            next(error)
-        })
-    })
-
-    /**************************************************************************
      * Groups REST routes
      * ************************************************************************/
     const GroupController = require('./controllers/GroupController')
