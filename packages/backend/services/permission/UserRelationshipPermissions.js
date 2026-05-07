@@ -80,7 +80,7 @@ module.exports = class UserRelationshipPermissions {
         }
 
         if ( ! this.core.features.has('feat-491-mutual-friends') ) {
-            const showFriendsOnProfile = context.relatedUser.settings?.showFriendsOnProfile || true
+            const showFriendsOnProfile = context.relatedUser.settings?.showFriendsOnProfile === false ? false : true
             if ( showFriendsOnProfile === false ) {
                 return false
             }

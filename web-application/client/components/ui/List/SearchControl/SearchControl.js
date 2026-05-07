@@ -20,11 +20,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
-import { MagnifyingGlassIcon, FunnelIcon } from '@heroicons/react/24/solid'
+import { FunnelIcon } from '@heroicons/react/24/solid'
 
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuBody, DropdownMenuItem } from '/components/ui/DropdownMenu'
-
-import Button from '/components/ui/Button'
 
 import './SearchControl.css'
 
@@ -82,6 +80,13 @@ const SearchControl = function({ entity, fields, defaultField, className  }) {
                 executeSearch()
             }, 200)
         } else {
+            if ( timeoutId.current ) {
+                clearTimeout(timeoutId.current)
+                clearSearch()
+            }
+        }
+
+        return () => {
             if ( timeoutId.current ) {
                 clearTimeout(timeoutId.current)
                 clearSearch()

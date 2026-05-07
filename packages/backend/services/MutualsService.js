@@ -120,7 +120,7 @@ module.exports = class MutualsService {
         `, [ currentUser.id, targetList])
 
         if ( mutualsResults.rows.length <= 0 ) {
-            return { dictionary: {} }
+            return { }
         }
 
         const mutualIds = mutualsResults.rows.map((r) => r.mutual_id) 

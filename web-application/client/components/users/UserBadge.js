@@ -54,7 +54,7 @@ const UserBadge = function({ id, children }) {
                     <div className="user-badge__details" >
                         { user.username !== null && <div className="user-badge__name"><Link to={ `/${user.username}` }>{user.name}</Link></div>}
                         { user.username === null && user.email !== null && <div className="user-badge__name">{ user.email }</div> }
-                        <div className="user-badge__about">{ user.about?.length > 100 ? user.about.substring(0,180).trim()+'...' : user.about }</div>
+                        <div className="user-badge__about">{ user.about?.length > 180 ? user.about.substring(0,180).trim()+'...' : user.about }</div>
                     </div> 
                 </div>
                 <div className="user-badge__bottom-grid">

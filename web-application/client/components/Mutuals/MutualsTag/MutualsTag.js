@@ -49,7 +49,7 @@ const MutualsTag = function({ id }) {
         return null
     }
 
-    if ( mutuals === undefined || mutuals === null || ! Array.isArray(mutuals)) {
+    if ( mutuals === undefined || mutuals === null || ! Array.isArray(mutuals) || mutuals.length <= 0 ) {
         return null
     }
 
@@ -60,7 +60,7 @@ const MutualsTag = function({ id }) {
 
     return (
         <>
-            <a href="" onClick={(e) => { e.preventDefault(); setShowList(true) }}>{ mutuals.length} mutual friend{ mutuals.length > 1 || mutuals.length === 0 ? 's' : '' }</a>
+            <a href="" onClick={(e) => { e.preventDefault(); setShowList(true) }}>{ mutuals.length} mutual friend{ mutuals.length > 1 ? 's' : '' }</a>
             <Modal className="mutuals-tag__modal" isVisible={showList} setIsVisible={setShowList}>
                 { mutualViews }
             </Modal>
