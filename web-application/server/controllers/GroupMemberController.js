@@ -342,8 +342,10 @@ module.exports = class GroupMemberController extends BaseController {
             params: [ memberIds ]
         })
 
-        // Update the number of members.
-        await this.core.database.query(`UPDATE groups SET total_members = ( SELECT count(*) FROM group_members WHERE group_members.group_id = $1 AND group_members.status = 'member') WHERE id = $1`, [ groupId ])
+        if ( this.core.features.has('feat-484-find-active-groups') ) {
+            // Update the number of members.
+            await this.core.database.query(`UPDATE groups SET total_members = ( SELECT count(*) FROM group_members WHERE group_members.group_id = $1 AND group_members.status = 'member') WHERE id = $1`, [ groupId ])
+        }
 
         const relations = await this.getRelations(currentUser, results)
 
@@ -509,8 +511,10 @@ module.exports = class GroupMemberController extends BaseController {
             }
         }
 
-        // Update the number of members.
-        await this.core.database.query(`UPDATE groups SET total_members = ( SELECT count(*) FROM group_members WHERE group_members.group_id = $1 AND group_members.status = 'member') WHERE id = $1`, [ groupId ])
+        if ( this.core.features.has('feat-484-find-active-groups') ) {
+            // Update the number of members.
+            await this.core.database.query(`UPDATE groups SET total_members = ( SELECT count(*) FROM group_members WHERE group_members.group_id = $1 AND group_members.status = 'member') WHERE id = $1`, [ groupId ])
+        }
 
         const relations = await this.getRelations(currentUser, results)
 
@@ -590,8 +594,11 @@ module.exports = class GroupMemberController extends BaseController {
 
         await this.groupMemberDAO.deleteGroupMember(existing)
 
-        // Update the number of members.
-        await this.core.database.query(`UPDATE groups SET total_members = ( SELECT count(*) FROM group_members WHERE group_members.group_id = $1 AND group_members.status = 'member') WHERE id = $1`, [ groupId ])
+
+        if ( this.core.features.has('feat-484-find-active-groups') ) {
+            // Update the number of members.
+            await this.core.database.query(`UPDATE groups SET total_members = ( SELECT count(*) FROM group_members WHERE group_members.group_id = $1 AND group_members.status = 'member') WHERE id = $1`, [ groupId ])
+        }
 
         // Delete their GroupSubscription.
         await this.core.database.query(

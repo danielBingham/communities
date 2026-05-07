@@ -21,8 +21,6 @@ import { useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 
-import { UsersIcon, QueueListIcon, ClockIcon } from '@heroicons/react/16/solid'
-
 import { useRequest } from '/lib/hooks/useRequest'
 import { useFeature } from '/lib/hooks/feature'
 
