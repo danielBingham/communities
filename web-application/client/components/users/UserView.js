@@ -24,6 +24,7 @@ import can, { Actions, Entities } from '/lib/permission'
 import { useUser } from '/lib/hooks/User'
 
 import UserProfileImage from '/components/users/UserProfileImage'
+import MutualsTag from '/components/Mutuals/MutualsTag'
 import FriendButton from '/components/friends/FriendButton'
 import BlockButton from '/components/friends/BlockButton'
 
@@ -71,6 +72,9 @@ const UserView = function(props) {
             <div className="user-view__details">
                 <div className="user-view__name"> { user.name }</div>
                 <div className="user-view__username"><Link to={`/${user.username}`}>@{ user.username }</Link></div>
+                <div className="user-view__mutuals">
+                    <MutualsTag id={user.id} />
+                </div>
                 <div className="user-view__relationship">
                     <FriendButton userId={user.id} />
                     { canModerateSite !== true && <BlockButton userId={user.id} /> }

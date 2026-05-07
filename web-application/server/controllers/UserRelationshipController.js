@@ -23,6 +23,7 @@ const {
     UserDAO, 
 
     NotificationService,
+    MutualsService,
     PermissionService,
     ValidationService
 } = require('@communities/backend')
@@ -38,6 +39,7 @@ module.exports = class UserRelationshipController {
         this.userDAO = new UserDAO(core)
 
         this.notificationService = new NotificationService(core)
+        this.mutualsService = new MutualsService(core)
         this.permissionService = new PermissionService(core)
         this.validationService = new ValidationService(core)
     }
@@ -54,16 +56,28 @@ module.exports = class UserRelationshipController {
 
         const userResults = await this.userDAO.selectUsers({ where: `users.id = ANY($1::uuid[])`, params: [ userIds ] })
 
-        const invitations = await this.core.database.query(`
-            SELECT user_id FROM tokens WHERE creator_id = $1
-        `, [ userId ])
+        let invitationDictionary = {}
+        if ( currentUser.id === userId ) {
+            const invitations = await this.core.database.query(`
+                SELECT user_id FROM tokens WHERE creator_id = $1
+            `, [ userId ])
 
-        const invitedUserIds = invitations.rows.map((row) => row.user_id)
+            const invitedUserIds = invitations.rows.map((row) => row.user_id)
 
-        const invitationResults = await this.userDAO.selectUsers({ where: `users.id = ANY($1::uuid[])`, params: [ invitedUserIds ], fields: [ 'email' ] })
+            const invitationResults = await this.userDAO.selectUsers({ where: `users.id = ANY($1::uuid[])`, params: [ invitedUserIds ], fields: [ 'email' ] })
+            invitationDictionary = invitationResults.dictionary
+        }
+
+        let mutualsDictionary = {}
+        if ( this.core.features.has('feat-491-mutual-friends' ) ) {
+            if ( currentUser ) {
+                mutualsDictionary = await this.mutualsService.getMutualsForCurrentUserAndList(currentUser, userIds) 
+            }
+        }
 
         return {
-            users: { ...userResults.dictionary, ...invitationResults.dictionary }
+            users: { ...userResults.dictionary, ...invitationDictionary},
+            mutuals: mutualsDictionary
         }
     }
 
@@ -76,10 +90,24 @@ module.exports = class UserRelationshipController {
             requestedRelations: requestQuery.relations ? requestQuery.relations : {}
         }
 
-        query.params.push(userId)
-        query.where += `
-            (user_relationships.user_id = $1 OR (user_relationships.friend_id = $1 AND user_relationships.status != 'blocked'))
-        `
+        if ( currentUser.id === userId ) {
+            // When querying your own relationships, you may query any
+            // relationship in which you have not beeen blocked.  Including
+            // those where you are the blocker. 
+            //
+            // Block relationships will be composed with `user_id` set to the
+            // blocker and `friend_id` set to the blocked.
+            query.params.push(userId)
+            query.where += `
+                (user_relationships.user_id = $1 OR (user_relationships.friend_id = $1 AND user_relationships.status != 'blocked'))
+            `
+        } else {
+            // When querying another user's relationships, you may only query their confirmed relationships.
+            query.params.push(userId)
+            query.where += `
+                ((user_relationships.user_id = $1 OR user_relationships.friend_id = $1) AND user_relationships.status = 'confirmed')
+            `
+        }
 
         if ( 'status' in requestQuery ) {
             query.params.push(requestQuery.status)
@@ -159,16 +187,6 @@ module.exports = class UserRelationshipController {
         const canQueryUserRelationships = await this.permissionService.can(currentUser, 'query', 'UserRelationship', 
             { userId: currentUser.id, relationId: userId })
         if ( canQueryUserRelationships !== true ) {
-            throw new ControllerError(403, 'not-authorized',
-                `User attempting to query the friend requests of User(${userId}) without permission.`,
-                `You are not authorized to query the friend requests of that User.`)
-        }
-
-        const user = await this.userDAO.getUserById(userId, 'all')
-        if ( currentUser.id !== userId 
-            && 'showFriendsOnProfile' in user.settings 
-            && user.settings.showFriendsOnProfile === false 
-        ) {
             throw new ControllerError(403, 'not-authorized',
                 `User attempting to query the friend requests of User(${userId}) without permission.`,
                 `You are not authorized to query the friend requests of that User.`)

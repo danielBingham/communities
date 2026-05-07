@@ -1,6 +1,8 @@
 import { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
+import { UserPlusIcon } from '@heroicons/react/24/outline'
+
 import { useRequest } from '/lib/hooks/useRequest'
 
 import { resetEntities } from '/state/lib'
@@ -41,7 +43,7 @@ const AddFriendButton = function({ userId }) {
     }
 
     return (
-         <Button type="primary" onClick={() => addFriend()}>Add Friend</Button>
+        <Button type="primary" onClick={() => addFriend()}><UserPlusIcon /> <span className="nav-text">Add Friend</span></Button>
     )
 
 }

@@ -20,6 +20,7 @@
 import { useSelector } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
+import { useFeature } from '/lib/hooks/feature'
 
 import { patchUser } from '/state/User'
 
@@ -34,6 +35,7 @@ const UserAccountPreferencesView = function() {
     const [request, makeRequest] = useRequest()
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
+    const hasMutualFriends = useFeature('feat-491-mutual-friends')
 
     const setSetting = function(setting, value) {
         const settings = JSON.parse(JSON.stringify(currentUser.settings)) 
@@ -65,15 +67,17 @@ const UserAccountPreferencesView = function() {
                     toggled={darkMode} 
                     onClick={(e) => setSetting('darkMode', ! darkMode)} />
             </Card>
-            <h2>Privacy</h2>
-            <Card className="user-account-preferences-view__section">
-                <p>Do you want to allow your friends to see your full friends list? This can help people find each other as we rebuild our networks on Communities!</p>
-                <Toggle 
-                    label="Show Friends List on Profile"
-                    explanation="Allow your friends to view your full friends list on your profile so they can find other people they may know."
-                    toggled={showFriendsOnProfile} 
-                    onClick={(e) => setSetting('showFriendsOnProfile', ! showFriendsOnProfile)} />
-            </Card>
+            { ! hasMutualFriends && <>
+                <h2>Privacy</h2>
+                <Card className="user-account-preferences-view__section">
+                    <p>Do you want to allow your friends to see your full friends list? This can help people find each other as we rebuild our networks on Communities!</p>
+                    <Toggle 
+                        label="Show Friends List on Profile"
+                        explanation="Allow your friends to view your full friends list on your profile so they can find other people they may know."
+                        toggled={showFriendsOnProfile} 
+                        onClick={(e) => setSetting('showFriendsOnProfile', ! showFriendsOnProfile)} />
+                </Card>
+            </> }
             <h2>Platform Administrative Posts</h2>
             <Card className="user-account-preferences-view__section">
                 <p>Do you want to see informational and administrative posts shared by site administrators in your feed?</p>

@@ -27,6 +27,7 @@ const {
     AuthenticationService,
     EmailService,
     NotificationService,
+    MutualsService,
     PermissionService,
     UserService,
     ValidationService,
@@ -60,6 +61,7 @@ module.exports = class UserController extends BaseController{
         this.auth = new AuthenticationService(core)
         this.emailService = new EmailService(core)
         this.notificationService = new NotificationService(core)
+        this.mutualsService = new MutualsService(core)
         this.permissionService = new PermissionService(core)
         this.userService = new UserService(core)
         this.validationService = new ValidationService(core)
@@ -97,8 +99,16 @@ module.exports = class UserController extends BaseController{
             userRelationshipDictionary = userRelationshipResults.dictionary
         }
 
+        let mutualsDictionary = {}
+        if ( this.core.features.has('feat-491-mutual-friends' ) ) {
+            if ( currentUser ) {
+                mutualsDictionary = await this.mutualsService.getMutualsForCurrentUserAndList(currentUser, results.list) 
+            }
+        }
+
         return {
             files: fileResults.dictionary,
+            mutuals: mutualsDictionary,
             userRelationships: userRelationshipDictionary
         }
     }
@@ -139,10 +149,6 @@ module.exports = class UserController extends BaseController{
             ignorePage: false
         }
 
-        if ( ! query) {
-            return
-        }
-
         const result = {
             where: ``,
             params: [],
@@ -150,7 +156,11 @@ module.exports = class UserController extends BaseController{
             order: '',
             fields: [],
             emptyResult: false,
-            requestedRelations: query.relations ? query.relations : []
+            requestedRelations: query?.relations ? query.relations : []
+        }
+
+        if ( ! query) {
+            return result
         }
 
         let canModerateSite = false
@@ -477,6 +487,19 @@ module.exports = class UserController extends BaseController{
         } else {
             const and = result.params.length > 0 ? ' AND ' : ''
             result.where += `${and} users.status != 'banned' AND users.status != 'invited'`
+        }
+
+        if ( 'sort' in query ) {
+            if ( query.sort === 'newest' ) {
+                result.order = 'users.created_date desc'
+            } else if ( query.sort === 'oldest' ) {
+                result.order = 'users.created_date asc'
+            } else if ( query.sort === 'relevance' ) {
+                // Skip.  We'll have set the order above and we don't want to
+                // override it.
+            } else {
+                result.order = 'users.created_date desc'
+            }
         }
 
         if ( query.page && ! options.ignorePage ) {

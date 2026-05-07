@@ -1,0 +1,34 @@
+.privacy-control {
+    display: grid;
+    grid-template-columns: auto 200px;
+    align-items: center;
+    padding: 10px;
+}
+.privacy-control__label {
+    font-weight: bold;
+    font-size: 18px;
+}
+.privacy-control__explanation {
+    font-size: 12px;
+    font-style: italic;
+}
+.privacy-control__menu {
+    justify-self: center;
+}
+
+.privacy-control__menu__button  {
+    display: inline-block;
+    padding: 5px 15px;
+    margin: 5px;
+    border-radius: 5px;
+
+    border: thin solid var(--button-color);
+    color: var(--button-text-color);
+    background-color: var(--button-color);
+}
+.privacy-control__menu svg {
+    width: 1.2em;
+    height: 1.2em;
+    margin-bottom: -0.3em;
+    margin-right: 5px;
+}

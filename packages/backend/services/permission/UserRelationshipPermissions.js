@@ -18,7 +18,11 @@
  *
  ******************************************************************************/
 
+const UserDAO = require('../../daos/UserDAO')
 const UserRelationshipDAO = require('../../daos/UserRelationshipDAO')
+
+const MutualsService = require('../MutualsService')
+
 
 const { util } = require('@communities/shared')
 
@@ -27,11 +31,14 @@ const ServiceError = require('../../errors/ServiceError')
 module.exports = class UserRelationshipPermissions {
 
     constructor(core, permissionService) {
-        this.core 
+        this.core = core
 
         this.permissionService = permissionService 
 
+        this.userDAO = new UserDAO(core)
         this.userRelationshipDAO = new UserRelationshipDAO(core)
+
+        this.mutualsService = new MutualsService(core)
     }
 
     async ensureContext(user, context, required, optional) { 
@@ -43,42 +50,81 @@ module.exports = class UserRelationshipPermissions {
             throw new ServiceError('missing-context', `Missing context 'relationId'.`)
         }
 
-        if ( (required.includes('relationship') || optional.includes('relationship')) && ! ('relationship' in context) ) {
+        if ( (required?.includes('relationship') || optional?.includes('relationship')) && ! ('relationship' in context) ) {
             context.relationship = await this.userRelationshipDAO.getUserRelationshipByUserAndRelation(context.userId, context.relationId)
-            if ( required.includes('relationship') && context.relationship === undefined ) {
+            if ( required?.includes('relationship') && context.relationship === undefined ) {
                 throw new ServiceError('missing-context', `'relationship' is missing from context.`)
+            }
+        }
+
+        if ( (required?.includes('relatedUser') || optional?.includes('relatedUser')) && ! ( 'relatedUser' in context) ) {
+            context.relatedUser = await this.userDAO.getUserById(context.relationId, 'all')
+            if ( required?.includes('relatedUser') && context.relatedUser === undefined ) {
+                throw new ServiceError('missing-context', `'relatedUser' is missing from context.`)
             }
         }
     }
 
     async canQueryUserRelationship(user, context) {
-        await this.ensureContext(user, context, [ 'relationship'])
+        await this.ensureContext(user, context, [ 'relationship', 'relatedUser' ])
 
         // Users can always view their own relationships.
         if ( user.id === context.userId && user.id === context.relationId ) {
             return true
         }
 
-        // You can only view the relationships of your friends.
-        if ( context.relationship === null ) {
-            return false
-        }
-
         // If one of the users has blocked the other, then neither may query
         // the other's relationships. 
+        //
+        // TECH DEBT  We may eventually want to allow users to query their
+        // *own* blocked relationships in order to view users they have
+        // blocked.
         if ( context.relationship !== null && context.relationship.status === 'blocked' ) {
             return false 
         }
 
-        // UserRelationship.userId is the creator of the relationship.
-        // UserRelationship.relationId is the reciever of the relationship request.
-        //
-        // Either User in the relationship may query the UserRelationships of the other.
-        if ( user.id === context.relationship.userId || user.id === context.relationship.relationId) {
-            if ( context.relationship.status === 'confirmed' ) {
-                return true 
-            } else {
+        if ( ! this.core.features.has('feat-491-mutual-friends') ) {
+            const showFriendsOnProfile = context.relatedUser.settings?.showFriendsOnProfile === false ? false : true
+            if ( showFriendsOnProfile === false ) {
                 return false
+            }
+
+            // You can only view the relationships of your friends.
+            if ( context.relationship === null ) {
+                return false
+            }
+
+            // UserRelationship.userId is the creator of the relationship.
+            // UserRelationship.relationId is the reciever of the relationship request.
+            //
+            // Either User in the relationship may query the UserRelationships of the other.
+            if ( user.id === context.relationship.userId || user.id === context.relationship.relationId) {
+                if ( context.relationship.status === 'confirmed' ) {
+                    return true 
+                } else {
+                    return false
+                }
+            }
+        } else {
+            if ( context.relatedUser.privacyViewFriends === 'me' ) {
+                return false
+            } else if ( context.relatedUser.privacyViewFriends === 'friends' ) {
+                if ( context.relationship !== null && context.relationship.status === 'confirmed' ) {
+                    return true
+                } else { 
+                    return false
+                }
+            } else if ( context.relatedUser.privacyViewFriends === 'friends-of-friends' ) {
+                // They can only view the relationships if they are friends or have mutual
+                // friends.
+                if ( context.relationship !== null && context.relationship.status === 'confirmed' ) {
+                    return true
+                }
+
+                const hasMutuals = await this.mutualsService.hasMutuals(user, context.relationId)
+                return hasMutuals === true
+            } else if ( context.relatedUser.privacyViewFriends === 'public' ) {
+                return true
             }
         }
 
