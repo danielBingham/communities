@@ -49,10 +49,6 @@ const FriendList = function({ userId, params, noSearch, descriptor }) {
 
     let content = ( <Spinner /> )
 
-    if ( query === null && ( request === null || request?.state === 'pending' )) {
-        return ( <Spinner /> )
-    }
-
     if ( request?.state === 'failed' && request.error.type === 'not-found' ) {
         return (<Error404 />)
     } else if ( request?.state === 'failed' && request.error.type === 'not-authorized' ) {
@@ -67,7 +63,7 @@ const FriendList = function({ userId, params, noSearch, descriptor }) {
         )
     }
 
-    if ( query?.list && query?.list.length > 0 ) {
+    if ( query !== null && query?.list && query?.list.length > 0 ) {
         const userBadges = []
         for( const id of query.list) {
             const relationship = relationshipDictionary[id]
@@ -105,17 +101,16 @@ const FriendList = function({ userId, params, noSearch, descriptor }) {
 
         explanation = (
             <span>
-                <span className="friend-list__page">{pageStart} to {pageEnd}</span>
-                <span className="friend-list__total">of {query.meta.count} {descriptor}</span>
+                {pageStart} to {pageEnd} of {query.meta.count} {descriptor}
             </span>
         )
     }
 
     return (
         <List className="friend-list">
+            { ! noSearch && <SearchControl entity={descriptor} /> }
             <ListHeader explanation={explanation}>
                 <Refresher onRefresh={() => reset()} />
-                { ! noSearch && <SearchControl entity={descriptor} /> }
             </ListHeader>
             <ListGridContent>
                 { content } 

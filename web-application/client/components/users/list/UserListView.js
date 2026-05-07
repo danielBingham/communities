@@ -13,6 +13,8 @@ import {
 import PaginationControls from '/components/PaginationControls'
 import Refresher from '/components/ui/Refresher'
 
+import UserListSortControl from './UserListSortControl'
+
 import './UserListView.css'
 
 const UserListView = function({ params }) {
@@ -46,8 +48,7 @@ const UserListView = function({ params }) {
 
         explanation = (
             <span>
-                <span className="user-list__page">{pageStart} to {pageEnd}</span>
-                <span className="user-list__total">of {query.meta.count} People</span>
+                {pageStart} to {pageEnd} of {query.meta.count} People
             </span>
         )
     }
@@ -56,9 +57,10 @@ const UserListView = function({ params }) {
     return (
         <div className="user-list-view">
             <List className="user-list">
+                <SearchControl entity="People" />
                 <ListHeader explanation={explanation}>
                     <Refresher onRefresh={() => reset()} />
-                    <SearchControl entity="People" />
+                    <UserListSortControl />
                 </ListHeader>
                 <ListGridContent>
                     { content } 

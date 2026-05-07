@@ -50,9 +50,9 @@ const RemoveFriendButton = function({ userId, type }) {
 
     let text = 'Remove'
     if ( type == 'reject' ) {
-        text = 'Reject Request'
+        text = 'Reject'
     } else if (type == 'cancel' ) {
-        text = 'Cancel Request'
+        text = 'Cancel'
     }
 
     return (

@@ -54,14 +54,6 @@ const UserFriendsView = function() {
         return (<Error404 />)
     }
 
-    if ( user.id === currentUser.id && 'showFriendsOnProfile' in currentUser.settings && currentUser.settings.showFriendsOnProfile === false) {
-        return (
-            <div className="user-friends-view">
-                <div className="user-friends-view__off">Your friends are not visible on your profile. You can view your friends <Link to="/friends">here</Link>.</div>
-            </div>
-        )
-    }
-
     return (
         <div className="user-friends-view">
             <FriendList userId={user.id} params={{ status: 'confirmed' }} />

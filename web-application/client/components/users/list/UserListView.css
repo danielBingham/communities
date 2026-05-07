@@ -1,3 +1,7 @@
+.user-list-view {
+    max-width: 760px;
+    margin: 0 auto;
+}
 .user-list__page {
     display: inline-block;
     padding-right: 5px;

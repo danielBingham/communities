@@ -44,6 +44,8 @@ CREATE TABLE features (
  * Users 
  *****************************************************************************/
 
+CREATE TYPE user_privacy AS ENUM('me', 'friends', 'friends-of-friends', 'public');
+
 CREATE TYPE user_status AS ENUM('invited', 'unconfirmed', 'confirmed', 'banned');
 CREATE TYPE user_permissions AS ENUM('user', 'moderator', 'admin', 'superadmin');
 CREATE TYPE user_site_role AS ENUM('user', 'moderator', 'admin', 'superadmin');
@@ -70,6 +72,9 @@ CREATE TABLE users (
 
     settings jsonb DEFAULT '{}'::jsonb,
     notices jsonb DEFAULT '{}'::jsonb,
+
+    privacy__view_friends user_privacy DEFAULT 'friends',
+    privacy__view_mutual_friends user_privacy DEFAULT 'friends-of-friends',
 
     failed_authentication_attempts int DEFAULT 0,
     last_authentication_attempt_date timestamptz,

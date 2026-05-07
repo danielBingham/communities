@@ -2,16 +2,17 @@
     display: flex;
     max-width: 760px;
     margin: 10px auto 10px auto;
-    padding: 0 5px;
+    padding: 0 3px;
 }
 .list__search-control input { 
     flex-grow: 1;
 }
-@media (width > 700px ) {
-    .list__search-control input {
-        width: 300px;
-    }
+
+.dropdown-menu__body.list__search-control__field-menu {
+    left: 0;
+    right: unset;
 }
+
 @media (width <= 500px) {
     .list__search-control .nav-text {
         display: none;
