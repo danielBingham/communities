@@ -75,6 +75,10 @@ module.exports = class UserRelationshipPermissions {
 
         // If one of the users has blocked the other, then neither may query
         // the other's relationships. 
+        //
+        // TECH DEBT  We may eventually want to allow users to query their
+        // *own* blocked relationships in order to view users they have
+        // blocked.
         if ( context.relationship !== null && context.relationship.status === 'blocked' ) {
             return false 
         }
