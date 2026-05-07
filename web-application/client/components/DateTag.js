@@ -15,7 +15,7 @@ const DateTag = function({ timestamp, type }) {
 
     let content = null
     if ( diff <= 60 ) {
-        content = `${diff} second${diff == 1 ? '' : 's'}  ago`
+        content = `${diff} second${diff == 1 ? '' : 's'} ago`
     } else if ( Math.floor(diff/60) < 60 ) {
         content = `${Math.floor(diff/60)} minute${Math.floor(diff/60) == 1 ? '' : 's'} ago`
     } else if ( Math.floor(diff / (60*60)) < 24 ) {
