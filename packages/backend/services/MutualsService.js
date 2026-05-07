@@ -67,6 +67,14 @@ module.exports = class MutualsService {
             return false
         }
 
+        // `friend-of-friend` and `public` visibility are functionally the same
+        // for the purposes of this permission check.
+        //
+        // If they have mutual friends with visibility set to
+        // 'friends-of-friends', then we don't need to filter those friends. If
+        // they don't have mutual friends, then there's nothing to view, the
+        // query we're filtering will return empty.
+
         return true
     }
 

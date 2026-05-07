@@ -111,8 +111,12 @@ module.exports = class UserRelationshipPermissions {
                     return false
                 }
             } else if ( context.relatedUser.privacyViewFriends === 'friends-of-friends' ) {
-                // They can only view the relationships if they have mutual
+                // They can only view the relationships if they are friends or have mutual
                 // friends.
+                if ( context.relationship !== null && context.relationship.status === 'confirmed' ) {
+                    return true
+                }
+
                 const hasMutuals = await this.mutualsService.hasMutuals(user, context.relationId)
                 return hasMutuals === true
             } else if ( context.relatedUser.privacyViewFriends === 'public' ) {

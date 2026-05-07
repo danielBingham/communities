@@ -46,7 +46,7 @@ module.exports = class Feat491MutualFriendsMigration extends BaseMigration {
 
         await this.core.database.query(`UPDATE users SET privacy__view_mutual_friends = 'friends-of-friends' WHERE (users.settings#>>'{showFriendsOnProfile}')::boolean = TRUE`, [])
         await this.core.database.query(`UPDATE users SET privacy__view_mutual_friends = 'friends-of-friends' WHERE (users.settings#>>'{showFriendsOnProfile}')::boolean IS NULL`, [])
-        await this.core.database.query(`UPDATE users SET privacy__view_friends = 'me' WHERE (users.settings#>>'{showFriendsOnProfile}')::boolean = FALSE`, [])
+        await this.core.database.query(`UPDATE users SET privacy__view_mutual_friends = 'me' WHERE (users.settings#>>'{showFriendsOnProfile}')::boolean = FALSE`, [])
     }
 
     async migrateBack(targets) { }

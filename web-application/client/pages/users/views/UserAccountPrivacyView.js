@@ -29,9 +29,9 @@ import Card from '/components/ui/Card'
 import { RequestErrorModal } from '/components/errors/RequestError'
 
 
-import './UserAccountPreferencesView.css'
+import './UserAccountPrivacyView.css'
 
-const UserAccountPreferencesView = function() {
+const UserAccountPrivacyView = function() {
     const [request, makeRequest] = useRequest()
     const hasMutualFriends = useFeature('feat-491-mutual-friends')
 
@@ -60,9 +60,9 @@ const UserAccountPreferencesView = function() {
     }
 
     return (
-        <div className="user-account-preferences-view">
+        <div className="user-account-privacy-view">
             <h2>Friends</h2>
-            <Card className="user-account-preferences-view__section">
+            <Card className="user-account-privacy-view__section">
                 <p>These settings control who can see your friends and relationships.</p>
                 <PrivacyControl
                     label="Who can see your friends?"
@@ -82,4 +82,4 @@ const UserAccountPreferencesView = function() {
     )
 }
 
-export default UserAccountPreferencesView
+export default UserAccountPrivacyView

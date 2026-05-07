@@ -36,6 +36,12 @@ const SearchControl = function({ entity, fields, defaultField, className  }) {
 
     const timeoutId = useRef(null)
 
+    const clearSearch = function() {
+        searchParams.delete(field)
+        setSearchParams(searchParams)
+        setSearch('')
+    }
+
     const executeSearch = function() {
         searchParams.set(field, search)
         searchParams.set('sort', 'relevance')
@@ -68,12 +74,6 @@ const SearchControl = function({ entity, fields, defaultField, className  }) {
     }
 
     useEffect(() => {
-        const clearSearch = function() {
-            searchParams.delete(field)
-            setSearchParams(searchParams)
-            setSearch('')
-        }
-
         if ( search.length > 0 ) {
             if ( timeoutId.current ) {
                 clearTimeout(timeoutId.current)
@@ -100,7 +100,7 @@ const SearchControl = function({ entity, fields, defaultField, className  }) {
     if ( fields ) {
         for(const [id, name] of Object.entries(fields)) {
             options.push(
-                <DropdownMenuItem onClick={() => { clearSearch(); setField(id) }}>{ name }</DropdownMenuItem>
+                <DropdownMenuItem key={id} onClick={() => { clearSearch(); setField(id) }}>{ name }</DropdownMenuItem>
             )
         }
     } 

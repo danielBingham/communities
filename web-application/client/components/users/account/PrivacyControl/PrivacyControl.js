@@ -48,7 +48,7 @@ const PrivacyControl = function({ value, setValue, className, label, explanation
         const label = labels.label
         const Icon = labels.icon
         menuOptionViews.push(
-            <DropdownMenuItem onClick={() => setValue(option)}><Icon /> { label }</DropdownMenuItem>
+            <DropdownMenuItem key={option} onClick={() => setValue(option)}><Icon /> { label }</DropdownMenuItem>
         )
     }
 
