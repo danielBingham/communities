@@ -95,6 +95,27 @@ const SCHEMA = {
                 select: DAO.SELECT.ALWAYS,
                 key: 'entranceQuestions'
             },
+            'total_members': {
+                insert: DAO.INSERT.DENY,
+                update: DAO.UPDATE.DENY,
+                select: DAO.SELECT.ALWAYS,
+                key: 'totalMembers',
+                needsFeature: 'feat-484-find-active-groups'
+            },
+            'total_posts': {
+                insert: DAO.INSERT.DENY,
+                update: DAO.UPDATE.DENY,
+                select: DAO.SELECT.ALWAYS,
+                key: 'totalPosts',
+                needsFeature: 'feat-484-find-active-groups'
+            },
+            'most_recent_post_date': {
+                insert: DAO.INSERT.DENY,
+                update: DAO.UPDATE.DENY,
+                select: DAO.SELECT.ALWAYS,
+                key: 'mostRecentPostDate',
+                needsFeature: 'feat-484-find-active-groups'
+            },
             'created_date': {
                 insert: DAO.INSERT.OVERRIDE,
                 insertOverride: 'now()',

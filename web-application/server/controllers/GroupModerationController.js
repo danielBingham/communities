@@ -473,6 +473,13 @@ module.exports = class GroupModerationController extends BaseController {
             throw new Error(`Failed to find GroupModeration(${id}) after update.`)
         }
 
+        if ( this.core.features.has('feat-484-find-active-groups') ) {
+            if ( existing.status === 'pending' && entity.status === 'approved' ) {
+                    // Update the group's tracking stats.
+                await this.core.database.query(`UPDATE groups SET total_posts = total_posts+1, most_recent_post_date = now() WHERE id = $1`, [ entity.groupId ])
+            }
+        }
+
         await this.notificationService.sendNotifications(
             currentUser,
             'GroupModeration:update',

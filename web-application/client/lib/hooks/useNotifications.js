@@ -171,10 +171,12 @@ export const useNotifications = function() {
     useEffect(() => {
         try { 
             if ( currentUser !== null && ! isNativePlatform() ) {
-                if ( ! ("notificationPermission" in device) && "Notification" in window ) {
-                    if ( Notification.permission === 'granted' || Notification.permission === 'denied' ) {
-                        if ( ! request ) {
-                            makeRequest(patchDevice({ notificationPermission: Notification.permission }))
+                if ( device !== undefined && device !== null ) {
+                    if ( ! ("notificationPermission" in device) && "Notification" in window ) {
+                        if ( Notification.permission === 'granted' || Notification.permission === 'denied' ) {
+                            if ( ! request ) {
+                                makeRequest(patchDevice({ notificationPermission: Notification.permission }))
+                            }
                         }
                     }
                 }

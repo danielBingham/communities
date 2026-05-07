@@ -252,6 +252,11 @@ CREATE TABLE groups (
 
     entrance_questions jsonb DEFAULT '{}'::jsonb,
 
+    /* Group activity metrics */
+    total_members int DEFAULT 1,
+    total_posts int DEFAULT 0,
+    most_recent_post_date timestamptz,
+
     created_date timestamptz,
     updated_date timestamptz
 );

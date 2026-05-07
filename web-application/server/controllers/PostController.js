@@ -559,6 +559,9 @@ module.exports = class PostController {
         if ( entity.groupId ) {
             const group = await this.groupDAO.getGroupById(entity.groupId) 
 
+
+            // Insert the pending moderation if the group is set to require
+            // post approval.
             if ( group.postPermissions === 'approval' ) {
                 const moderation = {
                     userId: currentUser.id,
@@ -589,6 +592,17 @@ module.exports = class PostController {
                     groupModerationId: moderation.id
                 }
                 await this.postDAO.updatePost(postPatch)
+            } 
+            // Otherwise, update the gracking stats.  We'll update this on
+            // approval in the GroupModerationController for groups that
+            // require approval.
+            else {
+                
+                if ( this.core.features.has('feat-484-find-active-groups') ) {
+                    // Update the group's tracking stats.
+                    await this.core.database.query(`UPDATE groups SET total_posts = total_posts+1, most_recent_post_date = now() WHERE id = $1`, [ entity.groupId ])
+                }
+
             }
         }
 
@@ -769,6 +783,19 @@ module.exports = class PostController {
         }
 
         await this.postDAO.deletePost(existing)
+
+        
+        if ( this.core.features.has('feat-484-find-active-groups') ) {
+            // If this was a post in a group, decrement the group post count.
+            if ( existing.groupId ) {
+                await this.core.database.query(`
+                    UPDATE groups SET 
+                        total_posts =  ( SELECT count(*) FROM posts LEFT OUTER JOIN group_moderation ON group_moderation.group_id = posts.group_id AND group_moderation.post_id = posts.id AND group_moderation.post_comment_id IS NULL WHERE posts.group_id = $1 AND (group_moderation.status IS NULL OR group_moderation.status = 'approved') ),
+                        most_recent_post_date = ( SELECT MAX(posts.created_date) FROM posts LEFT OUTER JOIN group_moderation ON group_moderation.group_id = posts.group_id AND group_moderation.post_id = posts.id AND group_moderation.post_comment_id IS NULL WHERE posts.group_id = $1 AND (group_moderation.status IS NULL OR group_moderation.status = 'approved') )
+                    WHERE id = $1
+                `, [ existing.groupId ])
+            }
+        }
 
         response.status(201).json({})
     }

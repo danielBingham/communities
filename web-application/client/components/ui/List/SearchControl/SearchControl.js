@@ -36,6 +36,8 @@ const SearchControl = function({ entity, fields, defaultField, className  }) {
 
     const clearSearch = function() {
         searchParams.delete(field)
+        searchParams.delete('sort')
+
         setSearchParams(searchParams)
         setSearch('')
     }
@@ -55,6 +57,7 @@ const SearchControl = function({ entity, fields, defaultField, className  }) {
 
         if ( value === '' ) {
             searchParams.delete(field)
+            searchParams.delete('sort')
             setSearchParams(searchParams)
         }
 
@@ -89,7 +92,6 @@ const SearchControl = function({ entity, fields, defaultField, className  }) {
         return () => {
             if ( timeoutId.current ) {
                 clearTimeout(timeoutId.current)
-                clearSearch()
             }
         }
     }, [ field, search ])

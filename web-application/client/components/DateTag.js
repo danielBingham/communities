@@ -4,6 +4,12 @@ import './DateTag.css'
 
 
 const DateTag = function({ timestamp, type }) {
+
+    if ( timestamp === undefined || timestamp === null ) {
+        return (<div className="date-tag" title={`Never`}>Never</div>)
+    }
+
+
     const date = new Date(timestamp)
     const now = new Date()
 
@@ -25,6 +31,8 @@ const DateTag = function({ timestamp, type }) {
     } else {
         if ( type == 'full' ) {
             content = `at ${date.toLocaleTimeString('en-us')} on ${date.toLocaleDateString('en-us')}`
+        } else if ( type === 'short' ) {
+            content = date.toLocaleDateString('en-us')
         } else if ( type == 'date' ) {
             content = `on ${date.toLocaleDateString('en-us')}`
         } else if ( type == 'time' ) {

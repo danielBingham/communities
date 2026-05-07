@@ -47,7 +47,7 @@ import PostAttachmentControls from './PostAttachmentControls'
 import PostVisibilityControl from './PostVisibilityControl'
 import PostTypeControl from './PostTypeControl'
 
-import ErrorModal from '/components/errors/ErrorModal'
+import { RequestErrorModal } from '/components/errors/RequestError'
 import ErrorCard from '/components/errors/ErrorCard'
 import Error404 from '/components/errors/Error404'
 
@@ -219,12 +219,6 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
         }
     }
 
-    if ( postRequest && postRequest.state == 'failed' ) {
-        errorView = (
-            <ErrorModal><p>Something went wrong when creating your post:</p> <p>{ postRequest.error.message }</p></ErrorModal>
-        )
-    }
-
     return (
         <div className="post-form">
             <PostContent postId={postId} groupId={groupId} sharedPostId={sharedPostId} />
@@ -255,6 +249,8 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
             >
                 <p>Are you sure you want to discard your { postId ? "edits" : "post" }?</p>
             </AreYouSure>
+            <RequestErrorModal message="Attempt to post" request={postRequest} />
+            <RequestErrorModal message="Attempt to edit post" request={patchRequest} />
         </div>
     )
 }

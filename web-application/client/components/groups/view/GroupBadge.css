@@ -28,6 +28,12 @@
     font-size: 12px;
 }
 
+.group-badge__stats {
+    box-sizing: border-box;
+    padding: 20px 10px 10px 10px;
+    text-align: center;
+}
+
 @media ( width < 400px ) {
     .group-badge {
         max-width: 360px;
