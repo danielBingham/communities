@@ -1,0 +1,8 @@
+.user-account-privacy-view {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+}
+.user-account-privacy-view__section {
+    padding: 20px;
+}

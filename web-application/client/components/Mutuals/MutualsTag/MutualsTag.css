@@ -1,0 +1,8 @@
+.mutuals-tag__modal .modal {
+    display: grid;
+    grid-template-columns: auto;
+    grid-row-gap: 10px;
+    align-items: center;
+    justify-items: center;
+    font-size: 18px;
+}

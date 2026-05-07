@@ -209,6 +209,27 @@ module.exports = class GroupController {
             query.page = parseInt(request.query.page)
         }
 
+        if ( this.core.features.has('feat-484-find-active-groups') ) {
+            if ( 'sort' in request.query ) {
+                if ( request.query.sort === 'recent' ) {
+                    query.order = 'groups.most_recent_post_date desc nulls last'
+                } else if ( request.query.sort === 'active' ) {
+                    query.order = 'groups.total_posts desc'
+                } else if ( request.query.sort === 'biggest' ) {
+                    query.order = 'groups.total_members desc'
+                } else if ( request.query.sort === 'newest' ) {
+                    query.order = 'groups.created_date desc'
+                } else if ( request.query.sort === 'relevance' ) {
+                    // Do nothing, the order will have been set above.
+                } else {
+                    query.order = 'groups.most_recent_post_date desc nulls last'
+                }
+            } else {
+                query.order = 'groups.most_recent_post_date desc nulls last'
+            }
+
+        }
+
         return query
     }
 

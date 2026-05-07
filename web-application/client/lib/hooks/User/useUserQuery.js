@@ -15,6 +15,14 @@ export const useUserQuery = function(queryParameters) {
     if ( searchParams.get('q') ) {
         params.name = searchParams.get('q')
     }
+    if ( searchParams.get('name') ) {
+        params.name = searchParams.get('name')
+    }
+    if ( searchParams.get('username') ) {
+        params.username = searchParams.get('username')
+    }
+
+    params.sort = searchParams.get('sort') || 'newest'
 
     // TODO TECHDEBT The order of items in an object is not guaranteed, so just
     // because the params objects are the same does not mean the generated keys are the

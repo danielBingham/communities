@@ -10,7 +10,8 @@ export const useGroupQuery = function(queryParameters, skip) {
     const params = queryParameters ? { ...queryParameters } : {}
     const [ searchParams, setSearchParams ] = useSearchParams()
 
-    params.page = searchParams.get('page') || 1
+    params.page = searchParams.get('page') ?? 1
+    params.sort = searchParams.get('sort') ?? 'recent'
 
     if ( searchParams.get('q') ) {
         params.title = searchParams.get('q')

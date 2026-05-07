@@ -24,6 +24,7 @@ import {
     UserCircleIcon,
     EnvelopeIcon,
     LockClosedIcon,
+    LockOpenIcon,
     CreditCardIcon,
     BellIcon,
     ExclamationTriangleIcon,
@@ -36,6 +37,7 @@ import {
 import { deleteAuthentication } from '/state/authentication'
 
 import { useRequest } from '/lib/hooks/useRequest'
+import { useFeature } from '/lib/hooks/feature'
 
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuBody, DropdownMenuSection, DropdownMenuItem } from '/components/ui/DropdownMenu'
 import Button from '/components/ui/Button'
@@ -52,6 +54,7 @@ import './UserMenu.css'
 const UserMenu = function(props) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
+    const hasMutualFriends = useFeature('feat-491-mutual-friends')
 
     const [request, makeRequest] = useRequest()
 
@@ -100,6 +103,7 @@ const UserMenu = function(props) {
                     </DropdownMenuSection>
                     <DropdownMenuSection>
                         <DropdownMenuItem href="/account/preferences"><AdjustmentsHorizontalIcon /> Preferences</DropdownMenuItem>
+                        { hasMutualFriends && <DropdownMenuItem href="/account/privacy"><LockOpenIcon /> Privacy</DropdownMenuItem> }
                         <DropdownMenuItem href="/account/notifications"><BellIcon />Notifications</DropdownMenuItem>
                         <DropdownMenuItem href="/account/danger-zone"><ExclamationTriangleIcon /> Danger Zone</DropdownMenuItem>
                     </DropdownMenuSection>

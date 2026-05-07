@@ -6,8 +6,7 @@
     align-items: center;
 
     margin: 10px auto 10px auto;
-    width: 100%;
-    max-width: 100vw;
+    max-width: 760px;
     box-sizing: border-box;
 }
 .list__header__explanation { 

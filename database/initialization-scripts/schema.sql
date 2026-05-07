@@ -44,6 +44,8 @@ CREATE TABLE features (
  * Users 
  *****************************************************************************/
 
+CREATE TYPE user_privacy AS ENUM('me', 'friends', 'friends-of-friends', 'public');
+
 CREATE TYPE user_status AS ENUM('invited', 'unconfirmed', 'confirmed', 'banned');
 CREATE TYPE user_permissions AS ENUM('user', 'moderator', 'admin', 'superadmin');
 CREATE TYPE user_site_role AS ENUM('user', 'moderator', 'admin', 'superadmin');
@@ -72,6 +74,9 @@ CREATE TABLE users (
     notices jsonb DEFAULT '{}'::jsonb,
 
     site_moderation_id uuid DEFAULT NULL, /* REFERENCES site_moderation (id) ON DELETE SET NULL -- defined below*/
+    
+    privacy__view_friends user_privacy DEFAULT 'friends',
+    privacy__view_mutual_friends user_privacy DEFAULT 'friends-of-friends',
 
     failed_authentication_attempts int DEFAULT 0,
     last_authentication_attempt_date timestamptz,
@@ -250,6 +255,11 @@ CREATE TABLE groups (
     entrance_questions jsonb DEFAULT '{}'::jsonb,
 
     site_moderation_id uuid DEFAULT NULL, /* REFERENCES site_moderation (id) ON DELETE SET NULL -- defined below*/
+
+    /* Group activity metrics */
+    total_members int DEFAULT 1,
+    total_posts int DEFAULT 0,
+    most_recent_post_date timestamptz,
 
     created_date timestamptz,
     updated_date timestamptz
