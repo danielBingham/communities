@@ -40,12 +40,17 @@ const GroupListSortControl = function({}) {
         'recent': 'Recent Activity'
     }
 
+    if ( searchParams.get('q') ) {
+        sortTitleMap['relevance'] = 'Relevance'
+    }
+
     const sort = searchParams.get('sort') || 'recent'
 
     return (
         <DropdownMenu className="group-list-sort-control" autoClose={true}>
             <DropdownMenuTrigger><span className="group-list-sort-control__button"><BarsArrowUpIcon /><span className="text"> { sortTitleMap[sort]}</span></span></DropdownMenuTrigger>
             <DropdownMenuBody>
+                { searchParams.get('q') && <DropdownMenuItem onClick={() => setSort('relevance')}>Relevance</DropdownMenuItem> }
                 <DropdownMenuItem onClick={() => setSort('recent')}>Recent Activity</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setSort('active')}>Most Activity</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setSort('biggest')}>Most Members</DropdownMenuItem>

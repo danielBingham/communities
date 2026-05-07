@@ -18,6 +18,7 @@
  *
  ******************************************************************************/
 import { useGroupQuery } from '/lib/hooks/Group'
+import { useFeature } from '/lib/hooks/feature'
 
 import GroupBadge from '/components/groups/view/GroupBadge'
 
@@ -31,6 +32,8 @@ import GroupListSortControl from './GroupListSortControl'
 import "./GroupList.css"
 
 const GroupList = function({ params }) {
+    const hasActiveStats = useFeature('feat-484-find-active-groups')
+
     const [query, request, reset] = useGroupQuery(params)
 
     let groupViews = []
@@ -61,7 +64,7 @@ const GroupList = function({ params }) {
         <List className="group-list">
             <Refresher onRefresh={() => reset()} />
             <SearchControl entity="Groups" />
-            <ListHeader explanation={explanation}><GroupListSortControl /></ListHeader>
+            <ListHeader explanation={explanation}>{ hasActiveStats && <GroupListSortControl /> }</ListHeader>
             <ListGridContent>
                 { groupViews }
             </ListGridContent>

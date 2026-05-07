@@ -89,7 +89,6 @@ const SearchControl = function({ entity, fields, defaultField, className  }) {
         return () => {
             if ( timeoutId.current ) {
                 clearTimeout(timeoutId.current)
-                clearSearch()
             }
         }
     }, [ field, search ])

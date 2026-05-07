@@ -84,12 +84,6 @@ const GroupBadge = function({ id }) {
                 </div>
                 { hasActiveStats && <div className="group-badge__stats">
                     <span>{ groupTypes[group.type] } &bull; { group.totalMembers} members &bull; { group.totalPosts } posts &bull; <span><DateTag timestamp={group.mostRecentPostDate} type="short" /></span></span>
-                    {/*<div className="group-badge__stats__stat group-badge__stats__members"><UsersIcon /> { group.totalMembers}</div>
-                    <div className="group-badge__stats__stat group-badge__stats__posts"><QueueListIcon /> { group.totalPosts}</div>
-                    <div className="group-badge__stats__stat group-badge__stats__recent">
-                        { group.mostRecentPostDate !== null && <><ClockIcon /> <DateTag timestamp={group.mostRecentPostDate} type="short" /></> }
-                        { group.mostRecentPostDate === null && <><ClockIcon /> <span>Never</span></> }
-                    </div>*/}
                 </div> }
             </ListGridContentItem>
         )
