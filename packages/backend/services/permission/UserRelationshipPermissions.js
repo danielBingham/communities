@@ -50,16 +50,16 @@ module.exports = class UserRelationshipPermissions {
             throw new ServiceError('missing-context', `Missing context 'relationId'.`)
         }
 
-        if ( (required.includes('relationship') || optional.includes('relationship')) && ! ('relationship' in context) ) {
+        if ( (required?.includes('relationship') || optional?.includes('relationship')) && ! ('relationship' in context) ) {
             context.relationship = await this.userRelationshipDAO.getUserRelationshipByUserAndRelation(context.userId, context.relationId)
-            if ( required.includes('relationship') && context.relationship === undefined ) {
+            if ( required?.includes('relationship') && context.relationship === undefined ) {
                 throw new ServiceError('missing-context', `'relationship' is missing from context.`)
             }
         }
 
-        if ( (required.includes('relatedUser') || optional.includes('relatedUser')) && ! ( 'relatedUser' in context) ) {
+        if ( (required?.includes('relatedUser') || optional?.includes('relatedUser')) && ! ( 'relatedUser' in context) ) {
             context.relatedUser = await this.userDAO.getUserById(context.relationId, 'all')
-            if ( required.includes('relatedUser') && context.relatedUser === undefined ) {
+            if ( required?.includes('relatedUser') && context.relatedUser === undefined ) {
                 throw new ServiceError('missing-context', `'relatedUser' is missing from context.`)
             }
         }
