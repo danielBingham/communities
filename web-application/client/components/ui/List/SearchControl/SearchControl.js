@@ -80,7 +80,7 @@ const SearchControl = function({ entity, fields, defaultField, className  }) {
             }
             timeoutId.current = setTimeout(() => {
                 executeSearch()
-            }, 250)
+            }, 200)
         } else {
             if ( timeoutId.current ) {
                 clearTimeout(timeoutId.current)

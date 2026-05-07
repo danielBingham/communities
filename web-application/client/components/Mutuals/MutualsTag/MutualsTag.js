@@ -17,7 +17,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 
 import { useFeature } from '/lib/hooks/feature'
@@ -29,12 +29,23 @@ import UserTag from '/components/users/UserTag'
 import './MutualsTag.css'
 
 const MutualsTag = function({ id }) {
+
     const [showList, setShowList] = useState(false)
+
+    const currentUser = useSelector((state) => state.authentication.currentUser)
     const mutuals = useSelector((state) => id in state.Mutuals.dictionary ? state.Mutuals.dictionary[id] : null)
 
     const hasMutualFriends = useFeature('feat-491-mutual-friends')
 
+    useEffect(() => {
+        setShowList(false)
+    }, [ id ])
+
     if ( hasMutualFriends !== true ) {
+        return null
+    }
+
+    if ( currentUser.id === id ) {
         return null
     }
 
