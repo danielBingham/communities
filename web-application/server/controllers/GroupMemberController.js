@@ -343,7 +343,7 @@ module.exports = class GroupMemberController extends BaseController {
         })
 
         // Update the number of members.
-        await this.core.database.query(`UPDATE groups SET total_members = total_members+$1 WHERE id = $2`, [ memberIds.length, groupId ])
+        await this.core.database.query(`UPDATE groups SET total_members = ( SELECT count(*) FROM group_members WHERE group_members.group_id = $1 AND group_members.status = 'member') WHERE id = $1`, [ groupId ])
 
         const relations = await this.getRelations(currentUser, results)
 
@@ -509,6 +509,9 @@ module.exports = class GroupMemberController extends BaseController {
             }
         }
 
+        // Update the number of members.
+        await this.core.database.query(`UPDATE groups SET total_members = ( SELECT count(*) FROM group_members WHERE group_members.group_id = $1 AND group_members.status = 'member') WHERE id = $1`, [ groupId ])
+
         const relations = await this.getRelations(currentUser, results)
 
         await this.notificationService.sendNotifications(
@@ -587,8 +590,8 @@ module.exports = class GroupMemberController extends BaseController {
 
         await this.groupMemberDAO.deleteGroupMember(existing)
 
-        // Update the group's tracking numbers.
-        await this.core.database.query(`UPDATE groups SET total_members = total_members-1 WHERE id = $1`, [ groupId ])
+        // Update the number of members.
+        await this.core.database.query(`UPDATE groups SET total_members = ( SELECT count(*) FROM group_members WHERE group_members.group_id = $1 AND group_members.status = 'member') WHERE id = $1`, [ groupId ])
 
         // Delete their GroupSubscription.
         await this.core.database.query(

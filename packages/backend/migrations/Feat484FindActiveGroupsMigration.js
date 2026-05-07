@@ -41,13 +41,24 @@ module.exports = class Feat484FindActiveGroupsMigration extends BaseMigration {
     async migrateForward(targets) {
         const groupIdResults = await this.core.database.query(`SELECT id FROM groups`, [])
         for(const row of groupIdResults.rows) {
-            const memberCountResults = await this.core.database.query(`SELECT count(*) as count FROM group_members WHERE group_members.group_id = $1`, [ row.id ])
+            const memberCountResults = await this.core.database.query(`SELECT count(*) as count FROM group_members WHERE group_members.group_id = $1 and group_members.status = 'member'`, [ row.id ])
             const memberCount = memberCountResults.rows[0].count
 
-            const postCountResults = await this.core.database.query(`SELECT count(*) as count FROM posts WHERE posts.group_id = $1`, [ row.id ])
+            const postCountResults = await this.core.database.query(`
+                SELECT count(*) as count 
+                    FROM posts 
+                    LEFT OUTER JOIN group_moderation ON posts.group_id = group_moderation.group_id AND posts.id = group_moderation.post_id AND group_moderation.post_comment_id IS NULL 
+                    WHERE posts.group_id = $1 AND (group_moderation.status IS NULL OR group_moderation.status = 'approved')
+            `, [ row.id ])
             const postCount = postCountResults.rows[0].count
 
-            const mostRecentPostResults = await this.core.database.query(`SELECT posts.created_date FROM posts WHERE posts.group_id = $1 ORDER BY created_date desc LIMIT 1`, [ row.id ])
+            const mostRecentPostResults = await this.core.database.query(`
+                SELECT MAX(posts.created_date) as created_date
+                    FROM posts 
+                        LEFT OUTER JOIN group_moderation 
+                            ON posts.group_id = group_moderation.group_id AND posts.id = group_moderation.post_id AND group_moderation.post_comment_id IS NULL 
+                    WHERE posts.group_id = $1 AND (group_moderation.status IS NULL OR group_moderation.status = 'approved') 
+            `, [ row.id ])
 
             let mostRecentPost = null
             if ( mostRecentPostResults.rows.length > 0 ) {

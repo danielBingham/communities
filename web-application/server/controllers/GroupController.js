@@ -212,6 +212,8 @@ module.exports = class GroupController {
                     query.order = 'groups.total_members desc'
                 } else if ( request.query.sort === 'newest' ) {
                     query.order = 'groups.created_date desc'
+                } else if ( request.query.sort === 'relevance' ) {
+                    // Do nothing, the order will have been set above.
                 } else {
                     query.order = 'groups.most_recent_post_date desc nulls last'
                 }

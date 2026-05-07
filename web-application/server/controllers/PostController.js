@@ -559,9 +559,9 @@ module.exports = class PostController {
         if ( entity.groupId ) {
             const group = await this.groupDAO.getGroupById(entity.groupId) 
 
-            // Update the group's tracking stats.
-            await this.core.database.query(`UPDATE groups SET total_posts = total_posts+1, most_recent_post_date = now() WHERE id = $1`, [ entity.groupId ])
 
+            // Insert the pending moderation if the group is set to require
+            // post approval.
             if ( group.postPermissions === 'approval' ) {
                 const moderation = {
                     userId: currentUser.id,
@@ -592,6 +592,14 @@ module.exports = class PostController {
                     groupModerationId: moderation.id
                 }
                 await this.postDAO.updatePost(postPatch)
+            } 
+            // Otherwise, update the gracking stats.  We'll update this on
+            // approval in the GroupModerationController for groups that
+            // require approval.
+            else {
+                // Update the group's tracking stats.
+                await this.core.database.query(`UPDATE groups SET total_posts = total_posts+1, most_recent_post_date = now() WHERE id = $1`, [ entity.groupId ])
+
             }
         }
 
@@ -775,7 +783,12 @@ module.exports = class PostController {
 
         // If this was a post in a group, decrement the group post count.
         if ( existing.groupId ) {
-            await this.core.database.query(`UPDATE groups SET total_posts = total_posts-1 WHERE id = $1`, [ existing.groupId ])
+            await this.core.database.query(`
+                UPDATE groups SET 
+                    total_posts = GREATEST(total_posts-1,0) ,
+                    most_recent_post_date = ( SELECT MAX(posts.created_date) FROM posts WHERE posts.group_id = $1 AND posts.id != $2)
+                WHERE id = $1
+            `, [ existing.groupId, existing.id ])
         }
 
         response.status(201).json({})

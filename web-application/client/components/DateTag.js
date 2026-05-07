@@ -4,6 +4,12 @@ import './DateTag.css'
 
 
 const DateTag = function({ timestamp, type }) {
+
+    if ( timestamp === undefined || timestamp === null ) {
+        return (<div className="date-tag" title={`Never`}>Never</div>)
+    }
+
+
     const date = new Date(timestamp)
     const now = new Date()
 
