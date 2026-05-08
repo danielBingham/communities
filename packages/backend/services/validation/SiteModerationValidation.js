@@ -97,7 +97,7 @@ module.exports = class SiteModerationValidation {
             if ( util.objectHas(siteModeration, 'userProfileId') && siteModeration.userProfileId !== existing.userProfileId ) {
                 errors.push({
                     type: `userProfileId:not-allowed`,
-                    log: `User(${curentUser.id}) attempting to change SiteModeration.userProfileId`,
+                    log: `User(${currentUser.id}) attempting to change SiteModeration.userProfileId`,
                     message: `You cannot edit SiteModeration.userProfileId.`
                 })
             }

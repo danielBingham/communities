@@ -59,6 +59,7 @@ module.exports = class SiteModerationSchema extends Schema {
                         .isRequiredToCreate()
                         .isRequiredToUpdate()
                         .mustNotBeNull()
+                        .mustBeString()
                         .mustNotBeEmpty()
                         .mustBeOneOf([ 'flagged', 'approved', 'rejected' ])
                         .getErrors()

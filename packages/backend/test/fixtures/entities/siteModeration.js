@@ -15,6 +15,8 @@ const siteModeration = {
         reason: '',
         postId: '789307dc-fe1f-4d57-ad88-1ecbb8a38a4e',
         postCommentId: null,
+        groupId: null,
+        userProfileId: null,
         createdDate: 'TIMESTAMP',
         updatedDate: 'TIMESTAMP'
     },
@@ -26,20 +28,50 @@ const siteModeration = {
         reason: null,
         postId: '1457275b-5230-473a-8558-ffce376d77ac',
         postCommentId: null,
+        groupId: null,
+        userProfileId: null,
         createdDate: 'TIMESTAMP',
         updatedDate: 'TIMESTAMP'
     },
-    // User: User One
+    // User: User One flagging a comment.
     'e79ffadc-7d14-4ce5-aca4-8305677023b3': {
         id: 'e79ffadc-7d14-4ce5-aca4-8305677023b3',
         userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
         status: 'flagged',
         reason: null,
-        postId: null,
+        postId: '1457275b-5230-473a-8558-ffce376d77ac',
         postCommentId: 'e12e046b-d7a3-4a53-aa5a-d057482b72a8',
+        groupId: null,
+        userProfileId: null,
         createdDate: 'TIMESTAMP',
         updatedDate: 'TIMESTAMP'
-    }
+    },
+    // User: User One flagging a group.
+    '637eaf2d-5a4b-4a5a-a739-03cf4ec3e943': {
+        id: 'e79ffadc-7d14-4ce5-aca4-8305677023b3',
+        userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
+        status: 'flagged',
+        reason: null,
+        postId: null,
+        postCommentId: null,
+        groupId: 'e12e046b-d7a3-4a53-aa5a-d057482b72a8',
+        userProfileId: null,
+        createdDate: 'TIMESTAMP',
+        updatedDate: 'TIMESTAMP'
+    },
+    // User: User One flagging a profile.
+    'b3c22d71-9353-4421-965f-e48a34a6673b': {
+        id: 'e79ffadc-7d14-4ce5-aca4-8305677023b3',
+        userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
+        status: 'flagged',
+        reason: null,
+        postId: null,
+        postCommentId: null,
+        groupId: null,
+        userProfileId: 'e12e046b-d7a3-4a53-aa5a-d057482b72a8',
+        createdDate: 'TIMESTAMP',
+        updatedDate: 'TIMESTAMP'
+    },
 }
 
 module.exports = {
