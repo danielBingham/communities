@@ -138,15 +138,10 @@ module.exports = class SiteModerationController {
 
         const moderation = this.siteModerationSchema.clean(request.body)
 
-        // TODO This allows a moderator to bypass flagging and directly create
-        // a 'rejected' or 'approved' moderation.  This would be fine except we
-        // only notify the owner of the moderator object on patch.  We should
-        // probably notify here too or restrict post to 'flagged' state.
-        const canModerateSite = await this.permissionService.can(currentUser, 'moderate', 'Site')
-        if ( moderation.status !== 'flagged' && ! canModerateSite ) {
+        if ( moderation.status !== 'flagged' ) {
             throw new ControllerError(403, 'not-authorized',
                 `User(${currentUser.id}) attempting to moderate site without permissions.`,
-                `You do not have permission to moderate Communities.`)
+                `Entities must be flagged before they can be moderated.`)
         }
 
         let existing = null
@@ -272,7 +267,14 @@ module.exports = class SiteModerationController {
                 `You must must be authenticated to edit a post.`)
         }
 
-        const siteModerationId = request.params.id
+        const canModerate = await this.permissionService.can(currentUser, 'moderate', 'Site')
+        if ( ! canModerate ) {
+            throw new ControllerError(403, 'not-authorized',
+                `User(${currentUser.id}) attempting to PATCH a SiteModeration they don't have permission to edit.`,
+                `You don't have permission to edit that SiteModeration.`)
+        }
+
+        const siteModerationId = this.siteModerationSchema.properties.id.clean(request.params.id)
         const siteModeration = this.siteModerationSchema.clean(request.body)
 
         if ( siteModeration.id !== siteModerationId ) {
@@ -286,13 +288,6 @@ module.exports = class SiteModerationController {
             throw new ControllerError(404, 'not-found',
                 `User(${currentUser.id}) attempting to PATCH a SiteModeration that doesn't exist.`,
                 `Either that SiteModeration doesn't exist or you don't have permission to see it.`)
-        }
-
-        const canModerate = await this.permissionService.can(currentUser, 'moderate', 'Site', {})
-        if ( ! canModerate ) {
-            throw new ControllerError(403, 'not-authorized',
-                `User(${currentUser.id}) attempting to PATCH a SiteModeration they don't have permission to edit.`,
-                `You don't have permission to edit that SiteModeration.`)
         }
 
         const validationErrors = await this.validationService.validateSiteModeration(currentUser, siteModeration, existing)
@@ -336,7 +331,12 @@ module.exports = class SiteModerationController {
                     }
                 )
             }
-            // TODO:feat-408 Notify user and/or group admins.
+
+            // TODO TECHDEBT In the future, we want auditable moderation.  For
+            // now, we're just removing groups and profiles that violate the
+            // terms of service. In theory we should notify users or group
+            // admins of the removed profiles here, but the current moderation
+            // system really needs an overhaul for that to make sense. 
         }
 
         // Insert the event to track the moderation history.

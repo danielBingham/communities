@@ -23,6 +23,7 @@ import logger from '/logger'
 
 import { isNativePlatform } from '/lib/native'
 
+import { useFeature } from '/lib/hooks/feature'
 import { useUser } from '/lib/hooks/User'
 
 import { NavigationMenu, NavigationMenuLink, CopyLink, NavigationSubmenu } from '/components/ui/NavigationMenu'
@@ -33,6 +34,8 @@ const UserNavigationMenu = function({ userId }) {
 
     const appBuild = useSelector((state) => state.system.appBuild)
     const [user, userRequest, reload] = useUser(userId)
+
+    const hasFlagProfilesAndGroups = useFeature('feat-408-flag-profiles-and-groups')
 
     if (  ( user === undefined || user === null ) 
         && ( userRequest === null || userRequest?.state === 'pending' )
@@ -50,7 +53,7 @@ const UserNavigationMenu = function({ userId }) {
             <NavigationMenuLink to={`/${user.username}`} icon="QueueList" text="Feed" /> 
             <NavigationMenuLink to={`/${user.username}/friends`} icon="Users" text="Friends" /> 
              <NavigationSubmenu icon="EllipsisHorizontal" title="More">
-                 <FlagUserAction userId={user.id} />
+                 { hasFlagProfilesAndGroups && <FlagUserAction userId={user.id} /> }
                  { ( ! isNativePlatform() || appBuild >= 15 ) && <CopyLink link={`/${user.username}`} /> }
             </NavigationSubmenu>
 
