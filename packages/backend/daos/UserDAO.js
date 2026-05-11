@@ -135,7 +135,7 @@ const SCHEMA = {
                 update: DAO.UPDATE.ALLOW,
                 select: DAO.SELECT.ALWAYS,
                 key: 'siteModerationId',
-                needsFeature: 'feat-408-flag-users-and-groups'
+                needsFeature: 'feat-408-flag-profiles-and-groups'
             },
             'privacy__view_friends': {
                 insert: DAO.INSERT.ALLOW,

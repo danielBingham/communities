@@ -188,7 +188,7 @@ module.exports = class UserController extends BaseController{
             result.where += `users.id != ALL($${result.params.length}::uuid[])`
         }
 
-        if ( this.core.features.has('feat-408-flag-users-and-groups') ) {
+        if ( this.core.features.has('feat-408-flag-profiles-and-groups') ) {
             const and = result.params.length > 0 ? ' AND ' : ''
             result.params.push('rejected')
             result.where += `${and} users.site_moderation_id NOT IN ( SELECT site_moderation.id FROM site_moderation WHERE site_moderation.user_profile_id = users.id AND site_moderation.status = $${result.params.length} )`
@@ -689,7 +689,9 @@ module.exports = class UserController extends BaseController{
         if ( user.siteModerationId !== undefined && user.siteModerationId !== null ) {
             const moderation = await this.siteModerationDAO.getSiteModerationById(user.siteModerationId)
             if ( moderation === null ) {
-                request.logger.error(`SiteModeration(${user.siteModerationId}) not found.`)
+                throw new ControllerError(404, 'not-found',
+                    `User(${user.id}) has a SiteModeration(${user.siteModerationId}) that we couldn't find.`,
+                    `Either that user doesn't exist or you don't have permission to see it.`)
             }
 
             if ( moderation.status === 'rejected' && canModerateSite !== true ) {

@@ -64,9 +64,21 @@ module.exports = class SiteModerationController {
             params: [ results.list ]
         })
 
+        const groupResults = await this.groupDAO.selectGroups({
+            where: `groups.site_moderation_id = ANY($1::uuid[])`,
+            params: [ results.list ]
+        })
+
+        const userResults = await this.userDAO.selectUsers({
+            where: `users.site_moderation_id = ANY($1::uuid[])`,
+            params: [ results.list ]
+        })
+
         return {
+            groups: groupResults.dictionary,
             posts: postResults.dictionary,
-            postComments: postCommentResults.dictionary
+            postComments: postCommentResults.dictionary,
+            users: userResults.dictionary
         } 
     }
 
@@ -142,6 +154,12 @@ module.exports = class SiteModerationController {
             throw new ControllerError(403, 'not-authorized',
                 `User(${currentUser.id}) attempting to moderate site without permissions.`,
                 `Entities must be flagged before they can be moderated.`)
+        }
+
+        if ( 'userProfileId' in moderation && currentUser.id === moderation.userProfileId ) {
+            throw new ControllerError(400, 'invalid',
+                `User(${currentUser.id}) attempting to flag themselves.`,
+                `You cannot flag yourself.  If you'd like to remove your own profile, please delete it.`)
         }
 
         let existing = null

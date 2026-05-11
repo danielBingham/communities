@@ -66,14 +66,14 @@ const SCHEMA = {
                 update: 'allow',
                 select: 'always',
                 key: 'groupId',
-                needsFeature: 'feat-408-flag-users-and-groups'
+                needsFeature: 'feat-408-flag-profiles-and-groups'
             },
             'user_profile_id': {
                 insert: 'allow',
                 update: 'allow',
                 select: 'always',
                 key: 'userProfileId',
-                needsFeature: 'feat-408-flag-users-and-groups'
+                needsFeature: 'feat-408-flag-profiles-and-groups'
             },
             'created_date': {
                 insert: 'override',

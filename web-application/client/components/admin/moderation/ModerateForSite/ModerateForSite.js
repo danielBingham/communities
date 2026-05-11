@@ -48,7 +48,7 @@ const ModerateForSite = function({ siteModerationId }) {
 
     if ( canModerateSite !== true ) {
         return (
-            <span className="moderate-for-site__flag" title={`${target} Flagged for Site Moderators`}><FlagIcon /></span>
+            <span className="moderate-for-site__flag" title={`Flagged for Site Moderators`}><FlagIcon /></span>
         )
     } else {
         return (

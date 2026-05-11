@@ -57,7 +57,6 @@ const AdminModerationView = function({}) {
             if ( moderation.status !== 'flagged' ) {
                 continue
             }
-            console.log(`moderation: `, moderation)
 
             if ( moderation.postId !== null && moderation.postCommentId === null) {
                 moderationViews.push(<PostAwaitingModeration key={moderation.id} siteModerationId={moderation.id} />)

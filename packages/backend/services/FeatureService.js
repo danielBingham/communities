@@ -80,7 +80,7 @@ module.exports = class FeatureService {
             'issue-67-video-uploads': {
                 migration: new Issue67VideoUploadsMigration(core)
             },
-            'feat-408-flag-users-and-groups': {
+            'feat-408-flag-profiles-and-groups': {
                 migration: new Feat408FlagUsersAndGroupsMigration(core)
             },
             'fix-486-unique-constraint': {

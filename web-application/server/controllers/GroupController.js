@@ -148,7 +148,11 @@ module.exports = class GroupController {
             }
         }
 
-        if ( this.core.features.has('feat-408-flag-users-and-groups') ) {
+        if ( this.core.features.has('feat-408-flag-profiles-and-groups') ) {
+            // TODO TECHDEBT This prevents rejected groups from being audited.
+            // That's fine for now, because we're mostly going to be deleting
+            // flagged groups rather than rejecting.  We'll write the auditing
+            // code in the future.
             query.params.push('rejected')
             query.where += ` ${ ! canModerateSite ? `AND` : '' } groups.site_moderation_id NOT IN ( SELECT site_moderation.id FROM site_moderation WHERE site_moderation.group_id = groups.id AND site_moderation.status = $${query.params.length} )`
         }
@@ -366,7 +370,9 @@ module.exports = class GroupController {
         if ( group.siteModerationId !== undefined && group.siteModerationId !== null ) {
             const moderation = await this.siteModerationDAO.getSiteModerationById(group.siteModerationId)
             if ( moderation === null ) {
-                request.logger.error(`SiteModeration(${group.siteModerationId}) not found.`)
+                throw new ControllerError(404, 'not-found',
+                    `Group(${groupId}) has a SiteModeration(${group.siteModerationId}) that we couldn't find.`,
+                    `Either that group doesn't exist or you don't have permission to see it.`)
             }
 
             if ( moderation.status === 'rejected' ) {

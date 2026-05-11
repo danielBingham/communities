@@ -331,7 +331,7 @@ module.exports = class PostController {
         query.where += `${and} (group_moderation.status IS NULL OR (group_moderation.status != 'rejected' AND group_moderation.status != 'pending') OR posts.user_id = $${query.params.length}) 
             AND (site_moderation.status IS NULL OR site_moderation.status != 'rejected' OR posts.user_id = $${query.params.length})`
 
-        if ( this.core.features.has('feat-408-flag-users-and-groups') ) {
+        if ( this.core.features.has('feat-408-flag-profiles-and-groups') ) {
             let and = query.params.length > 0 ? ' AND ' : ''
             query.params.push('rejected')
             query.where += `${and} ( posts.group_id IS NULL OR posts.group_id NOT IN ( SELECT site_moderation.group_id FROM site_moderation WHERE site_moderation.group_id IS NOT NULL AND site_moderation.status = $${query.params.length} ) )`
@@ -685,7 +685,9 @@ module.exports = class PostController {
         if ( post.userId !== currentUser.id && post.siteModerationId !== undefined && post.siteModerationId !== null ) {
             const moderation = await this.siteModerationDAO.getSiteModerationById(post.siteModerationId)
             if ( moderation === null ) {
-                request.logger.error(`SiteModeration(${post.siteModerationId}) not found.`)
+                throw new ControllerError(404, 'not-found',
+                    `Post(${post.id}) has a SiteModeration(${post.siteModerationId}) that we couldn't find.`,
+                    `Either that user doesn't exist or you don't have permission to see it.`)
             }
 
             if ( moderation.status === 'rejected' ) {

@@ -74,6 +74,10 @@ const FlagUserAction = function({ userId }) {
         return null
     }
 
+    if ( currentUser.id === user.id ) {
+        return null
+    }
+
     if ( request && request.state === 'failed' ) {
         if ( request.error.type == 'server-error' ) {
             return (

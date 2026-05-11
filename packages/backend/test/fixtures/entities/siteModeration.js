@@ -48,7 +48,7 @@ const siteModeration = {
     },
     // User: User One flagging a group.
     '637eaf2d-5a4b-4a5a-a739-03cf4ec3e943': {
-        id: 'e79ffadc-7d14-4ce5-aca4-8305677023b3',
+        id: '637eaf2d-5a4b-4a5a-a739-03cf4ec3e943',
         userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
         status: 'flagged',
         reason: null,
@@ -61,7 +61,7 @@ const siteModeration = {
     },
     // User: User One flagging a profile.
     'b3c22d71-9353-4421-965f-e48a34a6673b': {
-        id: 'e79ffadc-7d14-4ce5-aca4-8305677023b3',
+        id: 'b3c22d71-9353-4421-965f-e48a34a6673b',
         userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
         status: 'flagged',
         reason: null,
