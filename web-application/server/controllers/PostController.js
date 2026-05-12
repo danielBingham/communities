@@ -337,7 +337,7 @@ module.exports = class PostController {
             query.where += `${and} NOT EXISTS (
                 SELECT 1 FROM site_moderation 
                     WHERE site_moderation.status = $${query.params.length} AND ( 
-                        site_moderation.group_id = posts.group_id
+                        ( site_moderation.group_id IS NOT NULL AND site_moderation.group_id = posts.group_id)
                         OR site_moderation.user_profile_id = posts.user_id
                     )
             )`
@@ -683,33 +683,27 @@ module.exports = class PostController {
                 `That post either doesn't exist or you don't have permission to access it.`)
         }
 
-        // Users can always view their own posts.  Even when they've been removed by moderators.
-        if ( post.userId !== currentUser.id && post.siteModerationId !== undefined && post.siteModerationId !== null ) {
-            const moderation = await this.siteModerationDAO.getSiteModerationById(post.siteModerationId)
-            if ( moderation === null ) {
-                throw new ControllerError(404, 'not-found',
-                    `Post(${post.id}) has a SiteModeration(${post.siteModerationId}) that we couldn't find.`,
-                    `Either that user doesn't exist or you don't have permission to see it.`)
-            }
+        const canModerateSite = await this.permissionService.can(currentUser, 'moderate', 'Site')
+        // Users can always view their own posts, even when they've been
+        // removed by moderators.  Moderators can always view moderated posts.
+        if ( post.userId !== currentUser.id && canModerateSite !== true ) {
+            const results = await this.core.database.query(`
+                SELECT id, status FROM site_moderation WHERE
+                    site_moderation.status = 'rejected'
+                    AND (
+                        (site_moderation.post_id = $1 AND site_moderation.post_comment_id IS NULL)
+                        OR site_moderation.user_profile_id = $2
+                        OR ( site_moderation.group_id IS NOT NULL AND site_moderation.group_id = $3)
+                    )
+            `, [ post.id, post.userId, post.groupId ])
 
-            if ( moderation.status === 'rejected' ) {
-                const canModerateSite = await this.permissionService.can(currentUser, 'moderate', 'Site')
-                if ( canModerateSite !== true ) {
-                    throw new ControllerError(403, 'not-authorized',
-                        `User(${currentUser.id}) attempting to access rejected Post(${post.id}).`,
-                        `That post has been removed by site moderators.`)
-                }
-            }
-        }
-
-        if ( post.userId !== currentUser.id && post.groupId !== undefined && post.groupId !== null ) {
-            const moderation = await this.siteModerationDAO.getSiteModerationByGroupId(post.groupId)
-            if ( moderation !== null && moderation.status === 'rejected' ) {
-                const canModerateSite = await this.permissionService.can(currentUser, 'moderate', 'Site')
-                if ( canModerateSite !== true ) {
-                    throw new ControllerError(403, 'not-authorized',
-                        `User(${currentUser.id}) attempting to access rejected Post(${post.id}).`,
-                        `That group has been removed by site moderators.`)
+            if ( results.rows.length > 0 ) {
+                for(const row of results.rows ) {
+                    if ( row.status === 'rejected' ) {
+                        throw new ControllerError(403, 'not-authorized',
+                            `User(${currentUser.id}) attempting to access rejected Post(${post.id}).`,
+                            `That post has been removed by site moderators.`)
+                    }
                 }
             }
         }

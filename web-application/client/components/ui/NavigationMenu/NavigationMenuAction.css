@@ -26,7 +26,7 @@ a.navigation-menu__action.active, .navigation-menu__action.active  {
 a.navigation-menu__action .outline, .navigation-menu__action .outline  { 
     display: inline-block;
 }
-a.navigation-menu__action.active .outline, .navitgation-menu__action.active .outline { 
+a.navigation-menu__action.active .outline, .navigation-menu__action.active .outline { 
     display: none;
 }
 

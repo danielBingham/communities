@@ -62,7 +62,7 @@ module.exports = class SiteModerationValidation {
                 errors.push({
                     type: `entityId:missing`,
                     log: `SiteModeration missing ID of moderated entity.`,
-                    message: `ID of the entity being moderated is required.  Please include either 'postId' or 'postCommentId'.`
+                    message: `ID of the entity being moderated is required.  Please include one of 'postId', 'postCommentId', 'groupId', or 'userProfileId'.`
                 })
             }
 
@@ -82,7 +82,7 @@ module.exports = class SiteModerationValidation {
                 errors.push({
                     type: `postCommentId:not-allowed`,
                     log: `User(${currentUser.id}) attempting to change SiteModeration.postCommentId.`,
-                    message: `You cannot edit SiteModeration.postId.`
+                    message: `You cannot edit SiteModeration.postCommentId.`
                 })
             }
 

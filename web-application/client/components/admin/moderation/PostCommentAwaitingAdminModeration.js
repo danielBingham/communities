@@ -59,8 +59,8 @@ const PostCommentAwaitingAdminModeration = function({ siteModerationId }) {
 
     if ( moderation === undefined || moderation === null ) {
         return (
-            <div className="post-comment-awaiting-moderation">
-                <div className="post-comment-awaiting-moderation__not-found">
+            <div className="post-comment-awaiting-admin-moderation">
+                <div className="post-comment-awaiting-admin-moderation__not-found">
                     <p>404 Moderation Not Found</p>
                     <Button type="warning" onClick={() => reloadSiteModeration()}>Retry</Button>
                 </div>
@@ -71,8 +71,8 @@ const PostCommentAwaitingAdminModeration = function({ siteModerationId }) {
 
     if ( post === undefined || post === null ) {
         return (
-            <div className="post-comment-awaiting-moderation">
-                <div className="post-comment-awaiting-moderation__not-found">
+            <div className="post-comment-awaiting-admin-moderation">
+                <div className="post-comment-awaiting-admin-moderation__not-found">
                     <p>404 Post Not Found</p>
                     <Button type="warning" onClick={() => reloadPost()}>Retry</Button>
                 </div>
@@ -86,7 +86,7 @@ const PostCommentAwaitingAdminModeration = function({ siteModerationId }) {
                 <a href={`${link}#comment-${moderation.postCommentId}`}>View Context</a>
             </div>
             <PostComment postId={moderation.postId} id={moderation.postCommentId} />
-            <div className="post-comment-awaiting-moderation__form">
+            <div className="post-comment-awaiting-admin-moderation__form">
                 <SiteModerationForm siteModerationId={siteModerationId} />
             </div>
         </Card>

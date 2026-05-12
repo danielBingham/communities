@@ -72,7 +72,7 @@ const PostAwaitingModeration = function({ siteModerationId }) {
 
     return (
         <Card className="post-awaiting-moderation">
-            <div className="group-awaiting-moderation__context">
+            <div className="post-awaiting-moderation__context">
                 <a href={`${link}`}>View Context</a>
             </div>
             <div className="post-awaiting-moderation__profile">
