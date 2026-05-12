@@ -44,6 +44,8 @@ CREATE TABLE features (
  * Users 
  *****************************************************************************/
 
+CREATE TYPE user_privacy AS ENUM('me', 'friends', 'friends-of-friends', 'public');
+
 CREATE TYPE user_status AS ENUM('invited', 'unconfirmed', 'confirmed', 'banned');
 CREATE TYPE user_permissions AS ENUM('user', 'moderator', 'admin', 'superadmin');
 CREATE TYPE user_site_role AS ENUM('user', 'moderator', 'admin', 'superadmin');
@@ -70,6 +72,11 @@ CREATE TABLE users (
 
     settings jsonb DEFAULT '{}'::jsonb,
     notices jsonb DEFAULT '{}'::jsonb,
+
+    site_moderation_id uuid DEFAULT NULL, /* REFERENCES site_moderation (id) ON DELETE SET NULL -- defined below*/
+    
+    privacy__view_friends user_privacy DEFAULT 'friends',
+    privacy__view_mutual_friends user_privacy DEFAULT 'friends-of-friends',
 
     failed_authentication_attempts int DEFAULT 0,
     last_authentication_attempt_date timestamptz,
@@ -246,6 +253,13 @@ CREATE TABLE groups (
     file_id uuid REFERENCES files (id) ON DELETE SET NULL DEFAULT NULL,
 
     entrance_questions jsonb DEFAULT '{}'::jsonb,
+
+    site_moderation_id uuid DEFAULT NULL, /* REFERENCES site_moderation (id) ON DELETE SET NULL -- defined below*/
+
+    /* Group activity metrics */
+    total_members int DEFAULT 1,
+    total_posts int DEFAULT 0,
+    most_recent_post_date timestamptz,
 
     created_date timestamptz,
     updated_date timestamptz
@@ -462,6 +476,8 @@ CREATE TABLE site_moderation (
 
     post_id uuid REFERENCES posts (id) ON DELETE CASCADE DEFAULT NULL ,
     post_comment_id uuid REFERENCES post_comments (id) ON DELETE CASCADE DEFAULT NULL, 
+    group_id uuid REFERENCES groups (id) ON DELETE CASCADE DEFAULT NULL,
+    user_profile_id uuid REFERENCES users (id) ON DELETE CASCADE DEFAULT NULL,
 
     created_date timestamptz, 
     updated_date timestamptz
@@ -469,6 +485,8 @@ CREATE TABLE site_moderation (
 CREATE INDEX site_moderation__user_id ON site_moderation (user_id);
 CREATE INDEX site_moderation__post_id ON site_moderation (post_id);
 CREATE INDEX site_moderation__post_comment_id ON site_moderation (post_comment_id);
+CREATE INDEX site_moderation__group_id ON site_moderation (group_id);
+CREATE INDEX site_moderation__user_profile_id ON site_moderation (user_profile_id);
 
 CREATE TABLE site_moderation_events (
     id uuid PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
@@ -480,6 +498,8 @@ CREATE TABLE site_moderation_events (
 
     post_id uuid REFERENCES posts(id) ON DELETE CASCADE DEFAULT NULL,
     post_comment_id uuid REFERENCES post_comments(id) ON DELETE CASCADE DEFAULT NULL,
+    group_id uuid REFERENCES groups (id) ON DELETE CASCADE DEFAULT NULL,
+    user_profile_id uuid REFERENCES users (id) ON DELETE CASCADE DEFAULT NULL,
 
     created_date timestamptz
 );
@@ -487,9 +507,13 @@ CREATE INDEX site_moderation_events__site_moderation_id ON site_moderation_event
 CREATE INDEX site_moderation_events__user_id ON site_moderation_events (user_id);
 CREATE INDEX site_moderation_events__post_id ON site_moderation_events (post_id);
 CREATE INDEX site_moderation_events__post_comment_id ON site_moderation_events (post_comment_id);
+CREATE INDEX site_moderation_events__group_id ON site_moderation_events (group_id);
+CREATE INDEX site_moderation_events__user_profile_id ON site_moderation_events (user_profile_id);
 
 ALTER TABLE posts ADD CONSTRAINT posts_site_moderation_id_fkey FOREIGN KEY (site_moderation_id) REFERENCES site_moderation (id) ON DELETE SET NULL;
 ALTER TABLE post_comments ADD CONSTRAINT post_comments_site_moderation_id_fkey FOREIGN KEY (site_moderation_id) REFERENCES site_moderation (id) ON DELETE SET NULL;
+ALTER TABLE groups ADD CONSTRAINT groups_site_moderation_id_fkey FOREIGN KEY (site_moderation_id) REFERENCES site_moderation (id) ON DELETE SET NULL;
+ALTER TABLE users ADD CONSTRAINT users_site_moderation_id_fkey FOREIGN KEY (site_moderation_id) REFERENCES site_moderation (id) ON DELETE SET NULL;
 
 /******************************************************************************
  * Permissions

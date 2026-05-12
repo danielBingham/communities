@@ -18,6 +18,9 @@
 .user-view__name {
     font-size: 2em;
 }
+.user-view__mutuals {
+    padding: 10px;
+}
 .user-view__username a:link, 
 .user-view__username a:visited, 
 .user-view__username a:active,

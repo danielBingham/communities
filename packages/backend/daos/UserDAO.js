@@ -130,6 +130,27 @@ const SCHEMA = {
                 select: DAO.SELECT.REQUEST,
                 key: 'invitations'
             },
+            'site_moderation_id': {
+                insert: DAO.INSERT.ALLOW,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.ALWAYS,
+                key: 'siteModerationId',
+                needsFeature: 'feat-408-flag-profiles-and-groups'
+            },
+            'privacy__view_friends': {
+                insert: DAO.INSERT.ALLOW,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.REQUEST,
+                key: 'privacyViewFriends',
+                needsFeature: 'feat-491-mutual-friends'
+            },
+            'privacy__view_mutual_friends': {
+                insert: DAO.INSERT.ALLOW,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.REQUEST,
+                key: 'privacyViewMutualFriends',
+                needsFeature: 'feat-491-mutual-friends'
+            },
             'last_authentication_attempt_date': {
                 insert: DAO.INSERT.OVERRIDE,
                 insertOverride: 'now()',

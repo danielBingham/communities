@@ -24,6 +24,7 @@ const {
     GroupSubscriptionDAO,
     UserDAO, 
     FileDAO,
+    SiteModerationDAO,
     GroupService,
     NotificationService,
     PermissionService,
@@ -42,6 +43,7 @@ module.exports = class GroupController {
         this.groupSubscriptionDAO = new GroupSubscriptionDAO(core)
         this.userDAO = new UserDAO(core)
         this.fileDAO = new FileDAO(core)
+        this.siteModerationDAO = new SiteModerationDAO(core)
 
         this.groupService = new GroupService(core)
         this.notificationService = new NotificationService(core)
@@ -146,6 +148,16 @@ module.exports = class GroupController {
             }
         }
 
+        if ( this.core.features.has('feat-408-flag-profiles-and-groups') ) {
+            // TODO TECHDEBT This prevents rejected groups from being audited.
+            // That's fine for now, because we're mostly going to be deleting
+            // flagged groups rather than rejecting.  We'll write the auditing
+            // code in the future.
+            query.params.push('rejected')
+            const and = query.params.length > 1 ? ' AND ' : ''
+            query.where += `${and} groups.site_moderation_id NOT IN ( SELECT site_moderation.id FROM site_moderation WHERE site_moderation.group_id = groups.id AND site_moderation.status = $${query.params.length} )`
+        }
+
         // Get only the groups the currentUser is a member of with 'memberStatus'
         if ( 'memberStatus' in request.query ) {
 
@@ -200,6 +212,27 @@ module.exports = class GroupController {
 
         if ( 'page' in request.query && parseInt(request.query.page) > 0 ) {
             query.page = parseInt(request.query.page)
+        }
+
+        if ( this.core.features.has('feat-484-find-active-groups') ) {
+            if ( 'sort' in request.query ) {
+                if ( request.query.sort === 'recent' ) {
+                    query.order = 'groups.most_recent_post_date desc nulls last'
+                } else if ( request.query.sort === 'active' ) {
+                    query.order = 'groups.total_posts desc'
+                } else if ( request.query.sort === 'biggest' ) {
+                    query.order = 'groups.total_members desc'
+                } else if ( request.query.sort === 'newest' ) {
+                    query.order = 'groups.created_date desc'
+                } else if ( request.query.sort === 'relevance' ) {
+                    // Do nothing, the order will have been set above.
+                } else {
+                    query.order = 'groups.most_recent_post_date desc nulls last'
+                }
+            } else {
+                query.order = 'groups.most_recent_post_date desc nulls last'
+            }
+
         }
 
         return query
@@ -334,6 +367,24 @@ module.exports = class GroupController {
         }
 
         const group = results.dictionary[groupId]
+
+        if ( group.siteModerationId !== undefined && group.siteModerationId !== null ) {
+            const moderation = await this.siteModerationDAO.getSiteModerationById(group.siteModerationId)
+            if ( moderation === null ) {
+                throw new ControllerError(404, 'not-found',
+                    `Group(${groupId}) has a SiteModeration(${group.siteModerationId}) that we couldn't find.`,
+                    `Either that group doesn't exist or you don't have permission to see it.`)
+            }
+
+            if ( moderation.status === 'rejected' ) {
+                const canModerateSite = await this.permissionService.can(currentUser, 'moderate', 'Site')
+                if ( canModerateSite !== true ) {
+                    throw new ControllerError(403, 'not-authorized',
+                        `User(${currentUser.id}) attempting to access rejected Group(${group.id}).`,
+                        `That group has been removed by site moderators.`)
+                }
+            }
+        }
 
         const canViewGroup = await this.permissionService.can(currentUser, 'view', 'Group', { group: group })
         if ( ! canViewGroup ) {

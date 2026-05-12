@@ -27,6 +27,7 @@ const {
     AuthenticationService,
     EmailService,
     NotificationService,
+    MutualsService,
     PermissionService,
     UserService,
     ValidationService,
@@ -38,6 +39,7 @@ const {
     TokenDAO,
     FileDAO,
     PostDAO,
+    SiteModerationDAO,
 
     DAOError,
     ServiceError
@@ -60,6 +62,7 @@ module.exports = class UserController extends BaseController{
         this.auth = new AuthenticationService(core)
         this.emailService = new EmailService(core)
         this.notificationService = new NotificationService(core)
+        this.mutualsService = new MutualsService(core)
         this.permissionService = new PermissionService(core)
         this.userService = new UserService(core)
         this.validationService = new ValidationService(core)
@@ -71,6 +74,7 @@ module.exports = class UserController extends BaseController{
         this.tokenDAO = new TokenDAO(core)
         this.fileDAO = new FileDAO(core)
         this.postDAO = new PostDAO(core)
+        this.siteModerationDAO = new SiteModerationDAO(core)
     }
 
     async getRelations(currentUser, results, requestedRelations) {
@@ -97,8 +101,16 @@ module.exports = class UserController extends BaseController{
             userRelationshipDictionary = userRelationshipResults.dictionary
         }
 
+        let mutualsDictionary = {}
+        if ( this.core.features.has('feat-491-mutual-friends' ) ) {
+            if ( currentUser ) {
+                mutualsDictionary = await this.mutualsService.getMutualsForCurrentUserAndList(currentUser, results.list) 
+            }
+        }
+
         return {
             files: fileResults.dictionary,
+            mutuals: mutualsDictionary,
             userRelationships: userRelationshipDictionary
         }
     }
@@ -139,10 +151,6 @@ module.exports = class UserController extends BaseController{
             ignorePage: false
         }
 
-        if ( ! query) {
-            return
-        }
-
         const result = {
             where: ``,
             params: [],
@@ -150,7 +158,11 @@ module.exports = class UserController extends BaseController{
             order: '',
             fields: [],
             emptyResult: false,
-            requestedRelations: query.relations ? query.relations : []
+            requestedRelations: query?.relations ? query.relations : []
+        }
+
+        if ( ! query) {
+            return result
         }
 
         let canModerateSite = false
@@ -175,10 +187,16 @@ module.exports = class UserController extends BaseController{
             result.params.push(blockIds)
             result.where += `users.id != ALL($${result.params.length}::uuid[])`
         }
+
+        if ( this.core.features.has('feat-408-flag-profiles-and-groups') ) {
+            const and = result.params.length > 0 ? ' AND ' : ''
+            result.params.push('rejected')
+            result.where += `${and} users.site_moderation_id NOT IN ( SELECT site_moderation.id FROM site_moderation WHERE site_moderation.user_profile_id = users.id AND site_moderation.status = $${result.params.length} )`
+        }
+
         // ====================================================================
         // END Permissions
         // ====================================================================
-
 
         if ( 'name' in query && query.name.length > 0) {
             const and = result.params.length > 0 ? ' AND ' : ''
@@ -479,6 +497,19 @@ module.exports = class UserController extends BaseController{
             result.where += `${and} users.status != 'banned' AND users.status != 'invited'`
         }
 
+        if ( 'sort' in query ) {
+            if ( query.sort === 'newest' ) {
+                result.order = 'users.created_date desc'
+            } else if ( query.sort === 'oldest' ) {
+                result.order = 'users.created_date asc'
+            } else if ( query.sort === 'relevance' ) {
+                // Skip.  We'll have set the order above and we don't want to
+                // override it.
+            } else {
+                result.order = 'users.created_date desc'
+            }
+        }
+
         if ( query.page && ! options.ignorePage ) {
             result.page = query.page
         } else if ( ! options.ignorePage ) {
@@ -632,8 +663,10 @@ module.exports = class UserController extends BaseController{
         const currentUser = request.session.user
         const userId = request.params.id
 
+        // TODO TECHDEBT Why do we allow unauthenticated access here?
+
         const canModerateSite = await this.permissionService.can(currentUser, 'moderate', 'Site')
-        if ( currentUser && currentUser.id !== userId && canModerateSite !== true) {
+        if ( currentUser && currentUser?.id !== userId && canModerateSite !== true) {
             const relationship = await this.userRelationshipsDAO.getUserRelationshipByUserAndRelation(currentUser.id, userId)
             if ( relationship?.status === 'blocked' && currentUser.id === relationship?.relationId) {
                 throw new ControllerError(404, 'not-found', 
@@ -651,6 +684,23 @@ module.exports = class UserController extends BaseController{
 
         if ( ! results.dictionary[userId] ) {
             throw new ControllerError(404, 'not-found', `User(${userId}) not found.`)
+        }
+
+        const user = results.dictionary[userId]
+
+        if ( user.siteModerationId !== undefined && user.siteModerationId !== null ) {
+            const moderation = await this.siteModerationDAO.getSiteModerationById(user.siteModerationId)
+            if ( moderation === null ) {
+                throw new ControllerError(404, 'not-found',
+                    `User(${user.id}) has a SiteModeration(${user.siteModerationId}) that we couldn't find.`,
+                    `Either that user doesn't exist or you don't have permission to see it.`)
+            }
+
+            if ( moderation.status === 'rejected' && currentUser.id !== userId && canModerateSite !== true ) {
+                throw new ControllerError(403, 'not-authorized',
+                    `User(${currentUser.id}) attempting to access rejected User(${user.id}).`,
+                    `That user has been removed by site moderators.`)
+            }
         }
 
         const relations = await this.getRelations(currentUser, results)

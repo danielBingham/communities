@@ -30,25 +30,30 @@ export const useUserRelationshipQuery = function(userId, queryParameters) {
     // same.  We'll probably want a solution for this at some point.
     const key = JSON.stringify(params)
 
-    const query = useSelector((state) => key in state.UserRelationship.queries ? state.UserRelationship.queries[key] : null)
+    const query = useSelector((state) => key in state.UserRelationship.queries ? state.UserRelationship.queries[key] : undefined)
 
     const [ request, makeRequest, resetRequest ] = useRequest()
 
     const dispatch = useDispatch()
     useEffect(() => {
-        if ( query === null && request === null ) {
-            makeRequest(getUserRelationships(key, userId, params)) 
-        }
+        makeRequest(getUserRelationships(key, userId, params)) 
 
         return () => {
-            if ( query !== null && request !== null && request.state === 'fulfilled' ) {
-                dispatch(clearUserRelationshipQuery({ name: key }))
+            if ( request?.state === 'fulfilled' ) {
                 resetRequest()
+                dispatch(clearUserRelationshipQuery({ name: key }))
             }
         }
-    }, [ key, query, request ])
+    }, [ key])
 
-    return [query, request, resetRequest ]
+
+    useEffect(() => {
+        if ( query === undefined && request?.state === 'fulfilled' ) {
+            makeRequest(getUserRelationships(key, userId, params)) 
+        }
+    }, [ query, request ])
+
+    return [ query, request, resetRequest ]
 }
 
 

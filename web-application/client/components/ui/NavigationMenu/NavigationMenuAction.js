@@ -24,7 +24,7 @@ import NavigationMenuItem from './NavigationMenuItem'
 
 import './NavigationMenuAction.css'
 
-const NavigationMenuAction = function({ icon, text, className, onClick }) {
+const NavigationMenuAction = function({ icon, text, className, disabled, onClick }) {
     const SolidIcon = HeroIconsSolid[`${icon}Icon`]
     const OutlineIcon = HeroIconsOutline[`${icon}Icon`]
 
@@ -35,9 +35,19 @@ const NavigationMenuAction = function({ icon, text, className, onClick }) {
         throw new Error(`Missing icon '${icon}'.`)
     }
 
+    if ( disabled ) {
+        return (
+            <NavigationMenuItem>
+                <span className={`navigation-menu__action ${ disabled ? 'navigation-menu__action__disabled' : ''} ${className ? className : ''}`} onClick={onClick}>
+                    <SolidIcon className="solid" /><OutlineIcon className="outline" /><span className="nav-text">{ text }</span>
+                </span>
+            </NavigationMenuItem>
+        )
+    }
+
     return (
         <NavigationMenuItem>
-            <a className={`navigation-menu__action ${className ? className : ''}`} onClick={onClick}>
+            <a className={`navigation-menu__action ${ disabled ? 'navigation-menu__action__disabled' : ''} ${className ? className : ''}`} onClick={onClick}>
                 <SolidIcon className="solid" /><OutlineIcon className="outline" /><span className="nav-text">{ text }</span>
             </a>
         </NavigationMenuItem>

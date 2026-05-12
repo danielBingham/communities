@@ -7,6 +7,7 @@ import { setGroupModerationsInDictionary, removeGroupModeration } from '/state/G
 import { setGroupSubscriptionsInDictionary, removeGroupSubscription } from '/state/GroupSubscription/slice'
 import { setJobsInDictionary, removeJob } from '/state/jobs'
 import { setLinkPreviewsInDictionary, removeLinkPreview } from '/state/LinkPreview/slice'
+import { setMutualsInDictionary, removeMutuals } from '/state/Mutuals/slice'
 import { setPostsInDictionary, removePost } from '/state/Post/slice'
 import { setPostCommentsInDictionary, removePostComment } from '/state/PostComment/slice'
 import { setPostReactionsInDictionary, removePostReaction } from '/state/PostReaction/slice'
@@ -23,6 +24,7 @@ const entityMap = {
     groupSubscriptions: { set: setGroupSubscriptionsInDictionary, remove: removeGroupSubscription },
     jobs: { set: setJobsInDictionary, remove: removeJob },
     linkPreviews: { set: setLinkPreviewsInDictionary, remove: removeLinkPreview },
+    mutuals: { set: setMutualsInDictionary, remove: removeMutuals },
     posts: { set: setPostsInDictionary, remove: removePost },
     postComments: { set: setPostCommentsInDictionary, remove: removePostComment },
     postReactions: { set: setPostReactionsInDictionary, remove: removePostReaction },

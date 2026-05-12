@@ -26,7 +26,10 @@ const SubgroupMigration = require('../migrations/SubgroupMigration')
 const Issue330GroupShortDescriptionAndRulesMigration = require('../migrations/Issue330GroupShortDescriptionAndRulesMigration')
 const Issue252GroupSubscriptionMigration = require('../migrations/Issue252GroupSubscriptionMigration')
 const Issue67VideoUploadsMigration = require('../migrations/Issue67VideoUploadsMigration')
+const Feat408FlagUsersAndGroupsMigration = require('../migrations/Feat408FlagUsersAndGroupsMigration')
 const Fix486UniqueConstraintMigration = require('../migrations/Fix486UniqueConstraintMigration')
+const Feat484FindActiveGroupsMigration = require('../migrations/Feat484FindActiveGroupsMigration')
+const Feat491MutualFriendsMigration = require('../migrations/Feat491MutualFriendsMigration')
 
 const ServiceError = require('../errors/ServiceError')
 const MigrationError = require('../errors/MigrationError')
@@ -77,8 +80,17 @@ module.exports = class FeatureService {
             'issue-67-video-uploads': {
                 migration: new Issue67VideoUploadsMigration(core)
             },
+            'feat-408-flag-profiles-and-groups': {
+                migration: new Feat408FlagUsersAndGroupsMigration(core)
+            },
             'fix-486-unique-constraint': {
                 migration: new Fix486UniqueConstraintMigration(core)
+            },
+            'feat-484-find-active-groups': {
+                migration: new Feat484FindActiveGroupsMigration(core)
+            },
+            'feat-491-mutual-friends': {
+                migration: new Feat491MutualFriendsMigration(core)
             },
             'video-uploads': {}
         }

@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
+import { UserPlusIcon } from '@heroicons/react/24/outline'
+
 import { useRequest } from '/lib/hooks/useRequest'
 
 import { resetEntities } from '/state/lib'
@@ -49,7 +51,7 @@ const AcceptFriendButton = function({ userId, type }) {
     }
 
     return (
-        <Button type="primary" onClick={() => acceptFriend()}>Accept Request</Button>     
+        <Button type="primary" onClick={() => acceptFriend()}><UserPlusIcon /> <span className="nav-text">Accept</span></Button>     
     )
 
 }

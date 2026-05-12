@@ -21,10 +21,10 @@ import NavigationMenuAction from './NavigationMenuAction'
 
 import './NavigationSubmenuAction.css'
 
-const NavigationSubmenuAction = function({ text, icon, className, onClick }) {
+const NavigationSubmenuAction = function({ text, icon, className, disabled, onClick }) {
 
     return  (
-        <NavigationMenuAction text={text} icon={icon} className={`navigation-submenu__action ${ className ? className : ''}`} onClick={onClick} />
+        <NavigationMenuAction text={text} icon={icon} disabled={disabled} className={`navigation-submenu__action ${ className ? className : ''}`} onClick={onClick} />
     )
 
 }

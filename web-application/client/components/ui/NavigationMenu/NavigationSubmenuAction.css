@@ -1,9 +1,9 @@
-a.navigation-menu__action.navigation-submenu__action svg {
+a.navigation-menu__action.navigation-submenu__action svg, .navigation-menu__action.navigation-submenu__action svg {
     width: 18px;
     margin-right: 3px;
     margin-bottom: -3px;
 }
-a.navigation-menu__action.navigation-submenu__action {
+a.navigation-menu__action.navigation-submenu__action, .navigation-menu__action.navigation-submenu__action {
     padding: 7px;
     font-size: 14px;
 

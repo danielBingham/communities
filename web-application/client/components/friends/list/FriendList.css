@@ -1,3 +1,7 @@
+.friend-list {
+    margin: 0 auto;
+    max-width: 760px;
+}
 .friend-list__no-permission {
     margin: 50px auto;
     text-align: center;

@@ -32,6 +32,7 @@ import GroupMembershipButton from '/components/groups/GroupMembershipButton'
 
 import CopyGroupLink from './CopyGroupLink'
 import LeaveGroupAction from './LeaveGroupAction'
+import FlagGroupAction from './FlagGroupAction'
 
 const GroupNavigationMenu = function({ groupId }) {
 
@@ -54,6 +55,7 @@ const GroupNavigationMenu = function({ groupId }) {
     const canAdminSite = can(currentUser, Actions.admin, Entities.Site)
 
     const hasSubgroups = useFeature('issue-165-subgroups')
+    const hasFlagProfilesAndGroups = useFeature('feat-408-flag-profiles-and-groups')
 
     // ========================================================================
     //          Render
@@ -85,6 +87,7 @@ const GroupNavigationMenu = function({ groupId }) {
             { hasSubgroups && canViewGroupPost === true && <NavigationMenuLink to={`/group/${group.slug}/subgroups`} icon="UserGroup" text="Subgroups" /> }
             <NavigationSubmenu icon="EllipsisHorizontal" title="More">
                 <NavigationSubmenuLink to={`/group/${group.slug}/about`} icon="QuestionMarkCircle" text="About" />
+                { hasFlagProfilesAndGroups && <FlagGroupAction groupId={group.id} /> }
                 { ( ! isNativePlatform() || appBuild >= 15 ) && <CopyGroupLink groupId={group.id} /> }
                 { canModerateGroup === true && <NavigationSubmenuLink to="moderation" icon="Flag" text="Moderation" /> }
                 { canAdminGroup === true && <NavigationSubmenuLink to="settings" icon="Cog6Tooth" text="Settings" /> }

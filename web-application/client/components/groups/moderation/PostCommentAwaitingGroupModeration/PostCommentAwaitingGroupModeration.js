@@ -5,6 +5,8 @@ import { usePost, usePostLink } from '/lib/hooks/Post'
 
 import PostComment from '/components/posts/PostComment'
 
+import Card from '/components/ui/Card'
+
 import './PostCommentAwaitingGroupModeration.css'
 
 const PostCommentAwaitingGroupModeration = function({ groupId, id }) {
@@ -22,12 +24,12 @@ const PostCommentAwaitingGroupModeration = function({ groupId, id }) {
     }
 
     return (
-        <div key={moderation.id} className="post-comment-awaiting-group-moderation">
+        <Card className="post-comment-awaiting-group-moderation">
             <div className="post-comment-awaiting-group-moderation__context">
                 <a href={`${link}#comment-${moderation.postCommentId}`}>View Context</a>
             </div>
             <PostComment postId={moderation.postId} id={moderation.postCommentId} />
-        </div>
+        </Card>
     )
 }
 

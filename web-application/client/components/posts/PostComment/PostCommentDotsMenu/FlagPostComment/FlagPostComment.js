@@ -46,6 +46,11 @@ const FlagPostComment = function({ postId, id } ) {
         makeRequest(postSiteModerations(newModeration))
     }
 
+    const cancelFlag = function() {
+        setAreYouSure(false)
+        closeMenu()
+    }
+
     useEffect(() => {
         if ( request && request.state === 'fulfilled' ) {
             setAreYouSure(false)
@@ -123,7 +128,7 @@ const FlagPostComment = function({ postId, id } ) {
                 isVisible={areYouSure} 
                 isPending={request && request.state === 'pending'} 
                 execute={executeFlag} 
-                cancel={() => setAreYouSure(false)}
+                cancel={() => cancelFlag()}
             > 
                 <p><strong>Are you sure you want to flag this comment for Site moderators?</strong></p>
                 <div className="flag-post-comment__explanation">
