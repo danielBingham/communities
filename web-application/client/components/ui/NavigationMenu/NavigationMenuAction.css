@@ -1,11 +1,11 @@
-a.navigation-menu__action svg {
+a.navigation-menu__action svg, .navigation-menu__action svg {
     width: 22px;
     margin-right: 5px;
     margin-bottom: -5px;
     color: var(--navigation-menu-item-text-color);
 }
 
-a.navigation-menu__action {
+a.navigation-menu__action, .navigation-menu__action {
     display: block;
     padding: 10px;
     color: var(--navigation-menu-item-text-color);
@@ -18,28 +18,33 @@ a.navigation-menu__action:hover {
 
 
 /* The `.active` class comes from `NavLink`. */
-a.navigation-menu__action.active  {
+a.navigation-menu__action.active, .navigation-menu__action.active  {
     font-weight: bold;
 }
 
 /* Outline icons are shown unless they are active. */
-a.navigation-menu__action .outline { 
+a.navigation-menu__action .outline, .navigation-menu__action .outline  { 
     display: inline-block;
 }
-a.navigation-menu__action.active .outline { 
+a.navigation-menu__action.active .outline, .navigation-menu__action.active .outline { 
     display: none;
 }
 
 /* Solid icons are hidden unless they are active. */
-a.navigation-menu__action .solid {
+a.navigation-menu__action .solid, .navigation-menu__action .solid {
     display: none;
 }
-a.navigation-menu__action.active .solid {
+a.navigation-menu__action.active .solid, .navigation-menu__action.active .solid {
     display: inline-block;
 }
 
+.navigation-menu__action__disabled { 
+    filter: opacity(50%);
+}
+
+
 @media ( width <= 1220px) {
-    a.navigation-menu__action .nav-text {
+    a.navigation-menu__action .nav-text, .navigation-menu__action .nav-text {
         display: block;
         font-size: 10px;
     }

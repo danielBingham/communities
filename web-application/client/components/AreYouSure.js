@@ -17,17 +17,45 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
+import { useRef, useEffect } from 'react'
+
 import Button from '/components/ui/Button'
 import Spinner from '/components/Spinner'
 
 import './AreYouSure.css'
 
 const AreYouSure = function({ isVisible, isPending, cancelLabel = 'Cancel', executeLabel = 'Yes', cancel, execute, className, children }) {
+    const ref = useRef(null)
+    const overlayRef = useRef(null)
+
+    useEffect(() => {
+        if ( isVisible === true ) {
+            if ( ref.current !== null ) {
+                ref.current.focus()
+            }
+        }
+    }, [ isVisible ])
+
+    // Stifle scrolling on the background when the modal is open.
+    useEffect(() => {
+        const preventScroll = (event) => {
+            event.stopPropagation()
+            event.preventDefault()
+        }
+        if ( overlayRef.current !== null ) {
+            overlayRef.current.addEventListener('touchstart', preventScroll)
+            return () => {
+                if ( overlayRef.current !== null ) { 
+                    overlayRef.current.removeEventListener('touchstart', preventScroll)
+                }
+            }
+        }
+    }, [ isVisible ])
 
     return isVisible ?
             <div className="modal-wrapper">
-                <div className="modal-overlay" onClick={(e) => cancel()}></div>
-                <div className={className ? `are-you-sure ${className}` : 'are-you-sure'}>
+                <div ref={overlayRef} className="modal-overlay" onClick={(e) => { cancel() }} ></div>
+                <div ref={ref} className={className ? `are-you-sure ${className}` : 'are-you-sure'}>
                     <div className="are-you-sure__question">{ children }</div>
                     <Button onClick={(e) =>{ e.stopPropagation(); cancel() }}>{ cancelLabel }</Button> <Button type="warn" onClick={(e) => { e.stopPropagation(); execute() }}>{ isPending === true ? <Spinner /> : executeLabel }</Button>
                 </div>

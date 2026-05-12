@@ -7,3 +7,6 @@
     border-bottom: thin solid var(--main-border-color);
     text-align: right;
 }
+.admin-moderation-view__list {
+    padding: 20px 0;
+}

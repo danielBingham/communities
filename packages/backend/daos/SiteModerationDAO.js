@@ -61,6 +61,20 @@ const SCHEMA = {
                 select: 'always',
                 key: 'postCommentId'
             },
+            'group_id': {
+                insert: 'allow',
+                update: 'allow',
+                select: 'always',
+                key: 'groupId',
+                needsFeature: 'feat-408-flag-profiles-and-groups'
+            },
+            'user_profile_id': {
+                insert: 'allow',
+                update: 'allow',
+                select: 'always',
+                key: 'userProfileId',
+                needsFeature: 'feat-408-flag-profiles-and-groups'
+            },
             'created_date': {
                 insert: 'override',
                 insertOverride: 'now()',
@@ -144,6 +158,32 @@ module.exports = class SiteModerationDAO extends DAO {
         const results = await this.selectSiteModerations({
             where: `site_moderation.post_comment_id = $1`,
             params: [ postCommentId ]
+        })
+
+        if ( results.list.length <= 0 ) {
+            return null
+        }
+
+        return results.dictionary[results.list[0]]
+    }
+
+    async getSiteModerationByGroupId(groupId) {
+        const results = await this.selectSiteModerations({
+            where: `site_moderation.group_id = $1`,
+            params: [ groupId ] 
+        })
+
+        if ( results.list.length <= 0 ) {
+            return null
+        }
+
+        return results.dictionary[results.list[0]]
+    }
+
+    async getSiteModerationByUserProfileId(userProfileId) {
+        const results = await this.selectSiteModerations({
+            where: `site_moderation.user_profile_id = $1`,
+            params: [ userProfileId ]
         })
 
         if ( results.list.length <= 0 ) {

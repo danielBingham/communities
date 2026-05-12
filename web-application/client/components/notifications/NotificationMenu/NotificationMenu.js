@@ -111,6 +111,8 @@ const NotificationMenu = function({ }) {
             // permission again.
             if ( "notificationPermission" in device && device.notificationPermission !== 'denied' && Notification.permission !== 'granted' ) {
                 return true 
+            } else if ( "notificationPermission" in device && device.notificationPermission === 'denied' ) {
+                return false
             }
 
             if ( Notification.permission !== 'granted' && Notification.permission !== 'denied' ) {

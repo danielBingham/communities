@@ -61,7 +61,7 @@ export const UserSlice = createSlice({
         setUserNull: (state, action) => {
             const id = action.payload
 
-            if ( id in state.dictionary ) {
+            if ( id in state.dictionary && state.dictionary[id] !== null ) {
                 const entity = state.dictionary[id]
                 state.byUsername[entity.username] = null
             }

@@ -94,6 +94,12 @@ const can = function(currentUser, action, entity, context) {
             throw new Error(`Invalid GroupPost Action: ${action}.`)
         }
     } else if ( entity === Entities.Site ) {
+
+        // Must be authenticated to moderate the site.
+        if ( currentUser === undefined || currentUser === null ) {
+            return false
+        }
+
         if ( action === Actions.moderate) {
             return currentUser.siteRole === 'moderator' || currentUser.siteRole === 'admin' || currentUser.siteRole === 'superadmin'
         } else if ( action === Actions.admin ) {

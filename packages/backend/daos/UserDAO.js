@@ -130,6 +130,13 @@ const SCHEMA = {
                 select: DAO.SELECT.REQUEST,
                 key: 'invitations'
             },
+            'site_moderation_id': {
+                insert: DAO.INSERT.ALLOW,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.ALWAYS,
+                key: 'siteModerationId',
+                needsFeature: 'feat-408-flag-profiles-and-groups'
+            },
             'privacy__view_friends': {
                 insert: DAO.INSERT.ALLOW,
                 update: DAO.UPDATE.ALLOW,

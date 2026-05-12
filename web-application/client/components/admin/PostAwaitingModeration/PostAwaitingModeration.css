@@ -1,0 +1,8 @@
+.post-awaiting-moderation {
+    margin: 10px auto;
+    max-width: 650px;
+}
+.post-awaiting-moderation__context {
+    text-align: center;
+    padding: 5px;
+}

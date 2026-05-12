@@ -23,11 +23,14 @@ const {
     PermissionService,
     NotificationService,
 
+    GroupDAO,
     PostDAO,
     PostCommentDAO,
     SiteModerationDAO, 
-    SiteModerationEventDAO
+    SiteModerationEventDAO,
+    UserDAO
 }  = require('@communities/backend')
+const { schema } = require('@communities/shared')
 const ControllerError = require('../../errors/ControllerError')
 
 module.exports = class SiteModerationController {
@@ -35,14 +38,18 @@ module.exports = class SiteModerationController {
     constructor(core) {
         this.core = core
 
+        this.groupDAO = new GroupDAO(core)
         this.postDAO = new PostDAO(core)
         this.postCommentDAO = new PostCommentDAO(core)
         this.siteModerationDAO = new SiteModerationDAO(core)
         this.siteModerationEventDAO = new SiteModerationEventDAO(core)
+        this.userDAO = new UserDAO(core)
 
         this.notificationService = new NotificationService(core)
         this.permissionService = new PermissionService(core)
         this.validationService = new ValidationService(core)
+
+        this.siteModerationSchema = new schema.SiteModerationSchema()
     }
 
     async getRelations(currentUser, results, requestedRelations) {
@@ -57,9 +64,21 @@ module.exports = class SiteModerationController {
             params: [ results.list ]
         })
 
+        const groupResults = await this.groupDAO.selectGroups({
+            where: `groups.site_moderation_id = ANY($1::uuid[])`,
+            params: [ results.list ]
+        })
+
+        const userResults = await this.userDAO.selectUsers({
+            where: `users.site_moderation_id = ANY($1::uuid[])`,
+            params: [ results.list ]
+        })
+
         return {
+            groups: groupResults.dictionary,
             posts: postResults.dictionary,
-            postComments: postCommentResults.dictionary
+            postComments: postCommentResults.dictionary,
+            users: userResults.dictionary
         } 
     }
 
@@ -129,13 +148,18 @@ module.exports = class SiteModerationController {
                 `You must must be authenticated to create a post.`)
         }
 
-        const moderation = request.body
+        const moderation = this.siteModerationSchema.clean(request.body)
 
-        const canModerateSite = await this.permissionService.can(currentUser, 'moderate', 'Site')
-        if ( moderation.status !== 'flagged' && ! canModerateSite ) {
+        if ( moderation.status !== 'flagged' ) {
             throw new ControllerError(403, 'not-authorized',
                 `User(${currentUser.id}) attempting to moderate site without permissions.`,
-                `You do not have permission to moderate Communities.`)
+                `Entities must be flagged before they can be moderated.`)
+        }
+
+        if ( 'userProfileId' in moderation && currentUser.id === moderation.userProfileId ) {
+            throw new ControllerError(400, 'invalid',
+                `User(${currentUser.id}) attempting to flag themselves.`,
+                `You cannot flag yourself.  If you'd like to remove your own profile, please delete it.`)
         }
 
         let existing = null
@@ -143,6 +167,10 @@ module.exports = class SiteModerationController {
             existing = await this.siteModerationDAO.getSiteModerationByPostId(moderation.postId)
         } else if ( moderation.postCommentId ) {
             existing = await this.siteModerationDAO.getSiteModerationByPostCommentId(moderation.postCommentId)
+        } else if ( moderation.groupId ) {
+            existing = await this.siteModerationDAO.getSiteModerationByGroupId(moderation.groupId)
+        } else if ( moderation.userProfileId ) {
+            existing = await this.siteModerationDAO.getSiteModerationByUserProfileId(moderation.userProfileId)
         } else {
             throw new ControllerError(400, 'invalid',
                 `User(${currentUser.id}) posted an invalid moderation, nothing being moderated.`,
@@ -194,6 +222,18 @@ module.exports = class SiteModerationController {
                 siteModerationId: entity.id
             }
             await this.postCommentDAO.updatePostComment(postCommentUpdate)
+        } else if ( entity.groupId ) {
+            const groupUpdate = {
+                id: entity.groupId,
+                siteModerationId: entity.id
+            }
+            await this.groupDAO.updateGroup(groupUpdate)
+        } else if ( entity.userProfileId ) {
+            const userProfileUpdate = {
+                id: entity.userProfileId,
+                siteModerationId: entity.id,
+            }
+            await this.userDAO.updateUser(userProfileUpdate)
         }
 
         const relations = await this.getRelations(currentUser, entityResults)
@@ -245,8 +285,15 @@ module.exports = class SiteModerationController {
                 `You must must be authenticated to edit a post.`)
         }
 
-        const siteModerationId = request.params.id
-        const siteModeration = request.body
+        const canModerate = await this.permissionService.can(currentUser, 'moderate', 'Site')
+        if ( ! canModerate ) {
+            throw new ControllerError(403, 'not-authorized',
+                `User(${currentUser.id}) attempting to PATCH a SiteModeration they don't have permission to edit.`,
+                `You don't have permission to edit that SiteModeration.`)
+        }
+
+        const siteModerationId = this.siteModerationSchema.properties.id.clean(request.params.id)
+        const siteModeration = this.siteModerationSchema.clean(request.body)
 
         if ( siteModeration.id !== siteModerationId ) {
             throw new ControllerError(400, 'invalid', 
@@ -259,13 +306,6 @@ module.exports = class SiteModerationController {
             throw new ControllerError(404, 'not-found',
                 `User(${currentUser.id}) attempting to PATCH a SiteModeration that doesn't exist.`,
                 `Either that SiteModeration doesn't exist or you don't have permission to see it.`)
-        }
-
-        const canModerate = await this.permissionService.can(currentUser, 'moderate', 'Site', {})
-        if ( ! canModerate ) {
-            throw new ControllerError(403, 'not-authorized',
-                `User(${currentUser.id}) attempting to PATCH a SiteModeration they don't have permission to edit.`,
-                `You don't have permission to edit that SiteModeration.`)
         }
 
         const validationErrors = await this.validationService.validateSiteModeration(currentUser, siteModeration, existing)
@@ -309,6 +349,12 @@ module.exports = class SiteModerationController {
                     }
                 )
             }
+
+            // TODO TECHDEBT In the future, we want auditable moderation.  For
+            // now, we're just removing groups and profiles that violate the
+            // terms of service. In theory we should notify users or group
+            // admins of the removed profiles here, but the current moderation
+            // system really needs an overhaul for that to make sense. 
         }
 
         // Insert the event to track the moderation history.

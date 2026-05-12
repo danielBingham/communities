@@ -1,0 +1,13 @@
+.group-awaiting-moderation {
+    margin: 10px auto;
+    max-width: 650px;
+}
+.group-awaiting-moderation__profile {
+    padding: 10px;
+    border: thin solid var(--card-border-color);
+    border-radius: 7px;
+}
+.group-awaiting-moderation__context {
+    text-align: center;
+    padding: 5px;
+}

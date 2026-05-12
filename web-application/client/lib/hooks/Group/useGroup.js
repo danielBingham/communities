@@ -39,6 +39,10 @@ export const useGroup = function(groupId, options) {
 
     const [request, makeRequest ] = useRequest()
 
+    const reload = function() {
+        makeRequest(getGroup(groupId))
+    }
+
     useEffect(() => {
         if ( groupId  && group === undefined && request?.state !== 'pending'
             && options?.noQuery !== true && options?.skip !== true
@@ -47,5 +51,5 @@ export const useGroup = function(groupId, options) {
         }
     }, [ groupId, group, request ])
 
-    return [group, request]
+    return [group, request, reload]
 }

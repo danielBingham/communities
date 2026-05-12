@@ -325,14 +325,32 @@ module.exports = class PostController {
                 )`
         }
 
-        // ====================================================================
-        // END Post Visibility and Permissions
-        // ====================================================================
-
+        // Handle moderated posts.
         const and = query.params.length > 0 ? ' AND ' : ''
         query.params.push(currentUser.id)
         query.where += `${and} (group_moderation.status IS NULL OR (group_moderation.status != 'rejected' AND group_moderation.status != 'pending') OR posts.user_id = $${query.params.length}) 
             AND (site_moderation.status IS NULL OR site_moderation.status != 'rejected' OR posts.user_id = $${query.params.length})`
+
+        if ( this.core.features.has('feat-408-flag-profiles-and-groups') ) {
+            // This won't allow users with rejected profiles or posts in
+            // rejected groups to see their own rejected posts.  This is fine
+            // for now, because for the time being we're mostly going to delete
+            // rejected groups and posts.  But it's worth noting.  In the
+            // future, we need to do a complete moderation overhaul.
+            let and = query.params.length > 0 ? ' AND ' : ''
+            query.params.push('rejected')
+            query.where += `${and} NOT EXISTS (
+                SELECT 1 FROM site_moderation 
+                    WHERE site_moderation.status = $${query.params.length} AND ( 
+                        ( site_moderation.group_id IS NOT NULL AND site_moderation.group_id = posts.group_id)
+                        OR site_moderation.user_profile_id = posts.user_id
+                    )
+            )`
+        }
+        
+        // ====================================================================
+        // END Post Visibility and Permissions
+        // ====================================================================
 
 
         if ('userId' in request.query) {
@@ -668,6 +686,31 @@ module.exports = class PostController {
             throw new ControllerError(404, 'not-found',
                 `User(${currentUser.id}) attempting to access Post(${postId}) that doesn't exist.`,
                 `That post either doesn't exist or you don't have permission to access it.`)
+        }
+
+        const canModerateSite = await this.permissionService.can(currentUser, 'moderate', 'Site')
+        // Users can always view their own posts, even when they've been
+        // removed by moderators.  Moderators can always view moderated posts.
+        if ( post.userId !== currentUser.id && canModerateSite !== true ) {
+            const results = await this.core.database.query(`
+                SELECT id, status FROM site_moderation WHERE
+                    site_moderation.status = 'rejected'
+                    AND (
+                        (site_moderation.post_id = $1 AND site_moderation.post_comment_id IS NULL)
+                        OR site_moderation.user_profile_id = $2
+                        OR ( site_moderation.group_id IS NOT NULL AND site_moderation.group_id = $3)
+                    )
+            `, [ post.id, post.userId, post.groupId ])
+
+            if ( results.rows.length > 0 ) {
+                for(const row of results.rows ) {
+                    if ( row.status === 'rejected' ) {
+                        throw new ControllerError(403, 'not-authorized',
+                            `User(${currentUser.id}) attempting to access rejected Post(${post.id}).`,
+                            `That post has been removed by site moderators.`)
+                    }
+                }
+            }
         }
 
         const canViewPost = await this.permissionService.can(currentUser, 'view', 'Post', { post: post })
