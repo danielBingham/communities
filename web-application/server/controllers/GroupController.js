@@ -154,7 +154,8 @@ module.exports = class GroupController {
             // flagged groups rather than rejecting.  We'll write the auditing
             // code in the future.
             query.params.push('rejected')
-            query.where += ` ${ ! canModerateSite ? `AND` : '' } groups.site_moderation_id NOT IN ( SELECT site_moderation.id FROM site_moderation WHERE site_moderation.group_id = groups.id AND site_moderation.status = $${query.params.length} )`
+            const and = query.params.length > 1 ? ' AND ' : ''
+            query.where += `${and} groups.site_moderation_id NOT IN ( SELECT site_moderation.id FROM site_moderation WHERE site_moderation.group_id = groups.id AND site_moderation.status = $${query.params.length} )`
         }
 
         // Get only the groups the currentUser is a member of with 'memberStatus'

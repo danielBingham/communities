@@ -694,7 +694,7 @@ module.exports = class UserController extends BaseController{
                     `Either that user doesn't exist or you don't have permission to see it.`)
             }
 
-            if ( moderation.status === 'rejected' && canModerateSite !== true ) {
+            if ( moderation.status === 'rejected' && currentUser.id !== userId && canModerateSite !== true ) {
                 throw new ControllerError(403, 'not-authorized',
                     `User(${currentUser.id}) attempting to access rejected User(${user.id}).`,
                     `That user has been removed by site moderators.`)
