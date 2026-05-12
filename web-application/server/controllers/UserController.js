@@ -663,8 +663,10 @@ module.exports = class UserController extends BaseController{
         const currentUser = request.session.user
         const userId = request.params.id
 
+        // TODO TECHDEBT Why do we allow unauthenticated access here?
+
         const canModerateSite = await this.permissionService.can(currentUser, 'moderate', 'Site')
-        if ( currentUser && currentUser.id !== userId && canModerateSite !== true) {
+        if ( currentUser && currentUser?.id !== userId && canModerateSite !== true) {
             const relationship = await this.userRelationshipsDAO.getUserRelationshipByUserAndRelation(currentUser.id, userId)
             if ( relationship?.status === 'blocked' && currentUser.id === relationship?.relationId) {
                 throw new ControllerError(404, 'not-found', 

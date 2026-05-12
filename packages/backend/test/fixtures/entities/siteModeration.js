@@ -54,7 +54,7 @@ const siteModeration = {
         reason: null,
         postId: null,
         postCommentId: null,
-        groupId: 'e12e046b-d7a3-4a53-aa5a-d057482b72a8',
+        groupId: 'd4bcc631-e393-4620-a2b2-bbad5d0cfd33',
         userProfileId: null,
         createdDate: 'TIMESTAMP',
         updatedDate: 'TIMESTAMP'
@@ -68,7 +68,7 @@ const siteModeration = {
         postId: null,
         postCommentId: null,
         groupId: null,
-        userProfileId: 'e12e046b-d7a3-4a53-aa5a-d057482b72a8',
+        userProfileId: '899c02d4-b422-413c-8b65-c6e66090253c',
         createdDate: 'TIMESTAMP',
         updatedDate: 'TIMESTAMP'
     },

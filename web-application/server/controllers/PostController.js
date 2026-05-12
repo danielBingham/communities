@@ -332,6 +332,11 @@ module.exports = class PostController {
             AND (site_moderation.status IS NULL OR site_moderation.status != 'rejected' OR posts.user_id = $${query.params.length})`
 
         if ( this.core.features.has('feat-408-flag-profiles-and-groups') ) {
+            // This won't allow users with rejected profiles or posts in
+            // rejected groups to see their own rejected posts.  This is fine
+            // for now, because for the time being we're mostly going to delete
+            // rejected groups and posts.  But it's worth noting.  In the
+            // future, we need to do a complete moderation overhaul.
             let and = query.params.length > 0 ? ' AND ' : ''
             query.params.push('rejected')
             query.where += `${and} NOT EXISTS (
