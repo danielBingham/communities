@@ -334,11 +334,13 @@ module.exports = class PostController {
         if ( this.core.features.has('feat-408-flag-profiles-and-groups') ) {
             let and = query.params.length > 0 ? ' AND ' : ''
             query.params.push('rejected')
-            query.where += `${and} ( posts.group_id IS NULL OR posts.group_id NOT IN ( SELECT site_moderation.group_id FROM site_moderation WHERE site_moderation.group_id IS NOT NULL AND site_moderation.status = $${query.params.length} ) )`
-
-            and = query.params.length > 0 ? ' AND ' : ''
-            query.params.push('rejected')
-            query.where += `${and} ( posts.user_id NOT IN ( SELECT site_moderation.user_profile_id FROM site_moderation WHERE site_moderation.user_profile_id IS NOT NULL AND site_moderation.status = $${query.params.length} ) )`
+            query.where += `${and} NOT EXISTS (
+                SELECT 1 FROM site_moderation 
+                    WHERE site_moderation.status = $${query.params.length} AND ( 
+                        site_moderation.group_id = posts.group_id
+                        OR site_moderation.user_profile_id = posts.user_id
+                    )
+            )`
         }
         
         // ====================================================================
