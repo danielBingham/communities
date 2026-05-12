@@ -57,6 +57,13 @@ const FlagUserAction = function({ userId }) {
         makeRequest(postSiteModerations({ userId: currentUser.id, status: 'flagged', userProfileId: userId }))
     }
 
+    const cancelFlag = function() {
+        setAreYouSure(false)
+        if ( isMobile ) {
+            closeMenu()
+        }
+    }
+
     useEffect(() => {
         if ( request && request.state === 'fulfilled' ) {
             setAreYouSure(false)
@@ -133,7 +140,7 @@ const FlagUserAction = function({ userId }) {
                 isVisible={areYouSure} 
                 isPending={request && request.state === 'pending'} 
                 execute={flagForSite} 
-                cancel={() => setAreYouSure(false)}
+                cancel={() => cancelFlag()}
             > 
                 <p><strong>Are you sure you want to flag this user for Site moderators?</strong></p>
                 <div className="flag-user__explanation">
