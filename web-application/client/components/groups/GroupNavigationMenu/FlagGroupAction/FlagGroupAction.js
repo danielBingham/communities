@@ -59,6 +59,13 @@ const FlagGroupAction = function({ groupId }) {
         makeRequest(postSiteModerations({ userId: currentUser.id, status: 'flagged', groupId: groupId }))
     }
 
+    const cancelFlag = function() {
+        setAreYouSure(false)
+        if ( isMobile ) {
+            closeMenu()
+        }
+    }
+
     useEffect(() => {
         if ( request && request.state === 'fulfilled' ) {
             setAreYouSure(false)
@@ -131,7 +138,7 @@ const FlagGroupAction = function({ groupId }) {
                 isVisible={areYouSure} 
                 isPending={request && request.state === 'pending'} 
                 execute={flagForSite} 
-                cancel={() => setAreYouSure(false)}
+                cancel={() => cancelFlag() }
             > 
                 <p><strong>Are you sure you want to flag this group for Site moderators?</strong></p>
                 <div className="flag-group__explanation">

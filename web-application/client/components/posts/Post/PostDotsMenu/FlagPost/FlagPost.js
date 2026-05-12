@@ -136,7 +136,7 @@ const FlagPost = function({ postId } ) {
                 isVisible={areYouSureSite} 
                 isPending={request && request.state === 'pending'} 
                 execute={flagForSite} 
-                cancel={() => setAreYouSureSite(false)}
+                cancel={() => {  closeMenu(); setAreYouSureSite(false) }}
             > 
                 <p><strong>Are you sure you want to flag this post for Site moderators?</strong></p>
                 <div className="flag-post__explanation">
