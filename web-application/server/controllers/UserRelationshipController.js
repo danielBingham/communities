@@ -252,6 +252,15 @@ module.exports = class UserRelationshipController {
         // If we're blocking a user, then delete the existing relationship.
         // We're replacing it with a block relationship.
         if ( status === 'blocked' && existing !== null ) {
+            // We need to remove the mutuals here, because we're blocking the
+            // user but then setting "existing" to null.
+            if ( existing.status === 'confirmed' ) {
+                await this.core.queues['remove-mutuals-for-relationship'].add({ 
+                    session: { user: currentUser }, 
+                    relationship: existing 
+                }, { attempts: 2 })
+            }
+
             await this.userRelationshipDAO.deleteUserRelationship(existing)
             existing = null
         }

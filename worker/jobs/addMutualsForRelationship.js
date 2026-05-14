@@ -22,19 +22,25 @@ const { MutualsService } = require('@communities/backend')
 
 const getAddMutualsForRelationship = function(core) {
     return async function(job, done) {
-        core.logger.id = `Add Mutuals for Relationship: ${job.id}`
-
-        const currentUser = job.data.session.user
-        const relationship = job.data.relationship
-
-        core.logger.info(`Beginning job 'add-mutuals-for-relationship' for User(${currentUser.id}) and Relationship(${relationship.id}).`)
         try {
+            core.logger.id = `Add Mutuals for Relationship: ${job.id}`
+
+            const currentUser = job.data.session.user
+            const relationship = job.data.relationship
+
+            core.logger.info(`Beginning job 'add-mutuals-for-relationship' for User(${currentUser.id}) and Relationship(${relationship.id}).`)
+
             const mutualsService = new MutualsService(core)
             await mutualsService.addMutualsForRelationship(relationship)
+
+            core.logger.info(`Finishing job 'add-mutuals-for-relationship' for User(${currentUser.id}) and Relationship(${relationship.id}).`)
+            core.logger.id = 'core'
+            done(null)
         } catch (error) {
             core.logger.error(error)
+            core.logger.id = 'core'
+            done(error)
         }
-        core.logger.info(`Finishing job 'add-mutuals-for-relationship' for User(${currentUser.id}) and Relationship(${relationship.id}).`)
     }
 }
 

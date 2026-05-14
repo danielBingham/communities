@@ -34,54 +34,6 @@ module.exports = class MutualsService {
         this.userRelationshipService = new UserRelationshipService(core)
     }
 
-    async getFriendMap(currentUser, list) {
-        // Build a dictionary of users in the target list who are friends of the current user.
-        const isFriend = {}
-        const targetRelationships = await this.userRelationshipDAO.selectUserRelationships({
-            where: `
-                user_relationships.status = 'confirmed' AND (
-                    ( user_relationships.user_id = $1 AND user_relationships.friend_id = ANY($2::uuid[]))
-                    OR ( user_relationships.friend_id = $1 AND user_relationships.user_id = ANY($2::uuid[]))
-                )
-            `,
-            params: [ currentUser.id, list ]})
-        for(const id of targetRelationships.list) {
-            const relationship = targetRelationships.dictionary[id]
-            if ( relationship.userId === currentUser.id ) {
-                isFriend[relationship.relationId] = true
-            } else {
-                isFriend[relationship.userId] = true
-            }
-        }
-
-        return isFriend
-    }
-
-    canCurrentUserViewMutualFriends(user, isFriend) {
-        // If the target has "viewMutualFriends" set to 'me', then remove
-        // them from the list, because `currentUser` cannot view their
-        // mutual friends.
-        if ( user.privacyViewMutualFriends === 'me' ) {
-            return false 
-        }
-
-        // If the target has "viewMutualFriends" set to 'friends', and `currentUser` does not
-        // have a friend relationship with them, then remove them from the list.
-        if ( user.privacyViewMutualFriends === 'friends' && isFriend === false) { 
-            return false
-        }
-
-        // `friend-of-friend` and `public` visibility are functionally the same
-        // for the purposes of this permission check.
-        //
-        // If they have mutual friends with visibility set to
-        // 'friends-of-friends', then we don't need to filter those friends. If
-        // they don't have mutual friends, then there's nothing to view, the
-        // query we're filtering will return empty.
-
-        return true
-    }
-
     async getMutualsForCurrentUserAndList(currentUser, list) {
         const results = await this.core.database.query(`
             SELECT 
@@ -91,8 +43,8 @@ module.exports = class MutualsService {
                 LEFT OUTER JOIN users mutual ON mutual_relationships.mutual_id = mutual.id
                 LEFT OUTER JOIN users target ON mutual_relationships.target_id = target.id
                 LEFT OUTER JOIN user_relationships ON 
-                    (mutual_relationships.current_id = user_relationships.user_id AND mutual_relationships.target_id = user_relationships.friend_id)
-                    OR (mutual_relationships.current_id = user_relationships.friend_id AND mutual_relationships.target_id = user_relationships.user_id)
+                    (mutual_relationships.current_id = user_relationships.user_id AND mutual_relationships.target_id = user_relationships.friend_id and user_relationships.status = 'confirmed)
+                    OR (mutual_relationships.current_id = user_relationships.friend_id AND mutual_relationships.target_id = user_relationships.user_id and user_relationships.status = 'confirmed')
             WHERE 
                 mutual_relationships.current_id = $1 
                 AND mutual_relationships.target_id = ANY($2::uuid[])
@@ -133,41 +85,69 @@ module.exports = class MutualsService {
     }
 
     async addMutualsForRelationship(userRelationship) {
-        const userFriendIds = await this.userRelationshipService.getFriendIdsForUser(userRelationship.userId)
-        const relationFriendIds = await this.userRelationshipService.getFriendIdsForUser(userRelationship.relationId)
+        // `userRelationship` is already confirmed and we don't necessarily
+        // want a row pointing back to the relationship itself.
+        const userFriendIds = await this.userRelationshipService.getFriendIdsForUser(userRelationship.userId).filter((id) => id !== userRelationship.relationId)
+        const relationFriendIds = await this.userRelationshipService.getFriendIdsForUser(userRelationship.relationId).filter((id) => id !== userRelationship.userId)
 
+        let query = ''
+        let params = []
+
+        //
         // All of user's friends gain user as a mutual with relation.
+        //
+        query = `INSERT INTO mutual_relationships (current_id, mutual_id, target_id ) VALUES `
+        params = []
         for(const friendId of userFriendIds) {
-            await this.core.database.query(`
-                INSERT INTO mutual_relationships (current_id, mutual_id, target_id )
-                    VALUES ($1, $2, $3) ON CONFLICT DO NOTHING
-            `, [ friendId, userRelationship.userId, userRelationship.relationId ])
+            query += `($${params.length+1}, $${params.length+2}, $${params.length+3}),`
+            params.push(friendId, userRelationship.userId, userRelationship.relationId)
         }
+        // Strip off the last comma.
+        query.substring(0,query.length-1)
+        query += ` ON CONFLICT DO NOTHING`
+        await this.core.database.query(query, params)
 
+        //
         // All of relation's friends gain relation as a mutual with user.
+        //
+        query = `INSERT INTO mutual_relationships (current_id, mutual_id, target_id ) VALUES `
+        params = []
         for(const friendId of relationFriendIds) {
-            await this.core.database.query(`
-                INSERT INTO mutual_relationships (current_id, mutual_id, target_id )
-                    VALUES ($1, $2, $3) ON CONFLICT DO NOTHING
-            `, [ friendId, userRelationship.relationId, userRelationship.userId])
+            query += `($${params.length+1}, $${params.length+2}, $${params.length+3}),`
+            params.push(friendId, userRelationship.relationId, userRelationship.userId)
         }
+        // Strip off the last comma.
+        query.substring(0,query.length-1)
+        query += ` ON CONFLICT DO NOTHING`
+        await this.core.database.query(query, params)
 
+        //
         // Relation gains user as a mutual with all of user's friends.
+        //
+        query = `INSERT INTO mutual_relationships (current_id, mutual_id, target_id ) VALUES `
+        params = []
         for(const friendId of userFriendIds) {
-            await this.core.database.query(`
-                INSERT INTO mutual_relationships (current_id, mutual_id, target_id )
-                    VALUES ($1, $2, $3) ON CONFLICT DO NOTHING
-            `, [ userRelationship.relationId, userRelationship.userId, friendId ])
-
+            query += `($${params.length+1}, $${params.length+2}, $${params.length+3}),`
+            params.push(userRelationship.relationId, userRelationship.userId, friendId)
         }
+        // Strip off the last comma.
+        query.substring(0,query.length-1)
+        query += ` ON CONFLICT DO NOTHING`
+        await this.core.database.query(query, params)
 
+        //
         // User gains relation as a mutual with all of relation's friends.
+        //
+        query = `INSERT INTO mutual_relationships (current_id, mutual_id, target_id ) VALUES `
+        params = []
         for(const friendId of relationFriendIds) {
-            await this.core.database.query(`
-                INSERT INTO mutual_relationships (current_id, mutual_id, target_id )
-                    VALUES ($1, $2, $3) ON CONFLICT DO NOTHING
-            `, [ userRelationship.userId, userRelationship.relationId, friendId ])
+            query += `($${params.length+1}, $${params.length+2}, $${params.length+3}),`
+            params.push(userRelationship.userId, userRelationship.relationId, friendId)
         }
+        // Strip off the last comma.
+        query.substring(0,query.length-1)
+        query += ` ON CONFLICT DO NOTHING`
+        await this.core.database.query(query, params)
     }
 
     async removeMutualsForRelationship(userRelationship) {

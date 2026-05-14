@@ -21,11 +21,10 @@ const { Logger, NotificationWorker } = require('@communities/backend')
 
 const getSendNotificationsJob = function(core) {
     return async function(job, done) {
-        const logger = new Logger(core.logger.level, `send-notifications: ${job.id}`)
-        logger.info(`Beginning job 'send-notifications' of '${job.data.type}' for User(${job.data.currentUser.id}).`)
-        logger.verbose(`Data: `, job.data)
-
         try {
+            const logger = new Logger(core.logger.level, `send-notifications: ${job.id}`)
+            logger.info(`Beginning job 'send-notifications' of '${job.data.type}' for User(${job.data.currentUser.id}).`)
+
             job.progress({ step: 'initializing', stepDescription: `Initializing...`, progress: 0 })
 
             const notificationWorker = new NotificationWorker(core, logger)
@@ -34,8 +33,7 @@ const getSendNotificationsJob = function(core) {
 
             job.progress({ step: 'complete', stepDescription: `Complete!`, progress: 100 })
 
-            core.logger.info(`Finished job 'send-notifications' of '${job.data.type}' for user ${job.data.currentUser.id}.`)
-            core.logger.id = 'core' 
+            logger.info(`Finished job 'send-notifications' of '${job.data.type}' for user ${job.data.currentUser.id}.`)
             done(null)
         } catch (error) {
             core.logger.error(error)

@@ -118,7 +118,7 @@ CREATE TABLE mutual_relationships (
 );
 CREATE INDEX mutual_relationships__current_id ON mutual_relationships (current_id);
 CREATE INDEX mutual_relationships__target_id ON mutual_relationships (target_id);
-CREATE INDEX mutual_relationships__mutual_id ON mutual_relationships (mutual_id):
+CREATE INDEX mutual_relationships__mutual_id ON mutual_relationships (mutual_id);
 
 /******************************************************************************
  * Notifications 
