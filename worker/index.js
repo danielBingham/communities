@@ -30,6 +30,9 @@ const getResizeImageJob = require('./jobs/resizeImage')
 const getSendNotificationsJob = require('./jobs/sendNotifications')
 const getProcessVideoJob = require('./jobs/processVideo')
 
+const getAddMutualsForRelationship = require('./jobs/addMutualsForRelationship')
+const getRemoveMutualsForRelationship = require('./jobs/removeMutualsForRelationship')
+
 const configDefinition = require('./config')
 
 let queue = 'general'
@@ -57,16 +60,30 @@ async function initialize() {
     const features = await featureService.getEnabledFeatures()
     core.features = new FeatureFlags(features)
 
+    // You can't control parallelism by the job in a single queue.  The only
+    // way to control parallelism is by creating a queue per job type. The
+    // 'process-video' job will use all of the resources on its box, so each
+    // job needs to be isolated to its own vm.  To do this, we have to make it
+    // its own queue, and then use placement constraints to ensure that
+    // particular worker gets a whole node to itself.
+    //
+    // NOTE: When adding a new job, don't forget to create the queue in `backend/core.js`
     if ( queue === 'resize-image' ) {
         core.queues['resize-image'].process(getResizeImageJob(core))
     } else if ( queue === 'process-video' ) {
         core.queues['process-video'].process(getProcessVideoJob(core))
     } else if ( queue === 'send-notifications' ) {
         core.queues['send-notifications'].process(100, getSendNotificationsJob(core))
+    } else if ( queue === 'add-mutuals-for-relationship' ) {
+        core.queues['add-mutuals-for-relationship'].process(10, getAddMutualsForRelationship(core))
+    } else if ( queue === 'remove-mutuals-for-relationship' ) {
+        core.queues['remove-mutuals-for-relationship'].process(10, getRemoveMutualsForRelationship(core))
     } else {
         core.queues['send-notifications'].process(100, getSendNotificationsJob(core))
         core.queues['process-video'].process(getProcessVideoJob(core))
         core.queues['resize-image'].process(getResizeImageJob(core))
+        core.queues['add-mutuals-for-relationship'].process(10, getAddMutualsForRelationship(core))
+        core.queues['remove-mutuals-for-relationship'].process(10, getRemoveMutualsForRelationship(core))
     }
 
     core.logger.info(`Initialized and listening to queue '${queue}'...`)

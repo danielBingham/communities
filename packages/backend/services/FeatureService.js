@@ -30,6 +30,7 @@ const Feat408FlagUsersAndGroupsMigration = require('../migrations/Feat408FlagUse
 const Fix486UniqueConstraintMigration = require('../migrations/Fix486UniqueConstraintMigration')
 const Feat484FindActiveGroupsMigration = require('../migrations/Feat484FindActiveGroupsMigration')
 const Feat491MutualFriendsMigration = require('../migrations/Feat491MutualFriendsMigration')
+const Fix495SlowFriendsListMigration = require('../migrations/Fix495SlowFriendsListMigration')
 
 const ServiceError = require('../errors/ServiceError')
 const MigrationError = require('../errors/MigrationError')
@@ -91,6 +92,9 @@ module.exports = class FeatureService {
             },
             'feat-491-mutual-friends': {
                 migration: new Feat491MutualFriendsMigration(core)
+            },
+            'feat-495-slow-friends-list': {
+                migration: new Fix495SlowFriendsListMigration(core)
             },
             'video-uploads': {}
         }

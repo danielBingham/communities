@@ -296,6 +296,11 @@ module.exports = class UserRelationshipController {
                     `We confirmed the relationship between you and ${relationId}, but it wasn't there when we queried it. Please report bug.`)
             }
 
+            await this.core.queues['add-mutuals-for-relationship'].add({ 
+                session: { user: currentUser }, 
+                relationship: entity
+            }, { attempts: 2 })
+
             await this.notificationService.sendNotifications(
                 currentUser, 
                 'UserRelationship:update',
@@ -478,6 +483,11 @@ module.exports = class UserRelationshipController {
                 `We created the relationship between you and ${relationId}, but it wasn't there when we queried it. Please report bug.`)
         }
 
+        await this.core.queues['add-mutuals-for-relationship'].add({ 
+            session: { user: currentUser }, 
+            relationship: entity
+        }, { attempts: 2 })
+
         await this.notificationService.sendNotifications(
             currentUser, 
             'UserRelationship:update',
@@ -529,6 +539,11 @@ module.exports = class UserRelationshipController {
         const existing = existingResults.dictionary[existingResults.list[0]]
 
         await this.userRelationshipDAO.deleteUserRelationship(existing)
+
+        await this.core.queues['remove-mutuals-for-relationship'].add({ 
+            session: { user: currentUser }, 
+            relationship: existing 
+        }, { attempts: 2 })
 
         const relations = await this.getRelations(currentUser, userId, existingResults)
 

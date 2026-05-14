@@ -134,6 +134,8 @@ module.exports = class Core {
         this.queues['process-video'] = new BullQueue('process-video', { redis: this.config.redis })
         this.queues['resize-image'] = new BullQueue('resize-image', { redis: this.config.redis })
         this.queues['send-notifications'] = new BullQueue('send-notifications', { redis: this.config.redis })
+        this.queues['add-mutuals-for-relationship'] = new BullQueue('add-mutuals-for-relationship', { redis: this.config.redis })
+        this.queues['remove-mutuals-for-relationship'] = new BullQueue('remove-mutuals-for-relationship', { redis: this.config.redis })
 
         this.postmarkClient = new Postmark.ServerClient(this.config.postmark.api_token)
     }
