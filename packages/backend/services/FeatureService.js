@@ -93,7 +93,7 @@ module.exports = class FeatureService {
             'feat-491-mutual-friends': {
                 migration: new Feat491MutualFriendsMigration(core)
             },
-            'feat-495-slow-friends-list': {
+            'fix-495-slow-friends-list': {
                 migration: new Fix495SlowFriendsListMigration(core)
             },
             'video-uploads': {}

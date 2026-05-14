@@ -43,7 +43,7 @@ module.exports = class MutualsService {
                 LEFT OUTER JOIN users mutual ON mutual_relationships.mutual_id = mutual.id
                 LEFT OUTER JOIN users target ON mutual_relationships.target_id = target.id
                 LEFT OUTER JOIN user_relationships ON 
-                    (mutual_relationships.current_id = user_relationships.user_id AND mutual_relationships.target_id = user_relationships.friend_id and user_relationships.status = 'confirmed)
+                    (mutual_relationships.current_id = user_relationships.user_id AND mutual_relationships.target_id = user_relationships.friend_id and user_relationships.status = 'confirmed')
                     OR (mutual_relationships.current_id = user_relationships.friend_id AND mutual_relationships.target_id = user_relationships.user_id and user_relationships.status = 'confirmed')
             WHERE 
                 mutual_relationships.current_id = $1 
@@ -87,8 +87,8 @@ module.exports = class MutualsService {
     async addMutualsForRelationship(userRelationship) {
         // `userRelationship` is already confirmed and we don't necessarily
         // want a row pointing back to the relationship itself.
-        const userFriendIds = await this.userRelationshipService.getFriendIdsForUser(userRelationship.userId).filter((id) => id !== userRelationship.relationId)
-        const relationFriendIds = await this.userRelationshipService.getFriendIdsForUser(userRelationship.relationId).filter((id) => id !== userRelationship.userId)
+        const userFriendIds = (await this.userRelationshipService.getFriendIdsForUser(userRelationship.userId)).filter((id) => id !== userRelationship.relationId)
+        const relationFriendIds = (await this.userRelationshipService.getFriendIdsForUser(userRelationship.relationId)).filter((id) => id !== userRelationship.userId)
 
         let query = ''
         let params = []
@@ -96,58 +96,66 @@ module.exports = class MutualsService {
         //
         // All of user's friends gain user as a mutual with relation.
         //
-        query = `INSERT INTO mutual_relationships (current_id, mutual_id, target_id ) VALUES `
-        params = []
-        for(const friendId of userFriendIds) {
-            query += `($${params.length+1}, $${params.length+2}, $${params.length+3}),`
-            params.push(friendId, userRelationship.userId, userRelationship.relationId)
+        if ( userFriendIds.length > 0 ) {
+            query = `INSERT INTO mutual_relationships (current_id, mutual_id, target_id ) VALUES `
+            params = []
+            for(const friendId of userFriendIds) {
+                query += `($${params.length+1}, $${params.length+2}, $${params.length+3}),`
+                params.push(friendId, userRelationship.userId, userRelationship.relationId)
+            }
+            // Strip off the last comma.
+            query = query.substring(0,query.length-1)
+            query += ` ON CONFLICT DO NOTHING`
+            await this.core.database.query(query, params)
         }
-        // Strip off the last comma.
-        query.substring(0,query.length-1)
-        query += ` ON CONFLICT DO NOTHING`
-        await this.core.database.query(query, params)
 
         //
         // All of relation's friends gain relation as a mutual with user.
         //
-        query = `INSERT INTO mutual_relationships (current_id, mutual_id, target_id ) VALUES `
-        params = []
-        for(const friendId of relationFriendIds) {
-            query += `($${params.length+1}, $${params.length+2}, $${params.length+3}),`
-            params.push(friendId, userRelationship.relationId, userRelationship.userId)
+        if ( relationFriendIds.length > 0 ) {
+            query = `INSERT INTO mutual_relationships (current_id, mutual_id, target_id ) VALUES `
+            params = []
+            for(const friendId of relationFriendIds) {
+                query += `($${params.length+1}, $${params.length+2}, $${params.length+3}),`
+                params.push(friendId, userRelationship.relationId, userRelationship.userId)
+            }
+            // Strip off the last comma.
+            query = query.substring(0,query.length-1)
+            query += ` ON CONFLICT DO NOTHING`
+            await this.core.database.query(query, params)
         }
-        // Strip off the last comma.
-        query.substring(0,query.length-1)
-        query += ` ON CONFLICT DO NOTHING`
-        await this.core.database.query(query, params)
 
         //
         // Relation gains user as a mutual with all of user's friends.
         //
-        query = `INSERT INTO mutual_relationships (current_id, mutual_id, target_id ) VALUES `
-        params = []
-        for(const friendId of userFriendIds) {
-            query += `($${params.length+1}, $${params.length+2}, $${params.length+3}),`
-            params.push(userRelationship.relationId, userRelationship.userId, friendId)
+        if ( userFriendIds.length > 0 ) {
+            query = `INSERT INTO mutual_relationships (current_id, mutual_id, target_id ) VALUES `
+            params = []
+            for(const friendId of userFriendIds) {
+                query += `($${params.length+1}, $${params.length+2}, $${params.length+3}),`
+                params.push(userRelationship.relationId, userRelationship.userId, friendId)
+            }
+            // Strip off the last comma.
+            query = query.substring(0,query.length-1)
+            query += ` ON CONFLICT DO NOTHING`
+            await this.core.database.query(query, params)
         }
-        // Strip off the last comma.
-        query.substring(0,query.length-1)
-        query += ` ON CONFLICT DO NOTHING`
-        await this.core.database.query(query, params)
 
         //
         // User gains relation as a mutual with all of relation's friends.
         //
-        query = `INSERT INTO mutual_relationships (current_id, mutual_id, target_id ) VALUES `
-        params = []
-        for(const friendId of relationFriendIds) {
-            query += `($${params.length+1}, $${params.length+2}, $${params.length+3}),`
-            params.push(userRelationship.userId, userRelationship.relationId, friendId)
+        if ( relationFriendIds.length > 0 ) {
+            query = `INSERT INTO mutual_relationships (current_id, mutual_id, target_id ) VALUES `
+            params = []
+            for(const friendId of relationFriendIds) {
+                query += `($${params.length+1}, $${params.length+2}, $${params.length+3}),`
+                params.push(userRelationship.userId, userRelationship.relationId, friendId)
+            }
+            // Strip off the last comma.
+            query = query.substring(0,query.length-1)
+            query += ` ON CONFLICT DO NOTHING`
+            await this.core.database.query(query, params)
         }
-        // Strip off the last comma.
-        query.substring(0,query.length-1)
-        query += ` ON CONFLICT DO NOTHING`
-        await this.core.database.query(query, params)
     }
 
     async removeMutualsForRelationship(userRelationship) {
