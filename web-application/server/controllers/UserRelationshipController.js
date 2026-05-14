@@ -296,10 +296,17 @@ module.exports = class UserRelationshipController {
                     `We confirmed the relationship between you and ${relationId}, but it wasn't there when we queried it. Please report bug.`)
             }
 
-            await this.core.queues['add-mutuals-for-relationship'].add({ 
-                session: { user: currentUser }, 
-                relationship: entity
-            }, { attempts: 2 })
+            if ( existing.status !== 'confirmed' && entity.status === 'confirmed' ) {
+                await this.core.queues['add-mutuals-for-relationship'].add({ 
+                    session: { user: currentUser }, 
+                    relationship: entity
+                }, { attempts: 2 })
+            } else if ( existing.status === 'confirmed' && entity.status !== 'confirmed' ) {
+                await this.core.queues['remove-mutuals-for-relationship'].add({ 
+                    session: { user: currentUser }, 
+                    relationship: entity 
+                }, { attempts: 2 })
+            }
 
             await this.notificationService.sendNotifications(
                 currentUser, 
@@ -351,7 +358,7 @@ module.exports = class UserRelationshipController {
                     `We created the relationship between you and ${relationId}, but it wasn't there when we queried it. Please report bug.`)
             }
           
-            if ( userRelationship.status !== 'blocked' ) {
+            if ( entity.status !== 'blocked' ) {
                 await this.notificationService.sendNotifications(
                     currentUser, 
                     'UserRelationship:create',
@@ -360,6 +367,19 @@ module.exports = class UserRelationshipController {
                         relationId: relationId
                     }
                 )
+            }
+
+
+            // This really shouldn't happen.  But just in case there's a case
+            // where it does happen someday, lets make sure we cover that case.
+            //
+            // In the case where status is "blocked", we don't need to do
+            // anything, because there is no pre-existing relationship.
+            if ( entity.status === 'confirmed' ) {
+                await this.core.queues['add-mutuals-for-relationship'].add({ 
+                    session: { user: currentUser }, 
+                    relationship: entity
+                }, { attempts: 2 })
             }
 
             const relations = await this.getRelations(currentUser, userId, results)
@@ -483,10 +503,17 @@ module.exports = class UserRelationshipController {
                 `We created the relationship between you and ${relationId}, but it wasn't there when we queried it. Please report bug.`)
         }
 
-        await this.core.queues['add-mutuals-for-relationship'].add({ 
-            session: { user: currentUser }, 
-            relationship: entity
-        }, { attempts: 2 })
+        if ( existing.status !== 'confirmed' && entity.status === 'confirmed' ) {
+            await this.core.queues['add-mutuals-for-relationship'].add({ 
+                session: { user: currentUser }, 
+                relationship: entity
+            }, { attempts: 2 })
+        } else if ( existing.status === 'confirmed' && entity.status !== 'confirmed' ) {
+            await this.core.queues['remove-mutuals-for-relationship'].add({ 
+                session: { user: currentUser }, 
+                relationship: entity 
+            }, { attempts: 2 })
+        }
 
         await this.notificationService.sendNotifications(
             currentUser, 
@@ -540,10 +567,12 @@ module.exports = class UserRelationshipController {
 
         await this.userRelationshipDAO.deleteUserRelationship(existing)
 
-        await this.core.queues['remove-mutuals-for-relationship'].add({ 
-            session: { user: currentUser }, 
-            relationship: existing 
-        }, { attempts: 2 })
+        if ( existing.status === 'confirmed' ) {
+            await this.core.queues['remove-mutuals-for-relationship'].add({ 
+                session: { user: currentUser }, 
+                relationship: existing 
+            }, { attempts: 2 })
+        }
 
         const relations = await this.getRelations(currentUser, userId, existingResults)
 
