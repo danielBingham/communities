@@ -17,30 +17,37 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-const { Logger, NotificationWorker } = require('@communities/backend')
 
-const getSendNotificationsJob = function(core) {
+const { MutualsService } = require('@communities/backend')
+
+const getRemoveMutualsForRelationship = function(core) {
     return async function(job, done) {
         try {
-            const logger = new Logger(core.logger.level, `send-notifications: ${job.id}`)
-            logger.info(`Beginning job 'send-notifications' of '${job.data.type}' for User(${job.data.currentUser.id}).`)
+            core.logger.id = `Remove Mutuals For Relationship: ${job.id}`
 
-            job.progress({ step: 'initializing', stepDescription: `Initializing...`, progress: 0 })
+            if ( ! core.features.has('fix-495-slow-friends-list') ) {
+                core.logger.info(`Cannot run job 'remove-mutuals-for-relationship' before feature is enabled.`)
+                done(null)
+                return
+            }
 
-            const notificationWorker = new NotificationWorker(core, logger)
-            
-            await notificationWorker.processNotification(job.data.currentUser, job.data.type, job.data.context, job.data.options)
+            const currentUser = job.data.session.user
+            const relationship = job.data.relationship
 
-            job.progress({ step: 'complete', stepDescription: `Complete!`, progress: 100 })
+            core.logger.info(`Beginning job 'remove-mutuals-for-relationship' for User(${currentUser.id}) and Relationship(${relationship.id}).`)
 
-            logger.info(`Finished job 'send-notifications' of '${job.data.type}' for user ${job.data.currentUser.id}.`)
+            const mutualsService = new MutualsService(core)
+            await mutualsService.removeMutualsForRelationship(relationship)
+
+            core.logger.info(`Finishing job 'remove-mutuals-for-relationship' for User(${currentUser.id}) and Relationship(${relationship.id}).`)
+            core.logger.id = 'core'
             done(null)
         } catch (error) {
             core.logger.error(error)
+            core.logger.id = 'core'
             done(error)
         }
-
     }
 }
 
-module.exports = getSendNotificationsJob
+module.exports = getRemoveMutualsForRelationship 

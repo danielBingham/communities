@@ -252,6 +252,15 @@ module.exports = class UserRelationshipController {
         // If we're blocking a user, then delete the existing relationship.
         // We're replacing it with a block relationship.
         if ( status === 'blocked' && existing !== null ) {
+            // We need to remove the mutuals here, because we're blocking the
+            // user but then setting "existing" to null.
+            if ( existing.status === 'confirmed' ) {
+                await this.core.queues['remove-mutuals-for-relationship'].add({ 
+                    session: { user: currentUser }, 
+                    relationship: existing 
+                }, { attempts: 2 })
+            }
+
             await this.userRelationshipDAO.deleteUserRelationship(existing)
             existing = null
         }
@@ -294,6 +303,18 @@ module.exports = class UserRelationshipController {
                 throw new ControllerError(500, 'server-error',
                     `UserRelationship(${userId}, ${relationId}) missing after update.`,
                     `We confirmed the relationship between you and ${relationId}, but it wasn't there when we queried it. Please report bug.`)
+            }
+
+            if ( existing.status !== 'confirmed' && entity.status === 'confirmed' ) {
+                await this.core.queues['add-mutuals-for-relationship'].add({ 
+                    session: { user: currentUser }, 
+                    relationship: entity
+                }, { attempts: 2 })
+            } else if ( existing.status === 'confirmed' && entity.status !== 'confirmed' ) {
+                await this.core.queues['remove-mutuals-for-relationship'].add({ 
+                    session: { user: currentUser }, 
+                    relationship: entity 
+                }, { attempts: 2 })
             }
 
             await this.notificationService.sendNotifications(
@@ -346,7 +367,7 @@ module.exports = class UserRelationshipController {
                     `We created the relationship between you and ${relationId}, but it wasn't there when we queried it. Please report bug.`)
             }
           
-            if ( userRelationship.status !== 'blocked' ) {
+            if ( entity.status !== 'blocked' ) {
                 await this.notificationService.sendNotifications(
                     currentUser, 
                     'UserRelationship:create',
@@ -355,6 +376,19 @@ module.exports = class UserRelationshipController {
                         relationId: relationId
                     }
                 )
+            }
+
+
+            // This really shouldn't happen.  But just in case there's a case
+            // where it does happen someday, lets make sure we cover that case.
+            //
+            // In the case where status is "blocked", we don't need to do
+            // anything, because there is no pre-existing relationship.
+            if ( entity.status === 'confirmed' ) {
+                await this.core.queues['add-mutuals-for-relationship'].add({ 
+                    session: { user: currentUser }, 
+                    relationship: entity
+                }, { attempts: 2 })
             }
 
             const relations = await this.getRelations(currentUser, userId, results)
@@ -478,6 +512,18 @@ module.exports = class UserRelationshipController {
                 `We created the relationship between you and ${relationId}, but it wasn't there when we queried it. Please report bug.`)
         }
 
+        if ( existing.status !== 'confirmed' && entity.status === 'confirmed' ) {
+            await this.core.queues['add-mutuals-for-relationship'].add({ 
+                session: { user: currentUser }, 
+                relationship: entity
+            }, { attempts: 2 })
+        } else if ( existing.status === 'confirmed' && entity.status !== 'confirmed' ) {
+            await this.core.queues['remove-mutuals-for-relationship'].add({ 
+                session: { user: currentUser }, 
+                relationship: entity 
+            }, { attempts: 2 })
+        }
+
         await this.notificationService.sendNotifications(
             currentUser, 
             'UserRelationship:update',
@@ -530,11 +576,16 @@ module.exports = class UserRelationshipController {
 
         await this.userRelationshipDAO.deleteUserRelationship(existing)
 
-        const relations = await this.getRelations(currentUser, userId, existingResults)
+        if ( existing.status === 'confirmed' ) {
+            await this.core.queues['remove-mutuals-for-relationship'].add({ 
+                session: { user: currentUser }, 
+                relationship: existing 
+            }, { attempts: 2 })
+        }
 
         response.status(200).json({
             entity: existing,
-            relations: relations
+            relations: {} 
         })
     }
 
