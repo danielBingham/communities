@@ -25,6 +25,11 @@ const getAddMutualsForRelationship = function(core) {
         try {
             core.logger.id = `Add Mutuals for Relationship: ${job.id}`
 
+            if ( ! core.features.has('fix-495-slow-friends-list') ) {
+                core.logger.info(`Cannot run job 'add-mutuals-for-relationship' before feature is enabled.`)
+                done(null)
+            }
+
             const currentUser = job.data.session.user
             const relationship = job.data.relationship
 

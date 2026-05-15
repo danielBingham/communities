@@ -583,11 +583,9 @@ module.exports = class UserRelationshipController {
             }, { attempts: 2 })
         }
 
-        const relations = await this.getRelations(currentUser, userId, existingResults)
-
         response.status(200).json({
             entity: existing,
-            relations: relations
+            relations: {} 
         })
     }
 

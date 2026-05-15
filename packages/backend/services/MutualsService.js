@@ -35,6 +35,11 @@ module.exports = class MutualsService {
     }
 
     async getMutualsForCurrentUserAndList(currentUser, list) {
+        if ( ! this.core.features.has('fix-495-slow-friends-list') ) {
+            return {}
+        }
+
+
         const results = await this.core.database.query(`
             SELECT 
                 mutual_relationships.target_id as target_id,
@@ -73,6 +78,10 @@ module.exports = class MutualsService {
     }
 
     async hasMutuals(currentUser, userId) {
+        if ( ! this.core.features.has('fix-495-slow-friends-list') ) {
+            return false
+        }
+
         const results = await this.core.database.query(`
             SELECT mutual_id FROM mutual_relationships WHERE current_id = $1 AND target_id = $2
         `, [ currentUser.id, userId ])

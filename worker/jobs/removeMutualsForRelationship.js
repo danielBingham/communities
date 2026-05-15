@@ -23,10 +23,16 @@ const { MutualsService } = require('@communities/backend')
 const getRemoveMutualsForRelationship = function(core) {
     return async function(job, done) {
         try {
+            core.logger.id = `Remove Mutuals For Relationship: ${job.id}`
+
+            if ( ! core.features.has('fix-495-slow-friends-list') ) {
+                core.logger.info(`Cannot run job 'add-mutuals-for-relationship' before feature is enabled.`)
+                done(null)
+            }
+
             const currentUser = job.data.session.user
             const relationship = job.data.relationship
 
-            core.logger.id = `Remove Mutuals For Relationship: ${job.id}`
             core.logger.info(`Beginning job 'remove-mutuals-for-relationship' for User(${currentUser.id}) and Relationship(${relationship.id}).`)
 
             const mutualsService = new MutualsService(core)
