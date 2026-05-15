@@ -166,12 +166,12 @@ module.exports = class UserRelationshipDAO extends DAO {
     }
 
     async selectUserRelationships(query) {
-        const params = query.params ? [ ...query.params ] : []
-        const where = query.where ? `WHERE ${query.where}` : ''
-        const order = query.order ? `ORDER BY ${query.order}` : ''
+        const params = query?.params ? [ ...query.params ] : []
+        const where = query?.where ? `WHERE ${query.where}` : ''
+        const order = query?.order ? `ORDER BY ${query.order}` : ''
 
         let paging = ''
-        if ( query.page ) {
+        if ( query?.page ) {
             const page = query.page ? query.page : 1
             const pageSize = query.pageSize ? query.pageSize : DEFAULT_PAGE_SIZE
 

@@ -110,6 +110,16 @@ CREATE TABLE user_relationships (
 CREATE INDEX user_relationships__user_id ON user_relationships (user_id);
 CREATE INDEX user_relationships__friend_id ON user_relationships (friend_id);
 
+CREATE TABLE mutual_relationships (
+    current_id uuid REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+    target_id uuid REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+    mutual_id uuid REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+    PRIMARY KEY (current_id, target_id, mutual_id)
+);
+CREATE INDEX mutual_relationships__current_id ON mutual_relationships (current_id);
+CREATE INDEX mutual_relationships__target_id ON mutual_relationships (target_id);
+CREATE INDEX mutual_relationships__mutual_id ON mutual_relationships (mutual_id);
+
 /******************************************************************************
  * Notifications 
  *****************************************************************************/
