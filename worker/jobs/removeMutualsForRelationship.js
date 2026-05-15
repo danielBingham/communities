@@ -26,8 +26,9 @@ const getRemoveMutualsForRelationship = function(core) {
             core.logger.id = `Remove Mutuals For Relationship: ${job.id}`
 
             if ( ! core.features.has('fix-495-slow-friends-list') ) {
-                core.logger.info(`Cannot run job 'add-mutuals-for-relationship' before feature is enabled.`)
+                core.logger.info(`Cannot run job 'remove-mutuals-for-relationship' before feature is enabled.`)
                 done(null)
+                return
             }
 
             const currentUser = job.data.session.user
