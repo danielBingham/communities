@@ -115,6 +115,15 @@ const SCHEMA = {
                 select: 'always',
                 key: 'updatedDate'
             },
+            'post_files': {
+                insert: 'denied',
+                update: 'denied',
+                select: 'override',
+                selectOverride: function(row) {
+                    return []
+                },
+                key: 'files'
+            },
             'post_reactions': {
                 insert: 'denied',
                 update: 'denied',

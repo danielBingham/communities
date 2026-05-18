@@ -179,6 +179,7 @@ CREATE INDEX tokens__token ON tokens (token);
  * Files 
  *****************************************************************************/
 
+CREATE TYPE file_usage as ENUM('post', 'post-comment', 'user-profile', 'group-profile');
 CREATE TYPE file_state as ENUM('pending', 'processing', 'error', 'ready');
 CREATE TYPE supported_file_types as ENUM('image', 'video');
 CREATE TABLE files (
@@ -189,6 +190,7 @@ CREATE TABLE files (
     job_id int DEFAULT NULL,
     variants text[] DEFAULT '{}',
 
+    usage file_usage NOT NULL DEFAULT 'post',
     kind supported_file_types,
     mimetype text,
     type text, /* Deprecated.  Use mimetype instead. */
@@ -342,6 +344,15 @@ CREATE TABLE posts (
 CREATE INDEX posts__user_id ON posts (user_id);
 CREATE INDEX posts__file_id ON posts (file_id);
 CREATE INDEX posts__group_id ON posts (group_id);
+
+CREATE TABLE post_files (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    post_id uuid REFERENCES posts(id) ON DELETE CASCADE NOT NULL,
+    file_id uuid REFERENCES files(id) ON DELETE CASCADE NOT NULL
+);
+CREATE INDEX post_files__post_id ON post_files (post_id);
+CREATE INDEX post_files__file_id ON post_files (file_id);
 
 CREATE TABLE post_versions (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
