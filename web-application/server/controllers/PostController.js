@@ -126,23 +126,29 @@ module.exports = class PostController {
             userIds.push(post.userId)
         }
 
-        const fileIds = []
-        for (const postId of results.list) {
-            const post = results.dictionary[postId]
-            if ( post.fileId !== null ) {
-                fileIds.push(post.fileId)
+
+        let fileDictionary = {}
+        if ( this.core.features.has('feat-15-post-image-galleries') ) {
+            const fileIds = []
+            for (const postId of results.list) {
+                const post = results.dictionary[postId]
+                if ( post.files?.length > 0) {
+                    fileIds.push(...post.files)
+                }
             }
-        }
-        for(const postId of sharedPostResults.list) {
-            const post = sharedPostResults.dictionary[postId]
-            if ( post.fileId !== null ) {
-                fileIds.push(post.fileId)
+            for(const postId of sharedPostResults.list) {
+                const post = sharedPostResults.dictionary[postId]
+                if ( post.files?.length > 0) {
+                    fileIds.push(...post.files)
+                }
             }
+            const postFileResults = await this.fileDAO.selectFiles({
+                where: `files.id = ANY($1::uuid[])`, 
+                params: [fileIds]
+            })
+
+            fileDictionary = postFileResults.dictionary
         }
-        const postFileResults = await this.fileDAO.selectFiles({
-            where: `files.id = ANY($1::uuid[])`, 
-            params: [fileIds]
-        })
 
         const linkPreviewIds = []
         for(const postId of results.list) {

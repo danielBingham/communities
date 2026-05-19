@@ -288,47 +288,51 @@ module.exports = class FileController {
                 `You must be authenticated to view a file.`)
         }
 
-        const file = this.schema.clean(request.body)
-        if ( file === undefined || file === null ) {
+        if (request.body === undefined || request.body === null ) {
             throw new ControllerError(400, 'invalid',
-                `File must be provided.`,
-                `File must be provided.`)
+                `File or files must be provided.`,
+                `File or files must be provided.`)
         }
 
-
-        // Users may only upload their own files.  They may not upload the file
-        // of another user.
-        if ( file.userId !== currentUser.id ) {
-            throw new ControllerError(403, 'not-authorized',
-                `User(${currentUser.id}) attempting to create a File belonging to User(${file.userId}).`,
-                `You may not create a file for another user.`)
+        const files = []
+        if ( Array.isArray(request.body) ) {
+            for(const file of request.body) {
+                files.push(this.schema.clean(file))
+            }
+        } else {
+            files.push(this.schema.clean(request.body))
         }
 
-        const validationErrors = this.validationService.validateFile(currentUser, file)
-        if ( validationErrors.length > 0 ) {
-            const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
-            const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
-            throw new ControllerError(400, 'invalid',
-                `User submitted an invalid file: ${logString}`,
-                errorString)
+        // Validaate all of the files before we insert any of them.
+        for (const file of files) {
+            // Users may only upload their own files.  They may not upload the file
+            // of another user.
+            if ( file.userId !== currentUser.id ) {
+                throw new ControllerError(403, 'not-authorized',
+                    `User(${currentUser.id}) attempting to create a File belonging to User(${file.userId}).`,
+                    `You may not create a file for another user.`)
+            }
 
+            const validationErrors = this.validationService.validateFile(currentUser, file)
+            if ( validationErrors.length > 0 ) {
+                const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
+                const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
+                throw new ControllerError(400, 'invalid',
+                    `User submitted an invalid file: ${logString}`,
+                    errorString)
+
+            }
         }
 
-        file.variants = []
+        await this.fileDAO.insertFiles(files)
+        const fileIds = files.map((f) => f.id)
 
-        await this.fileDAO.insertFile(file)
-
-        const entityResults = await this.fileDAO.selectFiles({ where: 'files.id = $1', params: [ file.id ] })
-
-        const entity = entityResults.dictionary[file.id]
-        if ( entity === undefined || entity === null || entityResults.list.length <= 0 ) {
-            throw new ControllerError(500, 'insertion-failure', `Failed to select newly inserted file ${file.id}.`)
-        }
+        const entityResults = await this.fileDAO.selectFiles({ where: 'files.id = ANY($1::uuid[])', params: [ fileIds ] })
 
         const relations = await this.getRelations(currentUser, entityResults)
 
         response.status(200).json({
-            entity: entity,
+            dictionary: entityResults.dictionary,
             relations: relations
         })
     }

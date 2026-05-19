@@ -37,10 +37,10 @@ const PostFileAttachment = function({ postId, groupId, sharedPostId }) {
 
     const [ file, fileRequest] = useFile(draft?.fileId)
 
-    const setFileId = function(fileId) {
+    const removeFile = function(fileId) {
         const newDraft = { ...draft }
         newDraft.linkPreviewId = null 
-        newDraft.fileId = fileId 
+        newDraft.files = draft.files.filter((fid) => fid !== fileId) 
         newDraft.sharedPostId = null
         setDraft(newDraft)
     }
@@ -59,7 +59,7 @@ const PostFileAttachment = function({ postId, groupId, sharedPostId }) {
     }
 
     const type = file.type.split('/')[0]
-    let content = (<DraftImageFile fileId={draft.fileId} setFileId={setFileId} width={650} deleteOnRemove={ ! post || post.fileId != draft.fileId } />)
+    let content = (<DraftImageFile fileId={draft.fileId} removeFile={removeFile} width={650} deleteOnRemove={ ! post || post.fileId != draft.fileId } />)
     if ( type === 'video' ) {
         content = (<DraftVideoFile fileId={draft.fileId} setFileId={setFileId} deleteOnRemove={ ! post || post.fileId != draft.fileId } />)
     }

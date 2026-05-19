@@ -20,10 +20,13 @@
 import { useState, useEffect, useRef } from 'react'
 import { useSelector } from 'react-redux'
 
+import * as Uuid from 'uuid'
+
 import {  PhotoIcon, VideoCameraIcon } from '@heroicons/react/24/solid'
 
-import { uploadImage, uploadVideo, postFiles } from '/state/File'
+import logger from '/logger'
 
+import { uploadImage, uploadVideo, postFiles } from '/state/File'
 
 import { useRequest } from '/lib/hooks/useRequest'
 import { useFeature } from '/lib/hooks/feature'
@@ -45,9 +48,9 @@ import './FileUploadInput.css'
  * chosen, that file is left hanging in the database and on disk.  It's
  * effectively orphaned.  We should fix that.
  */
-const FileUploadInput = function({ text, fileId, setFileId, type, types, onChange }) {
+const FileUploadInput = function({ text, files, setFiles, type, types, onChange }) {
     const currentUser = useSelector((state) => state.authentication.currentUser)
-    const [file, fileRequest, refreshFile] = useFile(fileId)
+    /*const [file, fileRequest, refreshFile] = useFile(fileId)
 
     let queue = 'resize-image'
     if ( type === 'video' || ( type !== 'image' && file?.kind === 'video')) {
@@ -57,8 +60,9 @@ const FileUploadInput = function({ text, fileId, setFileId, type, types, onChang
     const [job, jobRequest] = useJob(queue, file?.jobId)
     useEventSubscription('Job', 'update', { queue: queue, jobId: file?.jobId }, { skip: ! file?.jobId })
 
-    const [ jobError, setJobError ] = useState(null)
-    const [ fileError, setFileError ] = useState(null)
+    const [ jobError, setJobError ] = useState(null)*/
+    const [ fileError, setFileError ] = useState([])
+    const [fileMap, setFileMap] = useState({})
     
     const hasVideoUploads = useFeature('issue-67-video-uploads')
 
@@ -66,39 +70,51 @@ const FileUploadInput = function({ text, fileId, setFileId, type, types, onChang
 
     const [postRequest, makePostRequest] = useRequest()
     const [uploadRequest, makeUploadRequest] = useRequest('FileUploadInput')
+
+    const addToFileMap = function(name, id) {
+        const newMap = { ...fileMap }
+        newMap[name] = id
+        setFileMap(newMap)
+    }
     
     const onChangeInternal = function(event) {
         if ( event.target.files.length <= 0 ) {
             return
         }
 
-        const uploadedFileData = event.target.files[0]
-        if ( ! types.includes(uploadedFileData.type) ) {
-            setFileError('invalid-type')
-            return
+        let files = []
+        for(const uploadedFileData of event.target.files) {
+            if ( ! types.includes(uploadedFileData.type) ) {
+                setFileError([ `'${uploadedFileData.name}' was an invalid file type.  Supported types are: ${ types.join(',') }`, ...fileError ])
+                continue 
+            }
+
+            if ( uploadedFileData.size <= 0 ) {
+                setFileError([ `'${uploadedFileData.name}' was empty.`, ...fileError ])
+                continue 
+            }
+
+            const newFile = {
+                id: Uuid.v4(),
+                userId: currentUser.id,
+                type: uploadedFileData.type
+            }
+
+            if ( hasVideoUploads === true ) {
+                newFile.kind = type
+                newFile.state = 'pending'
+                newFile.mimetype = uploadedFileData.type
+            }
+
+            addToFileMap(uploadedFileData.name, newFile.id)
+
+            files.push(newFile)
         }
 
-        if ( uploadedFileData.size <= 0 ) {
-            setFileError('empty-file')
-            return
-        }
-
-        const newFile = {
-            userId: currentUser.id,
-            type: uploadedFileData.type
-        }
-
-        if ( hasVideoUploads === true ) {
-            newFile.kind = type
-            newFile.state = 'pending'
-            newFile.mimetype = uploadedFileData.type
-        }
-
-        makePostRequest(postFiles(newFile))
+        makePostRequest(postFiles(files))
     }
 
     const onError = function() {
-        setFileId(null)
         if ( hiddenFileInput.current !== null && hiddenFileInput.current !== undefined) {
             hiddenFileInput.current.value = null
         }
@@ -106,23 +122,30 @@ const FileUploadInput = function({ text, fileId, setFileId, type, types, onChang
 
     useEffect(function() {
         if ( postRequest?.state === 'fulfilled' ) {
-            const createdFile = postRequest.response.body.entity
-            setFileId(createdFile.id)
+            for(const fileData of hiddenFileInput.current.files) {
+                if ( ! ( fileData.name in fileMap ) ) {
+                    logger.error(`File, '${fileData.name}', missing from fileMap.`)
+                    continue
+                }
 
-            const fileData = hiddenFileInput.current.files[0]
-            if ( type === 'image' ) {
-                makeUploadRequest(uploadImage(createdFile.id, fileData))
-            } else if ( type === 'video' ) {
-                makeUploadRequest(uploadVideo(createdFile.id, fileData))
-            } 
+                const id = fileMap[fileData.name]
+                if ( type === 'image' ) {
+                    makeUploadRequest(uploadImage(id, fileData))
+                } else if ( type === 'video' ) {
+                    makeUploadRequest(uploadVideo(id, fileData))
+                } 
+            }
+
+            const createdFileIds = Object.keys(postRequest.response.body.dictionary)
+            setFiles(createdFileIds)
 
             if ( onChange ) {
-                onChange(createdFile.id)
+                onChange(createdFileIds)
             }
         }
     }, [ postRequest ])
 
-    useEffect(function() {
+    /*useEffect(function() {
         if ( job && job.progress.step === 'complete') { 
             if ( job.progress.step === 'complete' ) {
                 refreshFile()
@@ -132,12 +155,13 @@ const FileUploadInput = function({ text, fileId, setFileId, type, types, onChang
                 setJobError('Attempt to process file failed with an error.')
             }
         }
-    }, [ job ])
+    }, [ job ])*/
 
     // ============ Render ==========================================
 
     if ( type !== 'image' && type !== 'video' ) {
-        throw new Error(`Invalid FileUpload type, '${type}'.`)
+        logger.error(`Invalid FileUpload type, '${type}'.`)
+        return null
     }
 
     const State = {
@@ -156,7 +180,7 @@ const FileUploadInput = function({ text, fileId, setFileId, type, types, onChang
     else if ( postRequest?.state === 'fulfilled' && ! uploadRequest )  {
         state = State.isPendingUpload
     }
-    else if ( uploadRequest?.state === 'pending' ) {
+    /*else if ( uploadRequest?.state === 'pending' ) {
         state = State.isUploading
     }
     else if ( file?.state === 'pending' ) {
@@ -164,13 +188,11 @@ const FileUploadInput = function({ text, fileId, setFileId, type, types, onChang
     }
     else if ( file?.state === 'processing' ) {
         state = State.isProcessing
-    } 
+    } */
 
-    let fileErrorView = null
-    if ( fileError === 'invalid-type' ) {
-        fileErrorView = ( <Alert type="error" timeout={5000}>Invalid-type selected.  Supported types are: { types.join(',') }.</Alert> )
-    } else if ( fileError === 'empty-file' ) {
-        fileErrorView = ( <Alert type="error" timeout={5000}>Uploaded file was empty.</Alert>)
+    let fileErrorView = [] 
+    for(const error of fileError) {
+        fileErrorView.push( <Alert type="error" timeout={5000}>{ error }</Alert> )
     }
 
     let icon = ( <PhotoIcon /> )
@@ -193,13 +215,14 @@ const FileUploadInput = function({ text, fileId, setFileId, type, types, onChang
             <input type="file"
                 name="file"
                 accept={types.join(',')}
+                multiple={ type === 'image' ? true : false }
                 onChange={onChangeInternal} 
                 style={{ display: 'none' }}
                 ref={hiddenFileInput}
             />
             <RequestErrorModal message="Attempt to initialize upload" request={postRequest} onContinue={onError} />
             <RequestErrorModal message="Attempt to upload file" request={uploadRequest} onContinue={onError} />
-            <JobError message="Attempt to process file" job={job} onContinue={onError} />
+            { /* <JobError message="Attempt to process file" job={job} onContinue={onError} /> */ }
             { fileErrorView }
         </div>
     )

@@ -114,9 +114,9 @@ module.exports = class VideoService {
 
             this.core.logger.info(`Checking size of the processed file...`)
             const size = this.local.getFileSize(localNewFile)
-            // If the processed size is greater than 100 MB, error.
-            if ( size > 70 * 1024 * 1024 ) {
-                throw new ServiceError('processed-file-too-large', 'Processed files can be no larger than 70 MB.')
+            // If the processed size is greater than 150 MB, error.
+            if ( size > 150 * 1024 * 1024 ) {
+                throw new ServiceError('processed-file-too-large', 'Processed files can be no larger than 150 MB.')
             }
 
             this.core.logger.info(`Uploading the newly formatted file...`)

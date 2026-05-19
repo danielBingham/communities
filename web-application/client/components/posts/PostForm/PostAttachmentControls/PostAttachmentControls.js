@@ -42,9 +42,7 @@ const PostAttachmentControls = function({ postId, groupId, sharedPostId }) {
 
     const [draft, setDraft] = usePostDraft(postId, groupId, sharedPostId)
 
-    const [file] = useFile(draft?.fileId)
-
-    const setFileId = function(fileId) {
+    const setFiles = function(files) {
         const newDraft = { ...draft }
         newDraft.linkPreviewId = null 
         newDraft.fileId = fileId 
@@ -56,30 +54,22 @@ const PostAttachmentControls = function({ postId, groupId, sharedPostId }) {
         return null
     }
 
-    if ( draft.fileId !== undefined && draft.fileId !== null ) {
-        if ( file === undefined || file === null ) {
-            return ( <Spinner /> ) 
-        } else if ( file.state === 'ready' ) {
-            return null
-        }
-    }
-
     return (
         <div className="attachment-controls">
-            { ( file === undefined || file === null || (file?.kind === 'image' && file?.state !== 'ready')) && <div className="post-form__image">
+            <div className="post-form__image">
                  <FileUploadInput 
                     text="Add Image"
-                    fileId={draft.fileId} 
-                    setFileId={setFileId} 
+                    files={draft.files} 
+                    setFiles={setFiles} 
                     type='image'
                     types={[ 'image/jpeg', 'image/png' ]} 
                 /> 
-            </div> } 
-        { ( file === undefined || file === null || ( file?.kind === 'video' && file?.state !== 'ready' )) && ( hasVideoUploads === true && videoUploadsEnabled === true ) && <div className="post-form__video">
+            </div> 
+        {  videoUploadsEnabled === true && <div className="post-form__video">
                 <FileUploadInput
                     text="Add Video"
-                    fileId={draft.fileId}
-                    setFileId={setFileId}
+                    files={draft.files}
+                    setFiles={setFiles}
                     type='video'
                     types={[ 'video/mp4', 'video/quicktime' ]}
                 />

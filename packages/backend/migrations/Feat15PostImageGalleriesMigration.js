@@ -33,6 +33,7 @@ module.exports = class Feat15PostImageGalleriesMigration extends BaseMigration {
         await this.core.database.query(`CREATE TYPE file_usage as ENUM('post', 'post-comment', 'user-profile', 'group-profile'`, [])
 
         await this.core.database.query(`ALTER TABLE files ADD COLUMN IF NOT EXISTS usage file_usage NOT NULL DEFAULT 'post' `, [])
+        await this.core.database.query(`ALTER TABLE files ALTER COLUMN variants SET DEFAULT '{}'`, [])
 
 
         await this.core.database.query(`
