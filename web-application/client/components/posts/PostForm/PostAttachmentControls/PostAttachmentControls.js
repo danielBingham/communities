@@ -45,7 +45,7 @@ const PostAttachmentControls = function({ postId, groupId, sharedPostId }) {
     const setFiles = function(files) {
         const newDraft = { ...draft }
         newDraft.linkPreviewId = null 
-        newDraft.fileId = fileId 
+        newDraft.files = [ ...draft.files, ...files ]
         newDraft.sharedPostId = null
         setDraft(newDraft)
     }

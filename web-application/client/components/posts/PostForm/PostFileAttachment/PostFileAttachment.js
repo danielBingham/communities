@@ -17,14 +17,10 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import { useSelector } from 'react-redux'
-
 import { usePost } from '/lib/hooks/Post'
 import { usePostDraft } from '/lib/hooks/usePostDraft'
-import { useFile } from '/lib/hooks/File'
 
-import DraftImageFile from '/components/files/DraftImageFile'
-import DraftVideoFile from '/components/files/DraftVideoFile'
+import DraftFile from '/components/files/DraftFile'
 
 import './PostFileAttachment.css'
 
@@ -33,9 +29,6 @@ const PostFileAttachment = function({ postId, groupId, sharedPostId }) {
     const [post] = usePost(postId) 
 
     const [draft, setDraft] = usePostDraft(postId, groupId, sharedPostId)
-    const api = useSelector((state) => state.system.api)
-
-    const [ file, fileRequest] = useFile(draft?.fileId)
 
     const removeFile = function(fileId) {
         const newDraft = { ...draft }
@@ -45,25 +38,18 @@ const PostFileAttachment = function({ postId, groupId, sharedPostId }) {
         setDraft(newDraft)
     }
 
-    if ( draft.fileId === null || draft.fileId === undefined ) {
+    if ( draft.files === null || draft.files === undefined || ! Array.isArray(draft.files) || draft.files.length <= 0 ) {
         return null
     }
 
-    if ( file === null || file === undefined ) {
-        return null
-    }
+    let content = []
+    for(const fileId of draft.files) {
+        if ( fileId === null || fileId === undefined ) {
+            continue 
+        }
 
-    // This is a pending or processing file, not a ready one.
-    if ( file.state !== 'ready' || file.filepath === '' ) {
-        return null
+        content.push(<DraftFile fileId={fileId} removeFile={removeFile} width={650} deleteOnRemove={ ! post || ! post.files.includes(fileId) }  />)
     }
-
-    const type = file.type.split('/')[0]
-    let content = (<DraftImageFile fileId={draft.fileId} removeFile={removeFile} width={650} deleteOnRemove={ ! post || post.fileId != draft.fileId } />)
-    if ( type === 'video' ) {
-        content = (<DraftVideoFile fileId={draft.fileId} setFileId={setFileId} deleteOnRemove={ ! post || post.fileId != draft.fileId } />)
-    }
-    
 
     return (
         <div className="attachment">

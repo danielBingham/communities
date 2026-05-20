@@ -193,8 +193,8 @@ const Post = function({ id, expanded, showLoading, shared }) {
                 <TextWithMentions text={`${post.content.substring(0,1000)}...` } />
                 <div className="post__show-more"><a href="" onClick={(e) => { e.preventDefault(); setShowMore(true) }}>Show More.</a></div>
             </div> }
-            { ! hasPostGalleries && post.fileId && <PostFile id={id} /> }
-            { hasPostGalleries && post.files?.length > 0 && <PostGallery postId={id} /> }
+            { ! hasImageGalleries && post.fileId && <PostFile id={id} /> }
+            { hasImageGalleries && post.files?.length > 0 && <PostGallery postId={id} /> }
             { post.linkPreviewId && <LinkPreview id={post.linkPreviewId} /> }
             { post.sharedPostId && <Post id={post.sharedPostId} shared={true} showLoading={true} /> }
             { ! shared && <PostReactions postId={id} /> }

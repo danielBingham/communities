@@ -55,7 +55,7 @@ const createVideoUploadMiddleware = function() {
         limits: {
             fileSize: 1000 * 1024 * 1024 // 1000MB filesize limit (It's going to shrink a lot after we process it)
         }
-    }).array('files', 1)
+    }).single('file')
 }
 
 const createImageUploadMiddleware = function() {
@@ -72,9 +72,9 @@ const createImageUploadMiddleware = function() {
             }
         },
         limits: {
-            fileSize: 20 * 1024 * 1024 // 20MB filesize limit
+            fileSize: 30 * 1024 * 1024 // 30MB filesize limit
         }
-    }).array('files', 30)
+    }).single('file')
 }
 
 const createFileUploadMiddleware = function() {

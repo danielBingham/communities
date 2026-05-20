@@ -17,27 +17,29 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { deleteFile } from '/state/File'
 import { XCircleIcon } from '@heroicons/react/24/solid'
 
+import { deleteFile } from '/state/File'
+
+import { useFile } from '/lib/hooks/File'
+import { useJob } from '/lib/hooks/Job'
+import { useEventSubscription } from '/lib/hooks/useEventSubscription'
+
 import File from '/components/files/File'
-import Video from '/components/ui/Video'
+
+import JobError from '/components/errors/JobError'
+import Spinner from '/components/Spinner'
 
 import "./DraftVideoFile.css"
 
 const DraftVideoFile = function({ fileId, removeFile, width, deleteOnRemove }) {
     const [file, fileRequest, refreshFile] = useFile(fileId)
 
-    let queue = 'resize-image'
-    if ( type === 'video' || ( type !== 'image' && file?.kind === 'video')) {
-        queue = 'process-video'
-    }
-
-    const [job, jobRequest] = useJob(queue, file?.jobId)
-    useEventSubscription('Job', 'update', { queue: queue, jobId: file?.jobId }, { skip: ! file?.jobId })
+    const [job, jobRequest] = useJob('process-video', file?.jobId)
+    useEventSubscription('Job', 'update', { queue: 'process-video', jobId: file?.jobId }, { skip: ! file?.jobId })
   
     const [ jobError, setJobError ] = useState(null)
     const [request, makeRequest] = useRequest()

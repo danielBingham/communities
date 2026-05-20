@@ -282,8 +282,8 @@ module.exports = class PostDAO extends DAO {
             SELECT
                 ${this.getPostSelectionString()},
                 post_comments.id as "PostComment_id",
-                post_reactions.id as "PostReaction_id",
-                post_files.file_id as "File_id"
+                post_reactions.id as "PostReaction_id"
+                ${ this.core.features.has('feat-15-post-image-galleries') ? ', post_files.file_id as "File_id"' : '' }
             FROM posts
                 LEFT OUTER JOIN post_reactions ON posts.id = post_reactions.post_id
                 LEFT OUTER JOIN post_comments ON posts.id = post_comments.post_id

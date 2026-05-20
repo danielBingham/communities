@@ -23,14 +23,10 @@ module.exports = class Feat15PostImageGalleriesMigration extends BaseMigration {
 
     constructor(core) {
         super(core)
-
-        this.userRelationshipDAO = new UserRelationshipDAO(core)
-
-        this.mutualsService = new MutualsService(core)
     }
 
     async initForward() { 
-        await this.core.database.query(`CREATE TYPE file_usage as ENUM('post', 'post-comment', 'user-profile', 'group-profile'`, [])
+        await this.core.database.query(`CREATE TYPE file_usage as ENUM('post', 'post-comment', 'user-profile', 'group-profile')`, [])
 
         await this.core.database.query(`ALTER TABLE files ADD COLUMN IF NOT EXISTS usage file_usage NOT NULL DEFAULT 'post' `, [])
         await this.core.database.query(`ALTER TABLE files ALTER COLUMN variants SET DEFAULT '{}'`, [])
@@ -42,9 +38,6 @@ CREATE TABLE IF NOT EXISTS post_files (
 
     post_id uuid REFERENCES posts(id) ON DELETE CASCADE NOT NULL,
     file_id uuid REFERENCES files(id) ON DELETE CASCADE NOT NULL,
-
-    created_date timestamptz,
-    updated_date timestamptz
 )
         `, [])
 
@@ -71,11 +64,11 @@ CREATE TABLE IF NOT EXISTS post_files (
     async migrateForward(targets) { 
         await this.core.database.query(`
             INSERT INTO post_files (post_id, file_id)
-                VALUE SELECT id, file_id FROM posts
+                (SELECT id, file_id FROM posts WHERE file_id IS NOT NULL)
         `, [])
     }
 
     async migrateBack(targets) { 
-        await this.core.database.query(`DROP FROM post_files`, [])
+        await this.core.database.query(`DELETE FROM post_files`, [])
     }
 }
