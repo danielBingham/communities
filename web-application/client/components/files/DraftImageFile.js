@@ -22,6 +22,8 @@ import { useRequest } from '/lib/hooks/useRequest'
 
 import { XCircleIcon } from '@heroicons/react/24/solid'
 
+import logger from '/logger'
+
 import { deleteFile } from '/state/File'
 
 import { useFile } from '/lib/hooks/File'
@@ -35,7 +37,7 @@ import Spinner from '/components/Spinner'
 
 import "./DraftImageFile.css"
 
-const DraftImageFile = function({ fileId, removeFile, width, deleteOnRemove }) {
+const DraftImageFile = function({ fileId, width, onRemove, onDragStart, onDragEnd, deleteOnRemove }) {
 
     const [file, fileRequest, refreshFile] = useFile(fileId)
 
@@ -46,7 +48,7 @@ const DraftImageFile = function({ fileId, removeFile, width, deleteOnRemove }) {
     const [request, makeRequest] = useRequest()
 
     const remove = function() {
-        removeFile(fileId)
+        onRemove(fileId)
 
         if ( deleteOnRemove !== false ) {
             makeRequest(deleteFile(fileId))
@@ -80,6 +82,10 @@ const DraftImageFile = function({ fileId, removeFile, width, deleteOnRemove }) {
         )
     }
 
+    if ( onDragStart !== undefined && onDragStart !== null && ( onDragEnd === undefined || onDragEnd === null )) {
+        logger.warn('`onDragStart` defined but not `onDragEnd`.  Both must be defined to enable drag and drop.')
+    }
+
 
     const State = {
         isPreparingUpload: 'isPreparingUpload',
@@ -101,8 +107,9 @@ const DraftImageFile = function({ fileId, removeFile, width, deleteOnRemove }) {
     }
 
     let renderWidth = width ? width : 650
+    let draggable = onDragStart !== undefined && onDragStart !== null && onDragEnd !== undefined && onDragEnd !== null
     return (
-        <div className="draft-image-file">
+        <div className="draft-image-file" draggable={draggable} onDragStart={onDragStart} onDragEnd={onDragEnd}>
             { state === State.isPreparingUpload && <div><Spinner local={true} /> <span>Preparing the upload...</span></div> }
             { state === State.isPendingUpload && <div><Spinner local={true} /> <span>Upload prepared. Upload will begin shortly...</span></div> }
             { state === State.isUploading && <div><Spinner local={true} /> <span>Uploading.  Do not navigate away.  This might take a several minutes...</span></div> }

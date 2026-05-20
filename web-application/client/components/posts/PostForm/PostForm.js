@@ -41,7 +41,7 @@ import AreYouSure from '/components/AreYouSure'
 
 import PostContent from './PostContent'
 import SharedPostAttachment from './SharedPostAttachment'
-import PostFileAttachment from './PostFileAttachment'
+import PostFileAttachments from './PostFileAttachments'
 import PostLinkPreviewAttachment from './PostLinkPreviewAttachment'
 import PostAttachmentControls from './PostAttachmentControls'
 import PostVisibilityControl from './PostVisibilityControl'
@@ -225,7 +225,7 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
             <div className="attachments">
                 <SharedPostAttachment postId={postId} groupId={groupId} sharedPostId={sharedPostId} />
                 <PostLinkPreviewAttachment postId={postId} groupId={groupId} sharedPostId={sharedPostId} />
-                <PostFileAttachment postId={postId} groupId={groupId} sharedPostId={sharedPostId} />
+                <PostFileAttachments postId={postId} groupId={groupId} sharedPostId={sharedPostId} />
             </div>
             <div className="post-form__controls">
                 <div className="post-form__controls__attachments">

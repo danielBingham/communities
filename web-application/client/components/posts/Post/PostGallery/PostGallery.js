@@ -23,6 +23,8 @@ import { useState } from 'react'
 import { useFeature } from '/lib/hooks/feature'
 import { usePost } from '/lib/hooks/Post'
 
+import File from '/components/files/File'
+
 const PostGallery = function({ postId, className }) {
     const [post, request] = usePost(postId) 
 

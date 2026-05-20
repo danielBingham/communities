@@ -17,6 +17,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
+import { useState } from 'react'
 import { usePost } from '/lib/hooks/Post'
 import { usePostDraft } from '/lib/hooks/usePostDraft'
 
@@ -24,8 +25,8 @@ import DraftFile from '/components/files/DraftFile'
 
 import './PostFileAttachment.css'
 
-const PostFileAttachment = function({ postId, groupId, sharedPostId }) {
-
+const PostFileAttachment = function({ fileId, postId, groupId, sharedPostId, onDragStart, onDragEnd, onDragOver, onDrop }) {
+    const [isDragged, setIsDragged] = useState(false)
     const [post] = usePost(postId) 
 
     const [draft, setDraft] = usePostDraft(postId, groupId, sharedPostId)
@@ -37,28 +38,63 @@ const PostFileAttachment = function({ postId, groupId, sharedPostId }) {
         newDraft.sharedPostId = null
         setDraft(newDraft)
     }
+    
+    const onDragStartInternal = function(event) {
+        event.dataTransfer.dropEffect = "move"
+        event.dataTransfer.effectAllowed = "move"
 
-    if ( draft.files === null || draft.files === undefined || ! Array.isArray(draft.files) || draft.files.length <= 0 ) {
-        return null
+        setIsDragged(true)
+
+        if ( onDragStart ) {
+            onDragStart()
+        }
     }
 
-    let content = []
-    for(const fileId of draft.files) {
-        if ( fileId === null || fileId === undefined ) {
-            continue 
-        }
+    const onDragOverInternal = function(event) {
+        event.preventDefault()
 
-        content.push(<DraftFile fileId={fileId} removeFile={removeFile} width={650} deleteOnRemove={ ! post || ! post.files.includes(fileId) }  />)
+        if ( onDragOver ) {
+            onDragOver(event)
+        }
+    }
+
+    const onDropInternal = function(event) {
+        event.preventDefault()
+
+        if ( onDrop ) {
+            onDrop(event)
+        }
+    }
+
+    const onDragEndInternal = function(event) {
+        setIsDragged(false)
+
+        if ( onDragEnd ) {
+            onDragEnd()
+        }
     }
 
     return (
-        <div className="attachment">
-            <div className="attached">
-                { content }
-            </div>
+        <div 
+            id={`${fileId}`}
+            className="post-file-attachment"
+            draggable={true}
+            onDragStart={onDragStartInternal}
+            onDragOver={onDragOverInternal}
+            onDrop={onDropInternal}
+            onDragEnd={onDragEndInternal}
+            style={{
+                opacity: isDragged ? "50%" : "100%"
+            }}
+        >
+            <DraftFile 
+                fileId={fileId} 
+                onRemove={removeFile} 
+                width={650} 
+                deleteOnRemove={ ! post || ! post.files.includes(fileId) }  
+            />
         </div>
     )
-
 }
 
 export default PostFileAttachment

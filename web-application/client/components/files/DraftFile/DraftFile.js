@@ -17,29 +17,76 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
+import { useState, useEffect } from 'react'
+import { useRequest } from '/lib/hooks/useRequest'
+
+import { XCircleIcon, PhotoIcon } from '@heroicons/react/24/solid'
+
+import logger from '/logger'
+
+import { deleteFile } from '/state/File'
 
 import { useFile } from '/lib/hooks/File'
+import { useJob } from '/lib/hooks/Job'
+import { useEventSubscription } from '/lib/hooks/useEventSubscription'
 
-import DraftImageFile from '/components/files/DraftImageFile'
-import DraftVideoFile from '/components/files/DraftVideoFile'
+import File from '/components/files/File'
 
-import Button from '/components/ui/Button'
+import JobError from '/components/errors/JobError'
 import Spinner from '/components/Spinner'
 
-import './DraftFile.css'
+import "./DraftFile.css"
 
-const DraftFile = function({ fileId, removeFile, width, deleteOnRemove }) {
+const DraftFile = function({ 
+    fileId, width, 
+    onRemove, deleteOnRemove,
+    onDragStart, onDrag, onDragEnd, 
+    onDragEnter, onDragOver, onDragLeave, 
+    onDrop
+}) {
 
-    const [file, request, refresh] = useFile(fileId)
+    const [file, fileRequest, refreshFile] = useFile(fileId)
 
-    if ( fileId == undefined || fileId === null ) {
+    let type = file ? file.type.split('/')[0] : 'image'
+    let queue = 'resize-image'
+    if ( type === 'video' ) {
+        queue = 'process-video'
+    }
+
+    const [job, jobRequest] = useJob(queue, file?.jobId)
+    useEventSubscription('Job', 'update', { queue: queue, jobId: file?.jobId }, { skip: ! file?.jobId })
+  
+    const [ jobError, setJobError ] = useState(null)
+    const [request, makeRequest] = useRequest()
+
+    const remove = function() {
+        onRemove(fileId)
+
+        if ( deleteOnRemove !== false ) {
+            makeRequest(deleteFile(fileId))
+        }
+    }
+
+    useEffect(function() {
+        if ( job && job.progress.step === 'complete') { 
+            if ( job.progress.step === 'complete' ) {
+                refreshFile()
+            } else if ( job.finishedOn !== null ) {
+                refreshFile()
+            } else if ( job.failedReason !== null ) {
+                setJobError('Attempt to process file failed with an error.')
+            }
+        }
+    }, [ job ])
+
+    // ============ Render ====================================================
+    //
+  
+    if ( fileId === undefined || fileId === null ) {
         return null
     }
 
-    console.log(`File: `, file)
-    console.log(`Request: `, request)
-
-    if ( (file === undefined || file === null) && (request === null || request?.state === 'pending') ) {
+    if ( ( file === undefined || file === null ) && ( request === null || request?.state === 'pending') ) {
         return (
             <div className="draft-file">
                 <Spinner />
@@ -47,26 +94,62 @@ const DraftFile = function({ fileId, removeFile, width, deleteOnRemove }) {
         )
     }
 
-    if ( (file === undefined || file === null) && request?.state !== 'fulfilled' ) {
+    if ( ( file === undefined || file === null ) && request?.state !== 'fulfilled' ) {
         return (
             <div className="draft-file">
-                <p>File failed to load:</p>
-                <Button type="warn" onClick={() => refresh()}>Retry</Button>
+                <p>Failed to load file.</p>
+                <Button type="warn" onClick={() => refreshFile()}>Retry</Button>
             </div>
         )
     }
 
-    const type = file.type.split('/')[0]
-    let content = (<Spinner />)
-    if ( type === 'image' ) {
-        content = (<DraftImageFile fileId={fileId} removeFile={removeFile} width={width} deleteOnRemove={deleteOnRemove } />)
-    } else if ( type === 'video' ) {
-       content = (<DraftVideoFile fileId={fileId} removeFile={removeFile} deleteOnRemove={deleteOnRemove} />)
-    } 
+    const State = {
+        isPreparingUpload: 'isPreparingUpload',
+        isPendingUpload: 'isPendingUpload',
+        isUploading: 'isUploading',
+        isProcessing: 'isProcessing',
+        isAwaitingFile: 'isAwaitingFile',
+        isReady: 'isReady'
+    }
 
+    let state = State.isAwaitingFile
+   
+    if ( file.state === 'pending' ) {
+        state = State.isUploading
+    } else if ( file.state === 'processing' ) {
+        state = State.isProcessing
+    } else if ( file.state === 'ready' ) {
+        state = State.isReady
+    }
+
+    let renderWidth = width ? width : 650
+    let draggable = (onDragStart !== undefined && onDragStart !== null)
+        || (onDrag !== undefined && onDrag !== null)
+        || (onDragEnd !== undefined && onDragEnd !== null)
+        || (onDragEnter !== undefined && onDragEnter !== null)
+        || (onDragOver !== undefined && onDragOver !== null)
+        || (onDragLeave !== undefined && onDragLeave !== null)
+        || (onDrop !== undefined && onDrop !== null)
     return (
-        <div className="draft-file">
-            { content }
+        <div 
+            className="draft-file" 
+            draggable={draggable} 
+            onDragStart={onDragStart} 
+            onDrag={onDrag}
+            onDragEnd={onDragEnd}
+            onDragEnter={onDragEnter}
+            onDragOver={onDragOver}
+            onDragLeave={onDragLeave}
+            onDrop={onDrop}
+        >
+            { state === State.isPreparingUpload && <div><Spinner local={true} /> <span>Preparing the upload...</span></div> }
+            { state === State.isPendingUpload && <div><Spinner local={true} /> <span>Upload prepared. Upload will begin shortly...</span></div> }
+            { state === State.isUploading && <div><Spinner local={true} /> <span>Uploading.  Do not navigate away.  This might take a several minutes...</span></div> }
+            { state === State.isProcessing && <div><Spinner local={true} /> <span>Processing. Do not navigate away. { job ? `${job.progress.progress}% complete.` : '' }  This might take a several minutes..</span></div> }
+            { state === State.isReady && <div className="file">
+                <a className="remove" href="" onClick={(e) => { e.preventDefault(); remove() }}><XCircleIcon /></a>
+                <File id={fileId} width={renderWidth} type={type}  />
+            </div> }
         </div>
     )
 }
