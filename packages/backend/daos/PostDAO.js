@@ -291,7 +291,7 @@ module.exports = class PostDAO extends DAO {
                 LEFT OUTER JOIN site_moderation ON posts.site_moderation_id = site_moderation.id
                 LEFT OUTER JOIN group_moderation ON posts.group_moderation_id = group_moderation.id
             ${where}
-            ORDER BY ${order}, post_comments.created_date ASC 
+            ORDER BY ${order}, post_comments.created_date ASC${ this.core.features.has('feat-15-post-image-galleries') ? ', post_files.order ASC' : '' }
         `
         const results = await this.core.database.query(sql, params)
 
@@ -350,12 +350,39 @@ module.exports = class PostDAO extends DAO {
         await this.insert('Post', posts)
     }
 
+    async insertPostFiles(post) {
+        if ( ! ('files' in post) || ! Array.isArray(post.files) || post.files.length <= 0 ) {
+            return
+        }
+
+        let sql = `INSERT INTO post_files (post_id, file_id, order) VALUES `
+        let params = []
+
+        let counter = 1
+        for(const fileId of post.files) {
+            sql += `($${params.length+1}, $${params.length+2}, $${params.length+3}),`
+            params.push(post.id, fileId, counter)
+            counter = counter+1
+        }
+
+        // Strip off the final comma
+        sql = sql.substring(0, sql.length-1)
+
+        await this.core.database.query(sql, params)
+    }
+
     async insertPostVersions(postVersions) {
         await this.insert('PostVersion', postVersions)
     }
 
     async updatePost(post) {
         await this.update('Post', post)
+    }
+
+    async updatePostFiles(post) {
+        await this.core.database.query(`DELETE FROM post_files WHERE post_id = $1`, [ post.id ])
+
+        await this.insertPostFiles(post)
     }
 
     async updatePostVersion(postVersion) {

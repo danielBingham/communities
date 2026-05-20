@@ -55,10 +55,18 @@ const validateVisibility = function(value, existing, action) {
     return errors
 }
 
-const validateFileId = function(value, existing, action) {
-    const validator = new UUIDValidator('fileId', value, existing, action)
+const validateFiles = function(value, existing, action) {
+    const validator = new ArrayValidation('files', value, existing, action)
     const errors = validator
-        .mustBeUUID()
+        .mustBeArray()
+        .mustBeShorterThan(31)
+        .mapValidation((item) => {
+            const validator = new UUIDValidator('fileId', item, undefined, action)
+            const errors = validator
+                .mustBeUUID()
+                .getErrors()
+            return errors
+        })
         .getErrors()
     return errors
 }
@@ -144,7 +152,7 @@ const validate = function(post, existing) {
         groupId: validateGroupId,
         type: validateType,
         visibility: validateVisibility,
-        fileId: validateFileId,
+        files: validateFiles,
         linkPreviewId: validateLinkPreviewId,
         sharedPostId: validateSharedPostId,
         siteModerationId: validateSiteModerationId,
@@ -164,7 +172,7 @@ module.exports = {
     validateGroupId: validateGroupId,
     validateType: validateType,
     validateVisibility: validateVisibility,
-    validateFileId: validateFileId,
+    validateFiles: validateFiles,
     validateLinkPreviewId: validateLinkPreviewId,
     validateSharedPostId: validateSharedPostId,
     validateSiteModerationId: validateSiteModerationId,

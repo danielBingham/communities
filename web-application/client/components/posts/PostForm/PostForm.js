@@ -130,7 +130,7 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
             type: draft.type, 
             visibility: draft.visibility,
             userId: currentUser.id,
-            fileId: draft.fileId,
+            files: draft.files,
             linkPreviewId: draft.linkPreviewId,
             sharedPostId: draft.sharedPostId,
             content: draft.content

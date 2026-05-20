@@ -17,7 +17,9 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import { useState } from 'react'
+import { useSortable } from '@dnd-kit/react/sortable'
+
+
 import { usePost } from '/lib/hooks/Post'
 import { usePostDraft } from '/lib/hooks/usePostDraft'
 
@@ -25,11 +27,14 @@ import DraftFile from '/components/files/DraftFile'
 
 import './PostFileAttachment.css'
 
-const PostFileAttachment = function({ fileId, postId, groupId, sharedPostId, onDragStart, onDragEnd, onDragOver, onDrop }) {
-    const [isDragged, setIsDragged] = useState(false)
+const PostFileAttachment = function({ fileId, postId, groupId, sharedPostId  }) {
     const [post] = usePost(postId) 
 
     const [draft, setDraft] = usePostDraft(postId, groupId, sharedPostId)
+
+    const index = draft.files.indexOf(fileId)
+
+    const { ref } = useSortable({ id: fileId, index: index })
 
     const removeFile = function(fileId) {
         const newDraft = { ...draft }
@@ -38,54 +43,12 @@ const PostFileAttachment = function({ fileId, postId, groupId, sharedPostId, onD
         newDraft.sharedPostId = null
         setDraft(newDraft)
     }
-    
-    const onDragStartInternal = function(event) {
-        event.dataTransfer.dropEffect = "move"
-        event.dataTransfer.effectAllowed = "move"
-
-        setIsDragged(true)
-
-        if ( onDragStart ) {
-            onDragStart()
-        }
-    }
-
-    const onDragOverInternal = function(event) {
-        event.preventDefault()
-
-        if ( onDragOver ) {
-            onDragOver(event)
-        }
-    }
-
-    const onDropInternal = function(event) {
-        event.preventDefault()
-
-        if ( onDrop ) {
-            onDrop(event)
-        }
-    }
-
-    const onDragEndInternal = function(event) {
-        setIsDragged(false)
-
-        if ( onDragEnd ) {
-            onDragEnd()
-        }
-    }
 
     return (
         <div 
             id={`${fileId}`}
             className="post-file-attachment"
-            draggable={true}
-            onDragStart={onDragStartInternal}
-            onDragOver={onDragOverInternal}
-            onDrop={onDropInternal}
-            onDragEnd={onDragEndInternal}
-            style={{
-                opacity: isDragged ? "50%" : "100%"
-            }}
+            ref={ref}
         >
             <DraftFile 
                 fileId={fileId} 

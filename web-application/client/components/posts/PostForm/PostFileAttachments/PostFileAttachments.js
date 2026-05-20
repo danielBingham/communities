@@ -18,6 +18,10 @@
  *
  ******************************************************************************/
 import { useState } from 'react'
+import { DragDropProvider } from '@dnd-kit/react'
+import { isSortable } from '@dnd-kit/react/sortable'
+
+
 import { usePostDraft } from '/lib/hooks/usePostDraft'
 
 import PostFileAttachment from './PostFileAttachment'
@@ -29,23 +33,31 @@ const PostFileAttachments = function({ postId, groupId, sharedPostId }) {
     const [draft, setDraft] = usePostDraft(postId, groupId, sharedPostId)
     const [dragId, setDragId] = useState(null)
 
+    const onDragEnd = function(event) {
+        if ( event.canceled ) {
+            return
+        }
+
+        const { source } = event.operation
+
+        if ( isSortable(source) ) {
+            // Source has moved.  Move it to the new index.
+            if ( source.initialIndex !== source.index ) {
+                const newFiles = [ ...draft.files ]
+                const [removed] = newFiles.splice(source.initialIndex, 1)
+                newFiles.splice(source.index, 0, removed)
+               
+                const newDraft = { ...draft }
+                newDraft.files = newFiles
+                setDraft(newDraft)
+            }
+        }
+    }
+
     if ( draft.files === null || draft.files === undefined || ! Array.isArray(draft.files) || draft.files.length <= 0 ) {
         return null
     }
 
-    // Swap the firstId with the second id.
-    const swapFiles = function(firstId, secondId) {
-        const newDraft = { ...draft }
-        const newFiles = [ ...draft.files ]
-        const firstIndex = draft.files.indexOf(firstId)
-        const secondIndex = draft.files.indexOf(secondId)
-
-        newFiles[firstIndex] = secondId
-        newFiles[secondIndex] = firstId
-
-        newDraft.files = newFiles
-        setDraft(newDraft)
-    }
 
     let content = []
     for(const fileId of draft.files) {
@@ -73,7 +85,9 @@ const PostFileAttachments = function({ postId, groupId, sharedPostId }) {
     return (
         <div className="attachment">
             <div className="attached">
-                { content }
+                <DragDropProvider onDragEnd={onDragEnd}>
+                    { content }
+                </DragDropProvider>
             </div>
         </div>
     )

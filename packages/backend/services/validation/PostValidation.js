@@ -82,34 +82,42 @@ module.exports = class PostValidation {
             }
         }
 
-        if ( util.objectHas(post, 'fileId') && post.fileId !== null ) {
-            const fileResults = await this.core.database.query(`
-                        SELECT id FROM files WHERE id = $1
-                    `, [ post.fileId ])
-
-            if ( fileResults.rows.length <= 0 ) {
+        if ( util.objectHas(post, 'files') && post.files !== null ) {
+            if ( ! Array.isArray(post.files) ) {
                 errors.push({
-                    type: 'fileId:not-found',
-                    log: `File(${post.fileId}) not found.`,
-                    message: `We couldn't find File(${post.fileId}).`
+                    type: 'files:invalid',
+                    log: `'files' must be an array of UUIDs.`,
+                    message: `Files must be an array of UUIDs.`
                 })
-            }
+                
+            } else {
+                const fileResults = await this.core.database.query(`
+                            SELECT id FROM files WHERE id =  ANY($1::uuid[])
+                        `, [ post.files ])
 
-            if ( util.objectHas(post, 'linkPreviewId') && post.linkPreviewId !== null ) {
-                errors.push({
-                    type: 'fileId:conflict',
-                    log: `Cannot have both fileId and linkPreviewId.`,
-                    message: `You cannot attach both a link and an image.`
-                })
-            }
+                if ( fileResults.rows.length !== post.files.length ) {
+                    errors.push({
+                        type: 'fileId:not-found',
+                        log: `We couldn't find all of the files in Post.files.`,
+                        message: `Some of the files submitted were missing.`
+                    })
+                }
 
-            if ( util.objectHas(post, 'sharedPostId') && post.sharedPostId !== null ) {
-                errors.push({
-                    type: 'fileId:conflict',
-                    log: `Cannot have both fileId and sharedPostId.`,
-                    message: `You cannot attach both an image and a shared post.`
-                })
-            }
+                if ( util.objectHas(post, 'linkPreviewId') && post.linkPreviewId !== null ) {
+                    errors.push({
+                        type: 'fileId:conflict',
+                        log: `Cannot have both fileId and linkPreviewId.`,
+                        message: `You cannot attach both a link and an image.`
+                    })
+                }
+
+                if ( util.objectHas(post, 'sharedPostId') && post.sharedPostId !== null ) {
+                    errors.push({
+                        type: 'fileId:conflict',
+                        log: `Cannot have both fileId and sharedPostId.`,
+                        message: `You cannot attach both an image and a shared post.`
+                    })
+                }
         }
 
         if ( util.objectHas(post, 'linkPreviewId') && post.linkPreviewId !== null ) {

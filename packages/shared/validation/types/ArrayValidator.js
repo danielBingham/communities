@@ -105,8 +105,21 @@ module.exports = class ArrayValidator extends BaseValidator {
             }
         }
         return this
-
     }
 
+    mapValidation(callback) {
+        if ( this.shortCircuit() ) {
+            return this
+        }
+
+        for(const item of this.value) {
+            const results = callback(item)
+            if ( results.length > 0 ) {
+                this.errors.push(...results)
+            }
+        }
+
+        return this
+    }
 }
 

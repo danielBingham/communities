@@ -8,7 +8,7 @@ const clean = function(postSubscription) {
         groupId: cleanUuid,
         type: stringCleaner,
         visibility: stringCleaner,
-        fileId: cleanUuid,
+        files: (files) => files.map((id) => cleanUuid(id)),
         linkPreviewId: cleanUuid,
         sharedPostId: cleanUuid,
         siteModerationId: cleanUuid,

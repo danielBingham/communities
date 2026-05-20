@@ -349,7 +349,9 @@ CREATE TABLE post_files (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 
     post_id uuid REFERENCES posts(id) ON DELETE CASCADE NOT NULL,
-    file_id uuid REFERENCES files(id) ON DELETE CASCADE NOT NULL
+    file_id uuid REFERENCES files(id) ON DELETE CASCADE NOT NULL,
+
+    order int NOT NULL DEFAULT 1
 );
 CREATE INDEX post_files__post_id ON post_files (post_id);
 CREATE INDEX post_files__file_id ON post_files (file_id);

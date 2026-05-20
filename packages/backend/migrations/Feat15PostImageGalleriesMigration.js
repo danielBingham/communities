@@ -38,6 +38,8 @@ CREATE TABLE IF NOT EXISTS post_files (
 
     post_id uuid REFERENCES posts(id) ON DELETE CASCADE NOT NULL,
     file_id uuid REFERENCES files(id) ON DELETE CASCADE NOT NULL,
+
+    order int NOT NULL DEFAULT 1
 )
         `, [])
 
