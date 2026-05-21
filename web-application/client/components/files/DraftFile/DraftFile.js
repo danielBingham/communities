@@ -20,7 +20,7 @@
 import { useState, useEffect } from 'react'
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { XCircleIcon, PhotoIcon } from '@heroicons/react/24/solid'
+import { XMarkIcon } from '@heroicons/react/16/solid'
 
 import logger from '/logger'
 
@@ -113,7 +113,10 @@ const DraftFile = function({
     }
 
     let state = State.isAwaitingFile
-   
+ 
+    if ( fileId === '0e65167b-006c-4167-88b7-d70c8787ed37' ) {
+        console.log(`DraftFile -- File: `, file)
+    }
     if ( file.state === 'pending' ) {
         state = State.isUploading
     } else if ( file.state === 'processing' ) {
@@ -146,8 +149,8 @@ const DraftFile = function({
             { state === State.isPendingUpload && <div><Spinner local={true} /> <span>Upload prepared. Upload will begin shortly...</span></div> }
             { state === State.isUploading && <div><Spinner local={true} /> <span>Uploading.  Do not navigate away.  This might take a several minutes...</span></div> }
             { state === State.isProcessing && <div><Spinner local={true} /> <span>Processing. Do not navigate away. { job ? `${job.progress.progress}% complete.` : '' }  This might take a several minutes..</span></div> }
-            { state === State.isReady && <div className="file">
-                <a className="remove" href="" onClick={(e) => { e.preventDefault(); remove() }}><XCircleIcon /></a>
+            { state === State.isReady && <div className="draft-file__file">
+                <a className="draft-file__remove" href="" onClick={(e) => { e.preventDefault(); remove() }}><XMarkIcon /></a>
                 <File id={fileId} width={renderWidth} type={type}  />
             </div> }
         </div>

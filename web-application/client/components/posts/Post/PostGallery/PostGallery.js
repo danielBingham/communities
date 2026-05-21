@@ -34,6 +34,7 @@ const PostGallery = function({ postId, className }) {
     const [post, request] = usePost(postId) 
 
     const [current, setCurrent] = useState(0)
+    const [isLoaded, setIsLoaded] = useState(false)
 
     const hasImageGalleries = useFeature('feat-15-post-image-galleries')
 
@@ -89,10 +90,10 @@ const PostGallery = function({ postId, className }) {
 
     return (
         <div className={`post-gallery ${className ? className : ''}`} { ...handlers }>
-            { isGallery && <div className="post-gallery__pages"><div className="post-gallery__pages__inner"><span>{ current + 1 }</span> / <span>{ post.files.length }</span></div></div> }
-            { isGallery && <button className="post-gallery__controls-prev" onClick={() => goToPrevious()}><ChevronLeftIcon /></button> }
-            { isGallery && <button className="post-gallery__controls-next" onClick={() => goToNext()}><ChevronRightIcon /></button> }
-            <File id={currentFileId} width={650} fallback={true} />
+            { isGallery && isLoaded && <div className="post-gallery__pages"><div className="post-gallery__pages__inner"><span>{ current + 1 }</span> / <span>{ post.files.length }</span></div></div> }
+            { isGallery && isLoaded && <button className="post-gallery__controls-prev" onClick={() => goToPrevious()}><ChevronLeftIcon /></button> }
+            { isGallery && isLoaded && <button className="post-gallery__controls-next" onClick={() => goToNext()}><ChevronRightIcon /></button> }
+            <File id={currentFileId} width={650} onLoad={() => setIsLoaded(true)} fallback={true} />
             { isGallery && preloads }
         </div>
     )

@@ -1,18 +1,34 @@
-.file {
+.draft-file {
     position: relative;
 }
-.file img {
+.draft-file img {
     width: 100%;
+    max-width: min(100vw, 650px);
 }
-.file .remove {
+.draft-file video {
+    width: 100%;
+    max-width: min(100vw, 650px);
+}
+.draft-file .draft-file__remove {
     position: absolute;
     top: 10px;
     right: 10px;
     z-index: 9;
+
+    box-sizing: border-box;
+
+    height: 32px;
+    width: 32px;
+    border-radius: 32px;
+    padding: 8px;
+
+    background-color: black;
+    opacity: 75%;
+    color: white;
 }
-.file .remove svg {
-    width: 30px;
-    height: 30px;
-    color: var(--primary-color-lightest);
-    filter: drop-shadow(0px 0px 1px black);
+.draft-file .draft-file__remove svg {
+    width: 16px;
+    height: 16px;
+    line-height: 16px;
+    color: white;
 }

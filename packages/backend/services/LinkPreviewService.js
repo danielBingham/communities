@@ -160,7 +160,7 @@ module.exports = class LinkPreviewService {
                         location: this.core.config.s3.bucket_url,
                         filepath: filepath
                     }
-                    await this.fileDAO.insertFile(file)
+                    await this.fileDAO.insertFiles(file)
                 } else {
                     image = ''
                 }

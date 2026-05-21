@@ -58,7 +58,6 @@ const PostFileAttachments = function({ postId, groupId, sharedPostId }) {
         return null
     }
 
-
     let content = []
     for(const fileId of draft.files) {
         if ( fileId === null || fileId === undefined ) {

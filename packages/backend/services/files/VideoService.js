@@ -123,7 +123,7 @@ module.exports = class VideoService {
             await this.s3.uploadFile(localNewFile, targetPath)
 
             const thumbId = uuid.v4()
-            await this.fileDAO.insertFile({
+            await this.fileDAO.insertFiles({
                 id: thumbId,
                 userId: file.userId,
                 type: 'image/jpeg',
