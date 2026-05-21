@@ -118,6 +118,7 @@ module.exports = class PostValidation {
                         message: `You cannot attach both an image and a shared post.`
                     })
                 }
+            }
         }
 
         if ( util.objectHas(post, 'linkPreviewId') && post.linkPreviewId !== null ) {

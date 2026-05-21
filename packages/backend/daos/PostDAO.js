@@ -291,9 +291,10 @@ module.exports = class PostDAO extends DAO {
                 LEFT OUTER JOIN site_moderation ON posts.site_moderation_id = site_moderation.id
                 LEFT OUTER JOIN group_moderation ON posts.group_moderation_id = group_moderation.id
             ${where}
-            ORDER BY ${order}, post_comments.created_date ASC${ this.core.features.has('feat-15-post-image-galleries') ? ', post_files.order ASC' : '' }
+            ORDER BY ${order}, post_comments.created_date ASC${ this.core.features.has('feat-15-post-image-galleries') ? ', post_files.position ASC' : '' }
         `
         const results = await this.core.database.query(sql, params)
+        console.log(`Results: `, results)
 
         if ( results.rows.length <= 0 ) {
             return { dictionary: {}, list: [] }
@@ -348,6 +349,14 @@ module.exports = class PostDAO extends DAO {
 
     async insertPosts(posts) {
         await this.insert('Post', posts)
+
+        if ( Array.isArray(posts) ) {
+            for(const post of posts) {
+                await this.insertPostFiles(post)
+            }
+        } else {
+            await this.insertPostFiles(posts)
+        }
     }
 
     async insertPostFiles(post) {
@@ -355,7 +364,7 @@ module.exports = class PostDAO extends DAO {
             return
         }
 
-        let sql = `INSERT INTO post_files (post_id, file_id, order) VALUES `
+        let sql = `INSERT INTO post_files (post_id, file_id, position) VALUES `
         let params = []
 
         let counter = 1
@@ -377,6 +386,8 @@ module.exports = class PostDAO extends DAO {
 
     async updatePost(post) {
         await this.update('Post', post)
+
+        await this.updatePostFiles(post)
     }
 
     async updatePostFiles(post) {

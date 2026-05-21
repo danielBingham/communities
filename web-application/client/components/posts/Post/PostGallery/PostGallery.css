@@ -1,0 +1,83 @@
+.post-gallery {
+    position: relative;
+    width: 100%;
+    max-width: min(100vw, 650px);
+}
+.post-gallery img {
+    display: block;
+    width: 100%;
+    max-width: min(100vw, 650px);
+}
+.post-gallery .post-gallery__preload {
+    width: 0px;
+    height: 0px;
+    visibility: hidden;
+    overflow: hidden;
+}
+.post-gallery .file {
+    z-index: 1
+}
+.post-gallery__pages {
+    position: absolute;
+    box-sizing: border-box;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    padding: 5px;
+}
+.post-gallery__pages__inner {
+    background-color: black;
+    box-sizing: border-box;
+    opacity: 75%;
+    color: white;
+    padding: 10px;
+    border-radius: 32px;
+    font-size: 12px;
+    line-height: 12px;
+}
+.post-gallery__controls-prev {
+    position: absolute;
+    z-index: 2;
+    left: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+
+    background-color: black;
+    color: white;
+    border: none;
+    cursor: pointer;
+
+    padding: 10px;
+    height: 32px;
+    width: 32px;
+    border-radius: 32px;
+}
+.post-gallery__controls-prev svg {
+    height: 12px;
+    width: 12px;
+    color: white;
+    z-index: 3;
+}
+.post-gallery__controls-next {
+    position: absolute;
+    z-index: 2;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+
+    background-color: black;
+    color: white;
+    border: none;
+    cursor: pointer;
+
+    padding: 10px;
+    height: 32px;
+    width: 32px;
+    border-radius: 32px;
+}
+.post-gallery__controls-next svg {
+    height: 12px;
+    width: 12px;
+    color: white;
+    z-index: 3;
+}

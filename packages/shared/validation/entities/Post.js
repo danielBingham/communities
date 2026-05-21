@@ -1,4 +1,4 @@
-const { StringValidator, NumberValidator, UUIDValidator, DateValidator } = require('../types')
+const { ArrayValidator, StringValidator, NumberValidator, UUIDValidator, DateValidator } = require('../types')
 const { validateEntity } = require('../validate')
 
 const validateId = function(id, existing, action) {
@@ -56,7 +56,7 @@ const validateVisibility = function(value, existing, action) {
 }
 
 const validateFiles = function(value, existing, action) {
-    const validator = new ArrayValidation('files', value, existing, action)
+    const validator = new ArrayValidator('files', value, existing, action)
     const errors = validator
         .mustBeArray()
         .mustBeShorterThan(31)

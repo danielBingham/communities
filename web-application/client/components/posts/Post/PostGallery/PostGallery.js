@@ -20,10 +20,14 @@
 
 import { useState } from 'react'
 
+import { ChevronRightIcon, ChevronLeftIcon } from '@heroicons/react/24/solid'
+
 import { useFeature } from '/lib/hooks/feature'
 import { usePost } from '/lib/hooks/Post'
 
 import File from '/components/files/File'
+
+import './PostGallery.css'
 
 const PostGallery = function({ postId, className }) {
     const [post, request] = usePost(postId) 
@@ -41,7 +45,7 @@ const PostGallery = function({ postId, className }) {
     }
 
     const goToNext = function() {
-        if ( current < post.files.length ) {
+        if ( current < post.files.length-1 ) {
             setCurrent(current+1)
         } else {
             setCurrent(post.files.length-1)
@@ -60,17 +64,27 @@ const PostGallery = function({ postId, className }) {
         return null
     }
 
-
     const currentFileId = post.files[current]
     const isGallery = post.files.length > 1
 
+    const preloads = []
+    if ( post.files.length > 1 ) {
+        for(const fileId of post.files) {
+            if ( fileId === currentFileId ) {
+                continue
+            }
+
+            preloads.push(<File key={fileId} id={fileId} width={650} className="post-gallery__preload" fallback={true} />)
+        }
+    }
+
     return (
         <div className={`post-gallery ${className ? className : ''}`}>
-            { isGallery && <div className="post-gallery__pages"><span>{ current + 1 }</span> / <span>{ post.files.length }</span></div> }
-            { isGallery && <button className="post-gallery__controls-prev" onClick={() => goToPrevious()}></button> }
-            { isGallery && <button className="post-gallery__controls-next" onClick={() => goToNext()}></button> }
+            { isGallery && <div className="post-gallery__pages"><div className="post-gallery__pages__inner"><span>{ current + 1 }</span> / <span>{ post.files.length }</span></div></div> }
+            { isGallery && <button className="post-gallery__controls-prev" onClick={() => goToPrevious()}><ChevronLeftIcon /></button> }
+            { isGallery && <button className="post-gallery__controls-next" onClick={() => goToNext()}><ChevronRightIcon /></button> }
             <File id={currentFileId} width={650} fallback={true} />
-            { isGallery && <div className="post-gallery__controls__tracker"></div> }
+            { isGallery && preloads }
         </div>
     )
 }

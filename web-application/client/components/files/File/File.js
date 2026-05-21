@@ -72,20 +72,20 @@ const File = function({ id, width, type, fallback, className, onLoad, onError, r
             || (url === null && rootUrl === undefined)
         )
     ) {
-        return ( <Spinner /> )
+        return (<div className={`file ${className ? className: ''}`}><Spinner /></div> )
     }
 
 
     if ( file?.kind === 'video' && 
         ( thumbnail === undefined || thumbnailUrl === undefined || (thumbnailUrl === null && rootThumbnailUrl === undefined))
     ) {
-        return ( <Spinner /> )
+        return ( <div className={`file ${className ? className : ''}`}><Spinner /></div> )
     }
 
     if ( file === null ||  ( url === null && rootUrl === null ) ) {
         if ( fallback === true ) {
             return (
-                <div className="file__fallback">
+                <div className={`file__fallback ${ className ? className : '' }`}>
                     <div className="file__fallback__icon"> { type && type === 'video' ? <VideoCameraIcon /> : <PhotoIcon /> }</div>
                     <p>Failed to load { type && type === 'video' ? 'video' : 'image' }.  If the error persists while you have a good connection, please report as a bug!</p>
                 </div>
