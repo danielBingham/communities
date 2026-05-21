@@ -8,6 +8,11 @@
     width: 100%;
     max-width: min(100vw, 650px);
 }
+.post-gallery video {
+    display: block;
+    width: 100%;
+    max-width: min(100vw, 650px);
+}
 .post-gallery .post-gallery__preload {
     width: 0px;
     height: 0px;
