@@ -19,6 +19,7 @@
  ******************************************************************************/
 
 import { useState } from 'react'
+import { useSwipeable } from 'react-swipeable'
 
 import { ChevronRightIcon, ChevronLeftIcon } from '@heroicons/react/24/solid'
 
@@ -52,6 +53,14 @@ const PostGallery = function({ postId, className }) {
         }
     }
 
+    const handlers = useSwipeable({
+        onSwipedLeft: () => goToNext(),
+        onSwipedRight: () => goToPrevious(),
+        swipeDuration: 250,
+        preventScrollOnSwipe: true,
+        trackMouse: true
+    })
+
     if ( post === null || post === undefined ) {
         return null
     }
@@ -79,7 +88,7 @@ const PostGallery = function({ postId, className }) {
     }
 
     return (
-        <div className={`post-gallery ${className ? className : ''}`}>
+        <div className={`post-gallery ${className ? className : ''}`} { ...handlers }>
             { isGallery && <div className="post-gallery__pages"><div className="post-gallery__pages__inner"><span>{ current + 1 }</span> / <span>{ post.files.length }</span></div></div> }
             { isGallery && <button className="post-gallery__controls-prev" onClick={() => goToPrevious()}><ChevronLeftIcon /></button> }
             { isGallery && <button className="post-gallery__controls-next" onClick={() => goToNext()}><ChevronRightIcon /></button> }
