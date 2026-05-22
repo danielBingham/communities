@@ -17,27 +17,21 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-
 import { useState } from 'react'
 
-import { useFile } from '/lib/hooks/File'
-import { useGroup } from '/lib/hooks/Group'
-import { usePost } from '/lib/hooks/Post'
 import { usePostDraft } from '/lib/hooks/usePostDraft'
 import { useFeature } from '/lib/hooks/feature/useFeature'
 
 import FileUploadInput from '/components/files/FileUploadInput'
-import Spinner from '/components/Spinner'
+
+import Alert from '/components/ui/Alert'
 
 import './PostAttachmentControls.css'
 
 const PostAttachmentControls = function({ postId, groupId, sharedPostId }) {
-    const [ showLinkForm, setShowLinkForm] = useState(false)
+   
+    const [ showMaxFilesError, setShowMaxFilesError] = useState(false)
 
-    const [post] = usePost(postId) 
-    const [group] = useGroup(post !== null ? post.groupId : groupId)
-    
-    const hasVideoUploads = useFeature('issue-67-video-uploads')
     const videoUploadsEnabled = useFeature('video-uploads')
 
     const [draft, setDraft] = usePostDraft(postId, groupId, sharedPostId)
@@ -54,13 +48,27 @@ const PostAttachmentControls = function({ postId, groupId, sharedPostId }) {
         return null
     }
 
+
+    // Posts may not have more than 30 files attached.
+    if ( draft.files.length >= 30 ) {
+        if ( showMaxFilesError ) {
+            return <Alert type="error" timeout={5000}>Too many files selected.  Galleries are limited to 30 files.</Alert>
+        } else {
+            return null
+        }
+    }
+
+    const maxFiles = 30 - draft.files.length
     return (
         <div className="attachment-controls">
+            { showMaxFilesError && <Alert type="error" timeout={5000}>Too many files selected.  Galleries are limited to 30 files.</Alert> }
             <div className="post-form__image">
                  <FileUploadInput 
                     text="Add Image"
                     files={draft.files} 
                     setFiles={setFiles} 
+                    maxFiles={maxFiles}
+                    onMaxFilesOverrun={() => setShowMaxFilesError(true)}
                     type='image'
                     types={[ 'image/jpeg', 'image/png' ]} 
                 /> 
@@ -70,6 +78,8 @@ const PostAttachmentControls = function({ postId, groupId, sharedPostId }) {
                     text="Add Video"
                     files={draft.files}
                     setFiles={setFiles}
+                    maxFiles={maxFiles}
+                    onMaxFilesOverrun={() => setShowMaxFilesError(true)}
                     type='video'
                     types={[ 'video/mp4', 'video/quicktime' ]}
                 />

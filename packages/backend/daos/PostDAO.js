@@ -294,7 +294,6 @@ module.exports = class PostDAO extends DAO {
             ORDER BY ${order}, post_comments.created_date ASC${ this.core.features.has('feat-15-post-image-galleries') ? ', post_files.position ASC' : '' }
         `
         const results = await this.core.database.query(sql, params)
-        console.log(`Results: `, results)
 
         if ( results.rows.length <= 0 ) {
             return { dictionary: {}, list: [] }
@@ -387,10 +386,16 @@ module.exports = class PostDAO extends DAO {
     async updatePost(post) {
         await this.update('Post', post)
 
-        await this.updatePostFiles(post)
+        if ( 'files' in post && post.files !== undefined && post.files !== null ) {
+            await this.updatePostFiles(post)
+        }
     }
 
     async updatePostFiles(post) {
+        if ( ! ('files' in post) || post.files === undefined || post.files === null ) {
+            return
+        }
+
         await this.core.database.query(`DELETE FROM post_files WHERE post_id = $1`, [ post.id ])
 
         await this.insertPostFiles(post)

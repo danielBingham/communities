@@ -48,7 +48,7 @@ import './FileUploadInput.css'
  * chosen, that file is left hanging in the database and on disk.  It's
  * effectively orphaned.  We should fix that.
  */
-const FileUploadInput = function({ text, files, setFiles, type, types, onChange }) {
+const FileUploadInput = function({ text, files, setFiles, maxFiles, onMaxFilesOverrun, type, types, onChange }) {
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
     const [ fileError, setFileError ] = useState([])
@@ -66,6 +66,12 @@ const FileUploadInput = function({ text, files, setFiles, type, types, onChange 
             return
         }
 
+        if ( event.target.files.length > maxFiles ) {
+            if ( onMaxFilesOverrun ) {
+                onMaxFilesOverrun()
+            }
+        }
+
         let files = []
         let newFileMap = {}
         for(const uploadedFileData of event.target.files) {
@@ -77,6 +83,10 @@ const FileUploadInput = function({ text, files, setFiles, type, types, onChange 
             if ( uploadedFileData.size <= 0 ) {
                 setFileError([ `'${uploadedFileData.name}' was empty.`, ...fileError ])
                 continue 
+            }
+
+            if ( files.length >= maxFiles ) {
+                break
             }
 
             const newFile = {
@@ -108,9 +118,13 @@ const FileUploadInput = function({ text, files, setFiles, type, types, onChange 
 
     useEffect(function() {
         if ( postRequest?.state === 'fulfilled' ) {
-            console.log(`Created files: `, postRequest)
-            console.log(`Beginning upload with map: `, fileMap)
+            let counter = 0
             for(const fileData of hiddenFileInput.current.files) {
+                if ( counter >= maxFiles ) {
+                    break
+                }
+                counter++
+
                 if ( ! ( fileData.name in fileMap ) ) {
                     logger.error(`File, '${fileData.name}', missing from fileMap.`)
                     continue
@@ -182,7 +196,7 @@ const FileUploadInput = function({ text, files, setFiles, type, types, onChange 
             <input type="file"
                 name="file"
                 accept={types.join(',')}
-                multiple={ type === 'image' ? true : false }
+                multiple={true}
                 onChange={onChangeInternal} 
                 style={{ display: 'none' }}
                 ref={hiddenFileInput}

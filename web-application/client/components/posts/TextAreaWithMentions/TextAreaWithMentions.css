@@ -1,5 +1,7 @@
 .text-area-with-mentions { 
     position: relative;
+    box-sizing: border-box;
+    max-width: min(100vw, 650px);
 }
 
 .text-area-with-mentions .text-area-with-mentions__autocomplete {

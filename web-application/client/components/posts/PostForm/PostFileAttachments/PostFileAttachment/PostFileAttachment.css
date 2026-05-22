@@ -1,3 +1,9 @@
 .post-file-attachment {
     touch-action: manipulation;
 }
+.post-file-attachment img {
+    -webkit-touch-callout: none !important;
+}
+.post-file-attachment video {
+    -webkit-touch-callout: none !important;
+}

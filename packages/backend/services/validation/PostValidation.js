@@ -82,7 +82,7 @@ module.exports = class PostValidation {
             }
         }
 
-        if ( util.objectHas(post, 'files') && post.files !== null ) {
+        if ( util.objectHas(post, 'files') && post.files !== null && post.files.length > 0 ) {
             if ( ! Array.isArray(post.files) ) {
                 errors.push({
                     type: 'files:invalid',
@@ -134,7 +134,7 @@ module.exports = class PostValidation {
                 })
             }
 
-            if ( util.objectHas(post, 'fileId') && post.fileId !== null ) {
+            if ( util.objectHas(post, 'files') && post.files !== null && post.files.length > 0 ) {
                 errors.push({
                     type: 'linkPreviewId:conflict',
                     log: `Cannot have both linkPreviewId and fileId set.`,
@@ -170,7 +170,7 @@ module.exports = class PostValidation {
                 })
             }
 
-            if ( util.objectHas(post, 'fileId') && post.fileId !== null ) {
+            if ( util.objectHas(post, 'files') && post.files !== null && post.files.length > 0 ) {
                 errors.push({
                     type: 'sharedPostId:conflict',
                     log: `Cannot have both sharedPostId and fileId.`,

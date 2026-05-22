@@ -20,7 +20,7 @@
 import { useState, useEffect } from 'react'
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { XMarkIcon } from '@heroicons/react/16/solid'
+import { XMarkIcon, PhotoIcon } from '@heroicons/react/16/solid'
 
 import logger from '/logger'
 
@@ -39,10 +39,7 @@ import "./DraftFile.css"
 
 const DraftFile = function({ 
     fileId, width, 
-    onRemove, deleteOnRemove,
-    onDragStart, onDrag, onDragEnd, 
-    onDragEnter, onDragOver, onDragLeave, 
-    onDrop
+    onRemove, deleteOnRemove
 }) {
 
     const [file, fileRequest, refreshFile] = useFile(fileId)
@@ -55,7 +52,10 @@ const DraftFile = function({
 
     const [job, jobRequest] = useJob(queue, file?.jobId)
     useEventSubscription('Job', 'update', { queue: queue, jobId: file?.jobId }, { skip: ! file?.jobId })
-  
+ 
+    const [isLoaded, setIsLoaded] = useState(false)
+    const [loadFailed, setLoadFailed] = useState(false)
+
     const [ jobError, setJobError ] = useState(null)
     const [request, makeRequest] = useRequest()
 
@@ -126,32 +126,21 @@ const DraftFile = function({
     }
 
     let renderWidth = width ? width : 650
-    let draggable = (onDragStart !== undefined && onDragStart !== null)
-        || (onDrag !== undefined && onDrag !== null)
-        || (onDragEnd !== undefined && onDragEnd !== null)
-        || (onDragEnter !== undefined && onDragEnter !== null)
-        || (onDragOver !== undefined && onDragOver !== null)
-        || (onDragLeave !== undefined && onDragLeave !== null)
-        || (onDrop !== undefined && onDrop !== null)
     return (
-        <div 
-            className="draft-file" 
-            draggable={draggable} 
-            onDragStart={onDragStart} 
-            onDrag={onDrag}
-            onDragEnd={onDragEnd}
-            onDragEnter={onDragEnter}
-            onDragOver={onDragOver}
-            onDragLeave={onDragLeave}
-            onDrop={onDrop}
-        >
+        <div className="draft-file" >
             { state === State.isPreparingUpload && <div><Spinner local={true} /> <span>Preparing the upload...</span></div> }
             { state === State.isPendingUpload && <div><Spinner local={true} /> <span>Upload prepared. Upload will begin shortly...</span></div> }
             { state === State.isUploading && <div><Spinner local={true} /> <span>Uploading.  Do not navigate away.  This might take a several minutes...</span></div> }
             { state === State.isProcessing && <div><Spinner local={true} /> <span>Processing. Do not navigate away. { job ? `${job.progress.progress}% complete.` : '' }  This might take a several minutes..</span></div> }
             { state === State.isReady && <div className="draft-file__file">
-                <a className="draft-file__remove" href="" onClick={(e) => { e.preventDefault(); remove() }}><XMarkIcon /></a>
-                <File id={fileId} width={renderWidth} type={type}  />
+                { (isLoaded || loadFailed) && <a className="draft-file__remove" href="" onClick={(e) => { e.preventDefault(); remove() }}><XMarkIcon /></a> }
+                { loadFailed && <div className="draft-file__failed-load">
+                    <div>
+                        <p>Failed to load image.</p>
+                        <p><PhotoIcon /></p>
+                    </div>
+                </div> }
+                { ! loadFailed && <File id={fileId} width={renderWidth} onLoad={() => setIsLoaded(true)} onError={() => setLoadFailed(true)} type={type}  /> }
             </div> }
         </div>
     )
