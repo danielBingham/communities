@@ -114,9 +114,6 @@ const DraftFile = function({
 
     let state = State.isAwaitingFile
  
-    if ( fileId === '0e65167b-006c-4167-88b7-d70c8787ed37' ) {
-        console.log(`DraftFile -- File: `, file)
-    }
     if ( file.state === 'pending' ) {
         state = State.isUploading
     } else if ( file.state === 'processing' ) {

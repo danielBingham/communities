@@ -88,11 +88,14 @@ const PostGallery = function({ postId, className }) {
         }
     }
 
+    const hasNext = post.files.length > 1 && current < post.files.length-1
+    const hasPrevious = current > 0
+
     return (
         <div className={`post-gallery ${className ? className : ''}`} { ...handlers }>
             { isGallery && isLoaded && <div className="post-gallery__pages"><div className="post-gallery__pages__inner"><span>{ current + 1 }</span> / <span>{ post.files.length }</span></div></div> }
-            { isGallery && isLoaded && <button className="post-gallery__controls-prev" onClick={() => goToPrevious()}><ChevronLeftIcon /></button> }
-            { isGallery && isLoaded && <button className="post-gallery__controls-next" onClick={() => goToNext()}><ChevronRightIcon /></button> }
+            { isGallery && isLoaded && hasPrevious && <button className="post-gallery__controls-prev" onClick={() => goToPrevious()}><ChevronLeftIcon /></button> }
+            { isGallery && isLoaded && hasNext && <button className="post-gallery__controls-next" onClick={() => goToNext()}><ChevronRightIcon /></button> }
             <File id={currentFileId} width={650} onLoad={() => setIsLoaded(true)} fallback={true} />
             { isGallery && preloads }
         </div>
