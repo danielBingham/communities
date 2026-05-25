@@ -626,142 +626,6 @@ describe('ValidationService.validatePost()', function() {
             })
         })
 
-        describe('for fileId', function() {
-            it('Should error for an invalid UUID', async function() {
-                const service = new ValidationService(core)
-
-                const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
-
-                const post = { 
-                    type: 'feed',
-                    userId: currentUser.id,
-                    visibility: 'private',
-                    fileId: 'test'
-                }
-
-                core.database.query.mockReturnValue(undefined)
-                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: currentUser.id }]})
-
-                const errors = await service.validatePost(currentUser, post, undefined)
-
-                expect(errors.length).toBe(1)
-                expect(errors[0].type).toBe('fileId:invalid')
-            })
-
-            it('Should error for a File not found', async function() {
-                const service = new ValidationService(core)
-
-                const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
-
-                const post = { 
-                    type: 'feed',
-                    userId: currentUser.id,
-                    visibility: 'private',
-                    fileId: 'a7a80c5f-2837-4080-a813-e66e6157124c'
-                }
-
-                core.database.query.mockReturnValue(undefined)
-                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: currentUser.id }]})
-                    .mockReturnValueOnce({ rowCount: 0, rows: []})
-
-                const errors = await service.validatePost(currentUser, post, undefined)
-
-                expect(errors.length).toBe(1)
-                expect(errors[0].type).toBe('fileId:not-found')
-            })
-
-            it('Should error if linkPreviewId is also set', async function() {
-                const service = new ValidationService(core)
-
-                const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
-
-                const post = { 
-                    type: 'feed',
-                    userId: currentUser.id,
-                    visibility: 'private',
-                    fileId: 'a7a80c5f-2837-4080-a813-e66e6157124c',
-                    linkPreviewId: '84c03e4d-1c07-49b1-a3a4-078cf8a03c66'
-                }
-
-                core.database.query.mockReturnValue(undefined)
-                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: currentUser.id }]})
-                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'a7a80c5f-2837-4080-a813-e66e6157124c' }]})
-                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '84c03e4d-1c07-49b1-a3a4-078cf8a03c66' }]})
-
-                const errors = await service.validatePost(currentUser, post, undefined)
-
-                expect(errors.length).toBe(2)
-                expect(errors[0].type).toBe('fileId:conflict')
-                expect(errors[1].type).toBe('linkPreviewId:conflict')
-            })
-
-            it('Should error if sharedPostId is also set', async function() {
-                const service = new ValidationService(core)
-
-                const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
-
-                const post = { 
-                    type: 'feed',
-                    userId: currentUser.id,
-                    visibility: 'private',
-                    fileId: 'a7a80c5f-2837-4080-a813-e66e6157124c',
-                    sharedPostId: '84c03e4d-1c07-49b1-a3a4-078cf8a03c66'
-                }
-
-                core.database.query.mockReturnValue(undefined)
-                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: currentUser.id }]})
-                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'a7a80c5f-2837-4080-a813-e66e6157124c' }]})
-                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '84c03e4d-1c07-49b1-a3a4-078cf8a03c66', visibility: 'public' }]})
-
-                const errors = await service.validatePost(currentUser, post, undefined)
-
-                expect(errors.length).toBe(2)
-                expect(errors[0].type).toBe('fileId:conflict')
-                expect(errors[1].type).toBe('sharedPostId:conflict')
-            })
-
-            it('Should pass a `null` fileId', async function() {
-                const service = new ValidationService(core)
-
-                const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
-
-                const post = { 
-                    type: 'feed',
-                    userId: currentUser.id,
-                    visibility: 'private',
-                    fileId: null 
-                }
-
-                core.database.query.mockReturnValue(undefined)
-                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: currentUser.id }]})
-
-                const errors = await service.validatePost(currentUser, post, undefined)
-
-                expect(errors.length).toBe(0)
-            })
-
-            it('Should pass a valid fileId with a found File', async function() {
-                const service = new ValidationService(core)
-
-                const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
-
-                const post = { 
-                    type: 'feed',
-                    userId: currentUser.id,
-                    visibility: 'private',
-                    fileId: 'a7a80c5f-2837-4080-a813-e66e6157124c'
-                }
-
-                core.database.query.mockReturnValue(undefined)
-                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: currentUser.id }]})
-                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'a7a80c5f-2837-4080-a813-e66e6157124c' }]})
-
-                const errors = await service.validatePost(currentUser, post, undefined)
-
-                expect(errors.length).toBe(0)
-            })
-        })
-
         describe('for linkPreviewId', function() {
             it('Should error for an invalid UUID', async function() {
                 const service = new ValidationService(core)
@@ -816,7 +680,7 @@ describe('ValidationService.validatePost()', function() {
                     userId: currentUser.id,
                     visibility: 'private',
                     linkPreviewId: 'a7a80c5f-2837-4080-a813-e66e6157124c',
-                    fileId: '21a44cd9-4141-43a3-aae3-93735bcb6a32' 
+                    files: ['21a44cd9-4141-43a3-aae3-93735bcb6a32']
                 }
 
                 core.database.query.mockReturnValue(undefined)
@@ -827,7 +691,7 @@ describe('ValidationService.validatePost()', function() {
                 const errors = await service.validatePost(currentUser, post, undefined)
 
                 expect(errors.length).toBe(2)
-                expect(errors[0].type).toBe('fileId:conflict')
+                expect(errors[0].type).toBe('files:conflict')
                 expect(errors[1].type).toBe('linkPreviewId:conflict')
             })
 
@@ -952,7 +816,7 @@ describe('ValidationService.validatePost()', function() {
                     userId: currentUser.id,
                     visibility: 'private',
                     sharedPostId: 'a7a80c5f-2837-4080-a813-e66e6157124c',
-                    fileId: '21a44cd9-4141-43a3-aae3-93735bcb6a32' 
+                    files: ['21a44cd9-4141-43a3-aae3-93735bcb6a32']
                 }
 
                 core.database.query.mockReturnValue(undefined)
@@ -963,7 +827,7 @@ describe('ValidationService.validatePost()', function() {
                 const errors = await service.validatePost(currentUser, post, undefined)
 
                 expect(errors.length).toBe(2)
-                expect(errors[0].type).toBe('fileId:conflict')
+                expect(errors[0].type).toBe('files:conflict')
                 expect(errors[1].type).toBe('sharedPostId:conflict')
             })
 

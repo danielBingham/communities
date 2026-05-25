@@ -97,7 +97,7 @@ module.exports = class PostValidation {
 
                 if ( fileResults.rows.length !== post.files.length ) {
                     errors.push({
-                        type: 'fileId:not-found',
+                        type: 'files:not-found',
                         log: `We couldn't find all of the files in Post.files.`,
                         message: `Some of the files submitted were missing.`
                     })
@@ -105,7 +105,7 @@ module.exports = class PostValidation {
 
                 if ( util.objectHas(post, 'linkPreviewId') && post.linkPreviewId !== null ) {
                     errors.push({
-                        type: 'fileId:conflict',
+                        type: 'files:conflict',
                         log: `Cannot have both fileId and linkPreviewId.`,
                         message: `You cannot attach both a link and an image.`
                     })
@@ -113,7 +113,7 @@ module.exports = class PostValidation {
 
                 if ( util.objectHas(post, 'sharedPostId') && post.sharedPostId !== null ) {
                     errors.push({
-                        type: 'fileId:conflict',
+                        type: 'files:conflict',
                         log: `Cannot have both fileId and sharedPostId.`,
                         message: `You cannot attach both an image and a shared post.`
                     })

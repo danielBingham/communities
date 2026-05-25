@@ -305,68 +305,6 @@ describe('validateVisibility', () => {
     })
 })
 
-describe('validateFileId', function() {
-    it('Should pass when present during creation', function() {
-        const value = 'd209158e-5c58-44e1-ab00-12b45aad065f'
-        const errors = validation.Post.validateFileId(value, undefined, 'create')
-
-        expect(errors.length).toBe(0)
-    })
-
-    it('Should pass when absent during creation', function() {
-        const value = 'd209158e-5c58-44e1-ab00-12b45aad065f'
-        const errors = validation.Post.validateFileId(value, undefined, 'create')
-
-        expect(errors.length).toBe(0)
-    })
-
-    it('Should pass when being updated', function() {
-        const value = 'd209158e-5c58-44e1-ab00-12b45aad065f'
-        const existing = '840b8db4-a91e-44e2-a7a3-6922e7e98290'
-        const errors = validation.Post.validateFileId(value, existing, 'update')
-
-        expect(errors.length).toBe(0)
-    })
-
-    it('Should pass when not being updated', function() {
-        const value = 'd209158e-5c58-44e1-ab00-12b45aad065f'
-        const existing = 'd209158e-5c58-44e1-ab00-12b45aad065f'
-        const errors = validation.Post.validateFileId(value, existing, 'update')
-
-        expect(errors.length).toBe(0)
-    })
-
-    it('Should pass when null', function() {
-        const value = null
-        const errors = validation.Post.validateFileId(value)
-
-        expect(errors.length).toBe(0)
-    })
-
-    it('Should return an error when not a string', function() {
-        const value = 5
-        const errors = validation.Post.validateFileId(value)
-
-        expect(errors.length).toBe(1)
-        expect(errors[0].type).toBe('fileId:invalid')
-    })
-
-    it('Should return an error when not a valid uuid', function() {
-        const value = 'test-id'
-        const errors = validation.Post.validateFileId(value)
-
-        expect(errors.length).toBe(1)
-        expect(errors[0].type).toBe('fileId:invalid')
-    })
-
-    it('Should pass a valid UUID', function() {
-        const value = 'd209158e-5c58-44e1-ab00-12b45aad065f'
-        const errors = validation.Post.validateFileId(value)
-
-        expect(errors.length).toBe(0)
-    })
-})
-
 describe('validateLinkPreviewId', function() {
     it('Should pass when present during creation', function() {
         const value = 'd209158e-5c58-44e1-ab00-12b45aad065f'
@@ -781,7 +719,7 @@ describe('validate', function() {
             groupId: 'test',
             type: 'open',
             visibility: 'hidden',
-            fileId: 'test',
+            files: 'test',
             linkPreviewId: 'test',
             sharedPostId: 'test',
             siteModerationId: 'test',
@@ -797,7 +735,7 @@ describe('validate', function() {
         expect(errors.userId.length).toBe(1)
         expect(errors.groupId.length).toBe(1)
         expect(errors.type.length).toBe(1)
-        expect(errors.fileId.length).toBe(1)
+        expect(errors.files.length).toBe(1)
         expect(errors.linkPreviewId.length).toBe(1)
         expect(errors.sharedPostId.length).toBe(1)
         expect(errors.siteModerationId.length).toBe(1)
@@ -814,7 +752,7 @@ describe('validate', function() {
             userId: '0be69c1f-402d-4dec-bba0-e0ac2a0586ff',
             type: 'feed',
             visibility: 'public',
-            fileId: '85a4fb5a-f6d3-4c5c-80b5-6139827b69e9',
+            files: [ '0be69c1f-402d-4dec-bba0-e0ac2a0586ff' ],
             content: 'This is a test post.' 
         }
 
