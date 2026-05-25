@@ -77,29 +77,7 @@ const createImageUploadMiddleware = function() {
     }).single('file')
 }
 
-const createFileUploadMiddleware = function() {
-    return new multer({
-        storage: storage,
-        fileFilter: (request, file, callback) => {
-            const fileExtension = path.extname(file.originalname).toLowerCase()
-            if ( ImageService.SUPPORTED_MIMETYPES.includes(file.mimetype) && ImageService.SUPPORTED_EXTENSIONS.includes(fileExtension) ) {
-                callback(null, true)
-            } else if ( VideoService.SUPPORTED_MIMETYPES.includes(file.mimetype) && VideoService.SUPPORTED_EXTENSIONS.includes(fileExtension) ) {
-                callback(null, true)
-            } else {
-                callback(new ControllerError(400, 'invalid',
-                    `Attempt to upload an file with an unsupported type: '${file.mimetype}'.`,
-                    `Unsupported file type or extension. Supported video types are: .mp4, .avi, .mov, and .webp. Supported image type are: .jpg, .png`), false)
-            }
-        },
-        limits: {
-            fileSize: 1000 * 1024 * 1024 // 1000MB filesize limit
-        }
-    }).array('files', 30)
-}
-
 module.exports = {
     createVideoUploadMiddleware: createVideoUploadMiddleware,
-    createImageUploadMiddleware: createImageUploadMiddleware,
-    createFileUploadMiddleware: createFileUploadMiddleware
+    createImageUploadMiddleware: createImageUploadMiddleware
 }

@@ -198,7 +198,7 @@ const FileUploadInput = function({ text, maxFiles, kind, allowedTypes, onChange,
         <div className="file-upload">
             { state === State.isPreparingUpload && <div><Spinner local={true} /> <span>Preparing the upload...</span></div> }
             { state === State.isPendingUpload && <div><Spinner local={true} /> <span>Upload prepared. Upload will begin shortly...</span></div> }
-            { state === State.isUploading && <div><Spinner local={true} /> <span>Uploading.  Do not navigate away.  This might take a several minutes...</span></div> }
+            { state === State.isUploading && <div><Spinner local={true} /> <span>Uploading.  Do not navigate away.  This might take several minutes...</span></div> }
             { state === State.isProcessing && kind === 'image' && <div><Spinner local={true} /> <span>Processing. Do not navigate away. { job ? `${job.progress.progress}% complete.` : '' }  This might take a several minutes..</span></div> }
             { state === State.isProcessing && kind === 'video' && <div><Spinner local={true} /> <span>Processing. Do not navigate away. This might take several minutes...</span></div> }
             { state === State.isAwaitingFile && <div className="upload-input">

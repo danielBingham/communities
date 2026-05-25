@@ -303,7 +303,7 @@ module.exports = class FileController {
             files.push(this.schema.clean(request.body))
         }
 
-        // Validaate all of the files before we insert any of them.
+        // Validate all of the files before we insert any of them.
         for (const file of files) {
             // Users may only upload their own files.  They may not upload the file
             // of another user.

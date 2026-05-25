@@ -179,7 +179,6 @@ CREATE INDEX tokens__token ON tokens (token);
  * Files 
  *****************************************************************************/
 
-CREATE TYPE file_usage as ENUM('post', 'post-comment', 'user-profile', 'group-profile');
 CREATE TYPE file_state as ENUM('pending', 'processing', 'error', 'ready');
 CREATE TYPE supported_file_types as ENUM('image', 'video');
 CREATE TABLE files (
@@ -190,7 +189,6 @@ CREATE TABLE files (
     job_id int DEFAULT NULL,
     variants text[] DEFAULT '{}',
 
-    usage file_usage NOT NULL DEFAULT 'post',
     kind supported_file_types,
     mimetype text,
     type text, /* Deprecated.  Use mimetype instead. */

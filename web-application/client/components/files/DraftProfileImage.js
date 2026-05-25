@@ -227,7 +227,7 @@ const DraftProfileImage = forwardRef(function({
         <div className="draft-profile-image">
             { stateInternal === State.isPreparingUpload && <div><Spinner local={true} /> <span>Preparing the upload...</span></div> }
             { stateInternal === State.isPendingUpload && <div><Spinner local={true} /> <span>Upload prepared. Upload will begin shortly...</span></div> }
-            { stateInternal === State.isUploading && <div><Spinner local={true} /> <span>Uploading.  Do not navigate away.  This might take a several minutes...</span></div> }
+            { stateInternal === State.isUploading && <div><Spinner local={true} /> <span>Uploading.  Do not navigate away.  This might take several minutes...</span></div> }
             { stateInternal === State.isProcessing && <div> <Spinner local={true} /> <span>Processing. Do not navigate away. { job ? `${job.progress.progress}% complete.` : '' }  This might take a several minutes..</span></div> }
             { stateInternal === State.isReady && 
                 <>

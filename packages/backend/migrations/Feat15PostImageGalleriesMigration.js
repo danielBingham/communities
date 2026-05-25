@@ -26,11 +26,7 @@ module.exports = class Feat15PostImageGalleriesMigration extends BaseMigration {
     }
 
     async initForward() { 
-        await this.core.database.query(`CREATE TYPE file_usage as ENUM('post', 'post-comment', 'user-profile', 'group-profile')`, [])
-
-        await this.core.database.query(`ALTER TABLE files ADD COLUMN IF NOT EXISTS usage file_usage NOT NULL DEFAULT 'post' `, [])
         await this.core.database.query(`ALTER TABLE files ALTER COLUMN variants SET DEFAULT '{}'`, [])
-
 
         await this.core.database.query(`
 CREATE TABLE IF NOT EXISTS post_files (
@@ -54,10 +50,6 @@ CREATE TABLE IF NOT EXISTS post_files (
     }
 
     async initBack() { 
-        await this.core.database.query(`ALTER TABLE files DROP COLUMN IF EXISTS usage`, [])
-
-        await this.core.database.query(`DROP TYPE IF EXISTS file_usage`, [])
-
         await this.core.database.query(`DROP INDEX IF EXISTS post_files__post_id`, [])
         await this.core.database.query(`DROP INDEX IF EXISTS post_files__file_id`, [])
 
