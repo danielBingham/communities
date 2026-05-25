@@ -159,12 +159,6 @@ const SCHEMA = {
                 select: 'always',
                 key: 'postId'
             },
-            'file_id': {
-                insert: 'allowed',
-                update: 'allowed',
-                select: 'always',
-                key: 'fileId'
-            },
             'content': {
                 insert: 'allowed',
                 update: 'allowed',
