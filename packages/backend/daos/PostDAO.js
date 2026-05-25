@@ -375,6 +375,7 @@ module.exports = class PostDAO extends DAO {
 
         // Strip off the final comma
         sql = sql.substring(0, sql.length-1)
+        sql += ` ON CONFLICT DO NOTHING`
 
         await this.core.database.query(sql, params)
     }
@@ -396,7 +397,7 @@ module.exports = class PostDAO extends DAO {
             return
         }
 
-        await this.core.database.query(`DELETE FROM post_files WHERE post_id = $1`, [ post.id ])
+        await this.core.database.query(`DELETE FROM post_files WHERE post_id = $1 AND file_id NOT IN $2::uuid[]`, [ post.id, post.files ])
 
         await this.insertPostFiles(post)
     }

@@ -351,7 +351,8 @@ CREATE TABLE post_files (
     post_id uuid REFERENCES posts(id) ON DELETE CASCADE NOT NULL,
     file_id uuid REFERENCES files(id) ON DELETE CASCADE NOT NULL,
 
-    position int NOT NULL DEFAULT 1
+    position int NOT NULL DEFAULT 1,
+    UNIQUE(post_id, file_id)
 );
 CREATE INDEX post_files__post_id ON post_files (post_id);
 CREATE INDEX post_files__file_id ON post_files (file_id);
