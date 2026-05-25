@@ -57,7 +57,7 @@ const FileUploadInput = function({ text, maxFiles, kind, allowedTypes, onChange,
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
     const [ fileError, setFileError ] = useState([])
-    const [fileMap, setFileMap] = useState({})
+    const fileMap = useRef({})
     
     const hasVideoUploads = useFeature('issue-67-video-uploads')
 
@@ -71,6 +71,8 @@ const FileUploadInput = function({ text, maxFiles, kind, allowedTypes, onChange,
             return
         }
 
+        // We're not returning here intentionally.  Instead we truncate the
+        // set of files and upload a partial batch.
         if ( event.target.files.length > maxFiles ) {
             if ( onError ) {
                 onError(createError(ErrorTypes.MaxFilesOverrun, `Too many files. You may not select more than ${maxFiles} more files.`))
@@ -79,7 +81,7 @@ const FileUploadInput = function({ text, maxFiles, kind, allowedTypes, onChange,
         
         const errors = []
         let files = []
-        let newFileMap = {}
+        fileMap.current = {}
         for(let index = 0; index < event.target.files.length; index++) {
             const uploadedFileData = event.target.files[index] 
             if ( ! allowedTypes.includes(uploadedFileData.type) ) {
@@ -108,8 +110,7 @@ const FileUploadInput = function({ text, maxFiles, kind, allowedTypes, onChange,
                 newFile.mimetype = uploadedFileData.type
             }
 
-            newFileMap[index] = newFile.id
-
+            fileMap.current[index] = newFile.id
             files.push(newFile)
         }
 
@@ -120,7 +121,6 @@ const FileUploadInput = function({ text, maxFiles, kind, allowedTypes, onChange,
             return
         }
 
-        setFileMap({ ...fileMap, ...newFileMap })
         makePostRequest(postFiles(files))
     }
 
@@ -138,12 +138,12 @@ const FileUploadInput = function({ text, maxFiles, kind, allowedTypes, onChange,
                     break
                 }
 
-                if ( ! ( index in fileMap ) ) {
+                if ( ! ( index in fileMap.current ) ) {
                     logger.error(`File, '${fileData.name}', missing from fileMap.`)
                     continue
                 }
 
-                const id = fileMap[index]
+                const id = fileMap.current[index]
                 if ( kind === 'image' ) {
                     makeUploadRequest(uploadImage(id, fileData))
                 } else if ( kind === 'video' ) {

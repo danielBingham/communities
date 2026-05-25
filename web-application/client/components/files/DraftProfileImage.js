@@ -250,7 +250,7 @@ const DraftProfileImage = forwardRef(function({
                 </>
             }
             <RequestErrorModal message={'Attempt to crop your profile'} request={request} onContinue={() => remove()} />
-            <JobError message={'File processing'} job={job} onContinue={() => setLoadFailed(true)} />
+            <JobError message={'File processing'} job={job} onContinue={() => remove()} />
         </div>
     )
 })
