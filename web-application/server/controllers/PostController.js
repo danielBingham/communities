@@ -694,8 +694,6 @@ module.exports = class PostController {
                 `That post either doesn't exist or you don't have permission to access it.`)
         }
 
-        console.log(`Post: `, post)
-
         const canModerateSite = await this.permissionService.can(currentUser, 'moderate', 'Site')
         // Users can always view their own posts, even when they've been
         // removed by moderators.  Moderators can always view moderated posts.

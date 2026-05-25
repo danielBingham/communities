@@ -65,23 +65,21 @@ const PostAttachmentControls = function({ postId, groupId, sharedPostId }) {
             <div className="post-form__image">
                  <FileUploadInput 
                     text="Add Image"
-                    files={draft.files} 
-                    setFiles={setFiles} 
                     maxFiles={maxFiles}
-                    onMaxFilesOverrun={() => setShowMaxFilesError(true)}
-                    type='image'
-                    types={[ 'image/jpeg', 'image/png' ]} 
+                    onChange={(files) => setFiles(files)} 
+                    onError={(error) => setShowMaxFilesError(true)}
+                    kind='image'
+                    allowedTypes={[ 'image/jpeg', 'image/png' ]} 
                 /> 
             </div> 
         {  videoUploadsEnabled === true && <div className="post-form__video">
                 <FileUploadInput
                     text="Add Video"
-                    files={draft.files}
-                    setFiles={setFiles}
                     maxFiles={maxFiles}
-                    onMaxFilesOverrun={() => setShowMaxFilesError(true)}
-                    type='video'
-                    types={[ 'video/mp4', 'video/quicktime' ]}
+                    onChange={(files) => setFiles(files)}
+                    onError={(error) => setShowMaxFilesError(true)}
+                    kind='video'
+                    allowedTypes={[ 'video/mp4', 'video/quicktime' ]}
                 />
             </div> }
         </div>

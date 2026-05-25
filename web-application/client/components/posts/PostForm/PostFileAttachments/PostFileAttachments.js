@@ -31,7 +31,6 @@ import './PostFileAttachments.css'
 const PostFileAttachments = function({ postId, groupId, sharedPostId }) {
 
     const [draft, setDraft] = usePostDraft(postId, groupId, sharedPostId)
-    const [dragId, setDragId] = useState(null)
 
     const onDragEnd = function(event) {
         if ( event.canceled ) {
@@ -71,12 +70,6 @@ const PostFileAttachments = function({ postId, groupId, sharedPostId }) {
                 postId={postId}
                 groupId={groupId}
                 sharedPostId={sharedPostId}
-                onDragStart={(event) => {
-                    setDragId(fileId)
-                }}
-                onDrop={(event) => {
-                    swapFiles(dragId, event.currentTarget.id)
-                }}
             />
         )
     }

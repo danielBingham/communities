@@ -78,18 +78,16 @@ const PostGallery = function({ postId, className }) {
     const isGallery = post.files.length > 1
 
     const preloads = []
-    if ( post.files.length > 1 ) {
-        for(const fileId of post.files) {
-            if ( fileId === currentFileId ) {
-                continue
-            }
-
-            preloads.push(<File key={fileId} id={fileId} width={650} className="post-gallery__preload" fallback={true} />)
-        }
-    }
-
     const hasNext = post.files.length > 1 && current < post.files.length-1
     const hasPrevious = current > 0
+
+    if ( hasNext ) {
+        preloads.push(<File key={post.files[current+1]} id={post.files[current+1]} width={650} className="post-gallery__preload" fallback={true} />)
+    }
+
+    if ( hasPrevious ) {
+        preloads.push(<File key={post.files[current-1]} id={post.files[current-1]} width={650} className="post-gallery__preload" fallback={true} />)
+    }
 
     return (
         <div className={`post-gallery ${className ? className : ''}`} { ...handlers }>

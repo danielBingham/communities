@@ -37,6 +37,15 @@ import Spinner from '/components/Spinner'
 
 import "./DraftFile.css"
 
+const State = {
+    isAwaitingFile: 'isAwaitingFile',
+    isPreparingUpload: 'isPreparingUpload',
+    isPendingUpload: 'isPendingUpload',
+    isUploading: 'isUploading',
+    isProcessing: 'isProcessing',
+    isReady: 'isReady'
+}
+
 const DraftFile = function({ 
     fileId, width, 
     onRemove, deleteOnRemove
@@ -56,14 +65,13 @@ const DraftFile = function({
     const [isLoaded, setIsLoaded] = useState(false)
     const [loadFailed, setLoadFailed] = useState(false)
 
-    const [ jobError, setJobError ] = useState(null)
-    const [request, makeRequest] = useRequest()
+    const [deleteRequest, makeDeleteRequest] = useRequest()
 
     const remove = function() {
         onRemove(fileId)
 
         if ( deleteOnRemove !== false ) {
-            makeRequest(deleteFile(fileId))
+            makeDeleteRequest(deleteFile(fileId))
         }
     }
 
@@ -73,9 +81,7 @@ const DraftFile = function({
                 refreshFile()
             } else if ( job.finishedOn !== null ) {
                 refreshFile()
-            } else if ( job.failedReason !== null ) {
-                setJobError('Attempt to process file failed with an error.')
-            }
+            } 
         }
     }, [ job ])
 
@@ -86,7 +92,7 @@ const DraftFile = function({
         return null
     }
 
-    if ( ( file === undefined || file === null ) && ( request === null || request?.state === 'pending') ) {
+    if ( ( file === undefined || file === null ) && ( fileRequest === null || fileRequest?.state === 'pending') ) {
         return (
             <div className="draft-file">
                 <Spinner />
@@ -94,7 +100,7 @@ const DraftFile = function({
         )
     }
 
-    if ( ( file === undefined || file === null ) && request?.state !== 'fulfilled' ) {
+    if ( ( file === undefined || file === null ) && fileRequest?.state !== 'fulfilled' ) {
         return (
             <div className="draft-file">
                 <p>Failed to load file.</p>
@@ -103,14 +109,6 @@ const DraftFile = function({
         )
     }
 
-    const State = {
-        isPreparingUpload: 'isPreparingUpload',
-        isPendingUpload: 'isPendingUpload',
-        isUploading: 'isUploading',
-        isProcessing: 'isProcessing',
-        isAwaitingFile: 'isAwaitingFile',
-        isReady: 'isReady'
-    }
 
     let state = State.isAwaitingFile
  
@@ -128,17 +126,20 @@ const DraftFile = function({
             { state === State.isPreparingUpload && <div><Spinner local={true} /> <span>Preparing the upload...</span></div> }
             { state === State.isPendingUpload && <div><Spinner local={true} /> <span>Upload prepared. Upload will begin shortly...</span></div> }
             { state === State.isUploading && <div><Spinner local={true} /> <span>Uploading.  Do not navigate away.  This might take a several minutes...</span></div> }
-            { state === State.isProcessing && <div><Spinner local={true} /> <span>Processing. Do not navigate away. { job ? `${job.progress.progress}% complete.` : '' }  This might take a several minutes..</span></div> }
-            { state === State.isReady && <div className="draft-file__file">
-                { (isLoaded || loadFailed) && <a className="draft-file__remove" href="" onClick={(e) => { e.preventDefault(); remove() }}><XMarkIcon /></a> }
-                { loadFailed && <div className="draft-file__failed-load">
-                    <div>
-                        <p>Failed to load image.</p>
-                        <p><PhotoIcon /></p>
-                    </div>
-                </div> }
-                { ! loadFailed && <File id={fileId} width={renderWidth} onLoad={() => setIsLoaded(true)} onError={() => setLoadFailed(true)} type={type}  /> }
-            </div> }
+            { state === State.isProcessing && <div> <Spinner local={true} /> <span>Processing. Do not navigate away. { job ? `${job.progress.progress}% complete.` : '' }  This might take a several minutes..</span></div> }
+            { state === State.isReady && 
+                <div className="draft-file__file">
+                    { (isLoaded || loadFailed) && <a className="draft-file__remove" href="" onClick={(e) => { e.preventDefault(); remove() }}><XMarkIcon /></a> }
+                    { loadFailed && <div className="draft-file__failed-load">
+                        <div>
+                            <p>Failed to load image.</p>
+                            <p><PhotoIcon /></p>
+                        </div>
+                    </div> }
+                    { ! loadFailed && <File id={fileId} width={renderWidth} onLoad={() => setIsLoaded(true)} onError={() => setLoadFailed(true)} type={type}  /> }
+                </div> 
+            }
+            <JobError message={'File processing'} job={job} onContinue={() => setLoadFailed(true)} />
         </div>
     )
 }

@@ -72,18 +72,17 @@ const validateAndCorrectDraft = function(draft, post, group, sharedPostId) {
         && uuid.validate(draft.fileId)
         && correctedDraft.sharedPostId === null
     ) {
-        if ( ! draft.files.includes(draft.fileId)  ) {
+        if ( ! correctedDraft.files.includes(draft.fileId)  ) {
             correctedDraft.files.push(draft.fileId)
             delete draft.fileId
         }
     } 
 
-
     if( has(draft, 'linkPreviewId')
         && draft.linkPreviewId !== null
         && uuid.validate(draft.linkPreviewId)
         && correctedDraft.sharedPostId === null
-        && correctedDraft.fileId === null
+        && correctedDraft.files.length <= 0 
     ) {
         correctedDraft.linkPreviewId = draft.linkPreviewId
     } else if ( has(draft, 'linkPreviewId') && draft.linkPreviewId === null ) {
