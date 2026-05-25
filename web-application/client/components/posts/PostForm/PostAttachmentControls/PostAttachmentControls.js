@@ -75,7 +75,7 @@ const PostAttachmentControls = function({ postId, groupId, sharedPostId }) {
         {  videoUploadsEnabled === true && <div className="post-form__video">
                 <FileUploadInput
                     text="Add Video"
-                    maxFiles={maxFiles}
+                    maxFiles={1}
                     onChange={(files) => setFiles(files)}
                     onError={(error) => setShowMaxFilesError(true)}
                     kind='video'
