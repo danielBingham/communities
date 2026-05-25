@@ -59,13 +59,18 @@ const File = function({ id, width, type, fallback, className, onLoad, onError, r
     const videoUploadsEnabled = useFeature('video-uploads')
 
     const onErrorInternal = function(event) {
-        logger.error(`Failed to load file with errror: `, event.target.error) 
-        if ( 'error' in event.target && event.target.error.code === 2 ) {
-            refreshFileSource()
-        }
+        try {
+            console.log(event)
+            logger.error(`Failed to load file with errror: `, event.target?.error) 
+            if ( event?.target?.error?.code === 2 ) {
+                refreshFileSource()
+            }
 
-        if ( onError !== undefined && onError !== null ) {
-            onError(event)
+            if ( onError !== undefined && onError !== null ) {
+                onError(event)
+            }
+        } catch (error) {
+            logger.error(error)
         }
     }
 

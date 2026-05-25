@@ -52,7 +52,7 @@ const PostAttachmentControls = function({ postId, groupId, sharedPostId }) {
     // Posts may not have more than 30 files attached.
     if ( draft.files.length >= 30 ) {
         if ( showMaxFilesError ) {
-            return <Alert type="error" timeout={5000}>Too many files selected.  Galleries are limited to 30 files.</Alert>
+            return <Alert type="error" timeout={5000} onClear={() => setShowMaxFilesError(false)}>Too many files selected.  Galleries are limited to 30 files.</Alert>
         } else {
             return null
         }

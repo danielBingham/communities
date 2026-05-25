@@ -104,8 +104,15 @@ const DraftFile = function({
     if ( ( file === undefined || file === null ) && fileRequest?.state !== 'fulfilled' ) {
         return (
             <div className="draft-file">
-                <p>Failed to load file.</p>
-                <Button type="warn" onClick={() => refreshFile()}>Retry</Button>
+                <div className="draft-file__file">
+                    <a className="draft-file__remove" href="" onClick={(e) => { e.preventDefault(); remove() }}><XMarkIcon /></a>
+                    <div className="draft-file__failed-load">
+                        <div>
+                            <p>Failed to load file.</p>
+                            <Button type="warn" onClick={() => refreshFile()}>Retry</Button>
+                        </div>
+                    </div>
+                </div>
             </div>
         )
     }
