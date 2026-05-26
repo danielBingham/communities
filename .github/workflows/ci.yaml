@@ -39,7 +39,7 @@ jobs:
         working-directory: ./packages/shared
         run: |
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-          npm ci
+          npm ci --ignore-scripts
 
       - name: Run Shared Unit Tests
         working-directory: ./packages/shared
@@ -52,7 +52,7 @@ jobs:
         working-directory: ./packages/backend
         run: |
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-          npm ci
+          npm ci --ignore-scripts
 
       - name: Copy the Shared package for testing
         run: |
@@ -70,7 +70,7 @@ jobs:
         working-directory: ./web-application
         run: |
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-          npm ci
+          npm ci --ignore-scripts
 
       - name: Copy the backend package for testing
         run: |

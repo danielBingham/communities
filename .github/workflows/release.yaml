@@ -45,7 +45,7 @@ jobs:
         working-directory: ./packages/shared
         run: |
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-          npm ci
+          npm ci --ignore-scripts
 
       - name: Run Shared Unit Tests
         working-directory: ./packages/shared
@@ -69,13 +69,13 @@ jobs:
         working-directory: ./packages/backend
         run: |
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-          npm install @communities/shared@${{ github.event.inputs.version }}
+          npm install --ignore-scripts @communities/shared@${{ github.event.inputs.version }}
 
       - name: Install Backend Dependencies 
         working-directory: ./packages/backend
         run: |
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-          npm ci
+          npm ci --ignore-scripts
 
       - name: Run Backend Unit Tests
         working-directory: ./packages/backend
@@ -99,7 +99,7 @@ jobs:
         working-directory: ./packages/session
         run: |
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-          npm ci
+          npm ci --ignore-scripts
 
       - name: Version the Session Package
         working-directory: ./packages/session
@@ -117,19 +117,19 @@ jobs:
         working-directory: ./worker
         run: |
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-          npm install @communities/shared@${{ github.event.inputs.version }}
+          npm install --ignore-scripts @communities/shared@${{ github.event.inputs.version }}
 
       - name: Install updated backend version
         working-directory: ./worker
         run: |
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-          npm install @communities/backend@${{ github.event.inputs.version }}
+          npm install --ignore-scripts @communities/backend@${{ github.event.inputs.version }}
       
       - name: Install Worker NPM Modules
         working-directory: ./worker
         run: |
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-          npm ci
+          npm ci --ignore-scripts
 
       - name: Version the worker package
         working-directory: ./worker
@@ -155,25 +155,25 @@ jobs:
         working-directory: ./web-application
         run: |
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-          npm install @communities/shared@${{ github.event.inputs.version }}
+          npm install --ignore-scripts @communities/shared@${{ github.event.inputs.version }}
 
       - name: Install updated backend version
         working-directory: ./web-application
         run: |
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-          npm install @communities/backend@${{ github.event.inputs.version }}
+          npm install --ignore-scripts @communities/backend@${{ github.event.inputs.version }}
 
       - name: Install updated session version
         working-directory: ./web-application
         run: |
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-          npm install @communities/session@${{ github.event.inputs.version }}
+          npm install --ignore-scripts @communities/session@${{ github.event.inputs.version }}
 
       - name: Install Web Application NPM Modules
         working-directory: ./web-application
         run: |
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-          npm ci
+          npm ci --ignore-scripts
 
       - name: Run Web Application Unit Tests
         working-directory: ./web-application
