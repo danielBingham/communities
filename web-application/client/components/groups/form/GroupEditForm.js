@@ -230,10 +230,10 @@ const GroupEditForm = function({ groupId }) {
                             deleteOnRemove={false} 
                         /> }
                         { ( ! fileId || file?.state !== 'ready') && <FileUploadInput 
-                            fileId={fileId}
-                            setFileId={setFileId} 
-                            type="image"
-                            types={[ 'image/jpeg', 'image/png' ]} 
+                            maxFiles={1}
+                            onChange={(fileIds) => setFileId(fileIds[0])}
+                            kind="image"
+                            allowedTypes={[ 'image/jpeg', 'image/png' ]} 
                         /> }
                     </div>
                 </div>

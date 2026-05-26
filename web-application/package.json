@@ -39,6 +39,7 @@
     "@capacitor/status-bar": "7.0.3",
     "@capawesome/capacitor-badge": "7.0.1",
     "@capgo/capacitor-updater": "7.0.36",
+    "@dnd-kit/react": "0.4.0",
     "@communities/backend": "^0.16.1",
     "@communities/session": "^0.16.1",
     "@communities/shared": "^0.16.1",
@@ -60,6 +61,7 @@
     "react-image-crop": "11.0.10",
     "react-redux": "9.2.0",
     "react-router-dom": "6.30.1",
+    "react-swipeable": "7.0.2",
     "textarea-caret": "3.1.0",
     "uuid": "11.1.0"
   },

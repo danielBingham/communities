@@ -17,14 +17,14 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-const stringCleaner = function(value) {
-    if ( typeof value !== 'string' ) {
-        return value
+import * as Uuid from 'uuid'
+
+const createError = function(type, message) {
+    return {
+        id: Uuid.v4(),
+        type: type,
+        message: message
     }
-
-    return value.trim()
 }
 
-module.exports = {
-    stringCleaner: stringCleaner
-}
+export default createError

@@ -17,62 +17,47 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import { useSelector } from 'react-redux'
+import { useSortable } from '@dnd-kit/react/sortable'
+
 
 import { usePost } from '/lib/hooks/Post'
 import { usePostDraft } from '/lib/hooks/usePostDraft'
-import { useFile } from '/lib/hooks/File'
 
-import DraftImageFile from '/components/files/DraftImageFile'
-import DraftVideoFile from '/components/files/DraftVideoFile'
+import DraftFile from '/components/files/DraftFile'
 
 import './PostFileAttachment.css'
 
-const PostFileAttachment = function({ postId, groupId, sharedPostId }) {
-
+const PostFileAttachment = function({ fileId, postId, groupId, sharedPostId  }) {
     const [post] = usePost(postId) 
 
     const [draft, setDraft] = usePostDraft(postId, groupId, sharedPostId)
-    const api = useSelector((state) => state.system.api)
 
-    const [ file, fileRequest] = useFile(draft?.fileId)
+    const index = draft.files.indexOf(fileId)
 
-    const setFileId = function(fileId) {
+    const { ref } = useSortable({ id: fileId, index: index })
+
+    const removeFile = function(fileId) {
         const newDraft = { ...draft }
         newDraft.linkPreviewId = null 
-        newDraft.fileId = fileId 
+        newDraft.files = draft.files.filter((fid) => fid !== fileId) 
         newDraft.sharedPostId = null
         setDraft(newDraft)
     }
 
-    if ( draft.fileId === null || draft.fileId === undefined ) {
-        return null
-    }
-
-    if ( file === null || file === undefined ) {
-        return null
-    }
-
-    // This is a pending or processing file, not a ready one.
-    if ( file.state !== 'ready' || file.filepath === '' ) {
-        return null
-    }
-
-    const type = file.type.split('/')[0]
-    let content = (<DraftImageFile fileId={draft.fileId} setFileId={setFileId} width={650} deleteOnRemove={ ! post || post.fileId != draft.fileId } />)
-    if ( type === 'video' ) {
-        content = (<DraftVideoFile fileId={draft.fileId} setFileId={setFileId} deleteOnRemove={ ! post || post.fileId != draft.fileId } />)
-    }
-    
-
     return (
-        <div className="attachment">
-            <div className="attached">
-                { content }
-            </div>
+        <div 
+            id={`${fileId}`}
+            className="post-file-attachment"
+            ref={ref}
+        >
+            <DraftFile 
+                fileId={fileId} 
+                onRemove={removeFile} 
+                width={650} 
+                deleteOnRemove={ ! post || ! post.files.includes(fileId) }  
+            />
         </div>
     )
-
 }
 
 export default PostFileAttachment

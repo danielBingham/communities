@@ -31,6 +31,7 @@ const Fix486UniqueConstraintMigration = require('../migrations/Fix486UniqueConst
 const Feat484FindActiveGroupsMigration = require('../migrations/Feat484FindActiveGroupsMigration')
 const Feat491MutualFriendsMigration = require('../migrations/Feat491MutualFriendsMigration')
 const Fix495SlowFriendsListMigration = require('../migrations/Fix495SlowFriendsListMigration')
+const Feat15PostImageGalleriesMigration = require('../migrations/Feat15PostImageGalleriesMigration')
 
 const ServiceError = require('../errors/ServiceError')
 const MigrationError = require('../errors/MigrationError')
@@ -95,6 +96,9 @@ module.exports = class FeatureService {
             },
             'fix-495-slow-friends-list': {
                 migration: new Fix495SlowFriendsListMigration(core)
+            },
+            'feat-15-post-image-galleries': {
+                migration: new Feat15PostImageGalleriesMigration(core)
             },
             'video-uploads': {}
         }

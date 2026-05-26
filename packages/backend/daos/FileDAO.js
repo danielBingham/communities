@@ -36,8 +36,7 @@ const SCHEMA = {
                 select: DAO.SELECT.ALWAYS,
                 key: 'userId'
             },
-            'state': {
-                insert: DAO.INSERT.ALLOW,
+            'state': { insert: DAO.INSERT.ALLOW,
                 update: DAO.UPDATE.ALLOW,
                 select: DAO.SELECT.ALWAYS,
                 key: 'state',
@@ -183,8 +182,8 @@ module.exports = class FilesDAO extends DAO {
         return this.hydrateFiles(results.rows)
     }
 
-    async insertFile(file) {
-        await this.insert('File', file)
+    async insertFiles(files) {
+        await this.insert('File', files)
     }
 
     async updateFile(file) {

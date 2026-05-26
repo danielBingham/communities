@@ -24,22 +24,6 @@ import { setRelationsInState }  from '/state/lib/relations'
 
 import { setFilesInDictionary, removeFile, setSource, setSources, setFileNull } from './slice'
 
-const uploadFile = function(type, id, fileData) {
-    return function(dispatch, getState) {
-        const formData = new FormData()
-        formData.append('file', fileData)
-
-        return dispatch(makeRequest('POST', `/upload/${encodeURIComponent(id)}/${type}`, formData,
-            function(response) {
-                dispatch(setFilesInDictionary({ entity: response.entity }))
-
-                dispatch(setRelationsInState(response.relations))
-            }
-        ))
-    }
-
-}
-
 /**
  * POST /upload/image
  *
@@ -53,7 +37,18 @@ const uploadFile = function(type, id, fileData) {
  * @returns {string} A uuid requestId that can be used to track this request.
  */
 export const uploadImage = function(id, fileData) {
-    return uploadFile('image', id, fileData)
+    return function(dispatch, getState) {
+        const formData = new FormData()
+        formData.append('file', fileData)
+
+        return dispatch(makeRequest('POST', `/upload/${encodeURIComponent(id)}/image`, formData,
+            function(response) {
+                dispatch(setFilesInDictionary({ entity: response.entity }))
+
+                dispatch(setRelationsInState(response.relations))
+            }
+        ))
+    }
 }
 
 /**
@@ -83,11 +78,11 @@ export const uploadVideo = function(id, fileData) {
     }
 }
 
-export const postFiles = function(file) {
+export const postFiles = function(files) {
     return function(dispatch, getState) {
-        return dispatch(makeRequest('POST', `/files`, file,
+        return dispatch(makeRequest('POST', `/files`, files,
             function(response) {
-                dispatch(setFilesInDictionary({ entity: response.entity}))
+                dispatch(setFilesInDictionary({ dictionary: response.dictionary}))
 
                 dispatch(setRelationsInState(response.relations))
             }

@@ -72,13 +72,12 @@ const createImageUploadMiddleware = function() {
             }
         },
         limits: {
-            fileSize: 20 * 1024 * 1024 // 20MB filesize limit
+            fileSize: 30 * 1024 * 1024 // 30MB filesize limit
         }
     }).single('file')
-
 }
 
 module.exports = {
     createVideoUploadMiddleware: createVideoUploadMiddleware,
-    createImageUploadMiddleware: createImageUploadMiddleware,
+    createImageUploadMiddleware: createImageUploadMiddleware
 }

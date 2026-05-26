@@ -1,4 +1,6 @@
-
+.file {
+    user-select: none;
+}
 .file__fallback {
     padding: 20px;
     border-top: thin solid var(--main-border-color);

@@ -126,23 +126,29 @@ module.exports = class PostController {
             userIds.push(post.userId)
         }
 
-        const fileIds = []
-        for (const postId of results.list) {
-            const post = results.dictionary[postId]
-            if ( post.fileId !== null ) {
-                fileIds.push(post.fileId)
+
+        let fileDictionary = {}
+        if ( this.core.features.has('feat-15-post-image-galleries') ) {
+            const fileIds = []
+            for (const postId of results.list) {
+                const post = results.dictionary[postId]
+                if ( post.files?.length > 0) {
+                    fileIds.push(...post.files)
+                }
             }
-        }
-        for(const postId of sharedPostResults.list) {
-            const post = sharedPostResults.dictionary[postId]
-            if ( post.fileId !== null ) {
-                fileIds.push(post.fileId)
+            for(const postId of sharedPostResults.list) {
+                const post = sharedPostResults.dictionary[postId]
+                if ( post.files?.length > 0) {
+                    fileIds.push(...post.files)
+                }
             }
+            const postFileResults = await this.fileDAO.selectFiles({
+                where: `files.id = ANY($1::uuid[])`, 
+                params: [fileIds]
+            })
+
+            fileDictionary = postFileResults.dictionary
         }
-        const postFileResults = await this.fileDAO.selectFiles({
-            where: `files.id = ANY($1::uuid[])`, 
-            params: [fileIds]
-        })
 
         const linkPreviewIds = []
         for(const postId of results.list) {
@@ -193,7 +199,7 @@ module.exports = class PostController {
         })
 
         const relations = {
-         //   files: fileDictionary,
+            files: fileDictionary,
             groups: groupResults.dictionary,
             groupMembers: groupMemberResults.dictionary,
             groupModerations: groupModerationResults.dictionary,
@@ -560,6 +566,15 @@ module.exports = class PostController {
                 errorString)
         }
 
+        // If we don't have the galleries feature, just stick the first item
+        // into fileId.
+        if ( ! this.core.features.has('feat-15-post-image-galleries') ) {
+            if ( 'files' in post && Array.isArray(post.files) ) {
+                post.fileId = post.files[0]
+                delete post.files
+            }
+        }
+
         await this.postDAO.insertPosts(post)
 
         const results = await this.postDAO.selectPosts({
@@ -768,6 +783,15 @@ module.exports = class PostController {
             throw new ControllerError(400, 'invalid',
                 `User submitted an invalid post: ${logString}`,
                 errorString)
+        }
+
+        // If we don't have the galleries feature, just stick the first item
+        // into fileId.
+        if ( ! this.core.features.has('feat-15-post-image-galleries') ) {
+            if ( 'files' in post && Array.isArray(post.files) ) {
+                post.fileId = post.files[0]
+                delete post.files
+            }
         }
 
         await this.postDAO.updatePost(post)

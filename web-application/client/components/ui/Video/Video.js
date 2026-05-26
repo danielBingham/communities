@@ -33,7 +33,7 @@ const Video = function({ className, src, poster, altText, ref, onLoad, onError }
             preload="metadata"
             src={src} 
             poster={poster}
-            onLoad={onLoad}
+            onLoadedMetadata={onLoad}
             onError={onError}
             controls
             crossOrigin="anonymous"

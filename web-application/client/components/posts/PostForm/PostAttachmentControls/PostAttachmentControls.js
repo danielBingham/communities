@@ -17,71 +17,75 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-
 import { useState } from 'react'
 
-import { useFile } from '/lib/hooks/File'
-import { useGroup } from '/lib/hooks/Group'
-import { usePost } from '/lib/hooks/Post'
 import { usePostDraft } from '/lib/hooks/usePostDraft'
 import { useFeature } from '/lib/hooks/feature/useFeature'
 
 import FileUploadInput from '/components/files/FileUploadInput'
-import Spinner from '/components/Spinner'
+
+import Alert from '/components/ui/Alert'
 
 import './PostAttachmentControls.css'
 
 const PostAttachmentControls = function({ postId, groupId, sharedPostId }) {
-    const [ showLinkForm, setShowLinkForm] = useState(false)
+   
+    const [ showMaxFilesError, setShowMaxFilesError] = useState(false)
 
-    const [post] = usePost(postId) 
-    const [group] = useGroup(post !== null ? post.groupId : groupId)
-    
-    const hasVideoUploads = useFeature('issue-67-video-uploads')
     const videoUploadsEnabled = useFeature('video-uploads')
+    const hasPostGalleries = useFeature('feat-15-post-image-galleries')
 
     const [draft, setDraft] = usePostDraft(postId, groupId, sharedPostId)
 
-    const [file] = useFile(draft?.fileId)
-
-    const setFileId = function(fileId) {
+    const setFiles = function(files) {
         const newDraft = { ...draft }
         newDraft.linkPreviewId = null 
-        newDraft.fileId = fileId 
+        newDraft.files = [ ...draft.files, ...files ]
         newDraft.sharedPostId = null
         setDraft(newDraft)
     }
+
+    let totalMaxFiles = 30
+    if ( ! hasPostGalleries ) {
+        totalMaxFiles = 1
+    }
+    const maxFiles = totalMaxFiles - draft.files.length
 
     if ( draft.sharedPostId || draft.linkPreviewId ) {
         return null
     }
 
-    if ( draft.fileId !== undefined && draft.fileId !== null ) {
-        if ( file === undefined || file === null ) {
-            return ( <Spinner /> ) 
-        } else if ( file.state === 'ready' ) {
+
+    // Posts may not have more than 30 files attached.
+    if ( draft.files.length >= totalMaxFiles ) {
+        if ( showMaxFilesError ) {
+            return <Alert type="error" timeout={5000} onClear={() => setShowMaxFilesError(false)}>Too many files selected.  Galleries are limited to 30 files.</Alert>
+        } else {
             return null
         }
     }
 
     return (
         <div className="attachment-controls">
-            { ( file === undefined || file === null || (file?.kind === 'image' && file?.state !== 'ready')) && <div className="post-form__image">
+            { showMaxFilesError && <Alert type="error" timeout={5000}>Too many files selected.  Galleries are limited to 30 files.</Alert> }
+            <div className="post-form__image">
                  <FileUploadInput 
                     text="Add Image"
-                    fileId={draft.fileId} 
-                    setFileId={setFileId} 
-                    type='image'
-                    types={[ 'image/jpeg', 'image/png' ]} 
+                    maxFiles={maxFiles}
+                    onChange={(files) => setFiles(files)} 
+                    onError={(error) => setShowMaxFilesError(true)}
+                    kind='image'
+                    allowedTypes={[ 'image/jpeg', 'image/png' ]} 
                 /> 
-            </div> } 
-        { ( file === undefined || file === null || ( file?.kind === 'video' && file?.state !== 'ready' )) && ( hasVideoUploads === true && videoUploadsEnabled === true ) && <div className="post-form__video">
+            </div> 
+        {  videoUploadsEnabled === true && <div className="post-form__video">
                 <FileUploadInput
                     text="Add Video"
-                    fileId={draft.fileId}
-                    setFileId={setFileId}
-                    type='video'
-                    types={[ 'video/mp4', 'video/quicktime' ]}
+                    maxFiles={1}
+                    onChange={(files) => setFiles(files)}
+                    onError={(error) => setShowMaxFilesError(true)}
+                    kind='video'
+                    allowedTypes={[ 'video/mp4', 'video/quicktime' ]}
                 />
             </div> }
         </div>
