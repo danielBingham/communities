@@ -33,6 +33,7 @@ const PostAttachmentControls = function({ postId, groupId, sharedPostId }) {
     const [ showMaxFilesError, setShowMaxFilesError] = useState(false)
 
     const videoUploadsEnabled = useFeature('video-uploads')
+    const hasPostGalleries = useFeature('feat-15-post-image-galleries')
 
     const [draft, setDraft] = usePostDraft(postId, groupId, sharedPostId)
 
@@ -44,13 +45,19 @@ const PostAttachmentControls = function({ postId, groupId, sharedPostId }) {
         setDraft(newDraft)
     }
 
+    let totalMaxFiles = 30
+    if ( ! hasPostGalleries ) {
+        totalMaxFiles = 1
+    }
+    const maxFiles = totalMaxFiles - draft.files.length
+
     if ( draft.sharedPostId || draft.linkPreviewId ) {
         return null
     }
 
 
     // Posts may not have more than 30 files attached.
-    if ( draft.files.length >= 30 ) {
+    if ( draft.files.length >= totalMaxFiles ) {
         if ( showMaxFilesError ) {
             return <Alert type="error" timeout={5000} onClear={() => setShowMaxFilesError(false)}>Too many files selected.  Galleries are limited to 30 files.</Alert>
         } else {
@@ -58,7 +65,6 @@ const PostAttachmentControls = function({ postId, groupId, sharedPostId }) {
         }
     }
 
-    const maxFiles = 30 - draft.files.length
     return (
         <div className="attachment-controls">
             { showMaxFilesError && <Alert type="error" timeout={5000}>Too many files selected.  Galleries are limited to 30 files.</Alert> }

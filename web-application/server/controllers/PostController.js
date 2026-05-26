@@ -566,6 +566,15 @@ module.exports = class PostController {
                 errorString)
         }
 
+        // If we don't have the galleries feature, just stick the first item
+        // into fileId.
+        if ( ! this.core.features.has('feat-15-post-image-galleries') ) {
+            if ( 'files' in post && Array.isArray(post.files) ) {
+                post.fileId = post.files[0]
+                delete post.files
+            }
+        }
+
         await this.postDAO.insertPosts(post)
 
         const results = await this.postDAO.selectPosts({
@@ -774,6 +783,15 @@ module.exports = class PostController {
             throw new ControllerError(400, 'invalid',
                 `User submitted an invalid post: ${logString}`,
                 errorString)
+        }
+
+        // If we don't have the galleries feature, just stick the first item
+        // into fileId.
+        if ( ! this.core.features.has('feat-15-post-image-galleries') ) {
+            if ( 'files' in post && Array.isArray(post.files) ) {
+                post.fileId = post.files[0]
+                delete post.files
+            }
         }
 
         await this.postDAO.updatePost(post)

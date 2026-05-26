@@ -90,6 +90,10 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
                 return true
             } else if ( draft.visibility !== post?.visibility ) {
                 return true
+            } else if ( Array.isArray(draft.files) !== Array.isArray(post.files) 
+                || (Array.isArray(draft.files) && Array.isArray(post.files) && draft.files?.length !== post?.files?.length )
+            ) {
+                return true
             } else if ( draft.fileId !== post?.fileId ) {
                 return true
             } else if ( draft.linkPreviewId !== post?.linkPreviewId ) {
@@ -112,6 +116,8 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
             } else if ( draft.type !== defaultType ) {
                 return true
             } else if ( draft.visibility !== defaultVisibility ) {
+                return true
+            } else if ( Array.isArray(draft.files) && draft.files.length > 0 ) {
                 return true
             } else if ( draft.fileId !== null ) {
                 return true
