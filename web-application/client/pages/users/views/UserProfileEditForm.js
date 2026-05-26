@@ -240,7 +240,7 @@ const UserProfileEditForm = function(props) {
                 <div className="user-profile-edit-form__profile-image">
                     <div>
                         { ! fileId && <UserCircleIcon className="user-profile-edit-form__placeholder" /> }
-                        { fileId && file && file.state === 'ready' && <DraftProfileImage
+                        { fileId && <DraftProfileImage
                                         ref={fileRef}
                                         fileId={fileId} 
                                         setFileId={setFileId} 
@@ -249,11 +249,11 @@ const UserProfileEditForm = function(props) {
                                         width={200} 
                                         deleteOnRemove={false} 
                         /> }
-                        { ( ! fileId || file?.state !== 'ready') && <FileUploadInput 
-                            fileId={fileId}
-                            setFileId={setFileId} 
-                            type="image"
-                            types={[ 'image/jpeg', 'image/png' ]} 
+                        { ( ! fileId ) && <FileUploadInput 
+                            maxFiles={1}
+                            onChange={(fileIds) => setFileId(fileIds[0])} 
+                            kind="image"
+                            allowedTypes={[ 'image/jpeg', 'image/png' ]} 
                         /> }
                     </div>
                 </div>

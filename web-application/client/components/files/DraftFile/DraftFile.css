@@ -1,0 +1,48 @@
+.draft-file {
+    position: relative;
+    width: 100%;
+}
+.draft-file img {
+    width: 100%;
+    max-width: min(100vw, 650px);
+}
+.draft-file video {
+    width: 100%;
+    max-width: min(100vw, 650px);
+}
+.draft-file__failed-load {
+    display: grid;
+    width: min(100vw, 630px);
+    aspect-ratio: 1 / 1;
+    border: thin solid var(--main-border-color);
+    align-items: center;
+    justify-items: center;
+}
+.draft-file__failed-load svg {
+    width: 48px;
+    height: 48px;
+    color: var(--main-border-color);
+}
+.draft-file .draft-file__remove {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 9;
+
+    box-sizing: border-box;
+
+    height: 32px;
+    width: 32px;
+    border-radius: 32px;
+    padding: 8px;
+
+    background-color: black;
+    opacity: 75%;
+    color: white;
+}
+.draft-file .draft-file__remove svg {
+    width: 16px;
+    height: 16px;
+    line-height: 16px;
+    color: white;
+}

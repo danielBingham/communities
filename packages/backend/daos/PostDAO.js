@@ -115,6 +115,15 @@ const SCHEMA = {
                 select: 'always',
                 key: 'updatedDate'
             },
+            'post_files': {
+                insert: 'denied',
+                update: 'denied',
+                select: 'override',
+                selectOverride: function(row) {
+                    return []
+                },
+                key: 'files'
+            },
             'post_reactions': {
                 insert: 'denied',
                 update: 'denied',
@@ -149,12 +158,6 @@ const SCHEMA = {
                 update: 'allowed',
                 select: 'always',
                 key: 'postId'
-            },
-            'file_id': {
-                insert: 'allowed',
-                update: 'allowed',
-                select: 'always',
-                key: 'fileId'
             },
             'content': {
                 insert: 'allowed',
@@ -205,6 +208,7 @@ module.exports = class PostDAO extends DAO {
 
         const postReactionDictionary = {}
         const postCommentDictionary = {}
+        const fileDictionary = {}
 
         for(const row of rows) {
 
@@ -225,6 +229,14 @@ module.exports = class PostDAO extends DAO {
             if ( row.PostComment_id !== null && ! (row.PostComment_id in postCommentDictionary) ) {
                 postCommentDictionary[row.PostComment_id] = true 
                 dictionary[row.Post_id].comments.push(row.PostComment_id)
+            }
+
+            if ( this.core.features.has('feat-15-post-image-galleries') ) {
+                // Hydate Files.
+                if ( row.File_id !== null && ! ( row.File_id in fileDictionary )) {
+                    fileDictionary[row.File_id] = true
+                    dictionary[row.Post_id].files.push(row.File_id)
+                }
             }
         }
 
@@ -265,13 +277,15 @@ module.exports = class PostDAO extends DAO {
                 ${this.getPostSelectionString()},
                 post_comments.id as "PostComment_id",
                 post_reactions.id as "PostReaction_id"
+                ${ this.core.features.has('feat-15-post-image-galleries') ? ', post_files.file_id as "File_id"' : '' }
             FROM posts
                 LEFT OUTER JOIN post_reactions ON posts.id = post_reactions.post_id
                 LEFT OUTER JOIN post_comments ON posts.id = post_comments.post_id
+                ${ this.core.features.has('feat-15-post-image-galleries') ? 'LEFT OUTER JOIN post_files ON posts.id = post_files.post_id' : '' }
                 LEFT OUTER JOIN site_moderation ON posts.site_moderation_id = site_moderation.id
                 LEFT OUTER JOIN group_moderation ON posts.group_moderation_id = group_moderation.id
             ${where}
-            ORDER BY ${order}, post_comments.created_date ASC 
+            ORDER BY ${order}, post_comments.created_date ASC${ this.core.features.has('feat-15-post-image-galleries') ? ', post_files.position ASC' : '' }
         `
         const results = await this.core.database.query(sql, params)
 
@@ -328,6 +342,35 @@ module.exports = class PostDAO extends DAO {
 
     async insertPosts(posts) {
         await this.insert('Post', posts)
+
+        if ( Array.isArray(posts) ) {
+            for(const post of posts) {
+                await this.insertPostFiles(post)
+            }
+        } else {
+            await this.insertPostFiles(posts)
+        }
+    }
+
+    async insertPostFiles(post) {
+        if ( ! ('files' in post) || ! Array.isArray(post.files) || post.files.length <= 0 ) {
+            return
+        }
+
+        let sql = `INSERT INTO post_files (post_id, file_id, position) VALUES `
+        let params = []
+
+        let counter = 1
+        for(const fileId of post.files) {
+            sql += `($${params.length+1}, $${params.length+2}, $${params.length+3}),`
+            params.push(post.id, fileId, counter)
+            counter = counter+1
+        }
+
+        // Strip off the final comma
+        sql = sql.substring(0, sql.length-1)
+
+        await this.core.database.query(sql, params)
     }
 
     async insertPostVersions(postVersions) {
@@ -336,6 +379,20 @@ module.exports = class PostDAO extends DAO {
 
     async updatePost(post) {
         await this.update('Post', post)
+
+        if ( 'files' in post && post.files !== undefined && post.files !== null ) {
+            await this.updatePostFiles(post)
+        }
+    }
+
+    async updatePostFiles(post) {
+        if ( ! ('files' in post) || post.files === undefined || post.files === null ) {
+            return
+        }
+
+        await this.core.database.query(`DELETE FROM post_files WHERE post_id = $1`, [ post.id ])
+
+        await this.insertPostFiles(post)
     }
 
     async updatePostVersion(postVersion) {
