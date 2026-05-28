@@ -124,7 +124,7 @@ module.exports = class FileController {
 
         // Add the new fields that come with video uploads.
         if ( this.core.features.has('issue-67-video-uploads') ) {
-            file.state  = 'ready'
+            file.state  = 'processing'
             file.kind = mimetype.split('/')[0]
             file.mimetype = mimetype
             file.variants = [ ]
@@ -132,7 +132,7 @@ module.exports = class FileController {
 
         await this.fileDAO.updateFile(file)
 
-        const job = await this.core.queues['resize-image'].add({ session: { user: currentUser }, fileId: file.id }, { attempts: 2 })
+        const job = await this.core.queues['resize-image'].add({ session: { user: currentUser }, fileId: file.id }, { attempts: 3 })
 
         if ( this.core.features.has('issue-67-video-uploads') ) {
             const filePatch = {
@@ -531,7 +531,7 @@ module.exports = class FileController {
         if ( this.core.features.has('issue-67-video-uploads') ) {
             const patch = {
                 id: fileId,
-                state: 'ready',
+                state: 'processing',
                 jobId: job.id
             }
             await this.fileDAO.updateFile(patch)

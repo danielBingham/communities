@@ -35,6 +35,7 @@ import File from '/components/files/File'
 import JobError from '/components/errors/JobError'
 import Spinner from '/components/Spinner'
 import Button from '/components/ui/Button'
+import ProgressBar from '/components/ProgressBar'
 
 import "./DraftFile.css"
 
@@ -61,8 +62,11 @@ const DraftFile = function({
     }
 
     const [job, jobRequest] = useJob(queue, file?.jobId)
-    useEventSubscription('Job', 'update', { queue: queue, jobId: file?.jobId }, { skip: ! file?.jobId })
- 
+    useEventSubscription(file?.jobId ? `Job-update-${queue}-${file.jobId}` : null, 
+        'Job', 'update', { queue: queue, jobId: file?.jobId }, { skip: ! file?.jobId })
+
+    console.log(`job: `, job)
+
     const [isLoaded, setIsLoaded] = useState(false)
     const [loadFailed, setLoadFailed] = useState(false)
 
@@ -133,8 +137,27 @@ const DraftFile = function({
         <div className="draft-file" >
             { state === State.isPreparingUpload && <div><Spinner local={true} /> <span>Preparing the upload...</span></div> }
             { state === State.isPendingUpload && <div><Spinner local={true} /> <span>Upload prepared. Upload will begin shortly...</span></div> }
-            { state === State.isUploading && <div><Spinner local={true} /> <span>Uploading.  Do not navigate away.  This might take several minutes...</span></div> }
-            { state === State.isProcessing && <div> <Spinner local={true} /> <span>Processing. Do not navigate away. { job ? `${job.progress.progress}% complete.` : '' }  This might take a several minutes..</span></div> }
+            { state === State.isUploading && 
+                <div className="draft-file__file">
+                    <a className="draft-file__remove" href="" onClick={(e) => { e.preventDefault(); remove() }}><XMarkIcon /></a>
+                    <div className="draft-file__pending">
+                        <div>
+                            <Spinner local={true} /> <span>Uploading.  Do not navigate away.  This might take several minutes...</span>
+                        </div> 
+                    </div>
+                </div>
+            }
+            { state === State.isProcessing && 
+                <div className="draft-file__file">  
+                    <a className="draft-file__remove" href="" onClick={(e) => { e.preventDefault(); remove() }}><XMarkIcon /></a>
+                    <div className="draft-file__pending">
+                        <div>
+                            <p>Processing. Do not navigate away. This might take several minutes...</p>
+                            <ProgressBar progress={ job ? job.progress.progress : 0 } />
+                        </div>
+                    </div>
+                </div> 
+            }
             { state === State.isReady && 
                 <div className="draft-file__file">
                     { (isLoaded || loadFailed) && <a className="draft-file__remove" href="" onClick={(e) => { e.preventDefault(); remove() }}><XMarkIcon /></a> }

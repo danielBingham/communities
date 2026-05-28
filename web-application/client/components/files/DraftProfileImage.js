@@ -17,10 +17,12 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import { useState, useEffect, useRef, useImperativeHandle, forwardRef } from 'react'
+import { useState, useEffect, useRef, useImperativeHandle } from 'react'
 import { useSelector } from 'react-redux'
 
 import { ReactCrop } from 'react-image-crop'
+
+import { XMarkIcon, PhotoIcon } from '@heroicons/react/16/solid'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
@@ -36,6 +38,7 @@ import JobError from '/components/errors/JobError'
 import Button from '/components/ui/Button'
 import Spinner from '/components/Spinner'
 import File from '/components/files/File'
+import ProgressBar from '/components/ProgressBar'
 
 import "react-image-crop/dist/ReactCrop.css"
 import "./DraftProfileImage.css"
@@ -49,18 +52,22 @@ const State = {
     isReady: 'isReady'
 }
 
-const DraftProfileImage = forwardRef(function({ 
+const DraftProfileImage = function({ 
+    ref,
     fileId, setFileId, 
-    state, setState,
     width, 
-    deleteOnRemove 
-}, ref) {
+    deleteOnRemove,
+    onError,
+    onProcessingSuccess,
+    onCropSuccess,
+    onRemove
+}) {
 
     const [file, fileRequest, refreshFile] = useFile(fileId)
     const [job, jobRequest] = useJob('resize-image', file?.jobId)
-    useEventSubscription('Job', 'update', { queue: 'resize-image', jobId: file?.jobId }, { skip: ! file?.jobId })
+    useEventSubscription(file?.jobId ? `Job-update-resize-image-${file.jobId}` : null, 
+        'Job', 'update', { queue: 'resize-image', jobId: file?.jobId }, { skip: ! file?.jobId })
 
-    const [ cacheBust, setCacheBust ] = useState(0)
     const [ dimensions, setDimensions ] = useState({
         width: 1,
         height: 1 
@@ -74,6 +81,7 @@ const DraftProfileImage = forwardRef(function({
 
     })
     const [isLoaded, setIsLoaded] = useState(false)
+    const [isCropping, setIsCropping] = useState(false)
 
     const [ request, makeRequest ] = useRequest()
     const imageRef = useRef(null)
@@ -83,6 +91,18 @@ const DraftProfileImage = forwardRef(function({
 
         if ( deleteOnRemove !== false ) {
             makeRequest(deleteFile(fileId))
+        }
+
+        if ( onRemove ) {
+            onRemove()
+        }
+    }
+
+    const onErrorInternal = function() {
+        remove()
+
+        if ( onError ) {
+            onError()
         }
     }
 
@@ -117,6 +137,7 @@ const DraftProfileImage = forwardRef(function({
         return {
             submit: function() {
                 makeRequest(patchFile(fileId, { crop: crop, dimensions: dimensions }))
+                setIsCropping(true)
             }
         }
     }, [ fileId, crop, dimensions ])
@@ -149,18 +170,13 @@ const DraftProfileImage = forwardRef(function({
     }, [ crop, isLoaded] )
 
     useEffect(function() {
-        if ( request && request.state !== state) {
-            setState(request.state)
-        }
-
         // Reset the crop once we're done cropping so that it doesn't appear
         // outside the image if the draft is still shown.
         //
-        // Aslo bust the cache.
+        // Also bust the cache.
         //
         // The draft image will still be shown in UserProfileEditForm.
-        if ( request && request.state == 'fulfilled' ) {
-            setCacheBust(cacheBust+1)
+        if ( request?.state == 'fulfilled' ) {
             setCrop({
                 unit: 'px',
                 x: 0,
@@ -168,18 +184,36 @@ const DraftProfileImage = forwardRef(function({
                 width: width,
                 height: width
             })
+            refreshFile()
+        } else if ( request?.state === 'failed' ) {
+            setCrop({
+                unit: 'px',
+                x: 0,
+                y: 0,
+                width: width,
+                height: width
+            })
+
+            refreshFile()
+
+            if ( onError ) {
+                onError()
+            }
         }
     }, [ request ])
 
     useEffect(function() {
-        if ( job && job.progress.step === 'complete') { 
-            if ( job.progress.step === 'complete' ) {
-                refreshFile()
-            } else if ( job.finishedOn !== null ) {
-                refreshFile()
-            } 
+        if ( job?.progress?.step === 'complete') { 
+            refreshFile()
+
+            if ( isCropping && onCropSuccess) {
+                setIsCropping(false)
+                onCropSuccess()
+            } else if ( onProcessingSuccess ) {
+                onProcessingSuccess()
+            }
         }
-    }, [ job ])
+    }, [ job?.progress?.step ])
 
     // ============ Render ====================================================
   
@@ -227,8 +261,31 @@ const DraftProfileImage = forwardRef(function({
         <div className="draft-profile-image">
             { stateInternal === State.isPreparingUpload && <div><Spinner local={true} /> <span>Preparing the upload...</span></div> }
             { stateInternal === State.isPendingUpload && <div><Spinner local={true} /> <span>Upload prepared. Upload will begin shortly...</span></div> }
-            { stateInternal === State.isUploading && <div><Spinner local={true} /> <span>Uploading.  Do not navigate away.  This might take several minutes...</span></div> }
-            { stateInternal === State.isProcessing && <div> <Spinner local={true} /> <span>Processing. Do not navigate away. { job ? `${job.progress.progress}% complete.` : '' }  This might take a several minutes..</span></div> }
+            { stateInternal === State.isUploading && 
+                <div className="draft-profile-image__file">
+                    <div className="draft-profile-image__pending">
+                        <div className="draft-profile-image__pending-progress">
+                            <Spinner local={true} /> <span>Uploading.  Do not navigate away.  This might take several minutes...</span>
+                        </div> 
+                    </div>
+                    <div className="draft-profile-image__buttons">
+                        <Button onClick={(e) => { e.preventDefault(); remove() }}>Remove Image</Button>
+                    </div>
+                </div>
+            }
+            { stateInternal === State.isProcessing && 
+                <div className="draft-profile-image__file">  
+                    <div className="draft-profile-image__pending">
+                        <div className="draft-profile-image__pending-progress">
+                            <p>Processing. Do not navigate away. This might take several minutes...</p>
+                            <ProgressBar progress={ job ? job.progress.progress : 0 } />
+                        </div>
+                    </div>
+                    <div className="draft-profile-image__buttons">
+                        <Button onClick={(e) => { e.preventDefault(); remove() }}>Remove Image</Button>
+                    </div>
+                </div> 
+            }
             { stateInternal === State.isReady && 
                 <>
                     <div className={`draft-profile-image__file-wrapper`} style={style}>
@@ -249,10 +306,10 @@ const DraftProfileImage = forwardRef(function({
                     </div>
                 </>
             }
-            <RequestErrorModal message={'Attempt to crop your profile'} request={request} onContinue={() => remove()} />
-            <JobError message={'File processing'} job={job} onContinue={() => remove()} />
+            <RequestErrorModal message={'Attempt to crop your profile'} request={request} onContinue={() => onErrorInternal()} />
+            <JobError message={'File processing'} job={job} onContinue={() => onErrorInternal()} />
         </div>
     )
-})
+}
 
 export default DraftProfileImage 

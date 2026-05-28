@@ -54,7 +54,7 @@ module.exports = class S3FileService {
                     Body: filestream
                 }
 
-                this.s3Client.send(new PutObjectCommand(params)).then(() => resolve())
+                this.s3Client.send(new PutObjectCommand(params)).then(() => resolve()).catch((error) => reject(error))
             })
         })
     }

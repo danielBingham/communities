@@ -34,13 +34,13 @@ const GroupEditForm = function({ groupId }) {
     const [group] = useGroup(groupId)
 
     const [areYouSure, setAreYouSure] = useState(false)
+    const [isPending, setIsPending] = useState(false)
 
     const [ title, setTitle ] = useLocalStorage('group.draft.title', ( group?.title ? group.title : ''))
     const [ about, setAbout ] = useLocalStorage('group.draft.about', ( group?.about ? group.about : ''))
     const [ shortDescription, setShortDescription ] = useLocalStorage('group.draft.shortDescription', (group?.shortDescription ? group.shortDescription: ''))
     const [ rules, setRules ] = useLocalStorage('group.draft.rules', (group?.rules ? group.rules : ''))
     const [ fileId, setFileId] = useLocalStorage('group.draft.fileId', ( group?.fileId ? group.fileId : null))
-    const [fileState, setFileState] = useState(null) 
     const [file] = useFile(fileId)
 
     const [ titleErrors, setTitleErrors ] = useState(null)
@@ -128,6 +128,17 @@ const GroupEditForm = function({ groupId }) {
             && rulesValidationErrors.length === 0
     }
 
+    const resetForm = function() {
+        setTitle(null)
+        setAbout(null)
+        setShortDescription(null)
+        setRules(null)
+        setFileId(null)
+
+        setIsPending(false)
+        setAreYouSure(false)
+    }
+
     const assembleGroup = function() {
         const newGroup = {
             id: groupId,
@@ -144,6 +155,10 @@ const GroupEditForm = function({ groupId }) {
         return newGroup
     }
 
+    const updateGroup = function() {
+        makeRequest(patchGroup(assembleGroup()))
+    }
+
     const onSubmit = function(event) {
         event.preventDefault()
 
@@ -151,10 +166,12 @@ const GroupEditForm = function({ groupId }) {
             return
         }
 
+        setIsPending(true)
+
         if ( fileId !== null && fileId !== undefined ) {
             fileRef.current?.submit()
         } else {
-            makeRequest(patchGroup(assembleGroup()))
+            updateGroup()
         }
     }
 
@@ -162,13 +179,7 @@ const GroupEditForm = function({ groupId }) {
      * Execute the cancelling of this Group edit and clear the form.
      */
     const cancel = function(event) {
-        setTitle(null)
-        setAbout(null)
-        setShortDescription(null)
-        setRules(null)
-        setFileId(null)
-
-        setAreYouSure(false)
+        resetForm()
 
         navigate(`/group/${group.slug}`)
     }
@@ -185,26 +196,14 @@ const GroupEditForm = function({ groupId }) {
     }
 
     useEffect(() => {
-        if ( fileId !== null && fileState == 'fulfilled' && ! request ) {
-            makeRequest(patchGroup(assembleGroup()))
-        } else if ( (fileState == 'fulfilled') && (request && request.state == 'fulfilled')) {
-            setTitle(null)
-            setAbout(null)
-            setShortDescription(null)
-            setRules(null)
-            setFileId(null)
+        if (request?.state === 'fulfilled') {
+            resetForm()
    
             navigate(`/group/${request.response.body.entity.slug}`)
-        } else if ( fileId === null && (request && request.state == 'fulfilled')) {
-            setTitle(null)
-            setAbout(null)
-            setShortDescription(null)
-            setRules(null)
-            setFileId(null)
-   
-            navigate(`/group/${request.response.body.entity.slug}`)
+        } else if ( request?.state === 'failed' ) {
+            setIsPending(false)
         }
-    }, [ request, fileState, fileId ])
+    }, [ request ])
 
     if ( ! group ) {
         return (<Spinner />)
@@ -212,7 +211,6 @@ const GroupEditForm = function({ groupId }) {
 
     let baseError = null
 
-    const inProgress = (request && request.state == 'pending') || (fileId && fileState == 'pending')
     return (
         <div className="group-edit-form">
             <form onSubmit={onSubmit} >
@@ -220,16 +218,18 @@ const GroupEditForm = function({ groupId }) {
                 <div className="group-edit-form__group-image">
                     <div>
                         { ! fileId && <UserCircleIcon className="placeholder" /> }
-                        { fileId && file?.state === 'ready' && <DraftProfileImage 
+                        { fileId && <DraftProfileImage 
                             ref={fileRef}
                             fileId={fileId} 
                             setFileId={setFileId} 
-                            state={fileState}
-                            setState={setFileState}
                             width={200} 
                             deleteOnRemove={false} 
+                            onProcessingSuccess={() => { setIsPending(false) }}
+                            onCropSuccess={() => { updateGroup() }}
+                            onError={() => { setIsPending(false)}}
+                            onRemove={() => { setIsPending(false)}}
                         /> }
-                        { ( ! fileId || file?.state !== 'ready') && <FileUploadInput 
+                        { ! fileId  && <FileUploadInput 
                             maxFiles={1}
                             onChange={(fileIds) => setFileId(fileIds[0])}
                             kind="image"
@@ -282,8 +282,8 @@ const GroupEditForm = function({ groupId }) {
                     />
                 }
                 <div className="group-edit-form__controls">
-                    { inProgress && <Spinner /> }
-                    { ! inProgress && <div className="buttons">
+                    { isPending && <Spinner /> }
+                    { ! isPending && <div className="buttons">
                         <Button onClick={() => handleCancel()}>Cancel</Button> 
                         <input type="submit" name="submit" value="Submit" />
                     </div> }

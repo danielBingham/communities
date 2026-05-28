@@ -58,7 +58,7 @@ const NotificationMenu = function({ }) {
     const notificationDictionary = useSelector((state) => state.notifications.dictionary)
     const unreadNotifications = notifications.filter((id) => ! notificationDictionary[id].isRead)
 
-    useEventSubscription('Notification', 'create')
+    useEventSubscription('Notification-create', 'Notification', 'create')
 
     const markAllRead = function(event) {
         try { 

@@ -10,7 +10,7 @@
     width: 100%;
     max-width: min(100vw, 650px);
 }
-.draft-file__failed-load {
+.draft-file__failed-load, .draft-file__pending {
     display: grid;
     width: min(100vw, 630px);
     aspect-ratio: 1 / 1;

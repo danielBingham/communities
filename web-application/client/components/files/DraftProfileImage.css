@@ -8,3 +8,44 @@
 .draft-profile-image__buttons {
     text-align: center;
 }
+
+.draft-profile-image__failed-load, .draft-profile-image__pending {
+    display: grid;
+    width: min(100vw, 200px);
+    aspect-ratio: 1 / 1;
+    border: thin solid var(--main-border-color);
+    align-items: center;
+    justify-items: center;
+}
+.draft-profile-image__pending-progress {
+    width: min(80vw, 150px);
+}
+
+.draft-profile-image__failed-load svg {
+    width: 48px;
+    height: 48px;
+    color: var(--main-border-color);
+}
+.draft-profile-image .draft-profile-image__remove {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 9;
+
+    box-sizing: border-box;
+
+    height: 32px;
+    width: 32px;
+    border-radius: 32px;
+    padding: 8px;
+
+    background-color: black;
+    opacity: 75%;
+    color: white;
+}
+.draft-profile-image .draft-profile-image__remove svg {
+    width: 16px;
+    height: 16px;
+    line-height: 16px;
+    color: white;
+}

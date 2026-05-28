@@ -25,7 +25,6 @@ const getResizeImageJob = function(core) {
         core.logger.info(`Beginning job 'resize-image' for user ${job.data.session.user.id} and file ${job.data.fileId}.`)
 
         try {
-
             job.progress({ step: 'initializing', stepDescription: `Initializing...`, progress: 0 })
 
             const imageService = new ImageService(core)

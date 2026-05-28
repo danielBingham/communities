@@ -30,6 +30,10 @@ const JobError = function({ message, job, onContinue }) {
 
     if ( job !== undefined && job !== null ) {
         if ( ( job.failedReason !== undefined && job.failedReason !== null ) || job.progress.step === 'failed' ) {
+            // If we still have more attempts to make, then ignore the current error.
+            if ( job.attemptsMade < job.opts?.attempts ) {
+                return null
+            }
 
             let state = State.UnknownFailure
             if ( job.failedReason !== undefined && job.failedReason !== null ) {

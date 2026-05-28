@@ -44,12 +44,12 @@ import './UserProfileEditForm.css'
 
 const UserProfileEditForm = function(props) {
 
+    const currentUser = useSelector((state) =>  state.authentication.currentUser)
+
     const [areYouSure, setAreYouSure] = useState(false)
+    const [isPending, setIsPending] = useState(false)
 
     const [fileId, setFileId] = useState(null)
-    const [fileState, setFileState] = useState(null)
-
-    const [file, fileRequest, fileReset] = useFile(fileId)
 
     const [name, setName] = useState('')
     const [about, setAbout] = useState('')
@@ -60,8 +60,6 @@ const UserProfileEditForm = function(props) {
     const fileRef = useRef(null)
 
     const [ request, makeRequest, resetRequest ] = useRequest()
-
-    const currentUser = useSelector((state) =>  state.authentication.currentUser)
 
     const madeChange = fileId != currentUser.fileId || name != currentUser.name || about != currentUser.about
 
@@ -130,6 +128,10 @@ const UserProfileEditForm = function(props) {
         }
     }
 
+    const updateUser = function() {
+        makeRequest(patchUser(assembleUser()))
+    }
+
     const onSubmit = function(event) {
         event.preventDefault()
 
@@ -137,11 +139,14 @@ const UserProfileEditForm = function(props) {
             return
         }
 
+        setIsPending(true)
         if ( fileId !== null && fileId !== undefined ) {
             fileRef.current?.submit()
-        } 
-        makeRequest(patchUser(assembleUser()))
+        } else {
+            updateUser() 
+        }
     }
+
 
     /**
      * Execute the cancelation of this user profile edit and clear the form.
@@ -165,6 +170,7 @@ const UserProfileEditForm = function(props) {
             setFileId(currentUser.fileId)
         }
 
+        setIsPending(false)
         setAreYouSure(false)
         
         navigate(`/${currentUser.username}`)
@@ -175,6 +181,7 @@ const UserProfileEditForm = function(props) {
      */
     const handleCancel = function() {
         if ( isDirty() ) {
+            setIsPending(false)
             setAreYouSure(true)
         } else {
             cancel()
@@ -210,10 +217,20 @@ const UserProfileEditForm = function(props) {
         }
     }, [ madeChange ])
 
+    useEffect(function() {
+        if ( request?.state === 'fulfilled' ) {
+            setIsPending(false)
+            navigate(`/${currentUser.username}`)
+        } else if ( request?.state === 'failed' ) {
+            setIsPending(false)
+        }
+    }, [ request ])
+
+
     // ======= Render ===============================================
    
     let result = null
-    if ( fileId && fileState == 'fulfilled' && request && request.state == 'fulfilled' ) {
+    if ( request && request.state == 'fulfilled' ) {
         result = (
             <div className="success">
                 Update successful.
@@ -225,15 +242,8 @@ const UserProfileEditForm = function(props) {
                 Request failed: { request.error.message }.
             </div>
         )
-    } else if ( fileId && fileState == 'failed' ) {
-        result = (
-            <div className="request-failure">
-                Request failed. Failed to crop your profile image.
-            </div>
-        )
-    }
+    } 
 
-    const isPending = (request && request.state == 'pending' ) || ( fileId && fileState == 'pending' )
     return (
         <div className='user-profile-edit-form'>
             <form onSubmit={onSubmit}>
@@ -244,14 +254,17 @@ const UserProfileEditForm = function(props) {
                                         ref={fileRef}
                                         fileId={fileId} 
                                         setFileId={setFileId} 
-                                        state={fileState}
-                                        setState={setFileState}
                                         width={200} 
                                         deleteOnRemove={false} 
+                                        onProcessingSuccess={() => { setIsPending(false) }}
+                                        onCropSuccess={() => { updateUser() }}
+                                        onError={() => { setIsPending(false)}}
+                                        onRemove={() => { setIsPending(false)}}
+                                        
                         /> }
                         { ( ! fileId ) && <FileUploadInput 
                             maxFiles={1}
-                            onChange={(fileIds) => setFileId(fileIds[0])} 
+                            onChange={(fileIds) => { setIsPending(true); setFileId(fileIds[0])}} 
                             kind="image"
                             allowedTypes={[ 'image/jpeg', 'image/png' ]} 
                         /> }
@@ -279,7 +292,6 @@ const UserProfileEditForm = function(props) {
                     error={aboutError}
                 />
                 <div className="result">
-                    { madeChange && <span>Submit to save your changes...</span> }
                     {result}
                 </div>
                 <div className="form-submit submit">
