@@ -18,6 +18,9 @@
  *
  ******************************************************************************/
 import { useState, useEffect } from 'react'
+import { useSelector } from 'react-redux'
+
+
 import { useRequest } from '/lib/hooks/useRequest'
 
 import { XMarkIcon, PhotoIcon } from '@heroicons/react/16/solid'
@@ -32,10 +35,13 @@ import { useEventSubscription } from '/lib/hooks/useEventSubscription'
 
 import File from '/components/files/File'
 
+import { RequestErrorModal } from '/components/errors/RequestError'
 import JobError from '/components/errors/JobError'
+
 import Spinner from '/components/Spinner'
 import Button from '/components/ui/Button'
 import ProgressBar from '/components/ProgressBar'
+import Alert from '/components/ui/Alert'
 
 import "./DraftFile.css"
 
@@ -53,6 +59,9 @@ const DraftFile = function({
     onRemove, deleteOnRemove
 }) {
 
+    const uploadInfo = useSelector((state) => fileId in state.File.requests ? state.File.requests[fileId] : null)
+    const uploadRequest = useSelector((state) => uploadInfo?.requestId in state.requests.dictionary ? state.requests.dictionary[uploadInfo?.requestId] : null)
+
     const [file, fileRequest, refreshFile] = useFile(fileId)
 
     let type = file ? file.type.split('/')[0] : 'image'
@@ -64,8 +73,6 @@ const DraftFile = function({
     const [job, jobRequest] = useJob(queue, file?.jobId)
     useEventSubscription(file?.jobId ? `Job-update-${queue}-${file.jobId}` : null, 
         'Job', 'update', { queue: queue, jobId: file?.jobId }, { skip: ! file?.jobId })
-
-    console.log(`job: `, job)
 
     const [isLoaded, setIsLoaded] = useState(false)
     const [loadFailed, setLoadFailed] = useState(false)
@@ -119,6 +126,14 @@ const DraftFile = function({
                 </div>
             </div>
         )
+    }
+
+    if ( uploadRequest?.state === 'failed' ) {
+        if ( uploadRequest.error.type === 'upload-error:file-size' ) {
+            return ( <Alert type="error" timeout={5000} onClear={() => remove() }>'{uploadInfo.fileName}' failed to upload. { uploadRequest.error?.message }</Alert>)
+        } else {
+            return ( <Alert type="error" timeout={5000} onClear={() => remove() }>'{uploadInfo.fileName}' failed to upload.  Please try again or try a different file.</Alert>)
+        }
     }
 
 

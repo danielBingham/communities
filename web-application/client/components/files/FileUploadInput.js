@@ -18,7 +18,7 @@
  *
  ******************************************************************************/
 import { useState, useEffect, useRef } from 'react'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 
 import * as Uuid from 'uuid'
 
@@ -26,7 +26,8 @@ import {  PhotoIcon, VideoCameraIcon } from '@heroicons/react/24/solid'
 
 import logger from '/logger'
 
-import { uploadImage, uploadVideo, postFiles } from '/state/File'
+import { uploadImage, uploadVideo, postFiles, setRequest } from '/state/File'
+import { makePersistedRequest } from '/state/requests'
 
 import { createError } from '/lib/errors'
 
@@ -64,7 +65,8 @@ const FileUploadInput = function({ text, maxFiles, kind, allowedTypes, onChange,
     const hiddenFileInput = useRef(null)
 
     const [postRequest, makePostRequest] = useRequest()
-    const [uploadRequest, makeUploadRequest] = useRequest('FileUploadInput')
+
+    const dispatch = useDispatch()
     
     const onChangeInternal = function(event) {
         if ( event.target.files.length <= 0 ) {
@@ -145,9 +147,11 @@ const FileUploadInput = function({ text, maxFiles, kind, allowedTypes, onChange,
 
                 const id = fileMap.current[index]
                 if ( kind === 'image' ) {
-                    makeUploadRequest(uploadImage(id, fileData))
+                    const requestId = dispatch(makePersistedRequest(uploadImage(id, fileData)))
+                    dispatch(setRequest({ requestId: requestId, fileId: id, fileName: fileData.name }))
                 } else if ( kind === 'video' ) {
-                    makeUploadRequest(uploadVideo(id, fileData))
+                    const requestId = dispatch(makePersistedRequest(uploadVideo(id, fileData)))
+                    dispatch(setRequest({ requestId: requestId, fileId: id, fileName: fileData.name }))
                 } 
             }
 
@@ -156,6 +160,8 @@ const FileUploadInput = function({ text, maxFiles, kind, allowedTypes, onChange,
             if ( onChange ) {
                 onChange(createdFileIds)
             }
+
+            hiddenFileInput.current.value = null
         }
     }, [ postRequest ])
 
@@ -164,23 +170,6 @@ const FileUploadInput = function({ text, maxFiles, kind, allowedTypes, onChange,
     if ( kind !== 'image' && kind !== 'video' ) {
         logger.error(`Invalid FileUpload type, '${kind}'.`)
         return null
-    }
-
-    const State = {
-        isPreparingUpload: 'isPreparingUpload',
-        isPendingUpload: 'isPendingUpload',
-        isUploading: 'isUploading',
-        isProcessing: 'isProcessing',
-        isAwaitingFile: 'isAwaitingFile'
-    }
-
-    let state = State.isAwaitingFile
-   
-    if ( postRequest?.state === 'pending' ) {
-        state = State.isPreparingUpload
-    } 
-    else if ( postRequest?.state === 'fulfilled' && ! uploadRequest )  {
-        state = State.isPendingUpload
     }
 
     let fileErrorView = [] 
@@ -196,14 +185,9 @@ const FileUploadInput = function({ text, maxFiles, kind, allowedTypes, onChange,
     // Perform the render.
     return (
         <div className="file-upload">
-            { state === State.isPreparingUpload && <div><Spinner local={true} /> <span>Preparing the upload...</span></div> }
-            { state === State.isPendingUpload && <div><Spinner local={true} /> <span>Upload prepared. Upload will begin shortly...</span></div> }
-            { state === State.isUploading && <div><Spinner local={true} /> <span>Uploading.  Do not navigate away.  This might take several minutes...</span></div> }
-            { state === State.isProcessing && kind === 'image' && <div><Spinner local={true} /> <span>Processing. Do not navigate away. { job ? `${job.progress.progress}% complete.` : '' }  This might take a several minutes..</span></div> }
-            { state === State.isProcessing && kind === 'video' && <div><Spinner local={true} /> <span>Processing. Do not navigate away. This might take several minutes...</span></div> }
-            { state === State.isAwaitingFile && <div className="upload-input">
+            <div className="upload-input">
                 <Button type="primary" onClick={(e) => hiddenFileInput.current.click()}>{ icon } <span className="file-upload-button-text"> { text ? text : 'Upload Image' }</span></Button>
-            </div> }
+            </div> 
             <input type="file"
                 name="file"
                 accept={allowedTypes.join(',')}
@@ -213,7 +197,6 @@ const FileUploadInput = function({ text, maxFiles, kind, allowedTypes, onChange,
                 ref={hiddenFileInput}
             />
             <RequestErrorModal message="Attempt to initialize upload" request={postRequest} onContinue={onErrorInternal} />
-            <RequestErrorModal message="Attempt to upload file" request={uploadRequest} onContinue={onErrorInternal} />
             { fileErrorView }
         </div>
     )

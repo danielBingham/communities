@@ -435,13 +435,24 @@ module.exports = class FileController {
         }
 
         const sources = {}
-        sources['full'] = await this.s3.getSignedUrl(file.filepath)
+
+        if ( file.filepath !== undefined && file.filepath !== null ) {
+            sources['full'] = await this.s3.getSignedUrl(file.filepath)
+        } else {
+            request.logger.warn(`Attempt to retrieve File(${file.id}) without a filepath!`)
+        }
 
         if ( this.core.features.has('issue-67-video-uploads') ) {
             const variant = request.query?.variant
 
             if ( variant !== undefined && variant !== null && variant !== 'full' && file.variants?.includes(variant) ) {
-                 sources[variant] = await this.s3.getSignedUrl(this.fileService.getPath(file, variant))
+                const path = this.fileService.getPath(file, variant)
+
+                if ( path !== null || path !== undefined ) {
+                    sources[variant] = await this.s3.getSignedUrl(path)
+                } else {
+                    request.logger.error(`Path for variant '${variant}' is null.`)
+                }
             }
         }
 
@@ -599,8 +610,15 @@ module.exports = class FileController {
         // because the database constraint will simply set the users.file_id
         // field to null when the file is deleted.
 
-        await this.fileService.deleteVariants(existing)
-        await this.s3.removeFile(existing.filepath)
+        if ( 'variants' in existing && Array.isArray(existing.variants) ) {
+            await this.fileService.deleteVariants(existing)
+        }
+
+        if ( existing.filepath !== null && existing.filepath !== undefined ) {
+            await this.s3.removeFile(existing.filepath)
+        } else {
+            request.logger.warn(`Removing File(${existing.id}) without a filepath.`)
+        }
 
         // Database constraints should handle any cascading here.
         await this.fileDAO.deleteFile(id)
