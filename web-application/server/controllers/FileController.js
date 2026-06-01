@@ -593,6 +593,14 @@ module.exports = class FileController {
         }
 
         const id = this.schema.properties.id.clean(request.params.id)
+        const validationErrors = this.schema.properties.id.validate(id)
+        if ( validationErrors.length > 0 ) {
+            const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
+            const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
+            throw new ControllerError(400, 'invalid',
+                `User attempted to delete File with invalid id: ${logString}`,
+                errorString)
+        }
 
         const existing = await this.fileDAO.getFileById(id)
         if ( existing === null || existing === undefined ) {
@@ -610,18 +618,8 @@ module.exports = class FileController {
         // because the database constraint will simply set the users.file_id
         // field to null when the file is deleted.
 
-        if ( 'variants' in existing && Array.isArray(existing.variants) ) {
-            await this.fileService.deleteVariants(existing)
-        }
+        await this.fileService.deleteFile(existing)
 
-        if ( existing.filepath !== null && existing.filepath !== undefined ) {
-            await this.s3.removeFile(existing.filepath)
-        } else {
-            request.logger.warn(`Removing File(${existing.id}) without a filepath.`)
-        }
-
-        // Database constraints should handle any cascading here.
-        await this.fileDAO.deleteFile(id)
         return response.status(200).json({ 
             entity: { 
                 id: id 

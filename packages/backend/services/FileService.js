@@ -24,10 +24,14 @@ const path = require('node:path')
 
 const S3FileService = require('./files/S3FileService')
 
+const FileDAO = require('../daos/FileDAO')
+
 module.exports = class FileService {
 
     constructor(core) {
         this.core = core
+
+        this.fileDAO = new FileDAO(core)
 
         this.s3 = new S3FileService(core)
 
@@ -73,6 +77,30 @@ module.exports = class FileService {
     getPath(file, variant, mimetype) {
         // For now all files live at the `files/` path.
         return path.join('files/', this.getFilename(file, variant, mimetype))
+    }
+
+    async deleteFileById(fileId) {
+        const existing = await this.fileDAO.getFileById(fileId)
+        if ( existing === null || existing === undefined ) {
+            return null
+        } 
+
+        await this.deleteFile(existing)
+    }
+
+    async deleteFile(file) {
+        if ( 'variants' in file && Array.isArray(file.variants) ) {
+            await this.deleteVariants(file)
+        }
+
+        if ( file.filepath !== null && file.filepath !== undefined ) {
+            await this.s3.removeFile(file.filepath)
+        } else {
+            this.core.logger.warn(`Removing File(${file.id}) without a filepath.`)
+        }
+
+        // Database constraints should handle any cascading here.
+        await this.fileDAO.deleteFile(file.id)
     }
 
     async deleteVariants(file) {

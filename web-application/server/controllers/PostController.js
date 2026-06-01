@@ -19,6 +19,7 @@
  ******************************************************************************/
 
 const {
+    FileService,
     LinkPreviewService,
     PermissionService,
     NotificationService,
@@ -62,6 +63,7 @@ module.exports = class PostController {
         this.siteModerationDAO = new SiteModerationDAO(core)
         this.userDAO = new UserDAO(core)
 
+        this.fileService = new FileService(core)
         this.linkPreviewService = new LinkPreviewService(core)
         this.notificationService = new NotificationService(core)
         this.permissionService = new PermissionService(core)
@@ -795,6 +797,17 @@ module.exports = class PostController {
         }
 
         await this.postDAO.updatePost(post)
+
+        // Now we need to clean up the actual file objects.  They are only used
+        // on this post (files are not reused across locations) so we need to
+        // delete them.
+        if ( this.core.features.has('feat-15-post-image-galleries') ) {
+            for (const fileId of existing.files ) {
+                if ( ! post.files.includes(fileId) ) {
+                    await this.fileService.deleteFileById(fileId)
+                }
+            }
+        }
 
         const results = await this.postDAO.selectPosts({
             where: `posts.id = $1`,

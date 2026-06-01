@@ -94,8 +94,6 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
                 || (Array.isArray(draft.files) && Array.isArray(post.files) && draft.files?.length !== post?.files?.length )
             ) {
                 return true
-            } else if ( draft.fileId !== post?.fileId ) {
-                return true
             } else if ( draft.linkPreviewId !== post?.linkPreviewId ) {
                 return true
             } else if ( draft.sharedPostId !== post?.sharedPostId ) {
@@ -118,8 +116,6 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
             } else if ( draft.visibility !== defaultVisibility ) {
                 return true
             } else if ( Array.isArray(draft.files) && draft.files.length > 0 ) {
-                return true
-            } else if ( draft.fileId !== null ) {
                 return true
             } else if ( draft.linkPreviewId !== null ) {
                 return true
@@ -152,10 +148,6 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
         } else { 
             newPost.id = postId
             makePatchRequest(patchPost(newPost))
-            
-            if ( post.fileId !== newPost.fileId ) {
-                makeDeleteFileRequest(deleteFile(post.fileId))
-            }
         }
     }
 
@@ -163,8 +155,15 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
      * Execute the canceling of the edit.
      */
     const cancel = function() {
-        if ( draft.fileId !== null && post?.fileId !== draft.fileId ) {
-            makeDeleteFileRequest(deleteFile(draft.fileId))
+        if ( 'files' in draft && Array.isArray(draft.files) 
+            && post?.files && Array.isArray(post.files) 
+            && draft.files.length !== post.files.length 
+        ) {
+            for(const fileId of draft.files) {
+                if ( ! post.files.includes(fileId) ) {
+                    makeDeleteFileRequest(deleteFile(fileId))
+                }
+            }
         }
 
         setAreYouSure(false)
