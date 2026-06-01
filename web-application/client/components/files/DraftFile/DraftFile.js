@@ -35,7 +35,6 @@ import { useEventSubscription } from '/lib/hooks/useEventSubscription'
 
 import File from '/components/files/File'
 
-import { RequestErrorModal } from '/components/errors/RequestError'
 import JobError from '/components/errors/JobError'
 
 import Spinner from '/components/Spinner'
@@ -88,12 +87,10 @@ const DraftFile = function({
     }
 
     useEffect(function() {
-        if ( job && job.progress.step === 'complete') { 
-            if ( job.progress.step === 'complete' ) {
-                refreshFile()
-            } else if ( job.finishedOn !== null ) {
-                refreshFile()
-            } 
+        if ( job?.progress?.step === 'complete') { 
+            refreshFile()
+        } else if ( job?.finishedOn !== null ) {
+            refreshFile()
         }
     }, [ job ])
 
@@ -133,6 +130,13 @@ const DraftFile = function({
             return ( <Alert type="error" timeout={5000} onClear={() => remove() }>'{uploadInfo.fileName}' failed to upload. { uploadRequest.error?.message }</Alert>)
         } else {
             return ( <Alert type="error" timeout={5000} onClear={() => remove() }>'{uploadInfo.fileName}' failed to upload.  Please try again or try a different file.</Alert>)
+        }
+    }
+
+    if ( job !== null && job !== undefined  ) {
+        console.log(`Job: `, job)
+        if ( job.progress.step === 'failed' && job.attemptsMade === job.opts?.attempts ) {
+            return ( <Alert type="error" timeout={5000} onClear={() => remove() }>{ job.progress?.stepDescription ? job.progress.stepDescription : 'File failed to process.  This could be becaues the file was corrupted or invalid in some way.' }</Alert> )
         }
     }
 

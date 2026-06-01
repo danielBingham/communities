@@ -33,7 +33,11 @@ const getProcessVideoJob = function(core) {
             fileDAO = new FileDAO(core)
 
             const videoService = new VideoService(core)
-            await videoService.process(currentUser, job.data.fileId)
+            const process = videoService.spawnVideoProcess(currentUser, job.data.fileId)
+            process.on('progress', function(progress) {
+                job.progress({ step: 'processing', stepDescription: 'Processing...', progress: Math.floor(progress) })
+            })
+            await process.run()
 
             await fileDAO.updateFile({
                 id: job.data.fileId,
@@ -46,11 +50,17 @@ const getProcessVideoJob = function(core) {
             core.logger.id = 'core' 
             done(null)
         } catch (error) {
-            core.logger.error(error)
+            core.logger.error(`Video processing error: `, error)
             try {
                 if ( error instanceof ServiceError ) {
                     if ( error.type === 'processed-file-too-large' ) {
-                        job.progress({ step: 'failed', stepDescription: `Your file was too large after processing.  This can happen if you upload a pre-optimized file.  Files must be no larger than 70 MB after processing.`, progress: 100})
+                        job.progress({ step: 'failed', stepDescription: `Your video was too large after processing.  This can happen if you upload a pre-optimized video.  Videos must be no larger than 150 MB after processing.`, progress: 100})
+                    } else if ( error.type === 'failed-download' ) {
+                        job.progress({ step: 'failed', stepDescription: `We failed to process your video due to temporary network issues. If the error persists, please contact support.`, progress: 100})
+                    } else if ( error.type === 'failed-upload' ) {
+                        job.progress({ step: 'failed', stepDescription: `We failed to process your video due to temporary network issues. If the error persists, please contact support.`, progress: 100})
+                    } else if ( error.type === 'failed-thumbnail-upload' ) {
+                        job.progress({ step: 'failed', stepDescription: `We failed to process your video due to temporary network issues. If the error persists, please contact support.`, progress: 100})
                     } else {
                         job.progress({ step: 'failed', stepDescription: `File failed to process. This could be because the file was corrupted or invalid in some way.`, progress: 100 })
                     }

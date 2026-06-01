@@ -30,6 +30,7 @@ const LocalFileService = require('./LocalFileService')
 const S3FileService = require('./S3FileService')
 const ServiceError = require('../../errors/ServiceError')
 
+
 class VideoProcess {
     constructor(core, currentUser, fileId) {
         this.core = core
@@ -70,28 +71,20 @@ class VideoProcess {
     }
 
     async run() {
-        const file = await this.fileDAO.getFileById(this.fileId)
-
-        const originalFilename = this.fileService.getFilename(file, 'original') 
-        const newFilename = this.fileService.getFilename(file, undefined, 'video/mp4') 
-
-        const localOriginalFile = path.join('tmp/', originalFilename)
-        const localNewFile = path.join('tmp/', newFilename)
-
-        let originalPath = file.filepath
-        const targetPath = this.fileService.getPath(file, undefined, 'video/mp4') 
-
-        this.trigger('progress', 2)
-
         try { 
-            // TODO: Add retries to this.
-            this.core.logger.info(`Downloading file "${originalPath}"...`)
-            await this.s3.downloadFile(originalPath, localOriginalFile).catch((error) => {
-                this.core.logger.error(`Failed to download video for processing: `, error)
-                throw new ServiceError('failed-download', 'We failed to download the video for processing.')
-            })
+            const file = await this.fileDAO.getFileById(this.fileId)
 
-            this.trigger('progress', 10)
+            const originalFilename = this.fileService.getFilename(file, 'original') 
+            const newFilename = this.fileService.getFilename(file, undefined, 'video/mp4') 
+
+            const localOriginalFile = path.join('tmp/', originalFilename)
+            const localNewFile = path.join('tmp/', newFilename)
+           
+            let originalPath = file.filepath
+            const targetPath = this.fileService.getPath(file, undefined, 'video/mp4') 
+
+            this.core.logger.info(`Downloading file "${originalPath}"...`)
+            await this.s3.downloadFile(originalPath, localOriginalFile)
 
             if ( originalPath === targetPath ) {
                 originalPath = this.fileService.getPath(file, 'original')
@@ -103,7 +96,6 @@ class VideoProcess {
             //
             // ffprobe -i <file> -show_entries format=duration -of csv=p=0
             const ffprobeArgs = [
-                '-v', 'quiet',
                 '-i', localOriginalFile,
                 '-show_entries', 'format=duration',
                 '-of', 'csv=p=0'
@@ -113,8 +105,6 @@ class VideoProcess {
             if ( Number.isNaN(durationSeconds) ) {
                 throw new ServiceError('unknown-length', 'Failed to determine video length.')
             }
-
-            this.trigger('progress', 15)
 
             // Reformat and scale the video for web.
             //
@@ -131,31 +121,21 @@ class VideoProcess {
                 '-b:a', '128k',
                 '-movflags', '+faststart',
                 '-vf', 'scale=650:-2',
-                '-nostdin',
-                '-y',
                 localNewFile,
             ]
             this.core.logger.info(`Reformatting file "${localOriginalFile}" to "${localNewFile}"...`)
             const process = this.processService.spawn('ffmpeg', ffmpegArgs)
 
-            // Read progress from stdout and report it on the 'progress' event.
+            // Read formatting progress from stdout and report it on the 'progress' event.
             process.on('stdout', (data) => {
-                try { 
-                    // Convert into an object.
-                    const parsedData = Object.fromEntries(data.split('\n').map((l) => l.split('=')))
+                // Convert into an object.
+                const parsedData = Object.fromEntries(data.split('\n').map((l) => l.split('=')))
 
-                    // Calculate our progress. 
-                    // * `out_time_ms` is in microseconds.
-                    // * durationSeconds is in seconds.
-                    const progress = 20 + ( ( ((parsedData.out_time_ms / (1000 * 1000)) / durationSeconds) * 100) * 0.6 ) 
+                // Calculate our progress. `out_time_ms` is in microseconds.
+                const progress = ( ((parsedData.out_time_ms / (1000 * 1000)) / durationSeconds) * 100)
 
-                    this.trigger('progress', progress)
-                } catch (error) {
-                    this.core.logger.error('Failed to parse ffmpeg progress report: ', error)
-                }
+                this.trigger('progress', progress)
             })
-
-            this.trigger('progress', 20)
             await process.run()
 
             this.core.logger.info(`Checking size of the processed file...`)
@@ -165,14 +145,8 @@ class VideoProcess {
                 throw new ServiceError('processed-file-too-large', 'Processed files can be no larger than 150 MB.')
             }
 
-            // TODO: Add retries to this.
             this.core.logger.info(`Uploading the newly formatted file...`)
-            await this.s3.uploadFile(localNewFile, targetPath).catch((error) => {
-                this.core.logger.error(`Failed to upload video after processing: `, error)
-                throw new ServiceError('failed-upload', 'We failed to upload the video after processing.')
-            })
-
-            this.trigger('progress', 85)
+            await this.s3.uploadFile(localNewFile, targetPath)
 
             const thumbId = uuid.v4()
             await this.fileDAO.insertFiles({
@@ -189,7 +163,7 @@ class VideoProcess {
             const thumbnailPath = this.fileService.getPath(thumbFile) 
 
             const ffmpegThumbnailArgs = [
-                '-ss', '00:00:00.000', // Make sure we're grabbing the first frame.
+                '-ss', '00:00:01.000', // Seek before input for accuracy
                 '-i', localOriginalFile,
                 '-vframes', '1', // Extract exactly one frame
                 '-q:v', '2', // Output quality (JPEG quality, 1-31, lower is better)
@@ -199,15 +173,8 @@ class VideoProcess {
             this.core.logger.info(`Generating thumbnail...`)
             await this.processService.run('ffmpeg', ffmpegThumbnailArgs)
 
-            this.trigger('progress', 90)
-
             this.core.logger.info(`Uploading the thumbnail...`)
-            await this.s3.uploadFile(thumbnailLocalFile, thumbnailPath).catch((error) => {
-                this.core.logger.error(`Failed to upload video thumbnail after processing: `, error)
-                throw new ServiceError('failed-thumbnail-upload', 'We failed to upload the video thumbnail after processing.')
-            })
-
-            this.trigger('progress', 95)
+            await this.s3.uploadFile(thumbnailLocalFile, thumbnailPath)
 
             const thumbPatch = {
                 id: thumbId,
@@ -237,8 +204,6 @@ class VideoProcess {
             // Remove both newFilename and originalFilename from local files
             this.local.removeFile(localOriginalFile)
             this.local.removeFile(localNewFile)
-
-            this.trigger('progress', 100)
         } catch (error ) {
             try {
                 if ( this.local.fileExists(localOriginalFile) ) {
