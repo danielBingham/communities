@@ -27,10 +27,9 @@ const getProcessVideoJob = function(core) {
         const currentUser = job.data.session.user
         core.logger.info(`Beginning job 'process-video' for User(${currentUser.id}) and File(${job.data.fileId}).`)
 
-        let fileDAO = null
+        const fileDAO = new FileDAO(core) 
         try {
             job.progress({ step: 'initializing', stepDescription: `Initializing...`, progress: 0 })
-            fileDAO = new FileDAO(core)
 
             const videoService = new VideoService(core)
             const process = videoService.spawnVideoProcess(currentUser, job.data.fileId)
@@ -62,10 +61,10 @@ const getProcessVideoJob = function(core) {
                     } else if ( error.type === 'failed-thumbnail-upload' ) {
                         job.progress({ step: 'failed', stepDescription: `We failed to process your video due to temporary network issues. If the error persists, please contact support.`, progress: 100})
                     } else {
-                        job.progress({ step: 'failed', stepDescription: `File failed to process. This could be because the file was corrupted or invalid in some way.`, progress: 100 })
+                        job.progress({ step: 'failed', stepDescription: `Video failed to process. This could be because the file was corrupted or invalid in some way.`, progress: 100 })
                     }
                 } else {
-                    job.progress({ step: 'failed', stepDescription: `File failed to process. This could be because the file was corrupted or invalid in some way.`, progress: 100 })
+                    job.progress({ step: 'failed', stepDescription: `Video failed to process. This could be because the file was corrupted or invalid in some way.`, progress: 100 })
                 }
 
                 await fileDAO?.updateFile({
@@ -77,7 +76,6 @@ const getProcessVideoJob = function(core) {
             }
             done(error)
         }
-        
     }
 }
 

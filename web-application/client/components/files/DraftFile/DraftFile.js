@@ -134,7 +134,6 @@ const DraftFile = function({
     }
 
     if ( job !== null && job !== undefined  ) {
-        console.log(`Job: `, job)
         if ( job.progress.step === 'failed' && job.attemptsMade === job.opts?.attempts ) {
             return ( <Alert type="error" timeout={5000} onClear={() => remove() }>{ job.progress?.stepDescription ? job.progress.stepDescription : 'File failed to process.  This could be becaues the file was corrupted or invalid in some way.' }</Alert> )
         }
@@ -189,7 +188,7 @@ const DraftFile = function({
                     { ! loadFailed && <File id={fileId} width={renderWidth} onLoad={() => setIsLoaded(true)} onError={() => setLoadFailed(true)} type={type}  /> }
                 </div> 
             }
-            <JobError message={'File processing'} job={job} onContinue={() => setLoadFailed(true)} />
+            <JobError message={'File processing'} job={job} onContinue={() => remove() } />
         </div>
     )
 }

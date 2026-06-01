@@ -60,25 +60,47 @@ module.exports = class ImageService {
         const tmpPath = `tmp/${fileName}`
         const targetPath = this.fileService.getPath(file, size) 
 
-        const fileContents = await this.s3.getFile(file.filepath)
+        try { 
+            const fileContents = await this.s3.getFile(file.filepath).catch((error) => {
+                this.core.logger.error(`Failed to download image from S3: `, error)
+                throw new ServiceError('failed-download', 'Failed to download image file for processing.')
+            })
 
-        await sharp(fileContents)
-            .rotate()
-            .resize({ width: size })
-            .toFile(tmpPath)
+            await sharp(fileContents)
+                .rotate()
+                .resize({ width: size })
+                .toFile(tmpPath)
 
-        await this.s3.uploadFile(tmpPath, targetPath)
-        this.local.removeFile(tmpPath)
+            await this.s3.uploadFile(tmpPath, targetPath).catch((error) => {
+                this.core.logger.error('Failed to upload processed image to S3: ', error)
+                throw new ServiceError('failed-upload', 'Failed to upload image file after processing.')
+            })
+            this.local.removeFile(tmpPath)
 
-        if ( this.core.features.has('issue-67-video-uploads') ) {
-            const hasFile = await this.s3.hasFile(targetPath)
+            const hasFile = await this.s3.hasFile(targetPath).catch((error) => {
+                this.core.logger.error(`Failed to read file variant, '${size}', on S3: `, error)
+                throw new ServiceError('failed-read', 'Failed to read image after processing.')
+            })
             if ( hasFile === true ) {
                 const filePatch = {
                     id: file.id,
                     variants: [ ...file.variants, size ]
                 }
                 await this.fileDAO.updateFile(filePatch)
+            } else {
+                this.core.logger.error(`Failed to confirm file variant, '${size}': `, error)
+                throw new ServiceError('failed-read', 'Failed to read image after processing.')
             }
+        } catch (error) {
+            this.core.logger.error(`Failed create file variant, '${size}': `, error) 
+            try {
+                if ( this.local.fileExists(tmpPath) ) {
+                    this.local.removeFile(tmpPath)
+                }
+            } catch (cleanupError) {
+                this.core.logger.error(`Failed to cleanup tmp file: `, cleanupError)
+            }
+            throw error
         }
     }
 
