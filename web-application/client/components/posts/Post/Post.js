@@ -41,7 +41,6 @@ import GroupTag from '/components/groups/view/GroupTag'
 
 import PostDotsMenu from './PostDotsMenu'
 import PostModeration from './PostModeration'
-import PostFile from './PostFile'
 import PostGallery from './PostGallery'
 import PostReactions from './PostReactions'
 import PostComments from './PostComments'
@@ -61,8 +60,6 @@ const Post = function({ id, expanded, showLoading, shared }) {
     const group = context.group
     const [groupModeration, groupModerationRequest] = useGroupModeration(post?.groupId, post?.groupModerationId)
     const [siteModeration, siteModerationRequest] = useSiteModeration(post?.siteModerationId)
-
-    const hasImageGalleries = useFeature('feat-15-post-image-galleries')
 
     if ( (request !== null && request.state == 'failed' && ( ! post || ! user ))) {
         return (
@@ -193,8 +190,7 @@ const Post = function({ id, expanded, showLoading, shared }) {
                 <TextWithMentions text={`${post.content.substring(0,1000)}...` } />
                 <div className="post__show-more"><a href="" onClick={(e) => { e.preventDefault(); setShowMore(true) }}>Show More.</a></div>
             </div> }
-            { ! hasImageGalleries && post.fileId && <PostFile id={id} /> }
-            { hasImageGalleries && post.files?.length > 0 && <PostGallery postId={id} /> }
+            { post.files?.length > 0 && <PostGallery postId={id} /> }
             { post.linkPreviewId && <LinkPreview id={post.linkPreviewId} /> }
             { post.sharedPostId && <Post id={post.sharedPostId} shared={true} showLoading={true} /> }
             { ! shared && <PostReactions postId={id} /> }

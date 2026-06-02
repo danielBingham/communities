@@ -59,8 +59,6 @@ const FileUploadInput = function({ text, maxFiles, kind, allowedTypes, onChange,
 
     const [ fileError, setFileError ] = useState([])
     const fileMap = useRef({})
-    
-    const hasVideoUploads = useFeature('issue-67-video-uploads')
 
     const hiddenFileInput = useRef(null)
 
@@ -103,14 +101,12 @@ const FileUploadInput = function({ text, maxFiles, kind, allowedTypes, onChange,
             const newFile = {
                 id: Uuid.v4(),
                 userId: currentUser.id,
-                type: uploadedFileData.type
+                type: uploadedFileData.type,
+                kind: kind ,
+                mimetype: uploadedFileData.type,
+                state: 'pending'
             }
 
-            if ( hasVideoUploads === true ) {
-                newFile.kind = kind 
-                newFile.state = 'pending'
-                newFile.mimetype = uploadedFileData.type
-            }
 
             fileMap.current[index] = newFile.id
             files.push(newFile)

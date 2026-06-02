@@ -88,7 +88,7 @@ module.exports = class ImageService {
                 }
                 await this.fileDAO.updateFile(filePatch)
             } else {
-                this.core.logger.error(`Failed to confirm file variant, '${size}': `, error)
+                this.core.logger.error(`Failed to confirm file variant, '${size}'.`)
                 throw new ServiceError('failed-read', 'Failed to read image after processing.')
             }
         } catch (error) {

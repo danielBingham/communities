@@ -262,7 +262,7 @@ const DraftProfileImage = function({
     }
 
     if ( job !== null && job !== undefined  ) {
-        if ( job.progress.step === 'failed' && job.attemptsMade === job.opts?.attempts ) {
+        if ( job.progress?.step === 'failed' && job.attemptsMade >= job.opts?.attempts ) {
             alertMessage = (<span>{ job.progress?.stepDescription ? job.progress.stepDescription : 'File failed to process.  This could be because the file was corrupted or invalid in some way.' }</span>)
             stateInternal = State.isFailedProcess
         }

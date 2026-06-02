@@ -36,8 +36,6 @@ const PostGallery = function({ postId, className }) {
     const [current, setCurrent] = useState(0)
     const [isLoaded, setIsLoaded] = useState(false)
 
-    const hasImageGalleries = useFeature('feat-15-post-image-galleries')
-
     const goToPrevious = function() {
         if ( current > 0 ) {
             setCurrent(current-1)
@@ -67,10 +65,6 @@ const PostGallery = function({ postId, className }) {
     }
 
     if ( post.files?.length <= 0 ) {
-        return null
-    }
-
-    if ( hasImageGalleries !== true ) {
         return null
     }
 

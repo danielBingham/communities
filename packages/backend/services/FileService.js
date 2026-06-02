@@ -62,11 +62,7 @@ module.exports = class FileService {
         }
 
         if ( mimetype === undefined || mimetype === null ) {
-            if ( this.core.features.has('issue-67-video-uploads') ) {
-                segments.push(mime.getExtension(file.mimetype))
-            } else {
-                segments.push(mime.getExtension(file.type))
-            }
+            segments.push(mime.getExtension(file.mimetype))
         } else {
             segments.push(mime.getExtension(mimetype))
         }
@@ -104,21 +100,11 @@ module.exports = class FileService {
     }
 
     async deleteVariants(file) {
-        if ( this.core.features.has('issue-67-video-uploads') ) {
-            for(const variant of file.variants) {
-                const filepath = this.getPath(file, variant) 
-                const hasFile = await this.s3.hasFile(filepath)
-                if ( hasFile ) {
-                    this.s3.removeFile(filepath)
-                }
-            }
-        } else {
-            for(const size of this.defaultVariants) {
-                const filepath = this.getPath(file, size) 
-                const hasFile = await this.s3.hasFile(filepath)
-                if ( hasFile ) {
-                    this.s3.removeFile(filepath)
-                }
+        for(const variant of file.variants) {
+            const filepath = this.getPath(file, variant) 
+            const hasFile = await this.s3.hasFile(filepath)
+            if ( hasFile ) {
+                this.s3.removeFile(filepath)
             }
         }
     }

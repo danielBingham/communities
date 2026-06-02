@@ -130,27 +130,25 @@ module.exports = class PostController {
 
 
         let fileDictionary = {}
-        if ( this.core.features.has('feat-15-post-image-galleries') ) {
-            const fileIds = []
-            for (const postId of results.list) {
-                const post = results.dictionary[postId]
-                if ( post.files?.length > 0) {
-                    fileIds.push(...post.files)
-                }
+        const fileIds = []
+        for (const postId of results.list) {
+            const post = results.dictionary[postId]
+            if ( post.files?.length > 0) {
+                fileIds.push(...post.files)
             }
-            for(const postId of sharedPostResults.list) {
-                const post = sharedPostResults.dictionary[postId]
-                if ( post.files?.length > 0) {
-                    fileIds.push(...post.files)
-                }
-            }
-            const postFileResults = await this.fileDAO.selectFiles({
-                where: `files.id = ANY($1::uuid[])`, 
-                params: [fileIds]
-            })
-
-            fileDictionary = postFileResults.dictionary
         }
+        for(const postId of sharedPostResults.list) {
+            const post = sharedPostResults.dictionary[postId]
+            if ( post.files?.length > 0) {
+                fileIds.push(...post.files)
+            }
+        }
+        const postFileResults = await this.fileDAO.selectFiles({
+            where: `files.id = ANY($1::uuid[])`, 
+            params: [fileIds]
+        })
+
+        fileDictionary = postFileResults.dictionary
 
         const linkPreviewIds = []
         for(const postId of results.list) {
@@ -568,15 +566,6 @@ module.exports = class PostController {
                 errorString)
         }
 
-        // If we don't have the galleries feature, just stick the first item
-        // into fileId.
-        if ( ! this.core.features.has('feat-15-post-image-galleries') ) {
-            if ( 'files' in post && Array.isArray(post.files) ) {
-                post.fileId = post.files[0]
-                delete post.files
-            }
-        }
-
         await this.postDAO.insertPosts(post)
 
         const results = await this.postDAO.selectPosts({
@@ -787,21 +776,16 @@ module.exports = class PostController {
                 errorString)
         }
 
-        // If we don't have the galleries feature, just stick the first item
-        // into fileId.
-        if ( ! this.core.features.has('feat-15-post-image-galleries') ) {
-            if ( 'files' in post && Array.isArray(post.files) ) {
-                post.fileId = post.files[0]
-                delete post.files
-            }
-        }
-
         await this.postDAO.updatePost(post)
 
         // Now we need to clean up the actual file objects.  They are only used
         // on this post (files are not reused across locations) so we need to
         // delete them.
-        if ( this.core.features.has('feat-15-post-image-galleries') ) {
+        //
+        // We only want to do this when the caller passed a files array with
+        // the post patch.  If the files array is missing, don't make any
+        // changes to it.
+        if ( 'files' in post && Array.isArray(post.files) ) {
             for (const fileId of existing.files ) {
                 if ( ! post.files.includes(fileId) ) {
                     await this.fileService.deleteFileById(fileId)

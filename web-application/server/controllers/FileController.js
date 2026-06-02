@@ -120,28 +120,22 @@ module.exports = class FileController {
             ...existing,
             type: mimetype,
             location: this.config.s3.bucket_url,
-            filepath: filepath
-        }
-
-        // Add the new fields that come with video uploads.
-        if ( this.core.features.has('issue-67-video-uploads') ) {
-            file.state  = 'processing'
-            file.kind = mimetype.split('/')[0]
-            file.mimetype = mimetype
-            file.variants = [ ]
+            filepath: filepath,
+            state: 'processing',
+            kind: mimetype.split('/')[0],
+            mimetype: mimetype,
+            variants: [ ]
         }
 
         await this.fileDAO.updateFile(file)
 
         const job = await this.core.queues['resize-image'].add({ session: { user: currentUser }, fileId: file.id }, { attempts: 3 })
 
-        if ( this.core.features.has('issue-67-video-uploads') ) {
-            const filePatch = {
-                id: file.id,
-                jobId: job.id
-            }
-            await this.fileDAO.updateFile(filePatch)
+        const filePatch = {
+            id: file.id,
+            jobId: job.id
         }
+        await this.fileDAO.updateFile(filePatch)
 
         const entityResults = await this.fileDAO.selectFiles({ 
             where: 'files.id = $1', 
@@ -177,7 +171,9 @@ module.exports = class FileController {
      * @returns {Promise}   Resolves to void.
      */
     async uploadVideo(request, response) {
-        if ( ! this.core.features.has('issue-67-video-uploads') ) {
+        // We may need to switch off video uploads if they get too expensive.
+        // This is here as a stop gap.
+        if ( ! this.core.features.has('video-uploads') ) {
             throw new ControllerError(503, 'unsupported',
                 `Video Uploads are not currently supported.`,
                 `Video Uploads are not currently supported.`)
@@ -373,12 +369,10 @@ module.exports = class FileController {
                 `Failed to find File(${id}).`)
         } 
 
-        if ( this.core.features.has('issue-67-video-uploads') ) {
-            if ( variant !== undefined && variant !== null && variant !== 'full' && ! file.variants?.includes(variant) ) {
-                throw new ControllerError(404, 'not-found', 
-                    `Failed to find variant, '${variant}', of File(${id}).`,
-                    `Failed to find variant, '${variant}', of File(${id}).`)
-            }
+        if ( variant !== undefined && variant !== null && variant !== 'full' && ! file.variants?.includes(variant) ) {
+            throw new ControllerError(404, 'not-found', 
+                `Failed to find variant, '${variant}', of File(${id}).`,
+                `Failed to find variant, '${variant}', of File(${id}).`)
         }
 
         const path = this.fileService.getPath(file, variant)
@@ -390,6 +384,11 @@ module.exports = class FileController {
         }
 
         const url = await this.s3.getSignedUrl(path)
+        if ( url === null ) {
+            throw new ControllerError(404, 'not-found',
+                `Failed to find File(${id}) at path '${path}'.`,
+                `Failed to file that file.`)
+        }
 
         const relations = await this.getRelations(currentUser, results)
 
@@ -437,23 +436,23 @@ module.exports = class FileController {
 
         const sources = {}
 
+        // Files that haven't had their file uploaded yet will not have a
+        // filepath.
         if ( file.filepath !== undefined && file.filepath !== null ) {
-            sources['full'] = await this.s3.getSignedUrl(file.filepath)
-        } else {
-            request.logger.warn(`Attempt to retrieve File(${file.id}) without a filepath!`)
-        }
+            const signedUrl = await this.s3.getSignedUrl(file.filepath)
+            if ( signedUrl !== null ) {
+                sources['full'] = signedUrl
+            }
+        } 
 
-        if ( this.core.features.has('issue-67-video-uploads') ) {
-            const variant = request.query?.variant
+        const variant = request.query?.variant
+        if ( variant !== undefined && variant !== null && variant !== 'full' && file.variants?.includes(variant) ) {
+            const path = this.fileService.getPath(file, variant)
 
-            if ( variant !== undefined && variant !== null && variant !== 'full' && file.variants?.includes(variant) ) {
-                const path = this.fileService.getPath(file, variant)
-
-                if ( path !== null || path !== undefined ) {
-                    sources[variant] = await this.s3.getSignedUrl(path)
-                } else {
-                    request.logger.error(`Path for variant '${variant}' is null.`)
-                }
+            if ( path !== null && path !== undefined ) {
+                sources[variant] = await this.s3.getSignedUrl(path)
+            } else {
+                request.logger.error(`Path for variant '${variant}' is null.`)
             }
         }
 
@@ -522,7 +521,9 @@ module.exports = class FileController {
                     `You do not have permission to update that file.`)
             }
         } else if ( groupFileResults.rows.length > 1 ) {
-            this.core.logger.error(`File(${file.id}) is used as profile image for multiple groups.`)
+            throw new ControllerError(500, 'server-error',
+                `File(${file.id}) used in multiple groups.`,
+                `Your file is in an invalid state.  Please reach out to support.`)
         }
 
         if ( ! ( 'crop' in filePatch) || filePatch.crop === undefined || filePatch.crop === null ) {
@@ -577,14 +578,12 @@ module.exports = class FileController {
 
         const job = await this.core.queues['resize-image'].add({ session: { user: currentUser }, fileId: file.id }, { attempts: 3 })
 
-        if ( this.core.features.has('issue-67-video-uploads') ) {
-            const patch = {
-                id: fileId,
-                state: 'processing',
-                jobId: job.id
-            }
-            await this.fileDAO.updateFile(patch)
+        const patch = {
+            id: fileId,
+            state: 'processing',
+            jobId: job.id
         }
+        await this.fileDAO.updateFile(patch)
 
         const entityResults = await this.fileDAO.selectFiles({
             where: `files.id = $1`, 

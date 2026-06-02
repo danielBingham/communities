@@ -43,7 +43,7 @@ class Process {
     async run() {
         return new Promise((resolve, reject) => {
             if ( this.command === null ) {
-                reject(new ProcessError('empty', 'Empty process.', ''))
+                return reject(new ProcessError('empty', 'Empty process.', ''))
             }
 
             const process = spawn(this.command, this.args)        

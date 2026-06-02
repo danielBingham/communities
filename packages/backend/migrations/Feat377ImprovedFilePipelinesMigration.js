@@ -17,32 +17,23 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
+const BaseMigration = require('./BaseMigration')
 
-import { usePost } from '/lib/hooks/Post'
-import { useFile } from '/lib/hooks/File'
+module.exports = class Feat15PostImageGalleriesMigration extends BaseMigration {
 
-import File from '/components/files/File'
-
-import './PostFile.css'
-
-const PostFile = function({ id, className }) {
-    
-    const [post, request] = usePost(id) 
-
-    if ( post === null || post === undefined ) {
-        return null
+    constructor(core) {
+        super(core)
     }
 
-    if ( post.fileId === undefined || post.fileId === null ) {
-        return null
+    async initForward() {
+        await this.database.query(`ALTER TABLE posts DROP CONSTRAINT posts_file_id_fkey`, [])
+        await this.database.query(`ALTER TABLE posts ADD CONSTRAINT posts_file_id_fkey FOREIGN KEY (file_id) REFERENCES files (id) ON DELETE SET NULL`, [])
     }
 
+    async initBack() {}
 
-    return (
-        <div className={`post-file ${className ? className : ''}`}>
-            <File id={post.fileId} width={650} fallback={true} />
-        </div>
-    )
+    async migrateForward(targets) { }
+
+    async migrateBack(targets) { 
+    }
 }
-
-export default PostFile
