@@ -20,6 +20,9 @@
 .draft-profile-image__pending-progress {
     width: min(80vw, 150px);
 }
+.draft-profile-image__failed-load__inner {
+    width: min(80vw, 150px);
+}
 
 .draft-profile-image__failed-load svg {
     width: 48px;

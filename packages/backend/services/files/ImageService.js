@@ -106,7 +106,10 @@ module.exports = class ImageService {
 
     async crop(file, crop, renderedDimensions) {
         // Load the original file into memory.
-        const fileContents = await this.s3.getFile(file.filepath)
+        const fileContents = await this.s3.getFile(file.filepath).catch((error) => {
+            this.core.logger.error(`Failed to download file: `, error)
+            throw new ServiceError('network-error', `Failed to download file.`)
+        })
 
         let orientedContents = null
         try {
@@ -117,7 +120,9 @@ module.exports = class ImageService {
                 crop: %O\n
                 renderedDimensions: %O
             `, file, crop, renderedDimensions)
-            throw error 
+            this.core.logger.error(error)
+            throw new ServiceError('processing-error',
+                `Attempt to orient image before crop failed.`)
         }
         const dimensions = imageSize(orientedContents)
         
@@ -169,7 +174,11 @@ module.exports = class ImageService {
 
         // Keep the uncropped file by moving it to `files/id.orig.ext`
         const originalPath = this.fileService.getPath(file, 'orig')
-        await this.s3.moveFile(file.filepath, originalPath)
+        await this.s3.moveFile(file.filepath, originalPath).catch((error) => {
+            this.core.logger.error(`Failed to move file on S3: `, error)
+            throw new ServiceError('network-error',
+                `Failed to move file on S3.`)
+        })
         await this.fileService.deleteVariants(file)
 
         // Crop the file and upload the cropped file to the original path.
@@ -190,10 +199,15 @@ module.exports = class ImageService {
                 widthRatio: ${widthRatio}, heightRatio: ${heightRatio}, x: ${x}, y: ${y}, width: ${width}, height: ${height}
             `, file, dimensions, crop, renderedDimensions)
             this.core.logger.error(error)
-            throw error 
+            throw new ServiceError('processing-error',
+                `Failed to crop file.`)
         }
 
-        await this.s3.uploadFile(tmpPath, targetPath)
+        await this.s3.uploadFile(tmpPath, targetPath).catch((error) => {
+            this.core.logger.error(`Failed to upload cropped file: `, error)
+            throw new ServiceError(`network-error`,
+                `Failed to upload cropped file.`)
+        })
         this.local.removeFile(tmpPath)
     }
 }

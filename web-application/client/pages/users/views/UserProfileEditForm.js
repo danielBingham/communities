@@ -296,7 +296,7 @@ const UserProfileEditForm = function(props) {
                 </div>
                 <div className="form-submit submit">
                     { ! isPending && <span><Button onClick={(e) => handleCancel()}>Cancel</Button> <input type="submit" name="submit" value="Submit" /></span> }
-                    { isPending && <Spinner /> }
+                    { isPending && <div><p><Spinner /></p><p>Updating. Do not navigate away...</p></div> }
                 </div>
             </form>
             <AreYouSure 

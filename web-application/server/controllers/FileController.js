@@ -22,7 +22,7 @@ const path = require('node:path')
 const mime = require('mime')
 const { v4: uuidv4 } = require('uuid')
 
-const { FileService, ImageService, VideoService, LocalFileService, S3FileService, ValidationService, FileDAO } = require('@communities/backend')
+const { FileService, ImageService, VideoService, LocalFileService, PermissionService, S3FileService, ValidationService, FileDAO, ServiceError } = require('@communities/backend')
 
 const { schema } = require('@communities/shared')
 
@@ -47,6 +47,7 @@ module.exports = class FileController {
         this.videoService = new VideoService(core)
         this.imageService = new ImageService(core)
 
+        this.permissionService = new PermissionService(core)
         this.validationService = new ValidationService(core)
 
         this.schema = new schema.FileSchema()
@@ -488,7 +489,7 @@ module.exports = class FileController {
         if ( file === null || file === undefined ) {
             throw new ControllerError(404, 'not-found', 
                 `File(${fileId}) not found!`,
-                `File(${fileId}) was not found.`)
+                `File was not found.`)
         } 
 
         // TODO TECHDEBT We need a better way to do this.  Right now, Groups
@@ -499,26 +500,41 @@ module.exports = class FileController {
         // When we implement events we need to note what type of file it is and
         // possibly back link it to the entity using it.
         const groupFileResults = await this.core.database.query(`
-            SELECT file_id FROM groups WHERE file_id = $1
+            SELECT id, file_id FROM groups WHERE file_id = $1
         `, [ file.id ])
 
         // User must be owner of File(:id), unless file is group profile.
         if ( file.userId !== currentUser.id && groupFileResults.rows.length <= 0 ) {
             throw new ControllerError(403, 'not-authorized', 
-                `User(${currentUser.id}) attempting to PATCH File(${file.id}, which they don't own.`,
-                `You cannot PATCH someone else's file.`)
+                `User(${currentUser.id}) attempting to PATCH File(${file.id}), which they don't own.`,
+                `You cannot update someone else's file.`)
+        }
+
+        // If the file is a group profile, then the user needs to have admin
+        // permissions on the group.
+        if ( groupFileResults.rows.length === 1 ) {
+            const groupId = groupFileResults.rows[0].id
+            const canAdminGroup = await this.permissionService.can(currentUser, 'admin', 'Group', { groupId: groupId })
+
+            if ( canAdminGroup !== true ) {
+                throw new ControllerError(403, 'not-authorized',
+                    `User(${currentUser.id}) attempting to PATCH File(${file.id}) used as profile for Group(${groupId}) they do not admin.`,
+                    `You do not have permission to update that file.`)
+            }
+        } else if ( groupFileResults.rows.length > 1 ) {
+            this.core.logger.error(`File(${file.id}) is used as profile image for multiple groups.`)
         }
 
         if ( ! ( 'crop' in filePatch) || filePatch.crop === undefined || filePatch.crop === null ) {
             throw new ControllerError(400, 'invalid',
                 `Attempt to patch File(${fileId}) missing crop.`,
-                `Must include 'crop' object in order to PATCH a file.`)
+                `Must include 'crop' object.`)
         }
 
         if ( ! ('dimensions' in filePatch) || filePatch.dimensions === undefined || filePatch.dimensions === null) {
             throw new ControllerError(400, 'invalid',
                 `Attempt to patch File(${fileId}) missing original dimensions.`,
-                `Must include the original dimensions of the object in order to PATCH a file.`)
+                `Must include the original dimensions of the object.`)
         }
 
         const crop = filePatch.crop
@@ -532,10 +548,32 @@ module.exports = class FileController {
         if ( ! ('width' in dimensions) || ! ('height' in dimensions) ) {
             throw new ControllerError(400, 'invalid',
                 `Missing element of 'dimensions' when PATCHing FILE(${fileId}).`,
-                `Missing  element of dimension data. Need { width, height }.`)
+                `Missing element of dimension data. Need { width, height }.`)
         }
 
-        await this.imageService.crop(file, crop, dimensions)
+        try { 
+            await this.imageService.crop(file, crop, dimensions)
+        } catch (error) {
+            if ( error instanceof ServiceError ) {
+                if ( error.type === 'validation-error' ) {
+                    throw new ControllerError(400, 'invalid',
+                        `Invalid crop dimensions.`,
+                        `Invalid crop dimensions.`)
+                } else if ( error.type === 'network-error' ) {
+                    throw new ControllerError(500, 'network-error',
+                        `Network error encountered while cropping file.`,
+                        `A temporary network error occurred while cropping your image.  Please try again.  If the error persists, contact support.`)
+                } else if ( error.type === 'processing-error' ) {
+                    throw new ControllerError(400, 'processing-error',
+                        `File(${file.id}) failed to process.`,
+                        `Attempt to crop image failed. Image may have been invalid or corrupted in some way.`)
+                } else {
+                    throw error
+                }
+            } else {
+                throw error
+            }
+        }
 
         const job = await this.core.queues['resize-image'].add({ session: { user: currentUser }, fileId: file.id }, { attempts: 3 })
 

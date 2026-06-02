@@ -39,6 +39,7 @@ import Button from '/components/ui/Button'
 import Spinner from '/components/Spinner'
 import File from '/components/files/File'
 import ProgressBar from '/components/ProgressBar'
+import Alert from '/components/ui/Alert'
 
 import "react-image-crop/dist/ReactCrop.css"
 import "./DraftProfileImage.css"
@@ -49,7 +50,10 @@ const State = {
     isPendingUpload: 'isPendingUpload',
     isUploading: 'isUploading',
     isProcessing: 'isProcessing',
-    isReady: 'isReady'
+    isFailedLoad: 'isFailedLoad',
+    isFailedUpload: 'isFailedUploading',
+    isFailedProcess: 'isFailedProcessing',
+    isReady: 'isReady',
 }
 
 const DraftProfileImage = function({ 
@@ -62,6 +66,9 @@ const DraftProfileImage = function({
     onCropSuccess,
     onRemove
 }) {
+
+    const uploadInfo = useSelector((state) => fileId in state.File.requests ? state.File.requests[fileId] : null)
+    const uploadRequest = useSelector((state) => uploadInfo?.requestId in state.requests.dictionary ? state.requests.dictionary[uploadInfo?.requestId] : null)
 
     const [file, fileRequest, refreshFile] = useFile(fileId)
     const [job, jobRequest] = useJob('resize-image', file?.jobId)
@@ -83,7 +90,7 @@ const DraftProfileImage = function({
     const [isLoaded, setIsLoaded] = useState(false)
     const [isCropping, setIsCropping] = useState(false)
 
-    const [ request, makeRequest ] = useRequest()
+    const [ request, makeRequest, resetRequest ] = useRequest()
     const imageRef = useRef(null)
 
     const remove = function() {
@@ -99,6 +106,7 @@ const DraftProfileImage = function({
     }
 
     const onErrorInternal = function() {
+        resetRequest()
         remove()
 
         if ( onError ) {
@@ -229,23 +237,48 @@ const DraftProfileImage = function({
         )
     }
 
-    if ( ( file === undefined || file === null ) && fileRequest?.state !== 'fulfilled' ) {
-        return (
-            <div className="draft-profile-image">
-                <p>Failed to load file.</p>
-                <Button type="warn" onClick={() => refreshFile()}>Retry</Button>
-            </div>
-        )
-    }
 
     let stateInternal = State.isAwaitingFile
- 
     if ( file.state === 'pending' ) {
         stateInternal = State.isUploading
     } else if ( file.state === 'processing' ) {
         stateInternal = State.isProcessing
     } else if ( file.state === 'ready' ) {
         stateInternal = State.isReady
+    }
+
+    let alertMessage = ''
+    if ( ( file === undefined || file === null ) && fileRequest?.state !== 'fulfilled' ) {
+        stateInternal = State.isFailedLoad
+    }
+
+    if ( uploadRequest?.state === 'failed' ) {
+        if ( uploadRequest.error.type === 'upload-error:file-size' ) {
+            alertMessage = (<span>'{uploadInfo.fileName}' failed to upload. { uploadRequest.error?.message }</span>)
+        } else {
+            alertMessage = (<span>'{uploadInfo.fileName}' failed to upload.  Please try again or try a different file.</span>)
+        }
+        stateInternal = State.isFailedUpload
+    }
+
+    if ( job !== null && job !== undefined  ) {
+        if ( job.progress.step === 'failed' && job.attemptsMade === job.opts?.attempts ) {
+            alertMessage = (<span>{ job.progress?.stepDescription ? job.progress.stepDescription : 'File failed to process.  This could be because the file was corrupted or invalid in some way.' }</span>)
+            stateInternal = State.isFailedProcess
+        }
+    }
+
+    if ( request?.state === 'failed' ) {
+        if ( 'error' in request && request.error !== undefined && request.error !== null && typeof request.error === 'object' ) {
+            alertMessage = (<span>Failed to crop image. The image file may be corrupted or invalid in some way.</span>)
+            stateInternal = State.isFailedProcess
+
+            if ( request.error.type === 'invalid' ) {
+                alertMessage = (<span>Crop dimensions were invalid.  Try re-uploading and re-positioning the crop.</span>)
+            } else if ( request.error.type === 'network-error' ) {
+                alertMessage = (<span>A temporary network error occurred while cropping. If the error persists, please contact support.</span>)
+            } 
+        }
     }
 
     let style = {}
@@ -286,6 +319,32 @@ const DraftProfileImage = function({
                     </div>
                 </div> 
             }
+            { stateInternal === State.isFailedLoad &&
+                <>
+                    <div className="draft-profile-image__failed-load">
+                        <p>Failed to load file.</p>
+                        <Button type="warn" onClick={() => refreshFile()}>Retry</Button>
+                    </div>
+                    <div className="draft-profile-image__buttons">
+                        <Button onClick={(e) => { e.preventDefault(); remove() }}>Remove Image</Button>
+                    </div>
+                </>
+            }
+            { ( stateInternal === State.isFailedUpload || stateInternal === State.isFailedProcess ) &&
+                    <>
+                        <Alert type="error" timeout={5000} onClear={() => onErrorInternal() }>{ alertMessage }</Alert> 
+                        <div className="draft-profile-image">
+                            <div className="draft-profile-image__failed-load">
+                                <div className="draft-profile-image__failed-load__inner">
+                                    <p>{ stateInternal === State.isFailedUpload ? 'Image failed to upload.' : 'Failed to process image.' }</p>
+                                </div>
+                            </div>
+                            <div className="draft-profile-image__buttons">
+                                <Button onClick={(e) => { e.preventDefault(); remove() }}>Remove Image</Button>
+                            </div>
+                        </div>
+                    </>
+            }
             { stateInternal === State.isReady && 
                 <>
                     <div className={`draft-profile-image__file-wrapper`} style={style}>
@@ -306,8 +365,6 @@ const DraftProfileImage = function({
                     </div>
                 </>
             }
-            <RequestErrorModal message={'Attempt to crop your profile'} request={request} onContinue={() => onErrorInternal()} />
-            <JobError message={'File processing'} job={job} onContinue={() => onErrorInternal()} />
         </div>
     )
 }
