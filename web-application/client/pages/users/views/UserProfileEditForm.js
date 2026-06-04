@@ -28,6 +28,8 @@ import { validateName, validateAbout } from '/lib/validation/user'
 import { UserCircleIcon } from '@heroicons/react/24/outline'
 
 import { patchUser } from '/state/User'
+import { removeRequest } from '/state/requests'
+import { removeRequest as removeFileRequest } from '/state/File'
 
 import DraftProfileImage from '/components/files/DraftProfileImage'
 import FileUploadInput from '/components/files/FileUploadInput'
@@ -59,6 +61,7 @@ const UserProfileEditForm = function(props) {
     
     const fileRef = useRef(null)
 
+    const uploadRequests = useSelector((state) => state.File.requests)
     const [ request, makeRequest, resetRequest ] = useRequest()
 
     const madeChange = fileId != currentUser.fileId || name != currentUser.name || about != currentUser.about
@@ -119,6 +122,13 @@ const UserProfileEditForm = function(props) {
         }
     }
 
+    const cleanupRequest = function() {
+        if ( fileId in uploadRequests ) {
+            dispatch(removeRequest({ id: uploadRequests[fileId] }))
+            dispatch(removeFileRequest({ fileId: fileId }))
+        }
+    }
+
     const assembleUser = function() {
         return {
             id: currentUser.id,
@@ -140,6 +150,9 @@ const UserProfileEditForm = function(props) {
         }
 
         setIsPending(true)
+
+        cleanupRequest()
+
         if ( fileId !== null && fileId !== undefined ) {
             fileRef.current?.submit()
         } else {
@@ -173,6 +186,8 @@ const UserProfileEditForm = function(props) {
         setIsPending(false)
         setAreYouSure(false)
         
+        cleanupRequest()
+
         navigate(`/${currentUser.username}`)
     }
 

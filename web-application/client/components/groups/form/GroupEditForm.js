@@ -13,6 +13,8 @@ import { useGroup } from '/lib/hooks/Group'
 import { useFile } from '/lib/hooks/File'
 
 import { patchGroup } from '/state/Group'
+import { removeRequest } from '/state/requests'
+import { removeRequest as removeFileRequest } from '/state/File'
 
 import DraftProfileImage from '/components/files/DraftProfileImage'
 import FileUploadInput from '/components/files/FileUploadInput'
@@ -48,6 +50,7 @@ const GroupEditForm = function({ groupId }) {
     const [ shortDescriptionErrors, setShortDescriptionErrors ] = useState(null)
     const [ rulesErrors, setRulesErrors ] = useState(null)
 
+    const uploadRequests = useSelector((state) => state.File.requests)
     const [request, makeRequest] = useRequest()
 
     const fileRef = useRef(null)
@@ -139,6 +142,13 @@ const GroupEditForm = function({ groupId }) {
         setAreYouSure(false)
     }
 
+    const cleanupRequest = function() {
+        if ( fileId in uploadRequests ) {
+            dispatch(removeRequest({ id: uploadRequests[fileId] }))
+            dispatch(removeFileRequest({ fileId: fileId }))
+        }
+    }
+
     const assembleGroup = function() {
         const newGroup = {
             id: groupId,
@@ -168,6 +178,8 @@ const GroupEditForm = function({ groupId }) {
 
         setIsPending(true)
 
+        cleanupRequest()
+
         if ( fileId !== null && fileId !== undefined ) {
             fileRef.current?.submit()
         } else {
@@ -180,6 +192,8 @@ const GroupEditForm = function({ groupId }) {
      */
     const cancel = function(event) {
         resetForm()
+
+        cleanupRequest()
 
         navigate(`/group/${group.slug}`)
     }

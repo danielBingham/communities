@@ -34,6 +34,8 @@ import { useGroupPermissionContext } from '/lib/hooks/Group'
 import { useFile } from '/lib/hooks/File'
 
 import { postGroups } from '/state/Group'
+import { removeRequest } from '/state/requests'
+import { removeRequest as removeFileRequest } from '/state/File'
 
 import DraftProfileImage from '/components/files/DraftProfileImage'
 import FileUploadInput from '/components/files/FileUploadInput'
@@ -100,6 +102,7 @@ const GroupForm = function({ parentId }) {
     const hasSubgroups = useFeature('issue-165-subgroups')
     const hasRules = useFeature('issue-330-group-short-description-and-rules')
 
+    const uploadRequests = useSelector((state) => state.File.requests)
     const [request, makeRequest] = useRequest()
     const fileRef = useRef(null)
 
@@ -239,6 +242,13 @@ const GroupForm = function({ parentId }) {
         setAreYouSure(false)
     }
 
+    const cleanupRequest = function() {
+        if ( fileId in uploadRequests ) {
+            dispatch(removeRequest({ id: uploadRequests[fileId] }))
+            dispatch(removeFileRequest({ fileId: fileId }))
+        }
+    }
+
     const assembleGroup = function() {
         const group = {
             type: type,
@@ -274,6 +284,8 @@ const GroupForm = function({ parentId }) {
         }
 
         setIsPending(true)
+        cleanupRequest()
+
         // If we have a file, we need to crop it first, and we don't want to
         // send the primary Group request until the crop is successful (in case
         // it errors).
@@ -289,6 +301,8 @@ const GroupForm = function({ parentId }) {
      */
     const cancel = function(event) {
         resetForm()
+
+        cleanupRequest()
 
         navigate('/groups')
     }

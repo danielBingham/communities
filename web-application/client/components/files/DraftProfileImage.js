@@ -223,18 +223,6 @@ const DraftProfileImage = function({
         }
     }, [ job?.progress?.step ])
 
-    useEffect(() => {
-        return () => {
-            // If we're unmounting and we have a succeeded request, clean it
-            // up.  We don't need it anymore.
-            //
-            if ( uploadRequest.state === 'failed' || uploadRequest.state === 'fulfilled' ) {
-                dispatch(removeRequest(uploadRequest))
-                dispatch(removeFileRequest({ filleId: fileId }))
-            }
-        }
-    }, [ uploadRequest ])
-
     // ============ Render ====================================================
   
     let stateInternal = State.isAwaitingFile
