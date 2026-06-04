@@ -18,7 +18,7 @@
  *
  ******************************************************************************/
 import { useRef, useState, useEffect } from 'react'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
 import { GlobeAltIcon, LockOpenIcon, LockClosedIcon, UserCircleIcon } from '@heroicons/react/24/outline'
@@ -105,6 +105,8 @@ const GroupForm = function({ parentId }) {
     const uploadRequests = useSelector((state) => state.File.requests)
     const [request, makeRequest] = useRequest()
     const fileRef = useRef(null)
+
+    const dispatch = useDispatch()
 
     /**
      * Determine whether any of the form's data has been changed.

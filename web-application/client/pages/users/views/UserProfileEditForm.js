@@ -18,7 +18,7 @@
  *
  ******************************************************************************/
 import { useState, useEffect, useRef }  from 'react'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
 import { useRequest } from '/lib/hooks/useRequest'
@@ -66,6 +66,7 @@ const UserProfileEditForm = function(props) {
 
     const madeChange = fileId != currentUser.fileId || name != currentUser.name || about != currentUser.about
 
+    const dispatch = useDispatch()
     const navigate = useNavigate()
     
     const isDirty = function() {
@@ -311,7 +312,7 @@ const UserProfileEditForm = function(props) {
                 </div>
                 <div className="form-submit submit">
                     { ! isPending && <span><Button onClick={(e) => handleCancel()}>Cancel</Button> <input type="submit" name="submit" value="Submit" /></span> }
-                    { isPending && <div><p><Spinner /></p><p>Updating. Do not navigate away...</p></div> }
+                    { isPending && <div><Spinner /><p>Updating. Do not navigate away...</p></div> }
                 </div>
             </form>
             <AreYouSure 
