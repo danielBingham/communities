@@ -315,7 +315,7 @@ const DraftProfileImage = function({
                     <div className="draft-profile-image__pending">
                         <div className="draft-profile-image__pending-progress">
                             <p>Processing. Do not navigate away. This might take several minutes...</p>
-                            <ProgressBar progress={ job ? job.progress.progress : 0 } />
+                            <ProgressBar progress={ job?.progress?.progress ?? 0 } />
                         </div>
                     </div>
                     <div className="draft-profile-image__buttons">

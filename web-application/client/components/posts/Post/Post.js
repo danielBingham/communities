@@ -24,10 +24,9 @@ import { Link } from 'react-router-dom'
 import { UsersIcon, UserGroupIcon, GlobeAltIcon, MegaphoneIcon } from '@heroicons/react/24/solid'
 import { InformationCircleIcon } from '@heroicons/react/16/solid'
 
-import { useFeature } from '/lib/hooks/feature'
 import { usePost } from '/lib/hooks/Post'
 import { useUser } from '/lib/hooks/User'
-import { useGroup, useGroupPermissionContext } from '/lib/hooks/Group'
+import { useGroupPermissionContext } from '/lib/hooks/Group'
 import { useSiteModeration } from '/lib/hooks/SiteModeration'
 import { useGroupModeration } from '/lib/hooks/GroupModeration'
 

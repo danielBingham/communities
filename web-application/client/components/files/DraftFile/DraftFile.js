@@ -173,7 +173,7 @@ const DraftFile = function({
                     <div className="draft-file__pending">
                         <div>
                             <p>Processing. Do not navigate away. This might take several minutes...</p>
-                            <ProgressBar progress={ job ? job.progress.progress : 0 } />
+                            <ProgressBar progress={ job?.progress?.progress ?? 0 } />
                         </div>
                     </div>
                 </div> 

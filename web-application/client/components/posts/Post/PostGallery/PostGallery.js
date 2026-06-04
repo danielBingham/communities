@@ -23,7 +23,6 @@ import { useSwipeable } from 'react-swipeable'
 
 import { ChevronRightIcon, ChevronLeftIcon } from '@heroicons/react/24/solid'
 
-import { useFeature } from '/lib/hooks/feature'
 import { usePost } from '/lib/hooks/Post'
 
 import File from '/components/files/File'

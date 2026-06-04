@@ -32,11 +32,9 @@ import { makePersistedRequest } from '/state/requests'
 import { createError } from '/lib/errors'
 
 import { useRequest } from '/lib/hooks/useRequest'
-import { useFeature } from '/lib/hooks/feature'
 
 import { RequestErrorModal } from '/components/errors/RequestError'
 
-import Spinner from '/components/Spinner'
 import Button from '/components/ui/Button'
 import Alert from '/components/ui/Alert'
 
