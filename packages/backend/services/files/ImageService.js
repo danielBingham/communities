@@ -144,9 +144,9 @@ module.exports = class ImageService {
         }
 
 
-        const x = Math.floor(parseInt(crop.x) * widthRatio)
-        const y = Math.floor(parseInt(crop.y) * heightRatio)
-        if ( x === NaN || y === NaN ) {
+        let x = Math.floor(parseInt(crop.x) * widthRatio)
+        let y = Math.floor(parseInt(crop.y) * heightRatio)
+        if ( Number.isNaN(x) || Number.isNaN(y) ) {
             throw new ServiceError('validation-error',
                 `X or Y of the crop is NaN after scaling.`)
         }
