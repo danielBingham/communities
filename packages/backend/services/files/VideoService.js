@@ -84,7 +84,6 @@ class VideoProcess {
         this.trigger('progress', 2)
 
         try { 
-            // TODO: Add retries to this.
             this.core.logger.info(`Downloading file "${originalPath}"...`)
             await this.s3.downloadFile(originalPath, localOriginalFile).catch((error) => {
                 this.core.logger.error(`Failed to download video for processing: `, error)
@@ -96,7 +95,7 @@ class VideoProcess {
             if ( originalPath === targetPath ) {
                 originalPath = this.fileService.getPath(file, 'original')
                 this.core.logger.info(`Backing up original file to ${originalPath}...`)
-                await this.s3.copyFile(file.filepath, originalPath)
+                await this.s3.moveFile(file.filepath, originalPath)
             }
 
             // Get the length of the video in seconds.
@@ -246,6 +245,7 @@ class VideoProcess {
             // Remove both newFilename and originalFilename from local files
             this.local.removeFile(localOriginalFile)
             this.local.removeFile(localNewFile)
+            this.local.removeFile(thumbnailLocalFile)
 
             this.trigger('progress', 100)
         } catch (error ) {
@@ -266,9 +266,17 @@ class VideoProcess {
             }
 
             try { 
+                if ( this.local.fileExists(thumbnailLocalFile) ) {
+                    this.local.removeFile(thumbnailLocalFile)
+                }
+            } catch (thumbnailError) {
+                this.core.logger.error(`Failed to clean up local thumbnail file: `, thumbnailError)
+            }
+
+            try { 
                 if ( originalPath !== file.filepath ) {
                     this.core.logger.info(`Restoring original file...`)
-                    await this.s3.copyFile(originalPath, file.filepath)
+                    await this.s3.moveFile(originalPath, file.filepath)
                 }
             } catch (restoreError) {
                 this.core.logger.error(`Failed to restore original file: `, restoreError)
