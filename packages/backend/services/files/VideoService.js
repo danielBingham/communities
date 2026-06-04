@@ -96,7 +96,7 @@ class VideoProcess {
             if ( originalPath === targetPath ) {
                 originalPath = this.fileService.getPath(file, 'original')
                 this.core.logger.info(`Backing up original file to ${originalPath}...`)
-                await this.s3.moveFile(file.filepath, originalPath)
+                await this.s3.copyFile(file.filepath, originalPath)
             }
 
             // Get the length of the video in seconds.
@@ -263,6 +263,15 @@ class VideoProcess {
                 }
             } catch (outputError) {
                 this.core.logger.error(`Failed to clean up local new file: `, outputError)
+            }
+
+            try { 
+                if ( originalPath !== file.filepath ) {
+                    this.core.logger.info(`Restoring original file...`)
+                    await this.s3.copyFile(originalPath, file.filepath)
+                }
+            } catch (restoreError) {
+                this.core.logger.error(`Failed to restore original file: `, restoreError)
             }
 
             this.core.logger.error(`Attempt to reformat file failed: `, error)
