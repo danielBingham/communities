@@ -147,7 +147,16 @@ class VideoProcess {
                     // Calculate our progress. 
                     // * `out_time_ms` is in microseconds.
                     // * durationSeconds is in seconds.
-                    const progress = 20 + ( ( ((parsedData.out_time_ms / (1000 * 1000)) / durationSeconds) * 100) * 0.6 ) 
+                    const processedDurationSeconds = (parsedData.out_time_ms / (1000 * 1000)) 
+                    
+                    let processProgressPercentage = 0
+                    if ( Number.isFinite(processedDurationSeconds) ) {
+                        processProgressPercentage = (processedDurationSeconds / durationSeconds) * 100
+                    }
+
+                    const progressGainPercentage = Math.floor(processProgressPercentage * 0.6)
+
+                    const progress = 20 + progressGainPercentage 
 
                     this.trigger('progress', progress)
                 } catch (error) {
