@@ -32,7 +32,8 @@ import { useGroup, useGroupPermissionContext } from '/lib/hooks/Group'
 import { useGroupMember } from '/lib/hooks/GroupMember'
 import { usePost } from '/lib/hooks/Post'
 
-import { deleteFile } from '/state/File'
+import { deleteFile, removeRequest as removeFileRequest } from '/state/File'
+import { removeRequest } from '/state/requests'
 import { postPosts, patchPost } from '/state/Post'
 
 import Button from '/components/ui/Button'
@@ -73,6 +74,7 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
     const [patchRequest, makePatchRequest] = useRequest()
     const [deleteFileRequest, makeDeleteFileRequest] = useRequest()
 
+    const uploadRequests = useSelector((state) => state.File.requests)
     const [ areYouSure, setAreYouSure ] = useState(false)
 
     const dispatch = useDispatch()
@@ -127,6 +129,17 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
         return false
     }
 
+    const cleanupRequests = function() {
+        if ( 'files' in draft && Array.isArray(draft.files) ) {
+            for(const fileId of draft.files) {
+                if ( fileId in uploadRequests ) {
+                    dispatch(removeRequest({ id: uploadRequests[fileId] }))
+                    dispatch(removeFileRequest({ fileId: fileId }))
+                }
+            }
+        }
+    }
+
     const submit = function() {
         const newPost = {
             type: draft.type, 
@@ -143,6 +156,8 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
             newPost.groupId = groupId
         }
 
+        cleanupRequests()
+
         if ( ! postId ) {
             makePostRequest(postPosts(newPost))
         } else { 
@@ -155,9 +170,11 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
      * Execute the canceling of the edit.
      */
     const cancel = function() {
+        // If this is a draft edit and we have added files to the draft that
+        // are not included in the post, then we need to delete them to clean
+        // them up.
         if ( 'files' in draft && Array.isArray(draft.files) 
             && post?.files && Array.isArray(post.files) 
-            && draft.files.length !== post.files.length 
         ) {
             for(const fileId of draft.files) {
                 if ( ! post.files.includes(fileId) ) {
@@ -165,6 +182,18 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
                 }
             }
         }
+
+        // Otherwise if this is a draft, then we just need to delete all the
+        // draft files.
+        if ( 'files' in draft && Array.isArray(draft.files)
+            && ( postId === undefined || postId === null)
+        ) { 
+            for(const fileId of draft.files) {
+                makeDeleteFileRequest(deleteFile(fileId))
+            }
+        }
+
+        cleanupRequests()
 
         setAreYouSure(false)
         setDraft(null) 

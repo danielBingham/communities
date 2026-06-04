@@ -85,6 +85,16 @@ module.exports = class FileService {
     }
 
     async deleteFile(file) {
+        // TODO If the file has a processing job in progress, we don't actually
+        // have the ability to cancel it.  So it's possible that job will be
+        // creating a variant while we're in the process of deleting them.
+        // There's a case in the race condition where the variant doesn't get
+        // deleted and is left hanging.
+        //
+        // At some point we're going to need a weekly orphan file cleanup job
+        // for our S3, but for now, storage is cheap, we're going to let them
+        // hang.
+        
         if ( 'variants' in file && Array.isArray(file.variants) ) {
             await this.deleteVariants(file)
         }

@@ -18,11 +18,9 @@
  *
  ******************************************************************************/
 import { useState, useEffect, useRef, useImperativeHandle } from 'react'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 
 import { ReactCrop } from 'react-image-crop'
-
-import { XMarkIcon, PhotoIcon } from '@heroicons/react/16/solid'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
@@ -30,10 +28,8 @@ import { useFile } from '/lib/hooks/File'
 import { useJob } from '/lib/hooks/Job'
 import { useEventSubscription } from '/lib/hooks/useEventSubscription'
 
-import {  patchFile, deleteFile } from '/state/File'
-
-import { RequestErrorModal } from '/components/errors/RequestError'
-import JobError from '/components/errors/JobError'
+import {  patchFile, deleteFile, removeRequest as removeFileRequest  } from '/state/File'
+import { removeRequest } from '/state/requests'
 
 import Button from '/components/ui/Button'
 import Spinner from '/components/Spinner'
@@ -92,6 +88,8 @@ const DraftProfileImage = function({
 
     const [ request, makeRequest, resetRequest ] = useRequest()
     const imageRef = useRef(null)
+
+    const dispatch = useDispatch()
 
     const remove = function() {
         setFileId(null)
@@ -220,11 +218,28 @@ const DraftProfileImage = function({
             } else if ( onProcessingSuccess ) {
                 onProcessingSuccess()
             }
+        } else if ( job?.finishedOn !== null ) {
+            refreshFile()
         }
     }, [ job?.progress?.step ])
 
+    useEffect(() => {
+        return () => {
+            // If we're unmounting and we have a succeeded request, clean it
+            // up.  We don't need it anymore.
+            //
+            if ( uploadRequest.state === 'failed' || uploadRequest.state === 'fulfilled' ) {
+                dispatch(removeRequest(uploadRequest))
+                dispatch(removeFileRequest({ filleId: fileId }))
+            }
+        }
+    }, [ uploadRequest ])
+
     // ============ Render ====================================================
   
+    let stateInternal = State.isAwaitingFile
+    let alertMessage = ''
+
     if ( fileId === undefined || fileId === null ) {
         return null
     }
@@ -237,17 +252,18 @@ const DraftProfileImage = function({
         )
     }
 
-
-    let stateInternal = State.isAwaitingFile
-    if ( file.state === 'pending' ) {
-        stateInternal = State.isUploading
-    } else if ( file.state === 'processing' ) {
-        stateInternal = State.isProcessing
-    } else if ( file.state === 'ready' ) {
-        stateInternal = State.isReady
+    if ( file !== undefined && file !== null ) {
+        if ( file.state === 'pending' ) {
+            stateInternal = State.isUploading
+        } else if ( file.state === 'processing' ) {
+            stateInternal = State.isProcessing
+        } else if ( file.state === 'ready' ) {
+            stateInternal = State.isReady
+        } else if ( file.state === 'error' ) {
+            stateInternal = State.isFailedProcess
+        }
     }
 
-    let alertMessage = ''
     if ( ( file === undefined || file === null ) && fileRequest?.state !== 'fulfilled' ) {
         stateInternal = State.isFailedLoad
     }

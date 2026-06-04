@@ -23,12 +23,15 @@ import * as Uuid from 'uuid'
 
 import logger from '/logger'
 
+const initialState = {
+    dictionary: {}
+}
+
 const requestsSlice = createSlice({
     name: 'requests',
-    initialState: {
-        dictionary: {}
-    },
+    initialState: initialState,
     reducers: {
+        resetRequestsSlice: (state, action) => initialState,
         setInDictionary: (state, action) => {
             state.dictionary[action.payload.id] = action.payload
         },

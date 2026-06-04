@@ -18,8 +18,7 @@
  *
  ******************************************************************************/
 import { useState, useEffect } from 'react'
-import { useSelector } from 'react-redux'
-
+import { useSelector, useDispatch } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
@@ -27,7 +26,8 @@ import { XMarkIcon, PhotoIcon } from '@heroicons/react/16/solid'
 
 import logger from '/logger'
 
-import { deleteFile } from '/state/File'
+import { deleteFile, removeRequest as removeFileRequest } from '/state/File'
+import { removeRequest } from '/state/requests'
 
 import { useFile } from '/lib/hooks/File'
 import { useJob } from '/lib/hooks/Job'
@@ -78,6 +78,8 @@ const DraftFile = function({
 
     const [deleteRequest, makeDeleteRequest] = useRequest()
 
+    const dispatch = useDispatch()
+
     const remove = function() {
         onRemove(fileId)
 
@@ -93,6 +95,17 @@ const DraftFile = function({
             refreshFile()
         }
     }, [ job ])
+
+    useEffect(() => {
+        return () => {
+            // If we're unmounting and we have a succeeded request, clean it
+            // up.  We don't need it anymore.
+            if ( uploadRequest?.state === 'failed' || uploadRequest?.state === 'fulfilled' ) {
+                dispatch(removeRequest(uploadRequest))
+                dispatch(removeFileRequest({ filleId: fileId }))
+            }
+        }
+    }, [ uploadRequest ])
 
     // ============ Render ====================================================
     //

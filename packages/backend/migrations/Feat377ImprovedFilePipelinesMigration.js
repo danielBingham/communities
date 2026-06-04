@@ -19,18 +19,21 @@
  ******************************************************************************/
 const BaseMigration = require('./BaseMigration')
 
-module.exports = class Feat15PostImageGalleriesMigration extends BaseMigration {
+module.exports = class Feat377ImprovedFilePipelinesMigration extends BaseMigration {
 
     constructor(core) {
         super(core)
     }
 
     async initForward() {
-        await this.database.query(`ALTER TABLE posts DROP CONSTRAINT posts_file_id_fkey`, [])
+        await this.database.query(`ALTER TABLE posts DROP CONSTRAINT IF EXISTS posts_file_id_fkey`, [])
         await this.database.query(`ALTER TABLE posts ADD CONSTRAINT posts_file_id_fkey FOREIGN KEY (file_id) REFERENCES files (id) ON DELETE SET NULL`, [])
     }
 
-    async initBack() {}
+    async initBack() {
+        await this.database.query(`ALTER TABLE posts DROP CONSTRAINT IF EXISTS posts_file_id_fkey`, [])
+        await this.database.query(`ALTER TABLE posts ADD CONSTRAINT posts_file_id_fkey FOREIGN KEY (file_id) REFERENCES files (id)`, [])
+    }
 
     async migrateForward(targets) { }
 
