@@ -266,7 +266,7 @@ const GroupEditForm = function({ groupId }) {
                         /> }
                         { ! fileId  && <FileUploadInput 
                             maxFiles={1}
-                            onChange={(fileIds) => setFileId(fileIds[0])}
+                            onChange={(fileIds) => { setIsPending(true); setFileId(fileIds[0]) }}
                             kind="image"
                             allowedTypes={[ 'image/jpeg', 'image/png' ]} 
                         /> }

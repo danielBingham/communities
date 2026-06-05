@@ -81,6 +81,8 @@ class VideoProcess {
         let originalPath = file.filepath
         const targetPath = this.fileService.getPath(file, undefined, 'video/mp4') 
 
+        let thumbnailLocalFile = '' 
+
         this.trigger('progress', 2)
 
         try { 
@@ -135,10 +137,10 @@ class VideoProcess {
                 localNewFile,
             ]
             this.core.logger.info(`Reformatting file "${localOriginalFile}" to "${localNewFile}"...`)
-            const process = this.processService.spawn('ffmpeg', ffmpegArgs)
+            const ffmpegProcess = this.processService.spawn('ffmpeg', ffmpegArgs)
 
             // Read progress from stdout and report it on the 'progress' event.
-            process.on('stdout', (data) => {
+            ffmpegProcess.on('stdout', (data) => {
                 try { 
                     // Convert into an object.
                     const parsedData = Object.fromEntries(data.split('\n').map((l) => l.split('=')))
@@ -164,7 +166,7 @@ class VideoProcess {
             })
 
             this.trigger('progress', 20)
-            await process.run()
+            await ffmpegProcess.run()
 
             this.core.logger.info(`Checking size of the processed file...`)
             const size = this.local.getFileSize(localNewFile)
@@ -193,7 +195,7 @@ class VideoProcess {
             })
             const thumbFile = await this.fileDAO.getFileById(thumbId)
 
-            const thumbnailLocalFile = path.join('tmp/', this.fileService.getFilename(thumbFile))
+            thumbnailLocalFile = path.join('tmp/', this.fileService.getFilename(thumbFile))
             const thumbnailPath = this.fileService.getPath(thumbFile) 
 
             const ffmpegThumbnailArgs = [

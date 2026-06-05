@@ -788,7 +788,14 @@ module.exports = class PostController {
         if ( 'files' in post && Array.isArray(post.files) ) {
             for (const fileId of existing.files ) {
                 if ( ! post.files.includes(fileId) ) {
-                    await this.fileService.deleteFileById(fileId)
+                    // The `await` here is intentionally left off because this
+                    // can take a while, since it's making multiple calls to
+                    // S3.  We don't actually need to wait for those calls to
+                    // finish and this could potentially be moved into a worker
+                    // in the future.
+                    //
+                    // In the mean time, we're going to just let it run async.
+                    this.fileService.deleteFileById(fileId)
                 }
             }
         }

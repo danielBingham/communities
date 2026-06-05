@@ -247,9 +247,7 @@ const DraftProfileImage = function({
             stateInternal = State.isProcessing
         } else if ( file.state === 'ready' ) {
             stateInternal = State.isReady
-        } else if ( file.state === 'error' ) {
-            stateInternal = State.isFailedProcess
-        }
+        } 
     }
 
     if ( ( file === undefined || file === null ) && fileRequest?.state !== 'fulfilled' ) {
