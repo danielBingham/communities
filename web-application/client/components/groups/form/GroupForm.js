@@ -246,7 +246,7 @@ const GroupForm = function({ parentId }) {
 
     const cleanupRequest = function() {
         if ( fileId in uploadRequests ) {
-            dispatch(removeRequest({ id: uploadRequests[fileId] }))
+            dispatch(removeRequest({ id: uploadRequests[fileId].requestId }))
             dispatch(removeFileRequest({ fileId: fileId }))
         }
     }

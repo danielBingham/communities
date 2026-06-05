@@ -133,7 +133,7 @@ const PostForm = function({ postId, groupId, sharedPostId, origin }) {
         if ( 'files' in draft && Array.isArray(draft.files) ) {
             for(const fileId of draft.files) {
                 if ( fileId in uploadRequests ) {
-                    dispatch(removeRequest({ id: uploadRequests[fileId] }))
+                    dispatch(removeRequest({ id: uploadRequests[fileId].requestId }))
                     dispatch(removeFileRequest({ fileId: fileId }))
                 }
             }
