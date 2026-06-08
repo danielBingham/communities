@@ -39,36 +39,31 @@ const SCHEMA = {
             'state': { insert: DAO.INSERT.ALLOW,
                 update: DAO.UPDATE.ALLOW,
                 select: DAO.SELECT.ALWAYS,
-                key: 'state',
-                needsFeature: 'issue-67-video-uploads'
+                key: 'state'
             },
             'job_id': {
                 insert: DAO.INSERT.ALLOW,
                 update: DAO.UPDATE.ALLOW,
                 select: DAO.SELECT.ALWAYS,
-                key: 'jobId',
-                needsFeature: 'issue-67-video-uploads'
+                key: 'jobId'
             },
             'variants': {
                 insert: DAO.INSERT.ALLOW,
                 update: DAO.UPDATE.ALLOW,
                 select: DAO.SELECT.ALWAYS,
-                key: 'variants',
-                needsFeature: 'issue-67-video-uploads'
+                key: 'variants'
             },
             'kind': {
                 insert: DAO.INSERT.ALLOW,
                 update: DAO.UPDATE.ALLOW,
                 select: DAO.SELECT.ALWAYS,
-                key: 'kind',
-                needsFeature: 'issue-67-video-uploads'
+                key: 'kind'
             },
             'mimetype': {
                 insert: DAO.INSERT.ALLOW,
                 update: DAO.UPDATE.ALLOW,
                 select: DAO.SELECT.ALWAYS,
-                key: 'mimetype',
-                needsFeature: 'issue-67-video-uploads'
+                key: 'mimetype'
             },
             'type': {
                 insert: DAO.INSERT.ALLOW,
@@ -80,8 +75,7 @@ const SCHEMA = {
                 insert: DAO.INSERT.ALLOW,
                 update: DAO.UPDATE.ALLOW,
                 select: DAO.SELECT.ALWAYS,
-                key: 'thumbId',
-                needsFeature: 'issue-67-video-uploads'
+                key: 'thumbId'
             },
             'location': {
                 insert: DAO.INSERT.ALLOW,
@@ -190,9 +184,9 @@ module.exports = class FilesDAO extends DAO {
         await this.update('File', file)
     }
 
-    async deleteFile(file) {
+    async deleteFile(fileId) {
         await this.database.query(`
             DELETE FROM files WHERE id = $1
-        `, [ file.id ])
+        `, [ fileId ])
     }
 }

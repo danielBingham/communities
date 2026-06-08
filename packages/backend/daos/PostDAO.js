@@ -55,12 +55,6 @@ const SCHEMA = {
                 select: 'always',
                 key: 'visibility'
             },
-            'file_id': {
-                insert: 'allowed',
-                update: 'allowed',
-                select: 'always',
-                key: 'fileId'
-            },
             'link_preview_id': {
                 insert: 'allowed',
                 update: 'allowed',
@@ -231,12 +225,10 @@ module.exports = class PostDAO extends DAO {
                 dictionary[row.Post_id].comments.push(row.PostComment_id)
             }
 
-            if ( this.core.features.has('feat-15-post-image-galleries') ) {
-                // Hydate Files.
-                if ( row.File_id !== null && ! ( row.File_id in fileDictionary )) {
-                    fileDictionary[row.File_id] = true
-                    dictionary[row.Post_id].files.push(row.File_id)
-                }
+            // Hydate Files.
+            if ( row.File_id !== null && ! ( row.File_id in fileDictionary )) {
+                fileDictionary[row.File_id] = true
+                dictionary[row.Post_id].files.push(row.File_id)
             }
         }
 
@@ -276,16 +268,16 @@ module.exports = class PostDAO extends DAO {
             SELECT
                 ${this.getPostSelectionString()},
                 post_comments.id as "PostComment_id",
-                post_reactions.id as "PostReaction_id"
-                ${ this.core.features.has('feat-15-post-image-galleries') ? ', post_files.file_id as "File_id"' : '' }
+                post_reactions.id as "PostReaction_id", 
+                post_files.file_id as "File_id"
             FROM posts
                 LEFT OUTER JOIN post_reactions ON posts.id = post_reactions.post_id
                 LEFT OUTER JOIN post_comments ON posts.id = post_comments.post_id
-                ${ this.core.features.has('feat-15-post-image-galleries') ? 'LEFT OUTER JOIN post_files ON posts.id = post_files.post_id' : '' }
+                LEFT OUTER JOIN post_files ON posts.id = post_files.post_id
                 LEFT OUTER JOIN site_moderation ON posts.site_moderation_id = site_moderation.id
                 LEFT OUTER JOIN group_moderation ON posts.group_moderation_id = group_moderation.id
             ${where}
-            ORDER BY ${order}, post_comments.created_date ASC${ this.core.features.has('feat-15-post-image-galleries') ? ', post_files.position ASC' : '' }
+            ORDER BY ${order}, post_comments.created_date ASC, post_files.position ASC
         `
         const results = await this.core.database.query(sql, params)
 

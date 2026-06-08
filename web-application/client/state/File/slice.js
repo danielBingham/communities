@@ -62,7 +62,9 @@ const initialState = {
      */
     queries: {},
 
-    sources: {}
+    sources: {},
+
+    requests: {}
 }
 
 export const FileSlice = createSlice({
@@ -134,10 +136,23 @@ export const FileSlice = createSlice({
             if ( fileId in state.sources) {
                 delete state.sources[fileId]
             }
+        },
+
+        setRequest: (state, action) => {
+            state.requests[action.payload.fileId] = {
+                requestId: action.payload.requestId,
+                fileName: action.payload.fileName
+            }
+        },
+
+        removeRequest: (state, action) => {
+            if ( action.payload.fileId in state.requests ) {
+                delete state.requests[action.payload.fileId]
+            }
         }
     }
 })
 
-export const {  setFilesInDictionary, removeFile, setFileNull, resetFileSlice, setSource, setSources, removeSource }  = FileSlice.actions
+export const {  setFilesInDictionary, removeFile, setFileNull, resetFileSlice, setSource, setSources, removeSource, setRequest, removeRequest }  = FileSlice.actions
 
 export default FileSlice.reducer

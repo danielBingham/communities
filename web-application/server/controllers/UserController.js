@@ -26,6 +26,7 @@
 const {
     AuthenticationService,
     EmailService,
+    FileService,
     NotificationService,
     MutualsService,
     PermissionService,
@@ -61,6 +62,7 @@ module.exports = class UserController extends BaseController{
 
         this.auth = new AuthenticationService(core)
         this.emailService = new EmailService(core)
+        this.fileService = new FileService(core)
         this.notificationService = new NotificationService(core)
         this.mutualsService = new MutualsService(core)
         this.permissionService = new PermissionService(core)
@@ -985,7 +987,7 @@ module.exports = class UserController extends BaseController{
         }
 
         if ( existingUser.fileId && user.fileId !== undefined && existingUser.fileId != user.fileId ) {
-            await this.fileDAO.deleteFile(existingUser.fileId)
+            await this.fileService.deleteFileById(existingUser.fileId)
         }
 
         await this.userDAO.updateUser(user)

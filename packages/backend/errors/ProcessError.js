@@ -17,32 +17,12 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
+const ServiceError = require('./ServiceError')
 
-import { usePost } from '/lib/hooks/Post'
-import { useFile } from '/lib/hooks/File'
+module.exports = class ProcessError extends ServiceError {
+    constructor(type, message, stderr) {
+        super(type, message)
 
-import File from '/components/files/File'
-
-import './PostFile.css'
-
-const PostFile = function({ id, className }) {
-    
-    const [post, request] = usePost(id) 
-
-    if ( post === null || post === undefined ) {
-        return null
+        this.stderr = stderr
     }
-
-    if ( post.fileId === undefined || post.fileId === null ) {
-        return null
-    }
-
-
-    return (
-        <div className={`post-file ${className ? className : ''}`}>
-            <File id={post.fileId} width={650} fallback={true} />
-        </div>
-    )
 }
-
-export default PostFile

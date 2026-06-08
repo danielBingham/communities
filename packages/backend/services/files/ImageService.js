@@ -60,31 +60,56 @@ module.exports = class ImageService {
         const tmpPath = `tmp/${fileName}`
         const targetPath = this.fileService.getPath(file, size) 
 
-        const fileContents = await this.s3.getFile(file.filepath)
+        try { 
+            const fileContents = await this.s3.getFile(file.filepath).catch((error) => {
+                this.core.logger.error(`Failed to download image from S3: `, error)
+                throw new ServiceError('failed-download', 'Failed to download image file for processing.')
+            })
 
-        await sharp(fileContents)
-            .rotate()
-            .resize({ width: size })
-            .toFile(tmpPath)
+            await sharp(fileContents)
+                .rotate()
+                .resize({ width: size })
+                .toFile(tmpPath)
 
-        await this.s3.uploadFile(tmpPath, targetPath)
-        this.local.removeFile(tmpPath)
+            await this.s3.uploadFile(tmpPath, targetPath).catch((error) => {
+                this.core.logger.error('Failed to upload processed image to S3: ', error)
+                throw new ServiceError('failed-upload', 'Failed to upload image file after processing.')
+            })
+            this.local.removeFile(tmpPath)
 
-        if ( this.core.features.has('issue-67-video-uploads') ) {
-            const hasFile = await this.s3.hasFile(targetPath)
+            const hasFile = await this.s3.hasFile(targetPath).catch((error) => {
+                this.core.logger.error(`Failed to read file variant, '${size}', on S3: `, error)
+                throw new ServiceError('failed-read', 'Failed to read image after processing.')
+            })
             if ( hasFile === true ) {
                 const filePatch = {
                     id: file.id,
                     variants: [ ...file.variants, size ]
                 }
                 await this.fileDAO.updateFile(filePatch)
+            } else {
+                this.core.logger.error(`Failed to confirm file variant, '${size}'.`)
+                throw new ServiceError('failed-read', 'Failed to read image after processing.')
             }
+        } catch (error) {
+            this.core.logger.error(`Failed create file variant, '${size}': `, error) 
+            try {
+                if ( this.local.fileExists(tmpPath) ) {
+                    this.local.removeFile(tmpPath)
+                }
+            } catch (cleanupError) {
+                this.core.logger.error(`Failed to cleanup tmp file: `, cleanupError)
+            }
+            throw error
         }
     }
 
     async crop(file, crop, renderedDimensions) {
         // Load the original file into memory.
-        const fileContents = await this.s3.getFile(file.filepath)
+        const fileContents = await this.s3.getFile(file.filepath).catch((error) => {
+            this.core.logger.error(`Failed to download file: `, error)
+            throw new ServiceError('network-error', `Failed to download file.`)
+        })
 
         let orientedContents = null
         try {
@@ -95,7 +120,9 @@ module.exports = class ImageService {
                 crop: %O\n
                 renderedDimensions: %O
             `, file, crop, renderedDimensions)
-            throw error 
+            this.core.logger.error(error)
+            throw new ServiceError('processing-error',
+                `Attempt to orient image before crop failed.`)
         }
         const dimensions = imageSize(orientedContents)
         
@@ -117,9 +144,9 @@ module.exports = class ImageService {
         }
 
 
-        const x = Math.floor(parseInt(crop.x) * widthRatio)
-        const y = Math.floor(parseInt(crop.y) * heightRatio)
-        if ( x === NaN || y === NaN ) {
+        let x = Math.floor(parseInt(crop.x) * widthRatio)
+        let y = Math.floor(parseInt(crop.y) * heightRatio)
+        if ( Number.isNaN(x) || Number.isNaN(y) ) {
             throw new ServiceError('validation-error',
                 `X or Y of the crop is NaN after scaling.`)
         }
@@ -147,7 +174,11 @@ module.exports = class ImageService {
 
         // Keep the uncropped file by moving it to `files/id.orig.ext`
         const originalPath = this.fileService.getPath(file, 'orig')
-        await this.s3.moveFile(file.filepath, originalPath)
+        await this.s3.moveFile(file.filepath, originalPath).catch((error) => {
+            this.core.logger.error(`Failed to move file on S3: `, error)
+            throw new ServiceError('network-error',
+                `Failed to move file on S3.`)
+        })
         await this.fileService.deleteVariants(file)
 
         // Crop the file and upload the cropped file to the original path.
@@ -168,10 +199,15 @@ module.exports = class ImageService {
                 widthRatio: ${widthRatio}, heightRatio: ${heightRatio}, x: ${x}, y: ${y}, width: ${width}, height: ${height}
             `, file, dimensions, crop, renderedDimensions)
             this.core.logger.error(error)
-            throw error 
+            throw new ServiceError('processing-error',
+                `Failed to crop file.`)
         }
 
-        await this.s3.uploadFile(tmpPath, targetPath)
+        await this.s3.uploadFile(tmpPath, targetPath).catch((error) => {
+            this.core.logger.error(`Failed to upload cropped file: `, error)
+            throw new ServiceError(`network-error`,
+                `Failed to upload cropped file.`)
+        })
         this.local.removeFile(tmpPath)
     }
 }

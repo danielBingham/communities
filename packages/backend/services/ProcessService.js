@@ -20,6 +20,92 @@
 
 const { spawn } = require('node:child_process')
 
+const ServiceError = require('../errors/ServiceError')
+const ProcessError = require('../errors/ProcessError')
+
+class Process {
+
+    constructor(core, command, args) {
+        this.core = core
+
+        this.command = command ?? null 
+        this.args = args ?? [] 
+
+        this.stdout = ''
+        this.stderr = ''
+
+        this.pipes = {
+            stdout: [],
+            stderr: []
+        }
+    }
+
+    async run() {
+        return new Promise((resolve, reject) => {
+            if ( this.command === null ) {
+                return reject(new ProcessError('empty', 'Empty process.', ''))
+            }
+
+            const process = spawn(this.command, this.args)        
+
+            // Collect standard error output
+            process.stderr.on('data', (data) => {
+                const stringData = data.toString()
+                this.stderr += stringData
+
+                this.trigger('stderr', stringData)
+            })
+
+            process.stdout.on('data', (data) => {
+                const stringData = data.toString()
+                this.stdout += stringData
+
+                this.trigger('stdout', stringData)
+            })
+
+            process.on('error', (error) => {
+                this.core.logger.warn(`Spawned process (${this.command} ${this.args.join(' ')}) encountered an error: `, error)
+                reject(error)
+            })
+
+            process.on('close', (code) => {
+                if ( code === 0 ) {
+                    resolve()
+                } else {
+                    this.core.logger.warn(`Spawned process(${this.command} ${this.args.join(' ')}) finished with error: `, this.stderr)
+                    reject(new ProcessError('error-code', `Spawned process(${this.command}) failed with error.`, this.stderr))
+                }
+            })
+        })
+    }
+
+    on(pipe, handler) {
+        if ( ! ( pipe in this.pipes) ) {
+            throw new ServiceError('no-pipe', `No pipe named '${pipe}' to subscribe.`)
+        }
+
+        this.pipes[pipe].push(handler)
+    }
+
+    trigger(pipe, output) {
+        if ( ! (pipe in this.pipes) ) {
+            throw new ServiceError('no-pipe', `No pipe named '${pipe}' to trigger.`)
+        }
+
+        for(const handler of this.pipes[pipe] ) {
+            handler(output)
+        }
+    }
+
+    getStdout() {
+        return this.stdout
+    }
+
+    getStderr() {
+        return this.stderr
+    }
+}
+
 
 /**
  * A service to handle spawning child CLI processes.
@@ -30,36 +116,14 @@ module.exports = class ProcessService {
         this.core = core
     }
 
-    async run(command, commandArgs) {
-        return new Promise((resolve, reject) => {
-            const process = spawn(command, commandArgs)        
+    spawn(command, args) {
+        return new Process(this.core, command, args)
+    }
 
-            // Collect standard error output
-            let stderr = ''
-            process.stderr.on('data', (data) => {
-                stderr += data.toString()
-            })
-
-            let stdout = ''
-            process.stdout.on('data', (data) => {
-                this.core.logger.verbose(`Spawned process (${command}) returned output: `, data.toString())
-                stdout += data.toString()
-            })
-
-            process.on('error', (error) => {
-                this.core.logger.warn(`Spawned process (${command}) encountered an error: `, error)
-                reject(error)
-            })
-
-            process.on('close', (code) => {
-                if ( code === 0 ) {
-                    resolve()
-                } else {
-                    this.core.logger.warn(`Spawned process(${command}) finished with error: `, stderr)
-                    reject(stderr)
-                }
-            })
-        })
+    async run(command, args) {
+        const process = this.spawn(command, args)
+        await process.run()
+        return process.getStdout()
     }
 
     runRaw(command, commandArgs) {

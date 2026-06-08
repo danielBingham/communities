@@ -17,31 +17,26 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import { useSelector } from 'react-redux'
+const BaseMigration = require('./BaseMigration')
 
-import Image from '/components/ui/Image'
+module.exports = class Feat377ImprovedFilePipelinesMigration extends BaseMigration {
 
-import './PostImage.css'
-
-const PostImage = function({ id, className }) {
-    
-    const post = useSelector((state) => id && id in state.Post.dictionary ? state.Post.dictionary[id] : null) 
-    const configuration = useSelector((state) => state.system.configuration)
-
-    if ( ! id || ! post ) {
-        console.error(new Error(`'props.id' and 'post' are both required for PostImage.`))
-        return null
+    constructor(core) {
+        super(core)
     }
 
-    if ( ! post.fileId ) {
-        return null
+    async initForward() {
+        await this.database.query(`ALTER TABLE posts DROP CONSTRAINT IF EXISTS posts_file_id_fkey`, [])
+        await this.database.query(`ALTER TABLE posts ADD CONSTRAINT posts_file_id_fkey FOREIGN KEY (file_id) REFERENCES files (id) ON DELETE SET NULL`, [])
     }
 
-    return (
-        <div className={ className ? `post-image ${className}` : "post-image"}>
-            <Image id={post.fileId} width={650} fallbackIcon={'Photo'} crossOrigin={true} />
-        </div>
-    )
+    async initBack() {
+        await this.database.query(`ALTER TABLE posts DROP CONSTRAINT IF EXISTS posts_file_id_fkey`, [])
+        await this.database.query(`ALTER TABLE posts ADD CONSTRAINT posts_file_id_fkey FOREIGN KEY (file_id) REFERENCES files (id)`, [])
+    }
+
+    async migrateForward(targets) { }
+
+    async migrateBack(targets) { 
+    }
 }
-
-export default PostImage

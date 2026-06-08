@@ -22,7 +22,7 @@ const path = require('node:path')
 const mime = require('mime')
 const { v4: uuidv4 } = require('uuid')
 
-const { FileService, ImageService, VideoService, LocalFileService, S3FileService, ValidationService, FileDAO } = require('@communities/backend')
+const { FileService, ImageService, VideoService, LocalFileService, PermissionService, S3FileService, ValidationService, FileDAO, ServiceError } = require('@communities/backend')
 
 const { schema } = require('@communities/shared')
 
@@ -47,6 +47,7 @@ module.exports = class FileController {
         this.videoService = new VideoService(core)
         this.imageService = new ImageService(core)
 
+        this.permissionService = new PermissionService(core)
         this.validationService = new ValidationService(core)
 
         this.schema = new schema.FileSchema()
@@ -119,28 +120,22 @@ module.exports = class FileController {
             ...existing,
             type: mimetype,
             location: this.config.s3.bucket_url,
-            filepath: filepath
-        }
-
-        // Add the new fields that come with video uploads.
-        if ( this.core.features.has('issue-67-video-uploads') ) {
-            file.state  = 'ready'
-            file.kind = mimetype.split('/')[0]
-            file.mimetype = mimetype
-            file.variants = [ ]
+            filepath: filepath,
+            state: 'processing',
+            kind: mimetype.split('/')[0],
+            mimetype: mimetype,
+            variants: [ ]
         }
 
         await this.fileDAO.updateFile(file)
 
-        const job = await this.core.queues['resize-image'].add({ session: { user: currentUser }, fileId: file.id }, { attempts: 2 })
+        const job = await this.core.queues['resize-image'].add({ session: { user: currentUser }, fileId: file.id }, { attempts: 3 })
 
-        if ( this.core.features.has('issue-67-video-uploads') ) {
-            const filePatch = {
-                id: file.id,
-                jobId: job.id
-            }
-            await this.fileDAO.updateFile(filePatch)
+        const filePatch = {
+            id: file.id,
+            jobId: job.id
         }
+        await this.fileDAO.updateFile(filePatch)
 
         const entityResults = await this.fileDAO.selectFiles({ 
             where: 'files.id = $1', 
@@ -176,7 +171,9 @@ module.exports = class FileController {
      * @returns {Promise}   Resolves to void.
      */
     async uploadVideo(request, response) {
-        if ( ! this.core.features.has('issue-67-video-uploads') ) {
+        // We may need to switch off video uploads if they get too expensive.
+        // This is here as a stop gap.
+        if ( ! this.core.features.has('video-uploads') ) {
             throw new ControllerError(503, 'unsupported',
                 `Video Uploads are not currently supported.`,
                 `Video Uploads are not currently supported.`)
@@ -372,12 +369,10 @@ module.exports = class FileController {
                 `Failed to find File(${id}).`)
         } 
 
-        if ( this.core.features.has('issue-67-video-uploads') ) {
-            if ( variant !== undefined && variant !== null && variant !== 'full' && ! file.variants?.includes(variant) ) {
-                throw new ControllerError(404, 'not-found', 
-                    `Failed to find variant, '${variant}', of File(${id}).`,
-                    `Failed to find variant, '${variant}', of File(${id}).`)
-            }
+        if ( variant !== undefined && variant !== null && variant !== 'full' && ! file.variants?.includes(variant) ) {
+            throw new ControllerError(404, 'not-found', 
+                `Failed to find variant, '${variant}', of File(${id}).`,
+                `Failed to find variant, '${variant}', of File(${id}).`)
         }
 
         const path = this.fileService.getPath(file, variant)
@@ -389,6 +384,11 @@ module.exports = class FileController {
         }
 
         const url = await this.s3.getSignedUrl(path)
+        if ( url === null ) {
+            throw new ControllerError(404, 'not-found',
+                `Failed to find File(${id}) at path '${path}'.`,
+                `Failed to file that file.`)
+        }
 
         const relations = await this.getRelations(currentUser, results)
 
@@ -435,13 +435,24 @@ module.exports = class FileController {
         }
 
         const sources = {}
-        sources['full'] = await this.s3.getSignedUrl(file.filepath)
 
-        if ( this.core.features.has('issue-67-video-uploads') ) {
-            const variant = request.query?.variant
+        // Files that haven't had their file uploaded yet will not have a
+        // filepath.
+        if ( file.filepath !== undefined && file.filepath !== null ) {
+            const signedUrl = await this.s3.getSignedUrl(file.filepath)
+            if ( signedUrl !== null ) {
+                sources['full'] = signedUrl
+            }
+        } 
 
-            if ( variant !== undefined && variant !== null && variant !== 'full' && file.variants?.includes(variant) ) {
-                 sources[variant] = await this.s3.getSignedUrl(this.fileService.getPath(file, variant))
+        const variant = request.query?.variant
+        if ( variant !== undefined && variant !== null && variant !== 'full' && file.variants?.includes(variant) ) {
+            const path = this.fileService.getPath(file, variant)
+
+            if ( path !== null && path !== undefined ) {
+                sources[variant] = await this.s3.getSignedUrl(path)
+            } else {
+                request.logger.error(`Path for variant '${variant}' is null.`)
             }
         }
 
@@ -477,7 +488,7 @@ module.exports = class FileController {
         if ( file === null || file === undefined ) {
             throw new ControllerError(404, 'not-found', 
                 `File(${fileId}) not found!`,
-                `File(${fileId}) was not found.`)
+                `File was not found.`)
         } 
 
         // TODO TECHDEBT We need a better way to do this.  Right now, Groups
@@ -488,26 +499,43 @@ module.exports = class FileController {
         // When we implement events we need to note what type of file it is and
         // possibly back link it to the entity using it.
         const groupFileResults = await this.core.database.query(`
-            SELECT file_id FROM groups WHERE file_id = $1
+            SELECT id, file_id FROM groups WHERE file_id = $1
         `, [ file.id ])
 
         // User must be owner of File(:id), unless file is group profile.
         if ( file.userId !== currentUser.id && groupFileResults.rows.length <= 0 ) {
             throw new ControllerError(403, 'not-authorized', 
-                `User(${currentUser.id}) attempting to PATCH File(${file.id}, which they don't own.`,
-                `You cannot PATCH someone else's file.`)
+                `User(${currentUser.id}) attempting to PATCH File(${file.id}), which they don't own.`,
+                `You cannot update someone else's file.`)
+        }
+
+        // If the file is a group profile, then the user needs to have admin
+        // permissions on the group.
+        if ( groupFileResults.rows.length === 1 ) {
+            const groupId = groupFileResults.rows[0].id
+            const canAdminGroup = await this.permissionService.can(currentUser, 'admin', 'Group', { groupId: groupId })
+
+            if ( canAdminGroup !== true ) {
+                throw new ControllerError(403, 'not-authorized',
+                    `User(${currentUser.id}) attempting to PATCH File(${file.id}) used as profile for Group(${groupId}) they do not admin.`,
+                    `You do not have permission to update that file.`)
+            }
+        } else if ( groupFileResults.rows.length > 1 ) {
+            throw new ControllerError(500, 'server-error',
+                `File(${file.id}) used in multiple groups.`,
+                `Your file is in an invalid state.  Please reach out to support.`)
         }
 
         if ( ! ( 'crop' in filePatch) || filePatch.crop === undefined || filePatch.crop === null ) {
             throw new ControllerError(400, 'invalid',
                 `Attempt to patch File(${fileId}) missing crop.`,
-                `Must include 'crop' object in order to PATCH a file.`)
+                `Must include 'crop' object.`)
         }
 
         if ( ! ('dimensions' in filePatch) || filePatch.dimensions === undefined || filePatch.dimensions === null) {
             throw new ControllerError(400, 'invalid',
                 `Attempt to patch File(${fileId}) missing original dimensions.`,
-                `Must include the original dimensions of the object in order to PATCH a file.`)
+                `Must include the original dimensions of the object.`)
         }
 
         const crop = filePatch.crop
@@ -521,21 +549,41 @@ module.exports = class FileController {
         if ( ! ('width' in dimensions) || ! ('height' in dimensions) ) {
             throw new ControllerError(400, 'invalid',
                 `Missing element of 'dimensions' when PATCHing FILE(${fileId}).`,
-                `Missing  element of dimension data. Need { width, height }.`)
+                `Missing element of dimension data. Need { width, height }.`)
         }
 
-        await this.imageService.crop(file, crop, dimensions)
+        try { 
+            await this.imageService.crop(file, crop, dimensions)
+        } catch (error) {
+            if ( error instanceof ServiceError ) {
+                if ( error.type === 'validation-error' ) {
+                    throw new ControllerError(400, 'invalid',
+                        `Invalid crop dimensions.`,
+                        `Invalid crop dimensions.`)
+                } else if ( error.type === 'network-error' ) {
+                    throw new ControllerError(500, 'network-error',
+                        `Network error encountered while cropping file.`,
+                        `A temporary network error occurred while cropping your image.  Please try again.  If the error persists, contact support.`)
+                } else if ( error.type === 'processing-error' ) {
+                    throw new ControllerError(400, 'processing-error',
+                        `File(${file.id}) failed to process.`,
+                        `Attempt to crop image failed. Image may have been invalid or corrupted in some way.`)
+                } else {
+                    throw error
+                }
+            } else {
+                throw error
+            }
+        }
 
         const job = await this.core.queues['resize-image'].add({ session: { user: currentUser }, fileId: file.id }, { attempts: 3 })
 
-        if ( this.core.features.has('issue-67-video-uploads') ) {
-            const patch = {
-                id: fileId,
-                state: 'ready',
-                jobId: job.id
-            }
-            await this.fileDAO.updateFile(patch)
+        const patch = {
+            id: fileId,
+            state: 'processing',
+            jobId: job.id
         }
+        await this.fileDAO.updateFile(patch)
 
         const entityResults = await this.fileDAO.selectFiles({
             where: `files.id = $1`, 
@@ -582,6 +630,14 @@ module.exports = class FileController {
         }
 
         const id = this.schema.properties.id.clean(request.params.id)
+        const validationErrors = this.schema.properties.id.validate(id)
+        if ( validationErrors.length > 0 ) {
+            const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
+            const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
+            throw new ControllerError(400, 'invalid',
+                `User attempted to delete File with invalid id: ${logString}`,
+                errorString)
+        }
 
         const existing = await this.fileDAO.getFileById(id)
         if ( existing === null || existing === undefined ) {
@@ -599,11 +655,8 @@ module.exports = class FileController {
         // because the database constraint will simply set the users.file_id
         // field to null when the file is deleted.
 
-        await this.fileService.deleteVariants(existing)
-        await this.s3.removeFile(existing.filepath)
+        await this.fileService.deleteFile(existing)
 
-        // Database constraints should handle any cascading here.
-        await this.fileDAO.deleteFile(id)
         return response.status(200).json({ 
             entity: { 
                 id: id 

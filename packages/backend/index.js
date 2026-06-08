@@ -40,6 +40,7 @@ exports.UserDAO = require('./daos/UserDAO')
 exports.UserRelationshipDAO = require('./daos/UserRelationshipDAO')
 
 exports.DAOError = require('./errors/DAOError')
+exports.ProcessError = require('./errors/ProcessError')
 exports.ServiceError = require('./errors/ServiceError')
 exports.UserErrors = require('./errors/UserErrors')
 

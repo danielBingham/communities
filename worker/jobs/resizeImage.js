@@ -17,15 +17,15 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-const { ImageService, FileDAO } = require('@communities/backend')
+const { ImageService, FileDAO, ServiceError } = require('@communities/backend')
 
 const getResizeImageJob = function(core) {
     return async function(job, done) {
         core.logger.id = `Image resize: ${job.id}`
         core.logger.info(`Beginning job 'resize-image' for user ${job.data.session.user.id} and file ${job.data.fileId}.`)
 
+        const fileDAO = new FileDAO(core)
         try {
-
             job.progress({ step: 'initializing', stepDescription: `Initializing...`, progress: 0 })
 
             const imageService = new ImageService(core)
@@ -38,7 +38,6 @@ const getResizeImageJob = function(core) {
                 job.progress({ step: 'resizing', stepDescription: `Resizing...`, progress: progress })
             }
 
-            const fileDAO = new FileDAO(core)
             await fileDAO.updateFile({ id: job.data.fileId, state: 'ready' })
 
             job.progress({ step: 'complete', stepDescription: `Complete!`, progress: 100 })
@@ -47,8 +46,27 @@ const getResizeImageJob = function(core) {
             core.logger.id = 'core' 
             done(null)
         } catch (error) {
-            core.logger.error(error)
-            job.progress({ step: 'failed', stepDescription: error.message, progress: 100 })
+            core.logger.error(`Image processing error: `, error)
+            try { 
+                if ( error instanceof ServiceError ) {
+                    // These are network errors which can be transient.
+                    if ( error.type === 'failed-download' || error.type === 'failed-upload' || error.type === 'failed-read' ) {
+                            job.progress({ step: 'failed', stepDescription: `We failed to process your image due to temporary network issues. If the error persists, please contact support.`, progress: 100})
+                    }  else {
+                        job.progress({ step: 'failed', stepDescription: 'Image failed to process. This could be because the file was corrupted or invalid in some way.', progress: 100 })
+                    }
+                } else {
+                    job.progress({ step: 'failed', stepDescription: 'Image failed to process. This could be because the file was corrupted or invalid in some way.', progress: 100 })
+                }
+
+                await fileDAO?.updateFile({
+                    id: job.data.fileId,
+                    state: 'error'
+                })
+            } catch (secondError) {
+                core.logger.error(`Failed job recovery error: `, secondError)
+                job.progress({ step: 'failed', stepDescription: 'Image failed to process. This could be because the file was corrupted or invalid in some way.', progress: 100 })
+            }
             done(error)
         }
     }

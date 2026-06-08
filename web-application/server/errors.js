@@ -47,7 +47,7 @@ const createErrorsMiddleware = function(core) {
                 if ( error.code === 'LIMIT_FILE_SIZE' ) {
                     response.status(400).json({
                         error: {
-                            type: 'upload-error',
+                            type: 'upload-error:file-size',
                             message: 'Your file was too large.  Images must be under 10 MB and Videos under 700 MB.' 
                         }
                     })

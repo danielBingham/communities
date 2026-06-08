@@ -18,13 +18,16 @@
  *
  ******************************************************************************/
 import { useState, useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+
 import { useRequest } from '/lib/hooks/useRequest'
 
 import { XMarkIcon, PhotoIcon } from '@heroicons/react/16/solid'
 
 import logger from '/logger'
 
-import { deleteFile } from '/state/File'
+import { deleteFile, removeRequest as removeFileRequest } from '/state/File'
+import { removeRequest } from '/state/requests'
 
 import { useFile } from '/lib/hooks/File'
 import { useJob } from '/lib/hooks/Job'
@@ -33,8 +36,11 @@ import { useEventSubscription } from '/lib/hooks/useEventSubscription'
 import File from '/components/files/File'
 
 import JobError from '/components/errors/JobError'
+
 import Spinner from '/components/Spinner'
 import Button from '/components/ui/Button'
+import ProgressBar from '/components/ProgressBar'
+import Alert from '/components/ui/Alert'
 
 import "./DraftFile.css"
 
@@ -52,6 +58,9 @@ const DraftFile = function({
     onRemove, deleteOnRemove
 }) {
 
+    const uploadInfo = useSelector((state) => fileId in state.File.requests ? state.File.requests[fileId] : null)
+    const uploadRequest = useSelector((state) => uploadInfo?.requestId in state.requests.dictionary ? state.requests.dictionary[uploadInfo?.requestId] : null)
+
     const [file, fileRequest, refreshFile] = useFile(fileId)
 
     let type = file ? file.type.split('/')[0] : 'image'
@@ -61,12 +70,15 @@ const DraftFile = function({
     }
 
     const [job, jobRequest] = useJob(queue, file?.jobId)
-    useEventSubscription('Job', 'update', { queue: queue, jobId: file?.jobId }, { skip: ! file?.jobId })
- 
+    useEventSubscription(file?.jobId ? `Job-update-${queue}-${file.jobId}` : null, 
+        'Job', 'update', { queue: queue, jobId: file?.jobId }, { skip: ! file?.jobId })
+
     const [isLoaded, setIsLoaded] = useState(false)
     const [loadFailed, setLoadFailed] = useState(false)
 
     const [deleteRequest, makeDeleteRequest] = useRequest()
+
+    const dispatch = useDispatch()
 
     const remove = function() {
         onRemove(fileId)
@@ -77,12 +89,10 @@ const DraftFile = function({
     }
 
     useEffect(function() {
-        if ( job && job.progress.step === 'complete') { 
-            if ( job.progress.step === 'complete' ) {
-                refreshFile()
-            } else if ( job.finishedOn !== null ) {
-                refreshFile()
-            } 
+        if ( job?.progress?.step === 'complete') { 
+            refreshFile()
+        } else if ( job?.finishedOn !== null ) {
+            refreshFile()
         }
     }, [ job ])
 
@@ -117,6 +127,20 @@ const DraftFile = function({
         )
     }
 
+    if ( uploadRequest?.state === 'failed' ) {
+        if ( uploadRequest.error.type === 'upload-error:file-size' ) {
+            return ( <Alert type="error" timeout={5000} onClear={() => remove() }>'{uploadInfo.fileName}' failed to upload. { uploadRequest.error?.message }</Alert>)
+        } else {
+            return ( <Alert type="error" timeout={5000} onClear={() => remove() }>'{uploadInfo.fileName}' failed to upload.  Please try again or try a different file.</Alert>)
+        }
+    }
+
+    if ( job !== null && job !== undefined  ) {
+        if ( job.progress?.step === 'failed' && job.attemptsMade >= job.opts?.attempts ) {
+            return ( <Alert type="error" timeout={5000} onClear={() => remove() }>{ job.progress?.stepDescription ? job.progress.stepDescription : 'File failed to process.  This could be because the file was corrupted or invalid in some way.' }</Alert> )
+        }
+    }
+
 
     let state = State.isAwaitingFile
  
@@ -133,8 +157,27 @@ const DraftFile = function({
         <div className="draft-file" >
             { state === State.isPreparingUpload && <div><Spinner local={true} /> <span>Preparing the upload...</span></div> }
             { state === State.isPendingUpload && <div><Spinner local={true} /> <span>Upload prepared. Upload will begin shortly...</span></div> }
-            { state === State.isUploading && <div><Spinner local={true} /> <span>Uploading.  Do not navigate away.  This might take several minutes...</span></div> }
-            { state === State.isProcessing && <div> <Spinner local={true} /> <span>Processing. Do not navigate away. { job ? `${job.progress.progress}% complete.` : '' }  This might take a several minutes..</span></div> }
+            { state === State.isUploading && 
+                <div className="draft-file__file">
+                    <a className="draft-file__remove" href="" onClick={(e) => { e.preventDefault(); remove() }}><XMarkIcon /></a>
+                    <div className="draft-file__pending">
+                        <div>
+                            <Spinner local={true} /> <span>Uploading.  Do not navigate away.  This might take several minutes...</span>
+                        </div> 
+                    </div>
+                </div>
+            }
+            { state === State.isProcessing && 
+                <div className="draft-file__file">  
+                    <a className="draft-file__remove" href="" onClick={(e) => { e.preventDefault(); remove() }}><XMarkIcon /></a>
+                    <div className="draft-file__pending">
+                        <div>
+                            <p>Processing. Do not navigate away. This might take several minutes...</p>
+                            <ProgressBar progress={ job?.progress?.progress ?? 0 } />
+                        </div>
+                    </div>
+                </div> 
+            }
             { state === State.isReady && 
                 <div className="draft-file__file">
                     { (isLoaded || loadFailed) && <a className="draft-file__remove" href="" onClick={(e) => { e.preventDefault(); remove() }}><XMarkIcon /></a> }
@@ -147,7 +190,7 @@ const DraftFile = function({
                     { ! loadFailed && <File id={fileId} width={renderWidth} onLoad={() => setIsLoaded(true)} onError={() => setLoadFailed(true)} type={type}  /> }
                 </div> 
             }
-            <JobError message={'File processing'} job={job} onContinue={() => setLoadFailed(true)} />
+            <JobError message={'File processing'} job={job} onContinue={() => remove() } />
         </div>
     )
 }

@@ -55,7 +55,6 @@ const File = function({ id, width, type, fallback, className, onLoad, onError, r
     // video on unmount.
     const videoRef = useRef(null)
 
-    const hasVideoUploads = useFeature('issue-67-video-uploads')
     const videoUploadsEnabled = useFeature('video-uploads')
 
     const onErrorInternal = function(event) {
@@ -125,7 +124,7 @@ const File = function({ id, width, type, fallback, className, onLoad, onError, r
         return null
     }
 
-    if ( filetype === 'video' && (hasVideoUploads !== true || videoUploadsEnabled !== true) ) {
+    if ( filetype === 'video' &&  videoUploadsEnabled !== true ) {
         return null
     }
 
