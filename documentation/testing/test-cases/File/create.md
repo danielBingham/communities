@@ -1,6 +1,6 @@
 ## [Create File](documentation/testing/test-cases/File/create.md)
 
-Cases covering making posts in all their forms and with all their attachments.
+Cases covering uploading files.
 
 ### Pre-requisites
 
