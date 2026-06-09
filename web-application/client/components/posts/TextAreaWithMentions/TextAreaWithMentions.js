@@ -38,7 +38,12 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
     // suggested user.
     const [highlightedSuggestion, setHighlightedSuggestion] = useState(0)
 
+    // The text of the current mention.  This is what the user has typed after
+    // and including the mention trigger character, '@'.  Eg. @john d
     const [currentMention, setCurrentMention] = useState('')
+
+    // Are we currently in the process of mentioning someone?  Determines
+    // whether we show the mention suggestion menu.
     const [areMentioning, setAreMentioning] = useState(false)
 
     const userDictionary = useSelector((state) => state.User.dictionary)
@@ -174,6 +179,23 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
             textareaRef.current.focus()
         }
     }, [])
+
+    // Check the suggestions to see if there's an exact match (by name or
+    // username) for the current mention.
+    useEffect(() => {
+        // Slice off the '@' character, so we can make an exact comparison.
+        const mentionText = currentMention.substring(1)
+
+        if ( query != null ) {
+            for(let index = 0; index <  query.list.length; index++) {
+                const id = query.list[index]
+                const user = userDictionary[id]
+                if ( mentionText === user.name.toLowerCase() || mentionText === user.username.toLowerCase() ) {
+                    selectSuggestion(index)
+                }
+            }
+        }
+    }, [ currentMention ])
 
     useEffect(() => {
         const bodyClickHandler = function(event) {
