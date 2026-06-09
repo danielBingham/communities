@@ -20,13 +20,16 @@
 import { useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 
-import { XCircleIcon } from '@heroicons/react/16/solid'
+import { XMarkIcon } from '@heroicons/react/16/solid'
 
 import './Modal.css'
 
 const Modal = function({ isVisible, setIsVisible, className, children, noClose, hideX}) {
+
     const ref = useRef(null)
     const overlayRef = useRef(null)
+    const timeoutRef = useRef(null)
+    const tappingRef = useRef(false)
 
     const close = function(event) {
         event.preventDefault()
@@ -50,26 +53,74 @@ const Modal = function({ isVisible, setIsVisible, className, children, noClose, 
 
     // Stifle scrolling on the background when the modal is open.
     useEffect(() => {
-        const touchHandler = (event) => {
+        // We want to detect taps and trigger the click function when the modal
+        // is open.  But we don't want to allow touches to propagate beyond the
+        // modal.
+        const touchStartHandler = (event) => {
             event.stopPropagation()
             event.preventDefault()
+
+            tappingRef.current = true
+            timeoutRef.current = setTimeout(() => {
+                tappingRef.current = false
+            }, 200)
         }
-        if ( overlayRef.current !== null ) {
-            overlayRef.current.addEventListener('touchstart', touchHandler)
-            return () => {
-                if ( overlayRef.current !== null ) { 
-                    overlayRef.current.removeEventListener('touchstart', touchHandler)
+
+        const touchStopHandler = (event) => {
+            event.stopPropagation()
+            event.preventDefault()
+
+            if ( tappingRef.current === true ) {
+                tappingRef.current = false
+                overlayClicked()
+
+                if ( timeoutRef.current !== null ) {
+                    clearTimeout(timeoutRef.current)
                 }
             }
         }
+
+        if ( overlayRef.current !== null ) {
+            overlayRef.current.addEventListener('touchstart', touchStartHandler)
+            overlayRef.current.addEventListener('touchend', touchStopHandler)
+        }
+
+        return () => {
+            if ( overlayRef.current !== null ) { 
+                overlayRef.current.removeEventListener('touchstart', touchStartHandler)
+                overlayRef.current.removeEventListener('touchend', touchStopHandler)
+            }
+
+            if ( timeoutRef.current !== null ) {
+                clearTimeout(timeoutRef.current)
+            }
+        }
     }, [ isVisible ])
+
+    useEffect(() => {
+        const preventTouchPropagation = (event) => {
+            event.stopPropagation()
+        }
+
+        if ( ref.current !== null ) {
+            ref.current.addEventListener('touchstart', preventTouchPropagation)
+        }
+
+        return () => {
+            if ( ref.current !== null ) {
+                ref.current.removeEventListener('touchstart', preventTouchPropagation)
+            }
+        }
+
+    }, [ isVisible ])
+
 
     const container = document.getElementById('root-layout')
     return isVisible ? createPortal(
             <div className={`modal-wrapper ${className ? className : ''}`} >
                 <div ref={overlayRef} className="modal__overlay" onClick={overlayClicked}></div>
                 <div ref={ref} className="modal">
-                    { ! noClose && ! hideX && <a href="" onClick={close} className="modal__close"><XCircleIcon /></a> }
+                    { ! noClose && ! hideX && <a href="" onClick={close} className="modal__close"><XMarkIcon /></a> }
                     { children }
                 </div>
             </div>,

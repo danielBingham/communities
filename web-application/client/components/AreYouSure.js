@@ -27,6 +27,8 @@ import './AreYouSure.css'
 const AreYouSure = function({ isVisible, isPending, cancelLabel = 'Cancel', executeLabel = 'Yes', cancel, execute, className, children }) {
     const ref = useRef(null)
     const overlayRef = useRef(null)
+    const timeoutRef = useRef(null)
+    const tappingRef = useRef(false)
 
     useEffect(() => {
         if ( isVisible === true ) {
@@ -38,18 +40,65 @@ const AreYouSure = function({ isVisible, isPending, cancelLabel = 'Cancel', exec
 
     // Stifle scrolling on the background when the modal is open.
     useEffect(() => {
-        const preventScroll = (event) => {
+        // We want to detect taps and trigger the click function when the modal
+        // is open.  But we don't want to allow touches to propagate beyond the
+        // modal.
+        const touchStartHandler = (event) => {
             event.stopPropagation()
             event.preventDefault()
+
+            tappingRef.current = true
+            timeoutRef.current = setTimeout(() => {
+                tappingRef.current = false
+            }, 200)
         }
-        if ( overlayRef.current !== null ) {
-            overlayRef.current.addEventListener('touchstart', preventScroll)
-            return () => {
-                if ( overlayRef.current !== null ) { 
-                    overlayRef.current.removeEventListener('touchstart', preventScroll)
+
+        const touchStopHandler = (event) => {
+            event.stopPropagation()
+            event.preventDefault()
+
+            if ( tappingRef.current === true ) {
+                tappingRef.current = false
+                cancel()
+
+                if ( timeoutRef.current !== null ) {
+                    clearTimeout(timeoutRef.current)
                 }
             }
         }
+
+        if ( overlayRef.current !== null ) {
+            overlayRef.current.addEventListener('touchstart', touchStartHandler)
+            overlayRef.current.addEventListener('touchend', touchStopHandler)
+        }
+
+        return () => {
+            if ( overlayRef.current !== null ) { 
+                overlayRef.current.removeEventListener('touchstart', touchStartHandler)
+                overlayRef.current.removeEventListener('touchend', touchStopHandler)
+            }
+
+            if ( timeoutRef.current !== null ) {
+                clearTimeout(timeoutRef.current)
+            }
+        }
+    }, [ isVisible ])
+
+    useEffect(() => {
+        const preventTouchPropagation = (event) => {
+            event.stopPropagation()
+        }
+
+        if ( ref.current !== null ) {
+            ref.current.addEventListener('touchstart', preventTouchPropagation)
+        }
+
+        return () => {
+            if ( ref.current !== null ) {
+                ref.current.removeEventListener('touchstart', preventTouchPropagation)
+            }
+        }
+
     }, [ isVisible ])
 
     return isVisible ?

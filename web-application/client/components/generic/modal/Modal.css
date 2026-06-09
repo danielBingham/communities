@@ -12,7 +12,7 @@
     overflow-y: auto;
     overscroll-behavior: none;
 
-    padding: 16px;
+    padding: 24px;
     border-radius: 10px;
     background-color: var(--card-background-color);
     border: thin solid var(--card-border-color);
@@ -29,17 +29,28 @@
     height: 100%;
     background-color: rgba(0,0,0,0.5);
     z-index: 99;
+    overscroll-behavior: none;
 }
 .modal__close {
     position: absolute;
-    top: 7px;
-    right: 7px;
+    box-sizing: border-box;
+    z-index: 2;
+    right: 10px;
+    top: 10px;
+
+    background-color: var(--menu-border-color);
+    color: var(--menu-background-color);
+    border: none;
+    cursor: pointer;
+
+    padding: 6px;
+    height: 32px;
+    width: 32px;
+    border-radius: 32px;
 }
 .modal__close svg {
-    width: 16px;
-    height: 16px;
-    color: var(--main-border-color);
-}
-.modal__close svg:hover {
-    filter: brightness(90%);
+    height: 20px;
+    width: 20px;
+    color: var(--menu-background-color);
+    z-index: 3;
 }
