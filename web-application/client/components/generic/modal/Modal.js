@@ -20,11 +20,12 @@
 import { useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 
-import { XCircleIcon } from '@heroicons/react/16/solid'
+import { XMarkIcon } from '@heroicons/react/16/solid'
 
 import './Modal.css'
 
 const Modal = function({ isVisible, setIsVisible, className, children, noClose, hideX}) {
+
     const ref = useRef(null)
     const overlayRef = useRef(null)
 
@@ -40,6 +41,16 @@ const Modal = function({ isVisible, setIsVisible, className, children, noClose, 
         }
     }
 
+    const isModalScrollable = function() {
+        if ( ref.current !== null ) {
+            if ( ref.current.scrollHeight > ref.current.clientHeight ) {
+                return true
+            } 
+        }
+
+        return false
+    }
+
     useEffect(() => {
         if ( isVisible === true ) {
             if ( ref.current !== null ) {
@@ -50,16 +61,30 @@ const Modal = function({ isVisible, setIsVisible, className, children, noClose, 
 
     // Stifle scrolling on the background when the modal is open.
     useEffect(() => {
-        const touchHandler = (event) => {
+        // We want to detect taps and trigger the click function when the modal
+        // is open.  But we don't want to allow touches to propagate beyond the
+        // modal.
+        const preventScrolling = (event) => {
             event.stopPropagation()
             event.preventDefault()
         }
+
         if ( overlayRef.current !== null ) {
-            overlayRef.current.addEventListener('touchstart', touchHandler)
-            return () => {
-                if ( overlayRef.current !== null ) { 
-                    overlayRef.current.removeEventListener('touchstart', touchHandler)
-                }
+            overlayRef.current.addEventListener('touchmove', preventScrolling)
+        }
+
+
+        if ( ref.current !== null && ! isModalScrollable() ) {
+            ref.current.addEventListener('touchmove', preventScrolling)
+        }
+
+        return () => {
+            if ( overlayRef.current !== null ) { 
+                overlayRef.current.removeEventListener('touchmove', preventScrolling)
+            }
+
+            if ( ref.current !== null ) {
+                ref.current.removeEventListener('touchmove', preventScrolling)
             }
         }
     }, [ isVisible ])
@@ -69,7 +94,7 @@ const Modal = function({ isVisible, setIsVisible, className, children, noClose, 
             <div className={`modal-wrapper ${className ? className : ''}`} >
                 <div ref={overlayRef} className="modal__overlay" onClick={overlayClicked}></div>
                 <div ref={ref} className="modal">
-                    { ! noClose && ! hideX && <a href="" onClick={close} className="modal__close"><XCircleIcon /></a> }
+                    { ! noClose && ! hideX && <a href="" onClick={close} className="modal__close"><XMarkIcon /></a> }
                     { children }
                 </div>
             </div>,
