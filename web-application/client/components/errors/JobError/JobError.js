@@ -18,34 +18,36 @@
  *
  ******************************************************************************/
 
-import ErrorModal from '/components/errors/ErrorModal'
+import Alert from '/components/ui/Alert'
 
 import './JobError.css'
 
-const State = {
-    UnknownFailure: 'unknown-failure'
-}
-
 const JobError = function({ message, job, onContinue }) {
 
-    if ( job !== undefined && job !== null ) {
-        if ( ( job.failedReason !== undefined && job.failedReason !== null ) || job.progress.step === 'failed' ) {
-
-            let state = State.UnknownFailure
-            if ( job.failedReason !== undefined && job.failedReason !== null ) {
-                state = State.UnknownFailure 
-            }
-
-            return (
-                <ErrorModal onContinue={onContinue}>
-                    { state === State.UnknownFailure && <p>{ message } failed.</p> }
-                    { 'progress' in job && 'stepDescription' in job?.progress && <p>{ job.progress.stepDescription }</p> }
-                </ErrorModal>
-            )
-        }
+    // If we don't have a job, then no job error to report.
+    if ( job === undefined || job === null ) {
+        return null
     }
 
-    return null
+    // If this job has not failed, no error to report. 
+    if ( ( job.failedReason === undefined || job.failedReason === null ) && job.progress?.step !== 'failed' ) {
+        return null
+    }
+
+    // If we still have more attempts to make, then ignore the current error.
+    if ( job.attemptsMade < job.opts?.attempts ) {
+        return null
+    }
+
+    // Otherwise, we have an error to report.
+    let alertMessage = `${message} failed.`
+    if ( job.progress?.step === 'failed' && 'stepDescription' in job.progress ) {
+        alertMessage = `${message} failed. ${job.progress.stepDescription}`
+    } 
+
+    return ( 
+        <Alert type="error" timeout={5000} onClear={onContinue}>{ alertMessage }</Alert> 
+    )
 }
 
 export default JobError

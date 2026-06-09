@@ -19,6 +19,7 @@
  ******************************************************************************/
 
 const {
+    FileService,
     LinkPreviewService,
     PermissionService,
     NotificationService,
@@ -62,6 +63,7 @@ module.exports = class PostController {
         this.siteModerationDAO = new SiteModerationDAO(core)
         this.userDAO = new UserDAO(core)
 
+        this.fileService = new FileService(core)
         this.linkPreviewService = new LinkPreviewService(core)
         this.notificationService = new NotificationService(core)
         this.permissionService = new PermissionService(core)
@@ -128,27 +130,25 @@ module.exports = class PostController {
 
 
         let fileDictionary = {}
-        if ( this.core.features.has('feat-15-post-image-galleries') ) {
-            const fileIds = []
-            for (const postId of results.list) {
-                const post = results.dictionary[postId]
-                if ( post.files?.length > 0) {
-                    fileIds.push(...post.files)
-                }
+        const fileIds = []
+        for (const postId of results.list) {
+            const post = results.dictionary[postId]
+            if ( post.files?.length > 0) {
+                fileIds.push(...post.files)
             }
-            for(const postId of sharedPostResults.list) {
-                const post = sharedPostResults.dictionary[postId]
-                if ( post.files?.length > 0) {
-                    fileIds.push(...post.files)
-                }
-            }
-            const postFileResults = await this.fileDAO.selectFiles({
-                where: `files.id = ANY($1::uuid[])`, 
-                params: [fileIds]
-            })
-
-            fileDictionary = postFileResults.dictionary
         }
+        for(const postId of sharedPostResults.list) {
+            const post = sharedPostResults.dictionary[postId]
+            if ( post.files?.length > 0) {
+                fileIds.push(...post.files)
+            }
+        }
+        const postFileResults = await this.fileDAO.selectFiles({
+            where: `files.id = ANY($1::uuid[])`, 
+            params: [fileIds]
+        })
+
+        fileDictionary = postFileResults.dictionary
 
         const linkPreviewIds = []
         for(const postId of results.list) {
@@ -566,15 +566,6 @@ module.exports = class PostController {
                 errorString)
         }
 
-        // If we don't have the galleries feature, just stick the first item
-        // into fileId.
-        if ( ! this.core.features.has('feat-15-post-image-galleries') ) {
-            if ( 'files' in post && Array.isArray(post.files) ) {
-                post.fileId = post.files[0]
-                delete post.files
-            }
-        }
-
         await this.postDAO.insertPosts(post)
 
         const results = await this.postDAO.selectPosts({
@@ -785,16 +776,29 @@ module.exports = class PostController {
                 errorString)
         }
 
-        // If we don't have the galleries feature, just stick the first item
-        // into fileId.
-        if ( ! this.core.features.has('feat-15-post-image-galleries') ) {
-            if ( 'files' in post && Array.isArray(post.files) ) {
-                post.fileId = post.files[0]
-                delete post.files
+        await this.postDAO.updatePost(post)
+
+        // Now we need to clean up the actual file objects.  They are only used
+        // on this post (files are not reused across locations) so we need to
+        // delete them.
+        //
+        // We only want to do this when the caller passed a files array with
+        // the post patch.  If the files array is missing, don't make any
+        // changes to it.
+        if ( 'files' in post && Array.isArray(post.files) ) {
+            for (const fileId of existing.files ) {
+                if ( ! post.files.includes(fileId) ) {
+                    // The `await` here is intentionally left off because this
+                    // can take a while, since it's making multiple calls to
+                    // S3.  We don't actually need to wait for those calls to
+                    // finish and this could potentially be moved into a worker
+                    // in the future.
+                    //
+                    // In the mean time, we're going to just let it run async.
+                    this.fileService.deleteFileById(fileId)
+                }
             }
         }
-
-        await this.postDAO.updatePost(post)
 
         const results = await this.postDAO.selectPosts({
             where: `posts.id = $1`,

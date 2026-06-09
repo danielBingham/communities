@@ -18,7 +18,7 @@
  *
  ******************************************************************************/
 import { useRef, useState, useEffect } from 'react'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
 import { GlobeAltIcon, LockOpenIcon, LockClosedIcon, UserCircleIcon } from '@heroicons/react/24/outline'
@@ -34,6 +34,8 @@ import { useGroupPermissionContext } from '/lib/hooks/Group'
 import { useFile } from '/lib/hooks/File'
 
 import { postGroups } from '/state/Group'
+import { removeRequest } from '/state/requests'
+import { removeRequest as removeFileRequest } from '/state/File'
 
 import DraftProfileImage from '/components/files/DraftProfileImage'
 import FileUploadInput from '/components/files/FileUploadInput'
@@ -63,6 +65,7 @@ const GroupForm = function({ parentId }) {
     }
 
     const [areYouSure, setAreYouSure] = useState(false)
+    const [isPending, setIsPending] = useState(false)
 
     const [ title, setTitle ] = useLocalStorage('group.draft.title', '')
     const [ slug, setSlug ] = useLocalStorage('group.draft.slug', '')
@@ -86,7 +89,6 @@ const GroupForm = function({ parentId }) {
     const [ shortDescription, setShortDescription ] = useLocalStorage('group.draft.shortDescription', '')
     const [ rules, setRules ] = useLocalStorage('group.draft.rules', '')
     const [ fileId, setFileId] = useLocalStorage('group.draft.fileId', null)
-    const [ fileState, setFileState] = useState(null)
     const [file] = useFile(fileId)
 
     const [ titleErrors, setTitleErrors ] = useState(null) 
@@ -100,8 +102,11 @@ const GroupForm = function({ parentId }) {
     const hasSubgroups = useFeature('issue-165-subgroups')
     const hasRules = useFeature('issue-330-group-short-description-and-rules')
 
+    const uploadRequests = useSelector((state) => state.File.requests)
     const [request, makeRequest] = useRequest()
     const fileRef = useRef(null)
+
+    const dispatch = useDispatch()
 
     /**
      * Determine whether any of the form's data has been changed.
@@ -225,6 +230,27 @@ const GroupForm = function({ parentId }) {
             && postPermissionsValidationErrors.length === 0
     }
 
+    const resetForm = function() {
+        setTitle(null)
+        setType(null)
+        setPostPermissions(null)
+        setSlug(null)
+        setAbout(null)
+        setShortDescription(null)
+        setRules(null)
+        setFileId(null)
+
+        setIsPending(false)
+        setAreYouSure(false)
+    }
+
+    const cleanupRequest = function() {
+        if ( fileId in uploadRequests ) {
+            dispatch(removeRequest({ id: uploadRequests[fileId].requestId }))
+            dispatch(removeFileRequest({ fileId: fileId }))
+        }
+    }
+
     const assembleGroup = function() {
         const group = {
             type: type,
@@ -248,6 +274,10 @@ const GroupForm = function({ parentId }) {
 
     }
 
+    const createGroup = function() {
+        makeRequest(postGroups(assembleGroup()))
+    }
+
     const onSubmit = function(event) {
         event.preventDefault()
 
@@ -255,29 +285,26 @@ const GroupForm = function({ parentId }) {
             return
         }
 
+        setIsPending(true)
+        cleanupRequest()
+
         // If we have a file, we need to crop it first, and we don't want to
         // send the primary Group request until the crop is successful (in case
         // it errors).
         if ( fileId !== null && fileId !== undefined ) {
             fileRef.current?.submit()
+        } else {
+            createGroup()
         }
-        makeRequest(postGroups(assembleGroup()))
     }
 
     /**
      * Cancel the creation of the group and clear the form's draft state.
      */
     const cancel = function(event) {
-        setTitle(null)
-        setType(null)
-        setPostPermissions(null)
-        setSlug(null)
-        setAbout(null)
-        setShortDescription(null)
-        setRules(null)
-        setFileId(null)
+        resetForm()
 
-        setAreYouSure(false)
+        cleanupRequest()
 
         navigate('/groups')
     }
@@ -287,6 +314,7 @@ const GroupForm = function({ parentId }) {
      */
     const handleCancel = function() {
         if ( isDirty() ) {
+            setIsPending(false)
             setAreYouSure(true)
         } else {
             cancel()
@@ -340,18 +368,13 @@ const GroupForm = function({ parentId }) {
     const navigate = useNavigate()
     useEffect(() => {
         if ( request?.state === 'fulfilled') {
-            setTitle(null)
-            setType(null)
-            setPostPermissions(null)
-            setSlug(null)
-            setAbout(null)
-            setShortDescription(null)
-            setRules(null)
-            setFileId(null)
+            resetForm()
    
             navigate(`/group/${encodeURIComponent(request.response.body.entity.slug)}`)
-        } 
-    }, [ request, fileId])
+        } else if ( request?.state === 'failed' ) {
+            setIsPending(false)
+        }
+    }, [ request ])
 
     let baseError = null 
     if ( titleErrors !== null || slugErrors !== null || typeErrors !== null || postPermissionsErrors !== null || aboutErrors !== null || shortDescriptionErrors !== null || rulesErrors !== null ) {
@@ -375,7 +398,6 @@ const GroupForm = function({ parentId }) {
         )
     }
 
-    const inProgress = (request && request.state == 'pending') || (fileId && fileState === 'pending') 
     return (
         <div className="group-form">
             <form onSubmit={onSubmit}>
@@ -385,18 +407,20 @@ const GroupForm = function({ parentId }) {
                 <div className="group-form__group-image">
                     <div>
                         { ! fileId && <UserCircleIcon className="placeholder" /> }
-                        { fileId && file?.state === 'ready' && <DraftProfileImage 
+                        { fileId  && <DraftProfileImage 
                             ref={fileRef}
                             fileId={fileId} 
                             setFileId={setFileId} 
-                            state={fileState}
-                            setState={setFileState}
                             width={200} 
                             deleteOnRemove={false} 
+                            onProcessingSuccess={() => { setIsPending(false) }}
+                            onCropSuccess={() => { createGroup() }}
+                            onError={() => { setIsPending(false)}}
+                            onRemove={() => { setIsPending(false)}}
                         /> }
-                        { ( ! fileId || file?.state !== 'ready') && <FileUploadInput 
+                        { ! fileId && <FileUploadInput 
                             maxFiles={1}
-                            onChange={(fileIds) => setFileId(fileIds[0])}
+                            onChange={(fileIds) => { setIsPending(true); setFileId(fileIds[0]) }}
                             kind="image"
                             allowedTypes={[ 'image/jpeg', 'image/png' ]} 
                         /> }
@@ -586,8 +610,8 @@ const GroupForm = function({ parentId }) {
                     />
                 </Radio>
                 <div className="group-form__errors">{ baseError }</div>
-                { inProgress && <Spinner /> }
-                { ! inProgress && <div className="group-form__controls">
+                { isPending && <Spinner /> }
+                { ! isPending && <div className="group-form__controls">
                     <Button onClick={(e) => handleCancel()}>Cancel</Button> 
                     <input type="submit" name="submit" value="Submit" />
                 </div> }

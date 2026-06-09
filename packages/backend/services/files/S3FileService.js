@@ -54,7 +54,7 @@ module.exports = class S3FileService {
                     Body: filestream
                 }
 
-                this.s3Client.send(new PutObjectCommand(params)).then(() => resolve())
+                this.s3Client.send(new PutObjectCommand(params)).then(() => resolve()).catch((error) => reject(error))
             })
         })
     }
@@ -128,13 +128,18 @@ module.exports = class S3FileService {
     }
 
     async getSignedUrl(path) {
-        const params = {
-            Bucket: this.config.s3.bucket,
-            Key: path
-        }
+        try { 
+            const params = {
+                Bucket: this.config.s3.bucket,
+                Key: path
+            }
 
-        const command = new GetObjectCommand(params)
-        return getSignedUrl(this.s3Client, command, { expiresIn: 60*60*24*7 })
+            const command = new GetObjectCommand(params)
+            return await getSignedUrl(this.s3Client, command, { expiresIn: 60*60*24*7 })
+        } catch (error) {
+            this.core.logger.error(`Failed to getSignedUrl for '${path}': `, error)
+            return null
+        }
     }
 
 

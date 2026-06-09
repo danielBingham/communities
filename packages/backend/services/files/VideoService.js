@@ -30,36 +30,12 @@ const LocalFileService = require('./LocalFileService')
 const S3FileService = require('./S3FileService')
 const ServiceError = require('../../errors/ServiceError')
 
-class ProgressTracker {
-    constructor() {
-        this.listeners = []
-    }
-
-    triggerProgress(percent) {
-        for(const listener of listeners) {
-            listener(percent)
-        }
-    }
-
-    onProgress(listener) {
-        this.listeners.push(listener)
-    }
-}
-
-module.exports = class VideoService {
-
-    static SUPPORTED_MIMETYPES = [ 
-        'video/mp4', // mp4
-        'video/quicktime', // mov
-        //'video/x-msvideo', // avi
-        //'video/webm' // webm
-
-    ]
-
-    static SUPPORTED_EXTENSIONS = [ '.mp4', '.mov', /*'.avi', '.webm'*/ ]
-
-    constructor(core) {
+class VideoProcess {
+    constructor(core, currentUser, fileId) {
         this.core = core
+
+        this.currentUser = currentUser
+        this.fileId = fileId
 
         this.fileDAO = new FileDAO(core)
 
@@ -69,36 +45,85 @@ module.exports = class VideoService {
 
         this.local = new LocalFileService(core)
         this.s3 = new S3FileService(core)
+
+        this.events = {
+            'progress': []
+        }
     }
 
+    on(event, handler) {
+        if ( ! ( event in this.events) ) {
+            throw new Error(`'${event}' is not a supported event.`)
+        }
 
-    async process(currentUser, fileId) {
-        const file = await this.fileDAO.getFileById(fileId)
+        this.events[event].push(handler)
+    }
+
+    trigger(event, data) {
+        if ( ! (event in this.events) ) {
+            throw new Error(`'${event}' is not a supported event.`)
+        }
+
+        for(const handler of this.events[event]) {
+            handler(data)
+        }
+    }
+
+    async run() {
+        const file = await this.fileDAO.getFileById(this.fileId)
 
         const originalFilename = this.fileService.getFilename(file, 'original') 
         const newFilename = this.fileService.getFilename(file, undefined, 'video/mp4') 
 
         const localOriginalFile = path.join('tmp/', originalFilename)
         const localNewFile = path.join('tmp/', newFilename)
-       
+
         let originalPath = file.filepath
         const targetPath = this.fileService.getPath(file, undefined, 'video/mp4') 
 
+        let thumbnailLocalFile = '' 
 
-        this.core.logger.info(`Downloading file "${originalPath}"...`)
-        await this.s3.downloadFile(originalPath, localOriginalFile)
-
-        if ( originalPath === targetPath ) {
-            originalPath = this.fileService.getPath(file, 'original')
-            this.core.logger.info(`Backing up original file to ${originalPath}...`)
-            await this.s3.moveFile(file.filepath, originalPath)
-        }
+        this.trigger('progress', 2)
 
         try { 
+            this.core.logger.info(`Downloading file "${originalPath}"...`)
+            await this.s3.downloadFile(originalPath, localOriginalFile).catch((error) => {
+                this.core.logger.error(`Failed to download video for processing: `, error)
+                throw new ServiceError('failed-download', 'We failed to download the video for processing.')
+            })
+
+            this.trigger('progress', 10)
+
+            if ( originalPath === targetPath ) {
+                originalPath = this.fileService.getPath(file, 'original')
+                this.core.logger.info(`Backing up original file to ${originalPath}...`)
+                await this.s3.moveFile(file.filepath, originalPath)
+            }
+
+            // Get the length of the video in seconds.
+            //
+            // ffprobe -i <file> -show_entries format=duration -of csv=p=0
+            const ffprobeArgs = [
+                '-v', 'quiet',
+                '-i', localOriginalFile,
+                '-show_entries', 'format=duration',
+                '-of', 'csv=p=0'
+            ]
+            const durationSecondsString = await this.processService.run('ffprobe', ffprobeArgs)
+            const durationSeconds = parseFloat(durationSecondsString)
+            if ( Number.isNaN(durationSeconds) ) {
+                throw new ServiceError('unknown-length', 'Failed to determine video length.')
+            }
+
+            this.trigger('progress', 15)
+
+            // Reformat and scale the video for web.
+            //
             // ffmpeg -i <file> -c:v libx264 -preset medium -profile:v high -level:v 4.0 -crf 23 -c:a aac -b:a 128k -movflags +faststart -vf scale=650:-1 <file>
             const ffmpegArgs = [
                 '-i', localOriginalFile,
                 '-c:v', 'libx264',
+                '-progress', 'pipe:1',
                 '-preset', 'medium',
                 '-profile:v', 'high',
                 '-level:v', '4.0',
@@ -107,10 +132,41 @@ module.exports = class VideoService {
                 '-b:a', '128k',
                 '-movflags', '+faststart',
                 '-vf', 'scale=650:-2',
+                '-nostdin',
+                '-y',
                 localNewFile,
             ]
             this.core.logger.info(`Reformatting file "${localOriginalFile}" to "${localNewFile}"...`)
-            await this.processService.run('ffmpeg', ffmpegArgs)
+            const ffmpegProcess = this.processService.spawn('ffmpeg', ffmpegArgs)
+
+            // Read progress from stdout and report it on the 'progress' event.
+            ffmpegProcess.on('stdout', (data) => {
+                try { 
+                    // Convert into an object.
+                    const parsedData = Object.fromEntries(data.split('\n').map((l) => l.split('=')))
+
+                    // Calculate our progress. 
+                    // * `out_time_ms` is in microseconds.
+                    // * durationSeconds is in seconds.
+                    const processedDurationSeconds = (parsedData.out_time_ms / (1000 * 1000)) 
+                    
+                    let processProgressPercentage = 0
+                    if ( Number.isFinite(processedDurationSeconds) ) {
+                        processProgressPercentage = (processedDurationSeconds / durationSeconds) * 100
+                    }
+
+                    const progressGainPercentage = Math.floor(processProgressPercentage * 0.6)
+
+                    const progress = 20 + progressGainPercentage 
+
+                    this.trigger('progress', progress)
+                } catch (error) {
+                    this.core.logger.error('Failed to parse ffmpeg progress report: ', error)
+                }
+            })
+
+            this.trigger('progress', 20)
+            await ffmpegProcess.run()
 
             this.core.logger.info(`Checking size of the processed file...`)
             const size = this.local.getFileSize(localNewFile)
@@ -119,8 +175,14 @@ module.exports = class VideoService {
                 throw new ServiceError('processed-file-too-large', 'Processed files can be no larger than 150 MB.')
             }
 
+            // TODO: Add retries to this.
             this.core.logger.info(`Uploading the newly formatted file...`)
-            await this.s3.uploadFile(localNewFile, targetPath)
+            await this.s3.uploadFile(localNewFile, targetPath).catch((error) => {
+                this.core.logger.error(`Failed to upload video after processing: `, error)
+                throw new ServiceError('failed-upload', 'We failed to upload the video after processing.')
+            })
+
+            this.trigger('progress', 85)
 
             const thumbId = uuid.v4()
             await this.fileDAO.insertFiles({
@@ -133,11 +195,11 @@ module.exports = class VideoService {
             })
             const thumbFile = await this.fileDAO.getFileById(thumbId)
 
-            const thumbnailLocalFile = path.join('tmp/', this.fileService.getFilename(thumbFile))
+            thumbnailLocalFile = path.join('tmp/', this.fileService.getFilename(thumbFile))
             const thumbnailPath = this.fileService.getPath(thumbFile) 
 
             const ffmpegThumbnailArgs = [
-                '-ss', '00:00:01.000', // Seek before input for accuracy
+                '-ss', '00:00:00.000', // Make sure we're grabbing the first frame.
                 '-i', localOriginalFile,
                 '-vframes', '1', // Extract exactly one frame
                 '-q:v', '2', // Output quality (JPEG quality, 1-31, lower is better)
@@ -147,8 +209,15 @@ module.exports = class VideoService {
             this.core.logger.info(`Generating thumbnail...`)
             await this.processService.run('ffmpeg', ffmpegThumbnailArgs)
 
+            this.trigger('progress', 90)
+
             this.core.logger.info(`Uploading the thumbnail...`)
-            await this.s3.uploadFile(thumbnailLocalFile, thumbnailPath)
+            await this.s3.uploadFile(thumbnailLocalFile, thumbnailPath).catch((error) => {
+                this.core.logger.error(`Failed to upload video thumbnail after processing: `, error)
+                throw new ServiceError('failed-thumbnail-upload', 'We failed to upload the video thumbnail after processing.')
+            })
+
+            this.trigger('progress', 95)
 
             const thumbPatch = {
                 id: thumbId,
@@ -157,7 +226,7 @@ module.exports = class VideoService {
             }
             await this.fileDAO.updateFile(thumbPatch)
 
-            const job = await this.core.queues['resize-image'].add({ session: { user: currentUser }, fileId: thumbId }, { attempts: 3 })
+            const job = await this.core.queues['resize-image'].add({ session: { user: this.currentUser }, fileId: thumbId }, { attempts: 3 })
 
             // Update File in the database with the new filename and mimetype
             const filePatch = {
@@ -174,6 +243,13 @@ module.exports = class VideoService {
             // file, delete the original to save space.  We're not going to use
             // it once we've reformatted it.
             await this.s3.removeFile(originalPath)
+        
+            // Remove both newFilename and originalFilename from local files
+            this.local.removeFile(localOriginalFile)
+            this.local.removeFile(localNewFile)
+            this.local.removeFile(thumbnailLocalFile)
+
+            this.trigger('progress', 100)
         } catch (error ) {
             try {
                 if ( this.local.fileExists(localOriginalFile) ) {
@@ -191,12 +267,47 @@ module.exports = class VideoService {
                 this.core.logger.error(`Failed to clean up local new file: `, outputError)
             }
 
+            try { 
+                if ( this.local.fileExists(thumbnailLocalFile) ) {
+                    this.local.removeFile(thumbnailLocalFile)
+                }
+            } catch (thumbnailError) {
+                this.core.logger.error(`Failed to clean up local thumbnail file: `, thumbnailError)
+            }
+
+            try { 
+                if ( originalPath !== file.filepath ) {
+                    this.core.logger.info(`Restoring original file...`)
+                    await this.s3.moveFile(originalPath, file.filepath)
+                }
+            } catch (restoreError) {
+                this.core.logger.error(`Failed to restore original file: `, restoreError)
+            }
+
             this.core.logger.error(`Attempt to reformat file failed: `, error)
             throw error
         }
-        
-        // Remove both newFilename and originalFilename from local files
-        this.local.removeFile(localOriginalFile)
-        this.local.removeFile(localNewFile)
+    }
+}
+
+
+module.exports = class VideoService {
+
+    static SUPPORTED_MIMETYPES = [ 
+        'video/mp4', // mp4
+        'video/quicktime', // mov
+        //'video/x-msvideo', // avi
+        //'video/webm' // webm
+
+    ]
+
+    static SUPPORTED_EXTENSIONS = [ '.mp4', '.mov', /*'.avi', '.webm'*/ ]
+
+    constructor(core) {
+        this.core = core
+    }
+
+    spawnVideoProcess(currentUser, fileId) {
+        return new VideoProcess(this.core, currentUser, fileId)
     }
 }

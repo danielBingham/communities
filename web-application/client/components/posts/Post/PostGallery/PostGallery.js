@@ -23,7 +23,6 @@ import { useSwipeable } from 'react-swipeable'
 
 import { ChevronRightIcon, ChevronLeftIcon } from '@heroicons/react/24/solid'
 
-import { useFeature } from '/lib/hooks/feature'
 import { usePost } from '/lib/hooks/Post'
 
 import File from '/components/files/File'
@@ -35,8 +34,6 @@ const PostGallery = function({ postId, className }) {
 
     const [current, setCurrent] = useState(0)
     const [isLoaded, setIsLoaded] = useState(false)
-
-    const hasImageGalleries = useFeature('feat-15-post-image-galleries')
 
     const goToPrevious = function() {
         if ( current > 0 ) {
@@ -67,10 +64,6 @@ const PostGallery = function({ postId, className }) {
     }
 
     if ( post.files?.length <= 0 ) {
-        return null
-    }
-
-    if ( hasImageGalleries !== true ) {
         return null
     }
 

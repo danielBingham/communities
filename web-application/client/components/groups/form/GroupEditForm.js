@@ -1,4 +1,24 @@
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media 
+ *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
 import React, { useRef, useState, useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
 import { GlobeAltIcon, LockOpenIcon, LockClosedIcon, UserCircleIcon } from '@heroicons/react/24/outline'
@@ -13,6 +33,8 @@ import { useGroup } from '/lib/hooks/Group'
 import { useFile } from '/lib/hooks/File'
 
 import { patchGroup } from '/state/Group'
+import { removeRequest } from '/state/requests'
+import { removeRequest as removeFileRequest } from '/state/File'
 
 import DraftProfileImage from '/components/files/DraftProfileImage'
 import FileUploadInput from '/components/files/FileUploadInput'
@@ -34,13 +56,13 @@ const GroupEditForm = function({ groupId }) {
     const [group] = useGroup(groupId)
 
     const [areYouSure, setAreYouSure] = useState(false)
+    const [isPending, setIsPending] = useState(false)
 
     const [ title, setTitle ] = useLocalStorage('group.draft.title', ( group?.title ? group.title : ''))
     const [ about, setAbout ] = useLocalStorage('group.draft.about', ( group?.about ? group.about : ''))
     const [ shortDescription, setShortDescription ] = useLocalStorage('group.draft.shortDescription', (group?.shortDescription ? group.shortDescription: ''))
     const [ rules, setRules ] = useLocalStorage('group.draft.rules', (group?.rules ? group.rules : ''))
     const [ fileId, setFileId] = useLocalStorage('group.draft.fileId', ( group?.fileId ? group.fileId : null))
-    const [fileState, setFileState] = useState(null) 
     const [file] = useFile(fileId)
 
     const [ titleErrors, setTitleErrors ] = useState(null)
@@ -48,10 +70,12 @@ const GroupEditForm = function({ groupId }) {
     const [ shortDescriptionErrors, setShortDescriptionErrors ] = useState(null)
     const [ rulesErrors, setRulesErrors ] = useState(null)
 
+    const uploadRequests = useSelector((state) => state.File.requests)
     const [request, makeRequest] = useRequest()
 
     const fileRef = useRef(null)
 
+    const dispatch = useDispatch()
     const navigate = useNavigate()
 
     const isDirty = function() {
@@ -128,6 +152,24 @@ const GroupEditForm = function({ groupId }) {
             && rulesValidationErrors.length === 0
     }
 
+    const resetForm = function() {
+        setTitle(null)
+        setAbout(null)
+        setShortDescription(null)
+        setRules(null)
+        setFileId(null)
+
+        setIsPending(false)
+        setAreYouSure(false)
+    }
+
+    const cleanupRequest = function() {
+        if ( fileId in uploadRequests ) {
+            dispatch(removeRequest({ id: uploadRequests[fileId].requestId }))
+            dispatch(removeFileRequest({ fileId: fileId }))
+        }
+    }
+
     const assembleGroup = function() {
         const newGroup = {
             id: groupId,
@@ -144,6 +186,10 @@ const GroupEditForm = function({ groupId }) {
         return newGroup
     }
 
+    const updateGroup = function() {
+        makeRequest(patchGroup(assembleGroup()))
+    }
+
     const onSubmit = function(event) {
         event.preventDefault()
 
@@ -151,10 +197,14 @@ const GroupEditForm = function({ groupId }) {
             return
         }
 
+        setIsPending(true)
+
+        cleanupRequest()
+
         if ( fileId !== null && fileId !== undefined ) {
             fileRef.current?.submit()
         } else {
-            makeRequest(patchGroup(assembleGroup()))
+            updateGroup()
         }
     }
 
@@ -162,13 +212,9 @@ const GroupEditForm = function({ groupId }) {
      * Execute the cancelling of this Group edit and clear the form.
      */
     const cancel = function(event) {
-        setTitle(null)
-        setAbout(null)
-        setShortDescription(null)
-        setRules(null)
-        setFileId(null)
+        resetForm()
 
-        setAreYouSure(false)
+        cleanupRequest()
 
         navigate(`/group/${group.slug}`)
     }
@@ -185,26 +231,14 @@ const GroupEditForm = function({ groupId }) {
     }
 
     useEffect(() => {
-        if ( fileId !== null && fileState == 'fulfilled' && ! request ) {
-            makeRequest(patchGroup(assembleGroup()))
-        } else if ( (fileState == 'fulfilled') && (request && request.state == 'fulfilled')) {
-            setTitle(null)
-            setAbout(null)
-            setShortDescription(null)
-            setRules(null)
-            setFileId(null)
+        if (request?.state === 'fulfilled') {
+            resetForm()
    
             navigate(`/group/${request.response.body.entity.slug}`)
-        } else if ( fileId === null && (request && request.state == 'fulfilled')) {
-            setTitle(null)
-            setAbout(null)
-            setShortDescription(null)
-            setRules(null)
-            setFileId(null)
-   
-            navigate(`/group/${request.response.body.entity.slug}`)
+        } else if ( request?.state === 'failed' ) {
+            setIsPending(false)
         }
-    }, [ request, fileState, fileId ])
+    }, [ request ])
 
     if ( ! group ) {
         return (<Spinner />)
@@ -212,7 +246,6 @@ const GroupEditForm = function({ groupId }) {
 
     let baseError = null
 
-    const inProgress = (request && request.state == 'pending') || (fileId && fileState == 'pending')
     return (
         <div className="group-edit-form">
             <form onSubmit={onSubmit} >
@@ -220,18 +253,20 @@ const GroupEditForm = function({ groupId }) {
                 <div className="group-edit-form__group-image">
                     <div>
                         { ! fileId && <UserCircleIcon className="placeholder" /> }
-                        { fileId && file?.state === 'ready' && <DraftProfileImage 
+                        { fileId && <DraftProfileImage 
                             ref={fileRef}
                             fileId={fileId} 
                             setFileId={setFileId} 
-                            state={fileState}
-                            setState={setFileState}
                             width={200} 
                             deleteOnRemove={false} 
+                            onProcessingSuccess={() => { setIsPending(false) }}
+                            onCropSuccess={() => { updateGroup() }}
+                            onError={() => { setIsPending(false)}}
+                            onRemove={() => { setIsPending(false)}}
                         /> }
-                        { ( ! fileId || file?.state !== 'ready') && <FileUploadInput 
+                        { ! fileId  && <FileUploadInput 
                             maxFiles={1}
-                            onChange={(fileIds) => setFileId(fileIds[0])}
+                            onChange={(fileIds) => { setIsPending(true); setFileId(fileIds[0]) }}
                             kind="image"
                             allowedTypes={[ 'image/jpeg', 'image/png' ]} 
                         /> }
@@ -282,8 +317,8 @@ const GroupEditForm = function({ groupId }) {
                     />
                 }
                 <div className="group-edit-form__controls">
-                    { inProgress && <Spinner /> }
-                    { ! inProgress && <div className="buttons">
+                    { isPending && <Spinner /> }
+                    { ! isPending && <div className="buttons">
                         <Button onClick={() => handleCancel()}>Cancel</Button> 
                         <input type="submit" name="submit" value="Submit" />
                     </div> }

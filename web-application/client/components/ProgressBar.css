@@ -1,8 +1,9 @@
 .progress-bar {
     position: relative;
-    height: 5px;
+    height: 7px;
     background: var(--input-border-color);
     padding: 2px;
+    border-radius: 14px;
 }
 .progress-bar > span {
     display: block;
@@ -10,4 +11,5 @@
     background-color: var(--input-highlight-color);
     position: relative;
     overflow: hidden;
+    border-radius: 14px;
 }

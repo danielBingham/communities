@@ -33,7 +33,6 @@ const PostAttachmentControls = function({ postId, groupId, sharedPostId }) {
     const [ showMaxFilesError, setShowMaxFilesError] = useState(false)
 
     const videoUploadsEnabled = useFeature('video-uploads')
-    const hasPostGalleries = useFeature('feat-15-post-image-galleries')
 
     const [draft, setDraft] = usePostDraft(postId, groupId, sharedPostId)
 
@@ -46,9 +45,6 @@ const PostAttachmentControls = function({ postId, groupId, sharedPostId }) {
     }
 
     let totalMaxFiles = 30
-    if ( ! hasPostGalleries ) {
-        totalMaxFiles = 1
-    }
     const maxFiles = totalMaxFiles - draft.files.length
 
     if ( draft.sharedPostId || draft.linkPreviewId ) {

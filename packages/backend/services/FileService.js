@@ -24,10 +24,14 @@ const path = require('node:path')
 
 const S3FileService = require('./files/S3FileService')
 
+const FileDAO = require('../daos/FileDAO')
+
 module.exports = class FileService {
 
     constructor(core) {
         this.core = core
+
+        this.fileDAO = new FileDAO(core)
 
         this.s3 = new S3FileService(core)
 
@@ -58,11 +62,7 @@ module.exports = class FileService {
         }
 
         if ( mimetype === undefined || mimetype === null ) {
-            if ( this.core.features.has('issue-67-video-uploads') ) {
-                segments.push(mime.getExtension(file.mimetype))
-            } else {
-                segments.push(mime.getExtension(file.type))
-            }
+            segments.push(mime.getExtension(file.mimetype))
         } else {
             segments.push(mime.getExtension(mimetype))
         }
@@ -75,22 +75,46 @@ module.exports = class FileService {
         return path.join('files/', this.getFilename(file, variant, mimetype))
     }
 
-    async deleteVariants(file) {
-        if ( this.core.features.has('issue-67-video-uploads') ) {
-            for(const variant of file.variants) {
-                const filepath = this.getPath(file, variant) 
-                const hasFile = await this.s3.hasFile(filepath)
-                if ( hasFile ) {
-                    this.s3.removeFile(filepath)
-                }
-            }
+    async deleteFileById(fileId) {
+        const existing = await this.fileDAO.getFileById(fileId)
+        if ( existing === null || existing === undefined ) {
+            return null
+        } 
+
+        await this.deleteFile(existing)
+    }
+
+    async deleteFile(file) {
+        // TODO If the file has a processing job in progress, we don't actually
+        // have the ability to cancel it.  So it's possible that job will be
+        // creating a variant while we're in the process of deleting them.
+        // There's a case in the race condition where the variant doesn't get
+        // deleted and is left hanging.
+        //
+        // At some point we're going to need a weekly orphan file cleanup job
+        // for our S3, but for now, storage is cheap, we're going to let them
+        // hang.
+        
+        if ( 'variants' in file && Array.isArray(file.variants) ) {
+            await this.deleteVariants(file)
+        }
+
+        if ( file.filepath !== null && file.filepath !== undefined ) {
+            await this.s3.removeFile(file.filepath)
         } else {
-            for(const size of this.defaultVariants) {
-                const filepath = this.getPath(file, size) 
-                const hasFile = await this.s3.hasFile(filepath)
-                if ( hasFile ) {
-                    this.s3.removeFile(filepath)
-                }
+            this.core.logger.warn(`Removing File(${file.id}) without a filepath.`)
+        }
+
+        // Database constraints should handle any cascading here.
+        await this.fileDAO.deleteFile(file.id)
+    }
+
+    async deleteVariants(file) {
+        for(const variant of file.variants) {
+            const filepath = this.getPath(file, variant) 
+            const hasFile = await this.s3.hasFile(filepath)
+            if ( hasFile ) {
+                this.s3.removeFile(filepath)
             }
         }
     }
