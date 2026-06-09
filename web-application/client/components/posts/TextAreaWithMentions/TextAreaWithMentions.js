@@ -1,4 +1,23 @@
-import React, { useState, useRef, useEffect } from 'react'
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media 
+ *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
+import { useState, useRef, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
 import * as shared from '@communities/shared'
@@ -8,8 +27,6 @@ import getCaretCoordinates from 'textarea-caret'
 import { useRequest } from '/lib/hooks/useRequest'
 
 import { getUsers, clearUserQuery } from '/state/User'
-
-import { DropdownMenu, DropdownMenuBody, DropdownMenuItem } from '/components/ui/DropdownMenu'
 
 import './TextAreaWithMentions.css'
 
@@ -31,6 +48,7 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
 
     const timeoutId = useRef(null)
     const textareaRef = useRef(null)
+    const mentionMenuRef = useRef(null)
 
     const dispatch = useDispatch()
 
@@ -157,6 +175,21 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
         }
     }, [])
 
+    useEffect(() => {
+        const bodyClickHandler = function(event) {
+            if ( mentionMenuRef.current && ! mentionMenuRef.current.contains(event.target) ) { 
+                clearMention()
+            }
+        }
+
+        document.body.addEventListener('click', bodyClickHandler)
+
+        return () => {
+            document.body.removeEventListener('click', bodyClickHandler)
+        }
+
+    }, [ areMentioning ])
+
     // Construct the suggestions list.
     const userSuggestions = []
     if ( query !== null ) {
@@ -185,9 +218,15 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
                 placeholder={placeholder}
             >
             </textarea> 
-            { areMentioning && query !== null && query.list.length > 0 && <div className="text-area-with-mentions__suggestions" style={{ top: menuTop, left: menuLeft }}>
-                { userSuggestions }
-            </div> }
+            { areMentioning && query !== null && query.list.length > 0 && 
+                <div 
+                    ref={mentionMenuRef}
+                    className="text-area-with-mentions__suggestions" 
+                    style={{ top: menuTop, left: menuLeft }}
+                >
+                    { userSuggestions }
+                </div> 
+            }
         </div>
         
     )
