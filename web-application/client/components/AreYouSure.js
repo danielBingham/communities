@@ -18,6 +18,7 @@
  *
  ******************************************************************************/
 import { useRef, useEffect } from 'react'
+import { Capacitor } from '@capacitor/core'
 
 import Button from '/components/ui/Button'
 import Spinner from '/components/Spinner'
@@ -27,8 +28,16 @@ import './AreYouSure.css'
 const AreYouSure = function({ isVisible, isPending, cancelLabel = 'Cancel', executeLabel = 'Yes', cancel, execute, className, children }) {
     const ref = useRef(null)
     const overlayRef = useRef(null)
-    const timeoutRef = useRef(null)
-    const tappingRef = useRef(false)
+
+    const isModalScrollable = function() {
+        if ( ref.current !== null ) {
+            if ( ref.current.scrollHeight > ref.current.clientHeight ) {
+                return true
+            } 
+        }
+
+        return false
+    }
 
     useEffect(() => {
         if ( isVisible === true ) {
@@ -43,62 +52,35 @@ const AreYouSure = function({ isVisible, isPending, cancelLabel = 'Cancel', exec
         // We want to detect taps and trigger the click function when the modal
         // is open.  But we don't want to allow touches to propagate beyond the
         // modal.
-        const touchStartHandler = (event) => {
+        const preventAllScrolling = (event) => {
             event.stopPropagation()
             event.preventDefault()
-
-            tappingRef.current = true
-            timeoutRef.current = setTimeout(() => {
-                tappingRef.current = false
-            }, 200)
         }
 
-        const touchStopHandler = (event) => {
+        const preventScrollPropagation = (event) => {
             event.stopPropagation()
-            event.preventDefault()
-
-            if ( tappingRef.current === true ) {
-                tappingRef.current = false
-                cancel()
-
-                if ( timeoutRef.current !== null ) {
-                    clearTimeout(timeoutRef.current)
-                }
-            }
         }
 
         if ( overlayRef.current !== null ) {
-            overlayRef.current.addEventListener('touchstart', touchStartHandler)
-            overlayRef.current.addEventListener('touchend', touchStopHandler)
+            overlayRef.current.addEventListener('touchmove', preventAllScrolling)
+        }
+
+
+        if ( ref.current !== null && ! isModalScrollable() ) {
+            ref.current.addEventListener('touchmove', preventAllScrolling)
+        } else if ( ref.current !== null ) {
+            ref.current.addEventListener('touchmove', preventScrollPropagation)
         }
 
         return () => {
             if ( overlayRef.current !== null ) { 
-                overlayRef.current.removeEventListener('touchstart', touchStartHandler)
-                overlayRef.current.removeEventListener('touchend', touchStopHandler)
+                overlayRef.current.removeEventListener('touchmove', preventAllScrolling)
             }
 
-            if ( timeoutRef.current !== null ) {
-                clearTimeout(timeoutRef.current)
-            }
-        }
-    }, [ isVisible ])
-
-    useEffect(() => {
-        const preventTouchPropagation = (event) => {
-            event.stopPropagation()
-        }
-
-        if ( ref.current !== null ) {
-            ref.current.addEventListener('touchstart', preventTouchPropagation)
-        }
-
-        return () => {
             if ( ref.current !== null ) {
-                ref.current.removeEventListener('touchstart', preventTouchPropagation)
+                ref.current.removeEventListener('touchmove', preventAllScrolling)
             }
         }
-
     }, [ isVisible ])
 
     return isVisible ?
