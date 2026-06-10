@@ -197,6 +197,15 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
                     setCurrentMention(lastMention)
                 }
 
+                // If the mention has grown longer than the name field, then
+                // it's time to be done mentioning.
+                //
+                // TODO Reduce length of display name to 128 (or even 90 characters)
+                // which will cover the vast majority of cases.
+                if ( lastMention.length >= 512) {
+                    clearMention()
+                }
+
                 const caretPosition = getCaretCoordinates(textareaRef.current, indexOfLastMention)
                 setMenuTop(caretPosition.top - textareaRef.current.scrollTop + 26)
                 setMenuLeft(caretPosition.left - textareaRef.current.scrollLeft)
@@ -272,15 +281,23 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
 
     useEffect(() => {
         const bodyClickHandler = function(event) {
-            if ( mentionMenuRef.current && ! mentionMenuRef.current.contains(event.target) ) { 
-                clearMention()
+            if ( areMentioning ) {
+                if ( mentionMenuRef.current && ! mentionMenuRef.current.contains(event.target) ) { 
+                    clearMention()
+                } else if ( mentionMenuRef.current === null ) {
+                    clearMention()
+                }
             }
         }
 
-        document.body.addEventListener('click', bodyClickHandler)
+        if ( areMentioning ) {
+            document.body.addEventListener('click', bodyClickHandler)
+        }
 
         return () => {
-            document.body.removeEventListener('click', bodyClickHandler)
+            if ( areMentioning ) {
+                document.body.removeEventListener('click', bodyClickHandler)
+            }
         }
 
     }, [ areMentioning ])
