@@ -225,41 +225,46 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
     }, [])
 
     // Check the suggestions to see if there's an exact match (by name or
-    // username) for the current mention.
+    // username) for the current mention. We're not going to worry about prefix
+    // shadowing, since they can just select from the menu to select the one
+    // the way.  We have a shadowing issue with autocomplete no matter how we
+    // handle it.
     useEffect(() => {
-        // Intentionally not including `query` or `userDictionary` in the
-        // dependency array here.  We only want this to run when the mention
-        // changes (as they type) because we don't want to blow away anything
-        // they've typed later or screw with their cursor. It's okay if query
-        // or userDictionary are a bit stale, since they'll probably get
-        // updated on the next run.  By the time they've typed a complete
-        // mention, it's highly likely we'll have the user in question in the
-        // query or the userDictionary (unless they are on a really slow
-        // connection).  In the case that they don't, it's better that the
-        // autocomplete silently fail than it fire after they've moved on.
-        //
-        // They can always back space and correct the mention later.
+        if ( areMentioning ) {
+            // Intentionally not including `query` or `userDictionary` in the
+            // dependency array here.  We only want this to run when the mention
+            // changes (as they type) because we don't want to blow away anything
+            // they've typed later or screw with their cursor. It's okay if query
+            // or userDictionary are a bit stale, since they'll probably get
+            // updated on the next run.  By the time they've typed a complete
+            // mention, it's highly likely we'll have the user in question in the
+            // query or the userDictionary (unless they are on a really slow
+            // connection).  In the case that they don't, it's better that the
+            // autocomplete silently fail than it fire after they've moved on.
+            //
+            // They can always back space and correct the mention later.
 
-        // Slice off the '@' character, so we can make an exact comparison.
-        const mentionText = currentMention.substring(1)
+            // Slice off the '@' character, so we can make an exact comparison.
+            const mentionText = currentMention.substring(1)
 
-        if ( query != null ) {
-            for(let index = 0; index <  query.list.length; index++) {
-                const id = query.list[index]
-                const user = userDictionary[id]
-                if ( mentionText.toLowerCase() === user.name.toLowerCase() || mentionText.toLowerCase() === user.username.toLowerCase() ) {
-                    selectSuggestion(index)
-                    break
-                }  
+            if ( query != null ) {
+                for(let index = 0; index <  query.list.length; index++) {
+                    const id = query.list[index]
+                    const user = userDictionary[id]
+                    if ( mentionText.toLowerCase() === user.name.toLowerCase() || mentionText.toLowerCase() === user.username.toLowerCase() ) {
+                        selectSuggestion(index)
+                        break
+                    }  
 
-                // If the mentionText is not an exact match for the substring
-                // of its length, then we're in to the fuzzy matches and there
-                // shouldn't be any exact matches further down the list.  We
-                // can break the loop.
-                else if ( mentionText.toLowerCase() !== user.name.toLowerCase().substring(0, mentionText.length)
-                    && mentionText.toLowerCase() !== user.username.toLowerCase().substring(0, mentionText.length)
-                ) {
-                    break
+                    // If the mentionText is not an exact match for the substring
+                    // of its length, then we're in to the fuzzy matches and there
+                    // shouldn't be any exact matches further down the list.  We
+                    // can break the loop.
+                    else if ( mentionText.toLowerCase() !== user.name.toLowerCase().substring(0, mentionText.length)
+                        && mentionText.toLowerCase() !== user.username.toLowerCase().substring(0, mentionText.length)
+                    ) {
+                        break
+                    }
                 }
             }
         }
