@@ -42,6 +42,9 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
     // and including the mention trigger character, '@'.  Eg. @john d
     const [currentMention, setCurrentMention] = useState('')
 
+    // The index of the start ('@' symbol) of the current mention.
+    const [currentMentionIndex, setCurrentMentionIndex] = useState(0)
+
     // Are we currently in the process of mentioning someone?  Determines
     // whether we show the mention suggestion menu.
     const [areMentioning, setAreMentioning] = useState(false)
@@ -107,25 +110,40 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
         }
 
         if ( event.key == 'Enter' ) {
-            event.preventDefault()
-            selectSuggestion(highlightedSuggestion)
+            if ( areMentioning ) {
+                event.preventDefault()
+                selectSuggestion(highlightedSuggestion)
+            }
         } else if ( event.key == 'ArrowDown' || ( ! event.shiftKey && event.key === 'Tab') ) {
-            event.preventDefault()
-            if ( highlightedSuggestion + 1 < query.list.length ) {
-                setHighlightedSuggestion(highlightedSuggestion+1)
-            } else {
-                setHighlightedSuggestion(query.list.length-1)
+            if ( areMentioning ) {
+                event.preventDefault()
+                if ( highlightedSuggestion + 1 < query.list.length ) {
+                    setHighlightedSuggestion(highlightedSuggestion+1)
+                } else {
+                    setHighlightedSuggestion(query.list.length-1)
+                }
             }
         } else if ( event.key == 'ArrowUp' || (event.shiftKey && event.key === 'Tab') ) {
-            event.preventDefault()
-            if ( highlightedSuggestion-1 <= 0 ) {
-                setHighlightedSuggestion(0)
-            } else {
-                setHighlightedSuggestion(highlightedSuggestion-1)
+            if ( areMentioning ) {
+                event.preventDefault()
+                if ( highlightedSuggestion-1 <= 0 ) {
+                    setHighlightedSuggestion(0)
+                } else {
+                    setHighlightedSuggestion(highlightedSuggestion-1)
+                }
+            }
+        } else if ( event.key == 'ArrowLeft' || event.key == 'ArrowRight' ) {
+            if ( areMentioning && textareaRef.current !== null) {
+                const cursorIndex = textareaRef.current.selectionStart
+                if ( cursorIndex-1 <= currentMentionIndex ) {
+                    clearMention()
+                }
             }
         } else if ( event.key == 'Escape' ) {
-            event.preventDefault()
-            clearMention()
+            if ( areMentioning ) {
+                event.preventDefault()
+                clearMention()
+            }
         } 
     }
 
@@ -156,6 +174,7 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
             // cursor is the mention character, '@'.
             if ( text.at(cursorIndex-1) === '@' ) {
                 setAreMentioning(true)
+                setCurrentMentionIndex(cursorIndex-1)
             }
 
             // If we are mentioning and we just deleted the '@' character, then unset mentioning.
