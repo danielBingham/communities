@@ -78,6 +78,7 @@ const AreYouSure = function({ isVisible, isPending, cancelLabel = 'Cancel', exec
 
             if ( ref.current !== null ) {
                 ref.current.removeEventListener('touchmove', preventAllScrolling)
+                ref.current.removeEventListener('touchmove', preventScrollPropagation)
             }
         }
     }, [ isVisible ])
