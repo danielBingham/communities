@@ -155,7 +155,7 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
             cursorPosition = textareaRef.current.selectionStart
         }
 
-        const indexOfLastMention = value.lastIndexOf('@', cursorPosition)
+        const indexOfLastMention = value.lastIndexOf('@', cursorPosition-1)
         const newValue = value.substring(0, indexOfLastMention) + `@${user.username} ` + value.substring(cursorPosition)
         // The +2 is so that we put the cursor after the space we just added at the end of the mention.
         cursorRef.current = indexOfLastMention + user.username.length + 2
@@ -188,7 +188,7 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
             }
 
             if ( areMentioning ) {
-                const indexOfLastMention = text.lastIndexOf('@', cursorIndex)
+                const indexOfLastMention = text.lastIndexOf('@', cursorIndex-1)
                 let lastMention = ''
                 if ( indexOfLastMention === -1 ) {
                     clearMention()
