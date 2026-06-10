@@ -18,7 +18,6 @@
  *
  ******************************************************************************/
 import { useRef, useEffect } from 'react'
-import { Capacitor } from '@capacitor/core'
 
 import Button from '/components/ui/Button'
 import Spinner from '/components/Spinner'
