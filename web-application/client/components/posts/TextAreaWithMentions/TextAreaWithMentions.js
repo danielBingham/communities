@@ -17,7 +17,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useLayoutEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
 import * as shared from '@communities/shared'
@@ -54,6 +54,7 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
     const timeoutId = useRef(null)
     const textareaRef = useRef(null)
     const mentionMenuRef = useRef(null)
+    const cursorRef = useRef(null)
 
     const dispatch = useDispatch()
 
@@ -131,8 +132,15 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
     const selectSuggestion = (index) => {
         const user = userDictionary[query.list[index]]
 
-        const indexOfLastMention = value.lastIndexOf('@')
-        const newValue = value.substring(0, indexOfLastMention) + `@${user.username} `
+        let cursorPosition = value.length
+        if ( textareaRef.current !== null ) {
+            cursorPosition = textareaRef.current.selectionStart
+        }
+
+        const indexOfLastMention = value.lastIndexOf('@', cursorPosition)
+        const newValue = value.substring(0, indexOfLastMention) + `@${user.username} ` + value.substring(cursorPosition)
+        // The +2 is so that we put the cursor after the space we just added at the end of the mention.
+        cursorRef.current = indexOfLastMention + user.username.length + 2
         setValue(newValue)
 
         clearMention()
@@ -141,37 +149,51 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
     const onChangeInternal = function(event) {
         const text = event.target.value
 
-        // Only trigger mentioning if we're increasing the length of `value`
-        // (eg. we're typing forward and not deleting).
-        if ( text.length > value.length && text.endsWith('@') ) {
-            if ( ! areMentioning ) {
+        if ( textareaRef.current !== null ) {
+            const cursorIndex = textareaRef.current.selectionStart
+
+            // Trigger mentioning when the character immediately before the
+            // cursor is the mention character, '@'.
+            if ( text.at(cursorIndex-1) === '@' ) {
                 setAreMentioning(true)
             }
-        }
 
-        if ( areMentioning ) {
-            const indexOfLastMention = text.lastIndexOf('@')
-            let lastMention = ''
-            if ( indexOfLastMention === -1 ) {
-                clearMention()
-            } else {
-                lastMention = text.substring(indexOfLastMention)
-                setCurrentMention(lastMention)
+            // If we are mentioning and we just deleted the '@' character, then unset mentioning.
+            if ( areMentioning ) {
+                if ( text.length < value.length && value.at(cursorIndex) === '@' ) {
+                    setAreMentioning(false)
+                }
             }
 
-            if ( textareaRef.current !== null ) {
+            if ( areMentioning ) {
+                const indexOfLastMention = text.lastIndexOf('@', cursorIndex)
+                let lastMention = ''
+                if ( indexOfLastMention === -1 ) {
+                    clearMention()
+                } else {
+                    lastMention = text.substring(indexOfLastMention, cursorIndex)
+                    setCurrentMention(lastMention)
+                }
+
                 const caretPosition = getCaretCoordinates(textareaRef.current, indexOfLastMention)
                 setMenuTop(caretPosition.top+26)
                 setMenuLeft(caretPosition.left)
-            }
 
-            suggestUsers(lastMention.substring(1))
+                suggestUsers(lastMention.substring(1))
+            }
         }
 
         if ( typeof setValue === 'function' ) {
             setValue(text) 
         }
     }
+
+    useLayoutEffect(() => {
+        if ( cursorRef.current !== null && textareaRef.current !== null ) {
+            textareaRef.current.setSelectionRange(cursorRef.current, cursorRef.current)
+            cursorRef.current = null
+        }
+    }, [ value ])
 
     // Focus the form on initial load.
     useEffect(function() {
