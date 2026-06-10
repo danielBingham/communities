@@ -176,8 +176,8 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
                 }
 
                 const caretPosition = getCaretCoordinates(textareaRef.current, indexOfLastMention)
-                setMenuTop(caretPosition.top+26)
-                setMenuLeft(caretPosition.left)
+                setMenuTop(caretPosition.top - textareaRef.current.scrollTop + 26)
+                setMenuLeft(caretPosition.left - textareaRef.current.scrollLeft)
 
                 suggestUsers(lastMention.substring(1))
             }
@@ -212,7 +212,7 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
             for(let index = 0; index <  query.list.length; index++) {
                 const id = query.list[index]
                 const user = userDictionary[id]
-                if ( mentionText === user.name.toLowerCase() || mentionText === user.username.toLowerCase() ) {
+                if ( mentionText.toLowerCase() === user.name.toLowerCase() || mentionText.toLowerCase() === user.username.toLowerCase() ) {
                     selectSuggestion(index)
                 }
             }

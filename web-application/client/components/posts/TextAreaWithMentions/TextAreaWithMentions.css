@@ -3,6 +3,9 @@
     box-sizing: border-box;
     max-width: min(100vw, 650px);
 }
+.text-area-with-mentions textarea {
+    overscroll-behavior: none;
+}
 
 .text-area-with-mentions .text-area-with-mentions__autocomplete {
     position: absolute;
