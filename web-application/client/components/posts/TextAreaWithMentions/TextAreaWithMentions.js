@@ -196,23 +196,22 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
             }
 
             if ( areMentioning ) {
-                let lastMention = ''
-                if ( cursorIndex < currentMentionIndex ) {
+                if ( cursorIndex <= currentMentionIndex ) {
                     clearMention()
                 } else {
-                    lastMention = text.substring(currentMentionIndex, cursorIndex)
+                    const lastMention = text.substring(currentMentionIndex, cursorIndex)
                     setCurrentMention(lastMention)
-                }
 
-                // If the mention has grown longer than the name field, then
-                // it's time to be done mentioning.
-                //
-                // TODO Reduce length of display name to 128 (or even 90 characters)
-                // which will cover the vast majority of cases.
-                if ( lastMention.length >= 512) {
-                    clearMention()
-                } else {
-                    suggestUsers(lastMention.substring(1))
+                    // If the mention has grown longer than the name field, then
+                    // it's time to be done mentioning.
+                    //
+                    // TODO Reduce length of display name to 128 (or even 90 characters)
+                    // which will cover the vast majority of cases.
+                    if ( lastMention.length >= 512) {
+                        clearMention()
+                    } else {
+                        suggestUsers(lastMention.substring(1))
+                    }
                 }
             }
         }
