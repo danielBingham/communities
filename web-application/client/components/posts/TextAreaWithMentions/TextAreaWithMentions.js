@@ -138,9 +138,10 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
                     setHighlightedSuggestion(highlightedSuggestion-1)
                 }
             }
-        } else if ( event.key == 'ArrowLeft' || event.key == 'ArrowRight' ) {
+        } else if ( event.key == 'ArrowLeft' ) {
             if ( areMentioning && textareaRef.current !== null) {
                 const cursorIndex = textareaRef.current.selectionStart
+                // KeyDown fires before the cursor moves.
                 if ( cursorIndex-1 <= currentMentionIndex ) {
                     clearMention()
                 }
