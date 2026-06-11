@@ -266,10 +266,30 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
                 for(let index = 0; index <  query.list.length; index++) {
                     const id = query.list[index]
                     const user = userDictionary[id]
+
+                    // If it's an exact match for a user's display name (lower
+                    // case), then complete the mention.
                     if ( mentionText.toLowerCase() === user.name.toLowerCase() ) {
                         selectSuggestion(index)
                         break
                     }  
+
+
+                    // If it's an exact match for a user's username, then
+                    // they've already fully completed a mention.  Close the
+                    // mention menu.  They may continue with a shadowwed
+                    // username, but we don't care if they do.  They're clearly
+                    // manually completing the mention and no longer need the
+                    // suggestions.
+                    //
+                    // TODO The username in question won't necessarily be
+                    // included in the suggestions if it's very different from
+                    // the name.  This is a known issue we may fix at a future
+                    // date.
+                    if ( mentionText.toLowerCase() === user.username.toLowerCase() ) {
+                        clearMention()
+                        break
+                    }
 
                     // If the mentionText is not an exact match for the substring
                     // of its length, then we're in to the fuzzy matches and there
