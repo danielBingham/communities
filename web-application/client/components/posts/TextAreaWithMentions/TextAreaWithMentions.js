@@ -162,10 +162,13 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
             cursorPosition = textareaRef.current.selectionStart
         }
 
-        const indexOfLastMention = value.lastIndexOf('@', cursorPosition-1)
-        const newValue = value.substring(0, indexOfLastMention) + `@${user.username} ` + value.substring(cursorPosition)
+        if ( cursorPosition < currentMentionIndex ) {
+            return
+        }
+
+        const newValue = value.substring(0, currentMentionIndex) + `@${user.username} ` + value.substring(cursorPosition)
         // The +2 is so that we put the cursor after the space we just added at the end of the mention.
-        cursorRef.current = indexOfLastMention + user.username.length + 2
+        cursorRef.current = currentMentionIndex + user.username.length + 2
         setValue(newValue)
 
         clearMention()
@@ -182,6 +185,10 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
             if ( text.at(cursorIndex-1) === '@' ) {
                 setAreMentioning(true)
                 setCurrentMentionIndex(cursorIndex-1)
+
+                const caretPosition = getCaretCoordinates(textareaRef.current, cursorIndex-1)
+                setMenuTop(caretPosition.top - textareaRef.current.scrollTop + 26)
+                setMenuLeft(caretPosition.left - textareaRef.current.scrollLeft)
             }
 
             // If we are mentioning and we just deleted the '@' character, then unset mentioning.
@@ -195,12 +202,11 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
             }
 
             if ( areMentioning ) {
-                const indexOfLastMention = text.lastIndexOf('@', cursorIndex-1)
                 let lastMention = ''
-                if ( indexOfLastMention === -1 ) {
+                if ( cursorIndex < currentMentionIndex ) {
                     clearMention()
                 } else {
-                    lastMention = text.substring(indexOfLastMention, cursorIndex)
+                    lastMention = text.substring(currentMentionIndex, cursorIndex)
                     setCurrentMention(lastMention)
                 }
 
@@ -211,13 +217,9 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
                 // which will cover the vast majority of cases.
                 if ( lastMention.length >= 512) {
                     clearMention()
+                } else {
+                    suggestUsers(lastMention.substring(1))
                 }
-
-                const caretPosition = getCaretCoordinates(textareaRef.current, indexOfLastMention)
-                setMenuTop(caretPosition.top - textareaRef.current.scrollTop + 26)
-                setMenuLeft(caretPosition.left - textareaRef.current.scrollLeft)
-
-                suggestUsers(lastMention.substring(1))
             }
         }
 
