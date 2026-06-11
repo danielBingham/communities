@@ -242,11 +242,15 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
         }
     }, [])
 
-    // Check the suggestions to see if there's an exact match (by name or
-    // username) for the current mention. We're not going to worry about prefix
-    // shadowing, since they can just select from the menu to select the one
-    // the way.  We have a shadowing issue with autocomplete no matter how we
-    // handle it.
+    // Check the suggestions to see if there's an exact match by name for the
+    // current mention. We're not going to worry about prefix shadowing, since
+    // they can just select from the menu to select the one the way.  We have a
+    // shadowing issue with autocomplete no matter how we handle it.
+    //
+    // We also don't need to worry about exact matches for username, because if
+    // they've fully typed out a mention with an exact match by username,
+    // then... they've self completed the mention.  We don't need to complete
+    // it for them.
     useEffect(() => {
         if ( areMentioning ) {
             // Intentionally not including `query` or `userDictionary` in the
@@ -269,7 +273,7 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
                 for(let index = 0; index <  query.list.length; index++) {
                     const id = query.list[index]
                     const user = userDictionary[id]
-                    if ( mentionText.toLowerCase() === user.name.toLowerCase() || mentionText.toLowerCase() === user.username.toLowerCase() ) {
+                    if ( mentionText.toLowerCase() === user.name.toLowerCase() ) {
                         selectSuggestion(index)
                         break
                     }  
@@ -278,9 +282,7 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
                     // of its length, then we're in to the fuzzy matches and there
                     // shouldn't be any exact matches further down the list.  We
                     // can break the loop.
-                    else if ( mentionText.toLowerCase() !== user.name.toLowerCase().substring(0, mentionText.length)
-                        && mentionText.toLowerCase() !== user.username.toLowerCase().substring(0, mentionText.length)
-                    ) {
+                    else if ( mentionText.toLowerCase() !== user.name.toLowerCase().substring(0, mentionText.length)) {
                         break
                     }
                 }
