@@ -104,6 +104,9 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
         }, 150)
     }
 
+    // TODO This will kill the mention if the user types to a new line
+    // scrolling the text area.  We're going to punt on this for now, but
+    // should try to find a fix in the future.
     const onScrollInternal = function(event) {
         if ( areMentioning ) {
             clearMention()
