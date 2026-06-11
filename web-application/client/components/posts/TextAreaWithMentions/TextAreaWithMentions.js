@@ -104,7 +104,13 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
         }, 150)
     }
 
-    const onKeyDown = function(event) {
+    const onScrollInternal = function(event) {
+        if ( areMentioning ) {
+            clearMention()
+        }
+    }
+
+    const onKeyDownInternal = function(event) {
         if ( query === null || query.list.length <= 0 ) {
             return
         }
@@ -326,7 +332,8 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
                 ref={textareaRef}
                 value={value}
                 onChange={onChangeInternal}
-                onKeyDown={onKeyDown}
+                onKeyDown={onKeyDownInternal}
+                onScroll={onScrollInternal}
                 placeholder={placeholder}
             >
             </textarea> 
