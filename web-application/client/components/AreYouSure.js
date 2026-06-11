@@ -28,6 +28,16 @@ const AreYouSure = function({ isVisible, isPending, cancelLabel = 'Cancel', exec
     const ref = useRef(null)
     const overlayRef = useRef(null)
 
+    const isModalScrollable = function() {
+        if ( ref.current !== null ) {
+            if ( ref.current.scrollHeight > ref.current.clientHeight ) {
+                return true
+            } 
+        }
+
+        return false
+    }
+
     useEffect(() => {
         if ( isVisible === true ) {
             if ( ref.current !== null ) {
@@ -37,17 +47,42 @@ const AreYouSure = function({ isVisible, isPending, cancelLabel = 'Cancel', exec
     }, [ isVisible ])
 
     // Stifle scrolling on the background when the modal is open.
+    //
+    // TODO This can break scrolling if the contents of the modal change from
+    // unscrollable to scrollable.  For now the contents of all these
+    // components are static.  If that ever changes we'll need to fix this.
     useEffect(() => {
-        const preventScroll = (event) => {
+        // We want to detect taps and trigger the click function when the modal
+        // is open.  But we don't want to allow touches to propagate beyond the
+        // modal.
+        const preventAllScrolling = (event) => {
             event.stopPropagation()
             event.preventDefault()
         }
+
+        const preventScrollPropagation = (event) => {
+            event.stopPropagation()
+        }
+
         if ( overlayRef.current !== null ) {
-            overlayRef.current.addEventListener('touchstart', preventScroll)
-            return () => {
-                if ( overlayRef.current !== null ) { 
-                    overlayRef.current.removeEventListener('touchstart', preventScroll)
-                }
+            overlayRef.current.addEventListener('touchmove', preventAllScrolling)
+        }
+
+
+        if ( ref.current !== null && ! isModalScrollable() ) {
+            ref.current.addEventListener('touchmove', preventAllScrolling)
+        } else if ( ref.current !== null ) {
+            ref.current.addEventListener('touchmove', preventScrollPropagation)
+        }
+
+        return () => {
+            if ( overlayRef.current !== null ) { 
+                overlayRef.current.removeEventListener('touchmove', preventAllScrolling)
+            }
+
+            if ( ref.current !== null ) {
+                ref.current.removeEventListener('touchmove', preventAllScrolling)
+                ref.current.removeEventListener('touchmove', preventScrollPropagation)
             }
         }
     }, [ isVisible ])
