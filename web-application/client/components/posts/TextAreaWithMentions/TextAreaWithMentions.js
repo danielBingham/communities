@@ -160,16 +160,7 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
     const selectSuggestion = (index) => {
         const user = userDictionary[query.list[index]]
 
-        let cursorPosition = value.length
-        if ( textareaRef.current !== null ) {
-            cursorPosition = textareaRef.current.selectionStart
-        }
-
-        if ( cursorPosition < currentMentionIndex ) {
-            return
-        }
-
-        const newValue = value.substring(0, currentMentionIndex) + `@${user.username} ` + value.substring(cursorPosition)
+        const newValue = value.substring(0, currentMentionIndex) + `@${user.username} ` + value.substring(currentMention.length)
         // The +2 is so that we put the cursor after the space we just added at the end of the mention.
         cursorRef.current = currentMentionIndex + user.username.length + 2
         setValue(newValue)
