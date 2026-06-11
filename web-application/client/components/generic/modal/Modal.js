@@ -60,6 +60,10 @@ const Modal = function({ isVisible, setIsVisible, className, children, noClose, 
     }, [ isVisible ])
 
     // Stifle scrolling on the background when the modal is open.
+    //
+    // TODO This can break scrolling if the contents of the modal change from
+    // unscrollable to scrollable.  For now, modals are all static, but if that
+    // changes we'll need to fix this.
     useEffect(() => {
         // We want to detect taps and trigger the click function when the modal
         // is open.  But we don't want to allow touches to propagate beyond the

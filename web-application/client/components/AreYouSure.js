@@ -47,6 +47,10 @@ const AreYouSure = function({ isVisible, isPending, cancelLabel = 'Cancel', exec
     }, [ isVisible ])
 
     // Stifle scrolling on the background when the modal is open.
+    //
+    // TODO This can break scrolling if the contents of the modal change from
+    // unscrollable to scrollable.  For now the contents of all these
+    // components are static.  If that ever changes we'll need to fix this.
     useEffect(() => {
         // We want to detect taps and trigger the click function when the modal
         // is open.  But we don't want to allow touches to propagate beyond the
