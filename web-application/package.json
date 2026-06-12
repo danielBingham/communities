@@ -37,6 +37,7 @@
     "@capacitor/device": "7.0.2",
     "@capacitor/push-notifications": "7.0.3",
     "@capacitor/status-bar": "7.0.3",
+    "@capacitor/text-zoom": "7.0.4",
     "@capawesome/capacitor-badge": "7.0.1",
     "@capgo/capacitor-updater": "7.0.36",
     "@communities/backend": "^0.18.1",
