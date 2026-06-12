@@ -1,4 +1,23 @@
-import React, { useState, useEffect } from 'react'
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media 
+ *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
+import { useState, useEffect } from 'react'
 import {
     BrowserRouter as Router,
     Routes,
@@ -6,6 +25,9 @@ import {
 } from 'react-router-dom'
 
 import { useSelector, useDispatch } from 'react-redux'
+
+import { Capacitor } from '@capacitor/core'
+import { TextZoom } from '@capacitor/text-zoom'
 
 import migrateLocalStorage from '/migrations/StorageMigrations'
 
@@ -16,7 +38,7 @@ import { useDevice } from '/lib/hooks/useDevice'
 
 import logger from '/logger'
 
-import { getInitialization } from '/state/system'
+import { getInitialization, setTextZoom } from '/state/system'
 import { getAuthentication } from '/state/authentication'
 
 import RootLayout from '/layouts/RootLayout'
@@ -100,11 +122,36 @@ const App = function(props) {
 
     const configuration = useSelector((state) => state.system.configuration)
 
+    const dispatch = useDispatch()
+
     // Note to self: These are system slice requests.  They go through
     // state/system and don't hit the API backend, instead they hit the root.
     useRetries('Initialize', function() {
         makeGetInitializationRequest(getInitialization())
     }, getInitializationRequest)
+
+    useEffect(() => {
+        try {
+            if ( Capacitor.isNativePlatform() ) {
+                TextZoom.getPreferred().then((result) => {
+                    // Store the zoom in the system and then reset it on the WebView.
+                    // We don't want it applied to all elements, so we're going to
+                    // apply it more specifically.
+                    dispatch(setTextZoom(result.value))
+                    TextZoom.set({ value: 1.0 })
+                }).catch((error) => {
+                    logger.error(`Failed to set textZoom: `, error)
+                    try { 
+                        TextZoom.set({ value: 1.0 })
+                    } catch (fallbackError) {
+                        logger.error(`Failed to reset zoom on fallback: `, fallbackError)
+                    }
+                })
+            }
+        } catch (error) {
+            logger.error(`Failed to load textZoom: `, error)
+        }
+    }, [])
 
     useEffect(function() {
         if ( getInitializationRequest?.state == 'fulfilled') {
