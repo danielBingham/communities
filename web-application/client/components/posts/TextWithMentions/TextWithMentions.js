@@ -83,7 +83,7 @@ const TextWithMentions = function({ text }) {
     } catch (error) {
         logger.error(error)
         return (
-            <div className="text-with-mentions">
+            <div className="text-with-mentions" style={{ fontSize: textZoom + 'em' }}>
                 { text }
             </div>
         )

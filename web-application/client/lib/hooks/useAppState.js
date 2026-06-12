@@ -51,6 +51,25 @@ export const useAppState = function() {
                             }
                         }
 
+                        // Refresh textZoom, it may have changed.
+                        if ( Capacitor.isNativePlatform() ) {
+                            TextZoom.getPreferred().then((result) => {
+                                // Store the zoom in the system and then reset it on the WebView.
+                                // We don't want it applied to all elements, so we're going to
+                                // apply it more specifically.
+                                dispatch(setTextZoom(result.value))
+                                TextZoom.set({ value: 1.0 })
+                            }).catch((error) => {
+                                logger.error(`Failed to set textZoom: `, error)
+                                try { 
+                                    TextZoom.set({ value: 1.0 })
+                                } catch (fallbackError) {
+                                    logger.error(`Failed to reset zoom on fallback: `, fallbackError)
+                                }
+                            })
+                        }
+
+
                     }
                 } catch ( error ) {
                     logger.error(`Error handling app state change: `, error)

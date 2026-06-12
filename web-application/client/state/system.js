@@ -77,7 +77,14 @@ const systemSlice = createSlice({
         },
         
         setTextZoom: function(state, action) {
-            state.textZoom = action.payload
+            let zoom = action.payload
+            if ( typeof zoom === 'string' ) {
+                zoom = parseFloat(zoom)
+            } else if ( typeof zoom !== 'number' ) {
+                zoom = 1.0
+            }
+
+            state.textZoom = Math.max(1.0, zoom)
         }
     }
 })

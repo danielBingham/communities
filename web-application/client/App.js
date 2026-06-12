@@ -141,6 +141,11 @@ const App = function(props) {
                     TextZoom.set({ value: 1.0 })
                 }).catch((error) => {
                     logger.error(`Failed to set textZoom: `, error)
+                    try { 
+                        TextZoom.set({ value: 1.0 })
+                    } catch (fallbackError) {
+                        logger.error(`Failed to reset zoom on fallback: `, fallbackError)
+                    }
                 })
             }
         } catch (error) {
