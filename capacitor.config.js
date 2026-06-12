@@ -15,7 +15,8 @@ const config = {
 // ============ Staging Environment Build =================
 if ( process.env.NODE_ENV === 'staging' ) {
   config.ios = {
-    scheme: 'App Staging'
+    scheme: 'App Staging',
+    preferredContentMode: 'mobile'
   }
   config.android = {
     flavor: 'staging'
@@ -24,7 +25,8 @@ if ( process.env.NODE_ENV === 'staging' ) {
 // ============ Production Environment Build ===============
 else if ( process.env.NODE_ENV === 'production' ) {
   config.ios = {
-    scheme: 'App'
+    scheme: 'App',
+    preferredContentMode: 'mobile'
   }
   config.android = {
     flavor: 'production'
@@ -33,7 +35,8 @@ else if ( process.env.NODE_ENV === 'production' ) {
 // =========== Development / Local Environment Build ======
 else {
   config.ios = {
-    scheme: 'App Local'
+    scheme: 'App Local',
+    preferredContentMode: 'mobile'
   }
   config.android = {
     flavor: 'local'

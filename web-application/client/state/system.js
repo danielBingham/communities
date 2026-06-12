@@ -30,7 +30,8 @@ const systemSlice = createSlice({
         serverVersion: null,
         appVersion: "0.0.0",
         appBuild: 0,
-        isActive: true
+        isActive: true,
+        textZoom: 1.0,
     },
     reducers: {
         reset: function(state, action) { },
@@ -73,6 +74,21 @@ const systemSlice = createSlice({
 
         setIsActive: function(state, action) {
             state.isActive = action.payload
+        },
+        
+        setTextZoom: function(state, action) {
+            let zoom = action.payload
+            if ( typeof zoom === 'string' ) {
+                zoom = parseFloat(zoom)
+            } else if ( typeof zoom !== 'number' ) {
+                zoom = 1.0
+            }
+
+            if ( ! Number.isFinite(zoom) ) {
+                zoom = 1.0
+            }
+
+            state.textZoom = Math.max(1.0, zoom)
         }
     }
 })
@@ -120,5 +136,5 @@ export const forwardLog = function(message) {
     }
 }
 
-export const { reset, setHost, setAPI, setConfiguration, setFeatures, setAppVersion, setAppBuild, setIsActive } = systemSlice.actions
+export const { reset, setHost, setAPI, setConfiguration, setFeatures, setAppVersion, setAppBuild, setIsActive, setTextZoom } = systemSlice.actions
 export default systemSlice.reducer

@@ -29,6 +29,7 @@ import UserMention from '/components/users/UserMention'
 
 const TextWithMentions = function({ text }) {
     const host = useSelector((state) => state.system.host)
+    const textZoom = useSelector((state) => state.system.textZoom)
 
     // We need to wrap this in a try/catch because if an error is thrown from
     // here (by linkify or by url) it will break the whole feed.
@@ -75,14 +76,14 @@ const TextWithMentions = function({ text }) {
         }
 
         return (
-            <div className="text-with-mentions">
+            <div className="text-with-mentions" style={{ fontSize: textZoom + 'em' }}>
                 { views }
             </div>
         )
     } catch (error) {
         logger.error(error)
         return (
-            <div className="text-with-mentions">
+            <div className="text-with-mentions" style={{ fontSize: textZoom + 'em' }}>
                 { text }
             </div>
         )

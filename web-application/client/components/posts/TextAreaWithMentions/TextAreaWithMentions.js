@@ -31,6 +31,8 @@ import { getUsers, clearUserQuery } from '/state/User'
 import './TextAreaWithMentions.css'
 
 const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeholder, className }) {
+    const textZoom = useSelector((state) => state.system.textZoom)
+
     const [ menuTop, setMenuTop ] = useState(0)
     const [ menuLeft, setMenuLeft ] = useState(0)
 
@@ -353,6 +355,7 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
                 onKeyDown={onKeyDownInternal}
                 onScroll={onScrollInternal}
                 placeholder={placeholder}
+                style={{ fontSize: (Math.floor(16 * textZoom) + 'px') }}
             >
             </textarea> 
             { areMentioning && query !== null && query.list.length > 0 && 
