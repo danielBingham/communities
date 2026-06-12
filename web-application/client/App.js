@@ -26,6 +26,7 @@ import {
 
 import { useSelector, useDispatch } from 'react-redux'
 
+import { Capacitor } from '@capacitor/core'
 import { TextZoom } from '@capacitor/text-zoom'
 
 import migrateLocalStorage from '/migrations/StorageMigrations'
@@ -131,15 +132,17 @@ const App = function(props) {
 
     useEffect(() => {
         try {
-            TextZoom.getPreferred().then((result) => {
-                // Store the zoom in the system and then reset it on the WebView.
-                // We don't want it applied to all elements, so we're going to
-                // apply it more specifically.
-                dispatch(setTextZoom(result.value))
-                TextZoom.set({ value: 1.0 })
-            }).catch((error) => {
-                logger.error(`Failed to set textZoom: `, error)
-            })
+            if ( Capacitor.isNativePlatform() ) {
+                TextZoom.getPreferred().then((result) => {
+                    // Store the zoom in the system and then reset it on the WebView.
+                    // We don't want it applied to all elements, so we're going to
+                    // apply it more specifically.
+                    dispatch(setTextZoom(result.value))
+                    TextZoom.set({ value: 1.0 })
+                }).catch((error) => {
+                    logger.error(`Failed to set textZoom: `, error)
+                })
+            }
         } catch (error) {
             logger.error(`Failed to load textZoom: `, error)
         }
