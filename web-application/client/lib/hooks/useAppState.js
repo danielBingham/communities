@@ -3,12 +3,13 @@ import { useSelector, useDispatch } from 'react-redux'
 
 import { Capacitor } from '@capacitor/core'
 import { App } from '@capacitor/app'
+import { TextZoom } from '@capacitor/text-zoom'
 
 import logger from '/logger'
 
 import { getAuthentication } from '/state/authentication'
 import { getNotifications, clearDeliveredNotifications } from '/state/notifications'
-import { setIsActive } from '/state/system'
+import { setIsActive, setTextZoom } from '/state/system'
 
 import { useRequest } from '/lib/hooks/useRequest'
 

@@ -355,7 +355,7 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
                 onKeyDown={onKeyDownInternal}
                 onScroll={onScrollInternal}
                 placeholder={placeholder}
-                style={{ fontSize: textZoom + 'em' }}
+                style={{ fontSize: (Math.floor(16 * textZoom) + 'px') }}
             >
             </textarea> 
             { areMentioning && query !== null && query.list.length > 0 && 

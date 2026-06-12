@@ -84,6 +84,10 @@ const systemSlice = createSlice({
                 zoom = 1.0
             }
 
+            if ( ! Number.isFinite(zoom) ) {
+                zoom = 1.0
+            }
+
             state.textZoom = Math.max(1.0, zoom)
         }
     }
