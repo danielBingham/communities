@@ -38,7 +38,7 @@ const NavigationMenuAction = function({ icon, text, className, disabled, onClick
     if ( disabled ) {
         return (
             <NavigationMenuItem>
-                <span className={`navigation-menu__action ${ disabled ? 'navigation-menu__action__disabled' : ''} ${className ? className : ''}`} onClick={onClick}>
+                <span role="button" aria-disabled="true" className={`navigation-menu__action ${ disabled ? 'navigation-menu__action__disabled' : ''} ${className ? className : ''}`} onClick={onClick}>
                     <SolidIcon className="solid" /><OutlineIcon className="outline" /><span className="nav-text">{ text }</span>
                 </span>
             </NavigationMenuItem>
@@ -47,7 +47,7 @@ const NavigationMenuAction = function({ icon, text, className, disabled, onClick
 
     return (
         <NavigationMenuItem>
-            <a className={`navigation-menu__action ${ disabled ? 'navigation-menu__action__disabled' : ''} ${className ? className : ''}`} onClick={onClick}>
+            <a role="button" tabIndex={0} className={`navigation-menu__action ${ disabled ? 'navigation-menu__action__disabled' : ''} ${className ? className : ''}`} onClick={onClick}>
                 <SolidIcon className="solid" /><OutlineIcon className="outline" /><span className="nav-text">{ text }</span>
             </a>
         </NavigationMenuItem>

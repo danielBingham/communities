@@ -17,7 +17,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import { useState, useEffect, useRef, createContext } from 'react'
+import { useState, useEffect, useRef, useId, createContext } from 'react'
 
 import * as HeroIconsSolid from '@heroicons/react/24/solid'
 import * as HeroIconsOutline from '@heroicons/react/24/outline' 
@@ -34,6 +34,8 @@ export const SubmenuIsMobileContext = createContext(false)
 const NavigationSubmenu = function({ id, title, icon, pinLeft, children, className }) {
     const [isOpen, setIsOpen] = useLocalStorage(`NavigationSubmenu.${id}.isOpen`, true)
     const [width, setWidth] = useState(window.innerWidth)
+
+    const submenuId = useId()
 
     const menuRef = useRef(null)
 
@@ -81,11 +83,17 @@ const NavigationSubmenu = function({ id, title, icon, pinLeft, children, classNa
 
     return (
         <NavigationMenuItem className={`navigation-menu__sub-menu ${ className ? className : '' } `}>
-            <a href="" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsOpen( ! isOpen )}} className="navigation-menu__sub-menu__header">
+            <a href=""
+                role="button"
+                aria-expanded={isOpen === true}
+                aria-controls={submenuId}
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsOpen( ! isOpen )}} className="navigation-menu__sub-menu__header">
                 { isOpen ? <SolidIcon /> : <OutlineIcon /> } <span className="nav-text">{ title }</span>
             </a>
             <menu 
                 ref={menuRef} 
+                id={submenuId}
+                aria-hidden={isOpen !== true}
                 className={`navigation-menu__sub-menu__menu ${ pinLeft ? `navigation-menu__sub-menu__pin-left` : 'navigation-menu__sub-menu__pin-right' }`}
                 style={{ display: ( isOpen ? 'block' : 'none' ) }}
             >

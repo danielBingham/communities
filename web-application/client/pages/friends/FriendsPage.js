@@ -21,7 +21,7 @@ const FriendsPage = function() {
     return (
         <Page id="friends-page">
             <PageLeftGutter>
-                <NavigationMenu>
+                <NavigationMenu ariaLabel="Friends">
                     <NavigationMenuButton href="/friends/invite" type="primary" icon="Plus" text="Invite" /> 
                     <NavigationMenuLink to="/friends" icon="Users" text="Your Friends" />
                     <NavigationSubmenu icon="UserPlus" title="Pending">

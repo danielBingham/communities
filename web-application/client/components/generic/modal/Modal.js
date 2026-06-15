@@ -96,9 +96,9 @@ const Modal = function({ isVisible, setIsVisible, className, children, noClose, 
     const container = document.getElementById('root-layout')
     return isVisible ? createPortal(
             <div className={`modal-wrapper ${className ? className : ''}`} >
-                <div ref={overlayRef} className="modal__overlay" onClick={overlayClicked}></div>
-                <div ref={ref} className="modal">
-                    { ! noClose && ! hideX && <a href="" onClick={close} className="modal__close"><XMarkIcon /></a> }
+                <div ref={overlayRef} className="modal__overlay" onClick={overlayClicked} aria-hidden="true"></div>
+                <div ref={ref} className="modal" role="dialog" aria-modal="true" tabIndex={-1}>
+                    { ! noClose && ! hideX && <a href="" onClick={close} className="modal__close" role="button" aria-label="Close"><XMarkIcon /></a> }
                     { children }
                 </div>
             </div>,

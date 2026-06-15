@@ -57,19 +57,20 @@ export const DropdownMenuItem = function({ className, disabled, children, href, 
 
     if ( disabled === true ) {
         return (
-            <span className={classNameInternal}>{ children }</span>
+            <span role="menuitem" aria-disabled="true" className={classNameInternal}>{ children }</span>
         )
     } 
 
     if ( href !== undefined && href !== null ) {
         return (
-            <Link className={classNameInternal} onClick={onClickInternal} to={href}>{ children }</Link>
+            <Link role="menuitem" className={classNameInternal} onClick={onClickInternal} to={href}>{ children }</Link>
         )
     }
     
     return (
         <a
             href=""
+            role="menuitem"
             className={classNameInternal}
             onClick={(e) => { e.preventDefault(); onClickInternal(e); }}
         >

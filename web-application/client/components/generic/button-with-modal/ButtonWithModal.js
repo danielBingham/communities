@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext, createContext } from 'react'
+import React, { useState, useEffect, useRef, useId, useContext, createContext } from 'react'
 
 import Button from '/components/ui/Button'
 
@@ -7,11 +7,17 @@ import './ButtonWithModal.css'
 export const VisibleContext = createContext(false)
 export const ToggleModalContext = createContext(null)
 
+// The DOM id of the modal, used to wire the button to the modal it controls
+// with `aria-controls`.
+export const ModalIdContext = createContext(null)
+
 export const ButtonWithModal = function({ className, children }) {
 
     // ======= Render State =========================================
 
     const [visible, setVisible] = useState(false)
+
+    const modalId = useId()
 
     const modalRef = useRef(null)
 
@@ -49,7 +55,9 @@ export const ButtonWithModal = function({ className, children }) {
         <div ref={modalRef} className={`button-with-modal ${className ? className : ''} `}>
             <VisibleContext.Provider value={visible}>
                 <ToggleModalContext.Provider value={toggleModal}>
-                    { children }
+                    <ModalIdContext.Provider value={modalId}>
+                        { children }
+                    </ModalIdContext.Provider>
                 </ToggleModalContext.Provider>
             </VisibleContext.Provider>
         </div>
@@ -60,6 +68,7 @@ export const ModalButton = function({ type, disabled, className, children }) {
 
     const visible = useContext(VisibleContext)
     const toggleModal = useContext(ToggleModalContext)
+    const modalId = useContext(ModalIdContext)
 
     return (
         <Button
@@ -71,9 +80,12 @@ export const ModalButton = function({ type, disabled, className, children }) {
                 toggleModal()
             }}
             disabled={disabled}
+            aria-haspopup="dialog"
+            aria-expanded={visible === true}
+            aria-controls={modalId}
         >
             { children }
-            <div className="arrow-wrapper">
+            <div className="arrow-wrapper" aria-hidden="true">
                 <div className="arrow">
                 </div>
             </div>
@@ -85,9 +97,13 @@ export const ButtonModal = function({ className, children }) {
 
     const visible = useContext(VisibleContext)
     const toggleModal = useContext(ToggleModalContext)
+    const modalId = useContext(ModalIdContext)
 
     return (
         <div 
+            id={modalId}
+            role="dialog"
+            aria-hidden={visible !== true}
             className={`button-modal ${className ? className : ''}`}
             style={{ display: (visible ? 'block' : 'none' ) }}
         >

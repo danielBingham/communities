@@ -1,10 +1,14 @@
-import React, { useState, useEffect, useRef, useContext, createContext, Children } from 'react'
+import React, { useState, useEffect, useRef, useId, useContext, createContext, Children } from 'react'
 
 import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline'
 import { XCircleIcon } from '@heroicons/react/24/solid'
 
 export const VisibleContext = createContext(false)
 export const ToggleMenuContext = createContext(null)
+
+// The DOM id of the listbox, used to wire the trigger to the list it
+// controls with `aria-controls`.
+export const ListboxIdContext = createContext(null)
 
 import './Select.css'
 
@@ -18,6 +22,8 @@ export const Select = function({ children, className, closeOnClick }) {
     // ======= Render State =========================================
 
     const [visible, setVisible] = useState(false)
+
+    const listboxId = useId()
 
     const menuRef = useRef(null)
 
@@ -56,7 +62,9 @@ export const Select = function({ children, className, closeOnClick }) {
         <div ref={menuRef} className={`select ${ className ? className : ''}`}>
             <VisibleContext.Provider value={visible}>
                 <ToggleMenuContext.Provider value={toggleMenu}>
-                    { children }
+                    <ListboxIdContext.Provider value={listboxId}>
+                        { children }
+                    </ListboxIdContext.Provider>
                 </ToggleMenuContext.Provider>
             </VisibleContext.Provider>
         </div>
@@ -69,12 +77,13 @@ export const Select = function({ children, className, closeOnClick }) {
  *
  * @param {object} props    The standard React props object - empty.
  */
-export const SelectTrigger = function({ className, children, showArrow }) {
+export const SelectTrigger = function({ className, children, showArrow, ariaLabel }) {
 
     // ======= Render State =========================================
 
     const visible = useContext(VisibleContext)
     const toggleMenu = useContext(ToggleMenuContext)
+    const listboxId = useContext(ListboxIdContext)
 
 
     // ======= Request Tracking =====================================
@@ -91,7 +100,14 @@ export const SelectTrigger = function({ className, children, showArrow }) {
 
     return (
         <div className={`select-trigger ${visible ? 'active' : '' } ${className ? className : ''}`} >
-            <a href="" onClick={(e) => { e.preventDefault(); toggleMenu(); }}>{ children } { ! doNotShowArrow && (visible ? <ChevronUpIcon /> : <ChevronDownIcon />) }</a>
+            <a href=""
+                role="button"
+                aria-haspopup="listbox"
+                aria-expanded={visible === true}
+                aria-controls={listboxId}
+                aria-label={ariaLabel}
+                onClick={(e) => { e.preventDefault(); toggleMenu(); }}
+            >{ children } { ! doNotShowArrow && (visible ? <ChevronUpIcon /> : <ChevronDownIcon />) }</a>
         </div>
     )
 
@@ -108,6 +124,7 @@ export const SelectBody = function(props) {
 
     const visible = useContext(VisibleContext)
     const toggleMenu = useContext(ToggleMenuContext)
+    const listboxId = useContext(ListboxIdContext)
 
 
     // ======= Request Tracking =====================================
@@ -121,7 +138,13 @@ export const SelectBody = function(props) {
     // ======= Render ===============================================
    
     return (
-        <div className={`select-body ${ props.className ? props.className : ''}`} style={{ display: (visible ? 'block' : 'none' ) }} >
+        <div
+            id={listboxId}
+            role="listbox"
+            aria-hidden={visible !== true}
+            className={`select-body ${ props.className ? props.className : ''}`}
+            style={{ display: (visible ? 'block' : 'none' ) }}
+        >
             { props.children }
         </div>
     )
@@ -161,6 +184,8 @@ export const SelectItem = function(props) {
     return (
         <a
             href=""
+            role="option"
+            aria-selected={ props.selected === true }
             className={ props.className ? `select-item ${props.className}` : "select-item"} 
             onClick={(e) => { e.preventDefault(); onClick(e); }}
         >

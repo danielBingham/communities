@@ -1,6 +1,6 @@
 import { useContext } from 'react'
 
-import { IsOpenContext } from './DropdownMenu'
+import { IsOpenContext, MenuIdContext } from './DropdownMenu'
 
 import './DropdownMenuTrigger.css'
 
@@ -9,15 +9,23 @@ import './DropdownMenuTrigger.css'
  *
  * @param {object} props    The standard React props object - empty.
  */
-export const DropdownMenuTrigger = function({ className, children }) {
+export const DropdownMenuTrigger = function({ className, ariaLabel, children }) {
 
     const [isOpen, setIsOpen] = useContext(IsOpenContext)
+    const menuId = useContext(MenuIdContext)
 
     // ======= Render ===============================================
 
     return (
         <div className={`dropdown-menu__trigger ${isOpen ? 'active' : '' } ${className ? className : ''}`} >
-            <a href="" onClick={(e) => { e.preventDefault(); setIsOpen(!isOpen); }}>{ children }</a>
+            <a href=""
+                role="button"
+                aria-haspopup="menu"
+                aria-expanded={isOpen === true}
+                aria-controls={menuId}
+                aria-label={ariaLabel}
+                onClick={(e) => { e.preventDefault(); setIsOpen(!isOpen); }}
+            >{ children }</a>
         </div>
     )
 }

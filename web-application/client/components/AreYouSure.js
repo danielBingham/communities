@@ -89,8 +89,8 @@ const AreYouSure = function({ isVisible, isPending, cancelLabel = 'Cancel', exec
 
     return isVisible ?
             <div className="modal-wrapper">
-                <div ref={overlayRef} className="modal-overlay" onClick={(e) => { cancel() }} ></div>
-                <div ref={ref} className={className ? `are-you-sure ${className}` : 'are-you-sure'}>
+                <div ref={overlayRef} className="modal-overlay" onClick={(e) => { cancel() }} aria-hidden="true"></div>
+                <div ref={ref} role="alertdialog" aria-modal="true" tabIndex={-1} className={className ? `are-you-sure ${className}` : 'are-you-sure'}>
                     <div className="are-you-sure__question">{ children }</div>
                     <Button onClick={(e) =>{ e.stopPropagation(); cancel() }}>{ cancelLabel }</Button> <Button type="warn" onClick={(e) => { e.stopPropagation(); execute() }}>{ isPending === true ? <Spinner /> : executeLabel }</Button>
                 </div>

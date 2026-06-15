@@ -2,10 +2,10 @@ import React from 'react'
 
 import './NavigationMenu.css'
 
-const NavigationMenu = function({ children, className }) {
+const NavigationMenu = function({ children, className, ariaLabel }) {
 
     return (
-        <menu className={`navigation-menu ${className ? className : ''}`}>
+        <menu role="navigation" aria-label={ariaLabel} className={`navigation-menu ${className ? className : ''}`}>
             { children }
         </menu> 
     )

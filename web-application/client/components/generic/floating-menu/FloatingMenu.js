@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext, createContext, Children } from 'react'
+import React, { useState, useEffect, useRef, useId, useContext, createContext, Children } from 'react'
 
 import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline'
 import { XCircleIcon } from '@heroicons/react/24/solid'
@@ -6,6 +6,10 @@ import { XCircleIcon } from '@heroicons/react/24/solid'
 export const VisibleContext = createContext(false)
 export const ToggleMenuContext = createContext(null)
 export const CloseOnClickContext = createContext(false)
+
+// The DOM id of the menu body, used to wire the trigger to the menu it
+// controls with `aria-controls`.
+export const MenuIdContext = createContext(null)
 
 import './FloatingMenu.css'
 
@@ -19,6 +23,8 @@ export const FloatingMenu = function({ children, className, closeOnClick }) {
     // ======= Render State =========================================
 
     const [visible, setVisible] = useState(false)
+
+    const menuId = useId()
 
     const menuRef = useRef(null)
 
@@ -58,7 +64,9 @@ export const FloatingMenu = function({ children, className, closeOnClick }) {
             <VisibleContext.Provider value={visible}>
                 <ToggleMenuContext.Provider value={toggleMenu}>
                     <CloseOnClickContext.Provider value={closeOnClick}>
-                        { children }
+                        <MenuIdContext.Provider value={menuId}>
+                            { children }
+                        </MenuIdContext.Provider>
                     </CloseOnClickContext.Provider>
                 </ToggleMenuContext.Provider>
             </VisibleContext.Provider>
@@ -72,12 +80,13 @@ export const FloatingMenu = function({ children, className, closeOnClick }) {
  *
  * @param {object} props    The standard React props object - empty.
  */
-export const FloatingMenuTrigger = function({ className, children, showArrow }) {
+export const FloatingMenuTrigger = function({ className, children, showArrow, ariaLabel }) {
 
     // ======= Render State =========================================
 
     const visible = useContext(VisibleContext)
     const toggleMenu = useContext(ToggleMenuContext)
+    const menuId = useContext(MenuIdContext)
 
 
     // ======= Request Tracking =====================================
@@ -94,7 +103,15 @@ export const FloatingMenuTrigger = function({ className, children, showArrow }) 
 
     return (
         <div className={`menu-trigger ${visible ? 'active' : '' } ${className ? className : ''}`} >
-            <a href="" className="no-close" onClick={(e) => { e.preventDefault(); toggleMenu(); }}>{ children } { ! doNotShowArrow && (visible ? <ChevronUpIcon /> : <ChevronDownIcon />) }</a>
+            <a href=""
+                className="no-close"
+                role="button"
+                aria-haspopup="menu"
+                aria-expanded={visible === true}
+                aria-controls={menuId}
+                aria-label={ariaLabel}
+                onClick={(e) => { e.preventDefault(); toggleMenu(); }}
+            >{ children } { ! doNotShowArrow && (visible ? <ChevronUpIcon /> : <ChevronDownIcon />) }</a>
         </div>
     )
 
@@ -111,6 +128,7 @@ export const FloatingMenuBody = function(props) {
 
     const visible = useContext(VisibleContext)
     const toggleMenu = useContext(ToggleMenuContext)
+    const menuId = useContext(MenuIdContext)
 
 
     // ======= Request Tracking =====================================
@@ -124,7 +142,13 @@ export const FloatingMenuBody = function(props) {
     // ======= Render ===============================================
    
     return (
-        <div className={`menu-body ${ props.className ? props.className : ''}`} style={{ display: (visible ? 'block' : 'none' ) }} >
+        <div
+            id={menuId}
+            role="menu"
+            aria-hidden={visible !== true}
+            className={`menu-body ${ props.className ? props.className : ''}`}
+            style={{ display: (visible ? 'block' : 'none' ) }}
+        >
             { props.children }
         </div>
     )
@@ -158,7 +182,7 @@ export const FloatingMenuHeader = function({ title, children }) {
         <div className="menu-header">
             <div className="menu-header-top">
                 <div className="menu-title">{ title }</div>
-                <div className="menu-escape" ><a href="" onClick={(e) => { e.preventDefault(); toggleMenu(); }}><XCircleIcon/></a></div>
+                <div className="menu-escape" ><a href="" role="button" aria-label="Close menu" onClick={(e) => { e.preventDefault(); toggleMenu(); }}><XCircleIcon/></a></div>
             </div>
             {  Children.count(children) > 0 && <div className="menu-header-bottom">
                 { children }
@@ -211,13 +235,14 @@ export const FloatingMenuItem = function({ className, disabled, children, onClic
 
     if ( disabled === true ) {
         return (
-            <span className={classNameInternal}>{ children }</span>
+            <span role="menuitem" aria-disabled="true" className={classNameInternal}>{ children }</span>
         )
     } 
     
     return (
         <a
             href=""
+            role="menuitem"
             className={classNameInternal}
             onClick={(e) => { e.preventDefault(); onClickInternal(e); }}
         >

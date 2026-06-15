@@ -9,7 +9,7 @@ const AboutPage = function() {
     return (
         <Page id="about-page">
             <PageLeftGutter>
-                <NavigationMenu className="about-page__menu">
+                <NavigationMenu className="about-page__menu" ariaLabel="About">
                     <NavigationSubmenu id="About" icon="InformationCircle" title="About" pinLeft={true}>
                         <NavigationSubmenuLink to="/about" icon="InformationCircle" text="About" />
                         <NavigationSubmenuLink to="/about/news" icon="Newspaper" text="News" />

@@ -179,9 +179,9 @@ const NotificationMenu = function({ }) {
     const unread = unreadNotifications.length
     return (
         <DropdownMenu className="notification-menu" autoClose={true}>
-            <DropdownMenuTrigger className="notification-trigger" >
+            <DropdownMenuTrigger className="notification-trigger" ariaLabel={ unread > 0 ? `Notifications, ${unread} unread` : 'Notifications' }>
                 <BellIcon />
-                { unread > 0 && <div className="unread-indicator">{unread}</div> }
+                { unread > 0 && <div className="unread-indicator" aria-hidden="true">{unread}</div> }
             </DropdownMenuTrigger>
             { needToRequestPermission && <DropdownMenuModal className="notification-permissions">
                 <p>Show desktop notifications?</p>
@@ -189,7 +189,7 @@ const NotificationMenu = function({ }) {
             </DropdownMenuModal> }
             <DropdownMenuBody className="notification-body">
                 <DropdownMenuHeader className="notification-header">
-                    <span className="mark-read"><a href="" onClick={(e) =>  markAllRead(e) }>Mark All Read</a></span>
+                    <span className="mark-read"><a href="" role="menuitem" onClick={(e) =>  markAllRead(e) }>Mark All Read</a></span>
                 </DropdownMenuHeader>
                 { notificationViews }
             </DropdownMenuBody>
