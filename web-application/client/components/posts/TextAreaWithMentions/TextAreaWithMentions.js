@@ -59,9 +59,9 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
     const timeoutId = useRef(null)
     const textareaRef = useRef(null)
     const mentionMenuRef = useRef(null)
+    const cursorRef = useRef(null)
 
     const suggestionsId = useId()
-    const cursorRef = useRef(null)
 
     const dispatch = useDispatch()
 
