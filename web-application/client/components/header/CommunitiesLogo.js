@@ -32,7 +32,7 @@ const CommunitiesLogo = function({ type, className }) {
     }
 
     return (
-        <a className={`communities-logo ${ typeClass } ${ className ? className : ''}`} href="/" aria-label="Communities home">
+        <a className={`communities-logo ${ typeClass } ${ className ? className : ''}`} href="/" aria-label="Communities">
             <img className="communities-logo__logo" src={logo} alt="" aria-hidden="true" /><img className="communities-logo__marque" src={marque} alt="" aria-hidden="true" />
         </a>
     )
