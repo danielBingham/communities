@@ -142,7 +142,7 @@ const PostReactions = function({ postId }) {
                     ><HandThumbDownIcon /> Dislike</a>
                 </div>
                 { (post.visibility === 'public' || post.sharedPostId) && <div className="group share">
-                    <a href="" onClick={(e) => { e.preventDefault(); sharePost() }} ><ArrowPathRoundedSquareIcon /> Share</a>
+                    <a href="" role="button" aria-label="Share post" onClick={(e) => { e.preventDefault(); sharePost() }} ><ArrowPathRoundedSquareIcon /> Share</a>
                 </div> }
             </div>
         </div>
