@@ -30,6 +30,7 @@ const Image = function({ className, src, altText, ref, crossOrigin, onLoad, onEr
         <img 
             ref={ref}
             src={src} 
+            alt={ altText !== undefined && altText !== null ? altText : '' }
             draggable={false}
             className={`image ${className ? className : ''}`}
             onLoad={onLoad}

@@ -120,19 +120,23 @@ const PostReactions = function({ postId }) {
                 </div>
             </Modal>
             { reactionViews.length > 0 && <div className="reactions__view">
-                <a href="" onClick={(e) => { e.preventDefault(); setShowReactions(true)}}>{ 'like' in reactionCounts && <span><HandThumbUpIcon /> {reactionCounts['like']}</span> }
+                <a href="" role="button" aria-haspopup="dialog" aria-label="View reactions" onClick={(e) => { e.preventDefault(); setShowReactions(true)}}>{ 'like' in reactionCounts && <span><HandThumbUpIcon /> {reactionCounts['like']}</span> }
                 { 'dislike' in reactionCounts && <span><HandThumbDownIcon /> {reactionCounts['dislike']}</span> }
                     { 'block' in reactionCounts && <span className="block"><NoSymbolIcon/> {reactionCounts['block']}</span>}</a>
             </div> }
             <div className="reactions__controls">
                 <div className="group positive">
                     <a href=""
+                        role="button"
+                        aria-pressed={ userReaction?.reaction == 'like' }
                         className={`${ userReaction?.reaction == 'like' ? 'reacted' : ''} like`}
                         onClick={(e) => { e.preventDefault(); react('like') }} 
                     ><HandThumbUpIcon /> Like </a>
                 </div>
                 <div className="group negative">
                     <a href=""
+                        role="button"
+                        aria-pressed={ userReaction?.reaction == 'dislike' }
                         className={`${ userReaction?.reaction == 'dislike' ? 'reacted' : ''} dislike`}
                         onClick={(e) => { e.preventDefault(); react('dislike') }} 
                     ><HandThumbDownIcon /> Dislike</a>

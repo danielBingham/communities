@@ -162,7 +162,7 @@ const FetchVideo = function({ id, width, ref, onLoad, fallbackIcon }) {
         )
     } else if ( haveError === true || videoUrl === false ) {
         return (
-            <div className="video__error"> <Fallback className='fetch-video__fallback' /></div>
+            <div className="video__error" role="img" aria-label="Video failed to load"> <Fallback className='fetch-video__fallback' /></div>
         )
 
     } else if ( isLoading === true ) {
@@ -173,7 +173,7 @@ const FetchVideo = function({ id, width, ref, onLoad, fallbackIcon }) {
         )
     } else {
         return (
-            <div className="video__error"> <Fallback className='fetch-video__fallback' /></div>
+            <div className="video__error" role="img" aria-label="Video failed to load"> <Fallback className='fetch-video__fallback' /></div>
         )
     }
 }

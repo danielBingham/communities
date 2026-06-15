@@ -57,7 +57,7 @@ const PostComment = function({ postId, id }) {
         || (groupModeration !== null && groupModeration.status === 'rejected') ) 
     {
         return (
-            <div id={`comment-${comment.id}`} key={comment.id} className={`post-comment ${ highlight ? 'highlight' : ''}`}>
+            <div id={`comment-${comment.id}`} key={comment.id} role="article" className={`post-comment ${ highlight ? 'highlight' : ''}`}>
                 <div className="post-comment__header">
                     <div>
                         <UserTag id={comment.userId} /> commented <a href={`${postLink}#comment-${comment.id}`}><DateTag timestamp={comment.createdDate} /></a>
@@ -90,7 +90,7 @@ const PostComment = function({ postId, id }) {
     }
 
     return (
-        <div id={`comment-${comment.id}`} key={comment.id} className={`post-comment ${ highlight ? 'highlight' : ''}`}>
+        <div id={`comment-${comment.id}`} key={comment.id} role="article" className={`post-comment ${ highlight ? 'highlight' : ''}`}>
             <div className="post-comment__header">
                 <div>
                     <UserTag id={comment.userId} /> commented <a href={`${postLink}#comment-${comment.id}`}><DateTag timestamp={comment.createdDate} /></a>

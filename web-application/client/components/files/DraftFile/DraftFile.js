@@ -115,7 +115,7 @@ const DraftFile = function({
         return (
             <div className="draft-file">
                 <div className="draft-file__file">
-                    <a className="draft-file__remove" href="" onClick={(e) => { e.preventDefault(); remove() }}><XMarkIcon /></a>
+                    <a className="draft-file__remove" href="" role="button" aria-label="Remove file" onClick={(e) => { e.preventDefault(); remove() }}><XMarkIcon /></a>
                     <div className="draft-file__failed-load">
                         <div>
                             <p>Failed to load file.</p>
@@ -159,7 +159,7 @@ const DraftFile = function({
             { state === State.isPendingUpload && <div><Spinner local={true} /> <span>Upload prepared. Upload will begin shortly...</span></div> }
             { state === State.isUploading && 
                 <div className="draft-file__file">
-                    <a className="draft-file__remove" href="" onClick={(e) => { e.preventDefault(); remove() }}><XMarkIcon /></a>
+                    <a className="draft-file__remove" href="" role="button" aria-label="Remove file" onClick={(e) => { e.preventDefault(); remove() }}><XMarkIcon /></a>
                     <div className="draft-file__pending">
                         <div>
                             <Spinner local={true} /> <span>Uploading.  Do not navigate away.  This might take several minutes...</span>
@@ -169,7 +169,7 @@ const DraftFile = function({
             }
             { state === State.isProcessing && 
                 <div className="draft-file__file">  
-                    <a className="draft-file__remove" href="" onClick={(e) => { e.preventDefault(); remove() }}><XMarkIcon /></a>
+                    <a className="draft-file__remove" href="" role="button" aria-label="Remove file" onClick={(e) => { e.preventDefault(); remove() }}><XMarkIcon /></a>
                     <div className="draft-file__pending">
                         <div>
                             <p>Processing. Do not navigate away. This might take several minutes...</p>
@@ -180,7 +180,7 @@ const DraftFile = function({
             }
             { state === State.isReady && 
                 <div className="draft-file__file">
-                    { (isLoaded || loadFailed) && <a className="draft-file__remove" href="" onClick={(e) => { e.preventDefault(); remove() }}><XMarkIcon /></a> }
+                    { (isLoaded || loadFailed) && <a className="draft-file__remove" href="" role="button" aria-label="Remove file" onClick={(e) => { e.preventDefault(); remove() }}><XMarkIcon /></a> }
                     { loadFailed && <div className="draft-file__failed-load">
                         <div>
                             <p>Failed to load image.</p>

@@ -30,6 +30,7 @@ const HtmlImage = function({ src, ref, onLoad }) {
             <img 
                 ref={ref}
                 src={src} 
+                alt=""
                 onLoad={onLoad}
                 crossOrigin="anonymous"
             />

@@ -31,6 +31,7 @@ const Video = function({ className, src, poster, altText, ref, onLoad, onError }
             ref={ref}
             className={`video ${className ? className : ''}`}
             preload="metadata"
+            aria-label={ altText !== undefined && altText !== null ? altText : undefined }
             src={src} 
             poster={poster}
             onLoadedMetadata={onLoad}
