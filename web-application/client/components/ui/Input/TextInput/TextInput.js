@@ -1,8 +1,13 @@
+import { useId } from 'react'
+
 import logger from '/logger'
 
 import './TextInput.css'
 
 const TextInput = function({ name, type, label, explanation, className, value, placeholder, ref, onChange, onKeyDown, onBlur, onFocus, error, children }) {
+
+    const explanationId = useId()
+    const errorId = useId()
 
     const onChangeInternal = function(event) {
         if ( onChange && typeof onChange === "function") {
@@ -43,14 +48,17 @@ const TextInput = function({ name, type, label, explanation, className, value, p
     return (
         <div className={`text-input ${className ? className : ''}`}>
             { label && <label htmlFor={name}>{label}</label> }
-            { explanation && <p className="text-input-explanation">{ explanation }</p> }
+            { explanation && <p id={explanationId} className="text-input-explanation">{ explanation }</p> }
             <div className="text-input__wrapper">
                 <input 
                     ref={ref}
                     type={type} 
+                    id={name}
                     name={name} 
                     value={value} 
                     placeholder={placeholder}
+                    aria-describedby={`${ explanation ? explanationId : '' } ${ error ? errorId : '' }`.trim() || undefined}
+                    aria-invalid={ error ? true : undefined }
                     onKeyDown={onKeyDownInternal}
                     onChange={onChangeInternal} 
                     onBlur={onBlurInternal} 
@@ -60,7 +68,7 @@ const TextInput = function({ name, type, label, explanation, className, value, p
                     { children }
                 </span>
             </div>
-            { error && <div className="text-input-error">{ error }</div> }
+            { error && <div id={errorId} className="text-input-error">{ error }</div> }
         </div>
     )
 

@@ -125,6 +125,8 @@ const SearchControl = function({ entity, fields, defaultField, className  }) {
             <input
                 name="search"
                 type="text"
+                role="searchbox"
+                aria-label={`Search ${entity}`}
                 value={search}
                 onChange={onChange}
                 onKeyUp={onKeyUp}

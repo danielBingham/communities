@@ -17,7 +17,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import { useState, useRef, useEffect, useLayoutEffect } from 'react'
+import { useState, useRef, useEffect, useLayoutEffect, useId } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
 import * as shared from '@communities/shared'
@@ -59,6 +59,8 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
     const timeoutId = useRef(null)
     const textareaRef = useRef(null)
     const mentionMenuRef = useRef(null)
+
+    const suggestionsId = useId()
     const cursorRef = useRef(null)
 
     const dispatch = useDispatch()
@@ -337,6 +339,8 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
             userSuggestions.push(
                 <a key={user.username} 
                     id={user.id} 
+                    role="option"
+                    aria-selected={index === highlightedSuggestion}
                     className={index === highlightedSuggestion ? "suggestion highlight" : "suggestion"} 
                     onClick={(e) => { e.preventDefault(); selectSuggestion(index) }}
                 >
@@ -346,11 +350,19 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
         }
     }
 
+   const suggestionsAreOpen = areMentioning && query !== null && query.list.length > 0
+   const highlightedId = suggestionsAreOpen && query.list.length > highlightedSuggestion ? query.list[highlightedSuggestion] : undefined
+
     return (
         <div className={`text-area-with-mentions ${className ? className : '' }`}>
             <textarea 
                 ref={textareaRef}
                 value={value}
+                role="combobox"
+                aria-autocomplete="list"
+                aria-expanded={suggestionsAreOpen === true}
+                aria-controls={suggestionsId}
+                aria-activedescendant={ suggestionsAreOpen ? highlightedId : undefined }
                 onChange={onChangeInternal}
                 onKeyDown={onKeyDownInternal}
                 onScroll={onScrollInternal}
@@ -358,9 +370,12 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
                 style={{ fontSize: (Math.floor(16 * textZoom) + 'px') }}
             >
             </textarea> 
-            { areMentioning && query !== null && query.list.length > 0 && 
+            { suggestionsAreOpen &&
                 <div 
                     ref={mentionMenuRef}
+                    id={suggestionsId}
+                    role="listbox"
+                    aria-label="User suggestions"
                     className="text-area-with-mentions__suggestions" 
                     style={{ top: menuTop, left: menuLeft }}
                 >

@@ -1,8 +1,11 @@
-import React from 'react'
+import React, { useId } from 'react'
 
 import './Checkbox.css'
 
 const Checkbox = function({ className, name, label, explanation, value, error, onClick }) {
+    const explanationId = useId()
+    const errorId = useId()
+
     return (
         <div className={`checkbox ${className ? className : ''}`}>
             <div className="checkbox__grid">
@@ -10,17 +13,20 @@ const Checkbox = function({ className, name, label, explanation, value, error, o
                     <div className="checkbox__label">
                         <label htmlFor={name} onClick={onClick}>{ label }</label>
                     </div>
-                    <div className="checkbox__explanation">
+                    <div id={explanationId} className="checkbox__explanation">
                         { explanation }
                     </div>
                 </div>
                 <input 
                     type="checkbox" 
+                    id={name}
                     name={name} 
                     checked={ value === true }
+                    aria-describedby={`${ explanation ? explanationId : '' } ${ error ? errorId : '' }`.trim() || undefined}
+                    aria-invalid={ error ? true : undefined }
                     onChange={onClick} />
             </div>
-            <div className="checkbox__error">
+            <div id={errorId} className="checkbox__error">
                 { error }
             </div>
         </div>

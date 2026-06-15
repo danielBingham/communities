@@ -22,9 +22,9 @@ const PasswordInput = function({ name, label, explanation, placeholder, classNam
         internalType = 'text'
     }
 
-    let passwordControl = (<a href="" onClick={togglePasswordVisibility} className="text-input__show-password"><EyeIcon /></a>)
+    let passwordControl = (<a href="" role="button" aria-label="Show password" aria-pressed="false" onClick={togglePasswordVisibility} className="text-input__show-password"><EyeIcon /></a>)
     if ( isPasswordVisible === true ) {
-        passwordControl = (<a href="" onClick={togglePasswordVisibility} className="text-input__show-password"><EyeSlashIcon /></a>)
+        passwordControl = (<a href="" role="button" aria-label="Hide password" aria-pressed="true" onClick={togglePasswordVisibility} className="text-input__show-password"><EyeSlashIcon /></a>)
     } 
 
     return (
