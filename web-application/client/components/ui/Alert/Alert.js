@@ -75,6 +75,7 @@ const Alert = function({ type, timeout, onClear, className, children }) {
     return (
         <div 
             className={`alert ${typeClass} ${ className ? className : ''}`} 
+            role={ type === 'error' || type === 'warn' ? 'alert' : 'status' }
             onClick={(e) => clearAlert()}
         >
             { children }

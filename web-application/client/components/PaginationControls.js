@@ -44,12 +44,12 @@ const PaginationControls = function({ meta }) {
     lastPageParams.set(`page`, lastPage)
 
     return (
-        <div className="page-controls">
-            <div><Button onClick={(e) => {e.preventDefault(); goToPage(firstPage)}}>First</Button></div>
-            <div><Button onClick={(e) => {e.preventDefault(); goToPage(prevPage)}}>Previous</Button></div>
-            <div><span className="control">{ page } of { meta.numberOfPages }</span></div>
-            <div><Button onClick={(e) => {e.preventDefault(); goToPage(nextPage)}}>Next</Button></div>
-            <div><Button onClick={(e) => {e.preventDefault(); goToPage(lastPage)}}>Last</Button></div>
+        <div className="page-controls" role="navigation" aria-label="Pagination">
+            <div><Button onClick={(e) => {e.preventDefault(); goToPage(firstPage)}} aria-disabled={page <= 1}>First</Button></div>
+            <div><Button onClick={(e) => {e.preventDefault(); goToPage(prevPage)}} aria-disabled={page <= 1}>Previous</Button></div>
+            <div><span className="control" aria-live="polite" aria-atomic="true">{ page } of { meta.numberOfPages }</span></div>
+            <div><Button onClick={(e) => {e.preventDefault(); goToPage(nextPage)}} aria-disabled={page >= meta.numberOfPages}>Next</Button></div>
+            <div><Button onClick={(e) => {e.preventDefault(); goToPage(lastPage)}} aria-disabled={page >= meta.numberOfPages}>Last</Button></div>
         </div>
     )
 

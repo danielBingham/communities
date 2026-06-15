@@ -4,9 +4,9 @@ import './Spinner.css'
 
 const Spinner = function() {
     return (
-        <div className="spinner-container">
+        <div className="spinner-container" role="status" aria-label="Loading">
             <div className="spinner-wrapper">
-                <div className="spinner"></div>
+                <div className="spinner" aria-hidden="true"></div>
             </div>
         </div>
     )

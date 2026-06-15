@@ -19,8 +19,8 @@ const ErrorNotice = function({ className, onClose, children }) {
     }
 
     return isVisible ? createPortal(
-            <div className={`error-notice ${className ? className : ''}`} >
-                <a href="" onClick={close} className="close"><XCircleIcon /></a>
+            <div role="alert" className={`error-notice ${className ? className : ''}`} >
+                <a href="" role="button" aria-label="Dismiss" onClick={close} className="close"><XCircleIcon /></a>
                 { children }
             </div>,
             document.body
