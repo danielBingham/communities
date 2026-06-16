@@ -115,7 +115,7 @@ const SearchControl = function({ entity, fields, defaultField, className  }) {
     return (
         <div className={`list__search-control ${className ? className : ''}`}>
             { fields && <DropdownMenu className="list__search-control__field-selector" autoClose={true}>
-                <DropdownMenuTrigger>
+                <DropdownMenuTrigger ariaLabel={`Choose field`}>
                     <span className="list__search-control__button"><FunnelIcon /><span className="nav-text">{ fields[field] }</span></span>
                 </DropdownMenuTrigger>
                 <DropdownMenuBody className="list__search-control__field-menu">
