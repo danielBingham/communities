@@ -135,7 +135,6 @@ const FetchImage = function({ id, width, ref, onLoad, fallbackIcon }) {
         return (
             <img 
                 ref={ref}
-                alt=""
                 onLoad={onLoadInternal} 
                 onError={onErrorInternal}
                 src={`${imageUrl}`} 
