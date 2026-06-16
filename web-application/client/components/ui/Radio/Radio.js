@@ -17,7 +17,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import { useId, useContext } from 'react'
+import { useId } from 'react'
 
 import './Radio.css'
 
