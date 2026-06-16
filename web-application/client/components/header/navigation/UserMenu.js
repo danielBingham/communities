@@ -88,7 +88,7 @@ const UserMenu = function(props) {
         const isAdmin = currentUser.siteRole == 'admin' || currentUser.siteRole == 'superadmin'
         return (
             <DropdownMenu className="user-menu user-menu__authenticated" autoClose={true} >
-                <DropdownMenuTrigger className="user-menu__trigger logged-in-user">
+                <DropdownMenuTrigger className="user-menu__trigger logged-in-user" ariaLabel="Account Menu">
                     <UserProfileImage userId={currentUser.id} noLink={true} />
                     <span className="navigation-text">{ currentUser.name }</span>
                 </DropdownMenuTrigger>
