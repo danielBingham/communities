@@ -10,7 +10,7 @@
     text-align: center;
     font-size: 16px;
 }
-.page-controls .control {
+.page-controls__display {
     display: inline-block;
     padding: 0 7px;
 }

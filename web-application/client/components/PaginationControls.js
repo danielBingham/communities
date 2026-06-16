@@ -45,11 +45,11 @@ const PaginationControls = function({ meta }) {
 
     return (
         <div className="page-controls" role="navigation" aria-label="Pagination">
-            <div><Button onClick={(e) => {e.preventDefault(); goToPage(firstPage)}} aria-disabled={page <= 1}>First</Button></div>
-            <div><Button onClick={(e) => {e.preventDefault(); goToPage(prevPage)}} aria-disabled={page <= 1}>Previous</Button></div>
-            <div><span className="control" aria-live="polite" aria-atomic="true">{ page } of { meta.numberOfPages }</span></div>
-            <div><Button onClick={(e) => {e.preventDefault(); goToPage(nextPage)}} aria-disabled={page >= meta.numberOfPages}>Next</Button></div>
-            <div><Button onClick={(e) => {e.preventDefault(); goToPage(lastPage)}} aria-disabled={page >= meta.numberOfPages}>Last</Button></div>
+            <div><Button onClick={(e) => {e.preventDefault(); goToPage(firstPage)}} disabled={page <= 1}>First</Button></div>
+            <div><Button onClick={(e) => {e.preventDefault(); goToPage(prevPage)}} disabled={page <= 1}>Previous</Button></div>
+            <div><span className="page-controls__display" aria-live="polite" aria-atomic="true">{ page } of { meta.numberOfPages }</span></div>
+            <div><Button onClick={(e) => {e.preventDefault(); goToPage(nextPage)}} disabled={page >= meta.numberOfPages}>Next</Button></div>
+            <div><Button onClick={(e) => {e.preventDefault(); goToPage(lastPage)}} disabled={page >= meta.numberOfPages}>Last</Button></div>
         </div>
     )
 

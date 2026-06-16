@@ -22,7 +22,7 @@ import { useNavigate } from 'react-router-dom'
 
 import './Button.css'
 
-const Button = function({ type, href, external, disabled, className, onClick, children, ...rest }) {
+const Button = function({ type, href, external, disabled, className, onClick, children }) {
 
     const ref = useRef(null)
     const navigate = useNavigate()
@@ -65,7 +65,6 @@ const Button = function({ type, href, external, disabled, className, onClick, ch
                 className={`button ${ type ? type : 'default' } ${ className ? className : '' }`} 
                 onClick={onClickInternal}
                 disabled={disabled}
-                {...rest}
             >
                 { children }
             </button>
