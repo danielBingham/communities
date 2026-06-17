@@ -29,15 +29,6 @@ const AcceptFriendButton = function({ userId, type }) {
         makeRequest(patchUserRelationship(relationship))
     }
 
-    useEffect(() => {
-        return () => {
-            // Reset entities on unmount.  Unmount will occur when the patched
-            // UserRelationship has been updated so that their state is no
-            // longer pending.
-            dispatch(resetEntities())
-        }
-    }, [])
-
     useEffect(function() {
         if ( request?.state === 'failed' && (request?.response.status === 404 || request?.response.status === 403) ) {
             // TODO There's probably a better way to handle this.
