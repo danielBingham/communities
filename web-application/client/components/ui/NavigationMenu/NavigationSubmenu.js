@@ -82,7 +82,7 @@ const NavigationSubmenu = function({ id, title, icon, pinLeft, children, classNa
 
 
     return (
-        <NavigationMenuItem className={`navigation-menu__sub-menu ${ className ? className : '' } `}>
+        <NavigationMenuItem ref={menuRef} className={`navigation-menu__sub-menu ${ className ? className : '' } `}>
             <a href=""
                 role="button"
                 aria-expanded={isOpen === true}
@@ -91,7 +91,6 @@ const NavigationSubmenu = function({ id, title, icon, pinLeft, children, classNa
                 { isOpen ? <SolidIcon /> : <OutlineIcon /> } <span className="nav-text">{ title }</span>
             </a>
             <menu 
-                ref={menuRef} 
                 id={submenuId}
                 aria-hidden={isOpen !== true}
                 className={`navigation-menu__sub-menu__menu ${ pinLeft ? `navigation-menu__sub-menu__pin-left` : 'navigation-menu__sub-menu__pin-right' }`}

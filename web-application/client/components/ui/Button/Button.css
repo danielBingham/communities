@@ -23,6 +23,7 @@
 }
 button.button:disabled {
     filter: opacity(50%);
+    cursor: default;
 }
 
 
@@ -30,9 +31,6 @@ button.button:disabled {
     background-color: var(--button-color);
     border: none;
     color: var(--button-text-color);
-}
-.button.default:hover{
-    color: var(--primary-highlight-color);
 }
 .button.primary {
     background-color: var(--button-primary-color);

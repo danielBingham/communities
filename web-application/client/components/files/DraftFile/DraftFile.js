@@ -179,7 +179,7 @@ const DraftFile = function({
                 </div> 
             }
             { state === State.isReady && 
-                <div className="draft-file__file">
+                <div className="draft-file__file" aria-label={`Draft file ${uploadInfo?.fileName ? uploadInfo.fileName : ''}`}>
                     { (isLoaded || loadFailed) && <a className="draft-file__remove" href="" role="button" aria-label="Remove file" onClick={(e) => { e.preventDefault(); remove() }}><XMarkIcon /></a> }
                     { loadFailed && <div className="draft-file__failed-load">
                         <div>

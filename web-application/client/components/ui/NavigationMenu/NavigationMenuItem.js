@@ -19,9 +19,9 @@
  ******************************************************************************/
 import "./NavigationMenuItem.css"
 
-const NavigationMenuItem = function({ className, children }) {
+const NavigationMenuItem = function({ ref, className, children }) {
     return (
-        <li className={`navigation-menu__item ${ className ? className : '' }`}>
+        <li ref={ref} className={`navigation-menu__item ${ className ? className : '' }`}>
             { children }
         </li>
     )
