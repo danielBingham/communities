@@ -142,7 +142,7 @@ const FetchImage = function({ id, width, ref, onLoad, fallbackIcon }) {
         )
     } else if ( haveError === true || imageUrl === false ) {
         return (
-            <div className="image__error"> <Fallback className='fetch-image__fallback' /></div>
+            <div className="image__error" role="img" aria-label="Image failed to load"> <Fallback className='fetch-image__fallback' /></div>
         )
 
     } else if ( isLoading === true ) {
@@ -153,7 +153,7 @@ const FetchImage = function({ id, width, ref, onLoad, fallbackIcon }) {
         )
     } else {
         return (
-            <div className="image__error"> <Fallback className='fetch-image__fallback' /></div>
+            <div className="image__error" role="img" aria-label="Image failed to load"> <Fallback className='fetch-image__fallback' /></div>
         )
     }
 }

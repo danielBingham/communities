@@ -57,6 +57,8 @@ const Button = function({ type, href, external, disabled, className, onClick, ch
                 target="_blank"
                 ref={ref} 
                 style={{ display: 'none' }}
+                aria-hidden="true"
+                tabIndex={-1}
             >{ href }</a> }
             <button
                 type="button"

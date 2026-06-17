@@ -10,7 +10,7 @@ import './DotsMenu.css'
 export const DotsMenu = function({ className, children }) {
     return (
         <DropdownMenu className={`dots-menu ${className ? className : ''}`}>
-            <DropdownMenuTrigger><EllipsisHorizontalIcon className="dots-menu__dots" /></DropdownMenuTrigger>
+            <DropdownMenuTrigger ariaLabel="More options"><EllipsisHorizontalIcon className="dots-menu__dots" /></DropdownMenuTrigger>
             <DropdownMenuBody>
                 { children }
             </DropdownMenuBody>

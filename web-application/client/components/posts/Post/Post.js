@@ -135,7 +135,7 @@ const Post = function({ id, expanded, showLoading, shared }) {
         || (groupModeration !== null && groupModeration.status === 'rejected') ) 
     {
         return (
-            <div id={post.id} className={`post ${shared ? 'shared' : '' }`}>
+            <div id={post.id} role="article" className={`post ${shared ? 'shared' : '' }`}>
                 <div className="post__header"> 
                     <div className="post__poster-image"><UserProfileImage userId={post.userId} /></div>
                     <div className="post__details">
@@ -168,7 +168,7 @@ const Post = function({ id, expanded, showLoading, shared }) {
     } 
 
     return (
-        <div id={post.id} className={`post ${ shared ? 'shared' : ''}`}>
+        <div id={post.id} role="article" className={`post ${ shared ? 'shared' : ''}`}>
             <div className="post__header"> 
                 <div className="post__poster-image"><div><UserProfileImage userId={post.userId} /></div></div>
                 <div className="post__details">

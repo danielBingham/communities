@@ -47,7 +47,7 @@ const UserProfileImage = function({ userId, className, noLink, width }) {
 
         } else {
             content = (
-                <Link to={`/${user.username}`}><File id={user.fileId} width={200} type="image" fallback={'UserCircle'} /></Link>
+                <Link to={`/${user.username}`} aria-label={`${user.name}'s profile`}><File id={user.fileId} width={200} type="image" fallback={'UserCircle'} /></Link>
             )
         }
     } 

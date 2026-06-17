@@ -25,7 +25,7 @@ const PostListSinceControl = function() {
     const since = searchParams.get('since') || 'always'
     return (
         <DropdownMenu className="post-list-since-control" autoClose={true}>
-            <DropdownMenuTrigger><span className="post-list-since-control__button"><ClockIcon /><span className="text"> { sinceTitleMap[since]}</span></span></DropdownMenuTrigger>
+            <DropdownMenuTrigger ariaLabel={`Since: ${sinceTitleMap[since]}`}><span className="post-list-since-control__button"><ClockIcon /><span className="text"> { sinceTitleMap[since]}</span></span></DropdownMenuTrigger>
             <DropdownMenuBody>
                 <DropdownMenuItem onClick={() => setSince('day')}>Last Day</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setSince('week')}>Last Week</DropdownMenuItem>

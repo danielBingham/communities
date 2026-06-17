@@ -66,7 +66,7 @@ const PrivacyControl = function({ value, setValue, className, label, explanation
                 </div>
             </div>
             <DropdownMenu className="privacy-control__menu" autoClose={true} >
-                <DropdownMenuTrigger className="privacy-control__menu__button"><CurrentIcon /> { currentLabel }</DropdownMenuTrigger>
+                <DropdownMenuTrigger className="privacy-control__menu__button" ariaLabel={`Privacy: ${currentLabel}`}><CurrentIcon /> { currentLabel }</DropdownMenuTrigger>
                 <DropdownMenuBody> { menuOptionViews }</DropdownMenuBody>
             </DropdownMenu>
         </div>

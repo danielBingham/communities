@@ -45,7 +45,7 @@ const UserListSortControl = function() {
     const sort = searchParams.get('sort') || 'newest'
     return (
         <DropdownMenu className="user-list-sort-control" autoClose={true}>
-            <DropdownMenuTrigger><span className="user-list-sort-control__button"><BarsArrowUpIcon /><span className="text"> { sortTitleMap[sort]}</span></span></DropdownMenuTrigger>
+            <DropdownMenuTrigger ariaLabel={`Sort: ${sortTitleMap[sort]}`}><span className="user-list-sort-control__button"><BarsArrowUpIcon /><span className="text"> { sortTitleMap[sort]}</span></span></DropdownMenuTrigger>
             <DropdownMenuBody>
                 { searchParams.get('q') && <DropdownMenuItem onClick={() => setSort('relevance')}>Relevance</DropdownMenuItem> }
                 <DropdownMenuItem onClick={() => setSort('newest')}>Newest</DropdownMenuItem>

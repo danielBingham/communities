@@ -23,7 +23,7 @@ const GroupsPage = function() {
     return (
         <Page id="groups-page">
             <PageLeftGutter>
-                <NavigationMenu className="groups-page__menu">
+                <NavigationMenu className="groups-page__menu" ariaLabel="Groups">
                     <NavigationMenuButton 
                         type="primary" 
                         onClick={() => navigate('/groups/create')} 

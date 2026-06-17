@@ -125,9 +125,9 @@ const FeedMenu = function() {
             { groupViews.length > 0 ? groupViews : <li>No groups.</li> }
             { groupsQuery?.meta.numberOfPages > 1 && <li>
                 <div className="groups-feed-menu__pages">
-                    <a className={groupsPage === 1 ? 'disabled' : ''} href="" onClick={(e) => { e.preventDefault(); pageGroups(groupsPage-1) }}>Prev</a>
+                    <a className={groupsPage === 1 ? 'disabled' : ''} aria-disabled={groupsPage === 1} href="" onClick={(e) => { e.preventDefault(); pageGroups(groupsPage-1) }}>Prev</a>
                     <span>Page {groupsPage}</span>
-                    <a className={groupsPage === groupsQuery?.meta.numberOfPages ? 'disabled' : ''} href="" onClick={(e) => { e.preventDefault(); pageGroups(groupsPage+1) }}>Next</a>
+                    <a className={groupsPage === groupsQuery?.meta.numberOfPages ? 'disabled' : ''} aria-disabled={groupsPage === groupsQuery?.meta.numberOfPages} href="" onClick={(e) => { e.preventDefault(); pageGroups(groupsPage+1) }}>Next</a>
                 </div>
             </li> }
         </menu>
@@ -135,24 +135,24 @@ const FeedMenu = function() {
 
     if ( width > 1220 ) {
         return (
-            <div className="feed-menu">
+            <div className="feed-menu" role="navigation" aria-label="Feeds">
                 <menu className="feed-menu__menu">
                     <li><CreatePostButton type="button" /></li>
                     <li>
                         <div className="feed-menu__sub-menu">
-                            <a href="" onClick={(e) => { e.preventDefault(); setIsOpen('feeds')}} className="header">{ feedsIsOpen ? <QueueListIconSolid/> : <QueueListIconOutline/> } <span className="nav-text">Your Feeds</span></a>
+                            <a href="" role="button" aria-expanded={feedsIsOpen === true} onClick={(e) => { e.preventDefault(); setIsOpen('feeds')}} className="header">{ feedsIsOpen ? <QueueListIconSolid/> : <QueueListIconOutline/> } <span className="nav-text">Your Feeds</span></a>
                             { feedsIsOpen && feedsMenu }
                         </div>
                     </li>
                     <li>
                         <div className="feed-menu__sub-menu">
-                            <a href="" onClick={(e) => { e.preventDefault(); setIsOpen('places')}} className="header">{ placesIsOpen ? <MapPinIconSolid /> : <MapPinIconOutline /> } <span className="nav-text">Place Feeds</span></a>
+                            <a href="" role="button" aria-expanded={placesIsOpen === true} onClick={(e) => { e.preventDefault(); setIsOpen('places')}} className="header">{ placesIsOpen ? <MapPinIconSolid /> : <MapPinIconOutline /> } <span className="nav-text">Place Feeds</span></a>
                             { placesIsOpen && placesMenu }
                         </div>
                     </li>
                     <li>
                         <div className="feed-menu__sub-menu">
-                            <a href="" onClick={(e) => { e.preventDefault(); setIsOpen('groups')}} className="header">{ groupsIsOpen ? <UserGroupIconSolid/> : <UserGroupIconOutline/> }<span className="nav-text">Group Feeds</span></a>
+                            <a href="" role="button" aria-expanded={groupsIsOpen === true} onClick={(e) => { e.preventDefault(); setIsOpen('groups')}} className="header">{ groupsIsOpen ? <UserGroupIconSolid/> : <UserGroupIconOutline/> }<span className="nav-text">Group Feeds</span></a>
                             { groupsIsOpen && groupsMenu }
                         </div>
                     </li>
@@ -161,17 +161,17 @@ const FeedMenu = function() {
         )
     } else {
         return (
-            <div className="feed-menu">
+            <div className="feed-menu" role="navigation" aria-label="Feeds">
                 <menu className="feed-menu__menu">
                     <li><CreatePostButton type="button" /></li>
                     <li>
-                        <a href="" onClick={(e) => { e.preventDefault(); setIsOpen('feeds')}} className="header">{ feedsIsOpen ? <QueueListIconSolid/> : <QueueListIconOutline/> } <span className="nav-text">Your Feeds</span></a>
+                        <a href="" role="button" aria-expanded={feedsIsOpen === true} onClick={(e) => { e.preventDefault(); setIsOpen('feeds')}} className="header">{ feedsIsOpen ? <QueueListIconSolid/> : <QueueListIconOutline/> } <span className="nav-text">Your Feeds</span></a>
                     </li>
                     <li>
-                        <a href="" onClick={(e) => { e.preventDefault(); setIsOpen('places')}} className="header">{ placesIsOpen ? <MapPinIconSolid /> : <MapPinIconOutline /> } <span className="nav-text">Place Feeds</span></a>
+                        <a href="" role="button" aria-expanded={placesIsOpen === true} onClick={(e) => { e.preventDefault(); setIsOpen('places')}} className="header">{ placesIsOpen ? <MapPinIconSolid /> : <MapPinIconOutline /> } <span className="nav-text">Place Feeds</span></a>
                     </li>
                     <li>
-                        <a href="" onClick={(e) => { e.preventDefault(); setIsOpen('groups')}} className="header">{ groupsIsOpen ? <UserGroupIconSolid/> : <UserGroupIconOutline/> }<span className="nav-text">Group Feeds</span></a>
+                        <a href="" role="button" aria-expanded={groupsIsOpen === true} onClick={(e) => { e.preventDefault(); setIsOpen('groups')}} className="header">{ groupsIsOpen ? <UserGroupIconSolid/> : <UserGroupIconOutline/> }<span className="nav-text">Group Feeds</span></a>
                     </li>
                 </menu>
                 { (feedsIsOpen || placesIsOpen || groupsIsOpen) && <div className="feed-menu__sub-menu">

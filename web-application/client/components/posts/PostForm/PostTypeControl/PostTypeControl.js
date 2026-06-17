@@ -46,7 +46,7 @@ const PostTypeControl = function({ postId, groupId, sharedPostId }) {
     return (
         <div className="post__type-control">
             <DropdownMenu autoClose={true}>
-                <DropdownMenuTrigger showArrow={false}>{ current }</DropdownMenuTrigger>
+                <DropdownMenuTrigger ariaLabel={`Post type:${current}`}>{ current }</DropdownMenuTrigger>
                 <DropdownMenuBody>
                     <DropdownMenuItem onClick={() => setType('feed')}>
                         <span><QueueListIcon /> Feed</span>

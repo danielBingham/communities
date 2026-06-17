@@ -69,7 +69,7 @@ const GroupSubscriptionControl = function({ groupId }) {
 
     return (
         <DropdownMenu className="group-subscription-control" autoClose={true}>
-            <DropdownMenuTrigger className="group-subscription-control__trigger"><Icon className="group-subscription-control__trigger__icon" /></DropdownMenuTrigger>
+            <DropdownMenuTrigger className="group-subscription-control__trigger" ariaLabel={`Group subscription: ${subscription.status}`}><Icon className="group-subscription-control__trigger__icon" /></DropdownMenuTrigger>
             <DropdownMenuBody>
                 <DropdownMenuItem className="group-subscription-control__status" onClick={(e) => changeStatus('posts')}>
                     <div><BellAlertIcon /> Posts</div>

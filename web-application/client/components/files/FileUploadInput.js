@@ -188,6 +188,8 @@ const FileUploadInput = function({ text, maxFiles, kind, allowedTypes, onChange,
                 multiple={maxFiles > 1 ? true : false}
                 onChange={onChangeInternal} 
                 style={{ display: 'none' }}
+                aria-hidden="true"
+                tabIndex={-1}
                 ref={hiddenFileInput}
             />
             <RequestErrorModal message="Attempt to initialize upload" request={postRequest} onContinue={onErrorInternal} />

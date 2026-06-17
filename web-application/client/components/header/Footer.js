@@ -23,7 +23,7 @@ const Footer = function() {
                 <p className="explanation">Communities is user-supported social media site working towards not for profit, cooperative governance. It is designed to help people build community, connect, and organize. It is funded and will be governed by its users.</p>
                 <p className="explanation">Communities is <a href="https://github.com/danielbingham/communities">open source</a> under the <a href="https://github.com/danielBingham/communities?tab=AGPL-3.0-1-ov-file">AGPL 3.0 license</a> and it's currently in <a href="/about/faq#beta">Public Beta</a>.</p>
             </div>
-            <div className="about-links footer__block">
+            <div className="about-links footer__block" role="navigation" aria-label="About Communities">
                 <p><a href="/about">about</a></p>
                 <p><a href="/about/news">news</a></p>
                 <p><a href="/about/faq">faq</a></p>
@@ -35,7 +35,7 @@ const Footer = function() {
                 <p><a href="/about/operating-agreement">operating agreement</a></p>
                 <p><a href="/about/contact">contact</a></p>
             </div>
-            <div className="content-links footer__block">
+            <div className="content-links footer__block" role="navigation" aria-label="Site content">
                 <p><a href="/">feeds</a></p>
                 <p><a href="/friends">friends</a></p>
                 <p><a href="/groups">groups</a></p>
@@ -43,8 +43,8 @@ const Footer = function() {
          </div>
          <div className="footer__bottom">
              <div className="footer__store-badges">
-                 <a href="https://play.google.com/store/apps/details?id=social.communities" target="_blank" className="footer__google-store"><img src={GoogleBadge} /></a>
-                 <a href="https://apps.apple.com/app/communities-social/id6751424847" target="_blank" className="footer__apple-store"><img src={AppleBadge} /></a>
+                 <a href="https://play.google.com/store/apps/details?id=social.communities" target="_blank" className="footer__google-store"><img src={GoogleBadge} alt="Get it on Google Play" /></a>
+                 <a href="https://apps.apple.com/app/communities-social/id6751424847" target="_blank" className="footer__apple-store"><img src={AppleBadge} alt="Download on the App Store" /></a>
              </div>
              <div>Version: { clientVersion === serverVersion ? `${clientVersion}` : `${clientVersion}/${serverVersion}` }</div>
              <div>Site text and design (c) Communities Social, LLC 2024 - 2025</div>
