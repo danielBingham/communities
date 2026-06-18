@@ -96,7 +96,7 @@ module.exports = class UserController extends BaseController{
         let userRelationshipDictionary = {}
         if ( currentUser ) {
             const userRelationshipResults = await this.userRelationshipsDAO.selectUserRelationships({
-                where: `(user_id = $1 AND friend_id = ANY($2::uuid[])) OR (user_id = ANY($2::uuid[]) AND friend_id = $1)`,
+                where: `(user_id = $1 AND friend_id = ANY($2::uuid[])) OR (user_id = ANY($2::uuid[]) AND friend_id = $1 AND status != 'blocked')`,
                 params: [ currentUser.id, results.list]
             })
 

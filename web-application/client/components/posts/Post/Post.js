@@ -61,14 +61,27 @@ const Post = function({ id, expanded, showLoading, shared }) {
     const [siteModeration, siteModerationRequest] = useSiteModeration(post?.siteModerationId)
 
     if ( (request !== null && request.state == 'failed' && ( ! post || ! user ))) {
-        return (
-            <div id={id} className="post">
-                <div className="post__error 404">
-                    <h1>404 Error</h1>
-                    That post does not seem to exist.
+        if ( shared === true ) {
+            return (
+                <div id={id} className="post shared">
+                    <div className="post__error 404">
+                        <h1>404 Error</h1>
+                        This post does not seem to exist or you don't have
+                        permission to view it. It may have been deleted or
+                        posted by a blocked user.
+                    </div>
                 </div>
-            </div>
-        )
+            )
+        } else {
+            return (
+                <div id={id} className="post">
+                    <div className="post__error 404">
+                        <h1>404 Error</h1>
+                        That post does not seem to exist.
+                    </div>
+                </div>
+            )
+        }
     }
 
     // ------------------------------------------------------------------------
