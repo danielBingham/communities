@@ -179,7 +179,7 @@ module.exports = class UserController extends BaseController{
         // they need to moderate the site.
         if ( currentUser && canModerateSite !== true) {
             const blockResults = await this.core.database.query(`
-                SElECT user_id 
+                SELECT user_id 
                     FROM user_relationships
                         WHERE friend_id = $1 AND status = 'blocked'
             `, [currentUser.id])
@@ -302,7 +302,7 @@ module.exports = class UserController extends BaseController{
                 // This is still necessary because blocked users could be found
                 // in the post results and the group results.
                 const blockResults = await this.core.database.query(`
-                    SElECT user_id, friend_id
+                    SELECT user_id, friend_id
                         FROM user_relationships
                             WHERE (user_id = $1 OR friend_id = $1) AND status = 'blocked'
                 `, [currentUser.id])
@@ -347,7 +347,7 @@ module.exports = class UserController extends BaseController{
                 // This is still necessary because blocked users could be found
                 // in the post results.
                 const blockResults = await this.core.database.query(`
-                    SElECT user_id, friend_id
+                    SELECT user_id, friend_id
                         FROM user_relationships
                             WHERE (user_id = $1 OR friend_id = $1) AND status = 'blocked'
                 `, [currentUser.id])
@@ -419,7 +419,7 @@ module.exports = class UserController extends BaseController{
                 // This is still necessary because blocked users could be found
                 // in the group results.
                 const blockResults = await this.core.database.query(`
-                    SElECT user_id, friend_id
+                    SELECT user_id, friend_id
                         FROM user_relationships
                             WHERE (user_id = $1 OR friend_id = $1) AND status = 'blocked'
                 `, [currentUser.id])
