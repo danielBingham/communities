@@ -50,6 +50,9 @@ module.exports = class MutualsService {
                 LEFT OUTER JOIN user_relationships ON 
                     (mutual_relationships.current_id = user_relationships.user_id AND mutual_relationships.target_id = user_relationships.friend_id and user_relationships.status = 'confirmed')
                     OR (mutual_relationships.current_id = user_relationships.friend_id AND mutual_relationships.target_id = user_relationships.user_id and user_relationships.status = 'confirmed')
+                LEFT OUTER JOIN user_relationships AS blocked ON
+                    (mutual_relationships.current_id = blocked.user_id AND mutual_relationships.target_id = blocked.friend_id AND blocked.status = 'blocked')
+                    OR (mutual_relationships.current_id = blocked.friend_id AND mutual_relationships.target_id = blocked.user_id AND blocked.status = 'blocked')
             WHERE 
                 mutual_relationships.current_id = $1 
                 AND mutual_relationships.target_id = ANY($2::uuid[])
@@ -59,6 +62,7 @@ module.exports = class MutualsService {
                     OR target.privacy__view_mutual_friends = 'friends-of-friends'
                     OR target.privacy__view_mutual_friends = 'public'
                 )
+                AND blocked.id IS NULL
         `, [currentUser.id, list])
 
         if ( results.rows.length <= 0 ) {

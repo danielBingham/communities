@@ -1,4 +1,5 @@
 export {
     default,
-    setMutualsInDictionary, removeMutuals, setMutualsNull
+    setMutualsInDictionary, removeMutuals, setMutualsNull,
+    resetMutualsSlice
 } from './slice'
