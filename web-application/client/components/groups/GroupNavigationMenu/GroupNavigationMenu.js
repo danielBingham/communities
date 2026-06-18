@@ -70,7 +70,7 @@ const GroupNavigationMenu = function({ groupId }) {
     }
 
     return (
-        <NavigationMenu className="group-navigation-menu">
+        <NavigationMenu className="group-navigation-menu" ariaLabel="Group">
             { ! isMember && <NavigationMenuItem><GroupMembershipButton groupId={group.id} userId={currentUser.id} /></NavigationMenuItem> }
             { canCreateGroupPost === true && <NavigationMenuButton href={`/create?groupId=${group.id}&origin=${encodeURIComponent(`/group/${group.slug}`)}`} icon="Plus" type="primary" text="Create" />  }
             { canViewGroupPost === true && <NavigationMenuLink to={`/group/${group.slug}`} icon="QueueList" text="Feed" /> }

@@ -25,7 +25,8 @@ const {
     NotificationService,
     MutualsService,
     PermissionService,
-    ValidationService
+    ValidationService,
+    UserRelationshipService
 } = require('@communities/backend')
 
 const ControllerError = require('../errors/ControllerError')
@@ -42,6 +43,7 @@ module.exports = class UserRelationshipController {
         this.mutualsService = new MutualsService(core)
         this.permissionService = new PermissionService(core)
         this.validationService = new ValidationService(core)
+        this.userRelationshipService = new UserRelationshipService(core)
     }
 
     async getRelations(currentUser, userId, results, requestedRelations) { 
@@ -90,6 +92,8 @@ module.exports = class UserRelationshipController {
             requestedRelations: requestQuery.relations ? requestQuery.relations : {}
         }
 
+        const blockIds = await this.userRelationshipService.getBlockIdsForUser(currentUser.id)
+        
         if ( currentUser.id === userId ) {
             // When querying your own relationships, you may query any
             // relationship in which you have not beeen blocked.  Including
@@ -103,9 +107,13 @@ module.exports = class UserRelationshipController {
             `
         } else {
             // When querying another user's relationships, you may only query their confirmed relationships.
+            //
+            // We also want to exclude any blocked or blocking users.
             query.params.push(userId)
+            query.params.push(blockIds)
             query.where += `
                 ((user_relationships.user_id = $1 OR user_relationships.friend_id = $1) AND user_relationships.status = 'confirmed')
+                AND (user_relationships.user_id != ALL($2::uuid[]) AND user_relationships.friend_id != ALL($2::uuid[]))
             `
         }
 

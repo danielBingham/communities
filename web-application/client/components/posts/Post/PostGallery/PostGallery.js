@@ -83,10 +83,16 @@ const PostGallery = function({ postId, className }) {
     }
 
     return (
-        <div className={`post-gallery ${className ? className : ''}`} { ...handlers }>
-            { isGallery && isLoaded && <div className="post-gallery__pages"><div className="post-gallery__pages__inner"><span>{ current + 1 }</span> / <span>{ post.files.length }</span></div></div> }
-            { isGallery && isLoaded && hasPrevious && <button className="post-gallery__controls-prev" onClick={() => goToPrevious()}><ChevronLeftIcon /></button> }
-            { isGallery && isLoaded && hasNext && <button className="post-gallery__controls-next" onClick={() => goToNext()}><ChevronRightIcon /></button> }
+        <div
+            className={`post-gallery ${className ? className : ''}`}
+            role={ isGallery ? 'group' : undefined }
+            aria-roledescription={ isGallery ? 'carousel' : undefined }
+            aria-label={ isGallery ? 'Post media gallery' : undefined }
+            { ...handlers }
+        >
+            { isGallery && isLoaded && <div className="post-gallery__pages" aria-live="polite" aria-atomic="true"><div className="post-gallery__pages__inner"><span>{ current + 1 }</span> / <span>{ post.files.length }</span></div></div> }
+            { isGallery && isLoaded && hasPrevious && <button className="post-gallery__controls-prev" aria-label="Previous item" onClick={() => goToPrevious()}><ChevronLeftIcon /></button> }
+            { isGallery && isLoaded && hasNext && <button className="post-gallery__controls-next" aria-label="Next item" onClick={() => goToNext()}><ChevronRightIcon /></button> }
             <File id={currentFileId} width={650} onLoad={() => setIsLoaded(true)} fallback={true} />
             { isGallery && preloads }
         </div>

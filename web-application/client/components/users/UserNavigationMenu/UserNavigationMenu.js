@@ -49,7 +49,7 @@ const UserNavigationMenu = function({ userId }) {
     }
 
     return (
-        <NavigationMenu className="user-profile-page__menu">
+        <NavigationMenu className="user-profile-page__menu" ariaLabel="User">
             <NavigationMenuLink to={`/${user.username}`} icon="QueueList" text="Feed" /> 
             <NavigationMenuLink to={`/${user.username}/friends`} icon="Users" text="Friends" /> 
              <NavigationSubmenu icon="EllipsisHorizontal" title="More">

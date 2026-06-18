@@ -43,7 +43,7 @@ const UserAccountPage = function(props) {
     return (
         <Page id="user-account-page">
             <PageLeftGutter>
-                <NavigationMenu className="user-account-page__menu">
+                <NavigationMenu className="user-account-page__menu" ariaLabel="Account settings">
                     <NavigationMenuLink to="/account/profile" icon="UserCircle" text="Profile" />
                     <NavigationMenuLink to="/account/change-email" icon="Envelope" text="Email" />
                     <NavigationMenuLink to="/account/change-password" icon="LockClosed" text="Password" />

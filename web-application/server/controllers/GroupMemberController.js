@@ -153,7 +153,7 @@ module.exports = class GroupMemberController extends BaseController {
 
             } else {
                 const blockResults = await this.core.database.query(`
-                    SElECT user_id, friend_id
+                    SELECT user_id, friend_id
                         FROM user_relationships
                             WHERE (friend_id = $1) AND status = 'blocked'
                 `, [currentUser.id])

@@ -24,6 +24,15 @@ module.exports = class UserRelationshipService {
         this.core = core
     }
 
+    /**
+     * Get an array of userIds for all the users who have a confirmed friend
+     * relationship with User(userId).  This will be an array of the User.id of
+     * all of User(userId)'s friends.
+     *
+     * @param uuid userId The id of the user who we're retrieving friends of.
+     *
+     * @return uuid[] The User.id of User(userId)'s friends.
+     */
     async getFriendIdsForUser(userId) {
         const friendResults = await this.core.database.query(`
             SELECT
@@ -40,5 +49,26 @@ module.exports = class UserRelationshipService {
 
         const friendIds = friendResults.rows.map((r) => r.friend_id)
         return friendIds
+    }
+
+    /**
+     * Get an array of userIds for users that User(userId) has either blocked
+     * or been blocked by.
+     *
+     * @param uuid userId The User.id of the user for whom we want to retrieve
+     * blocked user ids.
+     *
+     * @return uuid[] The ids of the User.id of the users who are either
+     * blocked by User(userId) or have blocked User(userId).
+     **/
+    async getBlockIdsForUser(userId) {
+        const blockResults = await this.core.database.query(`
+            SELECT user_id, friend_id
+                FROM user_relationships
+                    WHERE (user_id = $1 OR friend_id = $1) AND status = 'blocked'
+        `, [userId])
+
+        const blockIds = blockResults.rows.map((r) => r.user_id == userId ? r.friend_id : r.user_id)
+        return blockIds
     }
 }

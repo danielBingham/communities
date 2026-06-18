@@ -141,7 +141,7 @@ const Refresher = function({ onRefresh }) {
     }
 
     return (
-        <div ref={ref} className='refresher'>
+        <div ref={ref} className='refresher' aria-hidden="true">
             <ArrowPathIcon />
         </div>
     )

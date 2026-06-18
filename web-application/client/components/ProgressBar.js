@@ -23,8 +23,14 @@ import './ProgressBar.css'
 const ProgressBar = function({ progress }) {
 
     return (
-        <div className="progress-bar">
-            <span style={{ width: progress + "%" }} ></span>
+        <div
+            className="progress-bar"
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={progress}
+        >
+            <span style={{ width: progress + "%" }} aria-hidden="true"></span>
         </div>
     )
 

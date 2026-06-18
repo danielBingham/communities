@@ -54,7 +54,7 @@ const PostVisibilityControl = function({ postId, groupId, sharedPostId }) {
     return (
         <div className="post-visibility-control">
             <DropdownMenu autoClose={true}>
-                <DropdownMenuTrigger showArrow={false}>{ current }</DropdownMenuTrigger>
+                <DropdownMenuTrigger ariaLabel={`Post visibility: ${current}`}>{ current }</DropdownMenuTrigger>
                 <DropdownMenuBody>
                     <DropdownMenuItem onClick={() => setVisibility('private')}>
                         { group !== null && <span> <UserGroupIcon /> <span>Group</span></span> }

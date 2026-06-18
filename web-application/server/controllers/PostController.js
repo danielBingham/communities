@@ -77,7 +77,7 @@ module.exports = class PostController {
 
         if ( canModerateSite !== true ) {
             const blockResults = await this.core.database.query(`
-                SElECT user_id, friend_id
+                SELECT user_id, friend_id
                     FROM user_relationships
                         WHERE (user_id = $1 OR friend_id = $1) AND status = 'blocked'
             `, [currentUser.id])
@@ -111,8 +111,8 @@ module.exports = class PostController {
             }
         }
         const sharedPostResults = await this.postDAO.selectPosts({
-            where: `posts.id = ANY($1::uuid[])`,
-            params: [ sharedPostIds ]
+            where: `posts.id = ANY($1::uuid[]) AND posts.user_id != ALL($2::uuid[])`,
+            params: [ sharedPostIds, blockIds ]
         })
 
         // These will be displayed on Shared Posts, so we need to retrieve them
@@ -144,8 +144,8 @@ module.exports = class PostController {
             }
         }
         const postFileResults = await this.fileDAO.selectFiles({
-            where: `files.id = ANY($1::uuid[])`, 
-            params: [fileIds]
+            where: `files.id = ANY($1::uuid[]) AND files.user_id != ALL($2::uuid[])`, 
+            params: [fileIds, blockIds]
         })
 
         fileDictionary = postFileResults.dictionary
@@ -167,7 +167,7 @@ module.exports = class PostController {
             where: `link_previews.id = ANY($1::uuid[])`,
             params: [ linkPreviewIds ]
         })
-        const userResults = await this.userDAO.selectUsers({ where: `users.id = ANY($1::uuid[])`, params: [userIds]})
+        const userResults = await this.userDAO.selectUsers({ where: `users.id = ANY($1::uuid[]) AND users.id != ALL($2::uuid[])`, params: [userIds, blockIds]})
 
         // ==== Group ====
         const groupIds = []
@@ -262,7 +262,7 @@ module.exports = class PostController {
         friendIds.push(currentUser.id)
 
         const blockResults = await this.core.database.query(`
-            SElECT user_id, friend_id
+            SELECT user_id, friend_id
                 FROM user_relationships
                     WHERE (user_id = $1 OR friend_id = $1) AND status = 'blocked'
         `, [currentUser.id])

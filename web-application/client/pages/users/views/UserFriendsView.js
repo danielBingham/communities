@@ -17,7 +17,6 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-
 import { useSelector } from 'react-redux'
 import { useParams, Link } from 'react-router-dom'
 

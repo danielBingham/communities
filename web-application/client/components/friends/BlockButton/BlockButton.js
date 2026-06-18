@@ -67,13 +67,6 @@ const BlockButton = function({ userId }) {
         setAreYouSure(false)
     }
 
-    useEffect(() => {
-        if ( request?.state === 'fulfilled' ) {
-            // Reset state after the block.
-            dispatch(resetEntities())
-        }
-    }, [ request] ) 
-
     if ( user === undefined) {
         return null
     }

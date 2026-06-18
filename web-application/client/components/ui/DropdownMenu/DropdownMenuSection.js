@@ -23,7 +23,7 @@ import './DropdownMenuSection.css'
 export const DropdownMenuSection = function({ last, className, children })  {
 
     return (
-        <div className={`dropdown-menu__section ${ last ? 'dropdown-menu__section__last' : '' } ${ className ? className : '' }`}>
+        <div role="group" className={`dropdown-menu__section ${ last ? 'dropdown-menu__section__last' : '' } ${ className ? className : '' }`}>
             { children }
         </div>
     )

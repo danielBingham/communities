@@ -23,17 +23,11 @@ const GroupMembersList = function({ groupId, params, descriptor, noSearch }) {
     const [ query, request, reset ] = useGroupMemberQuery(groupId, params)
 
 
+    let content = ( <Spinner /> ) 
     if ( ( query === undefined || query === null ) && ( ! request || request?.state === 'pending')) {
-        return (
-            <div className="group-members-list">
-                <Spinner />
-            </div>
-        )
-    }
-
-    let memberViews = []
-
-    if ( query !== undefined && query !== null ) {
+        content = ( <Spinner /> )
+    } else if ( query !== undefined && query !== null ) {
+        content = []
         for(const id of query.list) {
             const member = dictionary[id]
 
@@ -41,10 +35,10 @@ const GroupMembersList = function({ groupId, params, descriptor, noSearch }) {
                 continue
             }
 
-            memberViews.push(<GroupMemberBadge key={id} groupId={groupId} userId={member.userId} />)
+            content.push(<GroupMemberBadge key={id} groupId={groupId} userId={member.userId} />)
         }
     } else if ( request?.state === 'failed' ) {
-        memberViews = ( <RequestErrorContent message="Attempt to retrieve members" request={request} /> )
+        content = ( <RequestErrorContent message="Attempt to retrieve members" request={request} /> )
     }
 
     descriptor = descriptor ? descriptor : 'Members'
@@ -70,7 +64,7 @@ const GroupMembersList = function({ groupId, params, descriptor, noSearch }) {
                 { ! noSearch && <SearchControl entity={descriptor} /> }
             </ListHeader>
             <ListGridContent>
-                {memberViews}        
+                {content}        
             </ListGridContent>
             <PaginationControls meta={query?.meta} />
         </List>

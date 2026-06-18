@@ -1,6 +1,6 @@
 import { useContext } from 'react'
 
-import { IsOpenContext } from './DropdownMenu'
+import { IsOpenContext, MenuIdContext } from './DropdownMenu'
 
 import './DropdownMenuBody.css'
 
@@ -12,11 +12,18 @@ import './DropdownMenuBody.css'
 export const DropdownMenuBody = function(props) {
 
     const [ isOpen, setIsOpen ] = useContext(IsOpenContext)
+    const menuId = useContext(MenuIdContext)
 
     // ======= Render ===============================================
    
     return (
-        <div className={`dropdown-menu__body ${ props.className ? props.className : ''}`} style={{ display: (isOpen ? 'block' : 'none' ) }} >
+        <div
+            id={menuId}
+            role="menu"
+            aria-hidden={isOpen !== true}
+            className={`dropdown-menu__body ${ props.className ? props.className : ''}`}
+            style={{ display: (isOpen ? 'block' : 'none' ) }}
+        >
             { props.children }
         </div>
     )
@@ -27,7 +34,7 @@ export const DropdownMenuBody = function(props) {
  */
 export const DropdownMenuModal = function({ className, children }) {
     return (
-        <div className={`dropdown-menu__body ${ className ? className : ''}`}>
+        <div role="dialog" className={`dropdown-menu__body ${ className ? className : ''}`}>
             { children }
         </div>
     )

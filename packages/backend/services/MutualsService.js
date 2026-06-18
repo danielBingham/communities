@@ -34,12 +34,27 @@ module.exports = class MutualsService {
         this.userRelationshipService = new UserRelationshipService(core)
     }
 
+    
     async getMutualsForCurrentUserAndList(currentUser, list) {
         if ( ! this.core.features.has('fix-495-slow-friends-list') ) {
             return {}
         }
 
-
+        // Blocked relationships should not be present in the
+        // `mutual_relationships` table as a `mutual`.  But there is a case
+        // where they can linger, so we defensively filter for them.  
+        //
+        // The case where they can linger:
+        //
+        // UserA and UserB are friends. UserA blocks UserB.  The job that
+        // cleans out their relationship from the mutual_relationships table
+        // fails and doesn't complete. The mutual friendship that formerly
+        // existed between UserA and UserB will linger in the table.
+        //
+        // Since we never want to show the blocking user to the blocked user
+        // and we only want to show the blocked user to the blocking user in
+        // one case (when they are intentionally looking at said user's
+        // profile), we defensively filter these users from this query.
         const results = await this.core.database.query(`
             SELECT 
                 mutual_relationships.target_id as target_id,
@@ -47,18 +62,23 @@ module.exports = class MutualsService {
             FROM mutual_relationships
                 LEFT OUTER JOIN users mutual ON mutual_relationships.mutual_id = mutual.id
                 LEFT OUTER JOIN users target ON mutual_relationships.target_id = target.id
-                LEFT OUTER JOIN user_relationships ON 
-                    (mutual_relationships.current_id = user_relationships.user_id AND mutual_relationships.target_id = user_relationships.friend_id and user_relationships.status = 'confirmed')
-                    OR (mutual_relationships.current_id = user_relationships.friend_id AND mutual_relationships.target_id = user_relationships.user_id and user_relationships.status = 'confirmed')
+                LEFT OUTER JOIN user_relationships as target_relationship  ON 
+                    (mutual_relationships.current_id = target_relationship.user_id AND mutual_relationships.target_id = target_relationship.friend_id)
+                    OR (mutual_relationships.current_id = target_relationship.friend_id AND mutual_relationships.target_id = target_relationship.user_id)
+                LEFT OUTER JOIN user_relationships as mutual_relationship ON
+                    (mutual_relationships.current_id = mutual_relationship.user_id AND mutual_relationships.mutual_id = mutual_relationship.friend_id)
+                    OR (mutual_relationships.current_id = mutual_relationship.friend_id AND mutual_relationships.mutual_id = mutual_relationship.user_id)
             WHERE 
                 mutual_relationships.current_id = $1 
                 AND mutual_relationships.target_id = ANY($2::uuid[])
                 AND mutual.privacy__view_mutual_friends != 'me'
                 AND ( 
-                    ( target.privacy__view_mutual_friends = 'friends' AND user_relationships.id IS NOT NULL)
+                    ( target.privacy__view_mutual_friends = 'friends' AND target_relationship.status = 'confirmed')
                     OR target.privacy__view_mutual_friends = 'friends-of-friends'
                     OR target.privacy__view_mutual_friends = 'public'
                 )
+                AND target_relationship.status != 'blocked'
+                AND mutual_relationship.status != 'blocked'
         `, [currentUser.id, list])
 
         if ( results.rows.length <= 0 ) {

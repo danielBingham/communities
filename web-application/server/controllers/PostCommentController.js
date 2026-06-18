@@ -110,7 +110,7 @@ module.exports = class PostCommentController {
         }
 
         const blockResults = await this.core.database.query(`
-            SElECT user_id, friend_id
+            SELECT user_id, friend_id
                 FROM user_relationships
                     WHERE (user_id = $1 OR friend_id = $1) AND status = 'blocked'
         `, [currentUser.id])

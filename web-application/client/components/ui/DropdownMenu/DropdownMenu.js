@@ -1,9 +1,13 @@
-import { useState, useEffect, useRef, createContext } from 'react'
+import { useState, useEffect, useRef, useId, createContext } from 'react'
 
 export const IsOpenContext = createContext([ false, null ])
 export const AutoCloseContext = createContext(false)
 
 export const CloseMenuContext = createContext(null)
+
+// The DOM id of the menu body, used to wire the trigger to the menu it
+// controls with `aria-controls`.
+export const MenuIdContext = createContext(null)
 
 import './DropdownMenu.css'
 
@@ -18,6 +22,8 @@ export const DropdownMenu = function({ children, className, autoClose, startIsOp
     
     const isOpen = openState[0]
     const setIsOpen = openState[1]
+
+    const menuId = useId()
 
     const menuRef = useRef(null)
     
@@ -47,7 +53,9 @@ export const DropdownMenu = function({ children, className, autoClose, startIsOp
             <IsOpenContext.Provider value={openState}>
                 <CloseMenuContext.Provider value={closeMenu}>
                     <AutoCloseContext.Provider value={autoClose}>
-                        { children }
+                        <MenuIdContext.Provider value={menuId}>
+                            { children }
+                        </MenuIdContext.Provider>
                     </AutoCloseContext.Provider>
                 </CloseMenuContext.Provider>
             </IsOpenContext.Provider>

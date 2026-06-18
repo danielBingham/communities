@@ -61,14 +61,27 @@ const Post = function({ id, expanded, showLoading, shared }) {
     const [siteModeration, siteModerationRequest] = useSiteModeration(post?.siteModerationId)
 
     if ( (request !== null && request.state == 'failed' && ( ! post || ! user ))) {
-        return (
-            <div id={id} className="post">
-                <div className="post__error 404">
-                    <h1>404 Error</h1>
-                    That post does not seem to exist.
+        if ( shared === true ) {
+            return (
+                <div id={id} className="post shared">
+                    <div className="post__error 404">
+                        <h1>404 Error</h1>
+                        This post does not seem to exist or you don't have
+                        permission to view it. It may have been deleted or
+                        posted by a blocked user.
+                    </div>
                 </div>
-            </div>
-        )
+            )
+        } else {
+            return (
+                <div id={id} className="post">
+                    <div className="post__error 404">
+                        <h1>404 Error</h1>
+                        That post does not seem to exist.
+                    </div>
+                </div>
+            )
+        }
     }
 
     // ------------------------------------------------------------------------
@@ -135,7 +148,7 @@ const Post = function({ id, expanded, showLoading, shared }) {
         || (groupModeration !== null && groupModeration.status === 'rejected') ) 
     {
         return (
-            <div id={post.id} className={`post ${shared ? 'shared' : '' }`}>
+            <div id={post.id} role="article" className={`post ${shared ? 'shared' : '' }`}>
                 <div className="post__header"> 
                     <div className="post__poster-image"><UserProfileImage userId={post.userId} /></div>
                     <div className="post__details">
@@ -168,7 +181,7 @@ const Post = function({ id, expanded, showLoading, shared }) {
     } 
 
     return (
-        <div id={post.id} className={`post ${ shared ? 'shared' : ''}`}>
+        <div id={post.id} role="article" className={`post ${ shared ? 'shared' : ''}`}>
             <div className="post__header"> 
                 <div className="post__poster-image"><div><UserProfileImage userId={post.userId} /></div></div>
                 <div className="post__details">
