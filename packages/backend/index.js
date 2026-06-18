@@ -66,6 +66,7 @@ exports.SessionService = require('./services/SessionService')
 exports.TokenService = require('./services/TokenService')
 exports.UserService = require('./services/UserService')
 exports.ValidationService = require('./services/ValidationService')
+exports.UserRelationshipService = require('./services/UserRelationshipService')
 exports.WebSocketService = require('./services/WebSocketService')
 exports.VideoService = require('./services/files/VideoService')
 
