@@ -44,7 +44,7 @@ const UserAdminView = function() {
                 { tab === 'posts' && <div className="user-admin-view__tab-pane__pane">
                     <UserAdminPostView userId={userId} /> 
                 </div> }
-                { tab === 'comments' && <div className="uesr-admin-view__tab-pane__pane"> 
+                { tab === 'comments' && <div className="user-admin-view__tab-pane__pane"> 
                     <UserAdminPostCommentView userId={userId} />
                 </div> }
             </div>

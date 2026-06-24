@@ -33,7 +33,7 @@ const UserAdminPostCommentView = function({ userId }) {
     if ( query !== null ) {
         content = []
         for(const id of query.list) {
-            content.push(<PostCommentWithContext postCommentId={id} />)
+            content.push(<PostCommentWithContext key={id} postCommentId={id} />)
         }
     }
 

@@ -700,8 +700,8 @@ module.exports = function(core) {
     const AdminPostCommentsController = require('./controllers/admin/AdminPostCommentsController')
     const adminPostCommentsController = new AdminPostCommentsController(core)
 
-    router.get('/admin/user/:userId/post_comments', rateLimit(core, 60), function(request, repsonse, next) {
-        adminPostCommentsController.getPostComments(request, repsonse).catch(function(error) {
+    router.get('/admin/user/:userId/post_comments', rateLimit(core, 60), function(request, response, next) {
+        adminPostCommentsController.getPostComments(request, response).catch(function(error) {
             next(error)
         })
     })

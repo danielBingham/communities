@@ -26,7 +26,7 @@ const UserAdminTable = function() {
     }
 
     let explanation = ''
-    if ( query === null || query === undefined || query?.meta.count == 0 ) {
+    if ( query === null || query === undefined || query?.meta?.count == 0 ) {
         explanation = `Showing 0 users`
     } else {
         const pageStart = ( query.meta.page-1) * query.meta.pageSize + 1
