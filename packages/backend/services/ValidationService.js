@@ -124,7 +124,7 @@ module.exports = class ValidationService {
 
         // These are fields the user is never allowed to set.
         const alwaysDisallowedFields = [
-            'permissions', 'invitations', 'createdDate', 'updatedDate'
+            'permissions', 'siteRole', 'invitations', 'createdDate', 'updatedDate'
         ]
 
         for(const disallowedField of alwaysDisallowedFields ) {
