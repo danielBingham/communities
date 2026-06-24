@@ -25,11 +25,13 @@ const {
     PermissionService, 
     ValidationService,
 
+    GroupDAO,
     GroupSubscriptionDAO,
     PostDAO, 
     PostCommentDAO, 
     PostSubscriptionDAO,
     SiteModerationDAO,
+    UserDAO,
     UserRelationshipDAO 
 
 } = require('@communities/backend')
@@ -41,11 +43,13 @@ module.exports = class AdminPostCommentsController {
     constructor(core) {
         this.core = core
 
+        this.groupDAO = new GroupDAO(core)
         this.groupSubscriptionDAO = new GroupSubscriptionDAO(core)
         this.postDAO = new PostDAO(core)
         this.postCommentDAO = new PostCommentDAO(core)
         this.postSubscriptionDAO = new PostSubscriptionDAO(core)
         this.siteModerationDAO = new SiteModerationDAO(core)
+        this.userDAO = new UserDAO(core)
         this.userRelationshipDAO = new UserRelationshipDAO(core)
 
         this.notificationService = new NotificationService(core)
@@ -55,6 +59,7 @@ module.exports = class AdminPostCommentsController {
 
     async getRelations(currentUser, results, requestedRelations) {
         const relations = {}
+        
 
         // -------- Post ------------------------------------------------------
         const postIds = []
@@ -67,6 +72,32 @@ module.exports = class AdminPostCommentsController {
             params: [ postIds ]
         })
         relations.posts = postResults.dictionary
+
+        const userIds = []
+        for(const commentId of results.list) {
+            userIds.push(results.dictionary[commentId].userId)
+        }
+        for(const postId of postResults.list) {
+            userIds.push(postResults.dictionary[postId].userId)
+        }
+
+        const userResults = await this.userDAO.selectUsers({
+            where: `users.id = ANY($1::uuid[])`,
+            params: [ userIds ]
+        })
+        relations.users = userResults.dictionary
+
+        const groupIds = []
+        for(const postId of postResults.list) {
+            if ( postResults.dictionary[postId].groupId !== undefined && postResults.dictionary[postId].groupId !== null ) {
+                groupIds.push(postResults.dictionary[postId].groupId)
+            }
+        }
+        const groupResults = await this.groupDAO.selectGroups({
+            where: `groups.id = ANY($1::uuid[])`,
+            params: [ groupIds ]
+        })
+        relations.groups = groupResults.dictionary
 
         // -------- PostSubscription ------------------------------------------
         const postSubscriptionResults = await this.postSubscriptionDAO.selectPostSubscriptions({

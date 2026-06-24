@@ -20,6 +20,8 @@
 import { useSelector } from 'react-redux'
 
 import { usePost, usePostLink } from '/lib/hooks/Post'
+import { useUser } from '/lib/hooks/User'
+import { useGroup } from '/lib/hooks/Group'
 
 import PostComment from '/components/posts/PostComment'
 
@@ -33,6 +35,9 @@ const PostCommentWithContext = function({ postCommentId }) {
     const comment = useSelector((state) => postCommentId in state.PostComment.dictionary ? state.PostComment.dictionary[postCommentId] : null)
 
     const [post, postRequest, reloadPost] = usePost(comment?.postId)
+    const [postUser] = useUser(post?.userId)
+    const [postGroup] = useGroup(post?.groupId)
+
     const link = usePostLink(post?.id)
 
     if ( comment === undefined || comment === null || postRequest?.state === 'pending') {
