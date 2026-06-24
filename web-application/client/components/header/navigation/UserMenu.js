@@ -36,6 +36,8 @@ import {
 
 import { deleteAuthentication } from '/state/authentication'
 
+import can, { Entities, Actions } from '/lib/permission'
+
 import { useRequest } from '/lib/hooks/useRequest'
 import { useFeature } from '/lib/hooks/feature'
 
@@ -55,6 +57,8 @@ const UserMenu = function(props) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const hasMutualFriends = useFeature('feat-491-mutual-friends')
+
+    const canModerateSite = can(currentUser, Actions.moderate, Entities.Site)
 
     const [request, makeRequest] = useRequest()
 
@@ -85,7 +89,6 @@ const UserMenu = function(props) {
     // ============= Render =======================
     
     if ( currentUser ) {
-        const isAdmin = currentUser.siteRole == 'admin' || currentUser.siteRole == 'superadmin'
         return (
             <DropdownMenu className="user-menu user-menu__authenticated" autoClose={true} >
                 <DropdownMenuTrigger className="user-menu__trigger logged-in-user" ariaLabel="Account Menu">
@@ -107,7 +110,7 @@ const UserMenu = function(props) {
                         <DropdownMenuItem href="/account/notifications"><BellIcon />Notifications</DropdownMenuItem>
                         <DropdownMenuItem href="/account/danger-zone"><ExclamationTriangleIcon /> Danger Zone</DropdownMenuItem>
                     </DropdownMenuSection>
-                    { isAdmin && <DropdownMenuSection className="admin">
+                    { canModerateSite === true && <DropdownMenuSection className="admin">
                         <DropdownMenuItem href="/admin"><AdjustmentsHorizontalIcon/>Admin</DropdownMenuItem>
                     </DropdownMenuSection> }
                     <DropdownMenuSection>
