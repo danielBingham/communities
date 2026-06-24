@@ -20,6 +20,8 @@
 
 const DAO = require('./DAO')
 
+const PAGE_SIZE = 20
+
 module.exports = class PostCommentDAO extends DAO {
     constructor(core) {
         super(core)
@@ -161,11 +163,11 @@ module.exports = class PostCommentDAO extends DAO {
 
     async selectPostComments(query) {
         let where = query.where ? `WHERE ${query.where}` : ''
-        let params = query.params ? query.params : []
-        let page = query.page 
+        let params = query.params ? [ ...query.params ] : []
+        let page = query.page ? query.page : null
         let order = query.order ? `ORDER BY ${query.order}` : `ORDER BY post_comments.created_date asc`
 
-        if ( page ) {
+        if ( page !== null ) {
             const commentIds = await this.getPostCommentPage(query)
             params.push(commentIds)
             if ( where === '' ) {
@@ -192,9 +194,9 @@ module.exports = class PostCommentDAO extends DAO {
     }
 
     async getPostCommentPageMeta(query) {
-        let where = query.where ? '' : `WHERE ${query.where}`
-        let params = query.params ? [] : query.params
-        let page = query.page ? 1 : query.page
+        let where = query.where ? `WHERE ${query.where}` : ''
+        let params = query.params ? [ ...query.params] : [] 
+        let page = query.page ? query.page : 1
 
         const results = await this.core.database.query(`
             SELECT
@@ -213,9 +215,9 @@ module.exports = class PostCommentDAO extends DAO {
     }
 
     async getPostCommentPage(query) {
-        let where = query.where ? '' : `WHERE ${query.where}`
-        let params = query.params ? [] : query.params
-        let page = query.page ? 1 : query.page
+        let where = query.where ? `WHERE ${query.where}` : ''
+        let params = query.params ? [ ...query.params ] : []
+        let page = query.page ? query.page : 1
         let order = query.order ? `ORDER BY ${query.order}` : `ORDER BY post_comments.created_date ASC` 
 
         const results = await this.core.database.query(`

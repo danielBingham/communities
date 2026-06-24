@@ -42,6 +42,11 @@ const SearchControl = function({ entity, fields, defaultField, className  }) {
         setSearch('')
     }
 
+    const clearSearchField = function() {
+        searchParams.delete(field)
+        setSearchParams(searchParams)
+    }
+
     const executeSearch = function() {
         searchParams.set(field, search)
         searchParams.set('sort', 'relevance')
@@ -107,7 +112,7 @@ const SearchControl = function({ entity, fields, defaultField, className  }) {
     if ( fields ) {
         for(const [id, name] of Object.entries(fields)) {
             options.push(
-                <DropdownMenuItem key={id} onClick={() => { clearSearch(); setField(id) }}>{ name }</DropdownMenuItem>
+                <DropdownMenuItem key={id} onClick={() => { clearSearchField(); setField(id) }}>{ name }</DropdownMenuItem>
             )
         }
     } 

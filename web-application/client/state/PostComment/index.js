@@ -5,5 +5,5 @@ export {
     clearPostCommentQueries, resetPostCommentSlice,
     startPostCommentEdit, finishPostCommentEdit
 } from './slice'
-export { getPostComments, postPostComments, getPostComment, patchPostComment, deletePostComment } from './thunks'
+export { getPostComments, postPostComments, getPostComment, patchPostComment, deletePostComment, getAdminPostComments } from './thunks'
 

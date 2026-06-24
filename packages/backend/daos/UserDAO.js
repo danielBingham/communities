@@ -85,7 +85,7 @@ const SCHEMA = {
             },
             'site_role': {
                 insert: DAO.INSERT.DENY,
-                update: DAO.UPDATE.ALLOW,
+                update: DAO.UPDATE.DENY,
                 select: DAO.SELECT.ALWAYS,
                 key: 'siteRole'
             },

@@ -17,6 +17,8 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
+import { Link } from 'react-router-dom'
+
 import { TableRow, TableCell } from '/components/ui/Table'
 import { DotsMenu } from '/components/ui/DotsMenu'
 import DateTag from '/components/DateTag'
@@ -29,7 +31,7 @@ import './UserAdminTableRow.css'
 const UserAdminTableRow = function({ user }) {
     return (
         <TableRow className="user-admin-table__row">
-            <TableCell>{ user.id }</TableCell>
+            <TableCell><Link to={`/admin/user/${user.id}`}>{ user.id }</Link></TableCell>
             <TableCell>{ user.name }</TableCell> 
             <TableCell>{ user.username }</TableCell> 
             <TableCell>{ user.email }</TableCell> 

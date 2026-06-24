@@ -59,7 +59,6 @@ const File = function({ id, width, type, fallback, className, onLoad, onError, r
 
     const onErrorInternal = function(event) {
         try {
-            console.log(event)
             logger.error(`Failed to load file with errror: `, event.target?.error) 
             if ( event?.target?.error?.code === 2 ) {
                 refreshFileSource()
