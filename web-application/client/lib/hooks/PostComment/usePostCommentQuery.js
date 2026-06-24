@@ -54,9 +54,6 @@ export const usePostCommentQuery = function(queryParameters, options) {
 
 
     useEffect(() => {
-        console.log(`key: `, key,
-            `\n\tquery: `, query,
-            `\n\]options: `, options)
         if ( query === null ) {
             if ( options?.admin === true ) {
                 const userId = params?.userId

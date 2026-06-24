@@ -28,8 +28,6 @@ import './UserAdminPostCommentView.css'
 const UserAdminPostCommentView = function({ userId }) {
 
     const [query] = usePostCommentQuery({ userId: userId }, { admin: true })
-    console.log(`UserAdminPostCommentView: `,
-        `\n\tquery: `, query)
     
     let content = ( <Spinner /> ) 
     if ( query !== null ) {
