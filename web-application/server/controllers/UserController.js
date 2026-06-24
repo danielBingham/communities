@@ -824,6 +824,8 @@ module.exports = class UserController extends BaseController{
 
             }
 
+            // User's can only turn on multi-factor authentication for
+            // themselves.
             if ( currentUser.id !== id ) {
                 throw new ControllerError(403, 'not-authorized',
                     `User(${currentUser.id}) attempting to alter multifactor setup for User(${id}).`,
@@ -831,6 +833,9 @@ module.exports = class UserController extends BaseController{
             }
 
             if ( user.authenticationMultifactorState === 'disabled' ) {
+                console.log(`\n`)
+                request.logger.info(`==== Disabling Multifactor Authentication ==== `)
+                console.log(`\n`)
 
                 await this.multifactorAuthenticationService.disable(id)
 
@@ -839,6 +844,10 @@ module.exports = class UserController extends BaseController{
                     params: [ id ],
                     fields: 'all'
                 })
+
+                // Update the session!  If we don't do this, the session and
+                // the user will get out of sync.
+                request.session.user = results.dictionary[id]
 
                 const relations = await this.getRelations(currentUser, results)
 
@@ -854,6 +863,10 @@ module.exports = class UserController extends BaseController{
                     params: [ id ],
                     fields: 'all'
                 })
+
+                // Update the session!  If we don't do this, the session and
+                // the user will get out of sync.
+                request.session.user = results.dictionary[id]
 
                 const relations = await this.getRelations(currentUser, results)
 

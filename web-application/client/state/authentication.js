@@ -23,7 +23,7 @@ export const authenticationSlice = createSlice({
 
         multifactorSecret: null,
 
-        backupCodes: null
+        multifactorRecoveryCodes: null
     },
     reducers: {
 
@@ -43,12 +43,12 @@ export const authenticationSlice = createSlice({
             state.multifactorSecret = null
         },
 
-        setBackupCodes: function(state, action) {
-            state.backupCodes = action.payload
+        setMultifactorRecoveryCodes: function(state, action) {
+            state.multifactorRecoveryCodes= action.payload
         },
 
-        clearBackupCodes: function(state, action) {
-            state.backupCodes = null
+        clearMultifactorRecoveryCodes: function(state, action) {
+            state.multifactorRecoveryCodes = null
         }
     }
 
@@ -165,7 +165,7 @@ export const patchAuthentication = function(token) {
                 }
 
                 if ( responseBody && ( 'codes' in responseBody) ) {
-                    dispatch(setBackupCodes(responseBody.codes))
+                    dispatch(authenticationSlice.actions.setMultifactorRecoveryCodes(responseBody.codes))
                 }
             }
         ))
@@ -231,6 +231,6 @@ export const patchDevice = function(deviceInfo) {
     }
 }
 
-export const { setCurrentUser, setNotificationPermissions, setMultifactorSecret, clearMultifactorSecret, setBackupCodes, clearBackupCodes } = authenticationSlice.actions
+export const { setCurrentUser, setNotificationPermissions, setMultifactorSecret, clearMultifactorSecret, clearMultifactorRecoveryCodes } = authenticationSlice.actions
 
 export default authenticationSlice.reducer

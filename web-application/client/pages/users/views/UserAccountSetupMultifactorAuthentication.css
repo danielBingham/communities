@@ -2,14 +2,43 @@
     max-width: min(100vw, 800px);
     margin: 0 auto;
     font-size: 16px;
+    padding: 20px;
 }
-.user-account-setup-multifactor-authentication h1 {
+.user-account-setup-multifactor-authentication h1,
+.user-account-setup-multifactor-authentication h2 {
     text-align: center;
 }
 .user-account-setup-multifactor-authentication__is-pending {
     max-width: min(100vw, 400px);
     margin: 0 auto;
 }
+.user-account-setup-multifactor-authentication__secret {
+    max-width: min(100vw, 400px);
+    margin: 0 auto;
+}
+
 .user-account-setup-multifactor-authentication__controls {
+    text-align: center;
+}
+
+
+.user-account-setup-multifactor-authentication__codes-card {
+    max-width: min(100vw, 400px);
+    margin: 2em auto;
+    padding: 10px;
+}
+.user-account-setup-multifactor-authentication__codes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    justify-items: center;
+
+}
+.user-account-setup-multifactor-authentication__code {
+    padding: 1em;
+}
+
+
+.user-account-setup-multifactor-authentication__enabled {
     text-align: center;
 }

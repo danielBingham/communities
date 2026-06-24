@@ -22,37 +22,58 @@ import { useSelector, useDispatch } from 'react-redux'
 
 import { useRequest } from '/lib/hooks/useRequest'
 
-import { clearMultifactorSecret, patchAuthentication } from '/state/authentication'
+import { clearMultifactorSecret, clearMultifactorRecoveryCodes, patchAuthentication } from '/state/authentication'
 import { patchUser } from '/state/User'
 
 import Input from '/components/ui/Input'
 import Button from '/components/ui/Button'
+import Alert from '/components/ui/Alert'
+import Spinner from '/components/Spinner'
+import Card from '/components/ui/Card'
 
 import { MultifactorAuthenticationSecret } from '/components/authentication/MultifactorAuthentication'
 
 import "./UserAccountSetupMultifactorAuthentication.css"
 
+const State = {
+    Disabled: 'disabled',
+    Initializing: 'initializing',
+    PendingAppConfiguration: 'pending-app-configuration',
+    Confirming: 'confirming',
+    Enabled: 'enabled',
+    ErrorInitializing: 'error-initializing',
+    ErrorConfirming: 'error-confirming'
+}
+
+
 const UserAccountSetupMultifactorAuthentication = function() {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const secret = useSelector((state) => state.authentication.multifactorSecret)
+    const codes = useSelector((state) => state.authentication.multifactorRecoveryCodes)
 
     const [ confirmationToken, setConfirmationToken] = useState('')
 
-    const [ request, makeRequest ] = useRequest()
+    const [ patchUserRequest, makePatchUserRequest, resetPatchUserRequest ] = useRequest()
+    const [ patchAuthenticationRequest, makePatchAuthenticationRequest, resetPatchAuthenticationRequest ] = useRequest()
 
     const dispatch = useDispatch()
 
     const enable = function() {
-        makeRequest(patchUser({ id: currentUser.id, authenticationMultifactorState: 'pending' }))
+        makePatchUserRequest(patchUser({ id: currentUser.id, authenticationMultifactorState: 'pending' }))
     }
 
     const disable = function() {
-        makeRequest(patchUser({ id: currentUser.id, authenticationMultifactorState: 'disabled' }))
+        makePatchUserRequest(patchUser({ id: currentUser.id, authenticationMultifactorState: 'disabled' }))
     }
 
     const confirm = function() {
+        makePatchAuthenticationRequest(patchAuthentication(confirmationToken))
+    }
 
+    const clearSecrets = function() {
+        dispatch(clearMultifactorSecret())
+        dispatch(clearMultifactorRecoveryCodes())
     }
 
     useEffect(() => {
@@ -69,15 +90,31 @@ const UserAccountSetupMultifactorAuthentication = function() {
         }
 
         return () => {
-            dispatch(clearMultifactorSecret())
+            clearSecrets()
         }
     }, [])
 
+    let state = State.Disabled 
+    if ( patchUserRequest?.state === 'pending' ) {
+        state = State.Initializing
+    } else if ( patchUserRequest?.state === 'failed' ) {
+        state = State.ErrorInitializing
+    } else if ( patchAuthenticationRequest?.state === 'pending' ) {
+        state = State.Confirming
+    } else if ( patchAuthenticationRequest?.state === 'failed' ) {
+        state = State.ErrorConfirming
+    } else if ( currentUser.authenticationMultifactorState === 'pending' ) {
+        state = State.PendingAppConfiguration
+    } else if ( currentUser.authenticationMultifactorState === 'enabled' ) {
+        state = State.Enabled
+    }
+
     return (
         <div className="user-account-setup-multifactor-authentication">
-            { currentUser.authenticationMultifactorState === 'disabled' && 
+            { (state === State.Disabled || state === State.ErrorInitializing) &&
                 <div className="user-account-setup-multifactor-authentication__is-disabled">
-                    <h1>Multifactor Authentication Setup</h1>
+                    { state === State.ErrorInitializing && <Alert type="error" timeout={5000} onClear={() => disable()}>Failed to initialize multi-factor authentication.</Alert> }
+                    <h2>Multifactor Authentication Setup</h2>
                     <p>
                         Multifactor Authentication allows you to secure your
                         account with an authenticator app (such as Google
@@ -108,8 +145,15 @@ const UserAccountSetupMultifactorAuthentication = function() {
                     </div>
                 </div>
             }
-            { currentUser.authenticationMultifactorState === 'pending' &&
+            { state === State.Initializing && 
+                <div className="user-account-setup-multifactor-authentication__initializing">
+                    <Spinner />
+                </div>
+            }
+            { (state === State.PendingAppConfiguration || state === State.ErrorConfirming ) &&
                 <div className="user-account-setup-multifactor-authentication__is-pending">
+                    <h2>Configure Multifactor Authentication</h2>
+                    { state === State.ErrorConfirming && <Alert type="error" timeout={5000} onClear={() => resetPatchAuthenticationRequest() }>Failed to confirm your authentication. Did you enter the correct code?</Alert> }
                     <MultifactorAuthenticationSecret />
                     <div className="user-account-setup-multifactor-authentication__confirmation">
                         <Input 
@@ -120,7 +164,46 @@ const UserAccountSetupMultifactorAuthentication = function() {
                             value={confirmationToken}
                             onChange={(e) => setConfirmationToken(e.target.value)}
                         />
-                        <div className="user-account-setup-multifactor-authentication__controls"><Button type="warn" onClick={() => disable()}>Cancel Setup</Button><Button type="primary" onClick={() => confirm()}>Confirm Setup</Button></div>
+                        <div className="user-account-setup-multifactor-authentication__controls">
+                            <Button type="warn" onClick={() => disable()}>Cancel Setup</Button>
+                            <Button type="primary" onClick={() => confirm()}>Confirm Setup</Button></div>
+                    </div>
+                </div>
+            }
+            { state === State.Confirming && 
+                <div className="user-account-setup-multifactor-authentication__confirming">
+                    <Spinner />
+                </div>
+            }
+            { state === State.Enabled && codes &&
+                <div className="user-account-setup-multifactor-authentication__save-codes">
+                    <h2>Backup Codes</h2>
+                    <Card className="user-account-setup-multifactor-authentication__codes-card">
+                        <div className="user-account-setup-multifactor-authentication__codes">
+                            { codes.map((code) => <div key={code} className="user-account-setup-multifactor-authentication__code">{ code }</div>) }
+                        </div>
+                    </Card>
+                    <p>
+                        Please save these backup codes somewhere secure, such
+                        as in a password manager.  They are single use codes
+                        that will allow you to access your account if you ever
+                        lose the device with your authenticator app. If you do
+                        use one of these codes, please remember to disable
+                        multifactor authentication so that you may reconfigure
+                        it on a new device.
+                    </p>
+                    <div className="user-account-setup-multifactor-authentication__controls">
+                        <Button type="primary" onClick={() => clearSecrets()}>Complete Setup</Button>
+                    </div>
+                </div>
+            }
+            { state === State.Enabled && ! codes &&
+                <div className="user-account-setup-multifactor-authentication__enabled">
+                    <h2>Multifactor Authentication</h2>
+                    <p>Multifactor Authentication is configured!</p>
+                    <p>If you need to regenerate your backup codes, please disable and then re-enabled authentication.</p>
+                    <div className="user-account-setup-multifactor-authentication__controls">
+                        <Button type="warn" onClick={() => disable()}>Disable Multifactor Authentication</Button>
                     </div>
                 </div>
             }

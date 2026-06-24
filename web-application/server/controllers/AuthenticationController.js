@@ -161,12 +161,23 @@ module.exports = class AuthenticationController {
             }
 
             const session = await this.auth.getSessionForUserId(userId)
-            request.session.user = session.user
-            request.session.file = session.file
+            
+            if ( session.user.authenticationMultifactorState === 'enabled' ) {
+                request.session.pendingUserId = session.user.id
 
-            response.status(200).json({
-                session: session
-            })
+                response.status(200).json({
+                    session: {
+                        pendingUserId: session.user.id
+                    }
+                })
+            } else {
+                request.session.user = session.user
+                request.session.file = session.file
+                response.status(200).json({
+                    session: session 
+                })
+            }
+
         } catch (error ) {
             request.logger.warn(error)
             if ( error instanceof ServiceError ) {
@@ -206,6 +217,7 @@ module.exports = class AuthenticationController {
 
         if ( currentUser ) {
 
+            console.log(`currentUser: `, currentUser)
             if ( currentUser.authenticationMultifactorState !== 'pending' ) {
                 throw new ControllerError(403, 'not-authorized',
                     `Logged in User(${currentUser.id}) attempting to verify authentication.`,
@@ -229,7 +241,7 @@ module.exports = class AuthenticationController {
             }
             await this.userDAO.updateUser(userPatch)
 
-            const session = await this.auth.getSessionForUserId(userId)
+            const session = await this.auth.getSessionForUserId(currentUser.id)
 
             request.session.user = session.user
             request.session.file = session.file

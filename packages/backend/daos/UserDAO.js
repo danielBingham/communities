@@ -173,13 +173,6 @@ const SCHEMA = {
                 key: 'authenticationMultifactorSecret',
                 needsFeature: 'feat-61-multifactor-authentication'
             },
-            'authentication__multifactor_backups': {
-                insert: DAO.INSERT.ALLOW,
-                update: DAO.UPDATE.ALLOW,
-                select: DAO.SELECT.NEVER,
-                key: 'authenticationMultifactorBackups',
-                needsFeature: 'feat-61-multifactor-authentication'
-            },
             'created_date': {
                 insert: DAO.INSERT.OVERRIDE,
                 insertOverride: 'now()',

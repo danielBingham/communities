@@ -73,7 +73,7 @@ module.exports = class MultifactorAuthenticationService {
             return false
         }
 
-        const secret = searchResults.rows[0].secret
+        const secret = secretResults.rows[0].secret
 
         if ( secret === undefined || secret === null ) {
             return false
@@ -106,17 +106,26 @@ module.exports = class MultifactorAuthenticationService {
         let sql = `INSERT INTO user_recovery_codes (user_id, code) VALUES `
 
         const codes = []
+        const promises = []
 
-        for(const count = 0; count < 10; count++) {
+        for(let count = 0; count < 10; count++) {
             const code = crypto.randomBytes(7).toString('hex')
             codes.push(code)
 
-            params.push(userId)
-            params.push(bcrypt.hashSync(code, 16))
-            sql += `($${params.length-1}, $${params.length}),`
+            promises.push(bcrypt.hash(code, 12).then(function(hash) {
+                params.push(userId)
+                params.push(hash)
+                sql += `($${params.length-1}, $${params.length}),`
+            }))
         }
+
+        await Promise.all(promises)
+
         // Peel off the last comma.
-        sql.substring(0, sql.length-1)
+        sql = sql.substring(0, sql.length-1)
+
+        console.log(sql)
+        console.log(params)
         await this.core.database.query(sql, params)
 
         return codes
