@@ -1,0 +1,66 @@
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media 
+ *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
+const BaseMigration = require('./BaseMigration')
+
+module.exports = class Feat61MultifactorAuthenticationMigration extends BaseMigration {
+
+    constructor(core) {
+        super(core)
+    }
+
+    async initForward() { 
+        await this.core.database.query(`
+            CREATE TYPE user_multifactor_state AS ENUM('disabled', 'pending', 'enabled')
+        `, [])
+
+        await this.core.database.query(`
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS authentication__multifactor_state user_multifactor_state NOT NULL DEFAULT 'disabled'
+        `, [])
+
+        await this.core.database.query(`
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS authentication__multifactor_secret text DEFAULT NULL
+        `, [])
+
+        await this.core.database.query(`
+            CREATE TABLE IF NOT EXISTS user_recovery_codes (
+                code text,
+                user_id uuid REFERENCES users(id) ON DELETE CASCADE NOT NULL
+            )
+        `, [])
+
+        await this.core.database.query(`CREATE INDEX IF NOT EXISTS user_recovery_codes__code ON user_recovery_codes (code)`, [])
+        await this.core.database.query(`CREATE INDEX IF NOT EXISTS user_recovery_codes__user_id ON user_recovery_codes (user_id)`, [])
+    }
+
+    async initBack() { 
+        await this.core.database.query(`DROP INDEX IF EXISTS user_recovery_codes__code`, [])
+        await this.core.database.query(`DROP INDEX IF EXISTS user_recovery_codes__user_id`, [])
+        await this.core.database.query(`DROP TABLE IF EXISTS user_recovery_codes`, [])
+
+        await this.core.database.query(`ALTER TABLE users DROP COLUMN IF EXISTS authentication__multifactor_state`, [])
+        await this.core.database.query(`ALTER TABLE users DROP COLUMN IF EXISTS authentication__multifactor_secret`, [])
+
+        await this.core.database.query(`DROP TYPE IF EXISTS user_multifactor_state`, [])
+    }
+
+    async migrateForward(targets) { }
+
+    async migrateBack(targets) { }
+}

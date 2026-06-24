@@ -1,0 +1,15 @@
+.user-account-setup-multifactor-authentication {
+    max-width: min(100vw, 800px);
+    margin: 0 auto;
+    font-size: 16px;
+}
+.user-account-setup-multifactor-authentication h1 {
+    text-align: center;
+}
+.user-account-setup-multifactor-authentication__is-pending {
+    max-width: min(100vw, 400px);
+    margin: 0 auto;
+}
+.user-account-setup-multifactor-authentication__controls {
+    text-align: center;
+}

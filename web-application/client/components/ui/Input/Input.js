@@ -6,7 +6,7 @@ import TextInput from './TextInput'
 
 import './Input.css'
 
-const Input = function({ name, type, label, explanation, placeholder, className, value, onChange, onKeyDown, onBlur, onFocus, error }) {
+const Input = function({ name, type, label, explanation, placeholder, className, value, onChange, onKeyDown, onBlur, onFocus, error, children }) {
 
     if ( type === 'password' ) {
         return ( 
@@ -39,6 +39,25 @@ const Input = function({ name, type, label, explanation, placeholder, className,
                 onFocus={onFocus}
                 error={error}
             />
+        )
+    } else if ( children !== undefined && children !== null ) {
+        return (
+            <TextInput
+                name={name}
+                type={type}
+                label={label}
+                explanation={explanation}
+                className={className}
+                value={value}
+                placeholder={placeholder}
+                onChange={onChange}
+                onKeyDown={onKeyDown}
+                onBlur={onBlur}
+                onFocus={onFocus}
+                error={error}
+            >
+                { children }
+            </TextInput>
         )
     } else {
         return (

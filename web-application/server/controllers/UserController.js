@@ -28,6 +28,7 @@ const {
     EmailService,
     FileService,
     NotificationService,
+    MultifactorAuthenticationService,
     MutualsService,
     PermissionService,
     UserService,
@@ -64,6 +65,7 @@ module.exports = class UserController extends BaseController{
         this.emailService = new EmailService(core)
         this.fileService = new FileService(core)
         this.notificationService = new NotificationService(core)
+        this.multifactorAuthenticationService = new MultifactorAuthenticationService(core)
         this.mutualsService = new MutualsService(core)
         this.permissionService = new PermissionService(core)
         this.userService = new UserService(core)
@@ -777,7 +779,7 @@ module.exports = class UserController extends BaseController{
             throw new ControllerError(401, 'not-authenticated', 
                 `Unauthenticated user attempting to update user(${user.id}).`,
                 `You must be authenticated to update a user.`)
-        } 
+        }  
 
         // 2b. :id must equal request.body.id
         if ( id != user.id ) {
@@ -796,6 +798,71 @@ module.exports = class UserController extends BaseController{
         }
 
         const existingUser = existingUsers.dictionary[id]
+
+        // ======== Multi-factor Authentication Path ==========================
+        // The PATCH endpoint is used to enable multi-factor authentication.
+        // This is a different code path from standard user update and
+        // overrides all other user updates. If the key
+        // `authenticationMultifactorState` is present in a user patch, then
+        // this is a multi-factor authentication configuration and that
+        // overrides.
+
+        if ( 'authenticationMultifactorState' in user ) {
+            // We allow users to update their password with a correct token.  But
+            // we don't want them to be able to update their multifactor auth state
+            // with a token.  To do that, they must be fully logged in.
+            if ( ! currentUser ) {
+                throw new ControllerError(403, 'not-authorized',
+                    `Unauthenticated user attempting to initial multi-factor authentication.`,
+                    `You must be authenticated to update a user.`)
+
+            }
+
+            if ( currentUser.id !== id ) {
+                throw new ControllerError(403, 'not-authorized',
+                    `User(${currentUser.id}) attempting to alter multifactor setup for User(${id}).`,
+                    `You may only setup multifactor authentication for yourself.`)
+            }
+
+            if ( user.authenticationMultifactorState === 'disabled' ) {
+
+                await this.multifactorAuthenticationService.disable(id)
+
+                const results = await this.userDAO.selectUsers({
+                    where: `users.id = $1`,
+                    params: [ id ],
+                    fields: 'all'
+                })
+
+                const relations = await this.getRelations(currentUser, results)
+
+                return response.status(200).json({ 
+                    entity: results.dictionary[id],
+                    relations: relations
+                })
+            } else if ( user.authenticationMultifactorState === 'pending' ) {
+                const secret = await this.multifactorAuthenticationService.initialize(id)
+
+                const results = await this.userDAO.selectUsers({
+                    where: `users.id = $1`,
+                    params: [ id ],
+                    fields: 'all'
+                })
+
+                const relations = await this.getRelations(currentUser, results)
+
+                return response.status(200).json({ 
+                    entity: results.dictionary[id],
+                    relations: relations,
+                    multifactorSecret: secret
+                })
+            } 
+
+            // If we get here, the user attempted to update with an invalid value.  Return an error.
+            throw new ControllerError(400, 'invalid',
+                `User attempted to update User.authenticationMultifactorState with invalid value.`,
+                `'${user.authenticationMultifactorState}' is not a valid value.  Value values are 'pending' or 'disabled'.`)
+        }
 
         // ======== PATCH Type Determination and Authentication ===============
         // There are a number of circumstances where the User can be PATCHed,

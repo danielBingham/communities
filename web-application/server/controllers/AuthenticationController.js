@@ -20,6 +20,7 @@
 
 const { 
     AuthenticationService,
+    MultifactorAuthenticationService,
 
     UserDAO,
     TokenDAO,
@@ -28,7 +29,6 @@ const {
 } = require('@communities/backend')
 
 const ControllerError = require('../errors/ControllerError')
-
 
 /**
  * Controller for the authentication resource.
@@ -46,6 +46,7 @@ module.exports = class AuthenticationController {
         this.config = core.config
 
         this.auth = new AuthenticationService(core)
+        this.multifactorAuthentication = new MultifactorAuthenticationService(core)
 
         this.userDAO = new UserDAO(core)
         this.tokenDAO = new TokenDAO(core)
@@ -192,6 +193,93 @@ module.exports = class AuthenticationController {
         }
     }
 
+    async patchAuthentication(request, response) {
+        const currentUser = request.session.user
+
+        if ( ! ( 'token' in request.body ) ) {
+            throw new ControllerError(400, 'invalid',
+                `User attempting to verify authentication without a token.`,
+                `You must include an TOPT token to verify your authentication.`)
+        }
+
+        const token = request.body.token
+
+        if ( currentUser ) {
+
+            if ( currentUser.authenticationMultifactorState !== 'pending' ) {
+                throw new ControllerError(403, 'not-authorized',
+                    `Logged in User(${currentUser.id}) attempting to verify authentication.`,
+                    `You are already logged in!`)
+            }
+
+
+            const verified = await this.multifactorAuthentication.verify(currentUser.id, token)
+
+            if ( verified !== true ) {
+                throw new ControllerError(404, 'not-found',
+                    `User(${currentUser.id}) failed to validate their multifactor authentication.`,
+                    `Failed to validate your.`)
+            }
+
+            const codes = await this.multifactorAuthentication.generateBackupCodes(currentUser.id)
+
+            const userPatch = {
+                id: currentUser.id,
+                authenticationMultifactorState: 'enabled'
+            }
+            await this.userDAO.updateUser(userPatch)
+
+            const session = await this.auth.getSessionForUserId(userId)
+
+            request.session.user = session.user
+            request.session.file = session.file
+
+            response.status(200).json({
+                session: session,
+                codes: codes
+            })
+
+            return
+        } else {
+
+            const pendingUserId = request.session.pendingUserId
+
+            if ( ! pendingUserId ) {
+                throw new ControllerError(401, 'not-authenticated',
+                    `Attempt to validate authentication without pending authentication.`,
+                    `You haven't logged in yet.  Log in before submitting an auth token.`)
+            }
+
+            if ( ! ( 'token' in request.body ) ) {
+                throw new ControllerError(400, 'invalid',
+                    `User attempting to verify authentication without a token.`,
+                    `You must include an TOPT token to verify your authentication.`)
+            }
+
+            const token = request.body.token
+
+            const verified = await this.multifactorAuthentication.verify(pendingUserId, token)
+
+            if ( verified !== true ) {
+                throw new ControllerError(404, 'not-found',
+                    `User(${currentUser.id}) failed to validate their multifactor authentication.`,
+                    `Failed to validate your.`)
+            }
+
+            const session = await this.auth.getSessionForUserId(pendingUserId)
+
+            request.session.user = session.user
+            request.session.file = session.file
+
+            response.status(200).json({
+                session: session
+            })
+        }
+
+
+
+    }
+
     /**
      * DELETE /authentication
      *
@@ -216,6 +304,10 @@ module.exports = class AuthenticationController {
                 response.status(200).json(null)
             }
         })
+    }
+
+    postMultifactor(request, response) {
+
     }
 }
 

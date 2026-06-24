@@ -19,7 +19,11 @@ export const authenticationSlice = createSlice({
          */
         currentUser: null,
 
-        device: null
+        device: null,
+
+        multifactorSecret: null,
+
+        backupCodes: null
     },
     reducers: {
 
@@ -29,6 +33,22 @@ export const authenticationSlice = createSlice({
 
         setDevice: function(state, action) {
             state.device = action.payload
+        },
+
+        setMultifactorSecret: function(state, action) {
+            state.multifactorSecret = action.payload
+        },
+
+        clearMultifactorSecret: function(state, action) {
+            state.multifactorSecret = null
+        },
+
+        setBackupCodes: function(state, action) {
+            state.backupCodes = action.payload
+        },
+
+        clearBackupCodes: function(state, action) {
+            state.backupCodes = null
         }
     }
 
@@ -117,6 +137,42 @@ export const postAuthentication = function(email, password) {
 }
 
 /**
+ * PATCH /authentication
+ *
+ * Verify a user's authentication by providing an MFA TOPT.
+ *
+ * Makes the request async and returns an id that can be used to track the
+ * request and get the results of a completed request from this state slice.
+ *
+ * @param {string} email - The email of the user we'd like to authenticate.
+ * @param {string} password - Their password.
+ *
+ * @returns {string} A uuid requestId we can use to track this request.
+ */
+export const patchAuthentication = function(token) {
+    return function(dispatch, getState) {
+        const endpoint = '/authentication'
+        const body = {
+            token: token
+        }
+
+        return dispatch(makeRequest('PATCH', endpoint, body,
+            function(responseBody) {
+                if ( responseBody && responseBody.session !== null) {
+                    dispatch(setSession(responseBody.session))
+                } else {
+                    dispatch(authenticationSlice.actions.setCurrentUser(null))
+                }
+
+                if ( responseBody && ( 'codes' in responseBody) ) {
+                    dispatch(setBackupCodes(responseBody.codes))
+                }
+            }
+        ))
+    }
+}
+
+/**
  * DELETE /authentication
  *
  * Attempt to logout the current user from the backend, destroying their
@@ -175,6 +231,6 @@ export const patchDevice = function(deviceInfo) {
     }
 }
 
-export const { setCurrentUser, setNotificationPermissions } = authenticationSlice.actions
+export const { setCurrentUser, setNotificationPermissions, setMultifactorSecret, clearMultifactorSecret, setBackupCodes, clearBackupCodes } = authenticationSlice.actions
 
 export default authenticationSlice.reducer

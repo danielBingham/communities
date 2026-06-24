@@ -49,6 +49,7 @@ CREATE TYPE user_privacy AS ENUM('me', 'friends', 'friends-of-friends', 'public'
 CREATE TYPE user_status AS ENUM('invited', 'unconfirmed', 'confirmed', 'banned');
 CREATE TYPE user_permissions AS ENUM('user', 'moderator', 'admin', 'superadmin');
 CREATE TYPE user_site_role AS ENUM('user', 'moderator', 'admin', 'superadmin');
+CREATE TYPE user_multifactor_state AS ENUM('disabled', 'pending', 'enabled');
 
 CREATE TABLE users (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -61,7 +62,7 @@ CREATE TABLE users (
     birthdate text DEFAULT '',
 
     status user_status DEFAULT 'unconfirmed',
-    permissions user_permissions DEFAULT 'user',
+    permissions user_permissions DEFAULT 'user', /* Deprecated */
     site_role user_site_role DEFAULT 'user',
 
     about text DEFAULT NULL,
@@ -81,6 +82,9 @@ CREATE TABLE users (
     failed_authentication_attempts int DEFAULT 0,
     last_authentication_attempt_date timestamptz,
 
+    authentication__multifactor_state user_multifactor_state NOT NULL DEFAULT 'disabled',
+    authentication__multifactor_secret text DEFAULT NULL,
+
     created_date timestamptz,
     updated_date timestamptz 
 );
@@ -95,6 +99,13 @@ CREATE INDEX users__name_trgm ON users USING GIN (name gin_trgm_ops);
  */
 INSERT INTO users (name, username, email, password, status, permissions, site_role, last_authentication_attempt_date, created_date, updated_date)
     VALUES ('Administrator', 'administrator', 'contact@communities.social', '$2b$10$ywAqKPvFH51jeILdx.Piy.mm5ci37vMpy7G4lEBWObfIzOif5ZgzK', 'confirmed', 'superadmin', 'superadmin', now(), now(), now());
+
+CREATE TABLE user_recovery_codes (
+    code text,
+    user_id uuid REFERENCES users(id) ON DELETE CASCADE NOT NULL
+);
+CREATE INDEX user_recovery_codes__code ON user_recovery_codes (code);
+CREATE INDEX user_recovery_codes__user_id ON user_recovery_codes (user_id);
 
 CREATE TYPE user_relationship_status AS ENUM('pending', 'confirmed', 'blocked');
 CREATE TABLE user_relationships (

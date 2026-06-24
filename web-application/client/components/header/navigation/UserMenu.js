@@ -25,6 +25,7 @@ import {
     EnvelopeIcon,
     LockClosedIcon,
     LockOpenIcon,
+    ShieldCheckIcon,
     CreditCardIcon,
     BellIcon,
     ExclamationTriangleIcon,
@@ -98,8 +99,7 @@ const UserMenu = function(props) {
                     </DropdownMenuSection>
                     <DropdownMenuSection>
                         <DropdownMenuItem href="/account/profile"><PencilIcon/>Edit Profile</DropdownMenuItem>
-                        <DropdownMenuItem href="/account/change-email"><EnvelopeIcon />Change Email</DropdownMenuItem>
-                        <DropdownMenuItem href="/account/change-password"><LockClosedIcon />Change Password</DropdownMenuItem>
+                        <DropdownMenuItem href="/account/security"><ShieldCheckIcon />Security</DropdownMenuItem>
                     </DropdownMenuSection>
                     <DropdownMenuSection>
                         <DropdownMenuItem href="/account/preferences"><AdjustmentsHorizontalIcon /> Preferences</DropdownMenuItem>
