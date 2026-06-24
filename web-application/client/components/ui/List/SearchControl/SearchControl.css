@@ -13,6 +13,24 @@
     right: unset;
 }
 
+.list__search-control__button  {
+    display: inline-block;
+    padding: 5px 15px;
+    margin: 5px;
+    border-radius: 5px;
+
+    border: thin solid var(--button-color);
+    color: var(--button-text-color);
+    background-color: var(--button-color);
+}
+.list__search-control__button svg {
+    width: 1.2em;
+    height: 1.2em;
+    margin-bottom: -0.3em;
+    margin-right: 5px;
+}
+
+
 @media (width <= 500px) {
     .list__search-control .nav-text {
         display: none;

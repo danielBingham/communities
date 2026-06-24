@@ -21,6 +21,9 @@ export const useUserQuery = function(queryParameters) {
     if ( searchParams.get('username') ) {
         params.username = searchParams.get('username')
     }
+    if ( searchParams.get('email') ) {
+        params.email = searchParams.get('email')
+    }
 
     params.sort = searchParams.get('sort') || 'newest'
 

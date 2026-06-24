@@ -130,4 +130,32 @@ export const deletePostComment = function(comment) {
     }
 } 
 
+// ================
+// ADMIN
+// ================
 
+/**
+ * GET /admin/user/:userId/post_comments 
+ *
+ * Get all post comments made by a user. Admin only endpoint.
+ *
+ * Makes the request asynchronously and returns a id that can be used to track
+ * the request and retreive the results from the state slice.
+ *
+ * @returns {string} A uuid requestId that can be used to track this request.
+ */
+export const getAdminPostComments = function(userId, name, params) {
+    return function(dispatch, getState) {
+        const endpoint = `/admin/user/${encodeURIComponent(userId)}/post_comments${( params ? '?' + qs.stringify(params) : '')}`
+
+        return dispatch(makeRequest('GET', endpoint, null,
+            function(response) {
+                dispatch(setPostCommentsInDictionary({ dictionary: response.dictionary}))
+
+                dispatch(setPostCommentQueryResults({ name: name, meta: response.meta, list: response.list }))
+
+                dispatch(setRelationsInState(response.relations))
+            }
+        ))
+    }
+}
