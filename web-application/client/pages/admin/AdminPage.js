@@ -9,9 +9,10 @@ import { Page, PageBody, PageLeftGutter, PageRightGutter } from '/components/gen
 
 import AdminDashboard from '/components/admin/dashboard/AdminDashboard'
 import FeatureFlags from '/components/admin/features/FeatureFlags'
-import UserAdminView from '/pages/admin/views/UserAdminView'
+import UserAdminListView from '/pages/admin/views/UserAdminListView'
 import AdminModerationView from '/pages/admin/views/AdminModerationView'
 import BlocklistView from '/pages/admin/views/BlocklistView'
+import UserAdminView from '/pages/admin/views/UserAdminView'
 
 import './AdminPage.css'
 
@@ -51,7 +52,11 @@ const AdminPage = function(props) {
             <PageBody>
                 <Routes>
                     <Route path="features" element={<FeatureFlags />} />
-                    <Route path="users" element={<UserAdminView />} />
+                    <Route path="users" element={<UserAdminListView />} />
+                    <Route path="user">
+                        <Route path=":userId" element={<UserAdminView />} />
+                        <Route index element={<UserAdminListView />} />
+                    </Route>
                     <Route path="moderation" element={<AdminModerationView />} />
                     <Route path="blocklist" element={<BlocklistView />} />
                     <Route index element={<AdminDashboard />} />

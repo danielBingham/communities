@@ -17,14 +17,6 @@ const UserAdminTable = function() {
     const dictionary = useSelector((state) => state.User.dictionary)
     const [ query, request ] = useUserQuery({ admin: true })
 
-    if ( ! query ) {
-        return (
-            <div className="user-admin-table">
-                <Spinner />
-            </div>
-        )
-    }
-
     const userRows = []
     if ( query !== null ) {
         for(const userId of query.list ) {
@@ -34,7 +26,7 @@ const UserAdminTable = function() {
     }
 
     let explanation = ''
-    if ( parseInt(query.meta.count) === 0 ) {
+    if ( query === null || query === undefined || query?.meta.count == 0 ) {
         explanation = `Showing 0 users`
     } else {
         const pageStart = ( query.meta.page-1) * query.meta.pageSize + 1
@@ -48,7 +40,7 @@ const UserAdminTable = function() {
             <div className="user-admin-header">
                 <div className="user-admin-header__explanation">{explanation}</div>
                 <div className="user-admin-header__controls">
-                    <div> <SearchControl entity="People" /></div>
+                    <div> <SearchControl entity="People" fields={{ name: 'Name', username: 'Username', email: 'Email' }} defaultField="name" /></div>
                 </div>
             </div>
             <Table className="user-admin-table__table">

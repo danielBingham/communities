@@ -470,6 +470,11 @@ module.exports = function(core) {
 
     /**************************************************************************
      * PostComment REST Routes
+     *
+     * TODO There's an argument to be made that PostComment should be a top
+     * level resource so that you can query for a post OR query for all
+     * comments made by a user. User's may want to be able to view all of their
+     * own comments for instance.  For a future date.
      **************************************************************************/
     const PostCommentController = require('./controllers/PostCommentController')
     const postCommentController = new PostCommentController(core)
@@ -690,9 +695,21 @@ module.exports = function(core) {
     })
 
     /**************************************************************************
+     *      Admin Post Comments View
+     * ************************************************************************/
+    const AdminPostCommentsController = require('./controllers/admin/AdminPostCommentsController')
+    const adminPostCommentsController = new AdminPostCommentsController(core)
+
+    router.get('/admin/user/:userId/post_comments', rateLimit(core, 60), function(request, repsonse, next) {
+        adminPostCommentsController.getPostComments(request, repsonse).catch(function(error) {
+            next(error)
+        })
+    })
+
+
+    /**************************************************************************
      *      API 404 
      *************************************************************************/
-
     router.all('*any', function(request, response) {
         response.status(404).send({
             error: {

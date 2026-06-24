@@ -123,8 +123,8 @@ module.exports = class PostCommentController {
             params: [ postId, blockIds ]
         })
 
-        const meta = await this.postCommentDAO.selectPostComments({
-            where: `post_commens.post_id = $1 AND post_comments.user_id != ALL($2::uuid[])`,
+        const meta = await this.postCommentDAO.getPostCommentPageMeta({
+            where: `post_comments.post_id = $1 AND post_comments.user_id != ALL($2::uuid[])`,
             params: [ postId, blockIds ]
         })
 

@@ -216,6 +216,12 @@ module.exports = class UserController extends BaseController{
             result.where += `${and} users.username = $${result.params.length}`
         }
 
+        if ( canModerateSite === true && 'email' in query && query.email.length > 0 ) {
+            const and = result.params.length > 0 ? ' AND ' : ''
+            result.params.push(`%${query.email}%`)
+            result.where += `${and} users.email LIKE $${result.params.length}`
+        }
+
         if ( 'mention' in query && query.mention.length > 0 ) {
             const and = result.params.length > 0 ? ' AND ' : ''
             result.params.push(`%${query.mention}%`)

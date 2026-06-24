@@ -2,9 +2,9 @@ import React from 'react'
 
 import UserAdminTable from '/components/admin/UserAdminTable'
 
-import './UserAdminView.css'
+import './UserAdminListView.css'
 
-const UserAdminView = function({}) {
+const UserAdminListView = function({}) {
     return (
         <div className="user-admin">
             <UserAdminTable />
@@ -12,4 +12,4 @@ const UserAdminView = function({}) {
     )
 }
 
-export default UserAdminView
+export default UserAdminListView
