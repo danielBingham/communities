@@ -244,8 +244,6 @@ module.exports = class MultifactorAuthenticationService {
      */
     async verifyRecoveryCode(userId, code) {
         try {
-            let isVerified = false
-
             const results = await this.core.database.query(`
                 SELECT code as code_hash FROM user_recovery_codes WHERE user_id = $1
             `, [ userId ])
@@ -255,23 +253,60 @@ module.exports = class MultifactorAuthenticationService {
             }
 
             const promises = []
+            let codeHashes = [] 
+
             for(const row of results.rows) {
                 promises.push(bcrypt.compare(code, row.code_hash).then((isCode) => {
                     if ( isCode === true) {
-                        isVerified = true
-
-                        // Remove the code after verifying it so that it cannot be used again.
-                        this.core.database.query(
-                            `DELETE FROM user_recovery_codes WHERE user_id = $1 AND code = $2`, 
-                            [ userId, row.code_hash ]
-                        )
+                        codeHashes.push(row.code_hash)
                     }
                 }))
             }
 
             await Promise.all(promises)
 
-            return isVerified 
+            if ( codeHashes.length <= 0 ) {
+                return false
+            }
+
+            if ( codeHashes.length > 1 ) {
+                this.core.logger.error(`Recovery code for User(${userId}) matched multiple hashes.  THIS SHOULD NEVER HAPPEN!`)
+                return false
+            }
+
+            const codeHash = codeHashes[0]
+            if ( codeHash !== null && codeHash !== undefined ) {
+                // Do one more check, just to be extra sure we got the match.
+                // Yeah, this is probably overkill, but better safe than breach.
+                const finalCheck = await bcrypt.compare(code, codeHash)
+                if ( finalCheck === true ) {
+
+                    try {
+                        // Remove the code after verifying it so that it cannot be used again.
+                        const deleteResults = await this.core.database.query(
+                            `DELETE FROM user_recovery_codes WHERE user_id = $1 AND code = $2 RETURNING *`, 
+                            [ userId, codeHash ]
+                        )
+
+                        // If we failed to remove the row, then we can't
+                        // verify. The code's still around and we don't want
+                        // to allow it to be used twice.
+                        if ( deleteResults.rows.length <= 0 || deleteResults.rows[0].code !== codeHash ) {
+                            // Don't verify if we failed to remove the code.
+                            this.core.logger.error(`Failed to remove recovery code after verification. No rows returned.`)
+                            return false
+                        } else {
+                            return true
+                        }
+                    } catch (error) {
+                        // Don't verify if we failed to remove the code.
+                        this.core.logger.error(`Failed to remove recovery code after verification: `, error)
+                        return false
+                    }
+                }
+            }
+
+            return false 
         } catch (error) {
             this.core.logger.error(`Failed to verify recovery code: `, error)
             return false

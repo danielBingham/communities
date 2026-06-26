@@ -82,8 +82,7 @@ module.exports = class AuthenticationService {
          *
          * 1. Their email is attached to a user record in the database.
          * 2. Their email is only attached to one user record in the database.
-         * 3. They have a password set. (If they don't, they authenticated with
-         * ORCID iD and cannot authenticate with this endpoint.)
+         * 3. They have a password set. 
          * 4. The submitted credentials include a password.
          * 5. They are not currently in authentication timeout (more than 10 failed attempts in 15 minutes).
          * 6. The passwords match.
