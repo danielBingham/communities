@@ -124,7 +124,14 @@ module.exports = class ValidationService {
 
         // These are fields the user is never allowed to set.
         const alwaysDisallowedFields = [
-            'permissions', 'siteRole', 'invitations', 'createdDate', 'updatedDate'
+            'permissions',  // Deprecated.
+            'siteRole',  // Only set by an admin directly in the database.
+            'invitations',  // Deprecated.
+            'location', // Not implemented yet.
+            'siteModerationId',  // Only set programatically through SiteModerationController.
+            'last_authentication_attempt_date', // Only set programatically through AuthenticationService. 
+            'createdDate',  // Automanaged by the DAO.
+            'updatedDate' // Automanaged by the DAO.
         ]
 
         for(const disallowedField of alwaysDisallowedFields ) {

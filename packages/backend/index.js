@@ -49,6 +49,7 @@ exports.NotificationEvents = require('./events/NotificationEvents')
 
 exports.AuthenticationService = require('./services/AuthenticationService')
 exports.EmailService = require('./services/EmailService')
+exports.EncryptionService = require('./services/EncryptionService')
 exports.FeatureService = require('./services/FeatureService')
 exports.FileService = require('./services/FileService')
 exports.GroupService = require('./services/GroupService')

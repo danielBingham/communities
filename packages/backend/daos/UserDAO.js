@@ -151,12 +151,13 @@ const SCHEMA = {
                 key: 'privacyViewMutualFriends',
                 needsFeature: 'feat-491-mutual-friends'
             },
+            // failed_authentication_attempts intentionally left out of the DAO.
+            //
+            // It is manually managed through AuthenticationService.
             'last_authentication_attempt_date': {
-                insert: DAO.INSERT.OVERRIDE,
-                insertOverride: 'now()',
-                update: DAO.UPDATE.OVERRIDE,
-                updateOverride: 'now()',
-                select: DAO.SELECT.REQUEST,
+                insert: DAO.INSERT.DENY, // Manually updated through AuthenticationService.
+                update: DAO.UPDATE.DENY, // Manually updated through AuthenticationService.
+                select: DAO.SELECT.REQUEST, // Only used for AdminUser requests.
                 key: 'lastAuthenticationAttemptDate'
             },
             'authentication__multifactor_state': {
@@ -166,13 +167,9 @@ const SCHEMA = {
                 key: 'authenticationMultifactorState',
                 needsFeature: 'feat-61-multifactor-authentication'
             },
-            'authentication__multifactor_secret': {
-                insert: DAO.INSERT.ALLOW,
-                update: DAO.UPDATE.ALLOW,
-                select: DAO.SELECT.NEVER,
-                key: 'authenticationMultifactorSecret',
-                needsFeature: 'feat-61-multifactor-authentication'
-            },
+            // authentication_multifactor_secret intentionally left out the DAO.
+            //
+            // It will be manually managed through MultifactorAuthenticationService.
             'created_date': {
                 insert: DAO.INSERT.OVERRIDE,
                 insertOverride: 'now()',

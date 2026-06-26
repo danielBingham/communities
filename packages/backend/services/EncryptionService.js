@@ -22,20 +22,6 @@ const ServiceError = require('../errors/ServiceError')
 
 const AES256GCM_Encryption = require('./encryption/AES256GCM_Encryption')
 
-const ALGORITHM = {
-
-    BLOCK_CIPHER: 'aes-256-gcm',
-
-    AUTH_TAG_LENGTH_BYTES: 16, // 128 bits
-
-    INITIALIZATION_VECTOR_LENGTH_BYTES: 12, // 96 bits
-
-    KEY_LENGTH_BYTES: 32, // 256 bits
-
-    SALT_LENGTH_BYTES: 32 // 256 bits
-}
-
-// TODO Don't forget to wrap usages of localStorage in availability checks!
 module.exports = class EncryptionService {
 
     constructor(core) {

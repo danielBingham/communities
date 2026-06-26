@@ -23,41 +23,87 @@ const { generateSecret, verify } = require('otplib')
 
 const UserDAO = require('../daos/UserDAO')
 
+const EncryptionService = require('./EncryptionService')
+
+/**
+ * A service to handle all aspects of managing Multifactor Authentication using
+ * a TOPT algorithm through `otplib`.
+ */
 module.exports = class MultifactorAuthenticationService {
 
     constructor(core) {
         this.core = core
 
         this.userDAO = new UserDAO(core)
+        
+        this.encryptionService = new EncryptionService(core)
     }
 
+    /**
+     * Disable multifactor authentication for User(userId) and delete their
+     * secret and recovery codes.
+     *
+     * @param {uuid} userId The id of the User we wish to disable MFA for.
+     *
+     * @return {void}
+     */
     async disable(userId) {
-
-        // Clear out the multifactor authentication state.
+        // TODO This should really be a transaction!
+        //
+        // But in the mean time, it's okay because we do the critical thing
+        // first: we turn off multifactor.  Once we've done that, the secret
+        // and backup codes are pretty much void. They will both be overriden
+        // when it's next enabled.
+       
+        // Set multifactor authentication to `disabled' first.  This is so that
+        // they don't get left in a state where they can't authenticate because
+        // multifactor authentication is enabled but the secret is gone.
         const userPatch = {
             id: userId,
-            authenticationMultifactorSecret: null,
-            authenticationMultifactorBackups: {},
             authenticationMultifactorState: 'disabled'
         }
-
         await this.userDAO.updateUser(userPatch)
 
-        // Now delete their recovery codes to cleanup.
+        // Now clear the secret.
+        // The secret is intentionally left out of the DAO so that we don't accidentially leak it.
         await this.core.database.query(`
-            DELETE FROM user_recovery_codes WHERE user_id = $1
-        `, [ userId ])
+            UPDATE users SET authentication__multifactor_secret = $1 WHERE id = $2
+        `, [ null, userId ])
+
+        // Now delete their recovery codes to cleanup.
+        await this.clearRecoveryCodes(userId)
 
     }
 
+    /**
+     * Initialize multifactor authentication for User(userId).  Generate a new
+     * secret, encrypt it, and store it in the database under a 'pending'
+     * state.
+     *
+     * @param {userId} uuid The id of the User we wish to initialize MFA for.
+     *
+     * @return {string} The unencrypted MFA secret.
+     */
     async initialize(userId) {
         const secret = generateSecret()
 
-        // Update the secret first.  The secret doesn't go through the DAO.
+        const encryptedSecret = await this.encryptionService.encrypt(secret, userId, 'mfa', 'v1')
+
+        // TODO This should really be a transaction.
+        //
+        // But we've done it in an order where it's okay that it's not.  If it
+        // fails while setting the secret, then it fails. If it fails while
+        // setting the user to 'pending', then we have an unused secret hanging
+        // out in the database. It'll be overridden when they try to initialize
+        // again.
+        
+        // Set the secret in the database first, so that it's present when we turn MFA to "pending".
+        await this.core.database.query(`
+            UPDATE users SET authentication__multifactor_secret = $1 WHERE id = $2
+        `, [ encryptedSecret, userId])
 
         const userPatch = {
             id: userId,
-            authenticationMultifactorSecret: secret,
             authenticationMultifactorState: 'pending'
         }
 
@@ -66,6 +112,17 @@ module.exports = class MultifactorAuthenticationService {
         return secret
     }
 
+    /**
+     * Use `otplib` to verify a TOPT token for User(userId). Retrieve their
+     * multifactor authentication secret from the database, decrypt it, and
+     * verify it against the provided token.  When verification fails due to an
+     * error, log the error and simply return false.
+     *
+     * @param {uuid} userId The id of the User we want to verify.
+     * @param {string} token The 6 digit TOPT token.
+     *
+     * @return {boolean} True if verification succeeded, false otherwise.
+     */
     async verify(userId, token) {
         try { 
             const secretResults = await this.core.database.query(`
@@ -77,12 +134,21 @@ module.exports = class MultifactorAuthenticationService {
             }
 
             if ( secretResults.rows.length > 1 ) {
+                this.core.logger.warn(`Multiple MFA secrets found for User(${userId}).`)
                 return false
             }
 
-            const secret = secretResults.rows[0].secret
+            const encryptedSecret = secretResults.rows[0].secret
+
+            if ( encryptedSecret === undefined || encryptedSecret === null ) {
+                this.core.logger.warn('Encrypted MFA secret missing during verification.')
+                return false
+            }
+
+            const secret = await this.encryptionService.decrypt(encryptedSecret, userId, 'mfa', 'v1')
 
             if ( secret === undefined || secret === null ) {
+                this.core.logger.warn('Decrypted MFA secret missing during verification.')
                 return false
             }
 
@@ -95,24 +161,48 @@ module.exports = class MultifactorAuthenticationService {
         }
     }
 
+    /**
+     * Enable multifactor authentication for User(userId).  Once flipped into
+     * `enabled` the user will need to enter their TOPT token to successfully
+     * log in.  This method assumes we've already asked them to verify their
+     * setup by using `verify()` against a token they've provided.
+     *
+     * @param {uuid} userId The id of the User we wish to enable MFA for.
+     * 
+     * @return {void}
+     */
     async enable(userId) {
-        const backups = {}
-
-        for(let i = 0; i < 10; i++) {
-
-        }
-        
         const userPatch = {
             id: userId,
             authenticationMultifactorState: 'enabled',
-            authenticationMultifactorBackup: backups
         }
 
         await this.userDAO.updateUser(userPatch)
-
     }
 
+    async clearRecoveryCodes(userId) {
+        await this.core.database.query(`
+            DELETE FROM user_recovery_codes WHERE user_id = $1
+        , `[ userId ])
+    }
+
+    /**
+     * Generate ten recovery codes for User(userId).  Hash the codes and store
+     * them in the database.  Return the unhashed codes so that they may be
+     * provided to the user.
+     *
+     * @param {uuid} userId The id of the User to generate codes for.
+     *
+     * @return {string[]} An array with the unhashed recovery codes.
+     */
     async generateRecoveryCodes(userId) {
+        // Before we generate new recovery codes, wipe out any old ones that
+        // might still be hanging around.  We only ever want <=10 codes in the
+        // database.
+        await this.clearRecoveryCodes(userId)
+
+        // Okay, now generate the new codes.
+        //
         const params = []
         let sql = `INSERT INTO user_recovery_codes (user_id, code) VALUES `
 
@@ -141,8 +231,16 @@ module.exports = class MultifactorAuthenticationService {
     }
 
     /**
-     * Verify the recovery code and remove it from the database if it has been
-     * verified.  Codes may only be used once.
+     * Verify a recovery code provided by User(userId).  Confirm it is one of
+     * their codes and that it has not already been used. Once verified, remove
+     * it from the database. Codes may only be used once.
+     *
+     * Doesn't throw errors.  If we encouter an error, log it and return false.
+     *
+     * @param {uuid} userId The id of the User who's code we're verifying.
+     * @param {string} code The recovery code to verify.
+     *
+     * @return {boolean} True if verified, false otherwise.
      */
     async verifyRecoveryCode(userId, code) {
         try {

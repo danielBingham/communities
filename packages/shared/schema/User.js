@@ -82,14 +82,14 @@ module.exports = class UserSchema extends Schema {
             email: {
                 clean: (value) => { return cleanEmail(value) },
                 validate: (value, existing, action) => {
-                    const validator = new StringValidator('email', value, existing, action)
+                    const validator = new EmailValidator('email', email, existing, action)
                     const errors = validator
                         .isRequiredToCreate()
                         .mustNotBeNull()
                         .mustBeString()
                         .mustNotBeEmpty()
                         .mustBeShorterThan(512)
-                        .mustMatch(/^\S+\@\S+$/)
+                        .mustBeEmail()
                         .getErrors()
                     return errors
 

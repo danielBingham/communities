@@ -44,24 +44,24 @@ module.exports = class AES256GCM_Encryption {
         /**
          * The length in bytes of the Auth Tag.  Passed to the algorithm.
          */
-        this.authTagLength = config.authTagLength
+        this.authTagLength = parseInt(config.authTagLength, 10)
 
         /**
          * The length in bytes of the Initialization Vector (IV)
          */
-        this.initializationVectorLength = config.initializationVectorLength
+        this.initializationVectorLength = parseInt(config.initializationVectorLength, 10)
 
         /**
          * The length in bytes of the keys. This applies to both the master key and
          * the generated per message keys.
          */
-        this.keyLength = config.keyLength
+        this.keyLength = parseInt(config.keyLength, 10)
 
         /**
          * The length in bytes of the salt we will generate to use with the per
          * message key.
          */
-        this.saltLength = config.saltLength
+        this.saltLength = parseInt(config.saltLength, 10)
 
         try {
             this.masterKey = Buffer.from(config.key, 'hex')
