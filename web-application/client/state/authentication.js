@@ -1,8 +1,28 @@
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media 
+ *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
 import { createSlice } from '@reduxjs/toolkit'
 
 import { Capacitor } from '@capacitor/core'
 import { SecureStoragePlugin } from 'capacitor-secure-storage-plugin'
 
+import { isLocalStorageAvailable } from '/lib/localStorage'
 import { makeRequest } from '/state/lib/makeRequest'
 
 import { reset } from '/state/system'
@@ -19,6 +39,8 @@ export const authenticationSlice = createSlice({
          */
         currentUser: null,
 
+        pendingUserId: null,
+
         device: null,
 
         multifactorSecret: null,
@@ -29,6 +51,10 @@ export const authenticationSlice = createSlice({
 
         setCurrentUser: function(state, action) {
             state.currentUser = action.payload
+        },
+
+        setPendingUserId: function(state, action) {
+            state.pendingUserId = action.payload
         },
 
         setDevice: function(state, action) {
@@ -56,11 +82,15 @@ export const authenticationSlice = createSlice({
 
 export const setSession = function(session) {
     return function(dispatch, getState) {
-        dispatch(authenticationSlice.actions.setCurrentUser(session.user))
-        dispatch(setUsersInDictionary({ entity: session.user }))
+        if ( 'user' in session ) {
+            dispatch(authenticationSlice.actions.setCurrentUser(session.user))
+            dispatch(setUsersInDictionary({ entity: session.user }))
 
-        if ( session.file ) {
-            dispatch(setFilesInDictionary({ entity: session.file }))
+            if ( session.file ) {
+                dispatch(setFilesInDictionary({ entity: session.file }))
+            }
+        } else if ( 'pendingUserId' in session ) {
+            dispatch(authenticationSlice.actions.setPendingUserId(session.pendingUserId))
         }
     }
 }
@@ -149,11 +179,15 @@ export const postAuthentication = function(email, password) {
  *
  * @returns {string} A uuid requestId we can use to track this request.
  */
-export const patchAuthentication = function(token) {
+export const patchAuthentication = function(token, recoveryCode) {
     return function(dispatch, getState) {
         const endpoint = '/authentication'
-        const body = {
-            token: token
+        const body = {}
+
+        if ( token !== undefined && token !== null) {
+            body.token = token
+        } else if ( recoveryCode !== undefined && recoveryCode !== null) {
+            body.recoveryCode = recoveryCode
         }
 
         return dispatch(makeRequest('PATCH', endpoint, body,
@@ -191,14 +225,28 @@ export const deleteAuthentication = function() {
             function(responseBody) {
                 if ( Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android' ) {
                     SecureStoragePlugin.clear().then(function() {
+                        if ( isLocalStorageAvailable() ) {
+                            // Clear local storage so their drafts don't carry over to another
+                            // login session.
+                            localStorage.clear()
+                        }
+
                         dispatch(reset())
+
                         // As soon as we reset the redux store, we need to redirect to
                         // the home page.  We don't want to go through anymore render
                         // cycles because that could have undefined impacts.
                         window.location.href = "/"
                     })
                 } else {
+                    if ( isLocalStorageAvailable() ) {
+                        // Clear local storage so their drafts don't carry over to another
+                        // login session.
+                        localStorage.clear()
+                    }
+
                     dispatch(reset())
+
                     // As soon as we reset the redux store, we need to redirect to
                     // the home page.  We don't want to go through anymore render
                     // cycles because that could have undefined impacts.

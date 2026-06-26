@@ -19,7 +19,6 @@
  *
  ******************************************************************************/
 import { useState, useEffect, useContext } from 'react'
-import { createPortal } from 'react-dom'
 import { useSelector } from 'react-redux'
 import { Clipboard } from '@capacitor/clipboard'
 
@@ -70,11 +69,10 @@ const CopyLink = function({ link }) {
         return null
     }
 
-    const container = document.getElementById('root-layout')
     return (
         <>
-            { status === STATUS.SUCCESS ? createPortal(<Alert type="success" timeout={2000} onClear={() => setStatus(STATUS.PENDING)}>Link copied.</Alert>, container) : null }
-            { status === STATUS.ERROR ? createPortal(<Alert type="error" timeout={2000} onClear={() => setStatus(STATUS.PENDING)}>Failed to copy link.</Alert>, container) : null }
+            { status === STATUS.SUCCESS ? <Alert type="success" timeout={2000} onClear={() => setStatus(STATUS.PENDING)}>Link copied.</Alert> : null }
+            { status === STATUS.ERROR ? <Alert type="error" timeout={2000} onClear={() => setStatus(STATUS.PENDING)}>Failed to copy link.</Alert> : null }
             <NavigationSubmenuAction onClick={(e) => executeCopy()} icon="Link" className="copy-link" text="Copy Link" />
         </>
     )

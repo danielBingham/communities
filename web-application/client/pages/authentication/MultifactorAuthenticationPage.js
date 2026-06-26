@@ -24,34 +24,33 @@ import { useNavigate } from 'react-router-dom'
 import { Page, PageLeftGutter, PageRightGutter, PageBody } from '/components/generic/Page'
 import Card from '/components/ui/Card'
 
-import LoginForm from '/components/authentication/LoginForm'
+import { MultifactorAuthenticationForm } from '/components/authentication/MultifactorAuthentication'
 
-import './LoginPage.css'
+import './MultifactorAuthenticationPage.css'
 
-const LoginPage = function(props) {
-
-    const currentUser = useSelector((state) => state.authentication.currentUser)
+const MultifactorAuthenticationPage = function(props) {
     const pendingUserId = useSelector((state) => state.authentication.pendingUserId)
+    const currentUser = useSelector((state) => state.authentication.currentUser)
 
     const navigate = useNavigate()
 
     useEffect(function() {
-        if ( currentUser || pendingUserId ) {
+        if ( currentUser || ! pendingUserId) {
             navigate('/')
         }
     }, [ currentUser, pendingUserId ])
 
     return (
-        <Page id="login-page">
+        <Page id="multifactor-authentication-page">
             <PageLeftGutter></PageLeftGutter>
             <PageBody>
-                <Card className="login-page__card">
-                    <LoginForm /> 
+                <Card className="multifactor-authentication-page__card">
+                    <MultifactorAuthenticationForm /> 
                 </Card>
            </PageBody>
-            <PageRightGutter></PageRightGutter>
+           <PageRightGutter></PageRightGutter>
         </Page>
     )
 }
 
-export default LoginPage
+export default MultifactorAuthenticationPage

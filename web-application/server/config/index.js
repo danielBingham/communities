@@ -24,6 +24,18 @@ module.exports = {
         password: 'aws-ssm-parameter:/database/password',
         name: 'aws-ssm-parameter:/database/name' 
     },
+    encryption: {
+        mfa: {
+            v1: {
+                key: 'aws-ssm-parameter:/encryption/mfa/v1/key',
+                algorithm: 'aws-ssm-parameter:/encryption/mfa/v1/algorithm',
+                authTagLength: 'aws-ssm-parameter:/encryption/mfa/v1/auth-tag-length',
+                initializationVectorLength: 'aws-ssm-parameter:/encryption/mfa/v1/initialization-vector-length',
+                keyLength: 'aws-ssm-parameter:/encryption/mfa/v1/key-length',
+                saltLength: 'aws-ssm-parameter:/encryption/mfa/v1/salt-length'
+            }
+        }
+    },
     redis: {
         host: 'aws-ssm-parameter:/redis/host',
         port: 'aws-ssm-parameter:/redis/port'

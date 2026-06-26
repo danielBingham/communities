@@ -17,8 +17,8 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-
 import { useEffect, useState, useRef } from 'react'
+import { createPortal } from 'react-dom'
 
 import logger from '/logger'
 
@@ -72,15 +72,46 @@ const Alert = function({ type, timeout, onClear, className, children }) {
         typeClass = 'alert__error'
     }
 
-    return (
-        <div 
-            className={`alert ${typeClass} ${ className ? className : ''}`} 
-            role="alert"
-            onClick={(e) => clearAlert()}
-        >
-            { children }
-        </div>
-    )
+    // Try to find a reasonable portal target.  Try to find the `<main>`
+    // element first, then fall back to the `#root-layout`, and finally to the
+    // `<body>` element.
+    let container = document.body
+    const mainElements = document.getElementsByName('main')
+    if ( mainElements.length <= 0 ) {
+        const root = document.getElementById('root-layout')
+        if ( root !== null && root !== undefined ) {
+            container = root
+        }
+    } else {
+        container = mainElements[0]
+    }
+
+    // Portal out to a reasonable outer most container if we can.
+    if ( container ) {
+        return (
+            createPortal(<div 
+                className={`alert ${typeClass} ${ className ? className : ''}`} 
+                role="alert"
+                onClick={(e) => clearAlert()}
+            >
+                { children }
+            </div>, container)
+        )
+    } 
+
+    // Otherwise, we'll just alert where we are!
+    else {
+        return (
+            <div 
+                className={`alert ${typeClass} ${ className ? className : ''}`} 
+                role="alert"
+                onClick={(e) => clearAlert()}
+            >
+                { children }
+            </div>
+        )
+
+    }
 
 }
 

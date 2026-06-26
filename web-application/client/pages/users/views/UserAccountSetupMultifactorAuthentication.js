@@ -114,31 +114,22 @@ const UserAccountSetupMultifactorAuthentication = function() {
             { (state === State.Disabled || state === State.ErrorInitializing) &&
                 <div className="user-account-setup-multifactor-authentication__is-disabled">
                     { state === State.ErrorInitializing && <Alert type="error" timeout={5000} onClear={() => disable()}>Failed to initialize multi-factor authentication.</Alert> }
-                    <h2>Multifactor Authentication Setup</h2>
+                    <h2>Setup Multifactor Authentication</h2>
                     <p>
-                        Multifactor Authentication allows you to secure your
-                        account with an authenticator app (such as Google
-                        Authenticator or Proton Authenticator, etc) that runs
+                        Multifactor Authentication (MFA) allows you to secure your
+                        account with an authenticator app (Proton Authenticator,
+                        Google Authenticator, etc) that runs
                         on a separate device you control. It provides strong
                         protection against account hacking and theft.
                     </p>
                     <p>
-                        Multifactor Authentication requires you to enter a six
-                        digit code from your authenticator app on every log in
-                        attempt. You will not be able to log in without either
-                        that code or one of the backup codes provided at setup
-                        time.
-                    </p>
-                    <p>
-                        We do not currently provide a backup system allowing
-                        you to recover your account if you lose your
-                        authenticator device, other than the backup codes you
-                        will be provided with during the setup process. Make
-                        sure you store those codes in a secure and accessible
-                        location (like a password manager). 
+                        MFA requires you to enter a six digit code from your
+                        authenticator app on every log in attempt. You will not
+                        be able to log in without either that code or one of
+                        the recovery codes provided at setup time.
                     </p>
                     <p> 
-                         Click the button below to begin the setup process.
+                         Click the button below to begin the MFA setup process.
                     </p>
                     <div className="user-account-setup-multifactor-authentication__controls">
                         <Button type="primary" onClick={() => enable()}>Setup Multifactor Authentication</Button>
@@ -152,8 +143,8 @@ const UserAccountSetupMultifactorAuthentication = function() {
             }
             { (state === State.PendingAppConfiguration || state === State.ErrorConfirming ) &&
                 <div className="user-account-setup-multifactor-authentication__is-pending">
-                    <h2>Configure Multifactor Authentication</h2>
-                    { state === State.ErrorConfirming && <Alert type="error" timeout={5000} onClear={() => resetPatchAuthenticationRequest() }>Failed to confirm your authentication. Did you enter the correct code?</Alert> }
+                    <h2>Configure Your MFA Device</h2>
+                    { state === State.ErrorConfirming && <Alert type="error" timeout={5000} onClear={() => resetPatchAuthenticationRequest() }>Failed to confirm your setup. Did you enter the correct code?</Alert> }
                     <MultifactorAuthenticationSecret />
                     <div className="user-account-setup-multifactor-authentication__confirmation">
                         <Input 
@@ -162,11 +153,13 @@ const UserAccountSetupMultifactorAuthentication = function() {
                             explanation="Enter the 6 digit code from your authenticator app to complete your multi-factor authentication setup." 
                             className="user-account-setup-multifactor-authentication__confirmation-input"
                             value={confirmationToken}
+                            autocomplete="off"
                             onChange={(e) => setConfirmationToken(e.target.value)}
                         />
                         <div className="user-account-setup-multifactor-authentication__controls">
                             <Button type="warn" onClick={() => disable()}>Cancel Setup</Button>
-                            <Button type="primary" onClick={() => confirm()}>Confirm Setup</Button></div>
+                            <Button type="primary" onClick={() => confirm()}>Confirm Setup</Button>
+                        </div>
                     </div>
                 </div>
             }
@@ -177,20 +170,16 @@ const UserAccountSetupMultifactorAuthentication = function() {
             }
             { state === State.Enabled && codes &&
                 <div className="user-account-setup-multifactor-authentication__save-codes">
-                    <h2>Backup Codes</h2>
+                    <h2>Save Your Recovery Codes</h2>
                     <Card className="user-account-setup-multifactor-authentication__codes-card">
                         <div className="user-account-setup-multifactor-authentication__codes">
                             { codes.map((code) => <div key={code} className="user-account-setup-multifactor-authentication__code">{ code }</div>) }
                         </div>
                     </Card>
                     <p>
-                        Please save these backup codes somewhere secure, such
-                        as in a password manager.  They are single use codes
-                        that will allow you to access your account if you ever
-                        lose the device with your authenticator app. If you do
-                        use one of these codes, please remember to disable
-                        multifactor authentication so that you may reconfigure
-                        it on a new device.
+                        These are single use recovery codes that will allow you
+                        to recover your account if you lose your MFA device.
+                        Please save them somewhere secure.
                     </p>
                     <div className="user-account-setup-multifactor-authentication__controls">
                         <Button type="primary" onClick={() => clearSecrets()}>Complete Setup</Button>
@@ -201,7 +190,7 @@ const UserAccountSetupMultifactorAuthentication = function() {
                 <div className="user-account-setup-multifactor-authentication__enabled">
                     <h2>Multifactor Authentication</h2>
                     <p>Multifactor Authentication is configured!</p>
-                    <p>If you need to regenerate your backup codes, please disable and then re-enabled authentication.</p>
+                    <p>If you need to regenerate your recovery codes, please disable and then re-enable MFA.</p>
                     <div className="user-account-setup-multifactor-authentication__controls">
                         <Button type="warn" onClick={() => disable()}>Disable Multifactor Authentication</Button>
                     </div>

@@ -114,7 +114,14 @@ module.exports = class AuthenticationController {
                     throw error
                 }
             }
+        } else if ( 'pendingUserId' in request.session && request.session.pendingUserId !== null && request.session.pendingUserId !== undefined ) {
+            response.status(200).json({
+                session: {
+                    pendingUserId: request.session.pendingUserId 
+                }
+            })
         } else {
+
             response.status(200).json({
                 session: null
             })
@@ -207,17 +214,15 @@ module.exports = class AuthenticationController {
     async patchAuthentication(request, response) {
         const currentUser = request.session.user
 
-        if ( ! ( 'token' in request.body ) ) {
-            throw new ControllerError(400, 'invalid',
-                `User attempting to verify authentication without a token.`,
-                `You must include an TOPT token to verify your authentication.`)
-        }
-
-        const token = request.body.token
-
         if ( currentUser ) {
+            if ( ! ( 'token' in request.body ) ) {
+                throw new ControllerError(400, 'invalid',
+                    `User attempting to verify authentication without a token.`,
+                    `You must include a TOPT token to verify your authentication.`)
+            }
 
-            console.log(`currentUser: `, currentUser)
+            const token = request.body.token
+
             if ( currentUser.authenticationMultifactorState !== 'pending' ) {
                 throw new ControllerError(403, 'not-authorized',
                     `Logged in User(${currentUser.id}) attempting to verify authentication.`,
@@ -233,7 +238,7 @@ module.exports = class AuthenticationController {
                     `Failed to validate your.`)
             }
 
-            const codes = await this.multifactorAuthentication.generateBackupCodes(currentUser.id)
+            const codes = await this.multifactorAuthentication.generateRecoveryCodes(currentUser.id)
 
             const userPatch = {
                 id: currentUser.id,
@@ -262,34 +267,70 @@ module.exports = class AuthenticationController {
                     `You haven't logged in yet.  Log in before submitting an auth token.`)
             }
 
-            if ( ! ( 'token' in request.body ) ) {
+            if ( ! ( 'token' in request.body ) && ! ( 'recoveryCode' in request.body ) ) {
                 throw new ControllerError(400, 'invalid',
-                    `User attempting to verify authentication without a token.`,
-                    `You must include an TOPT token to verify your authentication.`)
+                    `User attempting to verify authentication without a token or recovery code.`,
+                    `You must include an TOPT token or recovery code to verify your authentication.`)
             }
 
-            const token = request.body.token
+            // If they provided a TOPT token, then use that to verify them.
+            if ( 'token' in request.body ) {
+                const token = request.body.token
+                if ( token === null || token === undefined || ! ( typeof token === 'string' ) || token.length < 6 || token.length > 6 ) {
+                    throw new ControllerError(400, 'invalid',
+                        `User attempting to verify authentication with an invalid token.`,
+                        `You must include an TOPT token to verify your authentication.`)
+                }
 
-            const verified = await this.multifactorAuthentication.verify(pendingUserId, token)
+                const verified = await this.multifactorAuthentication.verify(pendingUserId, token)
 
-            if ( verified !== true ) {
-                throw new ControllerError(404, 'not-found',
-                    `User(${currentUser.id}) failed to validate their multifactor authentication.`,
-                    `Failed to validate your.`)
+                if ( verified !== true ) {
+                    throw new ControllerError(404, 'not-found',
+                        `User(${pendingUserId}) failed to validate their multifactor authentication.`,
+                        `Failed to validate your.`)
+                }
+
+                const session = await this.auth.getSessionForUserId(pendingUserId)
+
+                request.session.user = session.user
+                request.session.file = session.file
+
+                response.status(200).json({
+                    session: session
+                })
+                return
+            } else if ( 'recoveryCode' in request.body ) {
+                const code = request.body.recoveryCode
+                if ( code === undefined || code === null || ! ( typeof code === 'string' ) ) {
+                    throw new ControllerError(400, 'invalid',
+                        `User attempting to verify authentication with an invalid recovery code.`,
+                        `You must include a valid recovery code to verify your authentication.`)
+                }
+
+                const verified = await this.multifactorAuthentication.verifyRecoveryCode(pendingUserId, code)
+
+                if ( verified !== true ) {
+                    throw new ControllerError(404, 'not-found',
+                        `User(${pendingUserId}) failed to validate their recovery code.`,
+                        `Failed to validate your recovery code.`)
+                }
+
+                const session = await this.auth.getSessionForUserId(pendingUserId)
+
+                request.session.user = session.user
+                request.session.file = session.file
+
+                response.status(200).json({
+                    session: session
+                })
+
+                return
             }
-
-            const session = await this.auth.getSessionForUserId(pendingUserId)
-
-            request.session.user = session.user
-            request.session.file = session.file
-
-            response.status(200).json({
-                session: session
-            })
+        
+            throw new ControllerError(400, 'invalid',
+                `User attempting to verify authentication without a token or recovery code.`,
+                `You must include an TOPT token or recovery code to verify your authentication.`)
         }
-
-
-
     }
 
     /**

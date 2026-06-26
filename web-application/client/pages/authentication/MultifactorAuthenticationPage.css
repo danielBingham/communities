@@ -1,10 +1,10 @@
-#login-page {
+#multifactor-authentication-page {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%,-50%);
 }
-.login-page__card {
-    max-width: min(100vw, 500px);
+.multifactor-authentication-page__card {
+    max-width: min(100vw,500px);
     margin: 0 auto;
 }
