@@ -1,6 +1,6 @@
 .user-account-setup-multifactor-authentication {
     max-width: min(100vw, 600px);
-    margin: 0 auto;
+    margin: 0 auto 50px auto;
     font-size: 16px;
 }
 .user-account-setup-multifactor-authentication h1 {
@@ -39,9 +39,4 @@
 }
 .user-account-setup-multifactor-authentication__code {
     padding: 1em;
-}
-
-
-.user-account-setup-multifactor-authentication__enabled {
-    text-align: center;
 }

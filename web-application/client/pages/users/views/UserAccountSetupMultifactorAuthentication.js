@@ -30,6 +30,7 @@ import Button from '/components/ui/Button'
 import Alert from '/components/ui/Alert'
 import Spinner from '/components/Spinner'
 import Card from '/components/ui/Card'
+import AreYouSure from '/components/AreYouSure'
 
 import { MultifactorAuthenticationSecret } from '/components/authentication/MultifactorAuthentication'
 
@@ -52,7 +53,9 @@ const UserAccountSetupMultifactorAuthentication = function() {
     const secret = useSelector((state) => state.authentication.multifactorSecret)
     const codes = useSelector((state) => state.authentication.multifactorRecoveryCodes)
 
+    const [areYouSure, setAreYouSure ] = useState(false)
     const [ confirmationToken, setConfirmationToken] = useState('')
+    const [ state, setState ] = useState('')
 
     const [ patchUserRequest, makePatchUserRequest, resetPatchUserRequest ] = useRequest()
     const [ patchAuthenticationRequest, makePatchAuthenticationRequest, resetPatchAuthenticationRequest ] = useRequest()
@@ -94,20 +97,34 @@ const UserAccountSetupMultifactorAuthentication = function() {
         }
     }, [])
 
-    let state = State.Disabled 
-    if ( patchUserRequest?.state === 'pending' ) {
-        state = State.Initializing
-    } else if ( patchUserRequest?.state === 'failed' ) {
-        state = State.ErrorInitializing
-    } else if ( patchAuthenticationRequest?.state === 'pending' ) {
-        state = State.Confirming
-    } else if ( patchAuthenticationRequest?.state === 'failed' ) {
-        state = State.ErrorConfirming
-    } else if ( currentUser.authenticationMultifactorState === 'pending' ) {
-        state = State.PendingAppConfiguration
-    } else if ( currentUser.authenticationMultifactorState === 'enabled' ) {
-        state = State.Enabled
-    }
+    // Build our state machine in React state so that we can respond directly
+    // to state changes.
+    useEffect(() => {
+        let newState = State.Disabled 
+        if ( patchUserRequest?.state === 'pending' ) {
+            newState = State.Initializing
+        } else if ( patchUserRequest?.state === 'failed' ) {
+            newState = State.ErrorInitializing
+        } else if ( patchAuthenticationRequest?.state === 'pending' ) {
+            newState = State.Confirming
+        } else if ( patchAuthenticationRequest?.state === 'failed' ) {
+            newState = State.ErrorConfirming
+        } else if ( currentUser.authenticationMultifactorState === 'pending' ) {
+            newState = State.PendingAppConfiguration
+        } else if ( currentUser.authenticationMultifactorState === 'enabled' ) {
+            newState = State.Enabled
+        }
+
+        if ( newState !== state ) {
+            setState(newState)
+        }
+    }, [ currentUser, patchUserRequest, patchAuthenticationRequest ])
+
+    // Restore scroll whenever we change state so we don't get left at the
+    // bottom of the page.
+    useEffect(() => {
+        window.scrollTo(0,0) 
+    }, [ state ])
 
     return (
         <div className="user-account-setup-multifactor-authentication">
@@ -157,6 +174,7 @@ const UserAccountSetupMultifactorAuthentication = function() {
                             className="user-account-setup-multifactor-authentication__confirmation-input"
                             value={confirmationToken}
                             autocomplete="off"
+                            onKeyUp={(e) => { if (e.key === 'Enter') confirm() }}
                             onChange={(e) => setConfirmationToken(e.target.value)}
                         />
                         <div className="user-account-setup-multifactor-authentication__controls">
@@ -192,11 +210,24 @@ const UserAccountSetupMultifactorAuthentication = function() {
             { state === State.Enabled && ! codes &&
                 <div className="user-account-setup-multifactor-authentication__enabled">
                     <h2>Multifactor Authentication</h2>
-                    <p>Multifactor Authentication is configured!</p>
-                    <p>If you need to regenerate your recovery codes, please disable and then re-enable MFA.</p>
-                    <div className="user-account-setup-multifactor-authentication__controls">
-                        <Button type="warn" onClick={() => disable()}>Disable Multifactor Authentication</Button>
-                    </div>
+                    <Card className="user-account-setup-multifactor-authentication__explanation">
+                        <p>
+                            Multifactor Authentication (MFA) is currently
+                            enabled. If you need to regenerate your recovery
+                            codes, please disable and then re-enable MFA.
+                        </p>
+                        <div className="user-account-setup-multifactor-authentication__controls">
+                            <Button type="warn" onClick={() => setAreYouSure(true)}>Disable Multifactor Authentication</Button>
+                        </div>
+                    </Card>
+                    <AreYouSure className="user-account-setup-multifactor-authentication__disable"
+                        isVisible={areYouSure}
+                        isPending={patchUserRequest?.state === "pending"}
+                        execute={() => disable()}
+                        cancel={() => setAreYouSure(false)}
+                    >
+                        <p>Are you sure you want to disable Multifactor Authentication?</p>
+                    </AreYouSure>
                 </div>
             }
         </div>
