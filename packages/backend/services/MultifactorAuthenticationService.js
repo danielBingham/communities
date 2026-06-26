@@ -183,7 +183,7 @@ module.exports = class MultifactorAuthenticationService {
     async clearRecoveryCodes(userId) {
         await this.core.database.query(`
             DELETE FROM user_recovery_codes WHERE user_id = $1
-        , `[ userId ])
+        `, [ userId ])
     }
 
     /**

@@ -99,7 +99,7 @@ const MultifactorAuthenticationSecret = function() {
             { dataUrl === null && <div aria-label="Loading QR Code..." className="multifactor-authentication-secret__loading"><Spinner /></div> }
             <p id={qrDescriptionId} className="multifactor-authentication-secret__description">Follow this QR Code from your authenticator app to setup your app with your Communities authentication.</p>
             <div className="multifactor-authentication-secret__secret">
-                <Input name="secret" value={secret ?? ''}>
+                <Input type="text" name="secret" value={secret ?? ''}>
                     <button type="button" aria-label="Copy Secret" title="Copy Secret" className="multifactor-authentication-secret__copy-secret" onClick={copySecret}><DocumentDuplicateIcon /></button>
                 </Input>
                 <p id={secretDescriptionId}>If you're having touble with the QR Code, you can copy the secret above and manually enter it into your authenticator app.</p>

@@ -115,25 +115,27 @@ const UserAccountSetupMultifactorAuthentication = function() {
                 <div className="user-account-setup-multifactor-authentication__is-disabled">
                     { state === State.ErrorInitializing && <Alert type="error" timeout={5000} onClear={() => disable()}>Failed to initialize multi-factor authentication.</Alert> }
                     <h2>Setup Multifactor Authentication</h2>
-                    <p>
-                        Multifactor Authentication (MFA) allows you to secure your
-                        account with an authenticator app (Proton Authenticator,
-                        Google Authenticator, etc) that runs
-                        on a separate device you control. It provides strong
-                        protection against account hacking and theft.
-                    </p>
-                    <p>
-                        MFA requires you to enter a six digit code from your
-                        authenticator app on every log in attempt. You will not
-                        be able to log in without either that code or one of
-                        the recovery codes provided at setup time.
-                    </p>
-                    <p> 
-                         Click the button below to begin the MFA setup process.
-                    </p>
-                    <div className="user-account-setup-multifactor-authentication__controls">
-                        <Button type="primary" onClick={() => enable()}>Setup Multifactor Authentication</Button>
-                    </div>
+                    <Card className="user-account-setup-multifactor-authentication__explanation">
+                        <p>
+                            Multifactor Authentication (MFA) allows you to secure your
+                            account with an authenticator app (Proton Authenticator,
+                            Google Authenticator, etc) that runs
+                            on a separate device you control. It provides strong
+                            protection against account hacking and theft.
+                        </p>
+                        <p>
+                            MFA requires you to enter a six digit code from your
+                            authenticator app on every log in attempt. You will not
+                            be able to log in without either that code or one of
+                            the recovery codes provided at setup time.
+                        </p>
+                        <p> 
+                             Click the button below to begin the MFA setup process.
+                        </p>
+                        <div className="user-account-setup-multifactor-authentication__controls">
+                            <Button type="primary" onClick={() => enable()}>Setup Multifactor Authentication</Button>
+                        </div>
+                    </Card>
                 </div>
             }
             { state === State.Initializing && 
@@ -149,6 +151,7 @@ const UserAccountSetupMultifactorAuthentication = function() {
                     <div className="user-account-setup-multifactor-authentication__confirmation">
                         <Input 
                             name="confirmation" 
+                            type="text"
                             label="Enter Your 6 Digit Code" 
                             explanation="Enter the 6 digit code from your authenticator app to complete your multi-factor authentication setup." 
                             className="user-account-setup-multifactor-authentication__confirmation-input"

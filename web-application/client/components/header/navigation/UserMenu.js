@@ -58,6 +58,7 @@ const UserMenu = function(props) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const hasMutualFriends = useFeature('feat-491-mutual-friends')
+    const hasMFA = useFeature('feat-61-multifactor-authentication')
 
     const canModerateSite = can(currentUser, Actions.moderate, Entities.Site)
 
@@ -100,7 +101,7 @@ const UserMenu = function(props) {
                     <DropdownMenuSection>
                         <DropdownMenuItem href="/account/security/change-email"><EnvelopeIcon /> Change Email</DropdownMenuItem>
                         <DropdownMenuItem href="/account/security/change-password"><LockClosedIcon /> Change Password</DropdownMenuItem>
-                        <DropdownMenuItem href="/account/security/setup-multifactor"><ShieldCheckIcon />Multifactor Authentication</DropdownMenuItem>
+                        { hasMFA && <DropdownMenuItem href="/account/security/setup-multifactor"><ShieldCheckIcon />Multifactor Authentication</DropdownMenuItem>}
                     </DropdownMenuSection>
                     <DropdownMenuSection>
                         <DropdownMenuItem href="/account/preferences"><AdjustmentsHorizontalIcon /> Preferences</DropdownMenuItem>

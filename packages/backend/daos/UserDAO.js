@@ -151,7 +151,8 @@ const SCHEMA = {
                 key: 'privacyViewMutualFriends',
                 needsFeature: 'feat-491-mutual-friends'
             },
-            // failed_authentication_attempts intentionally left out of the DAO.
+            // failed_authentication_attempts intentionally left out of the DAO
+            // so that we don't leak it.
             //
             // It is manually managed through AuthenticationService.
             'last_authentication_attempt_date': {
@@ -167,7 +168,8 @@ const SCHEMA = {
                 key: 'authenticationMultifactorState',
                 needsFeature: 'feat-61-multifactor-authentication'
             },
-            // authentication_multifactor_secret intentionally left out the DAO.
+            // authentication_multifactor_secret intentionally left out the DAO
+            // so that we don't leak it.
             //
             // It will be manually managed through MultifactorAuthenticationService.
             'created_date': {

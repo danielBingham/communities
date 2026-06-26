@@ -32,6 +32,7 @@ import './UserAccountPage.css'
 const UserAccountPage = function(props) {
 
     const hasMutualFriends = useFeature('feat-491-mutual-friends')
+    const hasMFA = useFeature('feat-61-multifactor-authentication')
 
     const dispatch = useDispatch()
     useEffect(() => {
@@ -48,7 +49,7 @@ const UserAccountPage = function(props) {
                     <NavigationSubmenu id="user-account-security-menu" icon="LockClosed" title="Security">
                         <NavigationSubmenuLink to="/account/security/change-email" icon="Envelope" text="Email" />
                         <NavigationSubmenuLink to="/account/security/change-password" icon="LockClosed" text="Password" />
-                        <NavigationSubmenuLink to="/account/security/setup-multifactor" icon="ShieldCheck" text="Multifactor Authentication" />
+                        { hasMFA && <NavigationSubmenuLink to="/account/security/setup-multifactor" icon="ShieldCheck" text="Multifactor Authentication" /> }
                     </NavigationSubmenu>
                     <NavigationSubmenu id="user-account-settings-menu" title="Settings" icon="Cog8Tooth"> 
                         <NavigationSubmenuLink to="/account/preferences" icon="AdjustmentsHorizontal" text="Preferences" />

@@ -19,29 +19,48 @@
  ******************************************************************************/
 
 import Button from '/components/ui/Button'
+import Card from '/components/ui/Card'
 
 import './UserAccountSecurityView.css'
 
 const UserAccountSecurityView  = function() {
 
     return (
-        <menu className="user-account-security-view">
-            <li className="user-account-security-view__menu-item">
-                <label>Change Email</label>
-                <div className="user-account-security-view__menu-item__explanation">Update your password.</div>
-                <div className="user-account-security-view__menu-item__action"><Button type="primary" href="/account/security/change-email">Change Password</Button></div>
-            </li>
-            <li className="user-account-security-view__menu-item">
-                <label>Change Password</label>
-                <div className="user-account-security-view__menu-item__explanation">Update your email.</div>
-                <div className="user-account-security-view__menu-item__action"><Button type="primary" href="/account/security/change-password">Change Password</Button></div>
-            </li>
-            <li className="user-account-security-view__menu-item">
-                <label>Setup Multi-factor Authentication</label>
-                <div className="user-account-security-view__menu-item__explanation">Setup Multi-factor Authentication to secure your account against password theft.</div>
-                <div className="user-account-security-view__menu-item__action"><Button type="primary" href="/account/security/setup-multifactor">Setup Multi-factor Authentication</Button></div>
-            </li>
-        </menu>
+        <div className="user-account-security-view">
+            <h2>Account Security</h2>
+            <Card className="user-account-security-view__menu-card">
+                <p>Account security management options.</p>
+                <menu className="user-account-security-view__menu">
+                    <li className="user-account-security-view__menu-item">
+                        <div className="user-account-security-view__menu-item__description">
+                            <label>Change Email</label>
+                            <div className="user-account-security-view__menu-item__explanation">Update your password.</div>
+                        </div>
+                        <div className="user-account-security-view__menu-item__action">
+                            <Button type="primary" href="/account/security/change-email">Change Email</Button>
+                        </div>
+                    </li>
+                    <li className="user-account-security-view__menu-item">
+                        <div className="user-account-security-view__menu-item__description">
+                            <label>Change Password</label>
+                            <div className="user-account-security-view__menu-item__explanation">Update your email.</div>
+                        </div>
+                        <div className="user-account-security-view__menu-item__action">
+                            <Button type="primary" href="/account/security/change-password">Change Password</Button>
+                        </div>
+                    </li>
+                    <li className="user-account-security-view__menu-item">
+                        <div className="user-account-security-view__menu-item__description">
+                            <label>Setup Multi-factor Authentication</label>
+                            <div className="user-account-security-view__menu-item__explanation">Setup Multi-factor Authentication (MFA) to secure your account against password theft.</div>
+                        </div>
+                        <div className="user-account-security-view__menu-item__action">
+                            <Button type="primary" href="/account/security/setup-multifactor">Setup MFA</Button>
+                        </div>
+                    </li>
+                </menu>
+            </Card>
+        </div>
     )
 
 }
