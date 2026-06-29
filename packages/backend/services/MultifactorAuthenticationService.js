@@ -25,6 +25,8 @@ const UserDAO = require('../daos/UserDAO')
 
 const EncryptionService = require('./EncryptionService')
 
+const ServiceError = require('../errors/ServiceError')
+
 /**
  * A service to handle all aspects of managing Multifactor Authentication using
  * a TOPT algorithm through `otplib`.
@@ -125,6 +127,8 @@ module.exports = class MultifactorAuthenticationService {
      */
     async verify(userId, token) {
         try { 
+            const userRateLimitResults = await this:tabe
+
             const secretResults = await this.core.database.query(`
                 SELECT authentication__multifactor_secret as secret FROM users WHERE users.id = $1
             `, [ userId ])
@@ -317,6 +321,63 @@ module.exports = class MultifactorAuthenticationService {
         } catch (error) {
             this.core.logger.error(`Failed to verify recovery code: `, error)
             return false
+        }
+    }
+
+    async shouldRateLimit(userId) {
+        try { 
+            const rateLimitResults = await this.core.database.query(`
+                    SELECT authentication__multifactor_failed_attempts, authentication__multifactor_last_attempt_date FROM users WHERE users.id = $1
+                `, [ userId ])
+        } catch (error) {
+            this.core.logger.error(error)
+            throw new ServiceError('database-error', `Failed to retrieve rate limits for User(${userId}).`)
+        }
+
+        if ( rateLimitResults.rows.length <= 0 ) {
+            throw new ServiceError('not-found', `Failed to retrieve rate limits for User(${userId})`)
+        }
+
+        const rateLimits = rateLimitResults.rows[0]
+        const lastAttempt = new Date(rateLimits.authentication__multifactor_last_attempt_date)
+        const hasBeenThirtySecondsSinceLastAttempt = Date.now() - lastAttempt.getTime() > 30 * 1000 // 30 seconds 
+
+        // If they've made more than 10 or more attempts in the last 30 seconds, then rate limit them.
+        if ( rateLimits.authentication__multifactor_failed_attempts >= 10 && hasBeenThirtySecondsSinceLastAttempt !== true ) {
+            return true
+        } else if ( hasBeenThirtySecondsSinceLastAttempt === true ) {
+            // If it has been 30 seconds, then go ahead and reset their attempts.
+            await this.clearRateLimit(userId)
+        }
+
+        return false
+    }
+
+    async incrementRateLimit(userId) {
+        try { 
+            await this.core.database.query(`
+                UPDATE users 
+                    SET authentication__multifactor_failed_attempts = authentication__multifactor_failed_attempts+1,
+                        authentication__multifactor_last_attempt_date = now()
+                    WHERE id = $1
+            `, [ userId ])
+        } catch (error ) {
+            this.core.logger.error(error)
+            throw new ServiceError('database-error', `Failed to increment rate limit.`)
+        }
+    }
+
+    async clearRateLimit(userId) {
+        try { 
+        await this.core.database.query(`
+            UPDATE users 
+                SET authentication__multifactor_failed_attempts = 0,
+                    authentication__multifactor_last_attempt_date = now()
+                WHERE id = $1
+        `, [ userId ])
+        } catch (error) {
+            this.core.logger.error(error)
+            throw new ServiceError('database-error', `Failed to clear rate limit.`)
         }
     }
 }

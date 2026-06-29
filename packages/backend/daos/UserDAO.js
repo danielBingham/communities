@@ -168,8 +168,19 @@ const SCHEMA = {
                 key: 'authenticationMultifactorState',
                 needsFeature: 'feat-61-multifactor-authentication'
             },
-            // authentication_multifactor_secret intentionally left out the DAO
+
+            // authentication__multifactor_secret intentionally left out the DAO
             // so that we don't leak it.
+            //
+            // It will be manually managed through MultifactorAuthenticationService.
+
+            // authentication__multifactor_failed_attempts intentionally left
+            // out of the DAO so we don't leak it.
+            //
+            // It will be manually managed through MultifactorAuthenticationService.
+            
+            // authentication__multifactor_last_attempt_date intentionally left
+            // out of the DAO so we don't leak it.
             //
             // It will be manually managed through MultifactorAuthenticationService.
             'created_date': {

@@ -39,6 +39,14 @@ module.exports = class Feat61MultifactorAuthenticationMigration extends BaseMigr
         `, [])
 
         await this.core.database.query(`
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS authentication__multifactor_failed_attempts int DEFAULT 0
+        `, [])
+
+        await this.core.databsae.query(`
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS authentication__multifactor_last_attempt_date timestamptz
+        `, [])
+
+        await this.core.database.query(`
             CREATE TABLE IF NOT EXISTS user_recovery_codes (
                 code text,
                 user_id uuid REFERENCES users(id) ON DELETE CASCADE NOT NULL
@@ -56,6 +64,8 @@ module.exports = class Feat61MultifactorAuthenticationMigration extends BaseMigr
 
         await this.core.database.query(`ALTER TABLE users DROP COLUMN IF EXISTS authentication__multifactor_state`, [])
         await this.core.database.query(`ALTER TABLE users DROP COLUMN IF EXISTS authentication__multifactor_secret`, [])
+        await this.core.database.query(`ALTER TABLE users DROP COLUMN IF EXISTS authentication__multifactor_failed_attempts`, [])
+        await this.core.database.query(`ALTER TABLE users DROP COLUMN IF EXISTS authentication__multifactor_last_attempt_date`, [])
 
         await this.core.database.query(`DROP TYPE IF EXISTS user_multifactor_state`, [])
     }

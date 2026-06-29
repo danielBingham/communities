@@ -163,7 +163,8 @@ module.exports = class AuthenticationController {
 
             if ( ! userId ) {
                 throw new ControllerError(403, 'authentication-failed',
-                    `No user found with either email or token.`)
+                    `No user found with either email or token.`,
+                    `Authentication failed.`)
 
             }
 
@@ -189,19 +190,19 @@ module.exports = class AuthenticationController {
             request.logger.warn(error)
             if ( error instanceof ServiceError ) {
                 if ( error.type == 'no-user' ) {
-                    throw new ControllerError(403, 'authentication-failed', error.message)
+                    throw new ControllerError(403, 'authentication-failed', error.message, `Authentication failed.`)
                 } else if ( error.type == 'multiple-users') {
-                    throw new ControllerError(403, 'authentication-failed', error.message)
+                    throw new ControllerError(403, 'authentication-failed', error.message, `Authentication failed.`)
                 } else if ( error.type == 'no-user-password' ) {
-                    throw new ControllerError(403, 'authentication-failed', error.message)
+                    throw new ControllerError(403, 'authentication-failed', error.message, `Authentication failed.`)
                 } else if ( error.type === 'banned' ) {
-                    throw new ControllerError(403, 'authentication-failed', error.message)
+                    throw new ControllerError(403, 'authentication-failed', error.message, `Authentication failed.`)
                 } else if ( error.type == 'no-credential-password' ) {
-                    throw new ControllerError(400, 'password-required', error.message)
+                    throw new ControllerError(400, 'password-required', error.message, `You must include your password to authenticate.`)
                 } else if ( error.type == 'authentication-failed' ) {
-                    throw new ControllerError(403, 'authentication-failed', error.message)
+                    throw new ControllerError(403, 'authentication-failed', error.message, `Authentication failed.`)
                 } else if ( error.type == 'authentication-timeout' ) {
-                    throw new ControllerError(429, 'authentication-timeout', error.message)
+                    throw new ControllerError(429, 'authentication-timeout', error.message, `Too many attempts. Please wait 15 minutes before trying again.`)
                 } else {
                     throw error
                 }
@@ -235,7 +236,7 @@ module.exports = class AuthenticationController {
             if ( verified !== true ) {
                 throw new ControllerError(404, 'not-found',
                     `User(${currentUser.id}) failed to validate their multifactor authentication.`,
-                    `Failed to validate your.`)
+                    `Authentication failed.`)
             }
 
             const codes = await this.multifactorAuthentication.generateRecoveryCodes(currentUser.id)
@@ -273,6 +274,16 @@ module.exports = class AuthenticationController {
                     `You must include an TOPT token or recovery code to verify your authentication.`)
             }
 
+
+            // If they've made more than 10 or more attempts in the last 30 seconds, then rate limit them.
+            const shouldRateLimit = await this.multifactorAuthentication.shouldRateLimit(pendingUserId)
+            if ( shouldRateLimit !== false ) {
+                throw new ControllerError(429, 'too-many-attempts',
+                    `User(${pendingUserId}) is being rate limited for too many MFA attempts.`,
+                    `Too many attempts.  Please wait 30 seconds and try again.`)
+
+            } 
+
             // If they provided a TOPT token, then use that to verify them.
             if ( 'token' in request.body ) {
                 const token = request.body.token
@@ -283,11 +294,14 @@ module.exports = class AuthenticationController {
                 }
 
                 const verified = await this.multifactorAuthentication.verify(pendingUserId, token)
-
                 if ( verified !== true ) {
+                    await this.multifactorAuthentication.incrementRateLimit(pendingUserId)
+
                     throw new ControllerError(404, 'not-found',
                         `User(${pendingUserId}) failed to validate their multifactor authentication.`,
                         `Failed to validate your.`)
+                } else {
+                    await this.multifactorAuthentication.clearRateLimit(pendingUserId)
                 }
 
                 const session = await this.auth.getSessionForUserId(pendingUserId)
@@ -310,15 +324,29 @@ module.exports = class AuthenticationController {
                 const verified = await this.multifactorAuthentication.verifyRecoveryCode(pendingUserId, code)
 
                 if ( verified !== true ) {
+                    await this.multifactorAuthentication.incrementRateLimit(pendingUserId)
+
                     throw new ControllerError(404, 'not-found',
                         `User(${pendingUserId}) failed to validate their recovery code.`,
                         `Failed to validate your recovery code.`)
+                } else {
+                    await this.multifactorAuthentication.clearRateLimit(pendingUserId)
                 }
+
 
                 const session = await this.auth.getSessionForUserId(pendingUserId)
 
                 request.session.user = session.user
                 request.session.file = session.file
+
+                await this.notificationService.sendNotifications(
+                    session.user, 
+                    'Authentication:update:recovery',
+                    {
+                        userId: pendingUserId 
+                    },
+                    { noWeb: true, noMobile: true } // Email only.
+                )
 
                 response.status(200).json({
                     session: session

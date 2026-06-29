@@ -146,16 +146,4 @@ module.exports = class AuthenticationService {
 
         return userMatch.id 
     }
-
-    async connectOrcid(request, orcidId) {
-        const user = {
-            id: request.session.user.id,
-            orcidId: orcidId
-        }
-        await this.userDAO.updatePartialUser(user)
-
-        const responseBody = await this.loginUser(request.session.user.id, request)
-        responseBody.type = "connection"
-        return responseBody
-    }
 }

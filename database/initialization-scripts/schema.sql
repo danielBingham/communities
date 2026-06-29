@@ -84,6 +84,8 @@ CREATE TABLE users (
 
     authentication__multifactor_state user_multifactor_state NOT NULL DEFAULT 'disabled',
     authentication__multifactor_secret text DEFAULT NULL,
+    authentication__multifactor_failed_attempts int DEFAULT 0,
+    authentication__multifactor_last_attempt_date timestamptz,
 
     created_date timestamptz,
     updated_date timestamptz 

@@ -833,10 +833,6 @@ module.exports = class UserController extends BaseController{
             }
 
             if ( user.authenticationMultifactorState === 'disabled' ) {
-                console.log(`\n`)
-                request.logger.info(`==== Disabling Multifactor Authentication ==== `)
-                console.log(`\n`)
-
                 await this.multifactorAuthenticationService.disable(id)
 
                 const results = await this.userDAO.selectUsers({
