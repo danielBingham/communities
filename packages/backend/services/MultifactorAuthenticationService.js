@@ -127,8 +127,6 @@ module.exports = class MultifactorAuthenticationService {
      */
     async verify(userId, token) {
         try { 
-            const userRateLimitResults = await this:tabe
-
             const secretResults = await this.core.database.query(`
                 SELECT authentication__multifactor_secret as secret FROM users WHERE users.id = $1
             `, [ userId ])

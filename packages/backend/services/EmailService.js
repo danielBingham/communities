@@ -143,8 +143,32 @@ module.exports = class EmailService {
         })
     }
 
+    /**
+     * Sends an alert to the user that a recovery code has been used.  Since
+     * this is a security alert, it shouldn't go through NotificationService.
+     * We don't want the user to be able to turn this off.
+     */
+    async sendRecoveryCodeUsageAlert(user) {
 
+    }
 
+    /**
+     * Sends an alert to the user notifying them that their MFA state has
+     * changed.  Since this is a security alert, it shouldn't go through
+     * NotificationService.  We don't want them to be able to turn this off.
+     */
+    async sendMFAAlert(user, state) {
+
+    }
+
+    /**
+     * Sends an alert to the user notifying them that their password has
+     * changed. Since this is a security alert, it shouldn't go through
+     * NotificationService.  We don't want them to be able to turn this off.
+     */
+    async sendPasswordChangeAlert(user, state) {
+
+    }
 }
 
 
