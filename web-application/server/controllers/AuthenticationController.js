@@ -252,6 +252,16 @@ module.exports = class AuthenticationController {
             request.session.user = session.user
             request.session.file = session.file
 
+            await this.notificationService.sendNotifications(
+                session.user, 
+                'User:update:mfa',
+                {
+                    userId: session.user.id,
+                    state: 'Enabled'
+                },
+                { noWeb: true, noMobile: true  }
+            )
+
             response.status(200).json({
                 session: session,
                 codes: codes

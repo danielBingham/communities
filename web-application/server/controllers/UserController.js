@@ -845,6 +845,16 @@ module.exports = class UserController extends BaseController{
                 // the user will get out of sync.
                 request.session.user = results.dictionary[id]
 
+                await this.notificationService.sendNotifications(
+                    currentUser, 
+                    'User:update:mfa',
+                    {
+                        userId: currentUser.id,
+                        state: 'Disabled'
+                    },
+                    { noWeb: true, noMobile: true  }
+                )
+
                 const relations = await this.getRelations(currentUser, results)
 
                 return response.status(200).json({ 
