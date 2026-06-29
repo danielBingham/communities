@@ -20,6 +20,7 @@
 
 const { 
     AuthenticationService,
+    EmailService,
     MultifactorAuthenticationService,
 
     UserDAO,
@@ -46,6 +47,7 @@ module.exports = class AuthenticationController {
         this.config = core.config
 
         this.auth = new AuthenticationService(core)
+        this.emailService = new EmailService(core)
         this.multifactorAuthentication = new MultifactorAuthenticationService(core)
 
         this.userDAO = new UserDAO(core)
@@ -252,15 +254,7 @@ module.exports = class AuthenticationController {
             request.session.user = session.user
             request.session.file = session.file
 
-            await this.notificationService.sendNotifications(
-                session.user, 
-                'User:update:mfa',
-                {
-                    userId: session.user.id,
-                    state: 'Enabled'
-                },
-                { noWeb: true, noMobile: true  }
-            )
+            await this.emailService.sendMFAAlert(session.user, 'Enabled')
 
             response.status(200).json({
                 session: session,
@@ -349,14 +343,7 @@ module.exports = class AuthenticationController {
                 request.session.user = session.user
                 request.session.file = session.file
 
-                await this.notificationService.sendNotifications(
-                    session.user, 
-                    'Authentication:update:recovery',
-                    {
-                        userId: pendingUserId 
-                    },
-                    { noWeb: true, noMobile: true } // Email only.
-                )
+                await this.emailService.sendRecoveryCodeUsageAlert(session.user)
 
                 response.status(200).json({
                     session: session

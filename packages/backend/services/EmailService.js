@@ -17,6 +17,8 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
+const Handlebars = require('handlebars')
+
 const ServiceError = require('../errors/ServiceError')
 
 module.exports = class EmailService {
@@ -149,7 +151,28 @@ module.exports = class EmailService {
      * We don't want the user to be able to turn this off.
      */
     async sendRecoveryCodeUsageAlert(user) {
+        const bodyTemplateString = `
+<html>
+<head></head>
+<body>
+<div>
+<p>Your account has been accessed using one of your MFA Recovery Codes.</p>
+<p>If this was you, no further action is necessary.</p>
+<p>If this was not you, then your account is likely compromised.  We recommend you change your password.</p>
+</div>
+</body>
+</html>
+`
+        const bodyTemplate = Handlebars.compile(bodyTemplateString)
+        const body = bodyTemplate()
 
+        await this.sendEmail({
+            "From": "no-reply@communities.social",
+            "To": user.email,
+            "Subject": `[Communities] Your Account has been Accessed with an MFA Recovery Code`,
+            "HtmlBody": body,
+            "MessageStream": "security"
+        })
     }
 
     /**
@@ -158,7 +181,32 @@ module.exports = class EmailService {
      * NotificationService.  We don't want them to be able to turn this off.
      */
     async sendMFAAlert(user, state) {
+        const bodyTemplateString = `
+<html>
+<head></head>
+<body>
+<div>
+<p>Multifactor Authentication has been {{ state }} on your account.</p>
+<p>If this was you, no further action is necessary.</p>
+<p>If this wasn't you, your account has probably been compromised.  We recommend changing your password.</p>
+</div>
+</body>
+</html>
+`
+        const bodyTemplate = Handlebars.compile(bodyTemplateString)
+        const body = bodyTemplate()
 
+        const subjectTemplateString = `[Communities] Multifactor Authentication has been {{ state }}`
+        const subjectTemplate = Handlebars.compile(subjectTemplateString)
+        const subject = subjectTemplate({ state: state })
+
+        await this.sendEmail({
+            "From": "no-reply@communities.social",
+            "To": user.email,
+            "Subject": subject,
+            "HtmlBody": body,
+            "MessageStream": "security"
+        })
     }
 
     /**
@@ -166,8 +214,29 @@ module.exports = class EmailService {
      * changed. Since this is a security alert, it shouldn't go through
      * NotificationService.  We don't want them to be able to turn this off.
      */
-    async sendPasswordChangeAlert(user, state) {
+    async sendPasswordChangeAlert(user) {
+        const bodyTemplateString = `
+<html>
+<head></head>
+<body>
+<div>
+<p>Your password on Communities has been changed.</p>
+<p>If this was you, no further action is necessary.</p>
+<p>If this wasn't you, your account has probably been compromised. Please reach out to <a href="contact@communities.social">support</a>!</p>
+</div>
+</body>
+</html>
+`
+        const bodyTemplate = Handlebars.compile(bodyTemplateString)
+        const body = bodyTemplate()
 
+        await this.sendEmail({
+            "From": "no-reply@communities.social",
+            "To": user.email,
+            "Subject": `[Communities] Your password has been changed`,
+            "HtmlBody": body,
+            "MessageStream": "security"
+        })
     }
 }
 
