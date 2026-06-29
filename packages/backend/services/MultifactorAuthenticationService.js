@@ -203,10 +203,9 @@ module.exports = class MultifactorAuthenticationService {
 
         // Okay, now generate the new codes.
         //
-        const params = []
-        let sql = `INSERT INTO user_recovery_codes (user_id, code) VALUES `
 
         const codes = []
+        const hashes = []
         const promises = []
 
         for(let count = 0; count < 10; count++) {
@@ -214,13 +213,21 @@ module.exports = class MultifactorAuthenticationService {
             codes.push(code)
 
             promises.push(bcrypt.hash(code, 12).then(function(hash) {
-                params.push(userId)
-                params.push(hash)
-                sql += `($${params.length-1}, $${params.length}),`
+                hashes.push(hash)
             }))
         }
 
         await Promise.all(promises)
+
+        // Now generate the SQL to insert the codes.
+        const params = []
+        let sql = `INSERT INTO user_recovery_codes (user_id, code) VALUES `
+
+        for(const hash of hashes) {
+            params.push(userId)
+            params.push(hash)
+            sql += `($${params.length-1}, $${params.length}),`
+        }
 
         // Peel off the last comma.
         sql = sql.substring(0, sql.length-1)

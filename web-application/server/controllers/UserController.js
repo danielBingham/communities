@@ -1099,17 +1099,21 @@ module.exports = class UserController extends BaseController{
         // refreshed and GET /authentication will be called which will pull the
         // full session.
         //
+        // NOTE: We do not want to update the user for password resets.  OWASP
+        // guidances says not to log the user in after resetting their
+        // password. It would allow them to skip the MFA flow.
+        //
         // TECHDEBT This isn't the cleanest flow, and it's probably going to
         // prove a bit brittle.
         if ( (currentUser && currentUser.id === entity.id )
-            || ( type === 'password-reset' || type === 'invitation-acceptance')) 
+            || ( type === 'invitation-acceptance')) 
         {
             request.session.user = entity 
         }
 
         // If the user's status has been set to 'banned', then we need to
         // destroy their sessions and log them out.
-        if ( entity.status === 'banned' ) {
+        if ( entity.status === 'banned' || type === 'password-reset'  ) {
             await this.core.database.query(`
                 DELETE FROM session WHERE sess->'user'->>'id' = $1
             `, [ entity.id ])

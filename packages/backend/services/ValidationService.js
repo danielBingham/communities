@@ -129,7 +129,8 @@ module.exports = class ValidationService {
             'invitations',  // Deprecated.
             'location', // Not implemented yet.
             'siteModerationId',  // Only set programatically through SiteModerationController.
-            'last_authentication_attempt_date', // Only set programatically through AuthenticationService. 
+            'lastAuthenticationAttemptDate', // Only set programatically through AuthenticationService. 
+            'authenticationMultifactorState', // Only set programatically through UserController.
             'createdDate',  // Automanaged by the DAO.
             'updatedDate' // Automanaged by the DAO.
         ]

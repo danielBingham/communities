@@ -89,6 +89,7 @@ module.exports = class AES256GCM_Encryption {
                 (error, generatedKey) => {
                     if ( error ) {
                         reject(error)
+                        return
                     }
 
                     resolve(Buffer.from(generatedKey))

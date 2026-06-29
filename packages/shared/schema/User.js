@@ -82,7 +82,7 @@ module.exports = class UserSchema extends Schema {
             email: {
                 clean: (value) => { return cleanEmail(value) },
                 validate: (value, existing, action) => {
-                    const validator = new EmailValidator('email', email, existing, action)
+                    const validator = new EmailValidator('email', value, existing, action)
                     const errors = validator
                         .isRequiredToCreate()
                         .mustNotBeNull()
