@@ -98,7 +98,7 @@ module.exports = class TokenService {
         // create a temp table to hold the old tokens in order to allow us to
         // rollback the migration.
         const tokenHash = crypto.hash('sha256', tokenString)
-        const tokens = await this.tokenDAO.selectTokens('WHERE tokens.token = $1 OR tokens.toke = $2', [ tokenHash, tokenString ])
+        const tokens = await this.tokenDAO.selectTokens('WHERE tokens.token = $1 OR tokens.token = $2', [ tokenHash, tokenString ])
 
         if ( tokens.length <= 0 ) {
             throw new ServiceError('not-found',
