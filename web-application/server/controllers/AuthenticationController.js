@@ -254,7 +254,7 @@ module.exports = class AuthenticationController {
             request.session.user = session.user
             request.session.file = session.file
 
-            await this.emailService.sendMFAAlert(session.user, 'Enabled')
+            await this.emailService.sendMFAAlert(session.user, 'enabled')
 
             response.status(200).json({
                 session: session,
@@ -303,7 +303,7 @@ module.exports = class AuthenticationController {
 
                     throw new ControllerError(404, 'not-found',
                         `User(${pendingUserId}) failed to validate their multifactor authentication.`,
-                        `Failed to validate your.`)
+                        `Authentication failed.`)
                 } else {
                     await this.multifactorAuthentication.clearRateLimit(pendingUserId)
                 }
@@ -332,7 +332,7 @@ module.exports = class AuthenticationController {
 
                     throw new ControllerError(404, 'not-found',
                         `User(${pendingUserId}) failed to validate their recovery code.`,
-                        `Failed to validate your recovery code.`)
+                        `Authentication failed.`)
                 } else {
                     await this.multifactorAuthentication.clearRateLimit(pendingUserId)
                 }
@@ -382,10 +382,6 @@ module.exports = class AuthenticationController {
                 response.status(200).json(null)
             }
         })
-    }
-
-    postMultifactor(request, response) {
-
     }
 }
 

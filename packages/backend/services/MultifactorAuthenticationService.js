@@ -323,14 +323,9 @@ module.exports = class MultifactorAuthenticationService {
     }
 
     async shouldRateLimit(userId) {
-        try { 
-            const rateLimitResults = await this.core.database.query(`
+        const rateLimitResults = await this.core.database.query(`
                     SELECT authentication__multifactor_failed_attempts, authentication__multifactor_last_attempt_date FROM users WHERE users.id = $1
                 `, [ userId ])
-        } catch (error) {
-            this.core.logger.error(error)
-            throw new ServiceError('database-error', `Failed to retrieve rate limits for User(${userId}).`)
-        }
 
         if ( rateLimitResults.rows.length <= 0 ) {
             throw new ServiceError('not-found', `Failed to retrieve rate limits for User(${userId})`)

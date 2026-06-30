@@ -194,7 +194,7 @@ module.exports = class EmailService {
 </html>
 `
         const bodyTemplate = Handlebars.compile(bodyTemplateString)
-        const body = bodyTemplate()
+        const body = bodyTemplate({ state: state })
 
         const subjectTemplateString = `[Communities] Multifactor Authentication has been {{ state }}`
         const subjectTemplate = Handlebars.compile(subjectTemplateString)

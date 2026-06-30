@@ -42,7 +42,7 @@ module.exports = class Feat61MultifactorAuthenticationMigration extends BaseMigr
             ALTER TABLE users ADD COLUMN IF NOT EXISTS authentication__multifactor_failed_attempts int DEFAULT 0
         `, [])
 
-        await this.core.databsae.query(`
+        await this.core.database.query(`
             ALTER TABLE users ADD COLUMN IF NOT EXISTS authentication__multifactor_last_attempt_date timestamptz
         `, [])
 

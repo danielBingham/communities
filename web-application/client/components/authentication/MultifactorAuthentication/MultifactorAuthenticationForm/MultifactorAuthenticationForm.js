@@ -38,6 +38,7 @@ const State = {
     PendingAuthentication: 'pending-authentication',
     PendingLogout: 'pending-logout',
     AuthenticationFailed: 'authentication-failed',
+    RateLimited: 'rate-limited',
     LogoutFailed: 'logout-failed'
 }
 
@@ -143,7 +144,11 @@ const MultifactorAuthenticationForm = function() {
     }
 
     else if ( patchAuthenticationRequest?.state === 'failed' ) {
-        state = State.AuthenticationFailed
+        if ( patchAuthenticationRequest.response.status === 429 ) {
+            state = State.RateLimited
+        } else {
+            state = State.AuthenticationFailed
+        }
     }
 
     else if ( deleteAuthenticationRequest?.state === 'pending' ) {
@@ -174,9 +179,10 @@ const MultifactorAuthenticationForm = function() {
                     <Spinner />
                 </>
             }
-            { ( state === State.PendingMultifactor || state === State.AuthenticationFailed || state === State.LogoutFailed) && needsRecovery !== true && 
+            { ( state === State.PendingMultifactor || state === State.AuthenticationFailed || state === State.RateLimited || state === State.LogoutFailed) && needsRecovery !== true && 
                 <>
                     { state === State.AuthenticationFailed && <Alert type="error" timeout={5000} onClear={() => resetPatchAuthenticationRequest()}>Authentication failed.  Did you enter the correct token?</Alert> }
+                    { state === State.RateLimited && <Alert type="error" timeout={5000} onClear={() => resetPatchAuthenticationRequest()}>Too many attempts.  Please wait 60 seconds before trying again.</Alert> }
                     { state === State.LogoutFailed && <Alert type="error" timeout={5000} onClear={() => resetDeleteAuthenticationRequest()}>Logout failed.  This is probably a network error. Check your connection and try again!</Alert>}
                     <Input 
                         name="mfa" 
@@ -199,9 +205,10 @@ const MultifactorAuthenticationForm = function() {
                     </div>
                 </>
             }
-            { ( state === State.PendingMultifactor || state === State.AuthenticationFailed || state === State.LogoutFailed) && needsRecovery === true && 
+            { ( state === State.PendingMultifactor || state === State.AuthenticationFailed || state === State.RateLimited || state === State.LogoutFailed) && needsRecovery === true && 
                 <>
                     { state === State.AuthenticationFailed && <Alert type="error" timeout={5000} onClear={() => resetPatchAuthenticationRequest()}>Authentication failed.  Did you enter the correct recovery code?</Alert> }
+                    { state === State.RateLimited && <Alert type="error" timeout={5000} onClear={() => resetPatchAuthenticationRequest()}>Too many attempts.  Please wait 60 seconds before trying again.</Alert> }
                     { state === State.LogoutFailed && <Alert type="error" timeout={5000} onClear={() => resetDeleteAuthenticationRequest()}>Logout failed.  This is probably a network error. Check your connection and try again!</Alert>}
                     <Input 
                         name="recovery" 

@@ -34,7 +34,7 @@ const UserAccountSecurityView  = function() {
                     <li className="user-account-security-view__menu-item">
                         <div className="user-account-security-view__menu-item__description">
                             <label>Change Email</label>
-                            <div className="user-account-security-view__menu-item__explanation">Update your password.</div>
+                            <div className="user-account-security-view__menu-item__explanation">Update your email.</div>
                         </div>
                         <div className="user-account-security-view__menu-item__action">
                             <Button type="primary" href="/account/security/change-email">Change Email</Button>
@@ -43,7 +43,7 @@ const UserAccountSecurityView  = function() {
                     <li className="user-account-security-view__menu-item">
                         <div className="user-account-security-view__menu-item__description">
                             <label>Change Password</label>
-                            <div className="user-account-security-view__menu-item__explanation">Update your email.</div>
+                            <div className="user-account-security-view__menu-item__explanation">Update your password.</div>
                         </div>
                         <div className="user-account-security-view__menu-item__action">
                             <Button type="primary" href="/account/security/change-password">Change Password</Button>

@@ -10,6 +10,7 @@ import { patchUser } from '/state/User'
 import Button from '/components/ui/Button'
 import Spinner from '/components/Spinner'
 import Input from '/components/ui/Input'
+import Alert from '/components/ui/Alert'
 
 import './ResetPasswordForm.css'
 
@@ -20,24 +21,16 @@ const ResetPasswordForm = function(props) {
     // we're here, we should have one.
     const token = searchParams.get('token')
 
-    // ======= Render State =========================================
-
     const [newPassword, setNewPassword] = useState('')
     const [confirmNewPassword, setConfirmNewPassword] = useState('')
 
     const [passwordValidationError, setPasswordValidationError] = useState([])
     const [passwordConfirmationValidationError, setPasswordConfirmationValidationError] = useState([])
 
-    // ======= Request Tracking =====================================
-
     const [request, makeRequest] = useRequest()
     const [ tokenRequest, makeTokenRequest ] = useRequest()
 
-    // ======= Redux State ==========================================
-
     const user = useSelector((state) => token in state.tokens.usersByToken ? state.tokens.usersByToken[token] : null)
-
-    // ======= Actions and Event Handling ===========================
 
     /**
      * Perform validation on our state and return a boolean indicating whether
@@ -100,19 +93,15 @@ const ResetPasswordForm = function(props) {
         makeRequest(patchUser(userPatch))
     }
 
-    // ======= Effect Handling ======================================
+    const completeReset = function() {
+        window.location.href = "/login"
+    }
     
     useEffect(function() {
         const token = searchParams.get('token')
 
         makeTokenRequest(validateToken(token, 'reset-password'))
     }, [ searchParams ])
-
-    useEffect(function() {
-        if ( request && request.state == 'fulfilled' ) {
-            window.location.href = "/"
-        }
-    }, [ request ])
 
     // ======= Render ===============================================
 
@@ -176,6 +165,7 @@ const ResetPasswordForm = function(props) {
 
     return (
         <div className="reset-password-form">
+                { request?.state === 'fulfilled' && <Alert type="success" timeout={3000} onClear={() => completeReset()}>Password reset.  You will be redirected to the login page shortly.</Alert> }
             <form onSubmit={onSubmit}>
                 <div className="instructions">Please enter a new password for your Communities account.</div> 
                 <Input

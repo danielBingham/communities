@@ -31,6 +31,7 @@ const {
     MultifactorAuthenticationService,
     MutualsService,
     PermissionService,
+    SessionService,
     UserService,
     ValidationService,
 
@@ -68,6 +69,7 @@ module.exports = class UserController extends BaseController{
         this.multifactorAuthenticationService = new MultifactorAuthenticationService(core)
         this.mutualsService = new MutualsService(core)
         this.permissionService = new PermissionService(core)
+        this.sessionService = new SessionService(core)
         this.userService = new UserService(core)
         this.validationService = new ValidationService(core)
 
@@ -845,7 +847,7 @@ module.exports = class UserController extends BaseController{
                 // the user will get out of sync.
                 request.session.user = results.dictionary[id]
 
-                await this.emailService.sendMFAAlert(request.session.user, 'Disabled')
+                await this.emailService.sendMFAAlert(request.session.user, 'disabled')
 
                 const relations = await this.getRelations(currentUser, results)
 
@@ -1112,9 +1114,7 @@ module.exports = class UserController extends BaseController{
         // If the user's status has been set to 'banned', then we need to
         // destroy their sessions and log them out.
         if ( entity.status === 'banned' || type === 'password-reset'  ) {
-            await this.core.database.query(`
-                DELETE FROM session WHERE sess->'user'->>'id' = $1
-            `, [ entity.id ])
+            await this.sessionService.deleteSessionsForUser(entity.id)
         }
 
         // If we've changed the email, then we need to send out a new
