@@ -130,7 +130,11 @@ module.exports = class TokenController extends BaseController {
             // 4. Token(:token) must have type equal to request.query.type 
             token = await this.tokenService.validateToken(request.params.token, [ request.query.type ])
         } catch (error) {
-            if ( error instanceof DAOError ) {
+            if ( error instanceof ServiceError ) {
+                throw new ControllerError(403, 'not-authorized', 
+                    error.message,
+                    `Your token is invalid. Please request a new one and try again.`)
+            } else if ( error instanceof DAOError ) {
                 throw new ControllerError(403, 'not-authorized', 
                     error.message,
                     `Your token is invalid. Please request a new one and try again.`)

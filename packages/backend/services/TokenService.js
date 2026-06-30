@@ -60,7 +60,7 @@ module.exports = class TokenService {
 
     async createToken(token) {
         if ( ! ( token.type in this.validTypes) || this.validTypes[token.type] !== true ) {
-            throw new ServiceError('invalid-type'
+            throw new ServiceError('invalid-type',
                 `Attempt to create a token with invalid type, ${token.type}.`)
         }
 

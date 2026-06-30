@@ -18,7 +18,7 @@
  *
  ******************************************************************************/
 const { stringCleaner, cleanNumber, cleanBoolean, cleanUuid, cleanEmail } = require('../cleaning/types')
-const { StringValidator, NumberValidator, BooleanValidator, UUIDValidator } = require('../validation/types')
+const { StringValidator, NumberValidator, BooleanValidator, UUIDValidator, EmailValidator } = require('../validation/types')
 
 const Schema = require('./Schema')
 
