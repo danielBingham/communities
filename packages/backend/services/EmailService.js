@@ -59,88 +59,115 @@ module.exports = class EmailService {
     }
 
     async sendEmailConfirmation(user, token) {
-        const confirmationLink = new URL(`email-confirmation?token=${token.token}`, this.config.host).href
+        const searchParams = new URLSearchParams({ token: token })
+        const relativeUrl = `email-confirmation?${searchParams.toString()}`
+        const confirmationLink = new URL(relativeUrl, this.config.host).href
 
 
-        const emailTextBody = `
+        const bodyTemplateString = `
 <html>
 <head></head>
 <body>
 <div>
-<p>Hello ${user.name}!</p>
+<p>Hello {{ user.name }}!</p>
 <p>Your confirmation token is:</p>
-<p>${token.token}</p>
-<p>You can confirm your email address by following this link: <a href="${confirmationLink}">Confirm Email</a></p>
+<p>{{ token }}</p>
+<p>You can confirm your email address by following this link: <a href="{{ confirmationLink }}">Confirm Email</a></p>
 <p>Cheers,</p>
 <p>The Communities Team</p>
 </div>
 </body>
 </html>
 `
+        const bodyTemplate = Handlebars.compile(bodyTemplateString)
+        const body = bodyTemplate({
+            user: user,
+            token: token,
+            confirmationLink: confirmationLink
+        })
+
+        const subjectTemplateString = `[Communities] Please confirm your email, {{ user.name }}!`
+        const subjectTemplate = Handlebars.compile(subjectTemplateString)
+        const subject = subjectTemplate({ user: user })
 
 
 
         await this.sendEmail({
             "From": "no-reply@communities.social",
             "To": user.email,
-            "Subject": `[Communities] Please confirm your email, ${user.name}!`,
-            "HtmlBody": emailTextBody,
+            "Subject": subject,
+            "HtmlBody": body,
             "MessageStream": "email-confirmation"
         })
     }
 
     async sendPasswordReset(user, token) {
-        const resetLink = new URL(`reset-password?token=${token.token}`, this.config.host).href
+        const searchParams = new URLSearchParams({ token: token })
+        const relativeUrl = `reset-password?${searchParams.toString()}`
+        const resetLink = new URL(relativeUrl, this.config.host).href
 
-        const emailTextBody = `
+        const bodyTemplateString = `
 <html>
 <head></head>
 <body>
 <div>
-<p>Hello ${user.name},</p>
+<p>Hello {{ user.name }},</p>
 <p>Someone requested a password reset for your Communities account.</p>
-<p>If this was you, please use the following link to reset your password: <a href="${resetLink}">Reset Password</a></p>
+<p>If this was you, please use the following link to reset your password: <a href="{{ resetLink }}">Reset Password</a></p>
 <p>Cheers,</p>
 <p>The Communities Team</p>
 </div>
 </body>
 </html>
 `
+        const bodyTemplate = Handlebars.compile(bodyTemplateString)
+        const body = bodyTemplate({ user: user, resetLink: resetLink })
 
 
         await this.sendEmail({
             "From": "no-reply@communities.social",
             "To": user.email,
             "Subject": "[Communities] Please reset your password",
-            "HtmlBody": emailTextBody,
+            "HtmlBody": body,
             "MessageStream": "password-reset"
         })
     }
 
     async sendInvitation(inviter, user, token) {
-        const invitationLink = new URL(`accept-invitation?token=${token.token}`, this.config.host).href
+        const searchParams = new URLSearchParams({ token: token })
+        const relativeUrl = `accept-invitation?${searchParams.toString()}`
+        const invitationLink = new URL(relativeUrl, this.config.host).href
 
-        const emailTextBody = `
+        const bodyTemplateString = `
 <html>
 <head></head>
 <body>
 <div>
-<p>Hello ${user.email.substring(0, user.email.indexOf('@'))},</p>
-<p>You have been invited to join Communities by ${inviter.name}!</p>
+<p>Hello {{ name }},</p>
+<p>You have been invited to join Communities by {{ inviter.name }}!</p>
 <p>Communities is a non-profit, cooperative social media platform built to help users build community, connect, and organize.</p>
-<p>We're currently in public beta.  If you'd like to join, click the following link: <a href="${invitationLink}">Accept Invitation</a></p>
+<p>We're currently in public beta.  If you'd like to join, click the following link: <a href="{{ invitationLink }}">Accept Invitation</a></p>
 <p>Cheers!</p>
 <p>The Communities Team</p>
 </div>
 </body>
 </html>`
+        const bodyTemplate = Handlebars.compile(bodyTemplateString)
+        const body = bodyTemplate({ 
+            name: user.email.substring(0, user.email.indexOf('@')),
+            inviter: inviter,
+            invitationLink: invitationLink
+        })
 
+        const subjectTemplateString = `[Communities] ${inviter.name} invites you to join Communities`
+        const subjectTemplate = Handlebars.compile(subjectTemplateString)
+        const subject = subjectTemplate({ inviter: inviter })
 
         await this.sendEmail({
             "From": "no-reply@communities.social",
             "To": user.email,
-            "Subject": `[Communities] ${inviter.name} invites you to join Communities`,
-            "HtmlBody": emailTextBody,
+            "Subject": subject,
+            "HtmlBody": body,
             "MessageStream": "invitation"
         })
     }

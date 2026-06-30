@@ -55,7 +55,13 @@ module.exports = class SessionService {
 
     async deleteSessionsForUser(userId) {
         await this.core.database.query(`
-                DELETE FROM session WHERE sess->'user'->>'id' = $1
-            `, [ entity.id ])
+            DELETE FROM session WHERE sess->'user'->>'id' = $1
+        `, [ userId ])
+    }
+
+    async deleteSessionsForUserExcept(userId, sessionId) {
+        await this.core.database.query(`
+            DELETE FROM session WHERE sess->'user'->>'id' = $1 AND session.sid != $2
+        `, [ userId, sessionId ])
     }
 }

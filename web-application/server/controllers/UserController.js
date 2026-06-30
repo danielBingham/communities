@@ -32,6 +32,7 @@ const {
     MutualsService,
     PermissionService,
     SessionService,
+    TokenService,
     UserService,
     ValidationService,
 
@@ -70,6 +71,7 @@ module.exports = class UserController extends BaseController{
         this.mutualsService = new MutualsService(core)
         this.permissionService = new PermissionService(core)
         this.sessionService = new SessionService(core)
+        this.tokenService = new TokenService(core)
         this.userService = new UserService(core)
         this.validationService = new ValidationService(core)
 
@@ -909,9 +911,12 @@ module.exports = class UserController extends BaseController{
         //
         if ( user.token ) {
             try {
-                token = await this.tokenDAO.validateToken(user.token, [ 'reset-password', 'invitation' ])
+                token = await this.tokenService.validateToken(user.token, [ 'reset-password', 'invitation' ])
             } catch (error ) {
-                if ( error instanceof DAOError ) {
+                request.logger.error(`Error validating token: `, error)
+                if ( error instanceof ServiceError) {
+                    throw new ControllerError(403, 'not-authorized', error.message, `Invalid token.`)
+                } else if ( error instanceof DAOError ) {
                     throw new ControllerError(403, 'not-authorized', error.message, `Invalid token.`)
                 } else {
                     throw error
@@ -1111,18 +1116,35 @@ module.exports = class UserController extends BaseController{
             request.session.user = entity 
         }
 
+        // If they updated their password, then we need to notify them.
+        if ( ( type === 'authenticated-edit' && 'password' in user ) || type === 'password-reset' ) {
+            await this.emailService.sendPasswordChangeAlert(entity)
+        }
+
         // If the user's status has been set to 'banned', then we need to
         // destroy their sessions and log them out.
-        if ( entity.status === 'banned' || type === 'password-reset'  ) {
+        if ( entity.status === 'banned' ) {
             await this.sessionService.deleteSessionsForUser(entity.id)
         }
+
+        // If they changed their password, then we need to destroy all sessions
+        // but the current one.
+        //
+        // If this is a password reset, then they won't have a current session.
+        if ( type === 'password-reset' ) {
+            await this.sessionService.deleteSessionsForUser(entity.id)
+        } else if ( type === 'authenticated-edit' && 'password' in user ) {
+            await this.sessionService.deleteSessionsForUserExcept(entity.id, request.sessionID)
+        }
+
 
         // If we've changed the email, then we need to send out a new
         // confirmation token.
         if ( entity.email != existingUser.email ) {
-            const token = this.tokenDAO.createToken('email-confirmation')
-            token.userId = entity.id
-            token.id = await this.tokenDAO.insertToken(token)
+            const token = await this.tokenService.createToken({
+                type: 'email-confirmation',
+                userId: entity.id
+            })
 
             await this.emailService.sendEmailConfirmation(entity, token)
         }

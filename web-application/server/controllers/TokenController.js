@@ -20,6 +20,7 @@
 const { 
     AuthenticationService, 
     EmailService, 
+    TokenService,
 
     TokenDAO,
     UserDAO,
@@ -44,6 +45,7 @@ module.exports = class TokenController extends BaseController {
 
         this.authenticationService = new AuthenticationService(core)
         this.emailService = new EmailService(core)
+        this.tokenService = new TokenService(core)
 
         this.tokenDAO = new TokenDAO(core)
         this.userDAO = new UserDAO(core)
@@ -126,7 +128,7 @@ module.exports = class TokenController extends BaseController {
             // TokenDAO::validateToken() checks both of the following:
             // 3. Token(:token) must be exist
             // 4. Token(:token) must have type equal to request.query.type 
-            token = await this.tokenDAO.validateToken(request.params.token, [ request.query.type ])
+            token = await this.tokenService.validateToken(request.params.token, [ request.query.type ])
         } catch (error) {
             if ( error instanceof DAOError ) {
                 throw new ControllerError(403, 'not-authorized', 
@@ -253,10 +255,11 @@ module.exports = class TokenController extends BaseController {
             }
             const user = userResults.dictionary[userResults.list[0]]
 
-            const token = this.tokenDAO.createToken(tokenParams.type)
-            token.userId = user.id
-            token.creatorId = null
-            token.id = await this.tokenDAO.insertToken(token)
+            const token = await this.tokenService.createToken({ 
+                type: tokenParams.type,
+                userId: user.id,
+                creatorId: null
+            })
 
             try {
                 await this.emailService.sendPasswordReset(user, token)
@@ -309,9 +312,10 @@ module.exports = class TokenController extends BaseController {
                     `You are not awaiting email confirmation.  You may not request a confirmation email.`)
             }
 
-            const token = this.tokenDAO.createToken('email-confirmation')
-            token.userId = user.id
-            token.id = await this.tokenDAO.insertToken(token)
+            const token = await this.tokenService.createToken({
+                type: 'email-confirmation',
+                userId: user.id
+            })
 
             try {
                 await this.emailService.sendEmailConfirmation(user, token)

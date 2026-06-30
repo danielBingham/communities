@@ -52,7 +52,7 @@ module.exports = class SystemController extends BaseController {
         // anytime we destroy the session, which is the desired behavior.
         if ( request.session?.csrfToken === undefined  || request.session?.csrfToken === null ) {
             const tokenService = new TokenService(this.core)
-            request.session.csrfToken = tokenService.createToken()
+            request.session.csrfToken = tokenService.createCSRFToken()
         } 
 
         result.csrf = request.session.csrfToken

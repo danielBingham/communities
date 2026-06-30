@@ -163,6 +163,9 @@ const SCHEMA = {
             },
             'authentication__multifactor_state': {
                 insert: DAO.INSERT.ALLOW,
+                insertDefault: function() {
+                    return 'disabled'
+                },
                 update: DAO.UPDATE.ALLOW,
                 select: DAO.SELECT.REQUEST,
                 key: 'authenticationMultifactorState',

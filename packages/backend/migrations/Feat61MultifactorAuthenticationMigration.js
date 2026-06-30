@@ -17,6 +17,8 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
+const crypto = require('node:crypto')
+
 const BaseMigration = require('./BaseMigration')
 
 module.exports = class Feat61MultifactorAuthenticationMigration extends BaseMigration {
@@ -72,5 +74,8 @@ module.exports = class Feat61MultifactorAuthenticationMigration extends BaseMigr
 
     async migrateForward(targets) { }
 
-    async migrateBack(targets) { }
+    async migrateBack(targets) { 
+
+
+    }
 }

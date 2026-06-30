@@ -22,9 +22,9 @@ const {
     AuthenticationService,
     EmailService,
     MultifactorAuthenticationService,
+    TokenService,
 
     UserDAO,
-    TokenDAO,
 
     ServiceError
 } = require('@communities/backend')
@@ -49,9 +49,9 @@ module.exports = class AuthenticationController {
         this.auth = new AuthenticationService(core)
         this.emailService = new EmailService(core)
         this.multifactorAuthentication = new MultifactorAuthenticationService(core)
+        this.tokenService = new TokenService(core)
 
         this.userDAO = new UserDAO(core)
-        this.tokenDAO = new TokenDAO(core)
     }
 
 
@@ -159,7 +159,7 @@ module.exports = class AuthenticationController {
                 credentials.email = credentials.email.trim().toLowerCase()
                 userId = await this.auth.authenticateUser(credentials)
             } else if ( 'token' in credentials) {
-                const token = await this.tokenDAO.validateToken(credentials.token, [ 'reset-password', 'email-confirmation', 'invitation'])
+                const token = await this.tokenService.validateToken(credentials.token, [ 'email-confirmation', 'invitation'])
                 userId = token.userId
             }
 
