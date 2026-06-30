@@ -57,6 +57,13 @@ module.exports = class Feat61MultifactorAuthenticationMigration extends BaseMigr
 
         await this.core.database.query(`CREATE INDEX IF NOT EXISTS user_recovery_codes__code ON user_recovery_codes (code)`, [])
         await this.core.database.query(`CREATE INDEX IF NOT EXISTS user_recovery_codes__user_id ON user_recovery_codes (user_id)`, [])
+
+        await this.core.database.query(`
+            CREATE TABLE tokens_hash_migration (
+                id uuid PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
+                token text
+            )
+        `, [])
     }
 
     async initBack() { 
@@ -70,12 +77,39 @@ module.exports = class Feat61MultifactorAuthenticationMigration extends BaseMigr
         await this.core.database.query(`ALTER TABLE users DROP COLUMN IF EXISTS authentication__multifactor_last_attempt_date`, [])
 
         await this.core.database.query(`DROP TYPE IF EXISTS user_multifactor_state`, [])
+
+        await this.core.database.query(`DROP TABLE IF EXISTS tokens_hash_migration`, [])
     }
 
-    async migrateForward(targets) { }
+    async migrateForward(targets) { 
+        await this.core.database.query(`
+            INSERT INTO tokens_hash_migration (id, token) 
+                SELECT id, token FROM tokens
+            ON CONFLICT DO NOTHING 
+        `, [])
+
+        const results = await this.core.database.query(`SELECT id, token FROM tokens`, [])
+        
+        if ( results.rows.length <= 0 ) {
+            return
+        }
+
+        for(const row of results.rows) {
+            const tokenHash = crypto.hash('sha256', row.token)
+            await this.core.database.query(`
+                UPDATE tokens SET token = $1 WHERE id = $2
+            `, [ tokenHash, row.id ])
+        }
+    }
 
     async migrateBack(targets) { 
-
-
+        await this.core.database.query(`
+            UPDATE tokens 
+                SET token = backup.token 
+            FROM (
+                SELECT id, token FROM tokens_hash_migration
+            ) as backup
+            WHERE tokens.id = backup.id
+        `, [])
     }
 }
