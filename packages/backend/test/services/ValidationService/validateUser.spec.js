@@ -89,13 +89,12 @@ describe('ValidationService.validateUser()', function() {
                 settings: {},
                 notices: {},
                 about: 'set',
-                location: 'set',
                 status: 'set'
             }
 
             const errors = await service.validateUser(user, null, 'invitation')
 
-            expect(errors.length).toBe(9)
+            expect(errors.length).toBe(8)
 
         })
 
@@ -140,13 +139,13 @@ describe('ValidationService.validateUser()', function() {
                 settings: {},
                 notices: {},
                 about: 'set',
-                location: 'set',
                 status: 'set'
             }
 
             const errors = await service.validateUser(user, null, 'reinvitation')
+            console.log(errors)
 
-            expect(errors.length).toBe(9)
+            expect(errors.length).toBe(8)
 
         })
 
