@@ -165,7 +165,7 @@ const ResetPasswordForm = function(props) {
 
     return (
         <div className="reset-password-form">
-                { request?.state === 'fulfilled' && <Alert type="success" timeout={3000} onClear={() => completeReset()}>Password reset.  You will be redirected to the login page shortly.</Alert> }
+                { request?.state === 'fulfilled' && <Alert type="success" timeout={1500} onClear={() => completeReset()}>Password reset.  You will be redirected to the login page shortly.</Alert> }
             <form onSubmit={onSubmit}>
                 <div className="instructions">Please enter a new password for your Communities account.</div> 
                 <Input

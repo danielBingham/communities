@@ -67,7 +67,13 @@ module.exports = class TokenService {
         const buffer = crypto.randomBytes(32)
         const tokenContent = buffer.toString('base64url')
 
-        const tokenHash = crypto.hash('sha256', tokenContent) 
+        let tokenHash = '' 
+        if ( this.core.features.has('feat-61-multifactor-authentication') ) {
+            tokenHash = crypto.hash('sha256', tokenContent) 
+        } else {
+            tokenHash = tokenContent
+        }
+
 
         const tokenRow = {
             type: token.type,
@@ -89,16 +95,13 @@ module.exports = class TokenService {
             }
         }
 
-        // Rather than explicitly migrating and hashing all the tokens, we're
-        // going to do a soft migration.  Since the longest lived tokens expire
-        // after a month, we'll finish the migration at the end of the 30 day
-        // period.
-        //
-        // This saves us having to do a pretty complex migration where we
-        // create a temp table to hold the old tokens in order to allow us to
-        // rollback the migration.
-        const tokenHash = crypto.hash('sha256', tokenString)
-        const tokens = await this.tokenDAO.selectTokens('WHERE tokens.token = $1 OR tokens.token = $2', [ tokenHash, tokenString ])
+        let tokenHash = ''
+        if ( this.core.features.has('feat-61-multifactor-authentication') ) {
+            tokenHash = crypto.hash('sha256', tokenString)
+        } else {
+            tokenHash = tokenString
+        }
+        const tokens = await this.tokenDAO.selectTokens('WHERE tokens.token = $1', [ tokenHash ])
 
         if ( tokens.length <= 0 ) {
             throw new ServiceError('not-found',
