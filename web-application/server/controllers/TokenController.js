@@ -195,11 +195,23 @@ module.exports = class TokenController extends BaseController {
         } 
 
         else if ( token.type == 'invitation' ) {
+            // The whole invitation flow assumes the user is authenticated.  We
+            // can't remove that authentication with out totally rewiring the
+            // invitation flow.  They're going to be setting their password and
+            // everything in this case anyway (they don't have one yet).  So
+            // the risk is really that someone could register with someone
+            // else's email address. 
+            //
+            // It's pretty small in this case, but we should really rewrite the
+            // invitation flow to remove that risk.  That's a future TODO though.
             const session = await this.authenticationService.getSessionForUserId(token.userId)
+
+            // Log the user in.
+            request.session.user = session.user
+            request.session.file = session.file
+
             response.status(200).json({
-                session: {
-                    user: session.user
-                }
+                session: session
             })
         } else {
             throw new ControllerError(403, 'not-authorized',
