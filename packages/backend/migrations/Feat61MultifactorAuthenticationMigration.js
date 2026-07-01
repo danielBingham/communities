@@ -82,13 +82,16 @@ module.exports = class Feat61MultifactorAuthenticationMigration extends BaseMigr
     }
 
     async migrateForward(targets) { 
+        // We always want to add new plaintext tokens to the backup table.
+        // Because we can recover them.  There won't be hashed tokens in this, because
+        // we'll clean them out.
         await this.core.database.query(`
             INSERT INTO tokens_hash_migration (id, token) 
                 SELECT id, token FROM tokens
             ON CONFLICT DO NOTHING 
         `, [])
 
-        const results = await this.core.database.query(`SELECT id, token FROM tokens`, [])
+        const results = await this.core.database.query(`SELECT id, token FROM tokens_hash_migration`, [])
         
         if ( results.rows.length <= 0 ) {
             return
@@ -103,6 +106,11 @@ module.exports = class Feat61MultifactorAuthenticationMigration extends BaseMigr
     }
 
     async migrateBack(targets) { 
+        // Drop newly added hashed tokens.  They are unrecoverable.
+        await this.core.database.query(`
+            DELETE FROM tokens WHERE id NOT IN (select id from tokens_hash_migration)
+        `, [])
+
         await this.core.database.query(`
             UPDATE tokens 
                 SET token = backup.token 
