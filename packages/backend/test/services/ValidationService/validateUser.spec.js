@@ -143,7 +143,6 @@ describe('ValidationService.validateUser()', function() {
             }
 
             const errors = await service.validateUser(user, null, 'reinvitation')
-            console.log(errors)
 
             expect(errors.length).toBe(8)
 
