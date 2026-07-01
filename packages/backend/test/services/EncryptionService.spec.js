@@ -223,8 +223,11 @@ sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.
             const encryptionService = new EncryptionService(core)
             const encrypted = await encryptionService.encrypt(message, id, 'mfa', 'v1') 
 
+            const encryptedTamper = await encryptionService.encrypt('Hello World', id, 'mfa', 'v1')
+            const tamperedDigest = JSON.parse(Buffer.from(encryptedTamper, 'base64').toString('utf8'))
+
             const digest = JSON.parse(Buffer.from(encrypted, 'base64').toString('utf8'))
-            digest.message = digest.message.substring(0, digest.message.length-1)+'e'
+            digest.message = tamperedDigest.message 
             const tampered = Buffer.from(JSON.stringify(digest), 'utf8').toString('base64')
 
             let result = null
