@@ -106,7 +106,6 @@ CREATE TABLE user_recovery_codes (
     code text,
     user_id uuid REFERENCES users(id) ON DELETE CASCADE NOT NULL
 );
-CREATE INDEX user_recovery_codes__code ON user_recovery_codes (code);
 CREATE INDEX user_recovery_codes__user_id ON user_recovery_codes (user_id);
 
 CREATE TYPE user_relationship_status AS ENUM('pending', 'confirmed', 'blocked');

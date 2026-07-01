@@ -55,7 +55,6 @@ module.exports = class Feat61MultifactorAuthenticationMigration extends BaseMigr
             )
         `, [])
 
-        await this.core.database.query(`CREATE INDEX IF NOT EXISTS user_recovery_codes__code ON user_recovery_codes (code)`, [])
         await this.core.database.query(`CREATE INDEX IF NOT EXISTS user_recovery_codes__user_id ON user_recovery_codes (user_id)`, [])
 
         await this.core.database.query(`
@@ -67,7 +66,6 @@ module.exports = class Feat61MultifactorAuthenticationMigration extends BaseMigr
     }
 
     async initBack() { 
-        await this.core.database.query(`DROP INDEX IF EXISTS user_recovery_codes__code`, [])
         await this.core.database.query(`DROP INDEX IF EXISTS user_recovery_codes__user_id`, [])
         await this.core.database.query(`DROP TABLE IF EXISTS user_recovery_codes`, [])
 
