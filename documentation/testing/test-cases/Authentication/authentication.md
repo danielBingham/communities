@@ -11,6 +11,19 @@ password flow, etc.
 
 ### Cases
 
+- [ ] As a user, I can log in.
+    - As User1, log in through the splash page using username and password.
+        - Confirm authentication by navigating, posting, viewing some posts.
+        - Log out.
+    - As User1, log in through the `/login` page.
+        - Confirm authentication by navigating, posting, viewing some posts.
+        - Log out.
+
+- [ ] As a user, I can log out.
+    - As User1, log in.
+        - Make a draft post, but don't post it.
+        - Select UserMenu -> Logout
+        - Confirm that you are logged out and no longer authenticated.
 - [ ] As User1, log out.
 - [ ] As User1, attempt to log in with the wrong password. Confirm login fails.
 - [ ] As User1, log in with the right password.  Confirm login succeeds.

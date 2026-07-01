@@ -62,7 +62,8 @@ const AcceptInvitationForm = function(props) {
     const [usernameRequest, makeUsernameRequest] = useRequest()
 
     const existing = useSelector((state) => username in state.User.byUsername ? state.User.byUsername[username] : undefined)
-    const user = useSelector((state) => token in state.tokens.usersByToken ? state.tokens.usersByToken[token] : null) 
+    const userId = useSelector((state) => token in state.tokens.userIdsByToken ? state.tokens.userIdsByToken[token] : null) 
+    const user = useSelector((state) => userId in state.User.dictionary ? state.User.dictionary[userId] : null)
 
     /**
      * Perform validation on our state and return a boolean indicating whether

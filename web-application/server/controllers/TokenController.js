@@ -167,26 +167,39 @@ module.exports = class TokenController extends BaseController {
             // TODO better to hang on to it and mark it as used?
             await this.tokenDAO.deleteToken(token)
 
-            const session = await this.authenticationService.getSessionForUserId(token.userId)
+            // If they have a session already, then refresh it.  Otherwise, just return success.
+            if ( currentUser ) {
+                const session = await this.authenticationService.getSessionForUserId(token.userId)
 
-            // Log the user in.
-            request.session.user = session.user
-            request.session.file = session.file
+                // Log the user in.
+                request.session.user = session.user
+                request.session.file = session.file
 
-            response.status(200).json({
-                session: session
-            })
+                response.status(200).json({
+                    session: session
+                })
+            } else {
+                response.status(200).json({
+                    userId: token.userId
+                })
+            }
         } 
         
-        // For reset-password and invitation tokens, we don't log the user in
-        // when we validate the token because those flows have multiple steps.
-        // The user will be logged in at a later step.
-        else if ( token.type == 'reset-password' || token.type == 'invitation') {
+        // For reset-password, we don't log the user in when we validate the
+        // token because those flows have multiple steps. The user will be
+        // logged in at a later step.
+        else if ( token.type == 'reset-password' ) {
+            response.status(200).json({
+                userId: token.userId
+            })
+        } 
 
+        else if ( token.type == 'invitation' ) {
             const session = await this.authenticationService.getSessionForUserId(token.userId)
             response.status(200).json({
-                user: session.user,
-                file: session.file
+                session: {
+                    user: session.user
+                }
             })
         } else {
             throw new ControllerError(403, 'not-authorized',

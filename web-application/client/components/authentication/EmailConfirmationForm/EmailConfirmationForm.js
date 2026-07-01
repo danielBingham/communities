@@ -52,10 +52,24 @@ const EmailConfirmationForm = function({ initialToken }) {
         }
         makeRequest(validateToken(token, 'email-confirmation'))
     }
+
+    const completeValidation = function() {
+        window.location.href = '/login'
+    }
+
+    // If we have an initialToken, go ahead and validate it.
+    useEffect(() => {
+        if ( initialToken !== undefined && initialToken !== null && typeof initialToken === 'string' && initialToken.length > 0 ) {
+            makeRequest(validateToken(initialToken, 'email-confirmation'))
+        }
+    }, [ initialToken ])
     
     return (
         <div className="email-confirmation-form">
             { error && <Alert type="error" timeout={5000}>That token was invalid.  Please enter a valid token.</Alert> }
+            { ! currentUser && request?.state === 'fulfilled' && 
+                <Alert type="success" timeout={1500} onClear={() => completeValidation()}>Email successfully validated!  You'll be redirected to login shortly.</Alert> 
+            }
             <div className="email-confirmation-form__instructions">
                 <p>
                     Please check your email { currentUser ? `, "${ currentUser.email }",` : '' } for a

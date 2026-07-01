@@ -30,7 +30,7 @@ const ResetPasswordForm = function(props) {
     const [request, makeRequest] = useRequest()
     const [ tokenRequest, makeTokenRequest ] = useRequest()
 
-    const user = useSelector((state) => token in state.tokens.usersByToken ? state.tokens.usersByToken[token] : null)
+    const userId = useSelector((state) => token in state.tokens.userIdsByToken ? state.tokens.userIdsByToken[token] : null)
 
     /**
      * Perform validation on our state and return a boolean indicating whether
@@ -85,7 +85,7 @@ const ResetPasswordForm = function(props) {
 
 
         const userPatch = {
-            id: user.id,
+            id: userId,
             password: newPassword,
             token: token
         }
