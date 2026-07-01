@@ -76,7 +76,7 @@ const Alert = function({ type, timeout, onClear, className, children }) {
     // element first, then fall back to the `#root-layout`, and finally to the
     // `<body>` element.
     let container = document.body
-    const mainElements = document.getElementsByName('main')
+    const mainElements = document.getElementsByTagName('main')
     if ( mainElements.length <= 0 ) {
         const root = document.getElementById('root-layout')
         if ( root !== null && root !== undefined ) {

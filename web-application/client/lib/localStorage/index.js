@@ -17,6 +17,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
+import logger from '/logger'
 
 /** Can we use local storage? **/
 export const isLocalStorageAvailable = function() {
