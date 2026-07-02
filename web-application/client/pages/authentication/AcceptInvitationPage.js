@@ -17,6 +17,8 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
+import Card from '/components/ui/Card'
+
 import AcceptInvitationForm from '/components/authentication/AcceptInvitationForm'
 
 import CommunitiesLogo from '/components/header/CommunitiesLogo'
@@ -26,8 +28,10 @@ import './AcceptInvitationPage.css'
 const AcceptInvitationPage = function(props) {
     return (
         <div id="accept-invitation-page">
-            <div className="logo"><CommunitiesLogo type="logo" /></div>
-            <AcceptInvitationForm />
+            <Card className="accept-invitation-page__card">
+                <div className="logo"><CommunitiesLogo type="logo" /></div>
+                <AcceptInvitationForm />
+            </Card>
         </div>
     )
 

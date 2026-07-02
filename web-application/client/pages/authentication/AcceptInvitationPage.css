@@ -1,30 +1,33 @@
+#accept-invitation-page {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+    align-items: center;
+    justify-items: center;
 
-#accept-invitation-page .logo {
+    height: 100vh;
+    width: 100%;
+    padding: 20px 0;
+}
+
+.accept-invitation-page__card .logo {
     text-align: center;
 }
+
 @media (width > 700px) {
-    #accept-invitation-page {
-        margin: 0px auto;
+    .accept-invitation-page__card {
         box-sizing: border-box;
         display: block;
         padding: 20px;
         width: 600px;
-        border: thin solid var(--main-border-color);
-        background-color: white;
-        border-radius: 10px;
-        box-shadow: 0 0 7px -5px rgba(0,0,0,0.25);
         z-index:101;
     }
 }
 @media (width <= 700px) {
-    #accept-invitation-page {
+    .accept-invitation-page__card {
         box-sizing: border-box;
         display: block;
         padding: 10px;
         width: 100%;
-        border-top: thin solid var(--main-border-color);
-        border-bottom: thin solid var(--main-border-color);
-        background-color: white;
-        z-index:101;
     }
 }
