@@ -39,16 +39,14 @@ const EmailConfirmationPage = function(props) {
 
     useEffect(function() {
         if ( 
-             ( ! token && ! currentUser ) // No token and they aren't logged in. Just show the splash page.
-                || (currentUser && currentUser.status != 'unconfirmed') // They are logged in, but they've already confirmed or haven't finished registering.
+                (currentUser && currentUser.status != 'unconfirmed') // They are logged in, but they've already confirmed or haven't finished registering.
         ) {
             navigate('/')
         }
     }, [ currentUser, token ])
 
     if (  
-        ( ! token && ! currentUser ) // No token and they aren't logged in, show a spinner until they are navigated away.
-        || (currentUser && currentUser.status !== 'unconfirmed') // They are logged in, but aren't unconfirmed.  Ditto.
+         (currentUser && currentUser.status !== 'unconfirmed') // They are logged in, but aren't unconfirmed.  Ditto.
     ) {
         return (
             <Spinner />
