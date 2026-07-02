@@ -10,7 +10,7 @@ password flow, etc.
 ### Cases
 
 
-#### Log in: Success cases
+#### Log in
 
 - [ ] As a user, I can log in through the splash page.
     - As unauthenticated user:
@@ -34,8 +34,13 @@ password flow, etc.
         - Log in.
             - **Confirm draft post has been cleared.**
 
-
-#### Log in: Error Cases
+- [ ] As a user, I get temporarily locked out after too many attempts.
+    - As User1: 
+        - Attempt to login with the wrong pasword 10 times.
+        - Confirm locked out.
+        - Wait 15 minutes.
+        - Login with correct password.
+        - Confirm logged in.
 
 - [ ] As a user, I can only log in with the correct password.
     - As unauthenticated user:
@@ -47,6 +52,13 @@ password flow, etc.
         - Attempt to log in with an email not associated to an account.
         - Attempt to log in with User1's email and incorrect password.
             - **Confirm both failures give same message.**
+
+- [ ] As a user, actions in a stale tab are rejected after I have logged out and back in.
+    - As User1:
+        - Log in and open the app in two tabs (Tab A and Tab B).
+        - In Tab A, log out and then log back in.
+        - In Tab B (still showing the old session), attempt a state-changing action (e.g. post or edit profile).
+            - **Confirm the action is rejected rather than silently succeeding.**
 
 #### Reset Password
 
@@ -87,31 +99,59 @@ password flow, etc.
         - Enter valid TOPT token.
             - **Confirm log in success.**
 
+- [ ] As a user, a password reset link can only be used once.
+    - As User1:
+        - Log out and click "Forgot password?"
+        - Enter User1's email and follow the link in the reset email.
+        - Enter a new password and submit.
+            - **Confirm success and redirect to login.**
+        - Navigate back to the same reset link (browser back or paste the URL again).
+            - **Confirm the link is now rejected with an invalid-token error.**
 
-#### Authentication Lockout 
+- [ ] As a user, an expired password reset link is rejected.
+    - As User1:
+        - Log out and click "Forgot password?"
+        - Enter User1's email but do not open the link yet.
+        - Wait longer than 30 minutes, then follow the link in the reset email.
+            - **Confirm the link is rejected with an invalid/expired-token error.**
+        - Request a new reset and confirm a fresh link works.
 
-- [ ] As a user, I get temporarily locked out after too many attempts.
-    - As User1: 
-        - Attempt to login with the wrong pasword 10 times.
-        - Confirm locked out.
-        - Wait 15 minutes.
-        - Login with correct password.
-        - Confirm logged in.
+
+- [ ] As a user, requesting a reset for an unknown email doesn't reveal whether an account exists.
+    - As unauthenticated user:
+        - Click "Forgot password?" and enter an email not associated with any account.
+            - **Confirm the same success/confirmation message is shown as for a known email.**
+            - **Confirm no reset email is received at that address.**
+
+- [ ] As a user, resetting my password logs out all of my other sessions.
+    - As User1:
+        - Log in on Browser A and, separately, on Browser B.
+        - On Browser A, log out and complete the "Forgot password?" reset flow with a new password.
+        - Return to Browser B and attempt to navigate or post.
+            - **Confirm Browser B's session is no longer authenticated.**
+
+- [ ] As a user, I am not automatically logged in after resetting my password.
+    - As User1:
+        - Complete the "Forgot password?" reset flow with a new password.
+            - **Confirm I land on the login page and am not authenticated.**
+        - Log in with the new password.
+            - **Confirm success.**
+
+- [ ] As a user, the reset password form validates the new password.
+    - As User1:
+        - Log out.
+        - Open a valid reset link.
+        - Enter a new password shorter than 12 characters. Submit.
+            - **Confirm a validation error.**
+        - Enter a new password longer than 256 characters. Submit.
+            - **Confirm a validation error.**
+        - Enter a new password but a non-matching confirmation. Submit.
+            - **Confirm a confirmation-mismatch error.**
+        - Enter a valid, matching password. Submit.
+            - **Confirm success.**
+
 
 ### Multifactor Authentication
-
-- [ ] As a user, I can enable multifactor authentication.
-    - As User1:
-        - Select "Multifactor Authentication" from the UserMenu.
-        - Click "Setup Multifactor Authentication"
-        - Use an authentication app to follow the QR code.
-            - **Confirm app loads an authentication site with correct values for Site (Communities) and email (User1's email).**
-        - Enter an invalid 6 digit code.
-            - **Confirm error.**
-        - Enter the 6 digit code from the authentication app to confirm setup.
-            - **Confirm setup confirmed and recovery codes presented.**
-            - **Confirm email notifying of MFA change.**
-        - Save the backup codes somewhere accessible.
 
 - [ ] As a user with MFA enabled, I should be required to enter a TOPT token when logging in.
     - As User1:
@@ -178,3 +218,70 @@ password flow, etc.
         - From the UserMenu select "Multifactor Authentication".
         - Click "Disabled Multifactor Authentication".
             - **Confirm email notification of MFA change recieved.**
+
+- [ ] As a user who has entered my password but not my MFA token, I cannot access authenticated content.
+    - As User1:
+        - Log out, then log in with email and password so the MFA screen is shown.
+        - Without entering a token, attempt to navigate directly to an authenticated page (e.g. the home feed or a group URL).
+            - **Confirm authenticated content is not shown and I remain on the MFA screen.**
+        - Attempt an authenticated action (e.g. loading my feed) via the app.
+            - **Confirm the action is not permitted while MFA is pending.**
+
+- [ ] As a user at the MFA screen, I can cancel and return to an unauthenticated state.
+    - As User1:
+        - Log out, then log in with email and password so the MFA screen is shown.
+        - Click "Cancel".
+            - **Confirm I am returned to an unauthenticated state and am not logged in.**
+        - Attempt to navigate to an authenticated page.
+            - **Confirm authenticated content is not shown.**
+
+- [ ] As a user, a valid TOPT token succeeds after a few failed attempts and clears the counter.
+    - As User1:
+        - Log out and log in with email and password.
+        - Enter an invalid TOPT token a few times (fewer than 10).
+        - Enter a valid TOPT token.
+            - **Confirm login succeeds.**
+        - Log out and log in again, entering a valid token on the first try.
+            - **Confirm login succeeds (the earlier failures did not carry over).**
+
+- [ ] As a user, an out-of-date TOPT token is rejected.
+    - As User1:
+        - Log out and log in with email and password.
+        - Note the current code in the authenticator app, then wait for it to roll over to a new code.
+        - Enter the previous (now expired) code.
+            - **Confirm it is rejected.**
+        - Enter the current code.
+            - **Confirm login succeeds.**
+
+- [ ] As a user, the MFA token field rejects malformed input.
+    - As User1:
+        - Log out and log in with email and password to reach the MFA screen.
+        - Submit with the token field empty.
+            - **Confirm a validation error.**
+        - Enter fewer than 6 digits and submit.
+            - **Confirm a validation error.**
+        - Enter more than 6 characters and submit.
+            - **Confirm a validation error.**
+
+- [ ] As a user, the recovery code field rejects malformed input.
+    - As User1:
+        - Log out and log in with email and password, then switch to the recovery code view.
+        - Submit with the recovery code field empty.
+            - **Confirm a validation error.**
+        - Enter a recovery code of the wrong length and submit.
+            - **Confirm a validation error.**
+
+- [ ] As a user, switching between the TOPT and recovery code views keeps my pending login.
+    - As User1:
+        - Log out and log in with email and password to reach the MFA screen.
+        - Switch to the recovery code view and back to the TOPT view.
+        - Enter a valid TOPT token.
+            - **Confirm login succeeds (I was not forced to re-enter my password).**
+
+- [ ] As a user, invalid TOPT tokens and invalid recovery codes count toward the same rate limit.
+    - As User1:
+        - Log out and log in with email and password.
+        - Enter a mix of invalid TOPT tokens and invalid recovery codes totaling 10 attempts.
+            - **Confirm rate limiting engages.**
+        - Wait 30 seconds and enter a valid token or recovery code.
+            - **Confirm login succeeds.**
