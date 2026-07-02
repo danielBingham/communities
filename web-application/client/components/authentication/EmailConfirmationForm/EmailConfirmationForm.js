@@ -95,7 +95,9 @@ const EmailConfirmationForm = function({ initialToken }) {
                     />
 
                 </p>
-                { currentUser && <LogoutAction type="button" /> } <ResendTokenAction /> <Button type="primary" onClick={() => validate()}><CheckCircleIcon /> Confirm Email</Button>
+                { currentUser && <LogoutAction type="button" /> } 
+                <ResendTokenAction />  {/* Resend action will request the email if it doesn't have it. */}
+                <Button type="primary" onClick={() => validate()}><CheckCircleIcon /> Confirm Email</Button>
                 <p>
                     If you need help, don't hesitate to reach out to <a href="mailto:contact@communities.social">contact@communities.social</a>.
                 </p>
