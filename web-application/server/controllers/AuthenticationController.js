@@ -159,7 +159,7 @@ module.exports = class AuthenticationController {
                 credentials.email = credentials.email.trim().toLowerCase()
                 userId = await this.auth.authenticateUser(credentials)
             } else if ( 'token' in credentials) {
-                const token = await this.tokenService.validateToken(credentials.token, [ 'email-confirmation', 'invitation'])
+                const token = await this.tokenService.validateToken(credentials.token, [ 'invitation'])
                 userId = token.userId
             }
 
