@@ -28,8 +28,11 @@ const {
     EmailService,
     FileService,
     NotificationService,
+    MultifactorAuthenticationService,
     MutualsService,
     PermissionService,
+    SessionService,
+    TokenService,
     UserService,
     ValidationService,
 
@@ -64,8 +67,11 @@ module.exports = class UserController extends BaseController{
         this.emailService = new EmailService(core)
         this.fileService = new FileService(core)
         this.notificationService = new NotificationService(core)
+        this.multifactorAuthenticationService = new MultifactorAuthenticationService(core)
         this.mutualsService = new MutualsService(core)
         this.permissionService = new PermissionService(core)
+        this.sessionService = new SessionService(core)
+        this.tokenService = new TokenService(core)
         this.userService = new UserService(core)
         this.validationService = new ValidationService(core)
 
@@ -783,7 +789,7 @@ module.exports = class UserController extends BaseController{
             throw new ControllerError(401, 'not-authenticated', 
                 `Unauthenticated user attempting to update user(${user.id}).`,
                 `You must be authenticated to update a user.`)
-        } 
+        }  
 
         // 2b. :id must equal request.body.id
         if ( id != user.id ) {
@@ -802,6 +808,82 @@ module.exports = class UserController extends BaseController{
         }
 
         const existingUser = existingUsers.dictionary[id]
+
+        // ======== Multi-factor Authentication Path ==========================
+        // The PATCH endpoint is used to enable multi-factor authentication.
+        // This is a different code path from standard user update and
+        // overrides all other user updates. If the key
+        // `authenticationMultifactorState` is present in a user patch, then
+        // this is a multi-factor authentication configuration and that
+        // overrides.
+
+        if ( 'authenticationMultifactorState' in user ) {
+            // We allow users to update their password with a correct token.  But
+            // we don't want them to be able to update their multifactor auth state
+            // with a token.  To do that, they must be fully logged in.
+            if ( ! currentUser ) {
+                throw new ControllerError(403, 'not-authorized',
+                    `Unauthenticated user attempting to initial multi-factor authentication.`,
+                    `You must be authenticated to update a user.`)
+
+            }
+
+            // User's can only turn on multi-factor authentication for
+            // themselves.
+            if ( currentUser.id !== id ) {
+                throw new ControllerError(403, 'not-authorized',
+                    `User(${currentUser.id}) attempting to alter multifactor setup for User(${id}).`,
+                    `You may only setup multifactor authentication for yourself.`)
+            }
+
+            if ( user.authenticationMultifactorState === 'disabled' ) {
+                await this.multifactorAuthenticationService.disable(id)
+
+                const results = await this.userDAO.selectUsers({
+                    where: `users.id = $1`,
+                    params: [ id ],
+                    fields: 'all'
+                })
+
+                // Update the session!  If we don't do this, the session and
+                // the user will get out of sync.
+                request.session.user = results.dictionary[id]
+
+                await this.emailService.sendMFAAlert(request.session.user, 'disabled')
+
+                const relations = await this.getRelations(currentUser, results)
+
+                return response.status(200).json({ 
+                    entity: results.dictionary[id],
+                    relations: relations
+                })
+            } else if ( user.authenticationMultifactorState === 'pending' ) {
+                const secret = await this.multifactorAuthenticationService.initialize(id)
+
+                const results = await this.userDAO.selectUsers({
+                    where: `users.id = $1`,
+                    params: [ id ],
+                    fields: 'all'
+                })
+
+                // Update the session!  If we don't do this, the session and
+                // the user will get out of sync.
+                request.session.user = results.dictionary[id]
+
+                const relations = await this.getRelations(currentUser, results)
+
+                return response.status(200).json({ 
+                    entity: results.dictionary[id],
+                    relations: relations,
+                    multifactorSecret: secret
+                })
+            } 
+
+            // If we get here, the user attempted to update with an invalid value.  Return an error.
+            throw new ControllerError(400, 'invalid',
+                `User attempted to update User.authenticationMultifactorState with invalid value.`,
+                `'${user.authenticationMultifactorState}' is not a valid value.  Value values are 'pending' or 'disabled'.`)
+        }
 
         // ======== PATCH Type Determination and Authentication ===============
         // There are a number of circumstances where the User can be PATCHed,
@@ -829,9 +911,12 @@ module.exports = class UserController extends BaseController{
         //
         if ( user.token ) {
             try {
-                token = await this.tokenDAO.validateToken(user.token, [ 'reset-password', 'invitation' ])
+                token = await this.tokenService.validateToken(user.token, [ 'reset-password', 'invitation' ])
             } catch (error ) {
-                if ( error instanceof DAOError ) {
+                request.logger.error(`Error validating token: `, error)
+                if ( error instanceof ServiceError) {
+                    throw new ControllerError(403, 'not-authorized', error.message, `Invalid token.`)
+                } else if ( error instanceof DAOError ) {
                     throw new ControllerError(403, 'not-authorized', error.message, `Invalid token.`)
                 } else {
                     throw error
@@ -1019,28 +1104,47 @@ module.exports = class UserController extends BaseController{
         // refreshed and GET /authentication will be called which will pull the
         // full session.
         //
+        // NOTE: We do not want to update the user for password resets.  OWASP
+        // guidances says not to log the user in after resetting their
+        // password. It would allow them to skip the MFA flow.
+        //
         // TECHDEBT This isn't the cleanest flow, and it's probably going to
         // prove a bit brittle.
         if ( (currentUser && currentUser.id === entity.id )
-            || ( type === 'password-reset' || type === 'invitation-acceptance')) 
+            || ( type === 'invitation-acceptance')) 
         {
             request.session.user = entity 
+        }
+
+        // If they updated their password, then we need to notify them.
+        if ( ( type === 'authenticated-edit' && 'password' in user ) || type === 'password-reset' ) {
+            await this.emailService.sendPasswordChangeAlert(entity)
         }
 
         // If the user's status has been set to 'banned', then we need to
         // destroy their sessions and log them out.
         if ( entity.status === 'banned' ) {
-            await this.core.database.query(`
-                DELETE FROM session WHERE sess->'user'->>'id' = $1
-            `, [ entity.id ])
+            await this.sessionService.deleteSessionsForUser(entity.id)
         }
+
+        // If they changed their password, then we need to destroy all sessions
+        // but the current one.
+        //
+        // If this is a password reset, then they won't have a current session.
+        if ( type === 'password-reset' ) {
+            await this.sessionService.deleteSessionsForUser(entity.id)
+        } else if ( type === 'authenticated-edit' && 'password' in user ) {
+            await this.sessionService.deleteSessionsForUserExcept(entity.id, request.sessionID)
+        }
+
 
         // If we've changed the email, then we need to send out a new
         // confirmation token.
         if ( entity.email != existingUser.email ) {
-            const token = this.tokenDAO.createToken('email-confirmation')
-            token.userId = entity.id
-            token.id = await this.tokenDAO.insertToken(token)
+            const token = await this.tokenService.createToken({
+                type: 'email-confirmation',
+                userId: entity.id
+            })
 
             await this.emailService.sendEmailConfirmation(entity, token)
         }

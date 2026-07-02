@@ -20,6 +20,7 @@
 const { 
     AuthenticationService, 
     EmailService, 
+    TokenService,
 
     TokenDAO,
     UserDAO,
@@ -44,6 +45,7 @@ module.exports = class TokenController extends BaseController {
 
         this.authenticationService = new AuthenticationService(core)
         this.emailService = new EmailService(core)
+        this.tokenService = new TokenService(core)
 
         this.tokenDAO = new TokenDAO(core)
         this.userDAO = new UserDAO(core)
@@ -126,9 +128,13 @@ module.exports = class TokenController extends BaseController {
             // TokenDAO::validateToken() checks both of the following:
             // 3. Token(:token) must be exist
             // 4. Token(:token) must have type equal to request.query.type 
-            token = await this.tokenDAO.validateToken(request.params.token, [ request.query.type ])
+            token = await this.tokenService.validateToken(request.params.token, [ request.query.type ])
         } catch (error) {
-            if ( error instanceof DAOError ) {
+            if ( error instanceof ServiceError ) {
+                throw new ControllerError(403, 'not-authorized', 
+                    error.message,
+                    `Your token is invalid. Please request a new one and try again.`)
+            } else if ( error instanceof DAOError ) {
                 throw new ControllerError(403, 'not-authorized', 
                     error.message,
                     `Your token is invalid. Please request a new one and try again.`)
@@ -161,6 +167,43 @@ module.exports = class TokenController extends BaseController {
             // TODO better to hang on to it and mark it as used?
             await this.tokenDAO.deleteToken(token)
 
+            // If they have a session already, then refresh it.  Otherwise, just return success.
+            if ( currentUser ) {
+                const session = await this.authenticationService.getSessionForUserId(token.userId)
+
+                // Log the user in.
+                request.session.user = session.user
+                request.session.file = session.file
+
+                response.status(200).json({
+                    session: session
+                })
+            } else {
+                response.status(200).json({
+                    userId: token.userId
+                })
+            }
+        } 
+        
+        // For reset-password, we don't log the user in when we validate the
+        // token because those flows have multiple steps. The user will be
+        // logged in at a later step.
+        else if ( token.type == 'reset-password' ) {
+            response.status(200).json({
+                userId: token.userId
+            })
+        } 
+
+        else if ( token.type == 'invitation' ) {
+            // The whole invitation flow assumes the user is authenticated.  We
+            // can't remove that authentication with out totally rewiring the
+            // invitation flow.  They're going to be setting their password and
+            // everything in this case anyway (they don't have one yet).  So
+            // the risk is really that someone could register with someone
+            // else's email address. 
+            //
+            // It's pretty small in this case, but we should really rewrite the
+            // invitation flow to remove that risk.  That's a future TODO though.
             const session = await this.authenticationService.getSessionForUserId(token.userId)
 
             // Log the user in.
@@ -169,18 +212,6 @@ module.exports = class TokenController extends BaseController {
 
             response.status(200).json({
                 session: session
-            })
-        } 
-        
-        // For reset-password and invitation tokens, we don't log the user in
-        // when we validate the token because those flows have multiple steps.
-        // The user will be logged in at a later step.
-        else if ( token.type == 'reset-password' || token.type == 'invitation') {
-
-            const session = await this.authenticationService.getSessionForUserId(token.userId)
-            response.status(200).json({
-                user: session.user,
-                file: session.file
             })
         } else {
             throw new ControllerError(403, 'not-authorized',
@@ -253,10 +284,11 @@ module.exports = class TokenController extends BaseController {
             }
             const user = userResults.dictionary[userResults.list[0]]
 
-            const token = this.tokenDAO.createToken(tokenParams.type)
-            token.userId = user.id
-            token.creatorId = null
-            token.id = await this.tokenDAO.insertToken(token)
+            const token = await this.tokenService.createToken({ 
+                type: tokenParams.type,
+                userId: user.id,
+                creatorId: null
+            })
 
             try {
                 await this.emailService.sendPasswordReset(user, token)
@@ -309,9 +341,10 @@ module.exports = class TokenController extends BaseController {
                     `You are not awaiting email confirmation.  You may not request a confirmation email.`)
             }
 
-            const token = this.tokenDAO.createToken('email-confirmation')
-            token.userId = user.id
-            token.id = await this.tokenDAO.insertToken(token)
+            const token = await this.tokenService.createToken({
+                type: 'email-confirmation',
+                userId: user.id
+            })
 
             try {
                 await this.emailService.sendEmailConfirmation(user, token)

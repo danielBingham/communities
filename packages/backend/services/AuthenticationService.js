@@ -82,8 +82,7 @@ module.exports = class AuthenticationService {
          *
          * 1. Their email is attached to a user record in the database.
          * 2. Their email is only attached to one user record in the database.
-         * 3. They have a password set. (If they don't, they authenticated with
-         * ORCID iD and cannot authenticate with this endpoint.)
+         * 3. They have a password set. 
          * 4. The submitted credentials include a password.
          * 5. They are not currently in authentication timeout (more than 10 failed attempts in 15 minutes).
          * 6. The passwords match.
@@ -146,17 +145,5 @@ module.exports = class AuthenticationService {
         await this.database.query(`UPDATE users SET failed_authentication_attempts = 0, last_authentication_attempt_date = now() WHERE id = $1`, [ userMatch.id])
 
         return userMatch.id 
-    }
-
-    async connectOrcid(request, orcidId) {
-        const user = {
-            id: request.session.user.id,
-            orcidId: orcidId
-        }
-        await this.userDAO.updatePartialUser(user)
-
-        const responseBody = await this.loginUser(request.session.user.id, request)
-        responseBody.type = "connection"
-        return responseBody
     }
 }

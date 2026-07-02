@@ -17,6 +17,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
+import { useSelector } from 'react-redux'
 import { Outlet } from 'react-router-dom'
 
 import { useAuthentication } from '/lib/hooks/useAuthentication'
@@ -29,15 +30,52 @@ import Footer from '/components/header/Footer'
 
 import WelcomeSplash from '/pages/authentication/WelcomeSplash'
 import MobileWelcomeSplash from '/pages/authentication/MobileWelcomeSplash'
+import MultifactorAuthenticationPage from '/pages/authentication/MultifactorAuthenticationPage'
 
 import './AuthenticatedLayout.css'
 
+const State = {
+    Unauthenticated: 'unauthenticated',
+    PendingMultifactor: 'pending-multifactor',
+    Authenticated: 'authenticated'
+}
+
 const AuthenticatedLayout = function() {
+    const pendingUserId = useSelector((state) => state.authentication.pendingUserId)
     const currentUser = useAuthentication() 
     useNotifications()
     useHistoryTracking()
 
-    if ( ! currentUser && isNativePlatform() ) {
+    let state = State.Unauthenticated
+    if ( (currentUser === null || currentUser === undefined ) && pendingUserId !== null && pendingUserId !== undefined ) {
+        state = State.PendingMultifactor
+    } else if ( currentUser !== null && currentUser !== undefined && 'id' in currentUser) {
+        state = State.Authenticated
+    }
+
+    if ( state === State.Authenticated ) {
+        return (
+            <>
+            <Header />
+            <main id="authenticated">
+                <Outlet />
+            </main>
+            <Footer />
+            </>
+        )
+    } else if ( state === State.PendingMultifactor ) {
+        return (
+            <>
+                <main>
+                    <MultifactorAuthenticationPage />
+                </main>
+            </>
+        )
+    }
+
+    // Fall through to the unauthenticated state.
+    // state === State.Unauthenticated
+    if ( isNativePlatform() ) {
         return (
             <>
                 <main>
@@ -46,26 +84,16 @@ const AuthenticatedLayout = function() {
             </>
         )
 
-    } else if ( ! currentUser ) {
+    } else {
         return (
             <>
-            <Header />
-            <main id="footerless">
-                <WelcomeSplash />
-            </main>
+                <Header />
+                <main id="footerless">
+                    <WelcomeSplash />
+                </main>
             </>
         )
     }
-
-    return (
-        <>
-        <Header />
-        <main id="authenticated">
-            <Outlet />
-        </main>
-        <Footer />
-        </>
-    )
 }
 
 export default AuthenticatedLayout

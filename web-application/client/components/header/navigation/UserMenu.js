@@ -25,6 +25,7 @@ import {
     EnvelopeIcon,
     LockClosedIcon,
     LockOpenIcon,
+    ShieldCheckIcon,
     CreditCardIcon,
     BellIcon,
     ExclamationTriangleIcon,
@@ -57,6 +58,7 @@ const UserMenu = function(props) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const hasMutualFriends = useFeature('feat-491-mutual-friends')
+    const hasMFA = useFeature('feat-61-multifactor-authentication')
 
     const canModerateSite = can(currentUser, Actions.moderate, Entities.Site)
 
@@ -74,10 +76,6 @@ const UserMenu = function(props) {
      */
     const handleLogout = function(event) {
         event.preventDefault()
-
-        // Clear local storage so their drafts don't carry over to another
-        // login session.
-        localStorage.clear()
 
         makeRequest(deleteAuthentication())
     }
@@ -97,12 +95,13 @@ const UserMenu = function(props) {
                 </DropdownMenuTrigger>
                 <DropdownMenuBody className="user-menu__body">
                     <DropdownMenuSection>
-                        <DropdownMenuItem href={`/${currentUser.username}`}><UserCircleIcon />My Profile</DropdownMenuItem>
+                        <DropdownMenuItem href={`/${currentUser.username}`}><UserCircleIcon />View Profile</DropdownMenuItem>
+                        <DropdownMenuItem href="/account/profile"><PencilIcon/>Edit Profile</DropdownMenuItem>
                     </DropdownMenuSection>
                     <DropdownMenuSection>
-                        <DropdownMenuItem href="/account/profile"><PencilIcon/>Edit Profile</DropdownMenuItem>
-                        <DropdownMenuItem href="/account/change-email"><EnvelopeIcon />Change Email</DropdownMenuItem>
-                        <DropdownMenuItem href="/account/change-password"><LockClosedIcon />Change Password</DropdownMenuItem>
+                        <DropdownMenuItem href="/account/security/change-email"><EnvelopeIcon /> Change Email</DropdownMenuItem>
+                        <DropdownMenuItem href="/account/security/change-password"><LockClosedIcon /> Change Password</DropdownMenuItem>
+                        { hasMFA && <DropdownMenuItem href="/account/security/setup-multifactor"><ShieldCheckIcon />Multifactor Authentication</DropdownMenuItem>}
                     </DropdownMenuSection>
                     <DropdownMenuSection>
                         <DropdownMenuItem href="/account/preferences"><AdjustmentsHorizontalIcon /> Preferences</DropdownMenuItem>
