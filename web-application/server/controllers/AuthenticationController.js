@@ -20,15 +20,16 @@
 
 const { 
     AuthenticationService,
+    EmailService,
+    MultifactorAuthenticationService,
+    TokenService,
 
     UserDAO,
-    TokenDAO,
 
     ServiceError
 } = require('@communities/backend')
 
 const ControllerError = require('../errors/ControllerError')
-
 
 /**
  * Controller for the authentication resource.
@@ -46,9 +47,11 @@ module.exports = class AuthenticationController {
         this.config = core.config
 
         this.auth = new AuthenticationService(core)
+        this.emailService = new EmailService(core)
+        this.multifactorAuthentication = new MultifactorAuthenticationService(core)
+        this.tokenService = new TokenService(core)
 
         this.userDAO = new UserDAO(core)
-        this.tokenDAO = new TokenDAO(core)
     }
 
 
@@ -113,7 +116,14 @@ module.exports = class AuthenticationController {
                     throw error
                 }
             }
+        } else if ( 'pendingUserId' in request.session && request.session.pendingUserId !== null && request.session.pendingUserId !== undefined ) {
+            response.status(200).json({
+                session: {
+                    pendingUserId: request.session.pendingUserId 
+                }
+            })
         } else {
+
             response.status(200).json({
                 session: null
             })
@@ -149,46 +159,202 @@ module.exports = class AuthenticationController {
                 credentials.email = credentials.email.trim().toLowerCase()
                 userId = await this.auth.authenticateUser(credentials)
             } else if ( 'token' in credentials) {
-                const token = await this.tokenDAO.validateToken(credentials.token, [ 'reset-password', 'email-confirmation', 'invitation'])
+                const token = await this.tokenService.validateToken(credentials.token, [ 'invitation'])
                 userId = token.userId
             }
 
             if ( ! userId ) {
                 throw new ControllerError(403, 'authentication-failed',
-                    `No user found with either email or token.`)
+                    `No user found with either email or token.`,
+                    `Authentication failed.`)
 
             }
 
             const session = await this.auth.getSessionForUserId(userId)
-            request.session.user = session.user
-            request.session.file = session.file
+            
+            if ( session.user.authenticationMultifactorState === 'enabled' ) {
+                request.session.pendingUserId = session.user.id
 
-            response.status(200).json({
-                session: session
-            })
+                response.status(200).json({
+                    session: {
+                        pendingUserId: session.user.id
+                    }
+                })
+            } else {
+                request.session.user = session.user
+                request.session.file = session.file
+                response.status(200).json({
+                    session: session 
+                })
+            }
+
         } catch (error ) {
             request.logger.warn(error)
             if ( error instanceof ServiceError ) {
                 if ( error.type == 'no-user' ) {
-                    throw new ControllerError(403, 'authentication-failed', error.message)
+                    throw new ControllerError(403, 'authentication-failed', error.message, `Authentication failed.`)
                 } else if ( error.type == 'multiple-users') {
-                    throw new ControllerError(403, 'authentication-failed', error.message)
+                    throw new ControllerError(403, 'authentication-failed', error.message, `Authentication failed.`)
                 } else if ( error.type == 'no-user-password' ) {
-                    throw new ControllerError(403, 'authentication-failed', error.message)
+                    throw new ControllerError(403, 'authentication-failed', error.message, `Authentication failed.`)
                 } else if ( error.type === 'banned' ) {
-                    throw new ControllerError(403, 'authentication-failed', error.message)
+                    throw new ControllerError(403, 'authentication-failed', error.message, `Authentication failed.`)
                 } else if ( error.type == 'no-credential-password' ) {
-                    throw new ControllerError(400, 'password-required', error.message)
+                    throw new ControllerError(400, 'password-required', error.message, `You must include your password to authenticate.`)
                 } else if ( error.type == 'authentication-failed' ) {
-                    throw new ControllerError(403, 'authentication-failed', error.message)
+                    throw new ControllerError(403, 'authentication-failed', error.message, `Authentication failed.`)
                 } else if ( error.type == 'authentication-timeout' ) {
-                    throw new ControllerError(429, 'authentication-timeout', error.message)
+                    throw new ControllerError(429, 'authentication-timeout', error.message, `Too many attempts. Please wait 15 minutes before trying again.`)
                 } else {
                     throw error
                 }
             } else {
                 throw error 
             }
+        }
+    }
+
+    async patchAuthentication(request, response) {
+        const currentUser = request.session.user
+
+        if ( currentUser ) {
+            if ( ! ( 'token' in request.body ) ) {
+                throw new ControllerError(400, 'invalid',
+                    `User attempting to verify authentication without a token.`,
+                    `You must include a TOPT token to verify your authentication.`)
+            }
+
+            const token = request.body.token
+
+            if ( currentUser.authenticationMultifactorState !== 'pending' ) {
+                throw new ControllerError(403, 'not-authorized',
+                    `Logged in User(${currentUser.id}) attempting to verify authentication.`,
+                    `You are already logged in!`)
+            }
+
+
+            const verified = await this.multifactorAuthentication.verify(currentUser.id, token)
+
+            if ( verified !== true ) {
+                throw new ControllerError(404, 'not-found',
+                    `User(${currentUser.id}) failed to validate their multifactor authentication.`,
+                    `Authentication failed.`)
+            }
+
+            const codes = await this.multifactorAuthentication.generateRecoveryCodes(currentUser.id)
+
+            const userPatch = {
+                id: currentUser.id,
+                authenticationMultifactorState: 'enabled'
+            }
+            await this.userDAO.updateUser(userPatch)
+
+            const session = await this.auth.getSessionForUserId(currentUser.id)
+
+            request.session.user = session.user
+            request.session.file = session.file
+
+            await this.emailService.sendMFAAlert(session.user, 'enabled')
+
+            response.status(200).json({
+                session: session,
+                codes: codes
+            })
+
+            return
+        } else {
+
+            const pendingUserId = request.session.pendingUserId
+
+            if ( ! pendingUserId ) {
+                throw new ControllerError(401, 'not-authenticated',
+                    `Attempt to validate authentication without pending authentication.`,
+                    `You haven't logged in yet.  Log in before submitting an auth token.`)
+            }
+
+            if ( ! ( 'token' in request.body ) && ! ( 'recoveryCode' in request.body ) ) {
+                throw new ControllerError(400, 'invalid',
+                    `User attempting to verify authentication without a token or recovery code.`,
+                    `You must include an TOPT token or recovery code to verify your authentication.`)
+            }
+
+
+            // If they've made more than 10 or more attempts in the last 30 seconds, then rate limit them.
+            const shouldRateLimit = await this.multifactorAuthentication.shouldRateLimit(pendingUserId)
+            if ( shouldRateLimit !== false ) {
+                throw new ControllerError(429, 'too-many-attempts',
+                    `User(${pendingUserId}) is being rate limited for too many MFA attempts.`,
+                    `Too many attempts.  Please wait 30 seconds and try again.`)
+
+            } 
+
+            // If they provided a TOPT token, then use that to verify them.
+            if ( 'token' in request.body ) {
+                const token = request.body.token
+                if ( token === null || token === undefined || ! ( typeof token === 'string' ) || token.length < 6 || token.length > 6 ) {
+                    throw new ControllerError(400, 'invalid',
+                        `User attempting to verify authentication with an invalid token.`,
+                        `You must include an TOPT token to verify your authentication.`)
+                }
+
+                const verified = await this.multifactorAuthentication.verify(pendingUserId, token)
+                if ( verified !== true ) {
+                    await this.multifactorAuthentication.incrementRateLimit(pendingUserId)
+
+                    throw new ControllerError(404, 'not-found',
+                        `User(${pendingUserId}) failed to validate their multifactor authentication.`,
+                        `Authentication failed.`)
+                } else {
+                    await this.multifactorAuthentication.clearRateLimit(pendingUserId)
+                }
+
+                const session = await this.auth.getSessionForUserId(pendingUserId)
+
+                request.session.user = session.user
+                request.session.file = session.file
+
+                response.status(200).json({
+                    session: session
+                })
+                return
+            } else if ( 'recoveryCode' in request.body ) {
+                const code = request.body.recoveryCode
+                if ( code === undefined || code === null || ! ( typeof code === 'string' ) ) {
+                    throw new ControllerError(400, 'invalid',
+                        `User attempting to verify authentication with an invalid recovery code.`,
+                        `You must include a valid recovery code to verify your authentication.`)
+                }
+
+                const verified = await this.multifactorAuthentication.verifyRecoveryCode(pendingUserId, code)
+
+                if ( verified !== true ) {
+                    await this.multifactorAuthentication.incrementRateLimit(pendingUserId)
+
+                    throw new ControllerError(404, 'not-found',
+                        `User(${pendingUserId}) failed to validate their recovery code.`,
+                        `Authentication failed.`)
+                } else {
+                    await this.multifactorAuthentication.clearRateLimit(pendingUserId)
+                }
+
+
+                const session = await this.auth.getSessionForUserId(pendingUserId)
+
+                request.session.user = session.user
+                request.session.file = session.file
+
+                await this.emailService.sendRecoveryCodeUsageAlert(session.user)
+
+                response.status(200).json({
+                    session: session
+                })
+
+                return
+            }
+        
+            throw new ControllerError(400, 'invalid',
+                `User attempting to verify authentication without a token or recovery code.`,
+                `You must include an TOPT token or recovery code to verify your authentication.`)
         }
     }
 

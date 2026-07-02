@@ -31,6 +31,7 @@ const Feat484FindActiveGroupsMigration = require('../migrations/Feat484FindActiv
 const Feat491MutualFriendsMigration = require('../migrations/Feat491MutualFriendsMigration')
 const Fix495SlowFriendsListMigration = require('../migrations/Fix495SlowFriendsListMigration')
 const Feat377ImprovedFilePipelinesMigration = require('../migrations/Feat377ImprovedFilePipelinesMigration')
+const Feat61MultifactorAuthenticationMigration = require('../migrations/Feat61MultifactorAuthenticationMigration')
 
 const ServiceError = require('../errors/ServiceError')
 const MigrationError = require('../errors/MigrationError')
@@ -96,7 +97,11 @@ module.exports = class FeatureService {
             'feat-377-improved-file-pipelines': {
                 migration: new Feat377ImprovedFilePipelinesMigration(core)
             },
+            'feat-61-multifactor-authentication': {
+                migration: new Feat61MultifactorAuthenticationMigration(core)
+            },
             'video-uploads': {}
+
         }
     }
 

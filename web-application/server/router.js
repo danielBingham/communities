@@ -576,6 +576,12 @@ module.exports = function(core) {
         })
     })
 
+    router.patch('/authentication', rateLimit(core, 15), function(request, response, next) { 
+        authenticationController.patchAuthentication(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
     router.delete('/authentication', rateLimit(core, 15), function(request, response) {
         // Delete isn't async
         authenticationController.deleteAuthentication(request, response)

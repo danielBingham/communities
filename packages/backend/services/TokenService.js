@@ -19,24 +19,116 @@
  ******************************************************************************/
 const crypto = require('node:crypto')
 
-// 128 bytes is 1024 bits.  Seems like enough.
-const DEFAULT_LENGTH = 128 
+const TokenDAO = require('../daos/TokenDAO')
+
+const ServiceError = require('../errors/ServiceError')
+
+const TOKEN_TTL = {
+    'email-confirmation': 1000*60*60*24, // 1 day
+    'reset-password': 1000*60*30, // 30 minutes
+    'invitation': 1000*60*60*24*30 // 1 month
+}
 
 module.exports = class TokenService {
 
+    static TYPE = {
+        EMAIL_CONFIRMATION: 'email-confirmation',
+        RESET_PASSWORD: 'reset-password',
+        INVITATION: 'invitation'
+    }
+
     constructor(core) {
         this.core = core
+
+        this.tokenDAO = new TokenDAO(core)
+
+        this.validTypes = {}
+        for(const [key, value] of Object.entries(TokenService.TYPE)) {
+            this.validTypes[value] = true
+        }
     }
 
-    createToken(size) {
-        const length = size || DEFAULT_LENGTH
-        const buffer = crypto.randomBytes(length)
-        return buffer.toString('base64')
+    /**
+     * CSRF Tokens are handled differently, since they never go into the
+     * database. Also, we're using longer ones for a little extra security.
+     */
+    createCSRFToken() {
+        const buffer = crypto.randomBytes(32)
+        const tokenContent = buffer.toString('base64url')
+        return tokenContent
     }
 
-    createURLSafeToken(size) {
-        const length = size || DEFAULT_LENGTH
-        const buffer = crypto.randomBytes(length)
-        return buffer.toString('base64url')
+    async createToken(token) {
+        if ( ! ( token.type in this.validTypes) || this.validTypes[token.type] !== true ) {
+            throw new ServiceError('invalid-type',
+                `Attempt to create a token with invalid type, ${token.type}.`)
+        }
+
+        const buffer = crypto.randomBytes(32)
+        const tokenContent = buffer.toString('base64url')
+
+        let tokenHash = '' 
+        if ( this.core.features.has('feat-61-multifactor-authentication') ) {
+            tokenHash = crypto.hash('sha256', tokenContent) 
+        } else {
+            tokenHash = tokenContent
+        }
+
+
+        const tokenRow = {
+            type: token.type,
+            token: tokenHash,
+            userId: 'userId' in token ? token.userId : null,
+            creatorId: 'creatorId' in token ? token.creatorId: null
+        }
+
+        await this.tokenDAO.insertToken(tokenRow)
+
+        return tokenContent 
+    }
+
+    async validateToken(tokenString, validTypes) {
+        for(const type of validTypes ) {
+            if ( ! (type in this.validTypes) || this.validTypes[type] !== true ) {
+                throw new ServiceError('invalid-type',
+                    `Attempt to validate a token with an invalid type, ${type}.`)
+            }
+        }
+
+        let tokenHash = ''
+        if ( this.core.features.has('feat-61-multifactor-authentication') ) {
+            tokenHash = crypto.hash('sha256', tokenString)
+        } else {
+            tokenHash = tokenString
+        }
+        const tokens = await this.tokenDAO.selectTokens('WHERE tokens.token = $1', [ tokenHash ])
+
+        if ( tokens.length <= 0 ) {
+            throw new ServiceError('not-found',
+                `Attempt to redeem a non-existent token.`)
+        }
+
+        if ( tokens.length > 1 ) {
+            throw new ServiceError('invalid',
+                `Found multiple tokens.  This is invalid.`)
+        }
+
+        const token = tokens[0] 
+
+        if ( ! validTypes.includes(token.type) ) {
+            throw new ServiceError('wrong-type', 
+                `Attempt to redeem ${token.type} token as a ${validTypes.join(',')} token.`)
+        }
+
+        // Token lifespan.
+        const createdDate = new Date(token.createdDate)
+        const createdDateMs = createdDate.getTime()
+
+        if ( (Date.now() - createdDateMs) > TOKEN_TTL[token.type]) {
+            throw new ServiceError('expired',
+                `Attempt to redeem an expired token.`)
+        }
+
+        return token
     }
 }

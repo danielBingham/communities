@@ -32,10 +32,6 @@ const LogoutAction = function({ type, text }) {
     const [ request, makeRequest ] = useRequest()
 
     const logout = function() {
-        // Clear local storage so their drafts don't carry over to another
-        // login session.
-        localStorage.clear()
-
         makeRequest(deleteAuthentication())
     }
 

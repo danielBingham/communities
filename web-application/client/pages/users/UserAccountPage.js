@@ -32,6 +32,7 @@ import './UserAccountPage.css'
 const UserAccountPage = function(props) {
 
     const hasMutualFriends = useFeature('feat-491-mutual-friends')
+    const hasMFA = useFeature('feat-61-multifactor-authentication')
 
     const dispatch = useDispatch()
     useEffect(() => {
@@ -45,15 +46,18 @@ const UserAccountPage = function(props) {
             <PageLeftGutter>
                 <NavigationMenu className="user-account-page__menu" ariaLabel="Account settings">
                     <NavigationMenuLink to="/account/profile" icon="UserCircle" text="Profile" />
-                    <NavigationMenuLink to="/account/change-email" icon="Envelope" text="Email" />
-                    <NavigationMenuLink to="/account/change-password" icon="LockClosed" text="Password" />
-                    <NavigationMenuLink to="/account/contribute" icon="CreditCard" text="Contribution" />
-                    <NavigationSubmenu id="UserAccountPage" title="Settings" icon="Cog8Tooth"> 
+                    <NavigationSubmenu id="user-account-security-menu" icon="LockClosed" title="Security">
+                        <NavigationSubmenuLink to="/account/security/change-email" icon="Envelope" text="Email" />
+                        <NavigationSubmenuLink to="/account/security/change-password" icon="LockClosed" text="Password" />
+                        { hasMFA && <NavigationSubmenuLink to="/account/security/setup-multifactor" icon="ShieldCheck" text="Multifactor Authentication" /> }
+                    </NavigationSubmenu>
+                    <NavigationSubmenu id="user-account-settings-menu" title="Settings" icon="Cog8Tooth"> 
                         <NavigationSubmenuLink to="/account/preferences" icon="AdjustmentsHorizontal" text="Preferences" />
                         { hasMutualFriends && <NavigationSubmenuLink to="/account/privacy" icon="LockOpen" text="Privacy" /> }
                         <NavigationSubmenuLink to="/account/notifications" icon="Bell" text="Notifications" />
                         <NavigationSubmenuLink to="/account/danger-zone" icon="ExclamationTriangle" text="Danger Zone" />
                     </NavigationSubmenu>
+                    <NavigationMenuLink to="/account/contribute" icon="CreditCard" text="Contribution" />
                 </NavigationMenu>
             </PageLeftGutter>
             <PageBody>

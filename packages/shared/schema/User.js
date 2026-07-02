@@ -18,7 +18,7 @@
  *
  ******************************************************************************/
 const { stringCleaner, cleanNumber, cleanBoolean, cleanUuid, cleanEmail } = require('../cleaning/types')
-const { StringValidator, NumberValidator, BooleanValidator, UUIDValidator } = require('../validation/types')
+const { StringValidator, NumberValidator, BooleanValidator, UUIDValidator, EmailValidator } = require('../validation/types')
 
 const Schema = require('./Schema')
 
@@ -82,14 +82,14 @@ module.exports = class UserSchema extends Schema {
             email: {
                 clean: (value) => { return cleanEmail(value) },
                 validate: (value, existing, action) => {
-                    const validator = new StringValidator('email', value, existing, action)
+                    const validator = new EmailValidator('email', value, existing, action)
                     const errors = validator
                         .isRequiredToCreate()
                         .mustNotBeNull()
                         .mustBeString()
                         .mustNotBeEmpty()
                         .mustBeShorterThan(512)
-                        .mustMatch(/^\S+\@\S+$/)
+                        .mustBeEmail()
                         .getErrors()
                     return errors
 

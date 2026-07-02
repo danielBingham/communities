@@ -4,7 +4,7 @@ import { makeRequest } from '/state/lib/makeRequest'
 import { setRelationsInState } from '/state/lib/relations'
 import { queryIsUsing } from '/state/lib/queryIsUsing'
 
-import { setCurrentUser } from '/state/authentication'
+import { setCurrentUser, setMultifactorSecret } from '/state/authentication'
 
 import { setUsersInDictionary, setUserNull, removeUser, setUserQueryResults, clearUserQuery, clearUserQueries } from './slice'
 
@@ -162,6 +162,10 @@ export const patchUser = function(user) {
                 dispatch(setRelationsInState(response.relations))
 
                 dispatch(updateCurrentUser(response))
+
+                if ( 'multifactorSecret' in response ) {
+                    dispatch(setMultifactorSecret(response.multifactorSecret))
+                }
             }
         ))
     }

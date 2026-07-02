@@ -1,0 +1,33 @@
+.multifactor-authentication-form h2 {
+    text-align: center;
+}
+.multifactor-authentication-form__backup-code {
+    margin: 10px auto;
+    text-align: center;
+}
+.multifactor-authentication-form__controls {
+    text-align: center;
+}
+
+
+@media (width >= 700px) {
+    .multifactor-authentication-form { 
+        display: block;
+        background-color: white;
+        box-sizing: border-box;
+        padding: 6px 20px 20px 20px;
+        border-radius: 10px;
+        max-width: min(100vw, 500px);
+        margin: 0 auto;
+    }
+}
+@media (width < 700px) {
+    .multifactor-authentication-form { 
+        display: block;
+        box-sizing: border-box;
+        padding: 10px;
+        width: 100%;
+        min-width: 240px;
+    }
+}
+

@@ -21,14 +21,9 @@ import { useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 
-import { validateToken } from '/state/tokens'
-
-import { useRequest } from '/lib/hooks/useRequest'
-
 import Card from '/components/ui/Card'
 import CommunitiesLogo from '/components/header/CommunitiesLogo'
 import Spinner from '/components/Spinner'
-import { RequestErrorModal } from '/components/errors/RequestError'
 
 import EmailConfirmationForm from '/components/authentication/EmailConfirmationForm'
 
@@ -38,17 +33,9 @@ const EmailConfirmationPage = function(props) {
     const [ searchParams, setSearchParams ] = useSearchParams()
     const token = searchParams.get('token')
 
-    const [ request, makeRequest ] = useRequest()
-
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
     const navigate = useNavigate()
-
-    useEffect(function() {
-        if ( token ) {
-            makeRequest(validateToken(token, 'email-confirmation'))
-        }
-    }, [ token ])
 
     useEffect(function() {
         if ( 
@@ -85,7 +72,6 @@ const EmailConfirmationPage = function(props) {
         <Card id="email-confirmation-page">
             <div className="logo"><CommunitiesLogo type="logo" /></div>
             <EmailConfirmationForm initialToken={token} />
-            <RequestErrorModal message="Attempt to confirm email" request={request} />
         </Card>
     )
 }

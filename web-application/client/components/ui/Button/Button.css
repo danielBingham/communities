@@ -1,5 +1,6 @@
 .button {
-    all: unset;
+    border: none;
+    background: none;
 
     display: inline-block;
     border-radius: 5px;
