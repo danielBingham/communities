@@ -126,6 +126,20 @@ const UserAccountSetupMultifactorAuthentication = function() {
         window.scrollTo(0,0) 
     }, [ state ])
 
+    // Clear the confirmation token when we reach certain states.
+    useEffect(() => {
+        // If we reach the end states, reset the confirmation token.
+        if ( state === State.Enabled || state === State.Disabled ) {
+            setConfirmationToken('')
+        } 
+       
+        // Otherwise, if we have an error confirming, clear the token.  They
+        // need to enter a new one.
+        else if ( state === State.ErrorConfirming ) {
+            setConfirmationToken('')
+        }
+    }, [ state ])
+
     return (
         <div className="user-account-setup-multifactor-authentication">
             { (state === State.Disabled || state === State.ErrorInitializing) &&
@@ -223,7 +237,7 @@ const UserAccountSetupMultifactorAuthentication = function() {
                     <AreYouSure className="user-account-setup-multifactor-authentication__disable"
                         isVisible={areYouSure}
                         isPending={patchUserRequest?.state === "pending"}
-                        execute={() => disable()}
+                        execute={() => { setAreYouSure(false); disable() }}
                         cancel={() => setAreYouSure(false)}
                     >
                         <p>Are you sure you want to disable Multifactor Authentication?</p>
