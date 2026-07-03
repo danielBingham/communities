@@ -77,8 +77,8 @@ const MultifactorAuthenticationForm = function() {
                 return false
             }
 
-            if ( recoveryCode.length < 14 || recoveryCode.length > 14 ) {
-                errors.push('Your recovery code must be exactly 14 characters in length.')
+            if ( ! recoveryCode.match(/[0-f]{14}/) ) {
+                errors.push('Your recovery code must be 14 characters long and only contain characters 0-9 and a-f.')
             }
         }
 
