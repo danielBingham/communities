@@ -150,9 +150,9 @@ module.exports = class TokenController extends BaseController {
         }
 
         if ( currentUser && token.userId !== currentUser.id ) {
-            throw new ControllerError(409, 'logged-in',
+            throw new ControllerError(403, 'not-authorized',
                 `User(${currentUser.id}) currently logged in when attempting to validate a token.`,
-                `You cannot validate a token while logged in to another user.`)
+                `Your token is invalid.  Please request a new one and try again.`)
         }
 
         // For the email-confirmation flow, we do log the user in.
