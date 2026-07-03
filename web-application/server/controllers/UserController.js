@@ -1192,6 +1192,15 @@ module.exports = class UserController extends BaseController{
         }
 
 
+        // If this is the current user deleting themselves, then we'll keep
+        // their current session and destroy it below.  Otherwise, delete all
+        // their sesions.
+        if ( userId === currentUser.id ) {
+            await this.sessionService.deleteSessionsForUserExcept(userId, request.sessionID)
+        } else {
+            await this.sessionService.deleteSessionsForUser(userId)
+        }
+
         await this.userDAO.deleteUser({ id: userId })
 
         if ( userId === currentUser.id ) {
