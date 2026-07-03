@@ -67,8 +67,8 @@ const MultifactorAuthenticationForm = function() {
                 return false
             }
 
-            if ( mfaToken.length < 6 || mfaToken.length > 6 ) {
-                errors.push('Your token must be exactly 6 characters in length.')
+            if ( ! mfaToken.match(/\d\d\d\d\d\d/) ) {
+                errors.push('The code must be 6 digits in length.')
             }
         } else {
             if ( recoveryCode === null || recoveryCode === undefined || recoveryCode === '' ) {
