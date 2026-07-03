@@ -13,26 +13,26 @@ No pre-requisites.
 
 ### Cases
 
-- [ ] Register a new user named John Doe with username `john-doe` (communities-john-doe@mailinator.com)
-    - [ ] Attempt to register with too short a password.
-        - [ ] Confirm validation error.
-    - [ ] Attempt to register without checking Age Confirmation.
-        - [ ] Confirm validation error.
-    - [ ] Successfully register.
-        - [ ] Confirm email.
-        - [ ] Accept Terms of Service.
-        - [ ] Skip Pay What you Can.
-    - [ ] Turn off all email notifications.
+- [x] Register a new user named John Doe with username `john-doe` (communities-john-doe@mailinator.com)
+    - [x] Attempt to register with too short a password.
+        - [x] Confirm validation error.
+    - [x] Attempt to register without checking Age Confirmation.
+        - [x] Confirm validation error.
+    - [x] Successfully register.
+        - [x] Confirm email.
+        - [x] Accept Terms of Service.
+        - [x] Skip Pay What you Can.
+    - [x] Turn off all email notifications.
 
-- [ ] Register a new user named Jane Doe (communities-jane-doe@mailinator.com)
-    - [ ] Attempt to register with the username `john-doe`
-        - [ ] Confirm validation error.
-    - [ ] Register with the username `jane-doe`
-    - [ ] Successfully register.
-        - [ ] Confirm email.
-        - [ ] Accept Terms of Service.
-        - [ ] Skip Pay What you Can.
-        
+- [x] Register a new user named Jane Doe (communities-jane-doe@mailinator.com)
+    - [x] Attempt to register with the username `john-doe`
+        - [x] Confirm validation error.
+    - [x] Register with the username `jane-doe`
+    - [x] Successfully register.
+        - [x] Confirm email.
+        - [x] Accept Terms of Service.
+        - [x] Skip Pay What you Can.
+
 ## [Create User: Invitation](documentation/testing/test-cases/User/create/invitation.md)
 
 Cases covering the User Invitation flow, in which a user is sent an invitation
@@ -40,34 +40,34 @@ email and may use it to register on the platform.
 
 ### Pre-requisites
 
-- [ ] User1 has been registered and has made a private post.
-- [ ] User2 has been registered and has made a public post.
+- [x] User1 has been registered and has made a private post.
+- [x] User2 has been registered and has made a public post.
 
 ### Cases
 
-- [ ] As User1 invite James Smith (communities-james-smith@mailinator.com).
-    - [ ] As User1, confirm invitation is visible on the "Friend Requests" page.
-    - [ ] As James Smith, Accept the invite and register James Smith with username `james-smith`
-    - [ ] Successfully register.
-        - [ ] Confirm email.
-        - [ ] Accept Terms of Service.
-        - [ ] Skip Pay What you Can.
-    - [ ] Turn off all email notifications.
-    - [ ] As James Smith, attempt to view User1's profile.  Confirm private post not visible.
-    - [ ] As James Smith, accept the friend request and view User1's profile page.
+- [x] As User1 invite James Smith (communities-james-smith@mailinator.com).
+    - [x] As User1, confirm invitation is visible on the "Friend Requests" page.
+    - [x] As James Smith, Accept the invite and register James Smith with username `james-smith`
+    - [x] Successfully register.
+        - [x] Confirm email.
+        - [x] Accept Terms of Service.
+        - [x] Skip Pay What you Can.
+    - [x] Turn off all email notifications.
+    - [x] As James Smith, attempt to view User1's profile.  Confirm private post not visible.
+    - [x] As James Smith, accept the friend request and view User1's profile page.
 
-- [ ] As User2, invite Jenny Smith (communities-jenny-smith@mailiantor.com).
-    - [ ] As User2, confirm invitation is visible on the "Friend Requests" page.
-    - [ ] As Jenny Smith, from the same browser session attempt to accept the invite.
-        - [ ] Expectation: Error.
-    - [ ] As User1, confirm the invitation is *not* visible on the "Friend Requests" page.
-    - [ ] From a different browser session accept the invite and register Jenny Smith with username `jenny-smith`.
-    - [ ] Successfully register.
-        - [ ] Confirm email.
-        - [ ] Accept Terms of Service.
-        - [ ] Skip Pay What you Can.
-    - [ ] Turn off all email notifications.
-    - [ ] As Jenny Smith, accept the friend request and view User1's profile page.
+- [x] As User2, invite Jenny Smith (communities-jenny-smith@mailiantor.com).
+    - [x] As User2, confirm invitation is visible on the "Friend Requests" page.
+    - [x] As Jenny Smith, from the same browser session attempt to accept the invite.
+        - [x] Expectation: Error.
+    - [x] As User1, confirm the invitation is *not* visible on the "Friend Requests" page.
+    - [x] From a different browser session accept the invite and register Jenny Smith with username `jenny-smith`.
+    - [x] Successfully register.
+        - [x] Confirm email.
+        - [x] Accept Terms of Service.
+        - [x] Skip Pay What you Can.
+    - [x] Turn off all email notifications.
+    - [x] As Jenny Smith, accept the friend request and view User1's profile page.
  
 ## [Create User: Email Confirmation](documentation/testing/test-cases/User/create/registration.md)
 
@@ -81,7 +81,7 @@ No pre-requisites.
 
 #### Success cases
 
-- [ ] As a user, I can confirm my email by following the link in the email.
+- [x] As a user, I can confirm my email by following the link in the email.
     - Create a new user and confirm their email.
         - Register a new user.
         - Check the email you registered.
@@ -92,7 +92,7 @@ No pre-requisites.
             - **Confirm user is confirmed.**
             - **Confirm TOS page loads.**
 
-- [ ] As a user, I can confirm my email by copying and pasting the token into the form.
+- [x] As a user, I can confirm my email by copying and pasting the token into the form.
     - Create a new user and confirm their email.
         - Register a new user.
         - Check the email you registered.
@@ -102,7 +102,7 @@ No pre-requisites.
             - **Confirm the user is confirmed.**
             - **Confirm the TOS page loads.**
 
-- [ ] As a user, I can request a new confirmation email from the email confirmation form.
+- [x] As a user, I can request a new confirmation email from the email confirmation form.
     - Create a new user and request a new confirmation email.
         - Register a new user.
         - Click "Resend" on the email confirmation screen.
@@ -110,13 +110,13 @@ No pre-requisites.
         - Click the confirmation link in the new email.
             - **Confirm email verification success.**
 
-- [ ] As a user, I can logout from the email confirmation form.
+- [x] As a user, I can logout from the email confirmation form.
     - Create a new user and then log out from the confirmation screen.
         - Register a new user.
         - Click "Logout" on the email confirmation screen.
             - **Confirm logged out.**
 
-- [ ] As a user, I can confirm my email by following the link in the email when I am logged out.
+- [x] As a user, I can confirm my email by following the link in the email when I am logged out.
     - Create a new User, log out from the confirmation form, then confirm.
         - Register a new user.
             - **Confirm email confirmnation recieved.**
@@ -125,22 +125,12 @@ No pre-requisites.
             - **Confirm email confirmation form shows success message.**
             - **Confirm redirected to login page.**
 
-- [ ] As a user, I can confirm my email by copying and pasting the token from the email.
-    - Create a new User and confirm by copying and pasting the token.
-        - Register a new user.
-            - **Confirm email confirmnation recieved.**
-        - Copy the token from the confirmation email.
-        - Paste the token into the text box on the email confirmation screen.
-        - Click "Confirm".
-            - **Confirm email confirmation form shows success message.**
-            - **Confirm redirected to login page.**
-
 #### Error cases
 
-- [ ] Users are shown an error when they follow a link with an invalid token.
-- [ ] Users are shown an error when they manually enter an invalid token.
-- [ ] Users are shown an error when they attempt to request a new confirmation while already confirmed.
-- [ ] Users are simply forwarded to TOS when they attempt to re-confirm after already confirming.
+- [x] Users are shown an error when they follow a link with an invalid token.
+- [x] Users are shown an error when they manually enter an invalid token.
+- [x] Users are shown an error when they attempt to request a new confirmation while already confirmed.
+- [x] Users are simply forwarded to TOS when they attempt to re-confirm after already confirming.
 
 
 ## [Authentication](documentation/testing/test-cases/Authentication/authentication.md)
@@ -150,28 +140,28 @@ password flow, etc.
 
 ### Pre-requisites
 
-- [ ] User1 has been registered.
+- [x] User1 has been registered.
 
 ### Cases
 
 
 #### Log in
 
-- [ ] As a user, I can log in through the splash page.
+- [x] As a user, I can log in through the splash page.
     - As unauthenticated user:
         - Go to the root `/` page.
         - Enter User1's email and password into the login form.
             - **Confirm authentication by navigating, posting, viewing some posts.**
         - Log out.
 
-- [ ] As a user, I can log in through the Login page.
+- [x] As a user, I can log in through the Login page.
     - As unauthenticated user:
         - Go to the `/login` page.
         - Enter User1's email and password.
             - **Confirm authentication by navigating, posting, viewing some posts.**
         - Log out.
 
-- [ ] As a user, I can log out.
+- [x] As a user, I can log out.
     - As User1:
         - Make a draft post, but don't post it.
         - Select UserMenu -> Logout
@@ -179,7 +169,12 @@ password flow, etc.
         - Log in.
             - **Confirm draft post has been cleared.**
 
-- [ ] As a user, I get temporarily locked out after too many attempts.
+- [x] As a user, I can only log in with the correct password.
+    - As unauthenticated user:
+        - Attempt to log in with User1's email and incorrect password.
+            - **Confirm login fails.**
+
+- [x] As a user, I get temporarily locked out after too many attempts.
     - As User1: 
         - Attempt to login with the wrong pasword 10 times.
         - Confirm locked out.
@@ -187,18 +182,13 @@ password flow, etc.
         - Login with correct password.
         - Confirm logged in.
 
-- [ ] As a user, I can only log in with the correct password.
-    - As unauthenticated user:
-        - Attempt to log in with User1's email and incorrect password.
-            - **Confirm login fails.**
-
-- [ ] As a user, log in doesn't reveal whether an account with that email exists.
+- [x] As a user, log in doesn't reveal whether an account with that email exists.
     - As unauthenticated user:
         - Attempt to log in with an email not associated to an account.
         - Attempt to log in with User1's email and incorrect password.
             - **Confirm both failures give same message.**
 
-- [ ] As a user, actions in a stale tab are rejected after I have logged out and back in.
+- [x] As a user, actions in a stale tab are rejected after I have logged out and back in.
     - As User1:
         - Log in and open the app in two tabs (Tab A and Tab B).
         - In Tab A, log out and then log back in.
@@ -207,7 +197,7 @@ password flow, etc.
 
 #### Reset Password
 
-- [ ] As a user, I can request a password reset.
+- [x] As a user, I can request a password reset.
     - As User1:
         - Log out and click "Forgot password?"
         - Enter User1's email.
@@ -220,7 +210,7 @@ password flow, etc.
         - Log in with new password.
             - **Confirm success.**
 
-- [ ] As a user who just reset password, I shouldn't be able to log in with my old password.
+- [x] As a user who just reset password, I shouldn't be able to log in with my old password.
     - As User1:
         - Log out.
         - Attempt to log in with old password.
@@ -228,7 +218,7 @@ password flow, etc.
         - Attempt to log in with the new password.
             - **Confirm success.**
 
-- [ ] As a user with MFA enabled, resetting my password should still require TOPT token to login.
+- [x] As a user with MFA enabled, resetting my password should still require TOPT token to login.
     - As User1:
         - Log out.
         - Click "Forgot password?"
@@ -244,7 +234,7 @@ password flow, etc.
         - Enter valid TOPT token.
             - **Confirm log in success.**
 
-- [ ] As a user, a password reset link can only be used once.
+- [x] As a user, a password reset link can only be used once.
     - As User1:
         - Log out and click "Forgot password?"
         - Enter User1's email and follow the link in the reset email.
@@ -253,7 +243,7 @@ password flow, etc.
         - Navigate back to the same reset link (browser back or paste the URL again).
             - **Confirm the link is now rejected with an invalid-token error.**
 
-- [ ] As a user, an expired password reset link is rejected.
+- [x] As a user, an expired password reset link is rejected.
     - As User1:
         - Log out and click "Forgot password?"
         - Enter User1's email but do not open the link yet.
@@ -262,27 +252,27 @@ password flow, etc.
         - Request a new reset and confirm a fresh link works.
 
 
-- [ ] As a user, requesting a reset for an unknown email doesn't reveal whether an account exists.
+- [x] As a user, requesting a reset for an unknown email doesn't reveal whether an account exists.
     - As unauthenticated user:
         - Click "Forgot password?" and enter an email not associated with any account.
             - **Confirm the same success/confirmation message is shown as for a known email.**
             - **Confirm no reset email is received at that address.**
 
-- [ ] As a user, resetting my password logs out all of my other sessions.
+- [x] As a user, resetting my password logs out all of my other sessions.
     - As User1:
         - Log in on Browser A and, separately, on Browser B.
         - On Browser A, log out and complete the "Forgot password?" reset flow with a new password.
         - Return to Browser B and attempt to navigate or post.
             - **Confirm Browser B's session is no longer authenticated.**
 
-- [ ] As a user, I am not automatically logged in after resetting my password.
+- [x] As a user, I am not automatically logged in after resetting my password.
     - As User1:
         - Complete the "Forgot password?" reset flow with a new password.
             - **Confirm I land on the login page and am not authenticated.**
         - Log in with the new password.
             - **Confirm success.**
 
-- [ ] As a user, the reset password form validates the new password.
+- [x] As a user, the reset password form validates the new password.
     - As User1:
         - Log out.
         - Open a valid reset link.
@@ -298,7 +288,7 @@ password flow, etc.
 
 ### Multifactor Authentication
 
-- [ ] As a user with MFA enabled, I should be required to enter a TOPT token when logging in.
+- [x] As a user with MFA enabled, I should be required to enter a TOPT token when logging in.
     - As User1:
         - Log out.
         - Log in with username and password.
@@ -306,7 +296,7 @@ password flow, etc.
         - Enter current MFA token.
             - **Confirm log in success.**
 
-- [ ] As a user with MFA enabled, I should be able to use one of my recovery codes in place of a TOPT token.
+- [x] As a user with MFA enabled, I should be able to use one of my recovery codes in place of a TOPT token.
     - As User1:
         - Log out.
         - Log in with username and password.
@@ -318,7 +308,7 @@ password flow, etc.
             - **Confirm log in success.**
             - **Confirm email notification of recovery code usage recieved.**
 
-- [ ] As a user with MFA enabled, I should be rate limited when I enter too many invalid TOPT tokens.
+- [x] As a user with MFA enabled, I should be rate limited when I enter too many invalid TOPT tokens.
     - As User1:
         - Log out.
         - Log in with email and password.
@@ -330,7 +320,7 @@ password flow, etc.
         - Enter a valid TOPT token.
             - **Confirm login success.**
 
-- [ ] As a user with MFA enabled, I should only be able to use each recovery code once.
+- [x] As a user with MFA enabled, I should only be able to use each recovery code once.
     - As User1:
         - Log out.
         - Log in with email and password.
@@ -345,7 +335,7 @@ password flow, etc.
         - Enter same recovery code as just used.
             - **Confirm error.**
 
-- [ ] As a user with MFA enabled, I should be rate limited when I enter too many invalid recovery codes.
+- [x] As a user with MFA enabled, I should be rate limited when I enter too many invalid recovery codes.
     - As User1:
         - Log out.
         - Log in with email and password.
@@ -358,13 +348,13 @@ password flow, etc.
         - Enter a valid recovery code.
             - **Confirm success.**
 
-- [ ] As a user with MFA enabled, I should be able to disable MFA.
+- [x] As a user with MFA enabled, I should be able to disable MFA.
     - As User1:
         - From the UserMenu select "Multifactor Authentication".
         - Click "Disabled Multifactor Authentication".
             - **Confirm email notification of MFA change recieved.**
 
-- [ ] As a user who has entered my password but not my MFA token, I cannot access authenticated content.
+- [x] As a user who has entered my password but not my MFA token, I cannot access authenticated content.
     - As User1:
         - Log out, then log in with email and password so the MFA screen is shown.
         - Without entering a token, attempt to navigate directly to an authenticated page (e.g. the home feed or a group URL).
@@ -372,7 +362,7 @@ password flow, etc.
         - Attempt an authenticated action (e.g. loading my feed) via the app.
             - **Confirm the action is not permitted while MFA is pending.**
 
-- [ ] As a user at the MFA screen, I can cancel and return to an unauthenticated state.
+- [x] As a user at the MFA screen, I can cancel and return to an unauthenticated state.
     - As User1:
         - Log out, then log in with email and password so the MFA screen is shown.
         - Click "Cancel".
@@ -380,7 +370,7 @@ password flow, etc.
         - Attempt to navigate to an authenticated page.
             - **Confirm authenticated content is not shown.**
 
-- [ ] As a user, a valid TOPT token succeeds after a few failed attempts and clears the counter.
+- [x] As a user, a valid TOPT token succeeds after a few failed attempts and clears the counter.
     - As User1:
         - Log out and log in with email and password.
         - Enter an invalid TOPT token a few times (fewer than 10).
@@ -389,7 +379,7 @@ password flow, etc.
         - Log out and log in again, entering a valid token on the first try.
             - **Confirm login succeeds (the earlier failures did not carry over).**
 
-- [ ] As a user, an out-of-date TOPT token is rejected.
+- [x] As a user, an out-of-date TOPT token is rejected.
     - As User1:
         - Log out and log in with email and password.
         - Note the current code in the authenticator app, then wait for it to roll over to a new code.
@@ -398,7 +388,7 @@ password flow, etc.
         - Enter the current code.
             - **Confirm login succeeds.**
 
-- [ ] As a user, the MFA token field rejects malformed input.
+- [x] As a user, the MFA token field rejects malformed input.
     - As User1:
         - Log out and log in with email and password to reach the MFA screen.
         - Submit with the token field empty.
@@ -408,7 +398,7 @@ password flow, etc.
         - Enter more than 6 characters and submit.
             - **Confirm a validation error.**
 
-- [ ] As a user, the recovery code field rejects malformed input.
+- [x] As a user, the recovery code field rejects malformed input.
     - As User1:
         - Log out and log in with email and password, then switch to the recovery code view.
         - Submit with the recovery code field empty.
@@ -416,14 +406,14 @@ password flow, etc.
         - Enter a recovery code of the wrong length and submit.
             - **Confirm a validation error.**
 
-- [ ] As a user, switching between the TOPT and recovery code views keeps my pending login.
+- [x] As a user, switching between the TOPT and recovery code views keeps my pending login.
     - As User1:
         - Log out and log in with email and password to reach the MFA screen.
         - Switch to the recovery code view and back to the TOPT view.
         - Enter a valid TOPT token.
             - **Confirm login succeeds (I was not forced to re-enter my password).**
 
-- [ ] As a user, invalid TOPT tokens and invalid recovery codes count toward the same rate limit.
+- [x] As a user, invalid TOPT tokens and invalid recovery codes count toward the same rate limit.
     - As User1:
         - Log out and log in with email and password.
         - Enter a mix of invalid TOPT tokens and invalid recovery codes totaling 10 attempts.
@@ -445,7 +435,7 @@ Cases covering the user updating their security fields.
 
 ### Change Email
 
-- [ ] As a user, I can update my email and am required to confirm new email.
+- [x] As a user, I can update my email and am required to confirm new email.
     - As User1:
         - Select "Change Email" from the User Menu.
         - Enter a new email and your current password.
@@ -461,7 +451,7 @@ Cases covering the user updating their security fields.
         - Log in using the new email.
             - **Confirm login successful.**
 
-- [ ] As a user with MFA enabled, confirming a changed email while logged out does not bypass MFA.
+- [x] As a user with MFA enabled, confirming a changed email while logged out does not bypass MFA.
     - As User1 (with MFA enabled):
         - While logged in, change the email address, then log out.
         - Follow the confirmation link sent to the new address while logged out.
@@ -469,7 +459,7 @@ Cases covering the user updating their security fields.
         - Log in with email and password.
             - **Confirm the MFA screen is shown and a valid TOPT token is required.**
 
-- [ ] As a user, an email confirmation link can only be used once.
+- [x] As a user, an email confirmation link can only be used once.
     - As a new user:
         - Register and receive the confirmation email.
         - Follow the confirmation link.
@@ -484,7 +474,7 @@ Cases covering the user updating their security fields.
             - **Confirm the link is rejected with an invalid/expired-token error.**
         - Request a new confirmation email and confirm the fresh link works.
 
-- [ ] As a user, I cannot use an email confirmation token that belongs to a different account.
+- [x] As a user, I cannot use an email confirmation token that belongs to a different account.
     - As User1:
         - Change email to generate email confirmation link.
     - As User2:
@@ -499,21 +489,27 @@ Cases covering the user updating their security fields.
 
 ### Change Password
 
-- [ ] User can change password.
+- [x] User can change password.
     - As User1:
         - Select "Change Password" from the User Menu.
         - Enter a new password. 
-        - Enter a different password in the "Confirm Password" field.  Confirm validation error.
+        - Enter a different password in the "Confirm Password" field.
+            - **Confirm validation error.**
         - Enter the correct new password in the "Confirm Password" field.
         - Enter an incorrect old password in the "Old Password" field.
-        - Submit the form.  Confirm submission fails.
+        - Submit the form.
+            - **Confirm submission fails.**
         - Enter the correct old password in the "Old Password" field.
-        - Submit the form. Confirm form submits successful and reports success.
+        - Submit the form. 
+            - **Confirm form submits successful and reports success.**
+            - **Confirm password changed email received.**
         - Log out.
-        - Attempt to log in using old password.  Confirm login fails.
-        - Log in using the new password.  Confirm log in is successful.
+        - Attempt to log in using old password.
+            - **Confirm login fails.**
+        - Log in using the new password.
+            - **Confirm log in is successful.**
 
-- [ ] As a logged-in user, changing my password logs out my other sessions but keeps the current one.
+- [x] As a logged-in user, changing my password logs out my other sessions but keeps the current one.
     - As User1:
         - Log in on Browser A and, separately, on Browser B.
         - On Browser A, change the password from the Security settings.
@@ -522,7 +518,7 @@ Cases covering the user updating their security fields.
         - Return to Browser B and attempt to navigate or post.
             - **Confirm Browser B's session is no longer authenticated.**
 
-- [ ] As a user with MFA enabled, changing my password does not bypass MFA on my next login.
+- [x] As a user with MFA enabled, changing my password does not bypass MFA on my next login.
     - As User1:
         - Change the password while logged in.
         - Log out and log in with the new password.
@@ -538,7 +534,7 @@ Cases cover Multifactor Authentication (MFA) setup.
 
 ### Cases
 
-- [ ] As a user, I can enable multifactor authentication.
+- [x] As a user, I can enable multifactor authentication.
     - As User1:
         - Select "Multifactor Authentication" from the UserMenu.
         - Click "Setup Multifactor Authentication"
@@ -552,7 +548,7 @@ Cases cover Multifactor Authentication (MFA) setup.
         - Save the backup codes somewhere accessible.
 
 
-- [ ] As a user, I can set up MFA by manually entering the secret instead of scanning the QR code.
+- [x] As a user, I can set up MFA by manually entering the secret instead of scanning the QR code.
     - As User1:
         - Start MFA setup from the Security settings.
         - Copy the displayed secret (or use the copy button) and enter it manually into an authenticator app.
@@ -560,7 +556,7 @@ Cases cover Multifactor Authentication (MFA) setup.
         - Enter a valid code to confirm setup.
             - **Confirm setup succeeds and recovery codes are presented.**
 
-- [ ] As a user, I can cancel MFA setup before confirming and remain without MFA.
+- [x] As a user, I can cancel MFA setup before confirming and remain without MFA.
     - As User1:
         - Start MFA setup and reach the QR/secret screen.
         - Click "Cancel Setup".
@@ -568,7 +564,7 @@ Cases cover Multifactor Authentication (MFA) setup.
         - Log out and log back in.
             - **Confirm no MFA screen is shown.**
 
-- [ ] As a user, if I refresh the page mid-setup I can safely restart setup.
+- [x] As a user, if I refresh the page mid-setup I can safely restart setup.
     - As User1:
         - Start MFA setup and reach the QR/secret screen.
         - Refresh the browser.
@@ -576,27 +572,27 @@ Cases cover Multifactor Authentication (MFA) setup.
         - Start setup again.
             - **Confirm a new QR/secret is generated and setup can be completed.**
 
-- [ ] As a user, my MFA secret is only shown once, during setup.
+- [x] As a user, my MFA secret is only shown once, during setup.
     - As User1:
         - Complete MFA setup.
         - Navigate away and return to the MFA settings screen.
             - **Confirm the secret and QR code are not shown again.**
             - **Confirm only the enabled state and a disable option are shown.**
 
-- [ ] As a user, my recovery codes are only shown once, during setup.
+- [x] As a user, my recovery codes are only shown once, during setup.
     - As User1:
         - Complete MFA setup so recovery codes are displayed.
         - Click "Complete Setup".
         - Navigate away and return to the MFA settings screen.
             - **Confirm the recovery codes are not shown again.**
 
-- [ ] As a user, my recovery codes are not shown again if I refresh the recovery-codes screen.
+- [x] As a user, my recovery codes are not shown again if I refresh the recovery-codes screen.
     - As User1:
         - Complete MFA setup so recovery codes are displayed.
         - Refresh the browser while the codes are shown.
             - **Confirm the codes are not shown again and I am not left mid-setup.**
 
-- [ ] As a user, my MFA secret and recovery codes do not leak in application responses after setup.
+- [x] As a user, my MFA secret and recovery codes do not leak in application responses after setup.
     - As User1:
         - With browser developer tools open (Network tab), complete MFA setup and continue using the app.
             - **Confirm the secret only appears in the response to the setup (pending) request.**
@@ -604,7 +600,7 @@ Cases cover Multifactor Authentication (MFA) setup.
         - Reload the app and inspect the authenticated user object and subsequent responses.
             - **Confirm neither the secret nor the recovery codes appear in any later response.**
 
-- [ ] As a user, disabling and re-enabling MFA invalidates my old authenticator entry and old recovery codes.
+- [x] As a user, disabling and re-enabling MFA invalidates my old authenticator entry and old recovery codes.
     - As User1:
         - With MFA enabled, disable MFA.
         - Re-enable MFA and complete setup with a newly scanned secret.
@@ -625,13 +621,13 @@ None.
 
 ### Cases
 
-- [ ] As a user, I can delete my account.
+- [x] As a user, I can delete my account.
     - As an unauthenticated user:
         - Register a new user account.
         - Delete account.
             - **Confirm account successfully deletes.**
 
-- [ ] As a user with MFA, I can delete my account.
+- [x] As a user with MFA, I can delete my account.
     - As an unauthenticated user:
         - Register a new user account.
         - Turn on Multifactor Authentication.
