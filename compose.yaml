@@ -6,17 +6,18 @@
 #  the shared workspace packages bind-mounted in, so edits on the host reload
 #  and recompile inside the containers.
 #
-#  Postgres and Redis are assumed to be pre-built images (see DATABASE_IMAGE /
-#  REDIS_IMAGE in .env) and are only referenced here, not built.
+#  Redis image is run from a default image, but the postgres image must be
+#  built separately following instructions found in the
+#  `documentation/running-locally.md`.
 # =============================================================================
 
-name: communities-local
+name: communities
 
 services:
 
   # ---------------------------------------------------------------------------
-  # Postgres — pre-built image (database/). First start initializes the
-  # `communities` DB and `app` role from the image's init scripts.
+  # Postgres — pre-built image (database/Dockerfile). Instructions for building
+  # can be found in `documentation/running-locally.md`
   # ---------------------------------------------------------------------------
   postgres:
     image: communities-sql
@@ -35,7 +36,7 @@ services:
     restart: unless-stopped
 
   # ---------------------------------------------------------------------------
-  # Redis — pre-built / stock image.
+  # Redis — stock image.
   # ---------------------------------------------------------------------------
   redis:
     image: redis:7.0.10
