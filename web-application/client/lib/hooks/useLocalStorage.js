@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -24,19 +24,18 @@ import logger from '/logger'
 import { isLocalStorageAvailable } from '/lib/localStorage'
 
 
-
-
 const getLocalStorage = function(key, defaultValue) {
     if ( ! isLocalStorageAvailable() ) {
         return defaultValue
     }
 
-    try { 
+    try {
         const text = localStorage.getItem(key)
         const value = JSON.parse(text)
         return value || defaultValue
     } catch (error) {
         logger.error(error)
+        return defaultValue
     }
 }
 
@@ -46,7 +45,7 @@ export const useLocalStorage = function(key, defaultValue) {
     const setValue = (value) => {
         setInternalValue(value)
 
-        try { 
+        try {
             if ( isLocalStorageAvailable() ) {
                 if ( value === undefined || value === null || value === '' ) {
                     localStorage.removeItem(key)

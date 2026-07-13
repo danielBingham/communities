@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -49,8 +49,8 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
-    const comment = useSelector((state) => commentId && commentId in state.PostComment.dictionary ? state.PostComment.dictionary[commentId] : null) 
-    
+    const comment = useSelector((state) => commentId && commentId in state.PostComment.dictionary ? state.PostComment.dictionary[commentId] : null)
+
     const dispatch = useDispatch()
 
     const getDraftKey = function() {
@@ -67,7 +67,7 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
         }
 
         if ( isLocalStorageAvailable() ) {
-            try { 
+            try {
                 localStorage.setItem(`commentDraft.${postId}`, JSON.stringify(draft))
             } catch (error) {
                 logger.error(error)
@@ -98,7 +98,7 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
      */
     const cancel = function() {
         if ( isLocalStorageAvailable() ) {
-            try { 
+            try {
                 localStorage.removeItem(getDraftKey())
             } catch (error) {
                 logger.error(error)
@@ -122,13 +122,13 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
         // For edits, check to see if they've actually made any changes.  If
         // they have, then the form is dirty.
         if ( commentId && ( content !== comment?.content ) ) {
-            return true 
-        } 
+            return true
+        }
 
         // For new comment drafts, if there's any content, then the form is dirty.
         else if ( ! commentId && content.length > 0 ) {
             return true
-        } 
+        }
 
         return false
     }
@@ -141,7 +141,7 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
         // If the form is dirty, then we want to confirm discarding the draft.
         if ( isDirty() ) {
             setAreYouSure(true)
-        } 
+        }
         else {
             cancel()
         }
@@ -165,7 +165,7 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
 
         let existingDraft = null
         if ( isLocalStorageAvailable() ) {
-            try { 
+            try {
                 existingDraft = JSON.parse(localStorage.getItem(getDraftKey()))
             } catch (error) {
                 logger.error(error)
@@ -177,7 +177,7 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
             setShowForm(true)
         } else if ( commentId && comment ) {
             if ( isLocalStorageAvailable() ) {
-                try { 
+                try {
                     localStorage.setItem(getDraftKey(), JSON.stringify(draft))
                 } catch (error) {
                     logger.error(error)
@@ -191,7 +191,7 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
     useEffect(function() {
         if ( ! postRequest && ! patchRequest && (showForm || commentId )) {
             if ( isLocalStorageAvailable() ) {
-                try { 
+                try {
                     localStorage.setItem(getDraftKey(), JSON.stringify({ content: content }))
                 } catch (error) {
                     logger.error(error)
@@ -203,7 +203,7 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
     useEffect(function() {
         if ( (postRequest && postRequest.state == 'fulfilled') || (patchRequest && patchRequest.state == 'fulfilled')) {
             if ( isLocalStorageAvailable() ) {
-                try { 
+                try {
                     localStorage.removeItem(getDraftKey())
                 } catch (error) {
                     logger.error(error)
@@ -253,11 +253,11 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
                     <Button onClick={() => handleCancel()}>Cancel</Button>
                     <Button type="primary" onClick={() => submit()}>{ commentId ? 'Save Edit' : 'Comment' }</Button>
                 </div> }
-                <AreYouSure 
-                    isVisible={areYouSure} 
+                <AreYouSure
+                    isVisible={areYouSure}
                     cancelLabel="Keep Editing"
                     executeLabel={ commentId ? "Discard Edits" : "Discard Comment" }
-                    execute={cancel} 
+                    execute={cancel}
                     cancel={() => setAreYouSure(false)}
                 >
                     <p>Are you sure you want to discard your { commentId ? "edits" : "comment" }?</p>

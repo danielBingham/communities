@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -17,6 +17,8 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
+import logger from '/logger'
+
 let hasLocalStorage = null
 
 /** Can we use local storage? **/
@@ -27,17 +29,20 @@ export const isLocalStorageAvailable = function() {
     }
 
     try {
-        if ( ! ('localStorage' in window) ) {
-            return false
+        if ( ! ('localStorage' in window) || window.localStorage === null ) {
+            logger.warn(`'localStorage' not available.`)
+            hasLocalStorage = false
+            return hasLocalStorage
         }
 
         localStorage.setItem('__storage_test__', 'pending')
         localStorage.removeItem('__storage_test__')
 
         hasLocalStorage = true
-        return hasLocalStorage 
+        return hasLocalStorage
     } catch (error) {
+        logger.warn(`'localStorage' not availabile: `, error)
         hasLocalStorage = false
-        return hasLocalStorage 
+        return hasLocalStorage
     }
 }

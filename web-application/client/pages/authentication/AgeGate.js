@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -45,7 +45,7 @@ const AgeGate = function() {
 
 
             if ( isLocalStorageAvailable() ) {
-                try { 
+                try {
                     // Clear local storage so their drafts don't carry over to another
                     // login session.
                     localStorage.clear()

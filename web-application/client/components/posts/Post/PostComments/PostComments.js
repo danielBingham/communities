@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -56,7 +56,7 @@ const PostComments = function({ postId, expanded }) {
 
     useEffect(function() {
         if ( isLocalStorageAvailable() ) {
-            try { 
+            try {
                 if ( post !== null ) {
                     for(const commentId of post.comments) {
                         const editDraft = localStorage.getItem(`commentDraft.${postId}.${commentId}`)
@@ -92,7 +92,7 @@ const PostComments = function({ postId, expanded }) {
         for (const commentId of post.comments ) {
             let draftEdit = null
             if ( isLocalStorageAvailable() ) {
-                try { 
+                try {
                     draftEdit = localStorage.getItem(`commentDraft.${postId}.${commentId}`)
                 } catch (error) {
                     logger.error(error)
@@ -112,7 +112,7 @@ const PostComments = function({ postId, expanded }) {
             { showComments && post.comments.length > 0 && <div className="show-comments">
                 <a href="" onClick={(e) => { e.preventDefault(); setShowComments(false)}}>Hide { post.comments.length } comments.</a>
             </div> }
-            <PostCommentForm postId={postId} groupId={ post?.groupId } setShowComments={setShowComments} /> 
+            <PostCommentForm postId={postId} groupId={ post?.groupId } setShowComments={setShowComments} />
         </div>
     )
 }

@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -54,7 +54,7 @@ const UserAccountDangerZoneView = function() {
         if ( request && request.state == 'fulfilled') {
 
             if ( isLocalStorageAvailable() ) {
-                try { 
+                try {
                     // Clear local storage so their drafts don't carry over to another
                     // login session.
                     localStorage.clear()
@@ -83,7 +83,7 @@ const UserAccountDangerZoneView = function() {
                     <div className="danger-zone-view__button-wrapper">
                         <Button type="warn" onClick={(e) => setAreYouSure(true)}>Delete My Account</Button>
                     </div>
-                    <AreYouSure isVisible={areYouSure} execute={deleteCurrentUser} cancel={() => setAreYouSure(false)} > 
+                    <AreYouSure isVisible={areYouSure} execute={deleteCurrentUser} cancel={() => setAreYouSure(false)} >
                         <p>Are you sure you want to delete your account?</p>
                     </AreYouSure>
                 </div>

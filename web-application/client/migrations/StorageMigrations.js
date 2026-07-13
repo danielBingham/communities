@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -24,7 +24,7 @@ import { isLocalStorageAvailable } from '/lib/localStorage'
 const currentVersion = 1
 
 const migrateVersion0to1= function() {
-    try { 
+    try {
         logger.info(`Migrating localStorage from version 0 to version 1...`)
         // We're not going to both trying to migrate from version zero.  Just wipe
         // it out and give us a clean slate.  The only thing in there should be
@@ -41,13 +41,13 @@ const migrations = [
 ]
 
 export default function migrateLocalStorage() {
-    try { 
+    try {
         if ( ! isLocalStorageAvailable() ) {
             return
         }
 
-        const storageVersion = parseInt(localStorage.getItem('version'))
-        if ( storageVersion === NaN ) {
+        let storageVersion = parseInt(localStorage.getItem('version'))
+        if ( Number.isNaN(storageVersion) ) {
             storageVersion = 0
         }
 
