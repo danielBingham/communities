@@ -83,8 +83,9 @@ import UserAccountPage from '/pages/users/UserAccountPage'
 import UserProfileEditForm from '/pages/users/views/UserProfileEditForm'
 import ChangePasswordForm from '/pages/users/views/ChangePasswordForm'
 import ChangeEmailForm from '/pages/users/views/ChangeEmailForm'
+import UserAccountSetupMultifactorAuthentication from '/pages/users/views/UserAccountSetupMultifactorAuthentication'
 import ContributionView from '/pages/users/views/ContributionView'
-import UserAccountSettingsView from '/pages/users/views/UserAccountSettingsView'
+import UserAccountSecurityView from '/pages/users/views/UserAccountSecurityView'
 import UserAccountPrivacyView from '/pages/users/views/UserAccountPrivacyView'
 import UserAccountPreferencesView from '/pages/users/views/UserAccountPreferencesView'
 import UserAccountDangerZoneView from '/pages/users/views/UserAccountDangerZoneView'
@@ -240,10 +241,13 @@ const App = function(props) {
                         <Route element={<AuthenticatedLayout />}>
                             <Route path="/account" element={<UserAccountPage /> }>
                                 <Route path="profile" element={ <UserProfileEditForm />  } />
-                                <Route path="change-password" element={ <ChangePasswordForm /> } />
-                                <Route path="change-email" element={ <ChangeEmailForm /> } />
+                                <Route path="security">
+                                    <Route path="change-email" element={ <ChangeEmailForm /> } />
+                                    <Route path="change-password" element={ <ChangePasswordForm /> } />
+                                    <Route path="setup-multifactor" element={ <UserAccountSetupMultifactorAuthentication /> } />
+                                    <Route index element={ <UserAccountSecurityView /> } />
+                                </Route>
                                 <Route path="contribute" element={ <ContributionView /> } />
-                                <Route path="settings" element={ <UserAccountSettingsView /> } /> { /* deprecated */ }
                                 <Route path="preferences" element={ <UserAccountPreferencesView /> } />
                                 <Route path="privacy" element={ <UserAccountPrivacyView /> } />
                                 <Route path="danger-zone" element={ <UserAccountDangerZoneView/> } />

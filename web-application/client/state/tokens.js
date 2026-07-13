@@ -8,11 +8,11 @@ import { setSession } from '/state/authentication'
 export const tokenSlice = createSlice({
     name: 'token',
     initialState: {
-        usersByToken: {}
+        userIdsByToken: {}
     },
     reducers: {
         setUserForToken(state, action) {
-            state.usersByToken[action.payload.token] = action.payload.user
+            state.userIdsByToken[action.payload.token] = action.payload.userId
         }
     }
 
@@ -26,10 +26,10 @@ export const validateToken = function(token, type) {
         return dispatch(makeRequest('GET', endpoint, null,
             function(responseBody) {
                 if ( responseBody.session ) {
-                    dispatch(tokenSlice.actions.setUserForToken({ token: token, user: responseBody.session.user }))
+                    dispatch(tokenSlice.actions.setUserForToken({ token: token, userId: responseBody.session.user.id}))
                     dispatch(setSession(responseBody.session))
                 } else {
-                    dispatch(tokenSlice.actions.setUserForToken({ token: token, user: responseBody.user }))
+                    dispatch(tokenSlice.actions.setUserForToken({ token: token, userId: responseBody.userId }))
                 }
             }
         ))

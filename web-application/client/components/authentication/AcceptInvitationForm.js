@@ -30,9 +30,10 @@ import { validateEmail, validateName, validateUsername, validatePassword } from 
 
 import { validateToken } from '/state/tokens'
 import { patchUser, postUsers, getUsers } from '/state/User'
+import { deleteAuthentication } from '/state/authentication'
 
 import Input from '/components/ui/Input'
-import { Checkbox } from '/components/ui/Checkbox'
+import Button from '/components/ui/Button'
 
 import './AcceptInvitationForm.css'
 
@@ -60,9 +61,18 @@ const AcceptInvitationForm = function(props) {
     const [tokenRequest, makeTokenRequest] = useRequest()
     const [request, makeRequest] = useRequest()
     const [usernameRequest, makeUsernameRequest] = useRequest()
+    const [logoutRequest, makeLogoutRequest] = useRequest()
 
     const existing = useSelector((state) => username in state.User.byUsername ? state.User.byUsername[username] : undefined)
-    const user = useSelector((state) => token in state.tokens.usersByToken ? state.tokens.usersByToken[token] : null) 
+    const userId = useSelector((state) => token in state.tokens.userIdsByToken ? state.tokens.userIdsByToken[token] : null) 
+    const user = useSelector((state) => userId in state.User.dictionary ? state.User.dictionary[userId] : null)
+
+    /**
+     * Cancel the current invitation acceptance and logout.
+     **/
+    const cancel = function() {
+        makeLogoutRequest(deleteAuthentication())
+    }
 
     /**
      * Perform validation on our state and return a boolean indicating whether
@@ -396,6 +406,7 @@ const AcceptInvitationForm = function(props) {
                     { baseError }
                 </div>
                 <div className="submit field-wrapper">
+                    <Button type="warn" onClick={() => cancel()}>Cancel</Button>
                     <input type="submit" name="register" value="Accept Invitation" />
                 </div>
 

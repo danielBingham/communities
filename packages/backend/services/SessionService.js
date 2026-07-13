@@ -52,4 +52,16 @@ module.exports = class SessionService {
             throw new Error('Failed to update session!')
         }
     }
+
+    async deleteSessionsForUser(userId) {
+        await this.core.database.query(`
+            DELETE FROM session WHERE sess->'user'->>'id' = $1
+        `, [ userId ])
+    }
+
+    async deleteSessionsForUserExcept(userId, sessionId) {
+        await this.core.database.query(`
+            DELETE FROM session WHERE sess->'user'->>'id' = $1 AND session.sid != $2
+        `, [ userId, sessionId ])
+    }
 }

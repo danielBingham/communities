@@ -1,0 +1,32 @@
+.user-account-security-view {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+}
+.user-account-security-view__menu-card {
+    padding: 20px;
+}
+
+.user-account-security-view__menu {
+    list-style: none;
+    padding: 0;
+}
+.user-account-security-view__menu-item {
+    display: grid;
+    grid-template-columns: auto 200px;
+    align-items: center;
+    padding: 10px;
+}
+.user-account-security-view__menu-item label {
+    font-weight: bold;
+    font-size: 18px;
+}
+.user-account-security-view__menu-item__explanation {
+    font-size: 12px;
+    font-style: italic;
+}
+.user-account-security-view__menu-item__action {
+    justify-self: right;
+    text-align: right;
+}
+

@@ -4,7 +4,7 @@ import logger from '/logger'
 
 import './TextInput.css'
 
-const TextInput = function({ name, type, label, explanation, className, value, placeholder, ref, onChange, onKeyDown, onBlur, onFocus, error, children }) {
+const TextInput = function({ name, type, label, explanation, className, value, maxLength, placeholder, autocomplete, ref, onChange, onKeyDown, onKeyUp, onBlur, onFocus, error, children }) {
 
     const id = useId()
     const explanationId = useId()
@@ -42,6 +42,14 @@ const TextInput = function({ name, type, label, explanation, className, value, p
         }
     }
 
+    const onKeyUpInternal = function(event) {
+        if ( onKeyUp && typeof onKeyUp === "function" ) {
+            onKeyUp(event)
+        } else if ( onKeyUp && typeof onKeyUp !== "function") {
+            logger.error("Invalid `onKeyUp` set for TextInput.")
+        }
+    }
+
     if ( value === undefined || value === null ) {
         logger.error(`No value for ${name}.`)
     }
@@ -57,10 +65,13 @@ const TextInput = function({ name, type, label, explanation, className, value, p
                     id={`${name}-${id}`}
                     name={name} 
                     value={value} 
+                    maxLength={maxLength}
                     placeholder={placeholder}
+                    autoComplete={autocomplete}
                     aria-describedby={`${ explanation ? explanationId : '' } ${ error ? errorId : '' }`.trim() || undefined}
                     aria-invalid={ error ? true : undefined }
                     onKeyDown={onKeyDownInternal}
+                    onKeyUp={onKeyUpInternal}
                     onChange={onChangeInternal} 
                     onBlur={onBlurInternal} 
                     onFocus={onFocusInternal} 

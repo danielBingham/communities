@@ -146,10 +146,11 @@ module.exports = class UserService {
             // If they are in an 'invited' state, meaning they've been invited,
             // but haven't accepted yet, send them a new invitation.
             if ( existingUser.status === 'invited' ) {
-                const token = this.tokenDAO.createToken('invitation')
-                token.userId = existingUser.id
-                token.creatorId = currentUser.id
-                token.id = await this.tokenDAO.insertToken(token)
+                const token = await this.tokenService.createToken({ 
+                    type: 'invitation',
+                    userId: existingUser.id,
+                    creatorId: currentUser.id
+                })
 
                 try {
                     await this.emailService.sendInvitation(currentUser, existingUser, token)
@@ -252,10 +253,11 @@ module.exports = class UserService {
                 throw new ServiceError('server-error', `No user found after insertion. Looking for user with email: "${user.email}".`)
             }
 
-            const token = this.tokenDAO.createToken('invitation')
-            token.userId = createdUser.id
-            token.creatorId = currentUser.id
-            token.id = await this.tokenDAO.insertToken(token)
+            const token = await this.tokenService.createToken({
+                type: 'invitation',
+                userId: createdUser.id,
+                creatorId: currentUser.id
+            })
 
             try {
                 await this.emailService.sendInvitation(currentUser, createdUser, token)
@@ -448,10 +450,11 @@ module.exports = class UserService {
             throw new ServiceError('server-error', `No user found.  Email: ${user.email}.`)
         }
 
-        const token = this.tokenDAO.createToken('email-confirmation')
-        token.userId = createdUser.id
-        token.creatorId = createdUser.id
-        token.id = await this.tokenDAO.insertToken(token)
+        const token = await this.tokenService.createToken({
+            type: 'email-confirmation',
+            userId: createdUser.id,
+            creatorId: createdUser.id
+        })
 
         try {
             await this.emailService.sendEmailConfirmation(createdUser, token)
