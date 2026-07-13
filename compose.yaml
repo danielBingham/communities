@@ -1,0 +1,160 @@
+# =============================================================================
+#  Communities — local development stack
+# =============================================================================
+#  Runs the production `worker` and `web-application` images, but starts them
+#  in development mode (nodemon + webpack dev server) with the source tree and
+#  the shared workspace packages bind-mounted in, so edits on the host reload
+#  and recompile inside the containers.
+#
+#  Redis image is run from a default image, but the postgres image must be
+#  built separately following instructions found in the
+#  `documentation/running-locally.md`.
+# =============================================================================
+
+name: communities
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # Postgres — pre-built image (database/Dockerfile). Instructions for building
+  # can be found in `documentation/running-locally.md`
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: communities-sql
+    environment:
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - /Users/danielbingham/volumes/communities-sql:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # Redis — stock image.
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7.0.10
+    ports:
+      - "6379:6379"
+    volumes:
+      - /Users/danielbingham/volumes/communities-redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # Worker — built from worker/Dockerfile (production image), run with nodemon.
+  # Watches ./worker plus ../packages/{backend,shared} for live reload.
+  # ---------------------------------------------------------------------------
+  worker:
+    build:
+      context: ./worker
+      dockerfile: Dockerfile
+      # Needed by `npm ci` in the Dockerfile to pull @communities/* from
+      # CodeArtifact. Export CODEARTIFACT_AUTH_TOKEN before building.
+      secrets:
+        - CODEARTIFACT_AUTH_TOKEN
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      ENVIRONMENT_NAME: ${ENVIRONMENT_NAME:-local}
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      LOG_LEVEL: ${LOG_LEVEL:-debug}
+      # Force polling so file changes on bind mounts are seen reliably across
+      # macOS / Windows / WSL. Drop for a small perf win on native Linux.
+      CHOKIDAR_USEPOLLING: "true"
+    # The production ENTRYPOINT is ["npm","start"]; override it to run nodemon.
+    entrypoint:
+      - sh
+      - -c
+      - npx nodemon -L --trace-deprecation ./index.js
+    volumes:
+      # --- worker source (live reload) ---
+      - ./worker/index.js:/src/index.js
+      - ./worker/jobs:/src/jobs
+      - ./worker/config:/src/config
+      - ./worker/nodemon.json:/src/nodemon.json
+      # --- shared workspace packages ---
+      # Mounted at /packages so nodemon's "../packages/*" watch paths resolve,
+      # AND over node_modules so require() loads the live source (both point at
+      # the same host directory, so one edit does both).
+      - ./packages:/packages
+      - ./packages/backend:/src/node_modules/@communities/backend
+      - ./packages/shared:/src/node_modules/@communities/shared
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # Web application — built from web-application/Dockerfile (production image),
+  # run with nodemon (API/WS on 8080) + webpack dev server (client on 3000).
+  # Watches ./server, ./client and ../packages/{backend,shared,session}.
+  # ---------------------------------------------------------------------------
+  web-application:
+    build:
+      context: ./web-application
+      dockerfile: Dockerfile
+      secrets:
+        - CODEARTIFACT_AUTH_TOKEN
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      ENVIRONMENT_NAME: ${ENVIRONMENT_NAME:-local}
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      LOG_LEVEL: ${LOG_LEVEL:-debug}
+      PORT: "8080"
+      CHOKIDAR_USEPOLLING: "true"
+    ports:
+      - "8080:8080"        # Express API + WebSocket (HTTPS in dev)
+      - "3000:3000"        # webpack dev server (what the browser loads)
+    # Override the production ENTRYPOINT. Mirrors `npm run dev` but binds the
+    # dev server to 0.0.0.0 so it's reachable from the host, and uses npx so
+    # the local .bin tools resolve without relying on PATH.
+    entrypoint:
+      - sh
+      - -c
+      - >
+        npx concurrently -k -n server,client
+        "npx nodemon -L ./server/bin/www"
+        "npx webpack serve --mode development --devtool inline-source-map --no-open --no-hot --no-live-reload --host 0.0.0.0"
+    volumes:
+      # --- web-application source (live reload / recompile) ---
+      - ./web-application/server:/src/server
+      - ./web-application/client:/src/client
+      - ./web-application/public:/src/public
+      - ./web-application/webpack.config.js:/src/webpack.config.js
+      - ./web-application/babel.config.js:/src/babel.config.js
+      - ./web-application/nodemon.json:/src/nodemon.json
+      # Self-signed HTTPS certs the dev server + Express need in development.
+      - ./web-application/security:/src/security
+      # --- shared workspace packages (see worker note above) ---
+      - ./packages:/packages
+      - ./packages/backend:/src/node_modules/@communities/backend
+      - ./packages/shared:/src/node_modules/@communities/shared
+      - ./packages/session:/src/node_modules/@communities/session
+    restart: unless-stopped
+
+# The CodeArtifact token is read from the CODEARTIFACT_AUTH_TOKEN host env var
+# at build time and mounted as a BuildKit secret (never baked into a layer).
+secrets:
+  CODEARTIFACT_AUTH_TOKEN:
+    environment: CODEARTIFACT_AUTH_TOKEN
