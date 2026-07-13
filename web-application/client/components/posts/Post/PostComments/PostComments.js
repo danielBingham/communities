@@ -1,5 +1,28 @@
-import React, { useState, useEffect } from 'react'
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media 
+ *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
+import { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
+
+import logger from '/logger'
+
+import { isLocalStorageAvailable } from '/lib/localStorage'
 
 import { startPostCommentEdit } from '/state/PostComment'
 
@@ -32,18 +55,24 @@ const PostComments = function({ postId, expanded }) {
     }, [])
 
     useEffect(function() {
-        if ( post !== null ) {
-            for(const commentId of post.comments) {
-                const editDraft = localStorage.getItem(`commentDraft.${postId}.${commentId}`)
-                if ( editDraft && ! (commentId in editing)) {
-                    dispatch(startPostCommentEdit(commentId))
-                    setShowComments(true)
-                }
-            }
+        if ( isLocalStorageAvailable() ) {
+            try { 
+                if ( post !== null ) {
+                    for(const commentId of post.comments) {
+                        const editDraft = localStorage.getItem(`commentDraft.${postId}.${commentId}`)
+                        if ( editDraft && ! (commentId in editing)) {
+                            dispatch(startPostCommentEdit(commentId))
+                            setShowComments(true)
+                        }
+                    }
 
-            const draft = localStorage.getItem(`commentDraft.${postId}`)
-            if ( draft ) {
-                setShowComments(true)
+                    const draft = localStorage.getItem(`commentDraft.${postId}`)
+                    if ( draft ) {
+                        setShowComments(true)
+                    }
+                }
+            } catch (error) {
+                logger.error(error)
             }
         }
     }, [ postId, post ])
@@ -61,7 +90,14 @@ const PostComments = function({ postId, expanded }) {
     let commentViews = []
     if ( post ) {
         for (const commentId of post.comments ) {
-            const draftEdit = localStorage.getItem(`commentDraft.${postId}.${commentId}`)
+            let draftEdit = null
+            if ( isLocalStorageAvailable() ) {
+                try { 
+                    draftEdit = localStorage.getItem(`commentDraft.${postId}.${commentId}`)
+                } catch (error) {
+                    logger.error(error)
+                }
+            }
             if ( draftEdit || (commentId in editing) ) {
                 commentViews.push(<PostCommentForm key={commentId} postId={postId} commentId={commentId} groupId={ post.groupId } setShowComments={setShowComments} />)
             } else {

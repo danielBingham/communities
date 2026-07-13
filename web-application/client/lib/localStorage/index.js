@@ -17,10 +17,15 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import logger from '/logger'
+let hasLocalStorage = null
 
 /** Can we use local storage? **/
 export const isLocalStorageAvailable = function() {
+    // If we've already checked localStorage for this load.
+    if ( hasLocalStorage === true || hasLocalStorage === false) {
+        return hasLocalStorage
+    }
+
     try {
         if ( ! ('localStorage' in window) ) {
             return false
@@ -28,9 +33,11 @@ export const isLocalStorageAvailable = function() {
 
         localStorage.setItem('__storage_test__', 'pending')
         localStorage.removeItem('__storage_test__')
-        return true
+
+        hasLocalStorage = true
+        return hasLocalStorage 
     } catch (error) {
-        logger.warn(`LocalStorage is not available: `, error)
-        return false
+        hasLocalStorage = false
+        return hasLocalStorage 
     }
 }

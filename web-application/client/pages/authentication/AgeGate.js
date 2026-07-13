@@ -25,6 +25,7 @@ import logger from '/logger'
 import { deleteUser } from '/state/User'
 import { reset } from '/state/system'
 
+import { isLocalStorageAvailable } from '/lib/localStorage'
 import { useRequest } from '/lib/hooks/useRequest'
 
 import CommunitiesLogo from '/components/header/CommunitiesLogo'
@@ -42,9 +43,16 @@ const AgeGate = function() {
     useEffect(function() {
         if ( request && request.state == 'fulfilled') {
 
-            // Clear local storage so their drafts don't carry over to another
-            // login session.
-            localStorage.clear()
+
+            if ( isLocalStorageAvailable() ) {
+                try { 
+                    // Clear local storage so their drafts don't carry over to another
+                    // login session.
+                    localStorage.clear()
+                } catch (error) {
+                    logger.error(error)
+                }
+            }
 
             dispatch(reset())
 

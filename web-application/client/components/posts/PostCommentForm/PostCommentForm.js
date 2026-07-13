@@ -22,6 +22,7 @@ import { useSelector, useDispatch } from 'react-redux'
 
 import logger from '/logger'
 
+import { isLocalStorageAvailable } from '/lib/localStorage'
 import { useRequest } from '/lib/hooks/useRequest'
 
 import { postPostComments, patchPostComment, finishPostCommentEdit } from '/state/PostComment'
@@ -65,7 +66,14 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
             content: ''
         }
 
-        localStorage.setItem(`commentDraft.${postId}`, JSON.stringify(draft))
+        if ( isLocalStorageAvailable() ) {
+            try { 
+                localStorage.setItem(`commentDraft.${postId}`, JSON.stringify(draft))
+            } catch (error) {
+                logger.error(error)
+            }
+        }
+
         setShowForm(true)
         setShowComments(true)
     }
@@ -89,7 +97,13 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
      * Cancel the comment and wipe out any drafts.
      */
     const cancel = function() {
-        localStorage.removeItem(getDraftKey())
+        if ( isLocalStorageAvailable() ) {
+            try { 
+                localStorage.removeItem(getDraftKey())
+            } catch (error) {
+                logger.error(error)
+            }
+        }
 
         setAreYouSure(false)
         setContent('')
@@ -149,12 +163,26 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
             content: comment ? comment.content : ''
         }
 
-        const existingDraft = JSON.parse(localStorage.getItem(getDraftKey()))
+        let existingDraft = null
+        if ( isLocalStorageAvailable() ) {
+            try { 
+                existingDraft = JSON.parse(localStorage.getItem(getDraftKey()))
+            } catch (error) {
+                logger.error(error)
+            }
+        }
+
         if ( existingDraft ) {
             draft = existingDraft
             setShowForm(true)
         } else if ( commentId && comment ) {
-            localStorage.setItem(getDraftKey(), JSON.stringify(draft))
+            if ( isLocalStorageAvailable() ) {
+                try { 
+                    localStorage.setItem(getDraftKey(), JSON.stringify(draft))
+                } catch (error) {
+                    logger.error(error)
+                }
+            }
         }
 
         setContent(draft.content)
@@ -162,13 +190,25 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
 
     useEffect(function() {
         if ( ! postRequest && ! patchRequest && (showForm || commentId )) {
-            localStorage.setItem(getDraftKey(), JSON.stringify({ content: content }))
+            if ( isLocalStorageAvailable() ) {
+                try { 
+                    localStorage.setItem(getDraftKey(), JSON.stringify({ content: content }))
+                } catch (error) {
+                    logger.error(error)
+                }
+            }
         }
     }, [ commentId, content, postRequest, patchRequest ])
 
     useEffect(function() {
         if ( (postRequest && postRequest.state == 'fulfilled') || (patchRequest && patchRequest.state == 'fulfilled')) {
-            localStorage.removeItem(getDraftKey())
+            if ( isLocalStorageAvailable() ) {
+                try { 
+                    localStorage.removeItem(getDraftKey())
+                } catch (error) {
+                    logger.error(error)
+                }
+            }
 
             setContent('')
             setError('')
@@ -192,7 +232,6 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
     }
 
     const inProgress = (patchRequest && patchRequest.state == 'pending') || (postRequest && postRequest.state == 'pending')
-    const draft = localStorage.getItem(getDraftKey())
 
     if ( ! commentId && ! showForm ) {
         return (
