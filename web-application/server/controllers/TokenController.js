@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -17,9 +17,10 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-const { 
-    AuthenticationService, 
-    EmailService, 
+const {
+    AuthenticationService,
+    EmailService,
+    SessionService,
     TokenService,
 
     TokenDAO,
@@ -45,6 +46,7 @@ module.exports = class TokenController extends BaseController {
 
         this.authenticationService = new AuthenticationService(core)
         this.emailService = new EmailService(core)
+        this.sessionService = new SessionService(core)
         this.tokenService = new TokenService(core)
 
         this.tokenDAO = new TokenDAO(core)
@@ -77,8 +79,8 @@ module.exports = class TokenController extends BaseController {
          * 1. :token must be included.
          * 2. request.query.type must be included
          * 3. Token(:token) must be exist
-         * 4. Token(:token) must have type equal to request.query.type 
-         * 
+         * 4. Token(:token) must have type equal to request.query.type
+         *
          * **********************************************************/
         const currentUser = request.session.user
 
@@ -106,7 +108,7 @@ module.exports = class TokenController extends BaseController {
             })
             return
         }
-        
+
         const tokenErrors = validation.Token.validateToken(request.params.token)
         if ( tokenErrors.length > 0 ) {
             const logString = tokenErrors.reduce((string, error) => `${string}\n${error.log}`, '')
@@ -116,7 +118,7 @@ module.exports = class TokenController extends BaseController {
         }
 
         const typeErrors = validation.Token.validateType(request.query.type)
-        if ( typeErrors.length > 0 ) { 
+        if ( typeErrors.length > 0 ) {
             const logString = typeErrors.reduce((string, error) => `${string}\n${error.log}`, '')
             throw new ControllerError(403, 'not-authorized',
                 `Invalid token: ${ logString }`,
@@ -127,15 +129,15 @@ module.exports = class TokenController extends BaseController {
         try {
             // TokenDAO::validateToken() checks both of the following:
             // 3. Token(:token) must be exist
-            // 4. Token(:token) must have type equal to request.query.type 
+            // 4. Token(:token) must have type equal to request.query.type
             token = await this.tokenService.validateToken(request.params.token, [ request.query.type ])
         } catch (error) {
             if ( error instanceof ServiceError ) {
-                throw new ControllerError(403, 'not-authorized', 
+                throw new ControllerError(403, 'not-authorized',
                     error.message,
                     `Your token is invalid. Please request a new one and try again.`)
             } else if ( error instanceof DAOError ) {
-                throw new ControllerError(403, 'not-authorized', 
+                throw new ControllerError(403, 'not-authorized',
                     error.message,
                     `Your token is invalid. Please request a new one and try again.`)
             } else {
@@ -183,8 +185,8 @@ module.exports = class TokenController extends BaseController {
                     userId: token.userId
                 })
             }
-        } 
-        
+        }
+
         // For reset-password, we don't log the user in when we validate the
         // token because those flows have multiple steps. The user will be
         // logged in at a later step.
@@ -192,15 +194,17 @@ module.exports = class TokenController extends BaseController {
             response.status(200).json({
                 userId: token.userId
             })
-        } 
+        }
 
         else if ( token.type == 'invitation' ) {
+            await this.sessionService.regenerateSession(request)
+
             // The whole invitation flow assumes the user is authenticated.  We
             // can't remove that authentication with out totally rewiring the
             // invitation flow.  They're going to be setting their password and
             // everything in this case anyway (they don't have one yet).  So
             // the risk is really that someone could register with someone
-            // else's email address. 
+            // else's email address.
             //
             // It's pretty small in this case, but we should really rewrite the
             // invitation flow to remove that risk.  That's a future TODO though.
@@ -218,7 +222,7 @@ module.exports = class TokenController extends BaseController {
                 `Invalid token state!`,
                 `Your token is not valid. Please request a new one and try again.`
             )
-    
+
         }
     }
 
@@ -252,14 +256,14 @@ module.exports = class TokenController extends BaseController {
          * 2. request.body.type must be 'reset-password' or 'email-confirmation'
          *
          * **********************************************************/
-        
+
         const tokenParams  = request.body
         if ( tokenParams.email ) {
             tokenParams.email = tokenParams.email.toLowerCase().trim()
         }
 
         const typeErrors = validation.Token.validateType(tokenParams.type)
-        if ( typeErrors.length > 0 ) { 
+        if ( typeErrors.length > 0 ) {
             const logString = typeErrors.reduce((string, error) => `${string}\n${error.log}`, '')
             throw new ControllerError(400, 'invalid',
                 `Invalid token request: ${ logString }`,
@@ -267,7 +271,7 @@ module.exports = class TokenController extends BaseController {
         }
 
         const emailErrors = validation.User.validateEmail(tokenParams.email)
-        if ( emailErrors.length > 0 ) { 
+        if ( emailErrors.length > 0 ) {
             const logString = emailErrors.reduce((string, error) => `${string}\n${error.log}`, '')
             throw new ControllerError(400, 'invalid',
                 `Invalid token request: ${ logString }`,
@@ -284,7 +288,7 @@ module.exports = class TokenController extends BaseController {
             }
             const user = userResults.dictionary[userResults.list[0]]
 
-            const token = await this.tokenService.createToken({ 
+            const token = await this.tokenService.createToken({
                 type: tokenParams.type,
                 userId: user.id,
                 creatorId: null

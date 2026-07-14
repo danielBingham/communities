@@ -81,7 +81,7 @@ module.exports = class SessionService {
             request.session.regenerate((error) => {
                 if ( error ) {
                     this.core.logger.error(`Failed to regenerate session: `, error)
-                    reject()
+                    reject(error)
                 } else {
                     request.session.csrfToken = csrfToken
                     resolve()

@@ -24,8 +24,6 @@ const ServiceError = require('../errors/ServiceError')
 const UserDAO = require('../daos/UserDAO')
 const FileDAO = require('../daos/FileDAO')
 
-const SessionService = require('./SessionService')
-
 module.exports = class AuthenticationService {
 
     constructor(core) {
