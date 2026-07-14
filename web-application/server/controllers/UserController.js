@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -86,15 +86,15 @@ module.exports = class UserController extends BaseController{
     }
 
     async getRelations(currentUser, results, requestedRelations) {
-        
+
         // Profile pictures
         const fileIds = []
         for(const userId of results.list) {
             const user = results.dictionary[userId]
             fileIds.push(user.fileId)
         }
-        const fileResults = await this.fileDAO.selectFiles({ 
-            where: `files.id = ANY($1::uuid[])`, 
+        const fileResults = await this.fileDAO.selectFiles({
+            where: `files.id = ANY($1::uuid[])`,
             params: [ fileIds ]
         })
 
@@ -112,7 +112,7 @@ module.exports = class UserController extends BaseController{
         let mutualsDictionary = {}
         if ( this.core.features.has('feat-491-mutual-friends' ) ) {
             if ( currentUser ) {
-                mutualsDictionary = await this.mutualsService.getMutualsForCurrentUserAndList(currentUser, results.list) 
+                mutualsDictionary = await this.mutualsService.getMutualsForCurrentUserAndList(currentUser, results.list)
             }
         }
 
@@ -132,7 +132,7 @@ module.exports = class UserController extends BaseController{
      * @param {string} query.name   (Optional) A string to compare to user's names for
      * matches.  Compared using trigram matching.
      * @param {int} quer.page    (Optional) A page number indicating which page of
-     * results we want.  
+     * results we want.
      * @param {string} query.sort (Optional) A sort parameter describing how we want
      * to sort users.
      * @param {Object} options  A dictionary of options that adjust how we
@@ -144,7 +144,7 @@ module.exports = class UserController extends BaseController{
      * understandable to `selectUsers()` and `countUsers()`.  Of the following
      * format:
      * ```
-     * { 
+     * {
      *  where: 'WHERE ...', // An SQL where statement.
      *  params: [], // An array of paramters matching the $1,$2, parameterization of `where`
      *  page: 1, // A page parameter, to select which page of results we want.
@@ -185,7 +185,7 @@ module.exports = class UserController extends BaseController{
         // they need to moderate the site.
         if ( currentUser && canModerateSite !== true) {
             const blockResults = await this.core.database.query(`
-                SELECT user_id 
+                SELECT user_id
                     FROM user_relationships
                         WHERE friend_id = $1 AND status = 'blocked'
             `, [currentUser.id])
@@ -280,14 +280,14 @@ module.exports = class UserController extends BaseController{
                 const memberUserIds = groupMembers.map((member) => member.userId)
 
                 let userIds = [ ...postUserIds, ...memberUserIds ]
-              
+
                 // For 'open' type groups, we may be able to mention some or all of our friends.
                 //
                 // NOTE: If you update this logic, update the logic in the Group post branch below.
                 if ( group.type === 'open' || group.type === 'private-open' || group.type === 'hidden-open' ) {
                     const relationships = await this.userRelationshipsDAO.getUserRelationshipsForUserWithStatus(currentUser.id, 'confirmed')
                     const friendIds = relationships.map((r) => r.userId == currentUser.id ? r.relationId : r.userId)
-                    
+
                     // For open Groups, you can mention your friends.
                     if ( group.type === 'open' ) {
                         userIds.push(...friendIds)
@@ -295,10 +295,10 @@ module.exports = class UserController extends BaseController{
 
                     // For private-open and hidden-open groups, you can only
                     // mention your friends if they are also members of the group
-                    // or the parent group. 
+                    // or the parent group.
                     else if ( group.type === 'private-open' || group.type === 'hidden-open' ) {
                         const results = await this.core.database.query(`
-                            SELECT user_id FROM group_members 
+                            SELECT user_id FROM group_members
                                 WHERE (group_members.group_id = $1 OR group_members.group_id = $2) AND group_members.user_id = ANY($3::uuid[])
                         `, [ group.id, group.parentId, friendIds ])
 
@@ -308,7 +308,7 @@ module.exports = class UserController extends BaseController{
                         const friendsInGroupOrParentGroup = results.rows.map((r) => r.user_id)
                         userIds.push(...friendsInGroupOrParentGroup)
                     }
-                } 
+                }
 
 
                 // This is still necessary because blocked users could be found
@@ -331,7 +331,7 @@ module.exports = class UserController extends BaseController{
                 const and = result.params.length > 0 ? ' AND ' : ''
                 result.params.push(userIds)
                 result.where += `${and} users.id = ANY($${result.params.length}::uuid[])`
-            } 
+            }
 
             // If they are commenting in a post, limit the search to their
             // friends and people who've interacted with the post.
@@ -372,11 +372,11 @@ module.exports = class UserController extends BaseController{
                 // before anyone has enough friends and blocks that this is
                 // actually a problem.
                 userIds = userIds.filter((id) => ! blockIds.includes(id))
-                
+
                 const and = result.params.length > 0 ? ' AND ' : ''
                 result.params.push(userIds)
                 result.where += `${and} users.id = ANY($${result.params.length}::uuid[])`
-            } 
+            }
 
             // If they are posting in a group, limit the search to group
             // members and their friends.
@@ -405,7 +405,7 @@ module.exports = class UserController extends BaseController{
                 if ( group.type === 'open' || group.type === 'private-open' || group.type === 'hidden-open' ) {
                     const relationships = await this.userRelationshipsDAO.getUserRelationshipsForUserWithStatus(currentUser.id, 'confirmed')
                     const friendIds = relationships.map((r) => r.userId == currentUser.id ? r.relationId : r.userId)
-                    
+
                     // For open Groups, you can mention your friends.
                     if ( group.type === 'open' ) {
                         userIds.push(...friendIds)
@@ -413,10 +413,10 @@ module.exports = class UserController extends BaseController{
 
                     // For private-open and hidden-open groups, you can only
                     // mention your friends if they are also members of the group
-                    // or the parent group. 
+                    // or the parent group.
                     else if ( group.type === 'private-open' || group.type === 'hidden-open' ) {
                         const results = await this.core.database.query(`
-                            SELECT user_id FROM group_members 
+                            SELECT user_id FROM group_members
                                 WHERE (group_members.group_id = $1 OR group_members.group_id = $2) AND group_members.user_id = ANY($3::uuid[])
                         `, [ group.id, group.parentId, friendIds ])
 
@@ -426,7 +426,7 @@ module.exports = class UserController extends BaseController{
                         const friendsInGroupOrParentGroup = results.rows.map((r) => r.user_id)
                         userIds.push(...friendsInGroupOrParentGroup)
                     }
-                } 
+                }
 
                 // This is still necessary because blocked users could be found
                 // in the group results.
@@ -448,7 +448,7 @@ module.exports = class UserController extends BaseController{
                 const and = result.params.length > 0 ? ' AND ' : ''
                 result.params.push(userIds)
                 result.where += `${and} users.id = ANY($${result.params.length}::uuid[])`
-            } 
+            }
 
             // Limit the search to their friends.
             else {
@@ -544,7 +544,7 @@ module.exports = class UserController extends BaseController{
      * @param {string} request.query.name   (Optional) A string to compare to
      * user's names for matches.  Compared using trigram matching.
      * @param {int} request.query.page    (Optional) A page number indicating
-     * which page of results we want.  
+     * which page of results we want.
      * @param {string} request.query.sort (Optional) A sort parameter
      * describing how we want to sort users.
      * @param {Object} response Standard Express response object.
@@ -561,7 +561,7 @@ module.exports = class UserController extends BaseController{
                     page: 1,
                     pageSize: 1,
                     numberOfPages: 1
-                }, 
+                },
                 relations: {},
                 dictionary: {},
                 list: []
@@ -569,9 +569,9 @@ module.exports = class UserController extends BaseController{
         }
         const meta = await this.userDAO.countUsers(query)
         const results = await this.userDAO.selectUsers(query)
-        const relations = await this.getRelations(request.session.user, results, query.requestedRelations) 
+        const relations = await this.getRelations(request.session.user, results, query.requestedRelations)
 
-        return response.status(200).json({ 
+        return response.status(200).json({
             dictionary: results.dictionary,
             list: results.list,
             meta: meta,
@@ -593,7 +593,7 @@ module.exports = class UserController extends BaseController{
         const currentUser = request.session.user
 
         let userErrors = []
-        let resultingUsers = [] 
+        let resultingUsers = []
 
         // This is an invitation.
         if ( currentUser ) {
@@ -602,7 +602,7 @@ module.exports = class UserController extends BaseController{
                     const [invitedUser, errors] = await this.userService.inviteUser(currentUser, user)
                     if ( errors.length > 0 ) {
                         userErrors.push(...errors)
-                    } 
+                    }
                     if ( invitedUser !== null ) {
                         resultingUsers.push(invitedUser)
                     }
@@ -611,21 +611,23 @@ module.exports = class UserController extends BaseController{
                 const [invitedUser, errors] = await this.userService.inviteUser(currentUser, request.body)
                 if ( errors.length > 0 ) {
                     userErrors.push(...errors)
-                } 
+                }
                 if ( invitedUser !== null ) {
                     resultingUsers.push(invitedUser)
                 }
             }
-        } 
+        }
         // This is a registration.
         else {
-            try { 
+            try {
                 const [registeredUser, errors] = await this.userService.registerUser(request.body)
                 if ( errors.length > 0 ) {
                     userErrors.push(...errors)
-                } 
+                }
                 if ( registeredUser !== null ) {
                     resultingUsers.push(registeredUser)
+
+                    await this.sessionService.regenerateSession(request)
                     request.session.user = registeredUser
                 }
             } catch (error) {
@@ -656,7 +658,7 @@ module.exports = class UserController extends BaseController{
         const relations = await this.getRelations(request.session.user, results)
         relations.users = results.dictionary
 
-        response.status(201).json({ 
+        response.status(201).json({
             entity: request.session.user,
             relations: relations
         })
@@ -683,7 +685,7 @@ module.exports = class UserController extends BaseController{
         if ( currentUser && currentUser?.id !== userId && canModerateSite !== true) {
             const relationship = await this.userRelationshipsDAO.getUserRelationshipByUserAndRelation(currentUser.id, userId)
             if ( relationship?.status === 'blocked' && currentUser.id === relationship?.relationId) {
-                throw new ControllerError(404, 'not-found', 
+                throw new ControllerError(404, 'not-found',
                     `User(${currentUser.id}) attempting to view User(${userId}) who blocked them.`,
                     `Either that user doesn't exist or you don't have permissions to view them.`)
             }
@@ -719,7 +721,7 @@ module.exports = class UserController extends BaseController{
 
         const relations = await this.getRelations(currentUser, results)
 
-        return response.status(200).json({ 
+        return response.status(200).json({
             entity: results.dictionary[userId],
             relations: relations
         })
@@ -773,23 +775,23 @@ module.exports = class UserController extends BaseController{
          * 4. If a password is included, then oldPassword or a valid token are
          * required.
          * 5. If an email is included, then oldPassword is required.
-         * 
+         *
          * **********************************************************/
 
         const currentUser = request.session.user
 
         // ================= Initial Validation ===============================
-        // Do some basic initial validation before we determine what type of 
+        // Do some basic initial validation before we determine what type of
         // PATCH is taking place. Ensure the user is authenticated or has
         // a token.  Make sure the route and body match.  Make sure we're
-        // PATCHing a user that actually exists.  
+        // PATCHing a user that actually exists.
 
         // 1. User must be logged in unless they are using  token.
         if ( ! currentUser && ! ( 'token' in user) ) {
-            throw new ControllerError(401, 'not-authenticated', 
+            throw new ControllerError(401, 'not-authenticated',
                 `Unauthenticated user attempting to update user(${user.id}).`,
                 `You must be authenticated to update a user.`)
-        }  
+        }
 
         // 2b. :id must equal request.body.id
         if ( id != user.id ) {
@@ -853,7 +855,7 @@ module.exports = class UserController extends BaseController{
 
                 const relations = await this.getRelations(currentUser, results)
 
-                return response.status(200).json({ 
+                return response.status(200).json({
                     entity: results.dictionary[id],
                     relations: relations
                 })
@@ -872,12 +874,12 @@ module.exports = class UserController extends BaseController{
 
                 const relations = await this.getRelations(currentUser, results)
 
-                return response.status(200).json({ 
+                return response.status(200).json({
                     entity: results.dictionary[id],
                     relations: relations,
                     multifactorSecret: secret
                 })
-            } 
+            }
 
             // If we get here, the user attempted to update with an invalid value.  Return an error.
             throw new ControllerError(400, 'invalid',
@@ -928,7 +930,7 @@ module.exports = class UserController extends BaseController{
                     `User(${currentUser.id}) attempted to use token for User(${token.userId}).`,
                     `You are currently logged in with another user.  Please log out first.`)
             }
-            
+
             if ( token.userId != user.id ) {
                 throw new ControllerError(403, 'not-authorized',
                     `User(${user.id}) attempted to change their password with a valid token that wasn't theirs!`,
@@ -949,7 +951,7 @@ module.exports = class UserController extends BaseController{
             // Token was valid.  Clean it off the user object before we use
             // it as a patch.
             delete user.token
-        } 
+        }
 
         // Next check to see if they sent their password.  If they did and the
         // authentication is successful, then this is:
@@ -958,8 +960,8 @@ module.exports = class UserController extends BaseController{
         //
         else if ( user.oldPassword) {
             try {
-                const existingUserId = await this.auth.authenticateUser({ 
-                    email: request.session.user.email, 
+                const existingUserId = await this.auth.authenticateUser({
+                    email: request.session.user.email,
                     password: user.oldPassword
                 })
 
@@ -979,15 +981,15 @@ module.exports = class UserController extends BaseController{
             } catch (error ) {
                 if ( error instanceof ServiceError ) {
                     if ( error.type == 'authentication-failed' || error.type == 'no-user' || error.type == 'no-user-password' ) {
-                        throw new ControllerError(403, 'not-authorized', 
-                            error.message, 
+                        throw new ControllerError(403, 'not-authorized',
+                            error.message,
                             'Your password was incorrect.')
                     } else if ( error.type == 'multiple-users' ) {
-                        throw new ControllerError(500, 'server-error', 
+                        throw new ControllerError(500, 'server-error',
                             error.message,
                             'Multiple users found for your credentials. This is a bug, please report it!')
                     } else if ( error.type == 'no-credential-password' ) {
-                        throw new ControllerError(400, 'invalid', 
+                        throw new ControllerError(400, 'invalid',
                             error.message,
                             `Your current password is required.`)
                     } else {
@@ -1004,8 +1006,8 @@ module.exports = class UserController extends BaseController{
         //
         // - admin-edit
         //
-        else if ( currentUser.id !== existingUser.id 
-            && (currentUser.siteRole === 'admin' || currentUser.siteRole === 'superadmin')) 
+        else if ( currentUser.id !== existingUser.id
+            && (currentUser.siteRole === 'admin' || currentUser.siteRole === 'superadmin'))
         {
             type = 'admin-edit'
         }
@@ -1025,7 +1027,7 @@ module.exports = class UserController extends BaseController{
         // 2. User being patched must be the same as the logged in user or the
         // logged in user must be an admin.
         if ( type !== 'admin-edit' && currentUser && currentUser.id != id) {
-            throw new ControllerError(403, 'not-authorized', 
+            throw new ControllerError(403, 'not-authorized',
                 `User(${request.session.user.id}) attempted to update another user(${id}).`,
                 `You may not update a user other than yourself.`)
         }
@@ -1039,7 +1041,7 @@ module.exports = class UserController extends BaseController{
                 `User submitted an invalid user: ${logString}`,
                 errorString)
         }
-       
+
         const age = shared.lib.date.getAgeFromDate(user.birthdate)
         if ( age < 18 ) {
             // If the user is a pending invitation, then we need to delete
@@ -1066,7 +1068,7 @@ module.exports = class UserController extends BaseController{
 
         // If they included an email, determine whether we need to change their status.
         if ( user.email ) {
-            // If this is an invitation and they aren't changing their email, then go 
+            // If this is an invitation and they aren't changing their email, then go
             // ahead and confirm it since the token they are using came from their email.
             if ( type === 'invitation-acceptance' && user.email === existingUser.email ) {
                 user.status = 'confirmed'
@@ -1086,9 +1088,9 @@ module.exports = class UserController extends BaseController{
         // ================== Follow Up =======================================
         // We've finished the update, now we need to do any follow up: sending
         // notifications, cleaning up, setting tokens, etc.
-        
+
         // Issue #132 - We're going to allow the user's email to be returned in this case,
-        // because only authenticated users or admins may call this endpoint. 
+        // because only authenticated users or admins may call this endpoint.
         const results = await this.userDAO.selectUsers({ where: 'users.id=$1', params: [user.id], fields: 'all' })
 
         if ( ! results.dictionary[user.id] ) {
@@ -1111,9 +1113,14 @@ module.exports = class UserController extends BaseController{
         // TECHDEBT This isn't the cleanest flow, and it's probably going to
         // prove a bit brittle.
         if ( (currentUser && currentUser.id === entity.id )
-            || ( type === 'invitation-acceptance')) 
+            || ( type === 'invitation-acceptance'))
         {
-            request.session.user = entity 
+            // If this is an invitation acceptance, then we want to regenerate
+            // the session.
+            if ( type === 'invitation-acceptance' ) {
+                await this.sessionService.regenerateSession(request)
+            }
+            request.session.user = entity
         }
 
         // If they updated their password, then we need to notify them.
@@ -1156,7 +1163,7 @@ module.exports = class UserController extends BaseController{
 
         const relations = await this.getRelations(currentUser, results)
 
-        return response.status(200).json({ 
+        return response.status(200).json({
             entity: entity,
             relations: relations
         })
@@ -1217,4 +1224,4 @@ module.exports = class UserController extends BaseController{
         }
     }
 
-} 
+}

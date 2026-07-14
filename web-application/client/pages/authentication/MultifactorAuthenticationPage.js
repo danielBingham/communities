@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -45,7 +45,7 @@ const MultifactorAuthenticationPage = function(props) {
             <PageLeftGutter></PageLeftGutter>
             <PageBody>
                 <Card className="multifactor-authentication-page__card">
-                    <MultifactorAuthenticationForm /> 
+                    <MultifactorAuthenticationForm />
                 </Card>
            </PageBody>
            <PageRightGutter></PageRightGutter>

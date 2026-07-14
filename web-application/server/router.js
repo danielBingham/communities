@@ -1,5 +1,5 @@
 /**************************************************************************************************
- *         API Router v0 
+ *         API Router v0
  *
  * This is the RESTful API router.  It contains all of our backend API routes.
  *
@@ -9,7 +9,7 @@
  **************************************************************************************************/
 module.exports = function(core) {
     const express = require('express')
-    
+
     const rateLimit = require('./middleware/rateLimit')
     const { createVideoUploadMiddleware, createImageUploadMiddleware } = require('./middleware/upload')
 
@@ -180,14 +180,14 @@ module.exports = function(core) {
         })
     })
 
-    // Create a new user 
+    // Create a new user
     router.post('/users', rateLimit(core, 30), function(request, response, next) {
         userController.postUsers(request, response).catch(function(error) {
             next(error)
         })
     })
 
-    // Get the details of a single user 
+    // Get the details of a single user
     router.get('/user/:id', rateLimit(core, 2400), function(request, response, next) {
         userController.getUser(request, response).catch(function(error) {
             next(error)
@@ -237,7 +237,7 @@ module.exports = function(core) {
             next(error)
         })
     })
-    
+
     router.delete('/user/:userId/relationship/:relationId', rateLimit(core, 60), function(request, response, next) {
         userRelationshipController.deleteUserRelationship(request, response).catch(function(error) {
             next(error)
@@ -484,7 +484,7 @@ module.exports = function(core) {
             next(error)
         })
     })
-    
+
     router.post('/post/:postId/comments', rateLimit(core, 30), function(request, response, next) {
         postCommentController.postPostComments(request, response).catch(function(error) {
             next(error)
@@ -576,7 +576,7 @@ module.exports = function(core) {
         })
     })
 
-    router.patch('/authentication', rateLimit(core, 15), function(request, response, next) { 
+    router.patch('/authentication', rateLimit(core, 15), function(request, response, next) {
         authenticationController.patchAuthentication(request, response).catch(function(error) {
             next(error)
         })
@@ -714,7 +714,7 @@ module.exports = function(core) {
 
 
     /**************************************************************************
-     *      API 404 
+     *      API 404
      *************************************************************************/
     router.all('*any', function(request, response) {
         response.status(404).send({
