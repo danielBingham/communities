@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -19,18 +19,30 @@
  ******************************************************************************/
 import logger from '/logger'
 
+let hasLocalStorage = null
+
 /** Can we use local storage? **/
 export const isLocalStorageAvailable = function() {
+    // If we've already checked localStorage for this load.
+    if ( hasLocalStorage === true || hasLocalStorage === false) {
+        return hasLocalStorage
+    }
+
     try {
-        if ( ! ('localStorage' in window) ) {
-            return false
+        if ( ! ('localStorage' in window) || window.localStorage === null ) {
+            logger.warn(`'localStorage' not available.`)
+            hasLocalStorage = false
+            return hasLocalStorage
         }
 
         localStorage.setItem('__storage_test__', 'pending')
         localStorage.removeItem('__storage_test__')
-        return true
+
+        hasLocalStorage = true
+        return hasLocalStorage
     } catch (error) {
-        logger.warn(`LocalStorage is not available: `, error)
-        return false
+        logger.warn(`'localStorage' not availabile: `, error)
+        hasLocalStorage = false
+        return hasLocalStorage
     }
 }

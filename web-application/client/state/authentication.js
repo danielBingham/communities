@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -22,6 +22,8 @@ import { createSlice } from '@reduxjs/toolkit'
 import { Capacitor } from '@capacitor/core'
 import { SecureStoragePlugin } from 'capacitor-secure-storage-plugin'
 
+import logger from '/logger'
+
 import { isLocalStorageAvailable } from '/lib/localStorage'
 import { makeRequest } from '/state/lib/makeRequest'
 
@@ -35,7 +37,7 @@ export const authenticationSlice = createSlice({
         /**
          * A `user` object representing the currentUser.
          *
-         * @type {object} 
+         * @type {object}
          */
         currentUser: null,
 
@@ -97,7 +99,7 @@ export const setSession = function(session) {
 
 /**
  * Call getAuthentication and cleanup the created request as soon as it
- * returns.  
+ * returns.
  *
  * Use this to refresh authentication in contexts where we don't need to track
  * the request.
@@ -226,9 +228,13 @@ export const deleteAuthentication = function() {
                 if ( Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android' ) {
                     SecureStoragePlugin.clear().then(function() {
                         if ( isLocalStorageAvailable() ) {
-                            // Clear local storage so their drafts don't carry over to another
-                            // login session.
-                            localStorage.clear()
+                            try {
+                                // Clear local storage so their drafts don't carry over to another
+                                // login session.
+                                localStorage.clear()
+                            } catch (error) {
+                                logger.error(error)
+                            }
                         }
 
                         dispatch(reset())
@@ -240,9 +246,13 @@ export const deleteAuthentication = function() {
                     })
                 } else {
                     if ( isLocalStorageAvailable() ) {
-                        // Clear local storage so their drafts don't carry over to another
-                        // login session.
-                        localStorage.clear()
+                        try {
+                            // Clear local storage so their drafts don't carry over to another
+                            // login session.
+                            localStorage.clear()
+                        } catch (error) {
+                            logger.error(error)
+                        }
                     }
 
                     dispatch(reset())
