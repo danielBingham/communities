@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -26,11 +26,11 @@ module.exports = class SessionService {
 
     async getSessions(userId) {
         const results = await this.core.database.query(`
-            SELECT sid, sess FROM session 
+            SELECT sid, sess FROM session
                 WHERE (sess #>> '{user,id}')::uuid = $1
         `, [ userId ])
 
-        let sessions = [] 
+        let sessions = []
         if ( results.rows.length > 0 ) {
             for(const row of results.rows) {
                 sessions.push({
@@ -63,5 +63,32 @@ module.exports = class SessionService {
         await this.core.database.query(`
             DELETE FROM session WHERE sess->'user'->>'id' = $1 AND session.sid != $2
         `, [ userId, sessionId ])
+    }
+
+    async regenerateSession(request) {
+        // Translate their csrf to the new session so that they don't have to
+        // refresh and pull a new one.  If we don't do this, they'll get an
+        // "authenticated" error which will trigger a redirect to the homepage
+        // and a full refresh.
+        //
+        // The alternative is to generate a new CSRF Token, but in that case we
+        // need some way to get it to the front end and they'll probably get a
+        // CSRF mismatch error.
+        //
+        // TECHDEBT  We probably need a better way to handle this.
+        const csrfToken = request.session.csrfToken
+        const promise = new Promise((resolve, reject) => {
+            request.session.regenerate((error) => {
+                if ( error ) {
+                    this.core.logger.error(`Failed to regenerate session: `, error)
+                    reject()
+                } else {
+                    request.session.csrfToken = csrfToken
+                    resolve()
+                }
+            })
+        })
+
+        return promise
     }
 }

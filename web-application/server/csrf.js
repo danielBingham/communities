@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -26,9 +26,9 @@ const createCSRFMiddleware = function(core) {
             return
         }
 
-        if ( ! ( 'csrfToken' in request.session ) 
-            || request.session.csrfToken === undefined 
-            || request.session.csrfToken === null ) 
+        if ( ! ( 'csrfToken' in request.session )
+            || request.session.csrfToken === undefined
+            || request.session.csrfToken === null )
         {
             request.logger.verbose(`CSRF check identified an expired session.`)
             response.status(401).json({
@@ -44,8 +44,8 @@ const createCSRFMiddleware = function(core) {
 
         if ( csrfToken !== request.session.csrfToken ) {
             request.logger.warn(`
-                Request arrived with an invalid CSRF Token.  Possible forged request. 
-                    Submitted token: ${csrfToken} 
+                Request arrived with an invalid CSRF Token.  Possible forged request.
+                    Submitted token: ${csrfToken}
                     Stored Token: ${request.session.csrfToken}
             `)
             response.status(403).json({
@@ -55,10 +55,10 @@ const createCSRFMiddleware = function(core) {
                 }
             })
             return
-        } 
-        
+        }
 
-        next() 
+
+        next()
     }
 }
 

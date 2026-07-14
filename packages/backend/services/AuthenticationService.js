@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -24,6 +24,8 @@ const ServiceError = require('../errors/ServiceError')
 const UserDAO = require('../daos/UserDAO')
 const FileDAO = require('../daos/FileDAO')
 
+const SessionService = require('./SessionService')
+
 module.exports = class AuthenticationService {
 
     constructor(core) {
@@ -39,7 +41,7 @@ module.exports = class AuthenticationService {
     /**
      * Returns the hash password.
      *
-     * THIS IS A SYNCHRONOUS METHOD. 
+     * THIS IS A SYNCHRONOUS METHOD.
      */
     hashPassword(password) {
         return bcrypt.hashSync(password, 10);
@@ -58,16 +60,21 @@ module.exports = class AuthenticationService {
      *
      */
     async getSessionForUserId(id ) {
-        const results = await this.userDAO.selectUsers({ where: 'users.id=$1', params: [id], fields: 'all' })
+        const results = await this.userDAO.selectUsers({
+            where: 'users.id=$1',
+            params: [id],
+            fields: 'all'
+        })
+
         if ( results.list.length <= 0) {
             throw new ServiceError('no-user', 'Failed to get full record for authenticated user!')
-        } 
+        }
 
         const user = results.dictionary[id]
 
         let file = null
         if ( user.fileId !== null ) {
-            file = await this.fileDAO.getFileById(user.fileId)            
+            file = await this.fileDAO.getFileById(user.fileId)
         }
 
         return {
@@ -82,11 +89,11 @@ module.exports = class AuthenticationService {
          *
          * 1. Their email is attached to a user record in the database.
          * 2. Their email is only attached to one user record in the database.
-         * 3. They have a password set. 
+         * 3. They have a password set.
          * 4. The submitted credentials include a password.
          * 5. They are not currently in authentication timeout (more than 10 failed attempts in 15 minutes).
          * 6. The passwords match.
-         * 
+         *
          * **********************************************************/
 
         const sql = 'select id, password, failed_authentication_attempts, last_authentication_attempt_date, status from users where email = $1'
@@ -111,7 +118,7 @@ module.exports = class AuthenticationService {
             throw new ServiceError('banned', `The user for email ${credentials.email} has been banned.`)
         }
 
-        // 3. They have a password set. 
+        // 3. They have a password set.
         if ( ! results.rows[0].password || results.rows[0].password.trim().length <= 0) {
             throw new ServiceError('no-user-password', `User(${credentials.email}) doesn't have a password set.`)
         }
@@ -141,9 +148,9 @@ module.exports = class AuthenticationService {
 
             throw new ServiceError('authentication-failed', `Failed login for email ${credentials.email}.`)
         }
-       
+
         await this.database.query(`UPDATE users SET failed_authentication_attempts = 0, last_authentication_attempt_date = now() WHERE id = $1`, [ userMatch.id])
 
-        return userMatch.id 
+        return userMatch.id
     }
 }
