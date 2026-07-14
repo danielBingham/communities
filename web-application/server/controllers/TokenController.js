@@ -54,23 +54,6 @@ module.exports = class TokenController extends BaseController {
     }
 
     /**
-     * GET /token/:token
-     *
-     * Validate a token sent to a user.
-     *
-     * @param {Object} request  Standard Express request object.
-     * @param {string} request.params.token The token we want to validate.
-     * @param {string} request.query.type   The type of token we are trying to
-     * validate.  Must match what's in the database for :token.
-     * @param {Object} response Standard Express response object.
-     *
-     * @returns {Promise}   Resolves to void.
-     */
-    async getToken(request, response) {
-
-    }
-
-    /**
      * POST /tokens
      *
      * Create a new token.  Currently `reset-password` and 'email-confirmation'
@@ -226,9 +209,9 @@ module.exports = class TokenController extends BaseController {
          *
          * Validation:
          * 1. :token must be included.
-         * 2. request.query.type must be included
+         * 2. request.body.type must be included
          * 3. Token(:token) must be exist
-         * 4. Token(:token) must have type equal to request.query.type
+         * 4. Token(:token) must have type equal to request.body.type
          *
          * **********************************************************/
         const currentUser = request.session.user
@@ -284,7 +267,7 @@ module.exports = class TokenController extends BaseController {
         try {
             // TokenDAO::validateToken() checks both of the following:
             // 3. Token(:token) must be exist
-            // 4. Token(:token) must have type equal to request.query.type
+            // 4. Token(:token) must have type equal to request.body.type
             token = await this.tokenService.validateToken(request.body.token, [ request.body.type ])
         } catch (error) {
             if ( error instanceof ServiceError ) {
