@@ -1,143 +1,93 @@
 # Running Locally
 
-After pulling the github repo, you can run the development server by first
-running the PostgreSQL docker container. To run communities, you can either use
-nodemon and the react dev server or build a Docker container.
+Communities local development environment uses Docker Compose with volume and
+entrypoint overrides to allow for hot-reloading during development.
 
-## Running on Host with NPM
+The compose environment currently does *not* build the database image, so you
+will need to build and run that image before you can run the
+environment.
 
-From the root project directory, run a redis docker container:
-
-```
-$ docker run -d -p 6379:6379 --name communities-redis redis:7.0.10
-```
+## Initializing the Database
 
 From the root project directory, build the postgres docker container:
 
 ```
-$ docker build -t communities-sql database/initialization-scripts 
+$ docker build -t communities-sql database/initialization-scripts
 ```
 
-Run the Postgres docker container:
+## Configuring the Local Environment
+
+The local environment depends on parameters pull from AWS Parameter Store.  You
+will need to initialize it with a `.env` file setting the AWS credentials
+allowing it to pull the parameters.  You will also need to create all the
+required parameters on a path unique to your environment in parameter store.
+You can use a path prefixed `/local/<username>` to set your parameters.
+
+**TODO** *This section is currently a stub.  Until this section is completed,
+you can examine the parameters on other `/local` paths in order to populate
+your environment's parameters.*
+
+## Building the Environment
+
+Before you run the environment, or after changes to `package.json` or
+`package-lock.json` (including the version changes made by the release
+pipeline), you will need to build the environment.
+
+Before building the environment, you need to retrieve an AWS CodeArtifact
+token.
+
+### Authenticating with CodeArtifact
+
+Log in to AWS in your terminal using `aws login`:
 
 ```
-$ docker run -d -p 5432:5432 --name communities-sql communities-sql
+aws login
 ```
 
-Once the redis and SQL containers are running, you'll need to NPM install the
-web-application and the backend, and link the backend, before running.
-
-From the repo root:
+Retrieve the CodeArtifact token:
 
 ```
-$ (cd packages/backend && npm install && npm link)
-$ (cd web-application && npm install && npm link @communities/backend)
+export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
 ```
 
-You'll need to copy your secrets into a `.env` file under `web-application`.
-Create `web-application/.env` and copy in the secrets:
+Log out of AWS in your terminal:
 
 ```
-HOST=https://localhost:3000/
-
-LOG_LEVEL=debug
-
-DATABASE_HOST=localhost
-DATABASE_PORT=5432
-DATABASE_USER=postgres
-DATABASE_PASSWORD=password
-
-REDIS_HOST=localhost
-REDIS_PORT=6379
-
-SESSION_SECRET=hot-dev
-
-S3_BUCKET_URL=[Your bucket URL here]
-S3_BUCKET=[Your bucket here]
-S3_ACCESS_ID=<SECRET>
-S3_ACCESS_KEY=<SECRET>
-
-POSTMARK_API_TOKEN=<SECRET>
-
+aws logout
 ```
 
-Next confirm that the docker containers are running cleanly, then you can run
-the local from the repo root:
+It's a good practice to stay logged out of AWS, except at need, to reduce the
+attack surface for NPM supply chain attacks like SHA1-Hulud.
+
+### Building the Environment
+
+To build the whole environment:
 
 ```
-$ docker ps
-CONTAINER ID   IMAGE             COMMAND                  CREATED        STATUS         PORTS                                       NAMES
-2f805c5f8619   communities-sql   "docker-entrypoint.s…"   8 weeks ago    Up 3 minutes   0.0.0.0:5432->5432/tcp, :::5432->5432/tcp   communities-sql
-28958af88849   redis:7.0.10      "docker-entrypoint.s…"   2 months ago   Up 7 days      0.0.0.0:6379->6379/tcp, :::6379->6379/tcp   communities-redis
-
-$ npm run dev --prefix=web-application
+docker compose build
 ```
 
-## Running everything in Docker [UnTested]
-
-From the root project directory, run a redis docker container:
+To build individual containers:
 
 ```
-$ docker run -d -p 6379:6379 --name communities-redis redis
+docker compose build web-application
 ```
 
-From the root project directory, build the postgres docker container:
+To refresh the environment after a version increment:
 
 ```
-$ docker build -t communities-sql database/initialization-scripts 
+docker compose build web-application worker
 ```
 
-Navigate back to the root directory and run the Postgres docker container:
+## Running the Environment
+
+Once you have your environment initialized and build, you can bring it up using `up`:
 
 ```
-$ cd ..
-$ docker network create communities-network
-$ docker run -d -p 5432:5432 --name communities-sql --net communities-network communities-sql
+docker compose up
 ```
 
-Run `npm install` for the worker. From the root directory:
-
-```
-$ cd worker
-$ npm install
-```
-
-Run the worker in development mode. From the root directory:
-
-```
-$ cd worker
-$ npm run dev
-```
-
-Run `npm install` for the web application to install project dependencies. From the root directory:
-
-```
-$ cd web-application
-$ npm install
-```
-
-Run the development server for react and node to allow hot reloading while you develop. From the root directory:
-
-```
-$ cd web-application
-$ npm run dev
-```
-
-When you're ready to test your project in a more production like context, kill the development
-server and build the app docker container.
-
-From the root project directory:
-
-```
-$ docker build -t communities .
-$ docker run -d -p 8080:8080 --name communities --net communities-network communities 
-```
-
-When you're done, make sure to clean up the two docker containers:
-
-```
-$ docker stop communities
-$ docker stop communities-sql
-$ docker rm communities
-$ docker rm communities-sql
-```
+From there, it should automatically reload and recompile with any code changes.
+If you make any dependency changes (anything requiring `npm install`) you will
+need to rebuild the environment.  That includes changes to any of the
+`@communities` package dependencies.  See "Building the Environment".
