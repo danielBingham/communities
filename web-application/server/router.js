@@ -616,6 +616,16 @@ module.exports = function(core) {
             next(error)
         })
     })
+
+    // PATCH /tokens breaks our standard pattern of PATCH /entity/:id because
+    // we want to keep the token out of the URL.  Instead its submitted in the
+    // request body. Because of this, it's a `tokens` endpoint rather than a
+    // `token` endpoint to keep with the larger pattern.
+    router.patch('/tokens', rateLimit(core, 20), function(request, response, next) {
+        tokenController.patchTokens(request, response).catch(function(error) {
+            next(error)
+        })
+    })
     /**************************************************************************
      *      Stats REST Routes
      * ************************************************************************/

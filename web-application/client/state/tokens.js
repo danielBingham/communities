@@ -20,10 +20,12 @@ export const tokenSlice = createSlice({
 
 export const validateToken = function(token, type) {
     return function(dispatch, getState) {
-        const queryString = qs.stringify({type: type}) 
-        const endpoint = `/token/${token}?${queryString}`
+        const body = {
+            token: token,
+            type: type
+        }
 
-        return dispatch(makeRequest('GET', endpoint, null,
+        return dispatch(makeRequest('PATCH', '/tokens', body,
             function(responseBody) {
                 if ( responseBody.session ) {
                     dispatch(tokenSlice.actions.setUserForToken({ token: token, userId: responseBody.session.user.id}))
