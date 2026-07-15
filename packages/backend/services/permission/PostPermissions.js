@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -30,9 +30,9 @@ const ServiceError = require('../../errors/ServiceError')
 module.exports = class PostPermissions {
 
     constructor(core, permissionService) {
-        this.core 
+        this.core = core
 
-        this.permissionService = permissionService 
+        this.permissionService = permissionService
 
         this.postDAO = new PostDAO(core)
         this.groupDAO = new GroupDAO(core)
@@ -42,8 +42,8 @@ module.exports = class PostPermissions {
 
     async ensureContext(user, context, required, optional) {
         // If we don't have the post, then attempt to load it.
-        if ( ( required?.includes('post') || optional?.includes('post') ) 
-            && ( ! util.objectHas(context, 'post') || context.post === null )) 
+        if ( ( required?.includes('post') || optional?.includes('post') )
+            && ( ! util.objectHas(context, 'post') || context.post === null ))
         {
 
             // If it is in context, and null, then we don't want to load it.
@@ -56,8 +56,8 @@ module.exports = class PostPermissions {
                 }
             }
 
-            if ( required?.includes('post') 
-                && (! util.objectHas(context, 'post') || context.post === null ) ) 
+            if ( required?.includes('post')
+                && (! util.objectHas(context, 'post') || context.post === null ) )
             {
                 throw new ServiceError('missing-context', `'post' missing from context.`)
             }
@@ -82,7 +82,7 @@ module.exports = class PostPermissions {
                 throw new ServiceError('missing-context', `'userRelationship' missing from context.`)
             }
         }
-        
+
         // ===== Ensure all elements of Group context match. ======
 
         let postId = null
@@ -113,14 +113,14 @@ module.exports = class PostPermissions {
     }
 
     async canQueryPost(user, context) {
-        return permissions.Post.canQueryPost(user, context) 
+        return permissions.Post.canQueryPost(user, context)
     }
 
     async canCreatePost(user, context) {
         await this.ensureContext(user, context, [ 'post' ])
 
         // If the post is a Group post, then group permissions override post
-        // permissions. 
+        // permissions.
         if ( context.post.groupId ) {
             context.canCreateGroupPost = await this.permissionService.can(user, 'create', 'GroupPost', context)
         }

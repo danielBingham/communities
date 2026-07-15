@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -30,9 +30,9 @@ const ServiceError = require('../../errors/ServiceError')
 module.exports = class GroupPermissions {
 
     constructor(core, permissionService) {
-        this.core 
+        this.core = core
 
-        this.permissionService = permissionService 
+        this.permissionService = permissionService
 
         this.postDAO = new PostDAO(core)
         this.groupDAO = new GroupDAO(core)
@@ -42,8 +42,8 @@ module.exports = class GroupPermissions {
 
     async ensureContext(user, context, required, optional) {
         // If we don't have the group, then attempt to load it.
-        if ( (required.includes('group') || optional.includes('group')) 
-            && (! util.objectHas(context, 'group') || context.group === null)) 
+        if ( (required.includes('group') || optional.includes('group'))
+            && (! util.objectHas(context, 'group') || context.group === null))
         {
             // If group is in context and set to null, then we don't want to
             // try to load it.  We know it's null.
@@ -51,10 +51,10 @@ module.exports = class GroupPermissions {
                 // Load it from the groupId first.
                 if ( util.objectHas(context, 'groupId') && context.groupId !== null ) {
                     context.group = await this.groupDAO.getGroupById(context.groupId)
-                }  
+                }
                 // Otherwise attempt to use the userMember.
-                else if ( util.objectHas(context, 'userMember') && context.userMember !== null 
-                    && context.userMember.groupId !== undefined && context.userMember.groupId !== null ) 
+                else if ( util.objectHas(context, 'userMember') && context.userMember !== null
+                    && context.userMember.groupId !== undefined && context.userMember.groupId !== null )
                 {
                     context.group = await this.groupDAO.getGroupById(context.userMember.groupId)
                 }
@@ -66,16 +66,16 @@ module.exports = class GroupPermissions {
                 }
             }
 
-            if ( required.includes('group') && (! util.objectHas(context, 'group') || context.group === null) ) { 
+            if ( required.includes('group') && (! util.objectHas(context, 'group') || context.group === null) ) {
                 throw new ServiceError('missing-context', `'group' missing from context.`)
             }
-        } 
+        }
 
         // If the group has a parent, then we need to pull the parent.
-        if ( util.objectHas(context, 'group') && context.group !== null 
+        if ( util.objectHas(context, 'group') && context.group !== null
                 && (util.objectHas(context.group, 'parentId') && context.group.parentId !== null)
         ) {
-            if ( ( required.includes('parentGroup') || optional.includes('parentGroup') ) 
+            if ( ( required.includes('parentGroup') || optional.includes('parentGroup') )
                 && ( ! util.objectHas(context, 'parentGroup') || context.parentGroup === null )
             ) {
                 if ( context.parentGroup !== null ) {
@@ -101,8 +101,8 @@ module.exports = class GroupPermissions {
         }
 
         // If we don't have the user's groupMember then load it.
-        if ( (required.includes('userMember') || optional.includes('userMember')) 
-            && (! util.objectHas(context, 'userMember') || context.userMember === null) ) 
+        if ( (required.includes('userMember') || optional.includes('userMember'))
+            && (! util.objectHas(context, 'userMember') || context.userMember === null) )
         {
             // If userMember is in context and set to null, then we don't want
             // to try to load it.
@@ -115,14 +115,14 @@ module.exports = class GroupPermissions {
             if ( required.includes('userMember') && (! util.objectHas(context, 'userMember') || context.userMember === null) ) {
                 throw new ServiceError('missing-context', `'userMember' missing from context.`)
             }
-        } 
+        }
 
         if ( required.includes('groupMember') && (! util.objectHas(context, 'groupMember' ) || context.groupMember === null) ) {
             throw new ServiceError('missing-context', `'groupMember' missing from context.`)
-        } 
+        }
 
         // ===== Ensure all elements of Group context match. ======
-        
+
         let groupId = null
         if ( util.objectHas(context, 'groupId') && context.groupId !== null) {
             groupId = context.groupId
@@ -194,7 +194,7 @@ module.exports = class GroupPermissions {
         await this.ensureContext(user, context, [ 'group' ], [ 'userMember', 'parentGroup', 'parentMember' ])
 
         // Site moderators can always view groups.
-        context.canModerateSite = await this.permissionService.can(user, 'moderate', 'Site') 
+        context.canModerateSite = await this.permissionService.can(user, 'moderate', 'Site')
 
         return permissions.Group.canViewGroup(user, context)
     }
@@ -212,7 +212,7 @@ module.exports = class GroupPermissions {
     }
 
     async canModerateGroup(user, context) {
-        // TECHDEBT We don't actually need the `group` here and it's extra queries.  We just need the groupId, but 
+        // TECHDEBT We don't actually need the `group` here and it's extra queries.  We just need the groupId, but
         // I don't want to go down the rabbithole of pulling that off of all the context right now.
         await this.ensureContext(user, context, [ 'group' ], [ 'userMember', 'parentGroup', 'parentMember' ])
 

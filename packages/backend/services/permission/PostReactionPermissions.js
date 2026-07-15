@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -29,9 +29,9 @@ const ServiceError = require('../../errors/ServiceError')
 module.exports = class PostReactionPermissions {
 
     constructor(core, permissionService) {
-        this.core 
+        this.core = core
 
-        this.permissionService = permissionService 
+        this.permissionService = permissionService
 
         this.postDAO = new PostDAO(core)
         this.postReactionDAO = new PostReactionDAO(core)
@@ -44,7 +44,7 @@ module.exports = class PostReactionPermissions {
             && ( ! util.objectHas(context, 'postReaction') || context.postReaction === null))
         {
             if ( context.postReaction !== null ) {
-                if ( util.objectHas(context, 'postId') && context.postId !== null 
+                if ( util.objectHas(context, 'postId') && context.postId !== null
                     && util.objectHas(context, 'userId') && context.userId !== null)
                 {
                     context.postReaction = await this.postReactionDAO.getPostReactionByPostAndUser(context.postId, context.userId)

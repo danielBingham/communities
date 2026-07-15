@@ -31,7 +31,7 @@ const ServiceError = require('../../errors/ServiceError')
 module.exports = class FilePermissions {
 
     constructor(core, permissionService) {
-        this.core
+        this.core = core
 
         this.permissionService = permissionService
 
@@ -64,6 +64,46 @@ module.exports = class FilePermissions {
             }
         }
 
+        if ( ( required?.includes('usage') || optional?.includes('usage') )
+            && ( ! util.objectHas(context, 'usage') || context.usage === null )
+        ) {
+
+            if ( context.usage !== null ) {
+                // Get the full usage information for this file.  This will tell us how
+                // the file is used, which will tell us what permissions we need to
+                // retrieve.
+                const results = await this.core.database.query(`
+                    SELECT
+                        post_files.post_id as "postId",
+                        groups.id as "groupId",
+                        users.id as "userId"
+                    FROM files
+                        LEFT OUTER JOIN post_files ON files.id = post_files.file_id
+                        LEFT OUTER JOIN groups ON files.id = groups.file_id
+                        LEFT OUTER JOIN users ON files.id = users.file_id
+                    WHERE files.id = $1
+                `, [ context.file.id ])
+
+                if ( results.rows.length <= 0 ) {
+                   context.usage = null
+                }
+
+                // We should only ever have a single row since we're searching by ID.
+                if ( results.rows.length > 1 ) {
+                    this.core.logger.error(`Found more than one usage row for File(${context.file.id}).`)
+                    context.usage = null
+                }
+
+                context.usage = results.rows[0]
+            }
+
+            if ( required?.includes('usage')
+                && ( ! util.objectHas(context, 'usage') || context.usage === null )
+            ) {
+                throw new ServiceError('missing-context', `'usage' missing from context.`)
+            }
+        }
+
 
 
     }
@@ -77,73 +117,85 @@ module.exports = class FilePermissions {
     }
 
     async canViewFile(user, context) {
-        await this.ensureContext(user, context, [ 'file' ])
+        await this.ensureContext(user, context, [ 'file', 'usage' ])
 
         // Users can always view their own files.
         if ( user.id === context.file.userId ) {
             return true
         }
 
-        // Get the full usage information for this file.  This will tell us how
-        // the file is used, which will tell us what permissions we need to
-        // retrieve.
-        const results = await this.core.database.query(`
-            SELECT
-                files.id, posts.id as post_id, groups.id as group_id, users.id as user_id
-            FROM files
-                LEFT OUTER JOIN posts ON files.id = posts.file_id
-                LEFT OUTER JOIN groups ON files.id = groups.file_id
-                LEFT OUTER JOIN users ON files.id = users.file_id
-            WHERE files.id = $1
-        `, [ context.file.id ])
-
-        if ( results.rows.length <= 0 ) {
+        if ( context.usage === null ) {
             return false
         }
 
-        // We should only ever have a single row since we're searching by ID.
-        if ( results.rows.length > 1 ) {
-            this.core.logger.error(`Found more than one usage row for File(${context.file.id}).`)
-            return false
-        }
-
-        const fileUsage = results.rows[0]
 
         // If it's a file on a post, they can view it if they can view the post.
-        if ( fileUsage.post_id !== null ) {
-            const canViewPost = await this.permissionService.can(user, 'view', 'Post', { postId: fileUsage.post_id })
-            return canViewPost
+        if ( context.usage.postId !== null ) {
+            const canViewPost = await this.permissionService.can(user, 'view', 'Post', { postId: context.usage.postId })
+            if ( canViewPost === true ) {
+                return true
+            }
         }
 
         // If it's a Group profile picture, they can view it if they can view the group.
-        if ( fileUsage.group_id !== null ) {
-            const canViewGroup = await this.permissionService.can(user, 'view', 'Group', { groupId: fileUsage.group_id })
-            return canViewGroup
+        if ( context.usage.groupId !== null ) {
+            const canViewGroup = await this.permissionService.can(user, 'view', 'Group', { groupId: context.usage.groupId })
+            if ( canViewGroup === true ) {
+                return true
+            }
         }
 
         // If it's a user profile picture, they can view it if they can view the user.
-        if ( fileUsage.user_id !== null ) {
-            const canViewUser = await this.permissionService.can(user, 'view', 'User', { userId: fileUsage.user_id })
-            return canViewUser
+        if ( context.usage.userId !== null ) {
+            const canViewUser = await this.permissionService.can(user, 'view', 'User', { userId: context.usage.userId })
+            if ( canViewUser === true ) {
+                return true
+            }
         }
 
         return false
     }
 
+    // For files, update covers uploading the file itself as well as cropping
+    // it. In the future it will cover things like alt-text.
     async canUpdateFile(user, context) {
-        await this.ensureContext(user, context, [ 'file' ])
+        await this.ensureContext(user, context, [ 'file', 'usage' ])
 
         if ( user.id === context.file.userId ) {
             return true
+        }
+
+        // It's a group profile image.  They can update it if they can admin
+        // the group.
+        if ( context.usage !== null && context.usage.groupId !== null ) {
+            const canAdminGroup = await this.permissionService.can(user, 'admin', 'Group', { groupId: context.usage.groupId })
+            if ( canAdminGroup === true ) {
+                return true
+            }
         }
 
         return false
     }
 
     async canDeleteFile(user, context) {
-        await this.ensureContext(user, context, [ 'file' ])
+        await this.ensureContext(user, context, [ 'file', 'usage' ])
 
         if ( user.id === context.file.userId ) {
+            return true
+        }
+
+        // It's a group profile image.  They can delete it if they can admin
+        // the group.
+        if ( context.usage !== null && context.usage.groupId !== null ) {
+            const canAdminGroup = await this.permissionService.can(user, 'admin', 'Group', { groupId: context.usage.groupId })
+            if ( canAdminGroup === true ) {
+                return true
+            }
+        }
+
+        // Site moderators can always delete files.
+        const canModerateSite = await this.permissionService.can(user, 'moderate', 'Site')
+        if ( canModerateSite === true ) {
             return true
         }
 

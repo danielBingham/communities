@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -232,7 +232,7 @@ module.exports = class GroupDAO extends DAO {
     async selectGroups(query) {
         let where = query.where ? `WHERE ${query.where}` : ''
         let params = query.params ? [ ...query.params ] : []
-        let page = query.page 
+        let page = query.page
         let order = query.order ? `${query.order}` : `groups.created_date DESC`
 
         let paging = ''
@@ -276,7 +276,7 @@ module.exports = class GroupDAO extends DAO {
         let page = query.page ? query.page : 1
 
         const results = await this.core.database.query(`
-                SELECT 
+                SELECT
                     COUNT(*)
                 FROM groups
                 ${where}
@@ -287,7 +287,7 @@ module.exports = class GroupDAO extends DAO {
             count: count,
             page: page,
             pageSize: PAGE_SIZE,
-            numberOfPages: Math.floor(count / PAGE_SIZE) + ( (count % PAGE_SIZE) > 0 ? 1 : 0) 
+            numberOfPages: Math.floor(count / PAGE_SIZE) + ( (count % PAGE_SIZE) > 0 ? 1 : 0)
         }
     }
 

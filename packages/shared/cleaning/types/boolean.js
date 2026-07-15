@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -22,12 +22,12 @@ const cleanBoolean = function(value) {
     if ( typeof value === "boolean" ) {
         return value
     } else if ( typeof value === "string" ) {
-        if ( value.toLowerCase() === "true" ) {
+        if ( value.trim().toLowerCase() === "true" ) {
             return true
-        } else if ( value.toLowerCase() === "false" ) {
+        } else if ( value.trim().toLowerCase() === "false" ) {
             return false
         }
-    } 
+    }
 
     return undefined
 }

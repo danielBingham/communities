@@ -27,6 +27,7 @@ const FilePermissions = require('./permission/FilePermissions')
 const GroupPermissions = require('./permission/GroupPermissions')
 const GroupMemberPermissions = require('./permission/GroupMemberPermissions')
 const GroupPostPermissions = require('./permission/GroupPostPermissions')
+const NotificationPermissions = require('./permission/NotificationPermissions')
 const PostPermissions = require('./permission/PostPermissions')
 const PostCommentPermissions = require('./permission/PostCommentPermissions')
 const PostReactionPermissions = require('./permission/PostReactionPermissions')
@@ -64,6 +65,7 @@ module.exports = class PermissionService {
         this.group = new GroupPermissions(core, this)
         this.groupMember = new GroupMemberPermissions(core, this)
         this.groupPost = new GroupPostPermissions(core, this)
+        this.notification = new NotificationPermissions(core, this)
         this.post = new PostPermissions(core, this)
         this.postComment = new PostCommentPermissions(core, this)
         this.postReaction = new PostReactionPermissions(core, this)
@@ -179,18 +181,6 @@ module.exports = class PermissionService {
             } else if ( action === PermissionService.ACTIONS.DELETE) {
                 return await this.file.canDeleteFile(user, context)
             }
-        } else if ( entity === 'Post' ) {
-            if ( action === PermissionService.ACTIONS.QUERY ) {
-                return await this.post.canQueryPost(user, context)
-            } else if ( action === PermissionService.ACTIONS.CREATE ) {
-                return await this.post.canCreatePost(user, context)
-            } else if ( action === PermissionService.ACTIONS.VIEW ) {
-                return await this.post.canViewPost(user, context)
-            } else if ( action === PermissionService.ACTIONS.UPDATE) {
-                return await this.post.canUpdatePost(user, context)
-            } else if ( action === PermissionService.ACTIONS.DELETE) {
-                return await this.post.canDeletePost(user, context)
-            }
         } else if ( entity === 'Group' ) {
             if ( action === PermissionService.ACTIONS.CREATE ) {
                 return await this.group.canCreateGroup(user, context)
@@ -222,6 +212,30 @@ module.exports = class PermissionService {
                 return await this.groupMember.canUpdateGroupMember(user, context)
             } else if ( action === PermissionService.ACTIONS.DELETE ) {
                 return await this.groupMember.canDeleteGroupMember(user, context)
+            }
+        } else if ( entity === 'Notification' ) {
+            if ( action === PermissionService.ACTIONS.QUERY ) {
+                return await this.notification.canQueryNotification(user, context)
+            } else if ( action === PermissionService.ACTIONS.CREATE ) {
+                return await this.notification.canCreateNotification(user, context)
+            } else if ( action === PermissionService.ACTIONS.VIEW ) {
+                return await this.notification.canViewNotification(user, context)
+            } else if ( action === PermissionService.ACTIONS.UPDATE) {
+                return await this.notification.canUpdateNotification(user, context)
+            } else if ( action === PermissionService.ACTIONS.DELETE) {
+                return await this.notification.canDeleteNotification(user, context)
+            }
+        } else if ( entity === 'Post' ) {
+            if ( action === PermissionService.ACTIONS.QUERY ) {
+                return await this.post.canQueryPost(user, context)
+            } else if ( action === PermissionService.ACTIONS.CREATE ) {
+                return await this.post.canCreatePost(user, context)
+            } else if ( action === PermissionService.ACTIONS.VIEW ) {
+                return await this.post.canViewPost(user, context)
+            } else if ( action === PermissionService.ACTIONS.UPDATE) {
+                return await this.post.canUpdatePost(user, context)
+            } else if ( action === PermissionService.ACTIONS.DELETE) {
+                return await this.post.canDeletePost(user, context)
             }
         } else if ( entity === 'PostComment' ) {
             if ( action === PermissionService.ACTIONS.VIEW ) {

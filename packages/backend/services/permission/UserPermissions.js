@@ -28,7 +28,7 @@ const ServiceError = require('../../errors/ServiceError')
 module.exports = class UserPermissions {
 
     constructor(core, permissionService) {
-        this.core
+        this.core = core
 
         this.permissionService = permissionService
 
@@ -58,7 +58,7 @@ module.exports = class UserPermissions {
             }
         }
 
-        if ( ( required?.includes('userRelationship') || optional?.includes('userRelatioship') )
+        if ( ( required?.includes('userRelationship') || optional?.includes('userRelationship') )
             && ( ! util.objectHas(context, 'userRelationship') || context.userRelationship === null )
         ) {
 
@@ -92,7 +92,8 @@ module.exports = class UserPermissions {
     }
 
     async canViewUser(user, context) {
-        await this.ensureContext(user, context, [ 'user', 'userRelationship' ])
+        // There may or may not be a relationship.
+        await this.ensureContext(user, context, [ 'user' ], [ 'userRelationship' ])
 
         // Users can always view themselves.
         if ( user.id === context.user.id ) {
@@ -106,7 +107,7 @@ module.exports = class UserPermissions {
         }
 
         // If they aren't blocked they can view the user.
-        if ( context.userRelationship !== null && context.userRelationship.status !== 'blocked' ) {
+        if ( context.userRelationship === null || context.userRelationship?.status !== 'blocked' ) {
             return true
         }
 

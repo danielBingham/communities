@@ -106,7 +106,8 @@ module.exports = class FileController {
                 `You attempted to upload to a File(${id}) that didn't exist.  Please create a pending file with 'POST /files' before attempting an upload.`)
         }
 
-        if ( existing.userId !== currentUser.id ) {
+        const canUpdateFile = await this.permissionService.can(currentUser, 'update', 'File', { file: existing })
+        if ( canUpdateFile !== true) {
             throw new ControllerError(403, 'not-authorized',
                 `User(${currentUser.id}) attempting to upload File(${existing.id}) belonging to User(${existing.userId}).`,
                 `You may not upload to another user's file.`)
@@ -216,7 +217,8 @@ module.exports = class FileController {
                 `You attempted to upload to a File(${id}) that didn't exist.  Please create a pending file with 'POST /files' before attempting an upload.`)
         }
 
-        if ( existing.userId !== currentUser.id ) {
+        const canUpdateFile = await this.permissionService.can(user, 'update', 'File', { file: existing })
+        if ( canUpdateFile !== true) {
             throw new ControllerError(403, 'not-authorized',
                 `User(${currentUser.id}) attempting to upload File(${existing.id}) belonging to User(${existing.userId}).`,
                 `You may not upload to another user's file.`)
@@ -283,6 +285,13 @@ module.exports = class FileController {
             throw new ControllerError(401, 'not-authenticated',
                 `User must be authenticated to view a file.`,
                 `You must be authenticated to view a file.`)
+        }
+
+        const canCreateFile = await this.permissionService.can(currentUser, 'create', 'File')
+        if ( canCreateFile !== true ) {
+            throw new ControllerError(403, 'not-authorized',
+                `User(${currentUser.id}) not authorized to create files.`,
+                `You are not authorized to create files.`)
         }
 
         if (request.body === undefined || request.body === null ) {
@@ -371,7 +380,7 @@ module.exports = class FileController {
 
         const canViewFile = await this.permissionService.can(currentUser, 'view', 'File', { file: file })
         if ( canViewFile !== true ) {
-            throw new ControllerError(404, 'not-found'
+            throw new ControllerError(404, 'not-found',
                 `User(${currentUser.id}) attempting to view File(${id}) without permission.`,
                 `Either that file doesn't exist or you don't have permission to view it.`)
         }
@@ -505,39 +514,11 @@ module.exports = class FileController {
                 `File was not found.`)
         }
 
-        // TODO TECHDEBT We need a better way to do this.  Right now, Groups
-        // are the only objects where people who aren't the file's uploader can
-        // manipulate it.  But that's going to change.  Eventually events and
-        // organizations will also have this feature.
-        //
-        // When we implement events we need to note what type of file it is and
-        // possibly back link it to the entity using it.
-        const groupFileResults = await this.core.database.query(`
-            SELECT id, file_id FROM groups WHERE file_id = $1
-        `, [ file.id ])
-
-        // User must be owner of File(:id), unless file is group profile.
-        if ( file.userId !== currentUser.id && groupFileResults.rows.length <= 0 ) {
+        const canUpdateFile = await this.permissionService.can(currentUser, 'update', 'File', { file: file })
+        if ( canUpdateFile !== true ) {
             throw new ControllerError(403, 'not-authorized',
-                `User(${currentUser.id}) attempting to PATCH File(${file.id}), which they don't own.`,
-                `You cannot update someone else's file.`)
-        }
-
-        // If the file is a group profile, then the user needs to have admin
-        // permissions on the group.
-        if ( groupFileResults.rows.length === 1 ) {
-            const groupId = groupFileResults.rows[0].id
-            const canAdminGroup = await this.permissionService.can(currentUser, 'admin', 'Group', { groupId: groupId })
-
-            if ( canAdminGroup !== true ) {
-                throw new ControllerError(403, 'not-authorized',
-                    `User(${currentUser.id}) attempting to PATCH File(${file.id}) used as profile for Group(${groupId}) they do not admin.`,
-                    `You do not have permission to update that file.`)
-            }
-        } else if ( groupFileResults.rows.length > 1 ) {
-            throw new ControllerError(500, 'server-error',
-                `File(${file.id}) used in multiple groups.`,
-                `Your file is in an invalid state.  Please reach out to support.`)
+                `User(${currentUser.id}) attempting to update File(${file.id}), which they don't own.`,
+                `You are not authorized to update that file.`)
         }
 
         if ( ! ( 'crop' in filePatch) || filePatch.crop === undefined || filePatch.crop === null ) {
@@ -658,8 +639,8 @@ module.exports = class FileController {
             throw new ControllerError(404, 'not-found', `File ${request.params.id} not found!`)
         }
 
-        if ( existing.userId !== currentUser.id ) {
-            // TODO Admin and moderator permissions.
+        const canDeleteFile = await this.permissionService.can(currentUser, 'delete', 'File', { file: existing })
+        if ( canDeleteFile !== true ) {
             throw new ControllerError(403, 'not-authorized',
                 `User(${request.session.user.id}) attempting to delete file(${files[0].id}, which they don't own.`
                 `You are not allowed to delete a file you don't own.`)

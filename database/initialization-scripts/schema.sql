@@ -8,9 +8,9 @@ CREATE EXTENSION postgis;
  * Feature Flags
  *****************************************************************************/
 
-/** 
+/**
  * NOTE: When adding a new status, make sure to update it in
- * FeatureController::patchFeature() 
+ * FeatureController::patchFeature()
  */
 CREATE TYPE feature_status AS ENUM(
     'created', /* the feature's row has been inserted into the databse table */
@@ -20,8 +20,8 @@ CREATE TYPE feature_status AS ENUM(
     'migrated', /* the feature's data has been successfully migrated */
     'enabled',
     'disabled',
-    'rolling-back', 
-    'rolled-back', 
+    'rolling-back',
+    'rolled-back',
     'uninitializing',
     'uninitialized'
 );
@@ -36,12 +36,12 @@ CREATE TABLE features (
  * Insert those features that have already been migrated in the schema.
  */
 /*INSERT INTO features (name, status, created_date, updated_date)
-    VALUES 
+    VALUES
         ('80-group-moderators-can-ban-users', 'enabled', now(), now());*/
 
 
 /******************************************************************************
- * Users 
+ * Users
  *****************************************************************************/
 
 CREATE TYPE user_privacy AS ENUM('me', 'friends', 'friends-of-friends', 'public');
@@ -75,7 +75,7 @@ CREATE TABLE users (
     notices jsonb DEFAULT '{}'::jsonb,
 
     site_moderation_id uuid DEFAULT NULL, /* REFERENCES site_moderation (id) ON DELETE SET NULL -- defined below*/
-    
+
     privacy__view_friends user_privacy DEFAULT 'friends',
     privacy__view_mutual_friends user_privacy DEFAULT 'friends-of-friends',
 
@@ -88,7 +88,7 @@ CREATE TABLE users (
     authentication__multifactor_last_attempt_date timestamptz,
 
     created_date timestamptz,
-    updated_date timestamptz 
+    updated_date timestamptz
 );
 CREATE INDEX users__name ON users (name);
 CREATE INDEX users_username ON users (username);
@@ -133,12 +133,12 @@ CREATE INDEX mutual_relationships__target_id ON mutual_relationships (target_id)
 CREATE INDEX mutual_relationships__mutual_id ON mutual_relationships (mutual_id);
 
 /******************************************************************************
- * Notifications 
+ * Notifications
  *****************************************************************************/
 
 CREATE TABLE notifications (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id uuid REFERENCES users(id) ON DELETE CASCADE NOT NULL, 
+    user_id uuid REFERENCES users(id) ON DELETE CASCADE NOT NULL,
 
     type text,
     description text,
@@ -156,7 +156,7 @@ CREATE INDEX notifications__user_id ON notifications (user_id);
 
 CREATE TABLE blocklist (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id uuid REFERENCES users(id) ON DELETE SET NULL DEFAULT NULL, 
+    user_id uuid REFERENCES users(id) ON DELETE SET NULL DEFAULT NULL,
     domain text NOT NULL,
     notes text DEFAULT '',
     created_date timestamptz,
@@ -188,7 +188,7 @@ CREATE INDEX tokens__creator_id ON tokens (creator_id);
 CREATE INDEX tokens__token ON tokens (token);
 
 /******************************************************************************
- * Files 
+ * Files
  *****************************************************************************/
 
 CREATE TYPE file_state as ENUM('pending', 'processing', 'error', 'ready');
@@ -241,7 +241,7 @@ CREATE TABLE link_previews (
 CREATE INDEX link_previews__url ON link_previews (url);
 
 /******************************************************************************
- * Tags 
+ * Tags
  *****************************************************************************/
 
 CREATE TABLE tags (
@@ -291,7 +291,7 @@ CREATE INDEX groups_title ON groups (title);
 CREATE INDEX groups_title_trgm ON groups USING GIN (title gin_trgm_ops);
 
 CREATE TYPE group_member_status AS ENUM('pending-invited', 'pending-requested', 'member', 'banned');
-CREATE TYPE group_member_role AS ENUM('admin', 'moderator', 'member'); 
+CREATE TYPE group_member_role AS ENUM('admin', 'moderator', 'member');
 CREATE TABLE group_members (
     id uuid primary key DEFAULT gen_random_uuid(),
     group_id uuid REFERENCES groups (id) ON DELETE CASCADE NOT NULL,
@@ -322,7 +322,7 @@ CREATE INDEX group_subscriptions__group_id ON group_subscriptions (group_id);
 
 
 /******************************************************************************
- * Tags 
+ * Tags
  *****************************************************************************/
 
 CREATE TYPE post_type as ENUM('feed', 'group', 'event', 'announcement', 'info');
@@ -465,9 +465,9 @@ CREATE TABLE group_moderation (
     reason text,
 
     post_id uuid REFERENCES posts (id) ON DELETE CASCADE DEFAULT NULL ,
-    post_comment_id uuid REFERENCES post_comments (id) ON DELETE CASCADE DEFAULT NULL, 
+    post_comment_id uuid REFERENCES post_comments (id) ON DELETE CASCADE DEFAULT NULL,
 
-    created_date timestamptz, 
+    created_date timestamptz,
     updated_date timestamptz
 );
 CREATE INDEX group_moderation__user_id ON group_moderation (user_id);
@@ -509,11 +509,11 @@ CREATE TABLE site_moderation (
     reason text,
 
     post_id uuid REFERENCES posts (id) ON DELETE CASCADE DEFAULT NULL ,
-    post_comment_id uuid REFERENCES post_comments (id) ON DELETE CASCADE DEFAULT NULL, 
+    post_comment_id uuid REFERENCES post_comments (id) ON DELETE CASCADE DEFAULT NULL,
     group_id uuid REFERENCES groups (id) ON DELETE CASCADE DEFAULT NULL,
     user_profile_id uuid REFERENCES users (id) ON DELETE CASCADE DEFAULT NULL,
 
-    created_date timestamptz, 
+    created_date timestamptz,
     updated_date timestamptz
 );
 CREATE INDEX site_moderation__user_id ON site_moderation (user_id);
