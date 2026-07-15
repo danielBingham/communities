@@ -558,12 +558,52 @@ module.exports = class ValidationService {
 
         if ( this.has(user, 'fileId' ) ) {
             // FileId may be null.
-            if ( user.fileId !== null && ! uuid.validate(user.fileId) ) {
-                errors.push({
-                    type: 'fileId:invalid',
-                    log: `The 'fileId' must be a valid UUID.`,
-                    message: `The 'fileId' you have for your profile picture must be either 'null' or a valid UUID.`
-                })
+            if ( user.fileId !== null ) {
+                if ( ! uuid.validate(user.fileId) ) {
+                    errors.push({
+                        type: 'fileId:invalid',
+                        log: `The 'fileId' must be a valid UUID.`,
+                        message: `The 'fileId' you have for your profile picture must be either 'null' or a valid UUID.`
+                    })
+                } else {
+                    const fileResults = await this.core.database.query(`
+                                SELECT id, user_id FROM files WHERE id = $1
+                            `, [ user.fileId ])
+
+                    if ( fileResults.rows.length <= 0 ) {
+                        errors.push({
+                            type: 'file:not-found',
+                            log: `We couldn't find the file in User.fileId.`,
+                            message: `The file you attached as your profile is missing.`
+                        })
+                    }
+                    // We only want to check for ownership and usage if we know all
+                    // the files exist.
+                    else {
+                        // Ensure the user owns the files they are attaching.
+                        if ( fileResults.rows[0].user_id !== user.id ) {
+                            errors.push({
+                                type: 'files:not-authorized',
+                                log: `User attempting to attach files they do not own to their post.`,
+                                message: `You may only attach files you have uploaded.`
+                            })
+                        }
+
+                        // We only want to check usage if we know the user owns all
+                        // the files.
+                        else {
+
+                            const inUse = await this.fileService.isFileInUse(user.fileId)
+                            if ( inUse === true ) {
+                                errors.push({
+                                    type: 'files:conflict',
+                                    log: `User attempting to attach file to post, but file is in use.`,
+                                    message: `You may not attach files that are already in use.`
+                                })
+                            }
+                        }
+
+                }
             }
         }
 

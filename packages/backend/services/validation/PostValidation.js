@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -40,7 +40,7 @@ module.exports = class PostValidation {
         const errors = []
 
         if ( existing !== undefined && existing !== null && existing.id !== post.id ) {
-            throw new ServiceError('entity-mismatch', 
+            throw new ServiceError('entity-mismatch',
                 `Existing Post(${existing.id}) does not match Post(${post.id}).`)
         }
 
@@ -89,10 +89,10 @@ module.exports = class PostValidation {
                     log: `'files' must be an array of UUIDs.`,
                     message: `Files must be an array of UUIDs.`
                 })
-                
+
             } else {
                 const fileResults = await this.core.database.query(`
-                            SELECT id FROM files WHERE id =  ANY($1::uuid[])
+                            SELECT id, user_id FROM files WHERE id = ANY($1::uuid[])
                         `, [ post.files ])
 
                 if ( fileResults.rows.length !== post.files.length ) {
@@ -101,6 +101,50 @@ module.exports = class PostValidation {
                         log: `We couldn't find all of the files in Post.files.`,
                         message: `Some of the files submitted were missing.`
                     })
+                }
+                // We only want to check for ownership and usage if we know all
+                // the files exist.
+                else {
+
+                    // Ensure the user owns the files they are attaching.
+                    const notOwned = fileResults.rows.filter((f) => f.user_id !== currentUser.id)
+                    if ( notOwned.length > 0 ) {
+                        errors.push({
+                            type: 'files:not-authorized',
+                            log: `User attempting to attach files they do not own to their post.`,
+                            message: `You may only attach files you have uploaded.`
+                        })
+                    }
+
+                    // We only want to check usage if we know the user owns all
+                    // the files.
+                    else {
+
+                        // Ensure the files they are attaching are not in use already.
+                        const usageResults = await this.core.database.query(`
+                            SELECT
+                                post_files.id as "postId", users.id as "userId", groups.id as "groupId", link_previews.id as "linkPreviewId"
+                            FROM files
+                                LEFT OUTER JOIN post_files ON files.id = post_files.file_id
+                                LEFT OUTER JOIN users ON files.id = users.file_id
+                                LEFT OUTER JOIN groups ON files.id = groups.file_id
+                                LEFT OUTER JOIN link_previews ON files.id = link_previews.file_id
+                            WHERE
+                                files.id = ANY($1::uuid[]) AND (
+                                    post_files.id IS NOT NULL
+                                    OR users.id IS NOT NULL
+                                    OR groups.id IS NOT NULL
+                                    OR link_previews.id IS NOT NULL
+                                )
+                        `, [ post.files ])
+                        if ( usageResults.rows.length > 0 ) {
+                            errors.push({
+                                type: 'files:conflict',
+                                log: `User attempting to attach file to post, but file is in use.`,
+                                message: `You may not attach files that are already in use.`
+                            })
+                        }
+                    }
                 }
 
                 if ( util.objectHas(post, 'linkPreviewId') && post.linkPreviewId !== null ) {
@@ -221,8 +265,8 @@ module.exports = class PostValidation {
                         })
                     }
 
-                    if ( (group.type === 'private' || group.type === 'hidden') 
-                        && post.visibility === 'public' ) 
+                    if ( (group.type === 'private' || group.type === 'hidden')
+                        && post.visibility === 'public' )
                     {
                         errors.push({
                             type: 'visibility:invalid',

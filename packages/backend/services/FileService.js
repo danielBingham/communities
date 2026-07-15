@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -36,7 +36,7 @@ module.exports = class FileService {
         this.s3 = new S3FileService(core)
 
         // Default variants
-        this.defaultVariants = [ 30, 200, 325, 450, 650 ] 
+        this.defaultVariants = [ 30, 200, 325, 450, 650 ]
     }
 
     /**
@@ -75,11 +75,56 @@ module.exports = class FileService {
         return path.join('files/', this.getFilename(file, variant, mimetype))
     }
 
+    /**
+     * A convenience wrapper around `areFilesInUse` for a single file.
+     *
+     * @param {uuid} fileId The File.id of the file we want to check.
+     *
+     * @return {boolean} True if the file is in use, false otherwise.
+     */
+    async isFileInUse(fileId) {
+        return this.areFilesInUse([ fileId ])
+    }
+
+    /**
+     * Determine whether any of the files identified by the ids in `fileIds`
+     * are current in use anywhere.
+     *
+     * @param {uuid[]} fileIds An array of File.id for the files we wish to check.
+     *
+     * @return {boolean} True if any of the files are in use, false otherwise.
+     */
+    async areFilesInUse(fileIds) {
+        // Ensure the files they are attaching are not in use already.
+        const usageResults = await this.core.database.query(`
+            SELECT
+                post_files.id as "postId", users.id as "userId", groups.id as "groupId", link_previews.id as "linkPreviewId"
+            FROM files
+                LEFT OUTER JOIN post_files ON files.id = post_files.file_id
+                LEFT OUTER JOIN users ON files.id = users.file_id
+                LEFT OUTER JOIN groups ON files.id = groups.file_id
+                LEFT OUTER JOIN link_previews ON files.id = link_previews.file_id
+            WHERE
+                files.id = ANY($1::uuid[]) AND (
+                    post_files.id IS NOT NULL
+                    OR users.id IS NOT NULL
+                    OR groups.id IS NOT NULL
+                    OR link_previews.id IS NOT NULL
+                )
+        `, [ fileIds ])
+
+        if ( usageResults.rows.length === 0 ) {
+            return false
+        }
+
+        return true
+    }
+
     async deleteFileById(fileId) {
         const existing = await this.fileDAO.getFileById(fileId)
         if ( existing === null || existing === undefined ) {
             return null
-        } 
+        }
 
         await this.deleteFile(existing)
     }
@@ -94,7 +139,7 @@ module.exports = class FileService {
         // At some point we're going to need a weekly orphan file cleanup job
         // for our S3, but for now, storage is cheap, we're going to let them
         // hang.
-        
+
         if ( 'variants' in file && Array.isArray(file.variants) ) {
             await this.deleteVariants(file)
         }
@@ -111,7 +156,7 @@ module.exports = class FileService {
 
     async deleteVariants(file) {
         for(const variant of file.variants) {
-            const filepath = this.getPath(file, variant) 
+            const filepath = this.getPath(file, variant)
             const hasFile = await this.s3.hasFile(filepath)
             if ( hasFile ) {
                 this.s3.removeFile(filepath)
