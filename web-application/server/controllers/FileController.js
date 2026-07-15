@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -77,13 +77,13 @@ module.exports = class FileController {
 
         logger.info(`Processing image upload: ${currentPath}`)
 
-        const currentUser = request.session.user 
+        const currentUser = request.session.user
         if ( ! currentUser ) {
             this.local.removeFile(currentPath)
             throw new ControllerError(403, 'not-authorized', `Must have a logged in user to upload a file.`)
         }
 
-        const mimetype = request.file.mimetype 
+        const mimetype = request.file.mimetype
         if ( ! ImageService.SUPPORTED_MIMETYPES.includes(mimetype) ) {
             this.local.removeFile(currentPath)
             throw new ControllerError(400, 'invalid-type',
@@ -112,7 +112,7 @@ module.exports = class FileController {
                 `You may not upload to another user's file.`)
         }
 
-        const filepath = this.fileService.getPath(existing) 
+        const filepath = this.fileService.getPath(existing)
 
         await this.s3.uploadFile(currentPath, filepath)
 
@@ -137,8 +137,8 @@ module.exports = class FileController {
         }
         await this.fileDAO.updateFile(filePatch)
 
-        const entityResults = await this.fileDAO.selectFiles({ 
-            where: 'files.id = $1', 
+        const entityResults = await this.fileDAO.selectFiles({
+            where: 'files.id = $1',
             params: [ id ]
         })
 
@@ -154,7 +154,7 @@ module.exports = class FileController {
 
         response.status(200).json({
             entity: entity,
-            relations: relations 
+            relations: relations
         })
     }
 
@@ -179,7 +179,7 @@ module.exports = class FileController {
                 `Video Uploads are not currently supported.`)
         }
 
-        const currentUser = request.session.user 
+        const currentUser = request.session.user
         if ( ! currentUser ) {
             this.local.removeFile(currentPath)
             throw new ControllerError(403, 'not-authorized', `Must have a logged in user to upload a file.`)
@@ -193,7 +193,7 @@ module.exports = class FileController {
         logger.info(`Processing video upload: ${currentPath}`)
 
 
-        const mimetype = request.file.mimetype 
+        const mimetype = request.file.mimetype
         if ( ! VideoService.SUPPORTED_MIMETYPES.includes(mimetype) ) {
             this.local.removeFile(currentPath)
             throw new ControllerError(400, 'invalid-type',
@@ -222,7 +222,7 @@ module.exports = class FileController {
                 `You may not upload to another user's file.`)
         }
 
-        const filepath = this.fileService.getPath(existing) 
+        const filepath = this.fileService.getPath(existing)
 
         await this.s3.uploadFile(currentPath, filepath)
 
@@ -243,8 +243,8 @@ module.exports = class FileController {
             jobId: job.id
         })
 
-        const entityResults = await this.fileDAO.selectFiles({ 
-            where: 'files.id = $1', 
+        const entityResults = await this.fileDAO.selectFiles({
+            where: 'files.id = $1',
             params: [ id ]
         })
 
@@ -260,7 +260,7 @@ module.exports = class FileController {
 
         response.status(200).json({
             entity: entity,
-            relations: relations 
+            relations: relations
         })
     }
 
@@ -358,19 +358,26 @@ module.exports = class FileController {
         // because we're going to check it against a cleaned array.
 
         const results = await this.fileDAO.selectFiles({
-            where: 'files.id = $1', 
+            where: 'files.id = $1',
             params: [ id ]
         })
 
         const file = results.dictionary[id]
         if ( file === undefined || file === null ) {
-            throw new ControllerError(404, 'not-found', 
+            throw new ControllerError(404, 'not-found',
                 `Failed to find File(${id}).`,
                 `Failed to find File(${id}).`)
-        } 
+        }
+
+        const canViewFile = await this.permissionService.can(currentUser, 'view', 'File', { file: file })
+        if ( canViewFile !== true ) {
+            throw new ControllerError(404, 'not-found'
+                `User(${currentUser.id}) attempting to view File(${id}) without permission.`,
+                `Either that file doesn't exist or you don't have permission to view it.`)
+        }
 
         if ( variant !== undefined && variant !== null && variant !== 'full' && ! file.variants?.includes(variant) ) {
-            throw new ControllerError(404, 'not-found', 
+            throw new ControllerError(404, 'not-found',
                 `Failed to find variant, '${variant}', of File(${id}).`,
                 `Failed to find variant, '${variant}', of File(${id}).`)
         }
@@ -378,7 +385,7 @@ module.exports = class FileController {
         const path = this.fileService.getPath(file, variant)
         const hasFile = await this.s3.hasFile(path)
         if ( ! hasFile ) {
-            throw new ControllerError(404, 'not-found', 
+            throw new ControllerError(404, 'not-found',
                 `Failed to find File(${id}) at path '${path}'.`,
                 `Failed to find File(${id}) at path '${path}'.`)
         }
@@ -397,7 +404,7 @@ module.exports = class FileController {
             sources: {
                 [variant]: url
             },
-            relations: relations 
+            relations: relations
         })
     }
 
@@ -423,15 +430,22 @@ module.exports = class FileController {
         const id = this.schema.properties.id.clean(request.params.id)
 
         const results = await this.fileDAO.selectFiles({
-            where: 'files.id = $1', 
+            where: 'files.id = $1',
             params: [ id ]
         })
 
         const file = results.dictionary[id]
         if ( file === undefined || file === null ) {
-            throw new ControllerError(404, 'not-found', 
+            throw new ControllerError(404, 'not-found',
                 `Failed to find File(${id}).`,
                 `File(${id}) not found.`)
+        }
+
+        const canViewFile = await this.permissionService.can(currentUser, 'view', 'File', { file: file })
+        if ( canViewFile !== true ) {
+            throw new ControllerError(404, 'not-found'
+                `User(${currentUser.id}) attempting to view File(${id}) without permission.`,
+                `Either that file doesn't exist or you don't have permission to view it.`)
         }
 
         const sources = {}
@@ -443,7 +457,7 @@ module.exports = class FileController {
             if ( signedUrl !== null ) {
                 sources['full'] = signedUrl
             }
-        } 
+        }
 
         const variant = request.query?.variant
         if ( variant !== undefined && variant !== null && variant !== 'full' && file.variants?.includes(variant) ) {
@@ -461,7 +475,7 @@ module.exports = class FileController {
         response.status(200).json({
             entity: file,
             sources: sources,
-            relations: relations 
+            relations: relations
         })
     }
 
@@ -471,7 +485,7 @@ module.exports = class FileController {
         const filePatch = request.body
 
         if ( ! currentUser ) {
-            throw new ControllerError(403, 'not-authorized', 
+            throw new ControllerError(403, 'not-authorized',
                 `Must have a logged in user to patch a file.`,
                 `You must be authenticated to patch a file.`)
         }
@@ -482,14 +496,14 @@ module.exports = class FileController {
                 `You must include the file.id in the resource route.`)
         }
 
-        const file = await this.fileDAO.getFileById(fileId) 
+        const file = await this.fileDAO.getFileById(fileId)
 
         // Validation: 1. File(:id) must exist.
         if ( file === null || file === undefined ) {
-            throw new ControllerError(404, 'not-found', 
+            throw new ControllerError(404, 'not-found',
                 `File(${fileId}) not found!`,
                 `File was not found.`)
-        } 
+        }
 
         // TODO TECHDEBT We need a better way to do this.  Right now, Groups
         // are the only objects where people who aren't the file's uploader can
@@ -504,7 +518,7 @@ module.exports = class FileController {
 
         // User must be owner of File(:id), unless file is group profile.
         if ( file.userId !== currentUser.id && groupFileResults.rows.length <= 0 ) {
-            throw new ControllerError(403, 'not-authorized', 
+            throw new ControllerError(403, 'not-authorized',
                 `User(${currentUser.id}) attempting to PATCH File(${file.id}), which they don't own.`,
                 `You cannot update someone else's file.`)
         }
@@ -552,7 +566,7 @@ module.exports = class FileController {
                 `Missing element of dimension data. Need { width, height }.`)
         }
 
-        try { 
+        try {
             await this.imageService.crop(file, crop, dimensions)
         } catch (error) {
             if ( error instanceof ServiceError ) {
@@ -586,7 +600,7 @@ module.exports = class FileController {
         await this.fileDAO.updateFile(patch)
 
         const entityResults = await this.fileDAO.selectFiles({
-            where: `files.id = $1`, 
+            where: `files.id = $1`,
             params: [ file.id ]
         })
 
@@ -606,7 +620,7 @@ module.exports = class FileController {
             sources: {
                 ['full']: url
             },
-            relations: relations 
+            relations: relations
         })
     }
 
@@ -642,11 +656,11 @@ module.exports = class FileController {
         const existing = await this.fileDAO.getFileById(id)
         if ( existing === null || existing === undefined ) {
             throw new ControllerError(404, 'not-found', `File ${request.params.id} not found!`)
-        } 
+        }
 
         if ( existing.userId !== currentUser.id ) {
             // TODO Admin and moderator permissions.
-            throw new ControllerError(403, 'not-authorized', 
+            throw new ControllerError(403, 'not-authorized',
                 `User(${request.session.user.id}) attempting to delete file(${files[0].id}, which they don't own.`
                 `You are not allowed to delete a file you don't own.`)
         }
@@ -657,9 +671,9 @@ module.exports = class FileController {
 
         await this.fileService.deleteFile(existing)
 
-        return response.status(200).json({ 
-            entity: { 
-                id: id 
+        return response.status(200).json({
+            entity: {
+                id: id
             },
             relations: {}
         })
