@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -63,7 +63,7 @@ const FileUploadInput = function({ text, maxFiles, kind, allowedTypes, onChange,
     const [postRequest, makePostRequest] = useRequest()
 
     const dispatch = useDispatch()
-    
+
     const onChangeInternal = function(event) {
         if ( event.target.files.length <= 0 ) {
             return
@@ -76,20 +76,20 @@ const FileUploadInput = function({ text, maxFiles, kind, allowedTypes, onChange,
                 onError(createError(ErrorTypes.MaxFilesOverrun, `Too many files. You may not select more than ${maxFiles} more files.`))
             }
         }
-        
+
         const errors = []
         let files = []
         fileMap.current = {}
         for(let index = 0; index < event.target.files.length; index++) {
-            const uploadedFileData = event.target.files[index] 
+            const uploadedFileData = event.target.files[index]
             if ( ! allowedTypes.includes(uploadedFileData.type) ) {
                 errors.push(createError(ErrorTypes.InvalidFileType, `'${uploadedFileData.name}' was an invalid file type.  Supported types are: ${ allowedTypes.join(',') }`))
-                continue 
+                continue
             }
 
             if ( uploadedFileData.size <= 0 ) {
                 errors.push(createError(ErrorTypes.EmptyFile, `'${uploadedFileData.name}' was empty.`))
-                continue 
+                continue
             }
 
             if ( files.length >= maxFiles ) {
@@ -129,7 +129,7 @@ const FileUploadInput = function({ text, maxFiles, kind, allowedTypes, onChange,
     useEffect(function() {
         if ( postRequest?.state === 'fulfilled' ) {
             for(let index = 0; index < hiddenFileInput.current.files.length; index++) {
-                let fileData = hiddenFileInput.current.files[index] 
+                let fileData = hiddenFileInput.current.files[index]
                 if ( index >= maxFiles ) {
                     break
                 }
@@ -146,7 +146,7 @@ const FileUploadInput = function({ text, maxFiles, kind, allowedTypes, onChange,
                 } else if ( kind === 'video' ) {
                     const requestId = dispatch(makePersistedRequest(uploadVideo(id, fileData)))
                     dispatch(setRequest({ requestId: requestId, fileId: id, fileName: fileData.name }))
-                } 
+                }
             }
 
             const createdFileIds = Object.keys(postRequest.response.body.dictionary)
@@ -166,7 +166,7 @@ const FileUploadInput = function({ text, maxFiles, kind, allowedTypes, onChange,
         return null
     }
 
-    let fileErrorView = [] 
+    let fileErrorView = []
     for(const error of fileError) {
         fileErrorView.push( <Alert key={error.id} type="error" timeout={5000}>{ error.message }</Alert> )
     }
@@ -181,12 +181,12 @@ const FileUploadInput = function({ text, maxFiles, kind, allowedTypes, onChange,
         <div className="file-upload">
             <div className="upload-input">
                 <Button type="primary" onClick={(e) => hiddenFileInput.current.click()}>{ icon } <span className="file-upload-button-text"> { text ? text : 'Upload Image' }</span></Button>
-            </div> 
+            </div>
             <input type="file"
                 name="file"
                 accept={allowedTypes.join(',')}
                 multiple={maxFiles > 1 ? true : false}
-                onChange={onChangeInternal} 
+                onChange={onChangeInternal}
                 style={{ display: 'none' }}
                 aria-hidden="true"
                 tabIndex={-1}
@@ -198,4 +198,4 @@ const FileUploadInput = function({ text, maxFiles, kind, allowedTypes, onChange,
     )
 }
 
-export default FileUploadInput 
+export default FileUploadInput

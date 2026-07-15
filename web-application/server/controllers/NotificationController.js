@@ -91,20 +91,20 @@ module.exports = class NotificationController {
         })
 
         for(const notification of notifications) {
-            const validationErrors = this.validationService.validateNotification(currentUser, notification, existing.dictionary[notification.id])
+            const canUpdateNotification = await this.permissionService.can(currentUser, 'update', 'Notification', { notification: existing.dictionary[notification.id] })
+            if ( canUpdateNotification !== true ) {
+                throw new ControllerError(403, 'not-authorized',
+                    `User(${currentUser.id}) attempted to update notification without authorization.`,
+                    `You are not authorized to update that notification.`)
+            }
+
+            const validationErrors = await this.validationService.validateNotification(currentUser, notification, existing.dictionary[notification.id])
             if ( validationErrors.length > 0 ) {
                 const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
                 const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
                 throw new ControllerError(400, 'invalid',
                     `User submitted an invalid notification: ${logString}`,
                     errorString)
-            }
-
-            const canUpdateNotification = await this.permissionService.can(currentUser, 'update', 'Notification', { notification: notification })
-            if ( canUpdateNotification !== true ) {
-                throw new ControllerError(403, 'not-authorized',
-                    `User(${currentUser.id}) attempted to update notification without authorization.`,
-                    `You are not authorized to update that notification.`)
             }
         }
 
@@ -159,20 +159,20 @@ module.exports = class NotificationController {
                 `Either that notification doesn't exist or you don't have permissions to update it.`)
         }
 
-        const validationErrors = this.validationService.validateNotification(currentUser, notification, existing)
+        const canUpdateNotification = await this.permissionService.can(currentUser, 'update', 'Notification', { notification: existing })
+        if ( canUpdateNotification !== true ) {
+            throw new ControllerError(404, 'not-found',
+                `User(${currentUser.id}) attempted to update notification without authorization.`,
+                `Either that notification doesn't exist or you don't have permission to update it.`)
+        }
+
+        const validationErrors = await this.validationService.validateNotification(currentUser, notification, existing)
         if ( validationErrors.length > 0 ) {
             const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
             const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
             throw new ControllerError(400, 'invalid',
                 `User submitted an invalid notification: ${logString}`,
                 errorString)
-        }
-
-        const canUpdateNotification = await this.permissionService.can(currentUser, 'update', 'Notification', { notification: existing })
-        if ( canUpdateNotification !== true ) {
-            throw new ControllerError(404, 'not-found',
-                `User(${currentUser.id}) attempted to update notification without authorization.`,
-                `Either that notification doesn't exist or you don't have permission to update it.`)
         }
 
         await this.notificationDAO.updateNotification(notification)

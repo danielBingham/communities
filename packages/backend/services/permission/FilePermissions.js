@@ -76,11 +76,13 @@ module.exports = class FilePermissions {
                     SELECT
                         post_files.post_id as "postId",
                         groups.id as "groupId",
-                        users.id as "userId"
+                        users.id as "userId",
+                        link_previews.id as "linkPreviewId"
                     FROM files
                         LEFT OUTER JOIN post_files ON files.id = post_files.file_id
                         LEFT OUTER JOIN groups ON files.id = groups.file_id
                         LEFT OUTER JOIN users ON files.id = users.file_id
+                        LEFT OUTER JOIN link_previews ON files.id = link_previews.file_id
                     WHERE files.id = $1
                 `, [ context.file.id ])
 
@@ -103,9 +105,6 @@ module.exports = class FilePermissions {
                 throw new ServiceError('missing-context', `'usage' missing from context.`)
             }
         }
-
-
-
     }
 
     async canQueryFile(user, context) {
@@ -113,7 +112,17 @@ module.exports = class FilePermissions {
     }
 
     async canCreateFile(user, context) {
-        return true
+        // Can create a file that doesn't exist.
+        if ( ! util.objectHas(context, 'file') || context.file === null ) {
+            return false
+        }
+
+        // Users may only create files for themselves, not for another user.
+        if ( context.file.userId === user.id ) {
+            return true
+        }
+
+        return false
     }
 
     async canViewFile(user, context) {
@@ -124,10 +133,20 @@ module.exports = class FilePermissions {
             return true
         }
 
+        // Site moderators can always view files.
+        const canModerateSite = await this.permissionService.can(user, 'moderate', 'Site')
+        if ( canModerateSite === true ) {
+            return true
+        }
+
         if ( context.usage === null ) {
             return false
         }
 
+        // Link previews are shared, so anyone may view them.
+        if ( context.usage.linkPreviewId !== null ) {
+            return true
+        }
 
         // If it's a file on a post, they can view it if they can view the post.
         if ( context.usage.postId !== null ) {
@@ -184,6 +203,12 @@ module.exports = class FilePermissions {
             return true
         }
 
+        // Site moderators can always delete files.
+        const canModerateSite = await this.permissionService.can(user, 'moderate', 'Site')
+        if ( canModerateSite === true ) {
+            return true
+        }
+
         // It's a group profile image.  They can delete it if they can admin
         // the group.
         if ( context.usage !== null && context.usage.groupId !== null ) {
@@ -191,12 +216,6 @@ module.exports = class FilePermissions {
             if ( canAdminGroup === true ) {
                 return true
             }
-        }
-
-        // Site moderators can always delete files.
-        const canModerateSite = await this.permissionService.can(user, 'moderate', 'Site')
-        if ( canModerateSite === true ) {
-            return true
         }
 
         return false

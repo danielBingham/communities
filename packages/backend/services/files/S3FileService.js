@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -63,7 +63,7 @@ module.exports = class S3FileService {
         const params = {
             Bucket: this.config.s3.bucket,
             Key: targetPath,
-            Body: readStream 
+            Body: readStream
         }
 
         await this.s3Client.send(new PutObjectCommand(params))
@@ -128,7 +128,7 @@ module.exports = class S3FileService {
     }
 
     async getSignedUrl(path) {
-        try { 
+        try {
             const params = {
                 Bucket: this.config.s3.bucket,
                 Key: path

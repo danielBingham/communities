@@ -106,6 +106,12 @@ module.exports = class FileController {
                 `You attempted to upload to a File(${id}) that didn't exist.  Please create a pending file with 'POST /files' before attempting an upload.`)
         }
 
+        if ( mimetype !== existing.mimetype ) {
+            throw new ControllerError(400, 'invalid',
+                `File uploaded with mismatched mimetype.`,
+                `Mimetype of uploaded file does not match prepared file mimetype.`)
+        }
+
         const canUpdateFile = await this.permissionService.can(currentUser, 'update', 'File', { file: existing })
         if ( canUpdateFile !== true) {
             throw new ControllerError(403, 'not-authorized',
@@ -217,7 +223,13 @@ module.exports = class FileController {
                 `You attempted to upload to a File(${id}) that didn't exist.  Please create a pending file with 'POST /files' before attempting an upload.`)
         }
 
-        const canUpdateFile = await this.permissionService.can(user, 'update', 'File', { file: existing })
+        if ( mimetype !== existing.mimetype ) {
+            throw new ControllerError(400, 'invalid',
+                `File uploaded with mismatched mimetype.`,
+                `Mimetype of uploaded file does not match prepared file mimetype.`)
+        }
+
+        const canUpdateFile = await this.permissionService.can(currentUser, 'update', 'File', { file: existing })
         if ( canUpdateFile !== true) {
             throw new ControllerError(403, 'not-authorized',
                 `User(${currentUser.id}) attempting to upload File(${existing.id}) belonging to User(${existing.userId}).`,
@@ -287,12 +299,6 @@ module.exports = class FileController {
                 `You must be authenticated to view a file.`)
         }
 
-        const canCreateFile = await this.permissionService.can(currentUser, 'create', 'File')
-        if ( canCreateFile !== true ) {
-            throw new ControllerError(403, 'not-authorized',
-                `User(${currentUser.id}) not authorized to create files.`,
-                `You are not authorized to create files.`)
-        }
 
         if (request.body === undefined || request.body === null ) {
             throw new ControllerError(400, 'invalid',
@@ -311,15 +317,14 @@ module.exports = class FileController {
 
         // Validate all of the files before we insert any of them.
         for (const file of files) {
-            // Users may only upload their own files.  They may not upload the file
-            // of another user.
-            if ( file.userId !== currentUser.id ) {
+            const canCreateFile = await this.permissionService.can(currentUser, 'create', 'File', { file: file })
+            if ( canCreateFile !== true ) {
                 throw new ControllerError(403, 'not-authorized',
-                    `User(${currentUser.id}) attempting to create a File belonging to User(${file.userId}).`,
-                    `You may not create a file for another user.`)
+                    `User(${currentUser.id}) not authorized to create files.`,
+                    `You are not authorized to create files.`)
             }
 
-            const validationErrors = this.validationService.validateFile(currentUser, file)
+            const validationErrors = await this.validationService.validateFile(currentUser, file)
             if ( validationErrors.length > 0 ) {
                 const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
                 const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
@@ -452,7 +457,7 @@ module.exports = class FileController {
 
         const canViewFile = await this.permissionService.can(currentUser, 'view', 'File', { file: file })
         if ( canViewFile !== true ) {
-            throw new ControllerError(404, 'not-found'
+            throw new ControllerError(404, 'not-found',
                 `User(${currentUser.id}) attempting to view File(${id}) without permission.`,
                 `Either that file doesn't exist or you don't have permission to view it.`)
         }
