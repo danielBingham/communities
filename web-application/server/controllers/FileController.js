@@ -186,16 +186,17 @@ module.exports = class FileController {
                 `Video Uploads are not currently supported.`)
         }
 
+        const logger = request.logger ? request.logger : this.core.logger
+
+        const currentPath = request.file.path
+        const id = this.schema.properties.id.clean(request.params.id)
+
         const currentUser = request.session.user
         if ( ! currentUser ) {
             this.local.removeFile(currentPath)
             throw new ControllerError(403, 'not-authorized', `Must have a logged in user to upload a file.`)
         }
 
-        const logger = request.logger ? request.logger : this.core.logger
-
-        const currentPath = request.file.path
-        const id = this.schema.properties.id.clean(request.params.id)
 
         logger.info(`Processing video upload: ${currentPath}`)
 
@@ -647,7 +648,7 @@ module.exports = class FileController {
         const canDeleteFile = await this.permissionService.can(currentUser, 'delete', 'File', { file: existing })
         if ( canDeleteFile !== true ) {
             throw new ControllerError(403, 'not-authorized',
-                `User(${request.session.user.id}) attempting to delete file(${files[0].id}, which they don't own.`
+                `User(${currentUser.id}) attempting to delete File(${existing.id}, which they don't own.`,
                 `You are not allowed to delete a file you don't own.`)
         }
 

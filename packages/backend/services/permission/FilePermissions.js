@@ -91,12 +91,14 @@ module.exports = class FilePermissions {
                 }
 
                 // We should only ever have a single row since we're searching by ID.
-                if ( results.rows.length > 1 ) {
+                else if ( results.rows.length > 1 ) {
                     this.core.logger.error(`Found more than one usage row for File(${context.file.id}).`)
                     context.usage = null
                 }
 
-                context.usage = results.rows[0]
+                else {
+                    context.usage = results.rows[0]
+                }
             }
 
             if ( required?.includes('usage')
