@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -34,7 +34,7 @@ const SCHEMA = {
             'user_id': {
                 insert: 'require',
                 update: 'allow',
-                select: 'always',
+                select: 'request',
                 key: 'userId'
             },
             'group_id': {
@@ -167,8 +167,8 @@ module.exports = class GroupModerationDAO extends DAO {
 
         let paging = ''
         if ( 'page' in query && query.page !== undefined && query.page !== null) {
-            const limit = query.perPage ? query.perPage : PAGE_SIZE 
-            const offset = limit * (page-1) 
+            const limit = query.perPage ? query.perPage : PAGE_SIZE
+            const offset = limit * (page-1)
 
             paging = `
                 LIMIT ${limit}
@@ -203,9 +203,9 @@ module.exports = class GroupModerationDAO extends DAO {
         let page = query.page ? query.page : 1
 
         const results = await this.core.database.query(`
-                SELECT 
+                SELECT
                     COUNT(*)
-                FROM group_moderation 
+                FROM group_moderation
                 ${where}
         `, params)
 
@@ -215,7 +215,7 @@ module.exports = class GroupModerationDAO extends DAO {
             count: count,
             page: page,
             pageSize: pageSize,
-            numberOfPages: Math.floor(count / pageSize) + ( (count % pageSize) > 0 ? 1 : 0) 
+            numberOfPages: Math.floor(count / pageSize) + ( (count % pageSize) > 0 ? 1 : 0)
         }
     }
 
