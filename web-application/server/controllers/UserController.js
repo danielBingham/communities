@@ -787,7 +787,7 @@ module.exports = class UserController extends BaseController{
         // PATCHing a user that actually exists.
 
         // 1. User must be logged in unless they are using  token.
-        if ( ! currentUser && ( ! ( 'token' in user) || user.token === undefined || user.token === null ) ) {
+        if ( ! currentUser && ! user.token ) {
             throw new ControllerError(401, 'not-authenticated',
                 `Unauthenticated user attempting to update user(${user.id}).`,
                 `You must be authenticated to update a user.`)

@@ -207,7 +207,7 @@ module.exports = class SiteModerationController {
 
         if ( entityResults.list.length <= 0 ) {
             throw new ControllerError(500, 'server-error',
-                `Unable to find SiteModeration(${group.slug}) after creation.`,
+                `Unable to find SiteModeration(${moderation.id}) after creation.`,
                 `We encountered a bug on the server that we were unable to recover from.  Please report this bug!`)
         }
 

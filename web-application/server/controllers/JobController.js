@@ -139,6 +139,12 @@ module.exports = class JobController {
 
         const job = await this.core.queues[name].getJob(jobId)
 
+        if ( job === undefined || job === null ) {
+            throw new ControllerError(404, 'not-found',
+                `Attempt to retrieve a non-existent job.`,
+                `Either that job doesn't exist or you don't have permission to view it.`)
+        }
+
         // 2. User may only get their own job (or must be admin).
         if ( job.data.session.user.id !== request.session.user.id && request.session.user.siteRole != 'admin' && request.session.user.siteRole != 'superadmin' ) {
             throw new ControllerError(403, 'not-authorized',
