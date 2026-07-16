@@ -72,8 +72,11 @@ module.exports = class GroupValidation {
                 // We only want to check for ownership and usage if we know the
                 // file exists.
                 else {
-                    // Ensure the user owns the file they are attaching.
-                    if ( fileResults.rows[0].user_id !== currentUser.id ) {
+                    // Ensure the user owns the file they are attaching. We
+                    // only need to check this when they are uploading a new
+                    // file.  If the file isn't changing, then they won't
+                    // necessarily owned it (might be another admins).
+                    if ( ( existing === null || existing === undefined || existing?.fileId !== group.fileId) && fileResults.rows[0].user_id !== currentUser.id ) {
                         errors.push({
                             type: 'files:not-authorized',
                             log: `User attempting to attach files they do not own to their group.`,
