@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -144,7 +144,7 @@ module.exports = class PostController {
             }
         }
         const postFileResults = await this.fileDAO.selectFiles({
-            where: `files.id = ANY($1::uuid[]) AND files.user_id != ALL($2::uuid[])`, 
+            where: `files.id = ANY($1::uuid[]) AND files.user_id != ALL($2::uuid[])`,
             params: [fileIds, blockIds]
         })
 
@@ -194,7 +194,7 @@ module.exports = class PostController {
 
         // ==== GroupModeration ====
         const groupModerationResults = await this.groupModerationDAO.selectGroupModerations({
-            where: `group_moderation.post_id = ANY($1::uuid[]) OR group_moderation.post_comment_id = ANY($2::uuid[])`, 
+            where: `group_moderation.post_id = ANY($1::uuid[]) OR group_moderation.post_comment_id = ANY($2::uuid[])`,
             params: [ results.list, postCommentResults.list ]
         })
 
@@ -286,23 +286,23 @@ module.exports = class PostController {
                         SELECT groups.id FROM groups
                             LEFT OUTER JOIN group_members ON groups.id = group_members.group_id AND group_members.user_id = $1
                             LEFT OUTER JOIN group_members as parent_members ON groups.parent_id = parent_members.group_id AND parent_members.user_id = $1
-                        WHERE 
+                        WHERE
                             (groups.type = 'open' AND (group_members.user_id IS NULL OR group_members.status != 'banned'))
-                            OR ( 
-                                (groups.type = 'private' OR groups.type = 'private-open') 
+                            OR (
+                                (groups.type = 'private' OR groups.type = 'private-open')
                                 AND (group_members.user_id IS NULL OR group_members.status != 'banned')
                             )
-                            OR ( 
-                                groups.type = 'hidden' 
+                            OR (
+                                groups.type = 'hidden'
                                 AND (
-                                    (group_members.user_id = $1 AND group_members.status != 'banned') 
+                                    (group_members.user_id = $1 AND group_members.status != 'banned')
                                     OR (parent_members.user_id = $1 AND parent_members.status != 'banned' AND parent_members.role = 'admin')
                                 )
                             )
-                            OR ( 
-                                ( groups.type = 'hidden-open' OR groups.type = 'hidden-private' ) 
+                            OR (
+                                ( groups.type = 'hidden-open' OR groups.type = 'hidden-private' )
                                 AND (
-                                    (group_members.user_id = $1 AND group_members.status != 'banned') 
+                                    (group_members.user_id = $1 AND group_members.status != 'banned')
                                     OR (parent_members.user_id = $1 AND parent_members.status = 'member')
                                 )
                             )
@@ -323,10 +323,10 @@ module.exports = class PostController {
             const showAnnouncements = 'showAnnouncements' in currentUser.settings ? currentUser.settings.showAnnouncements : true
             const showInfo = 'showInfo' in currentUser.settings ? currentUser.settings.showInfo : true
             query.where += `(
-                        (posts.user_id = ANY($${friendParam}::uuid[]) AND posts.type = 'feed') 
+                        (posts.user_id = ANY($${friendParam}::uuid[]) AND posts.type = 'feed')
                         ${ showAnnouncements ? `OR posts.type = 'announcement'` : ''}
                         ${ showInfo ? `OR posts.type = 'info'` : ''}
-                        OR (posts.type = 'group' AND posts.group_id = ANY($${groupParam}::uuid[]) AND posts.user_id != ALL($${blockParam}::uuid[])) 
+                        OR (posts.type = 'group' AND posts.group_id = ANY($${groupParam}::uuid[]) AND posts.user_id != ALL($${blockParam}::uuid[]))
                         OR (posts.visibility = 'public' AND posts.user_id != ALL($${blockParam}::uuid[]))
                 )`
         }
@@ -334,7 +334,7 @@ module.exports = class PostController {
         // Handle moderated posts.
         const and = query.params.length > 0 ? ' AND ' : ''
         query.params.push(currentUser.id)
-        query.where += `${and} (group_moderation.status IS NULL OR (group_moderation.status != 'rejected' AND group_moderation.status != 'pending') OR posts.user_id = $${query.params.length}) 
+        query.where += `${and} (group_moderation.status IS NULL OR (group_moderation.status != 'rejected' AND group_moderation.status != 'pending') OR posts.user_id = $${query.params.length})
             AND (site_moderation.status IS NULL OR site_moderation.status != 'rejected' OR posts.user_id = $${query.params.length})`
 
         if ( this.core.features.has('feat-408-flag-profiles-and-groups') ) {
@@ -346,14 +346,14 @@ module.exports = class PostController {
             let and = query.params.length > 0 ? ' AND ' : ''
             query.params.push('rejected')
             query.where += `${and} NOT EXISTS (
-                SELECT 1 FROM site_moderation 
-                    WHERE site_moderation.status = $${query.params.length} AND ( 
+                SELECT 1 FROM site_moderation
+                    WHERE site_moderation.status = $${query.params.length} AND (
                         ( site_moderation.group_id IS NOT NULL AND site_moderation.group_id = posts.group_id)
                         OR site_moderation.user_profile_id = posts.user_id
                     )
             )`
         }
-        
+
         // ====================================================================
         // END Post Visibility and Permissions
         // ====================================================================
@@ -377,7 +377,7 @@ module.exports = class PostController {
             const and = query.params.length > 0 ? ' AND ' : ''
             query.params.push(request.query.groupId)
             query.where += `${and}posts.group_id = $${query.params.length}`
-        } 
+        }
 
         // ...if we have the slug then we have to do a little extra work.
         if ('groupSlug' in request.query) {
@@ -420,7 +420,7 @@ module.exports = class PostController {
                 const and = query.params.length > 0 ? ' AND ' : ''
                 query.params.push(request.query.type)
                 query.where += `${and}posts.type = ANY($${query.params.length}::post_type[])`
-            } else { 
+            } else {
                 const and = query.params.length > 0 ? ' AND ' : ''
                 query.params.push(request.query.type)
                 query.where += `${and}posts.type = $${query.params.length}`
@@ -435,7 +435,7 @@ module.exports = class PostController {
                 query.where += `${and} (posts.type = 'feed' AND posts.user_id = ANY($${query.params.length}::uuid[]))`
             } else if (request.query.feed == 'everything') {
                 const groupMembershipResults = await this.core.database.query(
-                    `SELECT groups.id FROM groups LEFT OUTER JOIN group_members ON groups.id = group_members.group_id WHERE group_members.user_id = $1 AND group_members.status = 'member'`, 
+                    `SELECT groups.id FROM groups LEFT OUTER JOIN group_members ON groups.id = group_members.group_id WHERE group_members.user_id = $1 AND group_members.status = 'member'`,
                     [ currentUser.id ]
                 )
 
@@ -448,9 +448,9 @@ module.exports = class PostController {
 
                 query.params.push(friendIds)
                 query.params.push(groupMemberships)
-                query.where += `${and} 
+                query.where += `${and}
                     (
-                        (posts.type = 'feed' and posts.user_id = ANY($${query.params.length-1}::uuid[])) 
+                        (posts.type = 'feed' and posts.user_id = ANY($${query.params.length-1}::uuid[]))
                             ${ showAnnouncements ? `OR posts.type = 'announcement'` : ''}
                             ${ showInfo ? `OR posts.type = 'info'` : ''}
                             OR (posts.type = 'group' AND posts.group_id = ANY($${query.params.length}::uuid[]))
@@ -475,8 +475,8 @@ module.exports = class PostController {
                 query.where += `${and} posts.created_date > current_timestamp - interval '7 days'`
             } else if ( since === 'month' ) {
                 const and = query.params.length > 0 ? ' AND ' : ''
-                query.where += `${and} posts.created_date > current_timestamp - interval '30 days'` 
-            } 
+                query.where += `${and} posts.created_date > current_timestamp - interval '30 days'`
+            }
         }
 
         if ('sort' in request.query) {
@@ -581,7 +581,7 @@ module.exports = class PostController {
         }
 
         if ( entity.groupId ) {
-            const group = await this.groupDAO.getGroupById(entity.groupId) 
+            const group = await this.groupDAO.getGroupById(entity.groupId)
 
 
             // Insert the pending moderation if the group is set to require
@@ -595,7 +595,7 @@ module.exports = class PostController {
                 }
 
                 await this.groupModerationDAO.insertGroupModerations(moderation)
-                await this.groupModerationEventDAO.insertGroupModerationEvents(this.groupModerationEventDAO.createEventFromGroupModeration(moderation))
+                await this.groupModerationEventDAO.createEventFromGroupModeration(moderation.id)
 
                 const moderationEntityResults = await this.groupModerationDAO.selectGroupModerations({
                     where: `group_moderation.id = $1`,
@@ -607,7 +607,7 @@ module.exports = class PostController {
                     currentUser,
                     'GroupModeration:create',
                     {
-                        moderation: moderationEntity 
+                        moderation: moderationEntity
                     }
                 )
 
@@ -616,12 +616,12 @@ module.exports = class PostController {
                     groupModerationId: moderation.id
                 }
                 await this.postDAO.updatePost(postPatch)
-            } 
+            }
             // Otherwise, update the gracking stats.  We'll update this on
             // approval in the GroupModerationController for groups that
             // require approval.
             else {
-                
+
                 if ( this.core.features.has('feat-484-find-active-groups') ) {
                     // Update the group's tracking stats.
                     await this.core.database.query(`UPDATE groups SET total_posts = total_posts+1, most_recent_post_date = now() WHERE id = $1`, [ entity.groupId ])
@@ -855,12 +855,12 @@ module.exports = class PostController {
 
         await this.postDAO.deletePost(existing)
 
-        
+
         if ( this.core.features.has('feat-484-find-active-groups') ) {
             // If this was a post in a group, decrement the group post count.
             if ( existing.groupId ) {
                 await this.core.database.query(`
-                    UPDATE groups SET 
+                    UPDATE groups SET
                         total_posts =  ( SELECT count(*) FROM posts LEFT OUTER JOIN group_moderation ON group_moderation.group_id = posts.group_id AND group_moderation.post_id = posts.id AND group_moderation.post_comment_id IS NULL WHERE posts.group_id = $1 AND (group_moderation.status IS NULL OR group_moderation.status = 'approved') ),
                         most_recent_post_date = ( SELECT MAX(posts.created_date) FROM posts LEFT OUTER JOIN group_moderation ON group_moderation.group_id = posts.group_id AND group_moderation.post_id = posts.id AND group_moderation.post_comment_id IS NULL WHERE posts.group_id = $1 AND (group_moderation.status IS NULL OR group_moderation.status = 'approved') )
                     WHERE id = $1
