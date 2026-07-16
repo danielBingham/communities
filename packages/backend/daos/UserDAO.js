@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -181,7 +181,7 @@ const SCHEMA = {
             // out of the DAO so we don't leak it.
             //
             // It will be manually managed through MultifactorAuthenticationService.
-            
+
             // authentication__multifactor_last_attempt_date intentionally left
             // out of the DAO so we don't leak it.
             //
@@ -212,7 +212,7 @@ module.exports = class UserDAO extends DAO {
         super(core)
         this.core = core
 
-        this.entityMaps = SCHEMA 
+        this.entityMaps = SCHEMA
     }
 
     getUserSelectionString(fields) {
@@ -228,7 +228,7 @@ module.exports = class UserDAO extends DAO {
      *
      * @param {Object[]}    rows    An array of rows returned from the database.
      *
-     * @return {Object}     The users parsed into a dictionary keyed using user.id. 
+     * @return {Object}     The users parsed into a dictionary keyed using user.id.
      */
     hydrateUsers(rows) {
         // Users
@@ -245,13 +245,13 @@ module.exports = class UserDAO extends DAO {
         }
 
 
-        return { dictionary: dictionary, list: list } 
+        return { dictionary: dictionary, list: list }
     }
 
     async getUserById(id, fields) {
         const results = await this.selectUsers({
-            where: 'users.id = $1', 
-            params: [ id ], 
+            where: 'users.id = $1',
+            params: [ id ],
             fields: fields
         })
 
@@ -292,9 +292,9 @@ module.exports = class UserDAO extends DAO {
         let paging = ''
         if ( 'page' in query ) {
             let page = query.page !== null && query.page !== undefined ? query.page : 1
-            
+
             const offset = (page-1) * PAGE_SIZE
-            let count = params.length 
+            let count = params.length
 
             paging = `
                 LIMIT $${count+1}
@@ -306,11 +306,11 @@ module.exports = class UserDAO extends DAO {
         }
 
         const sql = `
-                SELECT 
+                SELECT
                     ${this.getUserSelectionString(fields)}
                 FROM users
-                ${where} 
-                ORDER BY ${order} 
+                ${where}
+                ORDER BY ${order}
                 ${paging}
         `
 
@@ -323,10 +323,10 @@ module.exports = class UserDAO extends DAO {
         const params = query.params ? [ ...query.params ] : []
 
         const sql = `
-               SELECT 
+               SELECT
                  COUNT(users.id) as count
-                FROM users 
-                ${where} 
+                FROM users
+                ${where}
         `
 
         const results = await this.core.database.query(sql, params)
@@ -345,7 +345,7 @@ module.exports = class UserDAO extends DAO {
             count: count,
             page: query.page ? query.page : 1,
             pageSize: PAGE_SIZE,
-            numberOfPages: parseInt(count / PAGE_SIZE) + ( count % PAGE_SIZE > 0 ? 1 : 0) 
+            numberOfPages: parseInt(count / PAGE_SIZE) + ( count % PAGE_SIZE > 0 ? 1 : 0)
         }
     }
 

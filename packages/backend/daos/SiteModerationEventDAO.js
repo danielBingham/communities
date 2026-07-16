@@ -102,8 +102,8 @@ module.exports = class SiteModerationEventDAO extends DAO {
         this.entityMaps = SCHEMA
     }
 
-    getSiteModerationEventSelectionString() {
-        return this.getSelectionString('SiteModerationEvent')
+    getSiteModerationEventSelectionString(fields) {
+        return this.getSelectionString('SiteModerationEvent', fields)
     }
 
     hydrateSiteModerationEvent(row) {
@@ -170,6 +170,7 @@ module.exports = class SiteModerationEventDAO extends DAO {
         let params = query.params ? [ ...query.params ] : []
         let page  = query.page ? query.page : 1
         let order = query.order ? `${query.order}` : `site_moderation_events.created_date ASC`
+        const fields = query.fields ? query.fields : []
 
         let paging = ''
         if ( page > 0 ) {
@@ -184,7 +185,7 @@ module.exports = class SiteModerationEventDAO extends DAO {
 
         const results = await this.core.database.query(`
             SELECT
-                ${this.getSiteModerationEventSelectionString()}
+                ${this.getSiteModerationEventSelectionString(fields)}
             FROM site_moderation_events
             ${where}
             ORDER BY ${order}

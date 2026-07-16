@@ -96,8 +96,8 @@ module.exports = class GroupModerationDAO extends DAO {
         this.entityMaps = SCHEMA
     }
 
-    getGroupModerationSelectionString() {
-        return this.getSelectionString('GroupModeration')
+    getGroupModerationSelectionString(fields) {
+        return this.getSelectionString('GroupModeration', fields)
     }
 
     hydrateGroupModeration(row) {
@@ -164,6 +164,7 @@ module.exports = class GroupModerationDAO extends DAO {
         let params = query.params ? [ ...query.params ] : []
         let page  = query.page ? query.page : 1
         let order = query.order ? `${query.order}` : `group_moderation.created_date ASC`
+        const fields = query.fields ? query.fields : []
 
         let paging = ''
         if ( 'page' in query && query.page !== undefined && query.page !== null) {
@@ -178,7 +179,7 @@ module.exports = class GroupModerationDAO extends DAO {
 
         const sql = `
             SELECT
-                ${this.getGroupModerationSelectionString()}
+                ${this.getGroupModerationSelectionString(fields)}
             FROM group_moderation
             ${where}
             ORDER BY ${order}

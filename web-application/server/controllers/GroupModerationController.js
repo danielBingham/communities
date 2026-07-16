@@ -294,7 +294,7 @@ module.exports = class GroupModerationController extends BaseController {
         const entity = entityResults.dictionary[entityResults.list[0]]
 
         // Insert the event to track the moderation history.
-        await this.groupModerationEventDAO.insertGroupModerationEvents(this.groupModerationEventDAO.createEventFromGroupModeration(entity))
+        await this.groupModerationEventDAO.createEventFromGroupModeration(entity.id)
 
         if ( entity.postId && entity.postCommentId === null) {
             const postUpdate = {
@@ -506,7 +506,7 @@ module.exports = class GroupModerationController extends BaseController {
         )
 
         // Insert the event to track the moderation history.
-        await this.groupModerationEventDAO.insertGroupModerationEvents(this.groupModerationEventDAO.createEventFromGroupModeration(entity))
+        await this.groupModerationEventDAO.createEventFromGroupModeration(entity.id)
 
         const relations = this.getRelations(currentUser, results)
 

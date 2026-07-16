@@ -182,28 +182,28 @@ module.exports = class SiteModerationController {
         if ( moderation.postId && ! moderation.postCommentId) {
             const canViewPost = await this.permissionService.can(currentUser, 'view', 'Post', { postId: moderation.postId })
             if ( canViewPost !== true ) {
-                throw new NotFoundError(`User attempting to view moderation for post without authorization.`)
+                throw new NotFoundError(`User attempting to create moderation for post without authorization.`)
             }
 
             existing = await this.siteModerationDAO.getSiteModerationByPostId(moderation.postId)
         } else if ( moderation.postCommentId ) {
             const canViewPostComment = await this.permissionService.can(currentUser, 'view', 'PostComment', { postCommentId: moderation.postCommentId })
             if ( canViewPostComment !== true ) {
-                throw new NotFoundError(`User attempting to view moderation for PostComment without authorization.`)
+                throw new NotFoundError(`User attempting to create moderation for PostComment without authorization.`)
             }
 
             existing = await this.siteModerationDAO.getSiteModerationByPostCommentId(moderation.postCommentId)
         } else if ( moderation.groupId ) {
             const canViewGroup = await this.permissionService.can(currentUser, 'view', 'Group', { groupId: moderation.groupId })
             if ( canViewGroup !== true ) {
-                throw new NotFoundError(`User attempting to view moderation for Group without authorization.`)
+                throw new NotFoundError(`User attempting to create moderation for Group without authorization.`)
             }
 
             existing = await this.siteModerationDAO.getSiteModerationByGroupId(moderation.groupId)
         } else if ( moderation.userProfileId ) {
             const canViewUser = await this.permissionService.can(currentUser, 'view', 'User', { userId: moderation.userProfileId })
             if ( canViewUser !== true ) {
-                throw new NotFoundError(`User attempting to view moderation for User without authorization.`)
+                throw new NotFoundError(`User attempting to create moderation for User without authorization.`)
             }
 
             existing = await this.siteModerationDAO.getSiteModerationByUserProfileId(moderation.userProfileId)
@@ -244,7 +244,7 @@ module.exports = class SiteModerationController {
         const entity = entityResults.dictionary[entityResults.list[0]]
 
         // Insert the event to track the moderation history.
-        await this.siteModerationEventDAO.insertSiteModerationEvents(this.siteModerationEventDAO.createEventFromSiteModeration(entity))
+        await this.siteModerationEventDAO.createEventFromSiteModeration(entity.id)
 
         if ( entity.postId && entity.postCommentId === null ) {
             const postUpdate = {
@@ -297,12 +297,32 @@ module.exports = class SiteModerationController {
         })
 
         if ( results.list.length <= 0 || ! (siteModerationId in results.dictionary)) {
-            throw new ControllerError(404, 'not-found',
-                `SiteModeration(${siteModerationId}) not found for User(${currentUser.id}).`,
-                `Either that siteModeration doesn't exist or you don't have permission to see it.`)
+            throw new NotFoundError(`SiteModeration(${siteModerationId}) not found for User(${currentUser.id}).`)
         }
 
         const siteModeration = results.dictionary[siteModerationId]
+
+        if ( siteModeration.postId && ! siteModeration.postCommentId) {
+            const canViewPost = await this.permissionService.can(currentUser, 'view', 'Post', { postId: siteModeration.postId })
+            if ( canViewPost !== true ) {
+                throw new NotFoundError(`User attempting to view siteModeration for post without authorization.`)
+            }
+        } else if ( siteModeration.postCommentId ) {
+            const canViewPostComment = await this.permissionService.can(currentUser, 'view', 'PostComment', { postCommentId: siteModeration.postCommentId })
+            if ( canViewPostComment !== true ) {
+                throw new NotFoundError(`User attempting to view siteModeration for PostComment without authorization.`)
+            }
+        } else if ( siteModeration.groupId ) {
+            const canViewGroup = await this.permissionService.can(currentUser, 'view', 'Group', { groupId: siteModeration.groupId })
+            if ( canViewGroup !== true ) {
+                throw new NotFoundError(`User attempting to view siteModeration for Group without authorization.`)
+            }
+        } else if ( siteModeration.userProfileId ) {
+            const canViewUser = await this.permissionService.can(currentUser, 'view', 'User', { userId: siteModeration.userProfileId })
+            if ( canViewUser !== true ) {
+                throw new NotFoundError(`User attempting to view siteModeration for User without authorization.`)
+            }
+        }
 
         const relations = await this.getRelations(currentUser, results)
 
@@ -400,7 +420,7 @@ module.exports = class SiteModerationController {
         }
 
         // Insert the event to track the moderation history.
-        await this.siteModerationEventDAO.insertSiteModerationEvents(this.siteModerationEventDAO.createEventFromSiteModeration(entity))
+        await this.siteModerationEventDAO.createEventFromSiteModeration(entity.id)
 
         const relations = await this.getRelations(currentUser, results)
 
