@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -21,8 +21,8 @@
 const Uuid = require('uuid')
 
 const {
-    PostDAO, 
-    PostSubscriptionDAO, 
+    PostDAO,
+    PostSubscriptionDAO,
     UserRelationshipDAO,
 
     PermissionService,
@@ -47,13 +47,13 @@ module.exports = class PostSubscriptionController {
         this.validationService = new ValidationService(core)
     }
 
-    async getRelations(results, requestedRelations) { 
+    async getRelations(results, requestedRelations) {
         return {}
     }
 
     async createQuery(request) { }
 
-    async getPostSubscriptions(request, response) { 
+    async getPostSubscriptions(request, response) {
         throw new ControllerError(503, 'not-implemented',
             `User attempted to GET /post/:postId/subscriptions which isn't implemented.`,
             `GET /post/:postId/subscriptions is not implemented.`)
@@ -143,7 +143,7 @@ module.exports = class PostSubscriptionController {
         })
     }
 
-    async getPostSubscription(request, response) { 
+    async getPostSubscription(request, response) {
         const currentUser = request.session.user
         if ( ! currentUser ) {
             throw new ControllerError(401, 'not-authenticated',
@@ -154,8 +154,8 @@ module.exports = class PostSubscriptionController {
         const postId = cleaning.PostSubscription.cleanPostId(request.params.postId)
         const postIdValidationErrors = validation.PostSubscription.validatePostId(postId)
         if ( postIdValidationErrors.length > 0 ) {
-            const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
-            const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
+            const errorString = postIdValidationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
+            const logString = postIdValidationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
             throw new ControllerError(400, 'invalid',
                 `Invalid postId used used for PostSubscription.getPostSubscriptions: ${logString}`,
                 errorString)
@@ -187,7 +187,7 @@ module.exports = class PostSubscriptionController {
 
         const canViewPostSubscription = await this.permissionService.can(currentUser, 'view', 'PostSubscription', { postSubscription: entity })
         if ( canViewPostSubscription !== true ) {
-            throw new ControllerError(404, 'not-found', 
+            throw new ControllerError(404, 'not-found',
                 `User attempting to view PostSubscription without authorization.`,
                 `Either that PostSubscription doesn't exist or you don't have permission to view it.`)
         }
@@ -217,15 +217,15 @@ module.exports = class PostSubscriptionController {
         const postId = cleaning.PostSubscription.cleanPostId(request.params.postId)
         const postIdValidationErrors = validation.PostSubscription.validatePostId(postId)
         if ( postIdValidationErrors.length > 0 ) {
-            const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
-            const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
+            const errorString = postIdValidationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
+            const logString = postIdValidationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
             throw new ControllerError(400, 'invalid',
                 `Invalid postId used used for PostSubscription.deletePostSubscriptions: ${logString}`,
                 errorString)
         }
 
         const post = await this.postDAO.getPostById(postId)
-        if ( post === null ) { 
+        if ( post === null ) {
             throw new ControllerError(404, 'not-found',
                 `User(${currentUser.id}) attempted to unsubscribe from a post that does not exist.`,
                 `That post does not exist or you don't have access to view it.`)
@@ -251,7 +251,7 @@ module.exports = class PostSubscriptionController {
 
         const canViewPostSubscription = await this.permissionService.can(currentUser, 'view', 'PostSubscription', { postSubscription: existing})
         if ( canViewPostSubscription !== true ) {
-            throw new ControllerError(404, 'not-found', 
+            throw new ControllerError(404, 'not-found',
                 `User attempting to view PostSubscription without authorization.`,
                 `Either that PostSubscription doesn't exist or you don't have permission to view it.`)
         }
@@ -267,7 +267,7 @@ module.exports = class PostSubscriptionController {
 
         response.status(201).json({
             entity: existing,
-            relations: {} 
+            relations: {}
         })
     }
 

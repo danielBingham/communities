@@ -78,8 +78,8 @@ module.exports = class GroupSubscriptionController {
         const groupId = this.schema.properties.groupId.clean(request.params.groupId)
         const groupIdValidationErrors = this.schema.properties.groupId.validate(groupId)
         if ( groupIdValidationErrors.length > 0 ) {
-            const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
-            const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
+            const errorString = groupIdValidationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
+            const logString = groupIdValidationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
             throw new ControllerError(400, 'invalid',
                 `Invalid groupId used used for GroupSubscription.getGroupSubscriptions: ${logString}`,
                 errorString)

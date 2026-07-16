@@ -236,7 +236,7 @@ module.exports = class NotificationWorker {
                     definition.email.body(context)
                 )
             } catch (error) {
-                core.logger.error(error)
+                this.core.logger.error(error)
             }
         }
 
@@ -244,12 +244,12 @@ module.exports = class NotificationWorker {
             try {
                 await this.iosNotifications.notify(userId, notification)
             } catch (error) {
-                core.logger.error(error)
+                this.core.logger.error(error)
             }
             try {
                 await this.androidNotifications.sendAndroidNotification(userId, notification)
             } catch (error) {
-                core.logger.error(error)
+                this.core.logger.error(error)
             }
         }
     }
