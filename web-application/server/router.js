@@ -60,7 +60,7 @@ module.exports = function(core) {
         })
     })
 
-    router.post('/system/log', rateLimit(core, 2400), function(request, response, next) {
+    router.post('/system/log', rateLimit(core, 240), function(request, response, next) {
         systemController.postLog(request, response).catch(function(error) {
             next(error)
         })
@@ -295,18 +295,6 @@ module.exports = function(core) {
 
     router.delete('/group/:id', rateLimit(core, 30), function(request, response, next) {
         groupController.deleteGroup(request, response).catch(function(error) {
-            next(error)
-        })
-    })
-
-    router.get('/group/:id/parents', rateLimit(2400), function(request, response, next) {
-        groupController.getParents(request, response).catch(function(error) {
-            next(error)
-        })
-    })
-
-    router.get('/group/:id/parents/members/:userId', rateLimit(2400), function(request, response, next) {
-        groupController.getParentMembers(request, response).catch(function(error) {
             next(error)
         })
     })

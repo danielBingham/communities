@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -25,7 +25,7 @@ import * as shared from '@communities/shared'
 import { useRequest } from '/lib/hooks/useRequest'
 import { validateEmail, validateName, validateUsername, validatePassword } from '/lib/validation/user'
 
-import { postUsers, getUsers } from '/state/User'
+import { postUsers } from '/state/User'
 
 import Input from '/components/ui/Input'
 import { Checkbox } from '/components/ui/Checkbox'
@@ -51,8 +51,6 @@ const RegistrationForm = function(props) {
     const [request, makeRequest] = useRequest()
     const [usernameRequest, makeUsernameRequest] = useRequest()
 
-    const existing = useSelector((state) => username in state.User.byUsername ? state.User.byUsername[username] : undefined)
-
     /**
      * Perform validation on our state and return a boolean indicating whether
      * our current state is valid.
@@ -64,34 +62,30 @@ const RegistrationForm = function(props) {
      * false otherwise.
      */
     const isValid = function(field) {
-        let error = false 
+        let error = false
 
-        
+
         if ( ! field || field == 'name' ) {
-            const nameErrors = validateName(name, true) 
+            const nameErrors = validateName(name, true)
             error = error || nameErrors.length > 0
             setNameValidationError(nameErrors)
         }
 
         if ( ! field || field == 'username' ) {
-            const usernameErrors = validateUsername(username, true) 
-            
-            if ( existing && existing.username === username ) {
-                usernameErrors.push('That username is already in use.  Please choose a different one.')
-            }
+            const usernameErrors = validateUsername(username, true)
 
             error = error || usernameErrors.length > 0
             setUsernameValidationError(usernameErrors)
         }
 
         if ( ! field || field == 'email' ) {
-            const emailErrors = validateEmail(email, true) 
+            const emailErrors = validateEmail(email, true)
             error = error || emailErrors.length > 0
             setEmailValidationError(emailErrors)
         }
 
         if ( ! field || field == 'password' ) {
-            const passwordErrors = validatePassword(password, true) 
+            const passwordErrors = validatePassword(password, true)
             error = error || passwordErrors.length > 0
             setPasswordValidationError(passwordErrors)
         }
@@ -101,14 +95,14 @@ const RegistrationForm = function(props) {
 
             if (password != confirmPassword) {
                 passwordConfirmationErrors.push('Your passwords don\'t match!')
-                error = true 
-            } 
+                error = true
+            }
 
             setConfirmPasswordValidationError(passwordConfirmationErrors)
         }
 
         if ( ! field || field === 'birthdate' ) {
-            const birthdateErrors = shared.validation.User.validateBirthdate(birthdate) 
+            const birthdateErrors = shared.validation.User.validateBirthdate(birthdate)
             if ( birthdateErrors.length > 0 ) {
                 setBirthdateValidationError(birthdateErrors.map((error) => error.message))
             } else {
@@ -124,7 +118,7 @@ const RegistrationForm = function(props) {
         event.preventDefault()
 
         if ( ! isValid() ) {
-            return 
+            return
         }
 
         const user = {
@@ -162,7 +156,6 @@ const RegistrationForm = function(props) {
         let lowerUsername = username.toLowerCase()
         setUsername(lowerUsername)
 
-        makeUsernameRequest(getUsers(username, { username: lowerUsername }))
         isValid('username')
     }
 
@@ -173,7 +166,7 @@ const RegistrationForm = function(props) {
     }
 
     // ============ Validation ==================
-    
+
     useEffect(function() {
         if ( nameValidationError.length > 0 ) {
             isValid('name')
@@ -267,7 +260,7 @@ const RegistrationForm = function(props) {
                     placeholder="John Doe"
                     className="name"
                     onBlur={ (event) => isValid('name') }
-                    onChange={onNameChange} 
+                    onChange={onNameChange}
                     error={nameError}
                 />
                 <Input
@@ -278,7 +271,7 @@ const RegistrationForm = function(props) {
                     placeholder="john-doe"
                     className="username"
                     onBlur={ onUsernameBlur }
-                    onChange={ (event) => setUsername(event.target.value) } 
+                    onChange={ (event) => setUsername(event.target.value) }
                     error={usernameError}
                 />
                 <Input
@@ -289,7 +282,7 @@ const RegistrationForm = function(props) {
                     placeholder="john-doe@example.com"
                     className="email"
                     onBlur={ (event) => isValid('email') }
-                    onChange={ (event) => setEmail(event.target.value) } 
+                    onChange={ (event) => setEmail(event.target.value) }
                     error={emailError}
                 />
 
@@ -301,7 +294,7 @@ const RegistrationForm = function(props) {
                     value={password}
                     className="password"
                     onBlur={ (event) => isValid('password') }
-                    onChange={ (event) => setPassword(event.target.value) } 
+                    onChange={ (event) => setPassword(event.target.value) }
                     error={passwordError}
                 />
                 <Input

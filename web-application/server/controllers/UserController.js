@@ -552,7 +552,14 @@ module.exports = class UserController extends BaseController{
      * @returns {Promise}   Resolves to void.
      */
     async getUsers(request, response) {
-        const query = await this.parseQuery(request.session.user, request.query)
+        const currentUser = request.session.user
+        if ( ! currentUser ) {
+            throw new ControllerError(401, 'not-authenticated',
+                `User attempting to query users without authenticating.`,
+                `You must be authenticated to do that.`)
+        }
+
+        const query = await this.parseQuery(currentUser, request.query)
 
         if ( query.emptyResult ) {
             return response.status(200).json({
