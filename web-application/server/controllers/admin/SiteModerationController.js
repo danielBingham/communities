@@ -322,6 +322,9 @@ module.exports = class SiteModerationController {
             if ( canViewUser !== true ) {
                 throw new NotFoundError(`User attempting to view siteModeration for User without authorization.`)
             }
+        } else {
+            request.logger.error(`Attempt to retrieve invalid SiteModeration lacking entity id.`)
+            throw new NotFoundError(`Attempt to retrieve invalid SiteModeration -- no entity id.`)
         }
 
         const relations = await this.getRelations(currentUser, results)
