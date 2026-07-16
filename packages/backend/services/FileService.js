@@ -156,6 +156,14 @@ module.exports = class FileService {
         `, [ fileIds ])
 
         for(const row of usageResults.rows) {
+            if ( row.id in usageDictionary ) {
+                // We're going to allow the last row to win, but log the
+                // invalid usage so that we can (potentially) manually clean it
+                // up later.
+                this.core.logger.error(`File(${row.id}) used in multiple places!`)
+            }
+
+
             usageDictionary[row.id] = row
         }
 
