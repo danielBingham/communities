@@ -31,7 +31,9 @@ const {
     UserDAO
 }  = require('@communities/backend')
 const { schema } = require('@communities/shared')
+
 const ControllerError = require('../../errors/ControllerError')
+const NotFoundError = require('../../errors/NotFoundError')
 
 module.exports = class SiteModerationController {
 
@@ -53,7 +55,6 @@ module.exports = class SiteModerationController {
     }
 
     async getRelations(currentUser, results, requestedRelations) {
-
         const postResults = await this.postDAO.selectPosts({
             where: `posts.site_moderation_id = ANY($1::uuid[])`,
             params: [ results.list ]
@@ -126,6 +127,15 @@ module.exports = class SiteModerationController {
                 `You must be authenticated to retrieve posts.`)
         }
 
+
+        const canModerateSite = await this.permissionService.can(currentUser, 'moderate', 'Site')
+        if ( canModerateSite !== true ) {
+            throw new ControllerError(404, 'not-found',
+                `User attempting to query SiteModerations without authorization.`,
+                `Request for a non-existent resource.`)
+        }
+
+
         const query = await this.createQuery(request)
         const results = await this.siteModerationDAO.selectSiteModerations(query)
         const meta = await this.siteModerationDAO.getSiteModerationPageMeta(query)
@@ -170,12 +180,32 @@ module.exports = class SiteModerationController {
 
         let existing = null
         if ( moderation.postId && ! moderation.postCommentId) {
+            const canViewPost = await this.permissionService.can(currentUser, 'view', 'Post', { postId: moderation.postId })
+            if ( canViewPost !== true ) {
+                throw new NotFoundError(`User attempting to view moderation for post without authorization.`)
+            }
+
             existing = await this.siteModerationDAO.getSiteModerationByPostId(moderation.postId)
         } else if ( moderation.postCommentId ) {
+            const canViewPostComment = await this.permissionService.can(currentUser, 'view', 'PostComment', { postCommentId: moderation.postCommentId })
+            if ( canViewPostComment !== true ) {
+                throw new NotFoundError(`User attempting to view moderation for PostComment without authorization.`)
+            }
+
             existing = await this.siteModerationDAO.getSiteModerationByPostCommentId(moderation.postCommentId)
         } else if ( moderation.groupId ) {
+            const canViewGroup = await this.permissionService.can(currentUser, 'view', 'Group', { groupId: moderation.groupId })
+            if ( canViewGroup !== true ) {
+                throw new NotFoundError(`User attempting to view moderation for Group without authorization.`)
+            }
+
             existing = await this.siteModerationDAO.getSiteModerationByGroupId(moderation.groupId)
         } else if ( moderation.userProfileId ) {
+            const canViewUser = await this.permissionService.can(currentUser, 'view', 'User', { userId: moderation.userProfileId })
+            if ( canViewUser !== true ) {
+                throw new NotFoundError(`User attempting to view moderation for User without authorization.`)
+            }
+
             existing = await this.siteModerationDAO.getSiteModerationByUserProfileId(moderation.userProfileId)
         } else {
             throw new ControllerError(400, 'invalid',
