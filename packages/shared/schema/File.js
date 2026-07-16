@@ -113,7 +113,6 @@ module.exports = class FileSchema extends Schema {
                 validate: (value, existing, action) => {
                     const validator = new StringValidator('type', value, existing, action)
                     const errors = validator
-                        .isRequiredToCreate()
                         .mustNotBeUpdated()
                         .mustBeString()
                         .getErrors()

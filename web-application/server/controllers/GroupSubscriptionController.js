@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -21,9 +21,9 @@
 const Uuid = require('uuid')
 
 const {
-    GroupDAO, 
+    GroupDAO,
     GroupMemberDAO,
-    GroupSubscriptionDAO, 
+    GroupSubscriptionDAO,
     UserRelationshipDAO,
 
     PermissionService,
@@ -49,13 +49,13 @@ module.exports = class GroupSubscriptionController {
         this.schema = new schema.GroupSubscriptionSchema()
     }
 
-    async getRelations(results, requestedRelations) { 
+    async getRelations(results, requestedRelations) {
         return {}
     }
 
     async createQuery(request) { }
 
-    async getGroupSubscriptions(request, response) { 
+    async getGroupSubscriptions(request, response) {
         throw new ControllerError(503, 'not-implemented',
             `User attempted to GET /group/:groupId/subscriptions which isn't implemented.`,
             `GET /group/:groupId/subscriptions is not implemented.`)
@@ -67,7 +67,7 @@ module.exports = class GroupSubscriptionController {
             `POST /group/:groupId/subscriptions is not implemented.`)
     }
 
-    async getGroupSubscription(request, response) { 
+    async getGroupSubscription(request, response) {
         const currentUser = request.session.user
         if ( ! currentUser ) {
             throw new ControllerError(401, 'not-authenticated',
@@ -184,7 +184,7 @@ module.exports = class GroupSubscriptionController {
 
         const subscription = this.schema.clean(request.body)
         if ( subscription === null || subscription === undefined ) {
-            throw new ControllerError(400, 'invalid', 
+            throw new ControllerError(400, 'invalid',
                 `User(${currentUser.id}) provided an empty patch for GroupSubscription.`,
                 `You must provide a body to PATCH a subscription.`)
         }
@@ -193,7 +193,7 @@ module.exports = class GroupSubscriptionController {
             subscription.id = existing.id
         }
 
-        const validationErrors = this.validationService.validateGroupSubscription(currentUser, subscription, existing)
+        const validationErrors = await this.validationService.validateGroupSubscription(currentUser, subscription, existing)
         if ( validationErrors.length > 0 ) {
             const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
             const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')

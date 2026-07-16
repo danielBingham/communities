@@ -21,6 +21,7 @@
 const GroupDAO = require('../../daos/GroupDAO')
 
 const PermissionService = require ('../PermissionService')
+const FileService = require('../FileService')
 const { util, validation } = require('@communities/shared')
 
 const ServiceError = require('../../errors/ServiceError')
@@ -29,10 +30,11 @@ module.exports = class PostValidation {
 
     constructor(core, validationService) {
         this.core = core
+        this.validationService = validationService
 
         this.groupDAO = new GroupDAO(core)
 
-        this.validationService = validationService
+        this.fileService = new FileService(core)
         this.permissionService = new PermissionService(core)
     }
 
@@ -120,24 +122,9 @@ module.exports = class PostValidation {
                     // the files.
                     else {
 
-                        // Ensure the files they are attaching are not in use already.
-                        const usageResults = await this.core.database.query(`
-                            SELECT
-                                post_files.id as "postId", users.id as "userId", groups.id as "groupId", link_previews.id as "linkPreviewId"
-                            FROM files
-                                LEFT OUTER JOIN post_files ON files.id = post_files.file_id
-                                LEFT OUTER JOIN users ON files.id = users.file_id
-                                LEFT OUTER JOIN groups ON files.id = groups.file_id
-                                LEFT OUTER JOIN link_previews ON files.id = link_previews.file_id
-                            WHERE
-                                files.id = ANY($1::uuid[]) AND (
-                                    post_files.id IS NOT NULL
-                                    OR users.id IS NOT NULL
-                                    OR groups.id IS NOT NULL
-                                    OR link_previews.id IS NOT NULL
-                                )
-                        `, [ post.files ])
-                        if ( usageResults.rows.length > 0 ) {
+
+                        const inUse = await this.fileService.areFilesInUse(post.files)
+                        if ( inUse !== false ) {
                             errors.push({
                                 type: 'files:conflict',
                                 log: `User attempting to attach file to post, but file is in use.`,

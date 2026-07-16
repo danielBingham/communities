@@ -86,13 +86,8 @@ const SCHEMA = {
 
 module.exports = class NotificationsDAO extends DAO {
 
-    constructor(core, database) {
+    constructor(core) {
         super(core)
-        this.database = core.database
-
-        if ( database ) {
-            this.database = database
-        }
 
         this.entityMaps = SCHEMA
     }
@@ -167,7 +162,7 @@ module.exports = class NotificationsDAO extends DAO {
             ${paging}
         `
 
-        const results = await this.database.query(sql, params)
+        const results = await this.core.database.query(sql, params)
 
         if ( results.rows.length <= 0 ) {
             return { dictionary: {}, list: [] }
@@ -207,7 +202,7 @@ module.exports = class NotificationsDAO extends DAO {
     }
 
     async deleteNotification(notification) {
-        await this.database.query(`
+        await this.core.database.query(`
             DELETE FROM notifications WHERE id = $1
         `, [ notification.id ] )
     }

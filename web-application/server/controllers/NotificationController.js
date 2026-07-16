@@ -18,6 +18,7 @@
  *
  ******************************************************************************/
 const { NotificationDAO, PermissionService, ValidationService } = require('@communities/backend')
+const { schema } = require('@communities/shared')
 
 const ControllerError = require('../errors/ControllerError')
 
@@ -30,6 +31,8 @@ module.exports = class NotificationController {
 
         this.permissionService = new PermissionService(core)
         this.validationService = new ValidationService(core)
+
+        this.notificationSchema = new schema.NotificationSchema()
     }
 
     /**
@@ -79,9 +82,11 @@ module.exports = class NotificationController {
 
         let notifications = []
         if ( ! Array.isArray(request.body) ) {
-            notifications.push(request.body)
+            notifications.push(this.notificationSchema.clean(request.body))
         } else {
-            notifications = request.body
+            for(const notification of request.body) {
+                notifications.push(this.notificationSchema.clean(notification))
+            }
         }
 
         const notificationIds = notifications.map((n) => n.id)
@@ -91,6 +96,12 @@ module.exports = class NotificationController {
         })
 
         for(const notification of notifications) {
+            if ( ! ( notification.id in existing.dictionary ) ) {
+                throw new ControllerError(404, 'not-found',
+                    `Attempt to update Notification(${notification.id}) failed because notification was not found.`,
+                    `Notification(${notification.id}) not found. Either that notification doesn't exist or you don't have permissions to update it.`)
+            }
+
             const canUpdateNotification = await this.permissionService.can(currentUser, 'update', 'Notification', { notification: existing.dictionary[notification.id] })
             if ( canUpdateNotification !== true ) {
                 throw new ControllerError(403, 'not-authorized',
@@ -143,8 +154,8 @@ module.exports = class NotificationController {
                 `You must be authenticated to update notifications.`)
         }
 
-        const id = request.params.id
-        const notification = request.body
+        const id = this.notificationSchema.properties.id.clean(request.params.id)
+        const notification = this.notificationSchema.clean(request.body)
 
         if ( notification.id !== id ) {
             throw new ControllerError(400, 'invalid',

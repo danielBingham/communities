@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -20,6 +20,8 @@
 
 const { util, schema } = require('@communities/shared')
 
+const FileService = require('../FileService')
+
 const ServiceError = require('../../errors/ServiceError')
 
 module.exports = class GroupValidation {
@@ -27,6 +29,8 @@ module.exports = class GroupValidation {
     constructor(core, validationService) {
         this.core = core
         this.validationService = validationService
+
+        this.fileService = new FileService(core)
 
         this.groupSchema = new schema.GroupSchema()
     }
@@ -54,16 +58,44 @@ module.exports = class GroupValidation {
             // fileId may be null.
             if ( group.fileId !== null ) {
                 const fileResults = await this.core.database.query(`
-                    SELECT id FROM files WHERE id = $1
+                    SELECT id, user_id FROM files WHERE id = $1
                 `, [ group.fileId ])
 
                 if ( fileResults.rows.length <= 0 ) {
                     errors.push({
                         type: 'fileId:not-found',
                         log: `Did not file File(${group.fileId}).`,
-                        message: `Unable to find a File for that fileId.`
+                        message: `The file you attached is missing.`
                     })
                 }
+
+                // We only want to check for ownership and usage if we know the
+                // file exists.
+                else {
+                    // Ensure the user owns the file they are attaching.
+                    if ( fileResults.rows[0].user_id !== currentUser.id ) {
+                        errors.push({
+                            type: 'files:not-authorized',
+                            log: `User attempting to attach files they do not own to their group.`,
+                            message: `You may only attach files you have uploaded.`
+                        })
+                    }
+
+                    // We only want to check usage if we know the user owns the
+                    // file.
+                    else {
+
+                        const inUse = await this.fileService.isFileInUse(group.fileId)
+                        if ( inUse !== false ) {
+                            errors.push({
+                                type: 'files:conflict',
+                                log: `User attempting to attach file to group, but file is in use.`,
+                                message: `You may not attach files that are already in use.`
+                            })
+                        }
+                    }
+                }
+
             }
         }
 

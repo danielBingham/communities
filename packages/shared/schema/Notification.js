@@ -62,7 +62,7 @@ module.exports = class NotificationSchema extends Schema {
             description: {
                 clean: (value) => { return stringCleaner(value) },
                 validate: (value, existing, action) => {
-                    const validator = new StringValidator('', value, existing, action)
+                    const validator = new StringValidator('description', value, existing, action)
                     const errors = validator
                         .mustNotBeSet()
                         .getErrors()

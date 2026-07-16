@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -55,7 +55,7 @@ module.exports = class FeatureController {
          * 1. User is an admin => give them the full list.
          * 2. User is not an admin (or not logged in) => give them the list of
          * enabled features.
-         * 
+         *
          * ********************************************************************/
 
         // 1. User is an admin => give them the full list.
@@ -76,7 +76,7 @@ module.exports = class FeatureController {
                     results.dictionary[name].status = 'cleaned'
                 }
             }
-        } 
+        }
 
         //  2. User is not an admin (or not logged in) => give them the list of
         // enabled features.
@@ -112,7 +112,7 @@ module.exports = class FeatureController {
          * 3. Request body must contain a feature :name.
          * 4. Feature(:name) must exist in FeatureService.
          * 5. Feature(:name) must not already be in the database.
-         * 
+         *
          * ********************************************************************/
 
         // 1. User must be logged in.
@@ -159,7 +159,7 @@ module.exports = class FeatureController {
         const { dictionary } = await this.featureDAO.selectFeatures(`WHERE name = $1`, [ name ])
 
         if ( ! dictionary[name] ) {
-            throw new ControllerError(500, 'server-error'
+            throw new ControllerError(500, 'server-error',
                 `Can't find Feature(${name}) after insertion.`)
         }
 
@@ -182,7 +182,7 @@ module.exports = class FeatureController {
          * 1. Feature(:name) is enabled => anyone may read it.
          * 2. Feature(:name) is not enabled => only admins and superadmins may
          * read it.
-         * 
+         *
          * ********************************************************************/
 
         const name = request.params.name
@@ -239,7 +239,7 @@ module.exports = class FeatureController {
          * 6. Request body must contain a `status` parameter.
          * 7. `status` must be a valid feature status.
          * 8. `status` may not be an in-progress status.
-         * 
+         *
          * ********************************************************************/
 
         // 1. User must be logged in.
@@ -286,15 +286,15 @@ module.exports = class FeatureController {
         }
 
         const validStatuses = [
-            'created', 
+            'created',
             'initializing',
-            'initialized', 
-            'migrating', 
-            'migrated', 
+            'initialized',
+            'migrating',
+            'migrated',
             'enabled',
             'disabled',
-            'rolling-back', 
-            'rolled-back', 
+            'rolling-back',
+            'rolled-back',
             'uninitializing',
             'uninitialized'
         ]
@@ -306,13 +306,13 @@ module.exports = class FeatureController {
         }
 
         // 8. `status` may not be an in-progress status.
-        if ( feature.status == 'migrating' || feature.status == 'rolling-back' 
-            || feature.status == 'initializing' || feature.status == 'uninitializing' ) 
+        if ( feature.status == 'migrating' || feature.status == 'rolling-back'
+            || feature.status == 'initializing' || feature.status == 'uninitializing' )
         {
             throw new ControllerError(400, 'in-progress',
                 `Attempt to change status of Feature(${request.params.id}) which is currently ${feature.status}.`)
         }
-        
+
         /**********************************************************************
          * Basic Permissions and Validation Complete.
          **********************************************************************/
@@ -335,7 +335,7 @@ module.exports = class FeatureController {
         else if ( feature.status == 'initialized') {
             if ( status == 'migrated' ) {
                 await this.featureService.migrate(feature.name)
-            } 
+            }
 
             else if ( status == 'enabled' ) {
                 await this.featureService.migrate(feature.name)
@@ -352,7 +352,7 @@ module.exports = class FeatureController {
             }
         }
 
-        else if ( feature.status == 'migrated' ) { 
+        else if ( feature.status == 'migrated' ) {
             if ( status == 'enabled' ) {
                 await this.featureService.enable(feature.name)
             }

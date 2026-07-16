@@ -28,6 +28,7 @@ const GroupDAO = require('../daos/GroupDAO')
 const GroupMemberDAO = require('../daos/GroupMemberDAO')
 const PostDAO = require('../daos/PostDAO')
 
+const FileService = require('./FileService')
 const PermissionService = require('./PermissionService')
 
 const BlocklistValidation = require('./validation/BlocklistValidation')
@@ -52,6 +53,7 @@ module.exports = class ValidationService {
         this.groupMemberDAO = new GroupMemberDAO(core)
         this.postDAO = new PostDAO(core)
 
+        this.fileService = new FileService(core)
         this.permissionService = new PermissionService(core)
 
         this.blocklist = new BlocklistValidation(core, this)
@@ -577,32 +579,32 @@ module.exports = class ValidationService {
                             message: `The file you attached as your profile is missing.`
                         })
                     }
-                    // We only want to check for ownership and usage if we know all
-                    // the files exist.
+                    // We only want to check for ownership and usage if we know
+                    // the file exists.
                     else {
-                        // Ensure the user owns the files they are attaching.
+                        // Ensure the user owns the file they are attaching.
                         if ( fileResults.rows[0].user_id !== user.id ) {
                             errors.push({
                                 type: 'files:not-authorized',
-                                log: `User attempting to attach files they do not own to their post.`,
+                                log: `User attempting to attach files they do not own to their profile.`,
                                 message: `You may only attach files you have uploaded.`
                             })
                         }
 
-                        // We only want to check usage if we know the user owns all
-                        // the files.
+                        // We only want to check usage if we know the user owns
+                        // the file.
                         else {
 
                             const inUse = await this.fileService.isFileInUse(user.fileId)
-                            if ( inUse === true ) {
+                            if ( inUse !== false ) {
                                 errors.push({
                                     type: 'files:conflict',
-                                    log: `User attempting to attach file to post, but file is in use.`,
+                                    log: `User attempting to attach file to profile, but file is in use.`,
                                     message: `You may not attach files that are already in use.`
                                 })
                             }
                         }
-
+                    }
                 }
             }
         }
