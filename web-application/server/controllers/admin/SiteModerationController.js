@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -18,7 +18,7 @@
  *
  ******************************************************************************/
 
-const { 
+const {
     ValidationService,
     PermissionService,
     NotificationService,
@@ -26,7 +26,7 @@ const {
     GroupDAO,
     PostDAO,
     PostCommentDAO,
-    SiteModerationDAO, 
+    SiteModerationDAO,
     SiteModerationEventDAO,
     UserDAO
 }  = require('@communities/backend')
@@ -79,7 +79,7 @@ module.exports = class SiteModerationController {
             posts: postResults.dictionary,
             postComments: postCommentResults.dictionary,
             users: userResults.dictionary
-        } 
+        }
     }
 
     async createQuery(request) {
@@ -131,7 +131,7 @@ module.exports = class SiteModerationController {
         const meta = await this.siteModerationDAO.getSiteModerationPageMeta(query)
         const relations = await this.getRelations(currentUser, results, query.relations)
 
-        response.status(200).json({ 
+        response.status(200).json({
             dictionary: results.dictionary,
             list: results.list,
             meta: meta,
@@ -149,6 +149,12 @@ module.exports = class SiteModerationController {
         }
 
         const moderation = this.siteModerationSchema.clean(request.body)
+
+        if ( moderation.userId !== currentUser.id ) {
+            throw new ControllerError(403, 'not-authorized',
+                `User(${currentUser.id}) attempting to flag as User(${moderation.userId}).`,
+                `You may not flag on behalf of another user.`)
+        }
 
         if ( moderation.status !== 'flagged' ) {
             throw new ControllerError(403, 'not-authorized',
@@ -267,7 +273,7 @@ module.exports = class SiteModerationController {
         }
 
         const siteModeration = results.dictionary[siteModerationId]
-       
+
         const relations = await this.getRelations(currentUser, results)
 
         response.status(200).json({
@@ -296,9 +302,15 @@ module.exports = class SiteModerationController {
         const siteModeration = this.siteModerationSchema.clean(request.body)
 
         if ( siteModeration.id !== siteModerationId ) {
-            throw new ControllerError(400, 'invalid', 
+            throw new ControllerError(400, 'invalid',
                 `User(${currentUser.id}) submitted a SiteModeration patch with the wrong id.`,
                 `You used a different SiteModeration.id in your patch and your route.  Ids must match.`)
+        }
+
+        if ( siteModeration.userId !== currentUser.id ) {
+            throw new ControllerError(403, 'not-authorized',
+                `User(${currentUser.id}) attempting to update SiteModeration as User(${siteModeration.userId}).`,
+                `You may only update a SiteModeration as yourself.`)
         }
 
         const existing = await this.siteModerationDAO.getSiteModerationById(siteModerationId)
@@ -354,7 +366,7 @@ module.exports = class SiteModerationController {
             // now, we're just removing groups and profiles that violate the
             // terms of service. In theory we should notify users or group
             // admins of the removed profiles here, but the current moderation
-            // system really needs an overhaul for that to make sense. 
+            // system really needs an overhaul for that to make sense.
         }
 
         // Insert the event to track the moderation history.

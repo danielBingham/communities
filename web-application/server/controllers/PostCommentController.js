@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -20,17 +20,17 @@
 
 const Uuid = require('uuid')
 
-const { 
-    NotificationService, 
-    PermissionService, 
+const {
+    NotificationService,
+    PermissionService,
     ValidationService,
 
     GroupSubscriptionDAO,
-    PostDAO, 
-    PostCommentDAO, 
+    PostDAO,
+    PostCommentDAO,
     PostSubscriptionDAO,
     SiteModerationDAO,
-    UserRelationshipDAO 
+    UserRelationshipDAO
 
 } = require('@communities/backend')
 
@@ -194,7 +194,7 @@ module.exports = class PostCommentController {
         let activity = parseInt(post.activity)
         if ( reactionResults.rows.length <= 0 || reactionResults.rows[0].reaction != 'block') {
             activity += 1
-        } 
+        }
 
         const postPatch = {
             id: postId,
@@ -214,7 +214,7 @@ module.exports = class PostCommentController {
                 `PostComment(${comment.id}) missing after update.`,
                 `PostComment(${comment.id}) missing after being updated.  Please report as a bug.`)
         }
-    
+
         // Subscribe the user if they aren't already subscribed.
         // Don't subscribe post authors to their own posts.
         // Authors already get notified of comments on their posts.
@@ -255,7 +255,7 @@ module.exports = class PostCommentController {
 
 
         await this.notificationService.sendNotifications(
-            currentUser, 
+            currentUser,
             'PostComment:create',
             {
                 post: relations.posts[postId],
@@ -266,7 +266,7 @@ module.exports = class PostCommentController {
 
         response.status(201).json({
             entity: entity,
-            relations: relations 
+            relations: relations
         })
     }
 
@@ -274,7 +274,7 @@ module.exports = class PostCommentController {
         const currentUser = request.session.user
         const postId = request.params.postId
         const id = request.params.id
- 
+
         if ( ! currentUser ) {
             throw new ControllerError(401, 'not-authenticated',
                 `User must be authenticated to GET a comment.`,
@@ -316,7 +316,7 @@ module.exports = class PostCommentController {
         const relations = await this.getRelations(currentUser, results)
         response.status(200).json({
             entity: results.dictionary[id],
-            relations: relations 
+            relations: relations
         })
     }
 
@@ -325,7 +325,7 @@ module.exports = class PostCommentController {
         const postId = request.params.postId
         const commentId = request.params.id
         const comment = request.body
- 
+
         if ( ! currentUser ) {
             throw new ControllerError(401, 'not-authenticated',
                 `User must be authenticated to post a comment.`,
@@ -406,7 +406,7 @@ module.exports = class PostCommentController {
         const currentUser = request.session.user
         const postId = request.params.postId
         const commentId = request.params.id
- 
+
         if ( ! currentUser ) {
             throw new ControllerError(401, 'not-authenticated',
                 `User must be authenticated to delete a comment.`,
@@ -455,7 +455,7 @@ module.exports = class PostCommentController {
         }
 
         // ============= Update the Post Activity ======================
-        
+
         const reactionResults = await this.core.database.query(`
             SELECT reaction FROM post_reactions WHERE post_reactions.post_id = $1 AND post_reactions.user_id = $2
         `, [ postId, currentUser.id])
@@ -463,7 +463,7 @@ module.exports = class PostCommentController {
         let activity = parseInt(post.activity)
         if ( reactionResults.rows.length <= 0 || reactionResults.rows[0].reaction != 'block') {
             activity -= 1
-        } 
+        }
 
         const postPatch = {
             id: postId,
@@ -473,13 +473,13 @@ module.exports = class PostCommentController {
         await this.postDAO.updatePost(postPatch)
 
         // Just update our existing dictionary rather than requerying.
-        postResult.dictionary[postId].activity -= 1 
+        postResult.dictionary[postId].activity -= 1
 
         // =============== Get the Post to return it to the frontend ============
 
         if ( post.groupId !== null && currentUser.id !== comment.userId ) {
             await this.notificationService.sendNotifications(
-                currentUser, 
+                currentUser,
                 'Group:post:comment:deleted',
                 {
                     post: post,
@@ -492,7 +492,7 @@ module.exports = class PostCommentController {
         response.status(200).json({
             entity: {},
             relations: {
-                posts:postResult.dictionary 
+                posts:postResult.dictionary
             }
         })
 

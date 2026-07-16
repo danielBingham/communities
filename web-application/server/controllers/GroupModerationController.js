@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -18,11 +18,11 @@
  *
  ******************************************************************************/
 
-const { 
+const {
     ValidationService,
     PermissionService,
     NotificationService,
-    GroupModerationDAO, 
+    GroupModerationDAO,
     GroupModerationEventDAO,
     PostDAO,
     PostCommentDAO,
@@ -78,7 +78,7 @@ module.exports = class GroupModerationController extends BaseController {
             posts: postResults.dictionary,
             postComments: postCommentResults.dictionary,
             users: userResults.dictionary
-        } 
+        }
     }
 
     async createQuery(groupId, request) {
@@ -91,7 +91,7 @@ module.exports = class GroupModerationController extends BaseController {
         }
 
         const ignorePostResults = await this.core.database.query(`
-            SELECT group_moderation.id 
+            SELECT group_moderation.id
                 FROM group_moderation
                     JOIN site_moderation ON group_moderation.post_id = site_moderation.post_id
                 WHERE group_moderation.group_id = $1 AND site_moderation.status = 'rejected' AND site_moderation.post_comment_id IS NULL
@@ -195,7 +195,7 @@ module.exports = class GroupModerationController extends BaseController {
         const meta = await this.groupModerationDAO.getGroupModerationPageMeta(query)
         const relations = await this.getRelations(currentUser, results, query.relations)
 
-        response.status(200).json({ 
+        response.status(200).json({
             dictionary: results.dictionary,
             list: results.list,
             meta: meta,
@@ -243,6 +243,14 @@ module.exports = class GroupModerationController extends BaseController {
                 type: 'groupId:invalid',
                 log: `groupId in the route must match groupId in the body.`,
                 message: `groupId in the route must match groupId in the body.`
+            })
+        }
+
+        if ( groupModeration.userId !== currentUser.id ) {
+            return this.sendUserErrors(response, 403, {
+                type: 'not-authorized',
+                log: `User(${currentUser.id}) attempting to flag a post as User(${groupModeration.userId}).`,
+                message: `You may only flag posts as yourself.`
             })
         }
 
@@ -380,7 +388,7 @@ module.exports = class GroupModerationController extends BaseController {
                 message: `That doesn't exist or you don't have permission to see it.`
             })
         }
-       
+
         const relations = await this.getRelations(currentUser, results)
 
         response.status(200).json({
@@ -453,6 +461,14 @@ module.exports = class GroupModerationController extends BaseController {
                 type: 'invalid',
                 log: `User(${currentUser.id}) submitted a GroupModeration patch with the wrong id.`,
                 message: `You used a different GroupModeration.id in your patch and your route.  Ids must match.`
+            })
+        }
+
+        if ( groupModeration.userId !== currentUser.id ) {
+            return this.sendUserErrors(response, 403, {
+                type: 'not-authorized',
+                log: `User(${currentUser.id}) attempting to submit a GroupModeration patch as User(${groupModeration.userId}).`,
+                message: `You may only moderate as yourself.`
             })
         }
 

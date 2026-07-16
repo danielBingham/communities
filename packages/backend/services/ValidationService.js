@@ -597,16 +597,16 @@ module.exports = class ValidationService {
 
                             const usage = await this.fileService.getUsageByFileId(user.fileId)
                             if ( usage !== null ) {
-                                // If this is a new group and the file is in use, then conflict.
+                                // If this is a new user and the file is in use, then conflict.
                                 if ( existing === null || existing === undefined ) {
                                     errors.push({
                                         type: 'files:conflict',
-                                        log: `User attempting to attach file to group, but file is in use.`,
+                                        log: `User attempting to attach file to profile, but file is in use.`,
                                         message: `You may not attach files that are already in use.`
                                     })
                                 }
-                                // If this is not a new group, then the usage must
-                                // be for this group (and only this group).
+                                // If this is not a new user, then the usage must
+                                // be for this user (and only this user).
                                 else if ( usage.userId !== existing.id
                                     || usage.postId !== null
                                     || usage.groupId !== null
@@ -614,7 +614,7 @@ module.exports = class ValidationService {
                                 ) {
                                     errors.push({
                                         type: 'files:conflict',
-                                        log: `User attempting to attach file to group, but file is in use.`,
+                                        log: `User attempting to attach file to profile, but file is in use.`,
                                         message: `You may not attach files that are already in use.`
                                     })
                                 }

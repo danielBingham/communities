@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -35,7 +35,7 @@ module.exports = class GroupModerationValidation {
         const errors = []
 
         if ( existing !== undefined && existing !== null && existing.id !== groupModeration.id ) {
-            throw new ServiceError('entity-mismatch', 
+            throw new ServiceError('entity-mismatch',
                 `Existing GroupModeration(${existing.id}) does not match GroupModeration(${groupModeration.id}).`)
         }
 
@@ -82,6 +82,14 @@ module.exports = class GroupModerationValidation {
                     message: `User not found for that userId.`
                 })
             }
+
+            if ( groupModeration.userId !== currentUser.id ) {
+                errors.push({
+                    type: `not-authorized`,
+                    log: `User(${currentUser.id}) attempting to moderate group as User(${groupModeration.userId}).`,
+                    message: `You may only moderate as yourself.`
+                })
+            }
         }
 
         if ( util.objectHas(groupModeration, 'groupId') && groupModeration.groupId !== null ) {
@@ -114,7 +122,7 @@ module.exports = class GroupModerationValidation {
 
         if ( util.objectHas(groupModeration, 'postCommentId') && groupModeration.postCommentId !== null ) {
             const postCommentResults = await this.core.database.query(
-                `SELECT id FROM post_comments WHERE id = $1`, 
+                `SELECT id FROM post_comments WHERE id = $1`,
                 [ groupModeration.postCommentId ]
             )
             if ( postCommentResults.rows.length <= 0 || postCommentResults.rows[0].id !== groupModeration.postCommentId) {
