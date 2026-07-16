@@ -98,7 +98,7 @@ module.exports = class FileService {
         // Ensure the files they are attaching are not in use already.
         const usageResults = await this.core.database.query(`
             SELECT
-                post_files.id as "postId", users.id as "userId", groups.id as "groupId", link_previews.id as "linkPreviewId"
+                post_files.post_id as "postId", users.id as "userId", groups.id as "groupId", link_previews.id as "linkPreviewId"
             FROM files
                 LEFT OUTER JOIN post_files ON files.id = post_files.file_id
                 LEFT OUTER JOIN users ON files.id = users.file_id
@@ -106,7 +106,7 @@ module.exports = class FileService {
                 LEFT OUTER JOIN link_previews ON files.id = link_previews.file_id
             WHERE
                 files.id = ANY($1::uuid[]) AND (
-                    post_files.id IS NOT NULL
+                    post_files.post_id IS NOT NULL
                     OR users.id IS NOT NULL
                     OR groups.id IS NOT NULL
                     OR link_previews.id IS NOT NULL
@@ -118,6 +118,48 @@ module.exports = class FileService {
         }
 
         return true
+    }
+
+    async getUsageByFileId(fileId) {
+        const usageDictionary = await this.getUsageByFileIds([ fileId ])
+
+        if ( ! ( fileId in usageDictionary ) ) {
+            return null
+        }
+
+        return usageDictionary[fileId]
+    }
+
+    async getUsageByFileIds(fileIds) {
+        const usageDictionary = {}
+
+        // Ensure the files they are attaching are not in use already.
+        const usageResults = await this.core.database.query(`
+            SELECT
+                files.id,
+                post_files.post_id as "postId",
+                users.id as "userId",
+                groups.id as "groupId",
+                link_previews.id as "linkPreviewId"
+            FROM files
+                LEFT OUTER JOIN post_files ON files.id = post_files.file_id
+                LEFT OUTER JOIN users ON files.id = users.file_id
+                LEFT OUTER JOIN groups ON files.id = groups.file_id
+                LEFT OUTER JOIN link_previews ON files.id = link_previews.file_id
+            WHERE
+                files.id = ANY($1::uuid[]) AND (
+                    post_files.post_id IS NOT NULL
+                    OR users.id IS NOT NULL
+                    OR groups.id IS NOT NULL
+                    OR link_previews.id IS NOT NULL
+                )
+        `, [ fileIds ])
+
+        for(const row of usageResults.rows) {
+            usageDictionary[row.id] = row
+        }
+
+        return usageDictionary
     }
 
     async deleteFileById(fileId) {

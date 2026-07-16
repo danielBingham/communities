@@ -89,7 +89,20 @@ module.exports = class NotificationController {
             }
         }
 
-        const notificationIds = notifications.map((n) => n.id)
+        // Collect and validate the ids so that we can pull the existing
+        // notification.
+        const notificationIds = []
+        for(const notification of notifications) {
+            const idValidationErrors = this.notificationSchema.properties.id.validate(notification.id)
+            if ( idValidationErrors.length > 0 ) {
+                throw new ControllerError(400, 'invalid',
+                    `Attempt to update a Notification with an invalid id.`,
+                    `You cannot update a Notification with an invalid id.`)
+            }
+
+            notificationIds.push(notification.id)
+        }
+
         const existing = await this.notificationDAO.selectNotifications({
             where: `notifications.id = ANY($1::uuid[])`,
             params: [ notificationIds ]
@@ -156,6 +169,13 @@ module.exports = class NotificationController {
 
         const id = this.notificationSchema.properties.id.clean(request.params.id)
         const notification = this.notificationSchema.clean(request.body)
+
+        const idValidationErrors = this.notificationSchema.properties.id.validate(id)
+        if ( idValidationErrors.length > 0 ) {
+            throw new ControllerError(400, 'invalid',
+                `Attempt to update Notification with invalid id.`,
+                `Cannot update a notification with an invalid Notification.id.`)
+        }
 
         if ( notification.id !== id ) {
             throw new ControllerError(400, 'invalid',

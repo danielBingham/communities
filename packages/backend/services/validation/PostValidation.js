@@ -122,14 +122,45 @@ module.exports = class PostValidation {
                     // the files.
                     else {
 
+                        // The usage case is complicated. If this is an edit,
+                        // some of the files may be in use, but they must be in
+                        // use *on this post*.  We need to check each fileId in
+                        // the `files` array against its usage. It needs to
+                        // either not be in use or in use by this post already.
 
-                        const inUse = await this.fileService.areFilesInUse(post.files)
-                        if ( inUse !== false ) {
-                            errors.push({
-                                type: 'files:conflict',
-                                log: `User attempting to attach file to post, but file is in use.`,
-                                message: `You may not attach files that are already in use.`
-                            })
+                        const usage = await this.fileService.getUsageByFileIds(post.files)
+                        for( const fileId of post.files ) {
+                            // An unused file always passes.
+                            if ( ! ( fileId in usage) ) {
+                                continue
+                            }
+
+                            // An in use file for a new post always fails.
+                            if ( fileId in usage && ( existing === null || existing === undefined) ) {
+                                errors.push({
+                                    type: 'files:conflict',
+                                    log: `User attempting to attach file to post, but file is in use.`,
+                                    message: `You may not attach files that are already in use.`
+                                })
+                                continue
+                            }
+
+                            // A file in use by the existing post passes.
+                            if ( fileId in usage && existing.id === usage[fileId].postId
+                                && usage[fileId].userId === null
+                                && usage[fileId].groupId === null
+                                && usage[fileId].linkPreviewId === null
+                            ) {
+                                continue
+                            }
+                            // Any other usage fails.
+                            else {
+                                errors.push({
+                                    type: 'files:conflict',
+                                    log: `User attempting to attach file to post, but file is in use.`,
+                                    message: `You may not attach files that are already in use.`
+                                })
+                            }
                         }
                     }
                 }
