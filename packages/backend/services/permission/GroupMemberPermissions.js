@@ -167,7 +167,7 @@ module.exports = class GroupMemberPermissions {
     }
 
     async canQueryGroupMember(user, context) {
-        await this.ensureContext(user, context, [ 'group' ], [ 'userMember' ])
+        await this.ensureContext(user, context, [ 'group' ], [ 'userMember', 'parentMember' ])
 
         if ( ! util.objectHas(context, 'canModerateSite') ) {
             // Site moderators can always view group content.

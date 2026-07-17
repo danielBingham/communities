@@ -76,7 +76,7 @@ const validate = function(postComment) {
         content: validateContent,
         groupModerationId: validateGroupModerationId,
         siteModerationId: validateSiteModerationId,
-        createDate: validateCreatedDate,
+        createdDate: validateCreatedDate,
         updatedDate: validateUpdatedDate
     }
 

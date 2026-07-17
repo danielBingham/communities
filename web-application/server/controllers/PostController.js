@@ -282,24 +282,26 @@ module.exports = class PostController {
             // Open: As long as you aren't banned, you can see posts.
             // Private: Must be a group member.
             // Hidden: Must be a group member.
-            // Private-open: Must be parent group member and not banned or non-banned group member.
-            // Hidden-open: Must be a parent group member and not banned or non-banned group member.
+            // Private-open: Must be parent group member and not banned or a group member.
+            // Hidden-open: Must be a parent group member and not banned or a group member.
             // Hidden-private: Must be a group member.
+            //
+            // NOTE: IS DISTINCT FROM returns "true" for NULL values.
             const visibleGroupResults = await this.core.database.query(`
                     SELECT groups.id FROM groups
                         LEFT OUTER JOIN group_members ON groups.id = group_members.group_id AND group_members.user_id = $1
                         LEFT OUTER JOIN group_members as parent_members ON groups.parent_id = parent_members.group_id AND parent_members.user_id = $1
                     WHERE
                         (groups.type = 'open'
-                            AND (group_members.user_id IS NULL OR group_members.status != 'banned'))
+                            AND (group_members.status IS DISTINCT FROM 'banned'))
                         OR ( groups.type = 'private'
                             AND ( group_members.status = 'member' ))
                         OR ( groups.type = 'private-open'
-                            AND (group_members.status != 'banned' OR  (group_members.user_id IS NULL AND parent_members.status = 'member')))
+                            AND (group_members.status = 'member' OR  (group_members.status IS DISTINCT FROM 'banned' AND parent_members.status = 'member')))
                         OR ( groups.type = 'hidden'
                             AND group_members.status = 'member' )
                         OR ( groups.type = 'hidden-open'
-                            AND ( group_members.status != 'banned' OR ( group_members.user_id IS NULL AND parent_members.status = 'member' )))
+                            AND ( group_members.status = 'member' OR ( group_members.status IS DISTINCT FROM 'banned' AND parent_members.status = 'member' )))
                         OR ( groups.type = 'hidden-private'
                             AND group_members.status = 'member' )
                 `, [currentUser.id])

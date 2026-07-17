@@ -481,7 +481,7 @@ module.exports = class UserController extends BaseController{
 
             const canQueryGroupMembers = await this.permissionService.can(currentUser, 'query', 'GroupMember', { groupId: groupId })
             if ( canQueryGroupMembers !== true ) {
-                this.core.logger.warn(`User attempting to query GroupMembers for Group(${query.groupId}) without permission.`)
+                this.core.logger.warn(`User attempting to query GroupMembers for Group(${groupId}) without permission.`)
                 return { emptyResult: true }
             }
 
@@ -499,7 +499,7 @@ module.exports = class UserController extends BaseController{
 
             const canQueryGroupMembers = await this.permissionService.can(currentUser, 'query', 'GroupMember', { groupId: groupId })
             if ( canQueryGroupMembers !== true ) {
-                this.core.logger.warn(`User attempting to query GroupMembers for Group(${query.groupId}) without permission.`)
+                this.core.logger.warn(`User attempting to query GroupMembers for Group(${groupId}) without permission.`)
                 return { emptyResult: true }
             }
 
@@ -697,9 +697,13 @@ module.exports = class UserController extends BaseController{
      */
     async getUser(request, response) {
         const currentUser = request.session.user
-        const userId = request.params.id
+        if ( ! currentUser ) {
+            throw new ControllerError(401, 'not-authenticated',
+                `User attempting to retrieve user without authentication.`,
+                `You must be authenticated to retrieve that resource.`)
+        }
 
-        // TODO TECHDEBT Why do we allow unauthenticated access here?
+        const userId = request.params.id
 
         const canModerateSite = await this.permissionService.can(currentUser, 'moderate', 'Site')
         if ( currentUser && currentUser?.id !== userId && canModerateSite !== true) {
