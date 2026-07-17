@@ -108,7 +108,7 @@ module.exports = class GroupModerationValidation {
 
         if ( util.objectHas(groupModeration, 'postId' ) && groupModeration.postId !== null) {
             const postResults = await this.core.database.query(`
-                SELECT id FROM posts WHERE id = $1
+                SELECT id, group_id FROM posts WHERE id = $1
             `, [ groupModeration.postId ])
 
             if ( postResults.rows.length <= 0 || postResults.rows[0].id !== groupModeration.postId) {
@@ -118,11 +118,19 @@ module.exports = class GroupModerationValidation {
                     message: `Post not found for that postId.`
                 })
             }
+
+            if ( postResults.rows[0].group_id !== groupModeration.groupId) {
+                errors.push({
+                    type: `postId:not-authorized`,
+                    log: `Post(${groupModeration.postId}) does not belong to Group(${groupModeration.groupId}).`,
+                    message: `You may only moderate posts belonging to the group.`
+                })
+            }
         }
 
         if ( util.objectHas(groupModeration, 'postCommentId') && groupModeration.postCommentId !== null ) {
             const postCommentResults = await this.core.database.query(
-                `SELECT id FROM post_comments WHERE id = $1`,
+                `SELECT id, post_id FROM post_comments WHERE id = $1`,
                 [ groupModeration.postCommentId ]
             )
             if ( postCommentResults.rows.length <= 0 || postCommentResults.rows[0].id !== groupModeration.postCommentId) {
@@ -130,6 +138,14 @@ module.exports = class GroupModerationValidation {
                     type: 'postCommentId:not-found',
                     log: `PostComment not found for '${groupModeration.postCommentId}'.`,
                     message: `PostComment not found for '${groupModeration.postCommentId}'.`
+                })
+            }
+
+            if ( postCommentResults.rows[0].post_id !== groupModeration.postId ) {
+                errors.push({
+                    type: 'postCommentId:invalid',
+                    log: `PostComment(${groupModeration.postCommentId}) does not belong to Post(${groupModeration.postId}).`,
+                    message: `The postCommentId must belong to the postId.`
                 })
             }
         }

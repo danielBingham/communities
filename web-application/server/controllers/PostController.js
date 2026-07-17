@@ -319,7 +319,7 @@ module.exports = class PostController {
                         ${ showAnnouncements ? `OR posts.type = 'announcement'` : ''}
                         ${ showInfo ? `OR posts.type = 'info'` : ''}
                         OR (posts.type = 'group' AND posts.group_id = ANY($${groupParam}::uuid[]) AND posts.user_id != ALL($${blockParam}::uuid[]))
-                        OR (posts.visibility = 'public' AND posts.user_id != ALL($${blockParam}::uuid[]))
+                        OR (posts.type = 'feed' AND posts.visibility = 'public' AND posts.user_id != ALL($${blockParam}::uuid[]))
                 )`
         }
 

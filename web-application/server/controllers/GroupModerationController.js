@@ -254,6 +254,15 @@ module.exports = class GroupModerationController extends BaseController {
             })
         }
 
+        const post = await this.postDAO.getPostById(groupModeration.postId)
+        if ( post.groupId !== groupId ) {
+            return this.sendUserErrors(response, 403, {
+                type: 'not-authorized',
+                log: `User(${currentUser.id}) attempting to moderate a post that does not belong to this group.`,
+                message: `You may only moderate posts belonging to this group.`
+            })
+        }
+
         const validationErrors = await this.validationService.validateGroupModeration(currentUser, groupModeration)
         if ( validationErrors.length > 0 ) {
             return this.sendUserErrors(response, 400, validationErrors)
@@ -469,6 +478,39 @@ module.exports = class GroupModerationController extends BaseController {
                 type: 'not-authorized',
                 log: `User(${currentUser.id}) attempting to submit a GroupModeration patch as User(${groupModeration.userId}).`,
                 message: `You may only moderate as yourself.`
+            })
+        }
+
+        if ( existing.groupId !== groupModeration.groupId || existing.groupId !== groupId) {
+            return this.sendUserErrors(response, 403, {
+                type: 'not-authorized',
+                log: `User(${currentUser.id}) attempting to update a GroupModeration's Group.`,
+                message: `You may not change the group.`
+            })
+        }
+
+        if ( existing.postId !== groupModeration.postId ) {
+            return this.sendUserErrors(response, 403, {
+                type: 'not-authorized',
+                log: `User(${currentUser.id}) attempting to update a GroupModeration's Post.`,
+                message: `You may not change the post.`
+            })
+        }
+
+        if ( existing.postCommentId !== groupModeration.postCommentId ) {
+            return this.sendUserErrors(response, 403, {
+                type: 'not-authorized',
+                log: `User(${currentUser.id}) attempting to update a GroupModeration's PostComment.`,
+                message: `You may not change the post comment.`
+            })
+        }
+
+        const post = await this.postDAO.getPostById(groupModeration.postId)
+        if ( post.groupId !== groupId ) {
+            return this.sendUserErrors(response, 403, {
+                type: 'not-authorized',
+                log: `User(${currentUser.id}) attempting to moderate a post that does not belong to this group.`,
+                message: `You may only moderate posts belonging to this group.`
             })
         }
 
