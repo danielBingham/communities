@@ -105,7 +105,7 @@ const canViewGroupMember = function(user, context) {
     if ( context.group.type === 'hidden-open' ) {
         if ( 'parentMember' in context && context.parentMember !== undefined && context.parentMember !== null
             && context.parentMember.userId === user.id && context.parentMember.groupId === context.group.parentId
-            && context.parentMember.status !== 'banned'
+            && context.parentMember.status === 'member'
             && context.groupMember.groupId === context.group.id && context.groupMember.status === 'member'
         ) {
             return true
