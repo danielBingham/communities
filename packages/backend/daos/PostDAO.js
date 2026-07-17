@@ -249,7 +249,6 @@ module.exports = class PostDAO extends DAO {
     }
 
     async selectPosts(query) {
-        let withQueries = query.with && Array.isArray(query.with) && query.with.length > 0 ? `WITH ${query.with.join(',')}` : ''
         let where = query.where ? `WHERE ${query.where}` : ''
         let params = query.params && Array.isArray(query.params) ? [ ...query.params ] : []
         let page = query.page
@@ -266,7 +265,6 @@ module.exports = class PostDAO extends DAO {
         }
 
         const sql = `
-            ${withQueries}
             SELECT
                 ${this.getPostSelectionString()},
                 post_comments.id as "PostComment_id",
