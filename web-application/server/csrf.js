@@ -17,6 +17,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
+const crypto = require('node:crypto')
 
 const createCSRFMiddleware = function(core) {
     return function(request, response, next) {
@@ -42,7 +43,10 @@ const createCSRFMiddleware = function(core) {
 
         const csrfToken = request.get('X-Communities-CSRF-Token')
 
-        if ( csrfToken !== request.session.csrfToken ) {
+        const theirTokenBuffer = Buffer.from(csrfToken, 'base64url')
+        const ourTokenBuffer = Buffer.from(request.session.csrfToken, 'base64url')
+
+        if ( ! crypto.timingSafeEqual(theirTokenBuffer, ourTokenBuffer) ) {
             request.logger.warn(`
                 Request arrived with an invalid CSRF Token.  Possible forged request.
                     Submitted token: ${csrfToken}

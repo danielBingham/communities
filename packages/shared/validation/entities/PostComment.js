@@ -1,4 +1,4 @@
-const { UUIDValidator, StringValidator } = require('../types')
+const { UUIDValidator, StringValidator, DateValidator } = require('../types')
 const { validateEntity } = require('../validate')
 
 const validateUserId = function(userId) {
