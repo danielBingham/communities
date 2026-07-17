@@ -225,13 +225,4 @@ module.exports = class GroupPermissions {
         return permissions.Group.canAdminGroup(user, context)
     }
 
-    async canViewGroupContent(user, context) {
-        await this.ensureContext(user, context, [ 'group' ], [ 'userMember', 'parentGroup', 'parentMember' ])
-
-        // Site moderators can always view group content.
-        context.canModerateSite = await this.permissionService.can(user, 'moderate', 'Site')
-
-        return permissions.Group.canViewGroupContent(user, context)
-    }
-
 }

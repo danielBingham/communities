@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -34,15 +34,15 @@ module.exports = class PostCommentValidation {
         const errors = []
 
         if ( existing !== undefined && existing !== null && existing.id !== postComment.id ) {
-            throw new ServiceError('entity-mismatch', 
+            throw new ServiceError('entity-mismatch',
                 `Existing PostComment(${existing.id}) does not match PostComment(${postComment.id}).`)
         }
 
         // ================== Always Disallowed ===============================
-        // There are some fields the user is never allowed to set.  Check those 
+        // There are some fields the user is never allowed to set.  Check those
         // fields first and return if any of them are set.
 
-        const alwaysDisallowedFields = [ 'createdDate', 'updatedDate' ]
+        const alwaysDisallowedFields = [ 'groupModerationId', 'siteModerationId', 'createdDate', 'updatedDate' ]
 
         for(const disallowedField of alwaysDisallowedFields ) {
             if ( util.objectHas(postComment, disallowedField) ) {
@@ -74,14 +74,14 @@ module.exports = class PostCommentValidation {
                     })
                 }
             }
-        } 
+        }
 
         // We're editing a comment.
         else {
             const disallowedFields = [ 'userId', 'postId' ]
             for(const disallowedField of disallowedFields ) {
-                if ( util.objectHas(postComment, disallowedField) 
-                    && postComment[disallowedField] !== existing[disallowedField] ) 
+                if ( util.objectHas(postComment, disallowedField)
+                    && postComment[disallowedField] !== existing[disallowedField] )
                 {
                     errors.push({
                         type: `${disallowedField}:not-allowed`,

@@ -197,7 +197,6 @@ module.exports = class GroupModerationEventDAO extends DAO {
         let where = query.where ? `WHERE ${query.where}` : ''
         let params = query.params ? [ ...query.params ] : []
         let page = query.page ? query.page : 1
-        const fields = query.fields ? query.fields : []
 
         const results = await this.core.database.query(`
                 SELECT

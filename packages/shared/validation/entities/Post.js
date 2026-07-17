@@ -31,7 +31,7 @@ const validateGroupId = function(groupId, existing, action) {
 }
 
 const validateType = function(value, existing, action) {
-    const validator = new StringValidator('type', value, existing, action) 
+    const validator = new StringValidator('type', value, existing, action)
     const errors = validator
         .isRequiredToCreate()
         .mustNotBeUpdated()
@@ -82,6 +82,7 @@ const validateLinkPreviewId = function(value, existing, action) {
 const validateSharedPostId = function(value, existing, action) {
     const validator = new UUIDValidator('sharedPostId', value, existing, action)
     const errors = validator
+        .mustNotBeUpdated()
         .mustBeUUID()
         .getErrors()
     return errors
@@ -90,7 +91,7 @@ const validateSharedPostId = function(value, existing, action) {
 const validateSiteModerationId = function(value, existing, action) {
     const validator = new UUIDValidator('siteModerationId', value, existing, action)
     const errors = validator
-        .mustBeUUID()
+        .mustNotBeSet()
         .getErrors()
     return errors
 }
@@ -98,7 +99,7 @@ const validateSiteModerationId = function(value, existing, action) {
 const validateGroupModerationId = function(value, existing, action) {
     const validator = new UUIDValidator('groupModerationId', value, existing, action)
     const errors = validator
-        .mustBeUUID()
+        .mustNotBeSet()
         .getErrors()
     return errors
 }

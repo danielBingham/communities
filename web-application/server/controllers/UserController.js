@@ -477,23 +477,36 @@ module.exports = class UserController extends BaseController{
         }
 
         if ( 'isGroupMember' in query ) {
-            const and = result.params.length > 0 ? ' AND ' : ''
             const groupId = query.isGroupMember
+
+            const canQueryGroupMembers = await this.permissionService.can(currentUser, 'query', 'GroupMember', { groupId: groupId })
+            if ( canQueryGroupMembers !== true ) {
+                this.core.logger.warn(`User attempting to query GroupMembers for Group(${query.groupId}) without permission.`)
+                return { emptyResult: true }
+            }
+
 
             const members = await this.groupMemberDAO.getGroupMembers(groupId)
             const memberUserIds = members.map((member) => member.userId)
 
+            const and = result.params.length > 0 ? ' AND ' : ''
             result.params.push(memberUserIds)
             result.where += `${and} users.id = ANY($${result.params.length}::uuid[])`
         }
 
         if ( 'isNotGroupMember' in query ) {
-            const and = result.params.length > 0 ? ' AND ' : ''
             const groupId = query.isNotGroupMember
+
+            const canQueryGroupMembers = await this.permissionService.can(currentUser, 'query', 'GroupMember', { groupId: groupId })
+            if ( canQueryGroupMembers !== true ) {
+                this.core.logger.warn(`User attempting to query GroupMembers for Group(${query.groupId}) without permission.`)
+                return { emptyResult: true }
+            }
 
             const members = await this.groupMemberDAO.getGroupMembers(groupId)
             const memberUserIds = members.map((member) => member.userId)
 
+            const and = result.params.length > 0 ? ' AND ' : ''
             result.params.push(memberUserIds)
             result.where += `${and} users.id != ALL($${result.params.length}::uuid[])`
         }
