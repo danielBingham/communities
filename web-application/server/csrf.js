@@ -41,14 +41,25 @@ const createCSRFMiddleware = function(core) {
             return
         }
 
-        const csrfToken = request.get('X-Communities-CSRF-Token')
-
-        const theirTokenBuffer = Buffer.from(csrfToken, 'base64url')
-        const ourTokenBuffer = Buffer.from(request.session.csrfToken, 'base64url')
-
         try {
+            const csrfToken = request.get('X-Communities-CSRF-Token')
+            if ( ! csrfToken ) {
+                request.logger.warn(`Missing CSRF Token.  Possible forged request.`)
+                response.status(403).json({
+                    error: {
+                        type: 'invalid-csrf',
+                        message: 'Request rejected as a potential forged request. This is to protect you from attackers attempting to steal your account credentials. If this request was you, refresh the page and try again. If you continue to see this message, reach out to support at contact@communities.social.'
+                    }
+                })
+                return
+            }
+
+
+            const theirTokenBuffer = Buffer.from(csrfToken, 'base64url')
+            const ourTokenBuffer = Buffer.from(request.session.csrfToken, 'base64url')
+
             if ( ! crypto.timingSafeEqual(theirTokenBuffer, ourTokenBuffer) ) {
-                request.logger.warn(`Request arrived with an invalid CSRF Token.  Possible forged request.`)
+                request.logger.warn(`Invalid CSRF Token.  Possible forged request.`)
                 response.status(403).json({
                     error: {
                         type: 'invalid-csrf',
