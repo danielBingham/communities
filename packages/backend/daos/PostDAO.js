@@ -64,19 +64,19 @@ const SCHEMA = {
             'shared_post_id': {
                 insert: 'allowed',
                 update: 'denied',
-                selected: 'always',
+                select: 'always',
                 key: 'sharedPostId'
             },
             'site_moderation_id': {
                 insert: 'allowed',
                 update: 'allowed',
-                selected: 'always',
+                select: 'always',
                 key: 'siteModerationId'
             },
             'group_moderation_id': {
                 insert: 'allowed',
                 update: 'allowed',
-                selected: 'always',
+                select: 'always',
                 key: 'groupModerationId'
             },
             'activity': {
