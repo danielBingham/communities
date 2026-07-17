@@ -26,68 +26,68 @@ const SCHEMA = {
         table: 'site_moderation',
         fields: {
             'id': {
-                insert: 'primary',
-                update: 'primary',
-                select: 'always',
+                insert: DAO.INSERT.PRIMARY,
+                update: DAO.UPDATE.PRIMARY,
+                select: DAO.SELECT.ALWAYS,
                 key: 'id'
             },
             'user_id': {
-                insert: 'require',
-                update: 'allow',
-                select: 'request',
+                insert: DAO.INSERT.REQUIRE,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.REQUEST,
                 key: 'userId'
             },
             'status': {
-                insert: 'require',
-                update: 'allow',
-                select: 'always',
+                insert: DAO.INSERT.REQUIRE,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.ALWAYS,
                 key: 'status'
             },
             'reason': {
-                insert: 'allow',
-                update: 'allow',
-                select: 'always',
+                insert: DAO.INSERT.ALLOW,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.ALWAYS,
                 key: 'reason'
             },
             'post_id': {
-                insert: 'allow',
-                update: 'allow',
-                select: 'always',
+                insert: DAO.INSERT.ALLOW,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.ALWAYS,
                 key: 'postId'
             },
             'post_comment_id': {
-                insert: 'allow',
-                update: 'allow',
-                select: 'always',
+                insert: DAO.INSERT.ALLOW,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.ALWAYS,
                 key: 'postCommentId'
             },
             'group_id': {
-                insert: 'allow',
-                update: 'allow',
-                select: 'always',
+                insert: DAO.INSERT.ALLOW,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.ALWAYS,
                 key: 'groupId',
                 needsFeature: 'feat-408-flag-profiles-and-groups'
             },
             'user_profile_id': {
-                insert: 'allow',
-                update: 'allow',
-                select: 'always',
+                insert: DAO.INSERT.ALLOW,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.ALWAYS,
                 key: 'userProfileId',
                 needsFeature: 'feat-408-flag-profiles-and-groups'
             },
             'created_date': {
-                insert: 'override',
+                insert: DAO.INSERT.OVERRIDE,
                 insertOverride: 'now()',
-                update: 'denied',
-                select: 'always',
+                update: DAO.UPDATE.DENY,
+                select: DAO.SELECT.ALWAYS,
                 key: 'createdDate'
             },
             'updated_date': {
-                insert: 'override',
+                insert: DAO.INSERT.OVERRIDE,
                 insertOverride: 'now()',
-                update: 'override',
+                update: DAO.UPDATE.OVERRIDE,
                 updateOverride: 'now()',
-                select: 'always',
+                select: DAO.SELECT.ALWAYS,
                 key: 'updatedDate'
             },
         }

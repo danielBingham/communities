@@ -366,7 +366,7 @@ module.exports = class PostCommentController {
                 `You are not authorized to update that PostComment.`)
         }
 
-        const validationErrors = await this.validationService.validatePostComment(currentUser, comment)
+        const validationErrors = await this.validationService.validatePostComment(currentUser, comment, existing)
         if ( validationErrors.length > 0 ) {
             const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
             const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')

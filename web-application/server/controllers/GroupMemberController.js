@@ -192,7 +192,7 @@ module.exports = class GroupMemberController extends BaseController {
                 query.where += ` AND group_members.role = ANY($${query.params.length}::group_member_role[])`
             } else {
                 query.params.push(urlQuery.role)
-                query.where += ` AND group_members.role = $${query.params.length})`
+                query.where += ` AND group_members.role = $${query.params.length}`
             }
         }
 

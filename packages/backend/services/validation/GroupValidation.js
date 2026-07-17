@@ -54,6 +54,29 @@ module.exports = class GroupValidation {
             return errors
         }
 
+        if ( util.objectHas(group, 'parentId' ) ) {
+            if ( ! existing ) {
+                if ( group.parentId !== null ) {
+                    const parentGroup = await this.groupDAO.getGroupById(group.parentId)
+                    if ( parentGroup === null ) {
+                        errors.push({
+                            type: 'parentId:not-found',
+                            log: `Couldn't find parent Group(${group.parentId}).`,
+                            message: `Couldn't find that parent Group.`
+                        })
+                    }
+                }
+            } else {
+                if ( group.parentId !== existing.parentId ) {
+                    errors.push({
+                        type: 'parentId:not-authorized',
+                        log: `User attempting to update Group.parentId.`,
+                        message: `You may not change the parent Group.`
+                    })
+                }
+            }
+        }
+
         if ( util.objectHas(group, 'fileId') ) {
             // fileId may be null.
             if ( group.fileId !== null ) {

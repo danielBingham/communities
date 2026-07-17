@@ -84,6 +84,20 @@ module.exports = class PostValidation {
             }
         }
 
+        if ( util.objectHas(post, 'groupId') && post.groupId !== null ) {
+            const groupResults = await this.core.database.query(`
+                SELECT id FROM groups WHERE id = $1
+            `, [ post.groupId ])
+
+            if ( groupResults.rows.length <= 0 ) {
+                errors.push({
+                    type: 'groupId:not-found',
+                    log: `User attempting to post to Group(${post.groupId}) which wasn't found.`,
+                    message: `That group doesn't exist.`
+                })
+            }
+        }
+
         if ( util.objectHas(post, 'files') && post.files !== null && post.files.length > 0 ) {
             if ( ! Array.isArray(post.files) ) {
                 errors.push({
@@ -257,43 +271,152 @@ module.exports = class PostValidation {
         // Different types of posts have different constraints.  Group posts need
         // to have their visibility match the group type.
 
-        // The visibility of posts in groups must match the visibility of the group.
-        if ( util.objectHas(post, 'type') && post.type === 'group' ) {
-            if ( ! util.objectHas(post, 'groupId') || post.groupId === null ) {
-                errors.push({
-                    type: 'groupId:missing',
-                    log: 'Attempt to make a Group post without a groupId.',
-                    message: `You can't post to a Group without including a groupId.`
-                })
-            } else {
-                const group = await this.groupDAO.getGroupById(post.groupId)
 
-                if ( group === null ) {
+
+        // The visibility of posts in groups must match the visibility of the group.
+        if ( util.objectHas(post, 'visibility') || util.objectHas(post, 'type') ) {
+            let visibility = null
+            let type = null
+            // This is an edit.
+            if ( existing ) {
+                visibility = post.visibility ?? existing.visibility
+                type = existing.type // Type cannot be updated.
+            }
+            // This is a creation.
+            else {
+                visibility = post.visibility
+                type = post.type
+            }
+
+            if ( visibility === null || type === null ) {
+                errors.push({
+                    type: 'invalid',
+                    log: `Post submitted without type or visibility (in existing or submission).  Need both to validate.`,
+                    message: `You must include both visibility and type.`
+                })
+            }
+
+            if ( type === 'feed' ) {
+                if ( visibility !== 'public' && visibility !== 'private' ) {
                     errors.push({
-                        type: 'groupId:not-found',
-                        log: `Attempt to post to a Group(${post.groupId}) that doesn't exist.`,
-                        message: `You can't post to a group that doesn't exist.`
+                        type: 'invalid',
+                        log: `Post submitted with invalid visiblity.`,
+                        message: `Visibility is invalid.  Options are 'public' or 'private.`
+                    })
+                }
+            }
+            else if ( type === 'group' ) {
+                let groupId = null
+                if ( existing ) {
+                    groupId = existing.groupId
+                } else {
+                    groupId = post.groupId
+                }
+
+                // For a "group" type post, there has to be a groupId.
+                if ( groupId === undefined || groupId === null ) {
+                    errors.push({
+                        type: 'groupId:missing',
+                        log: `Group post missing groupId`,
+                        message: `Group posts must include their groupId.`
+                    })
+                }
+                // The groupId may not be editted.
+                else if ( existing && groupId !== existing.groupId ) {
+                    errors.push({
+                        type: 'invalid',
+                        log: `Post groupId may not be updated.`,
+                        message: `You may not update the Posts's groupId.`
                     })
                 } else {
-                    if ( group.type === 'open' && post.visibility === 'private' ) {
+
+                    const group = await this.groupDAO.getGroupById(groupId)
+                    if ( group === null ) {
                         errors.push({
-                            type: 'visibility:invalid',
-                            log: `Attempt to make a private Post to an Open Group.`,
-                            message: `You can't make a private Post to an Open Group.`
+                            type: 'groupId:not-found',
+                            log: `Attempt to post to a Group(${post.groupId}) that doesn't exist.`,
+                            message: `You can't post to a group that doesn't exist.`
                         })
                     }
 
-                    if ( (group.type === 'private' || group.type === 'hidden')
-                        && post.visibility === 'public' )
-                    {
-                        errors.push({
-                            type: 'visibility:invalid',
-                            log: `Attempt to make a public Post to a private or hidden Group.`,
-                            message: `You can't make a public Post to a private or hidden Group.`
-                        })
+                    if ( group.type === 'open' ) {
+                        if ( visibility !== 'public' ) {
+                            errors.push({
+                                type: 'visibility:invalid',
+                                log: `Posts to public groups must be public.`,
+                                message: `Posts to public groups must be public.`
+                            })
+                        }
+                    } else if ( group.type === 'private' ) {
+                        if ( visibility !== 'private' ) {
+                            errors.push({
+                                type: 'visibility:invalid',
+                                log: `Posts to private groups must be private.`,
+                                message: `Posts to private groups must be private.`
+                            })
+
+                        }
+                    } else if ( group.type === 'hidden' ) {
+                        if ( visibility !== 'private' ) {
+                            errors.push({
+                                type: 'visibility:invalid',
+                                log: `Posts to hidden groups must be private.`,
+                                message: `Posts to hidden groups must be private.`
+                            })
+                        }
+                    } else if ( group.type === 'private-open' ) {
+                        if ( visibility !== 'private' ) {
+                            errors.push({
+                                type: 'visibility:invalid',
+                                log: `Posts to private-open groups must be private.`,
+                                message: `Posts to private-open groups must be private.`
+                            })
+                        }
+                    } else if ( group.type === 'hidden-open' ) {
+                        if ( visibility !== 'private' ) {
+                            errors.push({
+                                type: 'visibility:invalid',
+                                log: `Posts to hidden-open groups must be private.`,
+                                message: `Posts to hidden-open groups must be private.`
+                            })
+                        }
+                    } else if ( group.type === 'hidden-private' ) {
+                        if ( visibility !== 'private' ) {
+                            errors.push({
+                                type: 'visibility:invalid',
+                                log: `Posts to hidden-private groups must be private.`,
+                                message: `Posts to hidden-private groups must be private.`
+                            })
+                        }
+                    } else {
+                        throw new ServiceError('unhandled-group-type',
+                            `Encountered a group with an unhandled type.`)
                     }
                 }
             }
+            else if ( type === 'announcement' ) {
+                if ( visibility !== 'public' ) {
+                    errors.push({
+                        type: 'visibility:invalid',
+                        log: `Announcement posts must be public.`,
+                        message: `Announcement posts must be public.`
+                    })
+                }
+            }
+            else if ( type === 'info' ) {
+                if ( visibility !== 'public' ) {
+                    errors.push({
+                        type: 'visibility:invalid',
+                        log: `Info posts must be public.`,
+                        message: `Info posts must be public.`
+                    })
+                }
+            }
+            else {
+                throw new ServiceError(`invalid-type`,
+                    `Invalid type reached consistency validation.`)
+            }
+
         }
 
         if ( util.objectHas(post, 'type') &&  ( post.type === 'announcement' || post.type === 'info' ) ) {

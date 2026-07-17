@@ -138,7 +138,7 @@ module.exports = class LinkPreviewController {
             params: [ id ]
         })
 
-        if ( results.list.length < 0 ) {
+        if ( results.list.length <= 0 ) {
             throw new ControllerError(404, 'not-found',
                 `LinkPreview(${id}) not found.`,
                 `LinkPreview(${id}) either doesn't exist or you don't have permision to view it.`)

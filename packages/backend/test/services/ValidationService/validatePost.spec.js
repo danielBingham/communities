@@ -178,6 +178,7 @@ describe('ValidationService.validatePost()', function() {
 
             core.database.query.mockReturnValue(undefined)
                 .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '5c44ce06-1687-4709-b67e-de76c05acb6a' }]})
+                .mockReturnValueOnce({ rowCount: 0, rows: []})
 
             const errors = await service.validatePost(currentUser, post, undefined)
 
@@ -224,6 +225,7 @@ describe('ValidationService.validatePost()', function() {
             const groupRows = database.groups['aeb26ec5-3644-4b7a-805e-375551ec65b6'].rows
             core.database.query.mockReturnValue(undefined)
                 .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '5c44ce06-1687-4709-b67e-de76c05acb6a' }]})
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'aeb26ec5-3644-4b7a-805e-375551ec65b6' }]})
                 .mockReturnValueOnce({ rowCount: groupRows.length, rows: groupRows })
 
             const errors = await service.validatePost(currentUser, post, undefined)
@@ -247,6 +249,7 @@ describe('ValidationService.validatePost()', function() {
             const groupRows = database.groups['8661a1ef-6259-4d5a-a59f-4d75929a765f'].rows
             core.database.query.mockReturnValue(undefined)
                 .mockReturnValueOnce({ rowCount: 1, rows: [{ id: currentUser.id }]})
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '8661a1ef-6259-4d5a-a59f-4d75929a765f' }]})
                 .mockReturnValueOnce({ rowCount: groupRows.length, rows: groupRows })
 
             const errors = await service.validatePost(currentUser, post, undefined)
@@ -271,6 +274,7 @@ describe('ValidationService.validatePost()', function() {
             const groupRows = database.groups['4e66c241-ef21-4143-b7b4-c4fe81a34acd'].rows
             core.database.query.mockReturnValue(undefined)
                 .mockReturnValueOnce({ rowCount: 1, rows: [{ id: currentUser.id }]})
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '4e66c241-ef21-4143-b7b4-c4fe81a34acd' }]})
                 .mockReturnValueOnce({ rowCount: groupRows.length, rows: groupRows })
 
             const errors = await service.validatePost(currentUser, post, undefined)
@@ -295,6 +299,7 @@ describe('ValidationService.validatePost()', function() {
             const groupRows = database.groups['aeb26ec5-3644-4b7a-805e-375551ec65b6'].rows
             core.database.query.mockReturnValue(undefined)
                 .mockReturnValueOnce({ rowCount: 1, rows: [{ id: currentUser.id }]})
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'aeb26ec5-3644-4b7a-805e-375551ec65b6' }]})
                 .mockReturnValueOnce({ rowCount: groupRows.length, rows: groupRows })
 
             const errors = await service.validatePost(currentUser, post, undefined)
@@ -317,6 +322,7 @@ describe('ValidationService.validatePost()', function() {
             const groupRows = database.groups['8661a1ef-6259-4d5a-a59f-4d75929a765f'].rows
             core.database.query.mockReturnValue(undefined)
                 .mockReturnValueOnce({ rowCount: 1, rows: [{ id: currentUser.id }]})
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '8661a1ef-6259-4d5a-a59f-4d75929a765f' }]})
                 .mockReturnValueOnce({ rowCount: groupRows.length, rows: groupRows })
 
             const errors = await service.validatePost(currentUser, post, undefined)
@@ -339,6 +345,7 @@ describe('ValidationService.validatePost()', function() {
             const groupRows = database.groups['4e66c241-ef21-4143-b7b4-c4fe81a34acd'].rows
             core.database.query.mockReturnValue(undefined)
                 .mockReturnValueOnce({ rowCount: 1, rows: [{ id: currentUser.id }]})
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '4e66c241-ef21-4143-b7b4-c4fe81a34acd' }]})
                 .mockReturnValueOnce({ rowCount: groupRows.length, rows: groupRows })
 
             const errors = await service.validatePost(currentUser, post, undefined)
@@ -443,6 +450,7 @@ describe('ValidationService.validatePost()', function() {
                 const groupRows = database.groups['4e66c241-ef21-4143-b7b4-c4fe81a34acd'].rows
                 core.database.query.mockReturnValue(undefined)
                     .mockReturnValueOnce({ rowCount: 1, rows: [{ id: currentUser.id }]})
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '4e66c241-ef21-4143-b7b4-c4fe81a34acd' }]})
                     .mockReturnValueOnce({ rowCount: groupRows.length, rows: groupRows})
 
                 const errors = await service.validatePost(currentUser, post, undefined)

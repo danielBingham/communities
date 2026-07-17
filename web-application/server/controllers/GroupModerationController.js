@@ -391,7 +391,7 @@ module.exports = class GroupModerationController extends BaseController {
         const entity = results.dictionary[id]
 
         if ( groupId !== entity.groupId ) {
-            return this.endUserErrors(response, 404, {
+            return this.sendUserErrors(response, 404, {
                 type: 'not-found',
                 log: `GroupModeration(${id}) queried with different groupId.`,
                 message: `That doesn't exist or you don't have permission to see it.`

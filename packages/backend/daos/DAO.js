@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -145,9 +145,9 @@ module.exports = class DAO {
                 }
 
                 // If they haven't included a primary key, generate one.
-                // The database would generate one if it were left out, but 
+                // The database would generate one if it were left out, but
                 // it has the same effect as us generating one here and here we
-                // can add it into the entity and we can have some entities include 
+                // can add it into the entity and we can have some entities include
                 // their own while others don't more easily.
                 if ( meta.insert == 'primary' && ! ( meta.key in entity)) {
                     entity[meta.key] = Uuid.v4()
@@ -157,10 +157,10 @@ module.exports = class DAO {
                     row += ( row == '(' ? '' : ', ' ) + `${meta.insertOverride}`
                 } else {
                     if ( ! (meta.key in entity) && ( 'insertDefault' in meta )) {
-                        params.push(meta.insertDefault()) 
+                        params.push(meta.insertDefault())
                     } else if ( ! (meta.key in entity) ) {
                         params.push(null)
-                    } else { 
+                    } else {
                         params.push(entity[meta.key])
                     }
                     row += ( row == '(' ? '' : ', ') + `$${params.length}`
@@ -191,7 +191,7 @@ module.exports = class DAO {
 
         // This is pure error checking.  If we don't have a primary key,
         // update's going to break or do weird shit.
-        let foundPrimary = false 
+        let foundPrimary = false
 
         for(const [field, meta] of Object.entries(this.entityMaps[entityName].fields)) {
             if ( meta.needsFeature && ! this.core.features.has(meta.needsFeature)) {

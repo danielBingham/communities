@@ -110,8 +110,13 @@ module.exports = class PostController {
                 sharedPostIds.push(post.sharedPostId)
             }
         }
+        // By including the `visbility` check here, we ensure that any shared
+        // posts we pull are genuinely public and shareable. Any that have been
+        // flipped to 'private' won't be loaded as a relation, which will force
+        // the frontend to retrieve them through GET /post which reapplies the
+        // per post permission controls.
         const sharedPostResults = await this.postDAO.selectPosts({
-            where: `posts.id = ANY($1::uuid[]) AND posts.user_id != ALL($2::uuid[])`,
+            where: `posts.id = ANY($1::uuid[]) AND posts.visibility = 'public' AND posts.user_id != ALL($2::uuid[])`,
             params: [ sharedPostIds, blockIds ]
         })
 
@@ -735,8 +740,8 @@ module.exports = class PostController {
                 `You must must be authenticated to edit a post.`)
         }
 
-        const postId = request.params.id
-        const post = request.body
+        const postId = cleaning.Post.properties.id.clean(request.params.id)
+        const post = cleaning.Post.clean(request.body)
 
         const existing = await this.postDAO.getPostById(postId)
         if ( ! existing ) {

@@ -217,8 +217,8 @@ describe('ValidationService.validateGroupModeration()', function() {
             core.database.query.mockReturnValue(undefined)
                 .mockReturnValueOnce({ rowCount: 1, rows: [{ id: currentUser.id } ]})
                 .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'dc0cf03c-d1d5-4722-bdaf-cffa509c981a' } ]})
-                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '7ea98d1e-dd4a-4abb-977c-1cf483356180' } ]})
-                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'a2d49442-4068-481d-b0be-c98b3c20d788' } ]})
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '7ea98d1e-dd4a-4abb-977c-1cf483356180', group_id: 'dc0cf03c-d1d5-4722-bdaf-cffa509c981a'}]})
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'a2d49442-4068-481d-b0be-c98b3c20d788', post_id: '7ea98d1e-dd4a-4abb-977c-1cf483356180' }]})
 
             const errors = await service.validateGroupModeration(currentUser, groupModeration, null)
 
@@ -245,7 +245,7 @@ describe('ValidationService.validateGroupModeration()', function() {
             core.database.query.mockReturnValue(undefined)
                 .mockReturnValueOnce({ rowCount: 0, rows: []})
                 .mockReturnValueOnce({ rowCount: 0, rows: [{ id: 'dc0cf03c-d1d5-4722-bdaf-cffa509c981a' } ]})
-                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '7ea98d1e-dd4a-4abb-977c-1cf483356180' } ]})
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '7ea98d1e-dd4a-4abb-977c-1cf483356180', group_id: 'dc0cf03c-d1d5-4722-bdaf-cffa509c981a' } ]})
 
             service.groupModeration.permissionService.can = jest.fn()
             service.groupModeration.permissionService.can.mockReturnValue(false)
@@ -277,15 +277,16 @@ describe('ValidationService.validateGroupModeration()', function() {
             core.database.query.mockReturnValue(undefined)
                 .mockReturnValueOnce({ rowCount: 1, rows: [{ id: currentUser.id } ]})
                 .mockReturnValueOnce({ rowCount: 0, rows: []})
-                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '7ea98d1e-dd4a-4abb-977c-1cf483356180' } ]})
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '7ea98d1e-dd4a-4abb-977c-1cf483356180', group_id: null } ]})
 
             service.groupModeration.permissionService.can = jest.fn()
             service.groupModeration.permissionService.can.mockReturnValue(false)
 
             const errors = await service.validateGroupModeration(currentUser, groupModeration, null)
 
-            expect(errors.length).toBe(1)
+            expect(errors.length).toBe(2)
             expect(errors[0].type).toBe('groupId:not-found')
+            expect(errors[1].type).toBe('postId:not-authorized')
         })
 
         it('Should return an error when postId is not found in the database', async function() {
@@ -339,7 +340,7 @@ describe('ValidationService.validateGroupModeration()', function() {
 
             core.database.query.mockReturnValue(undefined)
                 .mockReturnValueOnce({ rowCount: 1, rows: [{ id: currentUser.id } ]})
-                .mockReturnValueOnce({ rowCount: 0, rows: [{ id: 'dc0cf03c-d1d5-4722-bdaf-cffa509c981a' } ]})
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'dc0cf03c-d1d5-4722-bdaf-cffa509c981a' } ]})
                 .mockReturnValueOnce({ rowCount: 0, rows: [ ]})
 
             service.groupModeration.permissionService.can = jest.fn()
@@ -370,7 +371,7 @@ describe('ValidationService.validateGroupModeration()', function() {
             core.database.query.mockReturnValue(undefined)
                 .mockReturnValueOnce({ rowCount: 1, rows: [{ id: currentUser.id }]})
                 .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'dc0cf03c-d1d5-4722-bdaf-cffa509c981a' } ]})
-                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '7ea98d1e-dd4a-4abb-977c-1cf483356180' }]})
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '7ea98d1e-dd4a-4abb-977c-1cf483356180', group_id: 'dc0cf03c-d1d5-4722-bdaf-cffa509c981a' }]})
 
             service.groupModeration.permissionService.can = jest.fn()
             service.groupModeration.permissionService.can.mockReturnValue(false)
