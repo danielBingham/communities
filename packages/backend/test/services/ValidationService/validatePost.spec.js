@@ -25,18 +25,18 @@ describe('ValidationService.validatePost()', function() {
         postmarkClient: {
             sendEmail: jest.fn()
         },
-        features: new FeatureFlags() 
+        features: new FeatureFlags()
     }
 
     beforeEach(function() {
         core.database.query.mockReset()
         // Disable logging.
-        core.logger.level = -1 
+        core.logger.level = -1
     })
 
     it('Should return one error for each disallowed field included (activity, createdDate, updatedDate)', async function() {
         const service = new ValidationService(core)
-    
+
         const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
         const post = {
@@ -73,7 +73,7 @@ describe('ValidationService.validatePost()', function() {
     })
 
     describe('when creating a post', function() {
-        it('Should return errors if any required fields are missing', async function() { 
+        it('Should return errors if any required fields are missing', async function() {
             const service = new ValidationService(core)
 
             const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
@@ -108,7 +108,7 @@ describe('ValidationService.validatePost()', function() {
 
             const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-            const post = { 
+            const post = {
                 id: '789307dc-fe1f-4d57-ad88-1ecbb8a38a4e',
                 type: 'group',
                 userId: 'af96f77e-7f20-4441-be85-5dc0dc4bef71',
@@ -127,11 +127,11 @@ describe('ValidationService.validatePost()', function() {
 
             const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-            const post = { 
+            const post = {
                 id: 'b75c5eae-fc6a-4056-9674-279e13076f42',
                 type: null,
                 userId: null,
-                groupId: null 
+                groupId: null
             }
 
             const existing = entities['posts'].dictionary['b75c5eae-fc6a-4056-9674-279e13076f42']
@@ -147,13 +147,13 @@ describe('ValidationService.validatePost()', function() {
 
             const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-            const post = { 
+            const post = {
                 id: '703955d2-77df-4635-8ab8-b9108fef217f'
             }
 
             const existing = entities['posts'].dictionary['63b6fdfc-bdcc-4b55-90d8-eb8fcaba715d']
 
-            try { 
+            try {
                 const errors = await service.validatePost(currentUser, post, existing)
             } catch (thrownError) {
                 expect(thrownError).toBeInstanceOf(ServiceError)
@@ -170,7 +170,7 @@ describe('ValidationService.validatePost()', function() {
 
             const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-            const post = { 
+            const post = {
                 type: 'group',
                 userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
                 visibility: 'public'
@@ -178,6 +178,7 @@ describe('ValidationService.validatePost()', function() {
 
             core.database.query.mockReturnValue(undefined)
                 .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '5c44ce06-1687-4709-b67e-de76c05acb6a' }]})
+                .mockReturnValueOnce({ rowCount: 0, rows: []})
 
             const errors = await service.validatePost(currentUser, post, undefined)
 
@@ -191,7 +192,7 @@ describe('ValidationService.validatePost()', function() {
 
             const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-            const post = { 
+            const post = {
                 type: 'group',
                 userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
                 groupId: 'aeb26ec5-3644-4b7a-805e-375551ec65b6',
@@ -214,7 +215,7 @@ describe('ValidationService.validatePost()', function() {
 
             const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-            const post = { 
+            const post = {
                 type: 'group',
                 userId: '5c44ce06-1687-4709-b67e-de76c05acb6a',
                 groupId: 'aeb26ec5-3644-4b7a-805e-375551ec65b6',
@@ -224,6 +225,7 @@ describe('ValidationService.validatePost()', function() {
             const groupRows = database.groups['aeb26ec5-3644-4b7a-805e-375551ec65b6'].rows
             core.database.query.mockReturnValue(undefined)
                 .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '5c44ce06-1687-4709-b67e-de76c05acb6a' }]})
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'aeb26ec5-3644-4b7a-805e-375551ec65b6' }]})
                 .mockReturnValueOnce({ rowCount: groupRows.length, rows: groupRows })
 
             const errors = await service.validatePost(currentUser, post, undefined)
@@ -237,7 +239,7 @@ describe('ValidationService.validatePost()', function() {
 
             const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-            const post = { 
+            const post = {
                 type: 'group',
                 userId: currentUser.id,
                 groupId: '8661a1ef-6259-4d5a-a59f-4d75929a765f',
@@ -247,6 +249,7 @@ describe('ValidationService.validatePost()', function() {
             const groupRows = database.groups['8661a1ef-6259-4d5a-a59f-4d75929a765f'].rows
             core.database.query.mockReturnValue(undefined)
                 .mockReturnValueOnce({ rowCount: 1, rows: [{ id: currentUser.id }]})
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '8661a1ef-6259-4d5a-a59f-4d75929a765f' }]})
                 .mockReturnValueOnce({ rowCount: groupRows.length, rows: groupRows })
 
             const errors = await service.validatePost(currentUser, post, undefined)
@@ -261,7 +264,7 @@ describe('ValidationService.validatePost()', function() {
 
             const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-            const post = { 
+            const post = {
                 type: 'group',
                 userId: currentUser.id,
                 groupId: '4e66c241-ef21-4143-b7b4-c4fe81a34acd',
@@ -271,6 +274,7 @@ describe('ValidationService.validatePost()', function() {
             const groupRows = database.groups['4e66c241-ef21-4143-b7b4-c4fe81a34acd'].rows
             core.database.query.mockReturnValue(undefined)
                 .mockReturnValueOnce({ rowCount: 1, rows: [{ id: currentUser.id }]})
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '4e66c241-ef21-4143-b7b4-c4fe81a34acd' }]})
                 .mockReturnValueOnce({ rowCount: groupRows.length, rows: groupRows })
 
             const errors = await service.validatePost(currentUser, post, undefined)
@@ -285,7 +289,7 @@ describe('ValidationService.validatePost()', function() {
 
             const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-            const post = { 
+            const post = {
                 type: 'group',
                 userId: currentUser.id,
                 groupId: 'aeb26ec5-3644-4b7a-805e-375551ec65b6',
@@ -295,6 +299,7 @@ describe('ValidationService.validatePost()', function() {
             const groupRows = database.groups['aeb26ec5-3644-4b7a-805e-375551ec65b6'].rows
             core.database.query.mockReturnValue(undefined)
                 .mockReturnValueOnce({ rowCount: 1, rows: [{ id: currentUser.id }]})
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'aeb26ec5-3644-4b7a-805e-375551ec65b6' }]})
                 .mockReturnValueOnce({ rowCount: groupRows.length, rows: groupRows })
 
             const errors = await service.validatePost(currentUser, post, undefined)
@@ -307,7 +312,7 @@ describe('ValidationService.validatePost()', function() {
 
             const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-            const post = { 
+            const post = {
                 type: 'group',
                 userId: currentUser.id,
                 groupId: '8661a1ef-6259-4d5a-a59f-4d75929a765f',
@@ -317,6 +322,7 @@ describe('ValidationService.validatePost()', function() {
             const groupRows = database.groups['8661a1ef-6259-4d5a-a59f-4d75929a765f'].rows
             core.database.query.mockReturnValue(undefined)
                 .mockReturnValueOnce({ rowCount: 1, rows: [{ id: currentUser.id }]})
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '8661a1ef-6259-4d5a-a59f-4d75929a765f' }]})
                 .mockReturnValueOnce({ rowCount: groupRows.length, rows: groupRows })
 
             const errors = await service.validatePost(currentUser, post, undefined)
@@ -329,7 +335,7 @@ describe('ValidationService.validatePost()', function() {
 
             const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-            const post = { 
+            const post = {
                 type: 'group',
                 userId: currentUser.id,
                 groupId: '4e66c241-ef21-4143-b7b4-c4fe81a34acd',
@@ -339,6 +345,7 @@ describe('ValidationService.validatePost()', function() {
             const groupRows = database.groups['4e66c241-ef21-4143-b7b4-c4fe81a34acd'].rows
             core.database.query.mockReturnValue(undefined)
                 .mockReturnValueOnce({ rowCount: 1, rows: [{ id: currentUser.id }]})
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '4e66c241-ef21-4143-b7b4-c4fe81a34acd' }]})
                 .mockReturnValueOnce({ rowCount: groupRows.length, rows: groupRows })
 
             const errors = await service.validatePost(currentUser, post, undefined)
@@ -354,7 +361,7 @@ describe('ValidationService.validatePost()', function() {
 
                 const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-                const post = { 
+                const post = {
                     type: null,
                     userId: currentUser.id,
                     visibility: 'public'
@@ -374,7 +381,7 @@ describe('ValidationService.validatePost()', function() {
 
                 const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-                const post = { 
+                const post = {
                     type: 10,
                     userId: currentUser.id,
                     visibility: 'public'
@@ -394,7 +401,7 @@ describe('ValidationService.validatePost()', function() {
 
                 const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-                const post = { 
+                const post = {
                     type: 'event',
                     userId: currentUser.id,
                     visibility: 'public'
@@ -414,7 +421,7 @@ describe('ValidationService.validatePost()', function() {
 
                 const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-                const post = { 
+                const post = {
                     type: 'feed',
                     userId: currentUser.id,
                     visibility: 'public'
@@ -433,7 +440,7 @@ describe('ValidationService.validatePost()', function() {
 
                 const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-                const post = { 
+                const post = {
                     type: 'group',
                     userId: currentUser.id,
                     groupId: '4e66c241-ef21-4143-b7b4-c4fe81a34acd',
@@ -443,6 +450,7 @@ describe('ValidationService.validatePost()', function() {
                 const groupRows = database.groups['4e66c241-ef21-4143-b7b4-c4fe81a34acd'].rows
                 core.database.query.mockReturnValue(undefined)
                     .mockReturnValueOnce({ rowCount: 1, rows: [{ id: currentUser.id }]})
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '4e66c241-ef21-4143-b7b4-c4fe81a34acd' }]})
                     .mockReturnValueOnce({ rowCount: groupRows.length, rows: groupRows})
 
                 const errors = await service.validatePost(currentUser, post, undefined)
@@ -457,10 +465,10 @@ describe('ValidationService.validatePost()', function() {
 
                 const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-                const post = { 
+                const post = {
                     type: 'feed',
                     userId: currentUser.id,
-                    visibility: null 
+                    visibility: null
                 }
 
                 core.database.query.mockReturnValue(undefined)
@@ -477,10 +485,10 @@ describe('ValidationService.validatePost()', function() {
 
                 const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-                const post = { 
+                const post = {
                     type: 'feed',
                     userId: currentUser.id,
-                    visibility: 10 
+                    visibility: 10
                 }
 
                 core.database.query.mockReturnValue(undefined)
@@ -497,7 +505,7 @@ describe('ValidationService.validatePost()', function() {
 
                 const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-                const post = { 
+                const post = {
                     type: 'feed',
                     userId: currentUser.id,
                     visibility: 'hidden'
@@ -517,7 +525,7 @@ describe('ValidationService.validatePost()', function() {
 
                 const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-                const post = { 
+                const post = {
                     type: 'feed',
                     userId: currentUser.id,
                     visibility: 'public'
@@ -536,7 +544,7 @@ describe('ValidationService.validatePost()', function() {
 
                 const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-                const post = { 
+                const post = {
                     type: 'feed',
                     userId: currentUser.id,
                     visibility: 'private'
@@ -557,10 +565,10 @@ describe('ValidationService.validatePost()', function() {
 
                 const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-                const post = { 
+                const post = {
                     type: 'feed',
                     userId: null,
-                    visibility: 'private' 
+                    visibility: 'private'
                 }
 
                 const errors = await service.validatePost(currentUser, post, undefined)
@@ -574,10 +582,10 @@ describe('ValidationService.validatePost()', function() {
 
                 const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-                const post = { 
+                const post = {
                     type: 'feed',
                     userId: 'test',
-                    visibility: 'private' 
+                    visibility: 'private'
                 }
 
                 const errors = await service.validatePost(currentUser, post, undefined)
@@ -591,7 +599,7 @@ describe('ValidationService.validatePost()', function() {
 
                 const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-                const post = { 
+                const post = {
                     type: 'feed',
                     userId: currentUser.id,
                     visibility: 'private'
@@ -611,7 +619,7 @@ describe('ValidationService.validatePost()', function() {
 
                 const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-                const post = { 
+                const post = {
                     type: 'feed',
                     userId: currentUser.id,
                     visibility: 'private'
@@ -632,7 +640,7 @@ describe('ValidationService.validatePost()', function() {
 
                 const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-                const post = { 
+                const post = {
                     type: 'feed',
                     userId: currentUser.id,
                     visibility: 'private',
@@ -653,7 +661,7 @@ describe('ValidationService.validatePost()', function() {
 
                 const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-                const post = { 
+                const post = {
                     type: 'feed',
                     userId: currentUser.id,
                     visibility: 'private',
@@ -675,7 +683,7 @@ describe('ValidationService.validatePost()', function() {
 
                 const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-                const post = { 
+                const post = {
                     type: 'feed',
                     userId: currentUser.id,
                     visibility: 'private',
@@ -685,8 +693,9 @@ describe('ValidationService.validatePost()', function() {
 
                 core.database.query.mockReturnValue(undefined)
                     .mockReturnValueOnce({ rowCount: 1, rows: [{ id: currentUser.id }]})
-                    .mockReturnValueOnce({ rowCount: 0, rows: [{ id: 'a7a80c5f-2837-4080-a813-e66e6157124c' }]})
-                    .mockReturnValueOnce({ rowCount: 0, rows: [{ id: '21a44cd9-4141-43a3-aae3-93735bcb6a32' }]})
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '21a44cd9-4141-43a3-aae3-93735bcb6a32', user_id: currentUser.id }]})
+                    .mockReturnValueOnce({ rowCount: 0, rows: []})
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'a7a80c5f-2837-4080-a813-e66e6157124c' }]})
 
                 const errors = await service.validatePost(currentUser, post, undefined)
 
@@ -700,12 +709,12 @@ describe('ValidationService.validatePost()', function() {
 
                 const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-                const post = { 
+                const post = {
                     type: 'feed',
                     userId: currentUser.id,
                     visibility: 'private',
                     linkPreviewId: 'a7a80c5f-2837-4080-a813-e66e6157124c',
-                    sharedPostId: '21a44cd9-4141-43a3-aae3-93735bcb6a32' 
+                    sharedPostId: '21a44cd9-4141-43a3-aae3-93735bcb6a32'
                 }
 
                 core.database.query.mockReturnValue(undefined)
@@ -725,11 +734,11 @@ describe('ValidationService.validatePost()', function() {
 
                 const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-                const post = { 
+                const post = {
                     type: 'feed',
                     userId: currentUser.id,
                     visibility: 'private',
-                    linkPreviewId: null 
+                    linkPreviewId: null
                 }
 
                 core.database.query.mockReturnValue(undefined)
@@ -745,7 +754,7 @@ describe('ValidationService.validatePost()', function() {
 
                 const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-                const post = { 
+                const post = {
                     type: 'feed',
                     userId: currentUser.id,
                     visibility: 'private',
@@ -768,7 +777,7 @@ describe('ValidationService.validatePost()', function() {
 
                 const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-                const post = { 
+                const post = {
                     type: 'feed',
                     userId: currentUser.id,
                     visibility: 'private',
@@ -789,7 +798,7 @@ describe('ValidationService.validatePost()', function() {
 
                 const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-                const post = { 
+                const post = {
                     type: 'feed',
                     userId: currentUser.id,
                     visibility: 'private',
@@ -811,7 +820,7 @@ describe('ValidationService.validatePost()', function() {
 
                 const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-                const post = { 
+                const post = {
                     type: 'feed',
                     userId: currentUser.id,
                     visibility: 'private',
@@ -821,8 +830,9 @@ describe('ValidationService.validatePost()', function() {
 
                 core.database.query.mockReturnValue(undefined)
                     .mockReturnValueOnce({ rowCount: 1, rows: [{ id: currentUser.id }]})
-                    .mockReturnValueOnce({ rowCount: 0, rows: [{ id: 'a7a80c5f-2837-4080-a813-e66e6157124c' }]})
-                    .mockReturnValueOnce({ rowCount: 0, rows: [{ id: '21a44cd9-4141-43a3-aae3-93735bcb6a32', visibility: 'public' }]})
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '21a44cd9-4141-43a3-aae3-93735bcb6a32', user_id: currentUser.id }]})
+                    .mockReturnValueOnce({ rowCount: 0, rows: []})
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'a7a80c5f-2837-4080-a813-e66e6157124c', visibility: 'public' }]})
 
                 const errors = await service.validatePost(currentUser, post, undefined)
 
@@ -836,7 +846,7 @@ describe('ValidationService.validatePost()', function() {
 
                 const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-                const post = { 
+                const post = {
                     type: 'feed',
                     userId: currentUser.id,
                     visibility: 'private',
@@ -861,11 +871,11 @@ describe('ValidationService.validatePost()', function() {
 
                 const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-                const post = { 
+                const post = {
                     type: 'feed',
                     userId: currentUser.id,
                     visibility: 'private',
-                    sharedPostId: null 
+                    sharedPostId: null
                 }
 
                 core.database.query.mockReturnValue(undefined)
@@ -881,7 +891,7 @@ describe('ValidationService.validatePost()', function() {
 
                 const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-                const post = { 
+                const post = {
                     type: 'feed',
                     userId: currentUser.id,
                     visibility: 'private',
@@ -904,7 +914,7 @@ describe('ValidationService.validatePost()', function() {
 
                 const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-                const post = { 
+                const post = {
                     type: 'feed',
                     userId: currentUser.id,
                     visibility: 'private',
@@ -925,7 +935,7 @@ describe('ValidationService.validatePost()', function() {
 
                 const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-                const post = { 
+                const post = {
                     type: 'feed',
                     userId: currentUser.id,
                     visibility: 'private',
@@ -988,11 +998,11 @@ describe('ValidationService.validatePost()', function() {
 
                 const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
-                const post = { 
+                const post = {
                     type: 'feed',
                     userId: currentUser.id,
                     visibility: 'private',
-                    content: null 
+                    content: null
                 }
 
                 core.database.query.mockReturnValue(undefined)

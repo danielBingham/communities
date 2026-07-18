@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -53,8 +53,8 @@ const State = {
     isReady: 'isReady'
 }
 
-const DraftFile = function({ 
-    fileId, width, 
+const DraftFile = function({
+    fileId, width,
     onRemove, deleteOnRemove
 }) {
 
@@ -70,7 +70,7 @@ const DraftFile = function({
     }
 
     const [job, jobRequest] = useJob(queue, file?.jobId)
-    useEventSubscription(file?.jobId ? `Job-update-${queue}-${file.jobId}` : null, 
+    useEventSubscription(file?.jobId ? `Job-update-${queue}-${file.jobId}` : null,
         'Job', 'update', { queue: queue, jobId: file?.jobId }, { skip: ! file?.jobId })
 
     const [isLoaded, setIsLoaded] = useState(false)
@@ -89,7 +89,7 @@ const DraftFile = function({
     }
 
     useEffect(function() {
-        if ( job?.progress?.step === 'complete') { 
+        if ( job?.progress?.step === 'complete') {
             refreshFile()
         } else if ( job?.finishedOn !== null ) {
             refreshFile()
@@ -98,7 +98,7 @@ const DraftFile = function({
 
     // ============ Render ====================================================
     //
-  
+
     if ( fileId === undefined || fileId === null ) {
         return null
     }
@@ -143,7 +143,7 @@ const DraftFile = function({
 
 
     let state = State.isAwaitingFile
- 
+
     if ( file.state === 'pending' ) {
         state = State.isUploading
     } else if ( file.state === 'processing' ) {
@@ -157,18 +157,18 @@ const DraftFile = function({
         <div className="draft-file" >
             { state === State.isPreparingUpload && <div><Spinner local={true} /> <span>Preparing the upload...</span></div> }
             { state === State.isPendingUpload && <div><Spinner local={true} /> <span>Upload prepared. Upload will begin shortly...</span></div> }
-            { state === State.isUploading && 
+            { state === State.isUploading &&
                 <div className="draft-file__file">
                     <a className="draft-file__remove" href="" role="button" aria-label="Remove file" onClick={(e) => { e.preventDefault(); remove() }}><XMarkIcon /></a>
                     <div className="draft-file__pending">
                         <div>
                             <Spinner local={true} /> <span>Uploading.  Do not navigate away.  This might take several minutes...</span>
-                        </div> 
+                        </div>
                     </div>
                 </div>
             }
-            { state === State.isProcessing && 
-                <div className="draft-file__file">  
+            { state === State.isProcessing &&
+                <div className="draft-file__file">
                     <a className="draft-file__remove" href="" role="button" aria-label="Remove file" onClick={(e) => { e.preventDefault(); remove() }}><XMarkIcon /></a>
                     <div className="draft-file__pending">
                         <div>
@@ -176,9 +176,9 @@ const DraftFile = function({
                             <ProgressBar progress={ job?.progress?.progress ?? 0 } />
                         </div>
                     </div>
-                </div> 
+                </div>
             }
-            { state === State.isReady && 
+            { state === State.isReady &&
                 <div className="draft-file__file" aria-label={`Draft file ${uploadInfo?.fileName ? uploadInfo.fileName : ''}`}>
                     { (isLoaded || loadFailed) && <a className="draft-file__remove" href="" role="button" aria-label="Remove file" onClick={(e) => { e.preventDefault(); remove() }}><XMarkIcon /></a> }
                     { loadFailed && <div className="draft-file__failed-load">
@@ -188,7 +188,7 @@ const DraftFile = function({
                         </div>
                     </div> }
                     { ! loadFailed && <File id={fileId} width={renderWidth} onLoad={() => setIsLoaded(true)} onError={() => setLoadFailed(true)} type={type}  /> }
-                </div> 
+                </div>
             }
             <JobError message={'File processing'} job={job} onContinue={() => remove() } />
         </div>

@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -37,7 +37,7 @@ import { patchDevice } from '/state/authentication'
 export const useNotifications = function() {
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const device = useSelector((state) => state.authentication.device)
-   
+
     const [request, makeRequest, resetRequest] = useRequest()
     const [notificationRequest, makeNotificationRequest] = useRequest()
 
@@ -46,14 +46,14 @@ export const useNotifications = function() {
 
     const listenForPushNotifications = async function() {
         await PushNotifications.addListener('registration', (token) => {
-            try { 
+            try {
                 if ( ! request ) {
                     makeRequest(patchDevice({ deviceToken: token.value }))
                     dispatch(setIsRegisteredMobile(true))
 
                     // On iOS, the getNotifications() call will sync
                     // the delivered notifications with the backend's
-                    // notifications.  
+                    // notifications.
                     //
                     // On Android, the custom data isn't passed so we
                     // can't match a delivered notification to its
@@ -71,7 +71,7 @@ export const useNotifications = function() {
         })
 
         await PushNotifications.addListener('registrationError', (error) => {
-            try { 
+            try {
                 dispatch(setIsRegisteredMobile(false))
                 logger.error(`Push Notification Registration failed:: `, error)
             } catch (error) {
@@ -85,7 +85,7 @@ export const useNotifications = function() {
 
         await PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
             if ( action.actionId === 'tap' ) {
-                try { 
+                try {
                     const notificationData = action.notification.data
                     const notificationId = notificationData?.notificationId
                     const path = notificationData?.path
@@ -95,7 +95,6 @@ export const useNotifications = function() {
                         try {
                             makeNotificationRequest(patchNotification({
                                 id: notificationId,
-                                userId: currentUser.id,
                                 isRead: true
                             }))
                         } catch(error) {
@@ -114,10 +113,10 @@ export const useNotifications = function() {
                 }
             }
         })
-    } 
+    }
 
     const registerPushNotifications = async function() {
-        try { 
+        try {
             let status = await PushNotifications.checkPermissions()
 
             if ( status.receive === 'prompt' ) {
@@ -138,7 +137,7 @@ export const useNotifications = function() {
     // Listen for Push Notification events and then register with the mobile
     // Push Notification provider.
     useEffect(function() {
-        try { 
+        try {
             if ( currentUser !== null && isNativePlatform() ) {
                 listenForPushNotifications().then(function() {
                     registerPushNotifications().catch(function(error) {
@@ -154,7 +153,7 @@ export const useNotifications = function() {
 
         // Cleanup the listeners
         return () => {
-            try { 
+            try {
                 if ( isNativePlatform() ) {
                     PushNotifications.removeAllListeners().catch((error) => {
                         logger.error(`Failed to remove push notification listeners: `, error)
@@ -169,7 +168,7 @@ export const useNotifications = function() {
     // Update our device record with the status of our desktop notification
     // permissions
     useEffect(() => {
-        try { 
+        try {
             if ( currentUser !== null && ! isNativePlatform() ) {
                 if ( device !== undefined && device !== null ) {
                     if ( ! ("notificationPermission" in device) && "Notification" in window ) {

@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -52,7 +52,7 @@ module.exports = class GroupSchema extends Schema {
                         .getErrors()
                     return errors
                 }
-            }, 
+            },
             postPermissions: {
                 clean: (value) => { return stringCleaner(value) },
                 validate: (value, existing, action) => {
@@ -140,6 +140,7 @@ module.exports = class GroupSchema extends Schema {
 
                     // parentId may be null.
                     const errors = validator
+                        .mustNotBeUpdated()
                         .mustBeUUID()
                         .getErrors()
                     return errors

@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -29,9 +29,9 @@ const ServiceError = require('../../errors/ServiceError')
 module.exports = class PostSubscriptionPermissions {
 
     constructor(core, permissionService) {
-        this.core 
+        this.core = core
 
-        this.permissionService = permissionService 
+        this.permissionService = permissionService
 
         this.postDAO = new PostDAO(core)
         this.postSubscriptionDAO = new PostSubscriptionDAO(core)
@@ -44,7 +44,7 @@ module.exports = class PostSubscriptionPermissions {
             && ( ! util.objectHas(context, 'postSubscription') || context.postSubscription === null))
         {
             if ( context.postSubscription !== null ) {
-                if ( util.objectHas(context, 'postId') && context.postId !== null 
+                if ( util.objectHas(context, 'postId') && context.postId !== null
                     && util.objectHas(context, 'userId') && context.userId !== null)
                 {
                     context.postSubscription = await this.postSubscriptionDAO.getPostSubscriptionByPostAndUser(context.postId, context.userId)
@@ -106,7 +106,7 @@ module.exports = class PostSubscriptionPermissions {
 
     async canViewPostSubscription(user, context) {
         await this.ensureContext(user, context, [ 'postSubscription' ])
-        
+
         // We're not going to test post visibility.
         if ( context.postSubscription.userId === user.id ) {
             return true

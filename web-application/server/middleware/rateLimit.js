@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -27,11 +27,13 @@ const rateLimit = function(core, limit) {
         const method = request.method
 
         if ( limit === undefined || limit === null || typeof limit !== 'number' ) {
-            next()    
+            next()
+            return
         }
 
         if ( route === undefined || route === null || method === undefined || method === null) {
-            next()    
+            next()
+            return
         }
 
         const ipAddress = request.ip
@@ -40,7 +42,7 @@ const rateLimit = function(core, limit) {
         let previousRequests = {}
         if ( previousRequestsJSON !== null ) {
             previousRequests = JSON.parse(previousRequestsJSON)
-        } 
+        }
 
         const now = Date.now()
         let requestCount = 0
@@ -60,7 +62,7 @@ const rateLimit = function(core, limit) {
 
         request.logger.debug(`IP(${ipAddress}) has made ${requestCount} requests to ${method} ${route} against ${limit} in the last ${PERIOD / 1000} seconds.`)
         if ( requestCount > limit ) {
-            request.logger.warn(`IP(${request.ip}) is being rate limited.`) 
+            request.logger.warn(`IP(${request.ip}) is being rate limited.`)
             response.status(429).json({
                 error: {
                     type: 'too-many-requests',
@@ -68,9 +70,9 @@ const rateLimit = function(core, limit) {
                 }
             })
             return
-        } 
+        }
 
-        next() 
+        next()
     }
 }
 

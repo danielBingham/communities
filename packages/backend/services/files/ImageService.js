@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -47,7 +47,7 @@ module.exports = class ImageService {
         this.local = new LocalFileService(core)
         this.s3 = new S3FileService(core)
 
-        this.imageSizes = [ 30, 200, 325, 450, 650 ] 
+        this.imageSizes = [ 30, 200, 325, 450, 650 ]
     }
 
     async resize(fileId, size) {
@@ -55,12 +55,12 @@ module.exports = class ImageService {
         if ( file === null ) {
             throw new ServiceError('file-not-found', `File(${fileId}) not found.`)
         }
-        
-        const fileName = this.fileService.getFilename(file, size) 
-        const tmpPath = `tmp/${fileName}`
-        const targetPath = this.fileService.getPath(file, size) 
 
-        try { 
+        const fileName = this.fileService.getFilename(file, size)
+        const tmpPath = `tmp/${fileName}`
+        const targetPath = this.fileService.getPath(file, size)
+
+        try {
             const fileContents = await this.s3.getFile(file.filepath).catch((error) => {
                 this.core.logger.error(`Failed to download image from S3: `, error)
                 throw new ServiceError('failed-download', 'Failed to download image file for processing.')
@@ -92,7 +92,7 @@ module.exports = class ImageService {
                 throw new ServiceError('failed-read', 'Failed to read image after processing.')
             }
         } catch (error) {
-            this.core.logger.error(`Failed create file variant, '${size}': `, error) 
+            this.core.logger.error(`Failed create file variant, '${size}': `, error)
             try {
                 if ( this.local.fileExists(tmpPath) ) {
                     this.local.removeFile(tmpPath)
@@ -113,7 +113,7 @@ module.exports = class ImageService {
 
         let orientedContents = null
         try {
-            orientedContents = await sharp(fileContents).rotate().toBuffer() 
+            orientedContents = await sharp(fileContents).rotate().toBuffer()
         } catch ( error ) {
             this.core.logger.error(`Attempt to orient file before crop failed.\n
                 file: %O\n
@@ -125,7 +125,7 @@ module.exports = class ImageService {
                 `Attempt to orient image before crop failed.`)
         }
         const dimensions = imageSize(orientedContents)
-        
+
         // The image will have been scaled equivalently in each dimension in
         // order to maintain the aspect ratio. In theory, we should be able to
         // use the ratio from one dimension for both of them, but there are
@@ -182,11 +182,11 @@ module.exports = class ImageService {
         await this.fileService.deleteVariants(file)
 
         // Crop the file and upload the cropped file to the original path.
-        const filename = this.fileService.getFilename(file) 
+        const filename = this.fileService.getFilename(file)
         const tmpPath = `tmp/${filename}`
-        const targetPath = this.fileService.getPath(file) 
+        const targetPath = this.fileService.getPath(file)
 
-        try { 
+        try {
             await sharp(orientedContents)
                 .extract({ left: x, top: y, width: width, height: height })
                 .toFile(tmpPath)

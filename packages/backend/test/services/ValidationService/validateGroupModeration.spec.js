@@ -25,19 +25,19 @@ describe('ValidationService.validateGroupModeration()', function() {
         postmarkClient: {
             sendEmail: jest.fn()
         },
-        features: new FeatureFlags() 
+        features: new FeatureFlags()
     }
 
     beforeEach(function() {
         core.database.query.mockReset()
         // Disable logging.
-        core.logger.level = -1 
+        core.logger.level = -1
     })
 
     it('Should return one error for each disallowed field included (createdDate, updatedDate)', async function() {
         const service = new ValidationService(core)
 
-        const groupModeration = { 
+        const groupModeration = {
             userId: '4c73dbae-3d03-43cd-b03d-5be4953b832b',
             groupId: 'dc0cf03c-d1d5-4722-bdaf-cffa509c981a',
             status: 'flagged',
@@ -56,7 +56,7 @@ describe('ValidationService.validateGroupModeration()', function() {
     it('Should treat `null` as set for disallowed fields', async function() {
         const service = new ValidationService(core)
 
-        const groupModeration = { 
+        const groupModeration = {
             userId: '4c73dbae-3d03-43cd-b03d-5be4953b832b',
             groupId: 'dc0cf03c-d1d5-4722-bdaf-cffa509c981a',
             status: 'flagged',
@@ -64,7 +64,7 @@ describe('ValidationService.validateGroupModeration()', function() {
             postId: 'ff6234c5-f49d-4774-b738-3251fe16fb66',
             postCommentId: null,
             createdDate: null,
-            updatedDate: null 
+            updatedDate: null
         }
 
         const errors = await service.validateGroupModeration(null, groupModeration, null)
@@ -73,10 +73,10 @@ describe('ValidationService.validateGroupModeration()', function() {
     })
 
     describe('when creating', function() {
-        it('Should return errors if any required fields are missing', async function() { 
+        it('Should return errors if any required fields are missing', async function() {
             const service = new ValidationService(core)
 
-            const groupModeration = { 
+            const groupModeration = {
                 groupId: 'dc0cf03c-d1d5-4722-bdaf-cffa509c981a',
                 status: 'flagged',
                 reason: 'A test reason',
@@ -107,7 +107,7 @@ describe('ValidationService.validateGroupModeration()', function() {
             // Moderator User
             const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
 
-            const groupModeration = { 
+            const groupModeration = {
                 id: 'f5e9e853-6803-4a74-98c3-23fb0933062f',
             }
 
@@ -128,7 +128,7 @@ describe('ValidationService.validateGroupModeration()', function() {
         it('Should return one error for each disallowed field included (userId, postId, postCommentId) that does not match existing', async function() {
             const service = new ValidationService(core)
 
-            const groupModeration = { 
+            const groupModeration = {
                 id: 'a335d429-a7c5-429a-b6b0-5413e94e7921',
                 userId: '6d5e4ab8-5d71-432c-84f0-6c16543eab00',
                 groupId: 'dc0cf03c-d1d5-4722-bdaf-cffa509c981a',
@@ -160,7 +160,7 @@ describe('ValidationService.validateGroupModeration()', function() {
         it('Should return errors for invalid fields', async function() {
             const service = new ValidationService(core)
 
-            const groupModeration = { 
+            const groupModeration = {
                 userId: null,
                 groupId: null,
                 status: 'removed',
@@ -181,7 +181,7 @@ describe('ValidationService.validateGroupModeration()', function() {
         it('Should return an error when both postId and postCommentId are missing', async function() {
             const service = new ValidationService(core)
 
-            const groupModeration = { 
+            const groupModeration = {
                 userId: '4c73dbae-3d03-43cd-b03d-5be4953b832b',
                 groupId: 'dc0cf03c-d1d5-4722-bdaf-cffa509c981a',
                 status: 'flagged',
@@ -202,8 +202,10 @@ describe('ValidationService.validateGroupModeration()', function() {
         it('Should pass when both postId and postCommentId are present', async function() {
             const service = new ValidationService(core)
 
-            const groupModeration = { 
-                userId: '4c73dbae-3d03-43cd-b03d-5be4953b832b',
+            const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
+
+            const groupModeration = {
+                userId: currentUser.id,
                 groupId: 'dc0cf03c-d1d5-4722-bdaf-cffa509c981a',
                 status: 'flagged',
                 reason: 'A test reason',
@@ -211,13 +213,12 @@ describe('ValidationService.validateGroupModeration()', function() {
                 postCommentId: 'a2d49442-4068-481d-b0be-c98b3c20d788'
             }
 
-            const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
 
             core.database.query.mockReturnValue(undefined)
-                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '4c73dbae-3d03-43cd-b03d-5be4953b832b' } ]})
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: currentUser.id } ]})
                 .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'dc0cf03c-d1d5-4722-bdaf-cffa509c981a' } ]})
-                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '7ea98d1e-dd4a-4abb-977c-1cf483356180' } ]})
-                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'a2d49442-4068-481d-b0be-c98b3c20d788' } ]})
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '7ea98d1e-dd4a-4abb-977c-1cf483356180', group_id: 'dc0cf03c-d1d5-4722-bdaf-cffa509c981a'}]})
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'a2d49442-4068-481d-b0be-c98b3c20d788', post_id: '7ea98d1e-dd4a-4abb-977c-1cf483356180' }]})
 
             const errors = await service.validateGroupModeration(currentUser, groupModeration, null)
 
@@ -227,7 +228,10 @@ describe('ValidationService.validateGroupModeration()', function() {
         it('Should return an error when userId is not found in the database', async function() {
             const service = new ValidationService(core)
 
-            const groupModeration = { 
+            // Moderator User
+            const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
+
+            const groupModeration = {
                 id: '2a52fb39-a8bb-4f4a-badf-ec467d76cd8d',
                 userId: '4c73dbae-3d03-43cd-b03d-5be4953b832b',
                 groupId: 'dc0cf03c-d1d5-4722-bdaf-cffa509c981a',
@@ -237,29 +241,31 @@ describe('ValidationService.validateGroupModeration()', function() {
                 postCommentId: null,
             }
 
-            // Moderator User
-            const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
 
             core.database.query.mockReturnValue(undefined)
                 .mockReturnValueOnce({ rowCount: 0, rows: []})
-                .mockReturnValueOnce({ rowCount: 0, rows: [{ id: 'dc0cf03c-d1d5-4722-bdaf-cffa509c981a' } ]}) 
-                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '7ea98d1e-dd4a-4abb-977c-1cf483356180' } ]})
-                 
+                .mockReturnValueOnce({ rowCount: 0, rows: [{ id: 'dc0cf03c-d1d5-4722-bdaf-cffa509c981a' } ]})
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '7ea98d1e-dd4a-4abb-977c-1cf483356180', group_id: 'dc0cf03c-d1d5-4722-bdaf-cffa509c981a' } ]})
+
             service.groupModeration.permissionService.can = jest.fn()
             service.groupModeration.permissionService.can.mockReturnValue(false)
 
             const errors = await service.validateGroupModeration(currentUser, groupModeration, null)
 
-            expect(errors.length).toBe(1)
+            expect(errors.length).toBe(2)
             expect(errors[0].type).toBe('userId:not-found')
+            expect(errors[1].type).toBe('not-authorized')
         })
 
         it('Should return an error when groupId is not found in the database', async function() {
             const service = new ValidationService(core)
 
-            const groupModeration = { 
+            // Moderator User
+            const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
+
+            const groupModeration = {
                 id: '2a52fb39-a8bb-4f4a-badf-ec467d76cd8d',
-                userId: '4c73dbae-3d03-43cd-b03d-5be4953b832b',
+                userId: currentUser.id,
                 groupId: 'dc0cf03c-d1d5-4722-bdaf-cffa509c981a',
                 status: 'flagged',
                 reason: 'A test reason',
@@ -267,29 +273,31 @@ describe('ValidationService.validateGroupModeration()', function() {
                 postCommentId: null,
             }
 
-            // Moderator User
-            const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
 
             core.database.query.mockReturnValue(undefined)
-                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '4c73dbae-3d03-43cd-b03d-5be4953b832b' } ]})
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: currentUser.id } ]})
                 .mockReturnValueOnce({ rowCount: 0, rows: []})
-                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '7ea98d1e-dd4a-4abb-977c-1cf483356180' } ]})
-                 
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '7ea98d1e-dd4a-4abb-977c-1cf483356180', group_id: null } ]})
+
             service.groupModeration.permissionService.can = jest.fn()
             service.groupModeration.permissionService.can.mockReturnValue(false)
 
             const errors = await service.validateGroupModeration(currentUser, groupModeration, null)
 
-            expect(errors.length).toBe(1)
+            expect(errors.length).toBe(2)
             expect(errors[0].type).toBe('groupId:not-found')
+            expect(errors[1].type).toBe('postId:not-authorized')
         })
 
         it('Should return an error when postId is not found in the database', async function() {
             const service = new ValidationService(core)
 
-            const groupModeration = { 
+            // Moderator User
+            const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
+
+            const groupModeration = {
                 id: '2a52fb39-a8bb-4f4a-badf-ec467d76cd8d',
-                userId: '4c73dbae-3d03-43cd-b03d-5be4953b832b',
+                userId:  currentUser.id,
                 groupId: 'dc0cf03c-d1d5-4722-bdaf-cffa509c981a',
                 status: 'flagged',
                 reason: 'A test reason',
@@ -297,17 +305,15 @@ describe('ValidationService.validateGroupModeration()', function() {
                 postCommentId: null,
             }
 
-            // Moderator User
-            const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
 
             core.database.query.mockReturnValue(undefined)
-                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '4c73dbae-3d03-43cd-b03d-5be4953b832b' } ]})
-                .mockReturnValueOnce({ rowCount: 0, rows: [{ id: 'dc0cf03c-d1d5-4722-bdaf-cffa509c981a' } ]}) 
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: currentUser.id } ]})
+                .mockReturnValueOnce({ rowCount: 0, rows: [{ id: 'dc0cf03c-d1d5-4722-bdaf-cffa509c981a' } ]})
                 .mockReturnValueOnce({ rowCount: 0, rows: [ ]})
 
             service.groupModeration.permissionService.can = jest.fn()
             service.groupModeration.permissionService.can.mockReturnValue(false)
-                 
+
 
             const errors = await service.validateGroupModeration(currentUser, groupModeration, null)
 
@@ -318,9 +324,12 @@ describe('ValidationService.validateGroupModeration()', function() {
         it('Should return an error when postCommentId is not found in the database', async function() {
             const service = new ValidationService(core)
 
-            const groupModeration = { 
+            // Moderator User
+            const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
+
+            const groupModeration = {
                 id: '2a52fb39-a8bb-4f4a-badf-ec467d76cd8d',
-                userId: '4c73dbae-3d03-43cd-b03d-5be4953b832b',
+                userId: currentUser.id,
                 groupId: 'dc0cf03c-d1d5-4722-bdaf-cffa509c981a',
                 status: 'flagged',
                 reason: 'A test reason',
@@ -328,14 +337,12 @@ describe('ValidationService.validateGroupModeration()', function() {
                 postCommentId: '7ea98d1e-dd4a-4abb-977c-1cf483356180',
             }
 
-            // Moderator User
-            const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
 
             core.database.query.mockReturnValue(undefined)
-                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '4c73dbae-3d03-43cd-b03d-5be4953b832b' } ]})
-                .mockReturnValueOnce({ rowCount: 0, rows: [{ id: 'dc0cf03c-d1d5-4722-bdaf-cffa509c981a' } ]}) 
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: currentUser.id } ]})
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'dc0cf03c-d1d5-4722-bdaf-cffa509c981a' } ]})
                 .mockReturnValueOnce({ rowCount: 0, rows: [ ]})
-                 
+
             service.groupModeration.permissionService.can = jest.fn()
             service.groupModeration.permissionService.can.mockReturnValue(false)
 
@@ -348,9 +355,12 @@ describe('ValidationService.validateGroupModeration()', function() {
         it('Should pass a valid groupModeration', async function() {
             const service = new ValidationService(core)
 
-            const groupModeration = { 
+            // Moderator User
+            const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
+
+            const groupModeration = {
                 id: '2a52fb39-a8bb-4f4a-badf-ec467d76cd8d',
-                userId: '4c73dbae-3d03-43cd-b03d-5be4953b832b',
+                userId: currentUser.id,
                 groupId: 'dc0cf03c-d1d5-4722-bdaf-cffa509c981a',
                 status: 'flagged',
                 reason: 'A test reason',
@@ -358,13 +368,10 @@ describe('ValidationService.validateGroupModeration()', function() {
                 postId: '7ea98d1e-dd4a-4abb-977c-1cf483356180',
             }
 
-            // Moderator User
-            const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
-
             core.database.query.mockReturnValue(undefined)
-                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '4c73dbae-3d03-43cd-b03d-5be4953b832b' }]})
-                .mockReturnValueOnce({ rowCount: 0, rows: [{ id: 'dc0cf03c-d1d5-4722-bdaf-cffa509c981a' } ]}) 
-                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '7ea98d1e-dd4a-4abb-977c-1cf483356180' }]})
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: currentUser.id }]})
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'dc0cf03c-d1d5-4722-bdaf-cffa509c981a' } ]})
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '7ea98d1e-dd4a-4abb-977c-1cf483356180', group_id: 'dc0cf03c-d1d5-4722-bdaf-cffa509c981a' }]})
 
             service.groupModeration.permissionService.can = jest.fn()
             service.groupModeration.permissionService.can.mockReturnValue(false)

@@ -477,23 +477,36 @@ module.exports = class UserController extends BaseController{
         }
 
         if ( 'isGroupMember' in query ) {
-            const and = result.params.length > 0 ? ' AND ' : ''
             const groupId = query.isGroupMember
+
+            const canQueryGroupMembers = await this.permissionService.can(currentUser, 'query', 'GroupMember', { groupId: groupId })
+            if ( canQueryGroupMembers !== true ) {
+                this.core.logger.warn(`User attempting to query GroupMembers for Group(${groupId}) without permission.`)
+                return { emptyResult: true }
+            }
+
 
             const members = await this.groupMemberDAO.getGroupMembers(groupId)
             const memberUserIds = members.map((member) => member.userId)
 
+            const and = result.params.length > 0 ? ' AND ' : ''
             result.params.push(memberUserIds)
             result.where += `${and} users.id = ANY($${result.params.length}::uuid[])`
         }
 
         if ( 'isNotGroupMember' in query ) {
-            const and = result.params.length > 0 ? ' AND ' : ''
             const groupId = query.isNotGroupMember
+
+            const canQueryGroupMembers = await this.permissionService.can(currentUser, 'query', 'GroupMember', { groupId: groupId })
+            if ( canQueryGroupMembers !== true ) {
+                this.core.logger.warn(`User attempting to query GroupMembers for Group(${groupId}) without permission.`)
+                return { emptyResult: true }
+            }
 
             const members = await this.groupMemberDAO.getGroupMembers(groupId)
             const memberUserIds = members.map((member) => member.userId)
 
+            const and = result.params.length > 0 ? ' AND ' : ''
             result.params.push(memberUserIds)
             result.where += `${and} users.id != ALL($${result.params.length}::uuid[])`
         }
@@ -552,7 +565,14 @@ module.exports = class UserController extends BaseController{
      * @returns {Promise}   Resolves to void.
      */
     async getUsers(request, response) {
-        const query = await this.parseQuery(request.session.user, request.query)
+        const currentUser = request.session.user
+        if ( ! currentUser ) {
+            throw new ControllerError(401, 'not-authenticated',
+                `User attempting to query users without authenticating.`,
+                `You must be authenticated to do that.`)
+        }
+
+        const query = await this.parseQuery(currentUser, request.query)
 
         if ( query.emptyResult ) {
             return response.status(200).json({
@@ -677,9 +697,13 @@ module.exports = class UserController extends BaseController{
      */
     async getUser(request, response) {
         const currentUser = request.session.user
-        const userId = request.params.id
+        if ( ! currentUser ) {
+            throw new ControllerError(401, 'not-authenticated',
+                `User attempting to retrieve user without authentication.`,
+                `You must be authenticated to retrieve that resource.`)
+        }
 
-        // TODO TECHDEBT Why do we allow unauthenticated access here?
+        const userId = request.params.id
 
         const canModerateSite = await this.permissionService.can(currentUser, 'moderate', 'Site')
         if ( currentUser && currentUser?.id !== userId && canModerateSite !== true) {
@@ -787,7 +811,7 @@ module.exports = class UserController extends BaseController{
         // PATCHing a user that actually exists.
 
         // 1. User must be logged in unless they are using  token.
-        if ( ! currentUser && ! ( 'token' in user) ) {
+        if ( ! currentUser && ! user.token ) {
             throw new ControllerError(401, 'not-authenticated',
                 `Unauthenticated user attempting to update user(${user.id}).`,
                 `You must be authenticated to update a user.`)

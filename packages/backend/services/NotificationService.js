@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -25,12 +25,11 @@ module.exports = class NotificationService {
     }
 
     async sendNotifications(currentUser, type, context, options) {
-        await this.core.queues['send-notifications'].add({ 
-            currentUser: currentUser,
+        await this.core.queues['send-notifications'].add({
+            session: { user: currentUser },
             type: type,
             context: context,
             options: options
-        }, { attempts: 3 })
+        }, { attempts: 1 }) // Better no notification on error than spamming the user with notifications.
     }
-
 }

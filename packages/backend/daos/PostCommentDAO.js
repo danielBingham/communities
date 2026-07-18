@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -65,7 +65,7 @@ module.exports = class PostCommentDAO extends DAO {
                     'group_moderation_id': {
                         insert: 'allowed',
                         update: 'allowed',
-                        select: 'alwways',
+                        select: 'always',
                         key: 'groupModerationId'
                     },
                     'created_date': {
@@ -156,7 +156,7 @@ module.exports = class PostCommentDAO extends DAO {
 
         if ( ! (commentId in results.dictionary) ) {
             return null
-        } 
+        }
 
         return results.dictionary[commentId]
     }
@@ -195,7 +195,7 @@ module.exports = class PostCommentDAO extends DAO {
 
     async getPostCommentPageMeta(query) {
         let where = query.where ? `WHERE ${query.where}` : ''
-        let params = query.params ? [ ...query.params] : [] 
+        let params = query.params ? [ ...query.params] : []
         let page = query.page ? query.page : 1
 
         const results = await this.core.database.query(`
@@ -210,7 +210,7 @@ module.exports = class PostCommentDAO extends DAO {
             count: count,
             page: page,
             pageSize: PAGE_SIZE,
-            numberOfPages: Math.floor(count / PAGE_SIZE) + ( (count % PAGE_SIZE) > 0 ? 1 : 0) 
+            numberOfPages: Math.floor(count / PAGE_SIZE) + ( (count % PAGE_SIZE) > 0 ? 1 : 0)
         }
     }
 
@@ -218,10 +218,10 @@ module.exports = class PostCommentDAO extends DAO {
         let where = query.where ? `WHERE ${query.where}` : ''
         let params = query.params ? [ ...query.params ] : []
         let page = query.page ? query.page : 1
-        let order = query.order ? `ORDER BY ${query.order}` : `ORDER BY post_comments.created_date ASC` 
+        let order = query.order ? `ORDER BY ${query.order}` : `ORDER BY post_comments.created_date ASC`
 
         const results = await this.core.database.query(`
-            SELECT 
+            SELECT
                 post_comments.id
             FROM post_comments
             ${where}

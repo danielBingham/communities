@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -23,6 +23,7 @@ const FileSchema = require('./File')
 const GroupSchema = require('./Group')
 const GroupSubscriptionSchema = require('./GroupSubscription')
 const LogSchema = require('./Log')
+const NotificationSchema = require('./Notification')
 const SiteModerationSchema = require('./SiteModeration')
 
 module.exports = {
@@ -31,5 +32,6 @@ module.exports = {
     GroupSchema: GroupSchema,
     GroupSubscriptionSchema: GroupSubscriptionSchema,
     LogSchema: LogSchema,
+    NotificationSchema: NotificationSchema,
     SiteModerationSchema: SiteModerationSchema
 }

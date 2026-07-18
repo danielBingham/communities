@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -64,19 +64,19 @@ const SCHEMA = {
             'shared_post_id': {
                 insert: 'allowed',
                 update: 'denied',
-                selected: 'always',
+                select: 'always',
                 key: 'sharedPostId'
             },
             'site_moderation_id': {
                 insert: 'allowed',
                 update: 'allowed',
-                selected: 'always',
+                select: 'always',
                 key: 'siteModerationId'
             },
             'group_moderation_id': {
                 insert: 'allowed',
                 update: 'allowed',
-                selected: 'always',
+                select: 'always',
                 key: 'groupModerationId'
             },
             'activity': {
@@ -213,7 +213,7 @@ module.exports = class PostDAO extends DAO {
             }
 
             // Hydrate PostReactions.
-            if ( row.PostReaction_id !== null && ! (row.PostReaction_id in postReactionDictionary) ) 
+            if ( row.PostReaction_id !== null && ! (row.PostReaction_id in postReactionDictionary) )
             {
                 postReactionDictionary[row.PostReaction_id] = true
                 dictionary[row.Post_id].reactions.push(row.PostReaction_id)
@@ -221,7 +221,7 @@ module.exports = class PostDAO extends DAO {
 
             // Hydrate PostComments.
             if ( row.PostComment_id !== null && ! (row.PostComment_id in postCommentDictionary) ) {
-                postCommentDictionary[row.PostComment_id] = true 
+                postCommentDictionary[row.PostComment_id] = true
                 dictionary[row.Post_id].comments.push(row.PostComment_id)
             }
 
@@ -250,8 +250,8 @@ module.exports = class PostDAO extends DAO {
 
     async selectPosts(query) {
         let where = query.where ? `WHERE ${query.where}` : ''
-        let params = query.params ? [ ...query.params ] : []
-        let page = query.page 
+        let params = query.params && Array.isArray(query.params) ? [ ...query.params ] : []
+        let page = query.page
         let order = query.order ? `${query.order}` : `posts.created_date DESC`
 
         if ( page ) {
@@ -268,7 +268,7 @@ module.exports = class PostDAO extends DAO {
             SELECT
                 ${this.getPostSelectionString()},
                 post_comments.id as "PostComment_id",
-                post_reactions.id as "PostReaction_id", 
+                post_reactions.id as "PostReaction_id",
                 post_files.file_id as "File_id"
             FROM posts
                 LEFT OUTER JOIN post_reactions ON posts.id = post_reactions.post_id
@@ -294,7 +294,7 @@ module.exports = class PostDAO extends DAO {
         let page = query.page ? query.page : 1
 
         const results = await this.core.database.query(`
-            SELECT 
+            SELECT
                 COUNT(*)
             FROM posts
                 LEFT OUTER JOIN site_moderation on posts.site_moderation_id = site_moderation.id
@@ -307,18 +307,18 @@ module.exports = class PostDAO extends DAO {
             count: count,
             page: page,
             pageSize: PAGE_SIZE,
-            numberOfPages: Math.floor(count / PAGE_SIZE) + ( (count % PAGE_SIZE) > 0 ? 1 : 0) 
+            numberOfPages: Math.floor(count / PAGE_SIZE) + ( (count % PAGE_SIZE) > 0 ? 1 : 0)
         }
     }
 
     async getPostPage(query) {
         let where = query.where ? `WHERE ${query.where}` : ''
         let params = query.params ? [ ...query.params ] : []
-        let page = query.page ? query.page : 1 
-        let order = query.order ? `ORDER BY ${query.order}` : `ORDER BY posts.activity/((EXTRACT(EPOCH from now()) - EXTRACT(EPOCH from posts.created_date))/(60*60)) DESC` 
+        let page = query.page ? query.page : 1
+        let order = query.order ? `ORDER BY ${query.order}` : `ORDER BY posts.activity/((EXTRACT(EPOCH from now()) - EXTRACT(EPOCH from posts.created_date))/(60*60)) DESC`
 
         const results = await this.core.database.query(`
-            SELECT 
+            SELECT
                 posts.id
             FROM posts
                 LEFT OUTER JOIN site_moderation on posts.site_moderation_id = site_moderation.id

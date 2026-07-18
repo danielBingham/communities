@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -36,7 +36,7 @@ const canQueryGroupMember = function(user, context ) {
     // Always exclude banned members.
     if ( 'userMember' in context && context.userMember !== undefined && context.userMember !== null
         && context.userMember.userId === user.id && context.userMember.groupId === context.group.id
-        && context.userMember.status === 'banned' 
+        && context.userMember.status === 'banned'
     ) {
         return false
     }
@@ -58,20 +58,20 @@ const canQueryGroupMember = function(user, context ) {
     }
 
     // Otherwise they must be a confirmed member of the group.
-    if ( 'userMember' in context && context.userMember !== undefined && context.userMember !== null 
+    if ( 'userMember' in context && context.userMember !== undefined && context.userMember !== null
         && context.userMember.userId === user.id && context.userMember.groupId === context.group.id
-        && context.userMember.status === 'member') 
+        && context.userMember.status === 'member')
     {
-        return true 
+        return true
     }
 
-    return false 
+    return false
 }
 
 const canViewGroupMember = function(user, context) {
     // If we don't have our context, then bail out.
-    if ( ! ( 'group' in context) || context.group === undefined || context.group === null 
-        || ! ( 'groupMember' in context) || context.groupMember === undefined || context.groupMember === null ) 
+    if ( ! ( 'group' in context) || context.group === undefined || context.group === null
+        || ! ( 'groupMember' in context) || context.groupMember === undefined || context.groupMember === null )
     {
         return false
     }
@@ -104,8 +104,8 @@ const canViewGroupMember = function(user, context) {
     // are a member of the parent group.
     if ( context.group.type === 'hidden-open' ) {
         if ( 'parentMember' in context && context.parentMember !== undefined && context.parentMember !== null
-            && context.parentMember.userId === user.id && context.parentMember.groupId === context.group.id
-            && context.parentMember.status !== 'banned' 
+            && context.parentMember.userId === user.id && context.parentMember.groupId === context.group.parentId
+            && context.parentMember.status === 'member'
             && context.groupMember.groupId === context.group.id && context.groupMember.status === 'member'
         ) {
             return true
@@ -113,23 +113,23 @@ const canViewGroupMember = function(user, context) {
     }
 
     // If they are a confirmed member of the group, then they can view other confirmed members.
-    if ( 'userMember' in context && context.userMember !== undefined && context.userMember !== null  
-        && context.userMember.userId === user.id && context.userMember.groupId === context.group.id 
-        && context.userMember.status === 'member' && context.groupMember.status === 'member' 
+    if ( 'userMember' in context && context.userMember !== undefined && context.userMember !== null
+        && context.userMember.userId === user.id && context.userMember.groupId === context.group.id
+        && context.userMember.status === 'member' && context.groupMember.status === 'member'
     ) {
-        return true 
+        return true
     }
 
     // They can view their own member, if they haven't been banned.
-    if ( 'userMember' in context && context.userMember !== undefined && context.userMember !== null  
-        && context.userMember.userId === user.id && context.userMember.groupId === context.group.id 
+    if ( 'userMember' in context && context.userMember !== undefined && context.userMember !== null
+        && context.userMember.userId === user.id && context.userMember.groupId === context.group.id
         && context.groupMember.userId === user.id && context.groupMember.groupId === context.group.id
-        && context.userMember.status !== 'banned' && context.groupMember.status !== 'banned' 
+        && context.userMember.status !== 'banned' && context.groupMember.status !== 'banned'
     ) {
-        return true 
+        return true
     }
 
-    return false 
+    return false
 }
 
 const canCreateGroupMember = function(user, context) {
@@ -137,9 +137,9 @@ const canCreateGroupMember = function(user, context) {
         return true
     }
 
-    if ( context.group === undefined || context.group === null 
+    if ( context.group === undefined || context.group === null
         || context.userMember === undefined // userMember may be null, indicating that they aren't a member of the group yet
-        || context.groupMember === undefined || context.groupMember === null ) 
+        || context.groupMember === undefined || context.groupMember === null )
     {
         return false
     }
@@ -157,7 +157,7 @@ const canCreateGroupMember = function(user, context) {
         return context.canModerateGroup === true || ( context.userMember === null && context.groupMember.userId === user.id)
     }
     // For private groups
-    if ( context.group.type === 'private' ||  context.group.type === 'private-open' ) { 
+    if ( context.group.type === 'private' ||  context.group.type === 'private-open' ) {
         return context.canModerateGroup === true || (context.userMember === null && context.groupMember.userId === user.id)
     }
     // For Hidden groups
@@ -166,12 +166,12 @@ const canCreateGroupMember = function(user, context) {
     }
 
     if ( context.group.type === 'hidden-open' || context.group.type === 'hidden-private' ) {
-        if ( context.canModerateGroup === true 
+        if ( context.canModerateGroup === true
             || ( 'parentMember' in context && context.parentMember !== undefined && context.parentMember !== null
                 && context.parentMember.userId === user.id && context.parentMember.groupId === context.group.parentId
-                && context.parentMember.status === 'member' 
+                && context.parentMember.status === 'member'
                 && context.groupMember.userId === user.id && context.groupMember.groupId === context.group.id
-            ) 
+            )
         ) {
             return true
         }
@@ -197,7 +197,7 @@ const canUpdateGroupMember = function(user, context) {
     // Moderators can manage members.
     if ( context.groupMember.role === 'member' && context.canModerateGroup === true ) {
         return true
-    } 
+    }
 
     // Admins can manage moderators.
     if ( context.groupMember.role === 'moderator' && context.canAdminGroup === true) {
@@ -228,7 +228,7 @@ const canDeleteGroupMember = function(user, context) {
     // Moderators can delete members.
     if ( context.groupMember.role === 'member' && context.canModerateGroup === true ) {
         return true
-    } 
+    }
 
     // Admins can delete moderators.
     if ( context.groupMember.role === 'moderator' && context.canAdminGroup === true) {

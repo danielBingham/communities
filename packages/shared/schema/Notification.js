@@ -17,12 +17,12 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-const { stringCleaner, cleanUuid } = require('../cleaning/types')
-const { ArrayValidator, StringValidator, ObjectValidator, UUIDValidator } = require('../validation/types')
+const { stringCleaner, cleanUuid, cleanBoolean } = require('../cleaning/types')
+const { StringValidator, ObjectValidator, BooleanValidator, UUIDValidator } = require('../validation/types')
 
 const Schema = require('./Schema')
 
-module.exports = class FileSchema extends Schema {
+module.exports = class NotificationSchema extends Schema {
     constructor() {
         super()
 
@@ -44,66 +44,7 @@ module.exports = class FileSchema extends Schema {
                 validate: (value, existing, action) => {
                     const validator = new UUIDValidator('userId', value, existing, action)
                     const errors = validator
-                        .isRequiredToCreate()
-                        .mustNotBeUpdated()
-                        .mustNotBeNull()
-                        .mustBeUUID()
-                        .getErrors()
-                    return errors
-                }
-            },
-            state: {
-                clean: (value) => { return stringCleaner(value) },
-                validate: (value, existing, action) => {
-                    const validator = new StringValidator('state', value, existing, action)
-                    const errors = validator
-                        .mustNotBeNull()
-                        .mustBeString()
-                        .mustBeOneOf([ 'pending', 'processing', 'error', 'ready' ])
-                        .getErrors()
-                    return errors
-                }
-            },
-            jobId: {
-                clean: (value) => { return cleanUuid(value) },
-                validate: (value, existing, action) => {
-                    const validator = new UUIDValidator('jobId', value, existing, action)
-                    const errors = validator
                         .mustNotBeSet()
-                        .getErrors()
-                    return errors
-                }
-            },
-            variants: {
-                clean: (value) => { return value },
-                validate: (value, existing, action) => {
-                    const validator = new ArrayValidator('variants', value, existing, action)
-                    const errors = validator
-                        .mustNotBeSet()
-                        .getErrors()
-                    return errors
-                }
-            },
-            kind: {
-                clean: (value) => { return stringCleaner(value) },
-                validate: (value, existing, action) => {
-                    const validator = new StringValidator('kind', value, existing, action)
-                    const errors = validator
-                        .mustNotBeNull()
-                        .mustBeString()
-                        .mustBeOneOf([ 'video', 'image' ])
-                        .getErrors()
-                    return errors
-                }
-            },
-            mimetype: {
-                clean: (value) => { return stringCleaner(value) },
-                validate: (value, existing, action) => {
-                    const validator = new StringValidator('mimetype', value, existing, action)
-                    const errors = validator
-                        .isRequiredToCreate()
-                        .mustNotBeUpdated()
-                        .mustBeString()
                         .getErrors()
                     return errors
                 }
@@ -113,38 +54,38 @@ module.exports = class FileSchema extends Schema {
                 validate: (value, existing, action) => {
                     const validator = new StringValidator('type', value, existing, action)
                     const errors = validator
-                        .mustNotBeUpdated()
-                        .mustBeString()
-                        .getErrors()
-                    return errors
-                }
-            },
-            thumbId: {
-                clean: (value) => { return cleanUuid(value) },
-                validate: (value, existing, action) => {
-                    const validator = new UUIDValidator('thumbId', value, existing, action)
-                    const errors = validator
                         .mustNotBeSet()
                         .getErrors()
                     return errors
                 }
             },
-            location: {
+            description: {
                 clean: (value) => { return stringCleaner(value) },
                 validate: (value, existing, action) => {
-                    const validator = new StringValidator('location', value, existing, action)
+                    const validator = new StringValidator('description', value, existing, action)
                     const errors = validator
                         .mustNotBeSet()
                         .getErrors()
                     return errors
                 }
             },
-            filepath: {
+            path: {
                 clean: (value) => { return stringCleaner(value) },
                 validate: (value, existing, action) => {
-                    const validator = new StringValidator('filepath', value, existing, action)
+                    const validator = new StringValidator('path', value, existing, action)
                     const errors = validator
                         .mustNotBeSet()
+                        .getErrors()
+                    return errors
+                }
+            },
+            isRead: {
+                clean: (value) => { return cleanBoolean(value) },
+                validate: (value, existing, action) => {
+                    const validator = new BooleanValidator('isRead', value, existing, action)
+                    const errors = validator
+                        .isRequiredToUpdate()
+                        .mustBeBoolean()
                         .getErrors()
                     return errors
                 }

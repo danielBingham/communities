@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -112,7 +112,7 @@ module.exports = class DAO {
             if ( meta.needsFeature && ! this.core.features.has(meta.needsFeature)) {
                 continue
             }
-            if ( meta.insert == 'denied' ) {
+            if ( meta.insert == DAO.INSERT.DENY ) {
                 continue
             }
 
@@ -135,32 +135,32 @@ module.exports = class DAO {
                     continue
                 }
 
-                if ( meta.insert == 'required' && ! ( meta.key in entity ) ) {
+                if ( meta.insert == DAO.INSERT.REQUIRE && ! ( meta.key in entity ) ) {
                     throw new DAOError('missing-field',
                         `Required '${meta.key}' not found in ${entityName}.`)
                 }
 
-                if ( meta.insert == 'denied' ) {
+                if ( meta.insert == DAO.INSERT.DENY ) {
                     continue
                 }
 
                 // If they haven't included a primary key, generate one.
-                // The database would generate one if it were left out, but 
+                // The database would generate one if it were left out, but
                 // it has the same effect as us generating one here and here we
-                // can add it into the entity and we can have some entities include 
+                // can add it into the entity and we can have some entities include
                 // their own while others don't more easily.
-                if ( meta.insert == 'primary' && ! ( meta.key in entity)) {
+                if ( meta.insert == DAO.INSERT.PRIMARY && ! ( meta.key in entity)) {
                     entity[meta.key] = Uuid.v4()
                 }
 
-                if ( meta.insert == 'override' ) {
+                if ( meta.insert == DAO.INSERT.OVERRIDE ) {
                     row += ( row == '(' ? '' : ', ' ) + `${meta.insertOverride}`
                 } else {
                     if ( ! (meta.key in entity) && ( 'insertDefault' in meta )) {
-                        params.push(meta.insertDefault()) 
+                        params.push(meta.insertDefault())
                     } else if ( ! (meta.key in entity) ) {
                         params.push(null)
-                    } else { 
+                    } else {
                         params.push(entity[meta.key])
                     }
                     row += ( row == '(' ? '' : ', ') + `$${params.length}`
@@ -191,7 +191,7 @@ module.exports = class DAO {
 
         // This is pure error checking.  If we don't have a primary key,
         // update's going to break or do weird shit.
-        let foundPrimary = false 
+        let foundPrimary = false
 
         for(const [field, meta] of Object.entries(this.entityMaps[entityName].fields)) {
             if ( meta.needsFeature && ! this.core.features.has(meta.needsFeature)) {
@@ -199,7 +199,7 @@ module.exports = class DAO {
             }
 
             // Primary keys go into the `where` statement.
-            if ( meta.update == 'primary' && meta.key in entity ) {
+            if ( meta.update == DAO.UPDATE.PRIMARY && meta.key in entity ) {
                 params.push(entity[meta.key])
                 if ( where !== '' ) {
                     where += ' AND '
@@ -207,14 +207,14 @@ module.exports = class DAO {
                 where += `${field} = $${params.length}`
                 foundPrimary = true
                 continue
-            } else if ( meta.update == 'primary' ) {
+            } else if ( meta.update == DAO.UPDATE.PRIMARY ) {
                 throw new DAOError('missing-field',
                     `Cannot update a row in ${table} without a primary key.`)
             }
 
             // If the key is missing and required, throw an error.  If it's not
             // required, then just continue on to the next key.
-            if ( ! ( meta.key in entity ) && meta.update == 'required' ) {
+            if ( ! ( meta.key in entity ) && meta.update == DAO.UPDATE.REQUIRE ) {
                 throw new DAOError('missing-field',
                     `Required '${meta.key}' not found in ${entityName}.`)
             } else if ( ! (meta.key in entity) && meta.key !== 'updatedDate' ) {
@@ -223,11 +223,11 @@ module.exports = class DAO {
 
             // If updating this key is disallowed, then just continue and
             // ignore it in the entity.
-            if ( meta.update == 'denied' ) {
+            if ( meta.update == DAO.UPDATE.DENY ) {
                 continue
             }
 
-            if ( meta.update == 'override' ) {
+            if ( meta.update == DAO.UPDATE.OVERRIDE ) {
                 fields += ( fields == '' ? '' : ', ') + `${field} = ${meta.updateOverride}`
             } else {
                 params.push(( entity[meta.key] !== null ? entity[meta.key] : null ))

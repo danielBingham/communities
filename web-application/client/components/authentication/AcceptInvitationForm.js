@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -29,7 +29,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 import { validateEmail, validateName, validateUsername, validatePassword } from '/lib/validation/user'
 
 import { validateToken } from '/state/tokens'
-import { patchUser, postUsers, getUsers } from '/state/User'
+import { patchUser, postUsers } from '/state/User'
 import { deleteAuthentication } from '/state/authentication'
 
 import Input from '/components/ui/Input'
@@ -63,8 +63,7 @@ const AcceptInvitationForm = function(props) {
     const [usernameRequest, makeUsernameRequest] = useRequest()
     const [logoutRequest, makeLogoutRequest] = useRequest()
 
-    const existing = useSelector((state) => username in state.User.byUsername ? state.User.byUsername[username] : undefined)
-    const userId = useSelector((state) => token in state.tokens.userIdsByToken ? state.tokens.userIdsByToken[token] : null) 
+    const userId = useSelector((state) => token in state.tokens.userIdsByToken ? state.tokens.userIdsByToken[token] : null)
     const user = useSelector((state) => userId in state.User.dictionary ? state.User.dictionary[userId] : null)
 
     /**
@@ -85,7 +84,7 @@ const AcceptInvitationForm = function(props) {
      * false otherwise.
      */
     const isValid = function(field) {
-        let error = false 
+        let error = false
 
         if ( field == 'token') {
             if ( tokenRequestRef.current ) {
@@ -97,30 +96,26 @@ const AcceptInvitationForm = function(props) {
         }
 
         if ( ! field || field == 'name' ) {
-            const nameErrors = validateName(name, true) 
+            const nameErrors = validateName(name, true)
             error = error || nameErrors.length > 0
             setNameValidationError(nameErrors)
         }
 
         if ( ! field || field == 'username' ) {
-            const usernameErrors = validateUsername(username, true) 
-
-            if ( existing && existing.username === username ) {
-                usernameErrors.push('That username is already in use.  Please choose a different one.')
-            }
+            const usernameErrors = validateUsername(username, true)
 
             error = error || usernameErrors.length > 0
             setUsernameValidationError(usernameErrors)
         }
 
         if ( ! field || field == 'email' ) {
-            const emailErrors = validateEmail(email, true) 
+            const emailErrors = validateEmail(email, true)
             error = error || emailErrors.length > 0
             setEmailValidationError(emailErrors)
         }
 
         if ( ! field || field == 'password' ) {
-            const passwordErrors = validatePassword(password, true) 
+            const passwordErrors = validatePassword(password, true)
             error = error || passwordErrors.length > 0
             setPasswordValidationError(passwordErrors)
         }
@@ -130,14 +125,14 @@ const AcceptInvitationForm = function(props) {
 
             if (password != confirmPassword) {
                 passwordConfirmationErrors.push('Your passwords don\'t match!')
-                error = true 
-            } 
+                error = true
+            }
 
             setConfirmPasswordValidationError(passwordConfirmationErrors)
         }
 
         if ( ! field || field === 'birthdate' ) {
-            const birthdateErrors = shared.validation.User.validateBirthdate(birthdate) 
+            const birthdateErrors = shared.validation.User.validateBirthdate(birthdate)
             if ( birthdateErrors.length > 0 ) {
                 setBirthdateValidationError(birthdateErrors.map((error) => error.message))
             } else {
@@ -153,7 +148,7 @@ const AcceptInvitationForm = function(props) {
         event.preventDefault()
 
         if ( ! isValid() ) {
-            return 
+            return
         }
 
         const newUser = {
@@ -197,7 +192,6 @@ const AcceptInvitationForm = function(props) {
         let lowerUsername = username.toLowerCase()
         setUsername(lowerUsername)
 
-        makeUsernameRequest(getUsers(username, { username: lowerUsername }))
         isValid('username')
     }
 
@@ -313,7 +307,7 @@ const AcceptInvitationForm = function(props) {
                 </div>
             )
         }
-    } 
+    }
 
     if ( request && request.state == 'failed' ) {
         if ( request.error?.type !== 'underage' ) {
@@ -332,7 +326,7 @@ const AcceptInvitationForm = function(props) {
                     value={token}
                     className="token"
                     onBlur={ (event) => isValid('token') }
-                    onChange={ (event) => setToken(event.target.value) } 
+                    onChange={ (event) => setToken(event.target.value) }
                     error={tokenError}
                 /> }
                 <Input
@@ -343,7 +337,7 @@ const AcceptInvitationForm = function(props) {
                     className="name"
                     placeholder="John Doe"
                     onBlur={ (event) => isValid('name') }
-                    onChange={onNameChange} 
+                    onChange={onNameChange}
                     error={nameError}
                 />
                 <Input
@@ -354,7 +348,7 @@ const AcceptInvitationForm = function(props) {
                     className="username"
                     placeholder="john-doe"
                     onBlur={ onUsernameBlur }
-                    onChange={ (event) => setUsername(event.target.value) } 
+                    onChange={ (event) => setUsername(event.target.value) }
                     error={usernameError}
                 />
                 <Input
@@ -364,7 +358,7 @@ const AcceptInvitationForm = function(props) {
                     value={email}
                     className="email"
                     onBlur={ (event) => isValid('email') }
-                    onChange={ (event) => setEmail(event.target.value) } 
+                    onChange={ (event) => setEmail(event.target.value) }
                     error={emailError}
                 />
 
@@ -376,7 +370,7 @@ const AcceptInvitationForm = function(props) {
                     value={password}
                     className="password"
                     onBlur={ (event) => isValid('password') }
-                    onChange={ (event) => setPassword(event.target.value) } 
+                    onChange={ (event) => setPassword(event.target.value) }
                     error={passwordError}
                 />
                 <Input

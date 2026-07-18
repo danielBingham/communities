@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -102,8 +102,8 @@ module.exports = class SiteModerationEventDAO extends DAO {
         this.entityMaps = SCHEMA
     }
 
-    getSiteModerationEventSelectionString() {
-        return this.getSelectionString('SiteModerationEvent')
+    getSiteModerationEventSelectionString(fields) {
+        return this.getSelectionString('SiteModerationEvent', fields)
     }
 
     hydrateSiteModerationEvent(row) {
@@ -170,11 +170,12 @@ module.exports = class SiteModerationEventDAO extends DAO {
         let params = query.params ? [ ...query.params ] : []
         let page  = query.page ? query.page : 1
         let order = query.order ? `${query.order}` : `site_moderation_events.created_date ASC`
+        const fields = query.fields ? query.fields : []
 
         let paging = ''
         if ( page > 0 ) {
-            const limit = query.perPage ? query.perPage : PAGE_SIZE 
-            const offset = limit * (page-1) 
+            const limit = query.perPage ? query.perPage : PAGE_SIZE
+            const offset = limit * (page-1)
 
             paging = `
                 LIMIT ${limit}
@@ -184,7 +185,7 @@ module.exports = class SiteModerationEventDAO extends DAO {
 
         const results = await this.core.database.query(`
             SELECT
-                ${this.getSiteModerationEventSelectionString()}
+                ${this.getSiteModerationEventSelectionString(fields)}
             FROM site_moderation_events
             ${where}
             ORDER BY ${order}
@@ -207,9 +208,9 @@ module.exports = class SiteModerationEventDAO extends DAO {
         let page = query.page ? query.page : 1
 
         const results = await this.core.database.query(`
-                SELECT 
+                SELECT
                     COUNT(*)
-                FROM site_moderation_events 
+                FROM site_moderation_events
                 ${where}
         `, params)
 
@@ -219,16 +220,18 @@ module.exports = class SiteModerationEventDAO extends DAO {
             count: count,
             page: page,
             pageSize: pageSize,
-            numberOfPages: Math.floor(count / pageSize) + ( (count % pageSize) > 0 ? 1 : 0) 
+            numberOfPages: Math.floor(count / pageSize) + ( (count % pageSize) > 0 ? 1 : 0)
         }
     }
 
-    createEventFromSiteModeration(siteModeration) {
-        const event = { ...siteModeration }
-        event.siteModerationId = siteModeration.id
-        delete event.id
-        delete event.updatedDate
-        return event
+    async createEventFromSiteModeration(siteModerationId) {
+        await this.core.database.query(`
+            INSERT INTO site_moderation_events
+                (site_moderation_id, user_id, status, reason, post_id, post_comment_id, group_id, user_profile_id, created_date)
+            SELECT id, user_id, status, reason, post_id, post_comment_id, group_id, user_profile_id, now()
+                FROM site_moderation
+                WHERE site_moderation.id = $1
+        `, [ siteModerationId ])
     }
 
     async insertSiteModerationEvents(siteModerationEvents) {

@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -164,7 +164,7 @@ module.exports = class NotificationWorker {
      * @param   {Object}    context The contextual information necessary to
      * generate the notification content.  Differs per notification.type.  @see
      * `notificationDefinitions` for definition.
-     * 
+     *
      */
     async createNotification(userId, type, context, options) {
         if ( ! ( type in definitions ) ) {
@@ -181,7 +181,7 @@ module.exports = class NotificationWorker {
         `, [ userId ])
 
         const settings = results.rows[0].settings
-       
+
         // Use the default values if `type` isn't in their settings.
         let notificationSetting = {
             web: true, /* This is the root notification.  If this is off, no notifications are sent. */
@@ -199,7 +199,7 @@ module.exports = class NotificationWorker {
                 if ( migratedType in settings.notifications ) {
                     notificationSetting = settings.notifications[migratedType]
                 }
-            } 
+            }
         }
 
         // Only create the web notification if the user has web notifications
@@ -209,12 +209,15 @@ module.exports = class NotificationWorker {
             type: type,
             description: definition.web.text(context),
             path: definition.web.path(context) ,
-            isRead: notificationSetting.web === false || options?.noWeb === true 
+            isRead: notificationSetting.web === false || options?.noWeb === true
         }
-        notification.id = await this.notificationDAO.insertNotification(notification)
+        await this.notificationDAO.insertNotifications(notification)
 
         if ( notificationSetting.web && options?.noWeb !== true) {
-            const results = await this.notificationDAO.selectNotifications(`WHERE notifications.id = $1`, [ notification.id ]) 
+            const results = await this.notificationDAO.selectNotifications({
+                where: `notifications.id = $1`,
+                params: [ notification.id ]
+            })
 
             // This will send the notification to any connected sockets.
             await this.core.events.trigger(userId, 'Notification', 'create', { dictionary: results.dictionary })
@@ -228,12 +231,12 @@ module.exports = class NotificationWorker {
 
             try {
                 await this.emailService.sendNotificationEmail(
-                    email, 
-                    definition.email.subject(context), 
+                    email,
+                    definition.email.subject(context),
                     definition.email.body(context)
                 )
             } catch (error) {
-                core.logger.error(error)
+                this.core.logger.error(error)
             }
         }
 
@@ -241,12 +244,12 @@ module.exports = class NotificationWorker {
             try {
                 await this.iosNotifications.notify(userId, notification)
             } catch (error) {
-                core.logger.error(error)
+                this.core.logger.error(error)
             }
             try {
                 await this.androidNotifications.sendAndroidNotification(userId, notification)
             } catch (error) {
-                core.logger.error(error)
+                this.core.logger.error(error)
             }
         }
     }

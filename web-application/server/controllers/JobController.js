@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -31,7 +31,10 @@ module.exports = class JobController {
         this.config = core.config
     }
 
-    async getJobs(request, response) {
+    /* Temporarily commenting this out.  This is probably functionality we will
+     * eventually want.  But right now, we don't want it and it's attack
+     * surface we don't want to defend.
+     * async getJobs(request, response) {
         /**********************************************************************
          * Permissions Checking and Input Validation
          *
@@ -39,12 +42,12 @@ module.exports = class JobController {
          *
          * 1. User must be logged in.
          * 2. User may only get their own jobs (or must be admin).
-         * 
-         * ********************************************************************/
-        
+         *
+         * ********************************************************************
+
         // Permissions: 1. User must be logged in.
         if ( ! request.session.user ) {
-            throw new ControllerError(401, 'not-authenticated', 
+            throw new ControllerError(401, 'not-authenticated',
                 `Unauthenticated user attempted retrieve jobs.`)
         }
 
@@ -55,7 +58,7 @@ module.exports = class JobController {
             active: [],
             completed: []
         }
-        
+
         jobs.waiting = await this.core.queues[name].getJobs(['waiting'])
         jobs.active = await this.core.queues[name].getJobs(['active'])
         jobs.completed = await this.core.queues[name].getJobs(['completed'])
@@ -89,7 +92,7 @@ module.exports = class JobController {
         }
 
         return response.status(200).json(returnJobs)
-    }
+    }*/
 
     async getJob(request, response) {
         /**********************************************************************
@@ -103,7 +106,7 @@ module.exports = class JobController {
          * Validation:
          *
          * 1. :id must be set.
-         * 
+         *
          * ********************************************************************/
 
         const name = request.params.queue
@@ -117,11 +120,30 @@ module.exports = class JobController {
 
         // Permissions: 1. User must be logged in.
         if ( ! request.session.user ) {
-            throw new ControllerError(401, 'not-authenticated', 
+            throw new ControllerError(401, 'not-authenticated',
                 `Unauthenticated user attempted to get Job(${jobId}).`)
         }
-        
+
+        // These are the only jobs the user may introspect on.  The others are
+        // background jobs that don't report their status.
+        const allowedQueues = [
+            'process-video',
+            'resize-image'
+        ]
+
+        if ( ! allowedQueues.includes(name) ) {
+            throw new ControllerError(404, 'not-found',
+                `Attempt to retrieve a job from a background queue.`,
+                `Either that job doesn't exist or you don't have permission to view it.`)
+        }
+
         const job = await this.core.queues[name].getJob(jobId)
+
+        if ( job === undefined || job === null ) {
+            throw new ControllerError(404, 'not-found',
+                `Attempt to retrieve a non-existent job.`,
+                `Either that job doesn't exist or you don't have permission to view it.`)
+        }
 
         // 2. User may only get their own job (or must be admin).
         if ( job.data.session.user.id !== request.session.user.id && request.session.user.siteRole != 'admin' && request.session.user.siteRole != 'superadmin' ) {

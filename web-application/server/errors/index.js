@@ -18,18 +18,7 @@
  *
  ******************************************************************************/
 
-const cleanBoolean = function(value) {
-    if ( typeof value === "boolean" ) {
-        return value
-    } else if ( typeof value === "string" ) {
-        if ( value.trim().toLowerCase() === "true" ) {
-            return true
-        } else if ( value.trim().toLowerCase() === "false" ) {
-            return false
-        }
-    }
-
-    return undefined
+module.exports = {
+    ControllerError: require('./ControllerError'),
+    NotFoundError: require('./NotFoundError')
 }
-
-module.exports = cleanBoolean

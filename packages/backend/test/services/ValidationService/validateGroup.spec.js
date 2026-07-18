@@ -25,19 +25,19 @@ describe('ValidationService.validateGroup()', function() {
         postmarkClient: {
             sendEmail: jest.fn()
         },
-        features: new FeatureFlags() 
+        features: new FeatureFlags()
     }
 
     beforeEach(function() {
         core.database.query.mockReset()
         // Disable logging.
-        core.logger.level = -1 
+        core.logger.level = -1
     })
 
     it('Should return one error for each disallowed field included (createdDate, updatedDate)', async function() {
         const service = new ValidationService(core)
 
-        const group = { 
+        const group = {
             type: 'open',
             postPermissions: 'members',
             title: 'A test group',
@@ -55,7 +55,7 @@ describe('ValidationService.validateGroup()', function() {
     it('Should treat `null` as set for disallowed fields', async function() {
         const service = new ValidationService(core)
 
-        const group = { 
+        const group = {
             type: 'open',
             postPermissions: 'members',
             title: 'A test group',
@@ -71,10 +71,10 @@ describe('ValidationService.validateGroup()', function() {
     })
 
     describe('when creating', function() {
-        it('Should return errors if any required fields are missing', async function() { 
+        it('Should return errors if any required fields are missing', async function() {
             const service = new ValidationService(core)
 
-            const group = { 
+            const group = {
                 title: 'A Group Title',
                 slug: 'a-group-title',
                 postPermissions: 'members'
@@ -104,7 +104,7 @@ describe('ValidationService.validateGroup()', function() {
             // Moderator User
             const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
 
-            const group = { 
+            const group = {
                 id: 'f5e9e853-6803-4a74-98c3-23fb0933062f',
             }
 
@@ -125,7 +125,7 @@ describe('ValidationService.validateGroup()', function() {
         it('Should return one error for each disallowed field included (type, slug) that does not match existing', async function() {
             const service = new ValidationService(core)
 
-            const group = { 
+            const group = {
                 id: 'd3d5d52e-8c9b-427e-9823-9b9c5af77a6a',
                 type: 'open',
                 slug: 'a-test-group'
@@ -150,7 +150,7 @@ describe('ValidationService.validateGroup()', function() {
         it('Should return errors for invalid fields', async function() {
             const service = new ValidationService(core)
 
-            const group = { 
+            const group = {
                 type: 'public',
                 postPermissions: 'open',
                 title: 10,
@@ -170,7 +170,7 @@ describe('ValidationService.validateGroup()', function() {
         it('Should return an error when fileId is not found in the database', async function() {
             const service = new ValidationService(core)
 
-            const group = { 
+            const group = {
                 fileId: 'c8d958ac-4bed-44ad-a934-ca28e3525461',
                 type: 'open',
                 postPermissions: 'members',
@@ -193,7 +193,7 @@ describe('ValidationService.validateGroup()', function() {
         it('Should pass a valid group', async function() {
             const service = new ValidationService(core)
 
-            const group = { 
+            const group = {
                 type: 'open',
                 postPermissions: 'members',
                 title: 'A Test Group',
@@ -207,7 +207,8 @@ describe('ValidationService.validateGroup()', function() {
             const currentUser = entities.users.dictionary['f5e9e853-6803-4a74-98c3-23fb0933062f']
 
             core.database.query.mockReturnValue(undefined)
-                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'c8d958ac-4bed-44ad-a934-ca28e3525461' }]})
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: 'c8d958ac-4bed-44ad-a934-ca28e3525461', user_id: currentUser.id }]})
+                .mockReturnValueOnce({ rowCount: 0, rows: []})
 
             const errors = await service.validateGroup(currentUser, group, null)
 

@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -28,6 +28,7 @@ const GroupDAO = require('../daos/GroupDAO')
 const GroupMemberDAO = require('../daos/GroupMemberDAO')
 const PostDAO = require('../daos/PostDAO')
 
+const FileService = require('./FileService')
 const PermissionService = require('./PermissionService')
 
 const BlocklistValidation = require('./validation/BlocklistValidation')
@@ -37,6 +38,7 @@ const GroupMemberValidation = require('./validation/GroupMemberValidation')
 const GroupModerationValidation = require('./validation/GroupModerationValidation')
 const GroupSubscriptionValidation = require('./validation/GroupSubscriptionValidation')
 const LinkPreviewValidation = require('./validation/LinkPreviewValidation')
+const NotificationValidation = require('./validation/NotificationValidation')
 const PostValidation = require('./validation/PostValidation')
 const PostCommentValidation = require('./validation/PostCommentValidation')
 const PostReactionValidation = require('./validation/PostReactionValidation')
@@ -51,6 +53,7 @@ module.exports = class ValidationService {
         this.groupMemberDAO = new GroupMemberDAO(core)
         this.postDAO = new PostDAO(core)
 
+        this.fileService = new FileService(core)
         this.permissionService = new PermissionService(core)
 
         this.blocklist = new BlocklistValidation(core, this)
@@ -60,6 +63,7 @@ module.exports = class ValidationService {
         this.groupModeration = new GroupModerationValidation(core, this)
         this.groupSubscription = new GroupSubscriptionValidation(core, this)
         this.linkPreview = new LinkPreviewValidation(core, this)
+        this.notification = new NotificationValidation(core, this)
         this.post = new PostValidation(core, this)
         this.postComment = new PostCommentValidation(core, this)
         this.postReaction = new PostReactionValidation(core, this)
@@ -68,7 +72,7 @@ module.exports = class ValidationService {
     }
 
     has(entity, field) {
-        return field in entity && entity[field] !== undefined 
+        return field in entity && entity[field] !== undefined
     }
 
     async validateBlocklist(currentUser, blocklist, existing) {
@@ -94,11 +98,15 @@ module.exports = class ValidationService {
     async validateGroupSubscription(currentUser, groupSubscription, existing) {
         return await this.groupSubscription.validateGroupSubscription(currentUser, groupSubscription, existing)
     }
-    
+
     async validateLinkPreview(currentUser, linkPreview, existing) {
         return await this.linkPreview.validateLinkPreview(currentUser, linkPreview, existing)
     }
-    
+
+    async validateNotification(currentUser, notification, existing) {
+        return await this.notification.validateNotification(currentUser, notification, existing)
+    }
+
     async validatePost(currentUser, post, existing) {
         return await this.post.validatePost(currentUser, post, existing)
     }
@@ -129,7 +137,7 @@ module.exports = class ValidationService {
             'invitations',  // Deprecated.
             'location', // Not implemented yet.
             'siteModerationId',  // Only set programatically through SiteModerationController.
-            'lastAuthenticationAttemptDate', // Only set programatically through AuthenticationService. 
+            'lastAuthenticationAttemptDate', // Only set programatically through AuthenticationService.
             'authenticationMultifactorState', // Only set programatically through UserController.
             'createdDate',  // Automanaged by the DAO.
             'updatedDate' // Automanaged by the DAO.
@@ -176,7 +184,7 @@ module.exports = class ValidationService {
                         message: `You cannot invite a user without an email.`
                     })
                 }
-            } 
+            }
 
             else if ( type === 'registration' ) {
                 // Some fields we don't allow the user to set on registration,
@@ -206,18 +214,18 @@ module.exports = class ValidationService {
                         })
                     }
                 }
-            } 
+            }
 
             else {
                 throw new ServiceError('invalid-type',
                     `Attempt to validate a user without a type set.  We don't know what is and isn't allowed.`)
             }
-        } 
+        }
         // In this case they are editing.
         else {
 
             // Id is not required for a reinvitation.
-            if ( type !== 'reinvitation' ) { 
+            if ( type !== 'reinvitation' ) {
                     if ( ! this.has(user, 'id') || user.id === null ) {
                     errors.push({
                         type: `id:missing`,
@@ -377,7 +385,7 @@ module.exports = class ValidationService {
         // If we get there, the fields that are present may be set or updated.
         // So now we need to make sure the values they are being set to are
         // valid.
-        
+
         if ( this.has(user, 'email') ) {
             if ( user.email === null ) {
                 errors.push({
@@ -552,12 +560,68 @@ module.exports = class ValidationService {
 
         if ( this.has(user, 'fileId' ) ) {
             // FileId may be null.
-            if ( user.fileId !== null && ! uuid.validate(user.fileId) ) {
-                errors.push({
-                    type: 'fileId:invalid',
-                    log: `The 'fileId' must be a valid UUID.`,
-                    message: `The 'fileId' you have for your profile picture must be either 'null' or a valid UUID.`
-                })
+            if ( user.fileId !== null ) {
+                if ( ! uuid.validate(user.fileId) ) {
+                    errors.push({
+                        type: 'fileId:invalid',
+                        log: `The 'fileId' must be a valid UUID.`,
+                        message: `The 'fileId' you have for your profile picture must be either 'null' or a valid UUID.`
+                    })
+                } else {
+                    const fileResults = await this.core.database.query(`
+                                SELECT id, user_id FROM files WHERE id = $1
+                            `, [ user.fileId ])
+
+                    if ( fileResults.rows.length <= 0 ) {
+                        errors.push({
+                            type: 'file:not-found',
+                            log: `We couldn't find the file in User.fileId.`,
+                            message: `The file you attached as your profile is missing.`
+                        })
+                    }
+                    // We only want to check for ownership and usage if we know
+                    // the file exists.
+                    else {
+                        // Ensure the user owns the file they are attaching.
+                        if ( fileResults.rows[0].user_id !== user.id ) {
+                            errors.push({
+                                type: 'files:not-authorized',
+                                log: `User attempting to attach files they do not own to their profile.`,
+                                message: `You may only attach files you have uploaded.`
+                            })
+                        }
+
+                        // We only want to check usage if we know the user owns
+                        // the file.
+                        else {
+
+                            const usage = await this.fileService.getUsageByFileId(user.fileId)
+                            if ( usage !== null ) {
+                                // If this is a new user and the file is in use, then conflict.
+                                if ( existing === null || existing === undefined ) {
+                                    errors.push({
+                                        type: 'files:conflict',
+                                        log: `User attempting to attach file to profile, but file is in use.`,
+                                        message: `You may not attach files that are already in use.`
+                                    })
+                                }
+                                // If this is not a new user, then the usage must
+                                // be for this user (and only this user).
+                                else if ( usage.userId !== existing.id
+                                    || usage.postId !== null
+                                    || usage.groupId !== null
+                                    || usage.linkPreviewId !== null
+                                ) {
+                                    errors.push({
+                                        type: 'files:conflict',
+                                        log: `User attempting to attach file to profile, but file is in use.`,
+                                        message: `You may not attach files that are already in use.`
+                                    })
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -600,12 +664,12 @@ module.exports = class ValidationService {
         const errors = []
 
         if ( existing !== undefined && existing !== null && existing.id !== userRelationship.id ) {
-            throw new ServiceError('entity-mismatch', 
+            throw new ServiceError('entity-mismatch',
                 `Existing UserRelationship(${existing.id}) does not match UserRelationship(${userRelationship.id}).`)
         }
 
         // ================== Always Disallowed ===============================
-        // There are some fields the user is never allowed to set.  Check those 
+        // There are some fields the user is never allowed to set.  Check those
         // fields first and return if any of them are set.
 
         const alwaysDisallowedFields = [ 'createdDate', 'updatedDate' ]
@@ -640,14 +704,14 @@ module.exports = class ValidationService {
                     })
                 }
             }
-        } 
+        }
 
         // We're editing a relationship.
         else {
             const disallowedFields = [ 'userId', 'relationId' ]
             for(const disallowedField of disallowedFields ) {
-                if ( this.has(userRelationship, disallowedField) 
-                    && userRelationship[disallowedField] !== existing[disallowedField] ) 
+                if ( this.has(userRelationship, disallowedField)
+                    && userRelationship[disallowedField] !== existing[disallowedField] )
                 {
                     errors.push({
                         type: `${disallowedField}:not-allowed`,
@@ -701,7 +765,7 @@ module.exports = class ValidationService {
                     message: `You may only create a 'pending' relationship, which is a friend request.`
                 })
             }
-        } 
+        }
         // We're editing a friend request.
         else if ( existing ) {
             if ( currentUser.id !== existing.relationId ) {

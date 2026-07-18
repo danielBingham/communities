@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -29,9 +29,9 @@ const ServiceError = require('../../errors/ServiceError')
 module.exports = class GroupMemberPermissions {
 
     constructor(core, permissionService) {
-        this.core 
+        this.core = core
 
-        this.permissionService = permissionService 
+        this.permissionService = permissionService
 
         this.postDAO = new PostDAO(core)
         this.postCommentDAO = new PostCommentDAO(core)

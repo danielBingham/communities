@@ -60,7 +60,7 @@ module.exports = function(core) {
         })
     })
 
-    router.post('/system/log', rateLimit(core, 2400), function(request, response, next) {
+    router.post('/system/log', rateLimit(core, 240), function(request, response, next) {
         systemController.postLog(request, response).catch(function(error) {
             next(error)
         })
@@ -108,11 +108,11 @@ module.exports = function(core) {
     const JobController = require('./controllers/JobController')
     const jobController = new JobController(core)
 
-    router.get('/queue/:queue/jobs', rateLimit(core, 2400), function(request, response, next) {
+    /*router.get('/queue/:queue/jobs', rateLimit(core, 2400), function(request, response, next) {
         jobController.getJobs(request, response).catch(function(error) {
             next(error)
         })
-    })
+    })*/
 
     router.post('/queue/:queue/jobs', rateLimit(core, 30), function(request, response, next) {
         jobController.postJob(request, response).catch(function(error) {
@@ -299,18 +299,6 @@ module.exports = function(core) {
         })
     })
 
-    router.get('/group/:id/parents', rateLimit(2400), function(request, response, next) {
-        groupController.getParents(request, response).catch(function(error) {
-            next(error)
-        })
-    })
-
-    router.get('/group/:id/parents/members/:userId', rateLimit(2400), function(request, response, next) {
-        groupController.getParentMembers(request, response).catch(function(error) {
-            next(error)
-        })
-    })
-
     /**************************************************************************
      * GroupMembers REST routes
      **************************************************************************/
@@ -406,12 +394,6 @@ module.exports = function(core) {
      **************************************************************************/
     const LinkPreviewController = require('./controllers/LinkPreviewController')
     const linkPreviewController = new LinkPreviewController(core)
-
-    router.get('/link-previews', rateLimit(core, 2400), function(request, response, next) {
-        linkPreviewController.getLinkPreviews(request, response).catch(function(error) {
-            next(error)
-        })
-    })
 
     router.post('/link-previews', rateLimit(core, 60), function(request, response, next) {
         linkPreviewController.postLinkPreviews(request, response).catch(function(error) {
