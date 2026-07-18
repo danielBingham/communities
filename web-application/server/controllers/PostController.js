@@ -740,7 +740,7 @@ module.exports = class PostController {
                 `You must must be authenticated to edit a post.`)
         }
 
-        const postId = cleaning.Post.properties.id.clean(request.params.id)
+        const postId = cleaning.Post.cleanId(request.params.id)
         const post = cleaning.Post.clean(request.body)
 
         const existing = await this.postDAO.getPostById(postId)

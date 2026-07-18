@@ -299,9 +299,17 @@ module.exports = class PostValidation {
             if ( type === 'feed' ) {
                 if ( visibility !== 'public' && visibility !== 'private' ) {
                     errors.push({
-                        type: 'invalid',
+                        type: 'visibility:invalid',
                         log: `Post submitted with invalid visiblity.`,
                         message: `Visibility is invalid.  Options are 'public' or 'private.`
+                    })
+                }
+
+                if ( util.objectHas(post, 'groupId') && post.groupId !== null ) {
+                    errors.push({
+                        type: 'groupId:invalid',
+                        log: `Post submitted to feed with groupId.`,
+                        message: `Feed posts cannot have a 'groupId' set.`
                     })
                 }
             }
@@ -322,7 +330,7 @@ module.exports = class PostValidation {
                     })
                 }
                 // The groupId may not be editted.
-                else if ( existing && groupId !== existing.groupId ) {
+                else if ( existing && util.objectHas(post, 'groupId') && post.groupId !== existing.groupId ) {
                     errors.push({
                         type: 'invalid',
                         log: `Post groupId may not be updated.`,

@@ -255,7 +255,7 @@ module.exports = class GroupModerationController extends BaseController {
         }
 
         const post = await this.postDAO.getPostById(groupModeration.postId)
-        if ( post.groupId !== groupId ) {
+        if ( post?.groupId !== groupId ) {
             return this.sendUserErrors(response, 403, {
                 type: 'not-authorized',
                 log: `User(${currentUser.id}) attempting to moderate a post that does not belong to this group.`,
@@ -455,15 +455,6 @@ module.exports = class GroupModerationController extends BaseController {
             return this.sendUserErrors(response, 400, idValidationErrors)
         }
 
-        const existing = await this.groupModerationDAO.getGroupModerationById(id)
-        if ( existing === null ) {
-            return this.sendUserErrors(response, 400, {
-                type: 'not-found',
-                log: `User attempting to PATCH a GroupModeration that doesn't exist.`,
-                message: `That doesn't exist or you don't have permission to see it.`
-            })
-        }
-
         const groupModeration = cleaning.GroupModeration.clean(request.body)
         if ( groupModeration.id !== id) {
             return this.sendUserErrors(response, 400, {
@@ -481,6 +472,17 @@ module.exports = class GroupModerationController extends BaseController {
             })
         }
 
+        const existing = await this.groupModerationDAO.getGroupModerationById(id)
+        if ( existing === null ) {
+            return this.sendUserErrors(response, 400, {
+                type: 'not-found',
+                log: `User attempting to PATCH a GroupModeration that doesn't exist.`,
+                message: `That doesn't exist or you don't have permission to see it.`
+            })
+        }
+
+        // Ensure that the groupId matches across existing, the submitted
+        // groupModeration, and the groupId in the path.
         if ( existing.groupId !== groupModeration.groupId || existing.groupId !== groupId) {
             return this.sendUserErrors(response, 403, {
                 type: 'not-authorized',
@@ -489,24 +491,8 @@ module.exports = class GroupModerationController extends BaseController {
             })
         }
 
-        if ( existing.postId !== groupModeration.postId ) {
-            return this.sendUserErrors(response, 403, {
-                type: 'not-authorized',
-                log: `User(${currentUser.id}) attempting to update a GroupModeration's Post.`,
-                message: `You may not change the post.`
-            })
-        }
-
-        if ( existing.postCommentId !== groupModeration.postCommentId ) {
-            return this.sendUserErrors(response, 403, {
-                type: 'not-authorized',
-                log: `User(${currentUser.id}) attempting to update a GroupModeration's PostComment.`,
-                message: `You may not change the post comment.`
-            })
-        }
-
         const post = await this.postDAO.getPostById(groupModeration.postId)
-        if ( post.groupId !== groupId ) {
+        if ( post?.groupId !== groupId ) {
             return this.sendUserErrors(response, 403, {
                 type: 'not-authorized',
                 log: `User(${currentUser.id}) attempting to moderate a post that does not belong to this group.`,
