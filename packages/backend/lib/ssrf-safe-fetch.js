@@ -40,12 +40,11 @@ const lookup = (hostname, options, callback) => {
     let wantAll = false
     if ( optionsInternal && typeof optionsInternal === 'object' ) {
         if ( 'family' in optionsInternal && optionsInternal.family !== undefined) {
-            console.log(`family: `, optionsInternal.family)
             const parsedFamily = parseInt(optionsInternal.family, 10)
 
             const validFamilies = [0,4,6]
             if ( ! validFamilies.includes(parsedFamily) ) {
-                throw new Error('Invalid family.')
+                return callbackInternal(new Error('Invalid family.'))
             }
 
             family = parsedFamily
@@ -57,7 +56,7 @@ const lookup = (hostname, options, callback) => {
             } else if (optionsInternal.all === false ) {
                 wantAll = false
             } else {
-                throw new Error('Invalid all.')
+                return callbackInternal(new Error('Invalid all.'))
             }
         }
     }

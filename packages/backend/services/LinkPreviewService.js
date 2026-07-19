@@ -37,6 +37,8 @@ module.exports = class LinkPreviewService {
 
         this.s3 = new S3FileService(core)
         this.local = new LocalFileService(core)
+
+        this.portAllowlist = [ 80, 443 ]
     }
 
     async getPreview(url) {
@@ -45,6 +47,15 @@ module.exports = class LinkPreviewService {
             rootUrl = new URL(url)
         } catch (error) {
             throw new ServiceError('invalid-url', `Failed to parse the provided url.`)
+        }
+
+        if ( rootUrl.port ) {
+            const portInt = parseInt(rootUrl.port, 10)
+            if ( ! Number.isNaN(portInt) ) {
+                if ( ! this.portAllowlist.includes(portInt) ) {
+                    throw new ServiceError('invalid-port', `Link previews may only be generated for websites.`)
+                }
+            }
         }
 
         if ( rootUrl === null ) {

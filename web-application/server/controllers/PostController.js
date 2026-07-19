@@ -867,21 +867,4 @@ module.exports = class PostController {
 
         response.status(201).json({})
     }
-
-    async postLinkPreview(request, response) {
-        const currentUser = request.session.user
-
-        if (!currentUser) {
-            throw new ControllerError(401, 'not-authenticated',
-                `User must be authenticated to generate a link preview.`,
-                `You must must be authenticated to generate a link preview`)
-        }
-
-        const url = request.body.url
-
-        const preview = await this.linkPreviewService.getPreview(url)
-
-        response.status(200).json(preview)
-    }
-
 }
