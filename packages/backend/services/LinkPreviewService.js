@@ -71,10 +71,10 @@ module.exports = class LinkPreviewService {
 
             const linkPreview = {
                 url: url,
-                title: result.title,
-                type: result.mediaType,
-                siteName: result.siteName,
-                description: result.description,
+                title: result.title ?? '',
+                type: result.mediaType ?? '',
+                siteName: result.siteName ?? '',
+                description: result.description ?? '',
                 imageUrl: result.image ?? '',
                 fileId: null
             }
@@ -82,7 +82,11 @@ module.exports = class LinkPreviewService {
             return linkPreview
         } catch (error) {
             this.core.logger.error(`Failed retrieve link preview with error: `, error)
-            throw new ServiceError('request-failed', `Attempt to retrieve LinkPreview for ${rootUrl.href} failed.`)
+            if ( error instanceof ServiceError ) {
+                throw error
+            } else {
+                throw new ServiceError('request-failed', `Attempt to retrieve LinkPreview for ${rootUrl.href} failed.`)
+            }
         }
     }
 }
