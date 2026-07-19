@@ -45,10 +45,10 @@ const LinkPreview = function({ id }) {
             }
         } else if ( url.host == 'youtu.be' ) {
             videoId = url.pathname.split('/')[1]
-        }  
+        }
 
         if ( videoId !== '' ) {
-            return ( 
+            return (
                 <div className="link-preview">
                     <iframe
                         src={`https://www.youtube.com/embed/${encodeURIComponent(videoId)}`}
@@ -65,7 +65,7 @@ const LinkPreview = function({ id }) {
         <div className="link-preview">
             <a target="_blank" href={linkPreview.url}>
                 { linkPreview.fileId !== null && <File id={linkPreview.fileId} width={650} type="image" /> }
-                { linkPreview.fileId === null && linkPreview.imageUrl && <Image src={linkPreview.imageUrl} /> }
+                { linkPreview.fileId === null && linkPreview.imageUrl && <Image src={linkPreview.imageUrl}  /> }
                 <div className="link-preview__details">
                     <div className="link-preview__site">{linkPreview.siteName}</div>
                     <h2 className="link-preview__title">{linkPreview.title}</h2>

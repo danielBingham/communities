@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -20,17 +20,14 @@
 
 const ServiceError = require('../errors/ServiceError')
 
-const fs = require('fs')
-const { Buffer } = require('buffer')
-
-const mime = require('mime')
-const jsdom = require('jsdom')
-const { v4: uuidv4 } = require('uuid')
+const { preview, presets} = require('linkpeek')
 
 const FileDAO = require('../daos/FileDAO')
 
 const LocalFileService = require('./files/LocalFileService')
 const S3FileService = require('./files/S3FileService')
+
+const { ssrfSafeFetch } = require('../lib/ssrf-safe-fetch')
 
 module.exports = class LinkPreviewService {
     constructor(core) {
@@ -42,7 +39,7 @@ module.exports = class LinkPreviewService {
         this.local = new LocalFileService(core)
     }
 
-    async getPreview(url, headers) {
+    async getPreview(url) {
         let rootUrl = null
         try {
             rootUrl = new URL(url)
@@ -54,154 +51,38 @@ module.exports = class LinkPreviewService {
             throw new ServiceError('invalid-url', `Failed to parse the provided url.`)
         }
 
-        const scrapeHeaders = {
-            'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-            'Accept-Encoding':'gzip, deflate, br',
-            'Accept-Language':'en-US,en;q=0.9',
-            'Cache-Control': 'max-age=0',
-            'Sec-Ch-Ua': headers['sec-ch-ua'],
-            'Sec-Ch-Ua-Mobile': headers['sec-ch-ua-mobile'],
-            'Sec-Ch-Ua-Platform': headers['sec-ch-ua-platform'],
-            'Sec-Fetch-Dest': 'document',
-            'Sec-Fetch-Mode': 'navigate',
-            'Sec-Fetch-Site': 'same-origin',
-            'Sec-Fetch-User':'?1',
-            'Upgrade-Insecure-Requests': '1',
-            'User-Agent': headers['user-agent'],
-        }
-        let response = await fetch(rootUrl.href, 
-            {
-                method: 'GET',
-                headers: scrapeHeaders
-            }
-        )
+        try {
+            const result = await preview(rootUrl, {
+                ...presets.quality,
+                userAgent: 'CommunitiesBot-LinkExpanding 1.0 (+https://communities.social)',
+                fetch: ssrfSafeFetch }
+            )
 
-        if ( ! response.ok) {
-            this.core.logger.info(`LinkPreviewService:: User-agent failed trying raw retrieval.`)
-            // If it fails with the user agent, try again without.
-            response = await fetch(rootUrl.href)
-
-            if ( ! response.ok) {
-                if ( response.status === 404 ) {
+            if ( result.statusCode >= 400 ) {
+                this.core.logger.info(`LinkPreviewService:: Failed to retrieve ${rootUrl.href}.`)
+                if ( result.statusCode=== 404 ) {
                     throw new ServiceError('not-found', `Didn't find a site for link: ${rootUrl.href}`)
-                } else if ( response.status === 403 ) {
+                } else if ( result.statusCode=== 403 ) {
                     throw new ServiceError('not-authorized', `Site denied our attempt to scrape: ${rootUrl.href}`)
                 } else {
-                    throw new ServiceError('request-failed', `Attempt to retrieve LinkPreview(${rootUrl.href}) failed with status: ${response.status}`)
+                    throw new ServiceError('request-failed', `Attempt to retrieve LinkPreview(${rootUrl.href}) failed with status: ${result.statusCode}`)
                 }
             }
-        }
 
-        const data = await response.text()
-
-        let dom = null
-        try {
-            dom = new jsdom.JSDOM(data)
-        } catch (error) {
-            this.core.logger.log(`LinkPreviewService:: Caught error while parsing document.`)
-            this.core.logger.error(error)
-        }
-
-        if ( dom === null ) {
-            return {
+            const linkPreview = {
                 url: url,
-                title: '',
-                type: '',
-                siteName: '',
-                description: '',
-                imageUrl: '' 
+                title: result.title,
+                type: result.mediaType,
+                siteName: result.siteName,
+                description: result.description,
+                imageUrl: result.image ?? '',
+                fileId: null
             }
+
+            return linkPreview
+        } catch (error) {
+            this.core.logger.error(`Failed retrieve link preview with error: `, error)
+            throw new ServiceError('request-failed', `Attempt to retrieve LinkPreview for ${rootUrl.href} failed.`)
         }
-
-        const doc = dom.window.document
-        // Default to the Open Graph values and fallback to reasonable defaults if we can't find them.
-
-        let title = doc.querySelector('meta[property="og:title"]')?.getAttribute('content') || null 
-        if ( title === null ) {
-            title = doc.querySelector('title')?.textContent || ''
-        }
-
-        let description = doc.querySelector('meta[property="og:description"]')?.getAttribute('content') || null
-        if ( description === null ) {
-            description = doc.querySelector('meta[name="description"]')?.getAttribute('content') || ''
-        }
-
-        let image = doc.querySelector('meta[property="og:image"]')?.getAttribute('content') || ''
-        let fileId = null
-        if ( image !== '' ) {
-            fileId = uuidv4()
-
-            try {
-                const imageUrl = new URL(image, rootUrl.protocol + rootUrl.host)
-
-                const response = await fetch(imageUrl.href, { heaaders: { 'User-Agent': headers['user-agent'] }})
-
-                if ( response.ok ) {
-                    image = imageUrl.href
-
-                    const contentType = response.headers.get('Content-Type')
-                    const extension =  mime.getExtension(contentType)
-
-                    const tmpPath = `tmp/${fileId}.${extension}`
-                    const filepath = `previews/${fileId}.${extension}`
-
-                    const blob = await response.blob()
-                    const buffer = await blob.arrayBuffer()
-                    fs.writeFileSync(tmpPath, Buffer.from(buffer))
-
-                    await this.s3.uploadFile(tmpPath, filepath)
-
-                    this.local.removeFile(tmpPath)
-
-                    const file = {
-                        id: fileId,
-                        userId: null,
-                        type: contentType,
-                        location: this.core.config.s3.bucket_url,
-                        filepath: filepath
-                    }
-                    await this.fileDAO.insertFiles(file)
-                } else {
-                    image = ''
-                }
-            } catch (error) {
-                // On error cases, just null out the fileId and we'll fall
-                // back.
-                this.core.logger.error(error)
-                fileId = null
-            }
-        }
-
-
-    /*    The canonical URL is causing problems.  We're going to ignore it for now.
-     *    Maybe we'll store it in a different attribute in the future.
-     *
-     *    let cannonicalUrl = doc.querySelector('meta[property="og:url"]')?.getAttribute('content') || null
-        if ( cannonicalUrl === null ) {
-            cannonicalUrl = url
-        }*/
-
-        let siteName = doc.querySelector('meta[property="og:site_name"]')?.getAttribute('content') || null
-        if ( siteName === null ) {
-            const urlObj = new URL(url)
-            siteName = urlObj.hostname
-        }
-
-        let type = doc.querySelector('meta[property="og:type"]')?.getAttribute('content') || null
-        if ( type === null ) {
-            type = 'website'
-        }
-
-        const linkPreview = {
-            url: url,
-            title: title,
-            type: type,
-            siteName: siteName,
-            description: description,
-            imageUrl: image, 
-            fileId: fileId
-        }
-
-        return linkPreview
     }
 }

@@ -72,7 +72,7 @@ module.exports = class LinkPreviewController {
             let linkPreview = null
             try {
                 // If we haven't fetched this LinkPreview, then fetch and validate it.
-                linkPreview = cleaning.LinkPreview.clean(await this.linkPreviewService.getPreview(url, request.headers))
+                linkPreview = cleaning.LinkPreview.clean(await this.linkPreviewService.getPreview(url))
             } catch (error ) {
                 if ( 'type' in error && error.type === 'not-found' ) {
                     throw new ControllerError(404, 'not-found',
