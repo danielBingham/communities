@@ -72,7 +72,7 @@ module.exports = class LinkPreviewController {
             let linkPreview = null
             try {
                 // If we haven't fetched this LinkPreview, then fetch and validate it.
-                linkPreview = cleaning.LinkPreview.clean(await this.linkPreviewService.getPreview(url, request.headers))
+                linkPreview = cleaning.LinkPreview.clean(await this.linkPreviewService.getPreview(url))
             } catch (error ) {
                 if ( 'type' in error && error.type === 'not-found' ) {
                     throw new ControllerError(404, 'not-found',
@@ -85,7 +85,7 @@ module.exports = class LinkPreviewController {
                 } else {
                     throw new ControllerError(404, 'not-found',
                         error.message,
-                        `We were not able to scrape that site to generate a preivew.`)
+                        `We were not able to scrape that site to generate a preview.`)
                 }
             }
 

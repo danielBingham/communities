@@ -45,10 +45,10 @@ const LinkPreview = function({ id }) {
             }
         } else if ( url.host == 'youtu.be' ) {
             videoId = url.pathname.split('/')[1]
-        }  
+        }
 
         if ( videoId !== '' ) {
-            return ( 
+            return (
                 <div className="link-preview">
                     <iframe
                         src={`https://www.youtube.com/embed/${encodeURIComponent(videoId)}`}
