@@ -85,7 +85,7 @@ module.exports = class LinkPreviewController {
                 } else {
                     throw new ControllerError(404, 'not-found',
                         error.message,
-                        `We were not able to scrape that site to generate a preivew.`)
+                        `We were not able to scrape that site to generate a preview.`)
                 }
             }
 
