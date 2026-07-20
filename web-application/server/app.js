@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -31,13 +31,14 @@ const cors = require('cors')
 
 const path = require('path')
 
-const { 
-    FeatureFlags, 
-    FeatureService, 
+const {
+    FeatureFlags,
+    FeatureService,
 } = require('@communities/backend')
 
 const { createLogMiddleware } = require('./log')
 const { createCSRFMiddleware } = require('./csrf')
+const { createSecurityHeadersMiddleware } = require('./middleware/security-headers')
 const { createErrorsMiddleware } = require('./errors')
 
 const createRouter = require('./router')
@@ -49,7 +50,7 @@ const createExpressApp = function(core, sessionParser) {
 
     // Use the extended parser so we use 'qs' to parse query strings.
     // We use 'qs' on the frontend to create them.
-    app.set('query parser', 'extended') 
+    app.set('query parser', 'extended')
 
     // Trust the proxy.
     app.set('trust proxy', true)
@@ -58,14 +59,15 @@ const createExpressApp = function(core, sessionParser) {
     app.use(express.json({ limit: "50mb" }))
     app.use(express.urlencoded({ limit: "50mb", extended: false }))
 
+    app.use(createSecurityHeadersMiddleware(core))
 
     app.use(cors({
         origin: [ core.config.host, 'capacitor://localhost', 'https://localhost' ],
         methods: [ 'GET', 'POST', 'PATCH', 'DELETE' ],
-        allowedHeaders: [ 
+        allowedHeaders: [
             'Content-Type', 'Accept', 'Cache-Control',
             'Sec-WebSocket-Protocol',
-            'X-Communities-CSRF-Token', 'X-Communities-Platform', 'X-Communities-Auth' 
+            'X-Communities-CSRF-Token', 'X-Communities-Platform', 'X-Communities-Auth'
         ],
         exposedHeaders: '*'
     }))
@@ -228,6 +230,6 @@ const createExpressApp = function(core, sessionParser) {
     return app
 }
 
-module.exports = { 
+module.exports = {
     createExpressApp: createExpressApp
 }
