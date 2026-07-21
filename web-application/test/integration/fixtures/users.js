@@ -100,6 +100,118 @@ const dictionary = {
   },
 
   // ==========================================================================
+  // user5 - A standard user
+  //
+  // Manual setup (run once before running the tests)
+  //   1. Register "Test User5" (test-user5 /
+  //   communities-test-user5@mailinator.com) through the app.  Set the
+  //   account's password to match `password` below. Confirm the account's
+  //   email using `mailinator.com`. Once confirmed, make sure to turn email
+  //   notifications off (so we don't spam mailinator) and also turn off 'info'
+  //   and 'announcement' posts in preferences (so we have a blank slate for
+  //   post testing).
+  //
+  // Role in the GroupPost read suite: a PARENT-group moderator only -- added as
+  // a moderator of top-level groups but never a member of their subgroups.
+  // ==========================================================================
+  'user5': {
+    name: 'Test User5',
+    username: 'test-user5',
+    email: 'communities-test-user5@mailinator.com',
+    password: 'PasswordPassword',
+  },
+
+  // ==========================================================================
+  // user6 - A standard user
+  //
+  // Manual setup (run once before running the tests)
+  //   1. Register "Test User6" (test-user6 /
+  //   communities-test-user6@mailinator.com) through the app.  Set the
+  //   account's password to match `password` below. Confirm the account's
+  //   email using `mailinator.com`. Once confirmed, make sure to turn email
+  //   notifications off (so we don't spam mailinator) and also turn off 'info'
+  //   and 'announcement' posts in preferences (so we have a blank slate for
+  //   post testing).
+  //
+  // Role in the GroupPost read suite: a PARENT-group member only -- added as a
+  // plain member of top-level groups but never a member of their subgroups.
+  // ==========================================================================
+  'user6': {
+    name: 'Test User6',
+    username: 'test-user6',
+    email: 'communities-test-user6@mailinator.com',
+    password: 'PasswordPassword',
+  },
+
+  // ==========================================================================
+  // user7 - A standard user
+  //
+  // Manual setup (run once before running the tests)
+  //   1. Register "Test User7" (test-user7 /
+  //   communities-test-user7@mailinator.com) through the app.  Set the
+  //   account's password to match `password` below. Confirm the account's
+  //   email using `mailinator.com`. Once confirmed, make sure to turn email
+  //   notifications off (so we don't spam mailinator) and also turn off 'info'
+  //   and 'announcement' posts in preferences (so we have a blank slate for
+  //   post testing).
+  //
+  // Role in the GroupPost read suite: a NON-member of every group.  Also
+  // borrowed transiently by the banned-member cases (added, banned, then
+  // removed within a single test).
+  // ==========================================================================
+  'user7': {
+    name: 'Test User7',
+    username: 'test-user7',
+    email: 'communities-test-user7@mailinator.com',
+    password: 'PasswordPassword',
+  },
+
+  // ==========================================================================
+  // user8 - A standard user
+  //
+  // Manual setup (run once before running the tests)
+  //   1. Register "Test User8" (test-user8 /
+  //   communities-test-user8@mailinator.com) through the app.  Set the
+  //   account's password to match `password` below. Confirm the account's
+  //   email using `mailinator.com`. Once confirmed, make sure to turn email
+  //   notifications off (so we don't spam mailinator) and also turn off 'info'
+  //   and 'announcement' posts in preferences (so we have a blank slate for
+  //   post testing).
+  //
+  // Role in the GroupPost read suite: an INVITED (pending) member of a subgroup
+  // who is NOT a member of the parent group.
+  // ==========================================================================
+  'user8': {
+    name: 'Test User8',
+    username: 'test-user8',
+    email: 'communities-test-user8@mailinator.com',
+    password: 'PasswordPassword',
+  },
+
+  // ==========================================================================
+  // user9 - A standard user
+  //
+  // Manual setup (run once before running the tests)
+  //   1. Register "Test User9" (test-user9 /
+  //   communities-test-user9@mailinator.com) through the app.  Set the
+  //   account's password to match `password` below. Confirm the account's
+  //   email using `mailinator.com`. Once confirmed, make sure to turn email
+  //   notifications off (so we don't spam mailinator) and also turn off 'info'
+  //   and 'announcement' posts in preferences (so we have a blank slate for
+  //   post testing).
+  //
+  // Role in the GroupPost read suite: an INVITED (pending) member of a subgroup
+  // who IS also a member of the parent group -- the case that distinguishes the
+  // "-open" subgroup types (can view via the parent) from the others.
+  // ==========================================================================
+  'user9': {
+    name: 'Test User9',
+    username: 'test-user9',
+    email: 'communities-test-user9@mailinator.com',
+    password: 'PasswordPassword',
+  },
+
+  // ==========================================================================
   // user-banned -- A dedicated *banned* user.
   //
   // Manual setup (run once before running the tests):

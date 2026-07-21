@@ -64,7 +64,7 @@ const createGroup = async function(session, overrides = {}) {
 const createSubgroup = async function(session, parentId, type, overrides = {}) {
     return await createGroup(session, {
         type: type,
-        postPermissions: 'members',
+        postPermissions: type === 'open' ? 'anyone' : 'members',
         parentId: parentId,
         ...overrides
     })
@@ -180,6 +180,19 @@ const setGroupMemberRole = async function(adminSession, groupId, userId, role) {
     return response.content
 }
 
+// Remove a member from a group.  `adminSession` must belong to a group admin
+// or moderator (or the member themselves).  Used to tear down transient
+// memberships set up for a single test case (e.g. a member who is banned for a
+// ban test) without disturbing the shared state of the surrounding describe.
+const removeGroupMember = async function(adminSession, groupId, userId) {
+    const response = await fetchEndpoint('DELETE', `/group/${encodeURIComponent(groupId)}/member/${encodeURIComponent(userId)}`, { session: adminSession })
+    if ( ! response.ok ) {
+        throw new Error(`Failed to remove User(${userId}) from Group(${groupId}): ${response.status} ${JSON.stringify(response.content)}`)
+    }
+
+    return response.content
+}
+
 module.exports = {
     createGroup: createGroup,
     createSubgroup: createSubgroup,
@@ -189,5 +202,6 @@ module.exports = {
     acceptGroupInvite: acceptGroupInvite,
     addConfirmedMember: addConfirmedMember,
     setGroupMemberStatus: setGroupMemberStatus,
-    setGroupMemberRole: setGroupMemberRole
+    setGroupMemberRole: setGroupMemberRole,
+    removeGroupMember: removeGroupMember
 }

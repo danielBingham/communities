@@ -17,7 +17,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-const { describe, it, before } = require('node:test')
+const { describe, it, before, after } = require('node:test')
 const assert = require('node:assert/strict')
 
 const { initialize, logout, loginAs } = require('../../lib/authentication')
@@ -28,9 +28,11 @@ const {
     createSubgroup,
     deleteGroup,
     joinOpenGroup,
+    inviteToGroup,
     addConfirmedMember,
     setGroupMemberStatus,
-    setGroupMemberRole
+    setGroupMemberRole,
+    removeGroupMember
 } = require('../../lib/groups')
 const { makeFriends, sendFriendRequest, blockUser, deleteRelationship } = require('../../lib/relationships')
 const { isFeatureEnabled } = require('../../lib/system')
@@ -40,6 +42,32 @@ const { isFeatureEnabled } = require('../../lib/system')
 // When it is off the compound types and the `parentId` column do not exist, so
 // the subgroup tests below skip themselves rather than failing spuriously.
 const SUBGROUPS_FEATURE = 'issue-165-subgroups'
+
+// Small, branch-free assertion helpers.  These only wrap the HTTP round-trip
+// and the status/body checks -- they compute nothing about *who* should be
+// allowed.  Each test states its own expectation by choosing which one to call
+// (assertCanView / assertCanView for a permitted view, assertCannotView for a
+// denied one), so the expected outcome is always visible in the test itself.
+//
+//   assertCanView   -- 200 + the exact post entity (used for plain viewers:
+//                      confirmed members and parent members).
+//   assertCanView -- 200 + matching id only (used for elevated viewers --
+//                      admins, moderators, site moderators -- where we don't
+//                      want a deep-equality check to be sensitive to any extra
+//                      fields an elevated role might hydrate).
+//   assertCannotView-- 404 + error.type 'not-found' (a denied single-post view).
+async function assertCanView(session, expectedPost) {
+    const response = await getPost(session, expectedPost.id)
+    assert.equal(response.status, 200)
+    assert.equal(response.content?.entity?.id, expectedPost.id)
+    assert.deepEqual(response.content.entity, expectedPost)
+}
+
+async function assertCannotView(session, postId) {
+    const response = await getPost(session, postId)
+    assert.equal(response.status, 404)
+    assert.equal(response.content?.error?.type, 'not-found')
+}
 
 describe('GET /post/:id', function() {
 
@@ -347,7 +375,12 @@ describe('GET /post/:id', function() {
 
     describe("for posts to a group", function() {
         // ======================================================================
-        // Group posts: group permissions override post permissions entirely.
+        // Group posts: group permissions govern who can view a post.  Cases mirror
+        // documentation/testing/test-cases/GroupPost/regression/read.md.  Setup is
+        // shared per describe: a top-level group (with its members + post) is built
+        // once per group type; for subgroups the parent group + its role members
+        // are built once per parent type and reused across that parent's three
+        // subgroup describes, and each subgroup builds its own child group + post.
         // ======================================================================
 
         it(`Should let the author view their own group post`, async function() {
@@ -368,715 +401,1213 @@ describe('GET /post/:id', function() {
             }
         })
 
+        // ---- Top-level groups ----
         describe("for Open groups", function() {
-            it(`Should let anyone view a post in an OPEN group`, async function() {
-                const owner = await loginAs('user1')
-                const viewer = await loginAs('user2')
-                let group = null
-                try {
-                    group = await createGroup(owner.session, { type: 'open', postPermissions: 'anyone' })
-                    const created = await createGroupPost(owner.session, owner.user.id, group.id, 'open')
+            let owner, moderator, member, invited, nonMember, siteModerator
+            let group = null
+            let post = null
 
-                    // viewer is NOT a member -- open group content is visible to all.
-                    const response = await getPost(viewer.session, created.id)
+            before(async function() {
+                owner = await loginAs('user1')            // group admin (and post author)
+                moderator = await loginAs('user2')        // group moderator
+                member = await loginAs('user3')           // confirmed member
+                invited = await loginAs('user8')          // invited (pending) member
+                nonMember = await loginAs('user7')        // non-member
+                siteModerator = await loginAs('user-site-moderator')
 
-                    assert.equal(response.status, 200)
-                    assert.equal(response.content?.entity?.id, created.id)
-                } finally {
-                    if ( group ) await deleteGroup(owner.session, group.id)
-                    await logout(owner.session)
-                    await logout(viewer.session)
-                }
+                group = await createGroup(owner.session, { type: 'open', postPermissions: 'anyone' })
+
+                await joinOpenGroup(moderator.session, group.id, moderator.user.id)
+                await setGroupMemberRole(owner.session, group.id, moderator.user.id, 'moderator')
+                await joinOpenGroup(member.session, group.id, member.user.id)
+                await inviteToGroup(owner.session, group.id, invited.user.id)
+
+                post = await createGroupPost(owner.session, owner.user.id, group.id, 'open')
             })
 
-            it(`Should NOT let a banned member view an open group post`, async function() {
-                const owner = await loginAs('user1')
-                const viewer = await loginAs('user2')
-                let group = null
+            after(async function() {
+                if ( group ) await deleteGroup(owner.session, group.id)
+                await logout(owner.session)
+                await logout(moderator.session)
+                await logout(member.session)
+                await logout(invited.session)
+                await logout(nonMember.session)
+                await logout(siteModerator.session)
+            })
+
+            it(`Should let a Group Admin view the post`, async function() {
+                await assertCanView(owner.session, post)
+            })
+
+            it(`Should let a Group Moderator view the post`, async function() {
+                await assertCanView(moderator.session, post)
+            })
+
+            it(`Should let a Member view the post`, async function() {
+                await assertCanView(member.session, post)
+            })
+
+            it(`Should let a Non-member view the post`, async function() {
+                await assertCanView(nonMember.session, post)
+            })
+
+            it(`Should let an Invited/Requested (pending) member view the post`, async function() {
+                await assertCanView(invited.session, post)
+            })
+
+            it(`Should let a site moderator view the post`, async function() {
+                await assertCanView(siteModerator.session, post)
+            })
+
+            it(`Should NOT let a banned member view the post`, async function() {
+                // Borrow the non-member transiently: make them a member, ban them,
+                // assert, then remove them so the non-member case is unaffected.
                 try {
-                    group = await createGroup(owner.session, { type: 'open', postPermissions: 'anyone' })
-                    const created = await createGroupPost(owner.session, owner.user.id, group.id, 'open')
-
-                    // viewer joins, then gets banned by the admin.
-                    await joinOpenGroup(viewer.session, group.id, viewer.user.id)
-                    await setGroupMemberStatus(owner.session, group.id, viewer.user.id, 'banned')
-
-                    const response = await getPost(viewer.session, created.id)
-
-                    assert.equal(response.status, 404)
-                    assert.equal(response.content?.error?.type, 'not-found')
+                    await joinOpenGroup(nonMember.session, group.id, nonMember.user.id)
+                    await setGroupMemberStatus(owner.session, group.id, nonMember.user.id, 'banned')
+                    await assertCannotView(nonMember.session, post.id)
                 } finally {
-                    if ( group ) await deleteGroup(owner.session, group.id)
-                    await logout(owner.session)
-                    await logout(viewer.session)
+                    await removeGroupMember(owner.session, group.id, nonMember.user.id)
                 }
             })
         })
 
         describe("for Private groups", function() {
-            it(`Should NOT let a non-member view a post in a PRIVATE group`, async function() {
-                const owner = await loginAs('user1')
-                const viewer = await loginAs('user2')
-                let group = null
-                try {
-                    group = await createGroup(owner.session, { type: 'private', postPermissions: 'members' })
-                    const created = await createGroupPost(owner.session, owner.user.id, group.id, 'private')
+            let owner, moderator, member, invited, nonMember, siteModerator
+            let group = null
+            let post = null
 
-                    const response = await getPost(viewer.session, created.id)
+            before(async function() {
+                owner = await loginAs('user1')            // group admin (and post author)
+                moderator = await loginAs('user2')        // group moderator
+                member = await loginAs('user3')           // confirmed member
+                invited = await loginAs('user8')          // invited (pending) member
+                nonMember = await loginAs('user7')        // non-member
+                siteModerator = await loginAs('user-site-moderator')
 
-                    assert.equal(response.status, 404)
-                    assert.equal(response.content?.error?.type, 'not-found')
-                } finally {
-                    if ( group ) await deleteGroup(owner.session, group.id)
-                    await logout(owner.session)
-                    await logout(viewer.session)
-                }
+                group = await createGroup(owner.session, { type: 'private', postPermissions: 'members' })
+
+                await addConfirmedMember(owner.session, moderator.session, group.id, moderator.user.id)
+                await setGroupMemberRole(owner.session, group.id, moderator.user.id, 'moderator')
+                await addConfirmedMember(owner.session, member.session, group.id, member.user.id)
+                await inviteToGroup(owner.session, group.id, invited.user.id)
+
+                post = await createGroupPost(owner.session, owner.user.id, group.id, 'private')
             })
 
-            it(`Should let a confirmed member view a post in a PRIVATE group`, async function() {
-                const owner = await loginAs('user1')
-                const viewer = await loginAs('user2')
-                let group = null
-                try {
-                    group = await createGroup(owner.session, { type: 'private', postPermissions: 'members' })
-                    const created = await createGroupPost(owner.session, owner.user.id, group.id, 'private')
-
-                    // Invite the viewer and have them accept, making them a member.
-                    await addConfirmedMember(owner.session, viewer.session, group.id, viewer.user.id)
-
-                    const response = await getPost(viewer.session, created.id)
-
-                    assert.equal(response.status, 200)
-                    assert.equal(response.content?.entity?.id, created.id)
-                } finally {
-                    if ( group ) await deleteGroup(owner.session, group.id)
-                    await logout(owner.session)
-                    await logout(viewer.session)
-                }
+            after(async function() {
+                if ( group ) await deleteGroup(owner.session, group.id)
+                await logout(owner.session)
+                await logout(moderator.session)
+                await logout(member.session)
+                await logout(invited.session)
+                await logout(nonMember.session)
+                await logout(siteModerator.session)
             })
 
-            it(`Should NOT let a banned member view a post in a PRIVATE group`, async function() {
-                const owner = await loginAs('user1')
-                const viewer = await loginAs('user2')
-                let group = null
-                try {
-                    group = await createGroup(owner.session, { type: 'private', postPermissions: 'members' })
-                    const created = await createGroupPost(owner.session, owner.user.id, group.id, 'private')
-
-                    // The viewer becomes a confirmed member and is then banned.
-                    await addConfirmedMember(owner.session, viewer.session, group.id, viewer.user.id)
-                    await setGroupMemberStatus(owner.session, group.id, viewer.user.id, 'banned')
-
-                    const response = await getPost(viewer.session, created.id)
-
-                    assert.equal(response.status, 404)
-                    assert.equal(response.content?.error?.type, 'not-found')
-                } finally {
-                    if ( group ) await deleteGroup(owner.session, group.id)
-                    await logout(owner.session)
-                    await logout(viewer.session)
-                }
+            it(`Should let a Group Admin view the post`, async function() {
+                await assertCanView(owner.session, post)
             })
 
-            it(`Should let a site moderator view a PRIVATE group post they are not a member of`, async function() {
-                const owner = await loginAs('user1')
-                const moderator = await loginAs('user-site-moderator')
-                let group = null
+            it(`Should let a Group Moderator view the post`, async function() {
+                await assertCanView(moderator.session, post)
+            })
+
+            it(`Should let a Member view the post`, async function() {
+                await assertCanView(member.session, post)
+            })
+
+            it(`Should NOT let a Non-member view the post`, async function() {
+                await assertCannotView(nonMember.session, post.id)
+            })
+
+            it(`Should NOT let an Invited/Requested (pending) member view the post`, async function() {
+                await assertCannotView(invited.session, post.id)
+            })
+
+            it(`Should let a site moderator view the post`, async function() {
+                await assertCanView(siteModerator.session, post)
+            })
+
+            it(`Should NOT let a banned member view the post`, async function() {
+                // Borrow the non-member transiently: make them a member, ban them,
+                // assert, then remove them so the non-member case is unaffected.
                 try {
-                    group = await createGroup(owner.session, { type: 'private', postPermissions: 'members' })
-                    const created = await createGroupPost(owner.session, owner.user.id, group.id, 'private')
-
-                    const response = await getPost(moderator.session, created.id)
-
-                    assert.equal(response.status, 200)
-                    assert.equal(response.content?.entity?.id, created.id)
+                    await addConfirmedMember(owner.session, nonMember.session, group.id, nonMember.user.id)
+                    await setGroupMemberStatus(owner.session, group.id, nonMember.user.id, 'banned')
+                    await assertCannotView(nonMember.session, post.id)
                 } finally {
-                    if ( group ) await deleteGroup(owner.session, group.id)
-                    await logout(owner.session)
-                    await logout(moderator.session)
+                    await removeGroupMember(owner.session, group.id, nonMember.user.id)
                 }
             })
         })
 
         describe("for Hidden groups", function() {
-            it(`Should NOT let a non-member view a post in a HIDDEN group`, async function() {
-                const owner = await loginAs('user1')
-                const viewer = await loginAs('user2')
-                let group = null
-                try {
-                    group = await createGroup(owner.session, { type: 'hidden', postPermissions: 'members' })
-                    const created = await createGroupPost(owner.session, owner.user.id, group.id, 'hidden')
+            let owner, moderator, member, invited, nonMember, siteModerator
+            let group = null
+            let post = null
 
-                    const response = await getPost(viewer.session, created.id)
+            before(async function() {
+                owner = await loginAs('user1')            // group admin (and post author)
+                moderator = await loginAs('user2')        // group moderator
+                member = await loginAs('user3')           // confirmed member
+                invited = await loginAs('user8')          // invited (pending) member
+                nonMember = await loginAs('user7')        // non-member
+                siteModerator = await loginAs('user-site-moderator')
 
-                    assert.equal(response.status, 404)
-                    assert.equal(response.content?.error?.type, 'not-found')
-                } finally {
-                    if ( group ) await deleteGroup(owner.session, group.id)
-                    await logout(owner.session)
-                    await logout(viewer.session)
-                }
+                group = await createGroup(owner.session, { type: 'hidden', postPermissions: 'members' })
+
+                await addConfirmedMember(owner.session, moderator.session, group.id, moderator.user.id)
+                await setGroupMemberRole(owner.session, group.id, moderator.user.id, 'moderator')
+                await addConfirmedMember(owner.session, member.session, group.id, member.user.id)
+                await inviteToGroup(owner.session, group.id, invited.user.id)
+
+                post = await createGroupPost(owner.session, owner.user.id, group.id, 'hidden')
             })
 
-            it(`Should let a confirmed member view a post in a HIDDEN group`, async function() {
-                const owner = await loginAs('user1')
-                const viewer = await loginAs('user2')
-                let group = null
-                try {
-                    group = await createGroup(owner.session, { type: 'hidden', postPermissions: 'members' })
-                    const created = await createGroupPost(owner.session, owner.user.id, group.id, 'hidden')
-
-                    await addConfirmedMember(owner.session, viewer.session, group.id, viewer.user.id)
-
-                    const response = await getPost(viewer.session, created.id)
-
-                    assert.equal(response.status, 200)
-                    assert.equal(response.content?.entity?.id, created.id)
-                } finally {
-                    if ( group ) await deleteGroup(owner.session, group.id)
-                    await logout(owner.session)
-                    await logout(viewer.session)
-                }
+            after(async function() {
+                if ( group ) await deleteGroup(owner.session, group.id)
+                await logout(owner.session)
+                await logout(moderator.session)
+                await logout(member.session)
+                await logout(invited.session)
+                await logout(nonMember.session)
+                await logout(siteModerator.session)
             })
 
-            it(`Should NOT let a banned member view a post in a HIDDEN group`, async function() {
-                const owner = await loginAs('user1')
-                const viewer = await loginAs('user2')
-                let group = null
-                try {
-                    group = await createGroup(owner.session, { type: 'hidden', postPermissions: 'members' })
-                    const created = await createGroupPost(owner.session, owner.user.id, group.id, 'hidden')
-
-                    await addConfirmedMember(owner.session, viewer.session, group.id, viewer.user.id)
-                    await setGroupMemberStatus(owner.session, group.id, viewer.user.id, 'banned')
-
-                    const response = await getPost(viewer.session, created.id)
-
-                    assert.equal(response.status, 404)
-                    assert.equal(response.content?.error?.type, 'not-found')
-                } finally {
-                    if ( group ) await deleteGroup(owner.session, group.id)
-                    await logout(owner.session)
-                    await logout(viewer.session)
-                }
+            it(`Should let a Group Admin view the post`, async function() {
+                await assertCanView(owner.session, post)
             })
 
-            it(`Should let a site moderator view a HIDDEN group post they are not a member of`, async function() {
-                const owner = await loginAs('user1')
-                const moderator = await loginAs('user-site-moderator')
-                let group = null
+            it(`Should let a Group Moderator view the post`, async function() {
+                await assertCanView(moderator.session, post)
+            })
+
+            it(`Should let a Member view the post`, async function() {
+                await assertCanView(member.session, post)
+            })
+
+            it(`Should NOT let a Non-member view the post`, async function() {
+                await assertCannotView(nonMember.session, post.id)
+            })
+
+            it(`Should NOT let an Invited/Requested (pending) member view the post`, async function() {
+                await assertCannotView(invited.session, post.id)
+            })
+
+            it(`Should let a site moderator view the post`, async function() {
+                await assertCanView(siteModerator.session, post)
+            })
+
+            it(`Should NOT let a banned member view the post`, async function() {
+                // Borrow the non-member transiently: make them a member, ban them,
+                // assert, then remove them so the non-member case is unaffected.
                 try {
-                    group = await createGroup(owner.session, { type: 'hidden', postPermissions: 'members' })
-                    const created = await createGroupPost(owner.session, owner.user.id, group.id, 'hidden')
-
-                    const response = await getPost(moderator.session, created.id)
-
-                    assert.equal(response.status, 200)
-                    assert.equal(response.content?.entity?.id, created.id)
+                    await addConfirmedMember(owner.session, nonMember.session, group.id, nonMember.user.id)
+                    await setGroupMemberStatus(owner.session, group.id, nonMember.user.id, 'banned')
+                    await assertCannotView(nonMember.session, post.id)
                 } finally {
-                    if ( group ) await deleteGroup(owner.session, group.id)
-                    await logout(owner.session)
-                    await logout(moderator.session)
+                    await removeGroupMember(owner.session, group.id, nonMember.user.id)
                 }
             })
         })
 
+        // ---- Subgroups ----
+        // Stored `type` per (parent, child choice):
+        //   PUBLIC parent:  open->'open'          private->'private'        hidden->'hidden'
+        //   PRIVATE parent: open->'private-open'  private->'private'        hidden->'hidden'
+        //   HIDDEN parent:  open->'hidden-open'   private->'hidden-private' hidden->'hidden'
+        // Parent admins can always view (moderation inherited); parent members and
+        // moderators can view only the '-open' family (via the parent path).
         describe("For Subgroups", function() {
-            // ======================================================================
-            // Subgroups (child groups): post view permissions.
-            //
-            // A subgroup is a group with a `parentId`.  Subgroups are ordinary groups
-            // in every respect, EXCEPT that they are bounded by their parent and parent
-            // admins inherit rights over them.  For viewing a subgroup's *posts*
-            // (canViewGroupPost / the GET /posts visibility filter):
-            //
-            //   - 'private-open' / 'hidden-open':  behave like an OPEN group to members
-            //     of the PARENT group -- a (non-banned) parent member may view, as may a
-            //     confirmed member of the subgroup itself.
-            //   - 'hidden-private':               behaves like a PRIVATE group even to
-            //     parent members -- ONLY confirmed members of the subgroup itself may
-            //     view.  Parent membership alone is NOT sufficient.
-            //
-            // Across all subgroup types: banned subgroup members are denied; a parent
-            // group ADMIN inherits moderator rights over the subgroup and may therefore
-            // view any of its posts (even a 'hidden-private' one) without joining it;
-            // and site moderators may always view.  Denied views return 404.
-            //
-            // Fixture roles (all reused; no new fixtures required):
-            //   - user1                -- owner: creates the parent, the subgroup, and
-            //                             the post.  Admin of both groups.
-            //   - user2                -- the viewer under test (parent member, subgroup
-            //                             member, or -- once promoted -- parent admin).
-            //   - user4                -- a stranger: member of neither group.
-            //   - user-site-moderator  -- a site moderator (member of neither group).
-            //
-            // Each test builds its own parent + subgroup + post and tears them down.
-            // Deleting the subgroup cascades to its members and posts; deleting the
-            // parent cascades to the subgroup.  We delete the child then the parent.
-            // ======================================================================
 
             describe("For subgroups of Public groups", function() {
-                describe("For an OPEN subgroup of a PUBLIC group", function() {
+                let owner, parentAdmin, parentModerator, parentMember, invitedParentMember, nonMember, siteModerator
+                let parent = null
 
+                before(async function() {
+                    if ( ! subgroupsEnabled ) return
+                    owner = await loginAs('user1')                    // admin of every group; post author
+                    parentAdmin = await loginAs('user4')              // admin of the parent only
+                    parentModerator = await loginAs('user5')          // moderator of the parent only
+                    parentMember = await loginAs('user6')             // member of the parent only
+                    invitedParentMember = await loginAs('user9')      // parent member; invited into each subgroup
+                    nonMember = await loginAs('user7')                // member of nothing
+                    siteModerator = await loginAs('user-site-moderator')
+
+                    parent = await createGroup(owner.session, { type: 'open', postPermissions: 'anyone' })
+
+                    await joinOpenGroup(parentAdmin.session, parent.id, parentAdmin.user.id)
+                    await setGroupMemberRole(owner.session, parent.id, parentAdmin.user.id, 'admin')
+                    await joinOpenGroup(parentModerator.session, parent.id, parentModerator.user.id)
+                    await setGroupMemberRole(owner.session, parent.id, parentModerator.user.id, 'moderator')
+                    await joinOpenGroup(parentMember.session, parent.id, parentMember.user.id)
+                    await joinOpenGroup(invitedParentMember.session, parent.id, invitedParentMember.user.id)
+                })
+
+                after(async function() {
+                    if ( ! subgroupsEnabled ) return
+                    if ( parent ) await deleteGroup(owner.session, parent.id)
+                    await logout(owner.session)
+                    await logout(parentAdmin.session)
+                    await logout(parentModerator.session)
+                    await logout(parentMember.session)
+                    await logout(invitedParentMember.session)
+                    await logout(nonMember.session)
+                    await logout(siteModerator.session)
+                })
+
+                describe("For an OPEN subgroup of a PUBLIC group", function() {
+                    let subModerator, subMember, invited
+                    let child = null
+                    let post = null
+
+                    before(async function() {
+                        if ( ! subgroupsEnabled ) return
+                        subModerator = await loginAs('user2')     // subgroup moderator
+                        subMember = await loginAs('user3')        // confirmed subgroup member
+                        invited = await loginAs('user8')          // invited to subgroup; NOT a parent member
+
+                        child = await createSubgroup(owner.session, parent.id, 'open')
+
+                        await addConfirmedMember(owner.session, subModerator.session, child.id, subModerator.user.id)
+                        await setGroupMemberRole(owner.session, child.id, subModerator.user.id, 'moderator')
+                        await addConfirmedMember(owner.session, subMember.session, child.id, subMember.user.id)
+
+                        // Two pending (invited) members: one who is not a parent member and
+                        // one (user9) who is also a member of the parent group.
+                        await inviteToGroup(owner.session, child.id, invited.user.id)
+                        await inviteToGroup(owner.session, child.id, invitedParentMember.user.id)
+
+                        post = await createGroupPost(owner.session, owner.user.id, child.id, 'open')
+                    })
+
+                    after(async function() {
+                        if ( ! subgroupsEnabled ) return
+                        if ( child ) await deleteGroup(owner.session, child.id)
+                        await logout(subModerator.session)
+                        await logout(subMember.session)
+                        await logout(invited.session)
+                    })
+
+                    it(`Should let a Group Admin view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(owner.session, post)
+                    })
+
+                    it(`Should let a Group Moderator view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(subModerator.session, post)
+                    })
+
+                    it(`Should let a Member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(subMember.session, post)
+                    })
+
+                    it(`Should let a Parent Group Admin view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(parentAdmin.session, post)
+                    })
+
+                    it(`Should let a Parent Group Moderator view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(parentModerator.session, post)
+                    })
+
+                    it(`Should let a Parent Group Member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(parentMember.session, post)
+                    })
+
+                    it(`Should let a Non-member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(nonMember.session, post)
+                    })
+
+                    it(`Should let an Invited/Requested (pending) member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(invited.session, post)
+                    })
+
+                    it(`Should let an Invited/Requested (pending) member who is a Parent Group Member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(invitedParentMember.session, post)
+                    })
+
+                    it(`Should let a site moderator view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(siteModerator.session, post)
+                    })
+
+                    it(`Should NOT let a banned subgroup member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        // Borrow the non-member transiently: add to the subgroup, ban, assert,
+                        // then remove.  The ban overrides even the parent-member path.
+                        try {
+                            await addConfirmedMember(owner.session, nonMember.session, child.id, nonMember.user.id)
+                            await setGroupMemberStatus(owner.session, child.id, nonMember.user.id, 'banned')
+                            await assertCannotView(nonMember.session, post.id)
+                        } finally {
+                            await removeGroupMember(owner.session, child.id, nonMember.user.id)
+                        }
+                    })
                 })
 
                 describe("For a PRIVATE subgroup of a PUBLIC group", function() {
+                    let subModerator, subMember, invited
+                    let child = null
+                    let post = null
 
+                    before(async function() {
+                        if ( ! subgroupsEnabled ) return
+                        subModerator = await loginAs('user2')     // subgroup moderator
+                        subMember = await loginAs('user3')        // confirmed subgroup member
+                        invited = await loginAs('user8')          // invited to subgroup; NOT a parent member
+
+                        child = await createSubgroup(owner.session, parent.id, 'private')
+
+                        await addConfirmedMember(owner.session, subModerator.session, child.id, subModerator.user.id)
+                        await setGroupMemberRole(owner.session, child.id, subModerator.user.id, 'moderator')
+                        await addConfirmedMember(owner.session, subMember.session, child.id, subMember.user.id)
+
+                        // Two pending (invited) members: one who is not a parent member and
+                        // one (user9) who is also a member of the parent group.
+                        await inviteToGroup(owner.session, child.id, invited.user.id)
+                        await inviteToGroup(owner.session, child.id, invitedParentMember.user.id)
+
+                        post = await createGroupPost(owner.session, owner.user.id, child.id, 'private')
+                    })
+
+                    after(async function() {
+                        if ( ! subgroupsEnabled ) return
+                        if ( child ) await deleteGroup(owner.session, child.id)
+                        await logout(subModerator.session)
+                        await logout(subMember.session)
+                        await logout(invited.session)
+                    })
+
+                    it(`Should let a Group Admin view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(owner.session, post)
+                    })
+
+                    it(`Should let a Group Moderator view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(subModerator.session, post)
+                    })
+
+                    it(`Should let a Member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(subMember.session, post)
+                    })
+
+                    it(`Should let a Parent Group Admin view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(parentAdmin.session, post)
+                    })
+
+                    it(`Should NOT let a Parent Group Moderator view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCannotView(parentModerator.session, post.id)
+                    })
+
+                    it(`Should NOT let a Parent Group Member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCannotView(parentMember.session, post.id)
+                    })
+
+                    it(`Should NOT let a Non-member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCannotView(nonMember.session, post.id)
+                    })
+
+                    it(`Should NOT let an Invited/Requested (pending) member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCannotView(invited.session, post.id)
+                    })
+
+                    it(`Should NOT let an Invited/Requested (pending) member who is a Parent Group Member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCannotView(invitedParentMember.session, post.id)
+                    })
+
+                    it(`Should let a site moderator view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(siteModerator.session, post)
+                    })
+
+                    it(`Should NOT let a banned subgroup member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        // Borrow the non-member transiently: add to the subgroup, ban, assert,
+                        // then remove.  The ban overrides even the parent-member path.
+                        try {
+                            await addConfirmedMember(owner.session, nonMember.session, child.id, nonMember.user.id)
+                            await setGroupMemberStatus(owner.session, child.id, nonMember.user.id, 'banned')
+                            await assertCannotView(nonMember.session, post.id)
+                        } finally {
+                            await removeGroupMember(owner.session, child.id, nonMember.user.id)
+                        }
+                    })
                 })
 
                 describe("For a HIDDEN subgroup of a PUBLIC group", function() {
+                    let subModerator, subMember, invited
+                    let child = null
+                    let post = null
 
+                    before(async function() {
+                        if ( ! subgroupsEnabled ) return
+                        subModerator = await loginAs('user2')     // subgroup moderator
+                        subMember = await loginAs('user3')        // confirmed subgroup member
+                        invited = await loginAs('user8')          // invited to subgroup; NOT a parent member
+
+                        child = await createSubgroup(owner.session, parent.id, 'hidden')
+
+                        await addConfirmedMember(owner.session, subModerator.session, child.id, subModerator.user.id)
+                        await setGroupMemberRole(owner.session, child.id, subModerator.user.id, 'moderator')
+                        await addConfirmedMember(owner.session, subMember.session, child.id, subMember.user.id)
+
+                        // Two pending (invited) members: one who is not a parent member and
+                        // one (user9) who is also a member of the parent group.
+                        await inviteToGroup(owner.session, child.id, invited.user.id)
+                        await inviteToGroup(owner.session, child.id, invitedParentMember.user.id)
+
+                        post = await createGroupPost(owner.session, owner.user.id, child.id, 'hidden')
+                    })
+
+                    after(async function() {
+                        if ( ! subgroupsEnabled ) return
+                        if ( child ) await deleteGroup(owner.session, child.id)
+                        await logout(subModerator.session)
+                        await logout(subMember.session)
+                        await logout(invited.session)
+                    })
+
+                    it(`Should let a Group Admin view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(owner.session, post)
+                    })
+
+                    it(`Should let a Group Moderator view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(subModerator.session, post)
+                    })
+
+                    it(`Should let a Member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(subMember.session, post)
+                    })
+
+                    it(`Should let a Parent Group Admin view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(parentAdmin.session, post)
+                    })
+
+                    it(`Should NOT let a Parent Group Moderator view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCannotView(parentModerator.session, post.id)
+                    })
+
+                    it(`Should NOT let a Parent Group Member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCannotView(parentMember.session, post.id)
+                    })
+
+                    it(`Should NOT let a Non-member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCannotView(nonMember.session, post.id)
+                    })
+
+                    it(`Should NOT let an Invited/Requested (pending) member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCannotView(invited.session, post.id)
+                    })
+
+                    it(`Should NOT let an Invited/Requested (pending) member who is a Parent Group Member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCannotView(invitedParentMember.session, post.id)
+                    })
+
+                    it(`Should let a site moderator view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(siteModerator.session, post)
+                    })
+
+                    it(`Should NOT let a banned subgroup member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        // Borrow the non-member transiently: add to the subgroup, ban, assert,
+                        // then remove.  The ban overrides even the parent-member path.
+                        try {
+                            await addConfirmedMember(owner.session, nonMember.session, child.id, nonMember.user.id)
+                            await setGroupMemberStatus(owner.session, child.id, nonMember.user.id, 'banned')
+                            await assertCannotView(nonMember.session, post.id)
+                        } finally {
+                            await removeGroupMember(owner.session, child.id, nonMember.user.id)
+                        }
+                    })
                 })
+
             })
 
             describe("For subgroups of Private groups", function() {
-                // ---- 'private-open' subgroup (nested under a 'private' parent) ----
+                let owner, parentAdmin, parentModerator, parentMember, invitedParentMember, nonMember, siteModerator
+                let parent = null
+
+                before(async function() {
+                    if ( ! subgroupsEnabled ) return
+                    owner = await loginAs('user1')                    // admin of every group; post author
+                    parentAdmin = await loginAs('user4')              // admin of the parent only
+                    parentModerator = await loginAs('user5')          // moderator of the parent only
+                    parentMember = await loginAs('user6')             // member of the parent only
+                    invitedParentMember = await loginAs('user9')      // parent member; invited into each subgroup
+                    nonMember = await loginAs('user7')                // member of nothing
+                    siteModerator = await loginAs('user-site-moderator')
+
+                    parent = await createGroup(owner.session, { type: 'private', postPermissions: 'members' })
+
+                    await addConfirmedMember(owner.session, parentAdmin.session, parent.id, parentAdmin.user.id)
+                    await setGroupMemberRole(owner.session, parent.id, parentAdmin.user.id, 'admin')
+                    await addConfirmedMember(owner.session, parentModerator.session, parent.id, parentModerator.user.id)
+                    await setGroupMemberRole(owner.session, parent.id, parentModerator.user.id, 'moderator')
+                    await addConfirmedMember(owner.session, parentMember.session, parent.id, parentMember.user.id)
+                    await addConfirmedMember(owner.session, invitedParentMember.session, parent.id, invitedParentMember.user.id)
+                })
+
+                after(async function() {
+                    if ( ! subgroupsEnabled ) return
+                    if ( parent ) await deleteGroup(owner.session, parent.id)
+                    await logout(owner.session)
+                    await logout(parentAdmin.session)
+                    await logout(parentModerator.session)
+                    await logout(parentMember.session)
+                    await logout(invitedParentMember.session)
+                    await logout(nonMember.session)
+                    await logout(siteModerator.session)
+                })
+
                 describe("For an OPEN subgroup of a PRIVATE group (PRIVATE-OPEN)", function() {
-                    it(`Should let the author view their own post in a private-open subgroup`, async function(t) {
-                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                    let subModerator, subMember, invited
+                    let child = null
+                    let post = null
 
-                        const owner = await loginAs('user1')
-                        let parent = null
-                        let child = null
-                        try {
-                            parent = await createGroup(owner.session, { type: 'private', postPermissions: 'members' })
-                            child = await createSubgroup(owner.session, parent.id, 'private-open')
+                    before(async function() {
+                        if ( ! subgroupsEnabled ) return
+                        subModerator = await loginAs('user2')     // subgroup moderator
+                        subMember = await loginAs('user3')        // confirmed subgroup member
+                        invited = await loginAs('user8')          // invited to subgroup; NOT a parent member
 
-                            const created = await createGroupPost(owner.session, owner.user.id, child.id, 'private-open')
+                        child = await createSubgroup(owner.session, parent.id, 'private-open')
 
-                            const response = await getPost(owner.session, created.id)
+                        await addConfirmedMember(owner.session, subModerator.session, child.id, subModerator.user.id)
+                        await setGroupMemberRole(owner.session, child.id, subModerator.user.id, 'moderator')
+                        await addConfirmedMember(owner.session, subMember.session, child.id, subMember.user.id)
 
-                            assert.equal(response.status, 200)
-                            assert.equal(response.content?.entity?.id, created.id)
-                            assert.equal(response.content?.entity?.groupId, child.id)
-                            assert.deepEqual(response.content.entity, created)
-                        } finally {
-                            if ( child ) await deleteGroup(owner.session, child.id)
-                            if ( parent ) await deleteGroup(owner.session, parent.id)
-                            await logout(owner.session)
-                        }
+                        // Two pending (invited) members: one who is not a parent member and
+                        // one (user9) who is also a member of the parent group.
+                        await inviteToGroup(owner.session, child.id, invited.user.id)
+                        await inviteToGroup(owner.session, child.id, invitedParentMember.user.id)
+
+                        post = await createGroupPost(owner.session, owner.user.id, child.id, 'private-open')
                     })
 
-                    it(`Should let a member of the PARENT group view a post in a private-open subgroup`, async function(t) {
-                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
-
-                        const owner = await loginAs('user1')
-                        const viewer = await loginAs('user2')
-                        let parent = null
-                        let child = null
-                        try {
-                            parent = await createGroup(owner.session, { type: 'private', postPermissions: 'members' })
-                            child = await createSubgroup(owner.session, parent.id, 'private-open')
-
-                            const created = await createGroupPost(owner.session, owner.user.id, child.id, 'private-open')
-
-                            // The viewer is a confirmed member of the PARENT group only -- NOT
-                            // of the subgroup.  For 'private-open' that parent membership is
-                            // enough to view the subgroup's posts.
-                            await addConfirmedMember(owner.session, viewer.session, parent.id, viewer.user.id)
-
-                            const response = await getPost(viewer.session, created.id)
-
-                            assert.equal(response.status, 200)
-                            assert.equal(response.content?.entity?.id, created.id)
-                            assert.deepEqual(response.content.entity, created)
-                        } finally {
-                            if ( child ) await deleteGroup(owner.session, child.id)
-                            if ( parent ) await deleteGroup(owner.session, parent.id)
-                            await logout(owner.session)
-                            await logout(viewer.session)
-                        }
+                    after(async function() {
+                        if ( ! subgroupsEnabled ) return
+                        if ( child ) await deleteGroup(owner.session, child.id)
+                        await logout(subModerator.session)
+                        await logout(subMember.session)
+                        await logout(invited.session)
                     })
 
-                    it(`Should let a confirmed member of the subgroup view a post in a private-open subgroup`, async function(t) {
+                    it(`Should let a Group Admin view the post`, async function(t) {
                         if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
-
-                        const owner = await loginAs('user1')
-                        const viewer = await loginAs('user2')
-                        let parent = null
-                        let child = null
-                        try {
-                            parent = await createGroup(owner.session, { type: 'private', postPermissions: 'members' })
-                            child = await createSubgroup(owner.session, parent.id, 'private-open')
-
-                            const created = await createGroupPost(owner.session, owner.user.id, child.id, 'private-open')
-
-                            await addConfirmedMember(owner.session, viewer.session, child.id, viewer.user.id)
-
-                            const response = await getPost(viewer.session, created.id)
-
-                            assert.equal(response.status, 200)
-                            assert.equal(response.content?.entity?.id, created.id)
-                            assert.deepEqual(response.content.entity, created)
-                        } finally {
-                            if ( child ) await deleteGroup(owner.session, child.id)
-                            if ( parent ) await deleteGroup(owner.session, parent.id)
-                            await logout(owner.session)
-                            await logout(viewer.session)
-                        }
+                        await assertCanView(owner.session, post)
                     })
 
-                    it(`Should NOT let a non-member view a post in a private-open subgroup`, async function(t) {
+                    it(`Should let a Group Moderator view the post`, async function(t) {
                         if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
-
-                        const owner = await loginAs('user1')
-                        const viewer = await loginAs('user4')
-                        let parent = null
-                        let child = null
-                        try {
-                            parent = await createGroup(owner.session, { type: 'private', postPermissions: 'members' })
-                            child = await createSubgroup(owner.session, parent.id, 'private-open')
-
-                            const created = await createGroupPost(owner.session, owner.user.id, child.id, 'private-open')
-
-                            // Member of neither the parent nor the subgroup.
-                            const response = await getPost(viewer.session, created.id)
-
-                            assert.equal(response.status, 404)
-                            assert.equal(response.content?.error?.type, 'not-found')
-                        } finally {
-                            if ( child ) await deleteGroup(owner.session, child.id)
-                            if ( parent ) await deleteGroup(owner.session, parent.id)
-                            await logout(owner.session)
-                            await logout(viewer.session)
-                        }
+                        await assertCanView(subModerator.session, post)
                     })
 
-                    it(`Should NOT let a banned subgroup member view a private-open subgroup post even when they are a parent member`, async function(t) {
+                    it(`Should let a Member view the post`, async function(t) {
                         if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
-
-                        const owner = await loginAs('user1')
-                        const viewer = await loginAs('user2')
-                        let parent = null
-                        let child = null
-                        try {
-                            parent = await createGroup(owner.session, { type: 'private', postPermissions: 'members' })
-                            child = await createSubgroup(owner.session, parent.id, 'private-open')
-
-                            const created = await createGroupPost(owner.session, owner.user.id, child.id, 'private-open')
-
-                            // The viewer is a parent member (which would normally grant view of
-                            // a 'private-open' post) but is banned in the subgroup itself.  The
-                            // ban wins -- they see nothing.
-                            await addConfirmedMember(owner.session, viewer.session, parent.id, viewer.user.id)
-                            await addConfirmedMember(owner.session, viewer.session, child.id, viewer.user.id)
-                            await setGroupMemberStatus(owner.session, child.id, viewer.user.id, 'banned')
-
-                            const response = await getPost(viewer.session, created.id)
-
-                            assert.equal(response.status, 404)
-                            assert.equal(response.content?.error?.type, 'not-found')
-                        } finally {
-                            if ( child ) await deleteGroup(owner.session, child.id)
-                            if ( parent ) await deleteGroup(owner.session, parent.id)
-                            await logout(owner.session)
-                            await logout(viewer.session)
-                        }
+                        await assertCanView(subMember.session, post)
                     })
 
-                    it(`Should let a PARENT group admin view a private-open subgroup post they have not joined`, async function(t) {
+                    it(`Should let a Parent Group Admin view the post`, async function(t) {
                         if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(parentAdmin.session, post)
+                    })
 
-                        const owner = await loginAs('user1')
-                        const admin = await loginAs('user2')
-                        let parent = null
-                        let child = null
+                    it(`Should let a Parent Group Moderator view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(parentModerator.session, post)
+                    })
+
+                    it(`Should let a Parent Group Member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(parentMember.session, post)
+                    })
+
+                    it(`Should NOT let a Non-member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCannotView(nonMember.session, post.id)
+                    })
+
+                    it(`Should NOT let an Invited/Requested (pending) member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCannotView(invited.session, post.id)
+                    })
+
+                    it(`Should let an Invited/Requested (pending) member who is a Parent Group Member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(invitedParentMember.session, post)
+                    })
+
+                    it(`Should let a site moderator view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(siteModerator.session, post)
+                    })
+
+                    it(`Should NOT let a banned subgroup member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        // Borrow the non-member transiently: add to the subgroup, ban, assert,
+                        // then remove.  The ban overrides even the parent-member path.
                         try {
-                            parent = await createGroup(owner.session, { type: 'private', postPermissions: 'members' })
-
-                            // Promote `admin` to an admin of the PARENT group.  They never join
-                            // the subgroup -- their view rights are inherited from the parent.
-                            await addConfirmedMember(owner.session, admin.session, parent.id, admin.user.id)
-                            await setGroupMemberRole(owner.session, parent.id, admin.user.id, 'admin')
-
-                            child = await createSubgroup(owner.session, parent.id, 'private-open')
-                            const created = await createGroupPost(owner.session, owner.user.id, child.id, 'private-open')
-
-                            const response = await getPost(admin.session, created.id)
-
-                            assert.equal(response.status, 200)
-                            assert.equal(response.content?.entity?.id, created.id)
+                            await addConfirmedMember(owner.session, nonMember.session, child.id, nonMember.user.id)
+                            await setGroupMemberStatus(owner.session, child.id, nonMember.user.id, 'banned')
+                            await assertCannotView(nonMember.session, post.id)
                         } finally {
-                            if ( child ) await deleteGroup(owner.session, child.id)
-                            if ( parent ) await deleteGroup(owner.session, parent.id)
-                            await logout(owner.session)
-                            await logout(admin.session)
+                            await removeGroupMember(owner.session, child.id, nonMember.user.id)
                         }
                     })
                 })
 
                 describe("For a PRIVATE subgroup of a PRIVATE group", function() {
+                    let subModerator, subMember, invited
+                    let child = null
+                    let post = null
 
+                    before(async function() {
+                        if ( ! subgroupsEnabled ) return
+                        subModerator = await loginAs('user2')     // subgroup moderator
+                        subMember = await loginAs('user3')        // confirmed subgroup member
+                        invited = await loginAs('user8')          // invited to subgroup; NOT a parent member
+
+                        child = await createSubgroup(owner.session, parent.id, 'private')
+
+                        await addConfirmedMember(owner.session, subModerator.session, child.id, subModerator.user.id)
+                        await setGroupMemberRole(owner.session, child.id, subModerator.user.id, 'moderator')
+                        await addConfirmedMember(owner.session, subMember.session, child.id, subMember.user.id)
+
+                        // Two pending (invited) members: one who is not a parent member and
+                        // one (user9) who is also a member of the parent group.
+                        await inviteToGroup(owner.session, child.id, invited.user.id)
+                        await inviteToGroup(owner.session, child.id, invitedParentMember.user.id)
+
+                        post = await createGroupPost(owner.session, owner.user.id, child.id, 'private')
+                    })
+
+                    after(async function() {
+                        if ( ! subgroupsEnabled ) return
+                        if ( child ) await deleteGroup(owner.session, child.id)
+                        await logout(subModerator.session)
+                        await logout(subMember.session)
+                        await logout(invited.session)
+                    })
+
+                    it(`Should let a Group Admin view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(owner.session, post)
+                    })
+
+                    it(`Should let a Group Moderator view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(subModerator.session, post)
+                    })
+
+                    it(`Should let a Member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(subMember.session, post)
+                    })
+
+                    it(`Should let a Parent Group Admin view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(parentAdmin.session, post)
+                    })
+
+                    it(`Should NOT let a Parent Group Moderator view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCannotView(parentModerator.session, post.id)
+                    })
+
+                    it(`Should NOT let a Parent Group Member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCannotView(parentMember.session, post.id)
+                    })
+
+                    it(`Should NOT let a Non-member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCannotView(nonMember.session, post.id)
+                    })
+
+                    it(`Should NOT let an Invited/Requested (pending) member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCannotView(invited.session, post.id)
+                    })
+
+                    it(`Should NOT let an Invited/Requested (pending) member who is a Parent Group Member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCannotView(invitedParentMember.session, post.id)
+                    })
+
+                    it(`Should let a site moderator view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(siteModerator.session, post)
+                    })
+
+                    it(`Should NOT let a banned subgroup member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        // Borrow the non-member transiently: add to the subgroup, ban, assert,
+                        // then remove.  The ban overrides even the parent-member path.
+                        try {
+                            await addConfirmedMember(owner.session, nonMember.session, child.id, nonMember.user.id)
+                            await setGroupMemberStatus(owner.session, child.id, nonMember.user.id, 'banned')
+                            await assertCannotView(nonMember.session, post.id)
+                        } finally {
+                            await removeGroupMember(owner.session, child.id, nonMember.user.id)
+                        }
+                    })
                 })
 
                 describe("For a HIDDEN subgroup of a PRIVATE group", function() {
+                    let subModerator, subMember, invited
+                    let child = null
+                    let post = null
 
+                    before(async function() {
+                        if ( ! subgroupsEnabled ) return
+                        subModerator = await loginAs('user2')     // subgroup moderator
+                        subMember = await loginAs('user3')        // confirmed subgroup member
+                        invited = await loginAs('user8')          // invited to subgroup; NOT a parent member
+
+                        child = await createSubgroup(owner.session, parent.id, 'hidden')
+
+                        await addConfirmedMember(owner.session, subModerator.session, child.id, subModerator.user.id)
+                        await setGroupMemberRole(owner.session, child.id, subModerator.user.id, 'moderator')
+                        await addConfirmedMember(owner.session, subMember.session, child.id, subMember.user.id)
+
+                        // Two pending (invited) members: one who is not a parent member and
+                        // one (user9) who is also a member of the parent group.
+                        await inviteToGroup(owner.session, child.id, invited.user.id)
+                        await inviteToGroup(owner.session, child.id, invitedParentMember.user.id)
+
+                        post = await createGroupPost(owner.session, owner.user.id, child.id, 'hidden')
+                    })
+
+                    after(async function() {
+                        if ( ! subgroupsEnabled ) return
+                        if ( child ) await deleteGroup(owner.session, child.id)
+                        await logout(subModerator.session)
+                        await logout(subMember.session)
+                        await logout(invited.session)
+                    })
+
+                    it(`Should let a Group Admin view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(owner.session, post)
+                    })
+
+                    it(`Should let a Group Moderator view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(subModerator.session, post)
+                    })
+
+                    it(`Should let a Member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(subMember.session, post)
+                    })
+
+                    it(`Should let a Parent Group Admin view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(parentAdmin.session, post)
+                    })
+
+                    it(`Should NOT let a Parent Group Moderator view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCannotView(parentModerator.session, post.id)
+                    })
+
+                    it(`Should NOT let a Parent Group Member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCannotView(parentMember.session, post.id)
+                    })
+
+                    it(`Should NOT let a Non-member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCannotView(nonMember.session, post.id)
+                    })
+
+                    it(`Should NOT let an Invited/Requested (pending) member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCannotView(invited.session, post.id)
+                    })
+
+                    it(`Should NOT let an Invited/Requested (pending) member who is a Parent Group Member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCannotView(invitedParentMember.session, post.id)
+                    })
+
+                    it(`Should let a site moderator view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(siteModerator.session, post)
+                    })
+
+                    it(`Should NOT let a banned subgroup member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        // Borrow the non-member transiently: add to the subgroup, ban, assert,
+                        // then remove.  The ban overrides even the parent-member path.
+                        try {
+                            await addConfirmedMember(owner.session, nonMember.session, child.id, nonMember.user.id)
+                            await setGroupMemberStatus(owner.session, child.id, nonMember.user.id, 'banned')
+                            await assertCannotView(nonMember.session, post.id)
+                        } finally {
+                            await removeGroupMember(owner.session, child.id, nonMember.user.id)
+                        }
+                    })
                 })
+
             })
 
             describe("For subgroups of HIDDEN groups", function() {
-                // ---- 'hidden-open' subgroup (nested under a 'hidden' parent) ----
+                let owner, parentAdmin, parentModerator, parentMember, invitedParentMember, nonMember, siteModerator
+                let parent = null
+
+                before(async function() {
+                    if ( ! subgroupsEnabled ) return
+                    owner = await loginAs('user1')                    // admin of every group; post author
+                    parentAdmin = await loginAs('user4')              // admin of the parent only
+                    parentModerator = await loginAs('user5')          // moderator of the parent only
+                    parentMember = await loginAs('user6')             // member of the parent only
+                    invitedParentMember = await loginAs('user9')      // parent member; invited into each subgroup
+                    nonMember = await loginAs('user7')                // member of nothing
+                    siteModerator = await loginAs('user-site-moderator')
+
+                    parent = await createGroup(owner.session, { type: 'hidden', postPermissions: 'members' })
+
+                    await addConfirmedMember(owner.session, parentAdmin.session, parent.id, parentAdmin.user.id)
+                    await setGroupMemberRole(owner.session, parent.id, parentAdmin.user.id, 'admin')
+                    await addConfirmedMember(owner.session, parentModerator.session, parent.id, parentModerator.user.id)
+                    await setGroupMemberRole(owner.session, parent.id, parentModerator.user.id, 'moderator')
+                    await addConfirmedMember(owner.session, parentMember.session, parent.id, parentMember.user.id)
+                    await addConfirmedMember(owner.session, invitedParentMember.session, parent.id, invitedParentMember.user.id)
+                })
+
+                after(async function() {
+                    if ( ! subgroupsEnabled ) return
+                    if ( parent ) await deleteGroup(owner.session, parent.id)
+                    await logout(owner.session)
+                    await logout(parentAdmin.session)
+                    await logout(parentModerator.session)
+                    await logout(parentMember.session)
+                    await logout(invitedParentMember.session)
+                    await logout(nonMember.session)
+                    await logout(siteModerator.session)
+                })
+
                 describe("For an OPEN subgroup of a HIDDEN group (HIDDEN-OPEN)", function() {
-                    it(`Should let a member of the PARENT group view a post in a hidden-open subgroup`, async function(t) {
-                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                    let subModerator, subMember, invited
+                    let child = null
+                    let post = null
 
-                        const owner = await loginAs('user1')
-                        const viewer = await loginAs('user2')
-                        let parent = null
-                        let child = null
-                        try {
-                            parent = await createGroup(owner.session, { type: 'hidden', postPermissions: 'members' })
-                            child = await createSubgroup(owner.session, parent.id, 'hidden-open')
+                    before(async function() {
+                        if ( ! subgroupsEnabled ) return
+                        subModerator = await loginAs('user2')     // subgroup moderator
+                        subMember = await loginAs('user3')        // confirmed subgroup member
+                        invited = await loginAs('user8')          // invited to subgroup; NOT a parent member
 
-                            const created = await createGroupPost(owner.session, owner.user.id, child.id, 'hidden-open')
+                        child = await createSubgroup(owner.session, parent.id, 'hidden-open')
 
-                            // Parent membership only -- not a subgroup member.
-                            await addConfirmedMember(owner.session, viewer.session, parent.id, viewer.user.id)
+                        await addConfirmedMember(owner.session, subModerator.session, child.id, subModerator.user.id)
+                        await setGroupMemberRole(owner.session, child.id, subModerator.user.id, 'moderator')
+                        await addConfirmedMember(owner.session, subMember.session, child.id, subMember.user.id)
 
-                            const response = await getPost(viewer.session, created.id)
+                        // Two pending (invited) members: one who is not a parent member and
+                        // one (user9) who is also a member of the parent group.
+                        await inviteToGroup(owner.session, child.id, invited.user.id)
+                        await inviteToGroup(owner.session, child.id, invitedParentMember.user.id)
 
-                            assert.equal(response.status, 200)
-                            assert.equal(response.content?.entity?.id, created.id)
-                            assert.deepEqual(response.content.entity, created)
-                        } finally {
-                            if ( child ) await deleteGroup(owner.session, child.id)
-                            if ( parent ) await deleteGroup(owner.session, parent.id)
-                            await logout(owner.session)
-                            await logout(viewer.session)
-                        }
+                        post = await createGroupPost(owner.session, owner.user.id, child.id, 'hidden-open')
                     })
 
-                    it(`Should let a confirmed member of the subgroup view a post in a hidden-open subgroup`, async function(t) {
-                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
-
-                        const owner = await loginAs('user1')
-                        const viewer = await loginAs('user2')
-                        let parent = null
-                        let child = null
-                        try {
-                            parent = await createGroup(owner.session, { type: 'hidden', postPermissions: 'members' })
-                            child = await createSubgroup(owner.session, parent.id, 'hidden-open')
-
-                            const created = await createGroupPost(owner.session, owner.user.id, child.id, 'hidden-open')
-
-                            await addConfirmedMember(owner.session, viewer.session, child.id, viewer.user.id)
-
-                            const response = await getPost(viewer.session, created.id)
-
-                            assert.equal(response.status, 200)
-                            assert.equal(response.content?.entity?.id, created.id)
-                            assert.deepEqual(response.content.entity, created)
-                        } finally {
-                            if ( child ) await deleteGroup(owner.session, child.id)
-                            if ( parent ) await deleteGroup(owner.session, parent.id)
-                            await logout(owner.session)
-                            await logout(viewer.session)
-                        }
+                    after(async function() {
+                        if ( ! subgroupsEnabled ) return
+                        if ( child ) await deleteGroup(owner.session, child.id)
+                        await logout(subModerator.session)
+                        await logout(subMember.session)
+                        await logout(invited.session)
                     })
 
-                    it(`Should NOT let a non-member view a post in a hidden-open subgroup`, async function(t) {
+                    it(`Should let a Group Admin view the post`, async function(t) {
                         if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
-
-                        const owner = await loginAs('user1')
-                        const viewer = await loginAs('user4')
-                        let parent = null
-                        let child = null
-                        try {
-                            parent = await createGroup(owner.session, { type: 'hidden', postPermissions: 'members' })
-                            child = await createSubgroup(owner.session, parent.id, 'hidden-open')
-
-                            const created = await createGroupPost(owner.session, owner.user.id, child.id, 'hidden-open')
-
-                            const response = await getPost(viewer.session, created.id)
-
-                            assert.equal(response.status, 404)
-                            assert.equal(response.content?.error?.type, 'not-found')
-                        } finally {
-                            if ( child ) await deleteGroup(owner.session, child.id)
-                            if ( parent ) await deleteGroup(owner.session, parent.id)
-                            await logout(owner.session)
-                            await logout(viewer.session)
-                        }
+                        await assertCanView(owner.session, post)
                     })
 
-                    it(`Should let a PARENT group admin view a hidden-open subgroup post they have not joined`, async function(t) {
+                    it(`Should let a Group Moderator view the post`, async function(t) {
                         if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(subModerator.session, post)
+                    })
 
-                        const owner = await loginAs('user1')
-                        const admin = await loginAs('user2')
-                        let parent = null
-                        let child = null
+                    it(`Should let a Member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(subMember.session, post)
+                    })
+
+                    it(`Should let a Parent Group Admin view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(parentAdmin.session, post)
+                    })
+
+                    it(`Should let a Parent Group Moderator view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(parentModerator.session, post)
+                    })
+
+                    it(`Should let a Parent Group Member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(parentMember.session, post)
+                    })
+
+                    it(`Should NOT let a Non-member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCannotView(nonMember.session, post.id)
+                    })
+
+                    it(`Should NOT let an Invited/Requested (pending) member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCannotView(invited.session, post.id)
+                    })
+
+                    it(`Should let an Invited/Requested (pending) member who is a Parent Group Member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(invitedParentMember.session, post)
+                    })
+
+                    it(`Should let a site moderator view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(siteModerator.session, post)
+                    })
+
+                    it(`Should NOT let a banned subgroup member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        // Borrow the non-member transiently: add to the subgroup, ban, assert,
+                        // then remove.  The ban overrides even the parent-member path.
                         try {
-                            parent = await createGroup(owner.session, { type: 'hidden', postPermissions: 'members' })
-
-                            await addConfirmedMember(owner.session, admin.session, parent.id, admin.user.id)
-                            await setGroupMemberRole(owner.session, parent.id, admin.user.id, 'admin')
-
-                            child = await createSubgroup(owner.session, parent.id, 'hidden-open')
-                            const created = await createGroupPost(owner.session, owner.user.id, child.id, 'hidden-open')
-
-                            const response = await getPost(admin.session, created.id)
-
-                            assert.equal(response.status, 200)
-                            assert.equal(response.content?.entity?.id, created.id)
+                            await addConfirmedMember(owner.session, nonMember.session, child.id, nonMember.user.id)
+                            await setGroupMemberStatus(owner.session, child.id, nonMember.user.id, 'banned')
+                            await assertCannotView(nonMember.session, post.id)
                         } finally {
-                            if ( child ) await deleteGroup(owner.session, child.id)
-                            if ( parent ) await deleteGroup(owner.session, parent.id)
-                            await logout(owner.session)
-                            await logout(admin.session)
+                            await removeGroupMember(owner.session, child.id, nonMember.user.id)
                         }
                     })
                 })
 
-                // ---- 'hidden-private' subgroup (nested under a 'hidden' parent) ----
-                //
-                // Unlike the '-open' subgroups, parent membership is NOT sufficient here.
                 describe("For a PRIVATE subgroup of a HIDDEN group (HIDDEN-PRIVATE)", function() {
-                    it(`Should let a confirmed member of the subgroup view a post in a hidden-private subgroup`, async function(t) {
-                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                    let subModerator, subMember, invited
+                    let child = null
+                    let post = null
 
-                        const owner = await loginAs('user1')
-                        const viewer = await loginAs('user2')
-                        let parent = null
-                        let child = null
-                        try {
-                            parent = await createGroup(owner.session, { type: 'hidden', postPermissions: 'members' })
-                            child = await createSubgroup(owner.session, parent.id, 'hidden-private')
+                    before(async function() {
+                        if ( ! subgroupsEnabled ) return
+                        subModerator = await loginAs('user2')     // subgroup moderator
+                        subMember = await loginAs('user3')        // confirmed subgroup member
+                        invited = await loginAs('user8')          // invited to subgroup; NOT a parent member
 
-                            const created = await createGroupPost(owner.session, owner.user.id, child.id, 'hidden-private')
+                        child = await createSubgroup(owner.session, parent.id, 'hidden-private')
 
-                            await addConfirmedMember(owner.session, viewer.session, child.id, viewer.user.id)
+                        await addConfirmedMember(owner.session, subModerator.session, child.id, subModerator.user.id)
+                        await setGroupMemberRole(owner.session, child.id, subModerator.user.id, 'moderator')
+                        await addConfirmedMember(owner.session, subMember.session, child.id, subMember.user.id)
 
-                            const response = await getPost(viewer.session, created.id)
+                        // Two pending (invited) members: one who is not a parent member and
+                        // one (user9) who is also a member of the parent group.
+                        await inviteToGroup(owner.session, child.id, invited.user.id)
+                        await inviteToGroup(owner.session, child.id, invitedParentMember.user.id)
 
-                            assert.equal(response.status, 200)
-                            assert.equal(response.content?.entity?.id, created.id)
-                            assert.deepEqual(response.content.entity, created)
-                        } finally {
-                            if ( child ) await deleteGroup(owner.session, child.id)
-                            if ( parent ) await deleteGroup(owner.session, parent.id)
-                            await logout(owner.session)
-                            await logout(viewer.session)
-                        }
+                        post = await createGroupPost(owner.session, owner.user.id, child.id, 'hidden-private')
                     })
 
-                    it(`Should NOT let a member of the PARENT group (who is not a subgroup member) view a post in a hidden-private subgroup`, async function(t) {
-                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
-
-                        const owner = await loginAs('user1')
-                        const viewer = await loginAs('user2')
-                        let parent = null
-                        let child = null
-                        try {
-                            parent = await createGroup(owner.session, { type: 'hidden', postPermissions: 'members' })
-                            child = await createSubgroup(owner.session, parent.id, 'hidden-private')
-
-                            const created = await createGroupPost(owner.session, owner.user.id, child.id, 'hidden-private')
-
-                            // Confirmed member of the PARENT group but NOT of the subgroup.  For
-                            // 'hidden-private' that is not enough.
-                            await addConfirmedMember(owner.session, viewer.session, parent.id, viewer.user.id)
-
-                            const response = await getPost(viewer.session, created.id)
-
-                            assert.equal(response.status, 404)
-                            assert.equal(response.content?.error?.type, 'not-found')
-                        } finally {
-                            if ( child ) await deleteGroup(owner.session, child.id)
-                            if ( parent ) await deleteGroup(owner.session, parent.id)
-                            await logout(owner.session)
-                            await logout(viewer.session)
-                        }
+                    after(async function() {
+                        if ( ! subgroupsEnabled ) return
+                        if ( child ) await deleteGroup(owner.session, child.id)
+                        await logout(subModerator.session)
+                        await logout(subMember.session)
+                        await logout(invited.session)
                     })
 
-                    it(`Should NOT let a non-member view a post in a hidden-private subgroup`, async function(t) {
+                    it(`Should let a Group Admin view the post`, async function(t) {
                         if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
-
-                        const owner = await loginAs('user1')
-                        const viewer = await loginAs('user4')
-                        let parent = null
-                        let child = null
-                        try {
-                            parent = await createGroup(owner.session, { type: 'hidden', postPermissions: 'members' })
-                            child = await createSubgroup(owner.session, parent.id, 'hidden-private')
-
-                            const created = await createGroupPost(owner.session, owner.user.id, child.id, 'hidden-private')
-
-                            const response = await getPost(viewer.session, created.id)
-
-                            assert.equal(response.status, 404)
-                            assert.equal(response.content?.error?.type, 'not-found')
-                        } finally {
-                            if ( child ) await deleteGroup(owner.session, child.id)
-                            if ( parent ) await deleteGroup(owner.session, parent.id)
-                            await logout(owner.session)
-                            await logout(viewer.session)
-                        }
+                        await assertCanView(owner.session, post)
                     })
 
-                    it(`Should let a PARENT group admin view a hidden-private subgroup post they have not joined`, async function(t) {
+                    it(`Should let a Group Moderator view the post`, async function(t) {
                         if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
-
-                        // The distinguishing case: a plain parent *member* cannot view a
-                        // 'hidden-private' subgroup post (asserted above), but a parent *admin*
-                        // inherits moderator rights over the subgroup and therefore can --
-                        // without ever joining it.
-                        const owner = await loginAs('user1')
-                        const admin = await loginAs('user2')
-                        let parent = null
-                        let child = null
-                        try {
-                            parent = await createGroup(owner.session, { type: 'hidden', postPermissions: 'members' })
-
-                            await addConfirmedMember(owner.session, admin.session, parent.id, admin.user.id)
-                            await setGroupMemberRole(owner.session, parent.id, admin.user.id, 'admin')
-
-                            child = await createSubgroup(owner.session, parent.id, 'hidden-private')
-                            const created = await createGroupPost(owner.session, owner.user.id, child.id, 'hidden-private')
-
-                            const response = await getPost(admin.session, created.id)
-
-                            assert.equal(response.status, 200)
-                            assert.equal(response.content?.entity?.id, created.id)
-                        } finally {
-                            if ( child ) await deleteGroup(owner.session, child.id)
-                            if ( parent ) await deleteGroup(owner.session, parent.id)
-                            await logout(owner.session)
-                            await logout(admin.session)
-                        }
+                        await assertCanView(subModerator.session, post)
                     })
 
-                    it(`Should let a site moderator view a hidden-private subgroup post they are not a member of`, async function(t) {
+                    it(`Should let a Member view the post`, async function(t) {
                         if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(subMember.session, post)
+                    })
 
-                        const owner = await loginAs('user1')
-                        const moderator = await loginAs('user-site-moderator')
-                        let parent = null
-                        let child = null
+                    it(`Should let a Parent Group Admin view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(parentAdmin.session, post)
+                    })
+
+                    it(`Should NOT let a Parent Group Moderator view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCannotView(parentModerator.session, post.id)
+                    })
+
+                    it(`Should NOT let a Parent Group Member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCannotView(parentMember.session, post.id)
+                    })
+
+                    it(`Should NOT let a Non-member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCannotView(nonMember.session, post.id)
+                    })
+
+                    it(`Should NOT let an Invited/Requested (pending) member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCannotView(invited.session, post.id)
+                    })
+
+                    it(`Should NOT let an Invited/Requested (pending) member who is a Parent Group Member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCannotView(invitedParentMember.session, post.id)
+                    })
+
+                    it(`Should let a site moderator view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(siteModerator.session, post)
+                    })
+
+                    it(`Should NOT let a banned subgroup member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        // Borrow the non-member transiently: add to the subgroup, ban, assert,
+                        // then remove.  The ban overrides even the parent-member path.
                         try {
-                            parent = await createGroup(owner.session, { type: 'hidden', postPermissions: 'members' })
-                            child = await createSubgroup(owner.session, parent.id, 'hidden-private')
-
-                            const created = await createGroupPost(owner.session, owner.user.id, child.id, 'hidden-private')
-
-                            // Member of neither group; visible by virtue of site moderation.
-                            const response = await getPost(moderator.session, created.id)
-
-                            assert.equal(response.status, 200)
-                            assert.equal(response.content?.entity?.id, created.id)
+                            await addConfirmedMember(owner.session, nonMember.session, child.id, nonMember.user.id)
+                            await setGroupMemberStatus(owner.session, child.id, nonMember.user.id, 'banned')
+                            await assertCannotView(nonMember.session, post.id)
                         } finally {
-                            if ( child ) await deleteGroup(owner.session, child.id)
-                            if ( parent ) await deleteGroup(owner.session, parent.id)
-                            await logout(owner.session)
-                            await logout(moderator.session)
+                            await removeGroupMember(owner.session, child.id, nonMember.user.id)
                         }
                     })
                 })
 
                 describe("For a HIDDEN subgroup of a HIDDEN group", function() {
+                    let subModerator, subMember, invited
+                    let child = null
+                    let post = null
 
+                    before(async function() {
+                        if ( ! subgroupsEnabled ) return
+                        subModerator = await loginAs('user2')     // subgroup moderator
+                        subMember = await loginAs('user3')        // confirmed subgroup member
+                        invited = await loginAs('user8')          // invited to subgroup; NOT a parent member
+
+                        child = await createSubgroup(owner.session, parent.id, 'hidden')
+
+                        await addConfirmedMember(owner.session, subModerator.session, child.id, subModerator.user.id)
+                        await setGroupMemberRole(owner.session, child.id, subModerator.user.id, 'moderator')
+                        await addConfirmedMember(owner.session, subMember.session, child.id, subMember.user.id)
+
+                        // Two pending (invited) members: one who is not a parent member and
+                        // one (user9) who is also a member of the parent group.
+                        await inviteToGroup(owner.session, child.id, invited.user.id)
+                        await inviteToGroup(owner.session, child.id, invitedParentMember.user.id)
+
+                        post = await createGroupPost(owner.session, owner.user.id, child.id, 'hidden')
+                    })
+
+                    after(async function() {
+                        if ( ! subgroupsEnabled ) return
+                        if ( child ) await deleteGroup(owner.session, child.id)
+                        await logout(subModerator.session)
+                        await logout(subMember.session)
+                        await logout(invited.session)
+                    })
+
+                    it(`Should let a Group Admin view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(owner.session, post)
+                    })
+
+                    it(`Should let a Group Moderator view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(subModerator.session, post)
+                    })
+
+                    it(`Should let a Member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(subMember.session, post)
+                    })
+
+                    it(`Should let a Parent Group Admin view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(parentAdmin.session, post)
+                    })
+
+                    it(`Should NOT let a Parent Group Moderator view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCannotView(parentModerator.session, post.id)
+                    })
+
+                    it(`Should NOT let a Parent Group Member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCannotView(parentMember.session, post.id)
+                    })
+
+                    it(`Should NOT let a Non-member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCannotView(nonMember.session, post.id)
+                    })
+
+                    it(`Should NOT let an Invited/Requested (pending) member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCannotView(invited.session, post.id)
+                    })
+
+                    it(`Should NOT let an Invited/Requested (pending) member who is a Parent Group Member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCannotView(invitedParentMember.session, post.id)
+                    })
+
+                    it(`Should let a site moderator view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        await assertCanView(siteModerator.session, post)
+                    })
+
+                    it(`Should NOT let a banned subgroup member view the post`, async function(t) {
+                        if ( ! subgroupsEnabled ) { t.skip(`${SUBGROUPS_FEATURE} feature is not enabled`); return }
+                        // Borrow the non-member transiently: add to the subgroup, ban, assert,
+                        // then remove.  The ban overrides even the parent-member path.
+                        try {
+                            await addConfirmedMember(owner.session, nonMember.session, child.id, nonMember.user.id)
+                            await setGroupMemberStatus(owner.session, child.id, nonMember.user.id, 'banned')
+                            await assertCannotView(nonMember.session, post.id)
+                        } finally {
+                            await removeGroupMember(owner.session, child.id, nonMember.user.id)
+                        }
+                    })
                 })
+
             })
+
         })
     })
 })
