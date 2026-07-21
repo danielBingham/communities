@@ -120,11 +120,11 @@ describe('GET /authentication', function() {
     it('Should return the pending session for a user mid-MFA-login', async function() {
         const session = await initialize()
 
-        const user3 = userDictionary['user3']
+        const userMfa = userDictionary['user-mfa']
 
         const credentials = {
-            email: user3.email,
-            password: user3.password
+            email: userMfa.email,
+            password: userMfa.password
         }
 
         // For an MFA-enabled user, POST /authentication does not fully log them

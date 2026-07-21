@@ -43,11 +43,68 @@ const dictionary = {
   },
 
   // ==========================================================================
-  // user2 -- A *banned* user.
+  // user2 - A standard user
+  //
+  // Manual setup (run once before running the tests)
+  //   1. Register "Test User2" (test-user2 /
+  //   communities-test-user2@mailinator.com) through the app.  Set the
+  //   account's password to match `password` below. Confirm the account's
+  //   email using `mailinator.com`. Once confirmed, make sure to turn email
+  //   notifications off (so we don't spam mailinator) and also turn off 'info'
+  //   and 'announcement' posts in preferences (so we have a blank slate for
+  //   post testing).
+  // ==========================================================================
+  'user2': {
+    name: 'Test User',
+    username: 'test-user2',
+    email: 'communities-test-user2@mailinator.com',
+    password: 'PasswordPassword',
+  },
+
+  // ==========================================================================
+  // user3 - A standard user
+  //
+  // Manual setup (run once before running the tests)
+  //   1. Register "Test User3" (test-user3 /
+  //   communities-test-user3@mailinator.com) through the app.  Set the
+  //   account's password to match `password` below. Confirm the account's
+  //   email using `mailinator.com`. Once confirmed, make sure to turn email
+  //   notifications off (so we don't spam mailinator) and also turn off 'info'
+  //   and 'announcement' posts in preferences (so we have a blank slate for
+  //   post testing).
+  // ==========================================================================
+  'user3': {
+    name: 'Test User3',
+    username: 'test-user3',
+    email: 'communities-test-user3@mailinator.com',
+    password: 'PasswordPassword',
+  },
+
+  // ==========================================================================
+  // user4 - A standard user
+  //
+  // Manual setup (run once before running the tests)
+  //   1. Register "Test User3" (test-user3 /
+  //   communities-test-user3@mailinator.com) through the app.  Set the
+  //   account's password to match `password` below. Confirm the account's
+  //   email using `mailinator.com`. Once confirmed, make sure to turn email
+  //   notifications off (so we don't spam mailinator) and also turn off 'info'
+  //   and 'announcement' posts in preferences (so we have a blank slate for
+  //   post testing).
+  // ==========================================================================
+  'user4': {
+    name: 'Test User4',
+    username: 'test-user4',
+    email: 'communities-test-user4@mailinator.com',
+    password: 'PasswordPassword',
+  },
+
+  // ==========================================================================
+  // user-banned -- A dedicated *banned* user.
   //
   // Manual setup (run once before running the tests):
-  //   1. Register "Test User2" (test-user2 /
-  //   communities-test-user2@mailinator.com) through the app exactly the way
+  //   1. Register "Test User Banned" (test-user-banned /
+  //   communities-test-user-banned@mailinator.com) through the app exactly the way
   //   user1 was created, and confirm the account. Set the password to match
   //   `password` below. Once confirmed, make sure to turn email notifications
   //   off (so we don't spam mailinator) and also turn off 'info' and
@@ -58,21 +115,21 @@ const dictionary = {
   //
   //        UPDATE users
   //           SET status = 'banned'
-  //         WHERE email = 'communities-test-user2@mailinator.com';
+  //         WHERE email = 'communities-test-user-banned@mailinator.com';
   // ==========================================================================
-  'user2': {
-    name: 'Test User2',
-    username: 'test-user2',
-    email: 'communities-test-user2@mailinator.com',
+  'user-banned': {
+    name: 'Test User Banned',
+    username: 'test-user-banned',
+    email: 'communities-test-user-banned@mailinator.com',
     password: 'PasswordPassword',
   },
 
   // ==========================================================================
-  // user3 -- A user with multi-factor authentication ENABLED.
+  // user-mfa -- A user with multi-factor authentication ENABLED.
   //
   // Manual setup (only if enabling the skipped MFA tests):
-  //   1. Register "Test User3" (test-user3 /
-  //   communities-test-user3@mailinator.com) and confirm the account. Set the
+  //   1. Register "Test User MFA" (test-user-mfa /
+  //   communities-test-user-mfa@mailinator.com) and confirm the account. Set the
   //   password to match `password` below. Once confirmed, make sure to turn
   //   email notifications off (so we don't spam mailinator) and also turn off
   //   'info' and 'announcement' posts in preferences (so we have a blank slate
@@ -80,15 +137,15 @@ const dictionary = {
   //   2. Log in and enroll multi-factor authentication using an authenticator
   //   app so that `authentication__multifactor_state` becomes 'enabled'.
   // ==========================================================================
-  'user3': {
-    name: 'Test User3',
-    username: 'test-user3',
-    email: 'communities-test-user3@mailinator.com',
+  'user-mfa': {
+    name: 'Test User MFA',
+    username: 'test-user-mfa',
+    email: 'communities-test-user-mfa@mailinator.com',
     password: 'PasswordPassword',
   },
 
   // ==========================================================================
-  // user4 -- A DEDICATED account for the login lockout test.
+  // user-lockout -- A DEDICATED account for the login lockout test.
   //
   // Why a dedicated user: the lockout test intentionally exhausts the failed
   // login attempt counter (10+ failures within 15 minutes). Once locked,
@@ -111,17 +168,40 @@ const dictionary = {
   //      WHERE email = 'communities-test-user4@mailinator.com';
   //
   // Manual setup (run once before the suite):
-  //   1. Register "Test User4" (test-user4 /
-  //   communities-test-user4@mailinator.com) and confirm the account. Set the
+  //   1. Register "Test User Lockout" (test-user-lockout /
+  //   communities-test-user-lockout@mailinator.com) and confirm the account. Set the
   //   password to match `password` below. Once confirmed, make sure to turn
   //   email notifications off (so we don't spam mailinator) and also turn off
   //   'info' and 'announcement' posts in preferences (so we have a blank slate
   //   for post testing).
   // ==========================================================================
-  'user4': {
-    name: 'Test User4',
-    username: 'test-user4',
-    email: 'communities-test-user4@mailinator.com',
+  'user-lockout': {
+    name: 'Test User Lockout',
+    username: 'test-user-lockout',
+    email: 'communities-test-user-lockout@mailinator.com',
+    password: 'PasswordPassword',
+  },
+
+  // ==========================================================================
+  // user-site-moderator -- A SITE MODERATOR.
+  //
+  // Manual setup (run once before running the tests):
+  //   1. Register "Test User Site Moderator" (test-user-site-moderator /
+  //   communities-test-user-site-moderator@mailinator.com) and confirm the account. Set the
+  //   password to match `password` below. Once confirmed, make sure to turn
+  //   email notifications off (so we don't spam mailinator) and also turn off
+  //   'info' and 'announcement' posts in preferences (so we have a blank slate
+  //   for post testing).
+  //   2. Grant the account the site 'moderator' role directly in the database:
+  //
+  //        UPDATE users
+  //           SET site_role = 'moderator'
+  //         WHERE email = 'communities-test-user-site-moderator@mailinator.com';
+  // ==========================================================================
+  'user-site-moderator': {
+    name: 'Test User Site Moderator',
+    username: 'test-user-site-moderator',
+    email: 'communities-test-user-site-moderator@mailinator.com',
     password: 'PasswordPassword',
   }
 }

@@ -7,8 +7,13 @@ password flow, etc.
 
 - [ ] User1 has been registered.
 
-### Cases
 
+### Smoke Test
+
+
+
+
+### Full Regression
 
 #### Log in
 
@@ -35,7 +40,7 @@ password flow, etc.
             - **Confirm draft post has been cleared.**
 
 - [ ] As a user, I get temporarily locked out after too many attempts.
-    - As User1: 
+    - As User1:
         - Attempt to login with the wrong pasword 10 times.
         - Confirm locked out.
         - Wait 15 minutes.

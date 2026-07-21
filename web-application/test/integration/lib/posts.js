@@ -20,6 +20,68 @@
 
 const { fetchEndpoint } = require('./fetchEndpoint')
 
+const getPost = async function(session, postId) {
+    return await fetchEndpoint('GET', `/post/${encodeURIComponent(postId)}`, { session: session })
+}
+
+// Create a feed post for the currently authenticated user and return the
+// created entity.  `overrides` may set any of the post submission fields; by
+// default this creates a private feed post owned by `userId`.
+const createPost = async function(session, userId, overrides = {}) {
+    const submission = {
+        type: 'feed',
+        visibility: 'private',
+        userId: userId,
+        groupId: null,
+        files: [],
+        linkPreviewId: null,
+        sharedPostId: null,
+        content: 'This is a test post.',
+        ...overrides
+    }
+
+    const response = await fetchEndpoint('POST', '/posts', { session: session, body: submission })
+    if ( ! response.ok ) {
+        throw new Error(`Failed to create post: ${response.status} ${JSON.stringify(response.content)}`)
+    }
+
+    return response.content.entity
+}
+
+// Create a post in a group for the currently authenticated user and return the
+// created entity.  The post's visibility is defaulted to match what the group
+// type requires ('public' for open groups, 'private' otherwise) unless
+// overridden.  `groupType` is only used to pick a sensible default visibility.
+const createGroupPost = async function(session, userId, groupId, groupType = 'open', overrides = {}) {
+    const submission = {
+        type: 'group',
+        visibility: groupType === 'open' ? 'public' : 'private',
+        userId: userId,
+        groupId: groupId,
+        files: [],
+        linkPreviewId: null,
+        sharedPostId: null,
+        content: 'This is a test group post.',
+        ...overrides
+    }
+
+    const response = await fetchEndpoint('POST', '/posts', { session: session, body: submission })
+    if ( ! response.ok ) {
+        throw new Error(`Failed to create group post: ${response.status} ${JSON.stringify(response.content)}`)
+    }
+
+    return response.content.entity
+}
+
+// Delete a single post by id.
+const deletePost = async function(session, postId) {
+    const response = await fetchEndpoint('DELETE', `/post/${encodeURIComponent(postId)}`, { session: session })
+    if ( ! response.ok ) {
+        throw new Error(`Failed to delete Post(${postId}): ${response.status}`)
+    }
+    return response.content
+}
+
 // Delete all posts belonging to a test user so that we can run a fresh test
 // with a clean slate. Must have already acquired a session for the test user.
 const deleteAllPostsForUser = async function(session, userId) {
@@ -48,5 +110,9 @@ const deleteAllPostsForUser = async function(session, userId) {
 }
 
 module.exports = {
+    getPost: getPost,
+    createPost: createPost,
+    createGroupPost: createGroupPost,
+    deletePost: deletePost,
     deleteAllPostsForUser: deleteAllPostsForUser
 }

@@ -199,14 +199,14 @@ describe(`POST /authentication`, function() {
     })
 
     it(`Should reject a banned user`, async function() {
-        // See fixtures/users.js -> 'user2' for the required manual setup.
+        // See fixtures/users.js -> 'user-banned' for the required manual setup.
         const session = await initialize()
 
-        const user2 = userDictionary['user2']
+        const userBanned = userDictionary['user-banned']
 
         const credentials = {
-            email: user2.email,
-            password: user2.password
+            email: userBanned.email,
+            password: userBanned.password
         }
 
         const response = await fetchEndpoint('POST', '/authentication', { body: credentials, session: session })
@@ -224,16 +224,16 @@ describe(`POST /authentication`, function() {
         // stops even checking the password and returns a 429 for ~15 minutes.
         //
         // This test is intentionally destructive, so it runs against its own
-        // dedicated fixture (user4) -- see fixtures/users.js.  It is written to
+        // dedicated fixture (userLockout) -- see fixtures/users.js.  It is written to
         // be tolerant of an already-locked account so that re-running the suite
         // inside the 15 minute window still passes.
         const session = await initialize()
 
-        const user4 = userDictionary['user4']
+        const userLockout = userDictionary['user-lockout']
 
         const wrongCredentials = {
-            email: user4.email,
-            password: user4.password+'Wrong'
+            email: userLockout.email,
+            password: userLockout.password+'Wrong'
         }
 
         // 10 failures are needed to trip the lock from a cold start (the 11th
@@ -261,8 +261,8 @@ describe(`POST /authentication`, function() {
         // While locked out, even the *correct* password is rejected with the
         // same timeout -- the password is never checked.
         const correctCredentials = {
-            email: user4.email,
-            password: user4.password
+            email: userLockout.email,
+            password: userLockout.password
         }
         const lockedResponse = await fetchEndpoint('POST', '/authentication', { body: correctCredentials, session: session })
 
@@ -275,11 +275,11 @@ describe(`POST /authentication`, function() {
     it(`Should return a pending session for an MFA-enabled user`, async function() {
         const session = await initialize()
 
-        const user3 = userDictionary['user3']
+        const userMfa = userDictionary['user-mfa']
 
         const credentials = {
-            email: user3.email,
-            password: user3.password
+            email: userMfa.email,
+            password: userMfa.password
         }
 
         const response = await fetchEndpoint('POST', '/authentication', { body: credentials, session: session })
