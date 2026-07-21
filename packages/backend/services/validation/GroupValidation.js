@@ -20,6 +20,8 @@
 
 const { util, schema } = require('@communities/shared')
 
+const GroupDAO = require('../../daos/GroupDAO')
+
 const FileService = require('../FileService')
 
 const ServiceError = require('../../errors/ServiceError')
@@ -29,6 +31,8 @@ module.exports = class GroupValidation {
     constructor(core, validationService) {
         this.core = core
         this.validationService = validationService
+
+        this.groupDAO = new GroupDAO(core)
 
         this.fileService = new FileService(core)
 

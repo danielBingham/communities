@@ -46,6 +46,30 @@ const createGroup = async function(session, overrides = {}) {
     return response.content.entity
 }
 
+// Create a subgroup (child group) beneath `parentId`, owned by the currently
+// authenticated user, and return the created entity.
+//
+// The creator must be an admin of the parent group -- the parent's creator is,
+// by default, so the same session that created the parent may create its
+// children.  As with createGroup(), the creator is automatically made an
+// 'admin' member of the new subgroup.
+//
+// A subgroup's `type` is bounded by its parent: an "open" subgroup of a private
+// parent is a 'private-open' group; an "open" subgroup of a hidden parent is a
+// 'hidden-open' group; a "private" subgroup of a hidden parent is a
+// 'hidden-private' group.  Pass the resulting compound `type` here directly.
+// `overrides` may set any other group field.  This is a thin convenience
+// wrapper around createGroup() that just fixes `parentId` and `type` and
+// defaults postPermissions to 'members'.
+const createSubgroup = async function(session, parentId, type, overrides = {}) {
+    return await createGroup(session, {
+        type: type,
+        postPermissions: 'members',
+        parentId: parentId,
+        ...overrides
+    })
+}
+
 // Delete a group by id.  The creator (admin) must be the one deleting it.
 // Deleting a group cascades to its posts and members in the database, so this
 // is sufficient to tear down everything created for a group post test.
@@ -136,12 +160,34 @@ const setGroupMemberStatus = async function(adminSession, groupId, userId, statu
     return response.content
 }
 
+// Set the role of an existing, confirmed member (e.g. promote a 'member' to
+// 'admin' or 'moderator').  `adminSession` must belong to a group admin.  This
+// is how a second group admin is created for tests -- for example, promoting a
+// user to admin of a *parent* group so they inherit admin/moderator rights over
+// its subgroups.
+const setGroupMemberRole = async function(adminSession, groupId, userId, role) {
+    const member = {
+        userId: userId,
+        groupId: groupId,
+        role: role
+    }
+
+    const response = await fetchEndpoint('PATCH', `/group/${encodeURIComponent(groupId)}/member/${encodeURIComponent(userId)}`, { session: adminSession, body: member })
+    if ( ! response.ok ) {
+        throw new Error(`Failed to set role '${role}' for User(${userId}) in Group(${groupId}): ${response.status} ${JSON.stringify(response.content)}`)
+    }
+
+    return response.content
+}
+
 module.exports = {
     createGroup: createGroup,
+    createSubgroup: createSubgroup,
     deleteGroup: deleteGroup,
     joinOpenGroup: joinOpenGroup,
     inviteToGroup: inviteToGroup,
     acceptGroupInvite: acceptGroupInvite,
     addConfirmedMember: addConfirmedMember,
-    setGroupMemberStatus: setGroupMemberStatus
+    setGroupMemberStatus: setGroupMemberStatus,
+    setGroupMemberRole: setGroupMemberRole
 }
