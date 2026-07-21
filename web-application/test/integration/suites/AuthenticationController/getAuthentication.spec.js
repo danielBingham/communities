@@ -23,7 +23,6 @@ const assert = require('node:assert/strict')
 const { initialize, login, logout } = require('../../lib/authentication')
 const { fetchEndpoint } = require('../../lib/fetchEndpoint')
 
-
 const userDictionary = require('../../fixtures/users')
 
 describe('GET /authentication', function() {

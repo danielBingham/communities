@@ -30,7 +30,7 @@ const fetchEndpoint = async function(method, endpoint, options) {
         method: method,
         headers: {
             'Accept': 'application/json',
-            'X-Communities-Platform': 'android',
+            'X-Communities-Platform': 'test',
             'Cache-Control': 'no-store',
         }
     }
