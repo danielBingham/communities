@@ -84,8 +84,8 @@ const dictionary = {
   // user4 - A standard user
   //
   // Manual setup (run once before running the tests)
-  //   1. Register "Test User3" (test-user3 /
-  //   communities-test-user3@mailinator.com) through the app.  Set the
+  //   1. Register "Test User4" (test-user4 /
+  //   communities-test-user4@mailinator.com) through the app.  Set the
   //   account's password to match `password` below. Confirm the account's
   //   email using `mailinator.com`. Once confirmed, make sure to turn email
   //   notifications off (so we don't spam mailinator) and also turn off 'info'

@@ -52,7 +52,7 @@ Cases covering making posts in all their forms and with all their attachments.
 - [ ] As a user, I should be able to reorder the images I attach.
     - As User1:
         - Go to the Feed page.
-        - Click on the "Create post" form at the top of the fed.
+        - Click on the "Create post" form at the top of the feed.
         - Click "Add Image".
         - Select five images and click "ok".
             - **Confirm images are uploaded to post and processed before being shown.**
@@ -66,7 +66,7 @@ Cases covering making posts in all their forms and with all their attachments.
 - [ ] As a user, I should be able to attach a video to a post.
     - As User1:
         - Go to the Feed page.
-        - Click on the "Create post" form at the top of the fed.
+        - Click on the "Create post" form at the top of the feed.
         - Click "Add Video".
         - Select a video and click "ok".
             - **Confirm video is attached to the post, processed, and then displayed in a player.**
@@ -74,6 +74,21 @@ Cases covering making posts in all their forms and with all their attachments.
             - **Confirm the video plays.**
         - Click "post".
             - **Confirm post shows on feed and the video renders and plays.**
+
+- [ ] As a user, I should be able to mention my friends in a post.
+    - As User1:
+        - Go to the Feed page.
+        - Click on the "Create post" form at the top of the feed.
+        - Type some text in the text box.
+        - Type '@' to start a mention and start typing a friends name.
+            - **Confirm the friend suggestion list shows appropriate suggestions.**
+        - Select a suggestion and hit 'enter'.
+            - **Confirm the suggestion is completed.**
+        - Type '@' to start a mention and start typing a friend's username.
+            - **Confirm the suggestion list shows appropriate suggestions.**
+        - Finish typing the friend's username without making a selection.
+            - **Confirm suggestion list closes on completion.**
+        - Type '@' to start a mention and start typing a friend's name.
 
 ### Full Regression
 
