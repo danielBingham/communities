@@ -38,10 +38,10 @@ describe('GET /posts', function() {
             password: user1.password
         }
 
-        await login(credentials, session)
+        const currentUser = await login(credentials, session)
 
         // Clear out User1's posts before running out test.
-        await deleteAllPostsForUser(session, user1.id)
+        await deleteAllPostsForUser(session, currentUser.id)
 
         let page = 1
         let numberOfPages = 1
