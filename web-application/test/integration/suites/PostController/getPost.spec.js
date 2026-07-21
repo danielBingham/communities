@@ -319,6 +319,7 @@ describe('GET /post/:id', function() {
 
             assert.equal(response.status, 200)
             assert.equal(response.content?.entity?.id, created.id)
+            assert.deepEqual(response.content?.entity, created)
         } finally {
             await deleteRelationship(owner.session, owner.user.id, moderator.user.id)
             await deleteAllPostsForUser(owner.session, owner.user.id)
