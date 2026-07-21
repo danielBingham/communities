@@ -23,13 +23,17 @@ const assert = require('node:assert/strict')
 const { initialize, login, logout } = require('../../lib/authentication')
 const { fetchEndpoint } = require('../../lib/fetchEndpoint')
 
+const userDictionary = require('../../fixtures/users')
+
 describe(`POST /authentication`, function() {
     it('Should allow a user to log in', async function() {
         const session = await initialize()
 
+        const user1 = userDictionary['user1']
+
         const credentials = {
-            email: 'communities-john-doe@mailinator.com',
-            password: 'PasswordPass'
+            email: user1.email,
+            password: user1.password
         }
 
         const response = await fetchEndpoint('POST', '/authentication', { body: credentials, session: session })
@@ -39,9 +43,8 @@ describe(`POST /authentication`, function() {
             session.auth = response.raw.headers.get('X-Communities-Auth')
         }
 
-
         assert.equal(response.status, 200)
-        assert.equal(response.content?.session?.user?.username, 'john-doe')
+        assert.equal(response.content?.session?.user?.username, user1.username)
 
         await logout(session)
     })
@@ -49,9 +52,11 @@ describe(`POST /authentication`, function() {
     it('Should reject a user with invalid credentials', async function() {
         const session = await initialize()
 
+        const user1 = userDictionary['user1']
+
         const credentials = {
-            email: 'communities-john-doe@mailinator.com',
-            password: 'PasswordPassword'
+            email: user1.email,
+            password: user1.password+'Password'
         }
 
         const response = await fetchEndpoint('POST', '/authentication', { body: credentials, session: session })
