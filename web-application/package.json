@@ -18,7 +18,10 @@
     "server": "nodemon ./server/bin/www",
     "dev": "export NODE_ENV=development && concurrently \"npm run server\" \"npm run client\"",
     "jest": "jest --passWithNoTests",
-    "test": "jest --passWithNoTests test"
+    "test": "jest --passWithNoTests test/unit",
+    "test:integration": "API_ROOT=\"https://localhost:3000/api/0.0.0/\" node --use-system-ca --test test/integration/suites/**/*.spec.js",
+    "test:integration:single": "API_ROOT=\"https://localhost:3000/api/0.0.0/\" node --use-system-ca --test",
+    "test:integration:staging": "API_ROOT=\"https://staging.communities.social/api/0.0.0/\" node --use-system-ca --test test/integration/suites/**/*.spec.js"
   },
   "jest": {
     "verbose": true,

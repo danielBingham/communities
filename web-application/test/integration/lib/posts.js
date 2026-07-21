@@ -1,0 +1,52 @@
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
+
+const { fetchEndpoint } = require('./fetchEndpoint')
+
+// Delete all posts belonging to a test user so that we can run a fresh test
+// with a clean slate. Must have already acquired a session for the test user.
+const deleteAllPostsForUser = async function(session, userId) {
+
+    let page = 1
+    let numberOfPages = 1
+
+    while( page <= numberOfPages ) {
+        const response = await fetchEndpoint('GET', `/posts?userId=${encodeURIComponent(userId)}&page=${page}`, { session: session })
+
+        if ( response.content.meta.numberOfPages !== numberOfPages ) {
+            numberOfPages = response.content.meta.numberOfPages
+        }
+
+        for(const postId of response.content.list ) {
+            const post = response.content.dictionary[postId]
+            if ( post.userId !== userId) {
+                throw new Error('GET /posts?userId= returned a post not beloning to user!')
+            }
+
+            const deleteResponse = await fetchEndpoint('DELETE', `/post/${encodeURIComponent(postId)}`, { session: session })
+        }
+
+        page = page + 1
+    }
+}
+
+module.exports = {
+    deleteAllPostsForUser: deleteAllPostsForUser
+}
