@@ -7,7 +7,75 @@ Cases covering making posts in all their forms and with all their attachments.
 - [ ] User1 has been created.
 - [ ] User2 has been created.
 
-### Cases
+### Smoke Test
+
+- [ ] As a user, I should be able to make a post.
+    - As User1:
+        - Go to the Feed page.
+        - Click on the "Create post" form at the top of the feed.
+        - Enter text into the text field.
+        - Click "post"
+            - **Confirm post is created and navigated back to feed.**
+
+- [ ] As a user, I should get a preview generated for the first link added in the post body.
+    - As User1:
+        - Go to the Feed page.
+        - Click on the "Create post" form at the top of the feed.
+        - Enter text into the text field.
+        - Enter a link into the text field.
+            - NOTE: Not all links generate previews.  Many sites block our
+              attempts to scrape, so you might have to try a few different
+              sites to get one to generate.  (theguardian.com is pretty reliable)
+            - **Confirm a preview is generated from the link.**
+            - **Confirm "Add Image" and "Add Video" are disabled after link preview generates.**
+        - Click the "X" in the upper right of the preview to remove it.
+            - **Confirm preview removes.**
+        - Add a new link to the post.
+            - **Confirm preview generates for the new link.**
+        - Click "post"
+            - **Confirm post is created and preview renders.**
+            - **Confirm clicking the preview takes the user to the link.**
+
+- [ ] As a user, I should be able to make a post and attach one or more images.
+    - As User1:
+        - Go to the Feed page.
+        - Click on the "Create post" form at the top of the fed.
+        - Click "Add Image".
+        - Select an image and click "ok".
+            - **Confirm image is uploaded to post and processed before being shown.**
+        - Click "Add Image".
+        - Select two images and click "ok".
+            - **Confirm images are both uploaded to the post and processed before being shown.**
+        - Click "post".
+            - **Confirm post shows on feed with a gallery with all three images.**
+
+- [ ] As a user, I should be able to reorder the images I attach.
+    - As User1:
+        - Go to the Feed page.
+        - Click on the "Create post" form at the top of the fed.
+        - Click "Add Image".
+        - Select five images and click "ok".
+            - **Confirm images are uploaded to post and processed before being shown.**
+        - Click and drag an image in the middle of the gallery.  Drag it to the top of the gallery and release.
+            - **Confirm image is repositioned as the first image.**
+        - Click the second image and drag it down to the fourth spot.
+            - **Confirm image is repositioned as the fourth image.**
+        - Click "post".
+            - **Confirm post shows on feed with a gallery in the correct order.**
+
+- [ ] As a user, I should be able to attach a video to a post.
+    - As User1:
+        - Go to the Feed page.
+        - Click on the "Create post" form at the top of the fed.
+        - Click "Add Video".
+        - Select a video and click "ok".
+            - **Confirm video is attached to the post, processed, and then displayed in a player.**
+        - Play the video.
+            - **Confirm the video plays.**
+        - Click "post".
+            - **Confirm post shows on feed and the video renders and plays.**
+
+### Full Regression
 
 #### Private Posts
 
@@ -65,7 +133,7 @@ Cases covering making posts in all their forms and with all their attachments.
 #### Post Drafts
 
 - [ ] As User1, write a post draft with an image.
-    - [ ] Navigate away from the home feed and back to feed.  Confirm draft remains. 
+    - [ ] Navigate away from the home feed and back to feed.  Confirm draft remains.
     - [ ] Close the Communities browser window. Reopen and reload.  Confirm draft remains.
     - [ ] Post the draft. Confirm draft posts correctly.
 
@@ -73,9 +141,9 @@ Cases covering making posts in all their forms and with all their attachments.
     - [ ] Log out. Log back in. Confirm draft is gone.
 
 - [ ] As User1, write a post draft with a link.
-    - [ ] Navigate away from the home feed and back to feed.  Confirm draft remains. 
+    - [ ] Navigate away from the home feed and back to feed.  Confirm draft remains.
     - [ ] Close the Communities browser window. Reopen and reload.  Confirm draft remains.
-    - [ ] Post the draft.  Confirm draft posts correctly. 
+    - [ ] Post the draft.  Confirm draft posts correctly.
 
 - [ ] As User1, write a post draft with a link.
     - [ ] Log out. Log back in. Confirm draft is gone.

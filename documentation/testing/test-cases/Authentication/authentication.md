@@ -10,11 +10,6 @@ password flow, etc.
 
 ### Smoke Test
 
-
-
-
-### Full Regression
-
 #### Log in
 
 - [ ] As a user, I can log in through the splash page.
@@ -31,32 +26,13 @@ password flow, etc.
             - **Confirm authentication by navigating, posting, viewing some posts.**
         - Log out.
 
-- [ ] As a user, I can log out.
+- [ ] As a user, I can log out. (covered: integration)
     - As User1:
         - Make a draft post, but don't post it.
         - Select UserMenu -> Logout
             - **Confirm that you are logged out and no longer authenticated.**
         - Log in.
             - **Confirm draft post has been cleared.**
-
-- [ ] As a user, I get temporarily locked out after too many attempts.
-    - As User1:
-        - Attempt to login with the wrong pasword 10 times.
-        - Confirm locked out.
-        - Wait 15 minutes.
-        - Login with correct password.
-        - Confirm logged in.
-
-- [ ] As a user, I can only log in with the correct password.
-    - As unauthenticated user:
-        - Attempt to log in with User1's email and incorrect password.
-            - **Confirm login fails.**
-
-- [ ] As a user, log in doesn't reveal whether an account with that email exists.
-    - As unauthenticated user:
-        - Attempt to log in with an email not associated to an account.
-        - Attempt to log in with User1's email and incorrect password.
-            - **Confirm both failures give same message.**
 
 - [ ] As a user, actions in a stale tab are rejected after I have logged out and back in.
     - As User1:
@@ -121,7 +97,6 @@ password flow, etc.
             - **Confirm the link is rejected with an invalid/expired-token error.**
         - Request a new reset and confirm a fresh link works.
 
-
 - [ ] As a user, requesting a reset for an unknown email doesn't reveal whether an account exists.
     - As unauthenticated user:
         - Click "Forgot password?" and enter an email not associated with any account.
@@ -155,8 +130,7 @@ password flow, etc.
         - Enter a valid, matching password. Submit.
             - **Confirm success.**
 
-
-### Multifactor Authentication
+#### Multifactor Authentication
 
 - [ ] As a user with MFA enabled, I should be required to enter a TOPT token when logging in.
     - As User1:
@@ -290,3 +264,36 @@ password flow, etc.
             - **Confirm rate limiting engages.**
         - Wait 30 seconds and enter a valid token or recovery code.
             - **Confirm login succeeds.**
+
+### Full Regression
+
+#### Log in
+
+- [ ] As a user, I get temporarily locked out after too many attempts. (covered: integration)
+    - As User1:
+        - Attempt to login with the wrong pasword 10 times.
+        - Confirm locked out.
+        - Wait 15 minutes.
+        - Login with correct password.
+        - Confirm logged in.
+
+- [ ] As a user, I can only log in with the correct password. (covered: integration)
+    - As unauthenticated user:
+        - Attempt to log in with User1's email and incorrect password.
+            - **Confirm login fails.**
+
+- [ ] As a user, log in doesn't reveal whether an account with that email exists. (covered: integration)
+    - As unauthenticated user:
+        - Attempt to log in with an email not associated to an account.
+        - Attempt to log in with User1's email and incorrect password.
+            - **Confirm both failures give same message.**
+
+#### Reset Password
+
+All of the reset password tests are in the Smoke Test, since they require email
+access they cannot yet be automated.
+
+### Multifactor Authentication
+
+All of the MFA tests are in the Smoke Test.  Since they require an MFA device.
+They cannot yet be automated.
