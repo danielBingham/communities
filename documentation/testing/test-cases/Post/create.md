@@ -90,6 +90,40 @@ Cases covering making posts in all their forms and with all their attachments.
             - **Confirm suggestion list closes on completion.**
         - Type '@' to start a mention and start typing a friend's name.
 
+#### Long String
+
+- [ ] As a user, I should be able to post long strings without breaking the app.
+    - As User1:
+        - Create a post with a long (500+ characters) unbroken string.
+            - **Confirm app layout is not broken.**
+#### Post Drafts
+
+- [ ] As User1, write a post draft with an image.
+    - [ ] Navigate away from the home feed and back to feed.  Confirm draft remains.
+    - [ ] Close the Communities browser window. Reopen and reload.  Confirm draft remains.
+    - [ ] Post the draft. Confirm draft posts correctly.
+
+- [ ] As User1, write a post draft with an image.
+    - [ ] Log out. Log back in. Confirm draft is gone.
+
+- [ ] As User1, write a post draft with a link.
+    - [ ] Navigate away from the home feed and back to feed.  Confirm draft remains.
+    - [ ] Close the Communities browser window. Reopen and reload.  Confirm draft remains.
+    - [ ] Post the draft.  Confirm draft posts correctly.
+
+- [ ] As User1, write a post draft with a link.
+    - [ ] Log out. Log back in. Confirm draft is gone.
+
+#### Youtube Videos
+
+- [ ] As User1, create a post with a youtube video for a link, using the full link (`/watch?vid=`)
+    - [ ] Confirm embed loads.
+    - [ ] Post the post.  Confirm the embed will play.
+- [ ] As User1, create a post with a youtube video for a link using the shorted link (`youtu.be`)
+    - [ ] Confirm the embed loads.
+    - [ ] Post the post. Confirm the embed will play.
+
+
 ### Full Regression
 
 #### Private Posts
@@ -140,34 +174,3 @@ Cases covering making posts in all their forms and with all their attachments.
 - [ ] As User1, make a video post using a corrupted `.avi` - confirm failure.
 - [ ] As User1, make a video post using a corrupted `.webp` - confirm failure.
 
-#### Long String
-
-- [ ] As User1, make a post with a 500 character unbroken string.
-    - [ ] Confirm the mobile view is not expanded and the string is broken appropriately.
-
-#### Post Drafts
-
-- [ ] As User1, write a post draft with an image.
-    - [ ] Navigate away from the home feed and back to feed.  Confirm draft remains.
-    - [ ] Close the Communities browser window. Reopen and reload.  Confirm draft remains.
-    - [ ] Post the draft. Confirm draft posts correctly.
-
-- [ ] As User1, write a post draft with an image.
-    - [ ] Log out. Log back in. Confirm draft is gone.
-
-- [ ] As User1, write a post draft with a link.
-    - [ ] Navigate away from the home feed and back to feed.  Confirm draft remains.
-    - [ ] Close the Communities browser window. Reopen and reload.  Confirm draft remains.
-    - [ ] Post the draft.  Confirm draft posts correctly.
-
-- [ ] As User1, write a post draft with a link.
-    - [ ] Log out. Log back in. Confirm draft is gone.
-
-#### Youtube Videos
-
-- [ ] As User1, create a post with a youtube video for a link, using the full link (`/watch?vid=`)
-    - [ ] Confirm embed loads.
-    - [ ] Post the post.  Confirm the embed will play.
-- [ ] As User1, create a post with a youtube video for a link using the shorted link (`youtu.be`)
-    - [ ] Confirm the embed loads.
-    - [ ] Post the post. Confirm the embed will play.
