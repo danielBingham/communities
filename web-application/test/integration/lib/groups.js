@@ -108,6 +108,37 @@ const joinOpenGroup = async function(session, groupId, userId) {
     return response.content
 }
 
+// Fetch a single GroupMember by the member's *user* id.  Returns the raw
+// response (without throwing on non-2xx) so callers can assert on the status.
+//
+// NOTE: the route is `/group/:groupId/member/:userId` -- the member is
+// identified by their USER id, not by the group_members row id.  This is the
+// entity under test in the getGroupMember suite.
+const getGroupMember = async function(session, groupId, userId) {
+    return await fetchEndpoint('GET', `/group/${encodeURIComponent(groupId)}/member/${encodeURIComponent(userId)}`, { session: session })
+}
+
+// Request to join a group on behalf of the currently authenticated user.
+// Produces a 'pending-requested' membership (the counterpart to an invitation:
+// the user asks to join rather than being invited).  `session` must belong to
+// the requesting user.  Valid on groups the user can view but is not yet a
+// member of (e.g. private groups).
+const requestToJoinGroup = async function(session, groupId, userId) {
+    const member = {
+        userId: userId,
+        groupId: groupId,
+        status: 'pending-requested',
+        role: 'member'
+    }
+
+    const response = await fetchEndpoint('POST', `/group/${encodeURIComponent(groupId)}/members`, { session: session, body: member })
+    if ( ! response.ok ) {
+        throw new Error(`Failed to request to join Group(${groupId}) as User(${userId}): ${response.status} ${JSON.stringify(response.content)}`)
+    }
+
+    return response.content
+}
+
 // Invite a user to a group.  `adminSession` must belong to a group admin or
 // moderator.  Produces a 'pending-invited' membership.
 const inviteToGroup = async function(adminSession, groupId, userId) {
@@ -206,7 +237,9 @@ module.exports = {
     createGroup: createGroup,
     createSubgroup: createSubgroup,
     deleteGroup: deleteGroup,
+    getGroupMember: getGroupMember,
     joinOpenGroup: joinOpenGroup,
+    requestToJoinGroup: requestToJoinGroup,
     inviteToGroup: inviteToGroup,
     acceptGroupInvite: acceptGroupInvite,
     addConfirmedMember: addConfirmedMember,
