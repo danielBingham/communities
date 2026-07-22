@@ -65,7 +65,31 @@ async function assertCreated(session, body) {
     const response = await submitPost(session, body)
     assert.equal(response.status, 201, `Expected 201 Created but got ${response.status}: ${JSON.stringify(response.content)}`)
     assert.ok(response.content?.entity?.id, 'Created post is missing an entity id.')
-    return response.content.entity
+    return response.content
+}
+
+// Posting to a group whose postPermissions is 'approval' is allowed (201) but
+// has a side effect: the post is held for approval, so the controller attaches
+// a pending group moderation and returns the post with `groupModerationId` set.
+// This asserts the create succeeds AND that side effect landed.
+async function assertCreatedPending(session, body) {
+    const { entity, relations } = await assertCreated(session, body)
+    assert.ok(entity.groupModerationId,
+        `Expected an approval-group post to come back with a pending groupModerationId, got ${JSON.stringify(entity.groupModerationId)}`)
+    assert.match(String(entity.groupModerationId), /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+        `Expected groupModerationId to be a UUID, got ${entity.groupModerationId}`)
+    const moderation = relations.groupModerations[entity.groupModerationId]
+    assert.equal(moderation?.status, 'pending', `Expected approval-group post to come back with a 'pending' moderation status, got ${moderation?.status}.`)
+    return entity
+}
+
+// The contrast: a post that is NOT held for approval comes back with no
+// moderation attached.
+async function assertCreatedNotPending(session, body) {
+    const { entity } = await assertCreated(session, body)
+    assert.equal(entity.groupModerationId, null,
+        `Expected a non-approval post to have no groupModerationId, got ${JSON.stringify(entity.groupModerationId)}`)
+    return entity
 }
 
 async function assertForbidden(session, body) {
@@ -329,16 +353,18 @@ describe('POST /posts', function() {
                     await assertForbidden(nonMember.session, groupSubmission(nonMember.user.id, group.id, 'public'))
                 })
 
-                it(`Should let a confirmed member create a post`, async function() {
-                    await assertCreated(member.session, groupSubmission(member.user.id, group.id, 'public'))
+                it(`Should let a confirmed member create a post, held pending approval`, async function() {
+                    await assertCreatedPending(member.session, groupSubmission(member.user.id, group.id, 'public'))
                 })
 
-                it(`Should let a moderator create a post`, async function() {
-                    await assertCreated(moderator.session, groupSubmission(moderator.user.id, group.id, 'public'))
+                it(`Should let a moderator create a post, held pending approval`, async function() {
+                    // A moderator's own post is still routed through approval on
+                    // creation; the pending moderation is attached regardless of role.
+                    await assertCreatedPending(moderator.session, groupSubmission(moderator.user.id, group.id, 'public'))
                 })
 
-                it(`Should let an admin create a post`, async function() {
-                    await assertCreated(owner.session, groupSubmission(owner.user.id, group.id, 'public'))
+                it(`Should let an admin create a post, held pending approval`, async function() {
+                    await assertCreatedPending(owner.session, groupSubmission(owner.user.id, group.id, 'public'))
                 })
 
                 it(`Should NOT let a banned member create a post`, async function() {
@@ -644,7 +670,7 @@ describe('POST /posts', function() {
             })
 
             it(`Should create a valid public feed post`, async function() {
-                const entity = await assertCreated(owner.session, feedSubmission(owner.user.id, { visibility: 'public', content: 'Hello, world.' }))
+                const { entity } = await assertCreated(owner.session, feedSubmission(owner.user.id, { visibility: 'public', content: 'Hello, world.' }))
                 assert.equal(entity.type, 'feed')
                 assert.equal(entity.visibility, 'public')
                 assert.equal(entity.userId, owner.user.id)
@@ -653,20 +679,20 @@ describe('POST /posts', function() {
             })
 
             it(`Should create a valid private feed post`, async function() {
-                const entity = await assertCreated(owner.session, feedSubmission(owner.user.id, { visibility: 'private' }))
+                const { entity } = await assertCreated(owner.session, feedSubmission(owner.user.id, { visibility: 'private' }))
                 assert.equal(entity.type, 'feed')
                 assert.equal(entity.visibility, 'private')
             })
 
             it(`Should create a valid public post to an OPEN group`, async function() {
-                const entity = await assertCreated(owner.session, groupSubmission(owner.user.id, openGroup.id, 'public'))
+                const entity = await assertCreatedNotPending(owner.session, groupSubmission(owner.user.id, openGroup.id, 'public'))
                 assert.equal(entity.type, 'group')
                 assert.equal(entity.visibility, 'public')
                 assert.equal(entity.groupId, openGroup.id)
             })
 
             it(`Should create a valid private post to a PRIVATE group`, async function() {
-                const entity = await assertCreated(owner.session, groupSubmission(owner.user.id, privateGroup.id, 'private'))
+                const entity = await assertCreatedNotPending(owner.session, groupSubmission(owner.user.id, privateGroup.id, 'private'))
                 assert.equal(entity.type, 'group')
                 assert.equal(entity.visibility, 'private')
                 assert.equal(entity.groupId, privateGroup.id)
