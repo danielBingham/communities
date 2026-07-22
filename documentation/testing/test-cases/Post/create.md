@@ -96,15 +96,27 @@ Cases covering making posts in all their forms and with all their attachments.
     - As User1:
         - Create a post with a long (500+ characters) unbroken string.
             - **Confirm app layout is not broken.**
+
 #### Post Drafts
 
-- [ ] As User1, write a post draft with an image.
-    - [ ] Navigate away from the home feed and back to feed.  Confirm draft remains.
-    - [ ] Close the Communities browser window. Reopen and reload.  Confirm draft remains.
-    - [ ] Post the draft. Confirm draft posts correctly.
+- [ ] As a user, I can draft a post and it will be saved across reloads until I post it.
+    - As User1:
+        - Create a draft post.
+            - Write some text.
+            - Attach some media.
+        - Navigate away from the home feed and back to feed.
+            - **Confirm draft remains.**
+        - Close the Communities browser window. Reopen and reload.
+            - **Confirm draft remains.**
+        - Post the draft.
+            - **Confirm draft posts correctly.**
 
-- [ ] As User1, write a post draft with an image.
-    - [ ] Log out. Log back in. Confirm draft is gone.
+- [ ] As a user, my drafts are cleared out when I log out.
+    - As User1:
+        - Create a draft post with some text and some media.
+        -  Log out.
+        -  Log back in.
+            -  **Confirm draft is gone.**
 
 - [ ] As User1, write a post draft with a link.
     - [ ] Navigate away from the home feed and back to feed.  Confirm draft remains.
