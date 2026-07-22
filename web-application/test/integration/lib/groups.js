@@ -20,6 +20,14 @@
 
 const { fetchEndpoint } = require('./fetchEndpoint')
 
+// Fetch a single group by id and return the raw fetchEndpoint result
+// ({ status, ok, content, raw }).  Mirrors lib/posts.getPost -- it does not
+// throw on non-2xx so callers (e.g. the permission tests) can assert on the
+// status and error body of a denied view.
+const getGroup = async function(session, groupId) {
+    return await fetchEndpoint('GET', `/group/${encodeURIComponent(groupId)}`, { session: session })
+}
+
 // Create a group owned by the currently authenticated user and return the
 // created entity.  The creator is automatically made an 'admin' member.
 //
@@ -194,6 +202,7 @@ const removeGroupMember = async function(adminSession, groupId, userId) {
 }
 
 module.exports = {
+    getGroup: getGroup,
     createGroup: createGroup,
     createSubgroup: createSubgroup,
     deleteGroup: deleteGroup,
