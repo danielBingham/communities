@@ -116,10 +116,11 @@ module.exports = class GroupMemberController extends BaseController {
         }
 
         const canModerateGroup = await this.permissionService.can(currentUser, 'moderate', 'Group', { group: context.group, groupMember: context.member })
+        //const canModerateSite = await this.permissionService.can(currentUser, 'moderate', 'Site')
 
         // If they are a moderator or admin, they can view all group members,
         // including ones who are still pending.
-        if ( canModerateGroup ) {
+        if ( canModerateGroup === true) {
 
             // If they are querying for ancestor memberships, then they can only see their own.
             if ( 'isAncestorMemberFor' in urlQuery ) {
