@@ -71,7 +71,6 @@ module.exports = class PostController {
     }
 
     async getRelations(currentUser, results, requestedRelations) {
-
         let blockIds = []
         const canModerateSite = await this.permissionService.can(currentUser, 'moderate', 'Site')
 
@@ -568,12 +567,12 @@ module.exports = class PostController {
 
         await this.postDAO.insertPosts(post)
 
-        const results = await this.postDAO.selectPosts({
+        let results = await this.postDAO.selectPosts({
             where: `posts.id = $1`,
             params: [post.id]
         })
 
-        const entity = results.dictionary[post.id]
+        let entity = results.dictionary[post.id]
         if ( ! entity ) {
             throw new ControllerError(500, 'server-error',
                 `Post(${post.id}) missing after creation.`,
@@ -616,8 +615,16 @@ module.exports = class PostController {
                     groupModerationId: moderation.id
                 }
                 await this.postDAO.updatePost(postPatch)
+
+                // Update the results and the entity with the groupModeration
+                // change.
+                results = await this.postDAO.selectPosts({
+                    where: `posts.id = $1`,
+                    params: [post.id]
+                })
+                entity = results.dictionary[post.id]
             }
-            // Otherwise, update the gracking stats.  We'll update this on
+            // Otherwise, update the tracking stats.  We'll update this on
             // approval in the GroupModerationController for groups that
             // require approval.
             else {
