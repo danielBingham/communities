@@ -649,15 +649,6 @@ describe('POST /groups', function() {
         })
 
         describe("type / parent consistency", function() {
-            // ---- SKIPPED: possible gap ---------------------------------------
-            // schema/Group.js accepts the compound types ('private-open',
-            // 'hidden-open','hidden-private') for ANY group, and postGroups()
-            // does not check that a compound type is only used on a subgroup (nor
-            // that a subgroup's type is consistent with its parent's).  So a
-            // top-level group with a compound type is currently accepted (201).
-            // This asserts the arguably-correct behavior (reject a compound type
-            // with no parent); skipped because it is unclear whether the current
-            // permissiveness is intended.
             it(`Should reject a top-level group that carries a compound (subgroup-only) type`, async function() {
                 await assertInvalid(owner.session, groupSubmission({ type: 'private-open' }))
             })
