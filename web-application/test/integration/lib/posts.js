@@ -24,6 +24,14 @@ const getPost = async function(session, postId) {
     return await fetchEndpoint('GET', `/post/${encodeURIComponent(postId)}`, { session: session })
 }
 
+// Send a PATCH to /post/:id and return the raw response (without throwing on
+// non-2xx) so callers can assert on the status.  `body` should be a partial
+// Post entity and MUST include an `id` matching `postId` -- the controller
+// rejects a patch whose body id doesn't match the existing post.
+const patchPost = async function(session, postId, body) {
+    return await fetchEndpoint('PATCH', `/post/${encodeURIComponent(postId)}`, { session: session, body: body })
+}
+
 // Create a feed post for the currently authenticated user and return the
 // created entity.  `overrides` may set any of the post submission fields; by
 // default this creates a private feed post owned by `userId`.
@@ -111,6 +119,7 @@ const deleteAllPostsForUser = async function(session, userId) {
 
 module.exports = {
     getPost: getPost,
+    patchPost: patchPost,
     createPost: createPost,
     createGroupPost: createGroupPost,
     deletePost: deletePost,
