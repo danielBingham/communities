@@ -161,6 +161,16 @@ module.exports = class GroupSchema extends Schema {
 
                 }
             },
+            siteModerationId: {
+                clean: (value) => { return cleanUuid(value) },
+                validate: (value, existing, action) => {
+                    const validator = new ObjectValidator('siteModerationId', value, existing, action)
+                    const errors = validator
+                        .mustNotBeSet()
+                        .getErrors()
+                    return errors
+                }
+            },
             entranceQuestions: {
                 clean: (value) => { return value },
                 validate: (value, existing, action) => {

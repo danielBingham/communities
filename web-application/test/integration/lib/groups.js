@@ -28,6 +28,18 @@ const getGroup = async function(session, groupId) {
     return await fetchEndpoint('GET', `/group/${encodeURIComponent(groupId)}`, { session: session })
 }
 
+// Patch a group by id and return the raw fetchEndpoint result
+// ({ status, ok, content, raw }).  Mirrors lib/posts.patchPost -- it does not
+// throw on non-2xx so callers (e.g. the patchGroup permission and validation
+// tests) can assert on the status and error body of a rejected update.
+//
+// NOTE: PATCH /group/:id requires `id` in the body and it must match the id in
+// the route; the controller rejects a mismatch with 400 before it ever loads
+// the group.
+const patchGroup = async function(session, groupId, body) {
+    return await fetchEndpoint('PATCH', `/group/${encodeURIComponent(groupId)}`, { session: session, body: body })
+}
+
 // Create a group owned by the currently authenticated user and return the
 // created entity.  The creator is automatically made an 'admin' member.
 //
@@ -234,6 +246,7 @@ const removeGroupMember = async function(adminSession, groupId, userId) {
 
 module.exports = {
     getGroup: getGroup,
+    patchGroup: patchGroup,
     createGroup: createGroup,
     createSubgroup: createSubgroup,
     deleteGroup: deleteGroup,

@@ -164,53 +164,61 @@ module.exports = class GroupValidation {
         // Type cannot be null, and we've already enforced that by the time
         // we've gotten here.
         if ( util.objectHas(group, 'type') ) {
-            // These are subgroup types that may only be set for a subgroup.
-            if (
-                ( group.type === 'private-open' || group.type === 'hidden-open' || group.type === 'hidden-private' )
-                && parentGroup === null
-            ) {
+            if ( existing && existing.type !== group.type ) {
                 errors.push({
                     type: 'type:invalid',
-                    log: `User attempting to create a subgroup without a parent.`,
-                    message: `You must include Group.parentId to create a subgroup.`
+                    log: `User attempting to update group type.`,
+                    message: `Group.type may not be updated.`
                 })
-            }
-
-            if ( parentGroup !== null ) {
-
-                if ( parentGroup.type === 'open' ) {
-                    const validChildTypes = [ 'open', 'private', 'hidden' ]
-
-                    if ( ! validChildTypes.includes(group.type) ) {
-                        errors.push({
-                            type: 'type:invalid',
-                            log: `User attempting to create a subgroup of an open group with invalid type '${group.type}'.`,
-                            message: `Valid types for 'open' groups are ${validChildTypes.join(',')}.`
-                        })
-                    }
+            } else if ( ! existing ) {
+                // These are subgroup types that may only be set for a subgroup.
+                if (
+                    ( group.type === 'private-open' || group.type === 'hidden-open' || group.type === 'hidden-private' )
+                    && parentGroup === null
+                ) {
+                    errors.push({
+                        type: 'type:invalid',
+                        log: `User attempting to create a subgroup without a parent.`,
+                        message: `You must include Group.parentId to create a subgroup.`
+                    })
                 }
 
-                else if ( parentGroup.type.startsWith('private') ) {
-                    const validChildTypes = [ 'private-open', 'private', 'hidden' ]
+                if ( parentGroup !== null ) {
 
-                    if ( ! validChildTypes.includes(group.type) ) {
-                        errors.push({
-                            type: 'type:invalid',
-                            log: `User attempting to create a subgroup of a '${parentGroup.type}' group with invalid type '${group.type}'.`,
-                            message: `Valid types for '${parentGroup.type}' groups are ${validChildTypes.join(',')}.`
-                        })
+                    if ( parentGroup.type === 'open' ) {
+                        const validChildTypes = [ 'open', 'private', 'hidden' ]
+
+                        if ( ! validChildTypes.includes(group.type) ) {
+                            errors.push({
+                                type: 'type:invalid',
+                                log: `User attempting to create a subgroup of an open group with invalid type '${group.type}'.`,
+                                message: `Valid types for 'open' groups are ${validChildTypes.join(',')}.`
+                            })
+                        }
                     }
-                }
 
-                else if ( parentGroup.type.startsWith('hidden') ) {
-                    const validChildTypes = [ 'hidden-open', 'hidden-private', 'hidden' ]
+                    else if ( parentGroup.type.startsWith('private') ) {
+                        const validChildTypes = [ 'private-open', 'private', 'hidden' ]
 
-                    if ( ! validChildTypes.includes(group.type) ) {
-                        errors.push({
-                            type: 'type:invalid',
-                            log: `User attempting to create a subgroup of a '${parentGroup.type}' group with invalid type '${group.type}'.`,
-                            message: `Valid types for '${parentGroup.type}' groups are ${validChildTypes.join(',')}.`
-                        })
+                        if ( ! validChildTypes.includes(group.type) ) {
+                            errors.push({
+                                type: 'type:invalid',
+                                log: `User attempting to create a subgroup of a '${parentGroup.type}' group with invalid type '${group.type}'.`,
+                                message: `Valid types for '${parentGroup.type}' groups are ${validChildTypes.join(',')}.`
+                            })
+                        }
+                    }
+
+                    else if ( parentGroup.type.startsWith('hidden') ) {
+                        const validChildTypes = [ 'hidden-open', 'hidden-private', 'hidden' ]
+
+                        if ( ! validChildTypes.includes(group.type) ) {
+                            errors.push({
+                                type: 'type:invalid',
+                                log: `User attempting to create a subgroup of a '${parentGroup.type}' group with invalid type '${group.type}'.`,
+                                message: `Valid types for '${parentGroup.type}' groups are ${validChildTypes.join(',')}.`
+                            })
+                        }
                     }
                 }
             }
