@@ -8,30 +8,54 @@ Cases covering subscribing to posts.
 - [ ] User2 has been created and is friends with User1.
 - [ ] User3 has been created and is friends with User2, but not User1.
 
-### Cases
+### Smoke Test
 
-- [ ] When a user creates a post they should be subscribed to the post and notified of comments.
-    1. As User1, create a post.
-        1. Confirm subscribed.
-    2. As User2, comment on User1's post.
-    3. As User1, confirm notified.
+- [ ] As a user, I am subscribed to the posts I create and notified of comments.
+    - As User1:
+        - Create a post.
+            - **Confirm subscribed.**
+    - As User2:
+        - Comment on User1's post.
+    - As User1:
+        - **Confirm notified.**
 
-- [ ] When a user comments on a post, they should be subscribed to the post and notified of comments.
-    1. As User1, create a post.
-    2. As User2, comment on User1's post.
-        1. Confirm subscribed.
-    3. As User1, comment on User1's post.
-    4. As User2, confirm notified.
+- [ ] As a user, I am subscribed to the posts I comment on and notified of comments.
+    - As User1:
+        - Create a post.
+    - As User2:
+        - Comment on User1's post.
+            - **Confirm subscribed.**
+    - As User1:
+        - Comment on your own post.
+    - As User2:
+        - **Confirm notified.**
 
-- [ ] When a user subscribes to a post, they should be notified of comments.
-    1. As User1, create a public post.
-    2. As User3, subscribe to User1's post.
-    3. As User2, comment on User1's post.
-    4. As User3, confirm notification.
+### Manual Regression
 
-- [ ] When a user loses the ability to view a subscribed post they should no longer be notified of comments.
-    1. As User1, create a public post.
-    2. As User3, subscribe to User1's post.
-    3. As User1, change visibility of post to private.
-    4. As User2, comment on User1's post.
-    5. As User3, confirm no notification.
+- [ ] As a user, I am notified of comments on a post I subscribed to.
+    - As User1:
+        - Create a public post.
+    - As User3:
+        - Subscribe to User1's post.
+    - As User2:
+        - Comment on User1's post.
+    - As User3:
+        - **Confirm notification received.**
+
+- [ ] As a user, I stop being notified when I lose the ability to view a subscribed post.
+    - As User1:
+        - Create a public post.
+    - As User3:
+        - Subscribe to User1's post.
+    - As User1:
+        - Change visibility of post to private.
+    - As User2:
+        - Comment on User1's post.
+    - As User3:
+        - **Confirm no notification.**
+
+### Full Regression
+
+The post subscription endpoints are not yet covered by the Integration suite.
+All subscription creation cases are defined in the Smoke Test and Manual
+Regression sections above.

@@ -1,6 +1,6 @@
 ## [Read GroupModeration](documentation/testing/test-cases/GroupModeration/read.md)
 
-Cases covering GroupModeration creation.  Who can flag the posts in a group for group moderators?
+Cases covering GroupModeration reading.  Who can see the moderation status of the posts in a group?
 
 ### Pre-requisites
 
@@ -10,13 +10,13 @@ Cases covering GroupModeration creation.  Who can flag the posts in a group for 
         - [ ] A Private Group named Public - Private Group
         - [ ] A Hidden Group named Public - Hidden Group
 - [ ] A Private Group, Private Group, has been created.
-    - [ ] The following subgroups of Public Group have been created:
-        - [ ] A Public Group named Private - Public Group
+    - [ ] The following subgroups of Private Group have been created:
+        - [ ] An Open Group named Private - Open Group
         - [ ] A Private Group named Private - Private Group
         - [ ] A Hidden Group named Private - Hidden Group
 - [ ] A Hidden Group, Hidden Group, has been created.
-    - [ ] The following subgroups of Public Group have been created:
-        - [ ] A Public Group named Hidden - Public Group
+    - [ ] The following subgroups of Hidden Group have been created:
+        - [ ] An Open Group named Hidden - Open Group
         - [ ] A Private Group named Hidden - Private Group
         - [ ] A Hidden Group named Hidden - Hidden Group
 
@@ -29,141 +29,145 @@ Cases covering GroupModeration creation.  Who can flag the posts in a group for 
 - [ ] User6 has been created and added as a member only of the top level groups.
 
 - [ ] User7 has been created and is a non-member of all groups.
+- [ ] User8 has been created, has a pending invitation to each group, and has not accepted.
+- [ ] User9 has been created and has been banned from each group.
+- [ ] A site moderator has been created.
 
 ### Smoke Test
 
-#### Top level Groups
+- [ ] As a user, I can see when a post I can view has been moderated.
+    - As User2, a group moderator:
+        - Reject a flagged post in Public Group.
+    - As User7:
+        - Visit Public Group.
+            - **Confirm the rejected post is shown as removed by moderators rather than silently missing.**
 
-##### Public Groups
-
-- [ ] Non-members can can see moderation status of posts.
-- [ ] Members can can see moderation status of posts.
-- [ ] Group Moderators can can see moderation status of posts.
-- [ ] Group Admins can can see moderation status of posts.
-
-##### Private Groups
-
-- [ ] Non-members **cannot** can see moderation status of posts.
-- [ ] Members can can see moderation status of posts.
-- [ ] Group Moderators can can see moderation status of posts.
-- [ ] Group Admins can can see moderation status of posts.
-
-##### Hidden Groups
-
-- [ ] Non-members **cannot** can see moderation status of posts.
-- [ ] Members can can see moderation status of posts.
-- [ ] Group Moderators can can see moderation status of posts.
-- [ ] Group Admins can can see moderation status of posts.
-
-
-### Full Regression
+- [ ] As a post author, I can see the moderation status of my own post.
+    - As User3:
+        - Have a post in Public Group rejected by a moderator.
+        - Visit the post.
+            - **Confirm the moderation status and reason are shown to you.**
 
 #### Top level Groups
 
 ##### Public Groups
 
-- [ ] Non-members can can see moderation status of posts.
-- [ ] Members can can see moderation status of posts.
-- [ ] Group Moderators can can see moderation status of posts.
-- [ ] Group Admins can can see moderation status of posts.
+- [ ] Non-members **can** see the moderation status of posts.
+- [ ] Members **can** see the moderation status of posts.
+- [ ] Group Moderators **can** see the moderation status of posts.
+- [ ] Group Admins **can** see the moderation status of posts.
 
 ##### Private Groups
 
-- [ ] Non-members **cannot** can see moderation status of posts.
-- [ ] Members can can see moderation status of posts.
-- [ ] Group Moderators can can see moderation status of posts.
-- [ ] Group Admins can can see moderation status of posts.
+- [ ] Non-members **cannot** see the moderation status of posts.
+- [ ] Members **can** see the moderation status of posts.
+- [ ] Group Moderators **can** see the moderation status of posts.
+- [ ] Group Admins **can** see the moderation status of posts.
 
 ##### Hidden Groups
 
-- [ ] Non-members **cannot** can see moderation status of posts.
-- [ ] Members can can see moderation status of posts.
-- [ ] Group Moderators can can see moderation status of posts.
-- [ ] Group Admins can can see moderation status of posts.
+- [ ] Non-members **cannot** see the moderation status of posts.
+- [ ] Members **can** see the moderation status of posts.
+- [ ] Group Moderators **can** see the moderation status of posts.
+- [ ] Group Admins **can** see the moderation status of posts.
+
+### Manual Regression
+
+- [ ] As a group moderator, the moderation queue shows the status of each flagged post.
+    - As User2:
+        - Open Public Group -> Moderation.
+            - **Confirm pending, approved and rejected posts are distinguishable.**
+            - **Confirm each entry shows who flagged it and why.**
 
 #### Subgroups of Public Groups
 
 ##### Public Subgroups of Public Groups
 
-- [ ] Non-members can can see moderation status of posts.
-- [ ] Members can can see moderation status of posts.
-- [ ] Parent Group Members can can see moderation status of posts.
-- [ ] Parent Group Admins can can see moderation status of posts.
-- [ ] Group Moderators can can see moderation status of posts.
-- [ ] Group Admins can can see moderation status of posts.
+- [ ] Non-members **can** see the moderation status of posts.
+- [ ] Parent Group Members **can** see the moderation status of posts.
+- [ ] Parent Group Admins **can** see the moderation status of posts.
+- [ ] Members **can** see the moderation status of posts.
+- [ ] Group Moderators **can** see the moderation status of posts.
+- [ ] Group Admins **can** see the moderation status of posts.
 
 ##### Private Subgroups of Public Groups
 
-- [ ] Non-members **cannot** can see moderation status of posts.
-- [ ] Parent Group Members **cannot** can see moderation status of posts.
-- [ ] Parent Group Admins **cannot** can see moderation status of posts.
-- [ ] Members can can see moderation status of posts.
-- [ ] Group Moderators can can see moderation status of posts.
-- [ ] Group Admins can can see moderation status of posts.
+- [ ] Non-members **cannot** see the moderation status of posts.
+- [ ] Parent Group Members **cannot** see the moderation status of posts.
+- [ ] Parent Group Admins **cannot** see the moderation status of posts.
+- [ ] Members **can** see the moderation status of posts.
+- [ ] Group Moderators **can** see the moderation status of posts.
+- [ ] Group Admins **can** see the moderation status of posts.
 
-###### Hidden Subgroups of Public Groups
+##### Hidden Subgroups of Public Groups
 
-- [ ] Non-members **cannot** can see moderation status of posts.
-- [ ] Parent Group Members **cannot** can see moderation status of posts.
-- [ ] Parent Group Admins **cannot** can see moderation status of posts.
-- [ ] Members can can see moderation status of posts.
-- [ ] Group Moderators can can see moderation status of posts.
-- [ ] Group Admins can can see moderation status of posts.
+- [ ] Non-members **cannot** see the moderation status of posts.
+- [ ] Parent Group Members **cannot** see the moderation status of posts.
+- [ ] Parent Group Admins **cannot** see the moderation status of posts.
+- [ ] Members **can** see the moderation status of posts.
+- [ ] Group Moderators **can** see the moderation status of posts.
+- [ ] Group Admins **can** see the moderation status of posts.
 
 #### Subgroups of Private Groups
 
-##### Public Subgroups of Private Groups
+##### Open Subgroups of Private Groups
 
-- [ ] Non-members **cannot** can see moderation status of posts.
-- [ ] Parent Group Members can can see moderation status of posts.
-- [ ] Parent Group Admins can can see moderation status of posts.
-- [ ] Members can can see moderation status of posts.
-- [ ] Group Moderators can can see moderation status of posts.
-- [ ] Group Admins can can see moderation status of posts.
+- [ ] Non-members **cannot** see the moderation status of posts.
+- [ ] Parent Group Members **can** see the moderation status of posts.
+- [ ] Parent Group Admins **can** see the moderation status of posts.
+- [ ] Members **can** see the moderation status of posts.
+- [ ] Group Moderators **can** see the moderation status of posts.
+- [ ] Group Admins **can** see the moderation status of posts.
 
 ##### Private Subgroups of Private Groups
 
-- [ ] Non-members **cannot** can see moderation status of posts.
-- [ ] Parent Group Members **cannot** can see moderation status of posts.
-- [ ] Parent Group Admins **cannot** can see moderation status of posts.
-- [ ] Members can can see moderation status of posts.
-- [ ] Group Moderators can can see moderation status of posts.
-- [ ] Group Admins can can see moderation status of posts.
+- [ ] Non-members **cannot** see the moderation status of posts.
+- [ ] Parent Group Members **cannot** see the moderation status of posts.
+- [ ] Parent Group Admins **cannot** see the moderation status of posts.
+- [ ] Members **can** see the moderation status of posts.
+- [ ] Group Moderators **can** see the moderation status of posts.
+- [ ] Group Admins **can** see the moderation status of posts.
 
-###### Hidden Subgroups of Private Groups
+##### Hidden Subgroups of Private Groups
 
-- [ ] Non-members **cannot** can see moderation status of posts.
-- [ ] Parent Group Members **cannot** can see moderation status of posts.
-- [ ] Parent Group Admins **cannot** can see moderation status of posts.
-- [ ] Members can can see moderation status of posts.
-- [ ] Group Moderators can can see moderation status of posts.
-- [ ] Group Admins can can see moderation status of posts.
+- [ ] Non-members **cannot** see the moderation status of posts.
+- [ ] Parent Group Members **cannot** see the moderation status of posts.
+- [ ] Parent Group Admins **cannot** see the moderation status of posts.
+- [ ] Members **can** see the moderation status of posts.
+- [ ] Group Moderators **can** see the moderation status of posts.
+- [ ] Group Admins **can** see the moderation status of posts.
 
 #### Subgroups of Hidden Groups
 
-##### Public Subgroups of Hidden Groups
+##### Open Subgroups of Hidden Groups
 
-- [ ] Non-members **cannot** can see moderation status of posts.
-- [ ] Parent Group Members can can see moderation status of posts.
-- [ ] Parent Group Admins can can see moderation status of posts.
-- [ ] Members can can see moderation status of posts.
-- [ ] Group Moderators can can see moderation status of posts.
-- [ ] Group Admins can can see moderation status of posts.
+- [ ] Non-members **cannot** see the moderation status of posts.
+- [ ] Parent Group Members **can** see the moderation status of posts.
+- [ ] Parent Group Admins **can** see the moderation status of posts.
+- [ ] Members **can** see the moderation status of posts.
+- [ ] Group Moderators **can** see the moderation status of posts.
+- [ ] Group Admins **can** see the moderation status of posts.
 
 ##### Private Subgroups of Hidden Groups
 
-- [ ] Non-members **cannot** can see moderation status of posts.
-- [ ] Parent Group Members **cannot** can see moderation status of posts.
-- [ ] Parent Group Admins **cannot** can see moderation status of posts.
-- [ ] Members can can see moderation status of posts.
-- [ ] Group Moderators can can see moderation status of posts.
-- [ ] Group Admins can can see moderation status of posts.
+- [ ] Non-members **cannot** see the moderation status of posts.
+- [ ] Parent Group Members **cannot** see the moderation status of posts.
+- [ ] Parent Group Admins **cannot** see the moderation status of posts.
+- [ ] Members **can** see the moderation status of posts.
+- [ ] Group Moderators **can** see the moderation status of posts.
+- [ ] Group Admins **can** see the moderation status of posts.
 
-###### Hidden Subgroups of Hidden Groups
+##### Hidden Subgroups of Hidden Groups
 
-- [ ] Non-members **cannot** can see moderation status of posts.
-- [ ] Parent Group Members **cannot** can see moderation status of posts.
-- [ ] Parent Group Admins **cannot** can see moderation status of posts.
-- [ ] Members can can see moderation status of posts.
-- [ ] Group Moderators can can see moderation status of posts.
-- [ ] Group Admins can can see moderation status of posts.
+- [ ] Non-members **cannot** see the moderation status of posts.
+- [ ] Parent Group Members **cannot** see the moderation status of posts.
+- [ ] Parent Group Admins **cannot** see the moderation status of posts.
+- [ ] Members **can** see the moderation status of posts.
+- [ ] Group Moderators **can** see the moderation status of posts.
+- [ ] Group Admins **can** see the moderation status of posts.
+
+### Full Regression
+
+The group moderation endpoints are not yet covered by the Integration suite.
+All group moderation cases are defined in the Smoke Test and Manual Regression
+sections above.

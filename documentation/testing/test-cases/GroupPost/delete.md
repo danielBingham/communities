@@ -1,23 +1,26 @@
 ## [Delete GroupPost](documentation/testing/test-cases/GroupPost/delete.md)
 
-Cases covering GroupPost reading.  Who can view the posts in a group?
+Cases covering GroupPost deletion.  Who can delete the posts in a group?
+
+Removing a post as a moderation action is covered in
+[Update GroupModeration](documentation/testing/test-cases/GroupModeration/update.md).
 
 ### Pre-requisites
 
 - [ ] A Public Group, Public Group, has been created.
     - [ ] The following subgroups of Public Group have been created:
         - [ ] A Public Group named Public - Public Group
-        - [ ] A Private Group named Public - Private Group 
+        - [ ] A Private Group named Public - Private Group
         - [ ] A Hidden Group named Public - Hidden Group
 - [ ] A Private Group, Private Group, has been created.
-    - [ ] The following subgroups of Public Group have been created:
-        - [ ] A Public Group named Private - Public Group
-        - [ ] A Private Group named Private - Private Group 
+    - [ ] The following subgroups of Private Group have been created:
+        - [ ] An Open Group named Private - Open Group
+        - [ ] A Private Group named Private - Private Group
         - [ ] A Hidden Group named Private - Hidden Group
 - [ ] A Hidden Group, Hidden Group, has been created.
-    - [ ] The following subgroups of Public Group have been created:
-        - [ ] A Public Group named Hidden - Public Group
-        - [ ] A Private Group named Hidden - Private Group 
+    - [ ] The following subgroups of Hidden Group have been created:
+        - [ ] An Open Group named Hidden - Open Group
+        - [ ] A Private Group named Hidden - Private Group
         - [ ] A Hidden Group named Hidden - Hidden Group
 
 - [ ] User1 has been created and added as an admin of each group.
@@ -29,8 +32,61 @@ Cases covering GroupPost reading.  Who can view the posts in a group?
 - [ ] User6 has been created and added as a member only of the top level groups.
 
 - [ ] User7 has been created and is a non-member of all groups.
+- [ ] User8 has been created, has a pending invitation to each group, and has not accepted.
+- [ ] User9 has been created and has been banned from each group.
+- [ ] A site moderator has been created.
 
-### Cases
+### Smoke Test
 
-- [ ] Post authors can delete their posts.
-- [ ] Non-post authors **cannot** delete posts.
+- [ ] As a post author, I can delete my own group post.
+    - As User3:
+        - Create a post in Public Group and have another member comment on it.
+        - Delete the post.
+            - **Confirm the post is removed from the group.**
+    - As User7:
+        - Attempt to open the post permalink.
+            - **Confirm a not found page renders.**
+
+- [ ] A non-author **cannot** delete a group post. (covered: integration)
+    - As User2, a group moderator:
+        - Open User3's post in Public Group.
+            - **Confirm no delete option is offered.**
+
+### Manual Regression
+
+- [ ] As a post author, deleting a group post removes its comments and reactions.
+    - As User3:
+        - Create a post in Public Group, have members comment on and react to it.
+        - Delete the post.
+            - **Confirm the post, its comments and its reactions are all gone.**
+            - **Confirm the group's post count updates.**
+
+### Full Regression
+
+#### Basics
+
+- [ ] As an unauthenticated visitor, I cannot delete a group post. (covered: integration)
+    - As unauthenticated user:
+        - Attempt to delete a post in Public Group.
+            - **Confirm the request is refused.**
+
+- [ ] As a user, deleting a group post twice is not found the second time. (covered: integration)
+    - As User3:
+        - Delete your own group post, then attempt to delete it again.
+            - **Confirm a not found result.**
+
+#### Permissions
+
+- [ ] The author **can** delete their own group post. (covered: integration)
+- [ ] Another group ADMIN **cannot** delete the author's post -- they can view it but are not the author. (covered: integration)
+- [ ] A group MEMBER **cannot** delete another member's post. (covered: integration)
+- [ ] A non-member **cannot** delete a PRIVATE group post -- they cannot view it. (covered: integration)
+- [ ] A non-member **cannot** delete an OPEN group post -- they can view it but are not the author. (covered: integration)
+- [ ] A site moderator **cannot** delete another user's group post. (covered: integration)
+- [ ] The author **cannot** delete their own post once they have been banned, because they lose the ability to view it. (covered: integration)
+
+#### Subgroup posts
+
+- [ ] The author **can** delete their own subgroup post. (covered: integration)
+- [ ] A parent member who can VIEW the post **cannot** delete it, because they are not the author. (covered: integration)
+- [ ] A non-member who cannot view the post **cannot** delete it. (covered: integration)

@@ -6,7 +6,7 @@ Cases cover Multifactor Authentication (MFA) setup.
 
 - [ ] User1 has been registered.
 
-### CasesA
+### Smoke Test
 
 - [ ] As a user, I can enable multifactor authentication.
     - As User1:
@@ -21,6 +21,18 @@ Cases cover Multifactor Authentication (MFA) setup.
             - **Confirm email notifying of MFA change.**
         - Save the backup codes somewhere accessible.
 
+- [ ] As a user, my MFA secret and recovery codes do not leak in application responses after setup.
+    - As User1:
+        - With browser developer tools open (Network tab), complete MFA setup and continue using the app.
+            - **Confirm the secret only appears in the response to the setup (pending) request.**
+            - **Confirm the recovery codes only appear in the response that confirms setup.**
+        - Reload the app and inspect the authenticated user object and subsequent responses.
+            - **Confirm neither the secret nor the recovery codes appear in any later response.**
+
+### Manual Regression
+
+All of the MFA setup cases require an authenticator app (or a generated TOPT
+secret) and so cannot be covered by the Integration suite.
 
 - [ ] As a user, I can set up MFA by manually entering the secret instead of scanning the QR code.
     - As User1:
@@ -66,14 +78,6 @@ Cases cover Multifactor Authentication (MFA) setup.
         - Refresh the browser while the codes are shown.
             - **Confirm the codes are not shown again and I am not left mid-setup.**
 
-- [ ] As a user, my MFA secret and recovery codes do not leak in application responses after setup.
-    - As User1:
-        - With browser developer tools open (Network tab), complete MFA setup and continue using the app.
-            - **Confirm the secret only appears in the response to the setup (pending) request.**
-            - **Confirm the recovery codes only appear in the response that confirms setup.**
-        - Reload the app and inspect the authenticated user object and subsequent responses.
-            - **Confirm neither the secret nor the recovery codes appear in any later response.**
-
 - [ ] As a user, disabling and re-enabling MFA invalidates my old authenticator entry and old recovery codes.
     - As User1:
         - With MFA enabled, disable MFA.
@@ -85,3 +89,15 @@ Cases cover Multifactor Authentication (MFA) setup.
         - Log in using the new authenticator entry.
             - **Confirm success.**
 
+### Full Regression
+
+- [ ] As a user who is not mid-MFA-setup, a setup verification is refused. (covered: integration)
+    - As User1 (MFA not being set up):
+        - Submit an MFA setup verification.
+            - **Confirm the request is rejected.**
+
+- [ ] As a user mid-MFA-setup, a verification with no token is refused. (covered: integration)
+    - As User1:
+        - Start MFA setup and reach the QR/secret screen.
+        - Submit the verification with no token supplied.
+            - **Confirm the request is rejected.**

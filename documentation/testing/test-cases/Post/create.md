@@ -5,7 +5,8 @@ Cases covering making posts in all their forms and with all their attachments.
 ### Pre-requisites
 
 - [ ] User1 has been created.
-- [ ] User2 has been created.
+- [ ] User2 has been created and is friends with User1.
+- [ ] A site admin has been created.
 
 ### Smoke Test
 
@@ -49,20 +50,6 @@ Cases covering making posts in all their forms and with all their attachments.
         - Click "post".
             - **Confirm post shows on feed with a gallery with all three images.**
 
-- [ ] As a user, I should be able to reorder the images I attach.
-    - As User1:
-        - Go to the Feed page.
-        - Click on the "Create post" form at the top of the feed.
-        - Click "Add Image".
-        - Select five images and click "ok".
-            - **Confirm images are uploaded to post and processed before being shown.**
-        - Click and drag an image in the middle of the gallery.  Drag it to the top of the gallery and release.
-            - **Confirm image is repositioned as the first image.**
-        - Click the second image and drag it down to the fourth spot.
-            - **Confirm image is repositioned as the fourth image.**
-        - Click "post".
-            - **Confirm post shows on feed with a gallery in the correct order.**
-
 - [ ] As a user, I should be able to attach a video to a post.
     - As User1:
         - Go to the Feed page.
@@ -88,9 +75,24 @@ Cases covering making posts in all their forms and with all their attachments.
             - **Confirm the suggestion list shows appropriate suggestions.**
         - Finish typing the friend's username without making a selection.
             - **Confirm suggestion list closes on completion.**
-        - Type '@' to start a mention and start typing a friend's name.
+        - Click "post".
+            - **Confirm the post is created with the mentions rendered as links.**
 
-#### Long String
+### Manual Regression
+
+- [ ] As a user, I should be able to reorder the images I attach.
+    - As User1:
+        - Go to the Feed page.
+        - Click on the "Create post" form at the top of the feed.
+        - Click "Add Image".
+        - Select five images and click "ok".
+            - **Confirm images are uploaded to post and processed before being shown.**
+        - Click and drag an image in the middle of the gallery.  Drag it to the top of the gallery and release.
+            - **Confirm image is repositioned as the first image.**
+        - Click the second image and drag it down to the fourth spot.
+            - **Confirm image is repositioned as the fourth image.**
+        - Click "post".
+            - **Confirm post shows on feed with a gallery in the correct order.**
 
 - [ ] As a user, I should be able to post long strings without breaking the app.
     - As User1:
@@ -114,75 +116,230 @@ Cases covering making posts in all their forms and with all their attachments.
 - [ ] As a user, my drafts are cleared out when I log out.
     - As User1:
         - Create a draft post with some text and some media.
-        -  Log out.
-        -  Log back in.
-            -  **Confirm draft is gone.**
+        - Log out.
+        - Log back in.
+            - **Confirm draft is gone.**
 
-- [ ] As User1, write a post draft with a link.
-    - [ ] Navigate away from the home feed and back to feed.  Confirm draft remains.
-    - [ ] Close the Communities browser window. Reopen and reload.  Confirm draft remains.
-    - [ ] Post the draft.  Confirm draft posts correctly.
+- [ ] As a user, I can draft a post with a link and it will be saved across reloads.
+    - As User1:
+        - Write a post draft with a link.
+        - Navigate away from the home feed and back to feed.
+            - **Confirm draft remains.**
+        - Close the Communities browser window. Reopen and reload.
+            - **Confirm draft remains.**
+        - Post the draft.
+            - **Confirm draft posts correctly.**
 
-- [ ] As User1, write a post draft with a link.
-    - [ ] Log out. Log back in. Confirm draft is gone.
+- [ ] As a user, my link drafts are cleared out when I log out.
+    - As User1:
+        - Write a post draft with a link.
+        - Log out.
+        - Log back in.
+            - **Confirm draft is gone.**
 
 #### Youtube Videos
 
-- [ ] As User1, create a post with a youtube video for a link, using the full link (`/watch?vid=`)
-    - [ ] Confirm embed loads.
-    - [ ] Post the post.  Confirm the embed will play.
-- [ ] As User1, create a post with a youtube video for a link using the shorted link (`youtu.be`)
-    - [ ] Confirm the embed loads.
-    - [ ] Post the post. Confirm the embed will play.
+- [ ] As a user, I can post a youtube video using the full link.
+    - As User1:
+        - Create a post with a youtube video for a link, using the full link (`/watch?vid=`).
+            - **Confirm embed loads.**
+        - Post the post.
+            - **Confirm the embed will play.**
 
-
-### Full Regression
-
-#### Private Posts
-
-- [ ] As User1, make a private post with just text.
-- [ ] As User1, make a private post with just an image.
-- [ ] As User1, make a private post with just a link.
-- [ ] As User1, make a private post with just a video.
-- [ ] As User1, make a private post with text and an image.
-- [ ] As User1, make a private post with text and a link.
-- [ ] As User1, make a private post with text and a video.
-
-#### Public Posts
-
-- [ ] As User1, make a public post with just text.
-- [ ] As User1, make a public post with just an image.
-- [ ] As User1, make a public post with just a link.
-- [ ] As User1, make a public post with just a video.
-- [ ] As User1, make a public post with text and an image.
-- [ ] As User1, make a public post with text and a link.
-- [ ] As User1, make a public post with text and a video.
-
-- [ ] As User1, make a post mentioning User2.
-    - [ ] As User2, confirm notification.
+- [ ] As a user, I can post a youtube video using the shortened link.
+    - As User1:
+        - Create a post with a youtube video for a link using the shortened link (`youtu.be`).
+            - **Confirm the embed loads.**
+        - Post the post.
+            - **Confirm the embed will play.**
 
 #### Links
 
-- [ ] As User1, make a post with a link in the body. Confirm highlighted.
-- [ ] As User1, make a post with a link with a long string in the body.  Confirm it doesn't expand the view on mobile.
-- [ ] As User1, make a post with an incomplete link (www.refseek.com, refseek.com).  Confirm highlighted.
+- [ ] As a user, links in the post body are highlighted.
+    - As User1:
+        - Make a post with a link in the body.
+            - **Confirm the link is highlighted.**
+        - Make a post with an incomplete link (`www.refseek.com`, `refseek.com`).
+            - **Confirm the link is highlighted.**
+
+- [ ] As a user, a long link doesn't break the mobile layout.
+    - As User1:
+        - Make a post with a link with a long string in the body.
+            - **Confirm it doesn't expand the view on mobile.**
 
 #### Images
 
-- [ ] As User1, make an image post using a `.jpg`.
-- [ ] As User1, make an image post using a `.png`.
-- [ ] As User1, attempt to make a post with a corrupted `.png` - confirm failure.
-- [ ] As User1, attempt to make a post with a corrupted `.jpg` - confirm failure.
+- [ ] As a user, I can post the supported image formats.
+    - As User1:
+        - Make an image post using a `.jpg`.
+            - **Confirm the post is created and the image renders.**
+        - Make an image post using a `.png`.
+            - **Confirm the post is created and the image renders.**
 
-##### Videos
+- [ ] As a user, corrupted images are rejected.
+    - As User1:
+        - Attempt to make a post with a corrupted `.png`.
+            - **Confirm failure.**
+        - Attempt to make a post with a corrupted `.jpg`.
+            - **Confirm failure.**
 
-- [ ] As User1, make a video post using a `.mp4`
-- [ ] As User1, make a video post using a `.mov`
-- [ ] As User1, make a video post using a `.avi`
-- [ ] As User1, make a video post using a `.webp`
+#### Videos
 
-- [ ] As User1, make a video post using a corrupted `.mp4` - confirm failure.
-- [ ] As User1, make a video post using a corrupted `.mov` - confirm failure.
-- [ ] As User1, make a video post using a corrupted `.avi` - confirm failure.
-- [ ] As User1, make a video post using a corrupted `.webp` - confirm failure.
+- [ ] As a user, I can post the supported video formats.
+    - As User1:
+        - Make a video post using a `.mp4`.
+            - **Confirm the post is created and the video plays.**
+        - Make a video post using a `.mov`.
+            - **Confirm the post is created and the video plays.**
+        - Make a video post using a `.avi`.
+            - **Confirm the post is created and the video plays.**
+        - Make a video post using a `.webp`.
+            - **Confirm the post is created and the video plays.**
 
+- [ ] As a user, corrupted videos are rejected.
+    - As User1:
+        - Make a video post using a corrupted `.mp4`.
+            - **Confirm failure.**
+        - Make a video post using a corrupted `.mov`.
+            - **Confirm failure.**
+        - Make a video post using a corrupted `.avi`.
+            - **Confirm failure.**
+        - Make a video post using a corrupted `.webp`.
+            - **Confirm failure.**
+
+### Full Regression
+
+#### Permissions
+
+- [ ] As an unauthenticated visitor, I cannot create a post. (covered: integration)
+    - As unauthenticated user:
+        - Attempt to create a post.
+            - **Confirm the request is refused.**
+
+- [ ] As a user, I can create a feed post for myself. (covered: integration)
+    - As User1:
+        - Create a post on your own feed.
+            - **Confirm the post is created.**
+
+- [ ] As a user, I cannot post on behalf of another user. (covered: integration)
+    - As User1:
+        - Attempt to create a post attributed to User2.
+            - **Confirm the request is refused.**
+
+#### Private Posts
+
+- [ ] As a user, I can make private posts in every form. (covered: integration)
+    - As User1:
+        - Make a private post with just text.
+            - **Confirm the post is created and is private.**
+        - Make a private post with just an image.
+            - **Confirm the post is created and is private.**
+        - Make a private post with just a link.
+            - **Confirm the post is created and is private.**
+        - Make a private post with just a video.
+            - **Confirm the post is created and is private.**
+        - Make a private post with text and an image.
+            - **Confirm the post is created and is private.**
+        - Make a private post with text and a link.
+            - **Confirm the post is created and is private.**
+        - Make a private post with text and a video.
+            - **Confirm the post is created and is private.**
+
+#### Public Posts
+
+- [ ] As a user, I can make public posts in every form. (covered: integration)
+    - As User1:
+        - Make a public post with just text.
+            - **Confirm the post is created and is public.**
+        - Make a public post with just an image.
+            - **Confirm the post is created and is public.**
+        - Make a public post with just a link.
+            - **Confirm the post is created and is public.**
+        - Make a public post with just a video.
+            - **Confirm the post is created and is public.**
+        - Make a public post with text and an image.
+            - **Confirm the post is created and is public.**
+        - Make a public post with text and a link.
+            - **Confirm the post is created and is public.**
+        - Make a public post with text and a video.
+            - **Confirm the post is created and is public.**
+
+- [ ] As a user, mentioning someone in a post notifies them.
+    - As User1:
+        - Make a post mentioning User2.
+    - As User2:
+        - **Confirm notification received.**
+
+#### Validation
+
+- [ ] As a user, a post with a missing or invalid type is rejected. (covered: integration)
+    - As User1:
+        - Attempt to create a post with no type.
+            - **Confirm the request is refused.**
+        - Attempt to create a post with an invalid type.
+            - **Confirm the request is refused.**
+
+- [ ] As a user, a post with a missing or invalid visibility is rejected. (covered: integration)
+    - As User1:
+        - Attempt to create a post with no visibility.
+            - **Confirm the request is refused.**
+        - Attempt to create a post with an invalid visibility.
+            - **Confirm the request is refused.**
+
+- [ ] As a user, a post with a missing userId is rejected. (covered: integration)
+    - As User1:
+        - Attempt to create a post with no userId.
+            - **Confirm the request is refused.**
+
+- [ ] As a user, invalid content is rejected. (covered: integration)
+    - As User1:
+        - Attempt to create a post whose content is longer than the limit.
+            - **Confirm the request is refused.**
+        - Attempt to create a post with null content.
+            - **Confirm the request is refused.**
+
+- [ ] As a user, I cannot set server-managed fields on a new post. (covered: integration)
+    - As User1:
+        - Attempt to create a post that sets `siteModerationId`.
+            - **Confirm the request is refused.**
+        - Attempt to create a post that sets `groupModerationId`.
+            - **Confirm the request is refused.**
+        - Attempt to create a post that sets `activity`.
+            - **Confirm the request is refused.**
+        - Attempt to create a post that sets `createdDate`.
+            - **Confirm the request is refused.**
+        - Attempt to create a post that sets `updatedDate`.
+            - **Confirm the request is refused.**
+
+- [ ] As a user, a feed post carrying a groupId is rejected. (covered: integration)
+    - As User1:
+        - Attempt to create a feed post that carries a `groupId`.
+            - **Confirm the request is refused.**
+
+- [ ] As a non-admin, announcement and info posts are refused. (covered: integration)
+    - As User1:
+        - Attempt to create an announcement post.
+            - **Confirm the request is refused.**
+        - Attempt to create an info post.
+            - **Confirm the request is refused.**
+
+#### Shared Posts
+
+- [ ] As a user, I can share a public post. (covered: integration)
+    - As User2:
+        - Make a public post.
+    - As User1:
+        - Share User2's public post.
+            - **Confirm the share is created.**
+
+- [ ] As a user, I cannot share a private post. (covered: integration)
+    - As User2:
+        - Make a private post.
+    - As User1:
+        - Attempt to share User2's private post.
+            - **Confirm the request is refused.**
+
+- [ ] As a user, I cannot share a post that doesn't exist. (covered: integration)
+    - As User1:
+        - Attempt to share a post id that does not exist.
+            - **Confirm the request is refused.**

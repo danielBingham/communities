@@ -1,17 +1,15 @@
-## [Create User: Email Confirmation](documentation/testing/test-cases/User/create/registration.md)
+## [Create User: Email Confirmation](documentation/testing/test-cases/User/create/email-confirmation.md)
 
-Cases covering the Email Confirmation flow. 
+Cases covering the Email Confirmation flow.
 
 ### Pre-requisites
 
 No pre-requisites.
 
-### Cases
-
-#### Success cases
+### Smoke Test
 
 - [ ] As a user, I can confirm my email by following the link in the email.
-    - Create a new user and confirm their email.
+    - As a new user:
         - Register a new user.
         - Check the email you registered.
             - **Confirm email arrives.**
@@ -22,17 +20,24 @@ No pre-requisites.
             - **Confirm TOS page loads.**
 
 - [ ] As a user, I can confirm my email by copying and pasting the token into the form.
-    - Create a new user and confirm their email.
+    - As a new user:
         - Register a new user.
         - Check the email you registered.
             - **Confirm email arrives.**
             - **Confirm it contains a token.**
-        - Click copy the token into the form.  Click Confirm.
+        - Copy the token into the form and click "Confirm".
             - **Confirm the user is confirmed.**
             - **Confirm the TOS page loads.**
 
+### Manual Regression
+
+All of the email confirmation cases require access to an email inbox, so none
+of them can be covered by the Integration suite.
+
+#### Success cases
+
 - [ ] As a user, I can request a new confirmation email from the email confirmation form.
-    - Create a new user and request a new confirmation email.
+    - As a new user:
         - Register a new user.
         - Click "Resend" on the email confirmation screen.
             - **Confirm a new confirmation email is recieved.**
@@ -40,13 +45,13 @@ No pre-requisites.
             - **Confirm email verification success.**
 
 - [ ] As a user, I can logout from the email confirmation form.
-    - Create a new user and then log out from the confirmation screen.
+    - As a new user:
         - Register a new user.
         - Click "Logout" on the email confirmation screen.
             - **Confirm logged out.**
 
 - [ ] As a user, I can confirm my email by following the link in the email when I am logged out.
-    - Create a new User, log out from the confirmation form, then confirm.
+    - As a new user:
         - Register a new user.
             - **Confirm email confirmnation recieved.**
         - Log out from the email confirmation screen.
@@ -55,7 +60,7 @@ No pre-requisites.
             - **Confirm redirected to login page.**
 
 - [ ] As a user, I can confirm my email by copying and pasting the token from the email.
-    - Create a new User and confirm by copying and pasting the token.
+    - As a new user:
         - Register a new user.
             - **Confirm email confirmnation recieved.**
         - Copy the token from the confirmation email.
@@ -66,7 +71,28 @@ No pre-requisites.
 
 #### Error cases
 
-- [ ] Users are shown an error when they follow a link with an invalid token.
-- [ ] Users are shown an error when they manually enter an invalid token.
-- [ ] Users are shown an error when they attempt to request a new confirmation while already confirmed.
-- [ ] Users are simply forwarded to TOS when they attempt to re-confirm after already confirming.
+- [ ] As a user, I am shown an error when I follow a link with an invalid token.
+    - As a new, unconfirmed user:
+        - Follow a confirmation link with a corrupted token.
+            - **Confirm an error is shown and the account stays unconfirmed.**
+
+- [ ] As a user, I am shown an error when I manually enter an invalid token.
+    - As a new, unconfirmed user:
+        - Enter a token that does not match the one emailed and click "Confirm".
+            - **Confirm an error is shown and the account stays unconfirmed.**
+
+- [ ] As a user, I am shown an error when I request a new confirmation while already confirmed.
+    - As a newly confirmed user:
+        - Return to the email confirmation screen and click "Resend".
+            - **Confirm an error is shown and no new email is sent.**
+
+- [ ] As a user, I am simply forwarded to TOS when I attempt to re-confirm after already confirming.
+    - As a newly confirmed user:
+        - Follow the confirmation link a second time.
+            - **Confirm no error is shown and the TOS page loads.**
+
+### Full Regression
+
+The email confirmation endpoints are not yet covered by the Integration suite.
+All email confirmation cases are defined in the Smoke Test and Manual
+Regression sections above.

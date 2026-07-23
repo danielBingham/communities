@@ -1,40 +1,74 @@
 ## [Update User: Preferences](documentation/testing/test-cases/User/update/preferences.md)
 
-Cases covering the user updating their profile.
+Cases covering the user updating their feed and display preferences.
 
 ### Pre-requisites
 
 - [ ] User1 has registered.
+- [ ] A site admin has been created and can create Info and Announcement posts.
 
-### Cases
+### Smoke Test
 
-- [ ] Should not receive Info posts in feed when turned off. 
-    1. As User1, confirm info posts are present in your feed.
-        1. If not, log into an admin user and create some info posts.
-    2. As User1, navigate to User Menu -> Preferences.
-    3. Toggle Info posts to "off".
-    4. Return to your feed.
-    5. Confirm info posts *are not* shown.
+No preference cases are critical enough for the Smoke Test.  All cases are
+defined in the Manual Regression section below.
 
-- [ ] Should receive Info posts in feed when turned on. 
-    1. As User1, navigate to User Menu -> Preferences.
-    2. Toggle Info posts to "on".
-    3. Return to your feed.
-    4. Confirm info posts *are* shown.
+### Manual Regression
 
-- [ ] Announcement posts can be turned off.
-    1. As User1, confirm announcement posts are in your feed.
-        1. If not, log into an admin user and create some announcement posts.
-    2. As User1, navigate to User Menu -> Preferences.
-    3. Toggle Announcement posts to "off".
-    4. Return to your feed.
-    5. Confirm announcement posts are not shown.
+#### Info Posts
 
-- [ ] Announcement posts can be turned back on.
-    1. As User1, navigate to User Menu -> Preferences
-    2. Toggle Announcement posts to "on"
-    3. Return to your feed.
-    4. Confirm Announcement posts *are* shown.
+- [ ] As a user, I should not receive Info posts in my feed when they are turned off.
+    - As User1:
+        - Go to your feed.
+            - **Confirm info posts are present in your feed.**
+            - NOTE: If they are not, log into an admin user and create some info posts.
+        - Navigate to User Menu -> Preferences.
+        - Toggle Info posts to "off".
+        - Return to your feed.
+            - **Confirm info posts *are not* shown.**
 
-- [ ] Show Friends can be turned off.
-- [ ] Show Friends can be turned back on.
+- [ ] As a user, I should receive Info posts in my feed when they are turned on.
+    - As User1:
+        - Navigate to User Menu -> Preferences.
+        - Toggle Info posts to "on".
+        - Return to your feed.
+            - **Confirm info posts *are* shown.**
+
+#### Announcement Posts
+
+- [ ] As a user, I can turn Announcement posts off.
+    - As User1:
+        - Go to your feed.
+            - **Confirm announcement posts are present in your feed.**
+            - NOTE: If they are not, log into an admin user and create some announcement posts.
+        - Navigate to User Menu -> Preferences.
+        - Toggle Announcement posts to "off".
+        - Return to your feed.
+            - **Confirm announcement posts *are not* shown.**
+
+- [ ] As a user, I can turn Announcement posts back on.
+    - As User1:
+        - Navigate to User Menu -> Preferences.
+        - Toggle Announcement posts to "on".
+        - Return to your feed.
+            - **Confirm Announcement posts *are* shown.**
+
+#### Show Friends
+
+- [ ] As a user, I can turn Show Friends off.
+    - As User1:
+        - Navigate to User Menu -> Preferences.
+        - Toggle Show Friends to "off".
+        - Navigate to your profile page.
+            - **Confirm your friends list is not shown.**
+
+- [ ] As a user, I can turn Show Friends back on.
+    - As User1:
+        - Navigate to User Menu -> Preferences.
+        - Toggle Show Friends to "on".
+        - Navigate to your profile page.
+            - **Confirm your friends list is shown.**
+
+### Full Regression
+
+The user preferences endpoint is not yet covered by the Integration suite.
+All preference cases are defined in the Manual Regression section above.

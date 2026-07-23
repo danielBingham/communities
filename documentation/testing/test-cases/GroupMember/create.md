@@ -1,6 +1,10 @@
 ## [Create GroupMember](documentation/testing/test-cases/GroupMember/create.md)
 
-Cases covering group deletion.
+Cases covering GroupMember creation: joining a group, requesting membership,
+and inviting others to join.
+
+Accepting, rejecting and banning are status transitions and are covered in
+[Update GroupMember](documentation/testing/test-cases/GroupMember/update.md).
 
 ### Pre-requisites
 
@@ -10,13 +14,13 @@ Cases covering group deletion.
         - [ ] A Private Group named Public - Private Group
         - [ ] A Hidden Group named Public - Hidden Group
 - [ ] A Private Group, Private Group, has been created.
-    - [ ] The following subgroups of Public Group have been created:
-        - [ ] A Public Group named Private - Public Group
+    - [ ] The following subgroups of Private Group have been created:
+        - [ ] An Open Group named Private - Open Group
         - [ ] A Private Group named Private - Private Group
         - [ ] A Hidden Group named Private - Hidden Group
 - [ ] A Hidden Group, Hidden Group, has been created.
-    - [ ] The following subgroups of Public Group have been created:
-        - [ ] A Public Group named Hidden - Public Group
+    - [ ] The following subgroups of Hidden Group have been created:
+        - [ ] An Open Group named Hidden - Open Group
         - [ ] A Private Group named Hidden - Private Group
         - [ ] A Hidden Group named Hidden - Hidden Group
 
@@ -29,169 +33,271 @@ Cases covering group deletion.
 - [ ] User6 has been created and added as a member only of the top level groups.
 
 - [ ] User7 has been created and is a non-member of all groups.
+- [ ] User8 has been created, has a pending invitation to each group, and has not accepted.
+- [ ] User9 has been created and has been banned from each group.
+- [ ] A site moderator has been created.
 
 ### Smoke Test
 
-#### Top level Groups
+- [ ] As a non-member, I can join a Public Group.
+    - As User7:
+        - Visit Public Group and click "Join".
+            - **Confirm you become a confirmed member immediately.**
+            - **Confirm the group's posts become visible.**
 
-##### Public Groups
+- [ ] As a non-member, I can request membership of a Private Group.
+    - As User7:
+        - Visit Private Group and click "Request Membership".
+            - **Confirm the request is recorded as pending.**
+            - **Confirm the group's posts remain *not* visible.**
+    - As User2, a group moderator:
+        - Open the group's pending requests.
+            - **Confirm User7's request is listed.**
 
-- [ ] Non-members can join.
+- [ ] As a group moderator, I can invite a friend to join.
+    - As User2:
+        - Visit Hidden Group -> Members -> Invite and invite a non-member friend.
+            - **Confirm the invitation is recorded as pending.**
+    - As the invited user:
+        - **Confirm an invitation notification is received.**
+        - Accept the invitation.
+            - **Confirm you become a confirmed member.**
 
-- [ ] Group Moderators can invite non-member friends to join.
+### Manual Regression
 
-- [ ] Group Moderators can invite non-users to join using their email.
+Inviting a non-user by email cannot be automated by the Integration suite, so
+all email invitation cases live here.
 
-##### Private Groups
+#### Email invitations
 
-- [ ] Non-members can request membership.
+- [ ] As a group moderator, I can invite non-users to a Public Group by email.
+    - As User2:
+        - Visit Public Group -> Members -> Invite and enter an email address
+          that belongs to no account.
+            - **Confirm the invitation is recorded.**
+            - **Confirm an invitation email arrives at that address.**
+        - Follow the invitation link and register.
+            - **Confirm the new user lands as a member of Public Group.**
 
-- [ ] Group Moderators can accept or reject non-member membership requests.
+- [ ] As a group moderator, I can invite non-users to a Private Group by email.
+- [ ] As a group moderator, I can invite non-users to a Hidden Group by email.
+- [ ] As a group moderator, I can invite non-users to a Public subgroup of a Public Group by email.
+- [ ] As a group moderator, I can invite non-users to a Private subgroup of a Public Group by email.
+- [ ] As a group moderator, I can invite non-users to a Hidden subgroup of a Public Group by email.
+- [ ] As a group moderator, I can invite non-users to an Open subgroup of a Private Group by email.
+- [ ] As a group moderator, I can invite non-users to a Private subgroup of a Private Group by email.
+- [ ] As a group moderator, I can invite non-users to a Hidden subgroup of a Private Group by email.
+- [ ] As a group moderator, I can invite non-users to an Open subgroup of a Hidden Group by email.
+- [ ] As a group moderator, I can invite non-users to a Private subgroup of a Hidden Group by email.
+- [ ] As a group moderator, I can invite non-users to a Hidden subgroup of a Hidden Group by email.
 
-- [ ] Group Moderators can invite non-member friends to join.
+#### The join and invite interface
 
-- [ ] Group Moderators can invite non-users to join use their email.
+- [ ] As a non-member, the join control reflects the group type.
+    - As User7:
+        - Visit Public Group.
+            - **Confirm the control reads "Join".**
+        - Visit Private Group.
+            - **Confirm the control reads "Request Membership".**
+        - Visit a Public subgroup of Public Group.
+            - **Confirm the control reads "Join".**
 
-##### Hidden Groups
-
-- [ ] Group Moderators can invite non-member friends to join.
-
-- [ ] Group Moderators can invite non-users to join use their email.
-
-
+- [ ] As a group moderator, the invite control only suggests users I may invite.
+    - As User2:
+        - Visit Public Group -> Members -> Invite and begin typing a name.
+            - **Confirm the suggestion list is limited to your friends.**
+            - **Confirm existing members are not suggested.**
 
 ### Full Regression
 
+#### Basics
+
+- [ ] As an unauthenticated visitor, I cannot add a group member. (covered: integration)
+    - As unauthenticated user:
+        - Attempt to join Public Group.
+            - **Confirm the request is refused.**
+
+- [ ] As a user, a malformed or missing group is rejected. (covered: integration)
+    - As User7:
+        - Submit a join whose body groupId does not match the route.
+            - **Confirm the request is refused.**
+        - Attempt to join a group that doesn't exist.
+            - **Confirm a not found result.**
+
+- [ ] As an existing member, joining again is refused as a conflict. (covered: integration)
+    - As User3:
+        - Attempt to join Public Group again.
+            - **Confirm the request is refused as a conflict.**
+
 #### Top level Groups
 
 ##### Public Groups
 
-- [ ] Non-members can join.
-
-- [ ] Group Moderators can invite non-member friends to join.
-
-- [ ] Group Moderators can invite non-users to join using their email.
+- [ ] A non-member **can** add themselves as a confirmed member. (covered: integration)
+- [ ] A Group Moderator **can** invite a non-member. (covered: integration)
+- [ ] A Group Admin **can** invite a non-member. (covered: integration)
+- [ ] A plain Member **cannot** invite someone else. (covered: integration)
+- [ ] A banned member **cannot** add anyone, and is told the group is not found. (covered: integration)
+- [ ] A Group Moderator **can** accept or reject a non-member's membership request. (covered: integration)
 
 ##### Private Groups
 
-- [ ] Non-members can request membership.
-
-- [ ] Group Moderators can accept or reject non-member membership requests.
-
-- [ ] Group Moderators can invite non-member friends to join.
-
-- [ ] Group Moderators can invite non-users to join use their email.
+- [ ] A non-member **can** request membership, and the request is recorded as pending-requested. (covered: integration)
+- [ ] A Group Moderator **can** invite a non-member, and the invitation is recorded as pending-invited. (covered: integration)
+- [ ] A plain Member **cannot** invite someone else. (covered: integration)
+- [ ] A banned member **cannot** add anyone. (covered: integration)
+- [ ] A Group Moderator **can** accept or reject a non-member's membership request. (covered: integration)
 
 ##### Hidden Groups
 
-- [ ] Group Moderators can invite non-member friends to join.
-
-- [ ] Group Moderators can invite non-users to join use their email.
+- [ ] A Group Moderator **can** invite a non-member, and the invitation is recorded as pending-invited. (covered: integration)
+- [ ] A non-member **cannot** add themselves, and is told the group is not found because they cannot see it. (covered: integration)
+- [ ] A plain Member **cannot** invite someone else. (covered: integration)
+- [ ] A banned member **cannot** add anyone. (covered: integration)
+- [ ] A Group Moderator **can** accept or reject a non-member's membership request. (covered: integration)
 
 #### Subgroups of Public Groups
 
 ##### Public Subgroups of Public Groups
 
-- [ ] Non-members can join.
-
-- [ ] Parent Group Members can join.
-
-- [ ] Parent Group Admins can join.
-
-- [ ] Group Moderators can invite non-member friends to join.
-
-- [ ] Group Moderators can invite non-users to join using their email.
+- [ ] A non-member **can** add themselves as a confirmed member. (covered: integration)
+- [ ] A Parent Group Member **can** add themselves as a confirmed member. (covered: integration)
+- [ ] A Parent Group Admin **can** add themselves as an admin. (covered: integration)
+- [ ] A Group Moderator **can** invite a non-member (pending-invited). (covered: integration)
+- [ ] A Parent Group Member **cannot** add someone else. (covered: integration)
 
 ##### Private Subgroups of Public Groups
 
-- [ ] Non-members can request membership.
+- [ ] A non-member **can** request membership (pending-requested). (covered: integration)
+- [ ] A Parent Group Member **can** request membership (pending-requested). (covered: integration)
+- [ ] A Parent Group Admin **can** add themselves as an admin. (covered: integration)
+- [ ] A Group Moderator **can** invite a non-member (pending-invited). (covered: integration)
+- [ ] A Group Moderator **can** accept or reject a non-member's membership request. (covered: integration)
 
-- [ ] Parent Group Members can request membership.
+##### Hidden Subgroups of Public Groups
 
-- [ ] Parent Group Admins can join.
-
-- [ ] Group Moderators can accept or reject non-member membership requests.
-
-- [ ] Group Moderators can invite non-member friends to join.
-
-- [ ] Group Moderators can invite non-users to join using their email.
-
-###### Hidden Subgroups of Public Groups
-
-- [ ] Parent Group Admins can join.
-
-- [ ] Group Moderators can invite non-member friends to join.
-
-- [ ] Group Moderators can invite non-users to join using their email.
+- [ ] A Parent Group Admin **can** add themselves as an admin. (covered: integration)
+- [ ] A Group Moderator **can** invite a non-member (pending-invited). (covered: integration)
+- [ ] A Parent Group Member **cannot** add themselves -- a plain hidden subgroup is invisible to parent members. (covered: integration)
+- [ ] A non-member **cannot** add themselves. (covered: integration)
 
 #### Subgroups of Private Groups
 
-##### Public Subgroups of Private Groups
+##### Open Subgroups of Private Groups (PRIVATE-OPEN)
 
-- [ ] Non-members can request membership.
-
-- [ ] Parent Group Members can join.
-
-- [ ] Parent Group Admins can join.
-
-- [ ] Group Moderators can accept or reject non-member membership requests.
-
-- [ ] Group Moderators can invite non-member friends to join.
-
-- [ ] Group Moderators can invite non-users to join using their email.
+- [ ] A Parent Group Member **can** add themselves as a confirmed member. (covered: integration)
+- [ ] A non-parent non-member **can** request membership (pending-requested). (covered: integration)
+- [ ] A Parent Group Admin **can** add themselves as an admin. (covered: integration)
+- [ ] A Group Moderator **can** invite a non-member (pending-invited). (covered: integration)
+- [ ] A Group Moderator **can** accept or reject a non-member's membership request. (covered: integration)
 
 ##### Private Subgroups of Private Groups
 
-- [ ] Non-members can request membership.
+- [ ] A non-member **can** request membership (pending-requested). (covered: integration)
+- [ ] A Parent Group Member **can** request membership (pending-requested). (covered: integration)
+- [ ] A Parent Group Admin **can** add themselves as an admin. (covered: integration)
+- [ ] A Group Moderator **can** invite a non-member (pending-invited). (covered: integration)
+- [ ] A Group Moderator **can** accept or reject a non-member's membership request. (covered: integration)
 
-- [ ] Parent Group Members can request membership.
+##### Hidden Subgroups of Private Groups
 
-- [ ] Parent Group Admins can join.
-
-- [ ] Group Moderators can accept or reject non-member membership requests.
-
-- [ ] Group Moderators can invite non-member friends to join.
-
-- [ ] Group Moderators can invite non-users to join using their email.
-
-###### Hidden Subgroups of Private Groups
-
-- [ ] Parent Group Admins can join.
-
-- [ ] Group Moderators can invite non-member friends to join.
-
-- [ ] Group Moderators can invite non-users to join using their email.
+- [ ] A Parent Group Admin **can** add themselves as an admin. (covered: integration)
+- [ ] A Group Moderator **can** invite a non-member (pending-invited). (covered: integration)
 
 #### Subgroups of Hidden Groups
 
-##### Public Subgroups of Hidden Groups
+##### Open Subgroups of Hidden Groups (HIDDEN-OPEN)
 
-- [ ] Parent Group Members can join.
+- [ ] A Parent Group Member **can** add themselves as a confirmed member. (covered: integration)
+- [ ] A Parent Group Admin **can** add themselves as an admin. (covered: integration)
+- [ ] A Group Moderator **can** invite a non-member (pending-invited). (covered: integration)
+- [ ] A non-parent non-member **cannot** add themselves -- they cannot see a hidden-open subgroup. (covered: integration)
 
-- [ ] Parent Group Admins can join.
+##### Private Subgroups of Hidden Groups (HIDDEN-PRIVATE)
 
-- [ ] Group Moderators can invite non-member friends to join.
+- [ ] A Parent Group Member **can** request membership (pending-requested). (covered: integration)
+- [ ] A Parent Group Admin **can** add themselves as an admin. (covered: integration)
+- [ ] A Group Moderator **can** invite a non-member (pending-invited). (covered: integration)
+- [ ] A Group Moderator **can** accept or reject a non-member's membership request. (covered: integration)
 
-- [ ] Group Moderators can invite non-users to join using their email.
+##### Hidden Subgroups of Hidden Groups
 
-##### Private Subgroups of Hidden Groups
+- [ ] A Parent Group Admin **can** add themselves as an admin. (covered: integration)
+- [ ] A Group Moderator **can** invite a non-member (pending-invited). (covered: integration)
+- [ ] A Group Moderator **can** accept or reject a non-member's membership request. (covered: integration)
 
-- [ ] Parent Group Members can request membership.
+#### Field presence and format
 
-- [ ] Parent Group Admins can join.
+- [ ] As a user, disallowed and malformed fields are rejected. (covered: integration)
+    - As User2, a group moderator:
+        - Submit an invitation carrying a 'createdDate' field.
+            - **Confirm the request is refused.**
+        - Submit an invitation carrying an 'updatedDate' field.
+            - **Confirm the request is refused.**
+        - Submit an invitation carrying an 'entranceAnswers' field.
+            - **Confirm the request is refused.**
+        - Submit an invitation with no 'status'.
+            - **Confirm the request is refused.**
+        - Submit an invitation with no 'userId'.
+            - **Confirm the request is refused.**
+        - Submit an invitation with an out-of-enum 'status' value.
+            - **Confirm the request is refused.**
+        - Submit an invitation with an out-of-enum 'role' value.
+            - **Confirm the request is refused.**
+        - Submit an invitation with a well-formed but non-existent userId.
+            - **Confirm the request is refused as userId not found.**
+        - Submit an invitation with a malformed (non-UUID) userId.
+            - **Confirm the request is refused as userId invalid.**
 
-- [ ] Group Moderators can accept or reject non-member membership requests.
+#### Status and role rules by group type
 
-- [ ] Group Moderators can invite non-member friends to join.
+- [ ] As a user, self-joins and invitations must carry the right status and role. (covered: integration)
+    - As User7, self-joining an OPEN group:
+        - Submit with status 'pending-invited'.
+            - **Confirm the request is refused as an invalid status.**
+        - Submit with status 'pending-requested'.
+            - **Confirm the request is refused as an invalid status.**
+        - Submit with role 'moderator'.
+            - **Confirm the request is refused as an invalid role.**
+        - Submit with role 'admin'.
+            - **Confirm the request is refused as an invalid role.**
+    - As User2, inviting to an OPEN group:
+        - Submit with status 'member'.
+            - **Confirm the request is refused as an invalid status.**
+        - Submit with status 'pending-requested'.
+            - **Confirm the request is refused as an invalid status.**
+        - Submit with role 'moderator'.
+            - **Confirm the request is refused as an invalid role.**
+    - As User7, self-requesting a PRIVATE group:
+        - Submit with status 'member'.
+            - **Confirm the request is refused as an invalid status.**
+        - Submit with status 'pending-invited'.
+            - **Confirm the request is refused as an invalid status.**
+    - As User2, inviting to a PRIVATE group:
+        - Submit with status 'pending-requested'.
+            - **Confirm the request is refused as an invalid status.**
+    - As User2, inviting to a HIDDEN group:
+        - Submit with status 'member'.
+            - **Confirm the request is refused as an invalid status.**
 
-- [ ] Group Moderators can invite non-users to join using their email.
+#### Status and role rules for subgroups
 
-###### Hidden Subgroups of Hidden Groups
+- [ ] As a parent admin, my self-add into a subgroup must carry the right status and role. (covered: integration)
+    - As User4, a parent group admin:
+        - Self-add with role 'member'.
+            - **Confirm the request is refused as an invalid role.**
+        - Self-add with status 'pending-invited'.
+            - **Confirm the request is refused as an invalid status.**
+        - Attempt to add someone else.
+            - **Confirm the request is refused as an invalid userId.**
 
-- [ ] Parent Group Admins can join.
-
-- [ ] Group Moderators can accept or reject non-member membership requests.
-
-- [ ] Group Moderators can invite non-member friends to join.
-
-- [ ] Group Moderators can invite non-users to join using their email.
+- [ ] As a subgroup joiner, my status must match the subgroup type. (covered: integration)
+    - As User6, a parent group member joining a PRIVATE-OPEN subgroup:
+        - Submit with status 'pending-requested'.
+            - **Confirm the request is refused as an invalid status.**
+    - As User7, a non-parent requesting a PRIVATE-OPEN subgroup:
+        - Submit with status 'member'.
+            - **Confirm the request is refused as an invalid status.**
+    - As User6, a parent group member joining a HIDDEN-OPEN subgroup:
+        - Submit with status 'pending-invited'.
+            - **Confirm the request is refused as an invalid status.**

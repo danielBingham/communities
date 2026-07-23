@@ -6,7 +6,8 @@ password flow, etc.
 ### Pre-requisites
 
 - [ ] User1 has been registered.
-
+- [ ] User2 has been registered and has been banned by a site moderator.
+- [ ] An email client (mailinator) is available for the addresses under test.
 
 ### Smoke Test
 
@@ -64,6 +65,49 @@ password flow, etc.
         - Attempt to log in with the new password.
             - **Confirm success.**
 
+- [ ] As a user, requesting a reset for an unknown email doesn't reveal whether an account exists.
+    - As unauthenticated user:
+        - Click "Forgot password?" and enter an email not associated with any account.
+            - **Confirm the same success/confirmation message is shown as for a known email.**
+            - **Confirm no reset email is received at that address.**
+
+#### Multifactor Authentication
+
+- [ ] As a user with MFA enabled, I should be required to enter a TOPT token when logging in. (covered: integration)
+    - As User1:
+        - Log out.
+        - Log in with username and password.
+            - **Confirm presented with MFA screen.**
+        - Enter current MFA token.
+            - **Confirm log in success.**
+
+- [ ] As a user with MFA enabled, I should be able to use one of my recovery codes in place of a TOPT token.
+    - As User1:
+        - Log out.
+        - Log in with username and password.
+            - **Confirm presented with an MFA screen.**
+        - Switch to recovery code view.
+        - Enter an invalid recovery code.
+            - **Confirm error.**
+        - Enter recovery code.
+            - **Confirm log in success.**
+            - **Confirm email notification of recovery code usage recieved.**
+
+- [ ] As a user who has entered my password but not my MFA token, I cannot access authenticated content. (covered: integration)
+    - As User1:
+        - Log out, then log in with email and password so the MFA screen is shown.
+        - Without entering a token, attempt to navigate directly to an authenticated page (e.g. the home feed or a group URL).
+            - **Confirm authenticated content is not shown and I remain on the MFA screen.**
+        - Attempt an authenticated action (e.g. loading my feed) via the app.
+            - **Confirm the action is not permitted while MFA is pending.**
+
+### Manual Regression
+
+#### Reset Password
+
+All of the reset password cases require access to an email inbox, so none of
+them can be covered by the Integration suite.
+
 - [ ] As a user with MFA enabled, resetting my password should still require TOPT token to login.
     - As User1:
         - Log out.
@@ -95,13 +139,8 @@ password flow, etc.
         - Enter User1's email but do not open the link yet.
         - Wait longer than 30 minutes, then follow the link in the reset email.
             - **Confirm the link is rejected with an invalid/expired-token error.**
-        - Request a new reset and confirm a fresh link works.
-
-- [ ] As a user, requesting a reset for an unknown email doesn't reveal whether an account exists.
-    - As unauthenticated user:
-        - Click "Forgot password?" and enter an email not associated with any account.
-            - **Confirm the same success/confirmation message is shown as for a known email.**
-            - **Confirm no reset email is received at that address.**
+        - Request a new reset.
+            - **Confirm a fresh link works.**
 
 - [ ] As a user, resetting my password logs out all of my other sessions.
     - As User1:
@@ -132,25 +171,8 @@ password flow, etc.
 
 #### Multifactor Authentication
 
-- [ ] As a user with MFA enabled, I should be required to enter a TOPT token when logging in.
-    - As User1:
-        - Log out.
-        - Log in with username and password.
-            - **Confirm presented with MFA screen.**
-        - Enter current MFA token.
-            - **Confirm log in success.**
-
-- [ ] As a user with MFA enabled, I should be able to use one of my recovery codes in place of a TOPT token.
-    - As User1:
-        - Log out.
-        - Log in with username and password.
-            - **Confirm presented with an MFA screen.**
-        - Switch to recovery code view.
-        - Enter an invalid recovery code.
-            - **Confirm error.**
-        - Enter recovery code.
-            - **Confirm log in success.**
-            - **Confirm email notification of recovery code usage recieved.**
+All of the MFA cases below require an MFA device (or a generated TOPT secret)
+and so cannot be covered by the Integration suite.
 
 - [ ] As a user with MFA enabled, I should be rate limited when I enter too many invalid TOPT tokens.
     - As User1:
@@ -197,14 +219,6 @@ password flow, etc.
         - From the UserMenu select "Multifactor Authentication".
         - Click "Disabled Multifactor Authentication".
             - **Confirm email notification of MFA change recieved.**
-
-- [ ] As a user who has entered my password but not my MFA token, I cannot access authenticated content.
-    - As User1:
-        - Log out, then log in with email and password so the MFA screen is shown.
-        - Without entering a token, attempt to navigate directly to an authenticated page (e.g. the home feed or a group URL).
-            - **Confirm authenticated content is not shown and I remain on the MFA screen.**
-        - Attempt an authenticated action (e.g. loading my feed) via the app.
-            - **Confirm the action is not permitted while MFA is pending.**
 
 - [ ] As a user at the MFA screen, I can cancel and return to an unauthenticated state.
     - As User1:
@@ -272,10 +286,10 @@ password flow, etc.
 - [ ] As a user, I get temporarily locked out after too many attempts. (covered: integration)
     - As User1:
         - Attempt to login with the wrong pasword 10 times.
-        - Confirm locked out.
+            - **Confirm locked out.**
         - Wait 15 minutes.
         - Login with correct password.
-        - Confirm logged in.
+            - **Confirm logged in.**
 
 - [ ] As a user, I can only log in with the correct password. (covered: integration)
     - As unauthenticated user:
@@ -288,12 +302,75 @@ password flow, etc.
         - Attempt to log in with User1's email and incorrect password.
             - **Confirm both failures give same message.**
 
-#### Reset Password
+- [ ] As a user, my email is normalized before I am authenticated. (covered: integration)
+    - As unauthenticated user:
+        - Log in using User1's email with different capitalisation and surrounding whitespace.
+            - **Confirm login succeeds.**
 
-All of the reset password tests are in the Smoke Test, since they require email
-access they cannot yet be automated.
+- [ ] As a user, I must supply a password when I supply an email. (covered: integration)
+    - As unauthenticated user:
+        - Submit the login form with User1's email and no password at all.
+            - **Confirm login is rejected.**
+        - Submit with User1's email and an empty password.
+            - **Confirm login is rejected.**
+        - Submit with User1's email and a password of only whitespace.
+            - **Confirm login is rejected.**
 
-### Multifactor Authentication
+- [ ] As a user, an authentication attempt with neither an email nor a token is rejected. (covered: integration)
+    - As unauthenticated user:
+        - Submit an authentication request carrying neither an email nor a token.
+            - **Confirm the request is rejected.**
 
-All of the MFA tests are in the Smoke Test.  Since they require an MFA device.
-They cannot yet be automated.
+- [ ] As a banned user, I cannot log in. (covered: integration)
+    - As User2 (banned):
+        - Attempt to log in with the correct email and password.
+            - **Confirm login is refused.**
+
+#### Session
+
+- [ ] As a user, my session reports who I am. (covered: integration)
+    - As User1:
+        - Log in and load the app.
+            - **Confirm the session identifies User1 and exposes the full user record.**
+            - **Confirm the session never contains a password or multifactor secret.**
+
+- [ ] As an unauthenticated visitor, my session is empty. (covered: integration)
+    - As unauthenticated user:
+        - Load the app without logging in.
+            - **Confirm the session is null.**
+        - Load the app with no session credentials at all (a fresh private window).
+            - **Confirm the session is null.**
+
+- [ ] As a user, my session is emptied when I log out. (covered: integration)
+    - As User1:
+        - Log in, then log out.
+            - **Confirm the session is null after logging out.**
+            - **Confirm the previous session token is no longer accepted.**
+
+- [ ] As a user mid-MFA-login, my session is reported as pending. (covered: integration)
+    - As User1 (with MFA enabled):
+        - Log in with email and password but do not enter a token.
+            - **Confirm the session is reported as pending rather than authenticated.**
+
+- [ ] As a user, logging out succeeds even when I was never logged in. (covered: integration)
+    - As unauthenticated user:
+        - Trigger a log out without having logged in.
+            - **Confirm the request succeeds rather than erroring.**
+
+#### Multifactor Authentication
+
+- [ ] As a user, MFA verification is refused when I have not logged in. (covered: integration)
+    - As unauthenticated user:
+        - Submit an MFA verification without having entered an email and password first.
+            - **Confirm the request is rejected.**
+
+- [ ] As a user, MFA verification is refused when I omit the token. (covered: integration)
+    - As User1 (with MFA enabled):
+        - Log in with email and password to reach the MFA screen.
+        - Submit the verification with no token supplied.
+            - **Confirm the request is rejected.**
+
+- [ ] As a user who is not mid-MFA-setup, verification is refused. (covered: integration)
+    - As User1 (fully logged in, not setting up MFA):
+        - Submit an MFA setup verification.
+            - **Confirm the request is rejected.**

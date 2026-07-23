@@ -8,37 +8,66 @@ Cases covering who can and cannot see post comments.
 - [ ] User2 has been created and is friends with User1.
 - [ ] User3 has been created and is friends with User2, but not User1.
 
-### Cases
+### Smoke Test
 
-- [ ] Comments on public posts are always viewable.
-    1. As User1, create a public post.
-    2. As User2, comment on User1's post.
-    3. As User3, attempt to view User2's comment by direct link.  Confirm visible.
+- [ ] As a user, comments on public posts are always viewable.
+    - As User1:
+        - Create a public post.
+    - As User2:
+        - Comment on User1's post.
+    - As User3:
+        - Attempt to view User2's comment by direct link.
+            - **Confirm visible.**
 
-- [ ] Comments on private posts are only visible by the post author's friends.
-    1. As User1, create a private post.
-    2. As User2, comment on User1's post.
-    3. As User3, attempt to view User2's comment by direct link.  Confirm not visible.
+- [ ] As a user, comments on private posts are only visible to the post author's friends.
+    - As User1:
+        - Create a private post.
+    - As User2:
+        - Comment on User1's post.
+    - As User3:
+        - Attempt to view User2's comment by direct link.
+            - **Confirm not visible.**
 
-- [ ] Users who comment on public posts of those they are not friends with
-        lose visibility to those comments if the visibilty of the post changes to
-        private.
-    1. As User1, create public post.
-    2. As User3, comment on User1's post.
-    3. As User1, change visibility to private.
-    4. As User2, comment on User1's post.
-    5. As User3, confirm no comment notification is recieved.
-    6. As User3, attempt to view User2's comment by direct link.  Confirm not visible.
+### Manual Regression
+
+- [ ] As a user, I lose visibility of comments when a post's visibility changes to private.
+    - As User1:
+        - Create a public post.
+    - As User3:
+        - Comment on User1's post.
+    - As User1:
+        - Change visibility to private.
+    - As User2:
+        - Comment on User1's post.
+    - As User3:
+        - **Confirm no comment notification is recieved.**
+        - Attempt to view User2's comment by direct link.
+            - **Confirm not visible.**
 
 #### Mentions
 
-- [ ] Users mentioned on posts they can see should be notified of the mention.
-    1. As User1, create a public post.
-    2. As User2, comment on User1's post and mention User3.
-    3. As User3, confirm mention notification. Click through notification and confirm comment is visible.
+- [ ] As a user, I am notified when mentioned on a post I can see.
+    - As User1:
+        - Create a public post.
+    - As User2:
+        - Comment on User1's post and mention User3.
+    - As User3:
+        - **Confirm mention notification received.**
+        - Click through the notification.
+            - **Confirm comment is visible.**
 
-- [ ] Users mentioned on posts they cannot see should not be notified of the mention.
-    1. As User1, create a private post.
-    2. As User2, comment on User1's post and mention User3.
-    3. As User3, confirm no mention notification.
-    4. As User3, attempt to visit direct link for comment. confirm not visible.
+- [ ] As a user, I am not notified when mentioned on a post I cannot see.
+    - As User1:
+        - Create a private post.
+    - As User2:
+        - Comment on User1's post and mention User3.
+    - As User3:
+        - **Confirm no mention notification.**
+        - Attempt to visit direct link for the comment.
+            - **Confirm not visible.**
+
+### Full Regression
+
+The post comment endpoints are not yet covered by the Integration suite.  All
+comment read cases are defined in the Smoke Test and Manual Regression
+sections above.
