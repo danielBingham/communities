@@ -378,7 +378,7 @@ module.exports = function(core) {
     const groupSubscriptionController = new GroupSubscriptionController(core)
 
     router.get('/group/:groupId/subscription', rateLimit(core, 240), function(request, response, next) {
-        groupSubscriptionController.getGroupSubscriptions(request, response).catch(function(error) {
+        groupSubscriptionController.getGroupSubscription(request, response).catch(function(error) {
             next(error)
         })
     })
