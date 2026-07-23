@@ -295,6 +295,41 @@ const dictionary = {
   },
 
   // ==========================================================================
+  // user-unconfirmed -- A user who has registered but has NOT confirmed their
+  // email address, so their `status` is still 'unconfirmed'.
+  //
+  // Why this account exists: PermissionService.can() refuses every action for
+  // any user whose status is not exactly 'confirmed'.  A *banned* user can
+  // never reach that guard through the API (AuthenticationService rejects them
+  // at login, so they can't get a session), but an *unconfirmed* user CAN --
+  // only 'banned' is checked during authentication.  This fixture is what makes
+  // the `status !== 'confirmed'` branch of can() reachable from an integration
+  // test.
+  //
+  // Manual setup (run once before running the tests):
+  //   1. Register "Test User Unconfirmed" (test-user-unconfirmed /
+  //   communities-test-user-unconfirmed@mailinator.com) through the app and set
+  //   the account's password to match `password` below.
+  //   2. Do NOT confirm the email address.  Newly registered accounts default to
+  //   status 'unconfirmed', which is exactly what this fixture needs.
+  //   3. Verify (or force) the status directly in the database:
+  //
+  //        UPDATE users
+  //           SET status = 'unconfirmed'
+  //         WHERE email = 'communities-test-user-unconfirmed@mailinator.com';
+  //
+  //   Leave the account unconfirmed permanently -- nothing else depends on it,
+  //   and confirming it would silently turn the tests that use it into
+  //   duplicates of the ordinary confirmed-user cases.
+  // ==========================================================================
+  'user-unconfirmed': {
+    name: 'Test User Unconfirmed',
+    username: 'test-user-unconfirmed',
+    email: 'communities-test-user-unconfirmed@mailinator.com',
+    password: 'PasswordPassword',
+  },
+
+  // ==========================================================================
   // user-site-moderator -- A SITE MODERATOR.
   //
   // Manual setup (run once before running the tests):

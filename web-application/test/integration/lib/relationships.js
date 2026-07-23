@@ -77,10 +77,47 @@ const deleteRelationship = async function(session, userId, relationId) {
     return response.content
 }
 
+// Fetch a single relationship and return the raw response (without throwing on
+// non-2xx) so callers can assert on the status.  This is the endpoint under
+// test in the getUserRelationship suite.
+//
+// NOTE: the lookup behind this route is symmetric -- it matches
+// (user_id, friend_id) in EITHER order -- so `userId` and `relationId` are
+// interchangeable in the path.  Tests exercise both orderings deliberately.
+const getUserRelationship = async function(session, userId, relationId) {
+    return await fetchEndpoint('GET', `/user/${encodeURIComponent(userId)}/relationship/${encodeURIComponent(relationId)}`, { session: session })
+}
+
+// Teardown helper: guarantee that no relationship of any kind exists between
+// two users, whichever of them created it.
+//
+// `deleteRelationship` above is only safe when the caller is allowed to delete
+// the relationship.  A *block* may only be deleted by the blocker, so a
+// teardown that always deletes from one fixed side will 403 when the other side
+// did the blocking.  This attempts the delete from both sides and swallows the
+// expected teardown statuses (404 nothing-to-delete, 403 not-mine-to-delete),
+// which makes it safe to call in a `before` to normalize leftover state from an
+// earlier suite as well as in an `after`.
+const clearRelationship = async function(sessionA, userIdA, sessionB, userIdB) {
+    const sides = [
+        { session: sessionA, userId: userIdA, relationId: userIdB },
+        { session: sessionB, userId: userIdB, relationId: userIdA }
+    ]
+
+    for ( const side of sides ) {
+        const response = await fetchEndpoint('DELETE', `/user/${encodeURIComponent(side.userId)}/relationship/${encodeURIComponent(side.relationId)}`, { session: side.session })
+        if ( ! response.ok && response.status !== 404 && response.status !== 403 ) {
+            throw new Error(`Failed to clear relationship between User(${side.userId}) and User(${side.relationId}): ${response.status} ${JSON.stringify(response.content)}`)
+        }
+    }
+}
+
 module.exports = {
     sendFriendRequest: sendFriendRequest,
     acceptFriendRequest: acceptFriendRequest,
     makeFriends: makeFriends,
     blockUser: blockUser,
-    deleteRelationship: deleteRelationship
+    deleteRelationship: deleteRelationship,
+    getUserRelationship: getUserRelationship,
+    clearRelationship: clearRelationship
 }
