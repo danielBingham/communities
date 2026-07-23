@@ -7,17 +7,17 @@ Cases covering searching or browsing for GroupMembers.
 - [ ] A Public Group, Public Group, has been created.
     - [ ] The following subgroups of Public Group have been created:
         - [ ] A Public Group named Public - Public Group
-        - [ ] A Private Group named Public - Private Group 
+        - [ ] A Private Group named Public - Private Group
         - [ ] A Hidden Group named Public - Hidden Group
 - [ ] A Private Group, Private Group, has been created.
     - [ ] The following subgroups of Public Group have been created:
         - [ ] A Public Group named Private - Public Group
-        - [ ] A Private Group named Private - Private Group 
+        - [ ] A Private Group named Private - Private Group
         - [ ] A Hidden Group named Private - Hidden Group
 - [ ] A Hidden Group, Hidden Group, has been created.
     - [ ] The following subgroups of Public Group have been created:
         - [ ] A Public Group named Hidden - Public Group
-        - [ ] A Private Group named Hidden - Private Group 
+        - [ ] A Private Group named Hidden - Private Group
         - [ ] A Hidden Group named Hidden - Hidden Group
 
 - [ ] User1 has been created and added as an admin of each group.
@@ -30,7 +30,44 @@ Cases covering searching or browsing for GroupMembers.
 
 - [ ] User7 has been created and is a non-member of all groups.
 
-### Cases
+### Smoke Test
+
+#### Top level Groups
+
+##### Public Groups
+
+- [ ] Non-members can query Members.
+- [ ] Non-members can query Administrators.
+- [ ] Members can query Members.
+- [ ] Members can query Administrators.
+- [ ] Group Moderators can query Invitations.
+- [ ] Group Moderators can query Banned Users.
+- [ ] Group Moderators can query Email Invitations.
+
+##### Private Groups
+
+- [ ] Non-members **cannot** query Members.
+- [ ] Non-members **cannot** query Administrators.
+- [ ] Members can query Members.
+- [ ] Members can query Administrators.
+- [ ] Group Moderators can query Invitations.
+- [ ] Group Moderators can query Requests.
+- [ ] Group Moderators can query Banned Users.
+- [ ] Group Moderators can query Email Invitations.
+
+##### Hidden Groups
+
+- [ ] Non-members **cannot** query Members.
+- [ ] Non-members **cannot** query Administrators.
+- [ ] Members can query Members.
+- [ ] Members can query Administrators.
+- [ ] Group Moderators can query Invitations.
+- [ ] Group Moderators can query Requests.
+- [ ] Group Moderators can query Banned Users.
+- [ ] Group Moderators can query Email Invitations.
+
+
+### Full Regression
 
 #### Top level Groups
 

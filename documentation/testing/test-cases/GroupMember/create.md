@@ -7,17 +7,17 @@ Cases covering group deletion.
 - [ ] A Public Group, Public Group, has been created.
     - [ ] The following subgroups of Public Group have been created:
         - [ ] A Public Group named Public - Public Group
-        - [ ] A Private Group named Public - Private Group 
+        - [ ] A Private Group named Public - Private Group
         - [ ] A Hidden Group named Public - Hidden Group
 - [ ] A Private Group, Private Group, has been created.
     - [ ] The following subgroups of Public Group have been created:
         - [ ] A Public Group named Private - Public Group
-        - [ ] A Private Group named Private - Private Group 
+        - [ ] A Private Group named Private - Private Group
         - [ ] A Hidden Group named Private - Hidden Group
 - [ ] A Hidden Group, Hidden Group, has been created.
     - [ ] The following subgroups of Public Group have been created:
         - [ ] A Public Group named Hidden - Public Group
-        - [ ] A Private Group named Hidden - Private Group 
+        - [ ] A Private Group named Hidden - Private Group
         - [ ] A Hidden Group named Hidden - Hidden Group
 
 - [ ] User1 has been created and added as an admin of each group.
@@ -30,7 +30,37 @@ Cases covering group deletion.
 
 - [ ] User7 has been created and is a non-member of all groups.
 
-### Cases
+### Smoke Test
+
+#### Top level Groups
+
+##### Public Groups
+
+- [ ] Non-members can join.
+
+- [ ] Group Moderators can invite non-member friends to join.
+
+- [ ] Group Moderators can invite non-users to join using their email.
+
+##### Private Groups
+
+- [ ] Non-members can request membership.
+
+- [ ] Group Moderators can accept or reject non-member membership requests.
+
+- [ ] Group Moderators can invite non-member friends to join.
+
+- [ ] Group Moderators can invite non-users to join use their email.
+
+##### Hidden Groups
+
+- [ ] Group Moderators can invite non-member friends to join.
+
+- [ ] Group Moderators can invite non-users to join use their email.
+
+
+
+### Full Regression
 
 #### Top level Groups
 
