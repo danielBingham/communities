@@ -18,9 +18,10 @@
  *
  ******************************************************************************/
 
-module.exports = {
-    ControllerError: require('./ControllerError'),
-    NotAuthenticatedError: require('./NotAuthenticatedError'),
-    NotAuthorizedError: require('./NotAuthorizedError'),
-    NotFoundError: require('./NotFoundError')
+const ControllerError = require('./ControllerError')
+
+module.exports = class NotAuthenticatedError extends ControllerError {
+    constructor(logMessage, data) {
+        super(401, 'not-authenticated', logMessage, `You must be authenticated to do that.`, data)
+    }
 }

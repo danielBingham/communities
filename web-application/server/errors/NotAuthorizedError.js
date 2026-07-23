@@ -18,9 +18,10 @@
  *
  ******************************************************************************/
 
-module.exports = {
-    ControllerError: require('./ControllerError'),
-    NotAuthenticatedError: require('./NotAuthenticatedError'),
-    NotAuthorizedError: require('./NotAuthorizedError'),
-    NotFoundError: require('./NotFoundError')
+const ControllerError = require('./ControllerError')
+
+module.exports = class NotAuthorizedError extends ControllerError {
+    constructor(logMessage, publicMessage, data) {
+        super(403, 'not-authorized', logMessage,  ( publicMessage ? publicMessage : `You are not authorized to perform that action on that resource.`), data)
+    }
 }
