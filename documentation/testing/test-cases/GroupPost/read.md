@@ -30,7 +30,33 @@ Cases covering GroupPost reading.  Who can view the posts in a group?
 
 - [ ] User7 has been created and is a non-member of all groups.
 
-### Cases
+### Smoke Test
+
+#### Top level Groups
+
+##### Public Groups
+
+- [ ] Non-members can view posts.
+- [ ] Members can view posts.
+- [ ] Group Moderators can view posts.
+- [ ] Group Admins can view posts.
+
+##### Private Groups
+
+- [ ] Non-members **cannot** view posts.
+- [ ] Members can view posts.
+- [ ] Group Moderators can view posts.
+- [ ] Group Admins can view posts.
+
+##### Hidden Groups
+
+- [ ] Non-members **cannot** view posts.
+- [ ] Members can view posts.
+- [ ] Group Moderators can view posts.
+- [ ] Group Admins can view posts.
+
+
+### Full Regression
 
 #### Top level Groups
 

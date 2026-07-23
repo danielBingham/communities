@@ -7,17 +7,17 @@ Cases covering GroupModeration creation.  Who can flag the posts in a group for 
 - [ ] A Public Group, Public Group, has been created.
     - [ ] The following subgroups of Public Group have been created:
         - [ ] A Public Group named Public - Public Group
-        - [ ] A Private Group named Public - Private Group 
+        - [ ] A Private Group named Public - Private Group
         - [ ] A Hidden Group named Public - Hidden Group
 - [ ] A Private Group, Private Group, has been created.
     - [ ] The following subgroups of Public Group have been created:
         - [ ] A Public Group named Private - Public Group
-        - [ ] A Private Group named Private - Private Group 
+        - [ ] A Private Group named Private - Private Group
         - [ ] A Hidden Group named Private - Hidden Group
 - [ ] A Hidden Group, Hidden Group, has been created.
     - [ ] The following subgroups of Public Group have been created:
         - [ ] A Public Group named Hidden - Public Group
-        - [ ] A Private Group named Hidden - Private Group 
+        - [ ] A Private Group named Hidden - Private Group
         - [ ] A Hidden Group named Hidden - Hidden Group
 
 - [ ] User1 has been created and added as an admin of each group.
@@ -30,7 +30,33 @@ Cases covering GroupModeration creation.  Who can flag the posts in a group for 
 
 - [ ] User7 has been created and is a non-member of all groups.
 
-### Cases
+### Smoke Test
+
+#### Top level Groups
+
+##### Public Groups
+
+- [ ] Non-members can flag posts.
+- [ ] Members can flag posts.
+- [ ] Group Moderators can flag posts.
+- [ ] Group Admins can flag posts.
+
+##### Private Groups
+
+- [ ] Non-members **cannot** flag posts.
+- [ ] Members can flag posts.
+- [ ] Group Moderators can flag posts.
+- [ ] Group Admins can flag posts.
+
+##### Hidden Groups
+
+- [ ] Non-members **cannot** flag posts.
+- [ ] Members can flag posts.
+- [ ] Group Moderators can flag posts.
+- [ ] Group Admins can flag posts.
+
+
+### Full Regresion
 
 #### Top level Groups
 
@@ -61,7 +87,7 @@ Cases covering GroupModeration creation.  Who can flag the posts in a group for 
 
 - [ ] Non-members can flag posts.
 - [ ] Members can flag posts.
-- [ ] Parent Group Members can flag posts. 
+- [ ] Parent Group Members can flag posts.
 - [ ] Parent Group Admins can flag posts.
 - [ ] Group Moderators can flag posts.
 - [ ] Group Admins can flag posts.
@@ -69,7 +95,7 @@ Cases covering GroupModeration creation.  Who can flag the posts in a group for 
 ##### Private Subgroups of Public Groups
 
 - [ ] Non-members **cannot** flag posts.
-- [ ] Parent Group Members **cannot** flag posts. 
+- [ ] Parent Group Members **cannot** flag posts.
 - [ ] Parent Group Admins **cannot** flag posts.
 - [ ] Members can flag posts.
 - [ ] Group Moderators can flag posts.
@@ -78,7 +104,7 @@ Cases covering GroupModeration creation.  Who can flag the posts in a group for 
 ###### Hidden Subgroups of Public Groups
 
 - [ ] Non-members **cannot** flag posts.
-- [ ] Parent Group Members **cannot** flag posts. 
+- [ ] Parent Group Members **cannot** flag posts.
 - [ ] Parent Group Admins **cannot** flag posts.
 - [ ] Members can flag posts.
 - [ ] Group Moderators can flag posts.
@@ -89,7 +115,7 @@ Cases covering GroupModeration creation.  Who can flag the posts in a group for 
 ##### Public Subgroups of Private Groups
 
 - [ ] Non-members **cannot** flag posts.
-- [ ] Parent Group Members can flag posts. 
+- [ ] Parent Group Members can flag posts.
 - [ ] Parent Group Admins can flag posts.
 - [ ] Members can flag posts.
 - [ ] Group Moderators can flag posts.
@@ -98,7 +124,7 @@ Cases covering GroupModeration creation.  Who can flag the posts in a group for 
 ##### Private Subgroups of Private Groups
 
 - [ ] Non-members **cannot** flag posts.
-- [ ] Parent Group Members **cannot** flag posts. 
+- [ ] Parent Group Members **cannot** flag posts.
 - [ ] Parent Group Admins **cannot** flag posts.
 - [ ] Members can flag posts.
 - [ ] Group Moderators can flag posts.
@@ -107,7 +133,7 @@ Cases covering GroupModeration creation.  Who can flag the posts in a group for 
 ###### Hidden Subgroups of Private Groups
 
 - [ ] Non-members **cannot** flag posts.
-- [ ] Parent Group Members **cannot** flag posts. 
+- [ ] Parent Group Members **cannot** flag posts.
 - [ ] Parent Group Admins **cannot** flag posts.
 - [ ] Members can flag posts.
 - [ ] Group Moderators can flag posts.
@@ -118,7 +144,7 @@ Cases covering GroupModeration creation.  Who can flag the posts in a group for 
 ##### Public Subgroups of Hidden Groups
 
 - [ ] Non-members **cannot** flag posts.
-- [ ] Parent Group Members can flag posts. 
+- [ ] Parent Group Members can flag posts.
 - [ ] Parent Group Admins can flag posts.
 - [ ] Members can flag posts.
 - [ ] Group Moderators can flag posts.
@@ -127,7 +153,7 @@ Cases covering GroupModeration creation.  Who can flag the posts in a group for 
 ##### Private Subgroups of Hidden Groups
 
 - [ ] Non-members **cannot** flag posts.
-- [ ] Parent Group Members **cannot** flag posts. 
+- [ ] Parent Group Members **cannot** flag posts.
 - [ ] Parent Group Admins **cannot** flag posts.
 - [ ] Members can flag posts.
 - [ ] Group Moderators can flag posts.
@@ -136,7 +162,7 @@ Cases covering GroupModeration creation.  Who can flag the posts in a group for 
 ###### Hidden Subgroups of Hidden Groups
 
 - [ ] Non-members **cannot** flag posts.
-- [ ] Parent Group Members **cannot** flag posts. 
+- [ ] Parent Group Members **cannot** flag posts.
 - [ ] Parent Group Admins **cannot** flag posts.
 - [ ] Members can flag posts.
 - [ ] Group Moderators can flag posts.

@@ -7,17 +7,17 @@ Cases covering group deletion.
 - [ ] A Public Group, Public Group, has been created.
     - [ ] The following subgroups of Public Group have been created:
         - [ ] A Public Group named Public - Public Group
-        - [ ] A Private Group named Public - Private Group 
+        - [ ] A Private Group named Public - Private Group
         - [ ] A Hidden Group named Public - Hidden Group
 - [ ] A Private Group, Private Group, has been created.
     - [ ] The following subgroups of Public Group have been created:
         - [ ] A Public Group named Private - Public Group
-        - [ ] A Private Group named Private - Private Group 
+        - [ ] A Private Group named Private - Private Group
         - [ ] A Hidden Group named Private - Hidden Group
 - [ ] A Hidden Group, Hidden Group, has been created.
     - [ ] The following subgroups of Public Group have been created:
         - [ ] A Public Group named Hidden - Public Group
-        - [ ] A Private Group named Hidden - Private Group 
+        - [ ] A Private Group named Hidden - Private Group
         - [ ] A Hidden Group named Hidden - Hidden Group
 
 - [ ] User1 has been created and added as an admin of each group.
@@ -30,7 +30,7 @@ Cases covering group deletion.
 
 - [ ] User7 has been created and is a non-member of all groups.
 
-### Cases
+### Smoke Test
 
 #### Top level Groups
 
@@ -50,14 +50,50 @@ Cases covering group deletion.
 - [ ] Group Moderators can create posts.
 - [ ] Group Admins can create posts.
 
-###### Posting Permissions: Requires Approval 
+###### Posting Permissions: Requires Approval
 
 - [ ] Non-members **cannot** create posts.
 - [ ] Members can create pending posts.
 - [ ] Group Moderators can create pending posts.
 - [ ] Group Admins can create pending posts.
 
-###### Posting Permissions: Restricted 
+###### Posting Permissions: Restricted
+
+- [ ] Non-members **cannot** create posts.
+- [ ] Members **cannot** create posts.
+- [ ] Group Moderators can create posts.
+- [ ] Group Admins can create posts.
+
+
+
+### Full Regression
+
+#### Top level Groups
+
+##### Public Groups
+
+###### Posting Permissions: Anyone
+
+- [ ] Non-members can create posts.
+- [ ] Members can create posts.
+- [ ] Group Moderators can create posts.
+- [ ] Group Admins can create posts.
+
+###### Posting Permissions: Members
+
+- [ ] Non-members **cannot** create posts.
+- [ ] Members can create posts.
+- [ ] Group Moderators can create posts.
+- [ ] Group Admins can create posts.
+
+###### Posting Permissions: Requires Approval
+
+- [ ] Non-members **cannot** create posts.
+- [ ] Members can create pending posts.
+- [ ] Group Moderators can create pending posts.
+- [ ] Group Admins can create pending posts.
+
+###### Posting Permissions: Restricted
 
 - [ ] Non-members **cannot** create posts.
 - [ ] Members **cannot** create posts.
@@ -80,14 +116,14 @@ Cases covering group deletion.
 - [ ] Group Moderators can create posts.
 - [ ] Group Admins can create posts.
 
-###### Posting Permissions: Requires Approval 
+###### Posting Permissions: Requires Approval
 
 - [ ] Non-members **cannot** create posts.
 - [ ] Members can create pending posts.
 - [ ] Group Moderators can create pending posts.
 - [ ] Group Admins can create pending posts.
 
-###### Posting Permissions: Restricted 
+###### Posting Permissions: Restricted
 
 - [ ] Non-members **cannot** create posts.
 - [ ] Members **cannot** create posts.
@@ -110,14 +146,14 @@ Cases covering group deletion.
 - [ ] Group Moderators can create posts.
 - [ ] Group Admins can create posts.
 
-###### Posting Permissions: Requires Approval 
+###### Posting Permissions: Requires Approval
 
 - [ ] Non-members **cannot** create posts.
 - [ ] Members can create pending posts.
 - [ ] Group Moderators can create pending posts.
 - [ ] Group Admins can create pending posts.
 
-###### Posting Permissions: Restricted 
+###### Posting Permissions: Restricted
 
 - [ ] Non-members **cannot** create posts.
 - [ ] Members **cannot** create posts.
@@ -131,7 +167,7 @@ Cases covering group deletion.
 ###### Posting Permissions: Anyone
 
 - [ ] Non-members can create posts.
-- [ ] Parent Group Members can create posts. 
+- [ ] Parent Group Members can create posts.
 - [ ] Parent Group Admins can create posts.
 - [ ] Members can create posts.
 - [ ] Group Moderators can create posts.
@@ -140,26 +176,26 @@ Cases covering group deletion.
 ###### Posting Permissions: Members
 
 - [ ] Non-members **cannot** create posts.
-- [ ] Parent Group Members **cannot** create posts. 
+- [ ] Parent Group Members **cannot** create posts.
 - [ ] Parent Group Admins **cannot** create posts.
 - [ ] Members can create posts.
 - [ ] Group Moderators can create posts.
 - [ ] Group Admins can create posts.
 
-###### Posting Permissions: Requires Approval 
+###### Posting Permissions: Requires Approval
 
 - [ ] Non-members **cannot** create posts.
-- [ ] Parent Group Members **cannot** create posts. 
+- [ ] Parent Group Members **cannot** create posts.
 - [ ] Parent Group Admins **cannot** create posts.
 - [ ] Members can create pending posts.
 - [ ] Group Moderators can create pending posts.
 - [ ] Group Admins can create pending posts.
 
-###### Posting Permissions: Restricted 
+###### Posting Permissions: Restricted
 
 - [ ] Non-members **cannot** create posts.
 - [ ] Members **cannot** create posts.
-- [ ] Parent Group Members **cannot** create posts. 
+- [ ] Parent Group Members **cannot** create posts.
 - [ ] Parent Group Admins **cannot** create posts.
 - [ ] Group Moderators can create posts.
 - [ ] Group Admins can create posts.
@@ -169,7 +205,7 @@ Cases covering group deletion.
 ###### Posting Permissions: Anyone
 
 - [ ] Non-members **cannot** create posts.
-- [ ] Parent Group Members **cannot** create posts. 
+- [ ] Parent Group Members **cannot** create posts.
 - [ ] Parent Group Admins can create posts.
 - [ ] Members can create posts.
 - [ ] Group Moderators can create posts.
@@ -178,26 +214,26 @@ Cases covering group deletion.
 ###### Posting Permissions: Members
 
 - [ ] Non-members **cannot** create posts.
-- [ ] Parent Group Members **cannot** create posts. 
+- [ ] Parent Group Members **cannot** create posts.
 - [ ] Parent Group Admins **cannot** create posts.
 - [ ] Members can create posts.
 - [ ] Group Moderators can create posts.
 - [ ] Group Admins can create posts.
 
-###### Posting Permissions: Requires Approval 
+###### Posting Permissions: Requires Approval
 
 - [ ] Non-members **cannot** create posts.
-- [ ] Parent Group Members **cannot** create posts. 
+- [ ] Parent Group Members **cannot** create posts.
 - [ ] Parent Group Admins **cannot** create posts.
 - [ ] Members can create pending posts.
 - [ ] Group Moderators can create pending posts.
 - [ ] Group Admins can create pending posts.
 
-###### Posting Permissions: Restricted 
+###### Posting Permissions: Restricted
 
 - [ ] Non-members **cannot** create posts.
 - [ ] Members **cannot** create posts.
-- [ ] Parent Group Members **cannot** create posts. 
+- [ ] Parent Group Members **cannot** create posts.
 - [ ] Parent Group Admins **cannot** create posts.
 - [ ] Group Moderators can create posts.
 - [ ] Group Admins can create posts.
@@ -207,7 +243,7 @@ Cases covering group deletion.
 ###### Posting Permissions: Anyone
 
 - [ ] Non-members **cannot** create posts.
-- [ ] Parent Group Members **cannot** create posts. 
+- [ ] Parent Group Members **cannot** create posts.
 - [ ] Parent Group Admins can create posts.
 - [ ] Members can create posts.
 - [ ] Group Moderators can create posts.
@@ -216,26 +252,26 @@ Cases covering group deletion.
 ###### Posting Permissions: Members
 
 - [ ] Non-members **cannot** create posts.
-- [ ] Parent Group Members **cannot** create posts. 
+- [ ] Parent Group Members **cannot** create posts.
 - [ ] Parent Group Admins **cannot** create posts.
 - [ ] Members can create posts.
 - [ ] Group Moderators can create posts.
 - [ ] Group Admins can create posts.
 
-###### Posting Permissions: Requires Approval 
+###### Posting Permissions: Requires Approval
 
 - [ ] Non-members **cannot** create posts.
-- [ ] Parent Group Members **cannot** create posts. 
+- [ ] Parent Group Members **cannot** create posts.
 - [ ] Parent Group Admins **cannot** create posts.
 - [ ] Members can create pending posts.
 - [ ] Group Moderators can create pending posts.
 - [ ] Group Admins can create pending posts.
 
-###### Posting Permissions: Restricted 
+###### Posting Permissions: Restricted
 
 - [ ] Non-members **cannot** create posts.
 - [ ] Members **cannot** create posts.
-- [ ] Parent Group Members **cannot** create posts. 
+- [ ] Parent Group Members **cannot** create posts.
 - [ ] Parent Group Admins **cannot** create posts.
 - [ ] Group Moderators can create posts.
 - [ ] Group Admins can create posts.
@@ -247,7 +283,7 @@ Cases covering group deletion.
 ###### Posting Permissions: Anyone
 
 - [ ] Non-members **cannot** create posts.
-- [ ] Parent Group Members can create posts. 
+- [ ] Parent Group Members can create posts.
 - [ ] Parent Group Admins can create posts.
 - [ ] Members can create posts.
 - [ ] Group Moderators can create posts.
@@ -256,26 +292,26 @@ Cases covering group deletion.
 ###### Posting Permissions: Members
 
 - [ ] Non-members **cannot** create posts.
-- [ ] Parent Group Members **cannot** create posts. 
+- [ ] Parent Group Members **cannot** create posts.
 - [ ] Parent Group Admins **cannot** create posts.
 - [ ] Members can create posts.
 - [ ] Group Moderators can create posts.
 - [ ] Group Admins can create posts.
 
-###### Posting Permissions: Requires Approval 
+###### Posting Permissions: Requires Approval
 
 - [ ] Non-members **cannot** create posts.
-- [ ] Parent Group Members **cannot** create posts. 
+- [ ] Parent Group Members **cannot** create posts.
 - [ ] Parent Group Admins **cannot** create posts.
 - [ ] Members can create pending posts.
 - [ ] Group Moderators can create pending posts.
 - [ ] Group Admins can create pending posts.
 
-###### Posting Permissions: Restricted 
+###### Posting Permissions: Restricted
 
 - [ ] Non-members **cannot** create posts.
 - [ ] Members **cannot** create posts.
-- [ ] Parent Group Members **cannot** create posts. 
+- [ ] Parent Group Members **cannot** create posts.
 - [ ] Parent Group Admins **cannot** create posts.
 - [ ] Group Moderators can create posts.
 - [ ] Group Admins can create posts.
@@ -285,7 +321,7 @@ Cases covering group deletion.
 ###### Posting Permissions: Anyone
 
 - [ ] Non-members **cannot** create posts.
-- [ ] Parent Group Members **cannot** create posts. 
+- [ ] Parent Group Members **cannot** create posts.
 - [ ] Parent Group Admins can create posts.
 - [ ] Members can create posts.
 - [ ] Group Moderators can create posts.
@@ -294,26 +330,26 @@ Cases covering group deletion.
 ###### Posting Permissions: Members
 
 - [ ] Non-members **cannot** create posts.
-- [ ] Parent Group Members **cannot** create posts. 
+- [ ] Parent Group Members **cannot** create posts.
 - [ ] Parent Group Admins **cannot** create posts.
 - [ ] Members can create posts.
 - [ ] Group Moderators can create posts.
 - [ ] Group Admins can create posts.
 
-###### Posting Permissions: Requires Approval 
+###### Posting Permissions: Requires Approval
 
 - [ ] Non-members **cannot** create posts.
-- [ ] Parent Group Members **cannot** create posts. 
+- [ ] Parent Group Members **cannot** create posts.
 - [ ] Parent Group Admins **cannot** create posts.
 - [ ] Members can create pending posts.
 - [ ] Group Moderators can create pending posts.
 - [ ] Group Admins can create pending posts.
 
-###### Posting Permissions: Restricted 
+###### Posting Permissions: Restricted
 
 - [ ] Non-members **cannot** create posts.
 - [ ] Members **cannot** create posts.
-- [ ] Parent Group Members **cannot** create posts. 
+- [ ] Parent Group Members **cannot** create posts.
 - [ ] Parent Group Admins **cannot** create posts.
 - [ ] Group Moderators can create posts.
 - [ ] Group Admins can create posts.
@@ -323,7 +359,7 @@ Cases covering group deletion.
 ###### Posting Permissions: Anyone
 
 - [ ] Non-members **cannot** create posts.
-- [ ] Parent Group Members **cannot** create posts. 
+- [ ] Parent Group Members **cannot** create posts.
 - [ ] Parent Group Admins can create posts.
 - [ ] Members can create posts.
 - [ ] Group Moderators can create posts.
@@ -332,26 +368,26 @@ Cases covering group deletion.
 ###### Posting Permissions: Members
 
 - [ ] Non-members **cannot** create posts.
-- [ ] Parent Group Members **cannot** create posts. 
+- [ ] Parent Group Members **cannot** create posts.
 - [ ] Parent Group Admins **cannot** create posts.
 - [ ] Members can create posts.
 - [ ] Group Moderators can create posts.
 - [ ] Group Admins can create posts.
 
-###### Posting Permissions: Requires Approval 
+###### Posting Permissions: Requires Approval
 
 - [ ] Non-members **cannot** create posts.
-- [ ] Parent Group Members **cannot** create posts. 
+- [ ] Parent Group Members **cannot** create posts.
 - [ ] Parent Group Admins **cannot** create posts.
 - [ ] Members can create pending posts.
 - [ ] Group Moderators can create pending posts.
 - [ ] Group Admins can create pending posts.
 
-###### Posting Permissions: Restricted 
+###### Posting Permissions: Restricted
 
 - [ ] Non-members **cannot** create posts.
 - [ ] Members **cannot** create posts.
-- [ ] Parent Group Members **cannot** create posts. 
+- [ ] Parent Group Members **cannot** create posts.
 - [ ] Parent Group Admins **cannot** create posts.
 - [ ] Group Moderators can create posts.
 - [ ] Group Admins can create posts.
@@ -363,7 +399,7 @@ Cases covering group deletion.
 ###### Posting Permissions: Anyone
 
 - [ ] Non-members **cannot** create posts.
-- [ ] Parent Group Members can create posts. 
+- [ ] Parent Group Members can create posts.
 - [ ] Parent Group Admins can create posts.
 - [ ] Members can create posts.
 - [ ] Group Moderators can create posts.
@@ -372,26 +408,26 @@ Cases covering group deletion.
 ###### Posting Permissions: Members
 
 - [ ] Non-members **cannot** create posts.
-- [ ] Parent Group Members **cannot** create posts. 
+- [ ] Parent Group Members **cannot** create posts.
 - [ ] Parent Group Admins **cannot** create posts.
 - [ ] Members can create posts.
 - [ ] Group Moderators can create posts.
 - [ ] Group Admins can create posts.
 
-###### Posting Permissions: Requires Approval 
+###### Posting Permissions: Requires Approval
 
 - [ ] Non-members **cannot** create posts.
-- [ ] Parent Group Members **cannot** create posts. 
+- [ ] Parent Group Members **cannot** create posts.
 - [ ] Parent Group Admins **cannot** create posts.
 - [ ] Members can create pending posts.
 - [ ] Group Moderators can create pending posts.
 - [ ] Group Admins can create pending posts.
 
-###### Posting Permissions: Restricted 
+###### Posting Permissions: Restricted
 
 - [ ] Non-members **cannot** create posts.
 - [ ] Members **cannot** create posts.
-- [ ] Parent Group Members **cannot** create posts. 
+- [ ] Parent Group Members **cannot** create posts.
 - [ ] Parent Group Admins **cannot** create posts.
 - [ ] Group Moderators can create posts.
 - [ ] Group Admins can create posts.
@@ -401,7 +437,7 @@ Cases covering group deletion.
 ###### Posting Permissions: Anyone
 
 - [ ] Non-members **cannot** create posts.
-- [ ] Parent Group Members **cannot** create posts. 
+- [ ] Parent Group Members **cannot** create posts.
 - [ ] Parent Group Admins can create posts.
 - [ ] Members can create posts.
 - [ ] Group Moderators can create posts.
@@ -410,26 +446,26 @@ Cases covering group deletion.
 ###### Posting Permissions: Members
 
 - [ ] Non-members **cannot** create posts.
-- [ ] Parent Group Members **cannot** create posts. 
+- [ ] Parent Group Members **cannot** create posts.
 - [ ] Parent Group Admins **cannot** create posts.
 - [ ] Members can create posts.
 - [ ] Group Moderators can create posts.
 - [ ] Group Admins can create posts.
 
-###### Posting Permissions: Requires Approval 
+###### Posting Permissions: Requires Approval
 
 - [ ] Non-members **cannot** create posts.
-- [ ] Parent Group Members **cannot** create posts. 
+- [ ] Parent Group Members **cannot** create posts.
 - [ ] Parent Group Admins **cannot** create posts.
 - [ ] Members can create pending posts.
 - [ ] Group Moderators can create pending posts.
 - [ ] Group Admins can create pending posts.
 
-###### Posting Permissions: Restricted 
+###### Posting Permissions: Restricted
 
 - [ ] Non-members **cannot** create posts.
 - [ ] Members **cannot** create posts.
-- [ ] Parent Group Members **cannot** create posts. 
+- [ ] Parent Group Members **cannot** create posts.
 - [ ] Parent Group Admins **cannot** create posts.
 - [ ] Group Moderators can create posts.
 - [ ] Group Admins can create posts.
@@ -439,7 +475,7 @@ Cases covering group deletion.
 ###### Posting Permissions: Anyone
 
 - [ ] Non-members **cannot** create posts.
-- [ ] Parent Group Members **cannot** create posts. 
+- [ ] Parent Group Members **cannot** create posts.
 - [ ] Parent Group Admins can create posts.
 - [ ] Members can create posts.
 - [ ] Group Moderators can create posts.
@@ -448,26 +484,26 @@ Cases covering group deletion.
 ###### Posting Permissions: Members
 
 - [ ] Non-members **cannot** create posts.
-- [ ] Parent Group Members **cannot** create posts. 
+- [ ] Parent Group Members **cannot** create posts.
 - [ ] Parent Group Admins **cannot** create posts.
 - [ ] Members can create posts.
 - [ ] Group Moderators can create posts.
 - [ ] Group Admins can create posts.
 
-###### Posting Permissions: Requires Approval 
+###### Posting Permissions: Requires Approval
 
 - [ ] Non-members **cannot** create posts.
-- [ ] Parent Group Members **cannot** create posts. 
+- [ ] Parent Group Members **cannot** create posts.
 - [ ] Parent Group Admins **cannot** create posts.
 - [ ] Members can create pending posts.
 - [ ] Group Moderators can create pending posts.
 - [ ] Group Admins can create pending posts.
 
-###### Posting Permissions: Restricted 
+###### Posting Permissions: Restricted
 
 - [ ] Non-members **cannot** create posts.
 - [ ] Members **cannot** create posts.
-- [ ] Parent Group Members **cannot** create posts. 
+- [ ] Parent Group Members **cannot** create posts.
 - [ ] Parent Group Admins **cannot** create posts.
 - [ ] Group Moderators can create posts.
 - [ ] Group Admins can create posts.
