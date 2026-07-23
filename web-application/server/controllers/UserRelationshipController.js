@@ -30,6 +30,7 @@ const {
 } = require('@communities/backend')
 
 const ControllerError = require('../errors/ControllerError')
+const NotFoundError = require('../errors/NotFoundError')
 
 module.exports = class UserRelationshipController {
 
@@ -433,20 +434,15 @@ module.exports = class UserRelationshipController {
         })
 
         if ( results.list.length <= 0 ) {
-            throw new ControllerError(404, 'not-found',
-                `No relationship found for User(${userId}) and User(${relationId}).`,
-                `No relationship found for User(${userId}) and User(${relationId}).`)
+            throw new NotFoundError( `No relationship found for User(${userId}) and User(${relationId}).`)
         }
 
         const relationship = results.dictionary[results.list[0]]
         const canViewUserRelationship = await this.permissionService.can(currentUser, 'view', 'UserRelationship',
             { userId: userId, relationId: relationId, relationship: relationship })
         if ( canViewUserRelationship !== true ) {
-            throw new ControllerError(404, 'not-found',
-                `User attempting to view relationship for User(${userId}) and User(${relationId}) without authorization.`,
-                `Either that UserRelationship doesn't exist or you don't have permission to view it.`)
+            throw new NotFoundError(`User attempting to view relationship for User(${userId}) and User(${relationId}) without authorization.`)
         }
-
 
         const entity = results.dictionary[results.list[0]]
 
