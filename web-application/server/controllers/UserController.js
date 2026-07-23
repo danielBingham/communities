@@ -196,10 +196,27 @@ module.exports = class UserController extends BaseController{
             result.where += `users.id != ALL($${result.params.length}::uuid[])`
         }
 
-        if ( this.core.features.has('feat-408-flag-profiles-and-groups') ) {
+        if ( canModerateSite !== true) {
             const and = result.params.length > 0 ? ' AND ' : ''
             result.params.push('rejected')
             result.where += `${and} users.site_moderation_id NOT IN ( SELECT site_moderation.id FROM site_moderation WHERE site_moderation.user_profile_id = users.id AND site_moderation.status = $${result.params.length} )`
+        }
+
+        // Admin list vs friend list functionality.
+        //
+        // TECHDEBT This is wonky and breaks the permission model.  We really
+        // need a better way to handle this.
+        if ( 'admin' in query && query.admin === 'true') {
+            if ( currentUser.siteRole === 'admin' || currentUser.siteRole === 'superadmin' ) {
+                result.fields = 'all'
+            } else {
+                throw new ControllerError(403, 'not-authorized',
+                    `User(${currentUser.id}) not authorized to admin.`,
+                    `You are not authorized to admin this platform.`)
+            }
+        } else {
+            const and = result.params.length > 0 ? ' AND ' : ''
+            result.where += `${and} users.status != 'banned' AND users.status != 'invited'`
         }
 
         // ====================================================================
@@ -511,19 +528,6 @@ module.exports = class UserController extends BaseController{
             result.where += `${and} users.id != ALL($${result.params.length}::uuid[])`
         }
 
-        if ( 'admin' in query && query.admin === 'true') {
-            if ( currentUser.siteRole === 'admin' || currentUser.siteRole === 'superadmin' ) {
-                result.fields = 'all'
-            } else {
-                throw new ControllerError(403, 'not-authorized',
-                    `User(${currentUser.id}) not authorized to admin.`,
-                    `You are not authorized to admin this platform.`)
-            }
-        } else {
-            const and = result.params.length > 0 ? ' AND ' : ''
-            result.where += `${and} users.status != 'banned' AND users.status != 'invited'`
-        }
-
         if ( 'sort' in query ) {
             if ( query.sort === 'newest' ) {
                 result.order = 'users.created_date desc'
@@ -717,9 +721,9 @@ module.exports = class UserController extends BaseController{
 
         let results = null
         if ( currentUser && currentUser.id === userId) {
-            results = await this.userDAO.selectUsers({ where: `users.id = $1 AND users.status != 'invited'`, params: [ userId ], fields: 'all' })
+            results = await this.userDAO.selectUsers({ where: `users.id = $1 AND users.status != 'invited' ${ canModerateSite !== true ? `AND users.status != 'banned'` : ''}`, params: [ userId ], fields: 'all' })
         } else {
-            results = await this.userDAO.selectUsers({ where: `users.id = $1 AND users.status != 'invited'`, params: [ userId ]})
+            results = await this.userDAO.selectUsers({ where: `users.id = $1 AND users.status != 'invited' ${ canModerateSite !== true ? `AND users.status != 'banned'` : ''}`, params: [ userId ]})
         }
 
         if ( ! results.dictionary[userId] ) {
