@@ -58,7 +58,56 @@ const findUserIdByUsernameAsAdmin = async function(adminSession, username) {
     return response.content.list[0]
 }
 
+// PATCH a user and return the raw fetchEndpoint result.  `body` MUST include an
+// `id` matching `userId` -- the controller rejects a patch whose body id does
+// not match the route.
+const patchUser = async function(session, userId, body) {
+    return await fetchEndpoint('PATCH', `/user/${encodeURIComponent(userId)}`, { session: session, body: body })
+}
+
+// Set the authenticated user's `privacy__view_friends` column, which governs who
+// may query their relationships.  Valid values come from the user_privacy enum:
+// 'me', 'friends', 'friends-of-friends', 'public'.
+const setViewFriendsPrivacy = async function(session, userId, value) {
+    const response = await patchUser(session, userId, { id: userId, privacyViewFriends: value })
+    if ( ! response.ok ) {
+        throw new Error(`Failed to set privacyViewFriends='${value}' for User(${userId}): ${response.status} ${JSON.stringify(response.content)}`)
+    }
+    return response.content.entity
+}
+
+// Set a single key inside the authenticated user's `settings` JSON blob.
+//
+// IMPORTANT: PATCH /user replaces `settings` wholesale -- there is no server-side
+// merge -- so this merges against `currentSettings` before sending.  Always pass
+// the settings snapshot captured at login (`loginAs(...).user.settings`), never
+// `{}`, or the fixture's notification preferences get wiped and the account
+// starts emailing mailinator again.
+const setUserSetting = async function(session, userId, currentSettings, key, value) {
+    const settings = { ...(currentSettings ?? {}), [key]: value }
+
+    const response = await patchUser(session, userId, { id: userId, settings: settings })
+    if ( ! response.ok ) {
+        throw new Error(`Failed to set settings.${key}='${value}' for User(${userId}): ${response.status} ${JSON.stringify(response.content)}`)
+    }
+    return response.content.entity
+}
+
+// Teardown counterpart to setUserSetting: put the whole `settings` blob back to
+// the snapshot captured at login.
+const restoreUserSettings = async function(session, userId, originalSettings) {
+    const response = await patchUser(session, userId, { id: userId, settings: originalSettings ?? {} })
+    if ( ! response.ok ) {
+        throw new Error(`Failed to restore settings for User(${userId}): ${response.status} ${JSON.stringify(response.content)}`)
+    }
+    return response.content.entity
+}
+
 module.exports = {
     getUser: getUser,
-    findUserIdByUsernameAsAdmin: findUserIdByUsernameAsAdmin
+    findUserIdByUsernameAsAdmin: findUserIdByUsernameAsAdmin,
+    patchUser: patchUser,
+    setViewFriendsPrivacy: setViewFriendsPrivacy,
+    setUserSetting: setUserSetting,
+    restoreUserSettings: restoreUserSettings
 }

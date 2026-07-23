@@ -88,6 +88,17 @@ const getUserRelationship = async function(session, userId, relationId) {
     return await fetchEndpoint('GET', `/user/${encodeURIComponent(userId)}/relationship/${encodeURIComponent(relationId)}`, { session: session })
 }
 
+// Query a user's relationships and return the raw response (without throwing on
+// non-2xx) so callers can assert on the status.  This is the endpoint under test
+// in the getUserRelationships permissions suite.
+//
+// `page` is optional and exists only so helpers can scan every page of a result
+// set; the permission gate itself is exercised against the bare endpoint.
+const getUserRelationships = async function(session, userId, page) {
+    const query = page === undefined ? '' : `?page=${encodeURIComponent(page)}`
+    return await fetchEndpoint('GET', `/user/${encodeURIComponent(userId)}/relationships${query}`, { session: session })
+}
+
 // Teardown helper: guarantee that no relationship of any kind exists between
 // two users, whichever of them created it.
 //
@@ -119,5 +130,6 @@ module.exports = {
     blockUser: blockUser,
     deleteRelationship: deleteRelationship,
     getUserRelationship: getUserRelationship,
+    getUserRelationships: getUserRelationships,
     clearRelationship: clearRelationship
 }

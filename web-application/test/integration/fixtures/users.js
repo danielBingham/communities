@@ -335,6 +335,43 @@ const dictionary = {
   },
 
   // ==========================================================================
+  // user-privacy -- The PROFILE OWNER whose privacy configuration is mutated by
+  // the getUserRelationships permission suite.
+  //
+  // Why a dedicated user: GET /user/:userId/relationships gates on the profile
+  // owner's OWN `privacy__view_friends` setting.  Exercising that matrix means
+  // flipping the value repeatedly, and a test that fails partway can leave the
+  // account on a non-default setting.  Doing that to user1 would quietly change
+  // the behaviour of every other suite that uses them, so the mutation is
+  // isolated to this account instead.
+  //
+  // The suite restores the original value after each group, so this account
+  // should normally be found at its defaults.  If a run dies mid-way and you want
+  // to reset it by hand:
+  //
+  //      UPDATE users
+  //         SET settings = settings - 'showFriendsOnProfile',
+  //             privacy__view_friends = 'friends'
+  //       WHERE email = 'communities-test-user-privacy@mailinator.com';
+  //
+  // Manual setup (run once before running the tests):
+  //   1. Register "Test User Privacy" (test-user-privacy /
+  //   communities-test-user-privacy@mailinator.com) through the app.  Set the
+  //   account's password to match `password` below.  Confirm the account's email
+  //   using `mailinator.com`.  Once confirmed, make sure to turn email
+  //   notifications off (so we don't spam mailinator) and also turn off 'info'
+  //   and 'announcement' posts in preferences (so we have a blank slate for post
+  //   testing).
+  //   2. Leave the privacy settings at their defaults.
+  // ==========================================================================
+  'user-privacy': {
+    name: 'Test User Privacy',
+    username: 'test-user-privacy',
+    email: 'communities-test-user-privacy@mailinator.com',
+    password: 'PasswordPassword',
+  },
+
+  // ==========================================================================
   // user-site-moderator -- A SITE MODERATOR.
   //
   // Manual setup (run once before running the tests):

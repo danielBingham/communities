@@ -196,6 +196,10 @@ module.exports = class UserRelationshipController {
         }
 
         const userId = request.params.userId
+        const user = await this.userDAO.getUserById(userId)
+        if ( user === null ) {
+            throw new NotFoundError(`User attempted to query relationships for User(${userId}) who doesn't exist.`)
+        }
 
         const canQueryUserRelationships = await this.permissionService.can(currentUser, 'query', 'UserRelationship',
             { userId: currentUser.id, relationId: userId })
