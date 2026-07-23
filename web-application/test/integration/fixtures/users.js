@@ -55,7 +55,7 @@ const dictionary = {
   //   post testing).
   // ==========================================================================
   'user2': {
-    name: 'Test User',
+    name: 'Test User2',
     username: 'test-user2',
     email: 'communities-test-user2@mailinator.com',
     password: 'PasswordPassword',
@@ -211,6 +211,11 @@ const dictionary = {
     password: 'PasswordPassword',
   },
 
+  // NOTE: user10 -- communities-test-user10@mailiantor.com is actually
+  // user-site-admin below.  Mailinator would not accept
+  // `communities-test-user-site-admin@mailinator.com` and returned a hard
+  // bounce to any email sent to that address.  So we used this one instead.
+
   // ==========================================================================
   // user-banned -- A dedicated *banned* user.
   //
@@ -349,6 +354,159 @@ const dictionary = {
     name: 'Test User Site Moderator',
     username: 'test-user-site-moderator',
     email: 'communities-test-user-site-moderator@mailinator.com',
+    password: 'PasswordPassword',
+  },
+
+  // ==========================================================================
+  // user-site-admin -- A SITE ADMIN.
+  //
+  // Distinct from 'user-site-moderator': several endpoints separate the
+  // 'moderator' site role from 'admin'/'superadmin'.  In particular
+  // `GET /users?admin=true` -- the only way to look up a banned or invited
+  // user -- is refused with a 403 for a mere 'moderator'.  The getUser suite
+  // uses this account to resolve the ids of fixtures that cannot log in.
+  //
+  // Manual setup (run once before running the tests):
+  //   1. Register "Test User Site Admin" (test-user-site-admin /
+  //   communities-test-user-site-admin@mailinator.com) and confirm the account. Set
+  //   the password to match `password` below. Once confirmed, make sure to turn
+  //   email notifications off (so we don't spam mailinator) and also turn off
+  //   'info' and 'announcement' posts in preferences (so we have a blank slate
+  //   for post testing).
+  //   2. Grant the account the site 'admin' role directly in the database:
+  //
+  //        UPDATE users
+  //           SET site_role = 'admin'
+  //         WHERE email = 'communities-test-user-site-admin@mailinator.com';
+  // ==========================================================================
+  'user-site-admin': {
+    name: 'Test User Site Admin',
+    username: 'test-user-site-admin',
+    email: 'communities-test-user10@mailinator.com', // Mailinator would not accept `communities-test-user-site-admin`
+    password: 'PasswordPassword',
+  },
+
+  // ==========================================================================
+  // user-invited -- A user with status 'invited' who has never accepted.
+  //
+  // `GET /user/:id` filters on `users.status != 'invited'`, so this account
+  // must exist in the invited state permanently.  It CANNOT log in (an invited
+  // user has no password set), so it is only ever a *target* in tests; its id
+  // is resolved through the 'user-site-admin' fixture.
+  //
+  // Manual setup (run once before running the tests):
+  //   1. Log in as any confirmed user (user1 works) and send an invitation to
+  //   communities-test-user-invited@mailinator.com through the app's invite flow.
+  //   2. Do NOT accept the invitation.  Leave the account in the 'invited'
+  //   state.  Verify with:
+  //
+  //        SELECT status FROM users
+  //         WHERE email = 'communities-test-user-invited@mailinator.com';
+  //
+  //   3. Set the username so the suite can find the account (invited users have
+  //   not chosen one yet):
+  //
+  //        UPDATE users
+  //           SET username = 'test-user-invited',
+  //               name = 'Test User Invited'
+  //         WHERE email = 'communities-test-user-invited@mailinator.com';
+  // ==========================================================================
+  'user-invited': {
+    name: 'Test User Invited', // Invited users don't have names set
+    username: 'test-user-invited', // Invited users don't have usernames set
+    email: 'communities-test-user-invited@mailinator.com',
+  },
+
+  // ==========================================================================
+  // user-flagged -- A user whose profile carries a FLAGGED (but not rejected)
+  // SiteModeration.
+  //
+  // The control case for the site-moderation branch of `GET /user/:id`: only a
+  // moderation with status 'rejected' hides a profile, so this account must
+  // remain fully visible to everyone.
+  //
+  // Set up directly in the database rather than through the API because
+  // SiteModeration has no DELETE endpoint (it returns 501), so an
+  // API-created flag could not be torn down and the suite would not be
+  // re-runnable.
+  //
+  // Manual setup (run once before running the tests):
+  //   1. Register "Test User Flagged" (test-user-flagged /
+  //   communities-test-user-flagged@mailinator.com) and confirm the account. Set the
+  //   password to match `password` below. Once confirmed, make sure to turn
+  //   email notifications off (so we don't spam mailinator) and also turn off
+  //   'info' and 'announcement' posts in preferences (so we have a blank slate
+  //   for post testing).
+  //   2. Attach a 'flagged' SiteModeration to the profile, flagged by user1:
+  //
+  //        WITH flagger AS (
+  //            SELECT id FROM users
+  //             WHERE email = 'communities-test-user1@mailinator.com'
+  //        ), target AS (
+  //            SELECT id FROM users
+  //             WHERE email = 'communities-test-user-flagged@mailinator.com'
+  //        ), moderation AS (
+  //            INSERT INTO site_moderation
+  //                (user_id, status, user_profile_id, created_date, updated_date)
+  //            SELECT flagger.id, 'flagged', target.id, now(), now()
+  //              FROM flagger, target
+  //            RETURNING id, user_profile_id
+  //        )
+  //        UPDATE users SET site_moderation_id = moderation.id
+  //          FROM moderation WHERE users.id = moderation.user_profile_id;
+  // ==========================================================================
+  'user-flagged': {
+    name: 'Test User Flagged',
+    username: 'test-user-flagged',
+    email: 'communities-test-user-flagged@mailinator.com',
+    password: 'PasswordPassword',
+  },
+
+  // ==========================================================================
+  // user-rejected -- A user whose profile has been REJECTED by site
+  // moderators.
+  //
+  // `GET /user/:id` answers 403 'not-authorized' for anyone but the user
+  // themselves and site moderators.  The account is still 'confirmed', so
+  // unlike the banned fixture it CAN log in -- which is how the suite learns
+  // its id (a rejected profile is filtered out of `GET /users` for every
+  // caller, admins included, by the feat-408 clause in parseQuery()).
+  //
+  // Set up directly in the database for the same reason as 'user-flagged':
+  // SiteModeration cannot be deleted through the API.
+  //
+  // Manual setup (run once before running the tests):
+  //   1. Register "Test User Rejected" (test-user-rejected /
+  //   communities-test-user-rejected@mailinator.com) and confirm the account. Set
+  //   the password to match `password` below. Once confirmed, make sure to turn
+  //   email notifications off (so we don't spam mailinator) and also turn off
+  //   'info' and 'announcement' posts in preferences (so we have a blank slate
+  //   for post testing).
+  //   2. Attach a 'rejected' SiteModeration to the profile, flagged by user1:
+  //
+  //        WITH flagger AS (
+  //            SELECT id FROM users
+  //             WHERE email = 'communities-test-user1@mailinator.com'
+  //        ), target AS (
+  //            SELECT id FROM users
+  //             WHERE email = 'communities-test-user-rejected@mailinator.com'
+  //        ), moderation AS (
+  //            INSERT INTO site_moderation
+  //                (user_id, status, user_profile_id, created_date, updated_date)
+  //            SELECT flagger.id, 'rejected', target.id, now(), now()
+  //              FROM flagger, target
+  //            RETURNING id, user_profile_id
+  //        )
+  //        UPDATE users SET site_moderation_id = moderation.id
+  //          FROM moderation WHERE users.id = moderation.user_profile_id;
+  //
+  // NOTE: these tests only run when the `feat-408-flag-profiles-and-groups`
+  // feature flag is enabled; they skip themselves otherwise.
+  // ==========================================================================
+  'user-rejected': {
+    name: 'Test User Rejected',
+    username: 'test-user-rejected',
+    email: 'communities-test-user-rejected@mailinator.com',
     password: 'PasswordPassword',
   }
 }
