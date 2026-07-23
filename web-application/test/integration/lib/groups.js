@@ -90,6 +90,15 @@ const createSubgroup = async function(session, parentId, type, overrides = {}) {
     })
 }
 
+// Delete a group by id and return the raw fetchEndpoint result
+// ({ status, ok, content, raw }).  Mirrors getGroup()/patchGroup() -- unlike
+// deleteGroup() below it does NOT throw on a non-2xx, so the deleteGroup
+// permission tests can assert on the status and error body of a refused
+// delete.  Use deleteGroup() for teardown and this for assertions.
+const deleteGroupRequest = async function(session, groupId) {
+    return await fetchEndpoint('DELETE', `/group/${encodeURIComponent(groupId)}`, { session: session })
+}
+
 // Delete a group by id.  The creator (admin) must be the one deleting it.
 // Deleting a group cascades to its posts and members in the database, so this
 // is sufficient to tear down everything created for a group post test.
@@ -110,6 +119,24 @@ const joinOpenGroup = async function(session, groupId, userId) {
         groupId: groupId,
         status: 'member',
         role: 'member'
+    }
+
+    const response = await fetchEndpoint('POST', `/group/${encodeURIComponent(groupId)}/members`, { session: session, body: member })
+    if ( ! response.ok ) {
+        throw new Error(`Failed to join Group(${groupId}): ${response.status} ${JSON.stringify(response.content)}`)
+    }
+
+    return response.content
+}
+
+// Parent group admins can add themselves to child groups, but they have to do
+// it as an `admin` role.  They can't add themselves as members.
+const joinGroupAsAdmin = async function(session, groupId, userId) {
+    const member = {
+        userId: userId,
+        groupId: groupId,
+        status: 'member',
+        role: 'admin'
     }
 
     const response = await fetchEndpoint('POST', `/group/${encodeURIComponent(groupId)}/members`, { session: session, body: member })
@@ -250,8 +277,10 @@ module.exports = {
     createGroup: createGroup,
     createSubgroup: createSubgroup,
     deleteGroup: deleteGroup,
+    deleteGroupRequest: deleteGroupRequest,
     getGroupMember: getGroupMember,
     joinOpenGroup: joinOpenGroup,
+    joinGroupAsAdmin: joinGroupAsAdmin,
     requestToJoinGroup: requestToJoinGroup,
     inviteToGroup: inviteToGroup,
     acceptGroupInvite: acceptGroupInvite,
