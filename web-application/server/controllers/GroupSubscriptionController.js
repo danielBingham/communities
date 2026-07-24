@@ -33,6 +33,7 @@ const {
 const { schema } = require('@communities/shared')
 
 const ControllerError = require('../errors/ControllerError')
+const NotFoundError = require('../errors/NotFoundError')
 
 module.exports = class GroupSubscriptionController {
 
@@ -85,7 +86,12 @@ module.exports = class GroupSubscriptionController {
                 errorString)
         }
 
-        const canViewGroup = await this.permissionService.can(currentUser, 'view', 'Group', { groupId: groupId })
+        const existing = await this.groupDAO.getGroupById(groupId)
+        if ( existing === null ) {
+            throw new NotFoundError(`User attempted to retrieve subscription for Group(${groupId}) that doesn't exist.`)
+        }
+
+        const canViewGroup = await this.permissionService.can(currentUser, 'view', 'Group', { group: existing })
         if ( canViewGroup !== true ) {
 
             // If they've lost the ability to view the group, then unsubscribe them.

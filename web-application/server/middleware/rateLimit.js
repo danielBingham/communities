@@ -36,6 +36,13 @@ const rateLimit = function(core, limit) {
             return
         }
 
+
+        // Skip the rate limiting when we're on dev or staging and running the integration tests.
+        if ( ( process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'staging') && request.session?.platform === 'test' ) {
+            next()
+            return
+        }
+
         const ipAddress = request.ip
 
         let previousRequestsJSON = await core.redis.get(`web-application:${route}:${method}:requests:${ipAddress}`)

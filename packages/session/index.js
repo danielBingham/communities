@@ -170,8 +170,9 @@ function session(options) {
     const platform = getHeader(req, platformHeader)
     if ( platform === 'web'
           || platform === 'ios'
-          || platform === 'android' )
-    {
+          || platform === 'android'
+          || ( ( process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'staging' ) && platform === 'test')
+    ) {
       req.session.platform = platform
     } else {
       // If platform isn't set in the request, default to web.
@@ -245,7 +246,11 @@ function session(options) {
     if ( platform === 'web' ) {
       // get the session ID from the cookie
       cookieId = req.sessionID = getcookie(req, name, secrets);
-    } else if ( platform === 'ios' || platform === 'android' ) {
+    } else if (
+      platform === 'ios'
+      || platform === 'android'
+      || ( ( process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'staging' ) && platform === 'test')
+    ) {
       cookieId = req.sessionID = getAuthHeader(req, authHeader, secrets);
     } else {
       // If platform is not specified, fall back to cookie auth.
@@ -287,7 +292,11 @@ function session(options) {
         if ( platform === 'web' ) {
           logger.verbose(`Setting cookie: ${name}=${req.sessionId} `)
           setcookie(res, name, req.sessionID, secrets[0], req.session.cookie.data)
-        } else if ( platform === 'ios' || platform === 'android' ) {
+        } else if (
+          platform === 'ios'
+          || platform === 'android'
+          || ( ( process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'staging' ) && platform === 'test')
+        ) {
           logger.verbose(`Setting Auth header: ${authHeader}=${req.sessionID}`)
           setAuthHeader(res, authHeader, req.sessionID, secrets[0])
         } else {
@@ -614,7 +623,7 @@ function getcookie(req, name, secrets) {
         if (val === false) {
           val = undefined;
         }
-      } 
+      }
     }
   }
 
@@ -642,7 +651,7 @@ function getcookie(req, name, secrets) {
         if (val === false) {
           val = undefined;
         }
-      } 
+      }
     }
   }
 
@@ -660,7 +669,7 @@ function getAuthHeader(req, name, secrets) {
       if (val === false) {
         val = undefined;
       }
-    } 
+    }
   }
 
   return val

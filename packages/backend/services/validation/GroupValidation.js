@@ -20,6 +20,8 @@
 
 const { util, schema } = require('@communities/shared')
 
+const GroupDAO = require('../../daos/GroupDAO')
+
 const FileService = require('../FileService')
 
 const ServiceError = require('../../errors/ServiceError')
@@ -29,6 +31,8 @@ module.exports = class GroupValidation {
     constructor(core, validationService) {
         this.core = core
         this.validationService = validationService
+
+        this.groupDAO = new GroupDAO(core)
 
         this.fileService = new FileService(core)
 
@@ -54,10 +58,11 @@ module.exports = class GroupValidation {
             return errors
         }
 
+        let parentGroup = null
         if ( util.objectHas(group, 'parentId' ) ) {
             if ( ! existing ) {
                 if ( group.parentId !== null ) {
-                    const parentGroup = await this.groupDAO.getGroupById(group.parentId)
+                    parentGroup = await this.groupDAO.getGroupById(group.parentId)
                     if ( parentGroup === null ) {
                         errors.push({
                             type: 'parentId:not-found',
@@ -73,6 +78,11 @@ module.exports = class GroupValidation {
                         log: `User attempting to update Group.parentId.`,
                         message: `You may not change the parent Group.`
                     })
+                } else {
+                    if ( group.parentId !== null ) {
+                        // We'll need this for consistency validation later.
+                        parentGroup = await this.groupDAO.getGroupById(group.parentId)
+                    }
                 }
             }
         }
@@ -138,6 +148,79 @@ module.exports = class GroupValidation {
                     }
                 }
 
+            }
+        }
+
+        // If we have invalid fields set, then we don't need to go any further.
+        if ( errors.length > 0 ) {
+            return errors
+        }
+
+        // ======== Multi-field Consistency Enforcement =======================
+
+        // We need to ensure that type is valid in the parent/child content.
+        // We'll reuse `parentGroup` set above.
+        //
+        // Type cannot be null, and we've already enforced that by the time
+        // we've gotten here.
+        if ( util.objectHas(group, 'type') ) {
+            if ( existing && existing.type !== group.type ) {
+                errors.push({
+                    type: 'type:invalid',
+                    log: `User attempting to update group type.`,
+                    message: `Group.type may not be updated.`
+                })
+            } else if ( ! existing ) {
+                // These are subgroup types that may only be set for a subgroup.
+                if (
+                    ( group.type === 'private-open' || group.type === 'hidden-open' || group.type === 'hidden-private' )
+                    && parentGroup === null
+                ) {
+                    errors.push({
+                        type: 'type:invalid',
+                        log: `User attempting to create a subgroup without a parent.`,
+                        message: `You must include Group.parentId to create a subgroup.`
+                    })
+                }
+
+                if ( parentGroup !== null ) {
+
+                    if ( parentGroup.type === 'open' ) {
+                        const validChildTypes = [ 'open', 'private', 'hidden' ]
+
+                        if ( ! validChildTypes.includes(group.type) ) {
+                            errors.push({
+                                type: 'type:invalid',
+                                log: `User attempting to create a subgroup of an open group with invalid type '${group.type}'.`,
+                                message: `Valid types for 'open' groups are ${validChildTypes.join(',')}.`
+                            })
+                        }
+                    }
+
+                    else if ( parentGroup.type.startsWith('private') ) {
+                        const validChildTypes = [ 'private-open', 'private', 'hidden' ]
+
+                        if ( ! validChildTypes.includes(group.type) ) {
+                            errors.push({
+                                type: 'type:invalid',
+                                log: `User attempting to create a subgroup of a '${parentGroup.type}' group with invalid type '${group.type}'.`,
+                                message: `Valid types for '${parentGroup.type}' groups are ${validChildTypes.join(',')}.`
+                            })
+                        }
+                    }
+
+                    else if ( parentGroup.type.startsWith('hidden') ) {
+                        const validChildTypes = [ 'hidden-open', 'hidden-private', 'hidden' ]
+
+                        if ( ! validChildTypes.includes(group.type) ) {
+                            errors.push({
+                                type: 'type:invalid',
+                                log: `User attempting to create a subgroup of a '${parentGroup.type}' group with invalid type '${group.type}'.`,
+                                message: `Valid types for '${parentGroup.type}' groups are ${validChildTypes.join(',')}.`
+                            })
+                        }
+                    }
+                }
             }
         }
 

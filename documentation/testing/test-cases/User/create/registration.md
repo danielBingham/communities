@@ -2,29 +2,60 @@
 
 Cases covering the User Registration flow.
 
-### Pre-requisites
+### Smoke Test
 
-No pre-requisites.
+#### Pre-requisites
 
-### Cases
+- [ ] An email client (mailinator) is available for the addresses under test.
 
-- [ ] Register a new user named John Doe with username `john-doe` (communities-john-doe@mailinator.com)
-    - [ ] Attempt to register with too short a password.
-        - [ ] Confirm validation error.
-    - [ ] Attempt to register without checking Age Confirmation.
-        - [ ] Confirm validation error.
-    - [ ] Successfully register.
-        - [ ] Confirm email.
-        - [ ] Accept Terms of Service.
-        - [ ] Skip Pay What you Can.
-    - [ ] Turn off all email notifications.
+#### Cases
 
-- [ ] Register a new user named Jane Doe (communities-jane-doe@mailinator.com)
-    - [ ] Attempt to register with the username `john-doe`
-        - [ ] Confirm validation error.
-    - [ ] Register with the username `jane-doe`
-    - [ ] Successfully register.
-        - [ ] Confirm email.
-        - [ ] Accept Terms of Service.
-        - [ ] Skip Pay What you Can.
-    - [ ] Turn off all email notifications.
+- [ ] As a new user, I can register an account.
+    - As unauthenticated user:
+        - Go to the registration form and register a new user named John Doe
+          with username `john-doe` (communities-john-doe@mailinator.com).
+        - Attempt to register with too short a password.
+            - **Confirm validation error.**
+        - Attempt to register without checking Age Confirmation.
+            - **Confirm validation error.**
+        - Complete the form correctly and submit.
+            - **Confirm registration succeeds.**
+        - Confirm the email address.
+        - Accept the Terms of Service.
+        - Skip "Pay What you Can".
+            - **Confirm landed in the app as an authenticated user.**
+        - Turn off all email notifications.
+
+### Manual Regression
+
+#### Pre-requisites
+
+- [ ] A user with the username `john-doe` has been registered -- the state
+      left by the Smoke Test above.
+- [ ] An email client (mailinator) is available for the addresses under test.
+
+#### Cases
+
+- [ ] As a new user, I cannot register with a username that is already taken.
+    - As unauthenticated user:
+        - Go to the registration form and begin registering Jane Doe
+          (communities-jane-doe@mailinator.com).
+        - Attempt to register with the username `john-doe`.
+            - **Confirm validation error.**
+        - Change the username to `jane-doe` and submit.
+            - **Confirm registration succeeds.**
+        - Confirm the email address.
+        - Accept the Terms of Service.
+        - Skip "Pay What you Can".
+            - **Confirm landed in the app as an authenticated user.**
+        - Turn off all email notifications.
+
+### Full Regression
+
+#### Pre-requisites
+
+None.
+
+The registration endpoint is not yet covered by the Integration suite.  All
+registration cases are defined in the Smoke Test and Manual Regression
+sections above.

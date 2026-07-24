@@ -37,6 +37,9 @@ const {
 
 const BaseController = require('./BaseController')
 const ControllerError = require('../errors/ControllerError')
+const NotAuthenticatedError = require('../errors/NotAuthenticatedError')
+const NotAuthorizedError = require('../errors/NotAuthorizedError')
+const NotFoundError = require('../errors/NotFoundError')
 
 module.exports = class GroupMemberController extends BaseController {
 
@@ -116,10 +119,11 @@ module.exports = class GroupMemberController extends BaseController {
         }
 
         const canModerateGroup = await this.permissionService.can(currentUser, 'moderate', 'Group', { group: context.group, groupMember: context.member })
+        //const canModerateSite = await this.permissionService.can(currentUser, 'moderate', 'Site')
 
         // If they are a moderator or admin, they can view all group members,
         // including ones who are still pending.
-        if ( canModerateGroup ) {
+        if ( canModerateGroup === true) {
 
             // If they are querying for ancestor memberships, then they can only see their own.
             if ( 'isAncestorMemberFor' in urlQuery ) {
@@ -539,9 +543,7 @@ module.exports = class GroupMemberController extends BaseController {
         const currentUser = request.session.user
 
         if ( ! currentUser ) {
-            throw new ControllerError(401, 'not-authenticated',
-                `User must be authenticated.`,
-                `You must must be authenticated.`)
+            throw new NotAuthenticatedError('Unauthenticated User attempting to Delete GroupMember.')
         }
 
         const groupId = request.params.groupId
@@ -550,45 +552,35 @@ module.exports = class GroupMemberController extends BaseController {
         // Target group must exist.
         const group = await this.groupDAO.getGroupById(groupId)
         if ( ! group ) {
-            throw new ControllerError(404, 'not-found',
-                `User(${currentUser.id}) attempting to delete a member to a group that doesn't exist.`,
-                `Either that group doesn't exist or you don't have permission to see it.`)
+            throw new NotFoundError(`User(${currentUser.id}) attempting to delete a member to a group that doesn't exist.`)
         }
 
         const existing = await this.groupMemberDAO.getGroupMemberByGroupAndUser(groupId, memberId)
         if ( ! existing ) {
-            throw new ControllerError(404, 'not-found',
-                `User(${currentUser.id}) attempting to patch a non-existent GroupMember(${memberId}) of Group(${groupId}).`,
-                `You can't PATCH a GroupMember that doesn't exist.`)
+            throw new NotFoundError(`User(${currentUser.id}) attempting to delete a member to a group member that doesn't exist.`)
         }
 
         const userMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(groupId, currentUser.id)
 
         const canViewGroup = await this.permissionService.can(currentUser, 'view', 'Group', { group: group, userMember: userMember })
         if ( canViewGroup !== true ) {
-            throw new ControllerError(404, 'not-found',
-                `User(${currentUser.id}) attempting to remove a member to a Group(${groupId}) they can't view.`,
-                `Either that group doesn't exist or you don't have permission to see it.`)
+            throw new NotFoundError(`User(${currentUser.id}) attempting to remove a member to a Group(${groupId}) they can't view.`)
         }
 
         const canDeleteGroupMember = await this.permissionService.can(currentUser, 'delete', 'GroupMember', { group: group, userMember: userMember, groupMember: existing })
         // Current User must the member being removed or be an admin or a moderator.
         if ( canDeleteGroupMember !== true ) {
-            throw new ControllerError(403, 'not-authorized',
-                `User attempting to remove a member from a Group(${groupId}) without authorization.`,
-                `You're not authorized to remove that GroupMember.`)
+            throw new NotAuthorizedError(`User attempting to remove a member from a Group(${groupId}) without authorization.`)
         }
 
         if ( existing.role === 'admin' ) {
             // If this is the last admin, don't let them leave until they promote a new one.
             const groupAdmins = await this.core.database.query(`
-                SELECT user_id FROM group_members WHERE group_id = $1 AND role = 'admin'
+                SELECT user_id FROM group_members WHERE group_id = $1 AND role = 'admin' AND status = 'member'
             `, [ groupId ])
 
             if ( groupAdmins.rows.length <= 1 ) {
-                throw new ControllerError(403, 'not-authorized',
-                    `User(${currentUser.id}) aattempting to remove the last admin from Group(${groupId}).`,
-                    `You cannot remove the last admin from a group.`)
+                throw new NotAuthorizedError(`User(${currentUser.id}) attempting to remove the last admin from Group(${groupId}).`, `You may not remove the last admin from a group.`)
             }
         }
 

@@ -262,6 +262,14 @@ module.exports = class GroupController {
 
         let context = {}
         if ( 'parentId' in group ) {
+            // TODO See TECHDEBT string for slug validation.
+            const parentIdErrors = this.groupSchema.properties.parentId.validate(group.parentId, undefined, 'create')
+            if ( parentIdErrors.length > 0 ) {
+                throw new ControllerError(400, 'invalid',
+                    `User(${currentUser.id}) submitted a group with an invalid parentId.`,
+                    `Group.parentId must be a valid UUID identifying a valid Group.`)
+            }
+
             context.groupId = group.parentId
         }
 
@@ -272,13 +280,22 @@ module.exports = class GroupController {
                 `You are not authorized to create a new Group.`)
         }
 
-        group.slug = group.slug.toLowerCase()
-        const slugErrors = this.groupSchema.properties.slug.validate(group.slug)
+        // TODO Techdebt `schema.validate()` figures out whether this is a
+        // create or an update from the precense or absence of `existing`, but
+        // the individual validators make no assumptions and skip create/update
+        // requirements when neither is specified.  We also don't have access
+        // to the enum here, so we're just passing it as a bare string.
+        //
+        // This is a flaw in the schema definition.
+        const slugErrors = this.groupSchema.properties.slug.validate(group.slug, undefined, 'create')
         if ( slugErrors.length > 0 ) {
             throw new ControllerError(400, 'invalid',
-                `User(${currentUser}) submitted a Group with an invalid slug.`,
+                `User(${currentUser.id}) submitted a Group with an invalid slug.`,
                 `The URL of the group may only contain letters, numbers, '-', '_', and '.'.`)
         }
+
+        // Slugs should be case insensitive to match URLs.
+        group.slug = group.slug.toLowerCase()
 
         const existing = await this.groupDAO.getGroupBySlug(group.slug)
         if ( existing !== null ) {

@@ -71,7 +71,6 @@ module.exports = class PostController {
     }
 
     async getRelations(currentUser, results, requestedRelations) {
-
         let blockIds = []
         const canModerateSite = await this.permissionService.can(currentUser, 'moderate', 'Site')
 
@@ -291,13 +290,16 @@ module.exports = class PostController {
             // Hidden-open: Must be a parent group member and not banned or a group member.
             // Hidden-private: Must be a group member.
             //
+            // Parent group admins can always view posts in child groups.
+            //
             // NOTE: IS DISTINCT FROM returns "true" for NULL values.
             const visibleGroupResults = await this.core.database.query(`
                     SELECT groups.id FROM groups
                         LEFT OUTER JOIN group_members ON groups.id = group_members.group_id AND group_members.user_id = $1
                         LEFT OUTER JOIN group_members as parent_members ON groups.parent_id = parent_members.group_id AND parent_members.user_id = $1
                     WHERE
-                        (groups.type = 'open'
+                        (parent_members.status = 'member' AND parent_members.role = 'admin')
+                        OR (groups.type = 'open'
                             AND (group_members.status IS DISTINCT FROM 'banned'))
                         OR ( groups.type = 'private'
                             AND ( group_members.status = 'member' ))
@@ -565,12 +567,12 @@ module.exports = class PostController {
 
         await this.postDAO.insertPosts(post)
 
-        const results = await this.postDAO.selectPosts({
+        let results = await this.postDAO.selectPosts({
             where: `posts.id = $1`,
             params: [post.id]
         })
 
-        const entity = results.dictionary[post.id]
+        let entity = results.dictionary[post.id]
         if ( ! entity ) {
             throw new ControllerError(500, 'server-error',
                 `Post(${post.id}) missing after creation.`,
@@ -613,8 +615,16 @@ module.exports = class PostController {
                     groupModerationId: moderation.id
                 }
                 await this.postDAO.updatePost(postPatch)
+
+                // Update the results and the entity with the groupModeration
+                // change.
+                results = await this.postDAO.selectPosts({
+                    where: `posts.id = $1`,
+                    params: [post.id]
+                })
+                entity = results.dictionary[post.id]
             }
-            // Otherwise, update the gracking stats.  We'll update this on
+            // Otherwise, update the tracking stats.  We'll update this on
             // approval in the GroupModerationController for groups that
             // require approval.
             else {

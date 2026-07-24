@@ -100,9 +100,9 @@ const canViewGroupMember = function(user, context) {
         return true
     }
 
-    // For `hidden-open` groups they can see confirmed members if they
+    // For `hidden-open` and 'private-open' groups they can see confirmed members if they
     // are a member of the parent group.
-    if ( context.group.type === 'hidden-open' ) {
+    if ( context.group.type === 'private-open' || context.group.type === 'hidden-open' ) {
         if ( 'parentMember' in context && context.parentMember !== undefined && context.parentMember !== null
             && context.parentMember.userId === user.id && context.parentMember.groupId === context.group.parentId
             && context.parentMember.status === 'member'

@@ -20,5 +20,7 @@
 
 module.exports = {
     ControllerError: require('./ControllerError'),
+    NotAuthenticatedError: require('./NotAuthenticatedError'),
+    NotAuthorizedError: require('./NotAuthorizedError'),
     NotFoundError: require('./NotFoundError')
 }

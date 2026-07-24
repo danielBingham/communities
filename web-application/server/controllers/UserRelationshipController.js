@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -18,9 +18,9 @@
  *
  ******************************************************************************/
 
-const { 
-    UserRelationshipDAO, 
-    UserDAO, 
+const {
+    UserRelationshipDAO,
+    UserDAO,
 
     NotificationService,
     MutualsService,
@@ -30,6 +30,7 @@ const {
 } = require('@communities/backend')
 
 const ControllerError = require('../errors/ControllerError')
+const NotFoundError = require('../errors/NotFoundError')
 
 module.exports = class UserRelationshipController {
 
@@ -46,8 +47,8 @@ module.exports = class UserRelationshipController {
         this.userRelationshipService = new UserRelationshipService(core)
     }
 
-    async getRelations(currentUser, userId, results, requestedRelations) { 
-        const userIdDictionary = {} 
+    async getRelations(currentUser, userId, results, requestedRelations) {
+        const userIdDictionary = {}
         for(const id of results.list) {
             const relationship = results.dictionary[id]
             userIdDictionary[relationship.userId] = true
@@ -73,7 +74,7 @@ module.exports = class UserRelationshipController {
         let mutualsDictionary = {}
         if ( this.core.features.has('feat-491-mutual-friends' ) ) {
             if ( currentUser ) {
-                mutualsDictionary = await this.mutualsService.getMutualsForCurrentUserAndList(currentUser, userIds) 
+                mutualsDictionary = await this.mutualsService.getMutualsForCurrentUserAndList(currentUser, userIds)
             }
         }
 
@@ -93,11 +94,11 @@ module.exports = class UserRelationshipController {
         }
 
         const blockIds = await this.userRelationshipService.getBlockIdsForUser(currentUser.id)
-        
+
         if ( currentUser.id === userId ) {
             // When querying your own relationships, you may query any
             // relationship in which you have not beeen blocked.  Including
-            // those where you are the blocker. 
+            // those where you are the blocker.
             //
             // Block relationships will be composed with `user_id` set to the
             // blocker and `friend_id` set to the blocked.
@@ -152,20 +153,24 @@ module.exports = class UserRelationshipController {
                 query.order = `ARRAY_POSITION($${query.params.length}::uuid[], user_relationships.id)`
             }
         }
-       
+
         if ( 'GroupMember' in requestQuery ) {
             const GroupMemberQuery = requestQuery.GroupMember
-            if ( 'is' in GroupMemberQuery && GroupMemberQuery.is === 'empty') {
-                const results = await this.core.database.query(`
-                    SELECT user_relationships.id
-                        FROM user_relationships
-                            LEFT OUTER JOIN group_members ON (user_relationships.user_id = $1 AND user_relationships.friend_id = group_members.user_id AND group_members.group_id = $2) 
-                                OR (user_relationships.friend_id = $1 AND user_relationships.user_id = group_members.user_id AND group_members.group_id = $2)
-                        WHERE (user_relationships.user_id = $1 OR user_relationships.friend_id = $1) AND group_members.group_id IS NULL 
-                `, [ userId, GroupMemberQuery.groupId])
 
-                query.params.push(results.rows.map((r) => r.id))
-                query.where += ` AND user_relationships.id = ANY($${query.params.length}::uuid[])`
+            const canModerateGroup = await this.permissionService.can(currentUser, 'moderate', 'Group', { groupId: GroupMemberQuery.groupId })
+            if ( canModerateGroup === true ) {
+                if ( 'is' in GroupMemberQuery && GroupMemberQuery.is === 'empty') {
+                    const results = await this.core.database.query(`
+                        SELECT user_relationships.id
+                            FROM user_relationships
+                                LEFT OUTER JOIN group_members ON (user_relationships.user_id = $1 AND user_relationships.friend_id = group_members.user_id AND group_members.group_id = $2)
+                                    OR (user_relationships.friend_id = $1 AND user_relationships.user_id = group_members.user_id AND group_members.group_id = $2)
+                            WHERE (user_relationships.user_id = $1 OR user_relationships.friend_id = $1) AND group_members.group_id IS NULL
+                    `, [ userId, GroupMemberQuery.groupId])
+
+                    query.params.push(results.rows.map((r) => r.id))
+                    query.where += ` AND user_relationships.id = ANY($${query.params.length}::uuid[])`
+                }
             }
         }
 
@@ -179,7 +184,7 @@ module.exports = class UserRelationshipController {
     /**
      * GET /user/:userId/relationships
      *
-     * Get the relationships for :userId.  
+     * Get the relationships for :userId.
      */
     async getUserRelationships(request, response) {
         const currentUser = request.session.user
@@ -191,8 +196,12 @@ module.exports = class UserRelationshipController {
         }
 
         const userId = request.params.userId
+        const user = await this.userDAO.getUserById(userId)
+        if ( user === null ) {
+            throw new NotFoundError(`User attempted to query relationships for User(${userId}) who doesn't exist.`)
+        }
 
-        const canQueryUserRelationships = await this.permissionService.can(currentUser, 'query', 'UserRelationship', 
+        const canQueryUserRelationships = await this.permissionService.can(currentUser, 'query', 'UserRelationship',
             { userId: currentUser.id, relationId: userId })
         if ( canQueryUserRelationships !== true ) {
             throw new ControllerError(403, 'not-authorized',
@@ -236,7 +245,7 @@ module.exports = class UserRelationshipController {
         const relationId = request.body.relationId
         const status = request.body.status
 
-        const canCreateUserRelationship = await this.permissionService.can(currentUser, 'create', 'UserRelationship', 
+        const canCreateUserRelationship = await this.permissionService.can(currentUser, 'create', 'UserRelationship',
             { userId: userId, relationId: relationId })
         if ( canCreateUserRelationship !== true ) {
             throw new ControllerError(403, 'not-authorized',
@@ -254,7 +263,7 @@ module.exports = class UserRelationshipController {
             where: `(user_id = $1 AND friend_id = $2) OR (user_id = $2 AND friend_id = $1)`,
             params: [ userId, relationId]
         })
-      
+
         let existing = existingResults.list.length > 0 ? existingResults.dictionary[existingResults.list[0]] : null
 
         // If we're blocking a user, then delete the existing relationship.
@@ -263,9 +272,9 @@ module.exports = class UserRelationshipController {
             // We need to remove the mutuals here, because we're blocking the
             // user but then setting "existing" to null.
             if ( existing.status === 'confirmed' ) {
-                await this.core.queues['remove-mutuals-for-relationship'].add({ 
-                    session: { user: currentUser }, 
-                    relationship: existing 
+                await this.core.queues['remove-mutuals-for-relationship'].add({
+                    session: { user: currentUser },
+                    relationship: existing
                 }, { attempts: 2 })
             }
 
@@ -314,23 +323,23 @@ module.exports = class UserRelationshipController {
             }
 
             if ( existing.status !== 'confirmed' && entity.status === 'confirmed' ) {
-                await this.core.queues['add-mutuals-for-relationship'].add({ 
-                    session: { user: currentUser }, 
+                await this.core.queues['add-mutuals-for-relationship'].add({
+                    session: { user: currentUser },
                     relationship: entity
                 }, { attempts: 2 })
             } else if ( existing.status === 'confirmed' && entity.status !== 'confirmed' ) {
-                await this.core.queues['remove-mutuals-for-relationship'].add({ 
-                    session: { user: currentUser }, 
-                    relationship: entity 
+                await this.core.queues['remove-mutuals-for-relationship'].add({
+                    session: { user: currentUser },
+                    relationship: entity
                 }, { attempts: 2 })
             }
 
             await this.notificationService.sendNotifications(
-                currentUser, 
+                currentUser,
                 'UserRelationship:update',
                 {
                     userId: entity.userId,
-                    relationId: entity.relationId 
+                    relationId: entity.relationId
                 }
             )
 
@@ -348,7 +357,7 @@ module.exports = class UserRelationshipController {
             const userRelationship = {
                 userId: userId,
                 relationId: relationId,
-                status: status 
+                status: status
             }
 
             const validationErrors = await this.validationService.validateUserRelationship(currentUser, userRelationship)
@@ -374,10 +383,10 @@ module.exports = class UserRelationshipController {
                     `UserRelationship(${userId}, ${relationId}) missing after insert.`,
                     `We created the relationship between you and ${relationId}, but it wasn't there when we queried it. Please report bug.`)
             }
-          
+
             if ( entity.status !== 'blocked' ) {
                 await this.notificationService.sendNotifications(
-                    currentUser, 
+                    currentUser,
                     'UserRelationship:create',
                     {
                         userId: userId,
@@ -393,8 +402,8 @@ module.exports = class UserRelationshipController {
             // In the case where status is "blocked", we don't need to do
             // anything, because there is no pre-existing relationship.
             if ( entity.status === 'confirmed' ) {
-                await this.core.queues['add-mutuals-for-relationship'].add({ 
-                    session: { user: currentUser }, 
+                await this.core.queues['add-mutuals-for-relationship'].add({
+                    session: { user: currentUser },
                     relationship: entity
                 }, { attempts: 2 })
             }
@@ -429,20 +438,15 @@ module.exports = class UserRelationshipController {
         })
 
         if ( results.list.length <= 0 ) {
-            throw new ControllerError(404, 'not-found',
-                `No relationship found for User(${userId}) and User(${relationId}).`,
-                `No relationship found for User(${userId}) and User(${relationId}).`)
+            throw new NotFoundError( `No relationship found for User(${userId}) and User(${relationId}).`)
         }
 
         const relationship = results.dictionary[results.list[0]]
-        const canViewUserRelationship = await this.permissionService.can(currentUser, 'view', 'UserRelationship', 
+        const canViewUserRelationship = await this.permissionService.can(currentUser, 'view', 'UserRelationship',
             { userId: userId, relationId: relationId, relationship: relationship })
         if ( canViewUserRelationship !== true ) {
-            throw new ControllerError(404, 'not-found',
-                `User attempting to view relationship for User(${userId}) and User(${relationId}) without authorization.`,
-                `Either that UserRelationship doesn't exist or you don't have permission to view it.`)
+            throw new NotFoundError(`User attempting to view relationship for User(${userId}) and User(${relationId}) without authorization.`)
         }
-
 
         const entity = results.dictionary[results.list[0]]
 
@@ -493,7 +497,7 @@ module.exports = class UserRelationshipController {
             id: existing.id,
             userId: userId,
             relationId: relationId,
-            status: request.body.status 
+            status: request.body.status
         }
 
         const validationErrors = await this.validationService.validateUserRelationship(currentUser, userRelationship, existing)
@@ -521,19 +525,19 @@ module.exports = class UserRelationshipController {
         }
 
         if ( existing.status !== 'confirmed' && entity.status === 'confirmed' ) {
-            await this.core.queues['add-mutuals-for-relationship'].add({ 
-                session: { user: currentUser }, 
+            await this.core.queues['add-mutuals-for-relationship'].add({
+                session: { user: currentUser },
                 relationship: entity
             }, { attempts: 2 })
         } else if ( existing.status === 'confirmed' && entity.status !== 'confirmed' ) {
-            await this.core.queues['remove-mutuals-for-relationship'].add({ 
-                session: { user: currentUser }, 
-                relationship: entity 
+            await this.core.queues['remove-mutuals-for-relationship'].add({
+                session: { user: currentUser },
+                relationship: entity
             }, { attempts: 2 })
         }
 
         await this.notificationService.sendNotifications(
-            currentUser, 
+            currentUser,
             'UserRelationship:update',
             {
                 userId: entity.userId,
@@ -561,7 +565,7 @@ module.exports = class UserRelationshipController {
         const userId = request.params.userId
         const relationId = request.params.relationId
 
-        const canDeleteUserRelationship = await this.permissionService.can(currentUser, 'delete', 'UserRelationship', 
+        const canDeleteUserRelationship = await this.permissionService.can(currentUser, 'delete', 'UserRelationship',
             { userId: userId, relationId: relationId})
         if ( canDeleteUserRelationship !== true ) {
             throw new ControllerError(403, 'not-authorized',
@@ -585,15 +589,15 @@ module.exports = class UserRelationshipController {
         await this.userRelationshipDAO.deleteUserRelationship(existing)
 
         if ( existing.status === 'confirmed' ) {
-            await this.core.queues['remove-mutuals-for-relationship'].add({ 
-                session: { user: currentUser }, 
-                relationship: existing 
+            await this.core.queues['remove-mutuals-for-relationship'].add({
+                session: { user: currentUser },
+                relationship: existing
             }, { attempts: 2 })
         }
 
         response.status(200).json({
             entity: existing,
-            relations: {} 
+            relations: {}
         })
     }
 
