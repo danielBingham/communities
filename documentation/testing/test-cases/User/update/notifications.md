@@ -2,12 +2,15 @@
 
 Cases covering the user updating their profile to toggle Notifications.
 
-### Pre-requisites
+### Smoke Test
+
+#### Pre-requisites
 
 - [ ] User1 has registered.
 - [ ] User2 has registered.
+- [ ] Email, desktop and mobile notification channels are all available to check.
 
-### Smoke Test
+#### Cases
 
 - [ ] As a user, I should not receive any notifications when All Notifications are Silenced.
     - As User1:
@@ -19,6 +22,12 @@ Cases covering the user updating their profile to toggle Notifications.
             - **Confirm no notification of any kind is received.**
 
 ### Manual Regression
+
+#### Pre-requisites
+
+- [ ] User1 has registered.
+- [ ] User2 has registered.
+- [ ] Email, desktop and mobile notification channels are all available to check.
 
 #### All Notifications
 
@@ -64,6 +73,10 @@ NOTE: Cases for the Groups notification group have not been written yet.
 NOTE: Cases for the Moderation notification group have not been written yet.
 
 ### Full Regression
+
+#### Pre-requisites
+
+None.
 
 The notification settings endpoints are not yet covered by the Integration
 suite.  All notification cases are defined in the Smoke Test and Manual

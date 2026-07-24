@@ -2,13 +2,14 @@
 
 Cases covering group creation.
 
-### Pre-requisites
+### Smoke Test
+
+#### Pre-requisites
 
 - [ ] User1 has been created.
 - [ ] User2 has been created.
 - [ ] User3 has been created.
-
-### Smoke Test
+- [ ] Sample images are available to upload as group images.
 
 #### Top level Groups
 
@@ -77,6 +78,14 @@ Cases covering group creation.
 
 ### Manual Regression
 
+#### Pre-requisites
+
+- [ ] User1 has been created.
+- [ ] Sample images are available to upload as group images, including one
+      that does not have a 1:1 aspect ratio.
+
+#### Cases
+
 - [ ] As a user, the create group form behaves correctly.
     - As User1:
         - Go to Groups -> Create.
@@ -97,6 +106,18 @@ Cases covering group creation.
             - **Confirm a validation error is shown on the URL field.**
 
 ### Full Regression
+
+#### Pre-requisites
+
+- [ ] User1 has been created.
+- [ ] User2 has been created.
+- [ ] User3 has been created.
+- [ ] A Public, a Private, a Hidden and a Private-Open parent group have each
+      been created with User1 as their creating admin.
+- [ ] User4 has been added as a second admin, User5 as a moderator and User6
+      as a plain member of each parent group.
+- [ ] User7 has been created and is a non-member of every parent group.
+- [ ] Sample images are available to upload as group images.
 
 #### Basics
 

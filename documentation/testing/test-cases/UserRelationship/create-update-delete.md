@@ -3,16 +3,15 @@
 Cases covering sending friend requests, accepting friend requests, and
 rejecting friend requests.
 
-### Pre-requisites
+### Smoke Test
+
+#### Pre-requisites
 
 - [ ] User1 has been created.
 - [ ] User2 has been created.
 - [ ] User1 and User2 are not friends.
-- [ ] User3 has been created and is a friend of User2 but not of User1.
-- [ ] User4 has been created and has not confirmed their email.
-- [ ] A site moderator has been created.
 
-### Smoke Test
+#### Cases
 
 - [ ] As a user, I can send a friend request.
     - As User1:
@@ -45,6 +44,15 @@ rejecting friend requests.
             - **Confirm friend request is removed from "Friend Requests" view.**
 
 ### Manual Regression
+
+#### Pre-requisites
+
+- [ ] User1 has been created.
+- [ ] User2 has been created.
+- [ ] User1 and User2 are not friends.
+- [ ] Two browser sessions are available, one logged in as each user.
+
+#### Cases
 
 - [ ] As a user, it doesn't matter which of us removes the friendship.
     - As User1:
@@ -84,6 +92,14 @@ rejecting friend requests.
             - **Confirm relationship confirmed.**
 
 ### Full Regression
+
+#### Pre-requisites
+
+- [ ] User1 has been created.
+- [ ] User2 has been created.
+- [ ] User3 has been created and is a friend of User2 but not of User1.
+- [ ] User4 has been created and has not confirmed their email.
+- [ ] A site moderator has been created.
 
 The create, update and delete relationship endpoints are not yet covered by
 the Integration suite.  The cases below are the manual counterparts of the

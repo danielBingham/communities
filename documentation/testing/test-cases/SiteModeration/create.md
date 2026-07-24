@@ -3,15 +3,16 @@
 Test cases related to SiteModeration creation.  Who can flag posts and
 comments for site moderation?
 
-### Pre-requisites
+### Smoke Test
+
+#### Pre-requisites
 
 - [ ] User1 has been created.
 - [ ] User2 has been created and is friends with User1.
 - [ ] User3 has been created and is **not** friends with User1.
-- [ ] User4 has been created and is friends with User1.
 - [ ] A site moderator has been created.
 
-### Smoke Test
+#### Cases
 
 - [ ] As a user, I can flag a public post for Site Moderators.
     - As User1:
@@ -38,6 +39,13 @@ comments for site moderation?
             - **Confirm the post cannot be seen and no flag control is offered.**
 
 ### Manual Regression
+
+#### Pre-requisites
+
+- [ ] User1 has been created.
+- [ ] User2 has been created and is friends with User1.
+- [ ] User3 has been created and is **not** friends with User1.
+- [ ] User4 has been created and is friends with User1.
 
 #### Comments
 
@@ -83,6 +91,10 @@ comments for site moderation?
             - **Confirm the second flag is refused or the control is disabled.**
 
 ### Full Regression
+
+#### Pre-requisites
+
+None.
 
 The site moderation endpoints are not yet covered by the Integration suite.
 All site moderation creation cases are defined in the Smoke Test and Manual

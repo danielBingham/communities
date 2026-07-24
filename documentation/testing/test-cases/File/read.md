@@ -3,14 +3,13 @@
 Cases covering viewing and downloading uploaded files, and who is permitted to
 reach them.
 
-### Pre-requisites
+### Smoke Test
+
+#### Pre-requisites
 
 - [ ] User1 has been created.
 - [ ] User2 has been created and is friends with User1.
-- [ ] User3 has been created and is **not** friends with User1.
-- [ ] A Private Group has been created with User1 as a member and User3 as a non-member.
-
-### Smoke Test
+- [ ] Sample images and videos are available to upload.
 
 #### Post
 
@@ -25,6 +24,15 @@ reach them.
             - **Confirm the full size image loads.**
 
 ### Manual Regression
+
+#### Pre-requisites
+
+- [ ] User1 has been created.
+- [ ] User2 has been created and is friends with User1.
+- [ ] A group has been created with User1 as a member.
+- [ ] A user who has never set a profile image has been created.
+- [ ] Sample images are available to upload, along with a video large enough
+      to take a noticeable time to process.
 
 #### Post
 
@@ -64,6 +72,10 @@ reach them.
             - **Confirm the default avatar renders rather than a broken image.**
 
 ### Full Regression
+
+#### Pre-requisites
+
+None.
 
 The file endpoints are not yet covered by the Integration suite.  All file
 read cases are defined in the Smoke Test and Manual Regression sections above.

@@ -2,18 +2,22 @@
 
 Cases covering updating files.
 
-### Pre-requisites
-
-- [ ] User1 has been created.
-- [ ] User2 has been created.
-- [ ] A group has been created with User1 as admin.
-
 ### Smoke Test
+
+#### Pre-requisites
+
+None.
 
 No file update cases are critical enough for the Smoke Test.  All cases are
 defined in the Manual Regression section below.
 
 ### Manual Regression
+
+#### Pre-requisites
+
+- [ ] User1 has been created and has a profile image set.
+- [ ] A group has been created with User1 as an admin and a group image set.
+- [ ] Sample images are available to upload.
 
 #### Post
 
@@ -49,6 +53,10 @@ defined in the Manual Regression section below.
             - **Confirm the new image replaces the old one everywhere you are shown.**
 
 ### Full Regression
+
+#### Pre-requisites
+
+None.
 
 The file endpoints are not yet covered by the Integration suite.  All file
 update cases are defined in the Manual Regression section above.

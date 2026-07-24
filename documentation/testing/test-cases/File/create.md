@@ -2,13 +2,12 @@
 
 Cases covering uploading files.
 
-### Pre-requisites
+### Smoke Test
+
+#### Pre-requisites
 
 - [ ] User1 has been created.
-- [ ] User2 has been created.
-- [ ] A group has been created with User1 as admin.
-
-### Smoke Test
+- [ ] Sample images and videos are available to upload.
 
 #### Post
 
@@ -33,6 +32,13 @@ Cases covering uploading files.
             - **Confirm the image uploads and is shown.**
 
 ### Manual Regression
+
+#### Pre-requisites
+
+- [ ] User1 has been created.
+- [ ] A group has been created with User1 as an admin.
+- [ ] Sample images and videos are available to upload, including an image
+      larger than 30 mb, a video larger than 700 mb, and an empty file.
 
 #### Post
 
@@ -112,6 +118,10 @@ Cases covering uploading files.
             - **Confirm a clear error message is shown.**
 
 ### Full Regression
+
+#### Pre-requisites
+
+None.
 
 The file endpoints are not yet covered by the Integration suite.  All file
 upload cases are defined in the Smoke Test and Manual Regression sections

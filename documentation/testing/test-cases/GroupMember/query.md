@@ -2,38 +2,19 @@
 
 Cases covering searching or browsing for GroupMembers.
 
-### Pre-requisites
+### Smoke Test
 
-- [ ] A Public Group, Public Group, has been created.
-    - [ ] The following subgroups of Public Group have been created:
-        - [ ] A Public Group named Public - Public Group
-        - [ ] A Private Group named Public - Private Group
-        - [ ] A Hidden Group named Public - Hidden Group
-- [ ] A Private Group, Private Group, has been created.
-    - [ ] The following subgroups of Private Group have been created:
-        - [ ] An Open Group named Private - Open Group
-        - [ ] A Private Group named Private - Private Group
-        - [ ] A Hidden Group named Private - Hidden Group
-- [ ] A Hidden Group, Hidden Group, has been created.
-    - [ ] The following subgroups of Hidden Group have been created:
-        - [ ] An Open Group named Hidden - Open Group
-        - [ ] A Private Group named Hidden - Private Group
-        - [ ] A Hidden Group named Hidden - Hidden Group
+#### Pre-requisites
 
-- [ ] User1 has been created and added as an admin of each group.
+- [ ] A Public Group, Public Group, and a Private Group, Private Group, have
+      been created.
 - [ ] User2 has been created and added as a moderator of each group.
 - [ ] User3 has been created and added as a member of each group.
-
-- [ ] User4 has been created and added as an admin only of the top level groups.
-- [ ] User5 has been created an added as a moderator only of the top level groups.
-- [ ] User6 has been created and added as a member only of the top level groups.
-
 - [ ] User7 has been created and is a non-member of all groups.
-- [ ] User8 has been created, has a pending invitation to each group, and has not accepted.
-- [ ] User9 has been created and has been banned from each group.
-- [ ] A site moderator has been created.
+- [ ] Each group has more members than fit on a single page, along with
+      pending invitations, pending requests and banned users.
 
-### Smoke Test
+#### Cases
 
 - [ ] As a member, I can browse the member lists of a group.
     - As User3:
@@ -53,6 +34,31 @@ Cases covering searching or browsing for GroupMembers.
 - [ ] As a non-member, I **cannot** browse the member lists of a Private Group. (covered: integration)
 
 ### Manual Regression
+
+#### Pre-requisites
+
+- [ ] A Public Group, Public Group, has been created.
+    - [ ] The following subgroups of Public Group have been created:
+        - [ ] A Public Group named Public - Public Group
+        - [ ] A Private Group named Public - Private Group
+        - [ ] A Hidden Group named Public - Hidden Group
+- [ ] A Private Group, Private Group, has been created.
+    - [ ] The following subgroups of Private Group have been created:
+        - [ ] An Open Group named Private - Open Group
+        - [ ] A Private Group named Private - Private Group
+        - [ ] A Hidden Group named Private - Hidden Group
+- [ ] A Hidden Group, Hidden Group, has been created.
+    - [ ] The following subgroups of Hidden Group have been created:
+        - [ ] An Open Group named Hidden - Open Group
+        - [ ] A Private Group named Hidden - Private Group
+        - [ ] A Hidden Group named Hidden - Hidden Group
+
+- [ ] User2 has been created and added as a moderator of each group and subgroup.
+- [ ] User3 has been created and added as a member of each group.
+- [ ] User4 has been created and added as an admin only of the top level groups.
+- [ ] Every group and subgroup has outstanding Email Invitations.
+
+#### Cases
 
 - [ ] As a user, I can filter a member list using the Search control.
     - As User3:
@@ -130,6 +136,41 @@ Email Invitation list cases live here.
 - [ ] Parent Group Admins **can** query Email Invitations.
 
 ### Full Regression
+
+#### Pre-requisites
+
+- [ ] A Public Group, Public Group, has been created.
+    - [ ] The following subgroups of Public Group have been created:
+        - [ ] A Public Group named Public - Public Group
+        - [ ] A Private Group named Public - Private Group
+        - [ ] A Hidden Group named Public - Hidden Group
+- [ ] A Private Group, Private Group, has been created.
+    - [ ] The following subgroups of Private Group have been created:
+        - [ ] An Open Group named Private - Open Group
+        - [ ] A Private Group named Private - Private Group
+        - [ ] A Hidden Group named Private - Hidden Group
+- [ ] A Hidden Group, Hidden Group, has been created.
+    - [ ] The following subgroups of Hidden Group have been created:
+        - [ ] An Open Group named Hidden - Open Group
+        - [ ] A Private Group named Hidden - Private Group
+        - [ ] A Hidden Group named Hidden - Hidden Group
+
+- [ ] User1 has been created and added as an admin of each group.
+- [ ] User2 has been created and added as a moderator of each group.
+- [ ] User3 has been created and added as a member of each group.
+
+- [ ] User4 has been created and added as an admin only of the top level groups.
+- [ ] User5 has been created an added as a moderator only of the top level groups.
+- [ ] User6 has been created and added as a member only of the top level groups.
+
+- [ ] User7 has been created and is a non-member of all groups.
+- [ ] User8 has been created, has a pending invitation to each group, and has not accepted.
+- [ ] User9 has been created and has been banned from each group.
+- [ ] A site moderator has been created.
+
+- [ ] At least one group has more members than fit on a single page.
+
+#### Cases
 
 - [ ] As a user, the member list matches what I can read individually. (covered: integration)
     - As User1:

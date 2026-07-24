@@ -2,7 +2,64 @@
 
 Cases covering GroupMember reading.  Who can view the members of a group?
 
-### Pre-requisites
+### Smoke Test
+
+#### Pre-requisites
+
+- [ ] A Public Group, Public Group, has been created.
+- [ ] A Private Group, Private Group, has been created.
+- [ ] A Hidden Group, Hidden Group, has been created.
+
+- [ ] User1 has been created and added as an admin of each group.
+- [ ] User2 has been created and added as a moderator of each group.
+- [ ] User3 has been created and added as a member of each group.
+- [ ] User7 has been created and is a non-member of all groups.
+- [ ] User9 has been created and has been banned from Public Group.
+
+#### Cases
+
+- [ ] As a non-member, I can see the members of a Public Group but not of a Private or Hidden Group.
+    - As User7:
+        - Visit Public Group and open the Members tab.
+            - **Confirm the member list is visible.**
+        - Visit Private Group and open the Members tab.
+            - **Confirm the member list is *not* visible.**
+        - Visit Hidden Group.
+            - **Confirm the group is not visible at all.**
+
+- [ ] As a member, I can see the members of every group I belong to.
+    - As User3:
+        - Visit Public Group, Private Group and Hidden Group in turn and open the Members tab.
+            - **Confirm the member list is visible in each.**
+            - **Confirm User1 is listed as Admin and User2 as Moderator.**
+
+- [ ] A banned member **cannot** view the members of the group they were banned from. (covered: integration)
+
+### Manual Regression
+
+#### Pre-requisites
+
+- [ ] A Public Group, Public Group, has been created with User1 as an admin
+      and User2 as a moderator.
+- [ ] User3 has been created and added as a member of Public Group.
+
+#### Cases
+
+- [ ] As a user, the member list shows each member's role.
+    - As User3:
+        - Visit Public Group and open the Members tab.
+            - **Confirm admins are labelled as Admin.**
+            - **Confirm moderators are labelled as Moderator.**
+            - **Confirm plain members carry no role label.**
+
+- [ ] As a user, clicking a member in the list takes me to their profile.
+    - As User3:
+        - Visit Public Group, open the Members tab and click User1.
+            - **Confirm User1's profile page loads.**
+
+### Full Regression
+
+#### Pre-requisites
 
 - [ ] A Public Group, Public Group, has been created.
     - [ ] The following subgroups of Public Group have been created:
@@ -32,41 +89,6 @@ Cases covering GroupMember reading.  Who can view the members of a group?
 - [ ] User8 has been created, has a pending invitation to each group, and has not accepted.
 - [ ] User9 has been created and has been banned from each group.
 - [ ] A site moderator has been created.
-
-### Smoke Test
-
-- [ ] As a non-member, I can see the members of a Public Group but not of a Private or Hidden Group.
-    - As User7:
-        - Visit Public Group and open the Members tab.
-            - **Confirm the member list is visible.**
-        - Visit Private Group and open the Members tab.
-            - **Confirm the member list is *not* visible.**
-        - Visit Hidden Group.
-            - **Confirm the group is not visible at all.**
-
-- [ ] As a member, I can see the members of every group I belong to.
-    - As User3:
-        - Visit Public Group, Private Group and Hidden Group in turn and open the Members tab.
-            - **Confirm the member list is visible in each.**
-            - **Confirm User1 is listed as Admin and User2 as Moderator.**
-
-- [ ] A banned member **cannot** view the members of the group they were banned from. (covered: integration)
-
-### Manual Regression
-
-- [ ] As a user, the member list shows each member's role.
-    - As User3:
-        - Visit Public Group and open the Members tab.
-            - **Confirm admins are labelled as Admin.**
-            - **Confirm moderators are labelled as Moderator.**
-            - **Confirm plain members carry no role label.**
-
-- [ ] As a user, clicking a member in the list takes me to their profile.
-    - As User3:
-        - Visit Public Group, open the Members tab and click User1.
-            - **Confirm User1's profile page loads.**
-
-### Full Regression
 
 #### Basics
 

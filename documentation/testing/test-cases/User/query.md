@@ -2,16 +2,14 @@
 
 Cases covering searching for and browsing lists of users.
 
-### Pre-requisites
+### Smoke Test
+
+#### Pre-requisites
 
 - [ ] User1 has been created.
 - [ ] User2 has been created.
-- [ ] User3 has been created, is friends with User1, and has blocked User2.
-- [ ] User4 has been created and has not yet confirmed their email.
-- [ ] User5 has been created and has been banned by a site moderator.
-- [ ] User6 has been created and has had their profile rejected by a site moderator.
 
-### Smoke Test
+#### Cases
 
 - [ ] As a user, I can search for people by name on the Find Users page.
     - As User1:
@@ -21,6 +19,14 @@ Cases covering searching for and browsing lists of users.
             - **Confirm User2 is present in the results.**
 
 ### Manual Regression
+
+#### Pre-requisites
+
+- [ ] User1 has been created.
+- [ ] User2 has been created.
+- [ ] User3 has been created and is friends with User1.
+
+#### Cases
 
 - [ ] As a user, I can search for people by name on the Your Friends page.
     - As User1:
@@ -37,6 +43,19 @@ Cases covering searching for and browsing lists of users.
             - **Confirm the list filters down to matching pending requests.**
 
 ### Full Regression
+
+#### Pre-requisites
+
+- [ ] User1 has been created.
+- [ ] User2 has been created.
+- [ ] User3 has been created, is friends with User1, and has blocked User2.
+- [ ] User4 has been created and has not yet confirmed their email.
+- [ ] User5 has been created and has been banned by a site moderator.
+- [ ] User6 has been created and has had their profile rejected by a site moderator.
+- [ ] A user has been invited but has never registered.
+- [ ] A site moderator has been created.
+
+#### Cases
 
 - [ ] As a user, the user list is self-consistent and de-duplicated across pages. (covered: integration)
     - As User1:

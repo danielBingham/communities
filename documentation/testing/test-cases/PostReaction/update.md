@@ -2,13 +2,15 @@
 
 Cases covering updating reactions to Posts.
 
-### Pre-requisites
+### Smoke Test
+
+#### Pre-requisites
 
 - [ ] User1 has been created.
-- [ ] User2 has been created and has created at least three posts.
-- [ ] User1 has reacted to each of User2's posts.
+- [ ] User2 has been created and has created at least one post.
+- [ ] User1 has liked one of User2's posts.
 
-### Smoke Test
+#### Cases
 
 - [ ] As a user, I can change a like to a dislike.
     - As User1:
@@ -22,6 +24,14 @@ Cases covering updating reactions to Posts.
 
 ### Manual Regression
 
+#### Pre-requisites
+
+- [ ] User1 has been created.
+- [ ] User2 has been created and has created at least one post.
+- [ ] User1 has disliked one of User2's posts -- the state left by the Smoke
+      Test above.
+
+#### Cases
 
 - [ ] As a user, I can change a dislike to a like.
     - As User1:
@@ -34,6 +44,10 @@ Cases covering updating reactions to Posts.
             - **Confirm post stays the same in rank.**
 
 ### Full Regression
+
+#### Pre-requisites
+
+None.
 
 The post reaction endpoints are not yet covered by the Integration suite.  All
 reaction update cases are defined in the Smoke Test and Manual Regression

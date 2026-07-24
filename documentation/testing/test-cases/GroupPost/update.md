@@ -5,38 +5,16 @@ Cases covering GroupPost updating.  Who can edit the posts in a group?
 The composition of an edit (text, images, links, drafts) is covered in
 [Update Post](documentation/testing/test-cases/Post/update.md).
 
-### Pre-requisites
+### Smoke Test
+
+#### Pre-requisites
 
 - [ ] A Public Group, Public Group, has been created.
-    - [ ] The following subgroups of Public Group have been created:
-        - [ ] A Public Group named Public - Public Group
-        - [ ] A Private Group named Public - Private Group
-        - [ ] A Hidden Group named Public - Hidden Group
-- [ ] A Private Group, Private Group, has been created.
-    - [ ] The following subgroups of Private Group have been created:
-        - [ ] An Open Group named Private - Open Group
-        - [ ] A Private Group named Private - Private Group
-        - [ ] A Hidden Group named Private - Hidden Group
-- [ ] A Hidden Group, Hidden Group, has been created.
-    - [ ] The following subgroups of Hidden Group have been created:
-        - [ ] An Open Group named Hidden - Open Group
-        - [ ] A Private Group named Hidden - Private Group
-        - [ ] A Hidden Group named Hidden - Hidden Group
+- [ ] User2 has been created and added as a moderator of Public Group.
+- [ ] User3 has been created and added as a member of Public Group.
+- [ ] User7 has been created and is a non-member of Public Group.
 
-- [ ] User1 has been created and added as an admin of each group.
-- [ ] User2 has been created and added as a moderator of each group.
-- [ ] User3 has been created and added as a member of each group.
-
-- [ ] User4 has been created and added as an admin only of the top level groups.
-- [ ] User5 has been created an added as a moderator only of the top level groups.
-- [ ] User6 has been created and added as a member only of the top level groups.
-
-- [ ] User7 has been created and is a non-member of all groups.
-- [ ] User8 has been created, has a pending invitation to each group, and has not accepted.
-- [ ] User9 has been created and has been banned from each group.
-- [ ] A site moderator has been created.
-
-### Smoke Test
+#### Cases
 
 - [ ] As a post author, I can edit my own group post.
     - As User3:
@@ -54,6 +32,12 @@ The composition of an edit (text, images, links, drafts) is covered in
 
 ### Manual Regression
 
+#### Pre-requisites
+
+- [ ] A Public Group, Public Group, has been created with User3 as a member.
+
+#### Cases
+
 - [ ] As a post author, editing a group post does not change which group it belongs to.
     - As User3:
         - Create a post in Public Group and edit it.
@@ -61,6 +45,17 @@ The composition of an edit (text, images, links, drafts) is covered in
             - **Confirm no control is offered to move it to another group.**
 
 ### Full Regression
+
+#### Pre-requisites
+
+- [ ] An Open group and a Private group have each been created, containing
+      posts made by User3.
+- [ ] User1 has been added as an admin and User2 as a plain member of each group.
+- [ ] User7 has been created and is a non-member of both groups.
+- [ ] User9 has posts in the Open group and has since been banned from it.
+- [ ] A subgroup has been created containing a post by User3, with a parent
+      member who can view it and a non-member who cannot.
+- [ ] A site moderator has been created.
 
 #### Basics
 

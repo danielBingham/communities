@@ -2,12 +2,14 @@
 
 Cases covering reacting to Posts.
 
-### Pre-requisites
+### Smoke Test
+
+#### Pre-requisites
 
 - [ ] User1 has been created.
-- [ ] User2 has been created and has created at least three posts.
+- [ ] User2 has been created and has created at least one post.
 
-### Smoke Test
+#### Cases
 
 - [ ] As a user, I can like a post.
     - As User1:
@@ -20,6 +22,13 @@ Cases covering reacting to Posts.
 
 ### Manual Regression
 
+#### Pre-requisites
+
+- [ ] User1 has been created.
+- [ ] User2 has been created and has created at least two posts.
+
+#### Cases
+
 - [ ] As a user, I can dislike a post.
     - As User1:
         - Dislike a second one of User2's Posts.
@@ -30,6 +39,10 @@ Cases covering reacting to Posts.
             - **Confirm post increases rank.**
 
 ### Full Regression
+
+#### Pre-requisites
+
+None.
 
 The post reaction endpoints are not yet covered by the Integration suite.  All
 reaction creation cases are defined in the Smoke Test and Manual Regression

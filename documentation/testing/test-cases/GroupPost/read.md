@@ -2,38 +2,20 @@
 
 Cases covering GroupPost reading.  Who can view the posts in a group?
 
-### Pre-requisites
+### Smoke Test
+
+#### Pre-requisites
 
 - [ ] A Public Group, Public Group, has been created.
-    - [ ] The following subgroups of Public Group have been created:
-        - [ ] A Public Group named Public - Public Group
-        - [ ] A Private Group named Public - Private Group
-        - [ ] A Hidden Group named Public - Hidden Group
 - [ ] A Private Group, Private Group, has been created.
-    - [ ] The following subgroups of Private Group have been created:
-        - [ ] An Open Group named Private - Open Group
-        - [ ] A Private Group named Private - Private Group
-        - [ ] A Hidden Group named Private - Hidden Group
 - [ ] A Hidden Group, Hidden Group, has been created.
-    - [ ] The following subgroups of Hidden Group have been created:
-        - [ ] An Open Group named Hidden - Open Group
-        - [ ] A Private Group named Hidden - Private Group
-        - [ ] A Hidden Group named Hidden - Hidden Group
 
-- [ ] User1 has been created and added as an admin of each group.
-- [ ] User2 has been created and added as a moderator of each group.
+- [ ] Each group contains posts.
 - [ ] User3 has been created and added as a member of each group.
-
-- [ ] User4 has been created and added as an admin only of the top level groups.
-- [ ] User5 has been created an added as a moderator only of the top level groups.
-- [ ] User6 has been created and added as a member only of the top level groups.
-
 - [ ] User7 has been created and is a non-member of all groups.
-- [ ] User8 has been created, has a pending invitation to each group, and has not accepted.
-- [ ] User9 has been created and has been banned from each group.
-- [ ] A site moderator has been created.
+- [ ] User9 has been created and has been banned from Public Group.
 
-### Smoke Test
+#### Cases
 
 - [ ] As a non-member, I can read the posts of a Public Group only.
     - As User7:
@@ -55,6 +37,15 @@ Cases covering GroupPost reading.  Who can view the posts in a group?
 
 ### Manual Regression
 
+#### Pre-requisites
+
+- [ ] A Public Group, Public Group, and a Private Group, Private Group, have
+      been created, each containing posts.
+- [ ] User3 has been created and added as a member of both groups.
+- [ ] User7 has been created and is a non-member of both groups.
+
+#### Cases
+
 - [ ] As a user, a group post I cannot see is not reachable by permalink.
     - As User3:
         - Copy the permalink of a post in Private Group.
@@ -71,6 +62,39 @@ Cases covering GroupPost reading.  Who can view the posts in a group?
             - **Confirm the group's posts no longer appear.**
 
 ### Full Regression
+
+#### Pre-requisites
+
+- [ ] A Public Group, Public Group, has been created.
+    - [ ] The following subgroups of Public Group have been created:
+        - [ ] A Public Group named Public - Public Group
+        - [ ] A Private Group named Public - Private Group
+        - [ ] A Hidden Group named Public - Hidden Group
+- [ ] A Private Group, Private Group, has been created.
+    - [ ] The following subgroups of Private Group have been created:
+        - [ ] An Open Group named Private - Open Group
+        - [ ] A Private Group named Private - Private Group
+        - [ ] A Hidden Group named Private - Hidden Group
+- [ ] A Hidden Group, Hidden Group, has been created.
+    - [ ] The following subgroups of Hidden Group have been created:
+        - [ ] An Open Group named Hidden - Open Group
+        - [ ] A Private Group named Hidden - Private Group
+        - [ ] A Hidden Group named Hidden - Hidden Group
+
+- [ ] Every group and subgroup contains posts.
+
+- [ ] User1 has been created and added as an admin of each group.
+- [ ] User2 has been created and added as a moderator of each group.
+- [ ] User3 has been created and added as a member of each group.
+
+- [ ] User4 has been created and added as an admin only of the top level groups.
+- [ ] User5 has been created an added as a moderator only of the top level groups.
+- [ ] User6 has been created and added as a member only of the top level groups.
+
+- [ ] User7 has been created and is a non-member of all groups.
+- [ ] User8 has been created, has a pending invitation to each group, and has not accepted.
+- [ ] User9 has been created and has been banned from each group.
+- [ ] A site moderator has been created.
 
 #### Basics
 

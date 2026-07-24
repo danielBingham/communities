@@ -2,11 +2,13 @@
 
 Cases covering user deletion.
 
-### Pre-requisites
+### Smoke Test
+
+#### Pre-requisites
 
 None.
 
-### Smoke Test
+#### Cases
 
 - [ ] As a user, I can delete my account.
     - As an unauthenticated user:
@@ -17,6 +19,12 @@ None.
 
 ### Manual Regression
 
+#### Pre-requisites
+
+- [ ] An authenticator app is available to enrol for the MFA case.
+
+#### Cases
+
 - [ ] As a user with MFA, I can delete my account.
     - As an unauthenticated user:
         - Register a new user account.
@@ -26,6 +34,10 @@ None.
             - **Confirm the account can no longer be logged into.**
 
 ### Full Regression
+
+#### Pre-requisites
+
+None.
 
 The user deletion endpoint is not yet covered by the Integration suite.  All
 deletion cases are defined in the Smoke Test and Manual Regression sections

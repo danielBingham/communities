@@ -2,13 +2,14 @@
 
 Cases covering making posts in all their forms and with all their attachments.
 
-### Pre-requisites
-
-- [ ] User1 has been created.
-- [ ] User2 has been created and is friends with User1.
-- [ ] A site admin has been created.
-
 ### Smoke Test
+
+#### Pre-requisites
+
+- [ ] User1 has been created and has friends who can be mentioned.
+- [ ] Sample images and videos are available to upload.
+
+#### Cases
 
 - [ ] As a user, I should be able to make a post.
     - As User1:
@@ -79,6 +80,16 @@ Cases covering making posts in all their forms and with all their attachments.
             - **Confirm the post is created with the mentions rendered as links.**
 
 ### Manual Regression
+
+#### Pre-requisites
+
+- [ ] User1 has been created.
+- [ ] Sample images and videos are available to upload in `.jpg`, `.png`,
+      `.mp4`, `.mov`, `.avi` and `.webp`, including a corrupted copy of each.
+- [ ] A youtube video URL is available in both its full (`/watch?vid=`) and
+      shortened (`youtu.be`) forms.
+
+#### Cases
 
 - [ ] As a user, I should be able to reorder the images I attach.
     - As User1:
@@ -208,6 +219,12 @@ Cases covering making posts in all their forms and with all their attachments.
             - **Confirm failure.**
 
 ### Full Regression
+
+#### Pre-requisites
+
+- [ ] User1 has been created.
+- [ ] User2 has been created and is friends with User1.
+- [ ] Sample images, videos and links are available to attach.
 
 #### Permissions
 

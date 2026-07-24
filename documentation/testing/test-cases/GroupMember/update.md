@@ -3,38 +3,20 @@
 Cases covering GroupMember updates: accepting invitations, approving and
 rejecting requests, banning and un-banning, and changing roles.
 
-### Pre-requisites
+### Smoke Test
 
-- [ ] A Public Group, Public Group, has been created.
-    - [ ] The following subgroups of Public Group have been created:
-        - [ ] A Public Group named Public - Public Group
-        - [ ] A Private Group named Public - Private Group
-        - [ ] A Hidden Group named Public - Hidden Group
-- [ ] A Private Group, Private Group, has been created.
-    - [ ] The following subgroups of Private Group have been created:
-        - [ ] An Open Group named Private - Open Group
-        - [ ] A Private Group named Private - Private Group
-        - [ ] A Hidden Group named Private - Hidden Group
-- [ ] A Hidden Group, Hidden Group, has been created.
-    - [ ] The following subgroups of Hidden Group have been created:
-        - [ ] An Open Group named Hidden - Open Group
-        - [ ] A Private Group named Hidden - Private Group
-        - [ ] A Hidden Group named Hidden - Hidden Group
+#### Pre-requisites
 
+- [ ] A Public Group, Public Group, and a Private Group, Private Group, have
+      been created.
 - [ ] User1 has been created and added as an admin of each group.
 - [ ] User2 has been created and added as a moderator of each group.
 - [ ] User3 has been created and added as a member of each group.
-
-- [ ] User4 has been created and added as an admin only of the top level groups.
-- [ ] User5 has been created an added as a moderator only of the top level groups.
-- [ ] User6 has been created and added as a member only of the top level groups.
-
 - [ ] User7 has been created and is a non-member of all groups.
-- [ ] User8 has been created, has a pending invitation to each group, and has not accepted.
-- [ ] User9 has been created and has been banned from each group.
-- [ ] A site moderator has been created.
+- [ ] User8 has been created and has a pending invitation to Public Group.
+- [ ] Public Group contains posts.
 
-### Smoke Test
+#### Cases
 
 - [ ] As a group moderator, I can accept a membership request.
     - As User7:
@@ -68,6 +50,13 @@ rejecting requests, banning and un-banning, and changing roles.
 
 ### Manual Regression
 
+#### Pre-requisites
+
+- [ ] A Public Group, Public Group, has been created with User1 as an admin,
+      User2 as a moderator and at least one plain member.
+
+#### Cases
+
 - [ ] As a group moderator, the members interface only offers actions I am allowed to take.
     - As User2, a group moderator:
         - Open Public Group -> Members and open the actions menu for a plain member.
@@ -84,6 +73,37 @@ rejecting requests, banning and un-banning, and changing roles.
             - **Confirm the member is not banned.**
 
 ### Full Regression
+
+#### Pre-requisites
+
+- [ ] A Public Group, Public Group, has been created.
+    - [ ] The following subgroups of Public Group have been created:
+        - [ ] A Public Group named Public - Public Group
+        - [ ] A Private Group named Public - Private Group
+        - [ ] A Hidden Group named Public - Hidden Group
+- [ ] A Private Group, Private Group, has been created.
+    - [ ] The following subgroups of Private Group have been created:
+        - [ ] An Open Group named Private - Open Group
+        - [ ] A Private Group named Private - Private Group
+        - [ ] A Hidden Group named Private - Hidden Group
+- [ ] A Hidden Group, Hidden Group, has been created.
+    - [ ] The following subgroups of Hidden Group have been created:
+        - [ ] An Open Group named Hidden - Open Group
+        - [ ] A Private Group named Hidden - Private Group
+        - [ ] A Hidden Group named Hidden - Hidden Group
+
+- [ ] User1 has been created and added as an admin of each group.
+- [ ] User2 has been created and added as a moderator of each group.
+- [ ] User3 has been created and added as a member of each group.
+
+- [ ] User4 has been created and added as an admin only of the top level groups.
+- [ ] User5 has been created an added as a moderator only of the top level groups.
+- [ ] User6 has been created and added as a member only of the top level groups.
+
+- [ ] User7 has been created and is a non-member of all groups.
+- [ ] User8 has been created, has a pending invitation to each group, and has not accepted.
+- [ ] User9 has been created and has been banned from each group.
+- [ ] A site moderator has been created.
 
 #### Structural checks
 

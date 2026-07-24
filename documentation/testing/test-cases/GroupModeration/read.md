@@ -2,38 +2,22 @@
 
 Cases covering GroupModeration reading.  Who can see the moderation status of the posts in a group?
 
-### Pre-requisites
+### Smoke Test
+
+#### Pre-requisites
 
 - [ ] A Public Group, Public Group, has been created.
-    - [ ] The following subgroups of Public Group have been created:
-        - [ ] A Public Group named Public - Public Group
-        - [ ] A Private Group named Public - Private Group
-        - [ ] A Hidden Group named Public - Hidden Group
 - [ ] A Private Group, Private Group, has been created.
-    - [ ] The following subgroups of Private Group have been created:
-        - [ ] An Open Group named Private - Open Group
-        - [ ] A Private Group named Private - Private Group
-        - [ ] A Hidden Group named Private - Hidden Group
 - [ ] A Hidden Group, Hidden Group, has been created.
-    - [ ] The following subgroups of Hidden Group have been created:
-        - [ ] An Open Group named Hidden - Open Group
-        - [ ] A Private Group named Hidden - Private Group
-        - [ ] A Hidden Group named Hidden - Hidden Group
 
 - [ ] User1 has been created and added as an admin of each group.
 - [ ] User2 has been created and added as a moderator of each group.
-- [ ] User3 has been created and added as a member of each group.
-
-- [ ] User4 has been created and added as an admin only of the top level groups.
-- [ ] User5 has been created an added as a moderator only of the top level groups.
-- [ ] User6 has been created and added as a member only of the top level groups.
-
+- [ ] User3 has been created, added as a member of each group, and has made
+      posts in each.
 - [ ] User7 has been created and is a non-member of all groups.
-- [ ] User8 has been created, has a pending invitation to each group, and has not accepted.
-- [ ] User9 has been created and has been banned from each group.
-- [ ] A site moderator has been created.
+- [ ] At least one post in each group has been flagged and moderated.
 
-### Smoke Test
+#### Cases
 
 - [ ] As a user, I can see when a post I can view has been moderated.
     - As User2, a group moderator:
@@ -72,6 +56,36 @@ Cases covering GroupModeration reading.  Who can see the moderation status of th
 - [ ] Group Admins **can** see the moderation status of posts.
 
 ### Manual Regression
+
+#### Pre-requisites
+
+- [ ] A Public Group, Public Group, has been created.
+    - [ ] The following subgroups of Public Group have been created:
+        - [ ] A Public Group named Public - Public Group
+        - [ ] A Private Group named Public - Private Group
+        - [ ] A Hidden Group named Public - Hidden Group
+- [ ] A Private Group, Private Group, has been created.
+    - [ ] The following subgroups of Private Group have been created:
+        - [ ] An Open Group named Private - Open Group
+        - [ ] A Private Group named Private - Private Group
+        - [ ] A Hidden Group named Private - Hidden Group
+- [ ] A Hidden Group, Hidden Group, has been created.
+    - [ ] The following subgroups of Hidden Group have been created:
+        - [ ] An Open Group named Hidden - Open Group
+        - [ ] A Private Group named Hidden - Private Group
+        - [ ] A Hidden Group named Hidden - Hidden Group
+
+- [ ] Every group and subgroup contains posts, some flagged and some already
+      approved or rejected.
+
+- [ ] User1 has been created and added as an admin of each group and subgroup.
+- [ ] User2 has been created and added as a moderator of each group and subgroup.
+- [ ] User3 has been created and added as a member of each group and subgroup.
+- [ ] User4 has been created and added as an admin only of the top level groups.
+- [ ] User6 has been created and added as a member only of the top level groups.
+- [ ] User7 has been created and is a non-member of all groups.
+
+#### Cases
 
 - [ ] As a group moderator, the moderation queue shows the status of each flagged post.
     - As User2:
@@ -167,6 +181,10 @@ Cases covering GroupModeration reading.  Who can see the moderation status of th
 - [ ] Group Admins **can** see the moderation status of posts.
 
 ### Full Regression
+
+#### Pre-requisites
+
+None.
 
 The group moderation endpoints are not yet covered by the Integration suite.
 All group moderation cases are defined in the Smoke Test and Manual Regression

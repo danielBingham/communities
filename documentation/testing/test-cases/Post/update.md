@@ -5,14 +5,14 @@ Test cases related to editing posts.
 Editing posts made to a group is covered separately in
 [Update GroupPost](documentation/testing/test-cases/GroupPost/update.md).
 
-### Pre-requisites
+### Smoke Test
+
+#### Pre-requisites
 
 - [ ] User1 has been created.
-- [ ] User2 has been created and is friends with User1.
-- [ ] User3 has been created and is **not** friends with User1.
-- [ ] A site moderator has been created.
+- [ ] Sample images are available to upload.
 
-### Smoke Test
+#### Cases
 
 - [ ] As a user, I can edit the text of my post.
     - As User1:
@@ -21,6 +21,12 @@ Editing posts made to a group is covered separately in
             - **Confirm post updated appropriately.**
 
 ### Manual Regression
+
+#### Pre-requisites
+
+- [ ] User1 has been created.
+- [ ] User2 has been created and is friends with User1.
+- [ ] Sample images and links are available to attach.
 
 #### Post Editing
 
@@ -92,6 +98,14 @@ Editing posts made to a group is covered separately in
             - **Confirm draft is gone.**
 
 ### Full Regression
+
+#### Pre-requisites
+
+- [ ] User1 has been created and has made a PUBLIC and a PRIVATE feed post.
+- [ ] User2 has been created and is friends with User1.
+- [ ] User3 has been created and is **not** friends with User1.
+- [ ] User4 has been created and has been blocked by User1.
+- [ ] A site moderator has been created.
 
 #### Permissions
 

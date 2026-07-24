@@ -1,6 +1,7 @@
-# Full Regression
+# Test Index
 
-For each heading, copy the content of the linked file under the heading and execute the test cases within.
+For each heading, copy the content of the linked file under the heading and
+execute the test cases within.
 
 ## [Create User: Registration](documentation/testing/test-cases/User/create/registration.md)
 ## [Create User: Invitation](documentation/testing/test-cases/User/create/invitation.md)
@@ -32,6 +33,11 @@ For each heading, copy the content of the linked file under the heading and exec
 
 ## [Create PostSubscription](documentation/testing/test-cases/PostSubscription/create.md)
 ## [Delete PostSubscription](documentation/testing/test-cases/PostSubscription/delete.md)
+
+## [Create File](documentation/testing/test-cases/File/create.md)
+## [Read File](documentation/testing/test-cases/File/read.md)
+## [Update File](documentation/testing/test-cases/File/update.md)
+## [Delete File](documentation/testing/test-cases/File/delete.md)
 
 ## [Create SiteModeration](documentation/testing/test-cases/SiteModeration/create.md)
 ## [Update SiteModeration](documentation/testing/test-cases/SiteModeration/update.md)

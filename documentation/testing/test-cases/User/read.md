@@ -7,20 +7,17 @@ NOTE: This file is new.  It gives the manual counterparts for the
 `GET /user/:id` Integration suite, which previously had no manual test case
 definitions.
 
-### Pre-requisites
+### Smoke Test
+
+#### Pre-requisites
 
 - [ ] User1 has been created.
 - [ ] User2 has been created and is **not** friends with User1.
 - [ ] User3 has been created and is friends with User1.
 - [ ] User4 has been created and has blocked User2.
-- [ ] User5 has been created and has not yet confirmed their email.
-- [ ] User6 has been created and has been banned by a site moderator.
-- [ ] User7 has been created and has had their profile rejected by a site moderator.
-- [ ] User8 has been invited but has never registered.
 - [ ] A site moderator has been created.
-- [ ] A site admin has been created.
 
-### Smoke Test
+#### Cases
 
 - [ ] As a user, my password and multifactor secrets are never disclosed to anyone. (covered: integration)
     - As User1:
@@ -53,12 +50,34 @@ definitions.
 
 ### Manual Regression
 
+#### Pre-requisites
+
+- [ ] User1 has been created and has set a profile image, a name and an
+      "About You".
+
+#### Cases
+
 - [ ] As a user, my own profile page shows the fields I have set.
     - As User1:
         - Set a profile image, name and "About You", then load your own profile page.
             - **Confirm the profile image, name and about text all render correctly.**
 
 ### Full Regression
+
+#### Pre-requisites
+
+- [ ] User1 has been created.
+- [ ] User2 has been created and is **not** friends with User1.
+- [ ] User3 has been created and is friends with User1.
+- [ ] User5 has been created and has not yet confirmed their email.
+- [ ] User6 has been created and has been banned by a site moderator.
+- [ ] User7 has been created and has had their profile rejected by a site moderator.
+- [ ] User8 has been invited but has never registered.
+- [ ] A user who has never set a profile picture has been created.
+- [ ] A user who shares a friend with User1 has been created, with mutual
+      friends enabled.
+- [ ] A site moderator has been created.
+- [ ] A site admin has been created.
 
 #### The profile response
 

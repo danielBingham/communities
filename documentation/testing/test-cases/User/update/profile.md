@@ -2,11 +2,14 @@
 
 Cases covering the user updating their profile.
 
-### Pre-requisites
+### Smoke Test
+
+#### Pre-requisites
 
 - [ ] User1 has registered.
+- [ ] Sample images are available to upload.
 
-### Smoke Test
+#### Cases
 
 - [ ] As a user, I can upload a profile image.
     - As User1:
@@ -22,6 +25,13 @@ Cases covering the user updating their profile.
             - **Confirm name updated.**
 
 ### Manual Regression
+
+#### Pre-requisites
+
+- [ ] User1 has registered and has a profile image set.
+- [ ] A sample image that does not have a 1:1 aspect ratio is available to upload.
+
+#### Cases
 
 - [ ] As a user, I can crop an uploaded profile image.
     - As User1:
@@ -59,6 +69,10 @@ Cases covering the user updating their profile.
             - **Confirm the changes do show.**
 
 ### Full Regression
+
+#### Pre-requisites
+
+None.
 
 The user update endpoint is not yet covered by the Integration suite.  All
 profile update cases are defined in the Smoke Test and Manual Regression

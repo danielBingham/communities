@@ -2,20 +2,14 @@
 
 Cases covering group deletion.
 
-### Pre-requisites
-
-- [ ] User1 has been created.
-- [ ] User2 has been created.
-- [ ] User3 has been created.
-- [ ] User4 has been created.
-- [ ] A Group has been created with User1 as admin, User2 as moderator, and
-      User3 as member, and User4 as non-member.
-- [ ] User5 has been created and has been banned from the Group.
-- [ ] A site moderator has been created.
-- [ ] A second Group has been created with User1 as admin, containing posts,
-      comments, reactions and a subgroup tree.
-
 ### Smoke Test
+
+#### Pre-requisites
+
+- [ ] A Group has been created with User1 as admin, User2 as moderator,
+      User3 as member, and User4 as non-member.
+
+#### Cases
 
 - [ ] As a group admin, I can delete a group and all of its content goes with it.
     - As User1:
@@ -34,6 +28,13 @@ Cases covering group deletion.
 
 ### Manual Regression
 
+#### Pre-requisites
+
+- [ ] A Group has been created with User1 as admin.
+- [ ] The Group contains posts made by User1, and User1's feed shows them.
+
+#### Cases
+
 - [ ] As a group admin, deleting a group asks me to confirm first.
     - As User1:
         - Go to Group -> Settings -> Delete Group.
@@ -49,6 +50,23 @@ Cases covering group deletion.
             - **Confirm the group's posts no longer appear in your feed.**
 
 ### Full Regression
+
+#### Pre-requisites
+
+- [ ] An Open, a Private and a Hidden Group have each been created with User1
+      as their creating admin.
+- [ ] User2 has been added as a second admin, User3 as a moderator and User4
+      as a plain member of each group.
+- [ ] User8 has a pending invitation to each group and has not accepted.
+- [ ] User9 has been banned from each group.
+- [ ] User7 has been created and is a non-member of all groups.
+- [ ] A site moderator has been created.
+- [ ] A group tree three levels deep has been created, with User1 as admin of
+      the grandparent, the parent and the child, plus a HIDDEN-OPEN subgroup.
+- [ ] A fully populated group has been created with members, posts, comments
+      and reactions.
+- [ ] User1 owns a second group and some feed posts that must be left
+      untouched by any deletion.
 
 #### Authentication and existence
 

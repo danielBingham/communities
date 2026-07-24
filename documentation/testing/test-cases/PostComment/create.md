@@ -2,13 +2,14 @@
 
 Cases covering making comments on posts.
 
-### Pre-requisites
-
-- [ ] User1 has been created.
-- [ ] User2 has been created.
-- [ ] User1 has created a public post.
-
 ### Smoke Test
+
+#### Pre-requisites
+
+- [ ] User1 has been created and has created a public post.
+- [ ] User2 has been created.
+
+#### Cases
 
 - [ ] As a user, I can comment on a post I can see.
     - As User2:
@@ -25,6 +26,11 @@ Cases covering making comments on posts.
             - **Confirm comments appear in the correct order: User2 "First.", User1 "Second.", User2 "Third."**
 
 ### Manual Regression
+
+#### Pre-requisites
+
+- [ ] User1 has been created and has created a public post.
+- [ ] User2 has been created and has friends who can be mentioned.
 
 #### Mentions
 
@@ -77,6 +83,10 @@ Cases covering making comments on posts.
             - **Confirm draft is still gone.**
 
 ### Full Regression
+
+#### Pre-requisites
+
+None.
 
 The post comment endpoints are not yet covered by the Integration suite.  All
 comment creation cases are defined in the Smoke Test and Manual Regression

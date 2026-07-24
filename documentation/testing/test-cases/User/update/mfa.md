@@ -2,11 +2,14 @@
 
 Cases cover Multifactor Authentication (MFA) setup.
 
-### Pre-requisites
+### Smoke Test
+
+#### Pre-requisites
 
 - [ ] User1 has been registered.
+- [ ] An authenticator app is available to enrol.
 
-### Smoke Test
+#### Cases
 
 - [ ] As a user, I can enable multifactor authentication.
     - As User1:
@@ -30,6 +33,13 @@ Cases cover Multifactor Authentication (MFA) setup.
             - **Confirm neither the secret nor the recovery codes appear in any later response.**
 
 ### Manual Regression
+
+#### Pre-requisites
+
+- [ ] User1 has been registered.
+- [ ] An authenticator app is available to enrol.
+
+#### Cases
 
 All of the MFA setup cases require an authenticator app (or a generated TOPT
 secret) and so cannot be covered by the Integration suite.
@@ -90,6 +100,12 @@ secret) and so cannot be covered by the Integration suite.
             - **Confirm success.**
 
 ### Full Regression
+
+#### Pre-requisites
+
+- [ ] User1 has been registered.
+
+#### Cases
 
 - [ ] As a user who is not mid-MFA-setup, a setup verification is refused. (covered: integration)
     - As User1 (MFA not being set up):

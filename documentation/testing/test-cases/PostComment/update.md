@@ -2,14 +2,14 @@
 
 Cases covering editing comments on posts.
 
-### Pre-requisites
-
-- [ ] User1 has been created.
-- [ ] User2 has been created.
-- [ ] User3 has been created and is friends with User2.
-- [ ] User1 has created a public post.
-
 ### Smoke Test
+
+#### Pre-requisites
+
+- [ ] User1 has been created and has created a public post.
+- [ ] User2 has been created.
+
+#### Cases
 
 - [ ] As a user, I can edit my comments.
     - As User2:
@@ -20,6 +20,14 @@ Cases covering editing comments on posts.
             - **Confirm comment shows the edit.**
 
 ### Manual Regression
+
+#### Pre-requisites
+
+- [ ] User1 has been created and has created a public post.
+- [ ] User2 has been created.
+- [ ] User3 has been created and is friends with User2.
+
+#### Cases
 
 - [ ] As a user, I can cancel edits on my comments.
     - As User2:
@@ -86,6 +94,10 @@ Cases covering editing comments on posts.
             - **Confirm previous text is restored.**
 
 ### Full Regression
+
+#### Pre-requisites
+
+None.
 
 The post comment endpoints are not yet covered by the Integration suite.  All
 comment update cases are defined in the Smoke Test and Manual Regression

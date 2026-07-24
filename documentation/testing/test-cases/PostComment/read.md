@@ -2,13 +2,15 @@
 
 Cases covering who can and cannot see post comments.
 
-### Pre-requisites
+### Smoke Test
+
+#### Pre-requisites
 
 - [ ] User1 has been created.
 - [ ] User2 has been created and is friends with User1.
 - [ ] User3 has been created and is friends with User2, but not User1.
 
-### Smoke Test
+#### Cases
 
 - [ ] As a user, comments on public posts are always viewable.
     - As User1:
@@ -29,6 +31,14 @@ Cases covering who can and cannot see post comments.
             - **Confirm not visible.**
 
 ### Manual Regression
+
+#### Pre-requisites
+
+- [ ] User1 has been created.
+- [ ] User2 has been created and is friends with User1.
+- [ ] User3 has been created and is friends with User2, but not User1.
+
+#### Cases
 
 - [ ] As a user, I lose visibility of comments when a post's visibility changes to private.
     - As User1:
@@ -67,6 +77,10 @@ Cases covering who can and cannot see post comments.
             - **Confirm not visible.**
 
 ### Full Regression
+
+#### Pre-requisites
+
+None.
 
 The post comment endpoints are not yet covered by the Integration suite.  All
 comment read cases are defined in the Smoke Test and Manual Regression

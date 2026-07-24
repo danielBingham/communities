@@ -5,22 +5,28 @@ Cases covering reading posts and post visibility permissions.
 Posts made to a group are covered separately in
 [Read GroupPost](documentation/testing/test-cases/GroupPost/read.md).
 
-### Pre-requisites
+### Smoke Test
 
-- [ ] User1 has been created.
+#### Pre-requisites
+
+- [ ] User1 has been created and has made a PUBLIC and a PRIVATE feed post.
 - [ ] User2 has been created and is friends with User1.
 - [ ] User3 has been created and is **not** friends with User1.
-- [ ] User4 has been created and has been blocked by User1.
-- [ ] User5 has been created and has a pending friend request to User1.
-- [ ] A site moderator has been created.
 
-### Smoke Test
+#### Cases
 
 - [ ] A user **can** see a public post. (covered: integration)
 - [ ] A friend of a user **can** see that user's private post. (covered: integration)
 - [ ] A stranger **cannot** see a user's private post. (covered: integration)
 
 ### Manual Regression
+
+#### Pre-requisites
+
+- [ ] User1 has been created.
+- [ ] User3 has been created and is **not** friends with User1.
+
+#### Cases
 
 - [ ] As a user, a post I cannot see is not reachable by permalink.
     - As User1:
@@ -30,6 +36,15 @@ Posts made to a group are covered separately in
             - **Confirm the post is not shown and a not found page renders.**
 
 ### Full Regression
+
+#### Pre-requisites
+
+- [ ] User1 has been created and has made a PUBLIC and a PRIVATE feed post.
+- [ ] User2 has been created and is friends with User1.
+- [ ] User3 has been created and is **not** friends with User1.
+- [ ] User4 has been created and has been blocked by User1.
+- [ ] User5 has been created and has a pending friend request to User1.
+- [ ] A site moderator has been created.
 
 #### Basics
 

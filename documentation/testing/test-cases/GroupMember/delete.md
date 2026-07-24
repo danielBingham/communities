@@ -3,7 +3,59 @@
 Cases covering GroupMember deletion: leaving a group, declining or cancelling
 a pending membership, and removing another member.
 
-### Pre-requisites
+### Smoke Test
+
+#### Pre-requisites
+
+- [ ] A Public Group, Public Group, has been created with User1 as its only
+      admin, User2 as moderator and User3 as member.
+- [ ] Public Group contains posts.
+
+#### Cases
+
+- [ ] As a member, I can leave a group.
+    - As User3:
+        - Visit Public Group and click "Leave Group".
+            - **Confirm you are removed from the member list.**
+            - **Confirm the group's posts no longer appear in your feed.**
+
+- [ ] As a group moderator, I can remove a member.
+    - As User2:
+        - Open Public Group -> Members and remove a plain member.
+            - **Confirm the member is removed from the list.**
+
+- [ ] As the last group admin, I cannot leave the group. (covered: integration)
+    - As User1, the only admin of a group:
+        - Attempt to leave the group.
+            - **Confirm the request is refused and you remain a member.**
+
+### Manual Regression
+
+#### Pre-requisites
+
+- [ ] A Public Group, Public Group, and a Hidden Group, Hidden Group, have
+      been created.
+- [ ] User3 has been created and added as a member of both groups.
+
+#### Cases
+
+- [ ] As a member, leaving a group is confirmed before it takes effect.
+    - As User3:
+        - Click "Leave Group" on Public Group.
+            - **Confirm a confirmation prompt is shown.**
+        - Cancel the prompt.
+            - **Confirm you are still a member.**
+
+- [ ] As a user who left a Hidden Group, the group becomes invisible to me.
+    - As User3:
+        - Leave Hidden Group.
+            - **Confirm the group no longer appears in your Groups list.**
+        - Attempt to visit the group by URL.
+            - **Confirm a not found page renders.**
+
+### Full Regression
+
+#### Pre-requisites
 
 - [ ] A Public Group, Public Group, has been created.
     - [ ] The following subgroups of Public Group have been created:
@@ -34,41 +86,10 @@ a pending membership, and removing another member.
 - [ ] User9 has been created and has been banned from each group.
 - [ ] A site moderator has been created.
 
-### Smoke Test
-
-- [ ] As a member, I can leave a group.
-    - As User3:
-        - Visit Public Group and click "Leave Group".
-            - **Confirm you are removed from the member list.**
-            - **Confirm the group's posts no longer appear in your feed.**
-
-- [ ] As a group moderator, I can remove a member.
-    - As User2:
-        - Open Public Group -> Members and remove a plain member.
-            - **Confirm the member is removed from the list.**
-
-- [ ] As the last group admin, I cannot leave the group. (covered: integration)
-    - As User1, the only admin of a group:
-        - Attempt to leave the group.
-            - **Confirm the request is refused and you remain a member.**
-
-### Manual Regression
-
-- [ ] As a member, leaving a group is confirmed before it takes effect.
-    - As User3:
-        - Click "Leave Group" on Public Group.
-            - **Confirm a confirmation prompt is shown.**
-        - Cancel the prompt.
-            - **Confirm you are still a member.**
-
-- [ ] As a user who left a Hidden Group, the group becomes invisible to me.
-    - As User3:
-        - Leave Hidden Group.
-            - **Confirm the group no longer appears in your Groups list.**
-        - Attempt to visit the group by URL.
-            - **Confirm a not found page renders.**
-
-### Full Regression
+- [ ] A group has been created in which User1 is the only admin.
+- [ ] A group has been created in which the only second admin has never
+      accepted their invitation.
+- [ ] A group has been created in which the only second admin has been banned.
 
 #### Authentication and existence
 

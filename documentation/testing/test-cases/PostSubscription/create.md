@@ -2,13 +2,14 @@
 
 Cases covering subscribing to posts.
 
-### Pre-requisites
+### Smoke Test
+
+#### Pre-requisites
 
 - [ ] User1 has been created.
 - [ ] User2 has been created and is friends with User1.
-- [ ] User3 has been created and is friends with User2, but not User1.
 
-### Smoke Test
+#### Cases
 
 - [ ] As a user, I am subscribed to the posts I create and notified of comments.
     - As User1:
@@ -31,6 +32,14 @@ Cases covering subscribing to posts.
         - **Confirm notified.**
 
 ### Manual Regression
+
+#### Pre-requisites
+
+- [ ] User1 has been created.
+- [ ] User2 has been created and is friends with User1.
+- [ ] User3 has been created and is friends with User2, but not User1.
+
+#### Cases
 
 - [ ] As a user, I am notified of comments on a post I subscribed to.
     - As User1:
@@ -55,6 +64,10 @@ Cases covering subscribing to posts.
         - **Confirm no notification.**
 
 ### Full Regression
+
+#### Pre-requisites
+
+None.
 
 The post subscription endpoints are not yet covered by the Integration suite.
 All subscription creation cases are defined in the Smoke Test and Manual

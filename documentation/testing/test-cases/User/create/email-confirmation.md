@@ -2,11 +2,13 @@
 
 Cases covering the Email Confirmation flow.
 
-### Pre-requisites
-
-No pre-requisites.
-
 ### Smoke Test
+
+#### Pre-requisites
+
+- [ ] An email client (mailinator) is available for the addresses under test.
+
+#### Cases
 
 - [ ] As a user, I can confirm my email by following the link in the email.
     - As a new user:
@@ -30,6 +32,10 @@ No pre-requisites.
             - **Confirm the TOS page loads.**
 
 ### Manual Regression
+
+#### Pre-requisites
+
+- [ ] An email client (mailinator) is available for the addresses under test.
 
 All of the email confirmation cases require access to an email inbox, so none
 of them can be covered by the Integration suite.
@@ -92,6 +98,10 @@ of them can be covered by the Integration suite.
             - **Confirm no error is shown and the TOS page loads.**
 
 ### Full Regression
+
+#### Pre-requisites
+
+None.
 
 The email confirmation endpoints are not yet covered by the Integration suite.
 All email confirmation cases are defined in the Smoke Test and Manual

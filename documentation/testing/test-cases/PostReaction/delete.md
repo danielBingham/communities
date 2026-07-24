@@ -2,13 +2,15 @@
 
 Cases covering removing reactions from Posts.
 
-### Pre-requisites
+### Smoke Test
+
+#### Pre-requisites
 
 - [ ] User1 has been created.
-- [ ] User2 has been created and has created at least three posts.
-- [ ] User1 has reacted to each of User2's posts.
+- [ ] User2 has been created and has created at least one post.
+- [ ] User1 has liked one of User2's posts.
 
-### Smoke Test
+#### Cases
 
 - [ ] As a user, I can unlike a post.
     - As User1:
@@ -21,6 +23,14 @@ Cases covering removing reactions from Posts.
 
 ### Manual Regression
 
+#### Pre-requisites
+
+- [ ] User1 has been created.
+- [ ] User2 has been created and has created at least two posts.
+- [ ] User1 has disliked a second one of User2's posts.
+
+#### Cases
+
 - [ ] As a user, I can remove a dislike from a post.
     - As User1:
         - Remove a dislike from a second one of User2's Posts.
@@ -31,6 +41,10 @@ Cases covering removing reactions from Posts.
             - **Confirm post decreases rank.**
 
 ### Full Regression
+
+#### Pre-requisites
+
+None.
 
 The post reaction endpoints are not yet covered by the Integration suite.  All
 reaction deletion cases are defined in the Smoke Test and Manual Regression

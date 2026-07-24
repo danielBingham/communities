@@ -2,12 +2,14 @@
 
 Cases covering the user updating their security fields.
 
-### Pre-requisites
+### Smoke Test
+
+#### Pre-requisites
 
 - [ ] User1 has registered.
-- [ ] User2 has registered.
-
-### Smoke Test
+- [ ] An email client (mailinator) is available for User1's addresses.
+- [ ] A second browser or profile (Browser B) is available for the
+      multi-session case.
 
 #### Change Email
 
@@ -57,6 +59,12 @@ Cases covering the user updating their security fields.
 
 ### Manual Regression
 
+#### Pre-requisites
+
+- [ ] User1 has registered and has Multifactor Authentication enabled.
+- [ ] User2 has registered.
+- [ ] An email client (mailinator) is available for the addresses under test.
+
 #### Change Email
 
 - [ ] As a user with MFA enabled, confirming a changed email while logged out does not bypass MFA.
@@ -105,6 +113,10 @@ Cases covering the user updating their security fields.
             - **Confirm the MFA screen is shown and a valid TOPT token is required.**
 
 ### Full Regression
+
+#### Pre-requisites
+
+None.
 
 The email change and password change endpoints are not yet covered by the
 Integration suite.  All security cases are defined in the Smoke Test and

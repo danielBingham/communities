@@ -2,11 +2,13 @@
 
 Cases covering the User Registration flow.
 
-### Pre-requisites
-
-No pre-requisites.
-
 ### Smoke Test
+
+#### Pre-requisites
+
+- [ ] An email client (mailinator) is available for the addresses under test.
+
+#### Cases
 
 - [ ] As a new user, I can register an account.
     - As unauthenticated user:
@@ -26,6 +28,14 @@ No pre-requisites.
 
 ### Manual Regression
 
+#### Pre-requisites
+
+- [ ] A user with the username `john-doe` has been registered -- the state
+      left by the Smoke Test above.
+- [ ] An email client (mailinator) is available for the addresses under test.
+
+#### Cases
+
 - [ ] As a new user, I cannot register with a username that is already taken.
     - As unauthenticated user:
         - Go to the registration form and begin registering Jane Doe
@@ -41,6 +51,10 @@ No pre-requisites.
         - Turn off all email notifications.
 
 ### Full Regression
+
+#### Pre-requisites
+
+None.
 
 The registration endpoint is not yet covered by the Integration suite.  All
 registration cases are defined in the Smoke Test and Manual Regression

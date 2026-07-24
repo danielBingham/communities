@@ -3,13 +3,14 @@
 Cases covering the authentication system, logging in, logging out, reset
 password flow, etc.
 
-### Pre-requisites
+### Smoke Test
+
+#### Pre-requisites
 
 - [ ] User1 has been registered.
-- [ ] User2 has been registered and has been banned by a site moderator.
-- [ ] An email client (mailinator) is available for the addresses under test.
-
-### Smoke Test
+- [ ] User1 has Multifactor Authentication enabled, with an authenticator app
+      enrolled and their recovery codes saved.
+- [ ] An email client (mailinator) is available for User1's address.
 
 #### Log in
 
@@ -102,6 +103,15 @@ password flow, etc.
             - **Confirm the action is not permitted while MFA is pending.**
 
 ### Manual Regression
+
+#### Pre-requisites
+
+- [ ] User1 has been registered.
+- [ ] User1 has Multifactor Authentication enabled, with an authenticator app
+      enrolled and their recovery codes saved.
+- [ ] An email client (mailinator) is available for User1's address.
+- [ ] A second browser or profile (Browser B) is available for the
+      multi-session cases.
 
 #### Reset Password
 
@@ -280,6 +290,12 @@ and so cannot be covered by the Integration suite.
             - **Confirm login succeeds.**
 
 ### Full Regression
+
+#### Pre-requisites
+
+- [ ] User1 has been registered.
+- [ ] User1 has Multifactor Authentication enabled, with an authenticator app enrolled.
+- [ ] User2 has been registered and has been banned by a site moderator.
 
 #### Log in
 

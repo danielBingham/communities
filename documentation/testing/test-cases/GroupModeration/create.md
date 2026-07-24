@@ -2,38 +2,20 @@
 
 Cases covering GroupModeration creation.  Who can flag the posts in a group for group moderators?
 
-### Pre-requisites
+### Smoke Test
 
-- [ ] A Public Group, Public Group, has been created.
-    - [ ] The following subgroups of Public Group have been created:
-        - [ ] A Public Group named Public - Public Group
-        - [ ] A Private Group named Public - Private Group
-        - [ ] A Hidden Group named Public - Hidden Group
-- [ ] A Private Group, Private Group, has been created.
-    - [ ] The following subgroups of Private Group have been created:
-        - [ ] An Open Group named Private - Open Group
-        - [ ] A Private Group named Private - Private Group
-        - [ ] A Hidden Group named Private - Hidden Group
-- [ ] A Hidden Group, Hidden Group, has been created.
-    - [ ] The following subgroups of Hidden Group have been created:
-        - [ ] An Open Group named Hidden - Open Group
-        - [ ] A Private Group named Hidden - Private Group
-        - [ ] A Hidden Group named Hidden - Hidden Group
+#### Pre-requisites
+
+- [ ] A Public Group, Public Group, and a Private Group, Private Group, have
+      been created.
 
 - [ ] User1 has been created and added as an admin of each group.
 - [ ] User2 has been created and added as a moderator of each group.
-- [ ] User3 has been created and added as a member of each group.
-
-- [ ] User4 has been created and added as an admin only of the top level groups.
-- [ ] User5 has been created an added as a moderator only of the top level groups.
-- [ ] User6 has been created and added as a member only of the top level groups.
-
+- [ ] User3 has been created, added as a member of each group, and has made
+      posts in each.
 - [ ] User7 has been created and is a non-member of all groups.
-- [ ] User8 has been created, has a pending invitation to each group, and has not accepted.
-- [ ] User9 has been created and has been banned from each group.
-- [ ] A site moderator has been created.
 
-### Smoke Test
+#### Cases
 
 - [ ] As a user, I can flag a post for the group's moderators.
     - As User7:
@@ -72,6 +54,35 @@ Cases covering GroupModeration creation.  Who can flag the posts in a group for 
 - [ ] Group Admins **can** flag posts.
 
 ### Manual Regression
+
+#### Pre-requisites
+
+- [ ] A Public Group, Public Group, has been created.
+    - [ ] The following subgroups of Public Group have been created:
+        - [ ] A Public Group named Public - Public Group
+        - [ ] A Private Group named Public - Private Group
+        - [ ] A Hidden Group named Public - Hidden Group
+- [ ] A Private Group, Private Group, has been created.
+    - [ ] The following subgroups of Private Group have been created:
+        - [ ] An Open Group named Private - Open Group
+        - [ ] A Private Group named Private - Private Group
+        - [ ] A Hidden Group named Private - Hidden Group
+- [ ] A Hidden Group, Hidden Group, has been created.
+    - [ ] The following subgroups of Hidden Group have been created:
+        - [ ] An Open Group named Hidden - Open Group
+        - [ ] A Private Group named Hidden - Private Group
+        - [ ] A Hidden Group named Hidden - Hidden Group
+
+- [ ] Every group and subgroup contains posts that can be flagged.
+
+- [ ] User1 has been created and added as an admin of each group and subgroup.
+- [ ] User2 has been created and added as a moderator of each group and subgroup.
+- [ ] User3 has been created and added as a member of each group and subgroup.
+- [ ] User4 has been created and added as an admin only of the top level groups.
+- [ ] User6 has been created and added as a member only of the top level groups.
+- [ ] User7 has been created and is a non-member of all groups.
+
+#### Cases
 
 - [ ] As a user, flagging a post asks me for a reason.
     - As User7:
@@ -173,6 +184,10 @@ Cases covering GroupModeration creation.  Who can flag the posts in a group for 
 - [ ] Group Admins **can** flag posts.
 
 ### Full Regression
+
+#### Pre-requisites
+
+None.
 
 The group moderation endpoints are not yet covered by the Integration suite.
 All group moderation cases are defined in the Smoke Test and Manual Regression

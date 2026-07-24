@@ -3,14 +3,16 @@
 Test cases related to SiteModeration updating.  Who can act on posts and
 comments that have been flagged for site moderation?
 
-### Pre-requisites
+### Smoke Test
+
+#### Pre-requisites
 
 - [ ] A Site admin user has been created.
 - [ ] User1 has been created.
 - [ ] User2 has been created and is friends with User1.
-- [ ] Several posts and comments have been flagged for site moderation.
+- [ ] Several posts have been flagged for site moderation.
 
-### Smoke Test
+#### Cases
 
 - [ ] As a SiteAdmin, I can reject a flagged post.
     - As the Site admin:
@@ -32,6 +34,12 @@ comments that have been flagged for site moderation?
             - **Confirm it is not offered and cannot be reached by URL.**
 
 ### Manual Regression
+
+#### Pre-requisites
+
+- [ ] A Site admin user has been created.
+- [ ] Several posts and comments have been flagged for site moderation, and
+      their authors are available to log in as.
 
 #### Posts
 
@@ -87,6 +95,10 @@ comments that have been flagged for site moderation?
             - **Confirm the post returns to the platform.**
 
 ### Full Regression
+
+#### Pre-requisites
+
+None.
 
 The site moderation endpoints are not yet covered by the Integration suite.
 All site moderation update cases are defined in the Smoke Test and Manual

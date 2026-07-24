@@ -2,38 +2,16 @@
 
 Cases covering group updates.
 
-### Pre-requisites
-
-- [ ] A Public Group, Public Group, has been created.
-    - [ ] The following subgroups of Public Group have been created:
-        - [ ] A Public Group named Public - Public Group
-        - [ ] A Private Group named Public - Private Group
-        - [ ] A Hidden Group named Public - Hidden Group
-- [ ] A Private Group, Private Group, has been created.
-    - [ ] The following subgroups of Private Group have been created:
-        - [ ] An Open Group named Private - Open Group
-        - [ ] A Private Group named Private - Private Group
-        - [ ] A Hidden Group named Private - Hidden Group
-- [ ] A Hidden Group, Hidden Group, has been created.
-    - [ ] The following subgroups of Hidden Group have been created:
-        - [ ] An Open Group named Hidden - Open Group
-        - [ ] A Private Group named Hidden - Private Group
-        - [ ] A Hidden Group named Hidden - Hidden Group
-
-- [ ] User1 has been created and added as an admin of each group.
-- [ ] User2 has been created and added as a moderator of each group.
-- [ ] User3 has been created and added as a member of each group.
-
-- [ ] User4 has been created and added as an admin only of the top level groups.
-- [ ] User5 has been created an added as a moderator only of the top level groups.
-- [ ] User6 has been created and added as a member only of the top level groups.
-
-- [ ] User7 has been created and is a non-member of all groups.
-- [ ] User8 has been created, has a pending invitation to each group, and has not accepted.
-- [ ] User9 has been created and has been banned from each group.
-- [ ] A site moderator has been created.
-
 ### Smoke Test
+
+#### Pre-requisites
+
+- [ ] A Public Group, Public Group, has been created with User1 as admin,
+      User2 as moderator and User3 as member.
+- [ ] User7 has been created and is a non-member of Public Group.
+- [ ] Sample images are available to upload as group images.
+
+#### Cases
 
 - [ ] As a group admin, I can update a group's profile.
     - As User1:
@@ -53,6 +31,12 @@ Cases covering group updates.
 
 ### Manual Regression
 
+#### Pre-requisites
+
+- [ ] A Public Group, Public Group, has been created with User1 as admin.
+
+#### Cases
+
 - [ ] As a group admin, the group settings form doesn't commit until submitted.
     - As User1:
         - Go to Public Group -> Settings and change the title and description.
@@ -68,6 +52,20 @@ Cases covering group updates.
             - **Confirm the Visibility control is not editable.**
 
 ### Full Regression
+
+#### Pre-requisites
+
+- [ ] An Open, a Private and a Hidden Group have each been created with User1
+      as their creating admin.
+- [ ] User2 has been added as a second admin, User5 as a moderator and User3
+      as a plain member of each group.
+- [ ] User8 has a pending invitation to each group and has not accepted.
+- [ ] User9 has been banned from each group.
+- [ ] User7 has been created and is a non-member of all groups.
+- [ ] A site moderator has been created.
+- [ ] A group tree three levels deep has been created, plus a HIDDEN-OPEN
+      subgroup, with User1 as admin of each parent.
+- [ ] A file has been uploaded that can be referenced by fileId.
 
 #### Basics
 

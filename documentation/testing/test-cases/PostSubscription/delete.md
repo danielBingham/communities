@@ -2,13 +2,14 @@
 
 Cases covering unsubscribing from posts.
 
-### Pre-requisites
+### Smoke Test
+
+#### Pre-requisites
 
 - [ ] User1 has been created.
 - [ ] User2 has been created and is friends with User1.
-- [ ] User3 has been created and is friends with User2, but not User1.
 
-### Smoke Test
+#### Cases
 
 - [ ] As a user, I stop being notified when I unsubscribe from a post I created.
     - As User1:
@@ -20,6 +21,14 @@ Cases covering unsubscribing from posts.
         - **Confirm not notified.**
 
 ### Manual Regression
+
+#### Pre-requisites
+
+- [ ] User1 has been created.
+- [ ] User2 has been created and is friends with User1.
+- [ ] User3 has been created and is friends with User2, but not User1.
+
+#### Cases
 
 - [ ] As a user, I stop being notified when I unsubscribe from a post I commented on.
     - As User1:
@@ -48,6 +57,10 @@ Cases covering unsubscribing from posts.
         - **Confirm no notification.**
 
 ### Full Regression
+
+#### Pre-requisites
+
+None.
 
 The post subscription endpoints are not yet covered by the Integration suite.
 All subscription deletion cases are defined in the Smoke Test and Manual

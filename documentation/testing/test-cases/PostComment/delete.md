@@ -2,13 +2,14 @@
 
 Cases covering deleting comments on posts.
 
-### Pre-requisites
-
-- [ ] User1 has been created.
-- [ ] User2 has been created.
-- [ ] User1 has created a public post.
-
 ### Smoke Test
+
+#### Pre-requisites
+
+- [ ] User1 has been created and has created a public post.
+- [ ] User2 has been created.
+
+#### Cases
 
 - [ ] As a user, I can delete my comments.
     - As User2:
@@ -25,6 +26,13 @@ Cases covering deleting comments on posts.
 
 ### Manual Regression
 
+#### Pre-requisites
+
+- [ ] User1 has been created and has created a public post.
+- [ ] User2 has been created.
+
+#### Cases
+
 - [ ] As a user mentioned in a deleted comment, I can still view the post from the notification.
     - As User2:
         - Comment on User1's post, mentioning User1.
@@ -34,6 +42,10 @@ Cases covering deleting comments on posts.
             - **Confirm it shows the post, but the comment is gone.**
 
 ### Full Regression
+
+#### Pre-requisites
+
+None.
 
 The post comment endpoints are not yet covered by the Integration suite.  All
 comment deletion cases are defined in the Smoke Test and Manual Regression

@@ -2,17 +2,21 @@
 
 Cases covering the user updating their feed and display preferences.
 
-### Pre-requisites
-
-- [ ] User1 has registered.
-- [ ] A site admin has been created and can create Info and Announcement posts.
-
 ### Smoke Test
+
+#### Pre-requisites
+
+None.
 
 No preference cases are critical enough for the Smoke Test.  All cases are
 defined in the Manual Regression section below.
 
 ### Manual Regression
+
+#### Pre-requisites
+
+- [ ] User1 has registered and has friends.
+- [ ] A site admin has been created and can create Info and Announcement posts.
 
 #### Info Posts
 
@@ -69,6 +73,10 @@ defined in the Manual Regression section below.
             - **Confirm your friends list is shown.**
 
 ### Full Regression
+
+#### Pre-requisites
+
+None.
 
 The user preferences endpoint is not yet covered by the Integration suite.
 All preference cases are defined in the Manual Regression section above.

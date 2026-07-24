@@ -2,13 +2,12 @@
 
 Cases covering deleting files.
 
-### Pre-requisites
+### Smoke Test
+
+#### Pre-requisites
 
 - [ ] User1 has been created.
-- [ ] User2 has been created.
-- [ ] A group has been created with User1 as admin.
-
-### Smoke Test
+- [ ] Sample images and videos are available to upload.
 
 #### Post
 
@@ -22,6 +21,11 @@ Cases covering deleting files.
             - **Confirm the video is removed.**
 
 ### Manual Regression
+
+#### Pre-requisites
+
+- [ ] User1 has been created and has a profile image set.
+- [ ] A group has been created with User1 as an admin and a group image set.
 
 #### Group Profile
 
@@ -42,6 +46,10 @@ Cases covering deleting files.
             - **Confirm you fall back to the default avatar everywhere you are shown.**
 
 ### Full Regression
+
+#### Pre-requisites
+
+None.
 
 The file endpoints are not yet covered by the Integration suite.  All file
 deletion cases are defined in the Smoke Test and Manual Regression sections

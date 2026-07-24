@@ -2,7 +2,63 @@
 
 Cases covering group querying: the Find Group list and the search control.
 
-### Pre-requisites
+### Smoke Test
+
+#### Pre-requisites
+
+- [ ] A Public Group, Public Group, has been created.
+- [ ] A Private Group, Private Group, has been created.
+- [ ] A Hidden Group, Hidden Group, has been created.
+
+- [ ] User3 has been created and added as a member of each group.
+- [ ] User7 has been created and is a non-member of all groups.
+
+#### Cases
+
+- [ ] As a user, the Find Group list only includes groups I am allowed to see.
+    - As User7, a non-member of all groups:
+        - Go to the Find Group page.
+            - **Confirm Public Group and Private Group are listed.**
+            - **Confirm Hidden Group is *not* listed.**
+    - As User3, a member of all groups:
+        - Go to the Find Group page.
+            - **Confirm Public Group, Private Group and Hidden Group are all listed.**
+
+### Manual Regression
+
+#### Pre-requisites
+
+- [ ] A Public Group, Public Group, has been created.
+    - [ ] The following subgroups of Public Group have been created:
+        - [ ] A Public Group named Public - Public Group
+        - [ ] A Private Group named Public - Private Group
+        - [ ] A Hidden Group named Public - Hidden Group
+
+- [ ] User3 has been created and added as a member of Public Group and each of
+      its subgroups.
+- [ ] User7 has been created and is a non-member of all groups.
+
+#### Cases
+
+- [ ] As a user, I can filter the Find Group list using the Search control.
+    - As User3:
+        - Go to the Find Group page.
+        - Enter part of a group's name in the Search control.
+            - **Confirm the list filters down to matching groups.**
+        - Clear the Search control.
+            - **Confirm the full list returns.**
+        - Enter a string that matches no group.
+            - **Confirm an empty state is shown rather than an error.**
+
+- [ ] As a user, the Find Group list includes subgroups I can see.
+    - As User7:
+        - Go to the Find Group page.
+            - **Confirm Public - Public Group and Public - Private Group are listed.**
+            - **Confirm Public - Hidden Group is *not* listed.**
+
+### Full Regression
+
+#### Pre-requisites
 
 - [ ] A Public Group, Public Group, has been created.
     - [ ] The following subgroups of Public Group have been created:
@@ -33,36 +89,7 @@ Cases covering group querying: the Find Group list and the search control.
 - [ ] User9 has been created and has been banned from each group.
 - [ ] A site moderator has been created.
 
-### Smoke Test
-
-- [ ] As a user, the Find Group list only includes groups I am allowed to see.
-    - As User7, a non-member of all groups:
-        - Go to the Find Group page.
-            - **Confirm Public Group and Private Group are listed.**
-            - **Confirm Hidden Group is *not* listed.**
-    - As User3, a member of all groups:
-        - Go to the Find Group page.
-            - **Confirm Public Group, Private Group and Hidden Group are all listed.**
-
-### Manual Regression
-
-- [ ] As a user, I can filter the Find Group list using the Search control.
-    - As User3:
-        - Go to the Find Group page.
-        - Enter part of a group's name in the Search control.
-            - **Confirm the list filters down to matching groups.**
-        - Clear the Search control.
-            - **Confirm the full list returns.**
-        - Enter a string that matches no group.
-            - **Confirm an empty state is shown rather than an error.**
-
-- [ ] As a user, the Find Group list includes subgroups I can see.
-    - As User7:
-        - Go to the Find Group page.
-            - **Confirm Public - Public Group and Public - Private Group are listed.**
-            - **Confirm Public - Hidden Group is *not* listed.**
-
-### Full Regression
+#### Cases
 
 - [ ] As a user, the group list is self-consistent and de-duplicated across pages. (covered: integration)
     - As User3:

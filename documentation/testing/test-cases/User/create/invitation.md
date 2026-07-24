@@ -3,12 +3,14 @@
 Cases covering the User Invitation flow, in which a user is sent an invitation
 email and may use it to register on the platform.
 
-### Pre-requisites
+### Smoke Test
+
+#### Pre-requisites
 
 - [ ] User1 has been registered and has made a private post.
-- [ ] User2 has been registered and has made a public post.
+- [ ] An email client (mailinator) is available for the invited addresses.
 
-### Smoke Test
+#### Cases
 
 - [ ] As a user, I can invite someone by email and they can register from the invitation.
     - As User1:
@@ -27,6 +29,15 @@ email and may use it to register on the platform.
             - **Confirm User1's private post is now visible.**
 
 ### Manual Regression
+
+#### Pre-requisites
+
+- [ ] User1 has been registered.
+- [ ] User2 has been registered and has made a public post.
+- [ ] An email client (mailinator) is available for the invited addresses.
+- [ ] A second browser session is available.
+
+#### Cases
 
 - [ ] As a user, an invitation cannot be accepted from the inviting user's own session.
     - As User2:
@@ -49,6 +60,10 @@ email and may use it to register on the platform.
             - **Confirm User2's profile is visible.**
 
 ### Full Regression
+
+#### Pre-requisites
+
+None.
 
 The invitation endpoints are not yet covered by the Integration suite.  All
 invitation cases are defined in the Smoke Test and Manual Regression sections
