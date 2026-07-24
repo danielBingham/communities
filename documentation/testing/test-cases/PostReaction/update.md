@@ -22,27 +22,16 @@ Cases covering updating reactions to Posts.
 
 ### Manual Regression
 
-- [ ] As a user, I can change a dislike to a demote.
-    - As User1:
-        - Demote the User2 Post previously disliked.
-            - **Confirm "Are You Sure" modal is shown.**
-        - Select "Yes".
-            - **Confirm demote highlighted and dislike not highlighted.**
-            - **Confirm demotes is incremented by 1 and dislikes is decremented by 1.**
-        - Click on the reactions.
-            - **Confirm User1 is shown as demoting.**
-        - Sort the feed by "Most Activity".
-            - **Confirm post decreases rank.**
 
-- [ ] As a user, I can change a demote to a like.
+- [ ] As a user, I can change a dislike to a like.
     - As User1:
-        - Like the User2 Post previously demoted.
-            - **Confirm like is highlighted and demote is not highlighted.**
-            - **Confirm likes is incremented by 1 and demotes is decremented by 1.**
+        - Like the User2 Post previously disliked.
+            - **Confirm like is highlighted and dislike is not highlighted.**
+            - **Confirm likes is incremented by 1 and dislikes is decremented by 1.**
         - Click on the reactions.
             - **Confirm User1 is shown as liking.**
         - Sort the feed by "Most Activity".
-            - **Confirm post increases rank.**
+            - **Confirm post stays the same in rank.**
 
 ### Full Regression
 

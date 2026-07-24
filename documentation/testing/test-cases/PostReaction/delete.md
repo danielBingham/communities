@@ -30,15 +30,6 @@ Cases covering removing reactions from Posts.
         - Sort the feed by "Most Activity".
             - **Confirm post decreases rank.**
 
-- [ ] As a user, I can remove a demote from a post.
-    - As User1:
-        - Remove a demote from a third one of User2's Posts.
-            - **Confirm demote is not highlighted and "demotes" is decremented by 1.**
-        - Click on the reactions.
-            - **Confirm User1 is not shown as demoting.**
-        - Sort the feed by "Most Activity".
-            - **Confirm post increases rank.**
-
 ### Full Regression
 
 The post reaction endpoints are not yet covered by the Integration suite.  All

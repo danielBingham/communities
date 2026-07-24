@@ -29,17 +29,6 @@ Cases covering reacting to Posts.
         - Sort the feed by "Most Activity".
             - **Confirm post increases rank.**
 
-- [ ] As a user, I can demote a post.
-    - As User1:
-        - Demote a third one of User2's Posts.
-            - **Confirm "Are You Sure" modal shows.**
-        - Select "Yes".
-            - **Confirm demote is highlighted and "demotes" is incremented by 1.**
-        - Click on the reactions.
-            - **Confirm User1 is shown as demoting.**
-        - Sort the feed by "Most Activity".
-            - **Confirm post decreases rank.**
-
 ### Full Regression
 
 The post reaction endpoints are not yet covered by the Integration suite.  All

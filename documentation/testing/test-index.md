@@ -4,9 +4,13 @@ For each heading, copy the content of the linked file under the heading and exec
 
 ## [Create User: Registration](documentation/testing/test-cases/User/create/registration.md)
 ## [Create User: Invitation](documentation/testing/test-cases/User/create/invitation.md)
+## [Create User: Email Confirmation](documentation/testing/test-cases/User/create/email-confirmation.md)
 ## [Update User: Profile](documentation/testing/test-cases/User/update/profile.md)
 ## [Update User: Preferences](documentation/testing/test-cases/User/update/preferences.md)
-## [Update User: Notifications](documentation/testing/text-cases/User/update/notifications.md)
+## [Update User: Notifications](documentation/testing/test-cases/User/update/notifications.md)
+## [Update User: MFA](documentation/testing/test-cases/User/update/mfa.md)
+## [Update User: Security](documentation/testing/test-cases/User/update/security.md)
+## [Read User](documentation/testing/test-cases/User/read.md)
 ## [Query User](documentation/testing/test-cases/User/query.md)
 
 ## [UserRelationship](documentation/testing/test-cases/UserRelationship/create-update-delete.md)
@@ -28,7 +32,7 @@ For each heading, copy the content of the linked file under the heading and exec
 
 ## [Create PostSubscription](documentation/testing/test-cases/PostSubscription/create.md)
 ## [Delete PostSubscription](documentation/testing/test-cases/PostSubscription/delete.md)
- 
+
 ## [Create SiteModeration](documentation/testing/test-cases/SiteModeration/create.md)
 ## [Update SiteModeration](documentation/testing/test-cases/SiteModeration/update.md)
 
