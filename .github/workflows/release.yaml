@@ -61,7 +61,9 @@ jobs:
         working-directory: ./packages/shared
         run: |
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-          TAG=$([[ "${{github.event.inputs.environment }}" == "staging" ]] && echo "next" || echo "latest") echo $TAG && npm publish --tag $TAG
+          export TAG=$([[ "${{github.event.inputs.environment }}" == "staging" ]] && echo "next" || echo "latest")
+          echo "Tag: $TAG"
+          npm publish
 
       # Test, Version, and Publish @communities/backend
       #
