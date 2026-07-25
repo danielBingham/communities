@@ -59,7 +59,6 @@ jobs:
 
       - name: Publish to AWS CodeArtifact
         working-directory: ./packages/shared
-        with:
         run: |
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
           TAG=$([[ "${{github.event.inputs.environment }}" == "staging" ]] && echo "rc" || echo "latest") npm publish --tag $TAG
