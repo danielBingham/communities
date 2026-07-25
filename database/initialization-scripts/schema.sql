@@ -1,8 +1,30 @@
-/* Peer Review Schema file */
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
 
-/* Allows us to do fuzzy finding. */
-CREATE EXTENSION pg_trgm;
-CREATE EXTENSION postgis;
+/****************************************************************************
+ *      DATABASE SCHEMA
+ *
+ * This is the database schema file that defines the current state of the
+ * database (with all currently defined migrations run).
+ *
+ ****************************************************************************/
 
 /*****************************************************************************
  * Feature Flags
@@ -35,9 +57,21 @@ CREATE TABLE features (
 /**
  * Insert those features that have already been migrated in the schema.
  */
-/*INSERT INTO features (name, status, created_date, updated_date)
+INSERT INTO features (name, status, created_date, updated_date)
     VALUES
-        ('80-group-moderators-can-ban-users', 'enabled', now(), now());*/
+        ('issue-198-auto-generate-link-previews', 'enabled', now(), now()),
+        ('issue-165-subgroups', 'enabled', now(), now()),
+        ('issue-330-group-short-description-and-rules', 'enabled', now(), now()),
+        ('issue-252-group-subscriptions', 'enabled', now(), now()),
+        ('feat-408-flag-profiles-and-groups', 'enabled', now(), now()),
+        ('fix-486-unique-constraint', 'enabled', now(), now()),
+        ('feat-484-find-active-groups', 'enabled', now(), now()),
+        ('feat-491-mutual-friends', 'enabled', now(), now()),
+        ('fix-495-slow-friends-list', 'enabled', now(), now()),
+        ('feat-377-improved-file-pipelines', 'enabled', now(), now()),
+        ('feat-61-multifactor-authentication', 'enabled', now(), now()),
+        ('video-uploads', 'enabled', now(), now());
+
 
 
 /******************************************************************************
@@ -93,14 +127,6 @@ CREATE TABLE users (
 CREATE INDEX users__name ON users (name);
 CREATE INDEX users_username ON users (username);
 CREATE INDEX users__name_trgm ON users USING GIN (name gin_trgm_ops);
-
-/**
- * Insert the admin user. Initial password is "PasswordPassword".  If deploying
- * a non-local environment, it will be changed as soon as the environment is
- * finished creating.
- */
-INSERT INTO users (name, username, email, password, status, permissions, site_role, last_authentication_attempt_date, created_date, updated_date)
-    VALUES ('Administrator', 'administrator', 'contact@communities.social', '$2b$10$ywAqKPvFH51jeILdx.Piy.mm5ci37vMpy7G4lEBWObfIzOif5ZgzK', 'confirmed', 'superadmin', 'superadmin', now(), now(), now());
 
 CREATE TABLE user_recovery_codes (
     code text,

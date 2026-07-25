@@ -18,18 +18,11 @@
  *
  ******************************************************************************/
 /******************************************************************************
- * Performs initial permission setup, giving permissions to the `app` user and
- * clearing them from any other users.
+ * Extensions needed by the Communities Platform.
  ******************************************************************************/
 
-REVOKE ALL ON SCHEMA public FROM PUBLIC ;
-GRANT CONNECT ON DATABASE communities to app;
+/* Allows fuzzy finding using SIMILARITY() searches. */
+CREATE EXTENSION pg_trgm;
 
-GRANT USAGE ON SCHEMA public TO app;
-GRANT ALL ON SCHEMA public TO app;
-
-GRANT ALL ON ALL TABLES IN SCHEMA public TO app;
-GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO app;
-
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO app;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO app;
+/* Allows location and geographic types. */
+CREATE EXTENSION postgis;
