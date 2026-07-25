@@ -1,4 +1,4 @@
-name: Release 
+name: Release
 
 on:
   workflow_dispatch:
@@ -24,24 +24,24 @@ jobs:
 
     steps:
 
-      - name: Checkout Repo 
+      - name: Checkout Repo
         uses: actions/checkout@v5
 
       - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: ${{ matrix.node-version }}
 
       - name: Configure AWS CLI
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
-          aws-region: us-east-1 
+          aws-region: us-east-1
 
       # Test, Version, and Publish @communities/shared
       #
-      - name: Install Shared Dependencies 
+      - name: Install Shared Dependencies
         working-directory: ./packages/shared
         run: |
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
@@ -57,7 +57,7 @@ jobs:
         run: |
           npm version ${{ github.event.inputs.version }}
 
-      - name: Publish to AWS CodeArtifact 
+      - name: Publish to AWS CodeArtifact
         working-directory: ./packages/shared
         run: |
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
@@ -71,7 +71,7 @@ jobs:
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
           npm install @communities/shared@${{ github.event.inputs.version }}
 
-      - name: Install Backend Dependencies 
+      - name: Install Backend Dependencies
         working-directory: ./packages/backend
         run: |
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
@@ -87,7 +87,7 @@ jobs:
         run: |
           npm version ${{ github.event.inputs.version }}
 
-      - name: Publish to AWS CodeArtifact 
+      - name: Publish to AWS CodeArtifact
         working-directory: ./packages/backend
         run: |
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
@@ -95,7 +95,7 @@ jobs:
 
       # Test, Version, and Publish @communities/session
       #
-      - name: Install Session Dependencies 
+      - name: Install Session Dependencies
         working-directory: ./packages/session
         run: |
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
@@ -106,13 +106,13 @@ jobs:
         run: |
           npm version ${{ github.event.inputs.version }}
 
-      - name: Publish to AWS CodeArtifact 
+      - name: Publish to AWS CodeArtifact
         working-directory: ./packages/session
         run: |
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
           npm publish
 
-      # Build the worker docker container and push it to ECR 
+      # Build the worker docker container and push it to ECR
       - name: Install updated Shared version
         working-directory: ./worker
         run: |
@@ -124,7 +124,7 @@ jobs:
         run: |
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
           npm install @communities/backend@${{ github.event.inputs.version }}
-      
+
       - name: Install Worker NPM Modules
         working-directory: ./worker
         run: |
@@ -140,9 +140,9 @@ jobs:
         working-directory: ./worker
         run: |
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-          docker build --secret id=CODEARTIFACT_AUTH_TOKEN -t 843012963492.dkr.ecr.us-east-1.amazonaws.com/communities/worker:${{ github.event.inputs.version }} . 
+          docker build --secret id=CODEARTIFACT_AUTH_TOKEN -t 843012963492.dkr.ecr.us-east-1.amazonaws.com/communities/worker:${{ github.event.inputs.version }} .
 
-      - name: Login to ECR 
+      - name: Login to ECR
         run: |
           aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 843012963492.dkr.ecr.us-east-1.amazonaws.com
 
@@ -177,7 +177,7 @@ jobs:
 
       - name: Run Web Application Unit Tests
         working-directory: ./web-application
-        run: | 
+        run: |
           npm run test
 
       - name: Version the web application
@@ -189,9 +189,9 @@ jobs:
         working-directory: ./web-application
         run: |
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-          docker build --secret id=CODEARTIFACT_AUTH_TOKEN --build-arg NODE_ENV=${{ github.event.inputs.environment }} -t 843012963492.dkr.ecr.us-east-1.amazonaws.com/communities/web-application:${{ github.event.inputs.version }} . 
+          docker build --secret id=CODEARTIFACT_AUTH_TOKEN --build-arg NODE_ENV=${{ github.event.inputs.environment }} -t 843012963492.dkr.ecr.us-east-1.amazonaws.com/communities/web-application:${{ github.event.inputs.version }} .
 
-      - name: Login to ECR 
+      - name: Login to ECR
         run: |
           aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 843012963492.dkr.ecr.us-east-1.amazonaws.com
 
@@ -208,7 +208,7 @@ jobs:
           git config --global user.name $NAME
           git config --global user.email $EMAIL
           git commit -am 'Version ${{ github.event.inputs.version }}'
-          git push origin 
+          git push origin
       - name: Tag the version
         run: |
           NAME=$( git log --format="%an" ${{ github.sha }}^! )
