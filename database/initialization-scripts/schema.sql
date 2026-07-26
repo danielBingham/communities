@@ -89,9 +89,9 @@ CREATE TABLE users (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 
     name text DEFAULT '',
-    username text DEFAULT '',
+    username text DEFAULT '' UNIQUE,
 
-    email text NOT NULL,
+    email text NOT NULL UNIQUE,
     password text,
     birthdate text DEFAULT '',
 
@@ -105,8 +105,8 @@ CREATE TABLE users (
 
     invitations int DEFAULT 50, /* Deprecated */
 
-    settings jsonb DEFAULT '{}'::jsonb,
-    notices jsonb DEFAULT '{}'::jsonb,
+    settings jsonb NOT NULL DEFAULT '{}'::jsonb,
+    notices jsonb NOT NULL DEFAULT '{}'::jsonb,
 
     site_moderation_id uuid DEFAULT NULL, /* REFERENCES site_moderation (id) ON DELETE SET NULL -- defined below*/
 
@@ -290,7 +290,7 @@ CREATE TYPE group_post_permissions as ENUM('anyone', 'members', 'approval', 'res
 CREATE TABLE groups (
     id uuid primary key DEFAULT gen_random_uuid(),
     post_permissions group_post_permissions DEFAULT 'members',
-    type group_type,
+    type group_type DEFAULT 'hidden',
     title text,
     slug text,
     short_description text,
@@ -325,7 +325,7 @@ CREATE TABLE group_members (
 
     status group_member_status DEFAULT 'pending-requested',
     entrance_answers jsonb DEFAULT '{}'::jsonb,
-    role group_member_role DEFAULT 'member',
+    role group_member_role, /* TODO migrate and add the default 'member' */
 
     created_date timestamptz,
     updated_date timestamptz
@@ -363,7 +363,7 @@ CREATE TABLE posts (
     type post_type NOT NULL DEFAULT 'feed' ,
     visibility post_visibility NOT NULL DEFAULT 'private',
 
-    file_id uuid REFERENCES files (id) DEFAULT NULL,
+    file_id uuid REFERENCES files (id) ON DELETE SET NULL DEFAULT NULL,
     link_preview_id uuid REFERENCES link_previews (id) DEFAULT NULL,
     shared_post_id uuid REFERENCES posts (id) ON DELETE SET NULL DEFAULT NULL,
 
