@@ -217,7 +217,7 @@ module.exports = class UserController extends BaseController{
         } else {
             const and = result.params.length > 0 ? ' AND ' : ''
             result.params.push('banned', 'invited')
-            result.where += `${and} users.status != ${result.params.length-1} AND users.status !=  ${result.params.length}`
+            result.where += `${and} users.status != $${result.params.length-1} AND users.status !=  $${result.params.length}`
         }
 
         // ====================================================================
