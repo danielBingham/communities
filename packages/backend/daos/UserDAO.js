@@ -337,7 +337,15 @@ module.exports = class UserDAO extends DAO {
                 ${where}
         `
 
-        const results = await this.core.database.query(sql, params)
+        let results = null
+        try {
+            results = await this.core.database.query(sql, params)
+        } catch (error ) {
+            this.core.error.logger(`Failed to countUsers() with: `,
+                `\n\tsql: `, sql,
+                `\n\terror: `, error)
+            throw new DAOError(`query-error`, `Failed to select users with database error.`)
+        }
 
         if ( results.rows.length <= 0) {
             return {
