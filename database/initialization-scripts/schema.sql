@@ -624,4 +624,15 @@ CREATE INDEX permissions__role_id ON permissions (role_id);
 
 CREATE INDEX permissions__post_id ON permissions (post_id);
 
+/******************************************************************************
+ * Migrations: These are tables created to backup data for data migrations
+ ******************************************************************************/
+
+/* feat-61-multifactor-authentication */
+/* Backup the unhash tokens for the token hash migration */
+CREATE TABLE tokens_hash_migration (
+    id uuid PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
+    token text
+)
+
 
