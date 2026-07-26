@@ -281,40 +281,48 @@ module.exports = class UserDAO extends DAO {
      *
      */
     async selectUsers(query) {
-        let where = query.where ? `WHERE ${query.where}` : ''
-        const params = query.params ? [ ...query.params ] : []
-        let order = query.order ? `${query.order}` : 'users.created_date desc'
-        const fields = query.fields ? query.fields : []
+            let where = query.where ? `WHERE ${query.where}` : ''
+            const params = query.params ? [ ...query.params ] : []
+            let order = query.order ? `${query.order}` : 'users.created_date desc'
+            const fields = query.fields ? query.fields : []
 
-        // We only want to include the paging terms if we actually want paging.
-        // If we're making an internal call for another object, then we
-        // probably don't want to have to deal with pagination.
-        let paging = ''
-        if ( 'page' in query ) {
-            let page = query.page !== null && query.page !== undefined ? query.page : 1
+            // We only want to include the paging terms if we actually want paging.
+            // If we're making an internal call for another object, then we
+            // probably don't want to have to deal with pagination.
+            let paging = ''
+            if ( 'page' in query ) {
+                let page = query.page !== null && query.page !== undefined ? query.page : 1
 
-            const offset = (page-1) * PAGE_SIZE
-            let count = params.length
+                const offset = (page-1) * PAGE_SIZE
+                let count = params.length
 
-            paging = `
-                LIMIT $${count+1}
-                OFFSET $${count+2}
+                paging = `
+                    LIMIT $${count+1}
+                    OFFSET $${count+2}
+                `
+
+                params.push(PAGE_SIZE)
+                params.push(offset)
+            }
+
+            const sql = `
+                    SELECT
+                        ${this.getUserSelectionString(fields)}
+                    FROM users
+                    ${where}
+                    ORDER BY ${order}
+                    ${paging}
             `
 
-            params.push(PAGE_SIZE)
-            params.push(offset)
+        let results = null
+        try {
+            results = await this.core.database.query(sql, params)
+        } catch (error ) {
+            this.core.error.logger(`Failed to selectUsers() with: `,
+                `\n\tsql: `, sql,
+                `\n\terror: `, error)
+            throw new DAOError(`query-error`, `Failed to select users with database error.`)
         }
-
-        const sql = `
-                SELECT
-                    ${this.getUserSelectionString(fields)}
-                FROM users
-                ${where}
-                ORDER BY ${order}
-                ${paging}
-        `
-
-        const results = await this.core.database.query(sql, params)
         return this.hydrateUsers(results.rows)
     }
 
