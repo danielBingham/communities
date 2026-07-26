@@ -318,9 +318,9 @@ module.exports = class UserDAO extends DAO {
         try {
             results = await this.core.database.query(sql, params)
         } catch (error ) {
-            this.core.logger.error(`Failed to selectUsers() with: `,
-                `\n\tsql: `, sql,
-                `\n\terror: `, error)
+            this.core.logger.debug(`Failed to selectUsers() with: `,
+                `\n\tsql: `, sql)
+            this.core.logger.error(error)
             throw new DAOError(`query-error`, `Failed to select users with database error.`)
         }
         return this.hydrateUsers(results.rows)
@@ -341,9 +341,9 @@ module.exports = class UserDAO extends DAO {
         try {
             results = await this.core.database.query(sql, params)
         } catch (error ) {
-            this.core.logger.error(`Failed to countUsers() with: `,
-                `\n\tsql: `, sql,
-                `\n\terror: `, error)
+            this.core.logger.debug(`Failed to countUsers() with: `,
+                `\n\tsql: `, sql)
+            this.core.logger.error(error)
             throw new DAOError(`query-error`, `Failed to select users with database error.`)
         }
 
