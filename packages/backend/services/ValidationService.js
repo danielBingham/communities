@@ -164,7 +164,8 @@ module.exports = class ValidationService {
             // The user is being invited.  Only email is required or allowed.
             if ( type === 'invitation' || type === 'reinvitation' ) {
                 const disallowedFields = [
-                    'fileId', 'name', 'username', 'password', 'settings', 'notices', 'about', 'location', 'status'
+                    'fileId', 'name', 'username', 'password', 'settings', 'notices', 'about', 'location', 'status',
+                    'privacyViewFriends', 'privacyViewMutualFriends'
                 ]
 
                 for(const disallowedField of disallowedFields ) {
@@ -189,7 +190,9 @@ module.exports = class ValidationService {
             else if ( type === 'registration' ) {
                 // Some fields we don't allow the user to set on registration,
                 // though they may be allowed to edit them later.
-                const disallowedFields = [ 'settings', 'notices', 'status' ]
+                const disallowedFields = [ 'settings', 'notices', 'status',
+                    'privacyViewFriends', 'privacyViewMutualFriends'
+                 ]
 
                 for(const disallowedField of disallowedFields ) {
                     if ( this.has(user, disallowedField) ) {
@@ -245,7 +248,8 @@ module.exports = class ValidationService {
 
             if ( type === 'reinvitation' ) {
                 const disallowedFields = [
-                    'fileId', 'name', 'username', 'password', 'settings', 'notices', 'about', 'location', 'status'
+                    'fileId', 'name', 'username', 'password', 'settings', 'notices', 'about', 'location', 'status',
+                    'privacyViewFriends', 'privacyViewMutualFriends'
                 ]
 
                 for(const disallowedField of disallowedFields ) {
@@ -269,7 +273,9 @@ module.exports = class ValidationService {
 
                 // Some fields we don't allow the user to set on registration,
                 // though they may be allowed to edit them later.
-                const disallowedFields = [ 'settings', 'notices', 'status' ]
+                const disallowedFields = [ 'settings', 'notices', 'status',
+                    'privacyViewFriends', 'privacyViewMutualFriends'
+                ]
 
                 for(const disallowedField of disallowedFields ) {
                     if ( this.has(user, disallowedField) ) {
@@ -299,7 +305,7 @@ module.exports = class ValidationService {
 
                 // If we're reseting our password, the only field we're allowed
                 // to change is the password field.
-                const disallowedFields = [ 'settings', 'notices', 'email', 'name', 'username', 'status' ]
+                const disallowedFields = [ 'settings', 'notices', 'email', 'name', 'username', 'status', 'privacyViewFriends', 'privacyViewMutualFriends' ]
 
                 for(const disallowedField of disallowedFields ) {
                     if ( this.has(user, disallowedField) ) {
@@ -652,6 +658,56 @@ module.exports = class ValidationService {
                         type: `status:not-authorized`,
                         log: `User attempting to update status for unconfirmed user.`,
                         message: `You may only update status to ban confirmed users, unban previously banned users, or manually confirm unconfirmed users.`
+                    })
+                }
+            }
+        }
+
+        if ( this.has(user, 'privacyViewFriends') ) {
+            if ( user.privacyViewFriends === null ) {
+                errors.push({
+                    type: `privacyViewFriends:null`,
+                    log: `User.privacyViewFriends cannot be null.`,
+                    message: `User.privacyViewFriends cannot be null.`
+                })
+            } else if ( typeof user.privacyViewFriends !== 'string' ) {
+                errors.push({
+                    type: `privacyViewFriends:invalid-type`,
+                    log: `${typeof user.privacyViewFriends} is an invalid type for privacyViewFriends.`,
+                    message: `${typeof user.privacyViewFriends} is an invalid type for privacyViewFriends.`
+                })
+            } else {
+                const validValues = [ 'me', 'friends', 'friends-of-friends', 'public' ]
+                if ( ! validValues.includes(user.privacyViewFriends) ) {
+                    errors.push({
+                        type: `privacyViewFriends:invalid`,
+                        log: `privacyViewFriends is invalid.`,
+                        message: `privacyViewFriends is invalid.`
+                    })
+                }
+            }
+        }
+
+        if ( this.has(user, 'privacyViewMutualFriends') ) {
+            if ( user.privacyViewMutualFriends === null ) {
+                errors.push({
+                    type: `privacyViewMutualFriends:null`,
+                    log: `User.privacyViewMutualFriends cannot be null.`,
+                    message: `User.privacyViewMutualFriends cannot be null.`
+                })
+            } else if ( typeof user.privacyViewMutualFriends !== 'string' ) {
+                errors.push({
+                    type: `privacyViewMutualFriends:invalid-type`,
+                    log: `${typeof user.privacyViewMutualFriends} is an invalid type for privacyViewMutualFriends.`,
+                    message: `${typeof user.privacyViewMutualFriends} is an invalid type for privacyViewMutualFriends.`
+                })
+            } else {
+                const validValues = [ 'me', 'friends', 'friends-of-friends', 'public' ]
+                if ( ! validValues.includes(user.privacyViewMutualFriends) ) {
+                    errors.push({
+                        type: `privacyViewMutualFriends:invalid`,
+                        log: `privacyViewMutualFriends is invalid.`,
+                        message: `privacyViewMutualFriends is invalid.`
                     })
                 }
             }
