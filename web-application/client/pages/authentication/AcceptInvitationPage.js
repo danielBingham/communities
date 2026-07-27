@@ -34,7 +34,7 @@ const AcceptInvitationPage = function(props) {
 
     const navigate = useNavigate()
     useEffect(() => {
-        if ( currentUser?.status !== 'invited' ) {
+        if ( currentUser && currentUser.status !== 'invited' ) {
             navigate('/')
         }
     }, [ currentUser ])
