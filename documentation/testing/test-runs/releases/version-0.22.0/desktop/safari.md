@@ -64,12 +64,12 @@ email and may use it to register on the platform.
 
 #### Pre-requisites
 
-- [ ] User1 has been registered and has made a private post.
-- [ ] An email client (mailinator) is available for the invited addresses.
+- [x] User1 has been registered and has made a private post.
+- [x] An email client (mailinator) is available for the invited addresses.
 
 #### Cases
 
-- [ ] As a user, I can invite someone by email and they can register from the invitation.
+- [x] As a user, I can invite someone by email and they can register from the invitation.
     - As User1:
         - Invite James Smith (communities-james-smith@mailinator.com).
             - **Confirm invitation is visible on the "Friend Requests" page.**
@@ -89,14 +89,14 @@ email and may use it to register on the platform.
 
 #### Pre-requisites
 
-- [ ] User1 has been registered.
-- [ ] User2 has been registered and has made a public post.
-- [ ] An email client (mailinator) is available for the invited addresses.
-- [ ] A second browser session is available.
+- [x] User1 has been registered.
+- [x] User2 has been registered and has made a public post.
+- [x] An email client (mailinator) is available for the invited addresses.
+- [x] A second browser session is available.
 
 #### Cases
 
-- [ ] As a user, an invitation cannot be accepted from the inviting user's own session.
+- [x] As a user, an invitation cannot be accepted from the inviting user's own session.
     - As User2:
         - Invite Jenny Smith (communities-jenny-smith@mailinator.com).
             - **Confirm invitation is visible on the "Friend Requests" page.**
@@ -128,7 +128,7 @@ Cases covering the Email Confirmation flow.
 
 #### Cases
 
-- [ ] As a user, I can confirm my email by following the link in the email.
+- [-] As a user, I can confirm my email by following the link in the email.
     - As a new user:
         - Register a new user.
         - Check the email you registered.
@@ -139,7 +139,7 @@ Cases covering the Email Confirmation flow.
             - **Confirm user is confirmed.**
             - **Confirm TOS page loads.**
 
-- [ ] As a user, I can confirm my email by copying and pasting the token into the form.
+- [-] As a user, I can confirm my email by copying and pasting the token into the form.
     - As a new user:
         - Register a new user.
         - Check the email you registered.
@@ -153,14 +153,14 @@ Cases covering the Email Confirmation flow.
 
 #### Pre-requisites
 
-- [ ] An email client (mailinator) is available for the addresses under test.
+- [-] An email client (mailinator) is available for the addresses under test.
 
 All of the email confirmation cases require access to an email inbox, so none
 of them can be covered by the Integration suite.
 
 #### Success cases
 
-- [ ] As a user, I can request a new confirmation email from the email confirmation form.
+- [-] As a user, I can request a new confirmation email from the email confirmation form.
     - As a new user:
         - Register a new user.
         - Click "Resend" on the email confirmation screen.
@@ -168,13 +168,13 @@ of them can be covered by the Integration suite.
         - Click the confirmation link in the new email.
             - **Confirm email verification success.**
 
-- [ ] As a user, I can logout from the email confirmation form.
+- [-] As a user, I can logout from the email confirmation form.
     - As a new user:
         - Register a new user.
         - Click "Logout" on the email confirmation screen.
             - **Confirm logged out.**
 
-- [ ] As a user, I can confirm my email by following the link in the email when I am logged out.
+- [-] As a user, I can confirm my email by following the link in the email when I am logged out.
     - As a new user:
         - Register a new user.
             - **Confirm email confirmnation recieved.**
@@ -183,7 +183,7 @@ of them can be covered by the Integration suite.
             - **Confirm email confirmation form shows success message.**
             - **Confirm redirected to login page.**
 
-- [ ] As a user, I can confirm my email by copying and pasting the token from the email.
+- [-] As a user, I can confirm my email by copying and pasting the token from the email.
     - As a new user:
         - Register a new user.
             - **Confirm email confirmnation recieved.**
@@ -195,22 +195,22 @@ of them can be covered by the Integration suite.
 
 #### Error cases
 
-- [ ] As a user, I am shown an error when I follow a link with an invalid token.
+- [-] As a user, I am shown an error when I follow a link with an invalid token.
     - As a new, unconfirmed user:
         - Follow a confirmation link with a corrupted token.
             - **Confirm an error is shown and the account stays unconfirmed.**
 
-- [ ] As a user, I am shown an error when I manually enter an invalid token.
+- [-] As a user, I am shown an error when I manually enter an invalid token.
     - As a new, unconfirmed user:
         - Enter a token that does not match the one emailed and click "Confirm".
             - **Confirm an error is shown and the account stays unconfirmed.**
 
-- [ ] As a user, I am shown an error when I request a new confirmation while already confirmed.
+- [-] As a user, I am shown an error when I request a new confirmation while already confirmed.
     - As a newly confirmed user:
         - Return to the email confirmation screen and click "Resend".
             - **Confirm an error is shown and no new email is sent.**
 
-- [ ] As a user, I am simply forwarded to TOS when I attempt to re-confirm after already confirming.
+- [-] As a user, I am simply forwarded to TOS when I attempt to re-confirm after already confirming.
     - As a newly confirmed user:
         - Follow the confirmation link a second time.
             - **Confirm no error is shown and the TOS page loads.**
@@ -228,13 +228,13 @@ Cases covering the user updating their profile.
 
 #### Cases
 
-- [ ] As a user, I can upload a profile image.
+- [x] As a user, I can upload a profile image.
     - As User1:
         - Select "Edit Profile" from the User Menu.
         - Click Upload Image and choose a profile image. Submit.
             - **Confirm image successfully uploaded.**
 
-- [ ] As a user, I can edit my "Name".
+- [-] As a user, I can edit my "Name".
     - As User1:
         - Select "Edit Profile" from the User Menu.
         - Make a change to the "Name" field.
@@ -250,7 +250,7 @@ Cases covering the user updating their profile.
 
 #### Cases
 
-- [ ] As a user, I can crop an uploaded profile image.
+- [x] As a user, I can crop an uploaded profile image.
     - As User1:
         - Select "Edit Profile" from the User Menu.
         - Click Upload Image and choose a profile image that does not have a 1:1 aspect ratio.
@@ -258,7 +258,7 @@ Cases covering the user updating their profile.
         - Drag the crop box to an appropriate crop.  Submit the profile form.
             - **Confirm the image is cropped to the chosen crop box.**
 
-- [ ] As a user, I can remove an uploaded profile image.
+- [-] As a user, I can remove an uploaded profile image.
     - As User1:
         - Select "Edit Profile" from the User Menu.
         - Click "Remove Image" under your profile image.
@@ -266,14 +266,14 @@ Cases covering the user updating their profile.
         - Submit the form.
             - **Confirm image removed.**
 
-- [ ] As a user, I can edit "About You".
+- [-] As a user, I can edit "About You".
     - As User1:
         - Select "Edit Profile" from the User Menu.
         - Make a change to the "About You" field.
         - Submit the form and navigate to your profile page.
             - **Confirm About You updated.**
 
-- [ ] As a user, the update form doesn't commit updates until submitted.
+- [x] As a user, the update form doesn't commit updates until submitted.
     - As User1:
         - Select "Edit Profile" from the User Menu.
         - Change your profile picture.
@@ -307,7 +307,7 @@ defined in the Manual Regression section below.
 
 #### Info Posts
 
-- [ ] As a user, I should not receive Info posts in my feed when they are turned off.
+- [x] As a user, I should not receive Info posts in my feed when they are turned off.
     - As User1:
         - Go to your feed.
             - **Confirm info posts are present in your feed.**
@@ -317,7 +317,7 @@ defined in the Manual Regression section below.
         - Return to your feed.
             - **Confirm info posts *are not* shown.**
 
-- [ ] As a user, I should receive Info posts in my feed when they are turned on.
+- [x] As a user, I should receive Info posts in my feed when they are turned on.
     - As User1:
         - Navigate to User Menu -> Preferences.
         - Toggle Info posts to "on".
@@ -326,7 +326,7 @@ defined in the Manual Regression section below.
 
 #### Announcement Posts
 
-- [ ] As a user, I can turn Announcement posts off.
+- [x] As a user, I can turn Announcement posts off.
     - As User1:
         - Go to your feed.
             - **Confirm announcement posts are present in your feed.**
@@ -336,7 +336,7 @@ defined in the Manual Regression section below.
         - Return to your feed.
             - **Confirm announcement posts *are not* shown.**
 
-- [ ] As a user, I can turn Announcement posts back on.
+- [x] As a user, I can turn Announcement posts back on.
     - As User1:
         - Navigate to User Menu -> Preferences.
         - Toggle Announcement posts to "on".

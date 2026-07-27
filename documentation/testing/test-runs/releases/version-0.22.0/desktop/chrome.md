@@ -128,7 +128,7 @@ Cases covering the Email Confirmation flow.
 
 #### Cases
 
-- [ ] As a user, I can confirm my email by following the link in the email.
+- [x] As a user, I can confirm my email by following the link in the email.
     - As a new user:
         - Register a new user.
         - Check the email you registered.
@@ -139,7 +139,7 @@ Cases covering the Email Confirmation flow.
             - **Confirm user is confirmed.**
             - **Confirm TOS page loads.**
 
-- [ ] As a user, I can confirm my email by copying and pasting the token into the form.
+- [x] As a user, I can confirm my email by copying and pasting the token into the form.
     - As a new user:
         - Register a new user.
         - Check the email you registered.
@@ -160,7 +160,7 @@ of them can be covered by the Integration suite.
 
 #### Success cases
 
-- [ ] As a user, I can request a new confirmation email from the email confirmation form.
+- [x] As a user, I can request a new confirmation email from the email confirmation form.
     - As a new user:
         - Register a new user.
         - Click "Resend" on the email confirmation screen.
@@ -168,13 +168,13 @@ of them can be covered by the Integration suite.
         - Click the confirmation link in the new email.
             - **Confirm email verification success.**
 
-- [ ] As a user, I can logout from the email confirmation form.
+- [x] As a user, I can logout from the email confirmation form.
     - As a new user:
         - Register a new user.
         - Click "Logout" on the email confirmation screen.
             - **Confirm logged out.**
 
-- [ ] As a user, I can confirm my email by following the link in the email when I am logged out.
+- [x] As a user, I can confirm my email by following the link in the email when I am logged out.
     - As a new user:
         - Register a new user.
             - **Confirm email confirmnation recieved.**
@@ -183,7 +183,7 @@ of them can be covered by the Integration suite.
             - **Confirm email confirmation form shows success message.**
             - **Confirm redirected to login page.**
 
-- [ ] As a user, I can confirm my email by copying and pasting the token from the email.
+- [x] As a user, I can confirm my email by copying and pasting the token from the email.
     - As a new user:
         - Register a new user.
             - **Confirm email confirmnation recieved.**
@@ -195,22 +195,22 @@ of them can be covered by the Integration suite.
 
 #### Error cases
 
-- [ ] As a user, I am shown an error when I follow a link with an invalid token.
+- [x] As a user, I am shown an error when I follow a link with an invalid token.
     - As a new, unconfirmed user:
         - Follow a confirmation link with a corrupted token.
             - **Confirm an error is shown and the account stays unconfirmed.**
 
-- [ ] As a user, I am shown an error when I manually enter an invalid token.
+- [x] As a user, I am shown an error when I manually enter an invalid token.
     - As a new, unconfirmed user:
         - Enter a token that does not match the one emailed and click "Confirm".
             - **Confirm an error is shown and the account stays unconfirmed.**
 
-- [ ] As a user, I am shown an error when I request a new confirmation while already confirmed.
+- [x] As a user, I am shown an error when I request a new confirmation while already confirmed.
     - As a newly confirmed user:
         - Return to the email confirmation screen and click "Resend".
             - **Confirm an error is shown and no new email is sent.**
 
-- [ ] As a user, I am simply forwarded to TOS when I attempt to re-confirm after already confirming.
+- [x] As a user, I am simply forwarded to TOS when I attempt to re-confirm after already confirming.
     - As a newly confirmed user:
         - Follow the confirmation link a second time.
             - **Confirm no error is shown and the TOS page loads.**
@@ -228,13 +228,13 @@ Cases covering the user updating their profile.
 
 #### Cases
 
-- [ ] As a user, I can upload a profile image.
+- [x] As a user, I can upload a profile image.
     - As User1:
         - Select "Edit Profile" from the User Menu.
         - Click Upload Image and choose a profile image. Submit.
             - **Confirm image successfully uploaded.**
 
-- [ ] As a user, I can edit my "Name".
+- [x] As a user, I can edit my "Name".
     - As User1:
         - Select "Edit Profile" from the User Menu.
         - Make a change to the "Name" field.
@@ -250,7 +250,7 @@ Cases covering the user updating their profile.
 
 #### Cases
 
-- [ ] As a user, I can crop an uploaded profile image.
+- [x] As a user, I can crop an uploaded profile image.
     - As User1:
         - Select "Edit Profile" from the User Menu.
         - Click Upload Image and choose a profile image that does not have a 1:1 aspect ratio.
@@ -258,7 +258,7 @@ Cases covering the user updating their profile.
         - Drag the crop box to an appropriate crop.  Submit the profile form.
             - **Confirm the image is cropped to the chosen crop box.**
 
-- [ ] As a user, I can remove an uploaded profile image.
+- [x] As a user, I can remove an uploaded profile image.
     - As User1:
         - Select "Edit Profile" from the User Menu.
         - Click "Remove Image" under your profile image.
@@ -266,14 +266,14 @@ Cases covering the user updating their profile.
         - Submit the form.
             - **Confirm image removed.**
 
-- [ ] As a user, I can edit "About You".
+- [x] As a user, I can edit "About You".
     - As User1:
         - Select "Edit Profile" from the User Menu.
         - Make a change to the "About You" field.
         - Submit the form and navigate to your profile page.
             - **Confirm About You updated.**
 
-- [ ] As a user, the update form doesn't commit updates until submitted.
+- [x] As a user, the update form doesn't commit updates until submitted.
     - As User1:
         - Select "Edit Profile" from the User Menu.
         - Change your profile picture.
@@ -307,7 +307,7 @@ defined in the Manual Regression section below.
 
 #### Info Posts
 
-- [ ] As a user, I should not receive Info posts in my feed when they are turned off.
+- [x] As a user, I should not receive Info posts in my feed when they are turned off.
     - As User1:
         - Go to your feed.
             - **Confirm info posts are present in your feed.**
@@ -317,7 +317,7 @@ defined in the Manual Regression section below.
         - Return to your feed.
             - **Confirm info posts *are not* shown.**
 
-- [ ] As a user, I should receive Info posts in my feed when they are turned on.
+- [x] As a user, I should receive Info posts in my feed when they are turned on.
     - As User1:
         - Navigate to User Menu -> Preferences.
         - Toggle Info posts to "on".
@@ -326,7 +326,7 @@ defined in the Manual Regression section below.
 
 #### Announcement Posts
 
-- [ ] As a user, I can turn Announcement posts off.
+- [x] As a user, I can turn Announcement posts off.
     - As User1:
         - Go to your feed.
             - **Confirm announcement posts are present in your feed.**
@@ -336,28 +336,83 @@ defined in the Manual Regression section below.
         - Return to your feed.
             - **Confirm announcement posts *are not* shown.**
 
-- [ ] As a user, I can turn Announcement posts back on.
+- [x] As a user, I can turn Announcement posts back on.
     - As User1:
         - Navigate to User Menu -> Preferences.
         - Toggle Announcement posts to "on".
         - Return to your feed.
             - **Confirm Announcement posts *are* shown.**
 
-#### Show Friends
+## [Update User: Privacy](documentation/testing/test-cases/User/update/privacy.md)
 
-- [ ] As a user, I can turn Show Friends off.
+Cases covering the user updating their feed and display preferences.
+
+### Smoke Test
+
+#### Pre-requisites
+
+- [ ] User1 has registered.
+- [ ] User2 has registered and is friends with User1.
+- [ ] User3 has registered and is friends with User2 and *not* friends with User1.
+- [ ] User4 has registered is *not* friends with User1, User2, or User3.
+
+## Cases
+
+- [ ] As a user, I can turn "Who can see your friends?" to "Just Me" to hide my friends list.
     - As User1:
         - Navigate to User Menu -> Preferences.
-        - Toggle Show Friends to "off".
-        - Navigate to your profile page.
-            - **Confirm your friends list is not shown.**
+        - Toggle "Who can see your friends?" to "Just You".
+    - As User2:
+        - Navigate to User1's profile page.
+            - **Confirm User1's friends list is NOT shown.**
+    - As User3:
+        - Navigate to User1's profile page.
+            - **Confirm User1's friends list is NOT shown.**
+    - As User4:
+        - Navigate to User1's profile page.
+            - **Confirm User1's friends list is NOT shown.**
 
-- [ ] As a user, I can turn Show Friends back on.
+- [ ] As a user, I can turn "Who can see your mutual friends?" to "Just me" to hide my mutual friends.
     - As User1:
         - Navigate to User Menu -> Preferences.
-        - Toggle Show Friends to "on".
-        - Navigate to your profile page.
-            - **Confirm your friends list is shown.**
+        - Toggle "Who can see your mutual friends?" to "Just Me".
+    - As User3:
+        - Navigate to User1's profile page.
+            - **Confirm mutual friends are NOT shown.**
+
+### Manual Regression
+
+#### Pre-requisites
+
+- [ ] User1 has registered.
+- [ ] User2 has registered and is friends with User1.
+- [ ] User3 has registered and is friends with User2 and *not* friends with User1.
+
+#### Cases
+
+- [ ] As a user, I can turn "Who can see your mutual friends?" to "Friends" to show mutual friends to my friends.
+    - As User1:
+        - Navigate to User Menu -> Preferences.
+        - Toggle "Who can see your mutual friends?" to "Friends".
+    - As User3:
+        - Navigate to User1's profile page.
+            - **Confirm mutual friends are NOT shown.**
+
+- [ ] As a user, I can turn "Who can see your mutual friends?" to "Friends of Friends" to show my mutual friends to friends of my friends.
+    - As User1:
+        - Navigate to User Menu -> Preferences.
+        - Toggle "Who can see your mutual friends?" to "Friends".
+    - As User3:
+        - Navigate to User1's profile page.
+            - **Confirm mutual friends are shown.**
+
+- [ ] As a user, I can turn "Who can see your mutual friends?" to "Anyone" to show my mutual friends.
+    - As User1:
+        - Navigate to User Menu -> Preferences.
+        - Toggle "Who can see your mutual friends?" to "Friends".
+    - As User3:
+        - Navigate to User1's profile page.
+            - **Confirm mutual friends are shown.**
 
 ## [Update User: MFA](documentation/testing/test-cases/User/update/mfa.md)
 
