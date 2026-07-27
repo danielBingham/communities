@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -17,6 +17,10 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
+import { useEffect } from 'react'
+import { useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
+
 import Card from '/components/ui/Card'
 
 import AcceptInvitationForm from '/components/authentication/AcceptInvitationForm'
@@ -26,6 +30,15 @@ import CommunitiesLogo from '/components/header/CommunitiesLogo'
 import './AcceptInvitationPage.css'
 
 const AcceptInvitationPage = function(props) {
+    const currentUser = useSelector((state) => state.authentication.currentUser)
+
+    const navigate = useNavigate()
+    useEffect(() => {
+        if ( currentUser?.status !== 'invited' ) {
+            navigate('/')
+        }
+    }, [ currentUser ])
+
     return (
         <div id="accept-invitation-page">
             <Card className="accept-invitation-page__card">
