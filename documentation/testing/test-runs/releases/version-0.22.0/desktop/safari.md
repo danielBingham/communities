@@ -343,21 +343,76 @@ defined in the Manual Regression section below.
         - Return to your feed.
             - **Confirm Announcement posts *are* shown.**
 
-#### Show Friends
+## [Update User: Privacy](documentation/testing/test-cases/User/update/privacy.md)
 
-- [ ] As a user, I can turn Show Friends off.
+Cases covering the user updating their feed and display preferences.
+
+### Smoke Test
+
+#### Pre-requisites
+
+- [ ] User1 has registered.
+- [ ] User2 has registered and is friends with User1.
+- [ ] User3 has registered and is friends with User2 and *not* friends with User1.
+- [ ] User4 has registered is *not* friends with User1, User2, or User3.
+
+## Cases
+
+- [x] As a user, I can turn "Who can see your friends?" to "Just Me" to hide my friends list.
     - As User1:
         - Navigate to User Menu -> Preferences.
-        - Toggle Show Friends to "off".
-        - Navigate to your profile page.
-            - **Confirm your friends list is not shown.**
+        - Toggle "Who can see your friends?" to "Just You".
+    - As User2:
+        - Navigate to User1's profile page.
+            - **Confirm User1's friends list is NOT shown.**
+    - As User3:
+        - Navigate to User1's profile page.
+            - **Confirm User1's friends list is NOT shown.**
+    - As User4:
+        - Navigate to User1's profile page.
+            - **Confirm User1's friends list is NOT shown.**
 
-- [ ] As a user, I can turn Show Friends back on.
+- [x] As a user, I can turn "Who can see your mutual friends?" to "Just me" to hide my mutual friends.
     - As User1:
         - Navigate to User Menu -> Preferences.
-        - Toggle Show Friends to "on".
-        - Navigate to your profile page.
-            - **Confirm your friends list is shown.**
+        - Toggle "Who can see your mutual friends?" to "Just Me".
+    - As User3:
+        - Navigate to User1's profile page.
+            - **Confirm mutual friends are NOT shown.**
+
+### Manual Regression
+
+#### Pre-requisites
+
+- [ ] User1 has registered.
+- [ ] User2 has registered and is friends with User1.
+- [ ] User3 has registered and is friends with User2 and *not* friends with User1.
+
+#### Cases
+
+- [x] As a user, I can turn "Who can see your mutual friends?" to "Friends" to show mutual friends to my friends.
+    - As User1:
+        - Navigate to User Menu -> Preferences.
+        - Toggle "Who can see your mutual friends?" to "Friends".
+    - As User3:
+        - Navigate to User1's profile page.
+            - **Confirm mutual friends are NOT shown.**
+
+- [x] As a user, I can turn "Who can see your mutual friends?" to "Friends of Friends" to show my mutual friends to friends of my friends.
+    - As User1:
+        - Navigate to User Menu -> Preferences.
+        - Toggle "Who can see your mutual friends?" to "Friends".
+    - As User3:
+        - Navigate to User1's profile page.
+            - **Confirm mutual friends are shown.**
+
+- [x] As a user, I can turn "Who can see your mutual friends?" to "Anyone" to show my mutual friends.
+    - As User1:
+        - Navigate to User Menu -> Preferences.
+        - Toggle "Who can see your mutual friends?" to "Friends".
+    - As User3:
+        - Navigate to User1's profile page.
+            - **Confirm mutual friends are shown.**
 
 ## [Update User: MFA](documentation/testing/test-cases/User/update/mfa.md)
 
