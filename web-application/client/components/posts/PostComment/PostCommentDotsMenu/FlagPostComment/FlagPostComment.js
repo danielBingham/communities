@@ -37,11 +37,11 @@ const FlagPostComment = function({ postId, id } ) {
     const closeMenu = useContext(CloseMenuContext)
 
     const executeFlag = function() {
-        const newModeration = { 
-            userId: currentUser.id, 
-            status: 'flagged', 
-            postId: postId, 
-            postCommentId: id 
+        const newModeration = {
+            userId: currentUser.id,
+            status: 'flagged',
+            postId: postId,
+            postCommentId: id
         }
         makeRequest(postSiteModerations(newModeration))
     }
@@ -55,7 +55,7 @@ const FlagPostComment = function({ postId, id } ) {
         if ( request && request.state === 'fulfilled' ) {
             setAreYouSure(false)
             closeMenu()
-        } 
+        }
     }, [ areYouSure, request])
 
     if ( ! currentUser ) {
@@ -101,7 +101,7 @@ const FlagPostComment = function({ postId, id } ) {
                 return (
                     <>
                         <DotsMenuItem className="flag-post-comment flag-post-comment__moderate" onClick={(e)=>setShowModal(true)}><FlagIconSolid /> Moderate for Site</DotsMenuItem>
-                        <ModerateForSiteModal postId={postId} postCommentId={id} isVisible={showModal} setIsVisible={setShowModal} />
+                        <ModerateForSiteModal siteModerationId={siteModeration.id} isVisible={showModal} setIsVisible={setShowModal} />
                     </>
 
                 )
@@ -124,12 +124,12 @@ const FlagPostComment = function({ postId, id } ) {
     return (
         <>
             <DotsMenuItem onClick={(e) => setAreYouSure(true)} className="flag-post-comment"><FlagIconOutline /> Flag for Site Moderators</DotsMenuItem>
-            <AreYouSure className="flag-post-comment" 
-                isVisible={areYouSure} 
-                isPending={request && request.state === 'pending'} 
-                execute={executeFlag} 
+            <AreYouSure className="flag-post-comment"
+                isVisible={areYouSure}
+                isPending={request && request.state === 'pending'}
+                execute={executeFlag}
                 cancel={() => cancelFlag()}
-            > 
+            >
                 <p><strong>Are you sure you want to flag this comment for Site moderators?</strong></p>
                 <div className="flag-post-comment__explanation">
                     <p>
@@ -159,4 +159,4 @@ const FlagPostComment = function({ postId, id } ) {
     )
 }
 
-export default FlagPostComment 
+export default FlagPostComment
