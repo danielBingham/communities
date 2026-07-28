@@ -427,7 +427,7 @@ Cases cover Multifactor Authentication (MFA) setup.
 
 #### Cases
 
-- [ ] As a user, I can enable multifactor authentication.
+- [-] As a user, I can enable multifactor authentication.
     - As User1:
         - Select "Multifactor Authentication" from the UserMenu.
         - Click "Setup Multifactor Authentication"
@@ -440,7 +440,7 @@ Cases cover Multifactor Authentication (MFA) setup.
             - **Confirm email notifying of MFA change.**
         - Save the backup codes somewhere accessible.
 
-- [ ] As a user, my MFA secret and recovery codes do not leak in application responses after setup.
+- [-] As a user, my MFA secret and recovery codes do not leak in application responses after setup.
     - As User1:
         - With browser developer tools open (Network tab), complete MFA setup and continue using the app.
             - **Confirm the secret only appears in the response to the setup (pending) request.**

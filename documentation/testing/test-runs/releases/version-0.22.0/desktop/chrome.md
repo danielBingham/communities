@@ -473,7 +473,7 @@ Cases cover Multifactor Authentication (MFA) setup.
 
 #### Cases
 
-- [ ] As a user, I can enable multifactor authentication.
+- [x] As a user, I can enable multifactor authentication.
     - As User1:
         - Select "Multifactor Authentication" from the UserMenu.
         - Click "Setup Multifactor Authentication"
@@ -486,7 +486,7 @@ Cases cover Multifactor Authentication (MFA) setup.
             - **Confirm email notifying of MFA change.**
         - Save the backup codes somewhere accessible.
 
-- [ ] As a user, my MFA secret and recovery codes do not leak in application responses after setup.
+- [x] As a user, my MFA secret and recovery codes do not leak in application responses after setup.
     - As User1:
         - With browser developer tools open (Network tab), complete MFA setup and continue using the app.
             - **Confirm the secret only appears in the response to the setup (pending) request.**
@@ -506,7 +506,7 @@ Cases cover Multifactor Authentication (MFA) setup.
 All of the MFA setup cases require an authenticator app (or a generated TOPT
 secret) and so cannot be covered by the Integration suite.
 
-- [ ] As a user, I can set up MFA by manually entering the secret instead of scanning the QR code.
+- [x] As a user, I can set up MFA by manually entering the secret instead of scanning the QR code.
     - As User1:
         - Start MFA setup from the Security settings.
         - Copy the displayed secret (or use the copy button) and enter it manually into an authenticator app.
@@ -514,7 +514,7 @@ secret) and so cannot be covered by the Integration suite.
         - Enter a valid code to confirm setup.
             - **Confirm setup succeeds and recovery codes are presented.**
 
-- [ ] As a user, I can cancel MFA setup before confirming and remain without MFA.
+- [x] As a user, I can cancel MFA setup before confirming and remain without MFA.
     - As User1:
         - Start MFA setup and reach the QR/secret screen.
         - Click "Cancel Setup".
@@ -522,7 +522,7 @@ secret) and so cannot be covered by the Integration suite.
         - Log out and log back in.
             - **Confirm no MFA screen is shown.**
 
-- [ ] As a user, if I refresh the page mid-setup I can safely restart setup.
+- [x] As a user, if I refresh the page mid-setup I can safely restart setup.
     - As User1:
         - Start MFA setup and reach the QR/secret screen.
         - Refresh the browser.
@@ -530,27 +530,27 @@ secret) and so cannot be covered by the Integration suite.
         - Start setup again.
             - **Confirm a new QR/secret is generated and setup can be completed.**
 
-- [ ] As a user, my MFA secret is only shown once, during setup.
+- [x] As a user, my MFA secret is only shown once, during setup.
     - As User1:
         - Complete MFA setup.
         - Navigate away and return to the MFA settings screen.
             - **Confirm the secret and QR code are not shown again.**
             - **Confirm only the enabled state and a disable option are shown.**
 
-- [ ] As a user, my recovery codes are only shown once, during setup.
+- [x] As a user, my recovery codes are only shown once, during setup.
     - As User1:
         - Complete MFA setup so recovery codes are displayed.
         - Click "Complete Setup".
         - Navigate away and return to the MFA settings screen.
             - **Confirm the recovery codes are not shown again.**
 
-- [ ] As a user, my recovery codes are not shown again if I refresh the recovery-codes screen.
+- [x] As a user, my recovery codes are not shown again if I refresh the recovery-codes screen.
     - As User1:
         - Complete MFA setup so recovery codes are displayed.
         - Refresh the browser while the codes are shown.
             - **Confirm the codes are not shown again and I am not left mid-setup.**
 
-- [ ] As a user, disabling and re-enabling MFA invalidates my old authenticator entry and old recovery codes.
+- [x] As a user, disabling and re-enabling MFA invalidates my old authenticator entry and old recovery codes.
     - As User1:
         - With MFA enabled, disable MFA.
         - Re-enable MFA and complete setup with a newly scanned secret.
@@ -576,7 +576,7 @@ Cases covering the user updating their security fields.
 
 #### Change Email
 
-- [ ] As a user, I can update my email and am required to confirm new email.
+- [x] As a user, I can update my email and am required to confirm new email.
     - As User1:
         - Select "Change Email" from the User Menu.
         - Enter a new email and your current password.
@@ -594,7 +594,7 @@ Cases covering the user updating their security fields.
 
 #### Change Password
 
-- [ ] As a user, I can change my password.
+- [x] As a user, I can change my password.
     - As User1:
         - Select "Change Password" from the User Menu.
         - Enter a new password.
@@ -611,7 +611,7 @@ Cases covering the user updating their security fields.
         - Log in using the new password.
             - **Confirm log in is successful.**
 
-- [ ] As a logged-in user, changing my password logs out my other sessions but keeps the current one.
+- [x] As a logged-in user, changing my password logs out my other sessions but keeps the current one.
     - As User1:
         - Log in on Browser A and, separately, on Browser B.
         - On Browser A, change the password from the Security settings.
@@ -630,7 +630,7 @@ Cases covering the user updating their security fields.
 
 #### Change Email
 
-- [ ] As a user with MFA enabled, confirming a changed email while logged out does not bypass MFA.
+- [x] As a user with MFA enabled, confirming a changed email while logged out does not bypass MFA.
     - As User1 (with MFA enabled):
         - While logged in, change the email address, then log out.
         - Follow the confirmation link sent to the new address while logged out.
@@ -638,7 +638,7 @@ Cases covering the user updating their security fields.
         - Log in with email and password.
             - **Confirm the MFA screen is shown and a valid TOPT token is required.**
 
-- [ ] As a user, an email confirmation link can only be used once.
+- [x] As a user, an email confirmation link can only be used once.
     - As a new user:
         - Register and receive the confirmation email.
         - Follow the confirmation link.
@@ -646,7 +646,7 @@ Cases covering the user updating their security fields.
         - Follow the same confirmation link again.
             - **Confirm the link is now rejected with an invalid-token error.**
 
-- [ ] As a user, an expired email confirmation link is rejected.
+- [-] As a user, an expired email confirmation link is rejected.
     - As a new user:
         - Register but do not confirm.
         - Wait longer than 1 day, then follow the confirmation link.
@@ -654,7 +654,7 @@ Cases covering the user updating their security fields.
         - Request a new confirmation email and follow the fresh link.
             - **Confirm the fresh link works.**
 
-- [ ] As a user, I cannot use an email confirmation token that belongs to a different account.
+- [x] As a user, I cannot use an email confirmation token that belongs to a different account.
     - As User1:
         - Change email to generate email confirmation link.
     - As User2:
@@ -669,7 +669,7 @@ Cases covering the user updating their security fields.
 
 #### Change Password
 
-- [ ] As a user with MFA enabled, changing my password does not bypass MFA on my next login.
+- [x] As a user with MFA enabled, changing my password does not bypass MFA on my next login.
     - As User1:
         - Change the password while logged in.
         - Log out and log in with the new password.
@@ -696,7 +696,7 @@ definitions.
 
 #### Cases
 
-- [ ] As a user, my password and multifactor secrets are never disclosed to anyone. (covered: integration)
+- [x] As a user, my password and multifactor secrets are never disclosed to anyone. (covered: integration)
     - As User1:
         - With browser developer tools open (Network tab), load your own profile page.
             - **Confirm no password or multifactor secret appears in any response.**
@@ -706,7 +706,7 @@ definitions.
         - Load User1's profile page.
             - **Confirm no password or multifactor secret appears in any response.**
 
-- [ ] As a user, another user's email is never disclosed to me. (covered: integration)
+- [x] As a user, another user's email is never disclosed to me. (covered: integration)
     - As User2:
         - Load User1's profile page.
             - **Confirm User1's email is not shown or present in the response.**
@@ -717,7 +717,7 @@ definitions.
         - Load User1's profile page.
             - **Confirm User1's email is not shown or present in the response.**
 
-- [ ] As a user who has been blocked, I cannot view the blocker's profile. (covered: integration)
+- [x] As a user who has been blocked, I cannot view the blocker's profile. (covered: integration)
     - As User2 (blocked by User4):
         - Attempt to load User4's profile page.
             - **Confirm the profile is not found.**
@@ -755,14 +755,14 @@ Cases covering searching for and browsing lists of users.
 
 #### Cases
 
-- [ ] As a user, I can search for people by name on the Your Friends page.
+- [x] As a user, I can search for people by name on the Your Friends page.
     - As User1:
         - Go to the Your Friends page.
         - Enter part of User3's name in the search control.
             - **Confirm the list filters down to matching friends.**
             - **Confirm User3 is present in the results.**
 
-- [ ] As a user, I can search for people by name on the Pending -> Requests page.
+- [x] As a user, I can search for people by name on the Pending -> Requests page.
     - As User1:
         - Send a friend request to User2.
         - Go to the Pending -> Requests page.
