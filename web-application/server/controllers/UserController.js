@@ -207,6 +207,7 @@ module.exports = class UserController extends BaseController{
         // TECHDEBT This is wonky and breaks the permission model.  We really
         // need a better way to handle this.
         if ( 'admin' in query && query.admin === 'true') {
+            // Admin can query status of all users.
             if ( currentUser.siteRole === 'admin' || currentUser.siteRole === 'superadmin' ) {
                 result.fields = 'all'
             } else {
@@ -215,9 +216,12 @@ module.exports = class UserController extends BaseController{
                     `You are not authorized to admin this platform.`)
             }
         } else {
+            // Other user queries should only include confirmed users.  Queries
+            // for invited users go through `UserRelationshipController` and
+            // pull the user as a relation.
             const and = result.params.length > 0 ? ' AND ' : ''
-            result.params.push('banned', 'invited')
-            result.where += `${and} users.status != $${result.params.length-1} AND users.status !=  $${result.params.length}`
+            result.params.push( 'confirmed')
+            result.where += `${and} users.status = $${result.params.length}`
         }
 
         // ====================================================================
