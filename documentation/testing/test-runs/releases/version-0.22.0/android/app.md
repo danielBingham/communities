@@ -460,7 +460,7 @@ Cases cover Multifactor Authentication (MFA) setup.
 All of the MFA setup cases require an authenticator app (or a generated TOPT
 secret) and so cannot be covered by the Integration suite.
 
-- [ ] As a user, I can set up MFA by manually entering the secret instead of scanning the QR code.
+- [x] As a user, I can set up MFA by manually entering the secret instead of scanning the QR code.
     - As User1:
         - Start MFA setup from the Security settings.
         - Copy the displayed secret (or use the copy button) and enter it manually into an authenticator app.
@@ -468,7 +468,7 @@ secret) and so cannot be covered by the Integration suite.
         - Enter a valid code to confirm setup.
             - **Confirm setup succeeds and recovery codes are presented.**
 
-- [ ] As a user, I can cancel MFA setup before confirming and remain without MFA.
+- [x] As a user, I can cancel MFA setup before confirming and remain without MFA.
     - As User1:
         - Start MFA setup and reach the QR/secret screen.
         - Click "Cancel Setup".
@@ -476,7 +476,7 @@ secret) and so cannot be covered by the Integration suite.
         - Log out and log back in.
             - **Confirm no MFA screen is shown.**
 
-- [ ] As a user, if I refresh the page mid-setup I can safely restart setup.
+- [-] As a user, if I refresh the page mid-setup I can safely restart setup.
     - As User1:
         - Start MFA setup and reach the QR/secret screen.
         - Refresh the browser.
@@ -484,27 +484,27 @@ secret) and so cannot be covered by the Integration suite.
         - Start setup again.
             - **Confirm a new QR/secret is generated and setup can be completed.**
 
-- [ ] As a user, my MFA secret is only shown once, during setup.
+- [x] As a user, my MFA secret is only shown once, during setup.
     - As User1:
         - Complete MFA setup.
         - Navigate away and return to the MFA settings screen.
             - **Confirm the secret and QR code are not shown again.**
             - **Confirm only the enabled state and a disable option are shown.**
 
-- [ ] As a user, my recovery codes are only shown once, during setup.
+- [x] As a user, my recovery codes are only shown once, during setup.
     - As User1:
         - Complete MFA setup so recovery codes are displayed.
         - Click "Complete Setup".
         - Navigate away and return to the MFA settings screen.
             - **Confirm the recovery codes are not shown again.**
 
-- [ ] As a user, my recovery codes are not shown again if I refresh the recovery-codes screen.
+- [x] As a user, my recovery codes are not shown again if I refresh the recovery-codes screen.
     - As User1:
         - Complete MFA setup so recovery codes are displayed.
         - Refresh the browser while the codes are shown.
             - **Confirm the codes are not shown again and I am not left mid-setup.**
 
-- [ ] As a user, disabling and re-enabling MFA invalidates my old authenticator entry and old recovery codes.
+- [x] As a user, disabling and re-enabling MFA invalidates my old authenticator entry and old recovery codes.
     - As User1:
         - With MFA enabled, disable MFA.
         - Re-enable MFA and complete setup with a newly scanned secret.
@@ -530,7 +530,7 @@ Cases covering the user updating their security fields.
 
 #### Change Email
 
-- [ ] As a user, I can update my email and am required to confirm new email.
+- [-] As a user, I can update my email and am required to confirm new email.
     - As User1:
         - Select "Change Email" from the User Menu.
         - Enter a new email and your current password.
@@ -548,7 +548,7 @@ Cases covering the user updating their security fields.
 
 #### Change Password
 
-- [ ] As a user, I can change my password.
+- [x] As a user, I can change my password.
     - As User1:
         - Select "Change Password" from the User Menu.
         - Enter a new password.
@@ -565,7 +565,7 @@ Cases covering the user updating their security fields.
         - Log in using the new password.
             - **Confirm log in is successful.**
 
-- [ ] As a logged-in user, changing my password logs out my other sessions but keeps the current one.
+- [-] As a logged-in user, changing my password logs out my other sessions but keeps the current one.
     - As User1:
         - Log in on Browser A and, separately, on Browser B.
         - On Browser A, change the password from the Security settings.
@@ -584,7 +584,7 @@ Cases covering the user updating their security fields.
 
 #### Change Email
 
-- [ ] As a user with MFA enabled, confirming a changed email while logged out does not bypass MFA.
+- [-] As a user with MFA enabled, confirming a changed email while logged out does not bypass MFA.
     - As User1 (with MFA enabled):
         - While logged in, change the email address, then log out.
         - Follow the confirmation link sent to the new address while logged out.
@@ -592,7 +592,7 @@ Cases covering the user updating their security fields.
         - Log in with email and password.
             - **Confirm the MFA screen is shown and a valid TOPT token is required.**
 
-- [ ] As a user, an email confirmation link can only be used once.
+- [-] As a user, an email confirmation link can only be used once.
     - As a new user:
         - Register and receive the confirmation email.
         - Follow the confirmation link.
@@ -600,7 +600,7 @@ Cases covering the user updating their security fields.
         - Follow the same confirmation link again.
             - **Confirm the link is now rejected with an invalid-token error.**
 
-- [ ] As a user, an expired email confirmation link is rejected.
+- [-] As a user, an expired email confirmation link is rejected.
     - As a new user:
         - Register but do not confirm.
         - Wait longer than 1 day, then follow the confirmation link.
@@ -608,7 +608,7 @@ Cases covering the user updating their security fields.
         - Request a new confirmation email and follow the fresh link.
             - **Confirm the fresh link works.**
 
-- [ ] As a user, I cannot use an email confirmation token that belongs to a different account.
+- [-] As a user, I cannot use an email confirmation token that belongs to a different account.
     - As User1:
         - Change email to generate email confirmation link.
     - As User2:
@@ -623,7 +623,7 @@ Cases covering the user updating their security fields.
 
 #### Change Password
 
-- [ ] As a user with MFA enabled, changing my password does not bypass MFA on my next login.
+- [-] As a user with MFA enabled, changing my password does not bypass MFA on my next login.
     - As User1:
         - Change the password while logged in.
         - Log out and log in with the new password.
@@ -650,7 +650,7 @@ definitions.
 
 #### Cases
 
-- [ ] As a user, my password and multifactor secrets are never disclosed to anyone. (covered: integration)
+- [-] As a user, my password and multifactor secrets are never disclosed to anyone. (covered: integration)
     - As User1:
         - With browser developer tools open (Network tab), load your own profile page.
             - **Confirm no password or multifactor secret appears in any response.**
@@ -660,7 +660,7 @@ definitions.
         - Load User1's profile page.
             - **Confirm no password or multifactor secret appears in any response.**
 
-- [ ] As a user, another user's email is never disclosed to me. (covered: integration)
+- [-] As a user, another user's email is never disclosed to me. (covered: integration)
     - As User2:
         - Load User1's profile page.
             - **Confirm User1's email is not shown or present in the response.**
@@ -671,7 +671,7 @@ definitions.
         - Load User1's profile page.
             - **Confirm User1's email is not shown or present in the response.**
 
-- [ ] As a user who has been blocked, I cannot view the blocker's profile. (covered: integration)
+- [-] As a user who has been blocked, I cannot view the blocker's profile. (covered: integration)
     - As User2 (blocked by User4):
         - Attempt to load User4's profile page.
             - **Confirm the profile is not found.**
@@ -692,7 +692,7 @@ Cases covering searching for and browsing lists of users.
 
 #### Cases
 
-- [ ] As a user, I can search for people by name on the Find Users page.
+- [x] As a user, I can search for people by name on the Find Users page.
     - As User1:
         - Go to the Find Users page.
         - Enter part of User2's name in the search control.
@@ -709,14 +709,14 @@ Cases covering searching for and browsing lists of users.
 
 #### Cases
 
-- [ ] As a user, I can search for people by name on the Your Friends page.
+- [x] As a user, I can search for people by name on the Your Friends page.
     - As User1:
         - Go to the Your Friends page.
         - Enter part of User3's name in the search control.
             - **Confirm the list filters down to matching friends.**
             - **Confirm User3 is present in the results.**
 
-- [ ] As a user, I can search for people by name on the Pending -> Requests page.
+- [x] As a user, I can search for people by name on the Pending -> Requests page.
     - As User1:
         - Send a friend request to User2.
         - Go to the Pending -> Requests page.
@@ -738,7 +738,7 @@ rejecting friend requests.
 
 #### Cases
 
-- [ ] As a user, I can send a friend request.
+- [x] As a user, I can send a friend request.
     - As User1:
         - Send User2 a friend request.
             - **Confirm request shows on "Friend Requests" view.**
@@ -751,7 +751,7 @@ rejecting friend requests.
         - Cancel the request.
             - **Confirm request removed.**
 
-- [ ] As a user, I can accept a friend request and later remove the friend.
+- [x] As a user, I can accept a friend request and later remove the friend.
     - As User1:
         - Send User2 a friend request.
     - As User2:
@@ -760,7 +760,7 @@ rejecting friend requests.
         - Remove User1 as a friend.
             - **Confirm relationship removed.**
 
-- [ ] As a user, I can reject a friend request.
+- [x] As a user, I can reject a friend request.
     - As User1:
         - Send User2 a friend request.
     - As User2:
@@ -779,7 +779,7 @@ rejecting friend requests.
 
 #### Cases
 
-- [ ] As a user, it doesn't matter which of us removes the friendship.
+- [x] As a user, it doesn't matter which of us removes the friendship.
     - As User1:
         - Send User2 a friend request.
     - As User2:
@@ -789,7 +789,7 @@ rejecting friend requests.
         - Remove User2 as a friend.
             - **Confirm relationship removed.**
 
-- [ ] As a user, I can cancel a friend request I sent.
+- [x] As a user, I can cancel a friend request I sent.
     - As User1:
         - Send User2 a friend request.
     - As User2:
@@ -800,7 +800,7 @@ rejecting friend requests.
     - As User2:
         - **Confirm removed.**
 
-- [ ] As two users, we can simultaneously remove each other without error.
+- [x] As two users, we can simultaneously remove each other without error.
     - As User1:
         - Send User2 a friend request.
     - As User2:
@@ -810,7 +810,7 @@ rejecting friend requests.
           simultaneously remove each other as friends.
             - **Confirm no error occurs and the relationship is removed for both.**
 
-- [ ] As two users, we can simultaneously add each other and the request is auto-approved.
+- [x] As two users, we can simultaneously add each other and the request is auto-approved.
     - As User1 and User2 together:
         - With two browser windows open, one as User1 and one as User2, send
           each other simultaneous friend requests.
@@ -832,21 +832,21 @@ password flow, etc.
 
 #### Log in
 
-- [ ] As a user, I can log in through the splash page.
+- [x] As a user, I can log in through the splash page.
     - As unauthenticated user:
         - Go to the root `/` page.
         - Enter User1's email and password into the login form.
             - **Confirm authentication by navigating, posting, viewing some posts.**
         - Log out.
 
-- [ ] As a user, I can log in through the Login page.
+- [x] As a user, I can log in through the Login page.
     - As unauthenticated user:
         - Go to the `/login` page.
         - Enter User1's email and password.
             - **Confirm authentication by navigating, posting, viewing some posts.**
         - Log out.
 
-- [ ] As a user, I can log out. (covered: integration)
+- [-] As a user, I can log out. (covered: integration)
     - As User1:
         - Make a draft post, but don't post it.
         - Select UserMenu -> Logout
@@ -854,7 +854,7 @@ password flow, etc.
         - Log in.
             - **Confirm draft post has been cleared.**
 
-- [ ] As a user, actions in a stale tab are rejected after I have logged out and back in.
+- [-] As a user, actions in a stale tab are rejected after I have logged out and back in.
     - As User1:
         - Log in and open the app in two tabs (Tab A and Tab B).
         - In Tab A, log out and then log back in.
@@ -863,7 +863,7 @@ password flow, etc.
 
 #### Reset Password
 
-- [ ] As a user, I can request a password reset.
+- [-] As a user, I can request a password reset.
     - As User1:
         - Log out and click "Forgot password?"
         - Enter User1's email.
@@ -876,7 +876,7 @@ password flow, etc.
         - Log in with new password.
             - **Confirm success.**
 
-- [ ] As a user who just reset password, I shouldn't be able to log in with my old password.
+- [-] As a user who just reset password, I shouldn't be able to log in with my old password.
     - As User1:
         - Log out.
         - Attempt to log in with old password.
@@ -884,7 +884,7 @@ password flow, etc.
         - Attempt to log in with the new password.
             - **Confirm success.**
 
-- [ ] As a user, requesting a reset for an unknown email doesn't reveal whether an account exists.
+- [-] As a user, requesting a reset for an unknown email doesn't reveal whether an account exists.
     - As unauthenticated user:
         - Click "Forgot password?" and enter an email not associated with any account.
             - **Confirm the same success/confirmation message is shown as for a known email.**
@@ -892,7 +892,7 @@ password flow, etc.
 
 #### Multifactor Authentication
 
-- [ ] As a user with MFA enabled, I should be required to enter a TOPT token when logging in. (covered: integration)
+- [-] As a user with MFA enabled, I should be required to enter a TOPT token when logging in. (covered: integration)
     - As User1:
         - Log out.
         - Log in with username and password.
@@ -900,7 +900,7 @@ password flow, etc.
         - Enter current MFA token.
             - **Confirm log in success.**
 
-- [ ] As a user with MFA enabled, I should be able to use one of my recovery codes in place of a TOPT token.
+- [-] As a user with MFA enabled, I should be able to use one of my recovery codes in place of a TOPT token.
     - As User1:
         - Log out.
         - Log in with username and password.
@@ -912,7 +912,7 @@ password flow, etc.
             - **Confirm log in success.**
             - **Confirm email notification of recovery code usage recieved.**
 
-- [ ] As a user who has entered my password but not my MFA token, I cannot access authenticated content. (covered: integration)
+- [-] As a user who has entered my password but not my MFA token, I cannot access authenticated content. (covered: integration)
     - As User1:
         - Log out, then log in with email and password so the MFA screen is shown.
         - Without entering a token, attempt to navigate directly to an authenticated page (e.g. the home feed or a group URL).
@@ -933,7 +933,7 @@ Cases covering making posts in all their forms and with all their attachments.
 
 #### Cases
 
-- [ ] As a user, I should be able to make a post.
+- [x] As a user, I should be able to make a post.
     - As User1:
         - Go to the Feed page.
         - Click on the "Create post" form at the top of the feed.
@@ -941,7 +941,7 @@ Cases covering making posts in all their forms and with all their attachments.
         - Click "post"
             - **Confirm post is created and navigated back to feed.**
 
-- [ ] As a user, I should get a preview generated for the first link added in the post body.
+- [x] As a user, I should get a preview generated for the first link added in the post body.
     - As User1:
         - Go to the Feed page.
         - Click on the "Create post" form at the top of the feed.
@@ -960,7 +960,7 @@ Cases covering making posts in all their forms and with all their attachments.
             - **Confirm post is created and preview renders.**
             - **Confirm clicking the preview takes the user to the link.**
 
-- [ ] As a user, I should be able to make a post and attach one or more images.
+- [x] As a user, I should be able to make a post and attach one or more images.
     - As User1:
         - Go to the Feed page.
         - Click on the "Create post" form at the top of the fed.
@@ -973,7 +973,7 @@ Cases covering making posts in all their forms and with all their attachments.
         - Click "post".
             - **Confirm post shows on feed with a gallery with all three images.**
 
-- [ ] As a user, I should be able to attach a video to a post.
+- [x] As a user, I should be able to attach a video to a post.
     - As User1:
         - Go to the Feed page.
         - Click on the "Create post" form at the top of the feed.
@@ -985,7 +985,7 @@ Cases covering making posts in all their forms and with all their attachments.
         - Click "post".
             - **Confirm post shows on feed and the video renders and plays.**
 
-- [ ] As a user, I should be able to mention my friends in a post.
+- [x] As a user, I should be able to mention my friends in a post.
     - As User1:
         - Go to the Feed page.
         - Click on the "Create post" form at the top of the feed.
@@ -1017,7 +1017,7 @@ Editing posts made to a group is covered separately in
 
 #### Cases
 
-- [ ] As a user, I can edit the text of my post.
+- [-] As a user, I can edit the text of my post.
     - As User1:
         - Create a post with text and an image.
         - Edit the post and change the text.  Save the edit.
@@ -1040,7 +1040,7 @@ Deleting posts made to a group is covered separately in
 
 #### Cases
 
-- [ ] As a user, I can delete a private post with an image.
+- [-] As a user, I can delete a private post with an image.
     - As User1:
         - Create a private post with an image.
     - As User2:
@@ -1066,7 +1066,7 @@ Cases covering reacting to Posts.
 
 #### Cases
 
-- [ ] As a user, I can like a post.
+- [x] As a user, I can like a post.
     - As User1:
         - Like one of User2's Posts.
             - **Confirm like highlighted and "likes" is incremented by 1.**
@@ -1089,7 +1089,7 @@ Cases covering updating reactions to Posts.
 
 #### Cases
 
-- [ ] As a user, I can change a like to a dislike.
+- [x] As a user, I can change a like to a dislike.
     - As User1:
         - Dislike the User2 Post previously liked.
             - **Confirm dislike highlighted and like not highlighted.**
@@ -1113,7 +1113,7 @@ Cases covering removing reactions from Posts.
 
 #### Cases
 
-- [ ] As a user, I can unlike a post.
+- [x] As a user, I can unlike a post.
     - As User1:
         - Unlike one of User2's Posts.
             - **Confirm like unhighlighted and "likes" is decremented by 1.**
@@ -1136,7 +1136,7 @@ Cases covering who can and cannot see post comments.
 
 #### Cases
 
-- [ ] As a user, comments on public posts are always viewable.
+- [x] As a user, comments on public posts are always viewable.
     - As User1:
         - Create a public post.
     - As User2:
@@ -1145,7 +1145,7 @@ Cases covering who can and cannot see post comments.
         - Attempt to view User2's comment by direct link.
             - **Confirm visible.**
 
-- [ ] As a user, comments on private posts are only visible to the post author's friends.
+- [-] As a user, comments on private posts are only visible to the post author's friends.
     - As User1:
         - Create a private post.
     - As User2:
@@ -1167,12 +1167,12 @@ Cases covering making comments on posts.
 
 #### Cases
 
-- [ ] As a user, I can comment on a post I can see.
+- [x] As a user, I can comment on a post I can see.
     - As User2:
         - Comment "First." on User1's post.
             - **Confirm comment appears on User1's post.**
 
-- [ ] As a user, comments appear in the order they are made.
+- [x] As a user, comments appear in the order they are made.
     - As User1:
         - Comment "Second." on User1's post.
             - **Confirm comment appears on User1's post.**
@@ -1215,13 +1215,13 @@ Cases covering deleting comments on posts.
 
 #### Cases
 
-- [ ] As a user, I can delete my comments.
+- [-] As a user, I can delete my comments.
     - As User2:
         - Comment on User1's post.
         - Delete the comment.
             - **Confirm the comment is removed.**
 
-- [ ] A user **cannot** delete another user's comment.
+- [x] A user **cannot** delete another user's comment.
     - As User2:
         - Comment on User1's post.
     - As User1:
@@ -1241,7 +1241,7 @@ Cases covering subscribing to posts.
 
 #### Cases
 
-- [ ] As a user, I am subscribed to the posts I create and notified of comments.
+- [-] As a user, I am subscribed to the posts I create and notified of comments.
     - As User1:
         - Create a post.
             - **Confirm subscribed.**
@@ -1250,7 +1250,7 @@ Cases covering subscribing to posts.
     - As User1:
         - **Confirm notified.**
 
-- [ ] As a user, I am subscribed to the posts I comment on and notified of comments.
+- [-] As a user, I am subscribed to the posts I comment on and notified of comments.
     - As User1:
         - Create a post.
     - As User2:
@@ -1274,7 +1274,7 @@ Cases covering unsubscribing from posts.
 
 #### Cases
 
-- [ ] As a user, I stop being notified when I unsubscribe from a post I created.
+- [-] As a user, I stop being notified when I unsubscribe from a post I created.
     - As User1:
         - Create a post.
         - Unsubscribe from the post.
@@ -1296,7 +1296,7 @@ Cases covering uploading files.
 
 #### Post
 
-- [ ] As a user, I can upload images and videos to a post.
+- [x] As a user, I can upload images and videos to a post.
     - As User1:
         - Upload an image to a post.
             - **Confirm the image uploads and is processed before being shown.**
@@ -1311,7 +1311,7 @@ Cases covering uploading files.
 
 #### User Profile
 
-- [ ] As a user, I can upload an image to a user profile.
+- [x] As a user, I can upload an image to a user profile.
     - As User1:
         - Select "Edit Profile" from the User Menu and upload an image.
             - **Confirm the image uploads and is shown.**
@@ -1331,7 +1331,7 @@ reach them.
 
 #### Post
 
-- [ ] As a user, I can view the images and videos attached to a post I can see.
+- [x] As a user, I can view the images and videos attached to a post I can see.
     - As User1:
         - Create a public post with an image and a video.
     - As User2:
@@ -1354,7 +1354,7 @@ Cases covering deleting files.
 
 #### Post
 
-- [ ] As a user, I can remove media from a post.
+- [x] As a user, I can remove media from a post.
     - As User1:
         - Create a post and attach an image.
         - Remove the image from the post.
@@ -1379,7 +1379,7 @@ comments for site moderation?
 
 #### Cases
 
-- [ ] As a user, I can flag a public post for Site Moderators.
+- [-] As a user, I can flag a public post for Site Moderators.
     - As User1:
         - Create a public post.
     - As User3:
@@ -1389,14 +1389,14 @@ comments for site moderation?
         - Open the site moderation queue.
             - **Confirm the flagged post is listed with its reason.**
 
-- [ ] As a user, I can flag a private post I can see for Site Moderators.
+- [-] As a user, I can flag a private post I can see for Site Moderators.
     - As User1:
         - Create a private post.
     - As User2:
         - Flag User1's post for Site Moderators.
             - **Confirm the flag is accepted.**
 
-- [ ] A user **cannot** flag a post they can't see.
+- [-] A user **cannot** flag a post they can't see.
     - As User1:
         - Create a private post.
     - As User3:
@@ -1419,7 +1419,7 @@ comments that have been flagged for site moderation?
 
 #### Cases
 
-- [ ] As a SiteAdmin, I can reject a flagged post.
+- [-] As a SiteAdmin, I can reject a flagged post.
     - As the Site admin:
         - Open the site moderation queue and reject a flagged post.
             - **Confirm the post is removed from the platform.**
@@ -1427,13 +1427,13 @@ comments that have been flagged for site moderation?
         - Attempt to view the rejected post.
             - **Confirm it is shown as removed by moderators rather than silently missing.**
 
-- [ ] As a SiteAdmin, I can approve a flagged post.
+- [-] As a SiteAdmin, I can approve a flagged post.
     - As the Site admin:
         - Open the site moderation queue and approve a flagged post.
             - **Confirm the post remains visible.**
             - **Confirm the post leaves the moderation queue.**
 
-- [ ] A non-admin **cannot** act on the site moderation queue.
+- [-] A non-admin **cannot** act on the site moderation queue.
     - As User1:
         - Attempt to open the site moderation queue.
             - **Confirm it is not offered and cannot be reached by URL.**
@@ -1453,7 +1453,7 @@ Cases covering group creation.
 
 #### Top level Groups
 
-- [ ] As a user, I can create a Public group.
+- [x] As a user, I can create a Public group.
     - As User1:
         - Go to Groups -> Create.
         - Upload an image.
@@ -1480,7 +1480,7 @@ Cases covering group creation.
 
 #### Subgroups
 
-- [ ] As a user, I can create a Public subgroup of a Public group.
+- [-] As a user, I can create a Public subgroup of a Public group.
     - As User1:
         - Create a Public group called 'Public Group'.
         - Go to 'Public Group' -> Subgroups -> Create Subgroup.
@@ -1536,7 +1536,7 @@ description, and who can view its content.
 
 #### Cases
 
-- [ ] As a non-member, I can find and read a Public Group but a Hidden Group is invisible to me.
+- [x] As a non-member, I can find and read a Public Group but a Hidden Group is invisible to me.
     - As User7:
         - Visit Public Group.
             - **Confirm the group page loads with its description.**
@@ -1544,19 +1544,19 @@ description, and who can view its content.
         - Visit Hidden Group.
             - **Confirm the group is not visible and a not found page renders.**
 
-- [ ] As a non-member, I can read a Private Group's description but not its content.
+- [x] As a non-member, I can read a Private Group's description but not its content.
     - As User7:
         - Visit Private Group.
             - **Confirm the group page loads with its description.**
             - **Confirm the group's posts are *not* visible.**
 
-- [ ] As a member, I can read the content of every group I belong to.
+- [x] As a member, I can read the content of every group I belong to.
     - As User3:
         - Visit Public Group, Private Group and Hidden Group in turn.
             - **Confirm each group page loads with its description.**
             - **Confirm each group's posts are visible.**
 
-- [ ] As a banned member, a group I have been banned from is invisible to me.
+- [-] As a banned member, a group I have been banned from is invisible to me.
     - As User9:
         - Visit Public Group.
             - **Confirm the group is not visible and a not found page renders.**
@@ -1578,7 +1578,7 @@ Cases covering group querying: the Find Group list and the search control.
 
 #### Cases
 
-- [ ] As a user, the Find Group list only includes groups I am allowed to see.
+- [x] As a user, the Find Group list only includes groups I am allowed to see.
     - As User7, a non-member of all groups:
         - Go to the Find Group page.
             - **Confirm Public Group and Private Group are listed.**

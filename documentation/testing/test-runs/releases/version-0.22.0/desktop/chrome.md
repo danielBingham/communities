@@ -784,7 +784,7 @@ rejecting friend requests.
 
 #### Cases
 
-- [ ] As a user, I can send a friend request.
+- [x] As a user, I can send a friend request.
     - As User1:
         - Send User2 a friend request.
             - **Confirm request shows on "Friend Requests" view.**
@@ -797,7 +797,7 @@ rejecting friend requests.
         - Cancel the request.
             - **Confirm request removed.**
 
-- [ ] As a user, I can accept a friend request and later remove the friend.
+- [x] As a user, I can accept a friend request and later remove the friend.
     - As User1:
         - Send User2 a friend request.
     - As User2:
@@ -806,7 +806,7 @@ rejecting friend requests.
         - Remove User1 as a friend.
             - **Confirm relationship removed.**
 
-- [ ] As a user, I can reject a friend request.
+- [x] As a user, I can reject a friend request.
     - As User1:
         - Send User2 a friend request.
     - As User2:
@@ -825,7 +825,7 @@ rejecting friend requests.
 
 #### Cases
 
-- [ ] As a user, it doesn't matter which of us removes the friendship.
+- [x] As a user, it doesn't matter which of us removes the friendship.
     - As User1:
         - Send User2 a friend request.
     - As User2:
@@ -835,7 +835,7 @@ rejecting friend requests.
         - Remove User2 as a friend.
             - **Confirm relationship removed.**
 
-- [ ] As a user, I can cancel a friend request I sent.
+- [x] As a user, I can cancel a friend request I sent.
     - As User1:
         - Send User2 a friend request.
     - As User2:
@@ -846,7 +846,7 @@ rejecting friend requests.
     - As User2:
         - **Confirm removed.**
 
-- [ ] As two users, we can simultaneously remove each other without error.
+- [x] As two users, we can simultaneously remove each other without error.
     - As User1:
         - Send User2 a friend request.
     - As User2:
@@ -856,7 +856,7 @@ rejecting friend requests.
           simultaneously remove each other as friends.
             - **Confirm no error occurs and the relationship is removed for both.**
 
-- [ ] As two users, we can simultaneously add each other and the request is auto-approved.
+- [x] As two users, we can simultaneously add each other and the request is auto-approved.
     - As User1 and User2 together:
         - With two browser windows open, one as User1 and one as User2, send
           each other simultaneous friend requests.
@@ -878,21 +878,21 @@ password flow, etc.
 
 #### Log in
 
-- [ ] As a user, I can log in through the splash page.
+- [x] As a user, I can log in through the splash page.
     - As unauthenticated user:
         - Go to the root `/` page.
         - Enter User1's email and password into the login form.
             - **Confirm authentication by navigating, posting, viewing some posts.**
         - Log out.
 
-- [ ] As a user, I can log in through the Login page.
+- [x] As a user, I can log in through the Login page.
     - As unauthenticated user:
         - Go to the `/login` page.
         - Enter User1's email and password.
             - **Confirm authentication by navigating, posting, viewing some posts.**
         - Log out.
 
-- [ ] As a user, I can log out. (covered: integration)
+- [x] As a user, I can log out. (covered: integration)
     - As User1:
         - Make a draft post, but don't post it.
         - Select UserMenu -> Logout
@@ -900,7 +900,7 @@ password flow, etc.
         - Log in.
             - **Confirm draft post has been cleared.**
 
-- [ ] As a user, actions in a stale tab are rejected after I have logged out and back in.
+- [x] As a user, actions in a stale tab are rejected after I have logged out and back in.
     - As User1:
         - Log in and open the app in two tabs (Tab A and Tab B).
         - In Tab A, log out and then log back in.
@@ -909,7 +909,7 @@ password flow, etc.
 
 #### Reset Password
 
-- [ ] As a user, I can request a password reset.
+- [x] As a user, I can request a password reset.
     - As User1:
         - Log out and click "Forgot password?"
         - Enter User1's email.
@@ -922,7 +922,7 @@ password flow, etc.
         - Log in with new password.
             - **Confirm success.**
 
-- [ ] As a user who just reset password, I shouldn't be able to log in with my old password.
+- [x] As a user who just reset password, I shouldn't be able to log in with my old password.
     - As User1:
         - Log out.
         - Attempt to log in with old password.
@@ -930,7 +930,7 @@ password flow, etc.
         - Attempt to log in with the new password.
             - **Confirm success.**
 
-- [ ] As a user, requesting a reset for an unknown email doesn't reveal whether an account exists.
+- [x] As a user, requesting a reset for an unknown email doesn't reveal whether an account exists.
     - As unauthenticated user:
         - Click "Forgot password?" and enter an email not associated with any account.
             - **Confirm the same success/confirmation message is shown as for a known email.**
@@ -938,7 +938,7 @@ password flow, etc.
 
 #### Multifactor Authentication
 
-- [ ] As a user with MFA enabled, I should be required to enter a TOPT token when logging in. (covered: integration)
+- [x] As a user with MFA enabled, I should be required to enter a TOPT token when logging in. (covered: integration)
     - As User1:
         - Log out.
         - Log in with username and password.
@@ -946,7 +946,7 @@ password flow, etc.
         - Enter current MFA token.
             - **Confirm log in success.**
 
-- [ ] As a user with MFA enabled, I should be able to use one of my recovery codes in place of a TOPT token.
+- [x] As a user with MFA enabled, I should be able to use one of my recovery codes in place of a TOPT token.
     - As User1:
         - Log out.
         - Log in with username and password.
@@ -958,7 +958,7 @@ password flow, etc.
             - **Confirm log in success.**
             - **Confirm email notification of recovery code usage recieved.**
 
-- [ ] As a user who has entered my password but not my MFA token, I cannot access authenticated content. (covered: integration)
+- [x] As a user who has entered my password but not my MFA token, I cannot access authenticated content. (covered: integration)
     - As User1:
         - Log out, then log in with email and password so the MFA screen is shown.
         - Without entering a token, attempt to navigate directly to an authenticated page (e.g. the home feed or a group URL).
@@ -979,7 +979,7 @@ Cases covering making posts in all their forms and with all their attachments.
 
 #### Cases
 
-- [ ] As a user, I should be able to make a post.
+- [x] As a user, I should be able to make a post.
     - As User1:
         - Go to the Feed page.
         - Click on the "Create post" form at the top of the feed.
@@ -987,7 +987,7 @@ Cases covering making posts in all their forms and with all their attachments.
         - Click "post"
             - **Confirm post is created and navigated back to feed.**
 
-- [ ] As a user, I should get a preview generated for the first link added in the post body.
+- [x] As a user, I should get a preview generated for the first link added in the post body.
     - As User1:
         - Go to the Feed page.
         - Click on the "Create post" form at the top of the feed.
@@ -1006,7 +1006,7 @@ Cases covering making posts in all their forms and with all their attachments.
             - **Confirm post is created and preview renders.**
             - **Confirm clicking the preview takes the user to the link.**
 
-- [ ] As a user, I should be able to make a post and attach one or more images.
+- [x] As a user, I should be able to make a post and attach one or more images.
     - As User1:
         - Go to the Feed page.
         - Click on the "Create post" form at the top of the fed.
@@ -1019,7 +1019,7 @@ Cases covering making posts in all their forms and with all their attachments.
         - Click "post".
             - **Confirm post shows on feed with a gallery with all three images.**
 
-- [ ] As a user, I should be able to attach a video to a post.
+- [x] As a user, I should be able to attach a video to a post.
     - As User1:
         - Go to the Feed page.
         - Click on the "Create post" form at the top of the feed.
@@ -1031,7 +1031,7 @@ Cases covering making posts in all their forms and with all their attachments.
         - Click "post".
             - **Confirm post shows on feed and the video renders and plays.**
 
-- [ ] As a user, I should be able to mention my friends in a post.
+- [x] As a user, I should be able to mention my friends in a post.
     - As User1:
         - Go to the Feed page.
         - Click on the "Create post" form at the top of the feed.
@@ -1063,7 +1063,7 @@ Editing posts made to a group is covered separately in
 
 #### Cases
 
-- [ ] As a user, I can edit the text of my post.
+- [x] As a user, I can edit the text of my post.
     - As User1:
         - Create a post with text and an image.
         - Edit the post and change the text.  Save the edit.
@@ -1086,7 +1086,7 @@ Deleting posts made to a group is covered separately in
 
 #### Cases
 
-- [ ] As a user, I can delete a private post with an image.
+- [x] As a user, I can delete a private post with an image.
     - As User1:
         - Create a private post with an image.
     - As User2:
@@ -1112,7 +1112,7 @@ Cases covering reacting to Posts.
 
 #### Cases
 
-- [ ] As a user, I can like a post.
+- [x] As a user, I can like a post.
     - As User1:
         - Like one of User2's Posts.
             - **Confirm like highlighted and "likes" is incremented by 1.**
@@ -1135,7 +1135,7 @@ Cases covering updating reactions to Posts.
 
 #### Cases
 
-- [ ] As a user, I can change a like to a dislike.
+- [x] As a user, I can change a like to a dislike.
     - As User1:
         - Dislike the User2 Post previously liked.
             - **Confirm dislike highlighted and like not highlighted.**
@@ -1159,7 +1159,7 @@ Cases covering removing reactions from Posts.
 
 #### Cases
 
-- [ ] As a user, I can unlike a post.
+- [x] As a user, I can unlike a post.
     - As User1:
         - Unlike one of User2's Posts.
             - **Confirm like unhighlighted and "likes" is decremented by 1.**
@@ -1182,7 +1182,7 @@ Cases covering who can and cannot see post comments.
 
 #### Cases
 
-- [ ] As a user, comments on public posts are always viewable.
+- [x] As a user, comments on public posts are always viewable.
     - As User1:
         - Create a public post.
     - As User2:
@@ -1191,7 +1191,7 @@ Cases covering who can and cannot see post comments.
         - Attempt to view User2's comment by direct link.
             - **Confirm visible.**
 
-- [ ] As a user, comments on private posts are only visible to the post author's friends.
+- [x] As a user, comments on private posts are only visible to the post author's friends.
     - As User1:
         - Create a private post.
     - As User2:
@@ -1213,12 +1213,12 @@ Cases covering making comments on posts.
 
 #### Cases
 
-- [ ] As a user, I can comment on a post I can see.
+- [x] As a user, I can comment on a post I can see.
     - As User2:
         - Comment "First." on User1's post.
             - **Confirm comment appears on User1's post.**
 
-- [ ] As a user, comments appear in the order they are made.
+- [x] As a user, comments appear in the order they are made.
     - As User1:
         - Comment "Second." on User1's post.
             - **Confirm comment appears on User1's post.**
@@ -1240,7 +1240,7 @@ Cases covering editing comments on posts.
 
 #### Cases
 
-- [ ] As a user, I can edit my comments.
+- [x] As a user, I can edit my comments.
     - As User2:
         - Comment on User1's post.
         - Edit the comment.
@@ -1261,13 +1261,13 @@ Cases covering deleting comments on posts.
 
 #### Cases
 
-- [ ] As a user, I can delete my comments.
+- [x] As a user, I can delete my comments.
     - As User2:
         - Comment on User1's post.
         - Delete the comment.
             - **Confirm the comment is removed.**
 
-- [ ] A user **cannot** delete another user's comment.
+- [x] A user **cannot** delete another user's comment.
     - As User2:
         - Comment on User1's post.
     - As User1:
@@ -1287,7 +1287,7 @@ Cases covering subscribing to posts.
 
 #### Cases
 
-- [ ] As a user, I am subscribed to the posts I create and notified of comments.
+- [x] As a user, I am subscribed to the posts I create and notified of comments.
     - As User1:
         - Create a post.
             - **Confirm subscribed.**
@@ -1296,7 +1296,7 @@ Cases covering subscribing to posts.
     - As User1:
         - **Confirm notified.**
 
-- [ ] As a user, I am subscribed to the posts I comment on and notified of comments.
+- [x] As a user, I am subscribed to the posts I comment on and notified of comments.
     - As User1:
         - Create a post.
     - As User2:
@@ -1320,7 +1320,7 @@ Cases covering unsubscribing from posts.
 
 #### Cases
 
-- [ ] As a user, I stop being notified when I unsubscribe from a post I created.
+- [x] As a user, I stop being notified when I unsubscribe from a post I created.
     - As User1:
         - Create a post.
         - Unsubscribe from the post.
@@ -1342,7 +1342,7 @@ Cases covering uploading files.
 
 #### Post
 
-- [ ] As a user, I can upload images and videos to a post.
+- [x] As a user, I can upload images and videos to a post.
     - As User1:
         - Upload an image to a post.
             - **Confirm the image uploads and is processed before being shown.**
@@ -1357,7 +1357,7 @@ Cases covering uploading files.
 
 #### User Profile
 
-- [ ] As a user, I can upload an image to a user profile.
+- [x] As a user, I can upload an image to a user profile.
     - As User1:
         - Select "Edit Profile" from the User Menu and upload an image.
             - **Confirm the image uploads and is shown.**
@@ -1377,7 +1377,7 @@ reach them.
 
 #### Post
 
-- [ ] As a user, I can view the images and videos attached to a post I can see.
+- [x] As a user, I can view the images and videos attached to a post I can see.
     - As User1:
         - Create a public post with an image and a video.
     - As User2:
@@ -1400,7 +1400,7 @@ Cases covering deleting files.
 
 #### Post
 
-- [ ] As a user, I can remove media from a post.
+- [x] As a user, I can remove media from a post.
     - As User1:
         - Create a post and attach an image.
         - Remove the image from the post.
@@ -1425,7 +1425,7 @@ comments for site moderation?
 
 #### Cases
 
-- [ ] As a user, I can flag a public post for Site Moderators.
+- [x] As a user, I can flag a public post for Site Moderators.
     - As User1:
         - Create a public post.
     - As User3:
@@ -1435,14 +1435,14 @@ comments for site moderation?
         - Open the site moderation queue.
             - **Confirm the flagged post is listed with its reason.**
 
-- [ ] As a user, I can flag a private post I can see for Site Moderators.
+- [x] As a user, I can flag a private post I can see for Site Moderators.
     - As User1:
         - Create a private post.
     - As User2:
         - Flag User1's post for Site Moderators.
             - **Confirm the flag is accepted.**
 
-- [ ] A user **cannot** flag a post they can't see.
+- [x] A user **cannot** flag a post they can't see.
     - As User1:
         - Create a private post.
     - As User3:
@@ -1465,7 +1465,7 @@ comments that have been flagged for site moderation?
 
 #### Cases
 
-- [ ] As a SiteAdmin, I can reject a flagged post.
+- [x] As a SiteAdmin, I can reject a flagged post.
     - As the Site admin:
         - Open the site moderation queue and reject a flagged post.
             - **Confirm the post is removed from the platform.**
@@ -1473,13 +1473,13 @@ comments that have been flagged for site moderation?
         - Attempt to view the rejected post.
             - **Confirm it is shown as removed by moderators rather than silently missing.**
 
-- [ ] As a SiteAdmin, I can approve a flagged post.
+- [x] As a SiteAdmin, I can approve a flagged post.
     - As the Site admin:
         - Open the site moderation queue and approve a flagged post.
             - **Confirm the post remains visible.**
             - **Confirm the post leaves the moderation queue.**
 
-- [ ] A non-admin **cannot** act on the site moderation queue.
+- [x] A non-admin **cannot** act on the site moderation queue.
     - As User1:
         - Attempt to open the site moderation queue.
             - **Confirm it is not offered and cannot be reached by URL.**
@@ -1499,7 +1499,7 @@ Cases covering group creation.
 
 #### Top level Groups
 
-- [ ] As a user, I can create a Public group.
+- [x] As a user, I can create a Public group.
     - As User1:
         - Go to Groups -> Create.
         - Upload an image.
@@ -1526,7 +1526,7 @@ Cases covering group creation.
 
 #### Subgroups
 
-- [ ] As a user, I can create a Public subgroup of a Public group.
+- [x] As a user, I can create a Public subgroup of a Public group.
     - As User1:
         - Create a Public group called 'Public Group'.
         - Go to 'Public Group' -> Subgroups -> Create Subgroup.
@@ -1582,7 +1582,7 @@ description, and who can view its content.
 
 #### Cases
 
-- [ ] As a non-member, I can find and read a Public Group but a Hidden Group is invisible to me.
+- [x] As a non-member, I can find and read a Public Group but a Hidden Group is invisible to me.
     - As User7:
         - Visit Public Group.
             - **Confirm the group page loads with its description.**
@@ -1590,19 +1590,19 @@ description, and who can view its content.
         - Visit Hidden Group.
             - **Confirm the group is not visible and a not found page renders.**
 
-- [ ] As a non-member, I can read a Private Group's description but not its content.
+- [x] As a non-member, I can read a Private Group's description but not its content.
     - As User7:
         - Visit Private Group.
             - **Confirm the group page loads with its description.**
             - **Confirm the group's posts are *not* visible.**
 
-- [ ] As a member, I can read the content of every group I belong to.
+- [x] As a member, I can read the content of every group I belong to.
     - As User3:
         - Visit Public Group, Private Group and Hidden Group in turn.
             - **Confirm each group page loads with its description.**
             - **Confirm each group's posts are visible.**
 
-- [ ] As a banned member, a group I have been banned from is invisible to me.
+- [x] As a banned member, a group I have been banned from is invisible to me.
     - As User9:
         - Visit Public Group.
             - **Confirm the group is not visible and a not found page renders.**
@@ -1624,7 +1624,7 @@ Cases covering group querying: the Find Group list and the search control.
 
 #### Cases
 
-- [ ] As a user, the Find Group list only includes groups I am allowed to see.
+- [x] As a user, the Find Group list only includes groups I am allowed to see.
     - As User7, a non-member of all groups:
         - Go to the Find Group page.
             - **Confirm Public Group and Private Group are listed.**
@@ -1648,7 +1648,7 @@ Cases covering group updates.
 
 #### Cases
 
-- [ ] As a group admin, I can update a group's profile.
+- [x] As a group admin, I can update a group's profile.
     - As User1:
         - Go to Public Group -> Settings.
         - Upload a new profile image and crop it.
@@ -1660,9 +1660,9 @@ Cases covering group updates.
         - Reload the group page.
             - **Confirm all three changes persisted.**
 
-- [ ] A group moderator **cannot** update the group. (covered: integration)
-- [ ] A plain member **cannot** update the group. (covered: integration)
-- [ ] A non-member **cannot** update the group. (covered: integration)
+- [x] A group moderator **cannot** update the group. (covered: integration)
+- [x] A plain member **cannot** update the group. (covered: integration)
+- [x] A non-member **cannot** update the group. (covered: integration)
 
 ## [Create GroupMember](documentation/testing/test-cases/GroupMember/create.md)
 
@@ -1687,13 +1687,13 @@ Accepting, rejecting and banning are status transitions and are covered in
 
 #### Cases
 
-- [ ] As a non-member, I can join a Public Group.
+- [x] As a non-member, I can join a Public Group.
     - As User7:
         - Visit Public Group and click "Join".
             - **Confirm you become a confirmed member immediately.**
             - **Confirm the group's posts become visible.**
 
-- [ ] As a non-member, I can request membership of a Private Group.
+- [x] As a non-member, I can request membership of a Private Group.
     - As User7:
         - Visit Private Group and click "Request Membership".
             - **Confirm the request is recorded as pending.**
@@ -1702,7 +1702,7 @@ Accepting, rejecting and banning are status transitions and are covered in
         - Open the group's pending requests.
             - **Confirm User7's request is listed.**
 
-- [ ] As a group moderator, I can invite a friend to join.
+- [x] As a group moderator, I can invite a friend to join.
     - As User2:
         - Visit Hidden Group -> Members -> Invite and invite a non-member friend.
             - **Confirm the invitation is recorded as pending.**
@@ -1729,7 +1729,7 @@ Cases covering searching or browsing for GroupMembers.
 
 #### Cases
 
-- [ ] As a member, I can browse the member lists of a group.
+- [x] As a member, I can browse the member lists of a group.
     - As User3:
         - Visit Public Group -> Members.
             - **Confirm the Members list loads.**
@@ -1737,14 +1737,14 @@ Cases covering searching or browsing for GroupMembers.
         - Page through a list longer than one page.
             - **Confirm paging works and no member appears twice.**
 
-- [ ] As a group moderator, I can browse the pending and banned lists.
+- [x] As a group moderator, I can browse the pending and banned lists.
     - As User2:
         - Visit Private Group -> Members.
             - **Confirm the Invitations list loads.**
             - **Confirm the Requests list loads.**
             - **Confirm the Banned Users list loads.**
 
-- [ ] As a non-member, I **cannot** browse the member lists of a Private Group. (covered: integration)
+- [x] As a non-member, I **cannot** browse the member lists of a Private Group. (covered: integration)
 
 ## [Read GroupMember](documentation/testing/test-cases/GroupMember/read.md)
 
@@ -1766,7 +1766,7 @@ Cases covering GroupMember reading.  Who can view the members of a group?
 
 #### Cases
 
-- [ ] As a non-member, I can see the members of a Public Group but not of a Private or Hidden Group.
+- [x] As a non-member, I can see the members of a Public Group but not of a Private or Hidden Group.
     - As User7:
         - Visit Public Group and open the Members tab.
             - **Confirm the member list is visible.**
@@ -1775,13 +1775,13 @@ Cases covering GroupMember reading.  Who can view the members of a group?
         - Visit Hidden Group.
             - **Confirm the group is not visible at all.**
 
-- [ ] As a member, I can see the members of every group I belong to.
+- [x] As a member, I can see the members of every group I belong to.
     - As User3:
         - Visit Public Group, Private Group and Hidden Group in turn and open the Members tab.
             - **Confirm the member list is visible in each.**
             - **Confirm User1 is listed as Admin and User2 as Moderator.**
 
-- [ ] A banned member **cannot** view the members of the group they were banned from. (covered: integration)
+- [x] A banned member **cannot** view the members of the group they were banned from. (covered: integration)
 
 ## [Update GroupMember](documentation/testing/test-cases/GroupMember/update.md)
 
@@ -1803,7 +1803,7 @@ rejecting requests, banning and un-banning, and changing roles.
 
 #### Cases
 
-- [ ] As a group moderator, I can accept a membership request.
+- [x] As a group moderator, I can accept a membership request.
     - As User7:
         - Request membership of Private Group.
     - As User2:
@@ -1813,7 +1813,7 @@ rejecting requests, banning and un-banning, and changing roles.
         - Visit Private Group.
             - **Confirm the group's posts are now visible.**
 
-- [ ] As a group moderator, I can ban a member.
+- [x] As a group moderator, I can ban a member.
     - As User2:
         - Open Public Group -> Members and ban User3.
             - **Confirm User3's status changes to banned.**
@@ -1821,14 +1821,14 @@ rejecting requests, banning and un-banning, and changing roles.
         - Visit Public Group.
             - **Confirm the group is no longer visible.**
 
-- [ ] As a group admin, I can promote a member.
+- [x] As a group admin, I can promote a member.
     - As User1:
         - Open Public Group -> Members and promote a member to 'moderator'.
             - **Confirm the role changes to moderator.**
         - Promote a member to 'admin'.
             - **Confirm the role changes to admin.**
 
-- [ ] As an invited user, I can accept my invitation.
+- [x] As an invited user, I can accept my invitation.
     - As User8:
         - Open the invitation to Public Group and accept it.
             - **Confirm you become a confirmed member.**
@@ -1848,18 +1848,18 @@ a pending membership, and removing another member.
 
 #### Cases
 
-- [ ] As a member, I can leave a group.
+- [x] As a member, I can leave a group.
     - As User3:
         - Visit Public Group and click "Leave Group".
             - **Confirm you are removed from the member list.**
             - **Confirm the group's posts no longer appear in your feed.**
 
-- [ ] As a group moderator, I can remove a member.
+- [x] As a group moderator, I can remove a member.
     - As User2:
         - Open Public Group -> Members and remove a plain member.
             - **Confirm the member is removed from the list.**
 
-- [ ] As the last group admin, I cannot leave the group. (covered: integration)
+- [x] As the last group admin, I cannot leave the group. (covered: integration)
     - As User1, the only admin of a group:
         - Attempt to leave the group.
             - **Confirm the request is refused and you remain a member.**
@@ -1888,7 +1888,7 @@ covered in [Create Post](documentation/testing/test-cases/Post/create.md).
 
 #### Cases
 
-- [ ] As a member, I can post into a group and the post appears to other members.
+- [x] As a member, I can post into a group and the post appears to other members.
     - As User3:
         - Visit Public Group and create a post.
             - **Confirm the post is created and appears in the group.**
@@ -1896,7 +1896,7 @@ covered in [Create Post](documentation/testing/test-cases/Post/create.md).
         - Visit Public Group.
             - **Confirm User3's post is visible.**
 
-- [ ] As a group admin, Posting Permissions control who may post.
+- [x] As a group admin, Posting Permissions control who may post.
     - As User1:
         - Set Public Group's Posting Permissions to 'Members'.
     - As User7, a non-member:
@@ -1911,7 +1911,7 @@ covered in [Create Post](documentation/testing/test-cases/Post/create.md).
         - Post into Public Group.
             - **Confirm the post is created.**
 
-- [ ] As a member of a group set to 'Requires Approval', my post is held pending.
+- [x] As a member of a group set to 'Requires Approval', my post is held pending.
     - As User1:
         - Set Public Group's Posting Permissions to 'Requires Approval'.
     - As User3:
@@ -1942,7 +1942,7 @@ Cases covering GroupPost reading.  Who can view the posts in a group?
 
 #### Cases
 
-- [ ] As a non-member, I can read the posts of a Public Group only.
+- [x] As a non-member, I can read the posts of a Public Group only.
     - As User7:
         - Visit Public Group.
             - **Confirm the group's posts are visible.**
@@ -1951,7 +1951,7 @@ Cases covering GroupPost reading.  Who can view the posts in a group?
         - Visit Hidden Group.
             - **Confirm the group is not visible at all.**
 
-- [ ] As a member, I can read the posts of every group I belong to.
+- [x] As a member, I can read the posts of every group I belong to.
     - As User3:
         - Visit Public Group, Private Group and Hidden Group in turn.
             - **Confirm the posts are visible in each.**
@@ -1978,7 +1978,7 @@ The composition of an edit (text, images, links, drafts) is covered in
 
 #### Cases
 
-- [ ] As a post author, I can edit my own group post.
+- [x] As a post author, I can edit my own group post.
     - As User3:
         - Create a post in Public Group.
         - Edit the post and change the text.  Save the edit.
@@ -1987,7 +1987,7 @@ The composition of an edit (text, images, links, drafts) is covered in
         - View the post in Public Group.
             - **Confirm the edited text is shown.**
 
-- [ ] A non-author **cannot** edit a group post. (covered: integration)
+- [x] A non-author **cannot** edit a group post. (covered: integration)
     - As User2, a group moderator:
         - Open User3's post in Public Group.
             - **Confirm no edit option is offered.**
@@ -2010,7 +2010,7 @@ Removing a post as a moderation action is covered in
 
 #### Cases
 
-- [ ] As a post author, I can delete my own group post.
+- [x] As a post author, I can delete my own group post.
     - As User3:
         - Create a post in Public Group and have another member comment on it.
         - Delete the post.
@@ -2019,7 +2019,7 @@ Removing a post as a moderation action is covered in
         - Attempt to open the post permalink.
             - **Confirm a not found page renders.**
 
-- [ ] A non-author **cannot** delete a group post. (covered: integration)
+- [x] A non-author **cannot** delete a group post. (covered: integration)
     - As User2, a group moderator:
         - Open User3's post in Public Group.
             - **Confirm no delete option is offered.**
@@ -2043,7 +2043,7 @@ Cases covering GroupModeration creation.  Who can flag the posts in a group for 
 
 #### Cases
 
-- [ ] As a user, I can flag a post for the group's moderators.
+- [x] As a user, I can flag a post for the group's moderators.
     - As User7:
         - Visit Public Group and flag one of User3's posts.
             - **Confirm the flag is accepted and a confirmation is shown.**
@@ -2051,7 +2051,7 @@ Cases covering GroupModeration creation.  Who can flag the posts in a group for 
         - Open Public Group -> Moderation.
             - **Confirm the flagged post is listed with its reason.**
 
-- [ ] As a user, I cannot flag a post I cannot see.
+- [x] As a user, I cannot flag a post I cannot see.
     - As User7:
         - Visit Private Group.
             - **Confirm the group's posts are not visible and no flag control is offered.**
@@ -2060,24 +2060,24 @@ Cases covering GroupModeration creation.  Who can flag the posts in a group for 
 
 ##### Public Groups
 
-- [ ] Non-members **can** flag posts.
-- [ ] Members **can** flag posts.
-- [ ] Group Moderators **can** flag posts.
-- [ ] Group Admins **can** flag posts.
+- [x] Non-members **can** flag posts.
+- [x] Members **can** flag posts.
+- [x] Group Moderators **can** flag posts.
+- [x] Group Admins **can** flag posts.
 
 ##### Private Groups
 
-- [ ] Non-members **cannot** flag posts.
-- [ ] Members **can** flag posts.
-- [ ] Group Moderators **can** flag posts.
-- [ ] Group Admins **can** flag posts.
+- [x] Non-members **cannot** flag posts.
+- [x] Members **can** flag posts.
+- [x] Group Moderators **can** flag posts.
+- [x] Group Admins **can** flag posts.
 
 ##### Hidden Groups
 
-- [ ] Non-members **cannot** flag posts.
-- [ ] Members **can** flag posts.
-- [ ] Group Moderators **can** flag posts.
-- [ ] Group Admins **can** flag posts.
+- [x] Non-members **cannot** flag posts.
+- [x] Members **can** flag posts.
+- [x] Group Moderators **can** flag posts.
+- [x] Group Admins **can** flag posts.
 
 ## [Read GroupModeration](documentation/testing/test-cases/GroupModeration/read.md)
 
@@ -2100,14 +2100,14 @@ Cases covering GroupModeration reading.  Who can see the moderation status of th
 
 #### Cases
 
-- [ ] As a user, I can see when a post I can view has been moderated.
+- [x] As a user, I can see when a post I can view has been moderated.
     - As User2, a group moderator:
         - Reject a flagged post in Public Group.
     - As User7:
         - Visit Public Group.
             - **Confirm the rejected post is shown as removed by moderators rather than silently missing.**
 
-- [ ] As a post author, I can see the moderation status of my own post.
+- [x] As a post author, I can see the moderation status of my own post.
     - As User3:
         - Have a post in Public Group rejected by a moderator.
         - Visit the post.
@@ -2134,7 +2134,7 @@ Cases covering GroupModeration updating.  Who can moderate the posts in a group?
 
 #### Cases
 
-- [ ] As a group moderator, I can approve and reject flagged posts.
+- [x] As a group moderator, I can approve and reject flagged posts.
     - As User7:
         - Flag a post in Public Group.
     - As User2, a group moderator:
@@ -2143,7 +2143,7 @@ Cases covering GroupModeration updating.  Who can moderate the posts in a group?
         - Flag and then approve a second post.
             - **Confirm the post remains visible in the group.**
 
-- [ ] As a plain member, I cannot moderate posts.
+- [x] As a plain member, I cannot moderate posts.
     - As User3:
         - Visit Public Group.
             - **Confirm no Moderation section is offered.**
@@ -2186,7 +2186,7 @@ Cases covering group deletion.
 
 #### Cases
 
-- [ ] As a group admin, I can delete a group and all of its content goes with it.
+- [x] As a group admin, I can delete a group and all of its content goes with it.
     - As User1:
         - Create a post in the Group and have User3 comment on and react to it.
         - Go to Group -> Settings -> Delete Group and confirm the deletion.
