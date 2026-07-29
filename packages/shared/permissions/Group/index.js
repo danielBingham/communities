@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -27,10 +27,10 @@ const isAdmin = function(member, group) {
     }
 
     if ( member.groupId === group.id
-        && member.status === 'member' 
-        && member.role === 'admin') 
+        && member.status === 'member'
+        && member.role === 'admin')
     {
-        return true 
+        return true
     }
 
     return false
@@ -46,10 +46,10 @@ const isModerator = function(member, group) {
     }
 
     if ( member.groupId === group.id
-        && member.status === 'member' 
-        && member.role === 'moderator') 
+        && member.status === 'member'
+        && member.role === 'moderator')
     {
-        return true 
+        return true
     }
 
     return false
@@ -64,7 +64,7 @@ const canAdminGroup = function(user, context) {
 
     // TODO This is a really blunt tool.  Lets create something more granular in the future.
     // SiteModerators can admin groups in order to remove.
-    if ( user.siteRole === 'admin' || user.siteRole === 'superadmin' ) {
+    if ( user.siteRole === 'moderator' || user.siteRole === 'admin' || user.siteRole === 'superadmin' ) {
         return true
     }
 
@@ -116,12 +116,6 @@ const canModerateGroup = function(user, context) {
         return false
     }
 
-    // TODO This is a really blunt tool.  Lets create something more granular in the future.
-    // SiteModerators can admin groups in order to remove.
-    if ( user.siteRole === 'admin' || user.siteRole === 'superadmin' ) {
-        return true
-    }
-
     // If they can admin the group, then they can moderate it.
     if ( canAdminGroup(user, context) === true ) {
         return true
@@ -143,12 +137,12 @@ const canModerateGroup = function(user, context) {
         return false
     }
 
-    if ( isModerator(context.userMember, context.group) === true ) 
+    if ( isModerator(context.userMember, context.group) === true )
     {
-        return true 
+        return true
     }
 
-    return false 
+    return false
 }
 
 const canCreateGroup = function(user, context) {
@@ -156,7 +150,7 @@ const canCreateGroup = function(user, context) {
     // depends on their permissions in the parent group.  If group is not
     // present, then this is a new top level group and anyone can create it.
     if ( ! ('group' in context) || context.group === undefined || context.group === null ) {
-        return true 
+        return true
     }
 
     return canAdminGroup(user, context)
@@ -194,7 +188,7 @@ const canViewGroup = function(user, context) {
     if ( context.group.type === 'hidden-open' || context.group.type === 'hidden-private' ) {
         if ( 'parentMember' in context && context.parentMember !== undefined && context.parentMember !== null
             && context.parentMember.userId === user.id && context.parentMember.groupId === context.group.parentId
-            && context.parentMember.status === 'member' 
+            && context.parentMember.status === 'member'
         ) {
             return true
         }
@@ -202,14 +196,14 @@ const canViewGroup = function(user, context) {
 
     // At this point, 'hidden' is all that is left and hidden groups can only
     // be seen by their members and invitees.
-    if ( 'userMember' in context && context.userMember !== undefined && context.userMember !== null 
+    if ( 'userMember' in context && context.userMember !== undefined && context.userMember !== null
         && context.userMember.groupId === context.group.id
-        && context.userMember.status !== 'banned' ) 
+        && context.userMember.status !== 'banned' )
     {
-        return true 
+        return true
     }
 
-    return false 
+    return false
 }
 
 const canUpdateGroup = function(user, context) {

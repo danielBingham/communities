@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -19,14 +19,20 @@
  ******************************************************************************/
 import logger from '/logger'
 
+import { isLocalStorageAvailable } from '/lib/localStorage'
+
 const currentVersion = 1
 
 const migrateVersion0to1= function() {
-    logger.info(`Migrating localStorage from version 0 to version 1...`)
-    // We're not going to both trying to migrate from version zero.  Just wipe
-    // it out and give us a clean slate.  The only thing in there should be
-    // drafts.
-    localStorage.clear()
+    try {
+        logger.info(`Migrating localStorage from version 0 to version 1...`)
+        // We're not going to both trying to migrate from version zero.  Just wipe
+        // it out and give us a clean slate.  The only thing in there should be
+        // drafts.
+        localStorage.clear()
+    } catch (error) {
+        logger.error(`Failed to migrate from version 0 to 1: `, error)
+    }
 }
 
 // Order matters!
@@ -35,23 +41,31 @@ const migrations = [
 ]
 
 export default function migrateLocalStorage() {
-    const storageVersion = parseInt(localStorage.getItem('version'))
-    if ( storageVersion === NaN ) {
-        storageVersion = 0
-    }
-
-    logger.info(`Current localStorage version: `, storageVersion)
-
-    // Start with the storage version and run each migration up to the current
-    // version in order.  This is why order matters in the migrations array.
-    if ( storageVersion !== currentVersion) {
-        for(let index = storageVersion; index < migrations.length; index++) {
-            const migration = migrations[index]
-            migration()
+    try {
+        if ( ! isLocalStorageAvailable() ) {
+            return
         }
-        logger.info(`Migrated localStorage to version: `, currentVersion)
-        localStorage.setItem('version', currentVersion)
-    } else {
-        logger.info(`localStorage up to date with version: `, currentVersion)
+
+        let storageVersion = parseInt(localStorage.getItem('version'))
+        if ( Number.isNaN(storageVersion) ) {
+            storageVersion = 0
+        }
+
+        logger.info(`Current localStorage version: `, storageVersion)
+
+        // Start with the storage version and run each migration up to the current
+        // version in order.  This is why order matters in the migrations array.
+        if ( storageVersion !== currentVersion) {
+            for(let index = storageVersion; index < migrations.length; index++) {
+                const migration = migrations[index]
+                migration()
+            }
+            logger.info(`Migrated localStorage to version: `, currentVersion)
+            localStorage.setItem('version', currentVersion)
+        } else {
+            logger.info(`localStorage up to date with version: `, currentVersion)
+        }
+    } catch (error) {
+        logger.error(`Failed to migrate localstorage: `, error)
     }
 }

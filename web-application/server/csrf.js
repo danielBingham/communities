@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -17,6 +17,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
+const crypto = require('node:crypto')
 
 const createCSRFMiddleware = function(core) {
     return function(request, response, next) {
@@ -26,9 +27,9 @@ const createCSRFMiddleware = function(core) {
             return
         }
 
-        if ( ! ( 'csrfToken' in request.session ) 
-            || request.session.csrfToken === undefined 
-            || request.session.csrfToken === null ) 
+        if ( ! ( 'csrfToken' in request.session )
+            || request.session.csrfToken === undefined
+            || request.session.csrfToken === null )
         {
             request.logger.verbose(`CSRF check identified an expired session.`)
             response.status(401).json({
@@ -40,14 +41,35 @@ const createCSRFMiddleware = function(core) {
             return
         }
 
-        const csrfToken = request.get('X-Communities-CSRF-Token')
+        try {
+            const csrfToken = request.get('X-Communities-CSRF-Token')
+            if ( ! csrfToken ) {
+                request.logger.warn(`Missing CSRF Token.  Possible forged request.`)
+                response.status(403).json({
+                    error: {
+                        type: 'invalid-csrf',
+                        message: 'Request rejected as a potential forged request. This is to protect you from attackers attempting to steal your account credentials. If this request was you, refresh the page and try again. If you continue to see this message, reach out to support at contact@communities.social.'
+                    }
+                })
+                return
+            }
 
-        if ( csrfToken !== request.session.csrfToken ) {
-            request.logger.warn(`
-                Request arrived with an invalid CSRF Token.  Possible forged request. 
-                    Submitted token: ${csrfToken} 
-                    Stored Token: ${request.session.csrfToken}
-            `)
+
+            const theirTokenBuffer = Buffer.from(csrfToken, 'base64url')
+            const ourTokenBuffer = Buffer.from(request.session.csrfToken, 'base64url')
+
+            if ( ! crypto.timingSafeEqual(theirTokenBuffer, ourTokenBuffer) ) {
+                request.logger.warn(`Invalid CSRF Token.  Possible forged request.`)
+                response.status(403).json({
+                    error: {
+                        type: 'invalid-csrf',
+                        message: 'Request rejected as a potential forged request. This is to protect you from attackers attempting to steal your account credentials. If this request was you, refresh the page and try again. If you continue to see this message, reach out to support at contact@communities.social.'
+                    }
+                })
+                return
+            }
+        } catch ( error ) {
+            request.logger.error(`Error validating CSRF token: `, error)
             response.status(403).json({
                 error: {
                     type: 'invalid-csrf',
@@ -55,10 +77,9 @@ const createCSRFMiddleware = function(core) {
                 }
             })
             return
-        } 
-        
+        }
 
-        next() 
+        next()
     }
 }
 

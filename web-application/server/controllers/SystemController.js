@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -53,7 +53,7 @@ module.exports = class SystemController extends BaseController {
         if ( request.session?.csrfToken === undefined  || request.session?.csrfToken === null ) {
             const tokenService = new TokenService(this.core)
             request.session.csrfToken = tokenService.createCSRFToken()
-        } 
+        }
 
         result.csrf = request.session.csrfToken
 
@@ -71,6 +71,16 @@ module.exports = class SystemController extends BaseController {
     }
 
     async postLog(request, response) {
+        // We're going to silently drop unauthenticated logs for now, until we
+        // have a better solution.  This does mean we might miss errors in the
+        // authentication flows, but it is a significant vulnerability to leave
+        // this that wide open until we have a way to block bad actors.
+        const currentUser = request.session.user
+        if ( ! currentUser ) {
+            response.status(200).json({})
+            return
+        }
+
         const logMessage = this.logSchema.clean(request.body)
 
         const validationErrors = this.logSchema.validate(logMessage)
@@ -82,7 +92,7 @@ module.exports = class SystemController extends BaseController {
                 errorString)
         }
 
-        request.logger.forward(logMessage) 
+        request.logger.forward(logMessage)
         response.status(201).json({})
     }
 }

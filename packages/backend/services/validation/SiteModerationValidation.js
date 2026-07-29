@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -66,7 +66,7 @@ module.exports = class SiteModerationValidation {
                 })
             }
 
-        } 
+        }
         // We're editing a moderation.
         else {
 
@@ -118,11 +118,24 @@ module.exports = class SiteModerationValidation {
                     message: `We couldn't find a user for that userId.`
                 })
             }
+
+            // The `site_moderation` table really just records the most recent
+            // moderation event.  Each create / edit is replicated to the
+            // `site_moderation_events` table, which records the history. Given
+            // that, we're going to overwrite the userId on edit, and we want
+            // it to always be the userId of the currentUser.
+            if ( siteModeration.userId !== currentUser.id ) {
+                errors.push({
+                    type: 'userId:invalid',
+                    log: `User(${currentUser.id}) submitted SiteModeration with userId: ${siteModeration.userId}`,
+                    message: `You may only submit SiteModerations with your own userId.`
+                })
+            }
         }
 
         if ( util.objectHas(siteModeration, 'postId') ) {
             if ( siteModeration.postId !== null ) {
-                const results = await this.core.database.query(`SELECT id FROM posts WHERE id = $1`, [ siteModeration.postId ]) 
+                const results = await this.core.database.query(`SELECT id FROM posts WHERE id = $1`, [ siteModeration.postId ])
                 if ( results.rows.length <= 0 || results.rows[0].id !== siteModeration.postId) {
                     errors.push({
                         type: 'postId:not-found',
@@ -136,7 +149,7 @@ module.exports = class SiteModerationValidation {
         if ( util.objectHas(siteModeration, 'postCommentId' ) ) {
             if ( siteModeration.postCommentId !== null ) {
                 const postCommentResults = await this.core.database.query(
-                    `SELECT id FROM post_comments WHERE id = $1`, 
+                    `SELECT id FROM post_comments WHERE id = $1`,
                     [ siteModeration.postCommentId ]
                 )
                 if ( postCommentResults.rows.length <= 0 || postCommentResults.rows[0].id !== siteModeration.postCommentId) {

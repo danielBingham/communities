@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -23,7 +23,7 @@ const GroupDAO = require('../daos/GroupDAO')
 const ServiceError = require('../errors/ServiceError')
 
 module.exports = class GroupService {
-    
+
     constructor(core) {
         this.core = core
 
@@ -32,13 +32,13 @@ module.exports = class GroupService {
 
     async getParentIds(groupId) {
         const results = await this.core.database.query(`
-            WITH RECURSIVE parents(id, title, parent_id, path) AS ( 
-                    SELECT groups.id, groups.title, groups.parent_id, ARRAY[groups.id] 
-                        FROM groups 
-                UNION ALL 
-                    SELECT groups.id, groups.title, groups.parent_id, parents.path || groups.id 
-                        FROM groups, parents WHERE groups.id = parents.parent_id 
-            ) 
+            WITH RECURSIVE parents(id, title, parent_id, path) AS (
+                    SELECT groups.id, groups.title, groups.parent_id, ARRAY[groups.id]
+                        FROM groups
+                UNION ALL
+                    SELECT groups.id, groups.title, groups.parent_id, parents.path || groups.id
+                        FROM groups, parents WHERE groups.id = parents.parent_id AND NOT (groups.id = ANY(parents.path))
+            )
             SELECT id, path FROM parents WHERE $1 = path[0] AND parents.parent_id IS NULL;
         `, [ groupId ])
 
@@ -52,7 +52,7 @@ module.exports = class GroupService {
 
         const parentIds = results.rows[0].path.filter((gid) => gid !== groupId)
 
-        return parentIds 
+        return parentIds
     }
 
 }

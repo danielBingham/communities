@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -23,19 +23,22 @@ const GroupMemberDAO = require('../daos/GroupMemberDAO')
 const PostDAO = require('../daos/PostDAO')
 const UserRelationshipDAO = require('../daos/UserRelationshipDAO')
 
+const FilePermissions = require('./permission/FilePermissions')
 const GroupPermissions = require('./permission/GroupPermissions')
 const GroupMemberPermissions = require('./permission/GroupMemberPermissions')
 const GroupPostPermissions = require('./permission/GroupPostPermissions')
+const NotificationPermissions = require('./permission/NotificationPermissions')
 const PostPermissions = require('./permission/PostPermissions')
 const PostCommentPermissions = require('./permission/PostCommentPermissions')
 const PostReactionPermissions = require('./permission/PostReactionPermissions')
 const PostSubscriptionPermissions = require('./permission/PostSubscriptionPermissions')
+const UserPermissions = require('./permission/UserPermissions')
 const UserRelationshipPermissions = require('./permission/UserRelationshipPermissions')
 
 const ServiceError = require('../errors/ServiceError')
 
 /**
- * 
+ *
  */
 module.exports = class PermissionService {
 
@@ -58,77 +61,17 @@ module.exports = class PermissionService {
         this.groupMemberDAO = new GroupMemberDAO(core)
         this.userRelationshipDAO = new UserRelationshipDAO(core)
 
+        this.file = new FilePermissions(core, this)
         this.group = new GroupPermissions(core, this)
         this.groupMember = new GroupMemberPermissions(core, this)
         this.groupPost = new GroupPostPermissions(core, this)
+        this.notification = new NotificationPermissions(core, this)
         this.post = new PostPermissions(core, this)
         this.postComment = new PostCommentPermissions(core, this)
         this.postReaction = new PostReactionPermissions(core, this)
         this.postSubscription = new PostSubscriptionPermissions(core, this)
+        this.user = new UserPermissions(core, this)
         this.userRelationship = new UserRelationshipPermissions(core, this)
-    }
-
-
-    /**
-     * Get a list of `id` for `entity` that `user` can `action`.
-     */
-    async get(user, action, entity, context) {
-        if ( entity === 'Post' ) {
-            if ( action === PermissionService.ACTIONS.VIEW ) {
-                // TODO This is not going to scale beyond a few tens of
-                // thousands of posts. So we'll need to come up with a better
-                // way  to handle this.
-                const relationships = await this.userRelationshipDAO.getUserRelationshipsForUser(user.id)  
-                const friendIds = relationships.map((r) => r.userId === user.id ? r.relationId : r.userId)
-                const groupIds = await this.get(user, PermissionService.ACTIONS.VIEW, 'Group:content')
-
-                const results = await this.core.database.query(`
-                    SELECT posts.id FROM posts 
-                        WHERE posts.user_id = ANY($1::uuid[]) OR posts.group_id = ANY($2::uuid[[]) OR posts.visibility = 'public'
-                `, [ friendIds, groupIds ]) 
-
-                return results.rows.map((r) => r.id)
-            }
-        } else if ( entity === 'Group' ) {
-            if ( action === PermissionService.ACTIONS.VIEW ) {
-                /**
-                 * Group permissions vary by type:
-                 *
-                 * Open -- Anyone can view the group and its details. (And its
-                 *      content, controlled by Group:content)
-                 * Private -- Anyone can view the group and its details.  (But
-                 *      not its content, controlled by Group:content)
-                 * Hidden -- Only those with a membership (accepted or invite)
-                 *      may view the group and its details. (Only those with an
-                 *      accepted membership can view its content, controlled by
-                 *      Group:content)
-                 */
-                const results = await this.core.database.query(`
-                    SELECT groups.id FROM groups
-                        LEFT OUTER JOIN group_members ON groups.id = group_members.group_id AND group_members.user_id = $1
-                    WHERE (groups.type = 'open' AND (group_members.user_id IS NULL OR group_members.status != 'banned'))
-                            OR (groups.type = 'private' AND (group_members.user_id IS NULL OR group_members.status != 'banned'))
-                            OR (groups.type = 'hidden' AND group_members.user_id = $1 AND group_members.status != 'banned')
-                `, [ user.id ])
-
-                return results.rows.map((r) => r.id)
-            } 
-        } else if ( entity === 'Group:content' ) {
-            if ( action === PermissionService.ACTIONS.VIEW ) {
-                const results = await this.core.database.query(`
-                    SELECT groups.id FROM groups
-                        LEFT OUTER JOIN group_members ON groups.id = group_members.group_id
-                    WHERE groups.type = 'open' 
-                        OR (groups.type = 'private' AND group_members.user_id = $1 AND group_members.status = 'member')
-                        OR (groups.type = 'hidden' AND group_members.user_id = $1 AND group_members.status = 'member')
-                `, [ user.id ])
-
-                return results.rows.map((r) => r.id)
-            }
-        }
-
-        throw new ServiceError('unimplemented', 
-            `Attempt to get entity '${entity}' or action '${action}' that hasn't been implemented yet.`)
     }
 
     /**
@@ -145,6 +88,11 @@ module.exports = class PermissionService {
      * identified by `context`, false otherwise.
      */
     async can(user, action, entity, context) {
+        // Unauthenticated users are not allowed access.
+        if ( ! user ) {
+            return false
+        }
+
         if ( user.status === null ) {
             throw new ServiceError('missing-context',
                 `User.status requried to properly assess permissions.`)
@@ -163,18 +111,18 @@ module.exports = class PermissionService {
             return false
         }
 
-        if ( entity === 'Post' ) {
+        if ( entity === 'File' ) {
             if ( action === PermissionService.ACTIONS.QUERY ) {
-                return await this.post.canQueryPost(user, context)
+                return await this.file.canQueryFile(user, context)
             } else if ( action === PermissionService.ACTIONS.CREATE ) {
-                return await this.post.canCreatePost(user, context)
+                return await this.file.canCreateFile(user, context)
             } else if ( action === PermissionService.ACTIONS.VIEW ) {
-                return await this.post.canViewPost(user, context)
+                return await this.file.canViewFile(user, context)
             } else if ( action === PermissionService.ACTIONS.UPDATE) {
-                return await this.post.canUpdatePost(user, context)
+                return await this.file.canUpdateFile(user, context)
             } else if ( action === PermissionService.ACTIONS.DELETE) {
-                return await this.post.canDeletePost(user, context)
-            } 
+                return await this.file.canDeleteFile(user, context)
+            }
         } else if ( entity === 'Group' ) {
             if ( action === PermissionService.ACTIONS.CREATE ) {
                 return await this.group.canCreateGroup(user, context)
@@ -207,6 +155,30 @@ module.exports = class PermissionService {
             } else if ( action === PermissionService.ACTIONS.DELETE ) {
                 return await this.groupMember.canDeleteGroupMember(user, context)
             }
+        } else if ( entity === 'Notification' ) {
+            if ( action === PermissionService.ACTIONS.QUERY ) {
+                return await this.notification.canQueryNotification(user, context)
+            } else if ( action === PermissionService.ACTIONS.CREATE ) {
+                return await this.notification.canCreateNotification(user, context)
+            } else if ( action === PermissionService.ACTIONS.VIEW ) {
+                return await this.notification.canViewNotification(user, context)
+            } else if ( action === PermissionService.ACTIONS.UPDATE) {
+                return await this.notification.canUpdateNotification(user, context)
+            } else if ( action === PermissionService.ACTIONS.DELETE) {
+                return await this.notification.canDeleteNotification(user, context)
+            }
+        } else if ( entity === 'Post' ) {
+            if ( action === PermissionService.ACTIONS.QUERY ) {
+                return await this.post.canQueryPost(user, context)
+            } else if ( action === PermissionService.ACTIONS.CREATE ) {
+                return await this.post.canCreatePost(user, context)
+            } else if ( action === PermissionService.ACTIONS.VIEW ) {
+                return await this.post.canViewPost(user, context)
+            } else if ( action === PermissionService.ACTIONS.UPDATE) {
+                return await this.post.canUpdatePost(user, context)
+            } else if ( action === PermissionService.ACTIONS.DELETE) {
+                return await this.post.canDeletePost(user, context)
+            }
         } else if ( entity === 'PostComment' ) {
             if ( action === PermissionService.ACTIONS.VIEW ) {
                 return await this.postComment.canViewPostComment(user, context)
@@ -236,6 +208,18 @@ module.exports = class PermissionService {
                 return await this.postSubscription.canUpdatePostSubscription(user, context)
             } else if ( action === PermissionService.ACTIONS.DELETE ) {
                 return await this.postSubscription.canDeletePostSubscription(user, context)
+            }
+        } else if ( entity === 'User' ) {
+            if ( action === PermissionService.ACTIONS.QUERY ) {
+                return await this.user.canQueryUser(user, context)
+            } else if ( action === PermissionService.ACTIONS.VIEW ) {
+                return await this.user.canViewUser(user, context)
+            } else if ( action === PermissionService.ACTIONS.CREATE ) {
+                return await this.user.canCreateUser(user, context)
+            } else if ( action === PermissionService.ACTIONS.UPDATE ) {
+                return await this.user.canUpdateUser(user, context)
+            } else if ( action === PermissionService.ACTIONS.DELETE ) {
+                return await this.user.canDeleteUser(user, context)
             }
         } else if ( entity === 'UserRelationship' ) {
             if ( action === PermissionService.ACTIONS.QUERY ) {

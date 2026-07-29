@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -22,6 +22,7 @@ import { useSelector, useDispatch } from 'react-redux'
 
 import logger from '/logger'
 
+import { isLocalStorageAvailable } from '/lib/localStorage'
 import { useRequest } from '/lib/hooks/useRequest'
 
 import { postPostComments, patchPostComment, finishPostCommentEdit } from '/state/PostComment'
@@ -48,8 +49,8 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
-    const comment = useSelector((state) => commentId && commentId in state.PostComment.dictionary ? state.PostComment.dictionary[commentId] : null) 
-    
+    const comment = useSelector((state) => commentId && commentId in state.PostComment.dictionary ? state.PostComment.dictionary[commentId] : null)
+
     const dispatch = useDispatch()
 
     const getDraftKey = function() {
@@ -65,7 +66,14 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
             content: ''
         }
 
-        localStorage.setItem(`commentDraft.${postId}`, JSON.stringify(draft))
+        if ( isLocalStorageAvailable() ) {
+            try {
+                localStorage.setItem(`commentDraft.${postId}`, JSON.stringify(draft))
+            } catch (error) {
+                logger.error(error)
+            }
+        }
+
         setShowForm(true)
         setShowComments(true)
     }
@@ -89,7 +97,13 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
      * Cancel the comment and wipe out any drafts.
      */
     const cancel = function() {
-        localStorage.removeItem(getDraftKey())
+        if ( isLocalStorageAvailable() ) {
+            try {
+                localStorage.removeItem(getDraftKey())
+            } catch (error) {
+                logger.error(error)
+            }
+        }
 
         setAreYouSure(false)
         setContent('')
@@ -108,13 +122,13 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
         // For edits, check to see if they've actually made any changes.  If
         // they have, then the form is dirty.
         if ( commentId && ( content !== comment?.content ) ) {
-            return true 
-        } 
+            return true
+        }
 
         // For new comment drafts, if there's any content, then the form is dirty.
         else if ( ! commentId && content.length > 0 ) {
             return true
-        } 
+        }
 
         return false
     }
@@ -127,7 +141,7 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
         // If the form is dirty, then we want to confirm discarding the draft.
         if ( isDirty() ) {
             setAreYouSure(true)
-        } 
+        }
         else {
             cancel()
         }
@@ -149,12 +163,26 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
             content: comment ? comment.content : ''
         }
 
-        const existingDraft = JSON.parse(localStorage.getItem(getDraftKey()))
+        let existingDraft = null
+        if ( isLocalStorageAvailable() ) {
+            try {
+                existingDraft = JSON.parse(localStorage.getItem(getDraftKey()))
+            } catch (error) {
+                logger.error(error)
+            }
+        }
+
         if ( existingDraft ) {
             draft = existingDraft
             setShowForm(true)
         } else if ( commentId && comment ) {
-            localStorage.setItem(getDraftKey(), JSON.stringify(draft))
+            if ( isLocalStorageAvailable() ) {
+                try {
+                    localStorage.setItem(getDraftKey(), JSON.stringify(draft))
+                } catch (error) {
+                    logger.error(error)
+                }
+            }
         }
 
         setContent(draft.content)
@@ -162,13 +190,25 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
 
     useEffect(function() {
         if ( ! postRequest && ! patchRequest && (showForm || commentId )) {
-            localStorage.setItem(getDraftKey(), JSON.stringify({ content: content }))
+            if ( isLocalStorageAvailable() ) {
+                try {
+                    localStorage.setItem(getDraftKey(), JSON.stringify({ content: content }))
+                } catch (error) {
+                    logger.error(error)
+                }
+            }
         }
     }, [ commentId, content, postRequest, patchRequest ])
 
     useEffect(function() {
         if ( (postRequest && postRequest.state == 'fulfilled') || (patchRequest && patchRequest.state == 'fulfilled')) {
-            localStorage.removeItem(getDraftKey())
+            if ( isLocalStorageAvailable() ) {
+                try {
+                    localStorage.removeItem(getDraftKey())
+                } catch (error) {
+                    logger.error(error)
+                }
+            }
 
             setContent('')
             setError('')
@@ -192,7 +232,6 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
     }
 
     const inProgress = (patchRequest && patchRequest.state == 'pending') || (postRequest && postRequest.state == 'pending')
-    const draft = localStorage.getItem(getDraftKey())
 
     if ( ! commentId && ! showForm ) {
         return (
@@ -214,11 +253,11 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
                     <Button onClick={() => handleCancel()}>Cancel</Button>
                     <Button type="primary" onClick={() => submit()}>{ commentId ? 'Save Edit' : 'Comment' }</Button>
                 </div> }
-                <AreYouSure 
-                    isVisible={areYouSure} 
+                <AreYouSure
+                    isVisible={areYouSure}
                     cancelLabel="Keep Editing"
                     executeLabel={ commentId ? "Discard Edits" : "Discard Comment" }
-                    execute={cancel} 
+                    execute={cancel}
                     cancel={() => setAreYouSure(false)}
                 >
                     <p>Are you sure you want to discard your { commentId ? "edits" : "comment" }?</p>

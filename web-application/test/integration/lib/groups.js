@@ -1,0 +1,291 @@
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
+
+const { fetchEndpoint } = require('./fetchEndpoint')
+
+// Fetch a single group by id and return the raw fetchEndpoint result
+// ({ status, ok, content, raw }).  Mirrors lib/posts.getPost -- it does not
+// throw on non-2xx so callers (e.g. the permission tests) can assert on the
+// status and error body of a denied view.
+const getGroup = async function(session, groupId) {
+    return await fetchEndpoint('GET', `/group/${encodeURIComponent(groupId)}`, { session: session })
+}
+
+// Patch a group by id and return the raw fetchEndpoint result
+// ({ status, ok, content, raw }).  Mirrors lib/posts.patchPost -- it does not
+// throw on non-2xx so callers (e.g. the patchGroup permission and validation
+// tests) can assert on the status and error body of a rejected update.
+//
+// NOTE: PATCH /group/:id requires `id` in the body and it must match the id in
+// the route; the controller rejects a mismatch with 400 before it ever loads
+// the group.
+const patchGroup = async function(session, groupId, body) {
+    return await fetchEndpoint('PATCH', `/group/${encodeURIComponent(groupId)}`, { session: session, body: body })
+}
+
+// Create a group owned by the currently authenticated user and return the
+// created entity.  The creator is automatically made an 'admin' member.
+//
+// `overrides` may set any group field.  By default this creates an 'open'
+// group that anyone may post to, with a unique slug/title so that concurrent
+// or repeated runs don't collide.
+const createGroup = async function(session, overrides = {}) {
+    const unique = crypto.randomUUID()
+
+    const submission = {
+        type: 'open',
+        postPermissions: 'anyone',
+        title: `Test Group ${unique}`,
+        slug: `test-group-${unique}`,
+        about: 'A group created by the integration test suite.',
+        ...overrides
+    }
+
+    const response = await fetchEndpoint('POST', '/groups', { session: session, body: submission })
+    if ( ! response.ok ) {
+        throw new Error(`Failed to create group: ${response.status} ${JSON.stringify(response.content)}`)
+    }
+
+    return response.content.entity
+}
+
+// Create a subgroup (child group) beneath `parentId`, owned by the currently
+// authenticated user, and return the created entity.
+//
+// The creator must be an admin of the parent group -- the parent's creator is,
+// by default, so the same session that created the parent may create its
+// children.  As with createGroup(), the creator is automatically made an
+// 'admin' member of the new subgroup.
+//
+// A subgroup's `type` is bounded by its parent: an "open" subgroup of a private
+// parent is a 'private-open' group; an "open" subgroup of a hidden parent is a
+// 'hidden-open' group; a "private" subgroup of a hidden parent is a
+// 'hidden-private' group.  Pass the resulting compound `type` here directly.
+// `overrides` may set any other group field.  This is a thin convenience
+// wrapper around createGroup() that just fixes `parentId` and `type` and
+// defaults postPermissions to 'members'.
+const createSubgroup = async function(session, parentId, type, overrides = {}) {
+    return await createGroup(session, {
+        type: type,
+        postPermissions: type === 'open' ? 'anyone' : 'members',
+        parentId: parentId,
+        ...overrides
+    })
+}
+
+// Delete a group by id and return the raw fetchEndpoint result
+// ({ status, ok, content, raw }).  Mirrors getGroup()/patchGroup() -- unlike
+// deleteGroup() below it does NOT throw on a non-2xx, so the deleteGroup
+// permission tests can assert on the status and error body of a refused
+// delete.  Use deleteGroup() for teardown and this for assertions.
+const deleteGroupRequest = async function(session, groupId) {
+    return await fetchEndpoint('DELETE', `/group/${encodeURIComponent(groupId)}`, { session: session })
+}
+
+// Delete a group by id.  The creator (admin) must be the one deleting it.
+// Deleting a group cascades to its posts and members in the database, so this
+// is sufficient to tear down everything created for a group post test.
+const deleteGroup = async function(session, groupId) {
+    const response = await fetchEndpoint('DELETE', `/group/${encodeURIComponent(groupId)}`, { session: session })
+    if ( ! response.ok ) {
+        throw new Error(`Failed to delete Group(${groupId}): ${response.status}`)
+    }
+    return response.content
+}
+
+// Add a member to an open group by having them join it directly.  `session`
+// must belong to the joining user.  Only valid for 'open' groups, where a
+// non-member may add themselves with status 'member'.
+const joinOpenGroup = async function(session, groupId, userId) {
+    const member = {
+        userId: userId,
+        groupId: groupId,
+        status: 'member',
+        role: 'member'
+    }
+
+    const response = await fetchEndpoint('POST', `/group/${encodeURIComponent(groupId)}/members`, { session: session, body: member })
+    if ( ! response.ok ) {
+        throw new Error(`Failed to join Group(${groupId}): ${response.status} ${JSON.stringify(response.content)}`)
+    }
+
+    return response.content
+}
+
+// Parent group admins can add themselves to child groups, but they have to do
+// it as an `admin` role.  They can't add themselves as members.
+const joinGroupAsAdmin = async function(session, groupId, userId) {
+    const member = {
+        userId: userId,
+        groupId: groupId,
+        status: 'member',
+        role: 'admin'
+    }
+
+    const response = await fetchEndpoint('POST', `/group/${encodeURIComponent(groupId)}/members`, { session: session, body: member })
+    if ( ! response.ok ) {
+        throw new Error(`Failed to join Group(${groupId}): ${response.status} ${JSON.stringify(response.content)}`)
+    }
+
+    return response.content
+}
+
+// Fetch a single GroupMember by the member's *user* id.  Returns the raw
+// response (without throwing on non-2xx) so callers can assert on the status.
+//
+// NOTE: the route is `/group/:groupId/member/:userId` -- the member is
+// identified by their USER id, not by the group_members row id.  This is the
+// entity under test in the getGroupMember suite.
+const getGroupMember = async function(session, groupId, userId) {
+    return await fetchEndpoint('GET', `/group/${encodeURIComponent(groupId)}/member/${encodeURIComponent(userId)}`, { session: session })
+}
+
+// Request to join a group on behalf of the currently authenticated user.
+// Produces a 'pending-requested' membership (the counterpart to an invitation:
+// the user asks to join rather than being invited).  `session` must belong to
+// the requesting user.  Valid on groups the user can view but is not yet a
+// member of (e.g. private groups).
+const requestToJoinGroup = async function(session, groupId, userId) {
+    const member = {
+        userId: userId,
+        groupId: groupId,
+        status: 'pending-requested',
+        role: 'member'
+    }
+
+    const response = await fetchEndpoint('POST', `/group/${encodeURIComponent(groupId)}/members`, { session: session, body: member })
+    if ( ! response.ok ) {
+        throw new Error(`Failed to request to join Group(${groupId}) as User(${userId}): ${response.status} ${JSON.stringify(response.content)}`)
+    }
+
+    return response.content
+}
+
+// Invite a user to a group.  `adminSession` must belong to a group admin or
+// moderator.  Produces a 'pending-invited' membership.
+const inviteToGroup = async function(adminSession, groupId, userId) {
+    const member = {
+        userId: userId,
+        groupId: groupId,
+        status: 'pending-invited',
+        role: 'member'
+    }
+
+    const response = await fetchEndpoint('POST', `/group/${encodeURIComponent(groupId)}/members`, { session: adminSession, body: member })
+    if ( ! response.ok ) {
+        throw new Error(`Failed to invite User(${userId}) to Group(${groupId}): ${response.status} ${JSON.stringify(response.content)}`)
+    }
+
+    return response.content
+}
+
+// Accept a pending invitation.  `memberSession` must belong to the invited
+// user.  Transitions their membership from 'pending-invited' to 'member'.
+const acceptGroupInvite = async function(memberSession, groupId, userId) {
+    const member = {
+        userId: userId,
+        groupId: groupId,
+        status: 'member'
+    }
+
+    const response = await fetchEndpoint('PATCH', `/group/${encodeURIComponent(groupId)}/member/${encodeURIComponent(userId)}`, { session: memberSession, body: member })
+    if ( ! response.ok ) {
+        throw new Error(`Failed to accept invite to Group(${groupId}) for User(${userId}): ${response.status} ${JSON.stringify(response.content)}`)
+    }
+
+    return response.content
+}
+
+// Make a user a confirmed member of any group type via the invite + accept
+// flow.  `adminSession` invites; `memberSession` (the invited user's session)
+// accepts.  Works for open, private, and hidden groups.
+const addConfirmedMember = async function(adminSession, memberSession, groupId, userId) {
+    await inviteToGroup(adminSession, groupId, userId)
+    return await acceptGroupInvite(memberSession, groupId, userId)
+}
+
+// Set the status of an existing member (e.g. to 'banned').  `adminSession`
+// must belong to a group admin or moderator.
+const setGroupMemberStatus = async function(adminSession, groupId, userId, status) {
+    const member = {
+        userId: userId,
+        groupId: groupId,
+        status: status
+    }
+
+    const response = await fetchEndpoint('PATCH', `/group/${encodeURIComponent(groupId)}/member/${encodeURIComponent(userId)}`, { session: adminSession, body: member })
+    if ( ! response.ok ) {
+        throw new Error(`Failed to set status '${status}' for User(${userId}) in Group(${groupId}): ${response.status} ${JSON.stringify(response.content)}`)
+    }
+
+    return response.content
+}
+
+// Set the role of an existing, confirmed member (e.g. promote a 'member' to
+// 'admin' or 'moderator').  `adminSession` must belong to a group admin.  This
+// is how a second group admin is created for tests -- for example, promoting a
+// user to admin of a *parent* group so they inherit admin/moderator rights over
+// its subgroups.
+const setGroupMemberRole = async function(adminSession, groupId, userId, role) {
+    const member = {
+        userId: userId,
+        groupId: groupId,
+        role: role
+    }
+
+    const response = await fetchEndpoint('PATCH', `/group/${encodeURIComponent(groupId)}/member/${encodeURIComponent(userId)}`, { session: adminSession, body: member })
+    if ( ! response.ok ) {
+        throw new Error(`Failed to set role '${role}' for User(${userId}) in Group(${groupId}): ${response.status} ${JSON.stringify(response.content)}`)
+    }
+
+    return response.content
+}
+
+// Remove a member from a group.  `adminSession` must belong to a group admin
+// or moderator (or the member themselves).  Used to tear down transient
+// memberships set up for a single test case (e.g. a member who is banned for a
+// ban test) without disturbing the shared state of the surrounding describe.
+const removeGroupMember = async function(adminSession, groupId, userId) {
+    const response = await fetchEndpoint('DELETE', `/group/${encodeURIComponent(groupId)}/member/${encodeURIComponent(userId)}`, { session: adminSession })
+    if ( ! response.ok ) {
+        throw new Error(`Failed to remove User(${userId}) from Group(${groupId}): ${response.status} ${JSON.stringify(response.content)}`)
+    }
+
+    return response.content
+}
+
+module.exports = {
+    getGroup: getGroup,
+    patchGroup: patchGroup,
+    createGroup: createGroup,
+    createSubgroup: createSubgroup,
+    deleteGroup: deleteGroup,
+    deleteGroupRequest: deleteGroupRequest,
+    getGroupMember: getGroupMember,
+    joinOpenGroup: joinOpenGroup,
+    joinGroupAsAdmin: joinGroupAsAdmin,
+    requestToJoinGroup: requestToJoinGroup,
+    inviteToGroup: inviteToGroup,
+    acceptGroupInvite: acceptGroupInvite,
+    addConfirmedMember: addConfirmedMember,
+    setGroupMemberStatus: setGroupMemberStatus,
+    setGroupMemberRole: setGroupMemberRole,
+    removeGroupMember: removeGroupMember
+}

@@ -95,7 +95,10 @@ services:
       # the same host directory, so one edit does both).
       - ./packages:/packages
       - ./packages/backend:/src/node_modules/@communities/backend
+      - ./packages/shared:/src/node_modules/@communities/backend/node_modules/@communities/shared
       - ./packages/shared:/src/node_modules/@communities/shared
+      # --- Temp directory for file processing ---
+      - ./worker/tmp:/src/tmp
     restart: unless-stopped
 
   # ---------------------------------------------------------------------------
@@ -149,8 +152,11 @@ services:
       # --- shared workspace packages (see worker note above) ---
       - ./packages:/packages
       - ./packages/backend:/src/node_modules/@communities/backend
+      - ./packages/shared:/src/node_modules/@communities/backend/node_modules/@communities/shared
       - ./packages/shared:/src/node_modules/@communities/shared
       - ./packages/session:/src/node_modules/@communities/session
+      # --- Temp directory for image uploads ---
+      - ./web-application/tmp:/src/tmp
     restart: unless-stopped
 
 # The CodeArtifact token is read from the CODEARTIFACT_AUTH_TOKEN host env var

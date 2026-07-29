@@ -1,5 +1,24 @@
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
 /**************************************************************************************************
- *         API Router v0 
+ *         API Router v0
  *
  * This is the RESTful API router.  It contains all of our backend API routes.
  *
@@ -9,7 +28,7 @@
  **************************************************************************************************/
 module.exports = function(core) {
     const express = require('express')
-    
+
     const rateLimit = require('./middleware/rateLimit')
     const { createVideoUploadMiddleware, createImageUploadMiddleware } = require('./middleware/upload')
 
@@ -41,7 +60,7 @@ module.exports = function(core) {
         })
     })
 
-    router.post('/system/log', rateLimit(core, 2400), function(request, response, next) {
+    router.post('/system/log', rateLimit(core, 240), function(request, response, next) {
         systemController.postLog(request, response).catch(function(error) {
             next(error)
         })
@@ -89,11 +108,11 @@ module.exports = function(core) {
     const JobController = require('./controllers/JobController')
     const jobController = new JobController(core)
 
-    router.get('/queue/:queue/jobs', rateLimit(core, 2400), function(request, response, next) {
+    /*router.get('/queue/:queue/jobs', rateLimit(core, 2400), function(request, response, next) {
         jobController.getJobs(request, response).catch(function(error) {
             next(error)
         })
-    })
+    })*/
 
     router.post('/queue/:queue/jobs', rateLimit(core, 30), function(request, response, next) {
         jobController.postJob(request, response).catch(function(error) {
@@ -180,14 +199,14 @@ module.exports = function(core) {
         })
     })
 
-    // Create a new user 
+    // Create a new user
     router.post('/users', rateLimit(core, 30), function(request, response, next) {
         userController.postUsers(request, response).catch(function(error) {
             next(error)
         })
     })
 
-    // Get the details of a single user 
+    // Get the details of a single user
     router.get('/user/:id', rateLimit(core, 2400), function(request, response, next) {
         userController.getUser(request, response).catch(function(error) {
             next(error)
@@ -237,7 +256,7 @@ module.exports = function(core) {
             next(error)
         })
     })
-    
+
     router.delete('/user/:userId/relationship/:relationId', rateLimit(core, 60), function(request, response, next) {
         userRelationshipController.deleteUserRelationship(request, response).catch(function(error) {
             next(error)
@@ -276,18 +295,6 @@ module.exports = function(core) {
 
     router.delete('/group/:id', rateLimit(core, 30), function(request, response, next) {
         groupController.deleteGroup(request, response).catch(function(error) {
-            next(error)
-        })
-    })
-
-    router.get('/group/:id/parents', rateLimit(2400), function(request, response, next) {
-        groupController.getParents(request, response).catch(function(error) {
-            next(error)
-        })
-    })
-
-    router.get('/group/:id/parents/members/:userId', rateLimit(2400), function(request, response, next) {
-        groupController.getParentMembers(request, response).catch(function(error) {
             next(error)
         })
     })
@@ -371,7 +378,7 @@ module.exports = function(core) {
     const groupSubscriptionController = new GroupSubscriptionController(core)
 
     router.get('/group/:groupId/subscription', rateLimit(core, 240), function(request, response, next) {
-        groupSubscriptionController.getGroupSubscriptions(request, response).catch(function(error) {
+        groupSubscriptionController.getGroupSubscription(request, response).catch(function(error) {
             next(error)
         })
     })
@@ -387,12 +394,6 @@ module.exports = function(core) {
      **************************************************************************/
     const LinkPreviewController = require('./controllers/LinkPreviewController')
     const linkPreviewController = new LinkPreviewController(core)
-
-    router.get('/link-previews', rateLimit(core, 2400), function(request, response, next) {
-        linkPreviewController.getLinkPreviews(request, response).catch(function(error) {
-            next(error)
-        })
-    })
 
     router.post('/link-previews', rateLimit(core, 60), function(request, response, next) {
         linkPreviewController.postLinkPreviews(request, response).catch(function(error) {
@@ -484,7 +485,7 @@ module.exports = function(core) {
             next(error)
         })
     })
-    
+
     router.post('/post/:postId/comments', rateLimit(core, 30), function(request, response, next) {
         postCommentController.postPostComments(request, response).catch(function(error) {
             next(error)
@@ -576,7 +577,7 @@ module.exports = function(core) {
         })
     })
 
-    router.patch('/authentication', rateLimit(core, 15), function(request, response, next) { 
+    router.patch('/authentication', rateLimit(core, 15), function(request, response, next) {
         authenticationController.patchAuthentication(request, response).catch(function(error) {
             next(error)
         })
@@ -605,14 +606,18 @@ module.exports = function(core) {
     const TokenController = require('./controllers/TokenController')
     const tokenController = new TokenController(core)
 
-    router.get('/token/:token', rateLimit(core, 20), function(request, response, next) {
-        tokenController.getToken(request, response).catch(function(error) {
+    router.post('/tokens', rateLimit(core, 20), function(request, response, next) {
+        tokenController.postToken(request, response).catch(function(error) {
             next(error)
         })
     })
 
-    router.post('/tokens', rateLimit(core, 20), function(request, response, next) {
-        tokenController.postToken(request, response).catch(function(error) {
+    // PATCH /tokens breaks our standard pattern of PATCH /entity/:id because
+    // we want to keep the token out of the URL.  Instead its submitted in the
+    // request body. Because of this, it's a `tokens` endpoint rather than a
+    // `token` endpoint to keep with the larger pattern.
+    router.patch('/tokens', rateLimit(core, 20), function(request, response, next) {
+        tokenController.patchTokens(request, response).catch(function(error) {
             next(error)
         })
     })
@@ -714,7 +719,7 @@ module.exports = function(core) {
 
 
     /**************************************************************************
-     *      API 404 
+     *      API 404
      *************************************************************************/
     router.all('*any', function(request, response) {
         response.status(404).send({

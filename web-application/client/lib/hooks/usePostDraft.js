@@ -1,3 +1,22 @@
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
 import { useSelector, useDispatch } from 'react-redux'
 
 import * as uuid from 'uuid'
@@ -5,6 +24,8 @@ import * as uuid from 'uuid'
 import logger from '/logger'
 
 import { setDraft as setPostDraft, clearDraft as clearPostDraft } from '/state/Post'
+
+import { isLocalStorageAvailable } from '/lib/localStorage'
 
 import { useGroup } from '/lib/hooks/Group'
 import { usePost } from '/lib/hooks/Post'
@@ -28,7 +49,7 @@ const validateAndCorrectDraft = function(draft, post, group, sharedPostId) {
             defaultVisibility = 'public'
         }
     }
-    
+
     const correctedDraft = {
         content: post ? post.content : '',
         linkPreviewId: post ? post.linkPreviewId : null,
@@ -36,16 +57,16 @@ const validateAndCorrectDraft = function(draft, post, group, sharedPostId) {
         ignoredLinks: [],
         sharedPostId: post ? post.sharedPostId : sharedPostId,
         visibility: post ? post.visibility : defaultVisibility,
-        type: post ? post.type : defaultType 
+        type: post ? post.type : defaultType
     }
 
     if ( draft === undefined || draft === null ) {
-        return correctedDraft 
+        return correctedDraft
     }
 
-    if ( has(draft, 'content') 
+    if ( has(draft, 'content')
         && draft.content !== null
-        && typeof draft.content === 'string' 
+        && typeof draft.content === 'string'
     ) {
         correctedDraft.content = draft.content
     }
@@ -64,11 +85,11 @@ const validateAndCorrectDraft = function(draft, post, group, sharedPostId) {
         && Array.isArray(draft.files)
         && correctedDraft.sharedPostId === null
     ) {
-        correctedDraft.files = draft.files 
-    } 
+        correctedDraft.files = draft.files
+    }
 
-    if ( has(draft, 'fileId') 
-        && draft.fileId !== null 
+    if ( has(draft, 'fileId')
+        && draft.fileId !== null
         && uuid.validate(draft.fileId)
         && correctedDraft.sharedPostId === null
     ) {
@@ -76,13 +97,13 @@ const validateAndCorrectDraft = function(draft, post, group, sharedPostId) {
             correctedDraft.files.push(draft.fileId)
             delete draft.fileId
         }
-    } 
+    }
 
     if( has(draft, 'linkPreviewId')
         && draft.linkPreviewId !== null
         && uuid.validate(draft.linkPreviewId)
         && correctedDraft.sharedPostId === null
-        && correctedDraft.files.length <= 0 
+        && correctedDraft.files.length <= 0
     ) {
         correctedDraft.linkPreviewId = draft.linkPreviewId
     } else if ( has(draft, 'linkPreviewId') && draft.linkPreviewId === null ) {
@@ -120,7 +141,7 @@ const validateAndCorrectDraft = function(draft, post, group, sharedPostId) {
         }  else if ( draft.type === 'feed' || draft.type === 'announcement' || draft.type === 'info' )  {
             correctedDraft.type = draft.type
         }
-    } 
+    }
 
     return correctedDraft
 }
@@ -142,7 +163,7 @@ const getDraftKey = function(id, groupId, sharedPostId) {
         key = key + `sharedPostId:${sharedPostId}`
     }
 
-    return key 
+    return key
 }
 
 export const usePostDraft = function(id, groupId, sharedPostId) {
@@ -153,7 +174,14 @@ export const usePostDraft = function(id, groupId, sharedPostId) {
 
     // Here we want to correct the draft, because we may need to migrate drafts
     // in local storage due to code updates.
-    let savedDraft = JSON.parse(localStorage.getItem(`post.draft[${postKey}]`))
+    let savedDraft = {}
+    if ( isLocalStorageAvailable() ) {
+        try {
+            savedDraft = JSON.parse(localStorage.getItem(`post.draft[${postKey}]`))
+        } catch (error) {
+            logger.error(error)
+        }
+    }
     const draft = validateAndCorrectDraft(
         useSelector((state) => postKey in state.Post.drafts ? state.Post.drafts[postKey] : savedDraft), post, group, sharedPostId
     )
@@ -164,12 +192,24 @@ export const usePostDraft = function(id, groupId, sharedPostId) {
         if ( newDraft !== null ) {
             // TechDebt TODO really we should be validating the draft and
             // throwing an error here.
-            const correctedDraft = validateAndCorrectDraft(newDraft, post, group, sharedPostId) 
+            const correctedDraft = validateAndCorrectDraft(newDraft, post, group, sharedPostId)
             dispatch(setPostDraft({ key: postKey, draft: correctedDraft}))
-            localStorage.setItem(`post.draft[${postKey}]`, JSON.stringify(correctedDraft))
+            if ( isLocalStorageAvailable() ) {
+                try {
+                    localStorage.setItem(`post.draft[${postKey}]`, JSON.stringify(correctedDraft))
+                } catch (error) {
+                    logger.error(error)
+                }
+            }
         } else {
             dispatch(clearPostDraft({ key: postKey }))
-            localStorage.removeItem(`post.draft[${postKey}]`)
+            if ( isLocalStorageAvailable() ) {
+                try {
+                    localStorage.removeItem(`post.draft[${postKey}]`)
+                } catch (error) {
+                    logger.error(error)
+                }
+            }
         }
     }
 

@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -23,17 +23,17 @@ const getSendNotificationsJob = function(core) {
     return async function(job, done) {
         try {
             const logger = new Logger(core.logger.level, `send-notifications: ${job.id}`)
-            logger.info(`Beginning job 'send-notifications' of '${job.data.type}' for User(${job.data.currentUser.id}).`)
+            logger.info(`Beginning job 'send-notifications' of '${job.data.type}' for User(${job.data.session.user.id}).`)
 
             job.progress({ step: 'initializing', stepDescription: `Initializing...`, progress: 0 })
 
             const notificationWorker = new NotificationWorker(core, logger)
-            
-            await notificationWorker.processNotification(job.data.currentUser, job.data.type, job.data.context, job.data.options)
+
+            await notificationWorker.processNotification(job.data.session.user, job.data.type, job.data.context, job.data.options)
 
             job.progress({ step: 'complete', stepDescription: `Complete!`, progress: 100 })
 
-            logger.info(`Finished job 'send-notifications' of '${job.data.type}' for user ${job.data.currentUser.id}.`)
+            logger.info(`Finished job 'send-notifications' of '${job.data.type}' for user ${job.data.session.user.id}.`)
             done(null)
         } catch (error) {
             core.logger.error(error)

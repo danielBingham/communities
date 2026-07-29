@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -18,11 +18,11 @@
  *
  ******************************************************************************/
 
-const { 
+const {
     ValidationService,
     PermissionService,
     NotificationService,
-    GroupModerationDAO, 
+    GroupModerationDAO,
     GroupModerationEventDAO,
     PostDAO,
     PostCommentDAO,
@@ -78,7 +78,7 @@ module.exports = class GroupModerationController extends BaseController {
             posts: postResults.dictionary,
             postComments: postCommentResults.dictionary,
             users: userResults.dictionary
-        } 
+        }
     }
 
     async createQuery(groupId, request) {
@@ -91,7 +91,7 @@ module.exports = class GroupModerationController extends BaseController {
         }
 
         const ignorePostResults = await this.core.database.query(`
-            SELECT group_moderation.id 
+            SELECT group_moderation.id
                 FROM group_moderation
                     JOIN site_moderation ON group_moderation.post_id = site_moderation.post_id
                 WHERE group_moderation.group_id = $1 AND site_moderation.status = 'rejected' AND site_moderation.post_comment_id IS NULL
@@ -195,7 +195,7 @@ module.exports = class GroupModerationController extends BaseController {
         const meta = await this.groupModerationDAO.getGroupModerationPageMeta(query)
         const relations = await this.getRelations(currentUser, results, query.relations)
 
-        response.status(200).json({ 
+        response.status(200).json({
             dictionary: results.dictionary,
             list: results.list,
             meta: meta,
@@ -223,7 +223,7 @@ module.exports = class GroupModerationController extends BaseController {
         if ( canViewGroup !== true ) {
             return this.sendUserErrors(response, 404, {
                 type: 'not-found',
-                log: `GroupModeration(${id}) queried by User without authorization to view Group.`,
+                log: `User attempting to create GroupModeration with no authorization to view Group.`,
                 message: `That doesn't exist or you don't have permission to see it.`
             })
         }
@@ -232,7 +232,7 @@ module.exports = class GroupModerationController extends BaseController {
         if ( canViewGroupContent !== true ) {
             return this.sendUserErrors(response, 404, {
                 type: 'not-found',
-                log: `GroupModeration(${id}) queried by User without authorization.`,
+                log: `User attempting to create GroupModeration with no authorization to view group.`,
                 message: `That doesn't exist or you don't have permission to see it.`
             })
         }
@@ -243,6 +243,23 @@ module.exports = class GroupModerationController extends BaseController {
                 type: 'groupId:invalid',
                 log: `groupId in the route must match groupId in the body.`,
                 message: `groupId in the route must match groupId in the body.`
+            })
+        }
+
+        if ( groupModeration.userId !== currentUser.id ) {
+            return this.sendUserErrors(response, 403, {
+                type: 'not-authorized',
+                log: `User(${currentUser.id}) attempting to flag a post as User(${groupModeration.userId}).`,
+                message: `You may only flag posts as yourself.`
+            })
+        }
+
+        const post = await this.postDAO.getPostById(groupModeration.postId)
+        if ( post?.groupId !== groupId ) {
+            return this.sendUserErrors(response, 403, {
+                type: 'not-authorized',
+                log: `User(${currentUser.id}) attempting to moderate a post that does not belong to this group.`,
+                message: `You may only moderate posts belonging to this group.`
             })
         }
 
@@ -286,7 +303,7 @@ module.exports = class GroupModerationController extends BaseController {
         const entity = entityResults.dictionary[entityResults.list[0]]
 
         // Insert the event to track the moderation history.
-        await this.groupModerationEventDAO.insertGroupModerationEvents(this.groupModerationEventDAO.createEventFromGroupModeration(entity))
+        await this.groupModerationEventDAO.createEventFromGroupModeration(entity.id)
 
         if ( entity.postId && entity.postCommentId === null) {
             const postUpdate = {
@@ -374,13 +391,13 @@ module.exports = class GroupModerationController extends BaseController {
         const entity = results.dictionary[id]
 
         if ( groupId !== entity.groupId ) {
-            return this.endUserErrors(response, 404, {
+            return this.sendUserErrors(response, 404, {
                 type: 'not-found',
                 log: `GroupModeration(${id}) queried with different groupId.`,
                 message: `That doesn't exist or you don't have permission to see it.`
             })
         }
-       
+
         const relations = await this.getRelations(currentUser, results)
 
         response.status(200).json({
@@ -438,6 +455,23 @@ module.exports = class GroupModerationController extends BaseController {
             return this.sendUserErrors(response, 400, idValidationErrors)
         }
 
+        const groupModeration = cleaning.GroupModeration.clean(request.body)
+        if ( groupModeration.id !== id) {
+            return this.sendUserErrors(response, 400, {
+                type: 'invalid',
+                log: `User(${currentUser.id}) submitted a GroupModeration patch with the wrong id.`,
+                message: `You used a different GroupModeration.id in your patch and your route.  Ids must match.`
+            })
+        }
+
+        if ( groupModeration.userId !== currentUser.id ) {
+            return this.sendUserErrors(response, 403, {
+                type: 'not-authorized',
+                log: `User(${currentUser.id}) attempting to submit a GroupModeration patch as User(${groupModeration.userId}).`,
+                message: `You may only moderate as yourself.`
+            })
+        }
+
         const existing = await this.groupModerationDAO.getGroupModerationById(id)
         if ( existing === null ) {
             return this.sendUserErrors(response, 400, {
@@ -447,12 +481,22 @@ module.exports = class GroupModerationController extends BaseController {
             })
         }
 
-        const groupModeration = cleaning.GroupModeration.clean(request.body)
-        if ( groupModeration.id !== id) {
-            return this.sendUserErrors(response, 400, {
-                type: 'invalid',
-                log: `User(${currentUser.id}) submitted a GroupModeration patch with the wrong id.`,
-                message: `You used a different GroupModeration.id in your patch and your route.  Ids must match.`
+        // Ensure that the groupId matches across existing, the submitted
+        // groupModeration, and the groupId in the path.
+        if ( existing.groupId !== groupModeration.groupId || existing.groupId !== groupId) {
+            return this.sendUserErrors(response, 403, {
+                type: 'not-authorized',
+                log: `User(${currentUser.id}) attempting to update a GroupModeration's Group.`,
+                message: `You may not change the group.`
+            })
+        }
+
+        const post = await this.postDAO.getPostById(groupModeration.postId)
+        if ( post?.groupId !== groupId ) {
+            return this.sendUserErrors(response, 403, {
+                type: 'not-authorized',
+                log: `User(${currentUser.id}) attempting to moderate a post that does not belong to this group.`,
+                message: `You may only moderate posts belonging to this group.`
             })
         }
 
@@ -490,7 +534,7 @@ module.exports = class GroupModerationController extends BaseController {
         )
 
         // Insert the event to track the moderation history.
-        await this.groupModerationEventDAO.insertGroupModerationEvents(this.groupModerationEventDAO.createEventFromGroupModeration(entity))
+        await this.groupModerationEventDAO.createEventFromGroupModeration(entity.id)
 
         const relations = this.getRelations(currentUser, results)
 

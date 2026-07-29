@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -17,7 +17,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-const multer = require('multer') 
+const multer = require('multer')
 const ControllerError = require('./errors/ControllerError')
 
 const createErrorsMiddleware = function(core) {
@@ -27,7 +27,7 @@ const createErrorsMiddleware = function(core) {
             // Log the error.
             if ( error instanceof ControllerError ) {
                 if ( error.status < 500 ) {
-                    logger.warn(error)
+                    logger.info(error.message)
                 } else {
                     logger.error(error)
                 }
@@ -38,17 +38,17 @@ const createErrorsMiddleware = function(core) {
             if ( error instanceof ControllerError) {
                 response.status(error.status).json({
                     error: {
-                        type: error.type, 
+                        type: error.type,
                         message: error.publicMessage
                     }
                 })
-                return 
+                return
             } else if ( error instanceof multer.MulterError ) {
                 if ( error.code === 'LIMIT_FILE_SIZE' ) {
                     response.status(400).json({
                         error: {
                             type: 'upload-error:file-size',
-                            message: 'Your file was too large.  Images must be under 10 MB and Videos under 700 MB.' 
+                            message: 'Your file was too large.  Images must be under 10 MB and Videos under 700 MB.'
                         }
                     })
                 } else {
@@ -59,8 +59,8 @@ const createErrorsMiddleware = function(core) {
                         }
                     })
                 }
-            } else { 
-                response.status(500).json({ 
+            } else {
+                response.status(500).json({
                     error: {
                         type: 'server-error',
                         message: `Something went wrong on the backend in a way we couldn't handle.  Please report this as a bug!`
@@ -71,7 +71,7 @@ const createErrorsMiddleware = function(core) {
         } catch (secondError) {
             // If we fucked up something in our error handling.
             logger.error(secondError)
-            response.status(500).json({ 
+            response.status(500).json({
                 error: {
                     type: 'server-error',
                     message: `Something went wrong on the backend in a way we couldn't handle.  Please report this as a bug!`

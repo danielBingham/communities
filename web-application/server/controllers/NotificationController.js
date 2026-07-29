@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -17,7 +17,8 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-const { NotificationDAO } = require('@communities/backend')
+const { NotificationDAO, PermissionService, ValidationService } = require('@communities/backend')
+const { schema } = require('@communities/shared')
 
 const ControllerError = require('../errors/ControllerError')
 
@@ -27,31 +28,43 @@ module.exports = class NotificationController {
         this.core = core
 
         this.notificationDAO = new NotificationDAO(core)
+
+        this.permissionService = new PermissionService(core)
+        this.validationService = new ValidationService(core)
+
+        this.notificationSchema = new schema.NotificationSchema()
     }
 
     /**
      * Get notifications for the current user.
      */
     async getNotifications(request, response) {
-        /**********************************************************************
-         * Permissions Checking and Input Validation
-         *
-         * 1. User must be authenticated.
-         *
-         * 
-         * ********************************************************************/
-   
         const currentUser = request.session.user
-
-        // 1. User must be authenticated.
         if ( ! currentUser ) {
-            throw new ControllerError(401, 'not-authenticated', 'Must be authenticated to retrieve notifications!')
+            throw new ControllerError(401, 'not-authenticated',
+                'Must be authenticated to retrieve notifications!',
+                `Unauthenticated users may not query notifications.`)
         }
 
-        const results = await this.notificationDAO.selectNotifications('WHERE notifications.user_id = $1', [ currentUser.id ])
+        const canQueryNotifications = await this.permissionService.can(currentUser, 'query', 'Notification')
+        if ( canQueryNotifications !== true ) {
+            throw new ControllerError(403, 'not-authorized',
+                `Unauthorized User(${currentUser.id}) attempting to query notifications.`,
+                `You are not authorized to query notifications.`)
+        }
 
-        results.meta = {}
-        results.relations = []
+        // Users may only ever query their own notifications.
+        const results = await this.notificationDAO.selectNotifications({
+            where: 'notifications.user_id = $1',
+            params: [ currentUser.id ]
+        })
+
+        results.meta = await this.notificationDAO.getNotificationPageMeta({
+            where: 'notifications.user_id = $1',
+            params: [ currentUser.id ]
+        })
+
+        results.relations = {}
 
         return response.status(200).json(results)
     }
@@ -60,48 +73,85 @@ module.exports = class NotificationController {
      * Update a batch of notifications.
      */
     async patchNotifications(request, response) {
-        /**********************************************************************
-         * Permissions Checking and Input Validation
-         *
-         * 1. User must be authenticated.
-         * 2. All notifications in batch must belong to currentUser.
-         *
-         *********************************************************************/
-
         const currentUser = request.session.user
-        // 1. User must be authenticated.
         if ( ! currentUser ) {
-            throw new ControllerError(401, 'not-authenticated', 'Must be authenticated to retrieve notifications!')
+            throw new ControllerError(401, 'not-authenticated',
+                'Must be authenticated to retrieve notifications.',
+                `You must be authenticated to retrieve notifications.`)
         }
 
         let notifications = []
         if ( ! Array.isArray(request.body) ) {
-            notifications.push(request.body)
+            notifications.push(this.notificationSchema.clean(request.body))
         } else {
-            notifications = request.body
-        }
-
-        const otherUser = notifications.find((n) => n.userId !== currentUser.id)
-        if ( otherUser !== undefined ) {
-            throw new ControllerError(403, 'not-authorized',
-                `User(${currentUser.id}) attempted to update notification for User(${otherUser.userId}). Denied.`,
-                `You may not update another user's notifications.`)
-        }
-
-        for(const notification of notifications) {
-            const updateResult = await this.notificationDAO.updateNotification(notification)
-            if ( ! updateResult ) {
-                throw new ControllerError(400, 'no-content', 
-                    `Failed to update a batch of notifications because no content was provided.`,
-                    `Failed to update.`)
+            for(const notification of request.body) {
+                notifications.push(this.notificationSchema.clean(notification))
             }
         }
 
-        const results = await this.notificationDAO.selectNotifications(
-            'WHERE notifications.id = ANY($1::uuid[])', [ notifications.map((n) => n.id) ])
+        // Collect and validate the ids so that we can pull the existing
+        // notification.
+        const notificationIds = []
+        for(const notification of notifications) {
+            const idValidationErrors = this.notificationSchema.properties.id.validate(notification.id)
+            if ( idValidationErrors.length > 0 ) {
+                throw new ControllerError(400, 'invalid',
+                    `Attempt to update a Notification with an invalid id.`,
+                    `You cannot update a Notification with an invalid id.`)
+            }
 
-        results.meta = {}
-        results.relations = []
+            notificationIds.push(notification.id)
+        }
+
+        const existing = await this.notificationDAO.selectNotifications({
+            where: `notifications.id = ANY($1::uuid[])`,
+            params: [ notificationIds ]
+        })
+
+        for(const notification of notifications) {
+            if ( ! ( notification.id in existing.dictionary ) ) {
+                throw new ControllerError(404, 'not-found',
+                    `Attempt to update Notification(${notification.id}) failed because notification was not found.`,
+                    `Notification(${notification.id}) not found. Either that notification doesn't exist or you don't have permissions to update it.`)
+            }
+
+            const canUpdateNotification = await this.permissionService.can(currentUser, 'update', 'Notification', { notification: existing.dictionary[notification.id] })
+            if ( canUpdateNotification !== true ) {
+                throw new ControllerError(403, 'not-authorized',
+                    `User(${currentUser.id}) attempted to update notification without authorization.`,
+                    `You are not authorized to update that notification.`)
+            }
+
+            const validationErrors = await this.validationService.validateNotification(currentUser, notification, existing.dictionary[notification.id])
+            if ( validationErrors.length > 0 ) {
+                const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
+                const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
+                throw new ControllerError(400, 'invalid',
+                    `User submitted an invalid notification: ${logString}`,
+                    errorString)
+            }
+        }
+
+        for(const notification of notifications) {
+             await this.notificationDAO.updateNotification(notification)
+        }
+
+        const results = await this.notificationDAO.selectNotifications({
+            where: 'notifications.id = ANY($1::uuid[])',
+            params: [ notificationIds ]
+        })
+
+        if ( results.list.length !== notifications.length ) {
+            throw new ControllerError(500, 'server-error',
+                `Failed to retrieve all updated notifications.`)
+        }
+
+        results.meta = await this.notificationDAO.getNotificationPageMeta({
+            where: 'notifications.id = ANY($1::uuid[])',
+            params: [ notificationIds ]
+        })
+
+        results.relations = {}
 
         return response.status(200).json(results)
     }
@@ -110,40 +160,59 @@ module.exports = class NotificationController {
      * Update a notification.
      */
     async patchNotification(request, response) {
-        /**********************************************************************
-         * Permissions Checking and Input Validation
-         *
-         * 1. User must be authenticated.
-         * 2. Notification must belong to currentUser.
-         *
-         * 
-         * ********************************************************************/
-       
         const currentUser = request.session.user
-        // 1. User must be authenticated.
-        if ( ! request.session.user ) {
-            throw new ControllerError(401, 'not-authenticated', 'Must be authenticated to retrieve notifications!')
+        if ( ! currentUser ) {
+            throw new ControllerError(401, 'not-authenticated',
+                'Must be authenticated to update notifications.',
+                `You must be authenticated to update notifications.`)
         }
 
-        const id = request.params.id
-        const notification = request.body
+        const id = this.notificationSchema.properties.id.clean(request.params.id)
+        const notification = this.notificationSchema.clean(request.body)
 
-        notification.id = id
-
-        if ( notification.userId !== currentUser.id ) {
-            throw new ControllerError(403, 'not-authorized',
-                `User(${currentUser.id}) attempted to update notification for User(${notification.userId}). Denied.`,
-                `You may not update another user's notifications.`)
+        const idValidationErrors = this.notificationSchema.properties.id.validate(id)
+        if ( idValidationErrors.length > 0 ) {
+            throw new ControllerError(400, 'invalid',
+                `Attempt to update Notification with invalid id.`,
+                `Cannot update a notification with an invalid Notification.id.`)
         }
 
-        const updateResult = await this.notificationDAO.updateNotification(notification)
-        if ( ! updateResult ) {
-            throw new ControllerError(400, 'no-content', 
-                `Failed to update a notification because no content was provided.`,
-                `Failed to update notification.`)
+        if ( notification.id !== id ) {
+            throw new ControllerError(400, 'invalid',
+                `Attempt to update Notification(${notification.id}) on route for Notification(${id}).`,
+                `Notification.id must match the id in the route.`)
         }
 
-        const results = await this.notificationDAO.selectNotifications('WHERE notifications.id = $1', [ id ] )
+        const existing = await this.notificationDAO.getNotificationById(id)
+        if ( existing === null || existing === undefined ) {
+            throw new ControllerError(404, 'not-found',
+                `Attempt to update Notification(${id}) failed because notification was not found.`,
+                `Either that notification doesn't exist or you don't have permissions to update it.`)
+        }
+
+        const canUpdateNotification = await this.permissionService.can(currentUser, 'update', 'Notification', { notification: existing })
+        if ( canUpdateNotification !== true ) {
+            throw new ControllerError(404, 'not-found',
+                `User(${currentUser.id}) attempted to update notification without authorization.`,
+                `Either that notification doesn't exist or you don't have permission to update it.`)
+        }
+
+        const validationErrors = await this.validationService.validateNotification(currentUser, notification, existing)
+        if ( validationErrors.length > 0 ) {
+            const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
+            const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
+            throw new ControllerError(400, 'invalid',
+                `User submitted an invalid notification: ${logString}`,
+                errorString)
+        }
+
+        await this.notificationDAO.updateNotification(notification)
+
+        const results = await this.notificationDAO.selectNotifications({
+            where: 'notifications.id = $1',
+            params: [ id ]
+        })
+
         const entity = results.dictionary[id]
         if ( ! entity ) {
             throw new ControllerError(500, 'server-error', `Notification(${id}) doesn't exist after update.`)
@@ -151,7 +220,7 @@ module.exports = class NotificationController {
 
         return response.status(200).json({
             entity: entity,
-            relations: []
+            relations: {}
         })
     }
 

@@ -61,7 +61,9 @@ jobs:
         working-directory: ./packages/shared
         run: |
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-          npm publish
+          export TAG=$([[ "${{github.event.inputs.environment }}" == "staging" ]] && echo "next" || echo "latest")
+          echo "Tag: $TAG"
+          npm publish --tag $TAG
 
       # Test, Version, and Publish @communities/backend
       #
@@ -91,7 +93,9 @@ jobs:
         working-directory: ./packages/backend
         run: |
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-          npm publish
+          export TAG=$([[ "${{github.event.inputs.environment }}" == "staging" ]] && echo "next" || echo "latest")
+          echo "Tag: $TAG"
+          npm publish --tag $TAG
 
       # Test, Version, and Publish @communities/session
       #
@@ -110,7 +114,9 @@ jobs:
         working-directory: ./packages/session
         run: |
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-          npm publish
+          export TAG=$([[ "${{github.event.inputs.environment }}" == "staging" ]] && echo "next" || echo "latest")
+          echo "Tag: $TAG"
+          npm publish --tag $TAG
 
       # Build the worker docker container and push it to ECR
       - name: Install updated Shared version

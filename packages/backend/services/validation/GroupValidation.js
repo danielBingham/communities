@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -20,6 +20,10 @@
 
 const { util, schema } = require('@communities/shared')
 
+const GroupDAO = require('../../daos/GroupDAO')
+
+const FileService = require('../FileService')
+
 const ServiceError = require('../../errors/ServiceError')
 
 module.exports = class GroupValidation {
@@ -27,6 +31,10 @@ module.exports = class GroupValidation {
     constructor(core, validationService) {
         this.core = core
         this.validationService = validationService
+
+        this.groupDAO = new GroupDAO(core)
+
+        this.fileService = new FileService(core)
 
         this.groupSchema = new schema.GroupSchema()
     }
@@ -50,19 +58,168 @@ module.exports = class GroupValidation {
             return errors
         }
 
+        let parentGroup = null
+        if ( util.objectHas(group, 'parentId' ) ) {
+            if ( ! existing ) {
+                if ( group.parentId !== null ) {
+                    parentGroup = await this.groupDAO.getGroupById(group.parentId)
+                    if ( parentGroup === null ) {
+                        errors.push({
+                            type: 'parentId:not-found',
+                            log: `Couldn't find parent Group(${group.parentId}).`,
+                            message: `Couldn't find that parent Group.`
+                        })
+                    }
+                }
+            } else {
+                if ( group.parentId !== existing.parentId ) {
+                    errors.push({
+                        type: 'parentId:not-authorized',
+                        log: `User attempting to update Group.parentId.`,
+                        message: `You may not change the parent Group.`
+                    })
+                } else {
+                    if ( group.parentId !== null ) {
+                        // We'll need this for consistency validation later.
+                        parentGroup = await this.groupDAO.getGroupById(group.parentId)
+                    }
+                }
+            }
+        }
+
         if ( util.objectHas(group, 'fileId') ) {
             // fileId may be null.
             if ( group.fileId !== null ) {
                 const fileResults = await this.core.database.query(`
-                    SELECT id FROM files WHERE id = $1
+                    SELECT id, user_id FROM files WHERE id = $1
                 `, [ group.fileId ])
 
                 if ( fileResults.rows.length <= 0 ) {
                     errors.push({
                         type: 'fileId:not-found',
                         log: `Did not file File(${group.fileId}).`,
-                        message: `Unable to find a File for that fileId.`
+                        message: `The file you attached is missing.`
                     })
+                }
+
+                // We only want to check for ownership and usage if we know the
+                // file exists.
+                else {
+                    // Ensure the user owns the file they are attaching. We
+                    // only need to check this when they are uploading a new
+                    // file.  If the file isn't changing, then they won't
+                    // necessarily owned it (might be another admins).
+                    if ( ( existing === null || existing === undefined || existing?.fileId !== group.fileId) && fileResults.rows[0].user_id !== currentUser.id ) {
+                        errors.push({
+                            type: 'files:not-authorized',
+                            log: `User attempting to attach files they do not own to their group.`,
+                            message: `You may only attach files you have uploaded.`
+                        })
+                    }
+
+                    // We only want to check usage if we know the user owns the
+                    // file.
+                    else {
+
+                        const usage = await this.fileService.getUsageByFileId(group.fileId)
+                        if ( usage !== null ) {
+                            // If this is a new group and the file is in use, then conflict.
+                            if ( existing === null || existing === undefined ) {
+                                errors.push({
+                                    type: 'files:conflict',
+                                    log: `User attempting to attach file to group, but file is in use.`,
+                                    message: `You may not attach files that are already in use.`
+                                })
+                            }
+                            // If this is not a new group, then the usage must
+                            // be for this group (and only this group).
+                            else if ( usage.groupId !== existing.id
+                                || usage.postId !== null
+                                || usage.userId !== null
+                                || usage.linkPreviewId !== null
+                            ) {
+                                errors.push({
+                                    type: 'files:conflict',
+                                    log: `User attempting to attach file to group, but file is in use.`,
+                                    message: `You may not attach files that are already in use.`
+                                })
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+
+        // If we have invalid fields set, then we don't need to go any further.
+        if ( errors.length > 0 ) {
+            return errors
+        }
+
+        // ======== Multi-field Consistency Enforcement =======================
+
+        // We need to ensure that type is valid in the parent/child content.
+        // We'll reuse `parentGroup` set above.
+        //
+        // Type cannot be null, and we've already enforced that by the time
+        // we've gotten here.
+        if ( util.objectHas(group, 'type') ) {
+            if ( existing && existing.type !== group.type ) {
+                errors.push({
+                    type: 'type:invalid',
+                    log: `User attempting to update group type.`,
+                    message: `Group.type may not be updated.`
+                })
+            } else if ( ! existing ) {
+                // These are subgroup types that may only be set for a subgroup.
+                if (
+                    ( group.type === 'private-open' || group.type === 'hidden-open' || group.type === 'hidden-private' )
+                    && parentGroup === null
+                ) {
+                    errors.push({
+                        type: 'type:invalid',
+                        log: `User attempting to create a subgroup without a parent.`,
+                        message: `You must include Group.parentId to create a subgroup.`
+                    })
+                }
+
+                if ( parentGroup !== null ) {
+
+                    if ( parentGroup.type === 'open' ) {
+                        const validChildTypes = [ 'open', 'private', 'hidden' ]
+
+                        if ( ! validChildTypes.includes(group.type) ) {
+                            errors.push({
+                                type: 'type:invalid',
+                                log: `User attempting to create a subgroup of an open group with invalid type '${group.type}'.`,
+                                message: `Valid types for 'open' groups are ${validChildTypes.join(',')}.`
+                            })
+                        }
+                    }
+
+                    else if ( parentGroup.type.startsWith('private') ) {
+                        const validChildTypes = [ 'private-open', 'private', 'hidden' ]
+
+                        if ( ! validChildTypes.includes(group.type) ) {
+                            errors.push({
+                                type: 'type:invalid',
+                                log: `User attempting to create a subgroup of a '${parentGroup.type}' group with invalid type '${group.type}'.`,
+                                message: `Valid types for '${parentGroup.type}' groups are ${validChildTypes.join(',')}.`
+                            })
+                        }
+                    }
+
+                    else if ( parentGroup.type.startsWith('hidden') ) {
+                        const validChildTypes = [ 'hidden-open', 'hidden-private', 'hidden' ]
+
+                        if ( ! validChildTypes.includes(group.type) ) {
+                            errors.push({
+                                type: 'type:invalid',
+                                log: `User attempting to create a subgroup of a '${parentGroup.type}' group with invalid type '${group.type}'.`,
+                                message: `Valid types for '${parentGroup.type}' groups are ${validChildTypes.join(',')}.`
+                            })
+                        }
+                    }
                 }
             }
         }

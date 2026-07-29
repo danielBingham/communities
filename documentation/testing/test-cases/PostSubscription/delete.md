@@ -2,32 +2,66 @@
 
 Cases covering unsubscribing from posts.
 
-### Pre-requisites
+### Smoke Test
+
+#### Pre-requisites
+
+- [ ] User1 has been created.
+- [ ] User2 has been created and is friends with User1.
+
+#### Cases
+
+- [ ] As a user, I stop being notified when I unsubscribe from a post I created.
+    - As User1:
+        - Create a post.
+        - Unsubscribe from the post.
+    - As User2:
+        - Comment on User1's post.
+    - As User1:
+        - **Confirm not notified.**
+
+### Manual Regression
+
+#### Pre-requisites
 
 - [ ] User1 has been created.
 - [ ] User2 has been created and is friends with User1.
 - [ ] User3 has been created and is friends with User2, but not User1.
 
-### Cases
+#### Cases
 
-- [ ] When a user unsubscribes from a post they created, they should no longer be notified of comments. 
-    1. As User1, create a post.
-        1. Unsubscribe from post. 
-    2. As User2, comment on User1's post.
-    3. As User1, confirm not notified.
+- [ ] As a user, I stop being notified when I unsubscribe from a post I commented on.
+    - As User1:
+        - Create a post.
+    - As User2:
+        - Comment on User1's post.
+        - Unsubscribe from User1's post.
+    - As User1:
+        - Comment on your own post.
+    - As User2:
+        - **Confirm not notified.**
 
-- [ ] When a user unsubscribes from a post they commented on, they should no longer be notified of comments. 
-    1. As User1, create a post.
-    2. As User2, comment on User1's post.
-        1. Unsubscribe from User1's post. 
-    3. As User1, comment on User1's post.
-    4. As User2, confirm not notified.
+- [ ] As a user, I stop being notified when I unsubscribe from a post I subscribed to.
+    - As User1:
+        - Create a public post.
+    - As User3:
+        - Subscribe to User1's post.
+    - As User2:
+        - Comment on User1's post.
+    - As User3:
+        - **Confirm notification received.**
+        - Unsubscribe from User1's post.
+    - As User2:
+        - Comment on User1's post.
+    - As User3:
+        - **Confirm no notification.**
 
-- [ ] When a user unsubscribes from a post they subscribed to, they should not longer be notified of comments. 
-    1. As User1, create a public post.
-    2. As User3, subscribe to User1's post.
-    3. As User2, comment on User1's post.
-    4. As User3, confirm notification.
-        1. Unsubscribe from User1's post.
-    5. As User2 comment on User1's post.
-    6. As User3, confirm no notification.
+### Full Regression
+
+#### Pre-requisites
+
+None.
+
+The post subscription endpoints are not yet covered by the Integration suite.
+All subscription deletion cases are defined in the Smoke Test and Manual
+Regression sections above.

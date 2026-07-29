@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -26,60 +26,60 @@ const SCHEMA = {
         table: 'group_moderation',
         fields: {
             'id': {
-                insert: 'primary',
-                update: 'primary',
-                select: 'always',
+                insert: DAO.INSERT.PRIMARY,
+                update: DAO.UPDATE.PRIMARY,
+                select: DAO.SELECT.ALWAYS,
                 key: 'id'
             },
             'user_id': {
-                insert: 'require',
-                update: 'allow',
-                select: 'always',
+                insert: DAO.INSERT.REQUIRE,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.REQUEST,
                 key: 'userId'
             },
             'group_id': {
-                insert: 'require',
-                update: 'allow',
-                select: 'always',
+                insert: DAO.INSERT.REQUIRE,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.ALWAYS,
                 key: 'groupId'
             },
             'status': {
-                insert: 'require',
-                update: 'allow',
-                select: 'always',
+                insert: DAO.INSERT.REQUIRE,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.ALWAYS,
                 key: 'status'
             },
             'reason': {
-                insert: 'allow',
-                update: 'allow',
-                select: 'always',
+                insert: DAO.INSERT.ALLOW,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.ALWAYS,
                 key: 'reason'
             },
             'post_id': {
-                insert: 'allow',
-                update: 'allow',
-                select: 'always',
+                insert: DAO.INSERT.ALLOW,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.ALWAYS,
                 key: 'postId'
             },
             'post_comment_id': {
-                insert: 'allow',
-                update: 'allow',
-                select: 'always',
+                insert: DAO.INSERT.ALLOW,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.ALWAYS,
                 key: 'postCommentId'
             },
             'created_date': {
-                insert: 'override',
+                insert: DAO.INSERT.OVERRIDE,
                 insertOverride: 'now()',
-                update: 'denied',
-                select: 'always',
+                update: DAO.UPDATE.DENY,
+                select: DAO.SELECT.ALWAYS,
                 key: 'createdDate'
             },
             'updated_date': {
-                insert: 'override',
+                insert: DAO.INSERT.OVERRIDE,
                 insertOverride: 'now()',
-                update: 'override',
+                update: DAO.UPDATE.OVERRIDE,
                 updateOverride: 'now()',
-                select: 'always',
+                select: DAO.SELECT.ALWAYS,
                 key: 'updatedDate'
             },
         }
@@ -96,8 +96,8 @@ module.exports = class GroupModerationDAO extends DAO {
         this.entityMaps = SCHEMA
     }
 
-    getGroupModerationSelectionString() {
-        return this.getSelectionString('GroupModeration')
+    getGroupModerationSelectionString(fields) {
+        return this.getSelectionString('GroupModeration', fields)
     }
 
     hydrateGroupModeration(row) {
@@ -164,11 +164,12 @@ module.exports = class GroupModerationDAO extends DAO {
         let params = query.params ? [ ...query.params ] : []
         let page  = query.page ? query.page : 1
         let order = query.order ? `${query.order}` : `group_moderation.created_date ASC`
+        const fields = query.fields ? query.fields : []
 
         let paging = ''
         if ( 'page' in query && query.page !== undefined && query.page !== null) {
-            const limit = query.perPage ? query.perPage : PAGE_SIZE 
-            const offset = limit * (page-1) 
+            const limit = query.perPage ? query.perPage : PAGE_SIZE
+            const offset = limit * (page-1)
 
             paging = `
                 LIMIT ${limit}
@@ -178,7 +179,7 @@ module.exports = class GroupModerationDAO extends DAO {
 
         const sql = `
             SELECT
-                ${this.getGroupModerationSelectionString()}
+                ${this.getGroupModerationSelectionString(fields)}
             FROM group_moderation
             ${where}
             ORDER BY ${order}
@@ -203,9 +204,9 @@ module.exports = class GroupModerationDAO extends DAO {
         let page = query.page ? query.page : 1
 
         const results = await this.core.database.query(`
-                SELECT 
+                SELECT
                     COUNT(*)
-                FROM group_moderation 
+                FROM group_moderation
                 ${where}
         `, params)
 
@@ -215,7 +216,7 @@ module.exports = class GroupModerationDAO extends DAO {
             count: count,
             page: page,
             pageSize: pageSize,
-            numberOfPages: Math.floor(count / pageSize) + ( (count % pageSize) > 0 ? 1 : 0) 
+            numberOfPages: Math.floor(count / pageSize) + ( (count % pageSize) > 0 ? 1 : 0)
         }
     }
 

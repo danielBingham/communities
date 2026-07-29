@@ -25,7 +25,7 @@ export const useVersion = function() {
         const url = new URL('/dist/dist.zip', host).href
         const bundle = await CapacitorUpdater.download({
             version: serverVersion,
-            url: url 
+            url: url
         })
 
         logger.debug(`=== useVersion:: updateMobile(): Download complete.  Setting bundle.`)
@@ -39,7 +39,7 @@ export const useVersion = function() {
     useEffect(() => {
         logger.debug(`=== useVersion:: useEffect(${serverVersion}, ${clientVersion}).`)
         if ( clientVersion !== serverVersion) {
-            logger.debug(`=== useVersion:: Upgrade required.`)
+            logger.info(`=== useVersion:: ClientVersion(${clientVersion}) !== ServerVersion(${serverVersion})... Upgrade required.`)
             if ( Capacitor.getPlatform() === 'web' ) {
                 logger.debug(`=== useVersion:: Upgrading web.`)
                 window.location.reload(true)

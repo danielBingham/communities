@@ -8,9 +8,16 @@ const package = require('./package.json')
 
 let host = "https://communities.social"
 if ( process.env.NODE_ENV === 'development') {
-    host = 'https://localhost:3000' 
+    host = 'https://localhost:3000'
 } else if ( process.env.NODE_ENV === 'staging' ) {
     host = 'https://staging.communities.social'
+}
+
+let wsHost = "wss://communities.social"
+if ( process.env.NODE_ENV === 'development') {
+    wsHost = 'wss://localhost:3000'
+} else if ( process.env.NODE_ENV === 'staging' ) {
+    wsHost = 'wss://staging.communities.social'
 }
 
 let api = '/api/0.0.0'
@@ -86,9 +93,27 @@ module.exports = {
                 "communities-host": host,
                 "communities-api": api,
                 "communities-environment": process.env.NODE_ENV,
-                "communities-version": package.version
+                "communities-version": package.version,
+                "Content-Security-Policy": {
+                    "http-equiv": "Content-Security-Policy",
+                    content: `
+                      default-src 'self';
+                      script-src 'self';
+                      script-src-attr 'none';
+                      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+                      font-src 'self' https://fonts.gstatic.com data:;
+                      img-src 'self' data: blob: https:;
+                      media-src 'self' blob: https:;
+                      connect-src 'self' ${host} ${wsHost} https://*.ingest.us.sentry.io https://*.sentry.io;
+                      frame-src https://www.youtube.com;
+                      object-src 'none';
+                      base-uri 'self';
+                      form-action 'self';
+                      frame-ancestors 'none';
+                    `
+                }
             }
-        }), 
+        }),
         sentryWebpackPlugin({
             authToken: process.env.SENTRY_AUTH_TOKEN,
             org: "communities",

@@ -25,10 +25,6 @@ const LeaveGroup = function({ groupId }) {
         return null
     }
 
-    if ( currentMember.status == 'pending-requested' ) {
-        
-    }
-
     return (
         <span>
             { currentMember.status == 'member' &&  <Button onClick={() => leaveGroup()}><ArrowRightStartOnRectangleIcon /> <span>Leave</span></Button>    }

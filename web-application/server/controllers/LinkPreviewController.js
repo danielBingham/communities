@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -55,29 +55,6 @@ module.exports = class LinkPreviewController {
         return query
     }
 
-    async getLinkPreviews(request, response) {
-        const currentUser = request.session.user
-
-        if ( ! currentUser ) {
-            throw new ControllerError(401, 'not-authenticated',
-                `User must be authenticated to retrieve link previews.`,
-                `You must be authenticated to retrieve link previews.`)
-        }
-
-        const query = await this.createQuery(request)
-
-        const meta = await this.linkPreviewDAO.getLinkPreviewMeta(query)
-
-        const results = await this.linkPreviewDAO.selectLinkPreviews(query)
-
-        response.status(200).json({
-            dictionary: results.dictionary,
-            list: results.list,
-            meta: meta,
-            relations: await this.getRelations(results)
-        })
-    }
-
     async postLinkPreviews(request, response) {
         const currentUser = request.session.user
 
@@ -94,8 +71,8 @@ module.exports = class LinkPreviewController {
         if ( existing === null ) {
             let linkPreview = null
             try {
-                // If we haven't fetched this LinkPreview, then fetch and validate it. 
-                linkPreview = cleaning.LinkPreview.clean(await this.linkPreviewService.getPreview(url, request.headers))
+                // If we haven't fetched this LinkPreview, then fetch and validate it.
+                linkPreview = cleaning.LinkPreview.clean(await this.linkPreviewService.getPreview(url))
             } catch (error ) {
                 if ( 'type' in error && error.type === 'not-found' ) {
                     throw new ControllerError(404, 'not-found',
@@ -108,7 +85,7 @@ module.exports = class LinkPreviewController {
                 } else {
                     throw new ControllerError(404, 'not-found',
                         error.message,
-                        `We were not able to scrape that site to generate a preivew.`)
+                        `We were not able to scrape that site to generate a preview.`)
                 }
             }
 
@@ -132,7 +109,7 @@ module.exports = class LinkPreviewController {
         if ( results.list.length <= 0 ) {
             throw new ControllerError(500, 'server-error',
                 `LinkPreview for ${url} missing after insert.`,
-                `We created a LinkPreview for ${url} but couldn't find it after it was created. 
+                `We created a LinkPreview for ${url} but couldn't find it after it was created.
                 This is a bug.  Please report it.`)
         }
 
@@ -141,7 +118,7 @@ module.exports = class LinkPreviewController {
 
         response.status(200).json({
             entity: entity,
-            relations: relations 
+            relations: relations
         })
     }
 
@@ -161,7 +138,7 @@ module.exports = class LinkPreviewController {
             params: [ id ]
         })
 
-        if ( results.list.length < 0 ) {
+        if ( results.list.length <= 0 ) {
             throw new ControllerError(404, 'not-found',
                 `LinkPreview(${id}) not found.`,
                 `LinkPreview(${id}) either doesn't exist or you don't have permision to view it.`)

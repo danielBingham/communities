@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -18,25 +18,28 @@
  *
  ******************************************************************************/
 
-const { 
-    UserErrors, 
+const {
+    UserErrors,
 
     FileDAO,
-    GroupDAO, 
-    GroupMemberDAO, 
+    GroupDAO,
+    GroupMemberDAO,
     GroupSubscriptionDAO,
     PostSubscriptionDAO,
-    UserDAO,  
+    UserDAO,
 
     GroupService,
     GroupMemberService,
-    NotificationService, 
+    NotificationService,
     PermissionService,
     ValidationService
 }  = require('@communities/backend')
 
 const BaseController = require('./BaseController')
 const ControllerError = require('../errors/ControllerError')
+const NotAuthenticatedError = require('../errors/NotAuthenticatedError')
+const NotAuthorizedError = require('../errors/NotAuthorizedError')
+const NotFoundError = require('../errors/NotFoundError')
 
 module.exports = class GroupMemberController extends BaseController {
 
@@ -116,10 +119,11 @@ module.exports = class GroupMemberController extends BaseController {
         }
 
         const canModerateGroup = await this.permissionService.can(currentUser, 'moderate', 'Group', { group: context.group, groupMember: context.member })
+        //const canModerateSite = await this.permissionService.can(currentUser, 'moderate', 'Site')
 
         // If they are a moderator or admin, they can view all group members,
         // including ones who are still pending.
-        if ( canModerateGroup ) {
+        if ( canModerateGroup === true) {
 
             // If they are querying for ancestor memberships, then they can only see their own.
             if ( 'isAncestorMemberFor' in urlQuery ) {
@@ -135,7 +139,7 @@ module.exports = class GroupMemberController extends BaseController {
                 query.params.push(context.group.id)
                 query.where = `group_members.group_id = $${query.params.length}`
             }
-        } 
+        }
 
         // Otherwise they can only view confirmed group members and their own
         // membership (pending or not).
@@ -167,9 +171,9 @@ module.exports = class GroupMemberController extends BaseController {
                 query.params.push(currentUser.id)
                 const currentUserParam = query.params.length
 
-                query.where = `group_members.group_id = $${groupParam} 
+                query.where = `group_members.group_id = $${groupParam}
                     AND (
-                        group_members.status = 'member' 
+                        group_members.status = 'member'
                         OR (group_members.user_id = $${currentUserParam} AND group_members.user_id != ALL($${blockParam}::uuid[]))
                     )`
             }
@@ -192,7 +196,7 @@ module.exports = class GroupMemberController extends BaseController {
                 query.where += ` AND group_members.role = ANY($${query.params.length}::group_member_role[])`
             } else {
                 query.params.push(urlQuery.role)
-                query.where += ` AND group_members.role = $${query.params.length})`
+                query.where += ` AND group_members.role = $${query.params.length}`
             }
         }
 
@@ -200,7 +204,7 @@ module.exports = class GroupMemberController extends BaseController {
             const userQuery = urlQuery.user
             if ( 'name' in userQuery ) {
                 const results = await this.core.database.query(`
-                    SELECT group_members.id 
+                    SELECT group_members.id
                         FROM group_members
                             LEFT OUTER JOIN users ON group_members.user_id = users.id
                         WHERE group_members.group_id = $1 AND SIMILARITY(users.name, $2) > 0.05
@@ -215,10 +219,10 @@ module.exports = class GroupMemberController extends BaseController {
 
             if ( 'status' in userQuery ) {
                 const results = await this.core.database.query(`
-                    SELECT group_members.id 
+                    SELECT group_members.id
                         FROM group_members
                             LEFT OUTER JOIN users ON group_members.user_id = users.id
-                        WHERE group_members.group_id = $1 AND users.status = $2 
+                        WHERE group_members.group_id = $1 AND users.status = $2
                 `, [ context.group.id, userQuery.status])
 
                 query.params.push(results.rows.map((r) => r.id))
@@ -284,12 +288,12 @@ module.exports = class GroupMemberController extends BaseController {
             })
             return
         }
-        
+
         const results = await this.groupMemberDAO.selectGroupMembers(query)
         const meta = await this.groupMemberDAO.getGroupMemberPageMeta(query)
         const relations = await this.getRelations(currentUser, results, [], { group: group, member: member })
 
-        response.status(200).json({ 
+        response.status(200).json({
             dictionary: results.dictionary,
             list: results.list,
             meta: meta,
@@ -323,7 +327,7 @@ module.exports = class GroupMemberController extends BaseController {
                 const [ entity, errors ] = await groupMemberService.inviteGroupMember(currentUser, groupId, member)
                 if ( errors.hasErrors()) {
                     const errorResult = errors.getErrors()
-                    return response.status(errors.status).json(errorResult) 
+                    return response.status(errors.status).json(errorResult)
                 }
                 members.push(entity)
             }
@@ -364,7 +368,7 @@ module.exports = class GroupMemberController extends BaseController {
                 `You must be authenticated to retrieve posts.`)
         }
 
-        const groupId = request.params.groupId 
+        const groupId = request.params.groupId
         const memberId = request.params.userId
 
         const existing = await this.groupDAO.getGroupById(groupId)
@@ -396,7 +400,7 @@ module.exports = class GroupMemberController extends BaseController {
 
         const entity = results.dictionary[results.list[0]]
 
-        const canViewGroupMember = await this.permissionService.can(currentUser, 'view', 'GroupMember', 
+        const canViewGroupMember = await this.permissionService.can(currentUser, 'view', 'GroupMember',
             { group: existing, userMember: userMember, groupMember: entity })
         if ( ! canViewGroupMember ) {
             throw new ControllerError(404, 'not-found',
@@ -455,7 +459,7 @@ module.exports = class GroupMemberController extends BaseController {
                 `You can't PATCH a GroupMember that doesn't exist.`)
         }
 
-        const currentMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(groupId, currentUser.id) 
+        const currentMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(groupId, currentUser.id)
 
         const canViewGroup = await this.permissionService.can(currentUser, 'view', 'Group', { group: group, userMember: currentMember})
         if ( canViewGroup !== true ) {
@@ -467,8 +471,8 @@ module.exports = class GroupMemberController extends BaseController {
         // We need the primary field to update.
         member.id = existing.id
 
-        const canUpdateGroupMember = await this.permissionService.can(currentUser, 'update', 'GroupMember', 
-            { group: group, userMember: currentMember, groupMember: existing }) 
+        const canUpdateGroupMember = await this.permissionService.can(currentUser, 'update', 'GroupMember',
+            { group: group, userMember: currentMember, groupMember: existing })
         if ( canUpdateGroupMember !== true ) {
             throw new ControllerError(403, 'not-authorized',
                 `User attempting to update a GroupMember without authorization.`,
@@ -519,8 +523,8 @@ module.exports = class GroupMemberController extends BaseController {
         const relations = await this.getRelations(currentUser, results)
 
         await this.notificationService.sendNotifications(
-            currentUser, 
-            'GroupMember:update', 
+            currentUser,
+            'GroupMember:update',
             {
                 group: group,
                 previousStatus: existing.status,
@@ -539,9 +543,7 @@ module.exports = class GroupMemberController extends BaseController {
         const currentUser = request.session.user
 
         if ( ! currentUser ) {
-            throw new ControllerError(401, 'not-authenticated',
-                `User must be authenticated.`,
-                `You must must be authenticated.`)
+            throw new NotAuthenticatedError('Unauthenticated User attempting to Delete GroupMember.')
         }
 
         const groupId = request.params.groupId
@@ -550,45 +552,35 @@ module.exports = class GroupMemberController extends BaseController {
         // Target group must exist.
         const group = await this.groupDAO.getGroupById(groupId)
         if ( ! group ) {
-            throw new ControllerError(404, 'not-found',
-                `User(${currentUser.id}) attempting to delete a member to a group that doesn't exist.`,
-                `Either that group doesn't exist or you don't have permission to see it.`)
+            throw new NotFoundError(`User(${currentUser.id}) attempting to delete a member to a group that doesn't exist.`)
         }
 
         const existing = await this.groupMemberDAO.getGroupMemberByGroupAndUser(groupId, memberId)
         if ( ! existing ) {
-            throw new ControllerError(404, 'not-found',
-                `User(${currentUser.id}) attempting to patch a non-existent GroupMember(${memberId}) of Group(${groupId}).`,
-                `You can't PATCH a GroupMember that doesn't exist.`)
+            throw new NotFoundError(`User(${currentUser.id}) attempting to delete a member to a group member that doesn't exist.`)
         }
 
-        const userMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(groupId, currentUser.id) 
+        const userMember = await this.groupMemberDAO.getGroupMemberByGroupAndUser(groupId, currentUser.id)
 
         const canViewGroup = await this.permissionService.can(currentUser, 'view', 'Group', { group: group, userMember: userMember })
         if ( canViewGroup !== true ) {
-            throw new ControllerError(404, 'not-found',
-                `User(${currentUser.id}) attempting to remove a member to a Group(${groupId}) they can't view.`,
-                `Either that group doesn't exist or you don't have permission to see it.`)
+            throw new NotFoundError(`User(${currentUser.id}) attempting to remove a member to a Group(${groupId}) they can't view.`)
         }
 
         const canDeleteGroupMember = await this.permissionService.can(currentUser, 'delete', 'GroupMember', { group: group, userMember: userMember, groupMember: existing })
         // Current User must the member being removed or be an admin or a moderator.
         if ( canDeleteGroupMember !== true ) {
-            throw new ControllerError(403, 'not-authorized',
-                `User attempting to remove a member from a Group(${groupId}) without authorization.`,
-                `You're not authorized to remove that GroupMember.`)
+            throw new NotAuthorizedError(`User attempting to remove a member from a Group(${groupId}) without authorization.`)
         }
 
         if ( existing.role === 'admin' ) {
             // If this is the last admin, don't let them leave until they promote a new one.
             const groupAdmins = await this.core.database.query(`
-                SELECT user_id FROM group_members WHERE group_id = $1 AND role = 'admin'
+                SELECT user_id FROM group_members WHERE group_id = $1 AND role = 'admin' AND status = 'member'
             `, [ groupId ])
 
             if ( groupAdmins.rows.length <= 1 ) {
-                throw new ControllerError(403, 'not-authorized',
-                    `User(${currentUser.id}) aattempting to remove the last admin from Group(${groupId}).`,
-                    `You cannot remove the last admin from a group.`)
+                throw new NotAuthorizedError(`User(${currentUser.id}) attempting to remove the last admin from Group(${groupId}).`, `You may not remove the last admin from a group.`)
             }
         }
 
@@ -602,7 +594,7 @@ module.exports = class GroupMemberController extends BaseController {
 
         // Delete their GroupSubscription.
         await this.core.database.query(
-            `DELETE FROM group_subscriptions WHERE group_id = $1 AND user_id = $2`, 
+            `DELETE FROM group_subscriptions WHERE group_id = $1 AND user_id = $2`,
             [ groupId, memberId ]
         )
 
@@ -615,8 +607,8 @@ module.exports = class GroupMemberController extends BaseController {
             const subscriptionResults = await this.core.database.query(`
                 SELECT post_subscriptions.id FROM post_subscriptions
                     LEFT OUTER JOIN posts ON post_subscriptions.post_id = posts.id
-                    WHERE posts.group_id = $1
-            `, [ group.id ])
+                    WHERE posts.group_id = $1 and post_subscriptions.user_id = $2
+            `, [ group.id, memberId ])
 
             const subscriptionIds = subscriptionResults.rows.map((r) => r.id)
 

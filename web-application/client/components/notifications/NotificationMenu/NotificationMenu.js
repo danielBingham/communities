@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -33,10 +33,10 @@ import { useEventSubscription } from '/lib/hooks/useEventSubscription'
 import { getNotifications, patchNotifications } from '/state/notifications'
 import { patchDevice } from '/state/authentication'
 
-import { 
-    DropdownMenu, 
-    DropdownMenuHeader, 
-    DropdownMenuTrigger, 
+import {
+    DropdownMenu,
+    DropdownMenuHeader,
+    DropdownMenuTrigger,
     DropdownMenuBody,
     DropdownMenuModal
 } from '/components/ui/DropdownMenu'
@@ -54,25 +54,25 @@ const NotificationMenu = function({ }) {
     const [patchDeviceRequest, makePatchDeviceRequest] = useRequest()
 
     const emptyList = []
-    const notifications = useSelector((state) => 'NotificationMenu' in state.notifications.queries ? state.notifications.queries['NotificationMenu'].list : emptyList) 
+    const notifications = useSelector((state) => 'NotificationMenu' in state.notifications.queries ? state.notifications.queries['NotificationMenu'].list : emptyList)
     const notificationDictionary = useSelector((state) => state.notifications.dictionary)
     const unreadNotifications = notifications.filter((id) => ! notificationDictionary[id].isRead)
 
     useEventSubscription('Notification-create', 'Notification', 'create')
 
     const markAllRead = function(event) {
-        try { 
+        try {
             event.preventDefault()
-            
+
             const notifications = []
             for(const id of unreadNotifications) {
                 notifications.push({
-                    ...notificationDictionary[id],
+                    id: id,
                     isRead: true
                 })
             }
 
-            makeMarkReadRequest(patchNotifications(notifications))  
+            makeMarkReadRequest(patchNotifications(notifications))
         } catch (error) {
             logger.error(`Failed to mark all notifications as read: `, error)
         }
@@ -82,7 +82,7 @@ const NotificationMenu = function({ }) {
      * Determine if we need to request permission to send Desktop notifications.
      */
     const needToRequestDesktopNotificationPermissions = function() {
-        try { 
+        try {
             if ( device === null || device === undefined ) {
                 return false
             }
@@ -110,7 +110,7 @@ const NotificationMenu = function({ }) {
             // somehow we lost permission on the frontend.  We need to request
             // permission again.
             if ( "notificationPermission" in device && device.notificationPermission !== 'denied' && Notification.permission !== 'granted' ) {
-                return true 
+                return true
             } else if ( "notificationPermission" in device && device.notificationPermission === 'denied' ) {
                 return false
             }
@@ -130,7 +130,7 @@ const NotificationMenu = function({ }) {
      * Request permission to send Desktop notifications.
      */
     const requestDesktopNotificationPermissions = function(event) {
-        try { 
+        try {
             // The Notification api in this case is only relevant to desktop
             // notifications.  We should only be requesting permissions when
             // we're on web.
@@ -141,7 +141,7 @@ const NotificationMenu = function({ }) {
             // On macOs devices in Lockdown mode, the Notification Api will be
             // missing.
             if ( ! ( "Notification" in window ) ) {
-                return 
+                return
             }
 
             Notification.requestPermission().then((permission) => {
@@ -152,7 +152,7 @@ const NotificationMenu = function({ }) {
         } catch (error) {
             logger.error(`Failed to request permission to send desktop notifications: `, error)
         }
-            
+
     }
 
     useEffect(function() {
@@ -168,14 +168,14 @@ const NotificationMenu = function({ }) {
         )
     }
     if ( notificationViews.length == 0 ) {
-        notificationViews =  ( 
+        notificationViews =  (
             <div className="empty-list">
                 No notifications.
             </div>
         )
     }
 
-    let needToRequestPermission = needToRequestDesktopNotificationPermissions() 
+    let needToRequestPermission = needToRequestDesktopNotificationPermissions()
     const unread = unreadNotifications.length
     return (
         <DropdownMenu className="notification-menu" autoClose={true}>

@@ -1,16 +1,38 @@
-/* Peer Review Schema file */
+/******************************************************************************
+ *
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
 
-/* Allows us to do fuzzy finding. */
-CREATE EXTENSION pg_trgm;
-CREATE EXTENSION postgis;
+/****************************************************************************
+ *      DATABASE SCHEMA
+ *
+ * This is the database schema file that defines the current state of the
+ * database (with all currently defined migrations run).
+ *
+ ****************************************************************************/
 
 /*****************************************************************************
  * Feature Flags
  *****************************************************************************/
 
-/** 
+/**
  * NOTE: When adding a new status, make sure to update it in
- * FeatureController::patchFeature() 
+ * FeatureController::patchFeature()
  */
 CREATE TYPE feature_status AS ENUM(
     'created', /* the feature's row has been inserted into the databse table */
@@ -20,8 +42,8 @@ CREATE TYPE feature_status AS ENUM(
     'migrated', /* the feature's data has been successfully migrated */
     'enabled',
     'disabled',
-    'rolling-back', 
-    'rolled-back', 
+    'rolling-back',
+    'rolled-back',
     'uninitializing',
     'uninitialized'
 );
@@ -35,13 +57,25 @@ CREATE TABLE features (
 /**
  * Insert those features that have already been migrated in the schema.
  */
-/*INSERT INTO features (name, status, created_date, updated_date)
-    VALUES 
-        ('80-group-moderators-can-ban-users', 'enabled', now(), now());*/
+INSERT INTO features (name, status, created_date, updated_date)
+    VALUES
+        ('issue-198-auto-generate-link-previews', 'enabled', now(), now()),
+        ('issue-165-subgroups', 'enabled', now(), now()),
+        ('issue-330-group-short-description-and-rules', 'enabled', now(), now()),
+        ('issue-252-group-subscriptions', 'enabled', now(), now()),
+        ('feat-408-flag-profiles-and-groups', 'enabled', now(), now()),
+        ('fix-486-unique-constraint', 'enabled', now(), now()),
+        ('feat-484-find-active-groups', 'enabled', now(), now()),
+        ('feat-491-mutual-friends', 'enabled', now(), now()),
+        ('fix-495-slow-friends-list', 'enabled', now(), now()),
+        ('feat-377-improved-file-pipelines', 'enabled', now(), now()),
+        ('feat-61-multifactor-authentication', 'enabled', now(), now()),
+        ('video-uploads', 'enabled', now(), now());
+
 
 
 /******************************************************************************
- * Users 
+ * Users
  *****************************************************************************/
 
 CREATE TYPE user_privacy AS ENUM('me', 'friends', 'friends-of-friends', 'public');
@@ -55,9 +89,9 @@ CREATE TABLE users (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 
     name text DEFAULT '',
-    username text DEFAULT '',
+    username text DEFAULT '' UNIQUE,
 
-    email text NOT NULL,
+    email text NOT NULL UNIQUE,
     password text,
     birthdate text DEFAULT '',
 
@@ -71,11 +105,11 @@ CREATE TABLE users (
 
     invitations int DEFAULT 50, /* Deprecated */
 
-    settings jsonb DEFAULT '{}'::jsonb,
-    notices jsonb DEFAULT '{}'::jsonb,
+    settings jsonb NOT NULL DEFAULT '{}'::jsonb,
+    notices jsonb NOT NULL DEFAULT '{}'::jsonb,
 
     site_moderation_id uuid DEFAULT NULL, /* REFERENCES site_moderation (id) ON DELETE SET NULL -- defined below*/
-    
+
     privacy__view_friends user_privacy DEFAULT 'friends',
     privacy__view_mutual_friends user_privacy DEFAULT 'friends-of-friends',
 
@@ -88,19 +122,11 @@ CREATE TABLE users (
     authentication__multifactor_last_attempt_date timestamptz,
 
     created_date timestamptz,
-    updated_date timestamptz 
+    updated_date timestamptz
 );
 CREATE INDEX users__name ON users (name);
 CREATE INDEX users_username ON users (username);
 CREATE INDEX users__name_trgm ON users USING GIN (name gin_trgm_ops);
-
-/**
- * Insert the admin user. Initial password is "PasswordPassword".  If deploying
- * a non-local environment, it will be changed as soon as the environment is
- * finished creating.
- */
-INSERT INTO users (name, username, email, password, status, permissions, site_role, last_authentication_attempt_date, created_date, updated_date)
-    VALUES ('Administrator', 'administrator', 'contact@communities.social', '$2b$10$ywAqKPvFH51jeILdx.Piy.mm5ci37vMpy7G4lEBWObfIzOif5ZgzK', 'confirmed', 'superadmin', 'superadmin', now(), now(), now());
 
 CREATE TABLE user_recovery_codes (
     code text,
@@ -133,12 +159,12 @@ CREATE INDEX mutual_relationships__target_id ON mutual_relationships (target_id)
 CREATE INDEX mutual_relationships__mutual_id ON mutual_relationships (mutual_id);
 
 /******************************************************************************
- * Notifications 
+ * Notifications
  *****************************************************************************/
 
 CREATE TABLE notifications (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id uuid REFERENCES users(id) ON DELETE CASCADE NOT NULL, 
+    user_id uuid REFERENCES users(id) ON DELETE CASCADE NOT NULL,
 
     type text,
     description text,
@@ -156,7 +182,7 @@ CREATE INDEX notifications__user_id ON notifications (user_id);
 
 CREATE TABLE blocklist (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id uuid REFERENCES users(id) ON DELETE SET NULL DEFAULT NULL, 
+    user_id uuid REFERENCES users(id) ON DELETE SET NULL DEFAULT NULL,
     domain text NOT NULL,
     notes text DEFAULT '',
     created_date timestamptz,
@@ -188,7 +214,7 @@ CREATE INDEX tokens__creator_id ON tokens (creator_id);
 CREATE INDEX tokens__token ON tokens (token);
 
 /******************************************************************************
- * Files 
+ * Files
  *****************************************************************************/
 
 CREATE TYPE file_state as ENUM('pending', 'processing', 'error', 'ready');
@@ -241,7 +267,7 @@ CREATE TABLE link_previews (
 CREATE INDEX link_previews__url ON link_previews (url);
 
 /******************************************************************************
- * Tags 
+ * Tags
  *****************************************************************************/
 
 CREATE TABLE tags (
@@ -264,7 +290,7 @@ CREATE TYPE group_post_permissions as ENUM('anyone', 'members', 'approval', 'res
 CREATE TABLE groups (
     id uuid primary key DEFAULT gen_random_uuid(),
     post_permissions group_post_permissions DEFAULT 'members',
-    type group_type,
+    type group_type DEFAULT 'hidden',
     title text,
     slug text,
     short_description text,
@@ -291,7 +317,7 @@ CREATE INDEX groups_title ON groups (title);
 CREATE INDEX groups_title_trgm ON groups USING GIN (title gin_trgm_ops);
 
 CREATE TYPE group_member_status AS ENUM('pending-invited', 'pending-requested', 'member', 'banned');
-CREATE TYPE group_member_role AS ENUM('admin', 'moderator', 'member'); 
+CREATE TYPE group_member_role AS ENUM('admin', 'moderator', 'member');
 CREATE TABLE group_members (
     id uuid primary key DEFAULT gen_random_uuid(),
     group_id uuid REFERENCES groups (id) ON DELETE CASCADE NOT NULL,
@@ -299,7 +325,7 @@ CREATE TABLE group_members (
 
     status group_member_status DEFAULT 'pending-requested',
     entrance_answers jsonb DEFAULT '{}'::jsonb,
-    role group_member_role DEFAULT 'member',
+    role group_member_role, /* TODO migrate and add the default 'member' */
 
     created_date timestamptz,
     updated_date timestamptz
@@ -322,7 +348,7 @@ CREATE INDEX group_subscriptions__group_id ON group_subscriptions (group_id);
 
 
 /******************************************************************************
- * Tags 
+ * Tags
  *****************************************************************************/
 
 CREATE TYPE post_type as ENUM('feed', 'group', 'event', 'announcement', 'info');
@@ -337,7 +363,7 @@ CREATE TABLE posts (
     type post_type NOT NULL DEFAULT 'feed' ,
     visibility post_visibility NOT NULL DEFAULT 'private',
 
-    file_id uuid REFERENCES files (id) DEFAULT NULL,
+    file_id uuid REFERENCES files (id) ON DELETE SET NULL DEFAULT NULL,
     link_preview_id uuid REFERENCES link_previews (id) DEFAULT NULL,
     shared_post_id uuid REFERENCES posts (id) ON DELETE SET NULL DEFAULT NULL,
 
@@ -465,9 +491,9 @@ CREATE TABLE group_moderation (
     reason text,
 
     post_id uuid REFERENCES posts (id) ON DELETE CASCADE DEFAULT NULL ,
-    post_comment_id uuid REFERENCES post_comments (id) ON DELETE CASCADE DEFAULT NULL, 
+    post_comment_id uuid REFERENCES post_comments (id) ON DELETE CASCADE DEFAULT NULL,
 
-    created_date timestamptz, 
+    created_date timestamptz,
     updated_date timestamptz
 );
 CREATE INDEX group_moderation__user_id ON group_moderation (user_id);
@@ -509,11 +535,11 @@ CREATE TABLE site_moderation (
     reason text,
 
     post_id uuid REFERENCES posts (id) ON DELETE CASCADE DEFAULT NULL ,
-    post_comment_id uuid REFERENCES post_comments (id) ON DELETE CASCADE DEFAULT NULL, 
+    post_comment_id uuid REFERENCES post_comments (id) ON DELETE CASCADE DEFAULT NULL,
     group_id uuid REFERENCES groups (id) ON DELETE CASCADE DEFAULT NULL,
     user_profile_id uuid REFERENCES users (id) ON DELETE CASCADE DEFAULT NULL,
 
-    created_date timestamptz, 
+    created_date timestamptz,
     updated_date timestamptz
 );
 CREATE INDEX site_moderation__user_id ON site_moderation (user_id);
@@ -597,5 +623,16 @@ CREATE INDEX permissions__user_id ON permissions (user_id);
 CREATE INDEX permissions__role_id ON permissions (role_id);
 
 CREATE INDEX permissions__post_id ON permissions (post_id);
+
+/******************************************************************************
+ * Migrations: These are tables created to backup data for data migrations
+ ******************************************************************************/
+
+/* feat-61-multifactor-authentication */
+/* Backup the unhash tokens for the token hash migration */
+CREATE TABLE tokens_hash_migration (
+    id uuid PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
+    token text
+)
 
 

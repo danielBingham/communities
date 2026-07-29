@@ -25,13 +25,13 @@ describe('ValidationService.validateUser()', function() {
         postmarkClient: {
             sendEmail: jest.fn()
         },
-        features: new FeatureFlags() 
+        features: new FeatureFlags()
     }
 
     beforeEach(function() {
         core.database.query.mockReset()
         // Disable logging.
-        core.logger.level = -1 
+        core.logger.level = -1
     })
 
     it('Should return one error for each invalid field set', async function() {
@@ -113,8 +113,8 @@ describe('ValidationService.validateUser()', function() {
         it('should pass a valid email', async function() {
             const service = new ValidationService(core)
 
-            const user = { 
-                email: 'test@test.com' 
+            const user = {
+                email: 'test@test.com'
             }
 
             core.database.query.mockReturnValue(undefined)
@@ -163,8 +163,8 @@ describe('ValidationService.validateUser()', function() {
         it('should pass a valid email', async function() {
             const service = new ValidationService(core)
 
-            const user = { 
-                email: 'test@test.com' 
+            const user = {
+                email: 'test@test.com'
             }
 
             core.database.query.mockReturnValue(undefined)
@@ -236,7 +236,7 @@ describe('ValidationService.validateUser()', function() {
                 email: 'test@test.com',
                 name: 'User Name',
                 username: 'user-name',
-                password: 'passwordpassword' 
+                password: 'passwordpassword'
             }
 
             core.database.query.mockReturnValue(undefined)
@@ -265,7 +265,7 @@ describe('ValidationService.validateUser()', function() {
 
             }
 
-            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe'] 
+            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe']
 
             const errors = await service.validateUser(user, existing, 'invitation-acceptance')
 
@@ -286,7 +286,7 @@ describe('ValidationService.validateUser()', function() {
                 status: null
             }
 
-            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe'] 
+            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe']
 
             const errors = await service.validateUser(user, existing, 'invitation-acceptance')
 
@@ -296,11 +296,11 @@ describe('ValidationService.validateUser()', function() {
         it('Should require `email`, `name`, `username`, and `password`', async function() {
             const service = new ValidationService(core)
 
-            const user = { 
+            const user = {
                 id: '032563a3-1a0d-42f2-ad85-aef588b81ebe',
             }
 
-            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe'] 
+            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe']
 
             const errors = await service.validateUser(user, existing, 'invitation-acceptance')
 
@@ -318,7 +318,7 @@ describe('ValidationService.validateUser()', function() {
                 password: null
             }
 
-            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe'] 
+            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe']
 
             const errors = await service.validateUser(user, existing, 'invitation-acceptance')
 
@@ -333,10 +333,10 @@ describe('ValidationService.validateUser()', function() {
                 email: 'test@test.com',
                 name: 'User Name',
                 username: 'user-name',
-                password: 'passwordpassword' 
+                password: 'passwordpassword'
             }
 
-            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe'] 
+            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe']
 
             core.database.query.mockReturnValue(undefined)
                 .mockReturnValueOnce({ rowCount: 0, rows: []})
@@ -365,7 +365,7 @@ describe('ValidationService.validateUser()', function() {
 
             }
 
-            const existing = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a'] 
+            const existing = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
             const errors = await service.validateUser(user, existing, 'password-reset')
 
@@ -398,7 +398,7 @@ describe('ValidationService.validateUser()', function() {
 
             const user = {
                 id: '5c44ce06-1687-4709-b67e-de76c05acb6a',
-                password: 'passwordpassword' 
+                password: 'passwordpassword'
             }
 
             const existing = entities['users'].dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
@@ -419,7 +419,7 @@ describe('ValidationService.validateUser()', function() {
                 status: 'confirmed'
             }
 
-            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe'] 
+            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe']
 
             const errors = await service.validateUser(user, existing, 'authenticated-edit')
 
@@ -435,7 +435,7 @@ describe('ValidationService.validateUser()', function() {
                 status: 'confirmed'
             }
 
-            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe'] 
+            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe']
 
             const errors = await service.validateUser(user, existing, 'authenticated-edit')
 
@@ -450,7 +450,7 @@ describe('ValidationService.validateUser()', function() {
                 email: 'test@test.com'
             }
 
-            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe'] 
+            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe']
 
             core.database.query.mockReturnValue(undefined)
                 .mockReturnValueOnce({ rowCount: 0, rows: []})
@@ -468,7 +468,7 @@ describe('ValidationService.validateUser()', function() {
                 password: 'passwordpassword'
             }
 
-            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe'] 
+            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe']
 
             const errors = await service.validateUser(user, existing, 'authenticated-edit')
 
@@ -489,7 +489,7 @@ describe('ValidationService.validateUser()', function() {
                 password: 'passwordpassword'
             }
 
-            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe'] 
+            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe']
 
             core.database.query.mockReturnValue(undefined)
                 .mockReturnValueOnce({ rowCount: 0, rows: []})
@@ -509,7 +509,7 @@ describe('ValidationService.validateUser()', function() {
                 username: 'valid-username'
             }
 
-            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe'] 
+            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe']
 
             const errors = await service.validateUser(user, existing, 'admin-edit')
 
@@ -525,7 +525,7 @@ describe('ValidationService.validateUser()', function() {
                 username: 'valid-username'
             }
 
-            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe'] 
+            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe']
 
             const errors = await service.validateUser(user, existing, 'admin-edit')
 
@@ -541,7 +541,7 @@ describe('ValidationService.validateUser()', function() {
                 email: 'test@test.com'
             }
 
-            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe'] 
+            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe']
 
             core.database.query.mockReturnValue(undefined)
                 .mockReturnValueOnce({ rowCount: 0, rows: []})
@@ -559,7 +559,7 @@ describe('ValidationService.validateUser()', function() {
                 password: 'passwordpassword'
             }
 
-            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe'] 
+            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe']
 
             const errors = await service.validateUser(user, existing, 'admin-edit')
 
@@ -574,7 +574,7 @@ describe('ValidationService.validateUser()', function() {
                 status: 'banned'
             }
 
-            const existing = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a'] 
+            const existing = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
             const errors = await service.validateUser(user, existing, 'admin-edit')
 
@@ -611,7 +611,7 @@ describe('ValidationService.validateUser()', function() {
                 password: 'passwordpassword'
             }
 
-            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe'] 
+            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe']
 
             core.database.query.mockReturnValue(undefined)
                 .mockReturnValueOnce({ rowCount: 0, rows: []})
@@ -634,7 +634,7 @@ describe('ValidationService.validateUser()', function() {
                 status: 'confirmed'
             }
 
-            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe'] 
+            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe']
 
             const errors = await service.validateUser(user, existing, 'edit')
 
@@ -652,7 +652,7 @@ describe('ValidationService.validateUser()', function() {
                 status: 'status'
             }
 
-            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe'] 
+            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe']
 
             const errors = await service.validateUser(user, existing, 'edit')
 
@@ -671,7 +671,7 @@ describe('ValidationService.validateUser()', function() {
                 notices: {}
             }
 
-            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe'] 
+            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe']
 
             const errors = await service.validateUser(user, existing, 'edit')
 
@@ -683,7 +683,7 @@ describe('ValidationService.validateUser()', function() {
         it('should require email to be not `null`', async function() {
             const service = new ValidationService(core)
 
-            const user = { 
+            const user = {
                 email: null
             }
 
@@ -697,8 +697,8 @@ describe('ValidationService.validateUser()', function() {
         it('should error on a non-string email', async function() {
             const service = new ValidationService(core)
 
-            const user = { 
-                email: 1 
+            const user = {
+                email: 1
             }
 
             core.database.query.mockReturnValue(undefined)
@@ -714,8 +714,8 @@ describe('ValidationService.validateUser()', function() {
         it('should error on an invalid email', async function() {
             const service = new ValidationService(core)
 
-            const user = { 
-                email: 'set' 
+            const user = {
+                email: 'set'
             }
 
             core.database.query.mockReturnValue(undefined)
@@ -731,8 +731,8 @@ describe('ValidationService.validateUser()', function() {
         it('should error on an email conflict', async function() {
             const service = new ValidationService(core)
 
-            const user = { 
-                email: 'test@test.com' 
+            const user = {
+                email: 'test@test.com'
             }
 
             core.database.query.mockReturnValue(undefined)
@@ -748,8 +748,8 @@ describe('ValidationService.validateUser()', function() {
         it('should pass a valid email', async function() {
             const service = new ValidationService(core)
 
-            const user = { 
-                email: 'test@test.com' 
+            const user = {
+                email: 'test@test.com'
             }
 
             core.database.query.mockReturnValue(undefined)
@@ -770,7 +770,7 @@ describe('ValidationService.validateUser()', function() {
                 email: 'test@test.com',
                 name: null,
                 username: 'user-name',
-                password: 'passwordpassword' 
+                password: 'passwordpassword'
             }
 
             core.database.query.mockReturnValue(undefined)
@@ -790,7 +790,7 @@ describe('ValidationService.validateUser()', function() {
                 email: 'test@test.com',
                 name: 10,
                 username: 'user-name',
-                password: 'passwordpassword' 
+                password: 'passwordpassword'
             }
 
             core.database.query.mockReturnValue(undefined)
@@ -808,9 +808,9 @@ describe('ValidationService.validateUser()', function() {
 
             const user = {
                 email: 'test@test.com',
-                name: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 
+                name: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
                 username: 'user-name',
-                password: 'passwordpassword' 
+                password: 'passwordpassword'
             }
 
             core.database.query.mockReturnValue(undefined)
@@ -830,7 +830,7 @@ describe('ValidationService.validateUser()', function() {
                 email: 'test@test.com',
                 name: 'Valid Name',
                 username: 'user-name',
-                password: 'passwordpassword' 
+                password: 'passwordpassword'
             }
 
             core.database.query.mockReturnValue(undefined)
@@ -851,7 +851,7 @@ describe('ValidationService.validateUser()', function() {
                 email: 'test@test.com',
                 name: 'Valid Name',
                 username: null,
-                password: 'passwordpassword' 
+                password: 'passwordpassword'
             }
 
             core.database.query.mockReturnValue(undefined)
@@ -871,7 +871,7 @@ describe('ValidationService.validateUser()', function() {
                 email: 'test@test.com',
                 name: 'Valid Name',
                 username: 10,
-                password: 'passwordpassword' 
+                password: 'passwordpassword'
             }
 
             core.database.query.mockReturnValue(undefined)
@@ -889,9 +889,9 @@ describe('ValidationService.validateUser()', function() {
 
             const user = {
                 email: 'test@test.com',
-                name: 'Valid Name', 
+                name: 'Valid Name',
                 username: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-                password: 'passwordpassword' 
+                password: 'passwordpassword'
             }
 
             core.database.query.mockReturnValue(undefined)
@@ -909,9 +909,9 @@ describe('ValidationService.validateUser()', function() {
 
             const user = {
                 email: 'test@test.com',
-                name: 'Valid Name', 
+                name: 'Valid Name',
                 username: 'Invalid Username',
-                password: 'passwordpassword' 
+                password: 'passwordpassword'
             }
 
             core.database.query.mockReturnValue(undefined)
@@ -929,9 +929,9 @@ describe('ValidationService.validateUser()', function() {
 
             const user = {
                 email: 'test@test.com',
-                name: 'Valid Name', 
+                name: 'Valid Name',
                 username: 'Invalid%Username/',
-                password: 'passwordpassword' 
+                password: 'passwordpassword'
             }
 
             core.database.query.mockReturnValue(undefined)
@@ -949,9 +949,9 @@ describe('ValidationService.validateUser()', function() {
 
             const user = {
                 email: 'test@test.com',
-                name: 'Valid Name', 
+                name: 'Valid Name',
                 username: 'valid-username',
-                password: 'passwordpassword' 
+                password: 'passwordpassword'
             }
 
             core.database.query.mockReturnValue(undefined)
@@ -969,9 +969,9 @@ describe('ValidationService.validateUser()', function() {
 
             const user = {
                 email: 'test@test.com',
-                name: 'Valid Name', 
+                name: 'Valid Name',
                 username: '-invalid-username',
-                password: 'passwordpassword' 
+                password: 'passwordpassword'
             }
 
             core.database.query.mockReturnValue(undefined)
@@ -989,9 +989,9 @@ describe('ValidationService.validateUser()', function() {
 
             const user = {
                 email: 'test@test.com',
-                name: 'Valid Name', 
+                name: 'Valid Name',
                 username: '_invalid-username',
-                password: 'passwordpassword' 
+                password: 'passwordpassword'
             }
 
             core.database.query.mockReturnValue(undefined)
@@ -1009,9 +1009,9 @@ describe('ValidationService.validateUser()', function() {
 
             const user = {
                 email: 'test@test.com',
-                name: 'Valid Name', 
+                name: 'Valid Name',
                 username: '0invalid-username',
-                password: 'passwordpassword' 
+                password: 'passwordpassword'
             }
 
             core.database.query.mockReturnValue(undefined)
@@ -1029,9 +1029,9 @@ describe('ValidationService.validateUser()', function() {
 
             const user = {
                 email: 'test@test.com',
-                name: 'Valid Name', 
+                name: 'Valid Name',
                 username: 'valid_user-name98',
-                password: 'passwordpassword' 
+                password: 'passwordpassword'
             }
 
             core.database.query.mockReturnValue(undefined)
@@ -1050,9 +1050,9 @@ describe('ValidationService.validateUser()', function() {
 
             const user = {
                 email: 'test@test.com',
-                name: 'Valid Name', 
+                name: 'Valid Name',
                 username: 'valid-username',
-                password: null 
+                password: null
             }
 
             core.database.query.mockReturnValue(undefined)
@@ -1070,9 +1070,9 @@ describe('ValidationService.validateUser()', function() {
 
             const user = {
                 email: 'test@test.com',
-                name: 'Valid Name', 
+                name: 'Valid Name',
                 username: 'valid-username',
-                password: 10 
+                password: 10
             }
 
             core.database.query.mockReturnValue(undefined)
@@ -1090,9 +1090,9 @@ describe('ValidationService.validateUser()', function() {
 
             const user = {
                 email: 'test@test.com',
-                name: 'Valid Name', 
+                name: 'Valid Name',
                 username: 'valid-username',
-                password: 'tooshort' 
+                password: 'tooshort'
             }
 
             core.database.query.mockReturnValue(undefined)
@@ -1110,9 +1110,9 @@ describe('ValidationService.validateUser()', function() {
 
             const user = {
                 email: 'test@test.com',
-                name: 'Valid Name', 
+                name: 'Valid Name',
                 username: 'valid-username',
-                password: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' 
+                password: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
             }
 
             core.database.query.mockReturnValue(undefined)
@@ -1130,7 +1130,7 @@ describe('ValidationService.validateUser()', function() {
 
             const user = {
                 email: 'test@test.com',
-                name: 'Valid Name', 
+                name: 'Valid Name',
                 username: 'valid-username',
                 password: 'PasswordPassword'
             }
@@ -1151,10 +1151,10 @@ describe('ValidationService.validateUser()', function() {
 
             const user = {
                 id: '032563a3-1a0d-42f2-ad85-aef588b81ebe',
-                about: null 
+                about: null
             }
 
-            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe'] 
+            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe']
 
             const errors = await service.validateUser(user, existing, 'edit')
 
@@ -1167,10 +1167,10 @@ describe('ValidationService.validateUser()', function() {
 
             const user = {
                 id: '032563a3-1a0d-42f2-ad85-aef588b81ebe',
-                about: 10 
+                about: 10
             }
 
-            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe'] 
+            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe']
 
             const errors = await service.validateUser(user, existing, 'edit')
 
@@ -1183,10 +1183,10 @@ describe('ValidationService.validateUser()', function() {
 
             const user = {
                 id: '032563a3-1a0d-42f2-ad85-aef588b81ebe',
-                about: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' 
+                about: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
             }
 
-            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe'] 
+            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe']
 
             const errors = await service.validateUser(user, existing, 'edit')
 
@@ -1202,7 +1202,7 @@ describe('ValidationService.validateUser()', function() {
                 about: "I'm a user.  I do things."
             }
 
-            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe'] 
+            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe']
 
             const errors = await service.validateUser(user, existing, 'edit')
 
@@ -1219,7 +1219,7 @@ describe('ValidationService.validateUser()', function() {
                 fileId: 'test'
             }
 
-            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe'] 
+            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe']
 
             const errors = await service.validateUser(user, existing, 'edit')
 
@@ -1236,7 +1236,11 @@ describe('ValidationService.validateUser()', function() {
                 fileId: 'd9c7b8c3-ab8e-41d7-8c07-a52c33794e72'
             }
 
-            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe'] 
+            const existing = entities['users'].dictionary['032563a3-1a0d-42f2-ad85-aef588b81ebe']
+
+            core.database.query.mockReturnValue(undefined)
+                .mockReturnValueOnce({ rowCount: 1, rows: [{ id: '032563a3-1a0d-42f2-ad85-aef588b81ebe', user_id: user.id }]})
+                .mockReturnValueOnce({ rowCount: 0, rows: []})
 
             const errors = await service.validateUser(user, existing, 'edit')
 
@@ -1251,10 +1255,10 @@ describe('ValidationService.validateUser()', function() {
 
             const user = {
                 id: '5c44ce06-1687-4709-b67e-de76c05acb6a',
-                status: 10 
+                status: 10
             }
 
-            const existing = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a'] 
+            const existing = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
             const errors = await service.validateUser(user, existing, 'admin-edit')
 
@@ -1267,10 +1271,10 @@ describe('ValidationService.validateUser()', function() {
 
             const user = {
                 id: '5c44ce06-1687-4709-b67e-de76c05acb6a',
-                status: 'unconfirmed' 
+                status: 'unconfirmed'
             }
 
-            const existing = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a'] 
+            const existing = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
             const errors = await service.validateUser(user, existing, 'admin-edit')
 
@@ -1283,7 +1287,7 @@ describe('ValidationService.validateUser()', function() {
 
             const user = {
                 id: '5c44ce06-1687-4709-b67e-de76c05acb6a',
-                status: 'confirmed' 
+                status: 'confirmed'
             }
 
             const existing = { ...entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']  }
@@ -1300,10 +1304,10 @@ describe('ValidationService.validateUser()', function() {
 
             const user = {
                 id: '5c44ce06-1687-4709-b67e-de76c05acb6a',
-                status: 'banned' 
+                status: 'banned'
             }
 
-            const existing = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a'] 
+            const existing = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
 
             const errors = await service.validateUser(user, existing, 'admin-edit')
 

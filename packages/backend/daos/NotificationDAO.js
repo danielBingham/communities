@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -17,17 +17,87 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
+
+const DAO  = require('./DAO')
+
 const DAOError = require('../errors/DAOError')
 
-module.exports = class NotificationsDAO {
+const PAGE_SIZE = 20
+const SCHEMA = {
+    'Notification': {
+        table: 'notifications',
+        fields: {
+            'id': {
+                insert: DAO.INSERT.PRIMARY,
+                update: DAO.UPDATE.PRIMARY,
+                select: DAO.SELECT.ALWAYS,
+                key: 'id'
+            },
+            'user_id': {
+                insert: DAO.INSERT.REQUIRE,
+                update: DAO.UPDATE.DENY,
+                select: DAO.SELECT.ALWAYS,
+                key: 'userId'
+            },
+            'type': {
+                insert: DAO.INSERT.REQUIRE,
+                update: DAO.UPDATE.DENY,
+                select: DAO.SELECT.ALWAYS,
+                key: 'type'
+            },
+            'description': {
+                insert: DAO.INSERT.REQUIRE,
+                update: DAO.UPDATE.DENY,
+                select: DAO.SELECT.ALWAYS,
+                key: 'description'
+            },
+            'path': {
+                insert: DAO.INSERT.REQUIRE,
+                update: DAO.UPDATE.DENY,
+                select: DAO.SELECT.ALWAYS,
+                key: 'path',
+            },
+            'is_read': {
+                insert: DAO.INSERT.ALLOW,
+                insertDefault: () => false,
+                update: DAO.UPDATE.ALLOW,
+                select: DAO.SELECT.ALWAYS,
+                key: 'isRead'
+            },
+            'created_date': {
+                insert: DAO.INSERT.OVERRIDE,
+                insertOverride: 'now()',
+                update: DAO.UPDATE.DENY,
+                select: DAO.SELECT.ALWAYS,
+                key: 'createdDate'
+            },
+            'updated_date': {
+                insert: DAO.INSERT.OVERRIDE,
+                insertOverride: 'now()',
+                update: DAO.UPDATE.OVERRIDE,
+                updateOverride: 'now()',
+                select: DAO.SELECT.ALWAYS,
+                key: 'updatedDate'
+            }
 
-    constructor(core, database) {
-        this.core = core
-        this.database = core.database
-
-        if ( database ) {
-            this.database = database
         }
+    }
+}
+
+module.exports = class NotificationsDAO extends DAO {
+
+    constructor(core) {
+        super(core)
+
+        this.entityMaps = SCHEMA
+    }
+
+    getNotificationSelectionString() {
+        return this.getSelectionString('Notification')
+    }
+
+    hydrateNotification(row) {
+        return this.hydrate('Notification', row)
     }
 
     hydrateNotifications(rows) {
@@ -35,89 +105,105 @@ module.exports = class NotificationsDAO {
         const list = []
 
         for(const row of rows ) {
-            const notification = {
-                id: row.notification_id,
-                userId: row.notification_userId,
-                type: row.notification_type,
-                description: row.notification_description,
-                path: row.notification_path,
-                isRead: row.notification_isRead,
-                createdDate: row.notification_createdDate,
-                updatedDate: row.notification_updatedDate
-            }
-
-            if ( ! dictionary[notification.id] ) {
-                dictionary[notification.id] = notification
-                list.push(notification.id)
+            if ( ! ( row.Notification_id in dictionary) ) {
+                dictionary[row.Notification_id] = this.hydrateNotification(row)
+                list.push(row.Notification_id)
             }
         }
 
-        return { dictionary: dictionary, list: list } 
+        return { dictionary: dictionary, list: list }
     }
 
-    async selectNotifications(where, params) {
-        where = where || ''
-        params = params || []
+    async getNotificationById(id) {
+        const results = await this.selectNotifications({
+            where: `notifications.id = $1`,
+            params: [ id ]
+        })
+
+        if ( results.list.length <= 0 ) {
+            return null
+        }
+
+        if ( ! ( id in results.dictionary ) ) {
+            return null
+        }
+
+        return results.dictionary[id]
+    }
+
+    async selectNotifications(query) {
+        let where = query.where ? `WHERE ${query.where}` : ''
+        let params = query.params ? [ ...query.params ] : []
+        let order = query.order ? `${query.order}` : `notifications.created_date DESC`
+
+        let paging = ''
+        if ( 'page' in query && Number.isNaN(parseInt(query.page, 10)) !== true) {
+            const page = parseInt(query.page, 10)
+            const pageSize = query.pageSize ? query.pageSize : PAGE_SIZE
+
+            const offset = (page-1) * pageSize
+            let count = params.length
+
+            paging = `
+                LIMIT $${count+1}
+                OFFSET $${count+2}
+            `
+
+            params.push(pageSize)
+            params.push(offset)
+        }
 
         const sql = `
-            SELECT 
-                id as notification_id,
-                user_id as "notification_userId",
-                type as "notification_type",
-                description as notification_description,
-                path as notification_path,
-                is_read as "notification_isRead",
-                created_date as "notification_createdDate",
-                updated_date as "notification_updatedDate"
+            SELECT
+                ${this.getNotificationSelectionString()}
             FROM notifications
             ${where}
-            ORDER BY created_date desc
+            ORDER BY ${order}
+            ${paging}
         `
 
-        const results = await this.database.query(sql, params)
+        const results = await this.core.database.query(sql, params)
+
+        if ( results.rows.length <= 0 ) {
+            return { dictionary: {}, list: [] }
+        }
+
 
         return this.hydrateNotifications(results.rows)
     }
 
-    async insertNotification(notification) {
-        const results = await this.database.query(`
-            INSERT INTO notifications 
-                ( user_id, description, path, type, is_read, created_date )
-            VALUES
-                ( $1, $2, $3, $4, $5, now() )
-            RETURNING id
-        `, [ notification.userId, notification.description, notification.path, notification.type, notification.isRead ])
+    async getNotificationPageMeta(query) {
+        let where = query.where ? `WHERE ${query.where}` : ''
+        let params = query.params ? [ ...query.params ] : []
+        let page = query.page && Number.isNaN(parseInt(query.page, 10)) !== true ? parseInt(query.page, 10) : 1
 
-        if ( results.rowCount <= 0 ) {
-            throw new DAOError('insert-failed', `Attempt to insert notification failed.`)
+        const results = await this.core.database.query(`
+                SELECT
+                    COUNT(*)
+                FROM notifications
+                ${where}
+        `, params)
+
+        const count = results.rows.length <= 0 ? 0 : results.rows[0].count
+        return {
+            count: count,
+            page: page,
+            pageSize: PAGE_SIZE,
+            numberOfPages: Math.floor(count / PAGE_SIZE) + ( (count % PAGE_SIZE) > 0 ? 1 : 0)
         }
+    }
 
-        return results.rows[0].id
+    async insertNotifications(notifications) {
+        await this.insert('Notification', notifications)
     }
 
     async updateNotification(notification) {
-        if ( notification.isRead == false || notification.isRead == true ) {
-            const results = await this.database.query(`
-                UPDATE notifications SET is_read = $1, updated_date = now() WHERE id = $2 
-            `, [ notification.isRead, notification.id])
-
-            if ( results.rowCount <= 0 ) {
-                throw new DAOError('updated-failed', `Attempt to update notification failed.`)
-            }
-
-            return true
-        } else {
-            return false
-        }
+        await this.update('Notification', notification)
     }
 
-    async deleteNotification(id) {
-        const results = await this.database.query(`
+    async deleteNotification(notification) {
+        await this.core.database.query(`
             DELETE FROM notifications WHERE id = $1
-        `, [ id ] )
-
-        if ( results.rowCount <= 0 ) {
-            throw new DAOError('delete-failed', 'Attempt to delete a notification failed.')
-        }
+        `, [ notification.id ] )
     }
 }

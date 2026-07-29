@@ -36,7 +36,7 @@ describe('validateId', function() {
 describe('validateUserId', function() {
     it('Should return an error when userId is undefined while creating', function() {
         const userId = undefined
-        const existing = undefined 
+        const existing = undefined
 
         const errors = validation.Post.validateUserId(userId, existing, 'create')
 
@@ -145,7 +145,7 @@ describe('validateGroupId', function() {
 describe('validateType', () => {
     it('Should return an error when type is undefined while creating', function() {
         const value = undefined
-        const existing = undefined 
+        const existing = undefined
 
         const errors = validation.Post.validateType(value, existing, 'create')
 
@@ -187,7 +187,7 @@ describe('validateType', () => {
     })
 
     it('Should return an error when an empty string', () => {
-        const value = '' 
+        const value = ''
         const errors = validation.Post.validateType(value)
 
         expect(errors.length).toBe(2)
@@ -227,7 +227,7 @@ describe('validateType', () => {
 describe('validateVisibility', () => {
     it('Should return an error when undefined while creating', function() {
         const value = undefined
-        const existing = undefined 
+        const existing = undefined
 
         const errors = validation.Post.validateVisibility(value, existing, 'create')
 
@@ -268,7 +268,7 @@ describe('validateVisibility', () => {
     })
 
     it('Should return an error when an empty string', () => {
-        const value = '' 
+        const value = ''
         const errors = validation.Post.validateVisibility(value)
 
         expect(errors.length).toBe(2)
@@ -382,12 +382,13 @@ describe('validateSharedPostId', function() {
         expect(errors.length).toBe(0)
     })
 
-    it('Should pass when being updated', function() {
+    it('Should error when being updated', function() {
         const value = 'd209158e-5c58-44e1-ab00-12b45aad065f'
         const existing = '840b8db4-a91e-44e2-a7a3-6922e7e98290'
         const errors = validation.Post.validateSharedPostId(value, existing, 'update')
 
-        expect(errors.length).toBe(0)
+        expect(errors.length).toBe(1)
+        expect(errors[0].type).toBe('sharedPostId:not-allowed')
     })
 
     it('Should pass when not being updated', function() {
@@ -430,126 +431,54 @@ describe('validateSharedPostId', function() {
 })
 
 describe('validateSiteModerationId', function() {
-    it('Should pass when present during creation', function() {
-        const value = 'd209158e-5c58-44e1-ab00-12b45aad065f'
-        const errors = validation.Post.validateSiteModerationId(value, undefined, 'create')
+    it('Should pass when undefined', function() {
+        const siteModerationId = undefined
+        const errors = validation.Post.validateSiteModerationId(siteModerationId)
 
         expect(errors.length).toBe(0)
     })
 
-    it('Should pass when absent during creation', function() {
-        const value = 'd209158e-5c58-44e1-ab00-12b45aad065f'
-        const errors = validation.Post.validateSiteModerationId(value, undefined, 'create')
+    it('Should return an error when set', function() {
+        const siteModerationId = 'd209158e-5c58-44e1-ab00-12b45aad065f'
+        const errors = validation.Post.validateSiteModerationId(siteModerationId)
 
-        expect(errors.length).toBe(0)
+        expect(errors.length).toBe(1)
+        expect(errors[0].type).toBe('siteModerationId:not-allowed')
     })
 
-    it('Should pass when being updated', function() {
-        const value = 'd209158e-5c58-44e1-ab00-12b45aad065f'
+    it('Should return an error when being updated', function() {
+        const siteModerationId = 'd209158e-5c58-44e1-ab00-12b45aad065f'
         const existing = '840b8db4-a91e-44e2-a7a3-6922e7e98290'
-        const errors = validation.Post.validateSiteModerationId(value, existing, 'update')
-
-        expect(errors.length).toBe(0)
-    })
-
-    it('Should pass when not being updated', function() {
-        const value = 'd209158e-5c58-44e1-ab00-12b45aad065f'
-        const existing = 'd209158e-5c58-44e1-ab00-12b45aad065f'
-        const errors = validation.Post.validateSiteModerationId(value, existing, 'update')
-
-        expect(errors.length).toBe(0)
-    })
-
-    it('Should pass when null', function() {
-        const value = null
-        const errors = validation.Post.validateSiteModerationId(value)
-
-        expect(errors.length).toBe(0)
-    })
-
-    it('Should return an error when not a string', function() {
-        const value = 5
-        const errors = validation.Post.validateSiteModerationId(value)
+        const errors = validation.Post.validateSiteModerationId(siteModerationId, existing, 'update')
 
         expect(errors.length).toBe(1)
-        expect(errors[0].type).toBe('siteModerationId:invalid')
-    })
-
-    it('Should return an error when not a valid uuid', function() {
-        const value = 'test-id'
-        const errors = validation.Post.validateSiteModerationId(value)
-
-        expect(errors.length).toBe(1)
-        expect(errors[0].type).toBe('siteModerationId:invalid')
-    })
-
-    it('Should pass a valid UUID', function() {
-        const value = 'd209158e-5c58-44e1-ab00-12b45aad065f'
-        const errors = validation.Post.validateSiteModerationId(value)
-
-        expect(errors.length).toBe(0)
+        expect(errors[0].type).toBe('siteModerationId:not-allowed')
     })
 })
 
 describe('validateGroupModerationId', function() {
-    it('Should pass when present during creation', function() {
-        const value = 'd209158e-5c58-44e1-ab00-12b45aad065f'
-        const errors = validation.Post.validateGroupModerationId(value, undefined, 'create')
+    it('Should pass when undefined', function() {
+        const groupModerationId = undefined
+        const errors = validation.Post.validateGroupModerationId(groupModerationId)
 
         expect(errors.length).toBe(0)
     })
 
-    it('Should pass when absent during creation', function() {
-        const value = 'd209158e-5c58-44e1-ab00-12b45aad065f'
-        const errors = validation.Post.validateGroupModerationId(value, undefined, 'create')
+    it('Should return an error when set', function() {
+        const groupModerationId = 'd209158e-5c58-44e1-ab00-12b45aad065f'
+        const errors = validation.Post.validateGroupModerationId(groupModerationId)
 
-        expect(errors.length).toBe(0)
+        expect(errors.length).toBe(1)
+        expect(errors[0].type).toBe('groupModerationId:not-allowed')
     })
 
-    it('Should pass when being updated', function() {
-        const value = 'd209158e-5c58-44e1-ab00-12b45aad065f'
+    it('Should return an error when being updated', function() {
+        const groupModerationId = 'd209158e-5c58-44e1-ab00-12b45aad065f'
         const existing = '840b8db4-a91e-44e2-a7a3-6922e7e98290'
-        const errors = validation.Post.validateGroupModerationId(value, existing, 'update')
-
-        expect(errors.length).toBe(0)
-    })
-
-    it('Should pass when not being updated', function() {
-        const value = 'd209158e-5c58-44e1-ab00-12b45aad065f'
-        const existing = 'd209158e-5c58-44e1-ab00-12b45aad065f'
-        const errors = validation.Post.validateGroupModerationId(value, existing, 'update')
-
-        expect(errors.length).toBe(0)
-    })
-
-    it('Should pass when null', function() {
-        const value = null
-        const errors = validation.Post.validateGroupModerationId(value)
-
-        expect(errors.length).toBe(0)
-    })
-
-    it('Should return an error when not a string', function() {
-        const value = 5
-        const errors = validation.Post.validateGroupModerationId(value)
+        const errors = validation.Post.validateGroupModerationId(groupModerationId, existing, 'update')
 
         expect(errors.length).toBe(1)
-        expect(errors[0].type).toBe('groupModerationId:invalid')
-    })
-
-    it('Should return an error when not a valid uuid', function() {
-        const value = 'test-id'
-        const errors = validation.Post.validateGroupModerationId(value)
-
-        expect(errors.length).toBe(1)
-        expect(errors[0].type).toBe('groupModerationId:invalid')
-    })
-
-    it('Should pass a valid UUID', function() {
-        const value = 'd209158e-5c58-44e1-ab00-12b45aad065f'
-        const errors = validation.Post.validateGroupModerationId(value)
-
-        expect(errors.length).toBe(0)
+        expect(errors[0].type).toBe('groupModerationId:not-allowed')
     })
 })
 
@@ -562,7 +491,7 @@ describe('validateActivity', function() {
     })
 
     it('Should return an error when activity is set', function() {
-        const activity = 10 
+        const activity = 10
         const errors = validation.Post.validateActivity(activity)
 
         expect(errors.length).toBe(1)
@@ -570,8 +499,8 @@ describe('validateActivity', function() {
     })
 
     it('Should return an error when activity is being updated', function() {
-        const activity = 10 
-        const existing = 9 
+        const activity = 10
+        const existing = 9
         const errors = validation.Post.validateActivity(activity, existing, 'update')
 
         expect(errors.length).toBe(1)
@@ -613,7 +542,7 @@ describe('validateContent', () => {
     })
 
     it('Should pass when an empty string', () => {
-        const value = '' 
+        const value = ''
         const errors = validation.Post.validateContent(value)
 
         expect(errors.length).toBe(0)
@@ -744,7 +673,7 @@ describe('validate', function() {
         expect(errors.content.length).toBe(1)
         expect(errors.createdDate.length).toBe(1)
         expect(errors.updatedDate.length).toBe(1)
-        
+
     })
 
     it('Should pass a valid post', function() {
@@ -753,7 +682,7 @@ describe('validate', function() {
             type: 'feed',
             visibility: 'public',
             files: [ '0be69c1f-402d-4dec-bba0-e0ac2a0586ff' ],
-            content: 'This is a test post.' 
+            content: 'This is a test post.'
         }
 
         const errors = validation.Post.validate(post)

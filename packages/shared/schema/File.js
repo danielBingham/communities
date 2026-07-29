@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -63,7 +63,7 @@ module.exports = class FileSchema extends Schema {
                         .getErrors()
                     return errors
                 }
-            }, 
+            },
             jobId: {
                 clean: (value) => { return cleanUuid(value) },
                 validate: (value, existing, action) => {
@@ -83,7 +83,7 @@ module.exports = class FileSchema extends Schema {
                         .getErrors()
                     return errors
                 }
-            }, 
+            },
             kind: {
                 clean: (value) => { return stringCleaner(value) },
                 validate: (value, existing, action) => {
@@ -95,27 +95,30 @@ module.exports = class FileSchema extends Schema {
                         .getErrors()
                     return errors
                 }
-            }, 
+            },
             mimetype: {
                 clean: (value) => { return stringCleaner(value) },
                 validate: (value, existing, action) => {
                     const validator = new StringValidator('mimetype', value, existing, action)
                     const errors = validator
-                        .mustNotBeSet()
+                        .isRequiredToCreate()
+                        .mustNotBeUpdated()
+                        .mustBeString()
                         .getErrors()
                     return errors
                 }
-            }, 
+            },
             type: {
                 clean: (value) => { return stringCleaner(value) },
                 validate: (value, existing, action) => {
                     const validator = new StringValidator('type', value, existing, action)
                     const errors = validator
-                        .mustNotBeSet()
+                        .mustNotBeUpdated()
+                        .mustBeString()
                         .getErrors()
                     return errors
                 }
-            }, 
+            },
             thumbId: {
                 clean: (value) => { return cleanUuid(value) },
                 validate: (value, existing, action) => {
@@ -135,7 +138,7 @@ module.exports = class FileSchema extends Schema {
                         .getErrors()
                     return errors
                 }
-            }, 
+            },
             filepath: {
                 clean: (value) => { return stringCleaner(value) },
                 validate: (value, existing, action) => {
@@ -145,7 +148,7 @@ module.exports = class FileSchema extends Schema {
                         .getErrors()
                     return errors
                 }
-            }, 
+            },
             createdDate: {
                 clean: (value) => { return value },
                 validate: (value, existing, action) => {

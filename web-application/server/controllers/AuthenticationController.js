@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -18,10 +18,11 @@
  *
  ******************************************************************************/
 
-const { 
+const {
     AuthenticationService,
     EmailService,
     MultifactorAuthenticationService,
+    SessionService,
     TokenService,
 
     UserDAO,
@@ -50,6 +51,7 @@ module.exports = class AuthenticationController {
         this.emailService = new EmailService(core)
         this.multifactorAuthentication = new MultifactorAuthenticationService(core)
         this.tokenService = new TokenService(core)
+        this.sessionService = new SessionService(core)
 
         this.userDAO = new UserDAO(core)
     }
@@ -71,12 +73,15 @@ module.exports = class AuthenticationController {
          *
          * Any user may call this endpoint.  It simply checks the session and
          * returns what it finds.
-         * 
+         *
          * **********************************************************/
 
-        if ('user' in request.session && request.session.user !== null && request.session.user !== undefined) {
+        if ('user' in request.session
+            && request.session.user !== null
+            && request.session.user !== undefined
+        ) {
 
-            try { 
+            try {
                 const session = await this.auth.getSessionForUserId(request.session.user.id)
 
                 if ( session.user && session.user.status === 'banned' ) {
@@ -101,7 +106,7 @@ module.exports = class AuthenticationController {
                     session:  session
                 })
             } catch (error) {
-                if ( error.type == 'no-user' ) {
+                if ( error instanceof ServiceError && error.type == 'no-user' ) {
                     request.session.destroy(function(error) {
                         if (error) {
                             console.error(error)
@@ -116,14 +121,16 @@ module.exports = class AuthenticationController {
                     throw error
                 }
             }
-        } else if ( 'pendingUserId' in request.session && request.session.pendingUserId !== null && request.session.pendingUserId !== undefined ) {
+        } else if ( 'pendingUserId' in request.session
+            && request.session.pendingUserId !== null
+            && request.session.pendingUserId !== undefined
+        ) {
             response.status(200).json({
                 session: {
-                    pendingUserId: request.session.pendingUserId 
+                    pendingUserId: request.session.pendingUserId
                 }
             })
         } else {
-
             response.status(200).json({
                 session: null
             })
@@ -171,7 +178,6 @@ module.exports = class AuthenticationController {
             }
 
             const session = await this.auth.getSessionForUserId(userId)
-            
             if ( session.user.authenticationMultifactorState === 'enabled' ) {
                 request.session.pendingUserId = session.user.id
 
@@ -181,10 +187,11 @@ module.exports = class AuthenticationController {
                     }
                 })
             } else {
+                await this.sessionService.regenerateSession(request)
                 request.session.user = session.user
                 request.session.file = session.file
                 response.status(200).json({
-                    session: session 
+                    session: session
                 })
             }
 
@@ -209,7 +216,7 @@ module.exports = class AuthenticationController {
                     throw error
                 }
             } else {
-                throw error 
+                throw error
             }
         }
     }
@@ -249,6 +256,8 @@ module.exports = class AuthenticationController {
             }
             await this.userDAO.updateUser(userPatch)
 
+            await this.sessionService.regenerateSession(request)
+
             const session = await this.auth.getSessionForUserId(currentUser.id)
 
             request.session.user = session.user
@@ -286,7 +295,7 @@ module.exports = class AuthenticationController {
                     `User(${pendingUserId}) is being rate limited for too many MFA attempts.`,
                     `Too many attempts.  Please wait 30 seconds and try again.`)
 
-            } 
+            }
 
             // If they provided a TOPT token, then use that to verify them.
             if ( 'token' in request.body ) {
@@ -308,6 +317,7 @@ module.exports = class AuthenticationController {
                     await this.multifactorAuthentication.clearRateLimit(pendingUserId)
                 }
 
+                await this.sessionService.regenerateSession(request)
                 const session = await this.auth.getSessionForUserId(pendingUserId)
 
                 request.session.user = session.user
@@ -337,7 +347,7 @@ module.exports = class AuthenticationController {
                     await this.multifactorAuthentication.clearRateLimit(pendingUserId)
                 }
 
-
+                await this.sessionService.regenerateSession(request)
                 const session = await this.auth.getSessionForUserId(pendingUserId)
 
                 request.session.user = session.user
@@ -351,7 +361,7 @@ module.exports = class AuthenticationController {
 
                 return
             }
-        
+
             throw new ControllerError(400, 'invalid',
                 `User attempting to verify authentication without a token or recovery code.`,
                 `You must include an TOPT token or recovery code to verify your authentication.`)
@@ -366,7 +376,7 @@ module.exports = class AuthenticationController {
      * @param {Object} request  Standard Express request object.
      * @param {Object} response Standard Express response object.
      *
-     * @returns {void} 
+     * @returns {void}
      */
     deleteAuthentication(request, response) {
         /**********************************************************************

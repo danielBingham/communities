@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -18,11 +18,11 @@
  *
  ******************************************************************************/
 
-const { 
-    GroupDAO, 
-    GroupMemberDAO, 
+const {
+    GroupDAO,
+    GroupMemberDAO,
     GroupSubscriptionDAO,
-    UserDAO, 
+    UserDAO,
     FileDAO,
     SiteModerationDAO,
     GroupService,
@@ -74,23 +74,23 @@ module.exports = class GroupController {
             // Only members the user has permission to see.
             const memberResults = await this.groupMemberDAO.selectGroupMembers({
                 where: `
-                    group_members.group_id = ANY($1::uuid[]) 
+                    group_members.group_id = ANY($1::uuid[])
                     AND group_members.group_id IN (
                         SELECT groups.id FROM groups
                             LEFT OUTER JOIN group_members ON groups.id = group_members.group_id
-                        WHERE groups.type = 'open' 
+                        WHERE groups.type = 'open'
                             ${ currentUser ? `OR (groups.type = 'private' AND group_members.user_id = $2 AND group_members.status = 'member')` : ''}
                             ${ currentUser ? `OR (groups.type = 'hidden' AND group_members.user_id = $2 AND group_members.status = 'member')` : ''}
                     )
                     AND (group_members.status = 'member' ${ currentUser ? `OR group_members.user_id = $2` : ''})
-                `, 
-                params: params 
+                `,
+                params: params
             })
 
             relations['groupMembers'] = memberResults.dictionary
         }
 
-        return relations 
+        return relations
     }
 
     async createQuery(request) {
@@ -113,39 +113,28 @@ module.exports = class GroupController {
         if ( ! canModerateSite ) {
             // Restrict the query to only those groups the currentUser can see.
             query.params.push(currentUser.id)
-
-            if ( this.core.features.has('issue-165-subgroups') ) {
-                query.where = `groups.id IN (
-                        SELECT groups.id FROM groups
-                            LEFT OUTER JOIN group_members ON groups.id = group_members.group_id AND group_members.user_id = $1
-                            LEFT OUTER JOIN group_members as parent_members ON groups.parent_id = parent_members.group_id AND parent_members.user_id = $1
-                        WHERE 
-                            (groups.type = 'open' AND (group_members.user_id IS NULL OR group_members.status != 'banned'))
-                            OR ( 
-                                (groups.type = 'private' OR groups.type = 'private-open') 
-                                AND (group_members.user_id IS NULL OR group_members.status != 'banned')
+            // Logic should exactly match that found in `/packages/shared/permissions/Group/index.js:canViewGroup()`
+            //
+            // Using `IS DISTINCT FROM` and `IS NOT DISTINCT FROM` to ensure
+            // that `NULL` values are treated as comparable and the comparison
+            // returns `true` or `false` rather than `NULL`.
+            query.where = `
+            groups.id IN (
+                    SELECT groups.id FROM groups
+                        LEFT OUTER JOIN group_members ON groups.id = group_members.group_id AND group_members.user_id = $1
+                        LEFT OUTER JOIN group_members as parent_members ON groups.parent_id = parent_members.group_id AND parent_members.user_id = $1
+                    WHERE
+                        (parent_members.status IS NOT DISTINCT FROM 'member' AND parent_members.role IS NOT DISTINCT FROM 'admin')
+                        OR (
+                            group_members.status IS DISTINCT FROM 'banned'
+                            AND (
+                                groups.type IN ('open', 'private', 'private-open')
+                                OR ( groups.type IN ('hidden-open', 'hidden-private') AND parent_members.status IS NOT DISTINCT FROM 'member' )
+                                OR group_members.user_id IS NOT NULL
                             )
-                            OR ( 
-                                groups.type = 'hidden' 
-                                AND (
-                                    (group_members.user_id = $1 AND group_members.status != 'banned') 
-                                    OR (parent_members.user_id = $1 AND parent_members.status != 'banned' AND parent_members.role = 'admin')
-                                )
-                            )
-                            OR ( 
-                                ( groups.type = 'hidden-open' OR groups.type = 'hidden-private' ) 
-                                AND (
-                                    (group_members.user_id = $1 AND group_members.status != 'banned') 
-                                    OR (parent_members.user_id = $1 AND parent_members.status = 'member')
-                                )
-                            )
-                    )
-                `
-            } else {
-                query.where = `groups.id IN (
-                    SELECT groups.id FROM groups LEFT OUTER JOIN group_members ON groups.id = group_members.group_id WHERE (group_members.user_id = $1 AND group_members.status = 'member') OR groups.type = 'open'
-                )`
-            }
+                        )
+                )
+            `
         }
 
         if ( this.core.features.has('feat-408-flag-profiles-and-groups') ) {
@@ -174,7 +163,7 @@ module.exports = class GroupController {
             query.params.push(memberships)
             const and = query.params.length > 1 ? ' AND ' : ''
             query.where += `${and} groups.id = ANY($${query.params.length}::uuid[])`
-        } 
+        }
 
         // Get a single group matching `group.slug`.
         if ( request.query.slug && request.query.slug.length > 0 ) {
@@ -252,7 +241,7 @@ module.exports = class GroupController {
         const meta = await this.groupDAO.getGroupPageMeta(query)
         const relations = await this.getRelations(currentUser, results, query.relations)
 
-        response.status(200).json({ 
+        response.status(200).json({
             dictionary: results.dictionary,
             list: results.list,
             meta: meta,
@@ -273,6 +262,14 @@ module.exports = class GroupController {
 
         let context = {}
         if ( 'parentId' in group ) {
+            // TODO See TECHDEBT string for slug validation.
+            const parentIdErrors = this.groupSchema.properties.parentId.validate(group.parentId, undefined, 'create')
+            if ( parentIdErrors.length > 0 ) {
+                throw new ControllerError(400, 'invalid',
+                    `User(${currentUser.id}) submitted a group with an invalid parentId.`,
+                    `Group.parentId must be a valid UUID identifying a valid Group.`)
+            }
+
             context.groupId = group.parentId
         }
 
@@ -283,13 +280,22 @@ module.exports = class GroupController {
                 `You are not authorized to create a new Group.`)
         }
 
-        group.slug = group.slug.toLowerCase()
-        const slugErrors = this.groupSchema.properties.slug.validate(group.slug)
+        // TODO Techdebt `schema.validate()` figures out whether this is a
+        // create or an update from the precense or absence of `existing`, but
+        // the individual validators make no assumptions and skip create/update
+        // requirements when neither is specified.  We also don't have access
+        // to the enum here, so we're just passing it as a bare string.
+        //
+        // This is a flaw in the schema definition.
+        const slugErrors = this.groupSchema.properties.slug.validate(group.slug, undefined, 'create')
         if ( slugErrors.length > 0 ) {
             throw new ControllerError(400, 'invalid',
-                `User(${currentUser}) submitted a Group with an invalid slug.`,
+                `User(${currentUser.id}) submitted a Group with an invalid slug.`,
                 `The URL of the group may only contain letters, numbers, '-', '_', and '.'.`)
         }
+
+        // Slugs should be case insensitive to match URLs.
+        group.slug = group.slug.toLowerCase()
 
         const existing = await this.groupDAO.getGroupBySlug(group.slug)
         if ( existing !== null ) {
@@ -392,8 +398,8 @@ module.exports = class GroupController {
                 `User(${currentUser.id}) attempting to view Group(${groupId}) without permission.`,
                 `Either that group doesn't exist or you don't have permission to see it.`)
         }
-       
-       
+
+
         const relations = await this.getRelations(currentUser, results)
 
         response.status(200).json({
@@ -415,7 +421,7 @@ module.exports = class GroupController {
         const group = this.groupSchema.clean(request.body)
 
         if ( group.id !== groupId ) {
-            throw new ControllerError(400, 'invalid', 
+            throw new ControllerError(400, 'invalid',
                 `User(${currentUser.id}) submitted a group patch with the wrong id.`,
                 `You used a different groupId in your patch and your route.  Ids must match.`)
         }
@@ -466,8 +472,8 @@ module.exports = class GroupController {
 
 
         await this.notificationService.sendNotifications(
-            currentUser, 
-            'Group:update', 
+            currentUser,
+            'Group:update',
             {
                 previousGroup: existing,
                 group: entity
@@ -492,7 +498,7 @@ module.exports = class GroupController {
         }
 
         const groupId = request.params.id
-        const validationErrors = this.groupSchema.properties.id.validate(groupId) 
+        const validationErrors = this.groupSchema.properties.id.validate(groupId)
         if ( validationErrors.length > 0 ) {
             const errorString = validationErrors.reduce((string, error) => `${string}\n${error.message}`, '')
             const logString = validationErrors.reduce((string, error) => `${string}\n${error.log}`, '')
@@ -500,7 +506,7 @@ module.exports = class GroupController {
                 `User attempted to delete a Group with an invalid UUID: ${logString}`,
                 errorString)
         }
-        
+
         const existing = await this.groupDAO.getGroupById(groupId)
         if ( ! existing ) {
             throw new ControllerError(404, 'not-found',

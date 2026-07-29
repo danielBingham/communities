@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -17,9 +17,10 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-const { 
-    AuthenticationService, 
-    EmailService, 
+const {
+    AuthenticationService,
+    EmailService,
+    SessionService,
     TokenService,
 
     TokenDAO,
@@ -45,181 +46,11 @@ module.exports = class TokenController extends BaseController {
 
         this.authenticationService = new AuthenticationService(core)
         this.emailService = new EmailService(core)
+        this.sessionService = new SessionService(core)
         this.tokenService = new TokenService(core)
 
         this.tokenDAO = new TokenDAO(core)
         this.userDAO = new UserDAO(core)
-    }
-
-    /**
-     * GET /token/:token
-     *
-     * Validate a token sent to a user.
-     *
-     * @param {Object} request  Standard Express request object.
-     * @param {string} request.params.token The token we want to validate.
-     * @param {string} request.query.type   The type of token we are trying to
-     * validate.  Must match what's in the database for :token.
-     * @param {Object} response Standard Express response object.
-     *
-     * @returns {Promise}   Resolves to void.
-     */
-    async getToken(request, response) {
-
-        /*************************************************************
-         * Permissions Checking and Input Validation
-         *
-         * Permissions:
-         * No permissions for this endpoint.  Anyone can hit it, the
-         * permissions come from the token and its validation.
-         *
-         * Validation:
-         * 1. :token must be included.
-         * 2. request.query.type must be included
-         * 3. Token(:token) must be exist
-         * 4. Token(:token) must have type equal to request.query.type 
-         * 
-         * **********************************************************/
-        const currentUser = request.session.user
-
-        // 1. :token must be included.
-        if ( ! ('token' in request.params) || request.params.token === undefined || request.params.token === null ) {
-            throw new ControllerError(400, 'no-token',
-                `Attempt to redeem a token with no token!`,
-                `You must provide a token in order to redeem it.`)
-        }
-
-        // 2. request.query.type must be included
-        if ( ! ( 'type' in request.query) || request.query.type === undefined || request.query.type === null ) {
-            throw new ControllerError(403, 'not-authorized',
-                `User failed to specify a type when attempting to redeem a token.`,
-                `Your token is invalid. Please request a new one and try again.`)
-        }
-
-        // If they are trying to confirm their email, and they have already
-        // done so, just report success.
-        if ( request.query.type === 'email-confirmation' && currentUser && currentUser?.status === 'confirmed' ) {
-            const session = await this.authenticationService.getSessionForUserId(currentUser.id)
-
-            response.status(200).json({
-                session: session
-            })
-            return
-        }
-        
-        const tokenErrors = validation.Token.validateToken(request.params.token)
-        if ( tokenErrors.length > 0 ) {
-            const logString = tokenErrors.reduce((string, error) => `${string}\n${error.log}`, '')
-            throw new ControllerError(403, 'not-authorized',
-                `Invalid token: ${ logString }`,
-                `Your token is invalid. Please request a new one and try again.`)
-        }
-
-        const typeErrors = validation.Token.validateType(request.query.type)
-        if ( typeErrors.length > 0 ) { 
-            const logString = typeErrors.reduce((string, error) => `${string}\n${error.log}`, '')
-            throw new ControllerError(403, 'not-authorized',
-                `Invalid token: ${ logString }`,
-                `Your token is invalid. Please request a new one and try again.`)
-        }
-
-        let token = null
-        try {
-            // TokenDAO::validateToken() checks both of the following:
-            // 3. Token(:token) must be exist
-            // 4. Token(:token) must have type equal to request.query.type 
-            token = await this.tokenService.validateToken(request.params.token, [ request.query.type ])
-        } catch (error) {
-            if ( error instanceof ServiceError ) {
-                throw new ControllerError(403, 'not-authorized', 
-                    error.message,
-                    `Your token is invalid. Please request a new one and try again.`)
-            } else if ( error instanceof DAOError ) {
-                throw new ControllerError(403, 'not-authorized', 
-                    error.message,
-                    `Your token is invalid. Please request a new one and try again.`)
-            } else {
-                throw error
-            }
-        }
-
-        if ( token === null ) {
-            throw new ControllerError(403, 'not-authorized',
-                `Invalid token not found.`,
-                `Your token is invalid. Please request a new one and try again.`)
-        }
-
-        if ( currentUser && token.userId !== currentUser.id ) {
-            throw new ControllerError(403, 'not-authorized',
-                `User(${currentUser.id}) currently logged in when attempting to validate a token.`,
-                `Your token is invalid.  Please request a new one and try again.`)
-        }
-
-        // For the email-confirmation flow, we do log the user in.
-        if ( token.type == 'email-confirmation' ) {
-            // Mark their user record as confirmed.
-
-            const userUpdate = {
-                id: token.userId,
-                status: 'confirmed'
-            }
-            await this.userDAO.updateUser(userUpdate)
-            // TODO better to hang on to it and mark it as used?
-            await this.tokenDAO.deleteToken(token)
-
-            // If they have a session already, then refresh it.  Otherwise, just return success.
-            if ( currentUser ) {
-                const session = await this.authenticationService.getSessionForUserId(token.userId)
-
-                // Log the user in.
-                request.session.user = session.user
-                request.session.file = session.file
-
-                response.status(200).json({
-                    session: session
-                })
-            } else {
-                response.status(200).json({
-                    userId: token.userId
-                })
-            }
-        } 
-        
-        // For reset-password, we don't log the user in when we validate the
-        // token because those flows have multiple steps. The user will be
-        // logged in at a later step.
-        else if ( token.type == 'reset-password' ) {
-            response.status(200).json({
-                userId: token.userId
-            })
-        } 
-
-        else if ( token.type == 'invitation' ) {
-            // The whole invitation flow assumes the user is authenticated.  We
-            // can't remove that authentication with out totally rewiring the
-            // invitation flow.  They're going to be setting their password and
-            // everything in this case anyway (they don't have one yet).  So
-            // the risk is really that someone could register with someone
-            // else's email address. 
-            //
-            // It's pretty small in this case, but we should really rewrite the
-            // invitation flow to remove that risk.  That's a future TODO though.
-            const session = await this.authenticationService.getSessionForUserId(token.userId)
-
-            // Log the user in.
-            request.session.user = session.user
-            request.session.file = session.file
-
-            response.status(200).json({
-                session: session
-            })
-        } else {
-            throw new ControllerError(403, 'not-authorized',
-                `Invalid token state!`,
-                `Your token is not valid. Please request a new one and try again.`
-            )
-    
-        }
     }
 
     /**
@@ -252,14 +83,14 @@ module.exports = class TokenController extends BaseController {
          * 2. request.body.type must be 'reset-password' or 'email-confirmation'
          *
          * **********************************************************/
-        
+
         const tokenParams  = request.body
         if ( tokenParams.email ) {
             tokenParams.email = tokenParams.email.toLowerCase().trim()
         }
 
         const typeErrors = validation.Token.validateType(tokenParams.type)
-        if ( typeErrors.length > 0 ) { 
+        if ( typeErrors.length > 0 ) {
             const logString = typeErrors.reduce((string, error) => `${string}\n${error.log}`, '')
             throw new ControllerError(400, 'invalid',
                 `Invalid token request: ${ logString }`,
@@ -267,7 +98,7 @@ module.exports = class TokenController extends BaseController {
         }
 
         const emailErrors = validation.User.validateEmail(tokenParams.email)
-        if ( emailErrors.length > 0 ) { 
+        if ( emailErrors.length > 0 ) {
             const logString = emailErrors.reduce((string, error) => `${string}\n${error.log}`, '')
             throw new ControllerError(400, 'invalid',
                 `Invalid token request: ${ logString }`,
@@ -284,7 +115,7 @@ module.exports = class TokenController extends BaseController {
             }
             const user = userResults.dictionary[userResults.list[0]]
 
-            const token = await this.tokenService.createToken({ 
+            const token = await this.tokenService.createToken({
                 type: tokenParams.type,
                 userId: user.id,
                 creatorId: null
@@ -366,6 +197,170 @@ module.exports = class TokenController extends BaseController {
             throw new ControllerError(400, 'invalid-token',
                 `Attempt to create an invalid token type.`)
         }
+    }
 
+    async patchTokens(request, response) {
+        /*************************************************************
+         * Permissions Checking and Input Validation
+         *
+         * Permissions:
+         * No permissions for this endpoint.  Anyone can hit it, the
+         * permissions come from the token and its validation.
+         *
+         * Validation:
+         * 1. :token must be included.
+         * 2. request.body.type must be included
+         * 3. Token(:token) must be exist
+         * 4. Token(:token) must have type equal to request.body.type
+         *
+         * **********************************************************/
+        const currentUser = request.session.user
+
+        if ( request.body === null || request.body === undefined ) {
+            throw new ControllerError(400, 'invalid',
+                `Attempt to redeem a token with no request body.`,
+                `Token must be provided in the request body.`)
+        }
+
+        // 1. :token must be included.
+        if ( ! ('token' in request.body) || request.body.token === undefined || request.body.token === null ) {
+            throw new ControllerError(400, 'no-token',
+                `Attempt to redeem a token with no token!`,
+                `You must provide a token in order to redeem it.`)
+        }
+
+        // 2. request.body.type must be included
+        if ( ! ( 'type' in request.body) || request.body.type === undefined || request.body.type === null ) {
+            throw new ControllerError(403, 'not-authorized',
+                `User failed to specify a type when attempting to redeem a token.`,
+                `You must specify a token type when attempting to redeem a token.`)
+        }
+
+        // If they are trying to confirm their email, and they have already
+        // done so, just report success.
+        if ( request.body.type === 'email-confirmation' && currentUser && currentUser?.status === 'confirmed' ) {
+            const session = await this.authenticationService.getSessionForUserId(currentUser.id)
+
+            response.status(200).json({
+                session: session
+            })
+            return
+        }
+
+        const tokenErrors = validation.Token.validateToken(request.body.token)
+        if ( tokenErrors.length > 0 ) {
+            const logString = tokenErrors.reduce((string, error) => `${string}\n${error.log}`, '')
+            throw new ControllerError(403, 'not-authorized',
+                `Invalid token: ${ logString }`,
+                `Your token is invalid. Please request a new one and try again.`)
+        }
+
+        const typeErrors = validation.Token.validateType(request.body.type)
+        if ( typeErrors.length > 0 ) {
+            const logString = typeErrors.reduce((string, error) => `${string}\n${error.log}`, '')
+            throw new ControllerError(403, 'not-authorized',
+                `Invalid token: ${ logString }`,
+                `Your token is invalid. Please request a new one and try again.`)
+        }
+
+        let token = null
+        try {
+            // TokenDAO::validateToken() checks both of the following:
+            // 3. Token(:token) must be exist
+            // 4. Token(:token) must have type equal to request.body.type
+            token = await this.tokenService.validateToken(request.body.token, [ request.body.type ])
+        } catch (error) {
+            if ( error instanceof ServiceError ) {
+                throw new ControllerError(403, 'not-authorized',
+                    error.message,
+                    `Your token is invalid. Please request a new one and try again.`)
+            } else if ( error instanceof DAOError ) {
+                throw new ControllerError(403, 'not-authorized',
+                    error.message,
+                    `Your token is invalid. Please request a new one and try again.`)
+            } else {
+                throw error
+            }
+        }
+
+        if ( token === null ) {
+            throw new ControllerError(403, 'not-authorized',
+                `Invalid token not found.`,
+                `Your token is invalid. Please request a new one and try again.`)
+        }
+
+        if ( currentUser && token.userId !== currentUser.id ) {
+            throw new ControllerError(403, 'not-authorized',
+                `User(${currentUser.id}) currently logged in when attempting to validate a token.`,
+                `Your token is invalid.  Please request a new one and try again.`)
+        }
+
+        // For the email-confirmation flow, we do log the user in.
+        if ( token.type == 'email-confirmation' ) {
+            // Mark their user record as confirmed.
+
+            const userUpdate = {
+                id: token.userId,
+                status: 'confirmed'
+            }
+            await this.userDAO.updateUser(userUpdate)
+            // TODO better to hang on to it and mark it as used?
+            await this.tokenDAO.deleteToken(token)
+
+            // If they have a session already, then refresh it.  Otherwise, just return success.
+            if ( currentUser ) {
+                const session = await this.authenticationService.getSessionForUserId(token.userId)
+
+                // Log the user in.
+                request.session.user = session.user
+                request.session.file = session.file
+
+                response.status(200).json({
+                    session: session
+                })
+            } else {
+                response.status(200).json({
+                    userId: token.userId
+                })
+            }
+        }
+
+        // For reset-password, we don't log the user in when we validate the
+        // token because those flows have multiple steps. The user will be
+        // logged in at a later step.
+        else if ( token.type == 'reset-password' ) {
+            response.status(200).json({
+                userId: token.userId
+            })
+        }
+
+        else if ( token.type == 'invitation' ) {
+            await this.sessionService.regenerateSession(request)
+
+            // The whole invitation flow assumes the user is authenticated.  We
+            // can't remove that authentication with out totally rewiring the
+            // invitation flow.  They're going to be setting their password and
+            // everything in this case anyway (they don't have one yet).  So
+            // the risk is really that someone could register with someone
+            // else's email address.
+            //
+            // It's pretty small in this case, but we should really rewrite the
+            // invitation flow to remove that risk.  That's a future TODO though.
+            const session = await this.authenticationService.getSessionForUserId(token.userId)
+
+            // Log the user in.
+            request.session.user = session.user
+            request.session.file = session.file
+
+            response.status(200).json({
+                session: session
+            })
+        } else {
+            throw new ControllerError(403, 'not-authorized',
+                `Invalid token state!`,
+                `Your token is not valid. Please request a new one and try again.`
+            )
+
+        }
     }
 }
