@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -28,6 +28,7 @@ const Modal = function({ isVisible, setIsVisible, className, children, noClose, 
 
     const ref = useRef(null)
     const overlayRef = useRef(null)
+    const containerRef = useRef(null)
 
     const close = function(event) {
         event.preventDefault()
@@ -45,11 +46,17 @@ const Modal = function({ isVisible, setIsVisible, className, children, noClose, 
         if ( ref.current !== null ) {
             if ( ref.current.scrollHeight > ref.current.clientHeight ) {
                 return true
-            } 
+            }
         }
 
         return false
     }
+
+    // Set the container ref.
+    useEffect(() => {
+        const container = document.getElementById('root-layout')
+        containerRef.current = container
+    }, [])
 
     useEffect(() => {
         if ( isVisible === true ) {
@@ -83,7 +90,7 @@ const Modal = function({ isVisible, setIsVisible, className, children, noClose, 
         }
 
         return () => {
-            if ( overlayRef.current !== null ) { 
+            if ( overlayRef.current !== null ) {
                 overlayRef.current.removeEventListener('touchmove', preventScrolling)
             }
 
@@ -93,7 +100,10 @@ const Modal = function({ isVisible, setIsVisible, className, children, noClose, 
         }
     }, [ isVisible ])
 
-    const container = document.getElementById('root-layout')
+    if ( containerRef.current === null ) {
+        return null
+    }
+
     return isVisible ? createPortal(
             <div className={`modal-wrapper ${className ? className : ''}`} >
                 <div ref={overlayRef} className="modal__overlay" onClick={overlayClicked} aria-hidden="true"></div>
@@ -102,8 +112,8 @@ const Modal = function({ isVisible, setIsVisible, className, children, noClose, 
                     { children }
                 </div>
             </div>,
-            container 
-        ) : null 
+           containerRef.current
+        ) : null
 }
 
 export default Modal
