@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -19,7 +19,7 @@
  ******************************************************************************/
 import './Video.css'
 
-const Video = function({ className, src, poster, altText, ref, onLoad, onError }) {
+const Video = function({ className, src, preload, poster, altText, ref, onLoad, onError }) {
 
     if ( ! src) {
         console.error(new Error(`'src' is required!`))
@@ -30,9 +30,9 @@ const Video = function({ className, src, poster, altText, ref, onLoad, onError }
         <video
             ref={ref}
             className={`video ${className ? className : ''}`}
-            preload="metadata"
+            preload={ preload ? preload : "metadata" }
             aria-label={ altText !== undefined && altText !== null ? altText : undefined }
-            src={src} 
+            src={src}
             poster={poster}
             onLoadedMetadata={onLoad}
             onError={onError}
@@ -42,4 +42,4 @@ const Video = function({ className, src, poster, altText, ref, onLoad, onError }
     )
 }
 
-export default Video 
+export default Video
