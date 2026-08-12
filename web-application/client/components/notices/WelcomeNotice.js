@@ -21,13 +21,15 @@ import { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
 
+import logger from '/logger'
+
 import { useRequest } from '/lib/hooks/useRequest'
 
 import { patchUser } from '/state/User'
 
 import Button from '/components/ui/Button'
 import Modal from '/components/generic/modal/Modal'
-import Image from '/components/ui/Image'
+import Video from '/components/ui/Video'
 
 import './WelcomeNotice.css'
 
@@ -35,6 +37,7 @@ const WelcomeNotice = function({}) {
     const [isVisible, setIsVisible] = useState(true)
 
     const [ request, makeRequest] = useRequest()
+    const apiRoot = useSelector((state) => state.system.api)
 
     const navigate = useNavigate()
 
@@ -59,13 +62,51 @@ const WelcomeNotice = function({}) {
         }
     }, [ isVisible ])
 
+    let introVideoUrl = null
+    try {
+        const url = new URL('./assets/intro-video.mp4', apiRoot)
+        introVideoUrl = url.href
+    } catch (error) {
+        logger.error(`Failed to generate intro video url: `, error)
+    }
+
+    if ( introVideoUrl === null ) {
+        return (
+            <Modal isVisible={isVisible} setIsVisible={setIsVisible} noClose={true}>
+                <div className="welcome-notice">
+                    <h1>Welcome to Communities</h1>
+                    <p>
+                        Communities is designed to be a place for you
+                        to connect with your friends, family, and neighbors
+                        rather than a place to follow creators.
+                    </p>
+                    <p>
+                        To get started, invite some friends and start posting
+                        for each other!
+                    </p>
+                    <p>
+                        Communities is funded by user contributions so that we
+                        never have to show you ads and will never need to
+                        monetize your attention.  The ask is $10 / month, but
+                        it's a sliding scale and you don't have to contribute
+                        to be here.
+                    </p>
+                    <p>Welcome!  Thanks for being here and we'll see you around.</p>
+                    <div className="welcome-notice__close">
+                        <Button type="success" onClick={(e) => { setIsVisible(false); navigate('/account/contribute') }}>Contribute</Button>
+                        <Button type="primary" onClick={(e) => setIsVisible(false)}>Get Started</Button>
+                    </div>
+                </div>
+            </Modal>
+        )
+    }
+
     return (
         <Modal isVisible={isVisible} setIsVisible={setIsVisible} noClose={true}>
             <div className="welcome-notice">
                 <h1>Welcome to Communities</h1>
                 <p>Let us show you around!</p>
-                <Image className="welcome-notice__intro" src="/api/0.0.0/assets/daniel-headshot.jpg" crossOrigin={true} />
-                <p className="welcome-notice__ask">Communities is user funded. That means you stay in control and we never have to show you ads.  If you can chip in, please do!</p>
+                <Video className="welcome-notice__intro" src={introVideoUrl} preload="auto" />
                 <div className="welcome-notice__close">
                     <Button type="success" onClick={(e) => { setIsVisible(false); navigate('/account/contribute') }}>Contribute</Button>
                     <Button type="primary" onClick={(e) => setIsVisible(false)}>Get Started</Button>

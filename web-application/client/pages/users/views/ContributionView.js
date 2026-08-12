@@ -24,7 +24,7 @@ const ContributionView = function() {
                     We need users to contribute for this to work.
                 </p>
                 <p>
-                    Our bills are monthly, so we're asking users to contribute $10 / month, or whatever you can.
+                    Our bills are monthly, so we're asking users to contribute <strong>$10 / month</strong>, or whatever you can.
                 </p>
                 <p>
                     <strong>Beta:</strong> If you've already set up a contribution, <a href={portalURI}>click here</a> to manage it. If you have any issues, please reach out to <a href="mailto:contact@communities.social">contact@communities.social</a>.

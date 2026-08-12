@@ -50,13 +50,12 @@ module.exports = class FileController {
      */
     async getAsset(request, response) {
         const name = request.params.name
-        console.log(`Name: `, name)
 
         if ( ! name || typeof name !== 'string' ) {
             throw new NotFoundError(`Invalid asset requested: ${name}.`)
         }
 
-        const validAssets = [ 'daniel-headshot.jpg' ]
+        const validAssets = [ 'daniel-headshot.jpg', 'intro-video.mp4' ]
 
         if ( ! validAssets.includes(name) ) {
             throw new NotFoundError(`Invalid asset requested: ${name}.`)
