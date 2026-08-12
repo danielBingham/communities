@@ -67,6 +67,18 @@ module.exports = function(core) {
     })
 
     /******************************************************************************
+     * Assets
+     * ****************************************************************************/
+    const AssetController = require('./controllers/AssetController')
+    const assetController = new AssetController(core)
+
+    router.get('/assets/:name', rateLimit(core, 2400), function(request, response, next) {
+        assetController.getAsset(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    /******************************************************************************
      * Feature Flag Management and Migration Rest Routes
      *****************************************************************************/
     const FeatureController = require('./controllers/FeatureController')

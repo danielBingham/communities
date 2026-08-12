@@ -6,6 +6,8 @@
 .contribution .card {
     padding: 20px;
     text-align: center;
+    border-radius: 7px;
+    border: thin solid var(--card-border-color);
 }
 .contribution .card h2 {
     padding: 0.6em 0;

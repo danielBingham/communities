@@ -14,20 +14,28 @@ const ContributionView = function() {
     return (
         <div className="contribution-view">
             <div className="intro">
-                <p>Developing, maintaining, and moderating this platform all cost money.</p>
-                <p>We're not taking venture capital, not showing you ads, not
-                    selling your data, and <strong>not paywalling the platform</strong>.</p>
-                <p>We need users to contribute for this to work.</p>
-                <p>Communities uses a "pay what you can" monthly subscription.</p>
-                <p>We're asking you to contribute $10 / month, or whatever you can. <strong>You can use the platform without contributing.</strong>  But if you can contribute, please do!</p>
-                <p><strong>Beta:</strong> If you've already set up a contribution, <a href={portalURI}>click here</a> to manage it. If you have any issues, please reach out to <a href="mailto:contact@communities.social">contact@communities.social</a>.</p>
+                <p>
+                    Developing, maintaining, and moderating this platform all cost money.
+                </p>
+                <p>
+                    We're not taking venture capital, not showing you ads, and not selling your data.
+                </p>
+                <p>
+                    We need users to contribute for this to work.
+                </p>
+                <p>
+                    Our bills are monthly, so we're asking users to contribute <strong>$10 / month</strong>, or whatever you can.
+                </p>
+                <p>
+                    <strong>Beta:</strong> If you've already set up a contribution, <a href={portalURI}>click here</a> to manage it. If you have any issues, please reach out to <a href="mailto:contact@communities.social">contact@communities.social</a>.
+                </p>
             </div>
             <div className="contribution-grid">
                 <ContributionCard amount={5} explanation={"Cost of a cup of coffee."} />
                 <ContributionCard amount={10} explanation={"Sustainable contribution."} />
                 <ContributionCard amount={15} explanation={"Cost of streaming service."} />
             </div>
-           
+
             <div className="additional-contributions">
                 <a href="" onClick={(e) => { e.preventDefault(); setShowMore( ! showMore) }}>{ showMore ? 'Hide' : 'Show' } Supporter Levels</a>
             </div>

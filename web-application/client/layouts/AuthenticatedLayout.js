@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -27,6 +27,7 @@ import { isNativePlatform } from '/lib/native'
 
 import Header from '/components/header/Header'
 import Footer from '/components/header/Footer'
+import WelcomeNotice from '/components/notices/WelcomeNotice'
 
 import WelcomeSplash from '/pages/authentication/WelcomeSplash'
 import MobileWelcomeSplash from '/pages/authentication/MobileWelcomeSplash'
@@ -42,7 +43,7 @@ const State = {
 
 const AuthenticatedLayout = function() {
     const pendingUserId = useSelector((state) => state.authentication.pendingUserId)
-    const currentUser = useAuthentication() 
+    const currentUser = useAuthentication()
     useNotifications()
     useHistoryTracking()
 
@@ -53,11 +54,17 @@ const AuthenticatedLayout = function() {
         state = State.Authenticated
     }
 
+    // We don't want to show the welcome notice to people who already saw the
+    // old contribution notice (who will have notices.contribution set, but not
+    // notices.welcomeNotice).
+    let needsWelcome = currentUser && ! currentUser.notices?.welcomeNotice && ! currentUser.notices?.contribution
+
     if ( state === State.Authenticated ) {
         return (
             <>
             <Header />
             <main id="authenticated">
+                { needsWelcome && <WelcomeNotice /> }
                 <Outlet />
             </main>
             <Footer />

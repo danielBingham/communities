@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -45,7 +45,7 @@ export function useAuthentication() {
             if ( currentUser.birthdate !== '' && currentUser.birthdate !== null ) {
                 const birthdate = new Date(currentUser.birthdate)
 
-                const now = new Date() 
+                const now = new Date()
 
                 let age = now.getUTCFullYear() - birthdate.getUTCFullYear()
                 const month = now.getUTCMonth() - birthdate.getUTCMonth()
@@ -58,14 +58,14 @@ export function useAuthentication() {
                 if ( age < 18 ) {
                     // Age gate them.
                     navigate('/age-gate')
-                    return 
+                    return
                 } else {
                     // If they've passed the age gate, then delete their
                     // birthdate.
 
                     const userPatch = {
                         id: currentUser.id,
-                        birthdate: null 
+                        birthdate: null
                     }
                     makeRequest(patchUser(userPatch))
                 }
@@ -81,12 +81,6 @@ export function useAuthentication() {
                 const showTermsNotice = ! currentUser.notices?.termsOfService
                 if ( showTermsNotice ) {
                     navigate('/accept-terms-of-service')
-                    return
-                }
-
-                const showContributionNotice = ! currentUser.notices?.contribution
-                if ( showContributionNotice ) {
-                    navigate('/set-contribution')
                     return
                 }
 

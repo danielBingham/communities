@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -17,7 +17,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import { useRef, useEffect } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 
 import { XMarkIcon } from '@heroicons/react/16/solid'
@@ -25,9 +25,11 @@ import { XMarkIcon } from '@heroicons/react/16/solid'
 import './Modal.css'
 
 const Modal = function({ isVisible, setIsVisible, className, children, noClose, hideX}) {
+    const [container, setContainer] = useState(null)
 
     const ref = useRef(null)
     const overlayRef = useRef(null)
+    const containerRef = useRef(null)
 
     const close = function(event) {
         event.preventDefault()
@@ -45,11 +47,16 @@ const Modal = function({ isVisible, setIsVisible, className, children, noClose, 
         if ( ref.current !== null ) {
             if ( ref.current.scrollHeight > ref.current.clientHeight ) {
                 return true
-            } 
+            }
         }
 
         return false
     }
+
+    useEffect(() => {
+        const container = document.getElementById('root-layout')
+        setContainer(container)
+    }, [ ])
 
     useEffect(() => {
         if ( isVisible === true ) {
@@ -57,7 +64,7 @@ const Modal = function({ isVisible, setIsVisible, className, children, noClose, 
                 ref.current.focus()
             }
         }
-    }, [ isVisible ])
+    }, [ isVisible, container ])
 
     // Stifle scrolling on the background when the modal is open.
     //
@@ -83,7 +90,7 @@ const Modal = function({ isVisible, setIsVisible, className, children, noClose, 
         }
 
         return () => {
-            if ( overlayRef.current !== null ) { 
+            if ( overlayRef.current !== null ) {
                 overlayRef.current.removeEventListener('touchmove', preventScrolling)
             }
 
@@ -91,9 +98,12 @@ const Modal = function({ isVisible, setIsVisible, className, children, noClose, 
                 ref.current.removeEventListener('touchmove', preventScrolling)
             }
         }
-    }, [ isVisible ])
+    }, [ isVisible, container ])
 
-    const container = document.getElementById('root-layout')
+    if ( container === null ) {
+        return null
+    }
+
     return isVisible ? createPortal(
             <div className={`modal-wrapper ${className ? className : ''}`} >
                 <div ref={overlayRef} className="modal__overlay" onClick={overlayClicked} aria-hidden="true"></div>
@@ -102,8 +112,8 @@ const Modal = function({ isVisible, setIsVisible, className, children, noClose, 
                     { children }
                 </div>
             </div>,
-            container 
-        ) : null 
+           container
+        ) : null
 }
 
 export default Modal
