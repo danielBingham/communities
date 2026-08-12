@@ -64,7 +64,7 @@ const Modal = function({ isVisible, setIsVisible, className, children, noClose, 
                 ref.current.focus()
             }
         }
-    }, [ isVisible ])
+    }, [ isVisible, container ])
 
     // Stifle scrolling on the background when the modal is open.
     //
@@ -98,7 +98,7 @@ const Modal = function({ isVisible, setIsVisible, className, children, noClose, 
                 ref.current.removeEventListener('touchmove', preventScrolling)
             }
         }
-    }, [ isVisible ])
+    }, [ isVisible, container ])
 
     if ( container === null ) {
         return null

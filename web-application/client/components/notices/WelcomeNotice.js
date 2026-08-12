@@ -60,7 +60,7 @@ const WelcomeNotice = function({}) {
     }, [ isVisible ])
 
     if ( ! currentUser ) {
-        logger.error(new Error(`Attempt to show WelcomeNotice with no logged in user.`))
+        logger.error(`Attempt to show WelcomeNotice with no logged in user.`, new Error('Tried to show welcome notice to no user.'))
         return null
     }
 
