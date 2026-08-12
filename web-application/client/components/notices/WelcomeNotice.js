@@ -74,7 +74,7 @@ const WelcomeNotice = function({}) {
 
     if ( introVideoUrl === null || videoFailed === true) {
         return (
-            <Modal isVisible={isVisible} setIsVisible={setIsVisible} noClose={true}>
+            <Modal key="video-fallback" isVisible={isVisible} setIsVisible={setIsVisible} hideX={true}>
                 <div className="welcome-notice">
                     <h1>Welcome to Communities</h1>
                     <p>
@@ -88,12 +88,10 @@ const WelcomeNotice = function({}) {
                     </p>
                     <p>
                         Communities is funded by user contributions so that we
-                        never have to show you ads and will never need to
-                        monetize your attention.  The ask is $10 / month, but
-                        it's a sliding scale and you don't have to contribute
-                        to be here.
+                        never need to monetize your attention. The ask is $10 /
+                        month, but it's a sliding scale and you don't have to
+                        contribute to be here.
                     </p>
-                    <p>Welcome!  Thanks for being here and we'll see you around.</p>
                     <div className="welcome-notice__close">
                         <Button type="success" onClick={(e) => { setIsVisible(false); navigate('/account/contribute') }}>Contribute</Button>
                         <Button type="primary" onClick={(e) => setIsVisible(false)}>Get Started</Button>
@@ -104,7 +102,7 @@ const WelcomeNotice = function({}) {
     }
 
     return (
-        <Modal isVisible={isVisible} setIsVisible={setIsVisible} noClose={true}>
+        <Modal key="video" isVisible={isVisible} setIsVisible={setIsVisible} hideX={true}>
             <div className="welcome-notice">
                 <h1>Welcome to Communities</h1>
                 <p>Let us show you around!</p>
