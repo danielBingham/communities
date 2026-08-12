@@ -54,6 +54,9 @@ const AuthenticatedLayout = function() {
         state = State.Authenticated
     }
 
+    // We don't want to show the welcome notice to people who already saw the
+    // old contribution notice (who will have notices.contribution set, but not
+    // notices.welcomeNotice).
     let needsWelcome = currentUser && ! currentUser.notices?.welcomeNotice && ! currentUser.notices?.contribution
 
     if ( state === State.Authenticated ) {
