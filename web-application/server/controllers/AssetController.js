@@ -23,9 +23,9 @@ const path = require('node:path')
 const {  S3FileService } = require('@communities/backend')
 
 const ControllerError = require('../errors/ControllerError')
-const NotFoundError = require('../Errors/NotFoundError')
+const NotFoundError = require('../errors/NotFoundError')
 
-module.exports = class FileController {
+module.exports = class AssetController {
 
     constructor(core) {
         this.core = core

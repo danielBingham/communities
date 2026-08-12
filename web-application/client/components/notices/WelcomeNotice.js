@@ -35,6 +35,7 @@ import './WelcomeNotice.css'
 
 const WelcomeNotice = function({}) {
     const [isVisible, setIsVisible] = useState(true)
+    const [videoFailed, setVideoFailed] = useState(false)
 
     const [ request, makeRequest] = useRequest()
     const apiRoot = useSelector((state) => state.system.api)
@@ -42,10 +43,6 @@ const WelcomeNotice = function({}) {
     const navigate = useNavigate()
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
-    if ( ! currentUser ) {
-        console.error(new Error(`Attempt to show WelcomeNotice with no logged in user.`))
-        return null
-    }
 
     useEffect(function() {
         if ( ! isVisible ) {
@@ -62,6 +59,11 @@ const WelcomeNotice = function({}) {
         }
     }, [ isVisible ])
 
+    if ( ! currentUser ) {
+        logger.error(new Error(`Attempt to show WelcomeNotice with no logged in user.`))
+        return null
+    }
+
     let introVideoUrl = null
     try {
         const url = new URL('./assets/intro-video.mp4', apiRoot)
@@ -70,7 +72,7 @@ const WelcomeNotice = function({}) {
         logger.error(`Failed to generate intro video url: `, error)
     }
 
-    if ( introVideoUrl === null ) {
+    if ( introVideoUrl === null || videoFailed === true) {
         return (
             <Modal isVisible={isVisible} setIsVisible={setIsVisible} noClose={true}>
                 <div className="welcome-notice">
@@ -106,7 +108,7 @@ const WelcomeNotice = function({}) {
             <div className="welcome-notice">
                 <h1>Welcome to Communities</h1>
                 <p>Let us show you around!</p>
-                <Video className="welcome-notice__intro" src={introVideoUrl} preload="auto" />
+                <Video className="welcome-notice__intro" src={introVideoUrl} preload="auto" onError={() => setVideoFailed(true)} />
                 <div className="welcome-notice__close">
                     <Button type="success" onClick={(e) => { setIsVisible(false); navigate('/account/contribute') }}>Contribute</Button>
                     <Button type="primary" onClick={(e) => setIsVisible(false)}>Get Started</Button>

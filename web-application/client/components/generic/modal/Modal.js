@@ -17,7 +17,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import { useRef, useEffect } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 
 import { XMarkIcon } from '@heroicons/react/16/solid'
@@ -25,6 +25,7 @@ import { XMarkIcon } from '@heroicons/react/16/solid'
 import './Modal.css'
 
 const Modal = function({ isVisible, setIsVisible, className, children, noClose, hideX}) {
+    const [container, setContainer] = useState(null)
 
     const ref = useRef(null)
     const overlayRef = useRef(null)
@@ -52,11 +53,10 @@ const Modal = function({ isVisible, setIsVisible, className, children, noClose, 
         return false
     }
 
-    // Set the container ref.
     useEffect(() => {
         const container = document.getElementById('root-layout')
-        containerRef.current = container
-    }, [])
+        setContainer(container)
+    }, [ ])
 
     useEffect(() => {
         if ( isVisible === true ) {
@@ -100,7 +100,7 @@ const Modal = function({ isVisible, setIsVisible, className, children, noClose, 
         }
     }, [ isVisible ])
 
-    if ( containerRef.current === null ) {
+    if ( container === null ) {
         return null
     }
 
@@ -112,7 +112,7 @@ const Modal = function({ isVisible, setIsVisible, className, children, noClose, 
                     { children }
                 </div>
             </div>,
-           containerRef.current
+           container
         ) : null
 }
 
