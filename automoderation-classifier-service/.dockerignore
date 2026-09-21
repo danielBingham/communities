@@ -1,0 +1,15 @@
+# Local development artifacts that must never end up in the image.
+.venv/
+venv/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+test/
+pyproject.toml
+requirements-dev.txt
+.env
+.env.*
+README.md

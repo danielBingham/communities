@@ -1,0 +1,74 @@
+# =============================================================================
+#  Communities -- automoderation-classifier-service
+#  Development tool configuration
+# =============================================================================
+#  Tool settings live here, in TOML, rather than in pyrightconfig.json and
+#  pytest.ini.  TOML allows comments, which JSON does not -- an editor will
+#  flag a commented pyrightconfig.json even though pyright itself parses it
+#  fine.
+#
+#  Nothing here is needed to run the service.  It is not copied into the
+#  Docker image.
+# =============================================================================
+
+[tool.pyright]
+# Points pyright at the .venv the README tells you to create, so it resolves
+# fastapi, pydantic and pytest instead of reporting them as missing imports.
+#
+# This is a convenience, not a requirement: with the virtual environment
+# activated, pyright finds those packages on its own.  It matters when you run
+# pyright without activating, as an editor or a pre-commit hook might.
+#
+# Paths are relative to this file, so pyright must be run from this directory
+# (the same place you run pytest and mypy from).  Running it from the
+# repository root will not pick this up.
+#
+# Every type checking rule is left at pyright's default.  Nothing is loosened.
+venvPath = "."
+venv = ".venv"
+exclude = ["**/__pycache__", "**/.venv", "**/.pytest_cache"]
+
+[tool.ruff]
+# The service targets Python 3.11+ (the image uses 3.12).  Stating it here
+# means ruff knows `dict[str, int]` and `X | None` are available and stops
+# suggesting the typing module's deprecated aliases.
+target-version = "py311"
+line-length = 88
+
+[tool.ruff.lint]
+# Selected explicitly rather than left to ruff's default, because the default
+# set changes between ruff releases -- an upgrade would otherwise start
+# reporting new findings on code nobody touched.
+select = [
+    "E",    # pycodestyle
+    "F",    # pyflakes
+    "I",    # import sorting
+    "UP",   # pyupgrade -- modern annotation syntax
+    "B",    # bugbear
+    "C4",   # comprehensions
+    "RET",  # return statements
+    "SIM",  # simplifications
+    "TRY",  # exception antipatterns
+]
+
+ignore = [
+    # "Avoid specifying long messages outside the exception class."
+    #
+    # Deliberately off.  Our exceptions carry the context needed to act on
+    # them -- which config file was missing and what to set, which classifier
+    # name was unrecognized and what the valid ones are.  Satisfying this rule
+    # means hoisting those messages into the exception classes, where they
+    # lose the runtime detail that makes them worth reading.  Operators
+    # reading a stack trace at 2am benefit more from the message than we
+    # benefit from the consistency.
+    "TRY003",
+]
+
+[tool.pytest.ini_options]
+# The service is laid out as top-level packages (api, classifiers, config,
+# services) rather than a src/ package, matching the worker's flat layout.
+# Put the service root on the path so tests import the same way the app does.
+pythonpath = ["."]
+testpaths = ["test"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"

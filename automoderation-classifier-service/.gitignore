@@ -1,0 +1,12 @@
+# Python local development artifacts.
+#
+# The repo root .gitignore covers node_modules and .env files; this covers the
+# Python equivalents for this service.
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/

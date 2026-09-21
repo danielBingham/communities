@@ -1,0 +1,21 @@
+# Development and test dependencies.
+#
+# Install on top of requirements.txt:
+#
+#     pip install -r requirements.txt -r requirements-dev.txt
+
+pytest==8.3.4
+pytest-asyncio==0.25.0
+httpx==0.28.1
+
+# Linting and type checking.  Pinned like everything else so that a tool
+# upgrade is a deliberate commit rather than a surprise batch of new findings
+# on code nobody touched -- ruff in particular changes its default rule set
+# between releases, which is why pyproject.toml selects rules explicitly.
+#
+# types-PyYAML is what keeps mypy from reporting "Library stubs not installed
+# for yaml" -- PyYAML ships no inline types.
+ruff==0.16.8
+mypy==1.14.1
+pyright==1.1.391
+types-PyYAML==6.0.12.20241230

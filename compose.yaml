@@ -6,6 +6,10 @@
 #  the shared workspace packages bind-mounted in, so edits on the host reload
 #  and recompile inside the containers.
 #
+#  `automoderation-classifier` is a decoupled Python/FastAPI service and
+#  follows the same pattern: production image, started with uvicorn's reloader
+#  against bind-mounted source.
+#
 #  Redis image is run from a default image, but the postgres image must be
 #  built separately following instructions found in the
 #  `documentation/running-locally.md`.
@@ -157,6 +161,61 @@ services:
       - ./packages/session:/src/node_modules/@communities/session
       # --- Temp directory for image uploads ---
       - ./web-application/tmp:/src/tmp
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # Automoderation classifier — built from
+  # automoderation-classifier-service/Dockerfile, run with uvicorn's reloader.
+  #
+  # A decoupled Python/FastAPI service.  Deliberately has no database, Redis,
+  # worker, or AWS access and no dependency on the @communities/* packages:
+  # Communities calls it over HTTP and gets a score back.  That's the whole
+  # contract.  It therefore has no `depends_on` and needs no CodeArtifact
+  # secret to build.
+  #
+  # Reachable from the other containers at http://automoderation-classifier:8081
+  # and from the host at http://localhost:8081.
+  # ---------------------------------------------------------------------------
+  automoderation-classifier:
+    build:
+      context: ./automoderation-classifier-service
+      dockerfile: Dockerfile
+    environment:
+      # Only the variables the service actually reads.  It has no NODE_ENV
+      # equivalent and no AWS credentials because it needs neither.
+      LOG_LEVEL: ${LOG_LEVEL:-debug}
+      PORT: "8081"
+    ports:
+      - "8081:8081"        # FastAPI
+    # The production ENTRYPOINT is ["python","main.py"]; override it to run
+    # uvicorn's reloader against the bind-mounted source.  `--reload-include`
+    # picks up the YAML too, so editing config/config.yaml restarts the
+    # service the same way editing code does.
+    entrypoint:
+      - sh
+      - -c
+      - >
+        python -m uvicorn main:app
+        --host 0.0.0.0 --port 8081
+        --reload --reload-include '*.yaml'
+    volumes:
+      # --- service source (live reload) ---
+      - ./automoderation-classifier-service/main.py:/src/main.py
+      - ./automoderation-classifier-service/api:/src/api
+      - ./automoderation-classifier-service/classifiers:/src/classifiers
+      - ./automoderation-classifier-service/config:/src/config
+      - ./automoderation-classifier-service/services:/src/services
+    healthcheck:
+      # python:3.12-slim ships no curl, so check the endpoint with urllib.
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request; urllib.request.urlopen('http://localhost:8081/health')
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 15s
     restart: unless-stopped
 
 # The CodeArtifact token is read from the CODEARTIFACT_AUTH_TOKEN host env var

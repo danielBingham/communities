@@ -1,0 +1,28 @@
+# =============================================================================
+#  Communities -- automoderation-classifier-service
+#  Service configuration
+# =============================================================================
+#  Covers how the service runs: where it binds, how it logs, and what it will
+#  accept.
+#
+#  It does NOT cover which classifiers exist or which ones run.  Every
+#  classifier is registered in services/classification.py (CLASSIFIERS) and
+#  loaded at startup; callers pick the ones they want per request with the
+#  `classifiers` field on POST /classify.  A request that names none gets
+#  DEFAULT_CLASSIFIERS.
+#
+#  Any of the settings below can be overridden by environment variable:
+#  HOST, PORT, LOG_LEVEL.
+# =============================================================================
+
+service:
+  name: automoderation-classifier-service
+  host: 0.0.0.0
+  port: 8081
+  log_level: INFO
+
+  # Matches the post body limit in
+  # packages/shared/validation/entities/Post.js.  Longer content is rejected
+  # with a 422 rather than silently truncated -- scoring half a post and
+  # reporting it as a score for the whole post would be worse than failing.
+  max_content_length: 10000

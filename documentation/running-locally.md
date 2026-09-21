@@ -91,3 +91,25 @@ From there, it should automatically reload and recompile with any code changes.
 If you make any dependency changes (anything requiring `npm install`) you will
 need to rebuild the environment.  That includes changes to any of the
 `@communities` package dependencies.  See "Building the Environment".
+
+## The Automoderation Classifier Service
+
+`automoderation-classifier-service` is a decoupled Python / FastAPI service
+that scores content against our content policies.  It runs in the compose
+stack as `automoderation-classifier` on port 8081.
+
+It is not like the other services.  It needs no CodeArtifact token, no AWS
+credentials, and no Parameter Store entries, because it has no database
+access, no worker access, and no `@communities/*` dependencies.  It also has
+no `depends_on`, so it comes up without waiting on Postgres or Redis.  That
+means you can build and run it on its own:
+
+```
+docker compose build automoderation-classifier
+docker compose up automoderation-classifier
+```
+
+You can also run it outside Docker against a local Python virtual
+environment, which is usually the faster loop when working on classifiers.
+Setup instructions are in
+[`automoderation-classifier-service/README.md`](../automoderation-classifier-service/README.md).
