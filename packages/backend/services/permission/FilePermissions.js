@@ -72,17 +72,21 @@ module.exports = class FilePermissions {
                 // Get the full usage information for this file.  This will tell us how
                 // the file is used, which will tell us what permissions we need to
                 // retrieve.
+                //
+                // TODO This isn't quite right.  FIX ME!
                 const results = await this.core.database.query(`
                     SELECT
                         post_files.post_id as "postId",
                         groups.id as "groupId",
                         users.id as "userId",
-                        link_previews.id as "linkPreviewId"
+                        link_previews.id as "linkPreviewId",
+                        thumbs.id as "thumbId
                     FROM files
                         LEFT OUTER JOIN post_files ON files.id = post_files.file_id
                         LEFT OUTER JOIN groups ON files.id = groups.file_id
                         LEFT OUTER JOIN users ON files.id = users.file_id
                         LEFT OUTER JOIN link_previews ON files.id = link_previews.file_id
+                        LEFT OUTER JOIN files as thumbs ON files.id = files.thumb_id
                     WHERE files.id = $1
                 `, [ context.file.id ])
 
