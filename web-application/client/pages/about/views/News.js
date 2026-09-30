@@ -406,7 +406,7 @@ const posts = {
                 <p>
                     Enshittification is ultimately a social problem. It comes
                     from the concentrated power and misaligned goals created by
-                    equity ownership. We need a social solution to solve it.
+                    investor ownership. We need a social solution to solve it.
                 </p>
                 <h2>Protocols over Platforms?</h2>
                 <p>
@@ -423,7 +423,7 @@ const posts = {
                 <p>
                     This theory has been most aggressively applied to social
                     media. Years of effort has created an ecosystem of
-                    federated platforms. The fediverse is a small but lively
+                    federated platforms. The fediverse is a small and lively
                     place. But it hasn't been able to put much of a dent in the
                     big social platforms.
                 </p>
@@ -433,8 +433,8 @@ const posts = {
                 </p>
                 <h3>It's All About the User Experience</h3>
                 <p>
-                    User experience is how using a product feels: how easy,
-                    fast, and clear it is. In a software or digital
+                    User experience is how using a product feels. It's how
+                    easy, fast, and clear it is. In a software or digital
                     infrastructure context, the largest contributor to the user
                     experience is the software’s interface.
                 </p>
@@ -478,7 +478,7 @@ const posts = {
                     and abandon the fediverse.
                 </p>
                 <p>
-                    Since defeating enshittification is ultimately requires
+                    Since defeating enshittification ultimately requires
                     people to choose a non-enshittified alternative when a big
                     player enshittifies, this problem undermines the whole
                     project.
@@ -489,8 +489,9 @@ const posts = {
                     instance selection. But it has dodged it by acting like a
                     standard platform and as a result its network is 99%
                     centered on the Bluesky App. It may run on an open
-                    protocol, but the network is currently centralized. We'll
-                come back to that later.
+                    protocol, but the network is currently centralized. Which
+                    means we don't get the benefits of the protocol. We'll come
+                    back to that later.
                 </p>
                 <h3>Discovery</h3>
                 <p>
@@ -521,7 +522,7 @@ const posts = {
                     enough and concentrated enough that it basically still acts
                     like a centralized platform. It remains to be seen what
                     will happen to discovery if the network successfully
-                    distributes or scales beyond that.
+                    scales and distributes.
                 </p>
                 <h3>The Twitter Exodus: A Case Study</h3>
                 <p>
@@ -534,7 +535,7 @@ const posts = {
                     announced in April of 2022. As the buyout advanced, it absorbed small waves of
                     new users. But many people reported trying it and not being able to wrap their
                     heads around it or find their communities on it. It peaked at around 2.5M
-                    monthly active users  in December 2022 and activity has slowly dropped since
+                    monthly active users in December 2022 and activity has slowly dropped since
                     then.
                 </p>
                 <p>
@@ -546,16 +547,16 @@ const posts = {
                     Threads beat Bluesky to the punch, launching to the public
                     in July 2023. Because Threads tied accounts to Instagram,
                     it was able to bring over 100M new users in a single week.
-                    Usage immediately dropped off, then began steadily growing.
+                    Usage immediately dropped off, but then began steadily growing.
                 </p>
                 <p>
                     Bluesky opened up public registration in February of 2024 and passed 4 million
                     users in the same month. By the time Bluesky opened up, Threads was at 130M
-                    MAU.
+                    monthly active users.
                 </p>
                 <p>
-                    All three have steadily continued to add users. Mastodon currently sits around
-                    10M users, with about 1M active. Bluesky sits around 40M users, with 10M
+                    As it currently stands, Mastodon has around 10M users, with
+                    about 1M active. Bluesky sits around 40M users, with 10M
                     active. Threads has 500M monthly active users.
                 </p>
                 <p>
@@ -566,11 +567,22 @@ const posts = {
                     platforms.
                 </p>
                 <p>
+                    In order for us to get the benefits of protocols and
+                    interoperability, the network needs to be reasonably
+                    distributed and decentralized. The whole idea is that using
+                    the protocol to reduce switching costs can foster
+                    competition. If a network centralizes into an oligopoly,
+                    then the biggest players can effectively control the
+                    network. In the worst case, they can simply shut down the
+                    protocol's federation and close off the portion of the
+                    network they control.
+                </p>
+                <p>
                     More than 99% of users on the Bluesky network still use
                     Bluesky's PDS. Nearly all of Bluesky's users use it through
                     bsky.app and treat it as a centralized platform. Threads
-                    never completed its ActivityPub federation and now
-                    appears to be killing it.
+                    never completed its ActivityPub federation and now appears
+                    to be leaving it unfinished at best or killing it at worst.
                 </p>
                 <p>
                     There are complicating factors to the adoption timeline
@@ -603,8 +615,9 @@ const posts = {
                     as it grows?
                 </p>
                 <p>
-                    Well, we already have an example of an open, interoperable
-                    protocol and it's still centralized and enshittifying.
+                    Maybe. But we already have an example of an open,
+                    interoperable protocol and it's still centralized and
+                    enshittifying.
                 </p>
                 <h3>Email: A Counterexample</h3>
                 <p>
@@ -628,7 +641,8 @@ const posts = {
                 <p>
                     In spite of that, some new competitors like Proton Mail and
                     Fastmail have managed to break into the market. But their
-                    market share remains small fraction of the biggest players.
+                    market share remains a small fraction of the biggest
+                    players.
                 </p>
                 <p>
                     Even with an interoperable, open protocol that makes
@@ -637,7 +651,7 @@ const posts = {
                     person.
                 </p>
                 <p>
-                    As a result, email is enshittifying.
+                    And email is enshittifying.
                 </p>
                 <p>
                     Google used to scan all emails sent or received from its
@@ -666,9 +680,9 @@ const posts = {
                 <p>
                     Enshittification is ultimately a social problem. When we
                     hand control of businesses to the people who merely
-                    provided the capital, the result is that all other concerns
-                    will tend to be set aside in pursuit of returns on that
-                    capital.
+                    provided the capital, the investors, the result is that all
+                    other concerns will tend to be set aside in pursuit of
+                    returns on that capital.
                 </p>
                 <p>
                     The idea behind the protocols movement is that it's the
@@ -683,9 +697,10 @@ const posts = {
                     enshittification follows.
                 </p>
                 <p>
-                    Notice how appliances rarely last more than 5 years without
-                    breaking these days? That's enshittification in a market
-                    with no network effects and very low switching costs.
+                    Notice how quickly appliances seem to break these days?
+                    That's enshittification in a market with no network effects
+                    and very low switching costs. It still became an oligopoly
+                    and enshittified.
                 </p>
                 <p>
                     Market forces do not and have not kept it in check. So
@@ -694,8 +709,13 @@ const posts = {
                     problems inherent in creating distributed systems.
                 </p>
                 <p>
-                    We can't solve this with a technical solution. We need a
-                    social solution.
+                    We can't solve this with a technical solution. It's a
+                    social problem, created by concentrating power and control
+                    in the hands of small group of unaccountable people, investors.
+                </p>
+                <p>
+                    We need a social solution. We need to change who's in
+                    charge and how they are held accountable.
                 </p>
                 <p>
                     This article is the first in a series. We'll address the
