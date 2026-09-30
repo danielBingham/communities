@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -25,6 +25,331 @@ import NewsPost from '/components/about/NewsPost'
 import './News.css'
 
 const posts = {
+    '9-30-2026-social-solutions-for-enshittification': {
+        title: 'Social Solutions for Enshittification',
+        date: '09/30/2026',
+        author: 'Daniel Bingham',
+        content: (
+            <>
+                <p>
+                    Enshittification. It's when companies make products and
+                    services worse in pursuit of profits.
+                </p>
+                <p>
+                    The term was popularized by Cory Doctorow, who first wrote
+                    about it in the context of social media.
+                </p>
+                <p>
+                    The pro-social tech movement has coallesced around protocols
+                    and interoperability as the answer to it. In the first
+                    article in this series, we argued that Protocols Aren't the
+                    Answer.
+                </p>
+                <p>
+                    Enshittification is a social problem. It's caused by giving
+                    investors control. When the investors control an
+                    organization, the pursuit of returns will dominate.
+                    Enshittification follows.
+                </p>
+                <p>
+                    The protocols movement is an attempt to use market forces to
+                    keep investors in check, by removing the network effects
+                    inherent in certain kinds of platforms. But we know this
+                    doesn't work, because email is the quintessential protocol
+                    and email is enshittifying.
+                </p>
+                <p>
+                    Protocols are a technical solution to a social problem. We
+                    need a social solution. We need to change who's in charge
+                    and how they are held accountable.
+                </p>
+                <h2>Benevolent Oligarchy</h2>
+                <p>
+                    One approach is to put a select group of stewards in charge.
+                </p>
+                <p>
+                    This is usually done thorugh a nonprofit organization. The
+                    nonprofit's board is the group of stewards. The nonprofit
+                    either fully governs the platforms or has a majority share
+                    in the businesses that do.
+                </p>
+                <p>
+                    This is the Wikimedia Foundation and Wikipedia. The Proton
+                    Foundation and Proton. Signal, Ghost, each of these has
+                    created a nonprofit that ultimately controls the platform.
+                </p>
+                <p>
+                    The board is usually self-perpetuating, meaning the current
+                    board chooses its own members as it grows or members turn
+                    over.
+                </p>
+                <p>
+                    The problem with this model is that it's essentially a
+                    benevolent dictatorship. If the board is corrupted,
+                    captured, or gets out of step with the needs of the
+                    community there isn't really a recourse. There's no
+                    mechanism for the community to hold the board accountable.
+                    You're depending on those handful of board members to stay
+                    on mission.
+                </p>
+                <p>
+                    While we can point to successful cases of the stewardship
+                    model (Wikipedia being the most prominent), we can also
+                    point to clear failures that show the problems with the
+                    model.
+                </p>
+                <p>
+                    Couchsurfing started out as a nonprofit, built by
+                    volunteers. It attempted to form a 501(c)(3), but when those
+                    plans failed it didn't stay a nonprofit and instead
+                    converted to a standard Delaware C Corp by simply
+                    transferring the assets (the platform) out of the nonprofit.
+                    Volunteers protested. Users protested. But ultimately they
+                    had no recourse. From there, the cycle of enshittification
+                    began.
+                </p>
+                <p>
+                    OpenAI is another example. It started as a 501(c)(3)
+                    nonprofit and spun out a child public benefit corporation.
+                    When the nonprofit board tried to replace the CEO they were
+                    forced to backdown and resign under pressure by investors in
+                    the benefit corporation. Ultimately, it's pretty clear who's
+                    now in control of OpenAI.
+                </p>
+                <p>
+                    The stewardship model is only as good as the stewards. The
+                    actual structural protections are very weak.
+                </p>
+                <p>
+                    We can do better.
+                </p>
+                <h2>Users in Charge</h2>
+                <p>
+                    Another approach is to put the user in charge. This is the
+                    consumer cooperative approach.
+                </p>
+                <p>
+                    Outside of tech this is probably one of the most widely
+                    spread alternative business forms. There are tens of
+                    thousands of consumer cooperatives in the world.
+                </p>
+                <p>
+                    Consumer cooperatives have been around a long time. We have
+                    a lot of data on their enshittification resistance and they
+                    have not proven very resistant.
+                </p>
+                <p>
+                    Numerous consumer cooperatives have had their boards get
+                    captured and been converted back into traditional
+                    businesses. MEC and REI both provide prominent examples of
+                    boards that essentially took (or are taking) the co-op out
+                    from under the membership.
+                </p>
+                <p>
+                    Others have such low democratic engagement that the board
+                    can simply do whatever it wants, and it often chooses to
+                    behave no differently from a traditional investor board.
+                    Rural electric cooperatives provide a clear example of this.
+                </p>
+                <p>
+                    Democracy is hard. Most people do not have the time, energy,
+                    or willingness to do the work necessary to hold their
+                    grocery store or electric utility accountable. It's not hard
+                    for the boards of these businesses to simply stop being
+                    transparent and for the average consumer member to stop
+                    asking questions. By the time members realize something's
+                    wrong, it's often too late.
+                </p>
+                <p>
+                    In many of the cases where consumer cooperatives enshittify,
+                    it is often the cooperative's workers who are the first to
+                    sound the alarm. Which leads us to the next possibility.
+                </p>
+                <h2>Workers in Charge</h2>
+                <p>
+                    We could put workers in charge, and in many ways this
+                    approach shows the most promise.
+                </p>
+                <p>
+                    Cory Doctorow himself described workers as the last line of
+                    defense against enshittification:
+                </p>
+                <blockquote>
+                    <p>
+                        But for bosses, there's a downside to motivating your
+                        workers with appeals to a sense of mission, namely: your
+                        workers will feel a sense of mission. So when you ask
+                        them to enshittify the products they ruined their health
+                        to ship, workers will experience a sense of profound
+                        moral injury, respond with outrage, and threaten to
+                        quit.
+                    </p>
+                </blockquote>
+                <blockquote>
+                    <p>
+                        Thus tech workers themselves were the final bulwark
+                        against enshittification.
+                    </p>
+                </blockquote>
+                <p>
+                    Worker cooperatives have similarly been around for centuries
+                    have proven quite resistant to enshittification.
+                </p>
+                <p>
+                    The Mondragon Corporation has been around since the 1950s.
+                    It is a federation of worker cooperatives based in the
+                    Basque region of Spain. It has about 70,000 workers across
+                    hundreds of cooperatives spanning industry, retail, finance,
+                    and knowledge.
+                </p>
+                <p>
+                    Its products have a high standard for quality. Its
+                    cooperatives act as good neighbors to their communities. And
+                    it treats workers very well, in no small part because the
+                    workers are in control.
+                </p>
+                <p>
+                    Another example is Cooperative Home Care Associates, a
+                    worker cooperative in-home care agency with over 1600
+                    members. It has been around since 1985, over 40 years, and
+                    continues to provide far better working conditions and
+                    better care than the rest of the industry.
+                </p>
+                <p>
+                    The main failure mode of consumer cooperatives is a failure
+                    of democratic engagement leading to a loss of accountability
+                    for leadership. This happens much less in worker
+                    cooperatives.
+                </p>
+                <p>
+                    Workers have a much stronger incentive to engage with their
+                    workplace's democracy. They spend 8 hours a day or more at
+                    work. They are intimiately familiar with what's happening in
+                    their workplaces. And People's workplaces are often one of
+                    the most important communities in their lives. On top of
+                    that, their livelihoods -- their ability to feed, cloth, and
+                    house themselves -- are on the line.
+                </p>
+                <p>
+                    Where consumers often don't engage with cooperative
+                    democracy because they simply don't have the time or the
+                    bandwidth, workers can give themselves the time.
+                </p>
+                <p>
+                    But enshittification is about increasing returns on
+                    investments, profits. When workers are in charge, don't they
+                    still have incentives to enshittify to increase their take
+                    home pay? In theory yes, but in practice, we rarely see
+                    this.
+                </p>
+                <p>
+                    Workers are much closer to the work, and therefore the
+                    customers than the investors. They have to actually face the
+                    customer. Recieve customer feedback. And experience the
+                    impact of their work on the people who they serve. People
+                    tend to take pride in their work. They want to do something
+                    meaningful that helps other people. Like Cory says, workers
+                    don't generally want to enshittify their work.
+                </p>
+                <p>
+                    And what we actually tend to see in worker cooperatives is
+                    that pay tends to be a little bit lower than in similar
+                    capitalist businesses. This is because the workers, when
+                    given control, value things other than pay. They will give
+                    themselves pay cuts in a downturn to avoid layoffs. And will
+                    choose other benefits over pay in an upturn. There have been
+                    cases of worker cooperatives keeping prices, and their own
+                    pay, lower even when the market is pricing similar goods
+                    higher.
+                </p>
+                <p>
+                    On average, the evidence shows pretty strongly that workers
+                    are good stewards of their work.
+                </p>
+                <p>
+                    That doesn't mean that worker cooperatives can't enshittify.
+                    The most common ways in which they do enshittify is to
+                    simply cut off new membership and start hiring non-member
+                    workers. Mondragon did this. It started out sourcing work to
+                    lower wage countries and didn't bring those workers into the
+                    cooperative.
+                </p>
+                <p>
+                    The other way in which a worker cooperative could, in
+                    theory, enshittify is if the workers choose to sell out,
+                    which is not out the realm of possibility.
+                </p>
+                <p>
+                    So if our goal is to build an organization that is maximally
+                    resistent to enshittification, we can probably do even
+                    better than a worker cooperative.
+                </p>
+                <h2>Balance of Powers</h2>
+                <p>
+                    Multi-stakeholder cooperatives allow multiple stakeholder
+                    groups to share power. This would allow us to draw the best
+                    elements from all three previous approaches and to compose
+                    them in a way that balances their strengths and
+                    vulnerabilities.
+                </p>
+                <p>
+                    Nonprofits are only as good as their boards. Consumer
+                    cooperatives allow the users to elect the board, but users
+                    tend to have low democratic engagement. Worker cooperatives
+                    allow the workers to elect the board and tend to have very
+                    active democracies that generally resist enshittification,
+                    but workers sometimes sell out or stop extending the
+                    franchise.
+                </p>
+                <p>
+                    By creating a nonprofit where workers elect half the board
+                    and users elect the other half, with the bylaws providing a
+                    strong constitution, we can compose all of these forms into
+                    a structure maximally resistant to enshittification.
+                </p>
+                <p>
+                    Workers can steer the ship most of the time, with users
+                    given a strong voice in the direction the workers take. Most
+                    of the time, workers will resist enshittification on their
+                    own, but if they are tempted to sell, users will almost
+                    certainly stop them.
+                </p>
+                <p>
+                    The nonprofit's bylaws can form the constitution and can
+                    stipulate that all workers are included as members and given
+                    a vote. If we want to add additional layers of protection,
+                    we can ensure directly democratic processes provide an
+                    escape hatch to the representative democracy of the board:
+                    recall elections, referenda, and ratification of any bylaw
+                    changes.
+                </p>
+                <p>
+                    This mixture of worker and user control, representative and
+                    direct democracy, all housed in a nonprofit gives us a
+                    structure maximally resistant to enshittification.
+                </p>
+                <p>
+                    But why doesn't this exist already? Can we actually build an
+                    organization like this? We're trying, but we could use your
+                    help! We'll explain more in the next article: Can We Build a
+                    Tech Mondragon?
+                </p>
+                <p>
+                    <em>
+                        Communities is a cooperative social network platform
+                        seeking to de-enshittify social media and, if we succeed
+                        at that, the wider web. We're working to create a
+                        democratically governed multi-stakeholder cooperative
+                        umbrella that would incubate multiple platforms to
+                        provide democraticly governed alternatives to many
+                        enshittified platforms. We're funded by user-donations.
+                        If you want to help, we're currently recruiting an
+                        Advisory Board.
+                    </em>
+                </p>
+            </>
+        )
+    },
     '3-6-2026-release-0-11-0': {
         title: 'Release 0.11.0',
         date: '03/06/2026',
@@ -55,7 +380,7 @@ const posts = {
                     uploading files (you will now see an error if you upload an
                     empty file) and fixes for the styling on very small screens
                     (there were some places on the list views that caused
-                    horizontal scrolling on screens less than 400px wide). 
+                    horizontal scrolling on screens less than 400px wide).
                 </p>
                 <p>
                     Next up we're going to address the issues with iOS's lack
@@ -75,7 +400,7 @@ const posts = {
         content: (
             <>
                 <p>
-                    Release 0.10.0 has been deployed!  
+                    Release 0.10.0 has been deployed!
                 </p>
                 <p>
                     I think we managed it with no downtime (or very little
@@ -103,7 +428,7 @@ const posts = {
                     We support uploads up to 700 MB (~2 mins for raw phone
                     video) and processed videos up to 70 MB.  That means if you
                     pre-process it, you can potentially get it significantly
-                    longer (I've gotten it up to 5 mins).  
+                    longer (I've gotten it up to 5 mins).
                 </p>
                 <p>
                     There are still lots of improvements we can make.  Right
@@ -146,7 +471,7 @@ const posts = {
                     attacks are pretty new and are very scary.  A bunch of
                     organizations much larger than us (and with good
                     reputations for handling security) were breached in the
-                    fall through these attacks. 
+                    fall through these attacks.
                 </p>
                 <p>
                     We were not breached, but we needed to make sure we won't
@@ -190,10 +515,10 @@ const posts = {
             <>
                 <p>
                     Welcome to all the new folks and hello to everyone who’s
-                    been here a minute! 
+                    been here a minute!
                 </p>
                 <p>
-                    It’s time for another transparency update.  
+                    It’s time for another transparency update.
                 </p>
                 <p>
                     These are posts where we try to pull back the curtain on
@@ -210,7 +535,7 @@ const posts = {
                     HAH! Foundation!) We’re currently at $560 / month in
                     contributions from 71 recurring contributors and we raised
                     an additional $125 in January from an additional 6 one time
-                    contributors (Thank you!) 
+                    contributors (Thank you!)
                 </p>
                 <p>
                     We need to hit $1500 / month in recurring contributions by
@@ -219,7 +544,7 @@ const posts = {
                     that, the site will stay up, but I'll drop back to part
                     time and development will slow substantially.  We need to
                     hit $8000 / month in recurring contributions for me to be
-                    able to continue full time indefinitely. 
+                    able to continue full time indefinitely.
                 </p>
 
                 <h2>Long Version</h2>
@@ -231,7 +556,7 @@ const posts = {
                     one working on it full time.  I’m being helped by a few
                     part time freelancers, a scattering of volunteers, and a
                     cadre of enthusiastic supporters who are each contributing
-                    as they can.  
+                    as they can.
                 </p>
                 <p>
                     Communities is currently structured as an LCC with me as the
@@ -242,7 +567,7 @@ const posts = {
                     once we achieve financial sustainability.  We have a little
                     more work to do on it, but I’m hoping to have it in place
                     in the next few weeks and we’ll share it on the platform
-                    once we have it.  
+                    once we have it.
                 </p>
                 <p>
                     We’re currently in Open Beta, meaning there’s still a lot
@@ -255,7 +580,7 @@ const posts = {
                     Up through November 2025, Communities’ development was
                     mostly funded by my savings and some significant
                     contributions from family. As of the end of November 2025,
-                    we had pretty much used up that runway.  
+                    we had pretty much used up that runway.
                 </p>
                 <p>
                     In December 2025, we got a $20,000 grant from the <a href="https://ahhahfoundation.org">Ah HAH!
@@ -298,7 +623,7 @@ const posts = {
                     when they were $525, and this month in January, which is on
                     track to be ~$600.  As we grow, the costs to run the
                     production environment will grow, while the cost to run the
-                    staging environment should stay about the same. 
+                    staging environment should stay about the same.
                 </p>
                 <p>
                     Our biggest cost is development time.  I can keep working
@@ -327,7 +652,7 @@ const posts = {
                     scenario would be finding enough early adopters willing to join
                     and support the beta!  At our current contribution rate we need
                     18,000 people to join the platform in order to hit baseline
-                    financial sustainability.  
+                    financial sustainability.
                 </p>
                 <p>
                     Given all this, I’m going to spend a good chunk of February
@@ -446,7 +771,7 @@ const posts = {
         content: (
             <>
                 <p>
-                    Now that Subgroups is out, I have a moment to take a breather and talk about the planned cooperative conversion.  
+                    Now that Subgroups is out, I have a moment to take a breather and talk about the planned cooperative conversion.
                 </p>
                 <p>
                     Currently, Communities is a single-member LLC.  I'm the
@@ -465,11 +790,11 @@ const posts = {
                     legal costs.
                 </p>
                 <p>
-                    Our goal is to form a multi-stakeholder cooperative.  
+                    Our goal is to form a multi-stakeholder cooperative.
                 </p>
                 <h2>Aside on Cooperatives: Skip if you're familiar with them.</h2>
                 <p>
-                    Not familiar with cooperatives?  Lets do a quick crash course.  
+                    Not familiar with cooperatives?  Lets do a quick crash course.
                 </p>
                 <p>
                     Cooperatives are democratically run businesses.  There are a bunch of different kinds of cooperatives, but you can broadly categorize them along two axes:
@@ -500,7 +825,7 @@ const posts = {
                 <p>
                     The vast majority of consumer and worker cooperatives are
                     structured as for-profit businesses and the members have to
-                    purchase ownership in some way.  
+                    purchase ownership in some way.
                 </p>
                 <p>
                     However, there are also cooperatives that are structured as
@@ -512,15 +837,15 @@ const posts = {
                     on governance matters and got to vote for the board, for as
                     long as they lived in the co-op.
                 </p>
-                <h2>End of Aside on Cooperatives.</h2> 
+                <h2>End of Aside on Cooperatives.</h2>
                 <p>
                     The goal for Communities is to become a non-profit,
                     multi-stakeholder cooperative.  In multi-stakeholder
                     cooperatives, there are multiple groups of members who
-                    collaborate to govern the cooperative.  
+                    collaborate to govern the cooperative.
                 </p>
                 <p>
-                    In Communities' case, the groups will be the workers on the one hand and the users on the other hand.  
+                    In Communities' case, the groups will be the workers on the one hand and the users on the other hand.
                 </p>
                 <p>
                     We're aiming for Communities to become a non-profit, so no
@@ -544,16 +869,16 @@ const posts = {
                     low turnout elections?
                 </p>
                 <p>
-                    We've got some research and thinking to do before we put the structure in place.  
+                    We've got some research and thinking to do before we put the structure in place.
                 </p>
                 <p>
-                    So here's the current plan.  
+                    So here's the current plan.
                 </p>
                 <p>
                     Right now, we're still heads down on building.  We have
                     limited runway in which to get this thing off the ground,
                     so all our time is going towards building the platform and
-                    letting people know it exists. 
+                    letting people know it exists.
                 </p>
                 <p>
                     If we're able to achieve financial lift off, or if the
@@ -562,7 +887,7 @@ const posts = {
                     Once we have enough capital to pay the lawyers, we'll do
                     the legal research into which of the 501 structures is the
                     best fit. Then we'll form that structure and recruit an
-                    initial board.  
+                    initial board.
                 </p>
                 <p>
                     The first board will be appointed, rather than elected, and
@@ -571,7 +896,7 @@ const posts = {
                     years), after which new bylaws must be ratified and
                     elections for a new board held.  They will be tasked with
                     collecting feedback from users and workers and the bylaws
-                    will be ratified by the users and workers.  
+                    will be ratified by the users and workers.
                 </p>
                 <p>
                     This gives us the best chance of getting the initial bylaws
@@ -586,12 +911,12 @@ const posts = {
                     of a new democracy.  We can focus on building the platform
                     and, once there's a community ready to govern it, we can
                     turn our focus to navigating the creation of a new
-                    democracy. 
+                    democracy.
                 </p>
                 <p>
                     So that's the current plan.  If you have thoughts on the
                     plan, the planned structure, or any of the open questions,
-                    don't hesitate to share them!  
+                    don't hesitate to share them!
                 </p>
                 <p>
                     This thing belongs to all of us :)
@@ -609,7 +934,7 @@ const posts = {
                     Release 0.9.0 went live today!
                 </p>
                 <p>
-                    This release includes Subgroups, the ability to create Groups within your Groups.  
+                    This release includes Subgroups, the ability to create Groups within your Groups.
                 </p>
                 <p>
                     Subgroups are fully fledged Groups.  Depending on their
@@ -665,7 +990,7 @@ const posts = {
                     for Announcements that only admins and moderators can post
                     to.  Or you could create Subgroups for different topics of
                     conversation within your group to better organize the
-                    feeds.  
+                    feeds.
                 </p>
                 <p>
                     As always, new releases means a risk of new bugs.  This one
@@ -677,7 +1002,7 @@ const posts = {
                     Members, Approval, or Restricted) and they can also have
                     variety of member types (invited, requesting access, members,
                     moderators, admins, parent group member, parent group admin)
-                    and all of these interplay with each other.  
+                    and all of these interplay with each other.
                 </p>
                 <p>
                     When you put it all together there are well over 100
@@ -739,7 +1064,7 @@ const posts = {
                     We've removed the "Add Link" button and instead will
                     auto-generate link previews when you drop a link into the
                     text box.  This brings Communities in line with most other
-                    social platform's behaviors.  
+                    social platform's behaviors.
                 </p>
                 <p>
                     We will also no longer show an error when we can't generate
@@ -751,7 +1076,7 @@ const posts = {
                     the AI crawlers, also affect things like our servers
                     pulling the information we need to show link previews.
                     Things are changing so fast that an approach that works on
-                    Monday might fail by Friday.  
+                    Monday might fail by Friday.
                 </p>
                 <p>
                     Given that, it doesn't make sense to show an error message
@@ -759,7 +1084,7 @@ const posts = {
                     the post and we'll record the failure on the backend.
                     We'll do our best to keep up, but especially right now,
                     trying to get previews working on individual sites doesn't
-                    seem like the best use of our development time.  
+                    seem like the best use of our development time.
                 </p>
                 <p>
                     This also fixes the bug where links that contained `@`
@@ -823,15 +1148,15 @@ const posts = {
                     the curtain as much as possible.
                 </p>
                 <p>
-                    Let's start with finances.  
+                    Let's start with finances.
                 </p>
                 <p>
                     As of this writing we're bringing in $200 / month from 22
                     contributors.  With 257 users, that's a contribution rate
-                    of ~8.5% and an average contribution of ~$9. 
+                    of ~8.5% and an average contribution of ~$9.
                 </p>
                 <p>
-                    We're working towards several financial milestones. 
+                    We're working towards several financial milestones.
                 </p>
                 <p>
                     The first is that we're bringing in enough contributions to
@@ -859,7 +1184,7 @@ const posts = {
                     The third is the ability to hire a minimal team: a Quality
                     Analyst and another Software Engineer.  For that we need
                     about $50k /month, or 5,000 people contributing at an
-                    average of $10 /month. 
+                    average of $10 /month.
                 </p>
                 <p>
                     The fourth milestone is the ability to hire a complete
@@ -879,7 +1204,7 @@ const posts = {
                     people) and 10% of those people contribute at an average of
                     $10 / month (less than most of us are paying for
                     streaming), then we're there and then some.  We've got the
-                    complete team needed for the platform to really thrive.  
+                    complete team needed for the platform to really thrive.
                 </p>
                 <p>
                     To give you some idea of the scaling power of a small
@@ -897,7 +1222,7 @@ const posts = {
                     thoughts on that as they evolve.
                 </p>
                 <p>
-                    What happens if we don't reach those contribution levels?  
+                    What happens if we don't reach those contribution levels?
                 </p>
                 <p>
                     We'll keep the platform up as long as we can afford to.  As
@@ -905,14 +1230,14 @@ const posts = {
                     on the platform full time.  From November 2024 to May 2025,
                     I worked on it part time, getting up at 5 am to make
                     progress on it before starting my day job and then going to
-                    bed with the children.  
+                    bed with the children.
                 </p>
                 <p>
                     I can continue to work on it full time for another month or two
                     before I need to shift to job hunting at least part time.
                     I'm exploring raising non-extractive capital from various
                     cooperative financing institutions, if that comes through
-                    that will extend the runway.  
+                    that will extend the runway.
                 </p>
                 <p>
                     If I have to shift back to part time, I will continue to work
@@ -924,7 +1249,7 @@ const posts = {
                     development.
                 </p>
                 <p>
-                    So, if you'd like this platform to succeed, how can you help?  
+                    So, if you'd like this platform to succeed, how can you help?
                 </p>
                 <p>
                     The first thing you can do is share the platform far and wide.
@@ -946,7 +1271,7 @@ const posts = {
                     truly beautiful.
                 </p>
                 <p>
-                    So that's the finances.  
+                    So that's the finances.
                 </p>
                 <p>
                     In the next post, we'll share the plans for the nonprofit, cooperative conversion and what we need to make that happen.
@@ -974,7 +1299,7 @@ const posts = {
                         You can now block users from their profile page.
                         Blocked users won't be able to see your posts or
                         your user profile, you will still be able to see
-                        their profile, but not their posts.  
+                        their profile, but not their posts.
                     </li>
                     <li>
                         We now ask for your birthdate on registration.
@@ -1004,7 +1329,7 @@ const posts = {
                 <p>
                     This release includes some significant UX improvements
                     as well as all the changes necessary to support the
-                    mobile apps.  
+                    mobile apps.
                 </p>
                 <p>
                     I'll be submitting the Android and IOS apps for review
@@ -1016,14 +1341,14 @@ const posts = {
                     Aside from the mobile apps themselves, this release includes:
                 </p>
                 <ul>
-                    <li> 
-                        A design overhaul to make the views and the sub-navigation menus more consistent.  
+                    <li>
+                        A design overhaul to make the views and the sub-navigation menus more consistent.
                     </li>
                     <li>
                         All member and group lists should now be searchable.
                     </li>
                     <li>
-                        Each view includes a relevant "create" button ("Create Post" for feeds, "Invite Friends" for friends, "Create Group" for groups). 
+                        Each view includes a relevant "create" button ("Create Post" for feeds, "Invite Friends" for friends, "Create Group" for groups).
                     </li>
                     <li>
                         A significant overhaul of the invite UX.  You can now invite friends from a comma separate list of email addresses. It should be much easier to invite them now!
@@ -1040,7 +1365,7 @@ const posts = {
                         implemented them for desktop.  You can turn them off in the
                         notification settings.  You'll also get notifications
                         instantly on both mobile and desktop without having to
-                        refresh. 
+                        refresh.
                     </li>
                     <li>
                         These posts!  Site Admins can now make Announcement
