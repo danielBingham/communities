@@ -85,7 +85,7 @@ const posts = {
                 </p>
                 <p>
                     The problem with this model is that it's essentially a
-                    benevolent dictatorship. If the board is corrupted,
+                    benevolent oligarchy. If the board is corrupted,
                     captured, or gets out of step with the needs of the
                     community there isn't really a recourse. There's no
                     mechanism for the community to hold the board accountable.
@@ -351,26 +351,26 @@ const posts = {
         )
     },
     '9-29-2026-protocols-arent-the-answer': {
-        title: "Protocols Aren't the Answer",
+        title: "Protocols Aren't The Answer",
         date: '09/29/2026',
         author: 'Daniel Bingham',
         content: (
             <>
                 <p>
-                    Enshittification. If you haven't heard the word, it's probably not hard for you
-                    to guess what it means.
+                    Enshittification. If you haven't heard the word, it's
+                    probably not hard for you to guess what it means.
                 </p>
                 <p>
-                    Companies are making their products and services worse in the name of ever greater
-                    profits.
+                    Companies are making their products and services worse in
+                    the name of ever greater profits.
                 </p>
                 <p>
-                    Meta breaking our ability to connect with our friends by filling our feeds
-                    with ads and spam? Enshittification.
+                    Meta breaking our ability to connect with our friends by
+                    filling our feeds with ads and spam? Enshittification.
                 </p>
                 <p>
-                    Google breaking our ability to find what we need by filling search with ads and
-                    spam? Enshittification.
+                    Google breaking our ability to find what we need by filling
+                    search with ads and spam? Enshittification.
                 </p>
                 <p>
                     Amazon filling its marketplace with cheap crap? Enshittification.
@@ -378,18 +378,47 @@ const posts = {
                 <p>
                     The question remains, how do we stop it?
                 </p>
-                <h2>Protocols over Platforms</h2>
                 <p>
-                    Much of the pro-social tech movement has coalesced around
-                    an answer: protocols and interoperability. If we move to
-                    interoperable platforms that use open protocols, we can
-                    make it easy for people to switch platforms while bringing
-                    their data and networks with them.
+                    Cory Doctorow, who popularized the term 'enshittification',
+                    has proposed four main forces that can hold
+                    enshittification in check: competition, regulation,
+                    interoperability, and worker power.
                 </p>
                 <p>
-                    If we make it easy to switch, then market forces will keep
-                    the abuse in check. As soon as one platform starts to
-                    enshittify, we just move to another.
+                    Much of the pro-social tech movement has coalesced around
+                    protocols and interoperability as the primary force. If we
+                    move to interoperable platforms that use open protocols, we
+                    can make it easy for people to switch platforms while
+                    bringing their data and networks with them.
+                </p>
+                <p>
+                    But there are serious, unsolved challenges involved in
+                    building on open protocols. And even if we can overcome
+                    those challenges, we already know that they won't be enough
+                    to prevent centralization and keep enshittification in
+                    check.
+                </p>
+                <p>
+                    Email is the quintessential open protocol that has
+                    been in use for decades with almost complete adoption, and
+                    it has centralized and is enshittifying.
+                </p>
+                <p>
+                    Enshittification is ultimately a social problem. It stems
+                    from the concentrated power and misaligned goals created by
+                    equity ownership. We need a social solution to solve it.
+                </p>
+                <h2>Protocols over Platforms?</h2>
+                <p>
+                    The theory behind interoperability is that if we build on
+                    open protocols that allow platforms to federate and operate
+                    as a single network, then we can substantially reduce the
+                    cost of switching between platforms.
+                </p>
+                <p>
+                    If we make it easy to switch, then competition and market
+                    forces will keep the abuse in check. As soon as one
+                    platform starts to enshittify, we just move to another.
                 </p>
                 <p>
                     This theory has been most aggressively applied to social
@@ -399,16 +428,8 @@ const posts = {
                     big social platforms.
                 </p>
                 <p>
-                    Why?
-                </p>
-                <p>
-                    The internet started as an interoperable, decentralized network built around
-                    open protocols. From that starting point it evolved to where most people
-                    interact with it through a small collection of massive, centralized platforms.
-                </p>
-                <p>
-                    We can't take it back to its decentralized roots without addressing the reasons
-                    it centralized in the first place.
+                    Why? It all comes down to user experience: the reason the
+                    internet centralized in the first place.
                 </p>
                 <h3>It's All about the User Experience</h3>
                 <p>
@@ -428,66 +449,77 @@ const posts = {
                 </p>
                 <h3>High Cognitive Load, Right Off the Bat</h3>
                 <p>
-                    When you join a Fediverse platform the first thing you have to do is choose
-                    your instance. It's a process with a high cognitive load and, in that moment,
-                    the Fediverse loses a lot of people.
+                    When you join a Fediverse platform the first thing you have
+                    to do is choose your instance. It's a process with a high
+                    cognitive load and, in that moment, the Fediverse loses a
+                    lot of people.
                 </p>
                 <p>
                     Anecdotally, I'm a software engineer. I'm fully capable of
                     running my own Mastodon instance. Hell, I'm capable of
-                    <em>building my own Mastodon</em>. I have a Mastodon
-                    account, but I'm just on the default (mastodon.social).
+                    &nbsp;<em>building my own Mastodon</em>. I have a Mastodon
+                    account, but I'm just on the default instance (mastodon.social).
                     There are instances that would be a better fit for me, but
                     I didn't find them when I set about to join Mastodon and I
                     haven't had the bandwidth to move since I discovered them.
                 </p>
                 <p>
-                    It's not a lack of willingness, knowledge, or desire: it's purely a
-                    prioritization problem. I have too many other priorities and "change my
-                    instance" never bubbles to the top. For people with less technical expertise
-                    and experience, the thing that never bubbles to the top is "figure out this
-                    Mastodon thing".
+                    It's not a lack of willingness, knowledge, or desire: it's
+                    purely a prioritization problem. I have too many other
+                    priorities and "change my instance" never bubbles to the
+                    top. For people with less technical expertise and
+                    experience, the thing that never bubbles to the top is
+                    "figure out this Mastodon thing".
                 </p>
                 <p>
-                    For many people, perhaps most people, the challenge of chosing an instance
-                    alone is enough to make them give up and abandon the fediverse.
+                    For many people, perhaps most people, the challenge of
+                    chosing an instance alone is enough to make them give up
+                    and abandon the fediverse.
                 </p>
                 <p>
-                    Since defeating enshittification is ultimately about getting people to choose a
-                    non-enshittified alternative when a big player enshittifies, this problem
-                    undermines the whole project.
+                    Since defeating enshittification is ultimately requires
+                    people to choose a non-enshittified alternative when a big
+                    player enshittifies, this problem undermines the whole
+                    project.
                 </p>
                 <p>
-                    It's worth noting that Bluesky, using the AT Protocol, has largely dodged the
-                    problem of cognitive load created by instance selection. But it has dodged it
-                    by acting like a standard platform and as a result its network is 99% centered
-                    on the Bluesky PDS and App. It may run on an open protocol, but the network is
-                    currently centralized. We'll come back to that later.
+                    It's worth noting that Bluesky, using the AT Protocol, has
+                    largely dodged the problem of cognitive load created by
+                    instance selection. But it has dodged it by acting like a
+                    standard platform and as a result its network is 99%
+                    centered on the Bluesky App. It may run on an open
+                    protocol, but the network is currently centralized. We'll
+                come back to that later.
                 </p>
                 <h3>Discovery</h3>
                 <p>
-                    Discovery is your ability to find what you're looking for. It's an unsolved,&nbsp;
-                    <a href="https://xkcd.com/1425/">Very Hard Problem</a> in distributed systems. In the
-                    early open web it took Google, a massive centralized search behemoth to solve
-                    it.
+                    Discovery is your ability to find what you're looking for.
+                    It's an unsolved,&nbsp; <a
+                    href="https://xkcd.com/1425/">Very Hard Problem</a> in
+                    distributed systems. In the early open web it took Google,
+                    a massive centralized search behemoth to solve it.
                 </p>
                 <p>
-                    Centralized social media won over decentralized blogging and personal websites
-                    partly because it made it easy to find the people you were looking for and the
-                    content they produced.
+                    Centralized social media won over decentralized blogging
+                    and personal websites partly because it made it easy to
+                    find the people you were looking for and the content they
+                    produced.
                 </p>
                 <p>
-                    Mastodon has basically punted on this problem. When you search on Mastodon,
-                    you're only searching the parts of the fediverse your instance knows about. If
-                    the user or post you're looking for isn't already on your instance, you
-                    won't find it. This is extremely confusing to new users.
+                    Mastodon has basically punted on this problem. When you
+                    search on Mastodon, you're only searching the parts of the
+                    fediverse your instance knows about. If the user or post
+                    you're looking for isn't already known to your instance,
+                    you won't find it. This is extremely confusing to new
+                    users.
                 </p>
                 <p>
-                    The AT Protocol on which Bluesky runs uses Relays to try to solve this problem.
-                    But right now the network is small enough and concentrated enough that it
-                    basically still acts like a centralized platform. It remains to be seen what
-                    will happen to discovery if the network successfully distributes or scales
-                    beyond that.
+                    The AT Protocol on which Bluesky runs uses Relays to try to
+                    solve this problem. But right now the network is small
+                    enough and concentrated enough that it basically still acts
+                    like a centralized platform. It remains to be seen what
+                    will happen to discovery if the network successfully
+                    distributes or scales beyond that.
                 </p>
                 <h3>The Twitter Exodus: A Case Study</h3>
                 <p>
@@ -569,40 +601,75 @@ const posts = {
                     as it grows?
                 </p>
                 <p>
-                    Well, we already have an example of a perfectly
-                    decentralized protocol with a network far more
-                    decentralized than Bluesky is likely to achieve -- one
-                    closer to Mastodon's current level of decentralization --
-                    and it's still enshittifying.
+                    Well, we already have an example of an open, interoperable
+                    protocol and it's still centralized and enshittifying.
                 </p>
                 <h3>Email: A Counter Example</h3>
                 <p>
-                    Email is the quintessential open protocol. In theory, it should be fully
-                    distributed.
+                    Email is the quintessential open protocol. In theory, it
+                    should be fully distributed.
                 </p>
                 <p>
-                    Yet email is heavily centralized. Google claims over 3 billion email addresses
-                    which would give it nearly half of all estimated addresses. Apple, Tencent, and
-                    Microsoft each hold 1 billion, half a billion, and half a billion respectively.
+                    Yet email is heavily centralized. Google claims over 3
+                    billion email addresses which would give it nearly half of
+                    all estimated addresses. Apple, Tencent, and Microsoft each
+                    hold 1 billion, half a billion, and half a billion
+                    respectively.
                 </p>
                 <p>
-                    These few providers can use that centralization to control the whole network.
-                    Trying to self-host an email server is a nightmare these days. And email is
-                    enshittifying.
+                    These few providers can use that centralization to control
+                    the whole network. Trying to self-host an email server is a
+                    nightmare these days. The big providers simply won't accept
+                    your email unless you jump through an ever growing list of
+                    hoops (introduced in the name of stopping spam).
                 </p>
                 <p>
-                    Google used to scan all emails sent or received from its Gmail accounts for ad
-                    targeting, without even the implicit consent of users not on Gmail accounts.
-                    They (supposedly) stopped in 2017, but it was the courts that stopped them, not
-                    the protocol.
+                    In spite of that, some new competitors like Proton Mail and
+                    Fastmail have managed to break into the market. But their
+                    market share remains small fraction of the biggest players.
+                    Because the switching costs are still high.
                 </p>
                 <p>
-                    Google and Microsoft have both continued to find creative and frustrating ways
-                    to shove ads into their hosted inboxes. And recently Google introduced its
-                    Gemini AI to people's inboxes without consent. While it's not clear whether
-                    Google is using email data to train Gemini (Google says "no", a class action
-                    lawsuit says "yes"), it is definitely feeding people's emails through the LLM
-                    to power various "smart features".
+                    Anecdotally, I've been on Google Workspace with my own
+                    domain since its inception. For months, I've been meaning
+                    to switch to Proton Mail. In theory, it should be straight
+                    forward: create a new Proton email with an alias for my
+                    domain, swap my domain over, and download my old emails
+                    from workplace. It should be nearly seamless. But that's
+                    still ours of work and large pieces of that require a
+                    significant amount of technical know-how. With everything
+                    else I have to do, I just haven't gotten to it.
+                </p>
+                <p>
+                    For someone with less technical know-how, who's just on
+                    the default gmail.com, it requires giving up your old
+                    address and propagating an entirely new one.
+                </p>
+                <p>
+                    Even with an interoperable, open protocol that makes
+                    switching, in theory, very doable, the cognitive load and
+                    friction of switching are still too high for the average
+                    person.
+                </p>
+                <p>
+                    As a result, email is enshittifying.
+                </p>
+                <p>
+                    Google used to scan all emails sent or received from its
+                    Gmail accounts for ad targeting, without even the implicit
+                    consent of users not on Gmail accounts. They (supposedly)
+                    stopped in 2017, but it was the legal pressure that stopped
+                    them, not the protocol.
+                </p>
+                <p>
+                    Google and Microsoft have both continued to find creative
+                    and frustrating ways to shove ads into their hosted
+                    inboxes. And recently Google introduced its Gemini AI to
+                    people's inboxes without consent. While it's not clear
+                    whether Google is using email data to train Gemini (Google
+                    says "no", a class action lawsuit says "yes"), it is
+                    definitely feeding people's emails through the LLM to power
+                    various "smart features".
                 </p>
                 <p>
                     It's unclear how far the enshittification of email will go, strong privacy laws
@@ -611,21 +678,36 @@ const posts = {
                 </p>
                 <h2>A Technical Solution to a Social Problem?</h2>
                 <p>
-                    Enshittification is ultimately a social problem. When we hand control of
-                    businesses to the people who merely provided the capital, the result is that
-                    all other concerns will be set aside in pursuit of returns on that capital.
+                    Enshittification is ultimately a social problem. When we
+                    hand control of businesses to the people who merely
+                    provided the capital, the result is that all other concerns
+                    will tend to be set aside in pursuit of returns on that
+                    capital.
                 </p>
                 <p>
-                    The idea behind the protocols movement is that it's the network effects created
-                    by tech that really power the enshittification. Protocols can, in theory, break those
-                    network effects and allow market forces to keep capital in check.
+                    The idea behind the protocols movement is that it's the
+                    network effects and the related switching costs that really
+                    power the enshittification. Protocols can, in theory, break
+                    those network effects and allow market forces to keep capital
+                    in check.
                 </p>
                 <p>
-                    But oligopolies and monopolies form all the time in the market, without network
-                    effects or lock in. And enshittification follows. Market forces do not and have
-                    not kept it in check. So there's no reason to believe that a return to open
-                    protocols will, even if we can solve the user experience problems inherent in
-                    creating distributed systems.
+                    But oligopolies and monopolies form all the time in the
+                    market, without network effects or lock in. And
+                    enshittification follows.
+                </p>
+                <p>
+                    Noticed how appliances rarely last more than 5 years
+                    without breaking these days? That's enshittification in a
+                    market with no network effects and very low switching costs
+                    (just buy from a different company next time you buy an
+                    appliance).
+                </p>
+                <p>
+                    Market forces do not and have not kept it in check. So
+                    there's no reason to believe that a return to open
+                    protocols will, even if we can solve the user experience
+                    problems inherent in creating distributed systems.
                 </p>
                 <p>
                     We can't solve this with a technical solution. We need a social solution.
@@ -856,7 +938,7 @@ const posts = {
                     as they can.
                 </p>
                 <p>
-                    Communities is currently structured as an LCC with me as the
+                    Communities is currently structured as an LLC with me as the
                     sole member.  We’re working on getting an operating
                     agreement in place that locks us into the cooperative
                     transition.  It prevents me from selling either the LLC or
@@ -1091,7 +1173,7 @@ const posts = {
                 </p>
                 <h2>Aside on Cooperatives: Skip if you're familiar with them.</h2>
                 <p>
-                    Not familiar with cooperatives?  Lets do a quick crash course.
+                    Not familiar with cooperatives?  Let's do a quick crash course.
                 </p>
                 <p>
                     Cooperatives are democratically run businesses.  There are a bunch of different kinds of cooperatives, but you can broadly categorize them along two axes:
