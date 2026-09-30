@@ -25,9 +25,9 @@ import NewsPost from '/components/about/NewsPost'
 import './News.css'
 
 const posts = {
-    '9-30-2026-social-solutions-for-enshittification': {
+    '9-29-2026-social-solutions-for-enshittification': {
         title: 'Social Solutions for Enshittification',
-        date: '09/30/2026',
+        date: '09/29/2026',
         author: 'Daniel Bingham',
         content: (
             <>
