@@ -380,9 +380,8 @@ const posts = {
                 </p>
                 <p>
                     Cory Doctorow, who popularized the term 'enshittification',
-                    has proposed four main forces that can hold
-                    enshittification in check: competition, regulation,
-                    interoperability, and worker power.
+                    argues that four forces keep it in check: competition,
+                    regulation, interoperability, and worker power.
                 </p>
                 <p>
                     Much of the pro-social tech movement has coalesced around
@@ -394,17 +393,18 @@ const posts = {
                 <p>
                     But there are serious, unsolved challenges involved in
                     building on open protocols. And even if we can overcome
-                    those challenges, we already know that they won't be enough
-                    to prevent centralization and keep enshittification in
-                    check.
+                    those challenges, we already know that interoperability
+                    isn't enough to prevent centralization and keep
+                    enshittification in check.
                 </p>
                 <p>
-                    Email is the quintessential open protocol that has
-                    been in use for decades with almost complete adoption, and
-                    it has centralized and is enshittifying.
+                    Email is the quintessential interoperable, open protocol.
+                    It has been in use for decades and has almost complete
+                    adoption. It has centralized into an oligopoly and is being
+                    enshittified.
                 </p>
                 <p>
-                    Enshittification is ultimately a social problem. It stems
+                    Enshittification is ultimately a social problem. It comes
                     from the concentrated power and misaligned goals created by
                     equity ownership. We need a social solution to solve it.
                 </p>
@@ -683,11 +683,9 @@ const posts = {
                     enshittification follows.
                 </p>
                 <p>
-                    Noticed how appliances rarely last more than 5 years
-                    without breaking these days? That's enshittification in a
-                    market with no network effects and very low switching costs
-                    (just buy from a different company next time you buy an
-                    appliance).
+                    Notice how appliances rarely last more than 5 years without
+                    breaking these days? That's enshittification in a market
+                    with no network effects and very low switching costs.
                 </p>
                 <p>
                     Market forces do not and have not kept it in check. So
@@ -696,11 +694,13 @@ const posts = {
                     problems inherent in creating distributed systems.
                 </p>
                 <p>
-                    We can't solve this with a technical solution. We need a social solution.
+                    We can't solve this with a technical solution. We need a
+                    social solution.
                 </p>
                 <p>
-                    This article is the first in a series.  We'll address the potential social
-                    solutions in the next one: Social Solutions for Enshittification.
+                    This article is the first in a series. We'll address the
+                    potential social solutions in the next one: Social
+                    Solutions for Enshittification.
                 </p>
                 <p>
                     <em>
