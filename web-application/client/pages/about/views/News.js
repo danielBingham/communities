@@ -376,7 +376,7 @@ const posts = {
                     Amazon filling its marketplace with cheap crap? Enshittification.
                 </p>
                 <p>
-                    The question remains, how do we stop it?
+                    The question is: how do we stop it?
                 </p>
                 <p>
                     Cory Doctorow, who popularized the term 'enshittification',
@@ -422,8 +422,8 @@ const posts = {
                 </p>
                 <p>
                     This theory has been most aggressively applied to social
-                    media and years of effort has created an ecosystem of
-                    federated platforms. The fediverse is a small, but lively
+                    media. Years of effort has created an ecosystem of
+                    federated platforms. The fediverse is a small but lively
                     place. But it hasn't been able to put much of a dent in the
                     big social platforms.
                 </p>
@@ -431,14 +431,15 @@ const posts = {
                     Why? It all comes down to user experience: the reason the
                     internet centralized in the first place.
                 </p>
-                <h3>It's All about the User Experience</h3>
+                <h3>It's All About the User Experience</h3>
                 <p>
-                    User experience refers to the experience the user has while using a product. In
-                    a software or digital infrastructure context, the largest contributor to the
-                    user experience is the software’s interface.
+                    User experience is how using a product feels: how easy,
+                    fast, and clear it is. In a software or digital
+                    infrastructure context, the largest contributor to the user
+                    experience is the software’s interface.
                 </p>
                 <p>
-                    In interface design, we have the related concepts of “friction” and "cognitive
+                    In interface design, we have the related concepts of "friction" and "cognitive
                     load". Friction is anything that slows a user down: clicking, typing, thinking,
                     or waiting. Cognitive load is how hard you have to think about a piece of
                     software while using it.
@@ -449,9 +450,9 @@ const posts = {
                 </p>
                 <h3>High Cognitive Load, Right Off the Bat</h3>
                 <p>
-                    When you join a Fediverse platform the first thing you have
+                    When you join a fediverse platform the first thing you have
                     to do is choose your instance. It's a process with a high
-                    cognitive load and, in that moment, the Fediverse loses a
+                    cognitive load and, in that moment, the fediverse loses a
                     lot of people.
                 </p>
                 <p>
@@ -460,7 +461,7 @@ const posts = {
                     &nbsp;<em>building my own Mastodon</em>. I have a Mastodon
                     account, but I'm just on the default instance (mastodon.social).
                     There are instances that would be a better fit for me, but
-                    I didn't find them when I set about to join Mastodon and I
+                    I didn't find them when I set out to join Mastodon and I
                     haven't had the bandwidth to move since I discovered them.
                 </p>
                 <p>
@@ -473,7 +474,7 @@ const posts = {
                 </p>
                 <p>
                     For many people, perhaps most people, the challenge of
-                    chosing an instance alone is enough to make them give up
+                    choosing an instance alone is enough to make them give up
                     and abandon the fediverse.
                 </p>
                 <p>
@@ -494,10 +495,11 @@ const posts = {
                 <h3>Discovery</h3>
                 <p>
                     Discovery is your ability to find what you're looking for.
-                    It's an unsolved,&nbsp; <a
+                    It's an unsolved <a
                     href="https://xkcd.com/1425/">Very Hard Problem</a> in
                     distributed systems. In the early open web it took Google,
-                    a massive centralized search behemoth to solve it.
+                    a massive, centralized search behemoth, to come close to
+                    solving it.
                 </p>
                 <p>
                     Centralized social media won over decentralized blogging
@@ -524,15 +526,15 @@ const posts = {
                 <h3>The Twitter Exodus: A Case Study</h3>
                 <p>
                     The exodus from Twitter to Mastodon, Bluesky, and Threads gives us the clearest
-                    test case for protocols adoptability.
+                    test case for protocol's adoptability.
                 </p>
                 <p>
-                    Mastodon benefitted from the first wave of exodus. It was already in version 3
-                    and had been live for quite a while when Musk's agreement to buy Twitter was
+                    Mastodon benefitted from the first wave of exodus. It was already on version 3
+                    and had been live for quite a while when Elon Musk's agreement to buy Twitter was
                     announced in April of 2022. As the buyout advanced, it absorbed small waves of
                     new users. But many people reported trying it and not being able to wrap their
                     heads around it or find their communities on it. It peaked at around 2.5M
-                    monthly active users in December 2022 and activity has slowly dropped since
+                    monthly active users  in December 2022 and activity has slowly dropped since
                     then.
                 </p>
                 <p>
@@ -541,10 +543,10 @@ const posts = {
                     steadily growing.
                 </p>
                 <p>
-                    Threads beat Bluesky to the punch, lauching a 1.0 to the public in July 2023.
-                    Because Threads tied accounts in to Instagram, it was able to bring over 100M
-                    new users in a single week. Usage immediately dropped off at first, but then
-                    began steadily growing.
+                    Threads beat Bluesky to the punch, launching to the public
+                    in July 2023. Because Threads tied accounts to Instagram,
+                    it was able to bring over 100M new users in a single week.
+                    Usage immediately dropped off, then began steadily growing.
                 </p>
                 <p>
                     Bluesky opened up public registration in February of 2024 and passed 4 million
@@ -554,7 +556,7 @@ const posts = {
                 <p>
                     All three have steadily continued to add users. Mastodon currently sits around
                     10M users, with about 1M active. Bluesky sits around 40M users, with 10M
-                    active. Threads has 500M MAU.
+                    active. Threads has 500M monthly active users.
                 </p>
                 <p>
                     All three are (or were) technically federated. Mastodon is
@@ -566,14 +568,14 @@ const posts = {
                 <p>
                     More than 99% of users on the Bluesky network still use
                     Bluesky's PDS. Nearly all of Bluesky's users use it through
-                    `bsky.app` and treat it as a centralized platform. Threads
-                    never completed their ActivityPub federation and now
+                    bsky.app and treat it as a centralized platform. Threads
+                    never completed its ActivityPub federation and now
                     appears to be killing it.
                 </p>
                 <p>
-                    There's definitely complicating factors to the adoption
-                    timeline, Threads beating Bluesky out of the gate gave them
-                    a boost. But the clearest factor is friction.
+                    There are complicating factors to the adoption timeline
+                    (Threads beating Bluesky out of the gate gave them a
+                    boost), but the clearest factor is friction.
                 </p>
                 <p>
                     Mastodon makes it the hardest to join the network and get
@@ -604,14 +606,14 @@ const posts = {
                     Well, we already have an example of an open, interoperable
                     protocol and it's still centralized and enshittifying.
                 </p>
-                <h3>Email: A Counter Example</h3>
+                <h3>Email: A Counterexample</h3>
                 <p>
                     Email is the quintessential open protocol. In theory, it
                     should be fully distributed.
                 </p>
                 <p>
                     Yet email is heavily centralized. Google claims over 3
-                    billion email addresses which would give it nearly half of
+                    billion email addresses, which would give it nearly half of
                     all estimated addresses. Apple, Tencent, and Microsoft each
                     hold 1 billion, half a billion, and half a billion
                     respectively.
@@ -627,23 +629,6 @@ const posts = {
                     In spite of that, some new competitors like Proton Mail and
                     Fastmail have managed to break into the market. But their
                     market share remains small fraction of the biggest players.
-                    Because the switching costs are still high.
-                </p>
-                <p>
-                    Anecdotally, I've been on Google Workspace with my own
-                    domain since its inception. For months, I've been meaning
-                    to switch to Proton Mail. In theory, it should be straight
-                    forward: create a new Proton email with an alias for my
-                    domain, swap my domain over, and download my old emails
-                    from workplace. It should be nearly seamless. But that's
-                    still ours of work and large pieces of that require a
-                    significant amount of technical know-how. With everything
-                    else I have to do, I just haven't gotten to it.
-                </p>
-                <p>
-                    For someone with less technical know-how, who's just on
-                    the default gmail.com, it requires giving up your old
-                    address and propagating an entirely new one.
                 </p>
                 <p>
                     Even with an interoperable, open protocol that makes
@@ -672,9 +657,10 @@ const posts = {
                     various "smart features".
                 </p>
                 <p>
-                    It's unclear how far the enshittification of email will go, strong privacy laws
-                    will likely help keep it from going too far, but it is clear that the open
-                    protocol is not capable of keeping it in check.
+                    It's unclear how far the enshittification of email will go,
+                    strong privacy laws will likely help keep it from going too
+                    far, but it is clear that the open protocol is not capable
+                    of keeping it in check.
                 </p>
                 <h2>A Technical Solution to a Social Problem?</h2>
                 <p>
