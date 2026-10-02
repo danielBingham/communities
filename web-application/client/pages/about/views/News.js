@@ -433,10 +433,11 @@ const posts = {
                 </p>
                 <h3>It's All About the User Experience</h3>
                 <p>
-                    User experience is how using a product feels. It's how
-                    easy, fast, and clear it is. In a software or digital
-                    infrastructure context, the largest contributor to the user
-                    experience is the software’s interface.
+                    To quote Wikipedia, "User experience (UX) is how a user
+                    interacts with and experiences a product, system, or
+                    service." In a software or digital infrastructure context,
+                    the largest contributor to the user experience is the
+                    software’s interface.
                 </p>
                 <p>
                     In interface design, we have the related concepts of "friction" and "cognitive
