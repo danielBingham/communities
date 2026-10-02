@@ -351,7 +351,7 @@ const posts = {
         )
     },
     '9-29-2026-protocols-arent-the-answer': {
-        title: "Protocols Aren't The Answer",
+        title: "Protocols Aren't the Answer",
         date: '09/29/2026',
         author: 'Daniel Bingham',
         content: (
@@ -362,7 +362,7 @@ const posts = {
                 </p>
                 <p>
                     Companies are making their products and services worse in
-                    the name of ever greater profits.
+                    the name of ever-greater profits.
                 </p>
                 <p>
                     Meta breaking our ability to connect with our friends by
@@ -379,7 +379,7 @@ const posts = {
                     The question is: how do we stop it?
                 </p>
                 <p>
-                    Cory Doctorow, who popularized the term 'enshittification',
+                    Cory Doctorow, who popularized the term "enshittification,"
                     argues that four forces keep it in check: competition,
                     regulation, interoperability, and worker power.
                 </p>
@@ -406,7 +406,7 @@ const posts = {
                 <p>
                     Enshittification is ultimately a social problem. It comes
                     from the concentrated power and misaligned goals created by
-                    investor ownership. We need a social solution to solve it.
+                    investor ownership. We need a social solution.
                 </p>
                 <h2>Protocols over Platforms?</h2>
                 <p>
@@ -423,9 +423,9 @@ const posts = {
                 <p>
                     This theory has been most aggressively applied to social
                     media. Years of effort has created an ecosystem of
-                    federated platforms. The fediverse is a small and lively
-                    place. But it hasn't been able to put much of a dent in the
-                    big social platforms.
+                    federated platforms. The fediverse is a rich and lively
+                    place. But it hasn't put much of a dent in the big social
+                    platforms.
                 </p>
                 <p>
                     Why? It all comes down to user experience: the reason the
@@ -437,11 +437,11 @@ const posts = {
                     interacts with and experiences a product, system, or
                     service." In a software or digital infrastructure context,
                     the largest contributor to the user experience is the
-                    software’s interface.
+                    software's interface.
                 </p>
                 <p>
                     In interface design, we have the related concepts of "friction" and "cognitive
-                    load". Friction is anything that slows a user down: clicking, typing, thinking,
+                    load." Friction is anything that slows a user down: clicking, typing, thinking,
                     or waiting. Cognitive load is how hard you have to think about a piece of
                     software while using it.
                 </p>
@@ -451,63 +451,59 @@ const posts = {
                 </p>
                 <h3>High Cognitive Load, Right Off the Bat</h3>
                 <p>
-                    When you join a fediverse platform the first thing you have
-                    to do is choose your instance. It's a process with a high
-                    cognitive load and, in that moment, the fediverse loses a
-                    lot of people.
+                    When you join a fediverse platform, the first thing you
+                    have to do is choose your instance (the server your account
+                    lives on). It's a process with a high cognitive load and,
+                    in that moment, the fediverse loses a lot of people.
                 </p>
                 <p>
                     Anecdotally, I'm a software engineer. I'm fully capable of
-                    running my own Mastodon instance. Hell, I'm capable of
-                    &nbsp;<em>building my own Mastodon</em>. I have a Mastodon
+                    running my own Mastodon instance. Hell, I'm capable of <em>building my own Mastodon</em>. I have a Mastodon
                     account, but I'm just on the default instance (mastodon.social).
                     There are instances that would be a better fit for me, but
-                    I didn't find them when I set out to join Mastodon and I
+                    I didn't find them when I set out to join Mastodon, and I
                     haven't had the bandwidth to move since I discovered them.
                 </p>
                 <p>
                     It's not a lack of willingness, knowledge, or desire: it's
                     purely a prioritization problem. I have too many other
-                    priorities and "change my instance" never bubbles to the
+                    priorities, and "change my instance" never bubbles to the
                     top. For people with less technical expertise and
                     experience, the thing that never bubbles to the top is
-                    "figure out this Mastodon thing".
+                    "figure out this Mastodon thing."
                 </p>
                 <p>
                     For many people, perhaps most people, the challenge of
-                    choosing an instance alone is enough to make them give up
-                    and abandon the fediverse.
+                    choosing an instance is enough to make them give up on the
+                    fediverse.
                 </p>
                 <p>
-                    Since defeating enshittification ultimately requires
-                    people to choose a non-enshittified alternative when a big
-                    player enshittifies, this problem undermines the whole
-                    project.
+                    Since defeating enshittification requires people to move to
+                    an alternative when a big player enshittifies, this problem
+                    undermines the whole project.
                 </p>
                 <p>
-                    It's worth noting that Bluesky, using the AT Protocol, has
-                    largely dodged the problem of cognitive load created by
-                    instance selection. But it has dodged it by acting like a
-                    standard platform and as a result its network is 99%
-                    centered on the Bluesky App. It may run on an open
-                    protocol, but the network is currently centralized. Which
-                    means we don't get the benefits of the protocol. We'll come
-                    back to that later.
+                    It's worth noting that Bluesky, which uses the AT Protocol,
+                    has largely dodged the problem of cognitive load created by
+                    instance selection. But it did so by acting like a standard
+                    platform and as a result its network is 99% centered on the
+                    Bluesky App. Which means we don't get the benefits of the
+                    protocol. We'll come back to that later.
                 </p>
                 <h3>Discovery</h3>
                 <p>
                     Discovery is your ability to find what you're looking for.
                     It's an unsolved <a
                     href="https://xkcd.com/1425/">Very Hard Problem</a> in
-                    distributed systems. In the early open web it took Google,
-                    a massive, centralized search behemoth, to come close to
+                    distributed systems. In the early open web, it took Google --
+                    a massive, centralized search behemoth -- to come close to
                     solving it.
                 </p>
                 <p>
-                    Centralized social media won over decentralized blogging
-                    and personal websites partly because it made it easy to
-                    find the people you were looking for and the content they
-                    produced.
+                    Centralized social media largely replaced decentralized
+                    blogging and personal websites partly because it made it
+                    easy to find the people you were looking for and the
+                    content they produced.
                 </p>
                 <p>
                     Mastodon has basically punted on this problem. When you
@@ -518,12 +514,12 @@ const posts = {
                     users.
                 </p>
                 <p>
-                    The AT Protocol on which Bluesky runs uses Relays to try to
-                    solve this problem. But right now the network is small
-                    enough and concentrated enough that it basically still acts
-                    like a centralized platform. It remains to be seen what
-                    will happen to discovery if the network successfully
-                    scales and distributes.
+                    The AT Protocol (Bluesky) uses Relays to try to solve this
+                    problem. But right now the network is small enough and
+                    concentrated enough that it basically still acts like a
+                    centralized platform. It remains to be seen what will
+                    happen to discovery if the network successfully scales and
+                    distributes.
                 </p>
                 <h3>The Twitter Exodus: A Case Study</h3>
                 <p>
@@ -531,12 +527,12 @@ const posts = {
                     test case for protocol's adoptability.
                 </p>
                 <p>
-                    Mastodon benefitted from the first wave of exodus. It was already on version 3
+                    Mastodon benefited from the first wave of exodus. It was already on version 3
                     and had been live for quite a while when Elon Musk's agreement to buy Twitter was
-                    announced in April of 2022. As the buyout advanced, it absorbed small waves of
+                    announced in April of 2022. As the buyout advanced, Mastodon absorbed small waves of
                     new users. But many people reported trying it and not being able to wrap their
                     heads around it or find their communities on it. It peaked at around 2.5M
-                    monthly active users in December 2022 and activity has slowly dropped since
+                    monthly active users in December 2022, and activity has slowly dropped since
                     then.
                 </p>
                 <p>
@@ -545,10 +541,10 @@ const posts = {
                     steadily growing.
                 </p>
                 <p>
-                    Threads beat Bluesky to the punch, launching to the public
-                    in July 2023. Because Threads tied accounts to Instagram,
-                    it was able to bring over 100M new users in a single week.
-                    Usage immediately dropped off, but then began steadily growing.
+                    Threads beat Bluesky to a public launch in July 2023.
+                    Because Threads tied accounts to Instagram, it was able to
+                    bring in over 100M new users in a single week. Usage
+                    immediately dropped off, but then began steadily growing.
                 </p>
                 <p>
                     Bluesky opened up public registration in February of 2024 and passed 4 million
@@ -557,45 +553,45 @@ const posts = {
                 </p>
                 <p>
                     As it currently stands, Mastodon has around 10M users, with
-                    about 1M active. Bluesky sits around 40M users, with 10M
+                    about 1M active. Bluesky sits at around 40M users, with 10M
                     active. Threads has 500M monthly active users.
                 </p>
                 <p>
-                    All three are (or were) technically federated. Mastodon is
-                    ActivityPub, Bluesky is AT Protocol, and Threads added
+                    All three are (or were) technically federated. Mastodon uses
+                    ActivityPub, Bluesky uses AT Protocol, and Threads added
                     ActivityPub federation six months or so after launch. But
                     Threads and Bluesky both behave as heavily centralized
                     platforms.
                 </p>
                 <p>
-                    In order for us to get the benefits of protocols and
-                    interoperability, the network needs to be reasonably
-                    distributed and decentralized. The whole idea is that using
-                    the protocol to reduce switching costs can foster
-                    competition. If a network centralizes into an oligopoly,
-                    then the biggest players can effectively control the
-                    network. In the worst case, they can simply shut down the
-                    protocol's federation and close off the portion of the
+                    To get the benefits of protocols and interoperability, the
+                    network needs to be reasonably distributed and
+                    decentralized. The whole idea is that using the protocol to
+                    reduce switching costs can foster competition. If a network
+                    centralizes into an oligopoly, then the biggest players can
+                    effectively control the network. In the worst case, they
+                    can simply stop federating and wall off the portion of the
                     network they control.
                 </p>
                 <p>
                     More than 99% of users on the Bluesky network still use
-                    Bluesky's PDS. Nearly all of Bluesky's users use it through
-                    bsky.app and treat it as a centralized platform. Threads
-                    never completed its ActivityPub federation and now appears
-                    to be leaving it unfinished at best or killing it at worst.
+                    Bluesky's servers (its PDS, or Personal Data Server).
+                    Nearly all of Bluesky's users access it through bsky.app and
+                    treat it as a centralized platform. Threads never completed
+                    its ActivityPub federation and now appears to be leaving it
+                    unfinished at best or killing it at worst.
                 </p>
                 <p>
-                    There are complicating factors to the adoption timeline
+                    There are complicating factors in the adoption timeline
                     (Threads beating Bluesky out of the gate gave them a
                     boost), but the clearest factor is friction.
                 </p>
                 <p>
                     Mastodon makes it the hardest to join the network and get
-                    settled. You have to pick an instance and even when you do,
+                    settled. You have to pick an instance, and even when you do,
                     you then have an empty timeline and no easy way to populate
                     it. The people you want to follow can be scattered across
-                    instances and finding them often involves finding their
+                    instances, and finding them often involves finding their
                     instance first.
                 </p>
                 <p>
@@ -607,17 +603,17 @@ const posts = {
                 <p>
                     Threads achieved the lowest friction by integrating tightly
                     with Instagram, allowing you to bring some of your network
-                    with you when you joined.
+                    with you when you join.
                 </p>
                 <p>
-                    Bluesky's achievement of 40M+ users and 10M active is not
-                    nothing. Doesn't that suggest that it's possible to make
-                    protocols usable? Couldn't that network still decentralize
-                    as it grows?
+                    Bluesky's achievement of 40M+ users, 10M of them active, is
+                    not nothing. Doesn't that suggest that it's possible to
+                    make protocols usable? Couldn't that network still
+                    decentralize as it grows?
                 </p>
                 <p>
                     Maybe. But we already have an example of an open,
-                    interoperable protocol and it's still centralized and
+                    interoperable protocol and that has centralized and
                     enshittifying.
                 </p>
                 <h2>Email: An Open Protocol Enshittifying</h2>
@@ -628,73 +624,70 @@ const posts = {
                 <p>
                     Yet email is heavily centralized. Google claims over 3
                     billion email addresses, which would give it nearly half of
-                    all estimated addresses. Apple, Tencent, and Microsoft each
-                    hold 1 billion, half a billion, and half a billion
+                    all estimated addresses. Apple, Tencent, and Microsoft hold
+                    1 billion, half a billion, and half a billion,
                     respectively.
                 </p>
                 <p>
                     These few providers can use that centralization to control
                     the whole network. Trying to self-host an email server is a
                     nightmare these days. The big providers simply won't accept
-                    your email unless you jump through an ever growing list of
+                    your email unless you jump through an ever-growing list of
                     hoops (introduced in the name of stopping spam).
                 </p>
                 <p>
-                    In spite of that, some new competitors like Proton Mail and
+                    In spite of that, some smaller competitors like Proton Mail and
                     Fastmail have managed to break into the market. But their
-                    market share remains a small fraction of the biggest
-                    players.
+                    market share remains a small fraction of the total market.
                 </p>
                 <p>
-                    Even with an interoperable, open protocol that makes
-                    switching, in theory, very doable, the cognitive load and
-                    friction of switching are still too high for the average
-                    person.
+                    Even with an open protocol that makes switching possible in
+                    theory, the cognitive load and friction of switching are
+                    still too high for the average person.
                 </p>
                 <p>
                     And email is enshittifying.
                 </p>
                 <p>
-                    Google used to scan all emails sent or received from its
-                    Gmail accounts for ad targeting, without even the implicit
-                    consent of users not on Gmail accounts. They (supposedly)
-                    stopped in 2017, but it was the legal pressure that stopped
-                    them, not the protocol.
+                    Google used to scan all emails for ad targeting, without
+                    even the implicit consent of users not on Gmail accounts.
+                    Google (supposedly) stopped in 2017, but it was the legal
+                    pressure that stopped them, not the protocol.
                 </p>
                 <p>
                     Google and Microsoft have both continued to find creative
                     and frustrating ways to shove ads into their hosted
-                    inboxes. And recently Google introduced its Gemini AI to
+                    inboxes. More recently, Google introduced its Gemini AI to
                     people's inboxes without consent. While it's not clear
                     whether Google is using email data to train Gemini (Google
                     says "no", a class action lawsuit says "yes"), it is
                     definitely feeding people's emails through the LLM to power
-                    various "smart features".
+                    various "smart features."
                 </p>
                 <p>
-                    It's unclear how far the enshittification of email will go,
-                    strong privacy laws will likely help keep it from going too
+                    It's unclear how far the enshittification of email will go.
+                    Strong privacy laws will likely help keep it from going too
                     far, but it is clear that the open protocol is not capable
                     of keeping it in check.
                 </p>
                 <h2>A Technical Solution to a Social Problem?</h2>
                 <p>
                     Enshittification is ultimately a social problem. When we
-                    hand control of businesses to the people who merely
-                    provided the capital, the investors, the result is that all
-                    other concerns will tend to be set aside in pursuit of
-                    returns on that capital.
+                    hand control of businesses to investors, the people who
+                    merely provided the capital, the result is that all other
+                    concerns will tend to be set aside in pursuit of returns on
+                    that capital.
                 </p>
                 <p>
                     The idea behind the protocols movement is that it's the
                     network effects and the related switching costs that really
-                    power the enshittification. Protocols can, in theory, break
+                    power enshittification. Protocols can, in theory, break
                     those network effects and allow market forces to keep capital
                     in check.
                 </p>
                 <p>
                     But oligopolies and monopolies form all the time in the
-                    market, without network effects or lock in. And
+                    market, without network effects or lock-in. And
                     enshittification follows.
                 </p>
                 <p>
@@ -703,15 +696,15 @@ const posts = {
                     and very low switching costs.
                 </p>
                 <p>
-                    Market forces do not and have not kept it in check. So
-                    there's no reason to believe that a return to open
-                    protocols will, even if we can solve the user experience
-                    problems inherent in creating distributed systems.
+                    Market forces have not kept it in check. So there's no
+                    reason to believe that a return to open protocols will,
+                    even if we can solve the user experience problems inherent
+                    in creating distributed systems.
                 </p>
                 <p>
                     We can't solve this with a technical solution. It's a
                     social problem, created by concentrating power and control
-                    in the hands of small group of unaccountable people:
+                    in the hands of a small group of unaccountable people:
                     investors.
                 </p>
                 <p>
@@ -725,12 +718,12 @@ const posts = {
                 </p>
                 <p>
                     <em>
-                        Communities is a cooperative social network platform seeking to de-enshittify
-                        social media and, if we succeed at that, the wider web. We're working to create
-                        a democratically governed multi-stakeholder cooperative umbrella that would
-                        incubate multiple platforms to provide democraticly governed alternatives to
-                        many enshittified platforms. We're funded by user-donations. If you want to
-                        help, we're currently recruiting an Advisory Board.
+                        Communities is a social network platform working
+                        towards cooperative governance. We're seeking to
+                        de-enshittify social media and, if we succeed at that,
+                        the wider web. We're funded by user-donations. If you
+                        want to help, we're currently recruiting an Advisory
+                        Board.
                     </em>
                 </p>
             </>
