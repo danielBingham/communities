@@ -620,7 +620,7 @@ const posts = {
                     interoperable protocol and it's still centralized and
                     enshittifying.
                 </p>
-                <h3>Email: A Counterexample</h3>
+                <h2>Email: An Open Protocol Enshittifying</h2>
                 <p>
                     Email is the quintessential open protocol. In theory, it
                     should be fully distributed.
@@ -700,8 +700,7 @@ const posts = {
                 <p>
                     Notice how quickly appliances seem to break these days?
                     That's enshittification in a market with no network effects
-                    and very low switching costs. It still became an oligopoly
-                    and enshittified.
+                    and very low switching costs.
                 </p>
                 <p>
                     Market forces do not and have not kept it in check. So
@@ -712,7 +711,8 @@ const posts = {
                 <p>
                     We can't solve this with a technical solution. It's a
                     social problem, created by concentrating power and control
-                    in the hands of small group of unaccountable people, investors.
+                    in the hands of small group of unaccountable people:
+                    investors.
                 </p>
                 <p>
                     We need a social solution. We need to change who's in
