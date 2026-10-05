@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -86,6 +86,8 @@ const Team = function({}) {
                     <p>He has a firm belief in democracy and is committed to building a democratic economy.</p>
                 </div>
             </section>
+            <h1>Advisory Board</h1>
+            <p>We are in the process of recruiting a volunteer Advisory Board to support the development of the platform and the cooperative.  The Advisory Board will help form the nonprofit, write the initial bylaws, fundraise, and market the platform and cooperative. It's a volunteer position, with flexible time commitment (a minimum of one two hour meeting a month).</p>
         </article>
     )
 

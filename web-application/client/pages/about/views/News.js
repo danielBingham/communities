@@ -356,6 +356,7 @@ const posts = {
         author: 'Daniel Bingham',
         content: (
             <>
+                <p><em>This post is the first of a series on enshittification and what we can do about it. You can find part two here: <a href="/about/news/9-30-2026-social-solutions-for-enshittification">Social Solutions for Enshittification</a></em>.</p>
                 <p>
                     Enshittification. If you haven't heard the word, it's
                     probably not hard for you to guess what it means.
@@ -379,29 +380,36 @@ const posts = {
                     The question is: how do we stop it?
                 </p>
                 <p>
-                    Cory Doctorow, who popularized the term "enshittification,"
-                    argues that four forces keep it in check: competition,
-                    regulation, interoperability, and worker power.
+                    Cory Doctorow, <a
+                    href="https://pluralistic.net/2023/01/21/potemkin-ai/#hey-guys"
+                        target="_BLANK">who popularized</a> the term
+                    "enshittification," argues that <a target="_BLANK"
+                href="https://pluralistic.net/2024/01/30/go-nuts-meine-kerle/">
+                    four forces</a> keep it in check: competition,
+                    regulation, self-help, and worker power.
                 </p>
                 <p>
                     Much of the pro-social tech movement has coalesced around
-                    protocols and interoperability as the primary force. If we
-                    move to interoperable platforms that use open protocols, we
-                    can make it easy for people to switch platforms while
-                    bringing their data and networks with them.
+                    using <a
+                    href="https://knightcolumbia.org/content/protocols-not-platforms-a-technological-approach-to-free-speech"
+                            target="_BLANK">protocols</a> and <a target="_BLANK" href="https://www.eff.org/deeplinks/2019/10/adversarial-interoperability">interoperability</a> to drive
+                    competition as the primary check. If we move to
+                    interoperable platforms that use open protocols, we can
+                make it easy for people to switch platforms while bringing
+                    their data and networks with them, which would allow market
+                    competition to keep enshittification in check.
                 </p>
                 <p>
                     But there are serious, unsolved challenges involved in
                     building on open protocols. And even if we can overcome
-                    those challenges, we already know that interoperability
+                    those challenges, we already know that building on open protocols
                     isn't enough to prevent centralization and keep
                     enshittification in check.
                 </p>
                 <p>
-                    Email is the quintessential interoperable, open protocol.
-                    It has been in use for decades and has almost complete
-                    adoption. It has centralized into an oligopoly and is being
-                    enshittified.
+                    Email is the quintessential open protocol. It has been in
+                    use for decades, has almost complete adoption, and it has
+                    centralized into an oligopoly. It is being enshittified.
                 </p>
                 <p>
                     Enshittification is ultimately a social problem. It comes
@@ -433,7 +441,9 @@ const posts = {
                 </p>
                 <h3>It's All About the User Experience</h3>
                 <p>
-                    To quote Wikipedia, "User experience (UX) is how a user
+                    To <a target="_BLANK"
+                    href="https://en.wikipedia.org/wiki/User_experience">quote
+                    Wikipedia</a>, "User experience (UX) is how a user
                     interacts with and experiences a product, system, or
                     service." In a software or digital infrastructure context,
                     the largest contributor to the user experience is the
@@ -486,9 +496,10 @@ const posts = {
                     It's worth noting that Bluesky, which uses the AT Protocol,
                     has largely dodged the problem of cognitive load created by
                     instance selection. But it did so by acting like a standard
-                    platform and as a result its network is 99% centered on the
-                    Bluesky App. Which means we don't get the benefits of the
-                    protocol. We'll come back to that later.
+                    platform and as a result its network is, the time of this
+                    post, 99% centered on the Bluesky App. Which means we don't
+                    get the benefits of the protocol. We'll come back to that
+                    later.
                 </p>
                 <h3>Discovery</h3>
                 <p>
@@ -527,34 +538,37 @@ const posts = {
                     test case for protocol's adoptability.
                 </p>
                 <p>
-                    Mastodon benefited from the first wave of exodus. It was already on version 3
-                    and had been live for quite a while when Elon Musk's agreement to buy Twitter was
-                    announced in April of 2022. As the buyout advanced, Mastodon absorbed small waves of
-                    new users. But many people reported trying it and not being able to wrap their
-                    heads around it or find their communities on it. It peaked at around 2.5M
-                    monthly active users in December 2022, and activity has slowly dropped since
-                    then.
+                    Mastodon benefited from the first wave of exodus. It was
+                    already on version 3 and had been live for quite a while
+                    when Elon Musk's agreement to buy Twitter was <a
+                    target="_BLANK"
+                    href="https://www.npr.org/2022/04/25/1094604406/twitter-elon-musk-deal">announced</a> in April of 2022. As the buyout advanced, Mastodon absorbed
+                    small waves of new users. But many people reported trying
+                    it and not being able to wrap their heads around it or find
+                their communities on it. It <a target="_BLANK"
+                    href="https://techcrunch.com/2023/02/15/is-the-exodus-over-heres-how-twitter-alternatives-have-fared-since-elon-musks-acquisition/">peaked</a> at around 2.5M monthly active users in December 2022, and
+                    activity has slowly dropped since then.
                 </p>
                 <p>
-                    Bluesky announced its waitlist days before Musk closed the acquisition of
-                    Twitter in October 2022. It began invite-only beta in February 2023 and began
+                    Bluesky <a target="_BLANK" href="https://bsky.social/about/blog/10-18-2022-the-at-protocol">announced</a> its waitlist days before Musk <a target="_BLANK" href="https://www.npr.org/2022/10/27/1131378869/twitter-elon-musk-timeline">closed the acquisition</a> of
+                    Twitter in October 2022. It <a target="_BLANK" href="https://techcrunch.com/2023/02/28/jack-dorsey-backed-twitter-alternative-bluesky-hits-the-app-store-as-an-invite-only-app/">began invite-only beta</a> in February 2023 and began
                     steadily growing.
                 </p>
                 <p>
-                    Threads beat Bluesky to a public launch in July 2023.
+                    Threads beat Bluesky to a <a target="_BLANK" href="https://about.fb.com/news/2023/07/introducing-threads-new-app-text-sharing/">public launch</a> in July 2023.
                     Because Threads tied accounts to Instagram, it was able to
                     bring in over 100M new users in a single week. Usage
-                    immediately dropped off, but then began steadily growing.
+                    immediately <a target="_BLANK" href="https://edition.cnn.com/2023/08/03/tech/threads-user-count-falls">dropped off</a>, but then began steadily growing.
                 </p>
                 <p>
-                    Bluesky opened up public registration in February of 2024 and passed 4 million
-                    users in the same month. By the time Bluesky opened up, Threads was at 130M
+                    Bluesky opened up <a target="_BLANK" href="https://bsky.social/about/blog/02-06-2024-join-bluesky">public registration</a> in February of 2024 and passed <a target="_BLANK" href="https://techcrunch.com/2024/02/07">4 million
+                        users</a> in the same month. By the time Bluesky opened up, Threads was at 130M
                     monthly active users.
                 </p>
                 <p>
-                    As it currently stands, Mastodon has around 10M users, with
-                    about 1M active. Bluesky sits at around 40M users, with 10M
-                    active. Threads has 500M monthly active users.
+                    As it currently stands, Mastodon has around <a target="_BLANK" href="https://absolutelymaybe.plos.org/2025/10/30/a-mastodon-migration-from-bluesky-would-be-different/">10M users</a>, with
+                    less than 1M active. Bluesky sits at around 40M users, with <a target="_BLANK" href="https://techcrunch.com/2026/08/11/blueskys-active-user-base-is-shrinking-as-its-focus-expands-beyond-the-app/">around 10M
+                                active</a>. Threads has <a target="_BLANK" href="https://qz.com/meta-threads-500-million-monthly-users-new-features-061626">500M monthly active users</a>.
                 </p>
                 <p>
                     All three are (or were) technically federated. Mastodon uses
@@ -570,16 +584,16 @@ const posts = {
                     reduce switching costs can foster competition. If a network
                     centralizes into an oligopoly, then the biggest players can
                     effectively control the network. In the worst case, they
-                    can simply stop federating and wall off the portion of the
+                    can simply stop federating, <a target="_BLANK" href="https://www.eff.org/deeplinks/2013/05/google-abandons-open-standards-instant-messaging">like Google Talk did with XMPP</a>, and wall off the portion of the
                     network they control.
                 </p>
                 <p>
-                    More than 99% of users on the Bluesky network still use
+                    Almost <a target="_BLANK" href="https://blue.mackuba.eu/stats">99% of users</a> on the Bluesky network still use
                     Bluesky's servers (its PDS, or Personal Data Server).
                     Nearly all of Bluesky's users access it through bsky.app and
                     treat it as a centralized platform. Threads never completed
                     its ActivityPub federation and now appears to be leaving it
-                    unfinished at best or killing it at worst.
+                    <a target="_BLANK" href="https://coywolf.com/news/social-media/mastodon-creator-shares-what-went-wrong-with-threads-and-ponders-the-future-of-the-fediverse/">unfinished</a> <a target="_BLANK" href="https://www.federatedmind.com/threads-enters-the-fediverse/">at best</a> or killing it at worst.
                 </p>
                 <p>
                     There are complicating factors in the adoption timeline
@@ -618,20 +632,28 @@ const posts = {
                 </p>
                 <h2>Email: An Open Protocol Enshittifying</h2>
                 <p>
-                    Email is the quintessential open protocol. In theory, it
+                    Email is the <a target="_BLANK" href="https://knightcolumbia.org/content/protocols-not-platforms-a-technological-approach-to-free-speech">quintessential open protocol</a>. In theory, it
                     should be fully distributed.
                 </p>
                 <p>
-                    Yet email is heavily centralized. Google claims over 3
-                    billion email addresses, which would give it nearly half of
-                    all estimated addresses. Apple, Tencent, and Microsoft hold
-                    1 billion, half a billion, and half a billion,
-                    respectively.
+                    Yet email is heavily centralized. Google claims over <a
+                        target="_BLANK"
+                        href="https://blog.google/products-and-platforms/products/gmail/gmail-is-entering-the-gemini-era/">3
+                        billion email addresses</a>, which would give it more than a third of the roughly 8 billion estimated email addresses. Tencent's QQMail has over
+                        a <a target="_BLANK"
+                            href="https://baike.baidu.com/en/item/QQmail/1481672">billion
+                            users</a>. Similarly, the Chinese company NetEase
+                    claims another <a target="_BLANK"
+                        href="https://baike.baidu.com/en/item/NETEASE%20MAIL/946152">billion
+                        users</a>. Apple doesn't publish numbers, but estimates
+                    put it at around <a target="_BLANK"
+                href="https://en.wikipedia.org/wiki/ICloud">850 million iCloud
+                    users</a>. Account totals fall off steeply into a long tail from
+                    there.
                 </p>
                 <p>
                     These few providers can use that centralization to control
-                    the whole network. Trying to self-host an email server is a
-                    nightmare these days. The big providers simply won't accept
+                    the whole network. Trying to self-host an email server is a <a target="_BLANK" href="https://cfenollosa.com/blog/after-self-hosting-my-email-for-twenty-three-years-i-have-thrown-in-the-towel-the-oligopoly-has-won.html">nightmare these days</a>. The big providers simply won't accept
                     your email unless you jump through an ever-growing list of
                     hoops (introduced in the name of stopping spam).
                 </p>
@@ -649,20 +671,16 @@ const posts = {
                     And email is enshittifying.
                 </p>
                 <p>
-                    Google used to scan all emails for ad targeting, without
+                    Google used to <a target="_BLANK" href="https://www.jurist.org/news/2017/03/federal-judge-google-e-mail-scanning-settlement/">scan all emails for ad targeting</a>, without
                     even the implicit consent of users not on Gmail accounts.
-                    Google (supposedly) stopped in 2017, but it was the legal
+                    <a target="_BLANK" href="https://blog.google/products-and-platforms/products/gmail/g-suite-gains-traction-in-the-enterprise-g-suites-gmail-and-consumer-gmail-to-more-closely-align/">Google (supposedly) stopped in 2017</a>, but it was the legal
                     pressure that stopped them, not the protocol.
                 </p>
                 <p>
                     Google and Microsoft have both continued to find creative
-                    and frustrating ways to shove ads into their hosted
-                    inboxes. More recently, Google introduced its Gemini AI to
-                    people's inboxes without consent. While it's not clear
-                    whether Google is using email data to train Gemini (Google
-                    says "no", a class action lawsuit says "yes"), it is
-                    definitely feeding people's emails through the LLM to power
-                    various "smart features."
+                    and frustrating ways to <a target="_BLANK" href="https://9to5google.com/2023/05/05/gmail-ads-increase-2023/">shove</a> <a target="_BLANK" href="https://www.xda-developers.com/microsoft-more-ads-outlook-ios-android-apps/">ads</a> into their hosted
+                    inboxes. More recently, Google introduced its <a target="_BLANK" href="https://blog.google/products-and-platforms/products/gmail/gmail-is-entering-the-gemini-era/">Gemini AI</a> to
+                    people's inboxes without consent.
                 </p>
                 <p>
                     It's unclear how far the enshittification of email will go.
