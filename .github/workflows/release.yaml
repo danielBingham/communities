@@ -18,19 +18,15 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [ 24.x ]
-
     steps:
 
       - name: Checkout Repo
         uses: actions/checkout@v5
 
-      - name: Setup Node.js ${{ matrix.node-version }}
+      - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version-file: .nvmrc
 
       - name: Configure AWS CLI
         uses: aws-actions/configure-aws-credentials@v6
@@ -39,114 +35,31 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
           aws-region: us-east-1
 
-      # Test, Version, and Publish @communities/shared
-      #
-      - name: Install Shared Dependencies
-        working-directory: ./packages/shared
-        run: |
-          export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-          npm ci
+      # Install, check and test the whole workspace. Dependencies come from the
+      # public npm registry, pinned by package-lock.json integrity hashes; the
+      # internal @communities/* packages are linked from source.
+      - name: Install Dependencies
+        run: npm ci
 
-      - name: Run Shared Unit Tests
-        working-directory: ./packages/shared
-        run: |
-          npm run test
+      - name: Check the Lockfile
+        run: npm run check:lockfile
 
-      - name: Version the Shared Package
-        working-directory: ./packages/shared
-        run: |
-          npm version ${{ github.event.inputs.version }}
+      - name: Run Unit Tests
+        run: npm test
 
-      - name: Publish to AWS CodeArtifact
-        working-directory: ./packages/shared
+      # Version every workspace package (shared, backend, session, worker,
+      # web-application) at once. This also updates their entries in
+      # package-lock.json. The internal packages aren't published anywhere: the
+      # images below build them from source.
+      - name: Version the Workspace Packages
         run: |
-          export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-          export TAG=$([[ "${{github.event.inputs.environment }}" == "staging" ]] && echo "next" || echo "latest")
-          echo "Tag: $TAG"
-          npm publish --tag $TAG
+          npm version ${{ github.event.inputs.version }} --workspaces --no-git-tag-version
 
-      # Test, Version, and Publish @communities/backend
-      #
-      - name: Install updated Shared version
-        working-directory: ./packages/backend
-        run: |
-          export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-          npm install @communities/shared@${{ github.event.inputs.version }}
-
-      - name: Install Backend Dependencies
-        working-directory: ./packages/backend
-        run: |
-          export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-          npm ci
-
-      - name: Run Backend Unit Tests
-        working-directory: ./packages/backend
-        run: |
-          npm run test
-
-      - name: Version the Backend Package
-        working-directory: ./packages/backend
-        run: |
-          npm version ${{ github.event.inputs.version }}
-
-      - name: Publish to AWS CodeArtifact
-        working-directory: ./packages/backend
-        run: |
-          export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-          export TAG=$([[ "${{github.event.inputs.environment }}" == "staging" ]] && echo "next" || echo "latest")
-          echo "Tag: $TAG"
-          npm publish --tag $TAG
-
-      # Test, Version, and Publish @communities/session
-      #
-      - name: Install Session Dependencies
-        working-directory: ./packages/session
-        run: |
-          export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-          npm ci
-
-      - name: Version the Session Package
-        working-directory: ./packages/session
-        run: |
-          npm version ${{ github.event.inputs.version }}
-
-      - name: Publish to AWS CodeArtifact
-        working-directory: ./packages/session
-        run: |
-          export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-          export TAG=$([[ "${{github.event.inputs.environment }}" == "staging" ]] && echo "next" || echo "latest")
-          echo "Tag: $TAG"
-          npm publish --tag $TAG
-
-      # Build the worker docker container and push it to ECR
-      - name: Install updated Shared version
-        working-directory: ./worker
-        run: |
-          export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-          npm install @communities/shared@${{ github.event.inputs.version }}
-
-      - name: Install updated backend version
-        working-directory: ./worker
-        run: |
-          export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-          npm install @communities/backend@${{ github.event.inputs.version }}
-
-      - name: Install Worker NPM Modules
-        working-directory: ./worker
-        run: |
-          export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-          npm ci
-
-      - name: Version the worker package
-        working-directory: ./worker
-        run: |
-          npm version ${{ github.event.inputs.version }}
-
+      # Build the worker docker container and push it to ECR. Both images build
+      # from the repository root so they can install the workspace.
       - name: Build the Worker Docker Container
-        working-directory: ./worker
         run: |
-          export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-          docker build --secret id=CODEARTIFACT_AUTH_TOKEN -t 843012963492.dkr.ecr.us-east-1.amazonaws.com/communities/worker:${{ github.event.inputs.version }} .
+          docker build -f worker/Dockerfile -t 843012963492.dkr.ecr.us-east-1.amazonaws.com/communities/worker:${{ github.event.inputs.version }} .
 
       - name: Login to ECR
         run: |
@@ -156,46 +69,10 @@ jobs:
         run: |
           docker push 843012963492.dkr.ecr.us-east-1.amazonaws.com/communities/worker:${{ github.event.inputs.version }}
 
-      # Test web-application, then build the docker container and push it to ECR
-      - name: Install updated Shared version
-        working-directory: ./web-application
-        run: |
-          export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-          npm install @communities/shared@${{ github.event.inputs.version }}
-
-      - name: Install updated backend version
-        working-directory: ./web-application
-        run: |
-          export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-          npm install @communities/backend@${{ github.event.inputs.version }}
-
-      - name: Install updated session version
-        working-directory: ./web-application
-        run: |
-          export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-          npm install @communities/session@${{ github.event.inputs.version }}
-
-      - name: Install Web Application NPM Modules
-        working-directory: ./web-application
-        run: |
-          export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-          npm ci
-
-      - name: Run Web Application Unit Tests
-        working-directory: ./web-application
-        run: |
-          npm run test
-
-      - name: Version the web application
-        working-directory: ./web-application
-        run: |
-          npm version ${{ github.event.inputs.version }}
-
+      # Build the web application docker container and push it to ECR.
       - name: Build the  Web Application Docker Container
-        working-directory: ./web-application
         run: |
-          export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-          docker build --secret id=CODEARTIFACT_AUTH_TOKEN --build-arg NODE_ENV=${{ github.event.inputs.environment }} -t 843012963492.dkr.ecr.us-east-1.amazonaws.com/communities/web-application:${{ github.event.inputs.version }} .
+          docker build -f web-application/Dockerfile --build-arg NODE_ENV=${{ github.event.inputs.environment }} -t 843012963492.dkr.ecr.us-east-1.amazonaws.com/communities/web-application:${{ github.event.inputs.version }} .
 
       - name: Login to ECR
         run: |
