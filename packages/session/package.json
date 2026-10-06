@@ -1,6 +1,7 @@
 {
   "name": "@communities/session",
   "version": "0.23.0",
+  "private": true,
   "description": "Session middleware forked from Express Session version 1.18.2",
   "author": "TJ Holowaychuk <tj@vision-media.ca> (http://tjholowaychuk.com)",
   "contributors": [
@@ -11,9 +12,6 @@
   "homepage": "https://github.com/danielbingham/communities#README",
   "bugs": {},
   "repository": {},
-  "publishConfig": {
-    "registry": "https://communities-843012963492.d.codeartifact.us-east-1.amazonaws.com/npm/communities-shared-npm-repository/"
-  },
   "license": "MIT",
   "dependencies": {
     "cookie": "0.7.2",

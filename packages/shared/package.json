@@ -2,15 +2,13 @@
   "name": "@communities/shared",
   "type": "commonjs",
   "version": "0.23.0",
+  "private": true,
   "description": "The shared libraries of Communities.",
   "author": "Daniel Bingham",
   "license": "GPL-3.0",
   "homepage": "https://github.com/danielbingham/communities#README",
   "bugs": {},
   "repository": {},
-  "publishConfig": {
-    "registry": "https://communities-843012963492.d.codeartifact.us-east-1.amazonaws.com/npm/communities-shared-npm-repository/"
-  },
   "main": "index.js",
   "scripts": {
     "jest": "jest",

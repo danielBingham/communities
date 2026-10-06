@@ -1,21 +1,17 @@
 # Communities Backend
 
-## Building an Deploying
+The backend services shared by the `worker` and `web-application`.
 
-Log in to CodeArtifact:
+## Building and Deploying
 
-```
-export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-```
+This package is part of the Communities npm workspace and isn't published to
+any registry. The worker and web-application Docker images include it from
+source, and the Release workflow versions it together with every other
+workspace package (`npm version <version> --workspaces`).
 
-Run NPM version:
-
-```
-npm version [version]
-```
-
-Run NPM publish:
+To run its tests from the repository root:
 
 ```
-npm publish
+npm ci
+npm test -w packages/backend
 ```
