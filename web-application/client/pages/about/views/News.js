@@ -31,7 +31,7 @@ const posts = {
         author: 'Daniel Bingham',
         content: (
             <>
-                <p><em>This post is the first of a series on enshittification and what we can do about it. You can find part one here: <a href="/about/news/9-29-2026-protocols-arent-the-answer">Protocols Aren't the Answer</a></em>.</p>
+                <p><em>This post is the second of a series on enshittification and what we can do about it. You can find part one here: <a href="/about/news/9-29-2026-protocols-arent-the-answer">Protocols Aren't the Answer</a></em>.</p>
                 <p>
                     Enshittification. It's when companies make products and
                     services worse in pursuit of profits.
@@ -74,7 +74,7 @@ const posts = {
                     One approach is to put a select group of stewards in charge.
                 </p>
                 <p>
-                    This is usually done thorugh a nonprofit organization. The
+                    This is usually done through a nonprofit organization. The
                     nonprofit's board is the group of stewards. The nonprofit
                     either fully governs the platforms or has a majority share
                     in the businesses that do.
@@ -155,15 +155,11 @@ const posts = {
                 </p>
                 <p>
                     In theory, putting the community in charge allows them to
-                    directly hold the organization accountable. And this does
-                    happen, some of the time. It happened in Wikipedia, when the board wanted to secretly pursue a Search Engine project against the wishes of the community.
-
-                </p>
-                <p>
-                    But you often also see the
-                    community tune out, allowing cooperative boards to
-                    enshittify in spite of community control, or to even take
-                    the cooperative out from under the members entirely.
+                    directly hold the organization accountable. But you often
+                    also see the community tune out, allowing cooperatives to
+                    enshittify in spite of community control, or even allowing
+                    the board to take the cooperative out from under the
+                    community.
                 </p>
                 <p>
                     Numerous consumer cooperatives have had their boards get
