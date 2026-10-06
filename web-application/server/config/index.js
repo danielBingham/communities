@@ -7,7 +7,12 @@
  **************************************************************************************************/
 
 if ( process.env.NODE_ENV == 'development' ) {
-    require('dotenv').config()
+    // Load `.env` from this app's folder, then from the repository root, which
+    // is where documentation/running-locally.md puts it. Earlier files win, and
+    // variables already set in the environment win over both.
+    require('dotenv').config({
+        path: [ '.env', require('path').join(__dirname, '..', '..', '..', '.env') ]
+    })
 }
 
 module.exports = {

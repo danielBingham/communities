@@ -1,4 +1,5 @@
 **/.env*
+!/.env.local.example
 node_modules/
 *.swp
 web-application/public/uploads/*

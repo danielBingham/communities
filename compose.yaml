@@ -68,12 +68,21 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    # Configuration values (the COMMUNITIES_* variables) come from .env when
+    # CONFIG_SOURCE=env, and override single Parameter Store values when
+    # CONFIG_SOURCE=ssm. Both only work because NODE_ENV is development here.
+    # See .env.local.example.
+    env_file:
+      - path: .env
+        required: false
     environment:
       NODE_ENV: development
+      CONFIG_SOURCE: ${CONFIG_SOURCE:-ssm}
+      # Only used when CONFIG_SOURCE=ssm.
       ENVIRONMENT_NAME: ${ENVIRONMENT_NAME:-local}
       AWS_REGION: ${AWS_REGION:-us-east-1}
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
       LOG_LEVEL: ${LOG_LEVEL:-debug}
       # Force polling so file changes on bind mounts are seen reliably across
       # macOS / Windows / WSL. Drop for a small perf win on native Linux.
@@ -117,12 +126,17 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    env_file:                   # see the worker note above
+      - path: .env
+        required: false
     environment:
       NODE_ENV: development
+      CONFIG_SOURCE: ${CONFIG_SOURCE:-ssm}
+      # Only used when CONFIG_SOURCE=ssm.
       ENVIRONMENT_NAME: ${ENVIRONMENT_NAME:-local}
       AWS_REGION: ${AWS_REGION:-us-east-1}
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
       LOG_LEVEL: ${LOG_LEVEL:-debug}
       PORT: "8080"
       CHOKIDAR_USEPOLLING: "true"

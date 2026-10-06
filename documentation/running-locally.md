@@ -17,15 +17,81 @@ $ docker build -t communities-sql database/initialization-scripts
 
 ## Configuring the Local Environment
 
-The local environment depends on parameters pull from AWS Parameter Store.  You
-will need to initialize it with a `.env` file setting the AWS credentials
-allowing it to pull the parameters.  You will also need to create all the
-required parameters on a path unique to your environment in parameter store.
-You can use a path prefixed `/local/<username>` to set your parameters.
+Configuration comes from one of two sources, chosen by the `CONFIG_SOURCE`
+environment variable:
 
-**TODO** *This section is currently a stub.  Until this section is completed,
-you can examine the parameters on other `/local` paths in order to populate
-your environment's parameters.*
+- `env`: environment variables only. Nothing is read from AWS, so you don't
+  need an AWS account. This is the one to use if you're contributing. It only
+  works in development (`NODE_ENV=development`, which `compose.yaml` and
+  `npm run dev` set); anywhere else the apps refuse to start with it.
+- `ssm` (the default): AWS Systems Manager Parameter Store, under
+  `/$ENVIRONMENT_NAME`. This is what staging and production use, and what
+  maintainers can use locally with a `/local/<username>` path.
+
+Each parameter has a matching environment variable: the parameter path,
+uppercased, with `/` and `-` turned into `_` and a `COMMUNITIES_` prefix. For
+example `/database/host` is `COMMUNITIES_DATABASE_HOST`, and
+`/storage/s3/bucket-url` is `COMMUNITIES_STORAGE_S3_BUCKET_URL`. In
+development, a variable that is set (and not empty) wins over the parameter,
+so you can override single values while reading the rest from Parameter
+Store.
+
+Outside development, environment variables never supply configuration:
+every value comes from Parameter Store, and any `COMMUNITIES_*` variables
+are ignored (the apps log their names as a warning). That keeps a variable
+injected into a production container from changing the configuration.
+
+If anything is missing, the worker and web application stop at startup and
+list every missing variable (or parameter) at once.
+
+### Using environment variables (`CONFIG_SOURCE=env`)
+
+Copy the example file to `.env` in the repository root:
+
+```
+cp .env.local.example .env
+```
+
+Then fill in the two secrets it marks, `COMMUNITIES_SESSION_SECRET` and
+`COMMUNITIES_ENCRYPTION_MFA_V1_KEY`. Generate each with:
+
+```
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+The example is set up for Docker Compose, where the database and Redis are
+the `postgres` and `redis` services. If you run the apps directly on your
+machine instead, set `COMMUNITIES_DATABASE_HOST` and `COMMUNITIES_REDIS_HOST`
+to `localhost`.
+
+File storage, email and push notifications don't have local replacements
+yet, so the example fills their values with placeholders. Both apps start,
+but uploads, outgoing email and notification jobs fail until those land.
+
+### Using Parameter Store (`CONFIG_SOURCE=ssm`)
+
+Create a `.env` file in the repository root with AWS credentials that can read
+your parameters, and the path they live under:
+
+```
+CONFIG_SOURCE=ssm
+ENVIRONMENT_NAME=local/<username>
+AWS_ACCESS_KEY_ID=...
+AWS_SECRET_ACCESS_KEY=...
+```
+
+Create every parameter the apps need under `/local/<username>`; you can copy
+them from another `/local` path. To point at something different without
+touching Parameter Store, add the matching `COMMUNITIES_*` variable to `.env`,
+for example `COMMUNITIES_DATABASE_HOST=postgres`.
+
+### Where `.env` is read
+
+Docker Compose reads `.env` from the repository root for its own variables
+and passes it to the worker and web-application containers. When you run the
+apps directly (`npm run dev`), each app loads `.env` from its own folder and
+then from the repository root, in development only. Variables already set in
+your shell win over both.
 
 ## Installing Dependencies
 
