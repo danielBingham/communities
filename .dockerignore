@@ -1,0 +1,20 @@
+# The worker and web-application images build from the repository root so
+# they can install the npm workspace. Keep the context small and free of
+# host-installed modules, local secrets, and build output.
+**/node_modules
+**/.env*
+**/tmp
+**/*.swp
+**/.DS_Store
+.git
+.github
+android
+ios
+assets
+icons
+documentation
+database
+web-application/public/dist
+web-application/public/uploads
+web-application/security
+worker/security

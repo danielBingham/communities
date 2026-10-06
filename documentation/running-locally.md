@@ -27,39 +27,45 @@ You can use a path prefixed `/local/<username>` to set your parameters.
 you can examine the parameters on other `/local` paths in order to populate
 your environment's parameters.*
 
+## Installing Dependencies
+
+The repository is a single npm workspace: the root `package.json` lists the
+workspace packages (`packages/shared`, `packages/backend`, `packages/session`,
+`worker` and `web-application`), and one root `package-lock.json` pins every
+dependency. Dependencies come from the public npm registry; no registry
+credentials are needed. The internal `@communities/*` packages are linked from
+source and are never downloaded from a registry.
+
+Use the Node version in `.nvmrc` (with [nvm](https://github.com/nvm-sh/nvm),
+run `nvm use`), then install from the repository root:
+
+```
+npm ci
+```
+
+You need this on your machine to run the unit tests (`npm test`) or for your
+editor; the Docker images install their own copy.
+
+When you add or change a dependency, run `npm install` from the repository root
+(for example `npm install <package> -w packages/backend`) so the root lockfile
+is updated, and check it before committing:
+
+```
+npm run check:lockfile
+```
+
+The check fails if the lockfile resolves anything from a registry other than
+registry.npmjs.org, is missing an integrity hash, or resolves an internal
+`@communities/*` package from anywhere but the workspace. If you normally
+install through a mirror, override it for this repository with
+`--registry=https://registry.npmjs.org/`.
+
 ## Building the Environment
 
 Before you run the environment, or after changes to `package.json` or
 `package-lock.json` (including the version changes made by the release
-pipeline), you will need to build the environment.
-
-Before building the environment, you need to retrieve an AWS CodeArtifact
-token.
-
-### Authenticating with CodeArtifact
-
-Log in to AWS in your terminal using `aws login`:
-
-```
-aws login
-```
-
-Retrieve the CodeArtifact token:
-
-```
-export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain communities --domain-owner 843012963492 --query authorizationToken --output text`
-```
-
-Log out of AWS in your terminal:
-
-```
-aws logout
-```
-
-It's a good practice to stay logged out of AWS, except at need, to reduce the
-attack surface for NPM supply chain attacks like SHA1-Hulud.
-
-### Building the Environment
+pipeline), you will need to build the environment. Both images build from the
+repository root.
 
 To build the whole environment:
 
@@ -77,6 +83,14 @@ To refresh the environment after a version increment:
 
 ```
 docker compose build web-application worker
+```
+
+After a rebuild, start with `--renew-anon-volumes` (`-V`) so the containers
+pick up the newly installed `node_modules` in the workspace packages rather
+than the ones kept from the previous containers:
+
+```
+docker compose up -V
 ```
 
 ## Running the Environment
