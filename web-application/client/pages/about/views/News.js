@@ -31,6 +31,7 @@ const posts = {
         author: 'Daniel Bingham',
         content: (
             <>
+                <p><em>This post is the first of a series on enshittification and what we can do about it. You can find part one here: <a href="/about/news/9-29-2026-protocols-arent-the-answer">Protocols Aren't the Answer</a></em>.</p>
                 <p>
                     Enshittification. It's when companies make products and
                     services worse in pursuit of profits.
@@ -40,16 +41,17 @@ const posts = {
                     about it in the context of social media.
                 </p>
                 <p>
-                    The pro-social tech movement has coallesced around protocols
-                    and interoperability as the answer to it. In the first
-                    article in this series, we argued that Protocols Aren't the
-                    Answer.
+                    Much of the pro-social tech movement has coallesced around
+                    protocols and interoperability as the answer to it. In the
+                    first article in this series, we argued that <a
+                        href="/about/news/9-29-2026-protocols-arent-the-answer">Protocols
+                    Aren't the Answer</a>.
                 </p>
                 <p>
-                    Enshittification is a social problem. It's caused by giving
-                    investors control. When the investors control an
-                    organization, the pursuit of returns will dominate.
-                    Enshittification follows.
+                    Enshittification is a social problem. It's caused by
+                    concentrating power in the hands of investors. When the
+                    investors control an organization, the pursuit of returns
+                    will tend to dominate. Enshittification follows.
                 </p>
                 <p>
                     The protocols movement is an attempt to use market forces to
@@ -63,7 +65,11 @@ const posts = {
                     need a social solution. We need to change who's in charge
                     and how they are held accountable.
                 </p>
-                <h2>Benevolent Oligarchy</h2>
+                <p>
+                    But who do we put in charge? And how to do we hold them
+                    accountable?
+                </p>
+                <h2>Stewards in Charge</h2>
                 <p>
                     One approach is to put a select group of stewards in charge.
                 </p>
@@ -79,24 +85,24 @@ const posts = {
                     created a nonprofit that ultimately controls the platform.
                 </p>
                 <p>
-                    The board is usually self-perpetuating, meaning the current
-                    board chooses its own members as it grows or members turn
-                    over.
+                    In most cases, the board is self-perpetuating, meaning the
+                    current board chooses its own members as it grows or
+                    members turn over.
                 </p>
                 <p>
-                    The problem with this model is that it's essentially a
-                    benevolent oligarchy. If the board is corrupted,
-                    captured, or gets out of step with the needs of the
-                    community there isn't really a recourse. There's no
-                    mechanism for the community to hold the board accountable.
-                    You're depending on those handful of board members to stay
-                    on mission.
+                    This model has often worked well. All of the above examples
+                    have remained pro-social and resisted enshittification. But
+                    we have other examples of this model where the stewardship
+                    failed. The board was corrupted and veered off mission,
+                    sold out, or unable to keep investors in check.
                 </p>
                 <p>
-                    While we can point to successful cases of the stewardship
-                    model (Wikipedia being the most prominent), we can also
-                    point to clear failures that show the problems with the
-                    model.
+                    The problem with stewardship through a self-perpetuating
+                    non-profit board is that it's essentially a benevolent
+                    oligarchy. If the board is corrupted, captured, or goes off
+                    the rails there's no recourse. The community has no
+                    mechanisms to hold them accountable. You're depending on
+                    those handful of board members to stay on mission.
                 </p>
                 <p>
                     Couchsurfing started out as a nonprofit, built by
@@ -109,19 +115,33 @@ const posts = {
                     began.
                 </p>
                 <p>
-                    OpenAI is another example. It started as a 501(c)(3)
-                    nonprofit and spun out a child public benefit corporation.
-                    When the nonprofit board tried to replace the CEO they were
-                    forced to backdown and resign under pressure by investors in
-                    the benefit corporation. Ultimately, it's pretty clear who's
-                    now in control of OpenAI.
+                    <a target="_BLANK" href="https://en.wikipedia.org/wiki/EdX">edX</a> was online course software originally created at MIT
+                    and then developed through a collaborative partnership
+                    between MIT and Harvard. It was <a target="_BLANK" href="https://openlearning.mit.edu/news/mit-and-harvard-announce-edx">founded as a nonprofit</a> jointly governed by the
+                    two universities.
                 </p>
                 <p>
-                    The stewardship model is only as good as the stewards. The
-                    actual structural protections are very weak.
+                    In 2021, <a target="_BLANK" href="https://www.thecrimson.com/article/2021/6/29/harvard-mit-sell-edx/">it was sold to 2U</a> a private, venture funded
+                    education technology company, with the president of the
+                    nonprofit becoming the Chief Platform Office of 2U. Faculty
+                    and students protested, but ultimately they had no
+                    recourse. 2U has since <a target="_BLANK" href="https://www.thecrimson.com/article/2024/7/27/2u-bankruptcy-harvard-mit-edx/">declared chapter 11 bankrupcy</a>.
                 </p>
                 <p>
-                    We can do better.
+                    The stewardship model is only as good as the stewards. It's
+                    missing accountability mechanisms.
+                </p>
+                <p>
+                    Interestingly, Wikipedia points us in the direction of a
+                    another model to consider.
+                </p>
+                <p>
+                    Wikipedia is not a pure stewardship model. Half the board
+                    is self-perpetuating, the other half is elected by the
+                    community of editors, which creates a mechanism by which
+                    the community can hold the organization accountable. This
+                    brings us to the next model we could consider: Users in
+                    Charge.
                 </p>
                 <h2>Users in Charge</h2>
                 <p>
@@ -134,9 +154,16 @@ const posts = {
                     thousands of consumer cooperatives in the world.
                 </p>
                 <p>
-                    Consumer cooperatives have been around a long time. We have
-                    a lot of data on their enshittification resistance and they
-                    have not proven very resistant.
+                    In theory, putting the community in charge allows them to
+                    directly hold the organization accountable. And this does
+                    happen, some of the time. It happened in Wikipedia, when the board wanted to secretly pursue a Search Engine project against the wishes of the community.
+
+                </p>
+                <p>
+                    But you often also see the
+                    community tune out, allowing cooperative boards to
+                    enshittify in spite of community control, or to even take
+                    the cooperative out from under the members entirely.
                 </p>
                 <p>
                     Numerous consumer cooperatives have had their boards get
