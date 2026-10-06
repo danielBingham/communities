@@ -3,14 +3,26 @@
   "description": "Root package for Communities",
   "author": "Daniel Bingham",
   "license": "GPL-3.0",
+  "private": true,
+  "engines": {
+    "node": ">=24.5.0"
+  },
+  "workspaces": [
+    "packages/shared",
+    "packages/backend",
+    "packages/session",
+    "worker",
+    "web-application"
+  ],
   "scripts": {
-    "build": "export NODE_ENV=production && npm run build --prefix=web-application && npx cap sync",
-    "build-staging": "export NODE_ENV=staging && npm run build --prefix=web-application && npx cap sync",
-    "build-dev": "export NODE_ENV=development && npm run build-dev --prefix=web-application && npx cap sync",
-    "dev": "export NODE_ENV=development && concurrently \"npm run dev --prefix=worker\" \"npm run dev --prefix=web-application\"",
-    "test": "npm run test --prefix=packages/shared && npm run test --prefix=packages/backend && npm run test --prefix=web-application",
-    "test:integration": "npm run test:integration --prefix=web-application",
-    "test:integration:staging": "npm run test:integration:staging --prefix=web-application"
+    "build": "export NODE_ENV=production && npm run build -w web-application && npx cap sync",
+    "build-staging": "export NODE_ENV=staging && npm run build -w web-application && npx cap sync",
+    "build-dev": "export NODE_ENV=development && npm run build-dev -w web-application && npx cap sync",
+    "dev": "export NODE_ENV=development && concurrently \"npm run dev -w worker\" \"npm run dev -w web-application\"",
+    "test": "npm test -w packages/shared -w packages/backend -w web-application",
+    "test:integration": "npm run test:integration -w web-application",
+    "test:integration:staging": "npm run test:integration:staging -w web-application",
+    "check:lockfile": "node scripts/check-lockfile.js"
   },
   "dependencies": {
     "@capacitor/android": "^7.4.2",

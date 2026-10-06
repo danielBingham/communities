@@ -6,6 +6,10 @@
 #  the shared workspace packages bind-mounted in, so edits on the host reload
 #  and recompile inside the containers.
 #
+#  Both images are built from the repository root, where the npm workspace and
+#  its lockfile live. Inside the images the workspace is at /opt/communities
+#  and /src points at the app's own folder, as it always has.
+#
 #  Redis image is run from a default image, but the postgres image must be
 #  built separately following instructions found in the
 #  `documentation/running-locally.md`.
@@ -57,12 +61,8 @@ services:
   # ---------------------------------------------------------------------------
   worker:
     build:
-      context: ./worker
-      dockerfile: Dockerfile
-      # Needed by `npm ci` in the Dockerfile to pull @communities/* from
-      # CodeArtifact. Export CODEARTIFACT_AUTH_TOKEN before building.
-      secrets:
-        - CODEARTIFACT_AUTH_TOKEN
+      context: .
+      dockerfile: worker/Dockerfile
     depends_on:
       postgres:
         condition: service_healthy
@@ -90,13 +90,15 @@ services:
       - ./worker/config:/src/config
       - ./worker/nodemon.json:/src/nodemon.json
       # --- shared workspace packages ---
-      # Mounted at /packages so nodemon's "../packages/*" watch paths resolve,
-      # AND over node_modules so require() loads the live source (both point at
-      # the same host directory, so one edit does both).
-      - ./packages:/packages
-      - ./packages/backend:/src/node_modules/@communities/backend
-      - ./packages/shared:/src/node_modules/@communities/backend/node_modules/@communities/shared
-      - ./packages/shared:/src/node_modules/@communities/shared
+      # require('@communities/*') follows the workspace links to
+      # /opt/communities/packages, which is also where nodemon's
+      # "../packages/*" watch paths resolve, so one mount does both. The
+      # anonymous volumes keep the image's installed node_modules instead of
+      # whatever (if anything) the host has installed in those folders.
+      - ./packages:/opt/communities/packages
+      - /opt/communities/packages/shared/node_modules
+      - /opt/communities/packages/backend/node_modules
+      - /opt/communities/packages/session/node_modules
       # --- Temp directory for file processing ---
       - ./worker/tmp:/src/tmp
     restart: unless-stopped
@@ -108,10 +110,8 @@ services:
   # ---------------------------------------------------------------------------
   web-application:
     build:
-      context: ./web-application
-      dockerfile: Dockerfile
-      secrets:
-        - CODEARTIFACT_AUTH_TOKEN
+      context: .
+      dockerfile: web-application/Dockerfile
     depends_on:
       postgres:
         condition: service_healthy
@@ -150,17 +150,10 @@ services:
       # Self-signed HTTPS certs the dev server + Express need in development.
       - ./web-application/security:/src/security
       # --- shared workspace packages (see worker note above) ---
-      - ./packages:/packages
-      - ./packages/backend:/src/node_modules/@communities/backend
-      - ./packages/shared:/src/node_modules/@communities/backend/node_modules/@communities/shared
-      - ./packages/shared:/src/node_modules/@communities/shared
-      - ./packages/session:/src/node_modules/@communities/session
+      - ./packages:/opt/communities/packages
+      - /opt/communities/packages/shared/node_modules
+      - /opt/communities/packages/backend/node_modules
+      - /opt/communities/packages/session/node_modules
       # --- Temp directory for image uploads ---
       - ./web-application/tmp:/src/tmp
     restart: unless-stopped
-
-# The CodeArtifact token is read from the CODEARTIFACT_AUTH_TOKEN host env var
-# at build time and mounted as a BuildKit secret (never baked into a layer).
-secrets:
-  CODEARTIFACT_AUTH_TOKEN:
-    environment: CODEARTIFACT_AUTH_TOKEN
