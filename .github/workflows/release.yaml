@@ -47,13 +47,18 @@ jobs:
       - name: Run Unit Tests
         run: npm test
 
-      # Version every workspace package (shared, backend, session, worker,
-      # web-application) at once. This also updates their entries in
-      # package-lock.json. The internal packages aren't published anywhere: the
-      # images below build them from source.
-      - name: Version the Workspace Packages
+      # Version the root package and every workspace package (shared,
+      # backend, session, worker, web-application) at once. This also updates
+      # their entries in package-lock.json. The internal packages aren't
+      # published anywhere: the images below build them from source.
+      #
+      # --include-workspace-root matters: `npx` (which compose.yaml uses to
+      # start the dev server) sets npm_package_version from the root
+      # package.json, and the client reloads when the server's version doesn't
+      # match its own. Without it, only the workspace packages are bumped.
+      - name: Version the Root and Workspace Packages
         run: |
-          npm version ${{ github.event.inputs.version }} --workspaces --no-git-tag-version
+          npm version ${{ github.event.inputs.version }} --workspaces --include-workspace-root --no-git-tag-version
 
       # Build the worker docker container and push it to ECR. Both images build
       # from the repository root so they can install the workspace.

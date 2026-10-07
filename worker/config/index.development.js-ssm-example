@@ -1,0 +1,67 @@
+/**************************************************************************************************
+ *          Configuration: development, from Parameter Store (example)
+ *
+ * To use it, copy it to index.development.js in this folder (git ignores that
+ * file), then edit your copy as you like. index.development.js is loaded when
+ * NODE_ENV=development (see index.js).
+ *
+ * This example reads values from AWS Parameter Store, like production, so you
+ * need AWS credentials (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY) that can read
+ * the parameters under /$COMMUNITIES_ENVIRONMENT_NAME. To take one value from
+ * somewhere else, change its source, for example
+ * `host: 'env:COMMUNITIES_DATABASE_HOST'` under `database`.
+ *
+ * Every string value declares where it comes from:
+ *
+ *   'aws-ssm-parameter:/path'  AWS Parameter Store, at /$COMMUNITIES_ENVIRONMENT_NAME/path
+ *   'env:VARIABLE'             the environment variable VARIABLE
+ *   anything else              used as written
+ *
+ * Nothing is read from the environment unless this file says `env:` for it.
+ **************************************************************************************************/
+
+module.exports = {
+    host: 'aws-ssm-parameter:/host', 
+    wsHost: 'aws-ssm-parameter:/ws-host',
+    environment: 'development',
+    environmentName: 'env:COMMUNITIES_ENVIRONMENT_NAME',
+    log_level: 'env:COMMUNITIES_LOG_LEVEL',
+    // Database configuration
+    database: {
+        host: 'aws-ssm-parameter:/database/host',
+        port: 'aws-ssm-parameter:/database/port',
+        user: 'aws-ssm-parameter:/database/user',
+        password: 'aws-ssm-parameter:/database/password',
+        name: 'aws-ssm-parameter:/database/name' 
+    },
+    redis: {
+        host: 'aws-ssm-parameter:/redis/host',
+        port: 'aws-ssm-parameter:/redis/port'
+    },
+    session: {
+        cookieName: 'aws-ssm-parameter:/session/cookie-name',
+        headerName: 'aws-ssm-parameter:/session/header-name',
+        platformHeader: 'aws-ssm-parameter:/session/platform-header',
+        secret: 'aws-ssm-parameter:/session/secret' 
+    },
+    s3: {
+        bucket_url: 'aws-ssm-parameter:/storage/s3/bucket-url',
+        bucket: 'aws-ssm-parameter:/storage/s3/bucket',
+        access_id: 'aws-ssm-parameter:/storage/s3/access-id',
+        access_key: 'aws-ssm-parameter:/storage/s3/access-key' 
+    },
+    postmark: {
+        api_token: 'aws-ssm-parameter:/postmark/api-token' 
+    },
+    notifications: {
+        ios: {
+            privateCert: 'aws-ssm-parameter:/notifications/ios/apns-private-key-pem',
+            publicCert: 'aws-ssm-parameter:/notifications/ios/apns-public-cert-pem', 
+            applicationBundleID: 'aws-ssm-parameter:/notifications/ios/application-bundle-id',
+            endpoint: 'aws-ssm-parameter:/notifications/ios/endpoint' 
+        },
+        android: {
+            firebaseServiceAccount: 'aws-ssm-parameter:/notifications/android/firebase-service-account-json' 
+        }
+    }
+}
