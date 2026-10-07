@@ -135,7 +135,11 @@ module.exports = class Config {
     }
 
     /**
-     * Load a configuration definition.
+     * Load a configuration definition, in a single walk.
+     *
+     * Every value that names a source is loaded from it; every other value is
+     * used as written. Values that can't be loaded are collected, with their
+     * key path, and reported together.
      *
      * @param {Object} configDefinition The definition, as returned by
      * definitionFor().
@@ -143,139 +147,105 @@ module.exports = class Config {
      * @return {Promise<Object>} The configuration, with the same shape as the
      * definition.
      *
-     * @throws {ConfigError} When any value can't be found.
+     * @throws {ConfigError} When any value can't be loaded.
      */
     async loadConfig(configDefinition) {
-        const references = this.collectReferences(configDefinition)
-
-        const fromParameterStore = references.filter((r) => r.type === 'ssm')
-        const fromEnvironment = references.filter((r) => r.type === 'env')
-        console.log(`Loading configuration: ${fromParameterStore.length} value(s) from Parameter Store`
-            + (fromParameterStore.length > 0
-                ? (this.environmentName ? ` under '/${this.environmentName}'` : ` (COMMUNITIES_ENVIRONMENT_NAME isn't set)`)
-                : '')
-            + `, ${fromEnvironment.length} from environment variables...`)
-
-        const values = new Map()
+        // How many values each source supplied.
+        const tally = { ssm: 0, env: 0 }
         const missing = []
 
-        for (const reference of fromEnvironment) {
-            const value = this.env[reference.name]
-            if ( value !== undefined && value !== '' ) {
-                values.set(reference.source, value)
-            } else {
-                missing.push(...reference.keys.map((key) => ({ key: key, source: reference.source })))
+        const walk = async (definition, prefix) => {
+            const config = {}
+
+            for (const [key, value] of Object.entries(definition)) {
+                const keyPath = prefix ? `${prefix}.${key}` : key
+
+                if ( typeof value === 'object' && value !== null && ! Array.isArray(value) ) {
+                    config[key] = await walk(value, keyPath)
+                } else if ( typeof value === 'string' ) {
+                    const source = Config.parseSource(value)
+
+                    if ( source === null ) {
+                        config[key] = value
+                        continue
+                    }
+
+                    tally[source.type] += 1
+                    const loaded = source.type === 'env'
+                        ? this.loadEnvironmentVariable(source.name)
+                        : await this.loadAWSParameter(source.name)
+
+                    if ( loaded === undefined ) {
+                        missing.push({ key: keyPath, source: value })
+                    } else {
+                        config[key] = loaded
+                    }
+                } else {
+                    config[key] = value
+                }
             }
+
+            return config
         }
 
-        if ( fromParameterStore.length > 0 ) {
-            if ( ! this.environmentName ) {
-                // Without the prefix there's nowhere to look; report it once
-                // rather than every parameter that depends on it (and not at
-                // all if the definition's own env: value already did).
-                const source = `${ENV_PREFIX}${ENVIRONMENT_NAME_VARIABLE}`
-                if ( ! missing.some((m) => m.source === source) ) {
-                    missing.push({ key: '(Parameter Store path prefix)', source: source })
-                }
-            } else {
-                for (const reference of fromParameterStore) {
-                    const value = await this.loadParameter(reference.name)
-                    if ( value !== undefined ) {
-                        values.set(reference.source, value)
-                    } else {
-                        missing.push(...reference.keys.map((key) => ({ key: key, source: reference.source })))
-                    }
-                }
-            }
-        }
+        const config = await walk(configDefinition, '')
 
         if ( missing.length > 0 ) {
             throw new ConfigError(this.describeMissing(missing), missing)
         }
 
-        return this.buildConfig(configDefinition, values)
-    }
-
-    /**
-     * The distinct sources a definition refers to, in definition order, each
-     * with the configuration keys that use it.
-     *
-     * @return {Object[]} `{ source, type, name, keys }`, where `type` is `ssm`
-     * or `env` and `name` is the parameter path or variable name.
-     */
-    collectReferences(configDefinition) {
-        const references = new Map()
-
-        const walk = (definition, prefix) => {
-            for (const [key, value] of Object.entries(definition)) {
-                const keyPath = prefix ? `${prefix}.${key}` : key
-
-                if ( typeof value === 'string' ) {
-                    const reference = Config.parseSource(value)
-                    if ( reference === null ) {
-                        continue
-                    }
-                    if ( ! reference.name ) {
-                        throw new ConfigError(`'${keyPath}' is set to '${value}', which names no ${reference.type === 'env' ? 'variable' : 'parameter'}.`)
-                    }
-                    if ( ! references.has(value) ) {
-                        references.set(value, { ...reference, source: value, keys: [] })
-                    }
-                    references.get(value).keys.push(keyPath)
-                } else if ( typeof value === 'object' && ! Array.isArray(value) && value !== null ) {
-                    walk(value, keyPath)
-                }
-            }
-        }
-        walk(configDefinition, '')
-
-        return [ ...references.values() ]
-    }
-
-    /**
-     * Parse a definition value.
-     *
-     * @return {Object|null} `{ type, name }` for an `aws-ssm-parameter:` or
-     * `env:` value, or null for a value that's used as written.
-     */
-    static parseSource(value) {
-        if ( value.startsWith(SSM_PREFIX) ) {
-            return { type: 'ssm', name: value.substring(SSM_PREFIX.length).trim() }
-        }
-        if ( value.startsWith(ENV_PREFIX) ) {
-            return { type: 'env', name: value.substring(ENV_PREFIX.length).trim() }
-        }
-        return null
-    }
-
-    /**
-     * Build the configuration object from the definition and the loaded
-     * values. As before, only strings and nested objects are carried over.
-     */
-    buildConfig(configDefinition, values) {
-        const config = {}
-
-        for(const [key, value] of Object.entries(configDefinition)) {
-            if ( typeof value === 'string' ) {
-                config[key] = Config.parseSource(value) === null ? value : values.get(value)
-            } else if ( typeof value === 'object' && ! Array.isArray(value) && value !== null ) {
-                config[key] = this.buildConfig(value, values)
-            }
-        }
+        console.log(`Configuration loaded: ${tally.ssm} value(s) from Parameter Store`
+            + (tally.ssm > 0 ? ` under '/${this.environmentName}'` : '')
+            + `, ${tally.env} from environment variables.`)
 
         return config
     }
 
     /**
-     * Load one parameter from Parameter Store.
+     * Parse a definition value.
+     *
+     * @return {Object|null} `{ type, name }` for an `aws-ssm-parameter:`
+     * (`type: 'ssm'`) or `env:` (`type: 'env'`) value, or null for a value
+     * that's used as written.
+     */
+    static parseSource(value) {
+        if ( value.startsWith(SSM_PREFIX) ) {
+            return { type: 'ssm', name: value.substring(SSM_PREFIX.length) }
+        }
+        if ( value.startsWith(ENV_PREFIX) ) {
+            return { type: 'env', name: value.substring(ENV_PREFIX.length) }
+        }
+        return null
+    }
+
+    /**
+     * Load one value from an environment variable.
+     *
+     * @param {string} name The variable, e.g. `COMMUNITIES_DATABASE_HOST`.
+     *
+     * @return {string|undefined} The value, or undefined when the variable is
+     * unset or empty.
+     */
+    loadEnvironmentVariable(name) {
+        const value = this.env[name]
+        return value === '' ? undefined : value
+    }
+
+    /**
+     * Load one value from Parameter Store, under the environment name.
      *
      * @param {string} parameter    The path from the definition, without the
-     * environment name prefix.
+     * environment name prefix, e.g. `/database/host`.
      *
      * @return {Promise<string|undefined>} The value, or undefined when the
-     * parameter doesn't exist.
+     * parameter doesn't exist or COMMUNITIES_ENVIRONMENT_NAME isn't set.
      */
-    async loadParameter(parameter) {
+    async loadAWSParameter(parameter) {
+        // Without the prefix there's nowhere to look. describeMissing() says so.
+        if ( ! this.environmentName ) {
+            return undefined
+        }
+
         if ( this.client === null ) {
             this.client = new SSMClient({
                 region: this.region,
@@ -301,21 +271,29 @@ module.exports = class Config {
     }
 
     parameterPath(parameter) {
-        return path.posix.join(`/${this.environmentName}`, parameter)
+        return path.posix.join(`/${this.environmentName ?? ''}`, parameter)
     }
 
     describeMissing(missing) {
         const width = Math.max(...missing.map((m) => m.key.length))
         const lines = missing.map((m) => {
-            const reference = Config.parseSource(m.source)
-            const detail = reference.type === 'ssm'
-                ? `aws-ssm-parameter:${this.parameterPath(reference.name)} (not in Parameter Store)`
-                : `${m.source} (not set)`
+            const source = Config.parseSource(m.source)
+            let detail = `${m.source} (not set)`
+            if ( source.type === 'ssm' ) {
+                detail = this.environmentName
+                    ? `aws-ssm-parameter:${this.parameterPath(source.name)} (not in Parameter Store)`
+                    : `${m.source} (not loaded)`
+            }
             return `  ${m.key.padEnd(width)}  ${detail}`
         })
 
-        return `Missing configuration: ${missing.length} value(s) not found.\n`
-            + lines.join('\n')
+        let message = `Missing configuration: ${missing.length} value(s) not found.\n` + lines.join('\n')
+
+        if ( ! this.environmentName && missing.some((m) => Config.parseSource(m.source).type === 'ssm') ) {
+            message += `\n${ENVIRONMENT_NAME_VARIABLE} isn't set, so no aws-ssm-parameter: value could be loaded.`
+        }
+
+        return message
     }
 }
 

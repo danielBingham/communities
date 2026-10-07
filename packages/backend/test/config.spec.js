@@ -99,7 +99,7 @@ describe('Config', function() {
 
     describe('loadConfig()', function() {
 
-        it('Should load env: values from the environment, without AWS', async function() {
+        it('Should load env: values from the environment and keep everything else as written, without AWS', async function() {
             const config = new Config(undefined, undefined, undefined, { env: environment })
 
             const result = await config.loadConfig({
@@ -112,7 +112,10 @@ describe('Config', function() {
                 },
                 links: {
                     5: 'https://example.com/five'
-                }
+                },
+                retries: 3,
+                enabled: true,
+                hosts: [ 'a', 'b' ]
             })
 
             expect(result).toEqual({
@@ -125,29 +128,33 @@ describe('Config', function() {
                 },
                 links: {
                     5: 'https://example.com/five'
-                }
+                },
+                retries: 3,
+                enabled: true,
+                hosts: [ 'a', 'b' ]
             })
             expect(config.client).toBe(null)
         })
 
-        it('Should load aws-ssm-parameter: values from under the environment name, once each', async function() {
+        it('Should load aws-ssm-parameter: values from under the environment name', async function() {
             const client = ssmClient(parameterStore)
             const config = new Config('staging', 'us-east-1', {}, { env: {}, client: client })
 
             const result = await config.loadConfig({
                 host: 'aws-ssm-parameter:/host',
                 database: {
-                    host: 'aws-ssm-parameter:/database/host',
-                    hostAgain: 'aws-ssm-parameter:/database/host'
+                    host: 'aws-ssm-parameter:/database/host'
                 }
             })
 
             expect(result).toEqual({
                 host: 'https://staging.example.com',
-                database: { host: 'db.internal', hostAgain: 'db.internal' }
+                database: { host: 'db.internal' }
             })
-            expect(client.send).toHaveBeenCalledTimes(2)
-            expect(client.send.mock.calls[0][0].input).toEqual({ Name: '/staging/host', WithDecryption: true })
+            expect(client.send.mock.calls.map((call) => call[0].input)).toEqual([
+                { Name: '/staging/host', WithDecryption: true },
+                { Name: '/staging/database/host', WithDecryption: true }
+            ])
         })
 
         it('Should take each value only from the source its definition names', async function() {
@@ -166,7 +173,23 @@ describe('Config', function() {
             expect(client.send.mock.calls.map((call) => call[0].input.Name)).toEqual([ '/staging/database/password' ])
         })
 
-        it('Should report every missing value at once, with its key and source', async function() {
+        it('Should report how many values came from each source', async function() {
+            const config = new Config('staging', 'us-east-1', {}, { env: environment, client: ssmClient(parameterStore) })
+
+            await config.loadConfig({
+                host: 'aws-ssm-parameter:/host',
+                environment: 'staging',
+                database: {
+                    host: 'aws-ssm-parameter:/database/host',
+                    password: 'env:COMMUNITIES_DATABASE_PASSWORD'
+                }
+            })
+
+            expect(console.log).toHaveBeenCalledWith(
+                `Configuration loaded: 2 value(s) from Parameter Store under '/staging', 1 from environment variables.`)
+        })
+
+        it('Should report every missing value at once, in definition order, with its key and source', async function() {
             const config = new Config('staging', 'us-east-1', {}, {
                 env: { ...environment, COMMUNITIES_DATABASE_PASSWORD: '' },
                 client: ssmClient(parameterStore)
@@ -186,42 +209,31 @@ describe('Config', function() {
 
             expect(error).toBeInstanceOf(ConfigError)
             expect(error.missing).toEqual([
+                { key: 'wsHost', source: 'aws-ssm-parameter:/ws-host' },
                 { key: 'database.password', source: 'env:COMMUNITIES_DATABASE_PASSWORD' },
-                { key: 'session.secret', source: 'env:COMMUNITIES_SESSION_SECRET' },
-                { key: 'wsHost', source: 'aws-ssm-parameter:/ws-host' }
+                { key: 'session.secret', source: 'env:COMMUNITIES_SESSION_SECRET' }
             ])
             expect(error.message).toContain('3 value(s)')
             expect(error.message).toContain('aws-ssm-parameter:/staging/ws-host')
             expect(error.message).toContain('env:COMMUNITIES_SESSION_SECRET')
         })
 
-        it('Should report a missing COMMUNITIES_ENVIRONMENT_NAME once, without asking Parameter Store', async function() {
+        it('Should not ask Parameter Store without COMMUNITIES_ENVIRONMENT_NAME, and say why the values are missing', async function() {
             const client = ssmClient(parameterStore)
             const config = new Config(undefined, 'us-east-1', {}, { env: {}, client: client })
-
-            const error = await config.loadConfig({
-                host: 'aws-ssm-parameter:/host',
-                database: { host: 'aws-ssm-parameter:/database/host' }
-            }).catch((error) => error)
-
-            expect(error).toBeInstanceOf(ConfigError)
-            expect(error.missing).toEqual([
-                { key: '(Parameter Store path prefix)', source: 'env:COMMUNITIES_ENVIRONMENT_NAME' }
-            ])
-            expect(client.send).not.toHaveBeenCalled()
-        })
-
-        it('Should not report COMMUNITIES_ENVIRONMENT_NAME twice when the definition also reads it', async function() {
-            const config = new Config(undefined, 'us-east-1', {}, { env: {}, client: ssmClient(parameterStore) })
 
             const error = await config.loadConfig({
                 environmentName: 'env:COMMUNITIES_ENVIRONMENT_NAME',
                 host: 'aws-ssm-parameter:/host'
             }).catch((error) => error)
 
+            expect(error).toBeInstanceOf(ConfigError)
             expect(error.missing).toEqual([
-                { key: 'environmentName', source: 'env:COMMUNITIES_ENVIRONMENT_NAME' }
+                { key: 'environmentName', source: 'env:COMMUNITIES_ENVIRONMENT_NAME' },
+                { key: 'host', source: 'aws-ssm-parameter:/host' }
             ])
+            expect(error.message).toContain(`COMMUNITIES_ENVIRONMENT_NAME isn't set`)
+            expect(client.send).not.toHaveBeenCalled()
         })
 
         it('Should rethrow errors other than a missing parameter', async function() {
@@ -230,12 +242,15 @@ describe('Config', function() {
 
             await expect(config.loadConfig({ host: 'aws-ssm-parameter:/host' })).rejects.toThrow('Access denied')
         })
+    })
 
-        it('Should reject a source with no name', async function() {
-            const config = new Config(undefined, undefined, undefined, { env: environment })
+    describe('loadEnvironmentVariable()', function() {
+        it('Should treat an unset or empty variable as missing', function() {
+            const config = new Config(undefined, undefined, undefined, { env: { SET: 'value', EMPTY: '' } })
 
-            await expect(config.loadConfig({ host: 'env:' })).rejects.toThrow(ConfigError)
-            await expect(config.loadConfig({ host: 'aws-ssm-parameter:' })).rejects.toThrow(ConfigError)
+            expect(config.loadEnvironmentVariable('SET')).toBe('value')
+            expect(config.loadEnvironmentVariable('EMPTY')).toBe(undefined)
+            expect(config.loadEnvironmentVariable('UNSET')).toBe(undefined)
         })
     })
 })
