@@ -1,5 +1,9 @@
 **/.env*
 !/.env.local.example
+# Each developer's own configuration; copy it from the -example files
+# alongside it (see documentation/running-locally.md).
+web-application/server/config/index.development.js
+worker/config/index.development.js
 node_modules/
 *.swp
 web-application/public/uploads/*
