@@ -42,7 +42,7 @@ if ( process.argv.length >= 3 ) {
 
 async function initialize() {
 
-    const environmentName = process.env.ENVIRONMENT_NAME
+    const environmentName = process.env.COMMUNITIES_ENVIRONMENT_NAME
     const region = process.env.AWS_REGION
     const credentials = {
         accessKeyId: process.env.AWS_ACCESS_KEY_ID,

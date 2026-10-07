@@ -3,6 +3,7 @@
 # host-installed modules, local secrets, and build output.
 **/node_modules
 **/.env*
+**/config/index.development.js
 **/tmp
 **/*.swp
 **/.DS_Store
