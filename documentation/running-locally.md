@@ -17,50 +17,61 @@ $ docker build -t communities-sql database/initialization-scripts
 
 ## Configuring the Local Environment
 
-Configuration comes from one of two sources, chosen by the `CONFIG_SOURCE`
-environment variable:
+Each app has a configuration file per environment, and `NODE_ENV` picks
+which one is loaded:
 
-- `env`: environment variables only. Nothing is read from AWS, so you don't
-  need an AWS account. This is the one to use if you're contributing. It only
-  works in development (`NODE_ENV=development`, which `compose.yaml` and
-  `npm run dev` set); anywhere else the apps refuse to start with it.
-- `ssm` (the default): AWS Systems Manager Parameter Store, under
-  `/$ENVIRONMENT_NAME`. This is what staging and production use, and what
-  maintainers can use locally with a `/local/<username>` path.
+| `NODE_ENV`    | worker                                | web application                                       |
+| ------------- | ------------------------------------- | ----------------------------------------------------- |
+| `production`  | `worker/config/index.production.js`   | `web-application/server/config/index.production.js`   |
+| `staging`     | `worker/config/index.staging.js`      | `web-application/server/config/index.staging.js`      |
+| `development` | `worker/config/index.development.js`  | `web-application/server/config/index.development.js`  |
 
-Each parameter has a matching environment variable: the parameter path,
-uppercased, with `/` and `-` turned into `_` and a `COMMUNITIES_` prefix. For
-example `/database/host` is `COMMUNITIES_DATABASE_HOST`, and
-`/storage/s3/bucket-url` is `COMMUNITIES_STORAGE_S3_BUCKET_URL`. In
-development, a variable that is set (and not empty) wins over the parameter,
-so you can override single values while reading the rest from Parameter
-Store.
+The file declares where every value comes from, and nothing else decides it:
 
-Outside development, environment variables never supply configuration:
-every value comes from Parameter Store, and any `COMMUNITIES_*` variables
-are ignored (the apps log their names as a warning). That keeps a variable
-injected into a production container from changing the configuration.
+- `'aws-ssm-parameter:/database/host'` reads AWS Systems Manager Parameter
+  Store at `/$COMMUNITIES_ENVIRONMENT_NAME/database/host`.
+- `'env:COMMUNITIES_DATABASE_HOST'` reads that environment variable.
+- Any other string is used as written.
 
-If anything is missing, the worker and web application stop at startup and
-list every missing variable (or parameter) at once.
+A value only comes from the environment if the file says `env:` for it, so
+there are no implicit overrides. If any value can't be found, the app stops
+at startup and lists every missing one, with the key and where it looked.
 
-### Using environment variables (`CONFIG_SOURCE=env`)
+The production and staging files are committed. `index.development.js` is
+yours: git ignores it, and you create it by copying one of the two examples
+next to it, then edit it however you need.
 
-Copy the example file to `.env` in the repository root:
+- `index.development.js-env-example` reads every value from an environment
+  variable, so you don't need an AWS account. Use this one if you're
+  contributing.
+- `index.development.js-ssm-example` reads from Parameter Store, like
+  production. Maintainers can use it with a `/local/<username>` path.
+
+Environment variable names follow one scheme: the Parameter Store path in
+constant case, prefixed with `COMMUNITIES_`. `/database/host` is
+`COMMUNITIES_DATABASE_HOST`, and `/storage/s3/bucket-url` is
+`COMMUNITIES_STORAGE_S3_BUCKET_URL`.
+
+### Using environment variables
+
+Create the development configuration for both apps from the environment
+variable example, and copy the example `.env` to the repository root:
 
 ```
+cp worker/config/index.development.js-env-example worker/config/index.development.js
+cp web-application/server/config/index.development.js-env-example web-application/server/config/index.development.js
 cp .env.local.example .env
 ```
 
-Then fill in the two secrets it marks, `COMMUNITIES_SESSION_SECRET` and
+Then fill in the two secrets `.env` marks, `COMMUNITIES_SESSION_SECRET` and
 `COMMUNITIES_ENCRYPTION_MFA_V1_KEY`. Generate each with:
 
 ```
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
-The example is set up for Docker Compose, where the database and Redis are
-the `postgres` and `redis` services. If you run the apps directly on your
+The example `.env` is set up for Docker Compose, where the database and Redis
+are the `postgres` and `redis` services. If you run the apps directly on your
 machine instead, set `COMMUNITIES_DATABASE_HOST` and `COMMUNITIES_REDIS_HOST`
 to `localhost`.
 
@@ -68,22 +79,30 @@ File storage, email and push notifications don't have local replacements
 yet, so the example fills their values with placeholders. Both apps start,
 but uploads, outgoing email and notification jobs fail until those land.
 
-### Using Parameter Store (`CONFIG_SOURCE=ssm`)
+### Using Parameter Store
 
-Create a `.env` file in the repository root with AWS credentials that can read
-your parameters, and the path they live under:
+Create the development configuration for both apps from the Parameter Store
+example:
 
 ```
-CONFIG_SOURCE=ssm
-ENVIRONMENT_NAME=local/<username>
+cp worker/config/index.development.js-ssm-example worker/config/index.development.js
+cp web-application/server/config/index.development.js-ssm-example web-application/server/config/index.development.js
+```
+
+Then create a `.env` file in the repository root with the path your
+parameters live under, a log level, and AWS credentials that can read them:
+
+```
+COMMUNITIES_ENVIRONMENT_NAME=local/<username>
+COMMUNITIES_LOG_LEVEL=debug
 AWS_ACCESS_KEY_ID=...
 AWS_SECRET_ACCESS_KEY=...
 ```
 
 Create every parameter the apps need under `/local/<username>`; you can copy
-them from another `/local` path. To point at something different without
-touching Parameter Store, add the matching `COMMUNITIES_*` variable to `.env`,
-for example `COMMUNITIES_DATABASE_HOST=postgres`.
+them from another `/local` path. To take a single value from somewhere else,
+change its source in your `index.development.js`, for example
+`host: 'env:COMMUNITIES_DATABASE_HOST'`, and set that variable in `.env`.
 
 ### Where `.env` is read
 

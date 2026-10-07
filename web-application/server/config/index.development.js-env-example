@@ -1,0 +1,94 @@
+/**************************************************************************************************
+ *          Configuration: development, from environment variables (example)
+ *
+ * To use it, copy it to index.development.js in this folder (git ignores that
+ * file), then edit your copy as you like. index.development.js is loaded when
+ * NODE_ENV=development (see index.js).
+ *
+ * This example reads every value from an environment variable, so you don't
+ * need an AWS account. .env.local.example in the repository root lists the
+ * variables with working local values. Each variable is the Parameter Store
+ * path in constant case, prefixed with COMMUNITIES_: /database/host is
+ * COMMUNITIES_DATABASE_HOST.
+ *
+ * Every string value declares where it comes from:
+ *
+ *   'aws-ssm-parameter:/path'  AWS Parameter Store, at /$COMMUNITIES_ENVIRONMENT_NAME/path
+ *   'env:VARIABLE'             the environment variable VARIABLE
+ *   anything else              used as written
+ *
+ * Nothing is read from the environment unless this file says `env:` for it.
+ **************************************************************************************************/
+
+module.exports = {
+    host: 'env:COMMUNITIES_HOST',
+    wsHost: 'env:COMMUNITIES_WS_HOST',
+    environment: 'development',
+    environmentName: 'env:COMMUNITIES_ENVIRONMENT_NAME',
+    log_level: 'env:COMMUNITIES_LOG_LEVEL',
+    // Database configuration
+    database: {
+        host: 'env:COMMUNITIES_DATABASE_HOST',
+        port: 'env:COMMUNITIES_DATABASE_PORT',
+        user: 'env:COMMUNITIES_DATABASE_USER',
+        password: 'env:COMMUNITIES_DATABASE_PASSWORD',
+        name: 'env:COMMUNITIES_DATABASE_NAME'
+    },
+    encryption: {
+        mfa: {
+            v1: {
+                key: 'env:COMMUNITIES_ENCRYPTION_MFA_V1_KEY',
+                algorithm: 'env:COMMUNITIES_ENCRYPTION_MFA_V1_ALGORITHM',
+                authTagLength: 'env:COMMUNITIES_ENCRYPTION_MFA_V1_AUTH_TAG_LENGTH',
+                initializationVectorLength: 'env:COMMUNITIES_ENCRYPTION_MFA_V1_INITIALIZATION_VECTOR_LENGTH',
+                keyLength: 'env:COMMUNITIES_ENCRYPTION_MFA_V1_KEY_LENGTH',
+                saltLength: 'env:COMMUNITIES_ENCRYPTION_MFA_V1_SALT_LENGTH'
+            }
+        }
+    },
+    redis: {
+        host: 'env:COMMUNITIES_REDIS_HOST',
+        port: 'env:COMMUNITIES_REDIS_PORT'
+    },
+    session: {
+        cookieName: 'env:COMMUNITIES_SESSION_COOKIE_NAME',
+        headerName: 'env:COMMUNITIES_SESSION_HEADER_NAME',
+        platformHeader: 'env:COMMUNITIES_SESSION_PLATFORM_HEADER',
+        secret: 'env:COMMUNITIES_SESSION_SECRET'
+    },
+    s3: {
+        bucket_url: 'env:COMMUNITIES_STORAGE_S3_BUCKET_URL',
+        bucket: 'env:COMMUNITIES_STORAGE_S3_BUCKET',
+        access_id: 'env:COMMUNITIES_STORAGE_S3_ACCESS_ID',
+        access_key: 'env:COMMUNITIES_STORAGE_S3_ACCESS_KEY'
+    },
+    postmark: {
+        api_token: 'env:COMMUNITIES_POSTMARK_API_TOKEN'
+    },
+    notifications: {
+        ios: {
+            privateCert: 'env:COMMUNITIES_NOTIFICATIONS_IOS_APNS_PRIVATE_KEY_PEM',
+            publicCert: 'env:COMMUNITIES_NOTIFICATIONS_IOS_APNS_PUBLIC_CERT_PEM',
+            applicationBundleID: 'env:COMMUNITIES_NOTIFICATIONS_IOS_APPLICATION_BUNDLE_ID',
+            endpoint: 'env:COMMUNITIES_NOTIFICATIONS_IOS_ENDPOINT'
+        },
+        android: {
+            firebaseServiceAccount: 'env:COMMUNITIES_NOTIFICATIONS_ANDROID_FIREBASE_SERVICE_ACCOUNT_JSON'
+        }
+    },
+    stripe: {
+        portal: "https://billing.stripe.com/p/login/28o8xf0LV92h0uc8ww",
+        links: {
+            5: "https://donate.stripe.com/fZecQm48n09F7racMU",
+            10: "https://donate.stripe.com/eVa7w234j1dJaDm3cl",
+            15: "https://donate.stripe.com/aEUaIe20f09Fh1KdQW",
+            20: "https://donate.stripe.com/bIY4jQ7kz2hNfXG28f",
+            40: "https://donate.stripe.com/3csaIegV9aOj3aUeUV",
+            50: "https://donate.stripe.com/aEUdUqbAPcWraDm5kp",
+            60: "https://donate.stripe.com/00gbMi5crg8D3aUfYY",
+            100: "https://donate.stripe.com/5kA4jQ9sH9KfeTC3cg",
+            200: "https://donate.stripe.com/fZe9Ea9sH4pVbHq003",
+            500: "https://donate.stripe.com/8wM17E6gv8GbaDm4gi"
+        }
+    }
+}

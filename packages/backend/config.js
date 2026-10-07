@@ -18,39 +18,36 @@
  *
  ******************************************************************************/
 
+const fs = require('fs')
 const path = require('path')
 const { SSMClient, GetParameterCommand } = require("@aws-sdk/client-ssm")
 
 /**
- * Prefix that marks a configuration definition value as a parameter to load,
- * e.g. `'aws-ssm-parameter:/database/host'`.
+ * The environments a configuration definition file can exist for, selected by
+ * NODE_ENV: `config/index.<environment>.js`.
  */
-const PARAMETER_PREFIX = 'aws-ssm-parameter:'
+const ENVIRONMENTS = [ 'production', 'staging', 'development' ]
 
 /**
- * Prefix for the environment variable that holds a parameter's value.
+ * A value read from AWS Systems Manager Parameter Store. The path is prefixed
+ * with the COMMUNITIES_ENVIRONMENT_NAME environment variable:
+ * `'aws-ssm-parameter:/database/host'` reads `/<environment name>/database/host`.
  */
-const VARIABLE_PREFIX = 'COMMUNITIES_'
+const SSM_PREFIX = 'aws-ssm-parameter:'
 
 /**
- * Where parameter values come from.
- *
- * - `ssm`: AWS Systems Manager Parameter Store, under `/<environment>`. The
- *   default, and what staging and production use.
- * - `env`: environment variables only. Nothing is read from AWS, so no AWS
- *   credentials are needed. Development only.
- *
- * Environment variables only ever supply configuration in development
- * (NODE_ENV=development): the `env` source is refused otherwise, and with the
- * `ssm` source a parameter's variable overrides it only in development.
- * Outside development every value comes from Parameter Store, so a variable
- * injected into a container can't change the configuration.
+ * A value read from an environment variable: `'env:COMMUNITIES_DATABASE_HOST'`.
  */
-const SOURCES = [ 'ssm', 'env' ]
+const ENV_PREFIX = 'env:'
 
 /**
- * Thrown when the configuration can't be loaded: an unknown source, or
- * parameters with no value.
+ * The environment variable that holds the Parameter Store path prefix.
+ */
+const ENVIRONMENT_NAME_VARIABLE = 'COMMUNITIES_ENVIRONMENT_NAME'
+
+/**
+ * Thrown when the configuration can't be loaded: no definition file for the
+ * environment, or values that couldn't be found.
  */
 class ConfigError extends Error {
     constructor(message, missing) {
@@ -58,146 +55,138 @@ class ConfigError extends Error {
         this.name = 'ConfigError'
 
         /**
-         * The parameters that had no value, as `{ parameter, variable }`.
+         * The values that couldn't be found, as `{ key, source }`: the
+         * configuration key (e.g. `database.host`) and where it should have
+         * come from (e.g. `env:COMMUNITIES_DATABASE_HOST`).
          */
         this.missing = missing ?? []
     }
 }
 
 /**
- * Loads a configuration definition, replacing every
- * `'aws-ssm-parameter:<path>'` value with the parameter's value.
+ * Loads a configuration definition: an object whose string values declare
+ * where each configuration value comes from.
  *
- * Each parameter path maps to an environment variable: the path without its
- * leading slash, with `/` and `-` replaced by `_`, uppercased and prefixed
- * with `COMMUNITIES_`. For example `/storage/s3/bucket-url` is
- * `COMMUNITIES_STORAGE_S3_BUCKET_URL`.
+ *   'aws-ssm-parameter:/database/host'   Parameter Store, at
+ *                                        /$COMMUNITIES_ENVIRONMENT_NAME/database/host
+ *   'env:COMMUNITIES_DATABASE_HOST'      the environment variable
+ *   anything else                        used as written
  *
- * Resolution, per parameter:
- *  1. In development, the environment variable, if it's set and not empty.
- *  2. Otherwise, with the `ssm` source, Parameter Store at
- *     `/<environment><path>`.
- *  3. Otherwise the parameter is missing.
- *
- * Every missing parameter is reported together in a single ConfigError.
+ * The definition is the only source of truth: a value is read from the
+ * environment if, and only if, the definition says `env:` for it. Every value
+ * that can't be found is reported together in a single ConfigError.
  */
 module.exports = class Config {
 
     /**
-     * @param {string} environment  The Parameter Store path prefix (the
-     * ENVIRONMENT_NAME), used with the `ssm` source.
-     * @param {string} region   AWS region, used with the `ssm` source.
-     * @param {Object} credentials  AWS credentials, used with the `ssm` source.
+     * @param {string} environmentName  The Parameter Store path prefix, from
+     * COMMUNITIES_ENVIRONMENT_NAME. Only needed when the definition has
+     * `aws-ssm-parameter:` values.
+     * @param {string} region   AWS region, for Parameter Store.
+     * @param {Object} credentials  AWS credentials, for Parameter Store.
      * @param {Object} [options]
-     * @param {string} [options.source] `'ssm'` or `'env'`. Defaults to the
-     * CONFIG_SOURCE environment variable, then `'ssm'`.
-     * @param {Object} [options.env]    The environment to read variables,
-     * including NODE_ENV and CONFIG_SOURCE, from. Defaults to `process.env`.
+     * @param {Object} [options.env]    The environment that `env:` values are
+     * read from. Defaults to `process.env`.
      * @param {Object} [options.client] An SSM client to use instead of
      * constructing one.
      */
-    constructor(environment, region, credentials, options = {}) {
-        this.environment = environment
+    constructor(environmentName, region, credentials, options = {}) {
+        this.environmentName = environmentName
+        this.region = region
+        this.credentials = credentials
         this.env = options.env ?? process.env
 
-        // Whether environment variables may supply configuration at all.
-        this.development = this.env.NODE_ENV === 'development'
-
-        this.source = options.source || this.env.CONFIG_SOURCE || 'ssm'
-        if ( ! SOURCES.includes(this.source) ) {
-            throw new ConfigError(`Unknown configuration source '${this.source}'. `
-                + `Set CONFIG_SOURCE to one of: ${SOURCES.join(', ')}.`)
-        }
-
-        if ( this.source === 'env' && ! this.development ) {
-            throw new ConfigError(`CONFIG_SOURCE=env is only allowed in development (NODE_ENV=development), `
-                + `but NODE_ENV is '${this.env.NODE_ENV ?? ''}'. Outside development, configuration `
-                + `comes from Parameter Store only.`)
-        }
-
-        // Only the `ssm` source talks to AWS.
-        this.client = null
-        if ( this.source === 'ssm' ) {
-            this.client = options.client ?? new SSMClient({
-                region: region,
-                credentials: credentials
-            })
-        }
+        // Created on first use, so a definition with no `aws-ssm-parameter:`
+        // values never needs AWS.
+        this.client = options.client ?? null
     }
 
     /**
-     * The environment variable that holds a parameter's value.
+     * Load the configuration definition for an environment:
+     * `<directory>/index.<environment>.js`.
      *
-     * @param {string} parameter    The parameter path, e.g. `/database/host`.
+     * @param {string} directory    The app's config directory.
+     * @param {string} environment  NODE_ENV: one of production, staging or
+     * development.
      *
-     * @return {string} The variable name, e.g. `COMMUNITIES_DATABASE_HOST`.
+     * @return {Object} The configuration definition.
+     *
+     * @throws {ConfigError} When the environment isn't one of those, or its
+     * file doesn't exist.
      */
-    static variableName(parameter) {
-        return VARIABLE_PREFIX + parameter
-            .replace(/^\/+/, '')
-            .replace(/[/-]/g, '_')
-            .toUpperCase()
+    static definitionFor(directory, environment) {
+        // Checked against a fixed list, so NODE_ENV can't name another file.
+        if ( ! ENVIRONMENTS.includes(environment) ) {
+            throw new ConfigError(`NODE_ENV must be one of ${ENVIRONMENTS.join(', ')}, but it's '${environment ?? ''}'.`)
+        }
+
+        const file = path.join(directory, `index.${environment}.js`)
+        if ( ! fs.existsSync(file) ) {
+            if ( environment === 'development' ) {
+                throw new ConfigError(`There's no development configuration at ${file}. Create it by copying `
+                    + `index.development.js-env-example (values from environment variables) or `
+                    + `index.development.js-ssm-example (values from Parameter Store) in the same folder.`)
+            }
+            throw new ConfigError(`There's no configuration for '${environment}' at ${file}.`)
+        }
+
+        console.log(`Using configuration file ${file}`)
+        return require(file)
     }
 
     /**
      * Load a configuration definition.
      *
-     * @param {Object} configDefinition The definition, as in
-     * `web-application/server/config/index.js`.
+     * @param {Object} configDefinition The definition, as returned by
+     * definitionFor().
      *
      * @return {Promise<Object>} The configuration, with the same shape as the
      * definition.
      *
-     * @throws {ConfigError} When any parameter has no value.
+     * @throws {ConfigError} When any value can't be found.
      */
     async loadConfig(configDefinition) {
-        const parameters = this.collectParameters(configDefinition)
+        const references = this.collectReferences(configDefinition)
 
-        console.log(this.source === 'ssm'
-            ? `Loading configuration from Parameter Store under '/${this.environment}'...`
-            : `Loading configuration from environment variables (CONFIG_SOURCE=env)...`)
-
-        const isSet = (variable) => this.env[variable] !== undefined && this.env[variable] !== ''
-
-        // Outside development, environment variables never supply
-        // configuration. Say so up front (names only, never values) so it's
-        // visible even if loading from Parameter Store fails.
-        if ( ! this.development ) {
-            const ignored = parameters.map((parameter) => Config.variableName(parameter)).filter(isSet)
-            if ( ignored.length > 0 ) {
-                console.warn(`Configuration: ignoring ${ignored.length} environment variable(s) because NODE_ENV isn't development: ${ignored.join(', ')}`)
-            }
-        }
+        const fromParameterStore = references.filter((r) => r.type === 'ssm')
+        const fromEnvironment = references.filter((r) => r.type === 'env')
+        console.log(`Loading configuration: ${fromParameterStore.length} value(s) from Parameter Store`
+            + (fromParameterStore.length > 0
+                ? (this.environmentName ? ` under '/${this.environmentName}'` : ` (COMMUNITIES_ENVIRONMENT_NAME isn't set)`)
+                : '')
+            + `, ${fromEnvironment.length} from environment variables...`)
 
         const values = new Map()
         const missing = []
-        const overridden = []
 
-        for (const parameter of parameters) {
-            const variable = Config.variableName(parameter)
-
-            if ( this.development && isSet(variable) ) {
-                values.set(parameter, this.env[variable])
-                if ( this.source === 'ssm' ) {
-                    overridden.push(variable)
-                }
-                continue
+        for (const reference of fromEnvironment) {
+            const value = this.env[reference.name]
+            if ( value !== undefined && value !== '' ) {
+                values.set(reference.source, value)
+            } else {
+                missing.push(...reference.keys.map((key) => ({ key: key, source: reference.source })))
             }
-
-            if ( this.source === 'ssm' ) {
-                const value = await this.loadParameter(parameter)
-                if ( value !== undefined ) {
-                    values.set(parameter, value)
-                    continue
-                }
-            }
-
-            missing.push({ parameter: parameter, variable: variable })
         }
 
-        // Names only: never log values, most of them are secrets.
-        if ( overridden.length > 0 ) {
-            console.log(`Configuration: ${overridden.length} parameter(s) overridden by environment variables: ${overridden.join(', ')}`)
+        if ( fromParameterStore.length > 0 ) {
+            if ( ! this.environmentName ) {
+                // Without the prefix there's nowhere to look; report it once
+                // rather than every parameter that depends on it (and not at
+                // all if the definition's own env: value already did).
+                const source = `${ENV_PREFIX}${ENVIRONMENT_NAME_VARIABLE}`
+                if ( ! missing.some((m) => m.source === source) ) {
+                    missing.push({ key: '(Parameter Store path prefix)', source: source })
+                }
+            } else {
+                for (const reference of fromParameterStore) {
+                    const value = await this.loadParameter(reference.name)
+                    if ( value !== undefined ) {
+                        values.set(reference.source, value)
+                    } else {
+                        missing.push(...reference.keys.map((key) => ({ key: key, source: reference.source })))
+                    }
+                }
+            }
         }
 
         if ( missing.length > 0 ) {
@@ -208,56 +197,67 @@ module.exports = class Config {
     }
 
     /**
-     * The distinct parameter paths in a definition, in definition order.
-     * Throws if two paths map to the same environment variable.
+     * The distinct sources a definition refers to, in definition order, each
+     * with the configuration keys that use it.
+     *
+     * @return {Object[]} `{ source, type, name, keys }`, where `type` is `ssm`
+     * or `env` and `name` is the parameter path or variable name.
      */
-    collectParameters(configDefinition) {
-        const parameters = []
-        const seen = new Set()
-        const variables = new Map()
+    collectReferences(configDefinition) {
+        const references = new Map()
 
-        const walk = (definition) => {
-            for (const value of Object.values(definition)) {
-                if ( typeof value === 'string' && value.startsWith(PARAMETER_PREFIX) ) {
-                    const parameter = value.substring(PARAMETER_PREFIX.length)
-                    if ( seen.has(parameter) ) {
+        const walk = (definition, prefix) => {
+            for (const [key, value] of Object.entries(definition)) {
+                const keyPath = prefix ? `${prefix}.${key}` : key
+
+                if ( typeof value === 'string' ) {
+                    const reference = Config.parseSource(value)
+                    if ( reference === null ) {
                         continue
                     }
-                    seen.add(parameter)
-
-                    const variable = Config.variableName(parameter)
-                    if ( variables.has(variable) ) {
-                        throw new ConfigError(`Parameters '${variables.get(variable)}' and '${parameter}' `
-                            + `both map to the environment variable ${variable}. Rename one of them.`)
+                    if ( ! reference.name ) {
+                        throw new ConfigError(`'${keyPath}' is set to '${value}', which names no ${reference.type === 'env' ? 'variable' : 'parameter'}.`)
                     }
-                    variables.set(variable, parameter)
-
-                    parameters.push(parameter)
+                    if ( ! references.has(value) ) {
+                        references.set(value, { ...reference, source: value, keys: [] })
+                    }
+                    references.get(value).keys.push(keyPath)
                 } else if ( typeof value === 'object' && ! Array.isArray(value) && value !== null ) {
-                    walk(value)
+                    walk(value, keyPath)
                 }
             }
         }
-        walk(configDefinition)
+        walk(configDefinition, '')
 
-        return parameters
+        return [ ...references.values() ]
+    }
+
+    /**
+     * Parse a definition value.
+     *
+     * @return {Object|null} `{ type, name }` for an `aws-ssm-parameter:` or
+     * `env:` value, or null for a value that's used as written.
+     */
+    static parseSource(value) {
+        if ( value.startsWith(SSM_PREFIX) ) {
+            return { type: 'ssm', name: value.substring(SSM_PREFIX.length).trim() }
+        }
+        if ( value.startsWith(ENV_PREFIX) ) {
+            return { type: 'env', name: value.substring(ENV_PREFIX.length).trim() }
+        }
+        return null
     }
 
     /**
      * Build the configuration object from the definition and the loaded
-     * values. As before, only strings and nested objects are carried over;
-     * other values (e.g. an unset `process.env` entry) are left out.
+     * values. As before, only strings and nested objects are carried over.
      */
     buildConfig(configDefinition, values) {
         const config = {}
 
         for(const [key, value] of Object.entries(configDefinition)) {
             if ( typeof value === 'string' ) {
-                if ( value.startsWith(PARAMETER_PREFIX) ) {
-                    config[key] = values.get(value.substring(PARAMETER_PREFIX.length))
-                } else {
-                    config[key] = value
-                }
+                config[key] = Config.parseSource(value) === null ? value : values.get(value)
             } else if ( typeof value === 'object' && ! Array.isArray(value) && value !== null ) {
                 config[key] = this.buildConfig(value, values)
             }
@@ -269,11 +269,21 @@ module.exports = class Config {
     /**
      * Load one parameter from Parameter Store.
      *
+     * @param {string} parameter    The path from the definition, without the
+     * environment name prefix.
+     *
      * @return {Promise<string|undefined>} The value, or undefined when the
      * parameter doesn't exist.
      */
-    async loadParameter(param) {
-        const fullyQualifiedParameterPath = path.join(`/${this.environment}`, param)
+    async loadParameter(parameter) {
+        if ( this.client === null ) {
+            this.client = new SSMClient({
+                region: this.region,
+                credentials: this.credentials
+            })
+        }
+
+        const fullyQualifiedParameterPath = this.parameterPath(parameter)
         const command = new GetParameterCommand({
             Name: fullyQualifiedParameterPath,
             WithDecryption: true
@@ -290,28 +300,24 @@ module.exports = class Config {
         }
     }
 
+    parameterPath(parameter) {
+        return path.posix.join(`/${this.environmentName}`, parameter)
+    }
+
     describeMissing(missing) {
-        const fullPath = (m) => path.join(`/${this.environment}`, m.parameter)
+        const width = Math.max(...missing.map((m) => m.key.length))
+        const lines = missing.map((m) => {
+            const reference = Config.parseSource(m.source)
+            const detail = reference.type === 'ssm'
+                ? `aws-ssm-parameter:${this.parameterPath(reference.name)} (not in Parameter Store)`
+                : `${m.source} (not set)`
+            return `  ${m.key.padEnd(width)}  ${detail}`
+        })
 
-        if ( this.source === 'ssm' && ! this.development ) {
-            return `Missing configuration: ${missing.length} parameter(s) not found in Parameter Store under '/${this.environment}':\n`
-                + missing.map((m) => `  ${fullPath(m)}`).join('\n')
-        }
-
-        if ( this.source === 'ssm' ) {
-            const width = Math.max(...missing.map((m) => m.variable.length))
-            return `Missing configuration: ${missing.length} parameter(s) not found in Parameter Store under '/${this.environment}'.\n`
-                + `Create them there, or set these environment variables:\n`
-                + missing.map((m) => `  ${m.variable.padEnd(width)}  (${fullPath(m)})`).join('\n')
-        }
-
-        const lines = missing.map((m) => `  ${m.variable}`)
-
-        return `Missing configuration: ${missing.length} value(s) not set (CONFIG_SOURCE=env).\n`
-            + `Set these environment variables, for example in .env (see .env.local.example):\n`
+        return `Missing configuration: ${missing.length} value(s) not found.\n`
             + lines.join('\n')
     }
 }
 
 module.exports.ConfigError = ConfigError
-module.exports.SOURCES = SOURCES
+module.exports.ENVIRONMENTS = ENVIRONMENTS

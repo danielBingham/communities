@@ -1,42 +1,23 @@
+const fs = require('fs')
+const os = require('os')
+const path = require('path')
+
 const Config = require('../config')
 const { ConfigError } = Config
 
 describe('Config', function() {
 
-    const definition = {
-        host: 'aws-ssm-parameter:/host',
-        wsHost: 'aws-ssm-parameter:/ws-host',
-        environment: 'development',
-        unset: undefined,
-        database: {
-            host: 'aws-ssm-parameter:/database/host',
-            password: 'aws-ssm-parameter:/database/password'
-        },
-        storage: {
-            s3: {
-                bucketUrl: 'aws-ssm-parameter:/storage/s3/bucket-url'
-            }
-        },
-        links: {
-            5: 'https://example.com/five'
-        }
-    }
-
-    const allVariables = {
-        NODE_ENV: 'development',
+    const environment = {
         COMMUNITIES_HOST: 'https://localhost:3000',
-        COMMUNITIES_WS_HOST: 'wss://localhost:3000',
         COMMUNITIES_DATABASE_HOST: 'postgres',
         COMMUNITIES_DATABASE_PASSWORD: 'secret',
-        COMMUNITIES_STORAGE_S3_BUCKET_URL: 'https://bucket.example.com'
+        COMMUNITIES_LOG_LEVEL: 'debug'
     }
 
     const parameterStore = {
         '/staging/host': 'https://staging.example.com',
-        '/staging/ws-host': 'wss://staging.example.com',
         '/staging/database/host': 'db.internal',
-        '/staging/database/password': 'from-ssm',
-        '/staging/storage/s3/bucket-url': 'https://staging-bucket.example.com'
+        '/staging/database/password': 'from-ssm'
     }
 
     // A stand-in SSM client that serves `parameters`, failing like the real
@@ -57,7 +38,6 @@ describe('Config', function() {
 
     beforeEach(function() {
         jest.spyOn(console, 'log').mockImplementation(() => {})
-        jest.spyOn(console, 'warn').mockImplementation(() => {})
         jest.spyOn(console, 'error').mockImplementation(() => {})
     })
 
@@ -65,183 +45,197 @@ describe('Config', function() {
         jest.restoreAllMocks()
     })
 
-    describe('variableName()', function() {
-        it('Should map parameter paths to COMMUNITIES_ variables', function() {
-            expect(Config.variableName('/host')).toBe('COMMUNITIES_HOST')
-            expect(Config.variableName('/ws-host')).toBe('COMMUNITIES_WS_HOST')
-            expect(Config.variableName('/storage/s3/bucket-url')).toBe('COMMUNITIES_STORAGE_S3_BUCKET_URL')
-            expect(Config.variableName('/notifications/android/firebase-service-account-json'))
-                .toBe('COMMUNITIES_NOTIFICATIONS_ANDROID_FIREBASE_SERVICE_ACCOUNT_JSON')
+    describe('parseSource()', function() {
+        it('Should recognize Parameter Store and environment sources', function() {
+            expect(Config.parseSource('aws-ssm-parameter:/database/host')).toEqual({ type: 'ssm', name: '/database/host' })
+            expect(Config.parseSource('env:COMMUNITIES_DATABASE_HOST')).toEqual({ type: 'env', name: 'COMMUNITIES_DATABASE_HOST' })
+        })
+
+        it('Should treat anything else as a value used as written', function() {
+            expect(Config.parseSource('production')).toBe(null)
+            expect(Config.parseSource('https://billing.stripe.com/p/login/x')).toBe(null)
         })
     })
 
-    describe('constructor()', function() {
-        it('Should default to the ssm source', function() {
-            const config = new Config('staging', 'us-east-1', {}, { env: {}, client: ssmClient({}) })
-            expect(config.source).toBe('ssm')
-        })
+    describe('definitionFor()', function() {
+        let directory = null
 
-        it('Should read the source from CONFIG_SOURCE', function() {
-            const config = new Config('staging', 'us-east-1', {}, { env: { NODE_ENV: 'development', CONFIG_SOURCE: 'env' } })
-            expect(config.source).toBe('env')
-        })
-
-        it('Should not create an SSM client for the env source', function() {
-            const config = new Config(undefined, undefined, undefined, { env: { NODE_ENV: 'development', CONFIG_SOURCE: 'env' } })
-            expect(config.client).toBe(null)
-        })
-
-        it('Should refuse the env source outside development', function() {
-            for (const nodeEnv of [ 'production', 'staging', undefined ]) {
-                expect(() => new Config(undefined, undefined, undefined, { env: { NODE_ENV: nodeEnv, CONFIG_SOURCE: 'env' } }))
-                    .toThrow('CONFIG_SOURCE=env is only allowed in development')
+        beforeEach(function() {
+            directory = fs.mkdtempSync(path.join(os.tmpdir(), 'communities-config-'))
+            for (const name of [ 'production', 'staging', 'development' ]) {
+                fs.writeFileSync(path.join(directory, `index.${name}.js`), `module.exports = { environment: '${name}' }\n`)
             }
         })
 
-        it('Should reject an unknown source', function() {
-            expect(() => new Config('staging', 'us-east-1', {}, { env: { CONFIG_SOURCE: 'file' } }))
-                .toThrow(ConfigError)
+        afterEach(function() {
+            fs.rmSync(directory, { recursive: true, force: true })
+        })
+
+        it('Should load the file for each environment', function() {
+            for (const name of [ 'production', 'staging', 'development' ]) {
+                expect(Config.definitionFor(directory, name)).toEqual({ environment: name })
+            }
+        })
+
+        it('Should reject a NODE_ENV that is not one of the environments', function() {
+            for (const name of [ undefined, '', 'test', '../production', 'production.js' ]) {
+                expect(() => Config.definitionFor(directory, name)).toThrow(ConfigError)
+            }
+        })
+
+        it('Should explain how to create a missing development file', function() {
+            fs.rmSync(path.join(directory, 'index.development.js'))
+
+            expect(() => Config.definitionFor(directory, 'development'))
+                .toThrow(/index\.development\.js-env-example.*index\.development\.js-ssm-example/)
+        })
+
+        it('Should fail when a committed environment file is missing', function() {
+            fs.rmSync(path.join(directory, 'index.production.js'))
+
+            expect(() => Config.definitionFor(directory, 'production')).toThrow(ConfigError)
         })
     })
 
-    describe('loadConfig() with the env source', function() {
+    describe('loadConfig()', function() {
 
-        it('Should load every parameter from its variable and keep the definition shape', async function() {
-            const config = new Config(undefined, undefined, undefined, { source: 'env', env: allVariables })
+        it('Should load env: values from the environment, without AWS', async function() {
+            const config = new Config(undefined, undefined, undefined, { env: environment })
 
-            const result = await config.loadConfig(definition)
-
-            expect(result).toEqual({
-                host: 'https://localhost:3000',
-                wsHost: 'wss://localhost:3000',
+            const result = await config.loadConfig({
+                host: 'env:COMMUNITIES_HOST',
                 environment: 'development',
+                log_level: 'env:COMMUNITIES_LOG_LEVEL',
                 database: {
-                    host: 'postgres',
-                    password: 'secret'
-                },
-                storage: {
-                    s3: {
-                        bucketUrl: 'https://bucket.example.com'
-                    }
+                    host: 'env:COMMUNITIES_DATABASE_HOST',
+                    password: 'env:COMMUNITIES_DATABASE_PASSWORD'
                 },
                 links: {
                     5: 'https://example.com/five'
                 }
             })
+
+            expect(result).toEqual({
+                host: 'https://localhost:3000',
+                environment: 'development',
+                log_level: 'debug',
+                database: {
+                    host: 'postgres',
+                    password: 'secret'
+                },
+                links: {
+                    5: 'https://example.com/five'
+                }
+            })
+            expect(config.client).toBe(null)
         })
 
-        it('Should report every missing variable at once', async function() {
-            const env = { ...allVariables }
-            delete env.COMMUNITIES_DATABASE_PASSWORD
-            env.COMMUNITIES_WS_HOST = ''
-
-            const config = new Config(undefined, undefined, undefined, { source: 'env', env: env })
-
-            const error = await config.loadConfig(definition).catch((error) => error)
-
-            expect(error).toBeInstanceOf(ConfigError)
-            expect(error.missing).toEqual([
-                { parameter: '/ws-host', variable: 'COMMUNITIES_WS_HOST' },
-                { parameter: '/database/password', variable: 'COMMUNITIES_DATABASE_PASSWORD' }
-            ])
-            expect(error.message).toContain('COMMUNITIES_WS_HOST')
-            expect(error.message).toContain('COMMUNITIES_DATABASE_PASSWORD')
-            expect(error.message).not.toContain('COMMUNITIES_HOST\n')
-        })
-    })
-
-    describe('loadConfig() with the ssm source', function() {
-
-        it('Should load every parameter from under /<environment>', async function() {
+        it('Should load aws-ssm-parameter: values from under the environment name, once each', async function() {
             const client = ssmClient(parameterStore)
             const config = new Config('staging', 'us-east-1', {}, { env: {}, client: client })
 
-            const result = await config.loadConfig(definition)
+            const result = await config.loadConfig({
+                host: 'aws-ssm-parameter:/host',
+                database: {
+                    host: 'aws-ssm-parameter:/database/host',
+                    hostAgain: 'aws-ssm-parameter:/database/host'
+                }
+            })
 
-            expect(result.host).toBe('https://staging.example.com')
-            expect(result.database.password).toBe('from-ssm')
-            expect(result.storage.s3.bucketUrl).toBe('https://staging-bucket.example.com')
-            expect(client.send).toHaveBeenCalledTimes(5)
+            expect(result).toEqual({
+                host: 'https://staging.example.com',
+                database: { host: 'db.internal', hostAgain: 'db.internal' }
+            })
+            expect(client.send).toHaveBeenCalledTimes(2)
             expect(client.send.mock.calls[0][0].input).toEqual({ Name: '/staging/host', WithDecryption: true })
         })
 
-        it('Should let a set variable override its parameter in development, without asking Parameter Store', async function() {
+        it('Should take each value only from the source its definition names', async function() {
             const client = ssmClient(parameterStore)
-            const config = new Config('staging', 'us-east-1', {}, {
-                env: { NODE_ENV: 'development', COMMUNITIES_DATABASE_HOST: 'localhost' },
-                client: client
+            // Both variables are set, but only one value is declared env:.
+            const config = new Config('staging', 'us-east-1', {}, { env: environment, client: client })
+
+            const result = await config.loadConfig({
+                database: {
+                    host: 'env:COMMUNITIES_DATABASE_HOST',
+                    password: 'aws-ssm-parameter:/database/password'
+                }
             })
 
-            const result = await config.loadConfig(definition)
-
-            expect(result.database.host).toBe('localhost')
-            expect(result.database.password).toBe('from-ssm')
-            const names = client.send.mock.calls.map((call) => call[0].input.Name)
-            expect(names).not.toContain('/staging/database/host')
+            expect(result.database).toEqual({ host: 'postgres', password: 'from-ssm' })
+            expect(client.send.mock.calls.map((call) => call[0].input.Name)).toEqual([ '/staging/database/password' ])
         })
 
-        it('Should ignore variables outside development and load every parameter from Parameter Store', async function() {
-            const client = ssmClient(parameterStore)
+        it('Should report every missing value at once, with its key and source', async function() {
             const config = new Config('staging', 'us-east-1', {}, {
-                env: {
-                    NODE_ENV: 'production',
-                    COMMUNITIES_DATABASE_HOST: 'attacker.example.com',
-                    COMMUNITIES_DATABASE_PASSWORD: 'injected'
+                env: { ...environment, COMMUNITIES_DATABASE_PASSWORD: '' },
+                client: ssmClient(parameterStore)
+            })
+
+            const error = await config.loadConfig({
+                host: 'aws-ssm-parameter:/host',
+                wsHost: 'aws-ssm-parameter:/ws-host',
+                database: {
+                    host: 'env:COMMUNITIES_DATABASE_HOST',
+                    password: 'env:COMMUNITIES_DATABASE_PASSWORD'
                 },
-                client: client
-            })
-
-            const result = await config.loadConfig(definition)
-
-            expect(result.database.host).toBe('db.internal')
-            expect(result.database.password).toBe('from-ssm')
-            expect(client.send).toHaveBeenCalledTimes(5)
-            expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('COMMUNITIES_DATABASE_HOST, COMMUNITIES_DATABASE_PASSWORD'))
-            expect(console.warn).not.toHaveBeenCalledWith(expect.stringContaining('injected'))
-        })
-
-        it('Should not suggest variables for missing parameters outside development', async function() {
-            const store = { ...parameterStore }
-            delete store['/staging/host']
-            const config = new Config('staging', 'us-east-1', {}, { env: { NODE_ENV: 'production' }, client: ssmClient(store) })
-
-            const error = await config.loadConfig(definition).catch((error) => error)
+                session: {
+                    secret: 'env:COMMUNITIES_SESSION_SECRET'
+                }
+            }).catch((error) => error)
 
             expect(error).toBeInstanceOf(ConfigError)
-            expect(error.message).toContain('/staging/host')
-            expect(error.message).not.toContain('COMMUNITIES_HOST')
+            expect(error.missing).toEqual([
+                { key: 'database.password', source: 'env:COMMUNITIES_DATABASE_PASSWORD' },
+                { key: 'session.secret', source: 'env:COMMUNITIES_SESSION_SECRET' },
+                { key: 'wsHost', source: 'aws-ssm-parameter:/ws-host' }
+            ])
+            expect(error.message).toContain('3 value(s)')
+            expect(error.message).toContain('aws-ssm-parameter:/staging/ws-host')
+            expect(error.message).toContain('env:COMMUNITIES_SESSION_SECRET')
         })
 
-        it('Should report every parameter Parameter Store does not have', async function() {
-            const store = { ...parameterStore }
-            delete store['/staging/host']
-            delete store['/staging/database/password']
-            const config = new Config('staging', 'us-east-1', {}, { env: { NODE_ENV: 'development' }, client: ssmClient(store) })
+        it('Should report a missing COMMUNITIES_ENVIRONMENT_NAME once, without asking Parameter Store', async function() {
+            const client = ssmClient(parameterStore)
+            const config = new Config(undefined, 'us-east-1', {}, { env: {}, client: client })
 
-            const error = await config.loadConfig(definition).catch((error) => error)
+            const error = await config.loadConfig({
+                host: 'aws-ssm-parameter:/host',
+                database: { host: 'aws-ssm-parameter:/database/host' }
+            }).catch((error) => error)
 
             expect(error).toBeInstanceOf(ConfigError)
-            expect(error.missing.map((m) => m.parameter)).toEqual([ '/host', '/database/password' ])
-            expect(error.message).toContain('/staging/database/password')
-            expect(error.message).toContain('COMMUNITIES_DATABASE_PASSWORD')
+            expect(error.missing).toEqual([
+                { key: '(Parameter Store path prefix)', source: 'env:COMMUNITIES_ENVIRONMENT_NAME' }
+            ])
+            expect(client.send).not.toHaveBeenCalled()
+        })
+
+        it('Should not report COMMUNITIES_ENVIRONMENT_NAME twice when the definition also reads it', async function() {
+            const config = new Config(undefined, 'us-east-1', {}, { env: {}, client: ssmClient(parameterStore) })
+
+            const error = await config.loadConfig({
+                environmentName: 'env:COMMUNITIES_ENVIRONMENT_NAME',
+                host: 'aws-ssm-parameter:/host'
+            }).catch((error) => error)
+
+            expect(error.missing).toEqual([
+                { key: 'environmentName', source: 'env:COMMUNITIES_ENVIRONMENT_NAME' }
+            ])
         })
 
         it('Should rethrow errors other than a missing parameter', async function() {
             const client = { send: jest.fn(async () => { throw new Error('Access denied') }) }
             const config = new Config('staging', 'us-east-1', {}, { env: {}, client: client })
 
-            await expect(config.loadConfig(definition)).rejects.toThrow('Access denied')
+            await expect(config.loadConfig({ host: 'aws-ssm-parameter:/host' })).rejects.toThrow('Access denied')
         })
-    })
 
-    describe('collectParameters()', function() {
-        it('Should reject two parameters that map to the same variable', function() {
-            const config = new Config(undefined, undefined, undefined, { source: 'env', env: { NODE_ENV: 'development' } })
+        it('Should reject a source with no name', async function() {
+            const config = new Config(undefined, undefined, undefined, { env: environment })
 
-            expect(() => config.collectParameters({
-                a: 'aws-ssm-parameter:/database/host-name',
-                b: 'aws-ssm-parameter:/database-host/name'
-            })).toThrow(ConfigError)
+            await expect(config.loadConfig({ host: 'env:' })).rejects.toThrow(ConfigError)
+            await expect(config.loadConfig({ host: 'aws-ssm-parameter:' })).rejects.toThrow(ConfigError)
         })
     })
 })
