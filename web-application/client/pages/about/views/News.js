@@ -91,13 +91,10 @@ const posts = {
                 </p>
                 <p>
                     This model has often worked well. All of the above examples
-                    have remained pro-social and resisted enshittification. But
-                    we have other examples of this model where the stewardship
-                    failed. The board was corrupted and veered off mission,
-                    sold out, or unable to keep investors in check.
+                    have remained pro-social and resisted enshittification.
                 </p>
                 <p>
-                    The problem with stewardship through a self-perpetuating
+                    But the problem with stewardship through a self-perpetuating
                     non-profit board is that it's essentially a benevolent
                     oligarchy. If the board is corrupted, captured, or goes off
                     the rails there's no recourse. The community has no
@@ -159,34 +156,82 @@ const posts = {
                     also see the community tune out, allowing cooperatives to
                     enshittify in spite of community control, or even allowing
                     the board to take the cooperative out from under the
-                    community.
+                    community entirely.
                 </p>
                 <p>
-                    Numerous consumer cooperatives have had their boards get
-                    captured and been converted back into traditional
-                    businesses. MEC and REI both provide prominent examples of
-                    boards that essentially took (or are taking) the co-op out
-                    from under the membership.
+                    There are over 900 rural electric cooperatives in the US,
+                    consumer cooperative electric utilities where the electric
+                    customers are the members. Of the 583 examined in an
+                    <a target="_BLANK" href="https://ilsr.org/article/energy-democracy/just-how-democratic-are-rural-electric-cooperatives/">Institute for Local Self-Reliance study</a>, 424 (more than
+                    70%) had lower than 10% turnout in their board elections.
+                    Most members of rural electric cooperatives don't even
+                    realize they can vote for the board.
                 </p>
                 <p>
-                    Others have such low democratic engagement that the board
-                    can simply do whatever it wants, and it often chooses to
-                    behave no differently from a traditional investor board.
-                    Rural electric cooperatives provide a clear example of this.
+                    And many rural electric cooperatives are <a target="_BLANK"
+                    href="https://mississippitoday.org/2018/12/14/we-dont-have-any-voice-rural-mississippians-feel-shut-out-overcharged-by-electric-co-ops/">enshittifying</a>:
+                    overcharging their members, refusing to return profits,
+                    giving their executives and board members obscene perks,
+                    and not adopting clean energy even as their members often
+                    suffer the worst effects of dirty energy and climate
+                    change.
                 </p>
                 <p>
-                    Democracy is hard. Most people do not have the time, energy,
-                    or willingness to do the work necessary to hold their
-                    grocery store or electric utility accountable. It's not hard
-                    for the boards of these businesses to simply stop being
-                    transparent and for the average consumer member to stop
-                    asking questions. By the time members realize something's
-                    wrong, it's often too late.
+                    The cooperatives aren't transparent and people don't even
+                    realize they are technically democratic institutions.
                 </p>
                 <p>
-                    In many of the cases where consumer cooperatives enshittify,
-                    it is often the cooperative's workers who are the first to
-                    sound the alarm. Which leads us to the next possibility.
+                    Mountain Equipment Company (MEC) in Canada was taken right
+                    out from under its membership. First the board weakened
+                    member control by <a target="_BLANK" href="https://www.thenews.coop/sale-of-leading-canadian-co-op-mec-prompts-campaign-to-save-it/">changing the bylaws</a> so that it controlled
+                    elections: candidates had to be board approved to run for
+                    election. Then it took on so much debt that its debt load
+                    rivaled its membership equity. Then it used Canada's
+                    bankrupcy process to sell out the cooperative to private
+                    equity without member approval. More than 71,000 members
+                    petitioned to stop the sale, but Canada's courts overrode
+                    them and <a target="_BLANK" href="https://www.theglobeandmail.com/business/article-court-approves-sale-of-mec-to-us-equity-firm-ending-member-led/">approved it</a>.
+                </p>
+                <p>
+                    Democracy is hard. Most people do not have the time,
+                    energy, or willingness to do the work necessary to hold
+                    their grocery store, outdoor retailer, or electric utility
+                    accountable. It's not hard for the boards of these
+                    businesses to simply stop being transparent and for the
+                    average consumer member to stop asking questions. By the
+                    time members realize something's wrong, it's often too
+                    late.
+                </p>
+                <p>
+                    That said, sometimes when a consumer co-op starts to go off
+                    the rails someone will raise the alarm early enough that
+                    members are able to rally and put things back on track. And
+                    often, that someone is the co-ops workers.
+                </p>
+                <p>
+                    Similar to MEC, REI made changes to its bylaws in the early
+                    2000s to allow the board to effectively control elections
+                    by blocking candidates from the ballot. In 2022, workers
+                    unionized, though they haven't reached a contract agreement
+                    with REI yet and have accused REI of union busting.  In
+                    March 2025, REI's board exercised their control over the
+                    elections to block the union's candidates from the ballot
+                    and force a non-competitive election, by only allowing
+                    their three chosen candidates for the three open board
+                    seats.  The union sounded the alarm and organized what
+                    amounted to a vote of no-confidence campaign, successfully.
+                    In 2026, as part of a deal around the contract talks, the
+                    union stayed out of the election and the boards three
+                    candidates were approved.  But then in May 2026 contract
+                    talks broke down and the union called for a boycott.
+                </p>
+                <p>
+                    It remains to be seen how this will all play out at REI,
+                    but the scenario at REI where the workers unionize and then
+                    sound the alarm about drifting governance to engage the
+                    membership is a pretty common one. And it brings us to the next
+                    model we could considser: we could just put the workers in
+                    charge, since they're the ones paying attention.
                 </p>
                 <h2>Workers in Charge</h2>
                 <p>
@@ -207,16 +252,17 @@ const posts = {
                         moral injury, respond with outrage, and threaten to
                         quit.
                     </p>
-                </blockquote>
-                <blockquote>
+                    <p>[...]</p>
                     <p>
                         Thus tech workers themselves were the final bulwark
                         against enshittification.
                     </p>
                 </blockquote>
                 <p>
-                    Worker cooperatives have similarly been around for centuries
-                    have proven quite resistant to enshittification.
+                    Worker cooperatives, cooperatives governed democratically
+                    by their workers instead of their consumers, have been
+                    around for centuries have proven quite resistant to
+                    enshittification.
                 </p>
                 <p>
                     The Mondragon Corporation has been around since the 1950s.
@@ -239,10 +285,9 @@ const posts = {
                     better care than the rest of the industry.
                 </p>
                 <p>
-                    The main failure mode of consumer cooperatives is a failure
-                    of democratic engagement leading to a loss of accountability
-                    for leadership. This happens much less in worker
-                    cooperatives.
+                    Consumer cooperatives enshittify when democratic engagement
+                    is low to a loss of accountability for leadership. This
+                    happens much less in worker cooperatives.
                 </p>
                 <p>
                     Workers have a much stronger incentive to engage with their
