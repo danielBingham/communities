@@ -49,9 +49,9 @@ const posts = {
                 </p>
                 <p>
                     The protocols movement is an attempt to use market forces to
-                    keep enshittification in check, by removing the network effects
+                    keep enshittification in check by removing the network effects
                     inherent in certain kinds of platforms. But we know this
-                    doesn't work, because email is the quintessential protocol
+                    doesn't work. Email is the quintessential protocol
                     and email is enshittifying.
                 </p>
                 <p>
@@ -104,13 +104,12 @@ const posts = {
                 </p>
                 <p>
                     Couchsurfing started out as a nonprofit, built by
-                    volunteers. It attempted to form a 501(c)(3), but when those
-                    plans failed it didn't stay a nonprofit and instead
-                    converted to a standard Delaware C Corp by simply
-                    transferring the assets (the platform) out of the nonprofit.
-                    Volunteers protested. Users protested. But ultimately they
-                    had no recourse. From there, the cycle of enshittification
-                    began.
+                    volunteers. It attempted to form a 501(c)(3), but when
+                    those plans failed it instead converted to a standard
+                    Delaware C Corp and sold to investors. Volunteers
+                    protested. Users protested. But ultimately they had no
+                    recourse. Couchsurfing now charges subscriptions for
+                    access.
                 </p>
                 <p>
                     <a target="_BLANK" href="https://en.wikipedia.org/wiki/EdX">edX</a> was online course software originally created at MIT
@@ -146,8 +145,7 @@ const posts = {
                 </p>
                 <h2>Users in Charge</h2>
                 <p>
-                    Another approach is to put the user in charge. This is the
-                    consumer cooperative approach.
+                    This is the consumer cooperative approach.
                 </p>
                 <p>
                     Outside of tech this is probably one of the most widely
@@ -159,8 +157,7 @@ const posts = {
                     On average, consumer owned credit unions and mutual
                     insurance companies treat their customers better than their
                     investor owned counterparts. Consumer owned grocery stores
-                    often have cheaper prices than their investor owned
-                    counterparts.
+                    often have cheaper prices.
                 </p>
                 <p>
                     But when the community disengages from the democracy,
@@ -169,11 +166,11 @@ const posts = {
                     cooperative out from under the community entirely.
                 </p>
                 <p>
-                    There are over 900 rural electric cooperatives in the US,
-                    consumer cooperative electric utilities where the electric
-                    customers are the members. Of the 583 examined in an
-                    <a target="_BLANK" href="https://ilsr.org/article/energy-democracy/just-how-democratic-are-rural-electric-cooperatives/">Institute for Local Self-Reliance study</a>, 424 (more than
-                    70%) had lower than 10% turnout in their board elections.
+                    There are over 900 rural electric cooperatives in the US.
+                    Of the 583 examined in an <a target="_BLANK"
+                    href="https://ilsr.org/article/energy-democracy/just-how-democratic-are-rural-electric-cooperatives/">Institute
+                    for Local Self-Reliance study</a>, 424 (more than 70%) had
+                    lower than 10% turnout in their board elections.
                 </p>
                 <p>
                     And many rural electric cooperatives are <a target="_BLANK"
@@ -185,8 +182,8 @@ const posts = {
                     change.
                 </p>
                 <p>
-                    The cooperatives aren't transparent and people don't even
-                    realize they are technically democratic institutions.
+                    The cooperatives aren't transparent and people often don't
+                    even realize they are democratic institutions.
                 </p>
                 <p>
                     Mountain Equipment Company (MEC) in Canada was taken right
@@ -195,7 +192,7 @@ const posts = {
                     elections: candidates had to be board approved to run for
                     election. Then it took on so much debt that its debt load
                     rivaled its membership equity. Then it used Canada's
-                    bankrupcy process to sell out the cooperative to private
+                    Creditor Protection process to sell out the cooperative to private
                     equity without member approval. More than 71,000 members
                     petitioned to stop the sale, but Canada's courts overrode
                     them and <a target="_BLANK" href="https://www.theglobeandmail.com/business/article-court-approves-sale-of-mec-to-us-equity-firm-ending-member-led/">approved it</a>.
@@ -227,25 +224,24 @@ const posts = {
                     allowing their three chosen candidates for the three open
                     board seats. REI's union sounded the alarm and organized
                     the membership to reject the board's chosen candidates.
-                </p>
-                <p>
-                    It remains to be seen how this will all play out at REI,
-                    but the scenario where co-op workers unionize and then
-                    sound the alarm about drifting governance is a pretty
-                    common one.
+                    All three were rejected.
                 </p>
                 <p>
                     I have personal experience with a similar scenario at
-                    Bloomingfoods, my local grocery cooperative.  In that case
-                    we were able to get the co-op back on track, thanks to the
-                    workers. Which brings us to the next model we could
-                    consider: just put the workers in charge, since
-                    they're often the ones paying attention.
+                    Bloomingfoods, my local grocery cooperative. The board had
+                    gotten cosy with management, which was abusing the workers,
+                    and had overextended the cooperative. The workers unionized,
+                    sounded the alarm and, with their help, we were able
+                    to get the co-op back on track.
+                </p>
+                <p>
+                    Which brings us to the next model we could consider: just
+                    put the workers in charge, since they're often the ones
+                    paying attention.
                 </p>
                 <h2>Workers in Charge</h2>
                 <p>
-                    We could put workers in charge. This is the worker
-                    cooperative approach.
+                    This is the worker cooperative approach.
                 </p>
                 <p>
                     There's surprisingly little research on how worker
@@ -300,15 +296,15 @@ const posts = {
                 </p>
                 <p>
                     But don't workers have similar incentives as investors to
-                    enshittify? Well, there are forces that hold them in
-                    check that aren't there for investors.
+                    enshittify? To some degree, yes, but there are forces that
+                    check them which aren't there for investors.
                 </p>
                 <p>
                     Workers are much closer to the work, and therefore the
                     customers, than the investors. They have to actually
                     experience the impact of their work on the people who they
                     serve. People tend to take pride in their work and often
-                    want to do something meaningful that helps other people.
+                    want to do something meaningful that helps their community.
                     Like Doctorow says, workers don't generally want to
                     enshittify their work.
                 </p>
@@ -321,20 +317,18 @@ const posts = {
                 </p>
                 <p>
                     Egged was a worker cooperative bus service in Israel that
-                    was basically granted a monopoly by the government. It
-                    behaved as one would expect a monopoly to: providing poor
-                    service for high fares.
+                    gained monopoly power. It behaved as one would expect a
+                    monopoly to: providing poor service for high fares.
                 </p>
                 <p>
                     The plywood co-ops of the US Pascific Northwest illustrate
-                    the sell out case. Those co-ops were organized so that the
-                    workers owned them through shares. Almost immediately, they
-                    started hiring non-member workers, since new workers were
-                    required to buy shares to become members. As they grew and
-                    succeeded, the price of a share went up, until it was
-                    completely out of reach for new workers. Finally, the
-                    remaining workers decided to cash out their shares: by
-                    selling out.
+                    both the francise restriction and sell out cases. Those
+                    co-ops were organized so that the workers owned them
+                    through shares. New workers were required to buy shares to
+                    become members, and not all new workers did. As they grew,
+                    the price of a share went up and became out of reach for
+                    many new workers. Finally, the remaining workers decided to
+                    cash out their shares: by selling out.
                 </p>
                 <p>
                     If our goal is to build an organization that is
@@ -344,18 +338,18 @@ const posts = {
                 </p>
                 <h2>Balance of Powers</h2>
                 <p>
-                    All of these structures, stewardship through
-                    nonprofits, consumer cooperatives, and worker cooperatives,
-                    are substantially more resistant to enshittification than
-                    investor owned businesses.
+                    All of these structures, stewardship through nonprofits,
+                    consumer cooperatives, and worker cooperatives, are more
+                    resistant to enshittification than investor owned
+                    businesses.
                 </p>
                 <p>
-                    But none of these structures is fully resistant to
-                    enshittification. They all have vulnerabilities that allow
-                    them to enshittify, or to be captured by investors who
-                    would then enshittify them. Can we assemble a structure
-                    with the best aspects of each of them, and with checks and
-                    balances to shore up the weaknesses?
+                    But none of these structures is fully resistant. They all
+                    have vulnerabilities that allow them to enshittify, or to
+                    be captured by investors who would then enshittify them.
+                    Can we assemble a structure with the best aspects of each
+                    of them, and with checks and balances to shore up the
+                    weaknesses?
                 </p>
                 <p>
                     Multi-stakeholder cooperatives allow multiple stakeholder
@@ -365,67 +359,58 @@ const posts = {
                     elements from all three previous approaches.
                 </p>
                 <p>
-                    A nonprofit multi-stakeholder cooperative who's board is
-                    half elected by and from the consumers and half elected by
-                    and from the workers.
+                    Consider a nonprofit multi-stakeholder cooperative who's
+                    board is half elected by the consumers and half elected by
+                    the workers.
                 </p>
                 <p>
                     Stewardship nonprofits lack accountability mechanisms.
-                    Their consumers, their community, are often the source of
-                    that accountability. Giving the community half the board
-                    gives them a direct mechanism for accountability.
+                    Their consumers are often the source of that
+                    accountability. Giving the community half the board gives
+                    them a direct mechanism.
                 </p>
                 <p>
-                    Consumers can disengage though, and fail to hold their
-                    boards accountable. When they do, it's often the workers
-                    who sound the alarm. Giving the workers the other half of
-                    the board means there's always a highly engaged core.
-                    Someone will be paying attention and have the power to act.
-                    If part of the board starts to drift, the engaged workers
-                    can alert the community.
+                    But consumers can disengage. When they do, it's often the
+                    workers who sound the alarm. Giving the workers the other
+                    half of the board means there's always someone paying
+                    attention. If part of the board starts to drift, the
+                    engaged workers can alert the community. Once alerted, the
+                    community can hold the board accountable.
                 </p>
                 <p>
-                    Workers can be tempted to sell or to restrict the
-                    franchise, so ban those things in the bylaws. One worker,
-                    one vote, no buy-in. One active consumer, one vote, no
-                    buy-in. No sales.
+                    Workers can be tempted to restrict the franchise, so
+                    require universal franchise in the bylaws: one worker, one
+                    vote, no share purchase required. Similarly, one active
+                    consumer, one vote, no share purchase required.
                 </p>
                 <p>
-                    In all of these structures, democratic accountability
-                    mechanisms are the key. One of the first moves of
-                    enshittifying consumer cooperatives is often to restrict
-                    access to board elections. So deny the board this power.
-                    They often restrict access to corporate documents to hide
-                    their actions, so constitutionally mandate transparency.
+                    Democratic accountability mechanisms are the key. One of
+                    the first moves of enshittifying consumer cooperatives is
+                    to restrict access to board elections. Deny the board this
+                    power. They often restrict access to corporate documents to
+                    hide their actions, so constitutionally mandate
+                    transparency.
                 </p>
                 <p>
-                    Concentrated power is the ultimate root cause. Since we're
-                    still using a representative democracy with a board, there
-                    will still be a certain concentration of power on the
-                    board, even with strong democratic engagement. But we can
-                    further check that power by laying directly democratic
-                    mechanisms on top of the representative democracy:
-                    referenda to allow the community to directly influence
-                    policy, recall elections to quickly check a corrupted
-                    board, and ratification of changes to the bylaws to prevent
-                    the board unilaterally changing the constitution to take
-                    power for itself.
+                    We can add elements of direct democracy to provide
+                    additional accountability mechanisms: referenda to allow
+                    the community to directly influence policy, recall
+                    elections to quickly check a corrupted board, and
+                    ratification of changes to the bylaws to keep the board
+                    from unilaterally changing the constitution to take power
+                    for itself or sell out.
                 </p>
                 <p>
-                    Assembling the structure this way creates a system of
-                    checks and balances. The nonprofit with constitutional
-                    bylaws cut off the sale path and the ability to restrict the
-                    franchise. The workers will be engaged most of the time,
-                    and if they start to drift and enshittify the consumers can
-                    become more active and check them. The direct democracy
-                    mechanisms ensure there's always a tool for accountability
-                    available to the community.
+                    What we have now assembled is a strong democratic system
+                    with a balance of powers and directly democratic
+                    accountability mechanisms. It's democracy that can
+                    ultimately keep enshittification in check.
                 </p>
                 <p>
-                    We're working on building exactly this with Communities, a
-                    social network platform. There are a lot of challenges that
-                    remain to make it a reality, and we'll discuss them in a
-                    future article. Stay tuned!
+                    We're working on building exactly this with Communities.
+                    There are a lot of challenges that remain to make it a
+                    reality, and we'll discuss them in a future article. Stay
+                    tuned!
                 </p>
                 <p>
                     <em>
