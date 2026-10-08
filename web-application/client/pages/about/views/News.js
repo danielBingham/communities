@@ -48,17 +48,17 @@ const posts = {
                     Aren't the Answer</a>.
                 </p>
                 <p>
-                    Enshittification is a social problem. It's caused by
-                    concentrating power in the hands of investors. When the
-                    investors control an organization, the pursuit of returns
-                    will tend to dominate. Enshittification follows.
-                </p>
-                <p>
                     The protocols movement is an attempt to use market forces to
-                    keep investors in check, by removing the network effects
+                    keep enshittification in check, by removing the network effects
                     inherent in certain kinds of platforms. But we know this
                     doesn't work, because email is the quintessential protocol
                     and email is enshittifying.
+                </p>
+                <p>
+                    Enshittification is a social problem. It's caused by
+                    concentrating power in the hands of a small, unaccountable
+                    group who's interests diverge from the community. The vast
+                    majority of the time, that group is investors.
                 </p>
                 <p>
                     Protocols are a technical solution to a social problem. We
@@ -76,13 +76,13 @@ const posts = {
                 <p>
                     This is usually done through a nonprofit organization. The
                     nonprofit's board is the group of stewards. The nonprofit
-                    either fully governs the platforms or has a majority share
-                    in the businesses that do.
+                    either fully governs the platforms or has a controlling
+                    share in the businesses that do.
                 </p>
                 <p>
-                    This is the Wikimedia Foundation and Wikipedia. The Proton
-                    Foundation and Proton. Signal, Ghost, each of these has
-                    created a nonprofit that ultimately controls the platform.
+                    Proton, Signal, Ghost, and others use this approach. Each
+                    of these has a nonprofit that ultimately controls the
+                    platform.
                 </p>
                 <p>
                     In most cases, the board is self-perpetuating, meaning the
@@ -91,11 +91,12 @@ const posts = {
                 </p>
                 <p>
                     This model has often worked well. All of the above examples
-                    have remained pro-social and resisted enshittification.
+                    have, so far, remained pro-social and resisted
+                    enshittification.
                 </p>
                 <p>
                     But the problem with stewardship through a self-perpetuating
-                    non-profit board is that it's essentially a benevolent
+                    nonprofit board is that it's essentially a benevolent
                     oligarchy. If the board is corrupted, captured, or goes off
                     the rails there's no recourse. The community has no
                     mechanisms to hold them accountable. You're depending on
@@ -118,27 +119,30 @@ const posts = {
                     two universities.
                 </p>
                 <p>
-                    In 2021, <a target="_BLANK" href="https://www.thecrimson.com/article/2021/6/29/harvard-mit-sell-edx/">it was sold to 2U</a> a private, venture funded
-                    education technology company, with the president of the
-                    nonprofit becoming the Chief Platform Office of 2U. Faculty
-                    and students protested, but ultimately they had no
-                    recourse. 2U has since <a target="_BLANK" href="https://www.thecrimson.com/article/2024/7/27/2u-bankruptcy-harvard-mit-edx/">declared chapter 11 bankrupcy</a>.
+                    In 2021, <a target="_BLANK"
+                    href="https://www.thecrimson.com/article/2021/6/29/harvard-mit-sell-edx/">it
+                    was sold to 2U</a>, an education technology company, with
+                    the president of the nonprofit becoming the Chief Platform
+                    Office of 2U. Faculty protested, but ultimately they had no
+                    recourse. 2U has since <a target="_BLANK"
+                href="https://www.thecrimson.com/article/2024/7/27/2u-bankruptcy-harvard-mit-edx/">declared
+                    chapter 11 bankrupcy</a>.
                 </p>
                 <p>
                     The stewardship model is only as good as the stewards. It's
                     missing accountability mechanisms.
                 </p>
                 <p>
-                    Interestingly, Wikipedia points us in the direction of a
-                    another model to consider.
+                    Wikipedia points us in the direction of a another model to
+                    consider.
                 </p>
                 <p>
                     Wikipedia is not a pure stewardship model. Half the board
                     is self-perpetuating, the other half is elected by the
-                    community of editors, which creates a mechanism by which
-                    the community can hold the organization accountable. This
-                    brings us to the next model we could consider: Users in
-                    Charge.
+                    community of editors and affiliates, which creates a
+                    mechanism by which the community can hold the organization
+                    accountable. This brings us to the next model we could
+                    consider: Users in Charge.
                 </p>
                 <h2>Users in Charge</h2>
                 <p>
@@ -147,16 +151,22 @@ const posts = {
                 </p>
                 <p>
                     Outside of tech this is probably one of the most widely
-                    spread alternative business forms. There are tens of
-                    thousands of consumer cooperatives in the world.
+                    spread alternative business forms. There are hundreds of
+                    thousands of consumer cooperatives in the world, the
+                    majority of them serve their communities well.
                 </p>
                 <p>
-                    In theory, putting the community in charge allows them to
-                    directly hold the organization accountable. But you often
-                    also see the community tune out, allowing cooperatives to
-                    enshittify in spite of community control, or even allowing
-                    the board to take the cooperative out from under the
-                    community entirely.
+                    On average, consumer owned credit unions and mutual
+                    insurance companies treat their customers better than their
+                    investor owned counterparts. Consumer owned grocery stores
+                    often have cheaper prices than their investor owned
+                    counterparts.
+                </p>
+                <p>
+                    But when the community disengages from the democracy,
+                    cooperatives can enshittify in spite of community control.
+                    In some cases, even allowing the board to take the
+                    cooperative out from under the community entirely.
                 </p>
                 <p>
                     There are over 900 rural electric cooperatives in the US,
@@ -164,8 +174,6 @@ const posts = {
                     customers are the members. Of the 583 examined in an
                     <a target="_BLANK" href="https://ilsr.org/article/energy-democracy/just-how-democratic-are-rural-electric-cooperatives/">Institute for Local Self-Reliance study</a>, 424 (more than
                     70%) had lower than 10% turnout in their board elections.
-                    Most members of rural electric cooperatives don't even
-                    realize they can vote for the board.
                 </p>
                 <p>
                     And many rural electric cooperatives are <a target="_BLANK"
@@ -196,51 +204,68 @@ const posts = {
                     Democracy is hard. Most people do not have the time,
                     energy, or willingness to do the work necessary to hold
                     their grocery store, outdoor retailer, or electric utility
-                    accountable. It's not hard for the boards of these
+                    accountable. It's possible for the boards of these
                     businesses to simply stop being transparent and for the
                     average consumer member to stop asking questions. By the
-                    time members realize something's wrong, it's often too
+                    time members realize something's wrong, it's can be too
                     late.
                 </p>
                 <p>
-                    That said, sometimes when a consumer co-op starts to go off
-                    the rails someone will raise the alarm early enough that
+                    But sometimes when a consumer co-op starts to go off the
+                    rails someone will raise the alarm early enough that
                     members are able to rally and put things back on track. And
-                    often, that someone is the co-ops workers.
+                    often, that someone is the workers.
                 </p>
                 <p>
                     Similar to MEC, REI made changes to its bylaws in the early
                     2000s to allow the board to effectively control elections
-                    by blocking candidates from the ballot. In 2022, workers
-                    unionized, though they haven't reached a contract agreement
-                    with REI yet and have accused REI of union busting.  In
-                    March 2025, REI's board exercised their control over the
-                    elections to block the union's candidates from the ballot
-                    and force a non-competitive election, by only allowing
-                    their three chosen candidates for the three open board
-                    seats.  The union sounded the alarm and organized what
-                    amounted to a vote of no-confidence campaign, successfully.
-                    In 2026, as part of a deal around the contract talks, the
-                    union stayed out of the election and the boards three
-                    candidates were approved.  But then in May 2026 contract
-                    talks broke down and the union called for a boycott.
+                    by blocking candidates from the ballot.
+                </p>
+                <p>
+                    In March 2025, REI's board exercised their control over the
+                    elections to force a non-competitive election by only
+                    allowing their three chosen candidates for the three open
+                    board seats. REI's union sounded the alarm and organized
+                    the membership to reject the board's chosen candidates.
                 </p>
                 <p>
                     It remains to be seen how this will all play out at REI,
-                    but the scenario at REI where the workers unionize and then
-                    sound the alarm about drifting governance to engage the
-                    membership is a pretty common one. And it brings us to the next
-                    model we could considser: we could just put the workers in
-                    charge, since they're the ones paying attention.
+                    but the scenario where co-op workers unionize and then
+                    sound the alarm about drifting governance is a pretty
+                    common one.
+                </p>
+                <p>
+                    I have personal experience with a similar scenario at
+                    Bloomingfoods, my local grocery cooperative.  In that case
+                    we were able to get the co-op back on track, thanks to the
+                    workers. Which brings us to the next model we could
+                    consider: just put the workers in charge, since
+                    they're often the ones paying attention.
                 </p>
                 <h2>Workers in Charge</h2>
                 <p>
-                    We could put workers in charge, and in many ways this
-                    approach shows the most promise.
+                    We could put workers in charge. This is the worker
+                    cooperative approach.
                 </p>
                 <p>
-                    Cory Doctorow himself described workers as the last line of
-                    defense against enshittification:
+                    There's surprisingly little research on how worker
+                    cooperatives treat consumers. What exists, however, is
+                    encouraging: researchers studying home care co-ops found
+                    that worker input, ownership, and training appear to drive
+                    better care.
+                </p>
+                <p>
+                    Cooperative Home Care Associates in New York City gives us
+                    an example of this. It has been around since 1985, over 40
+                    years. It has nearly half the industry average worker turn
+                    over, and lower worker turn over in home care has been
+                    directly linked to better outcomes.
+                </p>
+                <p>
+                    We've already seen workers tend to be the ones to sound the
+                    alarm when consumer cooperatives enshittify. Cory Doctorow
+                    himself described workers as the last line of defense
+                    against enshittification:
                 </p>
                 <blockquote>
                     <p>
@@ -259,160 +284,157 @@ const posts = {
                     </p>
                 </blockquote>
                 <p>
-                    Worker cooperatives, cooperatives governed democratically
-                    by their workers instead of their consumers, have been
-                    around for centuries have proven quite resistant to
-                    enshittification.
-                </p>
-                <p>
-                    The Mondragon Corporation has been around since the 1950s.
-                    It is a federation of worker cooperatives based in the
-                    Basque region of Spain. It has about 70,000 workers across
-                    hundreds of cooperatives spanning industry, retail, finance,
-                    and knowledge.
-                </p>
-                <p>
-                    Its products have a high standard for quality. Its
-                    cooperatives act as good neighbors to their communities. And
-                    it treats workers very well, in no small part because the
-                    workers are in control.
-                </p>
-                <p>
-                    Another example is Cooperative Home Care Associates, a
-                    worker cooperative in-home care agency with over 1600
-                    members. It has been around since 1985, over 40 years, and
-                    continues to provide far better working conditions and
-                    better care than the rest of the industry.
-                </p>
-                <p>
-                    Consumer cooperatives enshittify when democratic engagement
-                    is low to a loss of accountability for leadership. This
-                    happens much less in worker cooperatives.
+                    Consumer cooperatives tend to enshittify when democratic
+                    engagement is low, leading to a loss of accountability for
+                    leadership.
                 </p>
                 <p>
                     Workers have a much stronger incentive to engage with their
-                    workplace's democracy. They spend 8 hours a day or more at
-                    work. They are intimiately familiar with what's happening in
-                    their workplaces. And People's workplaces are often one of
-                    the most important communities in their lives. On top of
-                    that, their livelihoods -- their ability to feed, cloth, and
-                    house themselves -- are on the line.
+                    workplace's democracy. They depend on their work to feed,
+                    clothe, and house themselves. They spend 8 hours a day or
+                    more at work. They are intimiately familiar with what's
+                    happening in their workplaces. Where consumers often don't
+                    engage with cooperative democracy because they simply don't
+                    have the time or the bandwidth, workers can give themselves
+                    the time.
                 </p>
                 <p>
-                    Where consumers often don't engage with cooperative
-                    democracy because they simply don't have the time or the
-                    bandwidth, workers can give themselves the time.
-                </p>
-                <p>
-                    But enshittification is about increasing returns on
-                    investments, profits. When workers are in charge, don't they
-                    still have incentives to enshittify to increase their take
-                    home pay? In theory yes, but in practice, we rarely see
-                    this.
+                    But don't workers have similar incentives as investors to
+                    enshittify? Well, there are forces that hold them in
+                    check that aren't there for investors.
                 </p>
                 <p>
                     Workers are much closer to the work, and therefore the
-                    customers than the investors. They have to actually face the
-                    customer. Recieve customer feedback. And experience the
-                    impact of their work on the people who they serve. People
-                    tend to take pride in their work. They want to do something
-                    meaningful that helps other people. Like Cory says, workers
-                    don't generally want to enshittify their work.
+                    customers, than the investors. They have to actually
+                    experience the impact of their work on the people who they
+                    serve. People tend to take pride in their work and often
+                    want to do something meaningful that helps other people.
+                    Like Doctorow says, workers don't generally want to
+                    enshittify their work.
                 </p>
                 <p>
-                    And what we actually tend to see in worker cooperatives is
-                    that pay tends to be a little bit lower than in similar
-                    capitalist businesses. This is because the workers, when
-                    given control, value things other than pay. They will give
-                    themselves pay cuts in a downturn to avoid layoffs. And will
-                    choose other benefits over pay in an upturn. There have been
-                    cases of worker cooperatives keeping prices, and their own
-                    pay, lower even when the market is pricing similar goods
-                    higher.
+                    All that said, worker cooperatives can and do enshittify,
+                    especially when they gain monopoly power. There have also
+                    been instances of them restricting the franchise (hiring
+                    workers without making them members) or selling out when
+                    the price is right.
                 </p>
                 <p>
-                    On average, the evidence shows pretty strongly that workers
-                    are good stewards of their work.
+                    Egged was a worker cooperative bus service in Israel that
+                    was basically granted a monopoly by the government. It
+                    behaved as one would expect a monopoly to: providing poor
+                    service for high fares.
                 </p>
                 <p>
-                    That doesn't mean that worker cooperatives can't enshittify.
-                    The most common ways in which they do enshittify is to
-                    simply cut off new membership and start hiring non-member
-                    workers. Mondragon did this. It started out sourcing work to
-                    lower wage countries and didn't bring those workers into the
-                    cooperative.
+                    The plywood co-ops of the US Pascific Northwest illustrate
+                    the sell out case. Those co-ops were organized so that the
+                    workers owned them through shares. Almost immediately, they
+                    started hiring non-member workers, since new workers were
+                    required to buy shares to become members. As they grew and
+                    succeeded, the price of a share went up, until it was
+                    completely out of reach for new workers. Finally, the
+                    remaining workers decided to cash out their shares: by
+                    selling out.
                 </p>
                 <p>
-                    The other way in which a worker cooperative could, in
-                    theory, enshittify is if the workers choose to sell out,
-                    which is not out the realm of possibility.
-                </p>
-                <p>
-                    So if our goal is to build an organization that is maximally
-                    resistent to enshittification, we can probably do even
-                    better than a worker cooperative.
+                    If our goal is to build an organization that is
+                    maximally resistent to enshittification, we should probably
+                    look for a structure that can balance the worker
+                    cooperative's vulnerabilities.
                 </p>
                 <h2>Balance of Powers</h2>
                 <p>
+                    All of these structures, stewardship through
+                    nonprofits, consumer cooperatives, and worker cooperatives,
+                    are substantially more resistant to enshittification than
+                    investor owned businesses.
+                </p>
+                <p>
+                    But none of these structures is fully resistant to
+                    enshittification. They all have vulnerabilities that allow
+                    them to enshittify, or to be captured by investors who
+                    would then enshittify them. Can we assemble a structure
+                    with the best aspects of each of them, and with checks and
+                    balances to shore up the weaknesses?
+                </p>
+                <p>
                     Multi-stakeholder cooperatives allow multiple stakeholder
-                    groups to share power. This would allow us to draw the best
-                    elements from all three previous approaches and to compose
-                    them in a way that balances their strengths and
-                    vulnerabilities.
+                    groups to share power, balancing each other. They can be
+                    created as nonprofits using the nonprofit bylaws to define
+                    the governance. This would allow us to draw the best
+                    elements from all three previous approaches.
                 </p>
                 <p>
-                    Nonprofits are only as good as their boards. Consumer
-                    cooperatives allow the users to elect the board, but users
-                    tend to have low democratic engagement. Worker cooperatives
-                    allow the workers to elect the board and tend to have very
-                    active democracies that generally resist enshittification,
-                    but workers sometimes sell out or stop extending the
-                    franchise.
+                    A nonprofit multi-stakeholder cooperative who's board is
+                    half elected by and from the consumers and half elected by
+                    and from the workers.
                 </p>
                 <p>
-                    By creating a nonprofit where workers elect half the board
-                    and users elect the other half, with the bylaws providing a
-                    strong constitution, we can compose all of these forms into
-                    a structure maximally resistant to enshittification.
+                    Stewardship nonprofits lack accountability mechanisms.
+                    Their consumers, their community, are often the source of
+                    that accountability. Giving the community half the board
+                    gives them a direct mechanism for accountability.
                 </p>
                 <p>
-                    Workers can steer the ship most of the time, with users
-                    given a strong voice in the direction the workers take. Most
-                    of the time, workers will resist enshittification on their
-                    own, but if they are tempted to sell, users will almost
-                    certainly stop them.
+                    Consumers can disengage though, and fail to hold their
+                    boards accountable. When they do, it's often the workers
+                    who sound the alarm. Giving the workers the other half of
+                    the board means there's always a highly engaged core.
+                    Someone will be paying attention and have the power to act.
+                    If part of the board starts to drift, the engaged workers
+                    can alert the community.
                 </p>
                 <p>
-                    The nonprofit's bylaws can form the constitution and can
-                    stipulate that all workers are included as members and given
-                    a vote. If we want to add additional layers of protection,
-                    we can ensure directly democratic processes provide an
-                    escape hatch to the representative democracy of the board:
-                    recall elections, referenda, and ratification of any bylaw
-                    changes.
+                    Workers can be tempted to sell or to restrict the
+                    franchise, so ban those things in the bylaws. One worker,
+                    one vote, no buy-in. One active consumer, one vote, no
+                    buy-in. No sales.
                 </p>
                 <p>
-                    This mixture of worker and user control, representative and
-                    direct democracy, all housed in a nonprofit gives us a
-                    structure maximally resistant to enshittification.
+                    In all of these structures, democratic accountability
+                    mechanisms are the key. One of the first moves of
+                    enshittifying consumer cooperatives is often to restrict
+                    access to board elections. So deny the board this power.
+                    They often restrict access to corporate documents to hide
+                    their actions, so constitutionally mandate transparency.
                 </p>
                 <p>
-                    But why doesn't this exist already? Can we actually build an
-                    organization like this? We're trying, but we could use your
-                    help! We'll explain more in the next article: Can We Build a
-                    Tech Mondragon?
+                    Concentrated power is the ultimate root cause. Since we're
+                    still using a representative democracy with a board, there
+                    will still be a certain concentration of power on the
+                    board, even with strong democratic engagement. But we can
+                    further check that power by laying directly democratic
+                    mechanisms on top of the representative democracy:
+                    referenda to allow the community to directly influence
+                    policy, recall elections to quickly check a corrupted
+                    board, and ratification of changes to the bylaws to prevent
+                    the board unilaterally changing the constitution to take
+                    power for itself.
+                </p>
+                <p>
+                    Assembling the structure this way creates a system of
+                    checks and balances. The nonprofit with constitutional
+                    bylaws cut off the sale path and the ability to restrict the
+                    franchise. The workers will be engaged most of the time,
+                    and if they start to drift and enshittify the consumers can
+                    become more active and check them. The direct democracy
+                    mechanisms ensure there's always a tool for accountability
+                    available to the community.
+                </p>
+                <p>
+                    We're working on building exactly this with Communities, a
+                    social network platform. There are a lot of challenges that
+                    remain to make it a reality, and we'll discuss them in a
+                    future article. Stay tuned!
                 </p>
                 <p>
                     <em>
-                        Communities is a cooperative social network platform
-                        seeking to de-enshittify social media and, if we succeed
-                        at that, the wider web. We're working to create a
-                        democratically governed multi-stakeholder cooperative
-                        umbrella that would incubate multiple platforms to
-                        provide democraticly governed alternatives to many
-                        enshittified platforms. We're funded by user-donations.
-                        If you want to help, we're currently recruiting an
-                        Advisory Board.
+                        Communities is a social network platform working
+                        towards cooperative governance. We're seeking to
+                        de-enshittify social media and, if we succeed at that,
+                        the wider web. We're funded by user-donations. If you
+                        want to help, we're currently recruiting an Advisory
+                        Board.
                     </em>
                 </p>
             </>
