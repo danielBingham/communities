@@ -108,8 +108,8 @@ const posts = {
                     those plans failed it instead converted to a standard
                     Delaware C Corp and sold to investors. Volunteers
                     protested. Users protested. But ultimately they had no
-                    recourse. Couchsurfing now charges subscriptions for
-                    access.
+                    recourse. Couchsurfing now charges many users a
+                    subscription for access.
                 </p>
                 <p>
                     <a target="_BLANK" href="https://en.wikipedia.org/wiki/EdX">edX</a> was online course software originally created at MIT
@@ -186,7 +186,7 @@ const posts = {
                     even realize they are democratic institutions.
                 </p>
                 <p>
-                    Mountain Equipment Company (MEC) in Canada was taken right
+                    Mountain Equipment Co-op (MEC) in Canada was taken right
                     out from under its membership. First the board weakened
                     member control by <a target="_BLANK" href="https://www.thenews.coop/sale-of-leading-canadian-co-op-mec-prompts-campaign-to-save-it/">changing the bylaws</a> so that it controlled
                     elections: candidates had to be board approved to run for
@@ -247,15 +247,15 @@ const posts = {
                     There's surprisingly little research on how worker
                     cooperatives treat consumers. What exists, however, is
                     encouraging: researchers studying home care co-ops found
-                    that worker input, ownership, and training appear to drive
-                    better care.
+                    they have half the worker turnover of their investor owned
+                    counterparts, which is associated with better care.
                 </p>
                 <p>
-                    Cooperative Home Care Associates in New York City gives us
-                    an example of this. It has been around since 1985, over 40
-                    years. It has nearly half the industry average worker turn
-                    over, and lower worker turn over in home care has been
-                    directly linked to better outcomes.
+                    The plywood cooperatives of the Pacific Northwest were more
+                    efficient and productive than conventional mills.  They
+                    wasted less wood and kept producing through downturns,
+                    which helped to keep plywood prices from rising. They did
+                    eventually sell out, but we'll come back to that later.
                 </p>
                 <p>
                     We've already seen workers tend to be the ones to sound the
@@ -364,6 +364,12 @@ const posts = {
                     the workers.
                 </p>
                 <p>
+                    The nonprofit structure means no one owns a stake in it, so
+                    no one's incentivized to sell. The bylaws can form the
+                    constitution, clearly stating who has what powers and how
+                    they are balanced.
+                </p>
+                <p>
                     Stewardship nonprofits lack accountability mechanisms.
                     Their consumers are often the source of that
                     accountability. Giving the community half the board gives
@@ -389,7 +395,8 @@ const posts = {
                     to restrict access to board elections. Deny the board this
                     power. They often restrict access to corporate documents to
                     hide their actions, so constitutionally mandate
-                    transparency.
+                    transparency. Require membership approval for any transfers
+                    or sale.
                 </p>
                 <p>
                     We can add elements of direct democracy to provide
@@ -409,8 +416,9 @@ const posts = {
                 <p>
                     We're working on building exactly this with Communities.
                     There are a lot of challenges that remain to make it a
-                    reality, and we'll discuss them in a future article. Stay
-                    tuned!
+                    reality, and details we still need to work out -- Who
+                    breaks a tie? How do we define an active member? -- and
+                    we'll discuss them in a future article. Stay tuned!
                 </p>
                 <p>
                     <em>
