@@ -91,9 +91,8 @@ const Team = function({}) {
             <section id="team-view__advisory-board">
                 <h1>Advisory Board</h1>
                 <p>
-                    We are recruiting a volunteer Advisory
-                    Board to help develop the
-                    cooperative.
+                    We are recruiting a volunteer Advisory Board to help
+                    develop the cooperative.
                 </p>
                 <p>
                     We're looking for people with knowledge of and experience in tech, nonprofits, cooperatives, software and social media ethics, social media health, dialog and deliberation, and more.  We're also interested in chatting with anyone who's down to help!
@@ -111,7 +110,7 @@ const Team = function({}) {
                     The time commitment is flexible beyond a minimum of a single two-hour meeting per month.
                 </p>
                 <p>
-                    If you're interested, reach out to <a href="mailto:contact@communities.social">contact@communities.social</a> and share your background and why you're interested in helping!
+                    If you're interested, reach out to <a href="mailto:contact@communities.social">contact@communities.social</a>. Share your background and why you're interested in helping!
                 </p>
             </section>
         </article>

@@ -432,12 +432,11 @@ const posts = {
                 <section id="social-solutions-for-enshittification__footer">
                     <p>
                         <em>
-                            Communities is a social network platform working
+                            <a href="/">Communities</a> is a social network platform working
                             towards cooperative governance. We're seeking to
                             de-enshittify social media and, if we succeed at that,
-                            the wider web. We're funded by user donations. If you
-                            want to help, we're currently recruiting an Advisory
-                            Board.
+                            the wider web. We're funded by <a href="/about/contribute">user-donations</a>. If you
+                            want to help, we're currently recruiting an <a href="/about/team#team-view__advisory-board">Advisory Board</a>.
                         </em>
                     </p>
                 </section>
