@@ -42,10 +42,10 @@ const createEmailDriver = function(core) {
     const driver = core.config.email?.driver
 
     if ( driver === 'postmark' ) {
-        return PostmarkEmailDriver(core, core.config.email.postmark)
+        return new PostmarkEmailDriver(core, core.config.email.postmark)
     } else if ( driver === 'log' ) {
         if ( core.config.environment === 'development' ) {
-            return LogEmailDriver(core, core.config.email.log)
+            return new LogEmailDriver(core, core.config.email.log)
         } else {
             throw new Error('The log email driver may only be used in development.')
         }

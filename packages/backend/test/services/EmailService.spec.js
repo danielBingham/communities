@@ -32,9 +32,22 @@ describe('Email', function() {
             expect(createEmailDriver(core)).toBeInstanceOf(PostmarkEmailDriver)
 
             const logCore = coreWith({ driver: 'log', log: { directory: 'tmp/email' } })
+            // The log driver may only be used in development.
+            logCore.config.environment = 'development'
             const driver = createEmailDriver(logCore)
             expect(driver).toBeInstanceOf(LogEmailDriver)
             expect(driver.directory).toBe('tmp/email')
+        })
+
+        it('should reject a log driver used in staging or production', function() {
+            const core = coreWith({ driver: 'log', log: { directory: 'tmp/email' } })
+            // The log driver may only be used in development.
+            core.config.environment = 'staging'
+            expect(() => createEmailDriver(core)).toThrow('The log email driver may only be used in development.')
+
+            // The log driver may only be used in development.
+            core.config.environment = 'production'
+            expect(() => createEmailDriver(core)).toThrow('The log email driver may only be used in development.')
         })
 
         it('Should reject a missing or unknown driver', function() {
