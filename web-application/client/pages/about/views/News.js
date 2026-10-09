@@ -333,9 +333,9 @@ const posts = {
                         co-ops were organized so that the workers owned them
                         through shares. New workers were required to buy shares to
                         become members, and not all new workers did. As they grew,
-                        the price of a share went up and became out of reach for
+                        the <a target="_BLANK" href="https://users.ssc.wisc.edu/~jfkennan/teaching/pencavelkrislov.pdf">price of a share went up</a> and became out of reach for
                         many new workers. Finally, the remaining workers decided to
-                        cash out their shares: by selling out.
+                        cash out their shares: by <a target="_BLANK" href="https://www.brookings.edu/wp-content/uploads/1995/01/1995_bpeamicro_craig.pdf">selling out</a>.
                     </p>
                     <p>
                         If our goal is to build an organization that is
@@ -373,10 +373,10 @@ const posts = {
                         the workers.
                     </p>
                     <p>
-                        The nonprofit structure means no one owns a stake in it, so
-                        no one's incentivized to sell. The bylaws can form the
-                        constitution, clearly stating who has what powers and how
-                        they are balanced.
+                        The nonprofit structure means no one owns a stake
+                        that they might be tempted to cash out. The bylaws can
+                        form the constitution, clearly stating who has what powers
+                        and how they are balanced.
                     </p>
                     <p>
                         Stewardship nonprofits lack accountability mechanisms.
