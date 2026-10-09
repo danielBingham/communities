@@ -31,405 +31,417 @@ const posts = {
         author: 'Daniel Bingham',
         content: (
             <>
-                <p><em>This post is the second of a series on enshittification and what we can do about it. You can find part one here: <a href="/about/news/9-29-2026-protocols-arent-the-answer">Protocols Aren't the Answer</a></em>.</p>
-                <p>
-                    Enshittification. It's when companies make products and
-                    services worse in pursuit of profits.
-                </p>
-                <p>
-                    The term was popularized by Cory Doctorow, who first wrote
-                    about it in the context of social media.
-                </p>
-                <p>
-                    Much of the pro-social tech movement has coallesced around
-                    protocols and interoperability as the answer to it. In the
-                    first article in this series, we argued that <a
-                        href="/about/news/9-29-2026-protocols-arent-the-answer">Protocols
-                    Aren't the Answer</a>.
-                </p>
-                <p>
-                    The protocols movement is an attempt to use market forces to
-                    keep enshittification in check by removing the network effects
-                    inherent in certain kinds of platforms. But we know this
-                    doesn't work. Email is the quintessential protocol
-                    and email is enshittifying.
-                </p>
-                <p>
-                    Enshittification is a social problem. It's caused by
-                    concentrating power in the hands of a small, unaccountable
-                    group who's interests diverge from the community. The vast
-                    majority of the time, that group is investors.
-                </p>
-                <p>
-                    Protocols are a technical solution to a social problem. We
-                    need a social solution. We need to change who's in charge
-                    and how they are held accountable.
-                </p>
-                <p>
-                    But who do we put in charge? And how to do we hold them
-                    accountable?
-                </p>
-                <h2>Stewards in Charge</h2>
-                <p>
-                    One approach is to put a select group of stewards in charge.
-                </p>
-                <p>
-                    This is usually done through a nonprofit organization. The
-                    nonprofit's board is the group of stewards. The nonprofit
-                    either fully governs the platforms or has a controlling
-                    share in the businesses that do.
-                </p>
-                <p>
-                    Proton, Signal, Ghost, and others use this approach. Each
-                    of these has a nonprofit that ultimately controls the
-                    platform.
-                </p>
-                <p>
-                    In most cases, the board is self-perpetuating, meaning the
-                    current board chooses its own members as it grows or
-                    members turn over.
-                </p>
-                <p>
-                    This model has often worked well. All of the above examples
-                    have, so far, remained pro-social and resisted
-                    enshittification.
-                </p>
-                <p>
-                    But the problem with stewardship through a self-perpetuating
-                    nonprofit board is that it's essentially a benevolent
-                    oligarchy. If the board is corrupted, captured, or goes off
-                    the rails there's no recourse. The community has no
-                    mechanisms to hold them accountable. You're depending on
-                    those handful of board members to stay on mission.
-                </p>
-                <p>
-                    Couchsurfing started out as a nonprofit, built by
-                    volunteers. It attempted to form a 501(c)(3), but when
-                    those plans failed it instead converted to a standard
-                    Delaware C Corp and sold to investors. Volunteers
-                    protested. Users protested. But ultimately they had no
-                    recourse. Couchsurfing now charges many users a
-                    subscription for access.
-                </p>
-                <p>
-                    <a target="_BLANK" href="https://en.wikipedia.org/wiki/EdX">edX</a> was online course software originally created at MIT
-                    and then developed through a collaborative partnership
-                    between MIT and Harvard. It was <a target="_BLANK" href="https://openlearning.mit.edu/news/mit-and-harvard-announce-edx">founded as a nonprofit</a> jointly governed by the
-                    two universities.
-                </p>
-                <p>
-                    In 2021, <a target="_BLANK"
-                    href="https://www.thecrimson.com/article/2021/6/29/harvard-mit-sell-edx/">it
-                    was sold to 2U</a>, an education technology company, with
-                    the president of the nonprofit becoming the Chief Platform
-                    Office of 2U. Faculty protested, but ultimately they had no
-                    recourse. 2U has since <a target="_BLANK"
-                href="https://www.thecrimson.com/article/2024/7/27/2u-bankruptcy-harvard-mit-edx/">declared
-                    chapter 11 bankrupcy</a>.
-                </p>
-                <p>
-                    The stewardship model is only as good as the stewards. It's
-                    missing accountability mechanisms.
-                </p>
-                <p>
-                    Wikipedia points us in the direction of a another model to
-                    consider.
-                </p>
-                <p>
-                    Wikipedia is not a pure stewardship model. Half the board
-                    is self-perpetuating, the other half is elected by the
-                    community of editors and affiliates, which creates a
-                    mechanism by which the community can hold the organization
-                    accountable. This brings us to the next model we could
-                    consider: Users in Charge.
-                </p>
-                <h2>Users in Charge</h2>
-                <p>
-                    This is the consumer cooperative approach.
-                </p>
-                <p>
-                    Outside of tech this is probably one of the most widely
-                    spread alternative business forms. There are hundreds of
-                    thousands of consumer cooperatives in the world, the
-                    majority of them serve their communities well.
-                </p>
-                <p>
-                    On average, consumer owned credit unions and mutual
-                    insurance companies treat their customers better than their
-                    investor owned counterparts. Consumer owned grocery stores
-                    often have cheaper prices.
-                </p>
-                <p>
-                    But when the community disengages from the democracy,
-                    cooperatives can enshittify in spite of community control.
-                    In some cases, even allowing the board to take the
-                    cooperative out from under the community entirely.
-                </p>
-                <p>
-                    There are over 900 rural electric cooperatives in the US.
-                    Of the 583 examined in an <a target="_BLANK"
-                    href="https://ilsr.org/article/energy-democracy/just-how-democratic-are-rural-electric-cooperatives/">Institute
-                    for Local Self-Reliance study</a>, 424 (more than 70%) had
-                    lower than 10% turnout in their board elections.
-                </p>
-                <p>
-                    And many rural electric cooperatives are <a target="_BLANK"
-                    href="https://mississippitoday.org/2018/12/14/we-dont-have-any-voice-rural-mississippians-feel-shut-out-overcharged-by-electric-co-ops/">enshittifying</a>:
-                    overcharging their members, refusing to return profits,
-                    giving their executives and board members obscene perks,
-                    and not adopting clean energy even as their members often
-                    suffer the worst effects of dirty energy and climate
-                    change.
-                </p>
-                <p>
-                    The cooperatives aren't transparent and people often don't
-                    even realize they are democratic institutions.
-                </p>
-                <p>
-                    Mountain Equipment Co-op (MEC) in Canada was taken right
-                    out from under its membership. First the board weakened
-                    member control by <a target="_BLANK" href="https://www.thenews.coop/sale-of-leading-canadian-co-op-mec-prompts-campaign-to-save-it/">changing the bylaws</a> so that it controlled
-                    elections: candidates had to be board approved to run for
-                    election. Then it took on so much debt that its debt load
-                    rivaled its membership equity. Then it used Canada's
-                    Creditor Protection process to sell out the cooperative to private
-                    equity without member approval. More than 71,000 members
-                    petitioned to stop the sale, but Canada's courts overrode
-                    them and <a target="_BLANK" href="https://www.theglobeandmail.com/business/article-court-approves-sale-of-mec-to-us-equity-firm-ending-member-led/">approved it</a>.
-                </p>
-                <p>
-                    Democracy is hard. Most people do not have the time,
-                    energy, or willingness to do the work necessary to hold
-                    their grocery store, outdoor retailer, or electric utility
-                    accountable. It's possible for the boards of these
-                    businesses to simply stop being transparent and for the
-                    average consumer member to stop asking questions. By the
-                    time members realize something's wrong, it's can be too
-                    late.
-                </p>
-                <p>
-                    But sometimes when a consumer co-op starts to go off the
-                    rails someone will raise the alarm early enough that
-                    members are able to rally and put things back on track. And
-                    often, that someone is the workers.
-                </p>
-                <p>
-                    Similar to MEC, REI made changes to its bylaws in the early
-                    2000s to allow the board to effectively control elections
-                    by blocking candidates from the ballot.
-                </p>
-                <p>
-                    In March 2025, REI's board exercised their control over the
-                    elections to force a non-competitive election by only
-                    allowing their three chosen candidates for the three open
-                    board seats. REI's union sounded the alarm and organized
-                    the membership to reject the board's chosen candidates.
-                    All three were rejected.
-                </p>
-                <p>
-                    I have personal experience with a similar scenario at
-                    Bloomingfoods, my local grocery cooperative. The board had
-                    gotten cosy with management, which was abusing the workers,
-                    and had overextended the cooperative. The workers unionized,
-                    sounded the alarm and, with their help, we were able
-                    to get the co-op back on track.
-                </p>
-                <p>
-                    Which brings us to the next model we could consider: just
-                    put the workers in charge, since they're often the ones
-                    paying attention.
-                </p>
-                <h2>Workers in Charge</h2>
-                <p>
-                    This is the worker cooperative approach.
-                </p>
-                <p>
-                    There's surprisingly little research on how worker
-                    cooperatives treat consumers. What exists, however, is
-                    encouraging: researchers studying home care co-ops found
-                    they have half the worker turnover of their investor owned
-                    counterparts, which is associated with better care.
-                </p>
-                <p>
-                    The plywood cooperatives of the Pacific Northwest were more
-                    efficient and productive than conventional mills.  They
-                    wasted less wood and kept producing through downturns,
-                    which helped to keep plywood prices from rising. They did
-                    eventually sell out, but we'll come back to that later.
-                </p>
-                <p>
-                    We've already seen workers tend to be the ones to sound the
-                    alarm when consumer cooperatives enshittify. Cory Doctorow
-                    himself described workers as the last line of defense
-                    against enshittification:
-                </p>
-                <blockquote>
+                <section id="social-solutions-for-enshittification__intro">
+                    <p><em>This post is the second of a series on enshittification and what we can do about it. You can find part one here: <a href="/about/news/9-29-2026-protocols-arent-the-answer">Protocols Aren't the Answer</a></em>.</p>
                     <p>
-                        But for bosses, there's a downside to motivating your
-                        workers with appeals to a sense of mission, namely: your
-                        workers will feel a sense of mission. So when you ask
-                        them to enshittify the products they ruined their health
-                        to ship, workers will experience a sense of profound
-                        moral injury, respond with outrage, and threaten to
-                        quit.
+                        Enshittification. It's when <a target="_BLANK" href="https://thenightly.com.au/culture/books/enshittification-macquarie-dictionary-2024-word-of-the-year-you-may-not-have-heard-it-but-youve-felt-it-c-16881013">companies make products and
+                            services worse in pursuit of profits</a>.
                     </p>
-                    <p>[...]</p>
                     <p>
-                        Thus tech workers themselves were the final bulwark
-                        against enshittification.
+                        The term was <a target="_BLANK" href="https://pluralistic.net/2023/01/21/potemkin-ai/">popularized by Cory Doctorow</a>, who first wrote
+                        about it in the context of <a target="_BLANK" href="https://doctorow.medium.com/social-quitting-1ce85b67b456">social media</a>.
                     </p>
-                </blockquote>
-                <p>
-                    Consumer cooperatives tend to enshittify when democratic
-                    engagement is low, leading to a loss of accountability for
-                    leadership.
-                </p>
-                <p>
-                    Workers have a much stronger incentive to engage with their
-                    workplace's democracy. They depend on their work to feed,
-                    clothe, and house themselves. They spend 8 hours a day or
-                    more at work. They are intimiately familiar with what's
-                    happening in their workplaces. Where consumers often don't
-                    engage with cooperative democracy because they simply don't
-                    have the time or the bandwidth, workers can give themselves
-                    the time.
-                </p>
-                <p>
-                    But don't workers have similar incentives as investors to
-                    enshittify? To some degree, yes, but there are forces that
-                    check them which aren't there for investors.
-                </p>
-                <p>
-                    Workers are much closer to the work, and therefore the
-                    customers, than the investors. They have to actually
-                    experience the impact of their work on the people who they
-                    serve. People tend to take pride in their work and often
-                    want to do something meaningful that helps their community.
-                    Like Doctorow says, workers don't generally want to
-                    enshittify their work.
-                </p>
-                <p>
-                    All that said, worker cooperatives can and do enshittify,
-                    especially when they gain monopoly power. There have also
-                    been instances of them restricting the franchise (hiring
-                    workers without making them members) or selling out when
-                    the price is right.
-                </p>
-                <p>
-                    Egged was a worker cooperative bus service in Israel that
-                    gained monopoly power. It behaved as one would expect a
-                    monopoly to: providing poor service for high fares.
-                </p>
-                <p>
-                    The plywood co-ops of the US Pascific Northwest illustrate
-                    both the francise restriction and sell out cases. Those
-                    co-ops were organized so that the workers owned them
-                    through shares. New workers were required to buy shares to
-                    become members, and not all new workers did. As they grew,
-                    the price of a share went up and became out of reach for
-                    many new workers. Finally, the remaining workers decided to
-                    cash out their shares: by selling out.
-                </p>
-                <p>
-                    If our goal is to build an organization that is
-                    maximally resistent to enshittification, we should probably
-                    look for a structure that can balance the worker
-                    cooperative's vulnerabilities.
-                </p>
-                <h2>Balance of Powers</h2>
-                <p>
-                    All of these structures, stewardship through nonprofits,
-                    consumer cooperatives, and worker cooperatives, are more
-                    resistant to enshittification than investor owned
-                    businesses.
-                </p>
-                <p>
-                    But none of these structures is fully resistant. They all
-                    have vulnerabilities that allow them to enshittify, or to
-                    be captured by investors who would then enshittify them.
-                    Can we assemble a structure with the best aspects of each
-                    of them, and with checks and balances to shore up the
-                    weaknesses?
-                </p>
-                <p>
-                    Multi-stakeholder cooperatives allow multiple stakeholder
-                    groups to share power, balancing each other. They can be
-                    created as nonprofits using the nonprofit bylaws to define
-                    the governance. This would allow us to draw the best
-                    elements from all three previous approaches.
-                </p>
-                <p>
-                    Consider a nonprofit multi-stakeholder cooperative who's
-                    board is half elected by the consumers and half elected by
-                    the workers.
-                </p>
-                <p>
-                    The nonprofit structure means no one owns a stake in it, so
-                    no one's incentivized to sell. The bylaws can form the
-                    constitution, clearly stating who has what powers and how
-                    they are balanced.
-                </p>
-                <p>
-                    Stewardship nonprofits lack accountability mechanisms.
-                    Their consumers are often the source of that
-                    accountability. Giving the community half the board gives
-                    them a direct mechanism.
-                </p>
-                <p>
-                    But consumers can disengage. When they do, it's often the
-                    workers who sound the alarm. Giving the workers the other
-                    half of the board means there's always someone paying
-                    attention. If part of the board starts to drift, the
-                    engaged workers can alert the community. Once alerted, the
-                    community can hold the board accountable.
-                </p>
-                <p>
-                    Workers can be tempted to restrict the franchise, so
-                    require universal franchise in the bylaws: one worker, one
-                    vote, no share purchase required. Similarly, one active
-                    consumer, one vote, no share purchase required.
-                </p>
-                <p>
-                    Democratic accountability mechanisms are the key. One of
-                    the first moves of enshittifying consumer cooperatives is
-                    to restrict access to board elections. Deny the board this
-                    power. They often restrict access to corporate documents to
-                    hide their actions, so constitutionally mandate
-                    transparency. Require membership approval for any transfers
-                    or sale.
-                </p>
-                <p>
-                    We can add elements of direct democracy to provide
-                    additional accountability mechanisms: referenda to allow
-                    the community to directly influence policy, recall
-                    elections to quickly check a corrupted board, and
-                    ratification of changes to the bylaws to keep the board
-                    from unilaterally changing the constitution to take power
-                    for itself or sell out.
-                </p>
-                <p>
-                    What we have now assembled is a strong democratic system
-                    with a balance of powers and directly democratic
-                    accountability mechanisms. It's democracy that can
-                    ultimately keep enshittification in check.
-                </p>
-                <p>
-                    We're working on building exactly this with Communities.
-                    There are a lot of challenges that remain to make it a
-                    reality, and details we still need to work out -- Who
-                    breaks a tie? How do we define an active member? -- and
-                    we'll discuss them in a future article. Stay tuned!
-                </p>
-                <p>
-                    <em>
-                        Communities is a social network platform working
-                        towards cooperative governance. We're seeking to
-                        de-enshittify social media and, if we succeed at that,
-                        the wider web. We're funded by user-donations. If you
-                        want to help, we're currently recruiting an Advisory
-                        Board.
-                    </em>
-                </p>
+                    <p>
+                        Much of the pro-social tech movement has coallesced around <a target="_BLANK" href="https://knightcolumbia.org/content/protocols-not-platforms-a-technological-approach-to-free-speech">protocols</a> and <a target="_BLANK" href="https://www.eff.org/deeplinks/2019/10/adversarial-interoperability">interoperability</a> as the answer to it. In the
+                        first article in this series, we argued that <a target="_BLANK"
+                            href="/about/news/9-29-2026-protocols-arent-the-answer">Protocols
+                        Aren't the Answer</a>.
+                    </p>
+                    <p>
+                        The protocols movement is an attempt to use market forces to
+                        keep enshittification in check by removing the network effects
+                        inherent in certain kinds of platforms. But we know this
+                        doesn't work. Email is the quintessential protocol
+                        and <a target="_BLANK" href="/about/news/9-29-2026-protocols-arent-the-answer#protocols-arent-the-answer__email-an-open-protocol-enshittifying">email is enshittifying</a>.
+                    </p>
+                    <p>
+                        Enshittification is a social problem. It's caused by <a target="_BLANK" href="https://pluralistic.net/2024/01/30/go-nuts-meine-kerle/">concentrating power in the hands of a small, unaccountable
+                            group</a> who's interests diverge from the community. The vast
+                        majority of the time, that group is investors.
+                    </p>
+                    <p>
+                        Protocols are a technical solution to a social problem. We
+                        need a social solution. We need to change who's in charge
+                        and how they are held accountable.
+                    </p>
+                    <p>
+                        But who do we put in charge? And how to do we hold them
+                        accountable?
+                    </p>
+                </section>
+                <section id="social-solutions-for-enshittification__stewards-in-charge">
+                    <h2>Stewards in Charge</h2>
+                    <p>
+                        One approach is to put a select group of stewards in charge.
+                    </p>
+                    <p>
+                        This is usually done through a nonprofit organization
+                        with the board as the stewards. The nonprofit either
+                        fully governs the platforms or has a controlling share
+                        in the businesses that do.
+                    </p>
+                    <p>
+                        <a target="_BLANK" href="https://proton.me/foundation">Proton</a>, <a target="_BLANK" href="https://signalfoundation.org/">Signal</a>, <a target="_BLANK" href="https://ghost.org/about/">Ghost</a>, and others use this approach. Each
+                        of these has a nonprofit that ultimately controls the
+                        platform.
+                    </p>
+                    <p>
+                        In most cases, the board is self-perpetuating, meaning the
+                        current board chooses its own members as it grows or
+                        members turn over.
+                    </p>
+                    <p>
+                        This model has often worked well. None of the above
+                        examples have followed the path of enshittification, so
+                        far.
+                    </p>
+                    <p>
+                        But the problem with stewardship through a self-perpetuating
+                        nonprofit board is that it's essentially a benevolent
+                        oligarchy. If the board is corrupted, captured, or goes off
+                        the rails there's no recourse. The community has few
+                        mechanisms to hold them accountable. You're depending on
+                        those handful of board members to stay on mission.
+                    </p>
+                    <p>
+                        <a target="_BLANK" href="https://www.couchsurfing.com/">Couchsurfing</a> started out as a <a target="_BLANK" href="https://en.wikipedia.org/wiki/CouchSurfing">nonprofit, built by
+                            volunteers</a>. It attempted to form a 501(c)(3), but when
+                        those plans failed it instead converted to a
+                        Delaware C Corp and sold to investors. <a target="_BLANK" href="https://nonprofitquarterly.org/couchsurfing-international-converts-to-benefit-corporation-and-donates-assets-to-new-hampshire-charity/">Volunteers
+                            protested. Users protested.</a> But ultimately they had no
+                        recourse. Couchsurfing now charges many users a
+                        subscription for access.
+                    </p>
+                    <p>
+                        <a target="_BLANK" href="https://en.wikipedia.org/wiki/EdX">edX</a> was online course software originally created at MIT
+                        and then developed through a collaborative partnership
+                        between MIT and Harvard. It was <a target="_BLANK" href="https://openlearning.mit.edu/news/mit-and-harvard-announce-edx">founded as a nonprofit</a> jointly governed by the
+                        two universities.
+                    </p>
+                    <p>
+                        In 2021, <a target="_BLANK"
+                        href="https://www.thecrimson.com/article/2021/6/29/harvard-mit-sell-edx/">it
+                        was sold to 2U</a>, an education technology company, with
+                        the CEO of the nonprofit becoming Chief Open Education Officer of 2U. Faculty protested, but ultimately they had no
+                        recourse. 2U has since <a target="_BLANK"
+                    href="https://www.thecrimson.com/article/2024/7/27/2u-bankruptcy-harvard-mit-edx/">declared
+                        chapter 11 bankrupcy</a>.
+                    </p>
+                    <p>
+                        The stewardship model is only as good as the stewards. It's
+                        missing accountability mechanisms.
+                    </p>
+                    <p>
+                        Wikipedia points us in the direction of a another model to
+                        consider.
+                    </p>
+                    <p>
+                        Wikipedia is not a pure <a target="_BLANK" href="https://en.wikipedia.org/wiki/Wikimedia_Foundation#Board_of_trustees">stewardship model</a>. Half the board
+                        is self-perpetuating, the other half is selected by the
+                        community of editors and affiliates, which creates a
+                        mechanism by which the community can hold the organization
+                        accountable. This brings us to the next model we could
+                        consider: Users in Charge.
+                    </p>
+                </section>
+                <section id="social-solutions-for-enshittification__users-in-charge">
+                    <h2>Users in Charge</h2>
+                    <p>
+                        This is the consumer cooperative approach.
+                    </p>
+                    <p>
+                        Outside of tech this is probably one of the most widely
+                        spread alternative business forms. There are hundreds
+                        of thousands of consumer cooperatives in the world and
+                        most serve their communities well.
+                    </p>
+                    <p>
+                        But when the community disengages from the democracy,
+                        cooperatives can enshittify in spite of community control.
+                        In some cases, even allowing the board to take the
+                        cooperative out from under the community entirely.
+                    </p>
+                    <p>
+                        There are nearly 900 rural electric cooperatives in the US.
+                        Of the 583 examined in an <a target="_BLANK"
+                        href="https://ilsr.org/article/energy-democracy/just-how-democratic-are-rural-electric-cooperatives/">Institute
+                        for Local Self-Reliance study</a>, 424 (more than 70%) had
+                        lower than 10% turnout in their board elections.
+                    </p>
+                    <p>
+                        And many rural electric cooperatives are <a target="_BLANK"
+                        href="https://mississippitoday.org/2018/12/14/we-dont-have-any-voice-rural-mississippians-feel-shut-out-overcharged-by-electric-co-ops/">enshittifying</a>:
+                        overcharging their members, refusing to <a target="_BLANK" href="https://appvoices.org/2018/12/19/reformers-uncover-corruption-bring-change-to-pedernales-co-op/">return profits</a>,
+                        giving their executives and board members <a target="_BLANK" href="https://www.theadvocate.com/baton_rouge/news/politics/article_8cb89832-bc26-11e8-94f5-bb915b06722b.html">lavish perks</a>,
+                        and not adopting clean energy even as their members often
+                        suffer the worst effects of dirty energy and climate
+                        change.
+                    </p>
+                    <p>
+                        The cooperatives aren't transparent and people often don't
+                        even realize they are democratic institutions.
+                    </p>
+                    <p>
+                        Mountain Equipment Co-op (MEC) in Canada was taken right
+                        out from under its membership. First the board weakened
+                        member control by <a target="_BLANK" href="https://www.thenews.coop/sale-of-leading-canadian-co-op-mec-prompts-campaign-to-save-it/">changing the bylaws</a> so that it controlled
+                        elections: candidates had to be board approved to run for
+                        election. Then it took on so much debt that its liabilities
+                        rivaled its membership equity. Then it used Canada's
+                        creditor protection process to sell out the cooperative to private
+                        equity without member approval. More than 140,000 supporters
+                        petitioned to stop the sale, but Canada's courts overrode
+                        them and <a target="_BLANK" href="https://www.theglobeandmail.com/business/article-court-approves-sale-of-mec-to-us-equity-firm-ending-member-led/">approved it</a>.
+                    </p>
+                    <p>
+                        Democracy is hard. Most people do not have the time,
+                        energy, or willingness to do the work necessary to hold
+                        their grocery store, outdoor retailer, or electric utility
+                        accountable. It's possible for the boards of these
+                        businesses to simply stop being transparent and for the
+                        average consumer member to stop asking questions. By the
+                        time members realize something's wrong, it's can be too
+                        late.
+                    </p>
+                    <p>
+                        But sometimes when a consumer co-op starts to go off the
+                        rails someone will raise the alarm early enough that
+                        members are able to rally and put things back on track. And
+                        often, that someone is the workers.
+                    </p>
+                    <p>
+                        Similar to MEC, REI made changes to its bylaws in the early
+                        2000s to allow the board to effectively control elections
+                        by blocking candidates from the ballot.
+                    </p>
+                    <p>
+                        In March 2025, REI's board <a target="_BLANK" href="https://washingtonstatestandard.com/2025/03/04/rei-board-blocks-labor-backed-candidates-from-ballot/">exercised their control</a> over the
+                        elections to force a non-competitive election by only
+                        allowing their three chosen candidates for the three open
+                        board seats. REI's union sounded the alarm and organized
+                        the membership to reject the board's chosen candidates.
+                        All three were <a target="_BLANK" href="https://www.cascadepbs.org/news/2025/05/rei-co-op-members-reject-company-board-picks-after-union-campaign/">rejected</a>.
+                    </p>
+                    <p>
+                        I have personal experience with a similar scenario at
+                        Bloomingfoods, my local grocery cooperative. The board had
+                        gotten cosy with management, which was abusing the workers,
+                        and had overextended the cooperative. The workers <a target="_BLANK" href="https://www.ipm.org/2019-10-04/bloomingfoods-employees-vote-unionize">unionized</a>, <a target="_BLANK" href="https://forlocals.ufcw.org/2014/10/14/bloomingfoods-workers-community-rally-in-support-of-right-to-join-a-union/">sounded the alarm</a> and, with their help, we were able
+                        to get the co-op back on track.
+                    </p>
+                    <p>
+                        Which brings us to the next model we could consider: just
+                        put the workers in charge, since they're often the ones
+                        paying attention.
+                    </p>
+                </section>
+                <section id="social-solutions-for-enshittification__workers-in-charge">
+                    <h2>Workers in Charge</h2>
+                    <p>
+                        This is the worker cooperative approach.
+                    </p>
+                    <p>
+                        There's surprisingly little research on how worker
+                        cooperatives treat consumers. What exists, however, is
+                        encouraging: home care co-ops have <a target="_BLANK"
+                        href="https://cdn.prod.website-files.com/65eeda808cdb3e4c9603cbb0/69c1950ae02b3167220e7205_2025-BenchmarkingReport_Final.pdf">nearly
+                            half</a> the worker turnover of their investor
+                            owned counterparts, which is <a target="_BLANK"
+                        href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10946305/">associated
+                            with better care</a>.
+                    </p>
+                    <p>
+                        The plywood cooperatives of the Pacific Northwest were
+                        more <a target="_BLANK"
+                        href="https://www.brookings.edu/wp-content/uploads/1995/01/1995_bpeamicro_craig.pdf">efficient
+                        and productive</a> than conventional mills. They would
+                        also cut their own pay during downturns in order to keep
+                        employment, and output, steady. They did eventually
+                        sell out, but we'll come back to that later.
+                    </p>
+                    <p>
+                        We've already seen workers tend to be the ones to sound the
+                        alarm when consumer cooperatives enshittify. Cory Doctorow
+                        himself <a target="_BLANK" href="https://pluralistic.net/2024/01/30/go-nuts-meine-kerle/">described workers</a> as the last line of defense
+                        against enshittification:
+                    </p>
+                    <blockquote>
+                        <p>
+                            But for bosses, there's a downside to motivating your
+                            workers with appeals to a sense of mission, namely: your
+                            workers will feel a sense of mission. So when you ask
+                            them to enshittify the products they ruined their health
+                            to ship, workers will experience a sense of profound
+                            moral injury, respond with outrage, and threaten to
+                            quit.
+                        </p>
+                        <p>
+                            Thus tech workers themselves were the final bulwark
+                            against enshittification.
+                        </p>
+                    </blockquote>
+                    <p>
+                        Consumer cooperatives tend to <a target="_BLANK" href="https://onlinelibrary.wiley.com/doi/10.1111/1756-2171.12496">enshittify when democratic
+                            engagement is low</a>, leading to a loss of accountability for
+                        leadership.
+                    </p>
+                    <p>
+                        Workers have a much stronger incentive to engage with their
+                        workplace's democracy. They depend on their work to feed,
+                        clothe, and house themselves. They spend 8 hours a day or
+                        more at work. They are intimiately familiar with what's
+                        happening in their workplaces. Where consumers often don't
+                        engage with cooperative democracy because they simply don't
+                        have the time or the bandwidth, workers can give themselves
+                        the time.
+                    </p>
+                    <p>
+                        And engage they do, a <a
+                        target="_BLANK"
+                    href="https://resources.uwcc.wisc.edu/Worker/CGRI_Worker%20Co-op_Final.pdf">survey</a> of worker cooperative board dynamics found an average
+                        of 90% turnout for board elections.
+                    </p>
+                    <p>
+                        But don't workers have similar incentives as investors to
+                        enshittify? To some degree, yes, but there are forces that
+                        check them which aren't there for investors.
+                    </p>
+                    <p>
+                        Workers are much closer to the work, and therefore the
+                        customers, than the investors. They have to actually
+                        experience the impact of their work on the people who they
+                        serve. People tend to take pride in their work and often
+                        want to do something meaningful that helps their community.
+                        Like Doctorow says, workers don't generally want to
+                        enshittify their work.
+                    </p>
+                    <p>
+                        All that said, worker cooperatives can and do enshittify,
+                        especially when they gain monopoly power. There have also
+                        been instances of them restricting the franchise (hiring
+                        workers without making them members) or selling out when
+                        the price is right.
+                    </p>
+                    <p>
+                        <a target="_BLANK" href="https://en.wikipedia.org/wiki/Egged_(company)">Egged</a> was a worker cooperative bus service in Israel that
+                        gained monopoly power. It <a target="_BLANK" href="">behaved</a> as one would expect a
+                        monopoly to: providing poor service for high fares.
+                    </p>
+                    <p>
+                        The plywood co-ops of the US Pascific Northwest illustrate
+                        both the francise restriction and sell out cases. Those
+                        co-ops were organized so that the workers owned them
+                        through shares. New workers were required to buy shares to
+                        become members, and not all new workers did. As they grew,
+                        the price of a share went up and became out of reach for
+                        many new workers. Finally, the remaining workers decided to
+                        cash out their shares: by selling out.
+                    </p>
+                    <p>
+                        If our goal is to build an organization that is
+                        maximally resistent to enshittification, we should probably
+                        look for a structure that can balance the worker
+                        cooperative's vulnerabilities.
+                    </p>
+                </section>
+                <section id="social-solutions-for-enshittification__balance-of-powers">
+                    <h2>Balance of Powers</h2>
+                    <p>
+                        All of these structures, stewardship through nonprofits,
+                        consumer cooperatives, and worker cooperatives, are more
+                        resistant to enshittification than investor owned
+                        businesses.
+                    </p>
+                    <p>
+                        But none of these structures is fully resistant. They all
+                        have vulnerabilities that allow them to enshittify, or to
+                        be captured by investors who would then enshittify them.
+                        Can we assemble a structure with the best aspects of each
+                        of them, and with checks and balances to shore up the
+                        weaknesses?
+                    </p>
+                    <p>
+                        Multi-stakeholder cooperatives allow multiple stakeholder
+                        groups to share power, balancing each other. They can be
+                        created as nonprofits using the nonprofit bylaws to define
+                        the governance. This would allow us to draw the best
+                        elements from all three previous approaches.
+                    </p>
+                    <p>
+                        Consider a nonprofit multi-stakeholder cooperative who's
+                        board is half elected by the consumers and half elected by
+                        the workers.
+                    </p>
+                    <p>
+                        The nonprofit structure means no one owns a stake in it, so
+                        no one's incentivized to sell. The bylaws can form the
+                        constitution, clearly stating who has what powers and how
+                        they are balanced.
+                    </p>
+                    <p>
+                        Stewardship nonprofits lack accountability mechanisms.
+                        Their consumers are often the source of that
+                        accountability. Giving the community half the board gives
+                        them a direct mechanism.
+                    </p>
+                    <p>
+                        But consumers can disengage. When they do, it's often the
+                        workers who sound the alarm. Giving the workers the other
+                        half of the board means there's always someone paying
+                        attention. If part of the board starts to drift, the
+                        engaged workers can alert the community. Once alerted, the
+                        community can hold the board accountable.
+                    </p>
+                    <p>
+                        Workers can be tempted to restrict the franchise, so
+                        require universal franchise in the bylaws: one worker, one
+                        vote, no share purchase required. Similarly, one active
+                        consumer, one vote, no share purchase required.
+                    </p>
+                    <p>
+                        Democratic accountability mechanisms are the key. One of
+                        the first moves of enshittifying consumer cooperatives is
+                        to restrict access to board elections. Deny the board this
+                        power. They often restrict access to corporate documents to
+                        hide their actions, so constitutionally mandate
+                        transparency. Require membership approval for any transfers
+                        or sale.
+                    </p>
+                    <p>
+                        We can add elements of direct democracy to provide
+                        additional accountability mechanisms: referenda to allow
+                        the community to directly influence policy, recall
+                        elections to quickly check a corrupted board, and
+                        ratification of changes to the bylaws to keep the board
+                        from unilaterally changing the constitution to take power
+                        for itself or sell out.
+                    </p>
+                    <p>
+                        What we have now assembled is a strong democratic system
+                        with a balance of powers and directly democratic
+                        accountability mechanisms. It's democracy that can
+                        ultimately keep enshittification in check.
+                    </p>
+                    <p>
+                        We're working on building exactly this with Communities.
+                        There are a lot of challenges that remain to make it a
+                        reality, and details we still need to work out -- Who
+                        breaks a tie? How do we define an active member? -- and
+                        we'll discuss them in a future article. Stay tuned!
+                    </p>
+                </section>
+                <section id="social-solutions-for-enshittification__footer">
+                    <p>
+                        <em>
+                            Communities is a social network platform working
+                            towards cooperative governance. We're seeking to
+                            de-enshittify social media and, if we succeed at that,
+                            the wider web. We're funded by user-donations. If you
+                            want to help, we're currently recruiting an Advisory
+                            Board.
+                        </em>
+                    </p>
+                </section>
             </>
         )
     },
@@ -439,394 +451,411 @@ const posts = {
         author: 'Daniel Bingham',
         content: (
             <>
-                <p><em>This post is the first of a series on enshittification and what we can do about it. You can find part two here: <a href="/about/news/9-30-2026-social-solutions-for-enshittification">Social Solutions for Enshittification</a></em>.</p>
-                <p>
-                    Enshittification. If you haven't heard the word, it's
-                    probably not hard for you to guess what it means.
-                </p>
-                <p>
-                    Companies are making their products and services worse in
-                    the name of ever-greater profits.
-                </p>
-                <p>
-                    Meta breaking our ability to connect with our friends by
-                    filling our feeds with ads and spam? Enshittification.
-                </p>
-                <p>
-                    Google breaking our ability to find what we need by filling
-                    search with ads and spam? Enshittification.
-                </p>
-                <p>
-                    Amazon filling its marketplace with cheap crap? Enshittification.
-                </p>
-                <p>
-                    The question is: how do we stop it?
-                </p>
-                <p>
-                    Cory Doctorow, <a
-                    href="https://pluralistic.net/2023/01/21/potemkin-ai/#hey-guys"
-                        target="_BLANK">who popularized</a> the term
-                    "enshittification," argues that <a target="_BLANK"
-                href="https://pluralistic.net/2024/01/30/go-nuts-meine-kerle/">
-                    four forces</a> keep it in check: competition,
-                    regulation, self-help, and worker power.
-                </p>
-                <p>
-                    Much of the pro-social tech movement has coalesced around
-                    using <a
-                    href="https://knightcolumbia.org/content/protocols-not-platforms-a-technological-approach-to-free-speech"
-                            target="_BLANK">protocols</a> and <a target="_BLANK" href="https://www.eff.org/deeplinks/2019/10/adversarial-interoperability">interoperability</a> to drive
-                    competition as the primary check. If we move to
-                    interoperable platforms that use open protocols, we can
-                make it easy for people to switch platforms while bringing
-                    their data and networks with them, which would allow market
-                    competition to keep enshittification in check.
-                </p>
-                <p>
-                    But there are serious, unsolved challenges involved in
-                    building on open protocols. And even if we can overcome
-                    those challenges, we already know that building on open protocols
-                    isn't enough to prevent centralization and keep
-                    enshittification in check.
-                </p>
-                <p>
-                    Email is the quintessential open protocol. It has been in
-                    use for decades, has almost complete adoption, and it has
-                    centralized into an oligopoly. It is being enshittified.
-                </p>
-                <p>
-                    Enshittification is ultimately a social problem. It comes
-                    from the concentrated power and misaligned goals created by
-                    investor ownership. We need a social solution.
-                </p>
-                <h2>Protocols over Platforms?</h2>
-                <p>
-                    The theory behind interoperability is that if we build on
-                    open protocols that allow platforms to federate and operate
-                    as a single network, then we can substantially reduce the
-                    cost of switching between platforms.
-                </p>
-                <p>
-                    If we make it easy to switch, then competition and market
-                    forces will keep the abuse in check. As soon as one
-                    platform starts to enshittify, we just move to another.
-                </p>
-                <p>
-                    This theory has been most aggressively applied to social
-                    media. Years of effort has created an ecosystem of
-                    federated platforms. The fediverse is a rich and lively
-                    place. But it hasn't put much of a dent in the big social
-                    platforms.
-                </p>
-                <p>
-                    Why? It all comes down to user experience: the reason the
-                    internet centralized in the first place.
-                </p>
-                <h3>It's All About the User Experience</h3>
-                <p>
-                    To <a target="_BLANK"
-                    href="https://en.wikipedia.org/wiki/User_experience">quote
-                    Wikipedia</a>, "User experience (UX) is how a user
-                    interacts with and experiences a product, system, or
-                    service." In a software or digital infrastructure context,
-                    the largest contributor to the user experience is the
-                    software's interface.
-                </p>
-                <p>
-                    In interface design, we have the related concepts of "friction" and "cognitive
-                    load." Friction is anything that slows a user down: clicking, typing, thinking,
-                    or waiting. Cognitive load is how hard you have to think about a piece of
-                    software while using it.
-                </p>
-                <p>
-                    The best software user experiences are created by minimizing both friction and
-                    cognitive load. And it doesn't take much of either to lose someone.
-                </p>
-                <h3>High Cognitive Load, Right Off the Bat</h3>
-                <p>
-                    When you join a fediverse platform, the first thing you
-                    have to do is choose your instance (the server your account
-                    lives on). It's a process with a high cognitive load and,
-                    in that moment, the fediverse loses a lot of people.
-                </p>
-                <p>
-                    Anecdotally, I'm a software engineer. I'm fully capable of
-                    running my own Mastodon instance. Hell, I'm capable of <em>building my own Mastodon</em>. I have a Mastodon
-                    account, but I'm just on the default instance (mastodon.social).
-                    There are instances that would be a better fit for me, but
-                    I didn't find them when I set out to join Mastodon, and I
-                    haven't had the bandwidth to move since I discovered them.
-                </p>
-                <p>
-                    It's not a lack of willingness, knowledge, or desire: it's
-                    purely a prioritization problem. I have too many other
-                    priorities, and "change my instance" never bubbles to the
-                    top. For people with less technical expertise and
-                    experience, the thing that never bubbles to the top is
-                    "figure out this Mastodon thing."
-                </p>
-                <p>
-                    For many people, perhaps most people, the challenge of
-                    choosing an instance is enough to make them give up on the
-                    fediverse.
-                </p>
-                <p>
-                    Since defeating enshittification requires people to move to
-                    an alternative when a big player enshittifies, this problem
-                    undermines the whole project.
-                </p>
-                <p>
-                    It's worth noting that Bluesky, which uses the AT Protocol,
-                    has largely dodged the problem of cognitive load created by
-                    instance selection. But it did so by acting like a standard
-                    platform and as a result its network is, the time of this
-                    post, 99% centered on the Bluesky App. Which means we don't
-                    get the benefits of the protocol. We'll come back to that
-                    later.
-                </p>
-                <h3>Discovery</h3>
-                <p>
-                    Discovery is your ability to find what you're looking for.
-                    It's an unsolved <a
-                    href="https://xkcd.com/1425/">Very Hard Problem</a> in
-                    distributed systems. In the early open web, it took Google --
-                    a massive, centralized search behemoth -- to come close to
-                    solving it.
-                </p>
-                <p>
-                    Centralized social media largely replaced decentralized
-                    blogging and personal websites partly because it made it
-                    easy to find the people you were looking for and the
-                    content they produced.
-                </p>
-                <p>
-                    Mastodon has basically punted on this problem. When you
-                    search on Mastodon, you're only searching the parts of the
-                    fediverse your instance knows about. If the user or post
-                    you're looking for isn't already known to your instance,
-                    you won't find it. This is extremely confusing to new
-                    users.
-                </p>
-                <p>
-                    The AT Protocol (Bluesky) uses Relays to try to solve this
-                    problem. But right now the network is small enough and
-                    concentrated enough that it basically still acts like a
-                    centralized platform. It remains to be seen what will
-                    happen to discovery if the network successfully scales and
-                    distributes.
-                </p>
-                <h3>The Twitter Exodus: A Case Study</h3>
-                <p>
-                    The exodus from Twitter to Mastodon, Bluesky, and Threads gives us the clearest
-                    test case for protocol's adoptability.
-                </p>
-                <p>
-                    Mastodon benefited from the first wave of exodus. It was
-                    already on version 3 and had been live for quite a while
-                    when Elon Musk's agreement to buy Twitter was <a
-                    target="_BLANK"
-                    href="https://www.npr.org/2022/04/25/1094604406/twitter-elon-musk-deal">announced</a> in April of 2022. As the buyout advanced, Mastodon absorbed
-                    small waves of new users. But many people reported trying
-                    it and not being able to wrap their heads around it or find
-                their communities on it. It <a target="_BLANK"
-                    href="https://techcrunch.com/2023/02/15/is-the-exodus-over-heres-how-twitter-alternatives-have-fared-since-elon-musks-acquisition/">peaked</a> at around 2.5M monthly active users in December 2022, and
-                    activity has slowly dropped since then.
-                </p>
-                <p>
-                    Bluesky <a target="_BLANK" href="https://bsky.social/about/blog/10-18-2022-the-at-protocol">announced</a> its waitlist days before Musk <a target="_BLANK" href="https://www.npr.org/2022/10/27/1131378869/twitter-elon-musk-timeline">closed the acquisition</a> of
-                    Twitter in October 2022. It <a target="_BLANK" href="https://techcrunch.com/2023/02/28/jack-dorsey-backed-twitter-alternative-bluesky-hits-the-app-store-as-an-invite-only-app/">began invite-only beta</a> in February 2023 and began
-                    steadily growing.
-                </p>
-                <p>
-                    Threads beat Bluesky to a <a target="_BLANK" href="https://about.fb.com/news/2023/07/introducing-threads-new-app-text-sharing/">public launch</a> in July 2023.
-                    Because Threads tied accounts to Instagram, it was able to
-                    bring in over 100M new users in a single week. Usage
-                    immediately <a target="_BLANK" href="https://edition.cnn.com/2023/08/03/tech/threads-user-count-falls">dropped off</a>, but then began steadily growing.
-                </p>
-                <p>
-                    Bluesky opened up <a target="_BLANK" href="https://bsky.social/about/blog/02-06-2024-join-bluesky">public registration</a> in February of 2024 and passed <a target="_BLANK" href="https://techcrunch.com/2024/02/07">4 million
-                        users</a> in the same month. By the time Bluesky opened up, Threads was at 130M
-                    monthly active users.
-                </p>
-                <p>
-                    As it currently stands, Mastodon has around <a target="_BLANK" href="https://absolutelymaybe.plos.org/2025/10/30/a-mastodon-migration-from-bluesky-would-be-different/">10M users</a>, with
-                    less than 1M active. Bluesky sits at around 40M users, with <a target="_BLANK" href="https://techcrunch.com/2026/08/11/blueskys-active-user-base-is-shrinking-as-its-focus-expands-beyond-the-app/">around 10M
-                                active</a>. Threads has <a target="_BLANK" href="https://qz.com/meta-threads-500-million-monthly-users-new-features-061626">500M monthly active users</a>.
-                </p>
-                <p>
-                    All three are (or were) technically federated. Mastodon uses
-                    ActivityPub, Bluesky uses AT Protocol, and Threads added
-                    ActivityPub federation six months or so after launch. But
-                    Threads and Bluesky both behave as heavily centralized
-                    platforms.
-                </p>
-                <p>
-                    To get the benefits of protocols and interoperability, the
-                    network needs to be reasonably distributed and
-                    decentralized. The whole idea is that using the protocol to
-                    reduce switching costs can foster competition. If a network
-                    centralizes into an oligopoly, then the biggest players can
-                    effectively control the network. In the worst case, they
-                    can simply stop federating, <a target="_BLANK" href="https://www.eff.org/deeplinks/2013/05/google-abandons-open-standards-instant-messaging">like Google Talk did with XMPP</a>, and wall off the portion of the
-                    network they control.
-                </p>
-                <p>
-                    Almost <a target="_BLANK" href="https://blue.mackuba.eu/stats">99% of users</a> on the Bluesky network still use
-                    Bluesky's servers (its PDS, or Personal Data Server).
-                    Nearly all of Bluesky's users access it through bsky.app and
-                    treat it as a centralized platform. Threads never completed
-                    its ActivityPub federation and now appears to be leaving it
-                    <a target="_BLANK" href="https://coywolf.com/news/social-media/mastodon-creator-shares-what-went-wrong-with-threads-and-ponders-the-future-of-the-fediverse/">unfinished</a> <a target="_BLANK" href="https://www.federatedmind.com/threads-enters-the-fediverse/">at best</a> or killing it at worst.
-                </p>
-                <p>
-                    There are complicating factors in the adoption timeline
-                    (Threads beating Bluesky out of the gate gave them a
-                    boost), but the clearest factor is friction.
-                </p>
-                <p>
-                    Mastodon makes it the hardest to join the network and get
-                    settled. You have to pick an instance, and even when you do,
-                    you then have an empty timeline and no easy way to populate
-                    it. The people you want to follow can be scattered across
-                    instances, and finding them often involves finding their
-                    instance first.
-                </p>
-                <p>
-                    Bluesky made the friction lower than Mastodon. It looks and
-                    behaves like a standard platform for most users. But the
-                    end result is that the network isn't actually
-                    decentralized.
-                </p>
-                <p>
-                    Threads achieved the lowest friction by integrating tightly
-                    with Instagram, allowing you to bring some of your network
-                    with you when you join.
-                </p>
-                <p>
-                    Bluesky's achievement of 40M+ users, 10M of them active, is
-                    not nothing. Doesn't that suggest that it's possible to
-                    make protocols usable? Couldn't that network still
-                    decentralize as it grows?
-                </p>
-                <p>
-                    Maybe. But we already have an example of an open,
-                    interoperable protocol and that has centralized and
-                    enshittifying.
-                </p>
-                <h2>Email: An Open Protocol Enshittifying</h2>
-                <p>
-                    Email is the <a target="_BLANK" href="https://knightcolumbia.org/content/protocols-not-platforms-a-technological-approach-to-free-speech">quintessential open protocol</a>. In theory, it
-                    should be fully distributed.
-                </p>
-                <p>
-                    Yet email is heavily centralized. Google claims over <a
-                        target="_BLANK"
-                        href="https://blog.google/products-and-platforms/products/gmail/gmail-is-entering-the-gemini-era/">3
-                        billion email addresses</a>, which would give it more than a third of the roughly 8 billion estimated email addresses. Tencent's QQMail has over
-                        a <a target="_BLANK"
-                            href="https://baike.baidu.com/en/item/QQmail/1481672">billion
-                            users</a>. Similarly, the Chinese company NetEase
-                    claims another <a target="_BLANK"
-                        href="https://baike.baidu.com/en/item/NETEASE%20MAIL/946152">billion
-                        users</a>. Apple doesn't publish numbers, but estimates
-                    put it at around <a target="_BLANK"
-                href="https://en.wikipedia.org/wiki/ICloud">850 million iCloud
-                    users</a>. Account totals fall off steeply into a long tail from
-                    there.
-                </p>
-                <p>
-                    These few providers can use that centralization to control
-                    the whole network. Trying to self-host an email server is a <a target="_BLANK" href="https://cfenollosa.com/blog/after-self-hosting-my-email-for-twenty-three-years-i-have-thrown-in-the-towel-the-oligopoly-has-won.html">nightmare these days</a>. The big providers simply won't accept
-                    your email unless you jump through an ever-growing list of
-                    hoops (introduced in the name of stopping spam).
-                </p>
-                <p>
-                    In spite of that, some smaller competitors like Proton Mail and
-                    Fastmail have managed to break into the market. But their
-                    market share remains a small fraction of the total market.
-                </p>
-                <p>
-                    Even with an open protocol that makes switching possible in
-                    theory, the cognitive load and friction of switching are
-                    still too high for the average person.
-                </p>
-                <p>
-                    And email is enshittifying.
-                </p>
-                <p>
-                    Google used to <a target="_BLANK" href="https://www.jurist.org/news/2017/03/federal-judge-google-e-mail-scanning-settlement/">scan all emails for ad targeting</a>, without
-                    even the implicit consent of users not on Gmail accounts.
-                    <a target="_BLANK" href="https://blog.google/products-and-platforms/products/gmail/g-suite-gains-traction-in-the-enterprise-g-suites-gmail-and-consumer-gmail-to-more-closely-align/">Google (supposedly) stopped in 2017</a>, but it was the legal
-                    pressure that stopped them, not the protocol.
-                </p>
-                <p>
-                    Google and Microsoft have both continued to find creative
-                    and frustrating ways to <a target="_BLANK" href="https://9to5google.com/2023/05/05/gmail-ads-increase-2023/">shove</a> <a target="_BLANK" href="https://www.xda-developers.com/microsoft-more-ads-outlook-ios-android-apps/">ads</a> into their hosted
-                    inboxes. More recently, Google introduced its <a target="_BLANK" href="https://blog.google/products-and-platforms/products/gmail/gmail-is-entering-the-gemini-era/">Gemini AI</a> to
-                    people's inboxes without consent.
-                </p>
-                <p>
-                    It's unclear how far the enshittification of email will go.
-                    Strong privacy laws will likely help keep it from going too
-                    far, but it is clear that the open protocol is not capable
-                    of keeping it in check.
-                </p>
-                <h2>A Technical Solution to a Social Problem?</h2>
-                <p>
-                    Enshittification is ultimately a social problem. When we
-                    hand control of businesses to investors, the people who
-                    merely provided the capital, the result is that all other
-                    concerns will tend to be set aside in pursuit of returns on
-                    that capital.
-                </p>
-                <p>
-                    The idea behind the protocols movement is that it's the
-                    network effects and the related switching costs that really
-                    power enshittification. Protocols can, in theory, break
-                    those network effects and allow market forces to keep capital
-                    in check.
-                </p>
-                <p>
-                    But oligopolies and monopolies form all the time in the
-                    market, without network effects or lock-in. And
-                    enshittification follows.
-                </p>
-                <p>
-                    Notice how quickly appliances seem to break these days?
-                    That's enshittification in a market with no network effects
-                    and very low switching costs.
-                </p>
-                <p>
-                    Market forces have not kept it in check. So there's no
-                    reason to believe that a return to open protocols will,
-                    even if we can solve the user experience problems inherent
-                    in creating distributed systems.
-                </p>
-                <p>
-                    We can't solve this with a technical solution. It's a
-                    social problem, created by concentrating power and control
-                    in the hands of a small group of unaccountable people:
-                    investors.
-                </p>
-                <p>
-                    We need a social solution. We need to change who's in
-                    charge and how they are held accountable.
-                </p>
-                <p>
-                    This article is the first in a series. We'll address the
-                    potential social solutions in the next one: Social
-                    Solutions for Enshittification.
-                </p>
-                <p>
-                    <em>
-                        Communities is a social network platform working
-                        towards cooperative governance. We're seeking to
-                        de-enshittify social media and, if we succeed at that,
-                        the wider web. We're funded by user-donations. If you
-                        want to help, we're currently recruiting an Advisory
-                        Board.
-                    </em>
-                </p>
+                <section id="protocols-arent-the-answer__intro">
+                    <p><em>This post is the first of a series on enshittification and what we can do about it. You can find part two here: <a href="/about/news/9-30-2026-social-solutions-for-enshittification">Social Solutions for Enshittification</a></em>.</p>
+                    <p>
+                        Enshittification. If you haven't heard the word, it's
+                        probably not hard for you to guess what it means.
+                    </p>
+                    <p>
+                        Companies are making their products and services worse in
+                        the name of ever-greater profits.
+                    </p>
+                    <p>
+                        Meta breaking our ability to connect with our friends by
+                        filling our feeds with ads and spam? Enshittification.
+                    </p>
+                    <p>
+                        Google breaking our ability to find what we need by filling
+                        search with ads and spam? Enshittification.
+                    </p>
+                    <p>
+                        Amazon filling its marketplace with cheap crap? Enshittification.
+                    </p>
+                    <p>
+                        The question is: how do we stop it?
+                    </p>
+                    <p>
+                        Cory Doctorow, <a
+                        href="https://pluralistic.net/2023/01/21/potemkin-ai/#hey-guys"
+                            target="_BLANK">who popularized</a> the term
+                        "enshittification," argues that <a target="_BLANK"
+                    href="https://pluralistic.net/2024/01/30/go-nuts-meine-kerle/">
+                        four forces</a> keep it in check: competition,
+                        regulation, self-help, and worker power.
+                    </p>
+                    <p>
+                        Much of the pro-social tech movement has coalesced around
+                        using <a
+                        href="https://knightcolumbia.org/content/protocols-not-platforms-a-technological-approach-to-free-speech"
+                                target="_BLANK">protocols</a> and <a target="_BLANK" href="https://www.eff.org/deeplinks/2019/10/adversarial-interoperability">interoperability</a> to drive
+                        competition as the primary check. If we move to
+                        interoperable platforms that use open protocols, we can
+                    make it easy for people to switch platforms while bringing
+                        their data and networks with them, which would allow market
+                        competition to keep enshittification in check.
+                    </p>
+                    <p>
+                        But there are serious, unsolved challenges involved in
+                        building on open protocols. And even if we can overcome
+                        those challenges, we already know that building on open protocols
+                        isn't enough to prevent centralization and keep
+                        enshittification in check.
+                    </p>
+                    <p>
+                        Email is the quintessential open protocol. It has been in
+                        use for decades, has almost complete adoption, and it has
+                        centralized into an oligopoly. It is being enshittified.
+                    </p>
+                    <p>
+                        Enshittification is ultimately a social problem. It comes
+                        from the concentrated power and misaligned goals created by
+                        investor ownership. We need a social solution.
+                    </p>
+                </section>
+                <section id="protocols-arent-the-answer__protocols-over-platforms">
+                    <h2>Protocols over Platforms?</h2>
+                    <p>
+                        The theory behind interoperability is that if we build on
+                        open protocols that allow platforms to federate and operate
+                        as a single network, then we can substantially reduce the
+                        cost of switching between platforms.
+                    </p>
+                    <p>
+                        If we make it easy to switch, then competition and market
+                        forces will keep the abuse in check. As soon as one
+                        platform starts to enshittify, we just move to another.
+                    </p>
+                    <p>
+                        This theory has been most aggressively applied to social
+                        media. Years of effort has created an ecosystem of
+                        federated platforms. The fediverse is a rich and lively
+                        place. But it hasn't put much of a dent in the big social
+                        platforms.
+                    </p>
+                    <p>
+                        Why? It all comes down to user experience: the reason the
+                        internet centralized in the first place.
+                    </p>
+                    <section id="protocols-arent-the-answer__its-all-about-the-user-experience">
+                        <h3>It's All About the User Experience</h3>
+                        <p>
+                            To <a target="_BLANK"
+                            href="https://en.wikipedia.org/wiki/User_experience">quote
+                            Wikipedia</a>, "User experience (UX) is how a user
+                            interacts with and experiences a product, system, or
+                            service." In a software or digital infrastructure context,
+                            the largest contributor to the user experience is the
+                            software's interface.
+                        </p>
+                        <p>
+                            In interface design, we have the related concepts of "friction" and "cognitive
+                            load." Friction is anything that slows a user down: clicking, typing, thinking,
+                            or waiting. Cognitive load is how hard you have to think about a piece of
+                            software while using it.
+                        </p>
+                        <p>
+                            The best software user experiences are created by minimizing both friction and
+                            cognitive load. And it doesn't take much of either to lose someone.
+                        </p>
+                    </section>
+                    <section id="protocols-arent-the-answer__high-cognitive-load-right-off-the-bat">
+                        <h3>High Cognitive Load, Right Off the Bat</h3>
+                        <p>
+                            When you join a fediverse platform, the first thing you
+                            have to do is choose your instance (the server your account
+                            lives on). It's a process with a high cognitive load and,
+                            in that moment, the fediverse loses a lot of people.
+                        </p>
+                        <p>
+                            Anecdotally, I'm a software engineer. I'm fully capable of
+                            running my own Mastodon instance. Hell, I'm capable of <em>building my own Mastodon</em>. I have a Mastodon
+                            account, but I'm just on the default instance (mastodon.social).
+                            There are instances that would be a better fit for me, but
+                            I didn't find them when I set out to join Mastodon, and I
+                            haven't had the bandwidth to move since I discovered them.
+                        </p>
+                        <p>
+                            It's not a lack of willingness, knowledge, or desire: it's
+                            purely a prioritization problem. I have too many other
+                            priorities, and "change my instance" never bubbles to the
+                            top. For people with less technical expertise and
+                            experience, the thing that never bubbles to the top is
+                            "figure out this Mastodon thing."
+                        </p>
+                        <p>
+                            For many people, perhaps most people, the challenge of
+                            choosing an instance is enough to make them give up on the
+                            fediverse.
+                        </p>
+                        <p>
+                            Since defeating enshittification requires people to move to
+                            an alternative when a big player enshittifies, this problem
+                            undermines the whole project.
+                        </p>
+                        <p>
+                            It's worth noting that Bluesky, which uses the AT Protocol,
+                            has largely dodged the problem of cognitive load created by
+                            instance selection. But it did so by acting like a standard
+                            platform and as a result its network is, the time of this
+                            post, 99% centered on the Bluesky App. Which means we don't
+                            get the benefits of the protocol. We'll come back to that
+                            later.
+                        </p>
+                    </section>
+                    <section id="protocols-arent-the-answer__discovery">
+                        <h3>Discovery</h3>
+                        <p>
+                            Discovery is your ability to find what you're looking for.
+                            It's an unsolved <a
+                            href="https://xkcd.com/1425/">Very Hard Problem</a> in
+                            distributed systems. In the early open web, it took Google --
+                            a massive, centralized search behemoth -- to come close to
+                            solving it.
+                        </p>
+                        <p>
+                            Centralized social media largely replaced decentralized
+                            blogging and personal websites partly because it made it
+                            easy to find the people you were looking for and the
+                            content they produced.
+                        </p>
+                        <p>
+                            Mastodon has basically punted on this problem. When you
+                            search on Mastodon, you're only searching the parts of the
+                            fediverse your instance knows about. If the user or post
+                            you're looking for isn't already known to your instance,
+                            you won't find it. This is extremely confusing to new
+                            users.
+                        </p>
+                        <p>
+                            The AT Protocol (Bluesky) uses Relays to try to solve this
+                            problem. But right now the network is small enough and
+                            concentrated enough that it basically still acts like a
+                            centralized platform. It remains to be seen what will
+                            happen to discovery if the network successfully scales and
+                            distributes.
+                        </p>
+                    </section>
+                    <section id="protocols-arent-the-answer__the-twitter-exodus-case-study">
+                        <h3>The Twitter Exodus: A Case Study</h3>
+                        <p>
+                            The exodus from Twitter to Mastodon, Bluesky, and Threads gives us the clearest
+                            test case for protocol's adoptability.
+                        </p>
+                        <p>
+                            Mastodon benefited from the first wave of exodus. It was
+                            already on version 3 and had been live for quite a while
+                            when Elon Musk's agreement to buy Twitter was <a
+                            target="_BLANK"
+                            href="https://www.npr.org/2022/04/25/1094604406/twitter-elon-musk-deal">announced</a> in April of 2022. As the buyout advanced, Mastodon absorbed
+                            small waves of new users. But many people reported trying
+                            it and not being able to wrap their heads around it or find
+                        their communities on it. It <a target="_BLANK"
+                            href="https://techcrunch.com/2023/02/15/is-the-exodus-over-heres-how-twitter-alternatives-have-fared-since-elon-musks-acquisition/">peaked</a> at around 2.5M monthly active users in December 2022, and
+                            activity has slowly dropped since then.
+                        </p>
+                        <p>
+                            Bluesky <a target="_BLANK" href="https://bsky.social/about/blog/10-18-2022-the-at-protocol">announced</a> its waitlist days before Musk <a target="_BLANK" href="https://www.npr.org/2022/10/27/1131378869/twitter-elon-musk-timeline">closed the acquisition</a> of
+                            Twitter in October 2022. It <a target="_BLANK" href="https://techcrunch.com/2023/02/28/jack-dorsey-backed-twitter-alternative-bluesky-hits-the-app-store-as-an-invite-only-app/">began invite-only beta</a> in February 2023 and began
+                            steadily growing.
+                        </p>
+                        <p>
+                            Threads beat Bluesky to a <a target="_BLANK" href="https://about.fb.com/news/2023/07/introducing-threads-new-app-text-sharing/">public launch</a> in July 2023.
+                            Because Threads tied accounts to Instagram, it was able to
+                            bring in over 100M new users in a single week. Usage
+                            immediately <a target="_BLANK" href="https://edition.cnn.com/2023/08/03/tech/threads-user-count-falls">dropped off</a>, but then began steadily growing.
+                        </p>
+                        <p>
+                            Bluesky opened up <a target="_BLANK" href="https://bsky.social/about/blog/02-06-2024-join-bluesky">public registration</a> in February of 2024 and passed <a target="_BLANK" href="https://techcrunch.com/2024/02/07">4 million
+                                users</a> in the same month. By the time Bluesky opened up, Threads was at 130M
+                            monthly active users.
+                        </p>
+                        <p>
+                            As it currently stands, Mastodon has around <a target="_BLANK" href="https://absolutelymaybe.plos.org/2025/10/30/a-mastodon-migration-from-bluesky-would-be-different/">10M users</a>, with
+                            less than 1M active. Bluesky sits at around 40M users, with <a target="_BLANK" href="https://techcrunch.com/2026/08/11/blueskys-active-user-base-is-shrinking-as-its-focus-expands-beyond-the-app/">around 10M
+                                        active</a>. Threads has <a target="_BLANK" href="https://qz.com/meta-threads-500-million-monthly-users-new-features-061626">500M monthly active users</a>.
+                        </p>
+                        <p>
+                            All three are (or were) technically federated. Mastodon uses
+                            ActivityPub, Bluesky uses AT Protocol, and Threads added
+                            ActivityPub federation six months or so after launch. But
+                            Threads and Bluesky both behave as heavily centralized
+                            platforms.
+                        </p>
+                        <p>
+                            To get the benefits of protocols and interoperability, the
+                            network needs to be reasonably distributed and
+                            decentralized. The whole idea is that using the protocol to
+                            reduce switching costs can foster competition. If a network
+                            centralizes into an oligopoly, then the biggest players can
+                            effectively control the network. In the worst case, they
+                            can simply stop federating, <a target="_BLANK" href="https://www.eff.org/deeplinks/2013/05/google-abandons-open-standards-instant-messaging">like Google Talk did with XMPP</a>, and wall off the portion of the
+                            network they control.
+                        </p>
+                        <p>
+                            Almost <a target="_BLANK" href="https://blue.mackuba.eu/stats">99% of users</a> on the Bluesky network still use
+                            Bluesky's servers (its PDS, or Personal Data Server).
+                            Nearly all of Bluesky's users access it through bsky.app and
+                            treat it as a centralized platform. Threads never completed
+                            its ActivityPub federation and now appears to be leaving it
+                            <a target="_BLANK" href="https://coywolf.com/news/social-media/mastodon-creator-shares-what-went-wrong-with-threads-and-ponders-the-future-of-the-fediverse/">unfinished</a> <a target="_BLANK" href="https://www.federatedmind.com/threads-enters-the-fediverse/">at best</a> or killing it at worst.
+                        </p>
+                        <p>
+                            There are complicating factors in the adoption timeline
+                            (Threads beating Bluesky out of the gate gave them a
+                            boost), but the clearest factor is friction.
+                        </p>
+                        <p>
+                            Mastodon makes it the hardest to join the network and get
+                            settled. You have to pick an instance, and even when you do,
+                            you then have an empty timeline and no easy way to populate
+                            it. The people you want to follow can be scattered across
+                            instances, and finding them often involves finding their
+                            instance first.
+                        </p>
+                        <p>
+                            Bluesky made the friction lower than Mastodon. It looks and
+                            behaves like a standard platform for most users. But the
+                            end result is that the network isn't actually
+                            decentralized.
+                        </p>
+                        <p>
+                            Threads achieved the lowest friction by integrating tightly
+                            with Instagram, allowing you to bring some of your network
+                            with you when you join.
+                        </p>
+                        <p>
+                            Bluesky's achievement of 40M+ users, 10M of them active, is
+                            not nothing. Doesn't that suggest that it's possible to
+                            make protocols usable? Couldn't that network still
+                            decentralize as it grows?
+                        </p>
+                        <p>
+                            Maybe. But we already have an example of an open,
+                            interoperable protocol and that has centralized and
+                            enshittifying.
+                        </p>
+                    </section>
+                </section>
+                <section id="protocols-arent-the-answer__email-an-open-protocol-enshittifying">
+                    <h2>Email: An Open Protocol Enshittifying</h2>
+                    <p>
+                        Email is the <a target="_BLANK" href="https://knightcolumbia.org/content/protocols-not-platforms-a-technological-approach-to-free-speech">quintessential open protocol</a>. In theory, it
+                        should be fully distributed.
+                    </p>
+                    <p>
+                        Yet email is heavily centralized. Google claims over <a
+                            target="_BLANK"
+                            href="https://blog.google/products-and-platforms/products/gmail/gmail-is-entering-the-gemini-era/">3
+                            billion email addresses</a>, which would give it more than a third of the roughly 8 billion estimated email addresses. Tencent's QQMail has over
+                            a <a target="_BLANK"
+                                href="https://baike.baidu.com/en/item/QQmail/1481672">billion
+                                users</a>. Similarly, the Chinese company NetEase
+                        claims another <a target="_BLANK"
+                            href="https://baike.baidu.com/en/item/NETEASE%20MAIL/946152">billion
+                            users</a>. Apple doesn't publish numbers, but estimates
+                        put it at around <a target="_BLANK"
+                    href="https://en.wikipedia.org/wiki/ICloud">850 million iCloud
+                        users</a>. Account totals fall off steeply into a long tail from
+                        there.
+                    </p>
+                    <p>
+                        These few providers can use that centralization to control
+                        the whole network. Trying to self-host an email server is a <a target="_BLANK" href="https://cfenollosa.com/blog/after-self-hosting-my-email-for-twenty-three-years-i-have-thrown-in-the-towel-the-oligopoly-has-won.html">nightmare these days</a>. The big providers simply won't accept
+                        your email unless you jump through an ever-growing list of
+                        hoops (introduced in the name of stopping spam).
+                    </p>
+                    <p>
+                        In spite of that, some smaller competitors like Proton Mail and
+                        Fastmail have managed to break into the market. But their
+                        market share remains a small fraction of the total market.
+                    </p>
+                    <p>
+                        Even with an open protocol that makes switching possible in
+                        theory, the cognitive load and friction of switching are
+                        still too high for the average person.
+                    </p>
+                    <p>
+                        And email is enshittifying.
+                    </p>
+                    <p>
+                        Google used to <a target="_BLANK" href="https://www.jurist.org/news/2017/03/federal-judge-google-e-mail-scanning-settlement/">scan all emails for ad targeting</a>, without
+                        even the implicit consent of users not on Gmail accounts.
+                        <a target="_BLANK" href="https://blog.google/products-and-platforms/products/gmail/g-suite-gains-traction-in-the-enterprise-g-suites-gmail-and-consumer-gmail-to-more-closely-align/">Google (supposedly) stopped in 2017</a>, but it was the legal
+                        pressure that stopped them, not the protocol.
+                    </p>
+                    <p>
+                        Google and Microsoft have both continued to find creative
+                        and frustrating ways to <a target="_BLANK" href="https://9to5google.com/2023/05/05/gmail-ads-increase-2023/">shove</a> <a target="_BLANK" href="https://www.xda-developers.com/microsoft-more-ads-outlook-ios-android-apps/">ads</a> into their hosted
+                        inboxes. More recently, Google introduced its <a target="_BLANK" href="https://blog.google/products-and-platforms/products/gmail/gmail-is-entering-the-gemini-era/">Gemini AI</a> to
+                        people's inboxes without consent.
+                    </p>
+                    <p>
+                        It's unclear how far the enshittification of email will go.
+                        Strong privacy laws will likely help keep it from going too
+                        far, but it is clear that the open protocol is not capable
+                        of keeping it in check.
+                    </p>
+                </section>
+                <section id="protocols-arent-the-answer__technical-solution-to-a-social-problem">
+                    <h2>A Technical Solution to a Social Problem?</h2>
+                    <p>
+                        Enshittification is ultimately a social problem. When we
+                        hand control of businesses to investors, the people who
+                        merely provided the capital, the result is that all other
+                        concerns will tend to be set aside in pursuit of returns on
+                        that capital.
+                    </p>
+                    <p>
+                        The idea behind the protocols movement is that it's the
+                        network effects and the related switching costs that really
+                        power enshittification. Protocols can, in theory, break
+                        those network effects and allow market forces to keep capital
+                        in check.
+                    </p>
+                    <p>
+                        But oligopolies and monopolies form all the time in the
+                        market, without network effects or lock-in. And
+                        enshittification follows.
+                    </p>
+                    <p>
+                        Notice how quickly appliances seem to break these days?
+                        That's enshittification in a market with no network effects
+                        and very low switching costs.
+                    </p>
+                    <p>
+                        Market forces have not kept it in check. So there's no
+                        reason to believe that a return to open protocols will,
+                        even if we can solve the user experience problems inherent
+                        in creating distributed systems.
+                    </p>
+                    <p>
+                        We can't solve this with a technical solution. It's a
+                        social problem, created by concentrating power and control
+                        in the hands of a small group of unaccountable people:
+                        investors.
+                    </p>
+                    <p>
+                        We need a social solution. We need to change who's in
+                        charge and how they are held accountable.
+                    </p>
+                    <p>
+                        This article is the first in a series. We'll address the
+                        potential social solutions in the next one: Social
+                        Solutions for Enshittification.
+                    </p>
+                </section>
+                <section id="protocols-arent-the-answer__footer">
+                    <p>
+                        <em>
+                            <a href="/">Communities</a> is a social network platform working
+                            towards cooperative governance. We're seeking to
+                            de-enshittify social media and, if we succeed at that,
+                            the wider web. We're funded by <a href="/about/contribute">user-donations</a>. If you
+                            want to help, we're currently recruiting an <a href="/about/team#team-view__advisory-board">Advisory Board</a>.
+                        </em>
+                    </p>
+                </section>
             </>
         )
     },
