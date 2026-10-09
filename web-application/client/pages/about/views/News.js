@@ -42,7 +42,7 @@ const posts = {
                         about it in the context of <a target="_BLANK" href="https://doctorow.medium.com/social-quitting-1ce85b67b456">social media</a>.
                     </p>
                     <p>
-                        Much of the pro-social tech movement has coallesced around <a target="_BLANK" href="https://knightcolumbia.org/content/protocols-not-platforms-a-technological-approach-to-free-speech">protocols</a> and <a target="_BLANK" href="https://www.eff.org/deeplinks/2019/10/adversarial-interoperability">interoperability</a> as the answer to it. In the
+                        Much of the pro-social tech movement has coalesced around <a target="_BLANK" href="https://knightcolumbia.org/content/protocols-not-platforms-a-technological-approach-to-free-speech">protocols</a> and <a target="_BLANK" href="https://www.eff.org/deeplinks/2019/10/adversarial-interoperability">interoperability</a> as the answer to it. In the
                         first article in this series, we argued that <a target="_BLANK"
                             href="/about/news/9-29-2026-protocols-arent-the-answer">Protocols
                         Aren't the Answer</a>.
@@ -56,7 +56,7 @@ const posts = {
                     </p>
                     <p>
                         Enshittification is a social problem. It's caused by <a target="_BLANK" href="https://pluralistic.net/2024/01/30/go-nuts-meine-kerle/">concentrating power in the hands of a small, unaccountable
-                            group</a> who's interests diverge from the community. The vast
+                            group</a> whose interests diverge from the community's. The vast
                         majority of the time, that group is investors.
                     </p>
                     <p>
@@ -65,7 +65,7 @@ const posts = {
                         and how they are held accountable.
                     </p>
                     <p>
-                        But who do we put in charge? And how to do we hold them
+                        But who do we put in charge? And how do we hold them
                         accountable?
                     </p>
                 </section>
@@ -99,9 +99,9 @@ const posts = {
                         But the problem with stewardship through a self-perpetuating
                         nonprofit board is that it's essentially a benevolent
                         oligarchy. If the board is corrupted, captured, or goes off
-                        the rails there's no recourse. The community has few
+                        the rails, there's no recourse. The community has few
                         mechanisms to hold them accountable. You're depending on
-                        those handful of board members to stay on mission.
+                        that handful of board members to stay on mission.
                     </p>
                     <p>
                         <a target="_BLANK" href="https://www.couchsurfing.com/">Couchsurfing</a> started out as a <a target="_BLANK" href="https://en.wikipedia.org/wiki/CouchSurfing">nonprofit, built by
@@ -125,19 +125,19 @@ const posts = {
                         the CEO of the nonprofit becoming Chief Open Education Officer of 2U. Faculty protested, but ultimately they had no
                         recourse. 2U has since <a target="_BLANK"
                     href="https://www.thecrimson.com/article/2024/7/27/2u-bankruptcy-harvard-mit-edx/">declared
-                        chapter 11 bankrupcy</a>.
+                        Chapter 11 bankrupcy</a>.
                     </p>
                     <p>
                         The stewardship model is only as good as the stewards. It's
                         missing accountability mechanisms.
                     </p>
                     <p>
-                        Wikipedia points us in the direction of a another model to
+                        Wikipedia points us in the direction of another model to
                         consider.
                     </p>
                     <p>
                         Wikipedia is not a pure <a target="_BLANK" href="https://en.wikipedia.org/wiki/Wikimedia_Foundation#Board_of_trustees">stewardship model</a>. Half the board
-                        is self-perpetuating, the other half is selected by the
+                        is self-perpetuating. The other half is selected by the
                         community of editors and affiliates, which creates a
                         mechanism by which the community can hold the organization
                         accountable. This brings us to the next model we could
@@ -158,7 +158,7 @@ const posts = {
                     <p>
                         But when the community disengages from the democracy,
                         cooperatives can enshittify in spite of community control.
-                        In some cases, even allowing the board to take the
+                        In some cases, disengagement even allowed the board to take the
                         cooperative out from under the community entirely.
                     </p>
                     <p>
@@ -200,12 +200,12 @@ const posts = {
                         accountable. It's possible for the boards of these
                         businesses to simply stop being transparent and for the
                         average consumer member to stop asking questions. By the
-                        time members realize something's wrong, it's can be too
+                        time members realize something's wrong, it can be too
                         late.
                     </p>
                     <p>
-                        But sometimes when a consumer co-op starts to go off the
-                        rails someone will raise the alarm early enough that
+                        But sometimes, when a consumer co-op starts to go off the
+                        rails, someone will raise the alarm early enough that
                         members are able to rally and put things back on track. And
                         often, that someone is the workers.
                     </p>
@@ -215,9 +215,9 @@ const posts = {
                         by blocking candidates from the ballot.
                     </p>
                     <p>
-                        In March 2025, REI's board <a target="_BLANK" href="https://washingtonstatestandard.com/2025/03/04/rei-board-blocks-labor-backed-candidates-from-ballot/">exercised their control</a> over the
-                        elections to force a non-competitive election by only
-                        allowing their three chosen candidates for the three open
+                        In March 2025, REI's board <a target="_BLANK" href="https://washingtonstatestandard.com/2025/03/04/rei-board-blocks-labor-backed-candidates-from-ballot/">exercised its control</a> over the
+                        elections to force a non-competitive election by
+                        allowing only its three chosen candidates for the three open
                         board seats. REI's union sounded the alarm and organized
                         the membership to reject the board's chosen candidates.
                         All three were <a target="_BLANK" href="https://www.cascadepbs.org/news/2025/05/rei-co-op-members-reject-company-board-picks-after-union-campaign/">rejected</a>.
@@ -225,7 +225,7 @@ const posts = {
                     <p>
                         I have personal experience with a similar scenario at
                         Bloomingfoods, my local grocery cooperative. The board had
-                        gotten cosy with management, which was abusing the workers,
+                        gotten cozy with management, which was abusing the workers,
                         and had overextended the cooperative. The workers <a target="_BLANK" href="https://www.ipm.org/2019-10-04/bloomingfoods-employees-vote-unionize">unionized</a>, <a target="_BLANK" href="https://forlocals.ufcw.org/2014/10/14/bloomingfoods-workers-community-rally-in-support-of-right-to-join-a-union/">sounded the alarm</a> and, with their help, we were able
                         to get the co-op back on track.
                     </p>
@@ -245,8 +245,7 @@ const posts = {
                         cooperatives treat consumers. What exists, however, is
                         encouraging: home care co-ops have <a target="_BLANK"
                         href="https://cdn.prod.website-files.com/65eeda808cdb3e4c9603cbb0/69c1950ae02b3167220e7205_2025-BenchmarkingReport_Final.pdf">nearly
-                            half</a> the worker turnover of their investor
-                            owned counterparts, which is <a target="_BLANK"
+                            half</a> the worker turnover of their investor-owned counterparts, which is <a target="_BLANK"
                         href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10946305/">associated
                             with better care</a>.
                     </p>
@@ -289,22 +288,22 @@ const posts = {
                         Workers have a much stronger incentive to engage with their
                         workplace's democracy. They depend on their work to feed,
                         clothe, and house themselves. They spend 8 hours a day or
-                        more at work. They are intimiately familiar with what's
+                        more at work. They are intimately familiar with what's
                         happening in their workplaces. Where consumers often don't
                         engage with cooperative democracy because they simply don't
                         have the time or the bandwidth, workers can give themselves
                         the time.
                     </p>
                     <p>
-                        And engage they do, a <a
+                        And engage they do. A <a
                         target="_BLANK"
                     href="https://resources.uwcc.wisc.edu/Worker/CGRI_Worker%20Co-op_Final.pdf">survey</a> of worker cooperative board dynamics found an average
                         of 90% turnout for board elections.
                     </p>
                     <p>
-                        But don't workers have similar incentives as investors to
-                        enshittify? To some degree, yes, but there are forces that
-                        check them which aren't there for investors.
+                        Workers do have some of the same incentives as investors to
+                        enshittify, but there are forces that check them which
+                        aren't there for investors.
                     </p>
                     <p>
                         Workers are much closer to the work, and therefore the
@@ -328,18 +327,18 @@ const posts = {
                         monopoly to: providing poor service for high fares.
                     </p>
                     <p>
-                        The plywood co-ops of the US Pascific Northwest illustrate
-                        both the francise restriction and sell out cases. Those
+                        The plywood co-ops of the US Pacific Northwest illustrate
+                        both the franchise restriction and sell out cases. Those
                         co-ops were organized so that the workers owned them
                         through shares. New workers were required to buy shares to
-                        become members, and not all new workers did. As they grew,
+                        become members, and not all new workers did. As the co-ops grew,
                         the <a target="_BLANK" href="https://users.ssc.wisc.edu/~jfkennan/teaching/pencavelkrislov.pdf">price of a share went up</a> and became out of reach for
                         many new workers. Finally, the remaining workers decided to
                         cash out their shares: by <a target="_BLANK" href="https://www.brookings.edu/wp-content/uploads/1995/01/1995_bpeamicro_craig.pdf">selling out</a>.
                     </p>
                     <p>
                         If our goal is to build an organization that is
-                        maximally resistent to enshittification, we should probably
+                        maximally resistant to enshittification, we should probably
                         look for a structure that can balance the worker
                         cooperative's vulnerabilities.
                     </p>
@@ -347,9 +346,9 @@ const posts = {
                 <section id="social-solutions-for-enshittification__balance-of-powers">
                     <h2>Balance of Powers</h2>
                     <p>
-                        All of these structures, stewardship through nonprofits,
-                        consumer cooperatives, and worker cooperatives, are more
-                        resistant to enshittification than investor owned
+                        All of these structures -- stewardship through nonprofits,
+                        consumer cooperatives, and worker cooperatives -- are more
+                        resistant to enshittification than investor-owned
                         businesses.
                     </p>
                     <p>
@@ -368,14 +367,14 @@ const posts = {
                         elements from all three previous approaches.
                     </p>
                     <p>
-                        Consider a nonprofit multi-stakeholder cooperative who's
+                        Consider a nonprofit multi-stakeholder cooperative whose
                         board is half elected by the consumers and half elected by
                         the workers.
                     </p>
                     <p>
-                        The nonprofit structure means no one owns a stake
-                        that they might be tempted to cash out. The bylaws can
-                        form the constitution, clearly stating who has what powers
+                        The nonprofit structure means no one owns a stake that
+                        they might be tempted to cash out. The bylaws can form
+                        the constitution, clearly stating who has what powers
                         and how they are balanced.
                     </p>
                     <p>
@@ -405,7 +404,7 @@ const posts = {
                         power. They often restrict access to corporate documents to
                         hide their actions, so constitutionally mandate
                         transparency. Require membership approval for any transfers
-                        or sale.
+                        or sales.
                     </p>
                     <p>
                         We can add elements of direct democracy to provide
@@ -436,7 +435,7 @@ const posts = {
                             Communities is a social network platform working
                             towards cooperative governance. We're seeking to
                             de-enshittify social media and, if we succeed at that,
-                            the wider web. We're funded by user-donations. If you
+                            the wider web. We're funded by user donations. If you
                             want to help, we're currently recruiting an Advisory
                             Board.
                         </em>
