@@ -8,6 +8,9 @@
     line-height: 1.7em;
     margin: 0 auto;
 }
+.team-view section {
+    margin-bottom: 50px;
+}
 .team-view h1 {
     text-align: center;
 }
