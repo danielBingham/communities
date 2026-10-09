@@ -5,9 +5,10 @@
  * file), then edit your copy as you like. index.development.js is loaded when
  * NODE_ENV=development (see index.js).
  *
- * This example reads every value from an environment variable, so you don't
- * need an AWS account. .env.local.example in the repository root lists the
- * variables with working local values. Each variable is the Parameter Store
+ * This example reads values from environment variables, so you don't need an
+ * AWS account, and uses the log email driver, so no email is sent: each one is
+ * logged and saved under tmp/email instead. .env.local.example in the
+ * repository root lists the variables with working local values. Each variable is the Parameter Store
  * path in constant case, prefixed with COMMUNITIES_: /database/host is
  * COMMUNITIES_DATABASE_HOST.
  *
@@ -62,8 +63,16 @@ module.exports = {
         access_id: 'env:COMMUNITIES_STORAGE_S3_ACCESS_ID',
         access_key: 'env:COMMUNITIES_STORAGE_S3_ACCESS_KEY'
     },
-    postmark: {
-        api_token: 'env:COMMUNITIES_POSTMARK_API_TOKEN'
+    // Email: `driver` selects how email is sent, and the block with the same
+    // name configures that driver (see packages/backend/services/email). The
+    // log driver sends nothing: it logs each message and, with `directory`,
+    // writes it there as JSON. To send through Postmark instead, use
+    // `driver: 'postmark'` with a `postmark: { api_token: ... }` block.
+    email: {
+        driver: 'log',
+        log: {
+            directory: 'tmp/email'
+        }
     },
     notifications: {
         ios: {

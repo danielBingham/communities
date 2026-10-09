@@ -3,8 +3,9 @@
  *
  * Every app has one committed definition per environment plus two development
  * examples. When a value is added to production, staging and both examples
- * need it too; these tests fail until they have it. Covers the web
- * application and the worker.
+ * need it too; these tests fail until they have it. The one exception is the
+ * email block, where the environment example uses the log driver. Covers the
+ * web application and the worker.
  ******************************************************************************/
 
 const path = require('path')
@@ -62,11 +63,25 @@ describe.each(Object.entries(apps))('Configuration definitions: %s', function(ap
         expect(withoutEnvironment(ssmExample)).toEqual(withoutEnvironment(production))
     })
 
-    it('Should read every Parameter Store value from its matching variable in the environment example', function() {
-        expect(Object.keys(envExample).sort()).toEqual(Object.keys(production).sort())
+    it('Should select a known email driver and configure it in each file', function() {
+        const drivers = { postmark: [ 'email.postmark.api_token' ], log: [] }
+        for (const definition of [ production, staging, ssmExample, envExample ]) {
+            expect(Object.keys(drivers)).toContain(definition['email.driver'])
+            for (const key of drivers[definition['email.driver']]) {
+                expect(definition).toHaveProperty([ key ])
+            }
+        }
+        expect(production['email.driver']).toBe('postmark')
+        expect(envExample['email.driver']).toBe('log')
+    })
+
+    it('Should read every other Parameter Store value from its matching variable in the environment example', function() {
+        // The email block legitimately differs: the example uses the log driver.
+        const outsideEmail = (definition) => Object.keys(definition).filter((key) => ! key.startsWith('email.')).sort()
+        expect(outsideEmail(envExample)).toEqual(outsideEmail(production))
 
         for (const [key, value] of Object.entries(production)) {
-            if ( key === 'environment' ) {
+            if ( key === 'environment' || key.startsWith('email.') ) {
                 continue
             }
             const expected = value.startsWith('aws-ssm-parameter:')
