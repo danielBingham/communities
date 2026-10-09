@@ -19,11 +19,11 @@
  ******************************************************************************/
 const { Client, Pool } = require('pg')
 const BullQueue = require('bull')
-const Postmark = require('postmark')
 const { createClient } = require('redis')
 
 const Events = require('./events')
 const Logger = require('./logger')
+const { createEmailDriver } = require('./services/email')
 
 /***
  * A wrapper around our core dependencies that will be used by most of our
@@ -62,10 +62,12 @@ module.exports = class Core {
         this.queues = {} 
 
         /**
-         * Our Postmark server client for sending emails to using the Postmark
-         * API.
+         * The email driver selected by `email.driver` in the configuration,
+         * which EmailService sends through.
+         *
+         * @see services/email/index.js
          */
-        this.postmarkClient = null
+        this.emailDriver = null
 
         /**
          * Our configuration values.  
@@ -137,7 +139,11 @@ module.exports = class Core {
         this.queues['add-mutuals-for-relationship'] = new BullQueue('add-mutuals-for-relationship', { redis: this.config.redis })
         this.queues['remove-mutuals-for-relationship'] = new BullQueue('remove-mutuals-for-relationship', { redis: this.config.redis })
 
-        this.postmarkClient = new Postmark.ServerClient(this.config.postmark.api_token)
+        /**********************************************************************
+         * Email Driver Initialization
+         **********************************************************************/
+        this.logger.info(`Using the '${this.config.email?.driver}' email driver.`)
+        this.emailDriver = createEmailDriver(this)
     }
 
     async shutdown() {

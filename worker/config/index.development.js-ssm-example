@@ -50,8 +50,13 @@ module.exports = {
         access_id: 'aws-ssm-parameter:/storage/s3/access-id',
         access_key: 'aws-ssm-parameter:/storage/s3/access-key' 
     },
-    postmark: {
-        api_token: 'aws-ssm-parameter:/postmark/api-token' 
+    // Email: `driver` selects how email is sent, and the block with the same
+    // name configures that driver (see packages/backend/services/email).
+    email: {
+        driver: 'postmark',
+        postmark: {
+            api_token: 'aws-ssm-parameter:/postmark/api-token'
+        }
     },
     notifications: {
         ios: {

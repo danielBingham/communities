@@ -75,9 +75,14 @@ are the `postgres` and `redis` services. If you run the apps directly on your
 machine instead, set `COMMUNITIES_DATABASE_HOST` and `COMMUNITIES_REDIS_HOST`
 to `localhost`.
 
-File storage, email and push notifications don't have local replacements
-yet, so the example fills their values with placeholders. Both apps start,
-but uploads, outgoing email and notification jobs fail until those land.
+The example configuration uses the `log` email driver, so nothing is sent:
+each email (account confirmation, password reset, invitations and so on) is
+logged with its links, and saved as JSON under each app's `tmp/email`
+folder. See [Email](#email) below.
+
+File storage and push notifications don't have local replacements yet, so the
+example fills their values with placeholders. Both apps start, but uploads
+and notification jobs fail until those land.
 
 ### Using Parameter Store
 
@@ -103,6 +108,28 @@ Create every parameter the apps need under `/local/<username>`; you can copy
 them from another `/local` path. To take a single value from somewhere else,
 change its source in your `index.development.js`, for example
 `host: 'env:COMMUNITIES_DATABASE_HOST'`, and set that variable in `.env`.
+
+### Email
+
+The `email` block in each configuration file picks how email is sent.
+`driver` names the driver, and the block with the same name holds that
+driver's settings:
+
+```
+email: {
+    driver: 'postmark',
+    postmark: {
+        api_token: 'aws-ssm-parameter:/postmark/api-token'
+    }
+}
+```
+
+- `postmark` sends through the Postmark API with `api_token`. Production and
+  staging use it, and so does the Parameter Store example.
+- `log` sends nothing. It logs each message with its recipient, subject and
+  links, and if `directory` is set, writes the whole message there as a JSON
+  file (a relative directory is relative to the app's folder). The
+  environment-variable example uses it with `directory: 'tmp/email'`.
 
 ### Where `.env` is read
 
