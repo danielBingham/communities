@@ -26,6 +26,7 @@ const { createClient } = require('redis')
 const Events = require('./events')
 const Logger = require('./logger')
 const { createEmailDriver } = require('./services/email')
+const { createStorage } = require('./services/storage')
 
 /***
  * A wrapper around our core dependencies that will be used by most of our
@@ -70,6 +71,14 @@ module.exports = class Core {
          * @see services/email/index.js
          */
         this.emailDriver = null
+
+        /**
+         * The storage driver selected by `storage.driver` in the
+         * configuration, where uploaded files are kept.
+         *
+         * @see services/storage/index.js
+         */
+        this.storage = null
 
         /**
          * Our configuration values.  
@@ -160,6 +169,12 @@ module.exports = class Core {
          **********************************************************************/
         this.logger.info(`Using the '${this.config.email?.driver}' email driver.`)
         this.emailDriver = createEmailDriver(this)
+
+        /**********************************************************************
+         * Storage Driver Initialization
+         **********************************************************************/
+        this.logger.info(`Using the '${this.config.storage?.driver}' storage driver.`)
+        this.storage = createStorage(this)
     }
 
     async shutdown() {

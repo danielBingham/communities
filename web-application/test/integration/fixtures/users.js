@@ -39,7 +39,8 @@
  *   multifactor     'enabled'
  *
  * Seeding again also undoes anything a test run left behind on these
- * accounts: failed login attempts, privacy settings and other settings.
+ * accounts: failed login attempts, privacy settings, other settings and
+ * profile pictures.
  * ****************************************************************************/
 
 const dictionary = {

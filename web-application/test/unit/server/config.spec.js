@@ -3,9 +3,9 @@
  *
  * Every app has one committed definition per environment plus two development
  * examples. When a value is added to production, staging and both examples
- * need it too; these tests fail until they have it. The one exception is the
- * email block, where the environment example uses the log driver. Covers the
- * web application and the worker.
+ * need it too; these tests fail until they have it. The exceptions are the
+ * email and storage blocks, where the environment example uses the log and
+ * filesystem drivers. Covers the web application and the worker.
  ******************************************************************************/
 
 const path = require('path')
@@ -75,13 +75,30 @@ describe.each(Object.entries(apps))('Configuration definitions: %s', function(ap
         expect(envExample['email.driver']).toBe('log')
     })
 
+    it('Should select a known storage driver and configure it in each file', function() {
+        const drivers = {
+            s3: [ 'storage.s3.bucket_url', 'storage.s3.bucket', 'storage.s3.access_id', 'storage.s3.access_key' ],
+            filesystem: [ 'storage.filesystem.directory', 'storage.filesystem.secret' ]
+        }
+        for (const definition of [ production, staging, ssmExample, envExample ]) {
+            expect(Object.keys(drivers)).toContain(definition['storage.driver'])
+            for (const key of drivers[definition['storage.driver']]) {
+                expect(definition).toHaveProperty([ key ])
+            }
+        }
+        expect(production['storage.driver']).toBe('s3')
+        expect(envExample['storage.driver']).toBe('filesystem')
+    })
+
     it('Should read every other Parameter Store value from its matching variable in the environment example', function() {
-        // The email block legitimately differs: the example uses the log driver.
-        const outsideEmail = (definition) => Object.keys(definition).filter((key) => ! key.startsWith('email.')).sort()
-        expect(outsideEmail(envExample)).toEqual(outsideEmail(production))
+        // The email and storage blocks legitimately differ: the example uses
+        // the log and filesystem drivers.
+        const driverBlock = (key) => key.startsWith('email.') || key.startsWith('storage.')
+        const outsideDriverBlocks = (definition) => Object.keys(definition).filter((key) => ! driverBlock(key)).sort()
+        expect(outsideDriverBlocks(envExample)).toEqual(outsideDriverBlocks(production))
 
         for (const [key, value] of Object.entries(production)) {
-            if ( key === 'environment' || key.startsWith('email.') ) {
+            if ( key === 'environment' || driverBlock(key) ) {
                 continue
             }
             const expected = value.startsWith('aws-ssm-parameter:')

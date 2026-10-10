@@ -68,6 +68,11 @@ const toCSPSource = function(url) {
 
 const createSecurityHeadersMiddleware = function(core) {
 
+    // Where browsers load stored files (images, video) from, which depends on
+    // the storage driver: the S3 bucket's hosts, or nothing beyond 'self' for
+    // the filesystem driver, whose links point at this app.
+    const storageSources = [ ...new Set(core.storage.contentOrigins.map(toCSPSource)) ]
+
     return helmet({
 
         // These are the directives that will be passed to the `Content-Security-Policy` response header.
@@ -113,8 +118,7 @@ const createSecurityHeadersMiddleware = function(core) {
                     "'self'",
                     toCSPSource(core.config.host), // Primary backend.
                     toCSPSource(core.config.wsHost), // Web socket
-                    toCSPSource(core.config.s3.bucket_url),  // Media when we load it through fetch.
-                    `https://${core.config.s3.bucket}.s3.us-east-1.amazonaws.com`,  // Media when we load it through fetch.
+                    ...storageSources,  // Media when we load it through fetch.
                     `https://*.sentry.io`, // Sentry
                     `https://*.ingest.us.sentry.io` // Sentry
                 ],
@@ -152,10 +156,10 @@ const createSecurityHeadersMiddleware = function(core) {
                 'img-src': [ "'self'", 'data:', 'blob:', 'https:' ],
 
                 // Controls where audo and video files can be loaded from. We
-                // need to include our S3 bucket.
+                // need to include our storage (the S3 bucket).
                 //
                 // @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/media-src
-                'media-src': [ "'self'", 'blob:', toCSPSource(core.config.s3.bucket_url), `https://${core.config.s3.bucket}.s3.us-east-1.amazonaws.com` ],
+                'media-src': [ "'self'", 'blob:', ...storageSources ],
 
                 // Controls where we can load PWA/Webmanifest from.  We don't
                 // use this, so keep it tight.

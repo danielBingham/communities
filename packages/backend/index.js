@@ -62,7 +62,6 @@ exports.MultifactorAuthenticationService = require('./services/MultifactorAuthen
 exports.MutualsService = require('./services/MutualsService')
 exports.PageMetadataService = require('./services/PageMetadataService')
 exports.PermissionService = require('./services/PermissionService')
-exports.S3FileService = require('./services/files/S3FileService')
 exports.ServerSideRenderingService = require('./services/ServerSideRenderingService')
 exports.SessionService = require('./services/SessionService')
 exports.TokenService = require('./services/TokenService')
@@ -71,6 +70,10 @@ exports.ValidationService = require('./services/ValidationService')
 exports.UserRelationshipService = require('./services/UserRelationshipService')
 exports.WebSocketService = require('./services/WebSocketService')
 exports.VideoService = require('./services/files/VideoService')
+
+exports.FilesystemStorage = require('./services/storage/FilesystemStorage')
+exports.S3Storage = require('./services/storage/S3Storage')
+exports.createStorage = require('./services/storage').createStorage
 
 exports.NotificationWorker = require('./services/notification/NotificationWorker')
 
