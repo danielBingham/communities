@@ -25,6 +25,7 @@
     "test:integration:staging": "npm run test:integration:staging -w web-application",
     "test:integration:seed": "npm run test:integration:seed -w web-application",
     "test:integration:seed:staging": "npm run test:integration:seed:staging -w web-application",
+    "storage:seed": "npm run storage:seed -w web-application",
     "check:lockfile": "node scripts/check-lockfile.js"
   },
   "dependencies": {

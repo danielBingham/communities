@@ -25,21 +25,75 @@ const { HeadObjectCommand, PutObjectCommand, GetObjectCommand, DeleteObjectComma
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner')
 
 
-module.exports = class S3FileService {
+/**
+ * Keeps files in an S3 bucket.
+ *
+ * Configured by the `storage.s3` block:
+ *
+ *   storage: {
+ *       driver: 's3',
+ *       s3: {
+ *           bucket_url: 'aws-ssm-parameter:/storage/s3/bucket-url',
+ *           bucket: 'aws-ssm-parameter:/storage/s3/bucket',
+ *           access_id: 'aws-ssm-parameter:/storage/s3/access-id',
+ *           access_key: 'aws-ssm-parameter:/storage/s3/access-key'
+ *       }
+ *   }
+ *
+ * For an S3-compatible server instead of AWS, also set:
+ *
+ *   endpoint          The server's S3 API, e.g. 'http://localhost:3900'.
+ *                     Buckets are then addressed by path, which these servers
+ *                     expect.
+ *   public_endpoint   (Optional) The same API as browsers reach it, when that
+ *                     differs from `endpoint` (e.g. `endpoint` is a container
+ *                     hostname). Signed links are made with it.
+ *   region            (Optional) Defaults to 'us-east-1'.
+ */
+module.exports = class S3Storage {
 
-    constructor(core) {
-        this.core = core
-        this.config = core.config
-
-        const s3Config = {
-            region: 'us-east-1',
-            credentials: {
-                accessKeyId: core.config.s3.access_id,
-                secretAccessKey: core.config.s3.access_key
+    /**
+     * @param {Core} core
+     * @param {Object} settings The `storage.s3` block.
+     * @param {Object} [client] An S3 client to use instead of constructing
+     * one.
+     */
+    constructor(core, settings, client) {
+        for (const key of [ 'bucket_url', 'bucket', 'access_id', 'access_key' ]) {
+            if ( ! settings?.[key] ) {
+                throw new Error(`The s3 storage driver needs storage.s3.${key} in the configuration.`)
             }
         }
 
-        this.s3Client = new S3(s3Config)
+        this.core = core
+        this.bucket = settings.bucket
+        this.region = settings.region || 'us-east-1'
+
+        const clientFor = (endpoint) => new S3({
+            region: this.region,
+            credentials: {
+                accessKeyId: settings.access_id,
+                secretAccessKey: settings.access_key
+            },
+            ...( endpoint ? { endpoint: endpoint, forcePathStyle: true } : {} )
+        })
+
+        this.s3Client = client ?? clientFor(settings.endpoint)
+        this.signingClient = settings.public_endpoint ? clientFor(settings.public_endpoint) : this.s3Client
+
+        /**
+         * Recorded as `files.location` for each file stored here.
+         */
+        this.location = settings.bucket_url
+
+        /**
+         * Where browsers load stored files from, for the Content Security
+         * Policy: the bucket's URL, and the host the signed links point at.
+         */
+        this.contentOrigins = [
+            settings.bucket_url,
+            settings.public_endpoint || settings.endpoint || `https://${this.bucket}.s3.${this.region}.amazonaws.com`
+        ]
     }
 
 
@@ -49,7 +103,7 @@ module.exports = class S3FileService {
             filestream.on('error', (error) => { reject(error) })
             filestream.on('ready', () => {
                 const params = {
-                    Bucket: this.config.s3.bucket,
+                    Bucket: this.bucket,
                     Key: targetPath,
                     Body: filestream
                 }
@@ -61,7 +115,7 @@ module.exports = class S3FileService {
 
     async uploadFileFromStream(readStream, targetPath) {
         const params = {
-            Bucket: this.config.s3.bucket,
+            Bucket: this.bucket,
             Key: targetPath,
             Body: readStream
         }
@@ -71,8 +125,8 @@ module.exports = class S3FileService {
 
     async copyFile(currentPath, newPath) {
         const params = {
-            Bucket: this.config.s3.bucket,
-            CopySource: this.config.s3.bucket + '/' + currentPath,
+            Bucket: this.bucket,
+            CopySource: this.bucket + '/' + currentPath,
             Key: newPath
         }
 
@@ -86,7 +140,7 @@ module.exports = class S3FileService {
 
     async hasFile(path) {
         const params = {
-            Bucket: this.config.s3.bucket,
+            Bucket: this.bucket,
             Key: path
         }
 
@@ -108,7 +162,7 @@ module.exports = class S3FileService {
 
     async getFile(path) {
         const params = {
-            Bucket: this.config.s3.bucket,
+            Bucket: this.bucket,
             Key: path
         }
 
@@ -118,7 +172,7 @@ module.exports = class S3FileService {
 
     async downloadFile(path, localPath) {
         const params = {
-            Bucket: this.config.s3.bucket,
+            Bucket: this.bucket,
             Key: path
         }
 
@@ -130,12 +184,12 @@ module.exports = class S3FileService {
     async getSignedUrl(path) {
         try {
             const params = {
-                Bucket: this.config.s3.bucket,
+                Bucket: this.bucket,
                 Key: path
             }
 
             const command = new GetObjectCommand(params)
-            return await getSignedUrl(this.s3Client, command, { expiresIn: 60*60*24*7 })
+            return await getSignedUrl(this.signingClient, command, { expiresIn: 60*60*24*7 })
         } catch (error) {
             this.core.logger.error(`Failed to getSignedUrl for '${path}': `, error)
             return null
@@ -145,7 +199,7 @@ module.exports = class S3FileService {
 
     async removeFile(path) {
         const params = {
-            Bucket: this.config.s3.bucket,
+            Bucket: this.bucket,
             Key: path
         }
 

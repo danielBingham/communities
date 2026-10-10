@@ -22,7 +22,7 @@ const path = require('node:path')
 const mime = require('mime')
 const { v4: uuidv4 } = require('uuid')
 
-const { FileService, ImageService, VideoService, LocalFileService, PermissionService, S3FileService, ValidationService, FileDAO, ServiceError } = require('@communities/backend')
+const { FileService, ImageService, VideoService, LocalFileService, PermissionService, ValidationService, FileDAO, ServiceError } = require('@communities/backend')
 
 const { schema } = require('@communities/shared')
 
@@ -41,7 +41,7 @@ module.exports = class FileController {
 
         this.fileService = new FileService(core)
 
-        this.s3 = new S3FileService(core)
+        this.storage = core.storage
         this.local = new LocalFileService(core)
 
         this.videoService = new VideoService(core)
@@ -121,12 +121,12 @@ module.exports = class FileController {
 
         const filepath = this.fileService.getPath(existing)
 
-        await this.s3.uploadFile(currentPath, filepath)
+        await this.storage.uploadFile(currentPath, filepath)
 
         const file = {
             ...existing,
             type: mimetype,
-            location: this.config.s3.bucket_url,
+            location: this.storage.location,
             filepath: filepath,
             state: 'processing',
             kind: mimetype.split('/')[0],
@@ -239,7 +239,7 @@ module.exports = class FileController {
 
         const filepath = this.fileService.getPath(existing)
 
-        await this.s3.uploadFile(currentPath, filepath)
+        await this.storage.uploadFile(currentPath, filepath)
 
         await this.fileDAO.updateFile({
             id: id,
@@ -248,7 +248,7 @@ module.exports = class FileController {
             mimetype: mimetype,
             type: mimetype,
             filepath: filepath,
-            location: this.config.s3.bucket_url
+            location: this.storage.location
         })
 
         const job = await this.core.queues['process-video'].add({ session: { user: currentUser }, fileId: id}, { attempts: 3 })
@@ -398,14 +398,14 @@ module.exports = class FileController {
         }
 
         const path = this.fileService.getPath(file, variant)
-        const hasFile = await this.s3.hasFile(path)
+        const hasFile = await this.storage.hasFile(path)
         if ( ! hasFile ) {
             throw new ControllerError(404, 'not-found',
                 `Failed to find File(${id}) at path '${path}'.`,
                 `Failed to find File(${id}) at path '${path}'.`)
         }
 
-        const url = await this.s3.getSignedUrl(path)
+        const url = await this.storage.getSignedUrl(path)
         if ( url === null ) {
             throw new ControllerError(404, 'not-found',
                 `Failed to find File(${id}) at path '${path}'.`,
@@ -468,7 +468,7 @@ module.exports = class FileController {
         // Files that haven't had their file uploaded yet will not have a
         // filepath.
         if ( file.filepath !== undefined && file.filepath !== null ) {
-            const signedUrl = await this.s3.getSignedUrl(file.filepath)
+            const signedUrl = await this.storage.getSignedUrl(file.filepath)
             if ( signedUrl !== null ) {
                 sources['full'] = signedUrl
             }
@@ -479,7 +479,7 @@ module.exports = class FileController {
             const path = this.fileService.getPath(file, variant)
 
             if ( path !== null && path !== undefined ) {
-                sources[variant] = await this.s3.getSignedUrl(path)
+                sources[variant] = await this.storage.getSignedUrl(path)
             } else {
                 request.logger.error(`Path for variant '${variant}' is null.`)
             }
@@ -598,7 +598,7 @@ module.exports = class FileController {
                 `Something went wrong on the backend.`)
         }
 
-        const url = await this.s3.getSignedUrl(file.filepath)
+        const url = await this.storage.getSignedUrl(file.filepath)
 
         const relations = await this.getRelations(currentUser, entityResults)
 
