@@ -550,7 +550,7 @@ describe('GET /user/:userId/relationship/:relationId', function() {
         // in.  The control case immediately below pins the difference to the
         // account status and nothing else.
         //
-        // See fixtures/users.js -> 'user-unconfirmed' for the manual setup.
+        // See fixtures/users.js -> 'user-unconfirmed'.
         // ------------------------------------------------------------------
         describe("for a user who has not confirmed their email", function() {
             let requester, unconfirmed, confirmedControl

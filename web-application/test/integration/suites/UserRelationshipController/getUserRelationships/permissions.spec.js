@@ -391,7 +391,7 @@ describe('GET /user/:userId/relationships', function() {
     // it should, unskip the third test.  If it shouldn't, delete it and keep the
     // second as documentation.
     //
-    // See fixtures/users.js -> 'user-rejected' for the manual setup.
+    // See fixtures/users.js -> 'user-rejected'.
     // ======================================================================
     describe("a profile owner removed by site moderation", function() {
         let rejected, friend
@@ -714,7 +714,7 @@ describe('GET /user/:userId/relationships', function() {
                 // ordinary stranger case -- with any other setting the caller would
                 // be denied regardless of their status.
                 //
-                // See fixtures/users.js -> 'user-unconfirmed' for the manual setup.
+                // See fixtures/users.js -> 'user-unconfirmed'.
                 // The sibling guard for site-BANNED callers is unreachable: a banned
                 // account is rejected at login and can never obtain a session.
                 await assertNotAuthorized(unconfirmed.session, owner.user.id)

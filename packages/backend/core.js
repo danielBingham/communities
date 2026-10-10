@@ -17,6 +17,8 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
+const fs = require('fs')
+
 const { Client, Pool } = require('pg')
 const BullQueue = require('bull')
 const { createClient } = require('redis')
@@ -90,6 +92,35 @@ module.exports = class Core {
     }
 
     /**
+     * Create a connection pool for the database the configuration names.
+     * Also used by the integration test fixture seed, so it connects exactly
+     * the way the apps do.
+     *
+     * @param {Object} database The configuration's `database` block: host,
+     * port, user, password, name and, optionally, certificate.
+     *
+     * @return {Pool}
+     */
+    static createDatabasePool(database) {
+        const databaseConfig = {
+            host: database.host,
+            user: database.user,
+            password: database.password,
+            database: database.name,
+            port: database.port
+        }
+
+        if ( database.certificate ) {
+            databaseConfig.ssl = {
+                rejectUnauthorized: false,
+                cert: fs.readFileSync(database.certificate).toString()
+            }
+        }
+
+        return new Pool(databaseConfig)
+    }
+
+    /**
      * Initialize the common dependencies.
      */
     async initialize() {
@@ -103,23 +134,8 @@ module.exports = class Core {
         /**********************************************************************
          * Database Connection Initialization
          **********************************************************************/
-        const databaseConfig = {
-            host: this.config.database.host,
-            user: this.config.database.user,
-            password: this.config.database.password,
-            database: this.config.database.name,
-            port: this.config.database.port 
-        }
-
-        if ( this.config.database.certificate ) {
-            databaseConfig.ssl = {
-                rejectUnauthorized: false,
-                cert: fs.readFileSync(this.config.database.certificate).toString()
-            }
-        }
-
-        this.logger.info(`Connecting to postgres database at ${databaseConfig.host}:${databaseConfig.port} with ${databaseConfig.user}.`)
-        this.database = new Pool(databaseConfig)
+        this.logger.info(`Connecting to postgres database at ${this.config.database.host}:${this.config.database.port} with ${this.config.database.user}.`)
+        this.database = Core.createDatabasePool(this.config.database)
 
         /**********************************************************************
          * Bull Queue Initialization

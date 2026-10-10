@@ -20,20 +20,31 @@
 
 /******************************************************************************
  * User Fixtures for use in the integration test suite
+ *
+ * Create these accounts, or put them back the way they're described here, by
+ * running the seed before the tests (see ../README.md):
+ *
+ *   npm run test:integration:seed
+ *
+ * The seed (../seed.js) writes them straight to the database. Unless a fixture
+ * says otherwise, each one is a confirmed account with the site role 'user',
+ * the password below, email notifications off, and 'info' and 'announcement'
+ * posts hidden from its feed (so we have a blank slate for post testing).
+ *
+ * A fixture says otherwise with:
+ *
+ *   status          'unconfirmed', 'invited' or 'banned'
+ *   siteRole        'moderator' or 'admin'
+ *   siteModeration  a moderation of its profile: { status, flaggedBy }
+ *   multifactor     'enabled'
+ *
+ * Seeding again also undoes anything a test run left behind on these
+ * accounts: failed login attempts, privacy settings and other settings.
  * ****************************************************************************/
 
 const dictionary = {
   // ==========================================================================
   // user1 - A standard user
-  //
-  // Manual setup (run once before running the tests)
-  //   1. Register "Test User1" (test-user1 /
-  //   communities-test-user1@mailinator.com) through the app.  Set the
-  //   account's password to match `password` below. Confirm the account's
-  //   email using `mailinator.com`. Once confirmed, make sure to turn email
-  //   notifications off (so we don't spam mailinator) and also turn off 'info'
-  //   and 'announcement' posts in preferences (so we have a blank slate for
-  //   post testing).
   // ==========================================================================
   'user1': {
     name: 'Test User1',
@@ -44,15 +55,6 @@ const dictionary = {
 
   // ==========================================================================
   // user2 - A standard user
-  //
-  // Manual setup (run once before running the tests)
-  //   1. Register "Test User2" (test-user2 /
-  //   communities-test-user2@mailinator.com) through the app.  Set the
-  //   account's password to match `password` below. Confirm the account's
-  //   email using `mailinator.com`. Once confirmed, make sure to turn email
-  //   notifications off (so we don't spam mailinator) and also turn off 'info'
-  //   and 'announcement' posts in preferences (so we have a blank slate for
-  //   post testing).
   // ==========================================================================
   'user2': {
     name: 'Test User2',
@@ -63,15 +65,6 @@ const dictionary = {
 
   // ==========================================================================
   // user3 - A standard user
-  //
-  // Manual setup (run once before running the tests)
-  //   1. Register "Test User3" (test-user3 /
-  //   communities-test-user3@mailinator.com) through the app.  Set the
-  //   account's password to match `password` below. Confirm the account's
-  //   email using `mailinator.com`. Once confirmed, make sure to turn email
-  //   notifications off (so we don't spam mailinator) and also turn off 'info'
-  //   and 'announcement' posts in preferences (so we have a blank slate for
-  //   post testing).
   // ==========================================================================
   'user3': {
     name: 'Test User3',
@@ -82,15 +75,6 @@ const dictionary = {
 
   // ==========================================================================
   // user4 - A standard user
-  //
-  // Manual setup (run once before running the tests)
-  //   1. Register "Test User4" (test-user4 /
-  //   communities-test-user4@mailinator.com) through the app.  Set the
-  //   account's password to match `password` below. Confirm the account's
-  //   email using `mailinator.com`. Once confirmed, make sure to turn email
-  //   notifications off (so we don't spam mailinator) and also turn off 'info'
-  //   and 'announcement' posts in preferences (so we have a blank slate for
-  //   post testing).
   // ==========================================================================
   'user4': {
     name: 'Test User4',
@@ -101,15 +85,6 @@ const dictionary = {
 
   // ==========================================================================
   // user5 - A standard user
-  //
-  // Manual setup (run once before running the tests)
-  //   1. Register "Test User5" (test-user5 /
-  //   communities-test-user5@mailinator.com) through the app.  Set the
-  //   account's password to match `password` below. Confirm the account's
-  //   email using `mailinator.com`. Once confirmed, make sure to turn email
-  //   notifications off (so we don't spam mailinator) and also turn off 'info'
-  //   and 'announcement' posts in preferences (so we have a blank slate for
-  //   post testing).
   //
   // Role in the GroupPost read suite: a PARENT-group moderator only -- added as
   // a moderator of top-level groups but never a member of their subgroups.
@@ -124,15 +99,6 @@ const dictionary = {
   // ==========================================================================
   // user6 - A standard user
   //
-  // Manual setup (run once before running the tests)
-  //   1. Register "Test User6" (test-user6 /
-  //   communities-test-user6@mailinator.com) through the app.  Set the
-  //   account's password to match `password` below. Confirm the account's
-  //   email using `mailinator.com`. Once confirmed, make sure to turn email
-  //   notifications off (so we don't spam mailinator) and also turn off 'info'
-  //   and 'announcement' posts in preferences (so we have a blank slate for
-  //   post testing).
-  //
   // Role in the GroupPost read suite: a PARENT-group member only -- added as a
   // plain member of top-level groups but never a member of their subgroups.
   // ==========================================================================
@@ -145,15 +111,6 @@ const dictionary = {
 
   // ==========================================================================
   // user7 - A standard user
-  //
-  // Manual setup (run once before running the tests)
-  //   1. Register "Test User7" (test-user7 /
-  //   communities-test-user7@mailinator.com) through the app.  Set the
-  //   account's password to match `password` below. Confirm the account's
-  //   email using `mailinator.com`. Once confirmed, make sure to turn email
-  //   notifications off (so we don't spam mailinator) and also turn off 'info'
-  //   and 'announcement' posts in preferences (so we have a blank slate for
-  //   post testing).
   //
   // Role in the GroupPost read suite: a NON-member of every group.  Also
   // borrowed transiently by the banned-member cases (added, banned, then
@@ -169,15 +126,6 @@ const dictionary = {
   // ==========================================================================
   // user8 - A standard user
   //
-  // Manual setup (run once before running the tests)
-  //   1. Register "Test User8" (test-user8 /
-  //   communities-test-user8@mailinator.com) through the app.  Set the
-  //   account's password to match `password` below. Confirm the account's
-  //   email using `mailinator.com`. Once confirmed, make sure to turn email
-  //   notifications off (so we don't spam mailinator) and also turn off 'info'
-  //   and 'announcement' posts in preferences (so we have a blank slate for
-  //   post testing).
-  //
   // Role in the GroupPost read suite: an INVITED (pending) member of a subgroup
   // who is NOT a member of the parent group.
   // ==========================================================================
@@ -190,15 +138,6 @@ const dictionary = {
 
   // ==========================================================================
   // user9 - A standard user
-  //
-  // Manual setup (run once before running the tests)
-  //   1. Register "Test User9" (test-user9 /
-  //   communities-test-user9@mailinator.com) through the app.  Set the
-  //   account's password to match `password` below. Confirm the account's
-  //   email using `mailinator.com`. Once confirmed, make sure to turn email
-  //   notifications off (so we don't spam mailinator) and also turn off 'info'
-  //   and 'announcement' posts in preferences (so we have a blank slate for
-  //   post testing).
   //
   // Role in the GroupPost read suite: an INVITED (pending) member of a subgroup
   // who IS also a member of the parent group -- the case that distinguishes the
@@ -218,47 +157,31 @@ const dictionary = {
 
   // ==========================================================================
   // user-banned -- A dedicated *banned* user.
-  //
-  // Manual setup (run once before running the tests):
-  //   1. Register "Test User Banned" (test-user-banned /
-  //   communities-test-user-banned@mailinator.com) through the app exactly the way
-  //   user1 was created, and confirm the account. Set the password to match
-  //   `password` below. Once confirmed, make sure to turn email notifications
-  //   off (so we don't spam mailinator) and also turn off 'info' and
-  //   'announcement' posts in preferences (so we have a blank slate for post
-  //   testing).
-  //   2. Ban the account by setting its status to 'banned' directly in the
-  //   database:
-  //
-  //        UPDATE users
-  //           SET status = 'banned'
-  //         WHERE email = 'communities-test-user-banned@mailinator.com';
   // ==========================================================================
   'user-banned': {
     name: 'Test User Banned',
     username: 'test-user-banned',
     email: 'communities-test-user-banned@mailinator.com',
     password: 'PasswordPassword',
+    status: 'banned',
   },
 
   // ==========================================================================
   // user-mfa -- A user with multi-factor authentication ENABLED.
   //
-  // Manual setup (only if enabling the skipped MFA tests):
-  //   1. Register "Test User MFA" (test-user-mfa /
-  //   communities-test-user-mfa@mailinator.com) and confirm the account. Set the
-  //   password to match `password` below. Once confirmed, make sure to turn
-  //   email notifications off (so we don't spam mailinator) and also turn off
-  //   'info' and 'announcement' posts in preferences (so we have a blank slate
-  //   for post testing).
-  //   2. Log in and enroll multi-factor authentication using an authenticator
-  //   app so that `authentication__multifactor_state` becomes 'enabled'.
+  // The seed turns multi-factor authentication on without giving the account
+  // a secret, so logging in stops at the pending step -- which is all the
+  // tests that use it need.  The skipped TOTP tests in
+  // patchAuthentication.spec.js would need a real secret.  If the account
+  // already has one (from enrolling an authenticator app by hand), the seed
+  // leaves it alone.
   // ==========================================================================
   'user-mfa': {
     name: 'Test User MFA',
     username: 'test-user-mfa',
     email: 'communities-test-user-mfa@mailinator.com',
     password: 'PasswordPassword',
+    multifactor: 'enabled',
   },
 
   // ==========================================================================
@@ -276,21 +199,8 @@ const dictionary = {
   //     an already-locked account).
   //   - After 15 minutes the counter resets on the next attempt and the test
   //     locks it again.
-  // Nothing else depends on user4 being unlocked. If you ever want it unlocked
-  // manually:
-  //
-  //     UPDATE users
-  //        SET failed_authentication_attempts = 0,
-  //            last_authentication_attempt_date = NULL
-  //      WHERE email = 'communities-test-user4@mailinator.com';
-  //
-  // Manual setup (run once before the suite):
-  //   1. Register "Test User Lockout" (test-user-lockout /
-  //   communities-test-user-lockout@mailinator.com) and confirm the account. Set the
-  //   password to match `password` below. Once confirmed, make sure to turn
-  //   email notifications off (so we don't spam mailinator) and also turn off
-  //   'info' and 'announcement' posts in preferences (so we have a blank slate
-  //   for post testing).
+  // Nothing else depends on this account being unlocked. Seeding again unlocks
+  // it.
   // ==========================================================================
   'user-lockout': {
     name: 'Test User Lockout',
@@ -311,27 +221,15 @@ const dictionary = {
   // the `status !== 'confirmed'` branch of can() reachable from an integration
   // test.
   //
-  // Manual setup (run once before running the tests):
-  //   1. Register "Test User Unconfirmed" (test-user-unconfirmed /
-  //   communities-test-user-unconfirmed@mailinator.com) through the app and set
-  //   the account's password to match `password` below.
-  //   2. Do NOT confirm the email address.  Newly registered accounts default to
-  //   status 'unconfirmed', which is exactly what this fixture needs.
-  //   3. Verify (or force) the status directly in the database:
-  //
-  //        UPDATE users
-  //           SET status = 'unconfirmed'
-  //         WHERE email = 'communities-test-user-unconfirmed@mailinator.com';
-  //
-  //   Leave the account unconfirmed permanently -- nothing else depends on it,
-  //   and confirming it would silently turn the tests that use it into
-  //   duplicates of the ordinary confirmed-user cases.
+  // It has to stay unconfirmed -- confirming it would silently turn the tests
+  // that use it into duplicates of the ordinary confirmed-user cases.
   // ==========================================================================
   'user-unconfirmed': {
     name: 'Test User Unconfirmed',
     username: 'test-user-unconfirmed',
     email: 'communities-test-user-unconfirmed@mailinator.com',
     password: 'PasswordPassword',
+    status: 'unconfirmed',
   },
 
   // ==========================================================================
@@ -346,23 +244,8 @@ const dictionary = {
   // isolated to this account instead.
   //
   // The suite restores the original value after each group, so this account
-  // should normally be found at its defaults.  If a run dies mid-way and you want
-  // to reset it by hand:
-  //
-  //      UPDATE users
-  //         SET settings = settings - 'showFriendsOnProfile',
-  //             privacy__view_friends = 'friends'
-  //       WHERE email = 'communities-test-user-privacy@mailinator.com';
-  //
-  // Manual setup (run once before running the tests):
-  //   1. Register "Test User Privacy" (test-user-privacy /
-  //   communities-test-user-privacy@mailinator.com) through the app.  Set the
-  //   account's password to match `password` below.  Confirm the account's email
-  //   using `mailinator.com`.  Once confirmed, make sure to turn email
-  //   notifications off (so we don't spam mailinator) and also turn off 'info'
-  //   and 'announcement' posts in preferences (so we have a blank slate for post
-  //   testing).
-  //   2. Leave the privacy settings at their defaults.
+  // should normally be found at its defaults.  If a run dies mid-way, seeding
+  // again puts them back.
   // ==========================================================================
   'user-privacy': {
     name: 'Test User Privacy',
@@ -373,25 +256,13 @@ const dictionary = {
 
   // ==========================================================================
   // user-site-moderator -- A SITE MODERATOR.
-  //
-  // Manual setup (run once before running the tests):
-  //   1. Register "Test User Site Moderator" (test-user-site-moderator /
-  //   communities-test-user-site-moderator@mailinator.com) and confirm the account. Set the
-  //   password to match `password` below. Once confirmed, make sure to turn
-  //   email notifications off (so we don't spam mailinator) and also turn off
-  //   'info' and 'announcement' posts in preferences (so we have a blank slate
-  //   for post testing).
-  //   2. Grant the account the site 'moderator' role directly in the database:
-  //
-  //        UPDATE users
-  //           SET site_role = 'moderator'
-  //         WHERE email = 'communities-test-user-site-moderator@mailinator.com';
   // ==========================================================================
   'user-site-moderator': {
     name: 'Test User Site Moderator',
     username: 'test-user-site-moderator',
     email: 'communities-test-user-site-moderator@mailinator.com',
     password: 'PasswordPassword',
+    siteRole: 'moderator',
   },
 
   // ==========================================================================
@@ -402,25 +273,13 @@ const dictionary = {
   // `GET /users?admin=true` -- the only way to look up a banned or invited
   // user -- is refused with a 403 for a mere 'moderator'.  The getUser suite
   // uses this account to resolve the ids of fixtures that cannot log in.
-  //
-  // Manual setup (run once before running the tests):
-  //   1. Register "Test User Site Admin" (test-user-site-admin /
-  //   communities-test-user-site-admin@mailinator.com) and confirm the account. Set
-  //   the password to match `password` below. Once confirmed, make sure to turn
-  //   email notifications off (so we don't spam mailinator) and also turn off
-  //   'info' and 'announcement' posts in preferences (so we have a blank slate
-  //   for post testing).
-  //   2. Grant the account the site 'admin' role directly in the database:
-  //
-  //        UPDATE users
-  //           SET site_role = 'admin'
-  //         WHERE email = 'communities-test-user-site-admin@mailinator.com';
   // ==========================================================================
   'user-site-admin': {
     name: 'Test User Site Admin',
     username: 'test-user-site-admin',
     email: 'communities-test-user10@mailinator.com', // Mailinator would not accept `communities-test-user-site-admin`
     password: 'PasswordPassword',
+    siteRole: 'admin',
   },
 
   // ==========================================================================
@@ -431,27 +290,14 @@ const dictionary = {
   // user has no password set), so it is only ever a *target* in tests; its id
   // is resolved through the 'user-site-admin' fixture.
   //
-  // Manual setup (run once before running the tests):
-  //   1. Log in as any confirmed user (user1 works) and send an invitation to
-  //   communities-test-user-invited@mailinator.com through the app's invite flow.
-  //   2. Do NOT accept the invitation.  Leave the account in the 'invited'
-  //   state.  Verify with:
-  //
-  //        SELECT status FROM users
-  //         WHERE email = 'communities-test-user-invited@mailinator.com';
-  //
-  //   3. Set the username so the suite can find the account (invited users have
-  //   not chosen one yet):
-  //
-  //        UPDATE users
-  //           SET username = 'test-user-invited',
-  //               name = 'Test User Invited'
-  //         WHERE email = 'communities-test-user-invited@mailinator.com';
+  // A real invited user hasn't chosen a name or username yet.  The seed gives
+  // this one both, so the suite can find it by username.
   // ==========================================================================
   'user-invited': {
-    name: 'Test User Invited', // Invited users don't have names set
-    username: 'test-user-invited', // Invited users don't have usernames set
+    name: 'Test User Invited',
+    username: 'test-user-invited',
     email: 'communities-test-user-invited@mailinator.com',
+    status: 'invited',
   },
 
   // ==========================================================================
@@ -466,37 +312,13 @@ const dictionary = {
   // SiteModeration has no DELETE endpoint (it returns 501), so an
   // API-created flag could not be torn down and the suite would not be
   // re-runnable.
-  //
-  // Manual setup (run once before running the tests):
-  //   1. Register "Test User Flagged" (test-user-flagged /
-  //   communities-test-user-flagged@mailinator.com) and confirm the account. Set the
-  //   password to match `password` below. Once confirmed, make sure to turn
-  //   email notifications off (so we don't spam mailinator) and also turn off
-  //   'info' and 'announcement' posts in preferences (so we have a blank slate
-  //   for post testing).
-  //   2. Attach a 'flagged' SiteModeration to the profile, flagged by user1:
-  //
-  //        WITH flagger AS (
-  //            SELECT id FROM users
-  //             WHERE email = 'communities-test-user1@mailinator.com'
-  //        ), target AS (
-  //            SELECT id FROM users
-  //             WHERE email = 'communities-test-user-flagged@mailinator.com'
-  //        ), moderation AS (
-  //            INSERT INTO site_moderation
-  //                (user_id, status, user_profile_id, created_date, updated_date)
-  //            SELECT flagger.id, 'flagged', target.id, now(), now()
-  //              FROM flagger, target
-  //            RETURNING id, user_profile_id
-  //        )
-  //        UPDATE users SET site_moderation_id = moderation.id
-  //          FROM moderation WHERE users.id = moderation.user_profile_id;
   // ==========================================================================
   'user-flagged': {
     name: 'Test User Flagged',
     username: 'test-user-flagged',
     email: 'communities-test-user-flagged@mailinator.com',
     password: 'PasswordPassword',
+    siteModeration: { status: 'flagged', flaggedBy: 'user1' },
   },
 
   // ==========================================================================
@@ -512,31 +334,6 @@ const dictionary = {
   // Set up directly in the database for the same reason as 'user-flagged':
   // SiteModeration cannot be deleted through the API.
   //
-  // Manual setup (run once before running the tests):
-  //   1. Register "Test User Rejected" (test-user-rejected /
-  //   communities-test-user-rejected@mailinator.com) and confirm the account. Set
-  //   the password to match `password` below. Once confirmed, make sure to turn
-  //   email notifications off (so we don't spam mailinator) and also turn off
-  //   'info' and 'announcement' posts in preferences (so we have a blank slate
-  //   for post testing).
-  //   2. Attach a 'rejected' SiteModeration to the profile, flagged by user1:
-  //
-  //        WITH flagger AS (
-  //            SELECT id FROM users
-  //             WHERE email = 'communities-test-user1@mailinator.com'
-  //        ), target AS (
-  //            SELECT id FROM users
-  //             WHERE email = 'communities-test-user-rejected@mailinator.com'
-  //        ), moderation AS (
-  //            INSERT INTO site_moderation
-  //                (user_id, status, user_profile_id, created_date, updated_date)
-  //            SELECT flagger.id, 'rejected', target.id, now(), now()
-  //              FROM flagger, target
-  //            RETURNING id, user_profile_id
-  //        )
-  //        UPDATE users SET site_moderation_id = moderation.id
-  //          FROM moderation WHERE users.id = moderation.user_profile_id;
-  //
   // NOTE: these tests only run when the `feat-408-flag-profiles-and-groups`
   // feature flag is enabled; they skip themselves otherwise.
   // ==========================================================================
@@ -545,6 +342,7 @@ const dictionary = {
     username: 'test-user-rejected',
     email: 'communities-test-user-rejected@mailinator.com',
     password: 'PasswordPassword',
+    siteModeration: { status: 'rejected', flaggedBy: 'user1' },
   }
 }
 

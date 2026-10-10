@@ -217,3 +217,16 @@ From there, it should automatically reload and recompile with any code changes.
 If you make any dependency changes (anything requiring `npm install`) you will
 need to rebuild the environment.  That includes changes to any of the
 `@communities` package dependencies.  See "Building the Environment".
+
+## Running the Integration Tests
+
+With the environment running, create the test users in your database, then
+run the tests from your machine:
+
+```
+COMMUNITIES_DATABASE_HOST=localhost npm run test:integration:seed
+npm run test:integration
+```
+
+See [the integration test README](../web-application/test/integration/README.md)
+for what the seed does and how to run against staging.
