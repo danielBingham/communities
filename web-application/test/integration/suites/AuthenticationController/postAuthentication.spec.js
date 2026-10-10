@@ -199,7 +199,7 @@ describe(`POST /authentication`, function() {
     })
 
     it(`Should reject a banned user`, async function() {
-        // See fixtures/users.js -> 'user-banned' for the required manual setup.
+        // See fixtures/users.js -> 'user-banned'.
         const session = await initialize()
 
         const userBanned = userDictionary['user-banned']

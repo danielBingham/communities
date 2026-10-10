@@ -60,6 +60,13 @@ for(const notification of notifications) {
 }
 
 module.exports = class NotificationWorker {
+
+    /**
+     * Every notification type, e.g. 'Post:create:mention'. Users' notification
+     * settings are keyed by these.
+     */
+    static notifications = notifications
+
     constructor(core, logger) {
         this.core = core
 

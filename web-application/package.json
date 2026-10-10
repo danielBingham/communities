@@ -18,7 +18,9 @@
     "test": "jest --passWithNoTests test/unit",
     "test:integration": "API_ROOT=\"https://localhost:3000/api/0.0.0/\" node --use-system-ca --test --test-concurrency 1 \"test/integration/suites/**/*.spec.js\"",
     "test:integration:single": "API_ROOT=\"https://localhost:3000/api/0.0.0/\" node --use-system-ca --test --test-concurrency 1",
-    "test:integration:staging": "API_ROOT=\"https://staging.communities.social/api/0.0.0/\" node --use-system-ca --test --test-concurrency 1 \"test/integration/suites/**/*.spec.js\""
+    "test:integration:staging": "API_ROOT=\"https://staging.communities.social/api/0.0.0/\" node --use-system-ca --test --test-concurrency 1 \"test/integration/suites/**/*.spec.js\"",
+    "test:integration:seed": "NODE_ENV=development node test/integration/seed.js",
+    "test:integration:seed:staging": "NODE_ENV=staging node test/integration/seed.js"
   },
   "jest": {
     "verbose": true,
