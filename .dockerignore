@@ -5,6 +5,7 @@
 **/.env*
 **/config/index.development.js
 **/tmp
+local-data
 **/*.swp
 **/.DS_Store
 .git

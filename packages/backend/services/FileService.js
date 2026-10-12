@@ -22,8 +22,6 @@ const mime = require('mime')
 
 const path = require('node:path')
 
-const S3FileService = require('./files/S3FileService')
-
 const FileDAO = require('../daos/FileDAO')
 
 module.exports = class FileService {
@@ -33,7 +31,7 @@ module.exports = class FileService {
 
         this.fileDAO = new FileDAO(core)
 
-        this.s3 = new S3FileService(core)
+        this.storage = core.storage
 
         // Default variants
         this.defaultVariants = [ 30, 200, 325, 450, 650 ]
@@ -195,7 +193,7 @@ module.exports = class FileService {
         }
 
         if ( file.filepath !== null && file.filepath !== undefined ) {
-            await this.s3.removeFile(file.filepath)
+            await this.storage.removeFile(file.filepath)
         } else {
             this.core.logger.warn(`Removing File(${file.id}) without a filepath.`)
         }
@@ -207,9 +205,9 @@ module.exports = class FileService {
     async deleteVariants(file) {
         for(const variant of file.variants) {
             const filepath = this.getPath(file, variant)
-            const hasFile = await this.s3.hasFile(filepath)
+            const hasFile = await this.storage.hasFile(filepath)
             if ( hasFile ) {
-                this.s3.removeFile(filepath)
+                this.storage.removeFile(filepath)
             }
         }
     }

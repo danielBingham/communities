@@ -63,8 +63,9 @@ cp web-application/server/config/index.development.js-env-example web-applicatio
 cp .env.local.example .env
 ```
 
-Then fill in the two secrets `.env` marks, `COMMUNITIES_SESSION_SECRET` and
-`COMMUNITIES_ENCRYPTION_MFA_V1_KEY`. Generate each with:
+Then fill in the three secrets `.env` marks, `COMMUNITIES_SESSION_SECRET`,
+`COMMUNITIES_ENCRYPTION_MFA_V1_KEY` and `COMMUNITIES_STORAGE_FILESYSTEM_SECRET`.
+Generate each with:
 
 ```
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
@@ -80,9 +81,13 @@ each email (account confirmation, password reset, invitations and so on) is
 logged with its links, and saved as JSON under each app's `tmp/email`
 folder. See [Email](#email) below.
 
-File storage and push notifications don't have local replacements yet, so the
-example fills their values with placeholders. Both apps start, but uploads
-and notification jobs fail until those land.
+It also uses the `filesystem` storage driver, so uploaded images and videos
+are kept in `local-data/storage` at the repository root and served by the
+web application. See [Storage](#storage) below.
+
+Push notifications don't have a local replacement yet, so the example fills
+their values with placeholders. Both apps start, but notification jobs fail
+until it lands.
 
 ### Using Parameter Store
 
@@ -130,6 +135,56 @@ email: {
   links, and if `directory` is set, writes the whole message there as a JSON
   file (a relative directory is relative to the app's folder). The
   environment-variable example uses it with `directory: 'tmp/email'`.
+
+### Storage
+
+The `storage` block picks where uploaded files (images, videos and their
+variants) are kept, the same way: `driver` names the driver, and the block
+with the same name holds its settings.
+
+```
+storage: {
+    driver: 's3',
+    s3: {
+        bucket_url: 'aws-ssm-parameter:/storage/s3/bucket-url',
+        bucket: 'aws-ssm-parameter:/storage/s3/bucket',
+        access_id: 'aws-ssm-parameter:/storage/s3/access-id',
+        access_key: 'aws-ssm-parameter:/storage/s3/access-key'
+    }
+}
+```
+
+- `s3` keeps files in an S3 bucket, and browsers load them from signed S3
+  links. Production and staging use it, and so does the Parameter Store
+  example.
+- `filesystem` keeps each file under `directory` and signs links to the web
+  application's `/api/0.0.0/storage/` route with `secret`. The
+  environment-variable example uses it with `directory:
+  '../local-data/storage'`; a relative directory is relative to the app's
+  folder, so both apps use `local-data/storage` at the repository root, which
+  Docker Compose mounts into both containers. It can only be used in
+  development.
+
+The `s3` driver also works with an S3-compatible server such as
+[Garage](https://garagehq.deuxfleurs.fr/) or
+[SeaweedFS](https://github.com/seaweedfs/seaweedfs), if you'd rather test
+against the S3 code path. Add `endpoint` (the server's S3 API, for example
+`'http://localhost:3900'`), and `region` if the server expects one other than
+`us-east-1`. If the apps reach the server at a different address than your
+browser does (a container hostname, say), set `public_endpoint` to the one
+your browser uses; signed links are made with it. Buckets on a custom
+endpoint are addressed by path.
+
+Two assets the web application serves come from storage too:
+`assets/intro-video.mp4` (the welcome notice's video) and
+`assets/daniel-headshot.jpg`. To give new local storage placeholder copies,
+run this from the repository root:
+
+```
+npm run storage:seed
+```
+
+It only adds files that aren't there, so it never replaces real ones.
 
 ### Where `.env` is read
 

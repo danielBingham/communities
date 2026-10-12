@@ -108,6 +108,10 @@ services:
       - /opt/communities/packages/session/node_modules
       # --- Temp directory for file processing ---
       - ./worker/tmp:/src/tmp
+      # --- Uploaded files (filesystem storage driver), shared with the web
+      # application. The example config's '../local-data/storage' resolves
+      # here from either app's folder.
+      - ./local-data/storage:/opt/communities/local-data/storage
     restart: unless-stopped
 
   # ---------------------------------------------------------------------------
@@ -167,4 +171,6 @@ services:
       - /opt/communities/packages/session/node_modules
       # --- Temp directory for image uploads ---
       - ./web-application/tmp:/src/tmp
+      # --- Uploaded files (filesystem storage driver), shared with the worker.
+      - ./local-data/storage:/opt/communities/local-data/storage
     restart: unless-stopped

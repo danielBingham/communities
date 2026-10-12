@@ -16,8 +16,8 @@ npm run test:integration:seed
 
 It creates any fixture user that's missing and puts the rest back the way
 `fixtures/users.js` describes them: password, status, site role, settings,
-privacy, failed login attempts, multi-factor authentication and profile
-moderation. Running it before every test run is fine. It doesn't touch other
+privacy, failed login attempts, multi-factor authentication, profile picture
+(none) and profile moderation. Running it before every test run is fine. It doesn't touch other
 users, or anything the tests create (groups, posts, friendships), which the
 tests clean up after themselves.
 

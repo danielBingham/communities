@@ -40,6 +40,7 @@ const { createLogMiddleware } = require('./log')
 const { createCSRFMiddleware } = require('./csrf')
 const { createSecurityHeadersMiddleware } = require('./middleware/security-headers')
 const { createErrorsMiddleware } = require('./errors')
+const { mountStorageRoute } = require('./storage')
 
 const createRouter = require('./router')
 
@@ -71,6 +72,14 @@ const createExpressApp = function(core, sessionParser) {
         ],
         exposedHeaders: '*'
     }))
+
+    // Files kept by the filesystem storage driver (development only), served
+    // from the signed links it hands out.  This comes ahead of the API's
+    // middleware because, as with S3's signed URLs, the signature is the
+    // permission: these requests don't need a session.
+    if ( core.config.storage.driver === 'filesystem' ) {
+        mountStorageRoute(app, core)
+    }
 
     app.use('/api', function(request, response, next) {
         // Don't cache API responses.  We'll take care of that in redux.

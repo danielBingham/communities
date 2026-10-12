@@ -45,11 +45,19 @@ module.exports = {
         platformHeader: 'env:COMMUNITIES_SESSION_PLATFORM_HEADER',
         secret: 'env:COMMUNITIES_SESSION_SECRET'
     },
-    s3: {
-        bucket_url: 'env:COMMUNITIES_STORAGE_S3_BUCKET_URL',
-        bucket: 'env:COMMUNITIES_STORAGE_S3_BUCKET',
-        access_id: 'env:COMMUNITIES_STORAGE_S3_ACCESS_ID',
-        access_key: 'env:COMMUNITIES_STORAGE_S3_ACCESS_KEY'
+    // Storage: `driver` selects where uploaded files are kept, and the block
+    // with the same name configures that driver (see
+    // packages/backend/services/storage). The filesystem driver keeps files
+    // under `directory` (relative to the app's folder, so both apps share
+    // local-data/storage at the repository root) and serves them to browsers
+    // from links signed with `secret`. To use S3, or an S3-compatible server,
+    // use `driver: 's3'` with an `s3: { ... }` block instead.
+    storage: {
+        driver: 'filesystem',
+        filesystem: {
+            directory: '../local-data/storage',
+            secret: 'env:COMMUNITIES_STORAGE_FILESYSTEM_SECRET'
+        }
     },
     // Email: `driver` selects how email is sent, and the block with the same
     // name configures that driver (see packages/backend/services/email). The

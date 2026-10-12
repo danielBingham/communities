@@ -105,6 +105,7 @@ const seedUser = async function(database, fixture) {
     // one it has, if any.
     await database.query(`
         UPDATE users SET
+            file_id = DEFAULT,
             privacy__view_friends = DEFAULT,
             privacy__view_mutual_friends = DEFAULT,
             failed_authentication_attempts = DEFAULT,

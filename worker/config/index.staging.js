@@ -36,11 +36,17 @@ module.exports = {
         platformHeader: 'aws-ssm-parameter:/session/platform-header',
         secret: 'aws-ssm-parameter:/session/secret' 
     },
-    s3: {
-        bucket_url: 'aws-ssm-parameter:/storage/s3/bucket-url',
-        bucket: 'aws-ssm-parameter:/storage/s3/bucket',
-        access_id: 'aws-ssm-parameter:/storage/s3/access-id',
-        access_key: 'aws-ssm-parameter:/storage/s3/access-key' 
+    // Storage: `driver` selects where uploaded files are kept, and the block
+    // with the same name configures that driver (see
+    // packages/backend/services/storage).
+    storage: {
+        driver: 's3',
+        s3: {
+            bucket_url: 'aws-ssm-parameter:/storage/s3/bucket-url',
+            bucket: 'aws-ssm-parameter:/storage/s3/bucket',
+            access_id: 'aws-ssm-parameter:/storage/s3/access-id',
+            access_key: 'aws-ssm-parameter:/storage/s3/access-key'
+        }
     },
     // Email: `driver` selects how email is sent, and the block with the same
     // name configures that driver (see packages/backend/services/email).

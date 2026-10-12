@@ -27,7 +27,6 @@ const FileDAO = require('../../daos/FileDAO')
 const ProcessService = require('../ProcessService')
 const FileService = require('../FileService')
 const LocalFileService = require('./LocalFileService')
-const S3FileService = require('./S3FileService')
 const ServiceError = require('../../errors/ServiceError')
 
 class VideoProcess {
@@ -44,7 +43,7 @@ class VideoProcess {
         this.fileService = new FileService(core)
 
         this.local = new LocalFileService(core)
-        this.s3 = new S3FileService(core)
+        this.storage = core.storage
 
         this.events = {
             'progress': []
@@ -87,7 +86,7 @@ class VideoProcess {
 
         try { 
             this.core.logger.info(`Downloading file "${originalPath}"...`)
-            await this.s3.downloadFile(originalPath, localOriginalFile).catch((error) => {
+            await this.storage.downloadFile(originalPath, localOriginalFile).catch((error) => {
                 this.core.logger.error(`Failed to download video for processing: `, error)
                 throw new ServiceError('failed-download', 'We failed to download the video for processing.')
             })
@@ -97,7 +96,7 @@ class VideoProcess {
             if ( originalPath === targetPath ) {
                 originalPath = this.fileService.getPath(file, 'original')
                 this.core.logger.info(`Backing up original file to ${originalPath}...`)
-                await this.s3.moveFile(file.filepath, originalPath)
+                await this.storage.moveFile(file.filepath, originalPath)
             }
 
             // Get the length of the video in seconds.
@@ -177,7 +176,7 @@ class VideoProcess {
 
             // TODO: Add retries to this.
             this.core.logger.info(`Uploading the newly formatted file...`)
-            await this.s3.uploadFile(localNewFile, targetPath).catch((error) => {
+            await this.storage.uploadFile(localNewFile, targetPath).catch((error) => {
                 this.core.logger.error(`Failed to upload video after processing: `, error)
                 throw new ServiceError('failed-upload', 'We failed to upload the video after processing.')
             })
@@ -212,7 +211,7 @@ class VideoProcess {
             this.trigger('progress', 90)
 
             this.core.logger.info(`Uploading the thumbnail...`)
-            await this.s3.uploadFile(thumbnailLocalFile, thumbnailPath).catch((error) => {
+            await this.storage.uploadFile(thumbnailLocalFile, thumbnailPath).catch((error) => {
                 this.core.logger.error(`Failed to upload video thumbnail after processing: `, error)
                 throw new ServiceError('failed-thumbnail-upload', 'We failed to upload the video thumbnail after processing.')
             })
@@ -222,7 +221,7 @@ class VideoProcess {
             const thumbPatch = {
                 id: thumbId,
                 filepath: thumbnailPath,
-                location: this.core.config.s3.bucket_url
+                location: this.storage.location
             }
             await this.fileDAO.updateFile(thumbPatch)
 
@@ -242,7 +241,7 @@ class VideoProcess {
             // Once we've updated the file to point to the newly formatted
             // file, delete the original to save space.  We're not going to use
             // it once we've reformatted it.
-            await this.s3.removeFile(originalPath)
+            await this.storage.removeFile(originalPath)
         
             // Remove both newFilename and originalFilename from local files
             this.local.removeFile(localOriginalFile)
@@ -278,7 +277,7 @@ class VideoProcess {
             try { 
                 if ( originalPath !== file.filepath ) {
                     this.core.logger.info(`Restoring original file...`)
-                    await this.s3.moveFile(originalPath, file.filepath)
+                    await this.storage.moveFile(originalPath, file.filepath)
                 }
             } catch (restoreError) {
                 this.core.logger.error(`Failed to restore original file: `, restoreError)
