@@ -69,17 +69,46 @@ module.exports = class S3Storage {
         this.bucket = settings.bucket
         this.region = settings.region || 'us-east-1'
 
-        const clientFor = (endpoint) => new S3({
-            region: this.region,
-            credentials: {
-                accessKeyId: settings.access_id,
-                secretAccessKey: settings.access_key
-            },
-            ...( endpoint ? { endpoint: endpoint, forcePathStyle: true } : {} )
-        })
+        // If client is defined, just use that client.
+        if ( client ) {
+            this.s3Client = client
+        }
+        // Otherwise, create a new S3 client using the configuration settings.
+        else {
+            const clientConfig = {
+                region: this.region,
+                credentials: {
+                    accessKeyId: settings.access_id,
+                    secretAccessKey: settings.access_key
+                }
+            }
 
-        this.s3Client = client ?? clientFor(settings.endpoint)
-        this.signingClient = settings.public_endpoint ? clientFor(settings.public_endpoint) : this.s3Client
+            // If endpoint is set, it means we're using an S3 compatible API.
+            // Pass it to the client.
+            if ( 'endpoint' in settings && settings.endpoint ) {
+                clientConfig.endpoint = settings.endpoint
+            }
+            this.s3Client = new S3(clientConfig)
+        }
+
+        // If `public_endpoint` is set, it means the endpoint used to read file
+        // is different from the one used to interact with the API.  This
+        // should only be true for S3 compatible alternatives.
+        if ( 'public_endpoint' in settings && settings.public_endpoint ) {
+            const signingClientConfig = {
+                region: this.region,
+                credentials: {
+                    accessKeyId: settings.access_id,
+                    secretAccessKey: settings.access_key
+                },
+                endpoint: settings.public_endpoint
+            }
+            this.signingClient = new S3(signingClientConfig)
+        }
+        // If we don't have `public_endpoint` set, just use the root client.
+        else {
+            this.signingClient = this.s3Client
+        }
 
         /**
          * Recorded as `files.location` for each file stored here.
