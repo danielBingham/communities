@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -62,7 +62,7 @@ module.exports = class Core {
          * An instance of of a bull queue that we'll use to queue up long
          * running jobs for pickup by the workers.
          */
-        this.queues = {} 
+        this.queues = {}
 
         /**
          * The email driver selected by `email.driver` in the configuration,
@@ -81,12 +81,12 @@ module.exports = class Core {
         this.storage = null
 
         /**
-         * Our configuration values.  
+         * Our configuration values.
          *
          * @see web-application/server/config/index.js
          * @see worker/config/index.js
          */
-        this.config = config 
+        this.config = config
 
         /**
          * An instance of FeatureFlags, initialized with information on what
