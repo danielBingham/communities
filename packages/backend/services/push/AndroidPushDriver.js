@@ -41,6 +41,33 @@ const SessionService = require('../SessionService')
 module.exports = class AndroidPushDriver {
 
     /**
+     * Check the `notifications.android` block.
+     *
+     * @param {Object} settings The `notifications.android` block.
+     *
+     * @throws {Error} When the service account is missing, isn't JSON, or
+     * lacks a field Firebase needs.
+     */
+    static validateConfig(settings) {
+        if ( ! settings?.firebaseServiceAccount ) {
+            throw new Error(`The android push driver needs notifications.android.firebaseServiceAccount in the configuration.`)
+        }
+
+        let serviceAccount = null
+        try {
+            serviceAccount = JSON.parse(settings.firebaseServiceAccount)
+        } catch (error) {
+            throw new Error(`notifications.android.firebaseServiceAccount in the configuration must be the service account's JSON.`)
+        }
+
+        for (const key of [ 'project_id', 'client_email', 'private_key' ]) {
+            if ( typeof serviceAccount?.[key] !== 'string' || serviceAccount[key] === '' ) {
+                throw new Error(`notifications.android.firebaseServiceAccount in the configuration needs its '${key}'.`)
+            }
+        }
+    }
+
+    /**
      * @param {Core} core
      * @param {Object} settings The `notifications.android` block.
      * @param {string} settings.firebaseServiceAccount  The Firebase service
@@ -48,9 +75,7 @@ module.exports = class AndroidPushDriver {
      * @param {Logger} [logger] Defaults to the core's logger.
      */
     constructor(core, settings, logger) {
-        if ( ! settings?.firebaseServiceAccount ) {
-            throw new Error(`The android push driver needs notifications.android.firebaseServiceAccount in the configuration.`)
-        }
+        AndroidPushDriver.validateConfig(settings, core.config?.environment)
 
         this.core = core
         this.logger = logger ?? core.logger

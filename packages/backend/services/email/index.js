@@ -36,7 +36,7 @@ const PostmarkEmailDriver = require('./PostmarkEmailDriver')
  * @return {Object} The driver: an object with `async send(message)`.
  *
  * @throws {Error} When `email.driver` isn't a known driver, or the driver's
- * settings are incomplete.
+ * settings are invalid (see each driver's validateConfig()).
  */
 const createEmailDriver = function(core) {
     const driver = core.config.email?.driver
@@ -44,13 +44,9 @@ const createEmailDriver = function(core) {
     if ( driver === 'postmark' ) {
         return new PostmarkEmailDriver(core, core.config.email.postmark)
     } else if ( driver === 'log' ) {
-        if ( core.config.environment === 'development' ) {
-            return new LogEmailDriver(core, core.config.email.log)
-        } else {
-            throw new Error('The log email driver may only be used in development.')
-        }
+        return new LogEmailDriver(core, core.config.email.log)
     } else {
-        throw new Error(`email.driver in the configuration must be one of 'postmark' or 'log'.`
+        throw new Error(`email.driver in the configuration must be one of 'postmark' or 'log', `
             + `but it's '${driver ?? ''}'.`)
     }
 }

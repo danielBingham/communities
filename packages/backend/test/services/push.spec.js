@@ -32,6 +32,30 @@ describe('Push notifications', function() {
         }
     }
 
+    describe('validateConfig()', function() {
+        it('Should require the iOS settings', function() {
+            expect(() => IOSPushDriver.validateConfig(ios, 'production')).not.toThrow()
+            for (const key of Object.keys(ios)) {
+                expect(() => IOSPushDriver.validateConfig({ ...ios, [key]: '' }, 'production')).toThrow(`notifications.ios.${key}`)
+            }
+        })
+
+        it('Should require the Android service account, as JSON', function() {
+            expect(() => AndroidPushDriver.validateConfig(android, 'production')).not.toThrow()
+            expect(() => AndroidPushDriver.validateConfig({}, 'production')).toThrow('notifications.android.firebaseServiceAccount')
+            expect(() => AndroidPushDriver.validateConfig({ firebaseServiceAccount: 'not-configured' }, 'production')).toThrow(/must be the service account's JSON/)
+            // The old local placeholder: JSON, but not a service account.
+            expect(() => AndroidPushDriver.validateConfig({ firebaseServiceAccount: '{}' }, 'production')).toThrow(`needs its 'project_id'`)
+        })
+
+        it('Should only allow the log driver in development', function() {
+            expect(() => LogPushDriver.validateConfig({}, 'development')).not.toThrow()
+            for (const environment of [ 'staging', 'production', undefined ]) {
+                expect(() => LogPushDriver.validateConfig({}, environment)).toThrow('The log push driver may only be used in development.')
+            }
+        })
+    })
+
     describe('createPushDrivers()', function() {
         it('Should turn push notifications off without a notifications block, or with an empty one', function() {
             expect(createPushDrivers(coreWith(undefined))).toEqual([])

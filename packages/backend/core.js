@@ -27,7 +27,6 @@ const Events = require('./events')
 const Logger = require('./logger')
 const { createEmailDriver } = require('./services/email')
 const { createStorage } = require('./services/storage')
-const { createPushDrivers } = require('./services/push')
 
 /***
  * A wrapper around our core dependencies that will be used by most of our
@@ -178,12 +177,11 @@ module.exports = class Core {
         this.storage = createStorage(this)
 
         /**********************************************************************
-         * Push Notification Check
+         * Push Notifications
          **********************************************************************/
         // Each NotificationWorker creates its own push drivers (the iOS driver
-        // holds a connection), so they aren't kept here. Creating them once
-        // checks the `notifications` configuration when the app starts.
-        createPushDrivers(this)
+        // holds a connection), so there's nothing to create here.
+        // Config.validateConfig() has already checked their settings.
         const pushDriverNames = Object.keys(this.config.notifications ?? {})
         this.logger.info(pushDriverNames.length > 0
             ? `Sending push notifications with: ${pushDriverNames.join(', ')}.`

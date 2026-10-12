@@ -57,16 +57,27 @@ const REASON = {
 module.exports = class IOSPushDriver {
 
     /**
-     * @param {Core} core
+     * Check the `notifications.ios` block.
+     *
      * @param {Object} settings The `notifications.ios` block.
-     * @param {Logger} [logger] Defaults to the core's logger.
+     *
+     * @throws {Error} When a required setting is missing.
      */
-    constructor(core, settings, logger) {
+    static validateConfig(settings) {
         for (const key of [ 'privateCert', 'publicCert', 'applicationBundleID', 'endpoint' ]) {
             if ( ! settings?.[key] ) {
                 throw new Error(`The ios push driver needs notifications.ios.${key} in the configuration.`)
             }
         }
+    }
+
+    /**
+     * @param {Core} core
+     * @param {Object} settings The `notifications.ios` block.
+     * @param {Logger} [logger] Defaults to the core's logger.
+     */
+    constructor(core, settings, logger) {
+        IOSPushDriver.validateConfig(settings, core.config?.environment)
 
         this.core = core
         this.settings = settings

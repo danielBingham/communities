@@ -22,6 +22,10 @@ const fs = require('fs')
 const path = require('path')
 const { SSMClient, GetParameterCommand } = require("@aws-sdk/client-ssm")
 
+const { LogEmailDriver, PostmarkEmailDriver } = require('./services/email')
+const { FilesystemStorage, S3Storage } = require('./services/storage')
+const { AndroidPushDriver, IOSPushDriver, LogPushDriver } = require('./services/push')
+
 /**
  * The environments a configuration definition file can exist for, selected by
  * NODE_ENV: `config/index.<environment>.js`.
@@ -46,8 +50,28 @@ const ENV_PREFIX = 'env:'
 const ENVIRONMENT_NAME_VARIABLE = 'COMMUNITIES_ENVIRONMENT_NAME'
 
 /**
- * Thrown when the configuration can't be loaded: no definition file for the
- * environment, or values that couldn't be found.
+ * The settings the `database` and `redis` blocks must have.
+ */
+const REQUIRED = {
+    database: [ 'host', 'port', 'user', 'password', 'name' ],
+    redis: [ 'host', 'port' ]
+}
+
+/**
+ * The drivers each block can turn on, by name. `email` and `storage` select
+ * one with their `driver` value; each block under `notifications` turns on
+ * the driver with the same name. Every driver checks its own settings with
+ * its static validateConfig().
+ */
+const DRIVERS = {
+    email: { postmark: PostmarkEmailDriver, log: LogEmailDriver },
+    storage: { s3: S3Storage, filesystem: FilesystemStorage },
+    notifications: { ios: IOSPushDriver, android: AndroidPushDriver, log: LogPushDriver }
+}
+
+/**
+ * Thrown when the configuration can't be loaded (no definition file for the
+ * environment, or values that couldn't be found) or isn't valid.
  */
 class ConfigError extends Error {
     constructor(message, missing) {
@@ -267,6 +291,66 @@ module.exports = class Config {
             }
             console.error(`Got error while loading parameter: '${fullyQualifiedParameterPath}'::`, error)
             throw error
+        }
+    }
+
+    /**
+     * Check a loaded configuration, so mistakes stop the app as it starts
+     * rather than when something first uses them:
+     *
+     * - the `database` and `redis` blocks have their required settings;
+     * - `email.driver` and `storage.driver` name a known driver, and each
+     *   block under `notifications` is a known push driver;
+     * - each driver that's selected or turned on accepts its block (see each
+     *   driver's static validateConfig()).
+     *
+     * @param {Object} config   An app's configuration, as loadConfig()
+     * returns it.
+     *
+     * @throws {ConfigError} When anything is wrong, listing every problem.
+     */
+    validateConfig(config) {
+        const problems = []
+
+        for (const [block, keys] of Object.entries(REQUIRED)) {
+            for (const key of keys) {
+                if ( ! config[block]?.[key] ) {
+                    problems.push(`The configuration needs ${block}.${key}.`)
+                }
+            }
+        }
+
+        // Ask a driver to check its block, recording what it finds.
+        const validate = (Driver, settings) => {
+            try {
+                Driver.validateConfig(settings, config.environment)
+            } catch (error) {
+                problems.push(error.message)
+            }
+        }
+
+        for (const block of [ 'email', 'storage' ]) {
+            const name = config[block]?.driver
+            if ( Object.hasOwn(DRIVERS[block], name ?? '') ) {
+                validate(DRIVERS[block][name], config[block][name])
+            } else {
+                problems.push(`${block}.driver in the configuration must be one of `
+                    + `${Object.keys(DRIVERS[block]).map((driver) => `'${driver}'`).join(' or ')}, but it's '${name ?? ''}'.`)
+            }
+        }
+
+        for (const [name, settings] of Object.entries(config.notifications ?? {})) {
+            if ( Object.hasOwn(DRIVERS.notifications, name) ) {
+                validate(DRIVERS.notifications[name], settings)
+            } else {
+                problems.push(`notifications.${name} in the configuration isn't a push driver. `
+                    + `Each block under notifications must be one of 'ios', 'android' or 'log'.`)
+            }
+        }
+
+        if ( problems.length > 0 ) {
+            throw new ConfigError(`Invalid configuration: ${problems.length} problem(s).\n`
+                + problems.map((problem) => `  ${problem}`).join('\n'))
         }
     }
 

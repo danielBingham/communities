@@ -31,12 +31,29 @@
 module.exports = class LogPushDriver {
 
     /**
+     * Check the `notifications.log` block. It has no settings, but the
+     * driver may only be used in development.
+     *
+     * @param {Object} [settings]   The `notifications.log` block.
+     * @param {string} environment  The configuration's `environment`.
+     *
+     * @throws {Error} When the environment isn't development.
+     */
+    static validateConfig(settings, environment) {
+        if ( environment !== 'development' ) {
+            throw new Error('The log push driver may only be used in development.')
+        }
+    }
+
+    /**
      * @param {Core} core
      * @param {Object} [settings]   The `notifications.log` block (no
      * settings yet).
      * @param {Logger} [logger] Defaults to the core's logger.
      */
     constructor(core, settings, logger) {
+        LogPushDriver.validateConfig(settings, core.config?.environment)
+
         this.logger = logger ?? core.logger
     }
 

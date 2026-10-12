@@ -36,6 +36,19 @@ const ServiceError = require('../../errors/ServiceError')
 module.exports = class PostmarkEmailDriver {
 
     /**
+     * Check the `email.postmark` block.
+     *
+     * @param {Object} settings The `email.postmark` block.
+     *
+     * @throws {Error} When a required setting is missing.
+     */
+    static validateConfig(settings) {
+        if ( ! settings?.api_token ) {
+            throw new Error(`The postmark email driver needs email.postmark.api_token in the configuration.`)
+        }
+    }
+
+    /**
      * @param {Core} core
      * @param {Object} settings The `email.postmark` block.
      * @param {string} settings.api_token   The Postmark server API token.
@@ -43,9 +56,7 @@ module.exports = class PostmarkEmailDriver {
      * constructing one.
      */
     constructor(core, settings, client) {
-        if ( ! settings?.api_token ) {
-            throw new Error(`The postmark email driver needs email.postmark.api_token in the configuration.`)
-        }
+        PostmarkEmailDriver.validateConfig(settings, core.config?.environment)
 
         this.client = client ?? new Postmark.ServerClient(settings.api_token)
     }

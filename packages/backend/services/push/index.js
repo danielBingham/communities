@@ -41,8 +41,8 @@ const LogPushDriver = require('./LogPushDriver')
  * @return {Object[]} The drivers: objects with `async send(userId,
  * notification)`.
  *
- * @throws {Error} When a block isn't a known driver, a driver's settings are
- * incomplete, or the log driver is used outside development.
+ * @throws {Error} When a block isn't a known driver, or a driver's settings
+ * are invalid (see each driver's validateConfig()).
  */
 const createPushDrivers = function(core, logger) {
     const drivers = []
@@ -53,11 +53,7 @@ const createPushDrivers = function(core, logger) {
         } else if ( name === 'android' ) {
             drivers.push(new AndroidPushDriver(core, settings, logger))
         } else if ( name === 'log' ) {
-            if ( core.config.environment === 'development' ) {
-                drivers.push(new LogPushDriver(core, settings, logger))
-            } else {
-                throw new Error('The log push driver may only be used in development.')
-            }
+            drivers.push(new LogPushDriver(core, settings, logger))
         } else {
             throw new Error(`notifications.${name} in the configuration isn't a push driver. `
                 + `Each block under notifications must be one of 'ios', 'android' or 'log'.`)

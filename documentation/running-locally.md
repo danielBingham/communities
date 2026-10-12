@@ -37,6 +37,10 @@ A value only comes from the environment if the file says `env:` for it, so
 there are no implicit overrides. If any value can't be found, the app stops
 at startup and lists every missing one, with the key and where it looked.
 
+It then checks what it loaded: the `database` and `redis` settings, the
+email, storage and push drivers the file selects, and the settings each of
+those drivers needs. Any problems stop it at startup too, listed together.
+
 The production and staging files are committed. `index.development.js` is
 yours: git ignores it, and you create it by copying one of the two examples
 next to it, then edit it however you need.

@@ -41,7 +41,7 @@ const S3Storage = require('./S3Storage')
  * @return {S3Storage|FilesystemStorage}
  *
  * @throws {Error} When `storage.driver` isn't a known driver, or the driver's
- * settings are incomplete.
+ * settings are invalid (see each driver's validateConfig()).
  */
 const createStorage = function(core) {
     const driver = core.config.storage?.driver
@@ -49,11 +49,7 @@ const createStorage = function(core) {
     if ( driver === 's3' ) {
         return new S3Storage(core, core.config.storage.s3)
     } else if ( driver === 'filesystem' ) {
-        if ( core.config.environment === 'development' ) {
-            return new FilesystemStorage(core, core.config.storage.filesystem)
-        } else {
-            throw new Error('The filesystem storage driver may only be used in development.')
-        }
+        return new FilesystemStorage(core, core.config.storage.filesystem)
     } else {
         throw new Error(`storage.driver in the configuration must be one of 's3' or 'filesystem', `
             + `but it's '${driver ?? ''}'.`)
