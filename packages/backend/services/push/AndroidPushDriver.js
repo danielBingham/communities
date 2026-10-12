@@ -26,16 +26,40 @@ const { getMessaging } = require('firebase-admin/messaging')
 
 const SessionService = require('../SessionService')
 
-module.exports = class AndroidNotifications {
+/**
+ * Sends push notifications to the Android app through Firebase Cloud
+ * Messaging.
+ *
+ * Configured by the `notifications.android` block:
+ *
+ *   notifications: {
+ *       android: {
+ *           firebaseServiceAccount: 'aws-ssm-parameter:/notifications/android/firebase-service-account-json'
+ *       }
+ *   }
+ */
+module.exports = class AndroidPushDriver {
 
-    constructor(core) {
+    /**
+     * @param {Core} core
+     * @param {Object} settings The `notifications.android` block.
+     * @param {string} settings.firebaseServiceAccount  The Firebase service
+     * account, as JSON.
+     * @param {Logger} [logger] Defaults to the core's logger.
+     */
+    constructor(core, settings, logger) {
+        if ( ! settings?.firebaseServiceAccount ) {
+            throw new Error(`The android push driver needs notifications.android.firebaseServiceAccount in the configuration.`)
+        }
+
         this.core = core
+        this.logger = logger ?? core.logger
 
         this.sessionService = new SessionService(core)
 
         this.app = null
         if ( getApps().length <= 0 ) {
-            const serviceAccount = JSON.parse(this.core.config.notifications.android.firebaseServiceAccount)
+            const serviceAccount = JSON.parse(settings.firebaseServiceAccount)
             this.app = initializeApp({
                 credential: cert(serviceAccount)
             }, 'communities')
@@ -47,7 +71,10 @@ module.exports = class AndroidNotifications {
     }
 
 
-    async sendAndroidNotification(userId, notification) {
+    /**
+     * Send a notification to each of the user's Android devices.
+     */
+    async send(userId, notification) {
         const sessions = await this.sessionService.getSessions(userId)
         const devices = {}
 
@@ -94,17 +121,17 @@ module.exports = class AndroidNotifications {
                 }
             }
 
-            this.core.logger.verbose(`Attempting to send notification: `, message)
-            this.core.logger.verbose(`To device: `, session.data.device)
+            this.logger.verbose(`Attempting to send notification: `, message)
+            this.logger.verbose(`To device: `, session.data.device)
 
             try { 
                 const response = await this.messaging.send(message)
-                this.core.logger.verbose(`Got response: `)
-                this.core.logger.verbose(response)
+                this.logger.verbose(`Got response: `)
+                this.logger.verbose(response)
             } catch (error) {
-                this.core.logger.error(`Failed sending Android Notification: `, error)
-                this.core.logger.error(`Message: `, message)
-                this.core.logger.error(`Device: `, session.data.device)
+                this.logger.error(`Failed sending Android Notification: `, error)
+                this.logger.error(`Message: `, message)
+                this.logger.error(`Device: `, session.data.device)
             }
         }
     }

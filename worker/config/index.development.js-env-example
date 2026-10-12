@@ -70,15 +70,12 @@ module.exports = {
             directory: 'tmp/email'
         }
     },
+    // Push notifications: each block under `notifications` turns on the
+    // driver with that name, `ios`, `android` or `log`, and an empty or
+    // missing block turns them off (see packages/backend/services/push). The
+    // log driver sends nothing: it logs each notification. To send to the
+    // mobile apps instead, use `ios: { ... }` and `android: { ... }` blocks.
     notifications: {
-        ios: {
-            privateCert: 'env:COMMUNITIES_NOTIFICATIONS_IOS_APNS_PRIVATE_KEY_PEM',
-            publicCert: 'env:COMMUNITIES_NOTIFICATIONS_IOS_APNS_PUBLIC_CERT_PEM',
-            applicationBundleID: 'env:COMMUNITIES_NOTIFICATIONS_IOS_APPLICATION_BUNDLE_ID',
-            endpoint: 'env:COMMUNITIES_NOTIFICATIONS_IOS_ENDPOINT'
-        },
-        android: {
-            firebaseServiceAccount: 'env:COMMUNITIES_NOTIFICATIONS_ANDROID_FIREBASE_SERVICE_ACCOUNT_JSON'
-        }
+        log: {}
     }
 }

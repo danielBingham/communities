@@ -85,9 +85,8 @@ It also uses the `filesystem` storage driver, so uploaded images and videos
 are kept in `local-data/storage` at the repository root and served by the
 web application. See [Storage](#storage) below.
 
-Push notifications don't have a local replacement yet, so the example fills
-their values with placeholders. Both apps start, but notification jobs fail
-until it lands.
+And it uses the `log` push driver, so push notifications are logged instead
+of sent to phones. See [Push notifications](#push-notifications) below.
 
 ### Using Parameter Store
 
@@ -185,6 +184,37 @@ npm run storage:seed
 ```
 
 It only adds files that aren't there, so it never replaces real ones.
+
+### Push notifications
+
+The `notifications` block works differently from email and storage: each
+block inside it turns on the driver with the same name, and every driver
+that's on gets each push notification.
+
+```
+notifications: {
+    ios: {
+        privateCert: 'aws-ssm-parameter:/notifications/ios/apns-private-key-pem',
+        publicCert: 'aws-ssm-parameter:/notifications/ios/apns-public-cert-pem',
+        applicationBundleID: 'aws-ssm-parameter:/notifications/ios/application-bundle-id',
+        endpoint: 'aws-ssm-parameter:/notifications/ios/endpoint'
+    },
+    android: {
+        firebaseServiceAccount: 'aws-ssm-parameter:/notifications/android/firebase-service-account-json'
+    }
+}
+```
+
+- `ios` sends to the iOS app through the Apple Push Notification service.
+- `android` sends to the Android app through Firebase Cloud Messaging.
+- `log` sends nothing. It logs each notification with its type, recipient,
+  text and link. It can only be used in development.
+
+Production, staging and the Parameter Store example use `ios` and `android`.
+The environment-variable example uses `log: {}`. An empty or missing
+`notifications` block turns push notifications off. Either way, notifications
+still appear in the app and are emailed; the block only decides where pushes
+to phones go.
 
 ### Where `.env` is read
 

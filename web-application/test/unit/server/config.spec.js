@@ -4,8 +4,9 @@
  * Every app has one committed definition per environment plus two development
  * examples. When a value is added to production, staging and both examples
  * need it too; these tests fail until they have it. The exceptions are the
- * email and storage blocks, where the environment example uses the log and
- * filesystem drivers. Covers the web application and the worker.
+ * email, storage and notifications blocks, where the environment example uses
+ * the log, filesystem and log drivers. Covers the web application and the
+ * worker.
  ******************************************************************************/
 
 const path = require('path')
@@ -90,10 +91,30 @@ describe.each(Object.entries(apps))('Configuration definitions: %s', function(ap
         expect(envExample['storage.driver']).toBe('filesystem')
     })
 
+    it('Should only turn on known push drivers, each configured, under notifications', function() {
+        const drivers = {
+            ios: [ 'privateCert', 'publicCert', 'applicationBundleID', 'endpoint' ],
+            android: [ 'firebaseServiceAccount' ],
+            log: []
+        }
+        // Not flattened: the log driver's block is empty.
+        const blocks = (name) => load(directory, name).notifications ?? {}
+        for (const name of [ 'index.production.js', 'index.staging.js', 'index.development.js-ssm-example', 'index.development.js-env-example' ]) {
+            for (const [driver, settings] of Object.entries(blocks(name))) {
+                expect(Object.keys(drivers)).toContain(driver)
+                for (const key of drivers[driver]) {
+                    expect(settings).toHaveProperty([ key ])
+                }
+            }
+        }
+        expect(Object.keys(blocks('index.production.js'))).toEqual([ 'ios', 'android' ])
+        expect(Object.keys(blocks('index.development.js-env-example'))).toEqual([ 'log' ])
+    })
+
     it('Should read every other Parameter Store value from its matching variable in the environment example', function() {
-        // The email and storage blocks legitimately differ: the example uses
-        // the log and filesystem drivers.
-        const driverBlock = (key) => key.startsWith('email.') || key.startsWith('storage.')
+        // The email, storage and notifications blocks legitimately differ:
+        // the example uses the log, filesystem and log drivers.
+        const driverBlock = (key) => key.startsWith('email.') || key.startsWith('storage.') || key.startsWith('notifications.')
         const outsideDriverBlocks = (definition) => Object.keys(definition).filter((key) => ! driverBlock(key)).sort()
         expect(outsideDriverBlocks(envExample)).toEqual(outsideDriverBlocks(production))
 
