@@ -87,6 +87,7 @@ module.exports = class S3Storage {
             // Pass it to the client.
             if ( 'endpoint' in settings && settings.endpoint ) {
                 clientConfig.endpoint = settings.endpoint
+                clientConfig.forcePathStyle = true // This is an undocumented API that prevents the client from adding the bucket to the origin.
             }
             this.s3Client = new S3(clientConfig)
         }
@@ -101,7 +102,8 @@ module.exports = class S3Storage {
                     accessKeyId: settings.access_id,
                     secretAccessKey: settings.access_key
                 },
-                endpoint: settings.public_endpoint
+                endpoint: settings.public_endpoint,
+                forcePathStyle: true // An undocumented API that prevents the client from adding the bucket to the origin.
             }
             this.signingClient = new S3(signingClientConfig)
         }
