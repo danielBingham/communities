@@ -55,11 +55,28 @@ const decodeEntities = function(text) {
 module.exports = class LogEmailDriver {
 
     /**
+     * Check the `email.log` block. Every setting is optional, but the driver
+     * may only be used in development.
+     *
+     * @param {Object} [settings]   The `email.log` block.
+     * @param {string} environment  The configuration's `environment`.
+     *
+     * @throws {Error} When the environment isn't development.
+     */
+    static validateConfig(settings, environment) {
+        if ( environment !== 'development' ) {
+            throw new Error('The log email driver may only be used in development.')
+        }
+    }
+
+    /**
      * @param {Core} core
      * @param {Object} [settings]   The `email.log` block.
      * @param {string} [settings.directory] Where to write each message.
      */
     constructor(core, settings) {
+        LogEmailDriver.validateConfig(settings, core.config?.environment)
+
         this.logger = core.logger
         this.directory = settings?.directory || null
     }

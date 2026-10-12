@@ -47,6 +47,26 @@ describe('Storage', function() {
         })
     })
 
+    describe('validateConfig()', function() {
+        it('Should require the S3 bucket and its credentials', function() {
+            expect(() => S3Storage.validateConfig(s3Settings, 'production')).not.toThrow()
+            for (const key of Object.keys(s3Settings)) {
+                expect(() => S3Storage.validateConfig({ ...s3Settings, [key]: undefined }, 'production')).toThrow(`storage.s3.${key}`)
+            }
+            expect(() => S3Storage.validateConfig(undefined, 'production')).toThrow('storage.s3.bucket_url')
+        })
+
+        it('Should only allow the filesystem driver in development, with a directory and a secret', function() {
+            const settings = { directory: 'tmp/storage', secret: 'secret' }
+            expect(() => FilesystemStorage.validateConfig(settings, 'development')).not.toThrow()
+            expect(() => FilesystemStorage.validateConfig({ secret: 'secret' }, 'development')).toThrow('storage.filesystem.directory')
+            expect(() => FilesystemStorage.validateConfig({ directory: 'tmp' }, 'development')).toThrow('storage.filesystem.secret')
+            for (const environment of [ 'staging', 'production', undefined ]) {
+                expect(() => FilesystemStorage.validateConfig(settings, environment)).toThrow('only be used in development')
+            }
+        })
+    })
+
     describe('S3Storage', function() {
         it('Should require the bucket and its credentials', function() {
             for (const key of Object.keys(s3Settings)) {

@@ -244,6 +244,90 @@ describe('Config', function() {
         })
     })
 
+    describe('validateConfig()', function() {
+        // A complete, valid configuration for development.
+        const valid = () => ({
+            environment: 'development',
+            database: { host: 'localhost', port: '5432', user: 'app', password: 'secret', name: 'communities' },
+            redis: { host: 'localhost', port: '6379' },
+            email: { driver: 'log', log: { directory: 'tmp/email' } },
+            storage: { driver: 'filesystem', filesystem: { directory: 'tmp/storage', secret: 'secret' } },
+            notifications: { log: {} }
+        })
+
+        const problems = function(config) {
+            try {
+                new Config().validateConfig(config)
+                return []
+            } catch (error) {
+                expect(error).toBeInstanceOf(ConfigError)
+                return error.message.split('\n').slice(1).map((line) => line.trim())
+            }
+        }
+
+        it('Should accept a complete configuration', function() {
+            expect(problems(valid())).toEqual([])
+
+            const production = {
+                ...valid(),
+                environment: 'production',
+                email: { driver: 'postmark', postmark: { api_token: 'token' } },
+                storage: { driver: 's3', s3: { bucket_url: 'https://files', bucket: 'files', access_id: 'id', access_key: 'key' } },
+                notifications: {
+                    ios: { privateCert: 'key', publicCert: 'cert', applicationBundleID: 'social.communities', endpoint: 'https://api.push.apple.com' },
+                    android: { firebaseServiceAccount: JSON.stringify({ project_id: 'communities', client_email: 'push@communities.example', private_key: 'key' }) }
+                }
+            }
+            expect(problems(production)).toEqual([])
+        })
+
+        it('Should allow push notifications to be off', function() {
+            expect(problems({ ...valid(), notifications: {} })).toEqual([])
+            expect(problems({ ...valid(), notifications: undefined })).toEqual([])
+        })
+
+        it('Should require the database and redis settings', function() {
+            const config = valid()
+            delete config.database.password
+            config.redis = undefined
+
+            expect(problems(config)).toEqual([
+                'The configuration needs database.password.',
+                'The configuration needs redis.host.',
+                'The configuration needs redis.port.'
+            ])
+        })
+
+        it('Should require known email and storage drivers', function() {
+            expect(problems({ ...valid(), email: { driver: 'smtp' }, storage: undefined })).toEqual([
+                `email.driver in the configuration must be one of 'postmark' or 'log', but it's 'smtp'.`,
+                `storage.driver in the configuration must be one of 's3' or 'filesystem', but it's ''.`
+            ])
+        })
+
+        it('Should reject a block under notifications that isn\'t a push driver', function() {
+            expect(problems({ ...valid(), notifications: { log: {}, apns: {} } })).toEqual([
+                `notifications.apns in the configuration isn't a push driver. Each block under notifications must be one of 'ios', 'android' or 'log'.`
+            ])
+        })
+
+        it('Should have each driver check its own block, and report every problem together', function() {
+            const config = {
+                ...valid(),
+                environment: 'production',
+                email: { driver: 'postmark', postmark: {} },
+                notifications: { ios: { privateCert: 'key' }, log: {} }
+            }
+
+            expect(problems(config)).toEqual([
+                'The postmark email driver needs email.postmark.api_token in the configuration.',
+                'The filesystem storage driver may only be used in development.',
+                'The ios push driver needs notifications.ios.publicCert in the configuration.',
+                'The log push driver may only be used in development.'
+            ])
+        })
+    })
+
     describe('loadEnvironmentVariable()', function() {
         it('Should treat an unset or empty variable as missing', function() {
             const config = new Config(undefined, undefined, undefined, { env: { SET: 'value', EMPTY: '' } })

@@ -37,6 +37,7 @@ const createCore = async function(name) {
 
     const configLoader = new Config(environmentName, region, credentials)
     const config = await configLoader.loadConfig(configDefinition)
+    configLoader.validateConfig(config)
 
     console.log('Configuration successfully loaded...')
 

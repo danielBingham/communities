@@ -23,8 +23,31 @@ describe('Email', function() {
     const coreWith = function(email) {
         const logger = new Logger()
         logger.level = -1
-        return { config: { email: email }, logger: logger }
+        return { config: { environment: 'development', email: email }, logger: logger }
     }
+
+    describe('validateConfig()', function() {
+        it('Should require an API token for the postmark driver', function() {
+            expect(() => PostmarkEmailDriver.validateConfig({ api_token: 'token' }, 'production')).not.toThrow()
+            for (const settings of [ undefined, {}, { api_token: '' } ]) {
+                expect(() => PostmarkEmailDriver.validateConfig(settings, 'production')).toThrow('email.postmark.api_token')
+            }
+        })
+
+        it('Should only allow the log driver in development', function() {
+            expect(() => LogEmailDriver.validateConfig({ directory: 'tmp/email' }, 'development')).not.toThrow()
+            expect(() => LogEmailDriver.validateConfig(undefined, 'development')).not.toThrow()
+            for (const environment of [ 'staging', 'production', undefined ]) {
+                expect(() => LogEmailDriver.validateConfig({}, environment)).toThrow('The log email driver may only be used in development.')
+            }
+        })
+
+        it('Should be checked when a driver is created', function() {
+            const production = { ...coreWith(), config: { environment: 'production' } }
+            expect(() => new LogEmailDriver(production, {})).toThrow('may only be used in development')
+            expect(() => new PostmarkEmailDriver(production, {})).toThrow('email.postmark.api_token')
+        })
+    })
 
     describe('createEmailDriver()', function() {
         it('Should create the driver email.driver names, with its block', function() {

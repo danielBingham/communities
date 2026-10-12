@@ -51,6 +51,7 @@ async function initialize() {
 
     const configLoader = new Config(environmentName, region, credentials)
     const config = await configLoader.loadConfig(configDefinition)
+    configLoader.validateConfig(config)
 
     const core = new Core('worker', config)
 

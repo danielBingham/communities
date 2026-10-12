@@ -56,17 +56,35 @@ module.exports = class FilesystemStorage {
     static ROUTE = '/api/0.0.0/storage'
 
     /**
+     * Check the `storage.filesystem` block. The driver may only be used in
+     * development.
+     *
+     * @param {Object} settings The `storage.filesystem` block.
+     * @param {string} environment  The configuration's `environment`.
+     *
+     * @throws {Error} When the environment isn't development, or a required
+     * setting is missing.
+     */
+    static validateConfig(settings, environment) {
+        if ( environment !== 'development' ) {
+            throw new Error('The filesystem storage driver may only be used in development.')
+        }
+
+        for (const key of [ 'directory', 'secret' ]) {
+            if ( ! settings?.[key] ) {
+                throw new Error(`The filesystem storage driver needs storage.filesystem.${key} in the configuration.`)
+            }
+        }
+    }
+
+    /**
      * @param {Core} core   A core with `config.host`.
      * @param {Object} settings The `storage.filesystem` block.
      * @param {string} settings.directory   Where to keep files.
      * @param {string} settings.secret  The key links are signed with.
      */
     constructor(core, settings) {
-        for (const key of [ 'directory', 'secret' ]) {
-            if ( ! settings?.[key] ) {
-                throw new Error(`The filesystem storage driver needs storage.filesystem.${key} in the configuration.`)
-            }
-        }
+        FilesystemStorage.validateConfig(settings, core.config?.environment)
 
         this.directory = path.resolve(settings.directory)
         this.secret = settings.secret

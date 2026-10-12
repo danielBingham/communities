@@ -25,7 +25,7 @@ describe('Stored files route', function() {
     beforeEach(function() {
         const logger = new Logger()
         logger.level = -1
-        const core = { config: { host: 'https://localhost:3000' }, logger: logger }
+        const core = { config: { environment: 'development', host: 'https://localhost:3000' }, logger: logger }
         storage = core.storage = new FilesystemStorage(core, { directory: directory, secret: 'secret' })
 
         const app = { get: (path, routeHandler) => { route = path; handler = routeHandler } }

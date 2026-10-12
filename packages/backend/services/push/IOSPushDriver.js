@@ -36,10 +36,51 @@ const REASON = {
     ERROR: 'InternalServerError'
 }
 
-module.exports = class IOSNotifications {
+/**
+ * Sends push notifications to the iOS app through the Apple Push Notification
+ * service.
+ *
+ * Configured by the `notifications.ios` block:
+ *
+ *   notifications: {
+ *       ios: {
+ *           privateCert: 'aws-ssm-parameter:/notifications/ios/apns-private-key-pem',
+ *           publicCert: 'aws-ssm-parameter:/notifications/ios/apns-public-cert-pem',
+ *           applicationBundleID: 'aws-ssm-parameter:/notifications/ios/application-bundle-id',
+ *           endpoint: 'aws-ssm-parameter:/notifications/ios/endpoint'
+ *       }
+ *   }
+ *
+ * Each instance holds its own connection, so create one per job rather than
+ * sharing one.
+ */
+module.exports = class IOSPushDriver {
 
-    constructor(core, logger) {
+    /**
+     * Check the `notifications.ios` block.
+     *
+     * @param {Object} settings The `notifications.ios` block.
+     *
+     * @throws {Error} When a required setting is missing.
+     */
+    static validateConfig(settings) {
+        for (const key of [ 'privateCert', 'publicCert', 'applicationBundleID', 'endpoint' ]) {
+            if ( ! settings?.[key] ) {
+                throw new Error(`The ios push driver needs notifications.ios.${key} in the configuration.`)
+            }
+        }
+    }
+
+    /**
+     * @param {Core} core
+     * @param {Object} settings The `notifications.ios` block.
+     * @param {Logger} [logger] Defaults to the core's logger.
+     */
+    constructor(core, settings, logger) {
+        IOSPushDriver.validateConfig(settings, core.config?.environment)
+
         this.core = core
+        this.settings = settings
         this.logger = logger ? logger : core.logger
 
         this.sessionService = new SessionService(core)
@@ -55,8 +96,8 @@ module.exports = class IOSNotifications {
     }
 
     getCredentials() {
-        const key = this.core.config.notifications.ios.privateCert
-        const cert = this.core.config.notifications.ios.publicCert
+        const key = this.settings.privateCert
+        const cert = this.settings.publicCert
 
         return {
             key: key,
@@ -101,7 +142,7 @@ module.exports = class IOSNotifications {
 
             // `client` is a ClientHttp2Session: https://nodejs.org/api/http2.html#class-clienthttp2session
             // Which extends Http2Session: https://nodejs.org/api/http2.html#class-http2session
-            this.client = http2.connect(this.core.config.notifications.ios.endpoint, this.getCredentials())
+            this.client = http2.connect(this.settings.endpoint, this.getCredentials())
 
             this.client.on("close", () => {
                 this.logger.verbose(`=== IOS Notifications:: Connection closed.`)
@@ -150,7 +191,10 @@ module.exports = class IOSNotifications {
         this.client.close()
     }
 
-    async notify(userId, notification) {
+    /**
+     * Send a notification to each of the user's iOS devices.
+     */
+    async send(userId, notification) {
         await this.connect()
 
         this.logger.verbose(`=== IOS Notifications:: Notifying User(${userId})...`)
@@ -240,7 +284,7 @@ module.exports = class IOSNotifications {
 
             const headers = {
                 ":method": "POST",
-                "apns-topic": this.core.config.notifications.ios.applicationBundleID,
+                "apns-topic": this.settings.applicationBundleID,
                 "apns-push-type": "alert",
                 "apns-priority": "10",
                 ":scheme": "https",

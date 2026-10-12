@@ -53,17 +53,28 @@ const { getSignedUrl } = require('@aws-sdk/s3-request-presigner')
 module.exports = class S3Storage {
 
     /**
+     * Check the `storage.s3` block.
+     *
+     * @param {Object} settings The `storage.s3` block.
+     *
+     * @throws {Error} When a required setting is missing.
+     */
+    static validateConfig(settings) {
+        for (const key of [ 'bucket_url', 'bucket', 'access_id', 'access_key' ]) {
+            if ( ! settings?.[key] ) {
+                throw new Error(`The s3 storage driver needs storage.s3.${key} in the configuration.`)
+            }
+        }
+    }
+
+    /**
      * @param {Core} core
      * @param {Object} settings The `storage.s3` block.
      * @param {Object} [client] An S3 client to use instead of constructing
      * one.
      */
     constructor(core, settings, client) {
-        for (const key of [ 'bucket_url', 'bucket', 'access_id', 'access_key' ]) {
-            if ( ! settings?.[key] ) {
-                throw new Error(`The s3 storage driver needs storage.s3.${key} in the configuration.`)
-            }
-        }
+        S3Storage.validateConfig(settings, core.config?.environment)
 
         this.core = core
         this.bucket = settings.bucket

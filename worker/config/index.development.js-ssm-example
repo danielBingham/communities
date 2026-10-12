@@ -64,6 +64,8 @@ module.exports = {
             api_token: 'aws-ssm-parameter:/postmark/api-token'
         }
     },
+    // Push notifications: each block under `notifications` turns on the
+    // driver with that name (see packages/backend/services/push).
     notifications: {
         ios: {
             privateCert: 'aws-ssm-parameter:/notifications/ios/apns-private-key-pem',
