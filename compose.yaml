@@ -30,7 +30,8 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - /Users/danielbingham/volumes/communities-sql:/var/lib/postgresql/data
+      # The database, in a volume Docker manages (see `volumes:` at the end).
+      - postgres-data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -47,7 +48,7 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - /Users/danielbingham/volumes/communities-redis:/data
+      - redis-data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -174,3 +175,14 @@ services:
       # --- Uploaded files (filesystem storage driver), shared with the worker.
       - ./local-data/storage:/opt/communities/local-data/storage
     restart: unless-stopped
+
+# -----------------------------------------------------------------------------
+# Postgres and Redis data, in volumes Docker manages (communities_postgres-data
+# and communities_redis-data in `docker volume ls`). They're kept across
+# `docker compose down`, rebuilds and `up -V`; `docker compose down -v` deletes
+# them. To keep either in a folder of your own instead, see "Keeping the Data in
+# a Folder" in documentation/running-locally.md.
+# -----------------------------------------------------------------------------
+volumes:
+  postgres-data:
+  redis-data:

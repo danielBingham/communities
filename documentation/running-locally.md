@@ -18,8 +18,8 @@ $ docker build -t communities-sql database/initialization-scripts
 The first time it starts with an empty data volume, the image creates the
 `app` role and the `communities` database, sets permissions, creates the
 extensions and loads the schema, the same way staging and production are set
-up. A volume that already has a database keeps it; to start over, remove the
-volume's contents. See [the database README](../database/README.md).
+up. Later starts keep that database; [Local Data](#local-data) covers
+starting over. See [the database README](../database/README.md).
 
 ## Configuring the Local Environment
 
@@ -312,6 +312,42 @@ From there, it should automatically reload and recompile with any code changes.
 If you make any dependency changes (anything requiring `npm install`) you will
 need to rebuild the environment.  That includes changes to any of the
 `@communities` package dependencies.  See "Building the Environment".
+
+## Local Data
+
+Compose keeps the database and Redis's data in two volumes that Docker
+manages, `communities_postgres-data` and `communities_redis-data`. They last
+across `docker compose down`, rebuilds and `docker compose up -V`, which only
+renews the containers' anonymous `node_modules` volumes.
+
+To start over with an empty database, delete its volume while the stack is
+down; the next `docker compose up` initializes a new one:
+
+```
+docker compose down
+docker volume rm communities_postgres-data
+```
+
+`docker compose down -v` deletes both volumes at once. Uploaded files are
+kept in the repository's `local-data/storage` folder instead (see
+[Storage](#storage)).
+
+### Keeping the Data in a Folder
+
+To keep the data in a folder of your own instead, such as one from before
+Compose used volumes, add a `compose.override.yaml` next to `compose.yaml`.
+Compose reads it automatically, and git ignores it. A mount there for the same
+path in the container replaces the volume:
+
+```yaml
+services:
+  postgres:
+    volumes:
+      - /path/to/communities-sql:/var/lib/postgresql/data
+  redis:
+    volumes:
+      - /path/to/communities-redis:/data
+```
 
 ## Running Without Docker
 
