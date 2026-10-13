@@ -1,0 +1,80 @@
+.video--with-poster {
+    position: relative;
+}
+.video--with-poster .video__media {
+    display: block;
+}
+/* Keep the video's layout box (it sizes the poster) while the poster is up. */
+.video--with-poster .video__media--hidden {
+    visibility: hidden;
+}
+.video .video__poster {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    display: grid;
+    place-items: center;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+
+    border: none;
+    border-radius: 0;
+    background-color: black;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+.video .video__poster:focus-visible {
+    outline: none;
+}
+.video .video__poster__image {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    display: block;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    object-fit: contain;
+
+    -webkit-touch-callout: none;
+    user-select: none;
+}
+.video .video__poster__play {
+    position: relative;
+
+    display: grid;
+    place-items: center;
+    box-sizing: border-box;
+    height: 64px;
+    width: 64px;
+    border-radius: 64px;
+
+    /* Translucent background rather than `opacity`, so the icon stays solid
+     * white instead of picking up the poster's colors. */
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    transition: background-color 150ms ease-in-out;
+}
+.video .video__poster__play svg {
+    width: 32px;
+    height: 32px;
+    /* The triangle is visually heavy on the left; nudge it to look centered. */
+    margin-left: 4px;
+    color: white;
+}
+.video .video__poster:focus-visible .video__poster__play {
+    background-color: rgba(0, 0, 0, 0.85);
+    outline: 3px solid white;
+    outline-offset: 2px;
+}
+@media (hover: hover) {
+    .video .video__poster:hover .video__poster__play {
+        background-color: rgba(0, 0, 0, 0.85);
+    }
+}
