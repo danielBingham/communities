@@ -44,8 +44,3 @@ Database"). They create the `app` role, with their own password, and the
 `communities` database by hand instead of running `local-database.sql`, then
 run the other three files from this folder: `permissions.sql` and
 `extensions.sql` as the master user, and `schema.sql` as `app`.
-
-## Restoring a dump
-
-`Dockerfile` and `initialize_from_dump.sh` in this folder build an image from a
-dump in `test-data/`, which isn't in the repository.
