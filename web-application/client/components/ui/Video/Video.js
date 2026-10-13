@@ -143,6 +143,31 @@ const Video = function({ className, src, preload, poster, playOverlay, altText, 
         }
     }
 
+    // The overlay is a <div role="button"> rather than a <button>, because
+    // drag and drop libraries won't start a drag from inside a <button>.
+    // PostForm uses dnd-kit to let people reorder draft files by dragging
+    // them, and the overlay covers the whole video.  (The native <video> it
+    // stands in for doesn't count as a button.)  So we handle the keyboard
+    // ourselves.
+    const onOverlayClick = function() {
+        if ( posterLoading ) {
+            return
+        }
+
+        play()
+    }
+
+    const onOverlayKeyDown = function(event) {
+        if ( posterLoading || event.repeat ) {
+            return
+        }
+
+        if ( event.key === 'Enter' || event.key === ' ' ) {
+            event.preventDefault()
+            play()
+        }
+    }
+
     if ( playOverlay !== true ) {
         return (
             <video
@@ -196,12 +221,14 @@ const Video = function({ className, src, preload, poster, playOverlay, altText, 
                 crossOrigin="anonymous"
             />
             { showOverlay &&
-                <button
-                    type="button"
-                    className="video__poster"
+                <div
+                    className={`video__poster ${ posterLoading ? 'video__poster--loading' : '' }`}
+                    role="button"
+                    tabIndex={ posterLoading ? -1 : 0 }
                     aria-label={ altText !== undefined && altText !== null && altText !== '' ? `Play video: ${altText}` : 'Play video' }
-                    onClick={play}
-                    disabled={posterLoading}
+                    aria-disabled={ posterLoading ? true : undefined }
+                    onClick={onOverlayClick}
+                    onKeyDown={onOverlayKeyDown}
                 >
                     { hasPoster && ! posterFailed &&
                         <img
@@ -215,7 +242,7 @@ const Video = function({ className, src, preload, poster, playOverlay, altText, 
                         />
                     }
                     { ! posterLoading && <span className="video__poster__play" aria-hidden="true"><PlayIcon /></span> }
-                </button>
+                </div>
             }
             { showOverlay && posterLoading && <div className="video__loading"><Spinner /></div> }
         </div>
