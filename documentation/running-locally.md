@@ -15,6 +15,12 @@ From the root project directory, build the postgres docker container:
 $ docker build -t communities-sql database/initialization-scripts
 ```
 
+The first time it starts with an empty data volume, the image creates the
+`app` role and the `communities` database, sets permissions, creates the
+extensions and loads the schema, the same way staging and production are set
+up. A volume that already has a database keeps it; to start over, remove the
+volume's contents. See [the database README](../database/README.md).
+
 ## Configuring the Local Environment
 
 Each app has a configuration file per environment, and `NODE_ENV` picks
@@ -306,6 +312,75 @@ From there, it should automatically reload and recompile with any code changes.
 If you make any dependency changes (anything requiring `npm install`) you will
 need to rebuild the environment.  That includes changes to any of the
 `@communities` package dependencies.  See "Building the Environment".
+
+## Running Without Docker
+
+You can also run everything directly on your machine. You'll need:
+
+- Node, the version in `.nvmrc`;
+- PostgreSQL with PostGIS, and `psql` (production runs PostgreSQL 17 with
+  PostGIS 3.5; 16 works too);
+- Redis 7;
+- ffmpeg, which the worker uses to process videos.
+
+Then, from the repository root:
+
+1. Install the dependencies with `npm ci` (see
+   [Installing Dependencies](#installing-dependencies)).
+
+2. Create the database:
+
+   ```
+   npm run db:init
+   ```
+
+   It creates the `app` role (password `local-development`) and the
+   `communities` database, sets permissions, creates the extensions and loads
+   the schema, the same way the database image does. It connects with the usual
+   PostgreSQL environment variables, as a superuser, and loads the schema as
+   `app` so that `app` owns the tables:
+
+   ```
+   PGHOST=localhost PGUSER=postgres PGPASSWORD=<password> npm run db:init
+   ```
+
+   With Homebrew's PostgreSQL your own user is a superuser, so plain
+   `npm run db:init` works. On Linux, where usually only `postgres` is, make
+   your user one first with `sudo -u postgres createuser --superuser $USER`.
+   If `communities` already exists, it stops without changing anything.
+
+3. Configure both apps as in
+   [Using environment variables](#using-environment-variables), and set
+   `COMMUNITIES_DATABASE_HOST` and `COMMUNITIES_REDIS_HOST` to `localhost` in
+   `.env`.
+
+4. Create the HTTPS certificate the web application serves
+   `https://localhost:3000` with:
+
+   ```
+   mkdir -p web-application/security
+   openssl req -x509 -newkey rsa:2048 -nodes -days 365 -subj "/CN=localhost" \
+       -addext "subjectAltName=DNS:localhost,IP:127.0.0.1" \
+       -keyout web-application/security/key.pem -out web-application/security/cert.pem
+   ```
+
+   Your browser warns about it until you trust it. The integration tests need
+   it trusted too: add it to your system's certificates, or run them with
+   `NODE_EXTRA_CA_CERTS=$PWD/web-application/security/cert.pem npm run test:integration`.
+
+5. Create the folders the apps process uploads in:
+
+   ```
+   mkdir -p web-application/tmp worker/tmp
+   ```
+
+6. Start both apps:
+
+   ```
+   npm run dev
+   ```
+
+   and open `https://localhost:3000`.
 
 ## Running the Integration Tests
 
