@@ -20,6 +20,11 @@
 /******************************************************************************
  * Performs initial permission setup, giving permissions to the `app` user and
  * clearing them from any other users.
+ *
+ * Run in the `communities` database as a superuser (the master user on
+ * Aurora), before schema.sql. schema.sql runs as `app`, so `app` owns the
+ * tables it creates; these grants cover what the superuser creates, such as
+ * PostGIS's tables. Safe to run again.
  ******************************************************************************/
 
 REVOKE ALL ON SCHEMA public FROM PUBLIC ;

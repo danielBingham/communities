@@ -24,6 +24,9 @@
  * This is the database schema file that defines the current state of the
  * database (with all currently defined migrations run).
  *
+ * Run it as the `app` user, so `app` owns the tables and can alter them when
+ * migrations run.
+ *
  ****************************************************************************/
 
 /*****************************************************************************
