@@ -28,19 +28,35 @@ import Spinner from '/components/Spinner'
 import './Video.css'
 
 /**
+ * Describe a URL for logging, without its query string.  Our poster URLs are
+ * signed links, and the signature and credentials live in the query string.
+ */
+const describeUrl = function(url) {
+    try {
+        const parsed = new URL(url, window.location.href)
+        return `${parsed.origin}${parsed.pathname}`
+    } catch (error) {
+        return '(invalid URL)'
+    }
+}
+
+/**
  * Renders a <video>.
  *
  * With `playOverlay`, the video is covered by its poster and a play button
  * until the user clicks to play.  The poster is a regular <img> rather than
  * the <video poster> attribute, so that we control how it loads and sizes.
  *
- * - While the poster image loads, we show a spinner on white, at the full
- *   width and a standard vertical video aspect ratio (4/5).
+ * - While both the poster image and the video's metadata are loading, we
+ *   show a spinner at the full width and a standard vertical video aspect
+ *   ratio (4/5).
  * - Once the poster loads, it takes its own aspect ratio.  We generate
  *   posters from the video's first frame, so this matches the video.
- * - If there's no poster, or it fails to load, we show the play button on
- *   black.  This takes the 4/5 shape until the video's metadata loads, and
- *   then matches the video.
+ * - If there's no poster, it fails to load, or the video loads first, we
+ *   show the play button on black, so that a slow or stuck poster never
+ *   holds up the video.  This takes the 4/5 shape until the video's
+ *   metadata loads, and then matches the video.  A poster that loads later
+ *   replaces the black.
  * - The video loads its metadata behind the overlay so that it is ready to
  *   play.  When the user clicks, we hide the overlay, show the video and
  *   start playback programmatically.
@@ -58,17 +74,21 @@ const Video = function({ className, src, preload, poster, playOverlay, altText, 
     const [loadedPoster, setLoadedPoster] = useState(null)
     const [failedPoster, setFailedPoster] = useState(null)
 
-    // The video's dimensions, once its metadata has loaded, along with the
-    // src they belong to.
-    const [videoSize, setVideoSize] = useState(null)
+    // The video's dimensions, once its metadata has loaded, and the src that
+    // failed to load, if any.  Both record their src, so that an event that
+    // arrives late from a previous src doesn't count.
+    const [videoMetadata, setVideoMetadata] = useState(null)
+    const [failedSrc, setFailedSrc] = useState(null)
 
-    // Changing the src resets the <video> to its unplayed state, so bring the
-    // overlay back.  This happens when a PostGallery reuses this component to
-    // move between videos.
+    // Changing the src resets the <video> to its unplayed, unloaded state, so
+    // start over: bring the overlay back and wait for the new metadata.  This
+    // happens when a PostGallery reuses this component to move between videos.
     const [previousSrc, setPreviousSrc] = useState(src)
     if ( src !== previousSrc ) {
         setPreviousSrc(src)
         setIsActivated(false)
+        setVideoMetadata(null)
+        setFailedSrc(null)
     }
 
     // We need our own handle on the <video> to play it, while still passing
@@ -95,19 +115,38 @@ const Video = function({ className, src, preload, poster, playOverlay, altText, 
     const posterLoaded = hasPoster && ! posterFailed && loadedPoster !== null && loadedPoster.url === poster
     const posterLoading = hasPoster && ! posterFailed && ! posterLoaded
 
+    const videoLoaded = videoMetadata !== null && videoMetadata.src === src
+    const videoFailed = failedSrc === src
+    const videoLoading = ! videoLoaded && ! videoFailed
+
+    // Only show the spinner while we're waiting on both.  If the video is
+    // ready first, show the play button rather than wait on the poster.
+    const showSpinner = posterLoading && videoLoading
+
     const onPosterLoad = function(event) {
         const image = event.currentTarget
         setLoadedPoster({ url: poster, width: image.naturalWidth, height: image.naturalHeight })
     }
 
+    const onPosterError = function() {
+        logger.warn(`Video :: Failed to load poster image: ${describeUrl(poster)}`)
+        setFailedPoster(poster)
+    }
+
     const onLoadedMetadata = function(event) {
         const element = event.currentTarget
-        if ( element.videoWidth > 0 && element.videoHeight > 0 ) {
-            setVideoSize({ src: src, width: element.videoWidth, height: element.videoHeight })
-        }
+        setVideoMetadata({ src: src, width: element.videoWidth, height: element.videoHeight })
 
         if ( onLoad !== undefined && onLoad !== null ) {
             onLoad(event)
+        }
+    }
+
+    const onVideoError = function(event) {
+        setFailedSrc(src)
+
+        if ( onError !== undefined && onError !== null ) {
+            onError(event)
         }
     }
 
@@ -150,7 +189,7 @@ const Video = function({ className, src, preload, poster, playOverlay, altText, 
     // stands in for doesn't count as a button.)  So we handle the keyboard
     // ourselves.
     const onOverlayClick = function() {
-        if ( posterLoading ) {
+        if ( showSpinner ) {
             return
         }
 
@@ -158,7 +197,7 @@ const Video = function({ className, src, preload, poster, playOverlay, altText, 
     }
 
     const onOverlayKeyDown = function(event) {
-        if ( posterLoading || event.repeat ) {
+        if ( showSpinner || event.repeat ) {
             return
         }
 
@@ -180,6 +219,7 @@ const Video = function({ className, src, preload, poster, playOverlay, altText, 
                 onLoadedMetadata={onLoad}
                 onError={onError}
                 controls
+                playsInline
                 crossOrigin="anonymous"
             />
         )
@@ -187,17 +227,17 @@ const Video = function({ className, src, preload, poster, playOverlay, altText, 
 
     const posterRatio = posterLoaded && loadedPoster.width > 0 && loadedPoster.height > 0
         ? `${loadedPoster.width} / ${loadedPoster.height}` : null
-    const videoRatio = videoSize !== null && videoSize.src === src
-        ? `${videoSize.width} / ${videoSize.height}` : null
+    const videoRatio = videoLoaded && videoMetadata.width > 0 && videoMetadata.height > 0
+        ? `${videoMetadata.width} / ${videoMetadata.height}` : null
 
     // Everything inside the wrapper fills it, so this sizes the whole thing.
     // A null ratio leaves the stylesheet's default of 4/5.
     let aspectRatio = null
     if ( showOverlay ) {
         // The spinner keeps the default.  A loaded poster takes its own
-        // aspect ratio.  The placeholder for a missing poster matches the
+        // aspect ratio.  The black placeholder (no poster yet) matches the
         // video once its metadata loads.
-        if ( ! posterLoading ) {
+        if ( ! showSpinner ) {
             aspectRatio = posterRatio !== null ? posterRatio : videoRatio
         }
     } else {
@@ -216,17 +256,18 @@ const Video = function({ className, src, preload, poster, playOverlay, altText, 
                 aria-label={ altText !== undefined && altText !== null ? altText : undefined }
                 src={src}
                 onLoadedMetadata={onLoadedMetadata}
-                onError={onError}
+                onError={onVideoError}
                 controls
+                playsInline
                 crossOrigin="anonymous"
             />
             { showOverlay &&
                 <div
-                    className={`video__poster ${ posterLoading ? 'video__poster--loading' : '' }`}
+                    className={`video__poster ${ showSpinner ? 'video__poster--loading' : '' }`}
                     role="button"
-                    tabIndex={ posterLoading ? -1 : 0 }
+                    tabIndex={ showSpinner ? -1 : 0 }
                     aria-label={ altText !== undefined && altText !== null && altText !== '' ? `Play video: ${altText}` : 'Play video' }
-                    aria-disabled={ posterLoading ? true : undefined }
+                    aria-disabled={ showSpinner ? true : undefined }
                     onClick={onOverlayClick}
                     onKeyDown={onOverlayKeyDown}
                 >
@@ -238,13 +279,13 @@ const Video = function({ className, src, preload, poster, playOverlay, altText, 
                             alt=""
                             draggable={false}
                             onLoad={onPosterLoad}
-                            onError={() => setFailedPoster(poster)}
+                            onError={onPosterError}
                         />
                     }
-                    { ! posterLoading && <span className="video__poster__play" aria-hidden="true"><PlayIcon /></span> }
+                    { ! showSpinner && <span className="video__poster__play" aria-hidden="true"><PlayIcon /></span> }
                 </div>
             }
-            { showOverlay && posterLoading && <div className="video__loading"><Spinner /></div> }
+            { showOverlay && showSpinner && <div className="video__loading"><Spinner /></div> }
         </div>
     )
 }

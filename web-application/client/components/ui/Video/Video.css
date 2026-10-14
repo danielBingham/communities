@@ -101,5 +101,6 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: white;
+    /* The post's background: white, or dark in dark mode. */
+    background-color: var(--card-background-color);
 }

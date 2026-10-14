@@ -908,6 +908,75 @@ describe('ValidationService.validatePost()', function() {
             })
         })
 
+        describe('for files', function() {
+            const fileId = '21a44cd9-4141-43a3-aae3-93735bcb6a32'
+            const videoId = 'd6a9a5b2-3c1e-4f0a-9e57-2f1c1b0c9a11'
+
+            it('Should error when attaching a file that is the thumbnail of another file', async function() {
+                const service = new ValidationService(core)
+
+                const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
+
+                const post = {
+                    type: 'feed',
+                    userId: currentUser.id,
+                    visibility: 'private',
+                    files: [ fileId ]
+                }
+
+                core.database.query.mockReturnValue(undefined)
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: currentUser.id }]})
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: fileId, user_id: currentUser.id }]})
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: fileId, postId: null, userId: null, groupId: null, linkPreviewId: null, parentId: videoId }]})
+
+                const errors = await service.validatePost(currentUser, post, undefined)
+
+                expect(errors.length).toBe(1)
+                expect(errors[0].type).toBe('files:conflict')
+            })
+
+            it('Should pass when editing a post with a file only in use by that post', async function() {
+                const service = new ValidationService(core)
+
+                const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
+                const existing = entities['posts'].dictionary['789307dc-fe1f-4d57-ad88-1ecbb8a38a4e']
+
+                const post = {
+                    id: existing.id,
+                    files: [ fileId ]
+                }
+
+                core.database.query.mockReturnValue(undefined)
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: fileId, user_id: currentUser.id }]})
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: fileId, postId: existing.id, userId: null, groupId: null, linkPreviewId: null, parentId: null }]})
+
+                const errors = await service.validatePost(currentUser, post, existing)
+
+                expect(errors.length).toBe(0)
+            })
+
+            it('Should error when editing a post with a file that is also the thumbnail of another file', async function() {
+                const service = new ValidationService(core)
+
+                const currentUser = entities.users.dictionary['5c44ce06-1687-4709-b67e-de76c05acb6a']
+                const existing = entities['posts'].dictionary['789307dc-fe1f-4d57-ad88-1ecbb8a38a4e']
+
+                const post = {
+                    id: existing.id,
+                    files: [ fileId ]
+                }
+
+                core.database.query.mockReturnValue(undefined)
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: fileId, user_id: currentUser.id }]})
+                    .mockReturnValueOnce({ rowCount: 1, rows: [{ id: fileId, postId: existing.id, userId: null, groupId: null, linkPreviewId: null, parentId: videoId }]})
+
+                const errors = await service.validatePost(currentUser, post, existing)
+
+                expect(errors.length).toBe(1)
+                expect(errors[0].type).toBe('files:conflict')
+            })
+        })
+
         describe('for content', function() {
             it('Should error when content is not a string', async function() {
                 const service = new ValidationService(core)
