@@ -179,7 +179,7 @@ module.exports = class FilePermissions {
         // If this is a thumbnail, then they can view it if they can view the parent file.
         if ( context.usage.parentId !== null ) {
             if ( 'rootId' in context && context.file.id === context.rootId ) {
-                throw new ServiceError('Loop detected in file permissions. Thumbnail parent loops back to thumbnail.')
+                throw new ServiceError('loop-detected', 'Loop detected in file permissions. Thumbnail parent loops back to thumbnail.')
             }
 
             const canViewParent = await this.permissionService.can(user, 'view', 'File', { fileId: context.usage.parentId, rootId: context.rootId ?? context.file.id })
