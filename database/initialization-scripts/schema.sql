@@ -73,7 +73,7 @@ INSERT INTO features (name, status, created_date, updated_date)
         ('fix-495-slow-friends-list', 'enabled', now(), now()),
         ('feat-377-improved-file-pipelines', 'enabled', now(), now()),
         ('feat-61-multifactor-authentication', 'enabled', now(), now()),
-        ('feat-563-video-poster-fails-on-mobile', 'enabled', now(), now()),
+        ('fix-563-video-poster-fails-on-mobile', 'enabled', now(), now()),
         ('video-uploads', 'enabled', now(), now());
 
 
