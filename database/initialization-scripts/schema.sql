@@ -243,6 +243,7 @@ CREATE TABLE files (
     updated_date timestamptz
 );
 CREATE INDEX files__user_id ON files (user_id);
+CREATE INDEX files__thumb_id ON files (thumb_id);
 
 /*  Now that we've created the files table, we can add the link to the users table. */
 /* This is for the user's profile picture. */

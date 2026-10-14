@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -32,6 +32,7 @@ const Feat491MutualFriendsMigration = require('../migrations/Feat491MutualFriend
 const Fix495SlowFriendsListMigration = require('../migrations/Fix495SlowFriendsListMigration')
 const Feat377ImprovedFilePipelinesMigration = require('../migrations/Feat377ImprovedFilePipelinesMigration')
 const Feat61MultifactorAuthenticationMigration = require('../migrations/Feat61MultifactorAuthenticationMigration')
+const Fix563VideoPosterFailsOnMobileMigration = require('../migrations/Fix563VideoPosterFailsOnMobileMigration')
 
 const ServiceError = require('../errors/ServiceError')
 const MigrationError = require('../errors/MigrationError')
@@ -51,7 +52,7 @@ module.exports = class FeatureService {
         this.core = core
         this.database = core.database
         this.logger = core.logger
-        this.config = core.config 
+        this.config = core.config
 
         this.featureDAO = new FeatureDAO(core)
 
@@ -99,6 +100,9 @@ module.exports = class FeatureService {
             },
             'feat-61-multifactor-authentication': {
                 migration: new Feat61MultifactorAuthenticationMigration(core)
+            },
+            'fix-563-video-poster-fails-on-mobile': {
+                migration: new Fix563VideoPosterFailsOnMobileMigration(core)
             },
             'video-uploads': {}
 
@@ -148,9 +152,9 @@ module.exports = class FeatureService {
                 name: name,
                 status: 'uncreated'
             }
-        } 
+        }
 
-        return feature 
+        return feature
     }
 
     async updateFeatureStatus(name, status) {
