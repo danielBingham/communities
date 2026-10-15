@@ -65,4 +65,17 @@
         display: block;
         font-size: 10px;
     }
+
+    /* The New Post button gets a row of its own, above the links. */
+    #admin menu.admin__menu li.navigation-menu__item {
+        display: block;
+        padding-bottom: 5px;
+    }
+    #admin menu.admin__menu li.navigation-menu__item button {
+        font-size: 14px;
+    }
+    #admin menu.admin__menu li.navigation-menu__item .nav-text {
+        display: inline;
+        font-size: 14px;
+    }
 }

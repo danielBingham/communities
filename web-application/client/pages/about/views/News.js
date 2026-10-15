@@ -18,17 +18,11 @@
  *
  ******************************************************************************/
 
-import { useState } from 'react'
-import { useSelector } from 'react-redux'
-import { useParams, useNavigate, Link } from 'react-router-dom'
-
-import can, { Actions, Entities } from '/lib/permission'
+import { useParams, Link } from 'react-router-dom'
 
 import { useNewsQuery } from '/lib/hooks/News'
 
 import NewsPost from '/components/about/NewsPost'
-import NewsForm from '/components/about/NewsForm'
-import Button from '/components/ui/Button'
 import PaginationControls from '/components/PaginationControls'
 import Spinner from '/components/Spinner'
 import { RequestErrorContent } from '/components/errors/RequestError'
@@ -36,18 +30,10 @@ import { RequestErrorContent } from '/components/errors/RequestError'
 import './News.css'
 
 /**
- * A page of News posts, newest first, with the page from `?page=`.  Site
- * admins can write a new post from the top of the list.
+ * A page of News posts, newest first, with the page from `?page=`.
  */
 const NewsList = function() {
-    const currentUser = useSelector((state) => state.authentication.currentUser)
-    const canAdminSite = can(currentUser, Actions.admin, Entities.Site)
-
-    const [ showForm, setShowForm ] = useState(false)
-
     const [ query, request ] = useNewsQuery()
-
-    const navigate = useNavigate()
 
     let content = null
     if ( query !== null && query !== undefined ) {
@@ -64,13 +50,6 @@ const NewsList = function() {
 
     return (
         <div className="news-view">
-            { canAdminSite && ! showForm && <div className="news-view__controls">
-                <Button type="primary" onClick={() => setShowForm(true)}>New Post</Button>
-            </div> }
-            { canAdminSite && showForm && <NewsForm
-                onComplete={(news) => { setShowForm(false); navigate(`/about/news/${encodeURIComponent(news.slug)}`) }}
-                onCancel={() => setShowForm(false)}
-            /> }
             { content }
             <PaginationControls meta={query?.meta} />
         </div>

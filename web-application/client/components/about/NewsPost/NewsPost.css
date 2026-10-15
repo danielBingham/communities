@@ -5,6 +5,9 @@ h1.news-post__title {
     margin-bottom: 5px;
     padding-bottom: 0;
 }
+.news-post__controls {
+    text-align: center;
+}
 .news-post__byline {
     text-align: center;
     padding: 0 0 5px 0;

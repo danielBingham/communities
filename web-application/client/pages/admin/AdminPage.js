@@ -27,12 +27,14 @@ import { useFeature } from '/lib/hooks/feature/useFeature'
 import { resetEntities } from '/state/lib'
 
 import { Page, PageBody, PageLeftGutter, PageRightGutter } from '/components/generic/Page'
+import { NavigationMenuButton } from '/components/ui/NavigationMenu'
 
 import AdminDashboard from '/components/admin/dashboard/AdminDashboard'
 import FeatureFlags from '/components/admin/features/FeatureFlags'
 import UserAdminListView from '/pages/admin/views/UserAdminListView'
 import AdminModerationView from '/pages/admin/views/AdminModerationView'
 import BlocklistView from '/pages/admin/views/BlocklistView'
+import NewsFormView from '/pages/admin/views/NewsFormView'
 import UserAdminView from '/pages/admin/views/UserAdminView'
 
 import './AdminPage.css'
@@ -70,6 +72,11 @@ const AdminPage = function(props) {
         <Page id="admin">
             <PageLeftGutter>
                 <menu className="admin__menu">
+                    { canAdminSite === true && <NavigationMenuButton
+                        type="primary"
+                        onClick={() => navigate('/admin/news/create')}
+                        icon="Plus"
+                        text="New Post" /> }
                     <li><NavLink to={``} end><span className="nav-text"> Dashboard</span></NavLink></li>
                     <li><NavLink to="moderation" end><span className="nav-text"> Moderation</span></NavLink></li> 
                     <li><NavLink to="blocklist" end><span className="nav-text">Blocklist</span></NavLink></li>
@@ -80,6 +87,8 @@ const AdminPage = function(props) {
             <PageBody>
                 <Routes>
                     { canAdminSite === true && <Route path="features" element={<FeatureFlags />} /> }
+                    { canAdminSite === true && <Route path="news/create" element={<NewsFormView />} /> }
+                    { canAdminSite === true && <Route path="news/:slug/edit" element={<NewsFormView />} /> }
                     <Route path="users" element={<UserAdminListView />} />
                     <Route path="user">
                         <Route path=":userId" element={<UserAdminView />} />

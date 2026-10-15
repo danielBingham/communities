@@ -198,9 +198,9 @@ It only adds files that aren't there, so it never replaces real ones.
 The posts on the News page (`/about/news`) are kept in storage as well, all
 together in one JSON file, `news/index.json`, keyed by each post's slug. New
 local storage doesn't have one, so the News page starts out empty. Log in as
-a site admin (`site_role` 'admin' or 'superadmin') and use the News page's
-New Post button to write one, or copy an `index.json` into
-`local-data/storage/news/`.
+a site admin (`site_role` 'admin' or 'superadmin') and use the New Post
+button at the top of the admin menu (`/admin`) to write one, or copy an
+`index.json` into `local-data/storage/news/`.
 
 ### Push notifications
 

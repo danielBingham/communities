@@ -18,11 +18,17 @@
  *
  ******************************************************************************/
 
-import { Link } from 'react-router-dom'
+import { useSelector } from 'react-redux'
+import { Link, useLocation } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
+
+import { PencilIcon } from '@heroicons/react/24/outline'
+
+import can, { Actions, Entities } from '/lib/permission'
 
 import { useNews } from '/lib/hooks/News'
 
+import Button from '/components/ui/Button'
 import Spinner from '/components/Spinner'
 import Error404 from '/components/errors/Error404'
 import { RequestErrorContent } from '/components/errors/RequestError'
@@ -49,7 +55,8 @@ const markdownComponents = {
 }
 
 /**
- * A News post, with its content rendered from Markdown.
+ * A News post, with its content rendered from Markdown.  Site admins get an
+ * Edit Post button, which opens the post in NewsForm.
  *
  * Raw HTML in the Markdown is shown as text rather than rendered, and links
  * are limited to safe protocols (react-markdown's defaults).
@@ -57,7 +64,12 @@ const markdownComponents = {
  * @param {string} slug     The post's slug.
  */
 const NewsPost = function({ slug }) {
+    const currentUser = useSelector((state) => state.authentication.currentUser)
+    const canAdminSite = can(currentUser, Actions.admin, Entities.Site)
+
     const [news, request] = useNews(slug)
+
+    const location = useLocation()
 
     if ( news === null ) {
         return ( <Error404 /> )
@@ -77,6 +89,11 @@ const NewsPost = function({ slug }) {
             <div className="news-post__byline">
                 posted on <span className="news-post__date">{ news.date }</span> by <span className="news-post__author">{ news.author }</span>
             </div>
+            { canAdminSite && <div className="news-post__controls">
+                <Button href={`/admin/news/${encodeURIComponent(news.slug)}/edit?origin=${encodeURIComponent(location.pathname + location.search)}`}>
+                    <PencilIcon /> Edit Post
+                </Button>
+            </div> }
             <section className="news-post__body">
                 <ReactMarkdown components={markdownComponents}>{ news.content }</ReactMarkdown>
             </section>

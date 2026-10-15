@@ -39,3 +39,7 @@
 .news-form .news-form__controls {
     text-align: right;
 }
+.news-form .news-form__url__explanation {
+    font-size: 12px;
+    font-style: italic;
+}

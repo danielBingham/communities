@@ -19,20 +19,23 @@
  ******************************************************************************/
 import { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 
 import * as shared from '@communities/shared'
 
 import { useLocalStorage } from '/lib/hooks/useLocalStorage'
 import { useRequest } from '/lib/hooks/useRequest'
+import { useNews } from '/lib/hooks/News'
 
-import { postNews } from '/state/News'
+import { postNews, patchNews } from '/state/News'
 
 import AreYouSure from '/components/AreYouSure'
 import Button from '/components/ui/Button'
 import Input from '/components/ui/Input'
 import { TextBox } from '/components/ui/TextBox'
 import Spinner from '/components/Spinner'
-import { RequestErrorModal } from '/components/errors/RequestError'
+import Error404 from '/components/errors/Error404'
+import { RequestErrorModal, RequestErrorContent } from '/components/errors/RequestError'
 
 import './NewsForm.css'
 
@@ -53,23 +56,46 @@ const describeErrors = function(errors) {
 }
 
 /**
- * Write a new post for the News page.  Site admins only: the backend refuses
- * everyone else.
+ * The local storage key for one field of a draft.  New posts share a single
+ * draft, and each post being edited has its own, like PostForm's drafts.
  *
- * The slug, which is the post's URL, is generated from the date and title,
- * and the author is the current user.  The draft is kept in local storage
- * until it's posted or discarded.
+ * @param {string} slug     The slug of the post being edited, or undefined
+ * for a new post.
+ * @param {string} field    The field.
  *
- * @param {function} onComplete     (Optional) Called with the new post once
- * it has been created.
- * @param {function} onCancel   (Optional) Called when the draft is discarded.
+ * @return {string} The key.
  */
-const NewsForm = function({ onComplete, onCancel }) {
+const getDraftKey = function(slug, field) {
+    return slug ? `news.draft[${slug}].${field}` : `news.draft.${field}`
+}
+
+/**
+ * Where to go when the form is cancelled: `origin`, when it's a path within
+ * Communities, or `fallback`.
+ */
+const getCancelPath = function(origin, fallback) {
+    if ( typeof origin === 'string' && origin.startsWith('/') && ! origin.startsWith('//') ) {
+        return origin
+    }
+
+    return fallback
+}
+
+/**
+ * The form itself.  Rendered by NewsForm once the post being edited, if
+ * there is one, has loaded, so the draft can start from its values.
+ *
+ * @param {object} news     The post being edited, or null for a new post.
+ * @param {string} origin   (Optional) Where to go if the form is cancelled.
+ */
+const NewsFormFields = function({ news, origin }) {
+    const isEdit = news !== null
+
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
-    const [ title, setTitle ] = useLocalStorage('news.draft.title', '')
-    const [ date, setDate ] = useLocalStorage('news.draft.date', getToday())
-    const [ content, setContent ] = useLocalStorage('news.draft.content', '')
+    const [ title, setTitle ] = useLocalStorage(getDraftKey(news?.slug, 'title'), isEdit ? news.title : '')
+    const [ date, setDate ] = useLocalStorage(getDraftKey(news?.slug, 'date'), isEdit ? news.date : getToday())
+    const [ content, setContent ] = useLocalStorage(getDraftKey(news?.slug, 'content'), isEdit ? news.content : '')
 
     const [ titleErrors, setTitleErrors ] = useState(null)
     const [ dateErrors, setDateErrors ] = useState(null)
@@ -80,7 +106,13 @@ const NewsForm = function({ onComplete, onCancel }) {
 
     const [ request, makeRequest ] = useRequest()
 
-    const slug = shared.lib.news.generateNewsSlug(date, title)
+    const navigate = useNavigate()
+
+    // A post's slug is its URL, so it's generated once, when the post is
+    // created, and doesn't change when it's edited.
+    const slug = isEdit ? news.slug : shared.lib.news.generateNewsSlug(date, title)
+
+    const cancelPath = getCancelPath(origin, isEdit ? `/about/news/${encodeURIComponent(news.slug)}` : '/admin')
 
     /**
      * Check the form's fields, showing any errors.
@@ -114,9 +146,9 @@ const NewsForm = function({ onComplete, onCancel }) {
         }
 
         // The slug is generated, so its errors are the title's or date's
-        // fault.  Only check it once those are fine.
+        // fault.  Only check it once those are fine, and only for new posts.
         let slugValidationErrors = []
-        if ( ! field && titleValidationErrors.length === 0 && dateValidationErrors.length === 0 ) {
+        if ( ! isEdit && ! field && titleValidationErrors.length === 0 && dateValidationErrors.length === 0 ) {
             const currentSlug = shared.lib.news.generateNewsSlug(current.date, current.title)
             slugValidationErrors = schema.properties.slug.validate(currentSlug, undefined, 'create')
             setSlugErrors(slugValidationErrors.length > 0
@@ -135,8 +167,8 @@ const NewsForm = function({ onComplete, onCancel }) {
     /**
      * Update a field.  When it's showing an error, check it again as it's
      * edited, so the error goes away as soon as it's fixed rather than when
-     * the field loses focus (which would move the Post button out from under
-     * a click).
+     * the field loses focus (which would move the submit button out from
+     * under a click).
      */
     const onChange = function(field, setValue, hasErrors) {
         return function(event) {
@@ -148,13 +180,24 @@ const NewsForm = function({ onComplete, onCancel }) {
         }
     }
 
+    /**
+     * Whether the draft differs from what we started with: the post being
+     * edited, or a blank new post.
+     */
     const isDirty = function() {
+        if ( isEdit ) {
+            return title !== news.title || date !== news.date || content !== news.content
+        }
+
         return title !== '' || date !== getToday() || content !== ''
     }
 
-    const resetForm = function() {
+    /**
+     * Discard the draft, removing it from local storage.
+     */
+    const clearDraft = function() {
         setTitle('')
-        setDate(getToday())
+        setDate('')
         setContent('')
 
         setTitleErrors(null)
@@ -172,21 +215,28 @@ const NewsForm = function({ onComplete, onCancel }) {
             return
         }
 
-        makeRequest(postNews({
-            title: title,
-            slug: slug,
-            date: date,
-            author: currentUser.name,
-            content: content
-        }))
+        if ( isEdit ) {
+            // The author stays whoever wrote the post.
+            makeRequest(patchNews({
+                slug: news.slug,
+                title: title,
+                date: date,
+                content: content
+            }))
+        } else {
+            makeRequest(postNews({
+                title: title,
+                slug: slug,
+                date: date,
+                author: currentUser.name,
+                content: content
+            }))
+        }
     }
 
     const cancel = function() {
-        resetForm()
-
-        if ( onCancel && typeof onCancel === 'function' ) {
-            onCancel()
-        }
+        clearDraft()
+        navigate(cancelPath)
     }
 
     const handleCancel = function() {
@@ -199,11 +249,8 @@ const NewsForm = function({ onComplete, onCancel }) {
 
     useEffect(() => {
         if ( request?.state === 'fulfilled' ) {
-            resetForm()
-
-            if ( onComplete && typeof onComplete === 'function' ) {
-                onComplete(request.response.body.entity)
-            }
+            clearDraft()
+            navigate(`/about/news/${encodeURIComponent(request.response.body.entity.slug)}`)
         }
     }, [ request ])
 
@@ -243,6 +290,7 @@ const NewsForm = function({ onComplete, onCancel }) {
                 />
                 <div className="news-form__url">
                     <span className="news-form__url__label">URL:</span> <span className="news-form__url__value">/about/news/{ slug }</span>
+                    { isEdit && <div className="news-form__url__explanation">A post's URL doesn't change when its title or date do.</div> }
                     { slugErrors && <div className="news-form__url__error">{ slugErrors }</div> }
                 </div>
                 <TextBox
@@ -255,26 +303,66 @@ const NewsForm = function({ onComplete, onCancel }) {
                     onChange={onChange('content', setContent, contentErrors !== null)}
                     error={contentErrors}
                 />
-                <div className="news-form__author">Posting as { currentUser?.name }.</div>
+                <div className="news-form__author">
+                    { isEdit ? `Posted by ${news.author}.` : `Posting as ${currentUser?.name}.` }
+                </div>
                 <div className="news-form__errors">{ baseError }</div>
                 { inProgress && <Spinner /> }
                 { ! inProgress && <div className="news-form__controls">
                     <Button onClick={(event) => handleCancel()}>Cancel</Button>
-                    <input type="submit" name="submit" value="Post" />
+                    <input type="submit" name="submit" value={ isEdit ? 'Edit Post' : 'Post' } />
                 </div> }
             </form>
             <AreYouSure
                 isVisible={areYouSure}
                 cancelLabel="Keep Editing"
-                executeLabel="Discard Post"
+                executeLabel={ isEdit ? 'Discard Edits' : 'Discard Post' }
                 execute={cancel}
                 cancel={() => setAreYouSure(false)}
             >
-                <p>Are you sure you want to discard your post?</p>
+                <p>Are you sure you want to discard your { isEdit ? 'edits' : 'post' }?</p>
             </AreYouSure>
-            <RequestErrorModal message="Attempt to post news" request={request} />
+            <RequestErrorModal message={ isEdit ? 'Attempt to edit news post' : 'Attempt to post news' } request={request} />
         </div>
     )
+}
+
+/**
+ * Write a new post for the News page, or edit an existing one.  Site admins
+ * only: the backend refuses everyone else.
+ *
+ * Modeled on PostForm: without a `slug` it writes a new post, and with one it
+ * edits that post, starting from its values.  Either way the draft is kept in
+ * local storage until it's posted or discarded, and once it's posted, the
+ * form goes to the post.
+ *
+ * A new post's slug, which is its URL, is generated from its date and title,
+ * and its author is the current user.  Editing a post changes neither.
+ *
+ * @param {string} slug     (Optional) The slug of the post to edit.
+ * @param {string} origin   (Optional) Where to go if the form is cancelled.
+ * Defaults to the post being edited, or to /admin for a new post.
+ */
+const NewsForm = function({ slug, origin }) {
+    const [ news, request ] = useNews(slug)
+
+    if ( slug ) {
+        if ( news === null ) {
+            return ( <Error404 /> )
+        }
+
+        if ( news === undefined ) {
+            if ( request?.state === 'failed' ) {
+                return ( <RequestErrorContent message="Attempt to retrieve news post" request={request} /> )
+            }
+
+            return ( <Spinner /> )
+        }
+    }
+
+    // Keyed by slug, so going from one post's form to another's starts over
+    // with the other post's draft.
+    return ( <NewsFormFields key={slug ?? ''} news={slug ? news : null} origin={origin} /> )
 }
 
 export default NewsForm
