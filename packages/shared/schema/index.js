@@ -23,6 +23,7 @@ const FileSchema = require('./File')
 const GroupSchema = require('./Group')
 const GroupSubscriptionSchema = require('./GroupSubscription')
 const LogSchema = require('./Log')
+const NewsSchema = require('./News')
 const NotificationSchema = require('./Notification')
 const SiteModerationSchema = require('./SiteModeration')
 
@@ -32,6 +33,7 @@ module.exports = {
     GroupSchema: GroupSchema,
     GroupSubscriptionSchema: GroupSubscriptionSchema,
     LogSchema: LogSchema,
+    NewsSchema: NewsSchema,
     NotificationSchema: NotificationSchema,
     SiteModerationSchema: SiteModerationSchema
 }

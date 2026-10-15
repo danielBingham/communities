@@ -36,3 +36,38 @@ h1.news-post__title {
 .news-post li {
     padding: 0.25em 0;
 }
+.news-post__body img {
+    max-width: 100%;
+    height: auto;
+}
+.news-post__body blockquote {
+    margin: 1em 0;
+    padding: 0 1em;
+    border-left: 4px solid var(--main-border-color);
+    color: var(--main-text-color-dim);
+}
+.news-post__body code {
+    padding: 0.1em 0.3em;
+    border-radius: 3px;
+    background-color: var(--card-header-background-color);
+    border: thin solid var(--main-border-color);
+    font-size: 0.9em;
+}
+.news-post__body pre {
+    overflow-x: auto;
+    padding: 0.75em;
+    border-radius: 5px;
+    background-color: var(--card-header-background-color);
+    border: thin solid var(--main-border-color);
+    line-height: 1.4em;
+}
+.news-post__body pre code {
+    padding: 0;
+    border: none;
+    background-color: transparent;
+}
+.news-post__body hr {
+    border: none;
+    border-top: thin solid var(--main-border-color);
+    margin: 2em 0;
+}

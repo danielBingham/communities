@@ -18,17 +18,67 @@
  *
  ******************************************************************************/
 
+import { Link } from 'react-router-dom'
+import ReactMarkdown from 'react-markdown'
+
+import { useNews } from '/lib/hooks/News'
+
+import Spinner from '/components/Spinner'
+import Error404 from '/components/errors/Error404'
+import { RequestErrorContent } from '/components/errors/RequestError'
+
 import './NewsPost.css'
 
-const NewsPost = function({title, url, date, author, children}) {
+/**
+ * Render links in a post's Markdown: links within Communities navigate in
+ * the app, and links off of Communities open in a new tab, the way the
+ * hand written posts did.
+ */
+const NewsPostLink = function({ node, href, children, ...props }) {
+    if ( typeof href === 'string' && href.startsWith('/') && ! href.startsWith('//') ) {
+        return ( <Link to={href} {...props}>{ children }</Link> )
+    } else if ( typeof href === 'string' && /^https?:\/\//i.test(href) ) {
+        return ( <a href={href} target="_blank" rel="noopener noreferrer" {...props}>{ children }</a> )
+    }
+
+    return ( <a href={href} {...props}>{ children }</a> )
+}
+
+const markdownComponents = {
+    a: NewsPostLink
+}
+
+/**
+ * A News post, with its content rendered from Markdown.
+ *
+ * Raw HTML in the Markdown is shown as text rather than rendered, and links
+ * are limited to safe protocols (react-markdown's defaults).
+ *
+ * @param {string} slug     The post's slug.
+ */
+const NewsPost = function({ slug }) {
+    const [news, request] = useNews(slug)
+
+    if ( news === null ) {
+        return ( <Error404 /> )
+    }
+
+    if ( news === undefined ) {
+        if ( request?.state === 'failed' ) {
+            return ( <RequestErrorContent message="Attempt to retrieve news post" request={request} /> )
+        }
+
+        return ( <Spinner /> )
+    }
+
     return (
-        <article id="" className="news-post">
-            <h1 className="news-post__title"><a href={url}>{ title }</a></h1>
+        <article className="news-post">
+            <h1 className="news-post__title"><Link to={`/about/news/${encodeURIComponent(news.slug)}`}>{ news.title }</Link></h1>
             <div className="news-post__byline">
-                posted on <span className="news-post__date">{ date }</span> by <span className="news-post__author">{ author }</span>
+                posted on <span className="news-post__date">{ news.date }</span> by <span className="news-post__author">{ news.author }</span>
             </div>
             <section className="news-post__body">
-                { children }
+                <ReactMarkdown components={markdownComponents}>{ news.content }</ReactMarkdown>
             </section>
         </article>
     )

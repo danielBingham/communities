@@ -1,0 +1,41 @@
+.news-form {
+    box-sizing: border-box;
+    margin: 0 auto 40px auto;
+    padding: 10px;
+    border: thin solid var(--main-border-color);
+    border-radius: 7px;
+    background-color: var(--card-background-color);
+}
+.news-form .news-form__content textarea {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 400px;
+    resize: vertical;
+    font-family: monospace;
+    font-size: 14px;
+    line-height: 1.5em;
+}
+.news-form .news-form__url {
+    padding: 0 0 10px 0;
+    font-size: 14px;
+    color: var(--main-text-color-dim);
+    overflow-wrap: anywhere;
+}
+.news-form .news-form__url__label {
+    font-weight: bold;
+}
+.news-form .news-form__url__error,
+.news-form .news-form__errors {
+    color: var(--error-text-color);
+}
+.news-form .news-form__author {
+    font-size: 14px;
+    color: var(--main-text-color-dim);
+}
+.news-form .news-form__errors {
+    padding: 10px;
+    text-align: center;
+}
+.news-form .news-form__controls {
+    text-align: right;
+}
