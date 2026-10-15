@@ -19,7 +19,7 @@
  ******************************************************************************/
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { useNavigate, NavLink, Routes, Route } from 'react-router-dom'
+import { useNavigate, Routes, Route } from 'react-router-dom'
 
 import can, { Entities, Actions } from '/lib/permission'
 
@@ -27,8 +27,8 @@ import { useFeature } from '/lib/hooks/feature/useFeature'
 import { resetEntities } from '/state/lib'
 
 import { Page, PageBody, PageLeftGutter, PageRightGutter } from '/components/generic/Page'
-import { NavigationMenuButton } from '/components/ui/NavigationMenu'
 
+import AdminNavigationMenu from '/components/admin/AdminNavigationMenu'
 import AdminDashboard from '/components/admin/dashboard/AdminDashboard'
 import FeatureFlags from '/components/admin/features/FeatureFlags'
 import UserAdminListView from '/pages/admin/views/UserAdminListView'
@@ -71,18 +71,7 @@ const AdminPage = function(props) {
     return (
         <Page id="admin">
             <PageLeftGutter>
-                <menu className="admin__menu">
-                    { canAdminSite === true && <NavigationMenuButton
-                        type="primary"
-                        onClick={() => navigate('/admin/news/create')}
-                        icon="Plus"
-                        text="New Post" /> }
-                    <li><NavLink to={``} end><span className="nav-text"> Dashboard</span></NavLink></li>
-                    <li><NavLink to="moderation" end><span className="nav-text"> Moderation</span></NavLink></li> 
-                    <li><NavLink to="blocklist" end><span className="nav-text">Blocklist</span></NavLink></li>
-                    { canAdminSite === true && <li><NavLink to="features" end><span className="nav-text"> Features</span></NavLink></li> }
-                    <li><NavLink to="users" end><span className="nav-text"> Users</span></NavLink></li>
-                </menu> 
+                <AdminNavigationMenu />
             </PageLeftGutter>
             <PageBody>
                 <Routes>
