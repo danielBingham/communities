@@ -86,25 +86,6 @@ describe('NewsService', function() {
                 .rejects.toMatchObject({ type: 'conflict' })
             expect(readIndex()['a-post'].title).toBe('Title of a-post')
         })
-
-        it('Should not lose posts created at the same time', async function() {
-            const slugs = Array.from({ length: 10 }, (value, index) => `post-${index}`)
-            await Promise.all(slugs.map((slug) => service.createNews(makeNews(slug))))
-
-            expect(Object.keys(readIndex()).sort()).toEqual([ ...slugs ].sort())
-        })
-
-        it('Should keep going after a change fails', async function() {
-            await service.createNews(makeNews('a-post'))
-
-            const results = await Promise.allSettled([
-                service.createNews(makeNews('a-post')),
-                service.createNews(makeNews('b-post'))
-            ])
-
-            expect(results.map((result) => result.status)).toEqual([ 'rejected', 'fulfilled' ])
-            expect(Object.keys(readIndex())).toEqual([ 'a-post', 'b-post' ])
-        })
     })
 
     describe('getNews()', function() {

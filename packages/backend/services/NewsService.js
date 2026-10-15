@@ -42,11 +42,14 @@ const ServiceError = require('../errors/ServiceError')
  * The file is written pretty printed so it can be read and, in a pinch,
  * edited by hand.
  *
- * Changes are made by reading the whole file, changing it and writing it
- * back.  Changes made by this process are queued so they can't overwrite each
- * other, but two web servers changing News at the same moment could still
- * lose one of the changes.  With a handful of admins writing a post now and
- * then, that's a risk we're accepting for now.
+ * TECHDEBT Changes are made by reading the whole file, changing it and
+ * writing it back, with nothing to stop two changes from overlapping.  If
+ * two changes are made at the same moment, both read the same index and the
+ * one saved last overwrites the other, which is lost.  We're accepting that
+ * risk for now: only one admin writes News, so a collision would mean they
+ * collided with themselves.  When more admins can post, this service should
+ * be rewritten to make changes safely (S3 conditional writes, or moving News
+ * into the database).
  */
 module.exports = class NewsService {
 
@@ -59,14 +62,6 @@ module.exports = class NewsService {
      * How many posts are on each page of GET /news.
      */
     static PAGE_SIZE = 5
-
-    /**
-     * The end of the queue of changes to the index, shared by every
-     * NewsService in this process.
-     *
-     * @see NewsService.queueChange()
-     */
-    static changes = Promise.resolve()
 
     constructor(core) {
         this.core = core
@@ -154,33 +149,6 @@ module.exports = class NewsService {
     }
 
     /**
-     * Run `change(index)` against the current index and save the index it
-     * leaves behind, after any change already queued in this process has
-     * finished.
-     *
-     * @param {function(Object): Object} change     Changes the index it's
-     * given, and returns whatever the caller should get back.  May throw to
-     * abandon the change, in which case nothing is saved.
-     *
-     * @return {Promise<*>} Whatever `change` returned.
-     */
-    async queueChange(change) {
-        const run = async () => {
-            const index = await this.getIndex()
-            const result = change(index)
-            await this.saveIndex(index)
-            return result
-        }
-
-        const result = NewsService.changes.then(run, run)
-
-        // Keep the queue moving whether or not this change succeeds.
-        NewsService.changes = result.catch(() => {})
-
-        return await result
-    }
-
-    /**
      * Get one page of posts, newest first.
      *
      * @param {number} page     Which page to get, counting from 1.  Past the
@@ -258,14 +226,18 @@ module.exports = class NewsService {
      * slug.
      */
     async createNews(news) {
-        return await this.queueChange((index) => {
-            if ( Object.hasOwn(index, news.slug) ) {
-                throw new ServiceError('conflict', `News(${news.slug}) already exists.`)
-            }
+        // TECHDEBT Not safe against a simultaneous change.  See the class
+        // comment.
+        const index = await this.getIndex()
 
-            index[news.slug] = this.toEntity(news, news.slug)
-            return index[news.slug]
-        })
+        if ( Object.hasOwn(index, news.slug) ) {
+            throw new ServiceError('conflict', `News(${news.slug}) already exists.`)
+        }
+
+        index[news.slug] = this.toEntity(news, news.slug)
+        await this.saveIndex(index)
+
+        return index[news.slug]
     }
 
     /**
@@ -280,14 +252,18 @@ module.exports = class NewsService {
      * @throws {ServiceError} 'not-found' when there's no post with that slug.
      */
     async updateNews(slug, patch) {
-        return await this.queueChange((index) => {
-            if ( ! Object.hasOwn(index, slug) ) {
-                throw new ServiceError('not-found', `News(${slug}) doesn't exist.`)
-            }
+        // TECHDEBT Not safe against a simultaneous change.  See the class
+        // comment.
+        const index = await this.getIndex()
 
-            index[slug] = this.toEntity({ ...index[slug], ...patch }, slug)
-            return index[slug]
-        })
+        if ( ! Object.hasOwn(index, slug) ) {
+            throw new ServiceError('not-found', `News(${slug}) doesn't exist.`)
+        }
+
+        index[slug] = this.toEntity({ ...index[slug], ...patch }, slug)
+        await this.saveIndex(index)
+
+        return index[slug]
     }
 
     /**
@@ -300,14 +276,18 @@ module.exports = class NewsService {
      * @throws {ServiceError} 'not-found' when there's no post with that slug.
      */
     async deleteNews(slug) {
-        return await this.queueChange((index) => {
-            if ( ! Object.hasOwn(index, slug) ) {
-                throw new ServiceError('not-found', `News(${slug}) doesn't exist.`)
-            }
+        // TECHDEBT Not safe against a simultaneous change.  See the class
+        // comment.
+        const index = await this.getIndex()
 
-            const news = this.toEntity(index[slug], slug)
-            delete index[slug]
-            return news
-        })
+        if ( ! Object.hasOwn(index, slug) ) {
+            throw new ServiceError('not-found', `News(${slug}) doesn't exist.`)
+        }
+
+        const news = this.toEntity(index[slug], slug)
+        delete index[slug]
+        await this.saveIndex(index)
+
+        return news
     }
 }
