@@ -30,6 +30,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 import { postPostComments, patchPostComment, finishPostCommentEdit } from '/state/PostComment'
 
 import { RequestErrorModal } from '/components/errors/RequestError'
+import Alert from '/components/ui/Alert'
 import Button from '/components/ui/Button'
 import Spinner from '/components/Spinner'
 import AreYouSure from '/components/AreYouSure'
@@ -50,10 +51,16 @@ const PostCommentForm = function({ ref, postId, groupId, commentId, setShowComme
     // form once it has rendered.
     const [ focusRequest, setFocusRequest ] = useState(0)
 
+    // Incremented each time the user tries to reply to someone they're
+    // already replying to, and used as the alert's key, so that clicking
+    // "Reply" again restarts the alert rather than leaving it to time out
+    // from the first click.  Zero when there's no alert.
+    const [ alreadyReplyingAlert, setAlreadyReplyingAlert ] = useState(0)
+
     const formRef = useRef(null)
     const textAreaRef = useRef(null)
 
-    const [postRequest, makePostRequest] = useRequest()
+    const [postRequest, makePostRequest, resetPostRequest] = useRequest()
     const [patchRequest, makePatchRequest] = useRequest()
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
@@ -94,8 +101,9 @@ const PostCommentForm = function({ ref, postId, groupId, commentId, setShowComme
      * "Reply" on a comment.
      *
      * If the user already has a draft in progress, we don't want to clobber
-     * it, so the mention is added to the end of the draft instead, unless the
-     * draft already mentions that user.
+     * it, so the mention is added to the end of the draft instead.  If the
+     * draft already mentions that user, we leave it alone and let them know
+     * they're already replying.
      *
      * @param {string} username The username of the author being replied to.
      */
@@ -105,7 +113,9 @@ const PostCommentForm = function({ ref, postId, groupId, commentId, setShowComme
         let newContent = content
         if ( content.trim().length <= 0 ) {
             newContent = mention
-        } else if ( ! shared.lib.mentions.parseMentions(content).includes(username) ) {
+        } else if ( shared.lib.mentions.parseMentions(content).includes(username) ) {
+            setAlreadyReplyingAlert((count) => count + 1)
+        } else {
             const separator = /\s$/.test(content) ? '' : ' '
             newContent = `${content}${separator}${mention}`
         }
@@ -234,8 +244,13 @@ const PostCommentForm = function({ ref, postId, groupId, commentId, setShowComme
         setContent(draft.content)
     }, [ commentId ])
 
+    // Save the draft as the user types.  We don't save while the comment is
+    // being submitted, or once it has been, because the draft is cleared on
+    // success.  We do save after a failure, so that changes made before
+    // trying again aren't lost.
     useEffect(function() {
-        if ( ! postRequest && ! patchRequest && (showForm || commentId )) {
+        const isSubmitted = (request) => request?.state === 'pending' || request?.state === 'fulfilled'
+        if ( ! isSubmitted(postRequest) && ! isSubmitted(patchRequest) && (showForm || commentId )) {
             if ( isLocalStorageAvailable() ) {
                 try {
                     localStorage.setItem(getDraftKey(), JSON.stringify({ content: content }))
@@ -263,6 +278,11 @@ const PostCommentForm = function({ ref, postId, groupId, commentId, setShowComme
 
             if ( commentId ) {
                 dispatch(finishPostCommentEdit(commentId))
+            } else {
+                // The new comment form stays mounted, ready for the next
+                // comment, so clear the finished request.  Otherwise we'd never
+                // save the next comment's draft.
+                resetPostRequest()
             }
         }
     }, [ commentId, postRequest, patchRequest])
@@ -319,6 +339,12 @@ const PostCommentForm = function({ ref, postId, groupId, commentId, setShowComme
                 >
                     <p>Are you sure you want to discard your { commentId ? "edits" : "comment" }?</p>
                 </AreYouSure>
+                { alreadyReplyingAlert > 0 && <Alert
+                    key={alreadyReplyingAlert}
+                    type="warn"
+                    timeout={3000}
+                    onClear={() => setAlreadyReplyingAlert(0)}
+                >You're already replying.</Alert> }
                 <RequestErrorModal message="Attempt to create comment" request={postRequest} />
                 <RequestErrorModal message="Attempt to edit comment" request={patchRequest} />
             </div>

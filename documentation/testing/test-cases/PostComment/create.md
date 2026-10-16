@@ -53,6 +53,23 @@ Cases covering making comments on posts.
         - Click on the notification.
             - **Confirm comment highlighted.**
 
+- [ ] As a user, I'm notified of mentions and subscribed comments even when someone else involved has blocked the commenter.
+    - Users who can't see a comment (because they've blocked, or been blocked by, its author) are skipped, and the users after them must still be notified.  Doing these steps in order makes it likely User3 is checked first.
+    - As User3:
+        - Comment on User1's post, which subscribes User3 to it.
+    - As User4:
+        - Comment on User1's post, which subscribes User4 to it.
+    - As User3:
+        - Block User2.
+    - As User2:
+        - Comment "@User3 @User1 Hello." on User1's post, using User3's and User1's usernames.
+    - As User1:
+        - **Confirm mention notification received.**
+    - As User3:
+        - **Confirm no notification received.**
+    - As User4:
+        - **Confirm comment notification received for User2's comment.**
+
 #### Replies
 
 - [ ] As a user, I can reply to another user's comment.
@@ -78,6 +95,9 @@ Cases covering making comments on posts.
             - **Confirm the draft becomes "Draft in progress. " followed by a mention of User1.**
         - Click "Reply" on User1's comment again.
             - **Confirm User1 is not mentioned a second time.**
+            - **Confirm a "You're already replying." warning appears for a few seconds, then disappears.**
+        - Click "Reply" on User1's comment again, twice in quick succession.
+            - **Confirm only one warning is shown, and it disappears a few seconds after the last click.**
         - Cancel the draft.
 
 - [ ] As a user, replying in a long thread brings the comment form into view.
@@ -111,6 +131,24 @@ Cases covering making comments on posts.
             - **Confirm draft remains.**
         - Post the draft.
             - **Confirm comment posts correctly.**
+
+- [ ] As a user, my comment drafts keep being saved after I've posted a comment.
+    - As User2:
+        - Post a comment on User1's post.
+        - Without reloading, start another comment on the same post and write a draft.
+        - Reload the page.
+            - **Confirm the second draft remains.**
+        - Post the draft.
+            - **Confirm comment posts correctly and the draft is gone.**
+
+- [ ] As a user, my comment drafts keep being saved after a comment fails to post.
+    - As User2:
+        - Write a comment draft.
+        - Turn off your network connection and try to post the draft.
+            - **Confirm an error is shown and the draft remains in the form.**
+        - Edit the draft.
+        - Turn your network connection back on and reload the page.
+            - **Confirm the edited draft remains.**
 
 - [ ] As a user, my comment drafts are deleted when I log out.
     - As User2:
