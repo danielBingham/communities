@@ -6,6 +6,7 @@ import { resetGroupModerationSlice } from '/state/GroupModeration'
 import { resetGroupSubscriptionSlice } from '/state/GroupSubscription'
 import { resetLinkPreviewSlice } from '/state/LinkPreview'
 import { resetMutualsSlice } from '/state/Mutuals'
+import { resetNewsSlice } from '/state/News'
 import { resetPostSlice } from '/state/Post'
 import { resetPostCommentSlice } from '/state/PostComment'
 import { resetPostReactionSlice } from '/state/PostReaction'
@@ -24,6 +25,7 @@ export const resetEntities = function() {
         dispatch(resetGroupSubscriptionSlice())
         dispatch(resetLinkPreviewSlice())
         dispatch(resetMutualsSlice())
+        dispatch(resetNewsSlice())
         dispatch(resetPostSlice())
         dispatch(resetPostCommentSlice())
         dispatch(resetPostReactionSlice())

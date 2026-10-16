@@ -32,9 +32,9 @@ const S3Storage = require('./S3Storage')
  *   }
  *
  * Every driver has the same methods: uploadFile, uploadFileFromStream,
- * copyFile, moveFile, hasFile, getFile, downloadFile, getSignedUrl and
- * removeFile, plus `location` (recorded with each file) and `contentOrigins`
- * (where browsers load files from).
+ * uploadFileFromBuffer, copyFile, moveFile, hasFile, getFile, downloadFile,
+ * getSignedUrl and removeFile, plus `location` (recorded with each file) and
+ * `contentOrigins` (where browsers load files from).
  *
  * @param {Core} core   A core with `config` and `logger`.
  *

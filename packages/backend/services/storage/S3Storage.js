@@ -165,6 +165,31 @@ module.exports = class S3Storage {
         await this.s3Client.send(new PutObjectCommand(params))
     }
 
+    /**
+     * Write `data` to `targetPath`, replacing anything already there.
+     *
+     * For contents we already hold in memory, like a JSON document.  The S3
+     * API needs to know a body's length up front, which a Buffer gives it and
+     * an arbitrary stream doesn't.
+     *
+     * @param {Buffer|Uint8Array|string} data   The file's contents.
+     * @param {string} targetPath   The key to write.
+     * @param {string} [contentType]    The file's MIME type, if known.
+     */
+    async uploadFileFromBuffer(data, targetPath, contentType) {
+        const params = {
+            Bucket: this.bucket,
+            Key: targetPath,
+            Body: data
+        }
+
+        if ( contentType ) {
+            params.ContentType = contentType
+        }
+
+        await this.s3Client.send(new PutObjectCommand(params))
+    }
+
     async copyFile(currentPath, newPath) {
         const params = {
             Bucket: this.bucket,

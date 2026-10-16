@@ -66,6 +66,7 @@
     "react": "19.1.1",
     "react-dom": "19.1.1",
     "react-image-crop": "11.0.10",
+    "react-markdown": "10.1.0",
     "react-redux": "9.2.0",
     "react-router-dom": "6.30.1",
     "react-swipeable": "7.0.2",

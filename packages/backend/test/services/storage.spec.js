@@ -114,6 +114,27 @@ describe('Storage', function() {
             client.send = jest.fn(async () => ({ $metadata: { httpStatusCode: 200 } }))
             expect(await new S3Storage(coreWith(), s3Settings, client).hasFile('files/a.jpeg')).toBe(true)
         })
+
+        it('Should upload a buffer with its length and content type', async function() {
+            const client = { send: jest.fn(async () => ({ $metadata: { httpStatusCode: 200 } })) }
+            const storage = new S3Storage(coreWith(), s3Settings, client)
+
+            await storage.uploadFileFromBuffer(Buffer.from('{}'), 'news/index.json', 'application/json')
+            expect(client.send).toHaveBeenCalledTimes(1)
+            expect(client.send.mock.calls[0][0].input).toEqual({
+                Bucket: 'communities-files',
+                Key: 'news/index.json',
+                Body: Buffer.from('{}'),
+                ContentType: 'application/json'
+            })
+
+            await storage.uploadFileFromBuffer(Buffer.from('image'), 'files/a.jpeg')
+            expect(client.send.mock.calls[1][0].input).toEqual({
+                Bucket: 'communities-files',
+                Key: 'files/a.jpeg',
+                Body: Buffer.from('image')
+            })
+        })
     })
 
     describe('FilesystemStorage', function() {
@@ -154,8 +175,15 @@ describe('Storage', function() {
             await storage.uploadFileFromStream(Readable.from([ 'streamed' ]), 'files/b.jpeg')
             expect(Buffer.from(await storage.getFile('files/b.jpeg')).toString()).toBe('streamed')
 
+            await storage.uploadFileFromBuffer(Buffer.from('buffered'), 'files/c.json', 'application/json')
+            expect(Buffer.from(await storage.getFile('files/c.json')).toString()).toBe('buffered')
+
+            // Uploading again replaces the file.
+            await storage.uploadFileFromBuffer(Buffer.from('replaced'), 'files/c.json', 'application/json')
+            expect(Buffer.from(await storage.getFile('files/c.json')).toString()).toBe('replaced')
+
             // Written to a temporary name, then renamed: nothing is left over.
-            expect(fs.readdirSync(path.join(directory, 'storage/files')).sort()).toEqual([ 'a.jpeg', 'b.jpeg' ])
+            expect(fs.readdirSync(path.join(directory, 'storage/files')).sort()).toEqual([ 'a.jpeg', 'b.jpeg', 'c.json' ])
         })
 
         it('Should copy, move and remove files', async function() {

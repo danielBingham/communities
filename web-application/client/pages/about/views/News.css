@@ -21,3 +21,7 @@
         max-width: 100vw;
     }
 }
+.news-view .news-view__empty {
+    text-align: center;
+    color: var(--main-text-color-dim);
+}

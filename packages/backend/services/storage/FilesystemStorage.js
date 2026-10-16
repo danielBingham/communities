@@ -141,6 +141,15 @@ module.exports = class FilesystemStorage {
         await this.write(targetKey, (file) => pipeline(readStream, createWriteStream(file)))
     }
 
+    /**
+     * Write `data` to `targetKey`, replacing anything already there.
+     * `contentType` is accepted to match S3Storage; files on disk don't keep
+     * one.
+     */
+    async uploadFileFromBuffer(data, targetKey, contentType) {
+        await this.write(targetKey, (file) => fs.writeFile(file, data))
+    }
+
     async copyFile(currentKey, newKey) {
         await this.write(newKey, (file) => fs.copyFile(this.pathFor(currentKey), file))
     }

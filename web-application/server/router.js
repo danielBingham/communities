@@ -420,6 +420,45 @@ module.exports = function(core) {
     })
 
     /**************************************************************************
+     * News REST Routes
+     *
+     * The posts on the News page.  Anyone may read them, including people
+     * without an account.  Only site admins may change them.
+     **************************************************************************/
+    const NewsController = require('./controllers/NewsController')
+    const newsController = new NewsController(core)
+
+    router.get('/news', rateLimit(core, 2400), function(request, response, next) {
+        newsController.getNewsList(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.post('/news', rateLimit(core, 30), function(request, response, next) {
+        newsController.postNews(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.get('/news/:slug', rateLimit(core, 2400), function(request, response, next) {
+        newsController.getNews(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.patch('/news/:slug', rateLimit(core, 30), function(request, response, next) {
+        newsController.patchNews(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.delete('/news/:slug', rateLimit(core, 30), function(request, response, next) {
+        newsController.deleteNews(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    /**************************************************************************
      * Post REST Routes
      **************************************************************************/
     const PostController = require('./controllers/PostController')
