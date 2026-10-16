@@ -53,6 +53,53 @@ Cases covering making comments on posts.
         - Click on the notification.
             - **Confirm comment highlighted.**
 
+#### Replies
+
+- [ ] As a user, I can reply to another user's comment.
+    - As User1:
+        - Comment "Reply to me." on User1's post.
+    - As User2:
+        - Comment "Me first." on User1's post.
+            - **Confirm a "Reply" link appears in the bottom left corner of User1's comment.**
+            - **Confirm no "Reply" link appears on User2's own comment.**
+        - Click "Reply" on User1's comment.
+            - **Confirm a new comment form opens at the end of the comment thread.**
+            - **Confirm it starts with a mention of User1's username followed by a space.**
+            - **Confirm the cursor is placed after the mention.**
+        - Finish the reply with "Replying." and post it.
+            - **Confirm the comment appears at the end of the thread, with a mention of User1 followed by "Replying."**
+    - As User1:
+        - **Confirm mention notification received.**
+
+- [ ] As a user, replying doesn't discard a comment I'm already writing.
+    - As User2:
+        - Start a comment and write "Draft in progress." without posting it.
+        - Click "Reply" on User1's comment.
+            - **Confirm the draft becomes "Draft in progress. " followed by a mention of User1.**
+        - Click "Reply" on User1's comment again.
+            - **Confirm User1 is not mentioned a second time.**
+        - Cancel the draft.
+
+- [ ] As a user, replying in a long thread brings the comment form into view.
+    - As User2, on a post with enough comments that the thread is taller than the screen:
+        - Scroll to the top of the thread and click "Reply" on one of the first comments.
+            - **Confirm the page scrolls so the comment form, including its buttons, is visible and focused.**
+    - Repeat on iOS and Android.
+        - **Confirm the keyboard opens with the comment form visible above it.**
+
+- [ ] As a user, the "Reply" link only appears where I can reply.
+    - As User2:
+        - Flag User1's comment.
+    - As an Administrator:
+        - Open the Site moderation queue.
+            - **Confirm no "Reply" link appears on User1's comment in the queue.**
+        - Click "View Context" on User1's comment.
+            - **Confirm the "Reply" link appears on User1's comment in the post's comment thread.**
+        - Remove User1's comment.
+    - As User2:
+        - View User1's post.
+            - **Confirm no "Reply" link appears on the removed comment.**
+
 #### Drafts
 
 - [ ] As a user, my comment drafts are saved as long as I am logged in.

@@ -17,8 +17,10 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useImperativeHandle } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
+
+import * as shared from '@communities/shared'
 
 import logger from '/logger'
 
@@ -36,13 +38,20 @@ import TextAreaWithMentions from '/components/posts/TextAreaWithMentions'
 
 import './PostCommentForm.css'
 
-const PostCommentForm = function({ postId, groupId, commentId, setShowComments }) {
+const PostCommentForm = function({ ref, postId, groupId, commentId, setShowComments }) {
     const [showForm, setShowForm ] = useState(false)
 
     const [ content, setContent ] = useState('')
 
     const [ error, setError ] = useState('')
     const [ areYouSure, setAreYouSure ] = useState(false)
+
+    // Incremented each time a reply is started, so that we can focus the
+    // form once it has rendered.
+    const [ focusRequest, setFocusRequest ] = useState(0)
+
+    const formRef = useRef(null)
+    const textAreaRef = useRef(null)
 
     const [postRequest, makePostRequest] = useRequest()
     const [patchRequest, makePatchRequest] = useRequest()
@@ -77,6 +86,43 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
         setShowForm(true)
         setShowComments(true)
     }
+
+    /**
+     * Start a comment replying to another comment's author, by opening it
+     * with a mention of them.  Only meaningful on the new comment form, where
+     * PostComments calls it (through the handle below) when the user clicks
+     * "Reply" on a comment.
+     *
+     * If the user already has a draft in progress, we don't want to clobber
+     * it, so the mention is added to the end of the draft instead, unless the
+     * draft already mentions that user.
+     *
+     * @param {string} username The username of the author being replied to.
+     */
+    const replyTo = function(username) {
+        const mention = `@${username} `
+
+        let newContent = content
+        if ( content.trim().length <= 0 ) {
+            newContent = mention
+        } else if ( ! shared.lib.mentions.parseMentions(content).includes(username) ) {
+            const separator = /\s$/.test(content) ? '' : ' '
+            newContent = `${content}${separator}${mention}`
+        }
+
+        if ( ! showForm ) {
+            startComment()
+        }
+
+        onChange(newContent)
+        setFocusRequest((count) => count + 1)
+    }
+
+    useImperativeHandle(ref, () => {
+        return {
+            replyTo: replyTo
+        }
+    }, [ postId, content, showForm ])
 
     const submit = function() {
         const newComment = {
@@ -221,6 +267,16 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
         }
     }, [ commentId, postRequest, patchRequest])
 
+    // When a reply is started, focus the textarea and bring the form into
+    // view.  This waits for the render, because starting a reply may be what
+    // opened the form, and the reply link may be far up the comment thread.
+    useEffect(function() {
+        if ( focusRequest > 0 ) {
+            textAreaRef.current?.focusAtEnd()
+            formRef.current?.scrollIntoView({ block: 'nearest' })
+        }
+    }, [ focusRequest ])
+
     if ( ! currentUser ) {
         logger.error(new Error('Attempt to load PostCommentForm without logged in user.'))
         return null
@@ -239,8 +295,9 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
         )
     } else {
         return (
-            <div className="post-comment-form">
+            <div ref={formRef} className="post-comment-form">
                 <TextAreaWithMentions
+                    ref={textAreaRef}
                     value={content}
                     setValue={onChange}
                     placeholder="Write a comment..."
