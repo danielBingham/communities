@@ -37,7 +37,12 @@
     text-align: center;
 }
 .news-form .news-form__controls {
-    text-align: right;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+.news-form .news-form__controls .news-form__controls__delete {
+    margin-right: auto;
 }
 .news-form .news-form__url__explanation {
     font-size: 12px;

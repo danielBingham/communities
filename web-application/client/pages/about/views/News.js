@@ -63,7 +63,7 @@ const News = function({}) {
         return (
             <div className="news-view">
                 <div className="news-view__back"><Link to="/about/news">&lt;- Back to News</Link></div>
-                <NewsPost slug={url} />
+                <NewsPost slug={url} showEditButton={true} />
             </div>
         )
     }

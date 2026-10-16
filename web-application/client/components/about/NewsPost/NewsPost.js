@@ -55,15 +55,17 @@ const markdownComponents = {
 }
 
 /**
- * A News post, with its content rendered from Markdown.  Site admins get an
- * Edit Post button, which opens the post in NewsForm.
+ * A News post, with its content rendered from Markdown.
  *
  * Raw HTML in the Markdown is shown as text rather than rendered, and links
  * are limited to safe protocols (react-markdown's defaults).
  *
  * @param {string} slug     The post's slug.
+ * @param {boolean} showEditButton  (Optional) Give site admins an Edit Post
+ * button, which opens the post in NewsForm.  Shown on the single post view,
+ * not in the list.
  */
-const NewsPost = function({ slug }) {
+const NewsPost = function({ slug, showEditButton }) {
     const currentUser = useSelector((state) => state.authentication.currentUser)
     const canAdminSite = can(currentUser, Actions.admin, Entities.Site)
 
@@ -89,7 +91,7 @@ const NewsPost = function({ slug }) {
             <div className="news-post__byline">
                 posted on <span className="news-post__date">{ news.date }</span> by <span className="news-post__author">{ news.author }</span>
             </div>
-            { canAdminSite && <div className="news-post__controls">
+            { showEditButton === true && canAdminSite && <div className="news-post__controls">
                 <Button href={`/admin/news/${encodeURIComponent(news.slug)}/edit?origin=${encodeURIComponent(location.pathname + location.search)}`}>
                     <PencilIcon /> Edit Post
                 </Button>

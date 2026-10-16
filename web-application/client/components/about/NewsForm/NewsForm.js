@@ -21,13 +21,19 @@ import { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
+import { TrashIcon } from '@heroicons/react/24/outline'
+
 import * as shared from '@communities/shared'
+
+import logger from '/logger'
+
+import { isLocalStorageAvailable } from '/lib/localStorage'
 
 import { useLocalStorage } from '/lib/hooks/useLocalStorage'
 import { useRequest } from '/lib/hooks/useRequest'
 import { useNews } from '/lib/hooks/News'
 
-import { postNews, patchNews } from '/state/News'
+import { postNews, patchNews, deleteNews } from '/state/News'
 
 import AreYouSure from '/components/AreYouSure'
 import Button from '/components/ui/Button'
@@ -70,6 +76,26 @@ const getDraftKey = function(slug, field) {
 }
 
 /**
+ * Remove a post's draft from local storage, for when the form that holds it
+ * is already gone.
+ *
+ * @param {string} slug     The slug of the post, or undefined for a new post.
+ */
+const removeDraft = function(slug) {
+    if ( ! isLocalStorageAvailable() ) {
+        return
+    }
+
+    for(const field of [ 'title', 'date', 'content' ]) {
+        try {
+            localStorage.removeItem(getDraftKey(slug, field))
+        } catch (error) {
+            logger.error(error)
+        }
+    }
+}
+
+/**
  * Where to go when the form is cancelled: `origin`, when it's a path within
  * Communities, or `fallback`.
  */
@@ -87,8 +113,10 @@ const getCancelPath = function(origin, fallback) {
  *
  * @param {object} news     The post being edited, or null for a new post.
  * @param {string} origin   (Optional) Where to go if the form is cancelled.
+ * @param {function} onDelete   (Optional) Deletes the post being edited,
+ * once the admin has confirmed it.
  */
-const NewsFormFields = function({ news, origin }) {
+const NewsFormFields = function({ news, origin, onDelete }) {
     const isEdit = news !== null
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
@@ -103,6 +131,7 @@ const NewsFormFields = function({ news, origin }) {
     const [ slugErrors, setSlugErrors ] = useState(null)
 
     const [ areYouSure, setAreYouSure ] = useState(false)
+    const [ confirmDelete, setConfirmDelete ] = useState(false)
 
     const [ request, makeRequest ] = useRequest()
 
@@ -309,6 +338,9 @@ const NewsFormFields = function({ news, origin }) {
                 <div className="news-form__errors">{ baseError }</div>
                 { inProgress && <Spinner /> }
                 { ! inProgress && <div className="news-form__controls">
+                    { isEdit && onDelete && <div className="news-form__controls__delete">
+                        <Button type="warn" onClick={(event) => setConfirmDelete(true)}><TrashIcon /> Delete Post</Button>
+                    </div> }
                     <Button onClick={(event) => handleCancel()}>Cancel</Button>
                     <input type="submit" name="submit" value={ isEdit ? 'Edit Post' : 'Post' } />
                 </div> }
@@ -322,6 +354,14 @@ const NewsFormFields = function({ news, origin }) {
             >
                 <p>Are you sure you want to discard your { isEdit ? 'edits' : 'post' }?</p>
             </AreYouSure>
+            { isEdit && onDelete && <AreYouSure
+                isVisible={confirmDelete}
+                executeLabel="Delete Post"
+                execute={() => { setConfirmDelete(false); onDelete() }}
+                cancel={() => setConfirmDelete(false)}
+            >
+                <p>Are you sure you want to delete "{ news.title }"?  This can't be undone.</p>
+            </AreYouSure> }
             <RequestErrorModal message={ isEdit ? 'Attempt to edit news post' : 'Attempt to post news' } request={request} />
         </div>
     )
@@ -339,12 +379,35 @@ const NewsFormFields = function({ news, origin }) {
  * A new post's slug, which is its URL, is generated from its date and title,
  * and its author is the current user.  Editing a post changes neither.
  *
+ * When editing, the form can also delete the post, after asking, and then
+ * goes to the News page.
+ *
  * @param {string} slug     (Optional) The slug of the post to edit.
  * @param {string} origin   (Optional) Where to go if the form is cancelled.
  * Defaults to the post being edited, or to /admin for a new post.
  */
 const NewsForm = function({ slug, origin }) {
-    const [ news, request ] = useNews(slug)
+    // Deleting is done here rather than in NewsFormFields: a deleted post is
+    // removed from state, which unmounts NewsFormFields before its request
+    // could finish.
+    const [ deleteRequest, makeDeleteRequest ] = useRequest()
+
+    // Once the post is being deleted, don't ask for it again when it leaves
+    // state.
+    const [ news, request ] = useNews(slug, { skip: deleteRequest !== null })
+
+    const navigate = useNavigate()
+
+    useEffect(() => {
+        if ( deleteRequest?.state === 'fulfilled' ) {
+            removeDraft(slug)
+            navigate('/about/news')
+        }
+    }, [ deleteRequest ])
+
+    if ( deleteRequest?.state === 'pending' || deleteRequest?.state === 'fulfilled' ) {
+        return ( <Spinner /> )
+    }
 
     if ( slug ) {
         if ( news === null ) {
@@ -362,7 +425,17 @@ const NewsForm = function({ slug, origin }) {
 
     // Keyed by slug, so going from one post's form to another's starts over
     // with the other post's draft.
-    return ( <NewsFormFields key={slug ?? ''} news={slug ? news : null} origin={origin} /> )
+    return (
+        <>
+            <NewsFormFields
+                key={slug ?? ''}
+                news={slug ? news : null}
+                origin={origin}
+                onDelete={ slug ? () => makeDeleteRequest(deleteNews(news)) : undefined }
+            />
+            <RequestErrorModal message="Attempt to delete news post" request={deleteRequest} />
+        </>
+    )
 }
 
 export default NewsForm
