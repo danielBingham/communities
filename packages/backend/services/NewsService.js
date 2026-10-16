@@ -195,6 +195,25 @@ module.exports = class NewsService {
     }
 
     /**
+     * Find one post in an index we've already read.
+     *
+     * @param {Object} index    The index, from getIndex().
+     * @param {string} slug     The post's slug.
+     *
+     * @return {Object|null} The post, or null when there's no post with that
+     * slug.
+     */
+    findNews(index, slug) {
+        // `slug` comes from the URL: make sure it names a post rather than
+        // something every object has, like 'constructor'.
+        if ( ! Object.hasOwn(index, slug) || ! this.isPost(index[slug], slug) ) {
+            return null
+        }
+
+        return this.toEntity(index[slug], slug)
+    }
+
+    /**
      * Get one post.
      *
      * @param {string} slug     The post's slug.
@@ -204,14 +223,7 @@ module.exports = class NewsService {
      */
     async getNews(slug) {
         const index = await this.getIndex()
-
-        // `slug` comes from the URL: make sure it names a post rather than
-        // something every object has, like 'constructor'.
-        if ( ! Object.hasOwn(index, slug) || ! this.isPost(index[slug], slug) ) {
-            return null
-        }
-
-        return this.toEntity(index[slug], slug)
+        return this.findNews(index, slug)
     }
 
     /**
