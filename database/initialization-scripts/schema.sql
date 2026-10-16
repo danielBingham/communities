@@ -73,6 +73,7 @@ INSERT INTO features (name, status, created_date, updated_date)
         ('fix-495-slow-friends-list', 'enabled', now(), now()),
         ('feat-377-improved-file-pipelines', 'enabled', now(), now()),
         ('feat-61-multifactor-authentication', 'enabled', now(), now()),
+        ('fix-563-video-poster-fails-on-mobile', 'enabled', now(), now()),
         ('video-uploads', 'enabled', now(), now());
 
 
@@ -243,6 +244,7 @@ CREATE TABLE files (
     updated_date timestamptz
 );
 CREATE INDEX files__user_id ON files (user_id);
+CREATE INDEX files__thumb_id ON files (thumb_id);
 
 /*  Now that we've created the files table, we can add the link to the users table. */
 /* This is for the user's profile picture. */

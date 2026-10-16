@@ -77,12 +77,14 @@ module.exports = class FilePermissions {
                         post_files.post_id as "postId",
                         groups.id as "groupId",
                         users.id as "userId",
-                        link_previews.id as "linkPreviewId"
+                        link_previews.id as "linkPreviewId",
+                        parents.id as "parentId"
                     FROM files
                         LEFT OUTER JOIN post_files ON files.id = post_files.file_id
                         LEFT OUTER JOIN groups ON files.id = groups.file_id
                         LEFT OUTER JOIN users ON files.id = users.file_id
                         LEFT OUTER JOIN link_previews ON files.id = link_previews.file_id
+                        LEFT OUTER JOIN files as parents ON parents.thumb_id = files.id
                     WHERE files.id = $1
                 `, [ context.file.id ])
 
@@ -170,6 +172,18 @@ module.exports = class FilePermissions {
         if ( context.usage.userId !== null ) {
             const canViewUser = await this.permissionService.can(user, 'view', 'User', { userId: context.usage.userId })
             if ( canViewUser === true ) {
+                return true
+            }
+        }
+
+        // If this is a thumbnail, then they can view it if they can view the parent file.
+        if ( context.usage.parentId !== null ) {
+            if ( 'rootId' in context && context.file.id === context.rootId ) {
+                throw new ServiceError('loop-detected', 'Loop detected in file permissions. Thumbnail parent loops back to thumbnail.')
+            }
+
+            const canViewParent = await this.permissionService.can(user, 'view', 'File', { fileId: context.usage.parentId, rootId: context.rootId ?? context.file.id })
+            if ( canViewParent === true) {
                 return true
             }
         }

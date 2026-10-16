@@ -617,6 +617,7 @@ module.exports = class ValidationService {
                                     || usage.postId !== null
                                     || usage.groupId !== null
                                     || usage.linkPreviewId !== null
+                                    || usage.parentId !== null
                                 ) {
                                     errors.push({
                                         type: 'files:conflict',
