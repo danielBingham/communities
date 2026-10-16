@@ -17,8 +17,10 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useImperativeHandle } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
+
+import * as shared from '@communities/shared'
 
 import logger from '/logger'
 
@@ -28,6 +30,7 @@ import { useRequest } from '/lib/hooks/useRequest'
 import { postPostComments, patchPostComment, finishPostCommentEdit } from '/state/PostComment'
 
 import { RequestErrorModal } from '/components/errors/RequestError'
+import Alert from '/components/ui/Alert'
 import Button from '/components/ui/Button'
 import Spinner from '/components/Spinner'
 import AreYouSure from '/components/AreYouSure'
@@ -36,7 +39,7 @@ import TextAreaWithMentions from '/components/posts/TextAreaWithMentions'
 
 import './PostCommentForm.css'
 
-const PostCommentForm = function({ postId, groupId, commentId, setShowComments }) {
+const PostCommentForm = function({ ref, postId, groupId, commentId, setShowComments }) {
     const [showForm, setShowForm ] = useState(false)
 
     const [ content, setContent ] = useState('')
@@ -44,7 +47,20 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
     const [ error, setError ] = useState('')
     const [ areYouSure, setAreYouSure ] = useState(false)
 
-    const [postRequest, makePostRequest] = useRequest()
+    // Incremented each time a reply is started, so that we can focus the
+    // form once it has rendered.
+    const [ focusRequest, setFocusRequest ] = useState(0)
+
+    // Incremented each time the user tries to reply to someone they're
+    // already replying to, and used as the alert's key, so that clicking
+    // "Reply" again restarts the alert rather than leaving it to time out
+    // from the first click.  Zero when there's no alert.
+    const [ alreadyReplyingAlert, setAlreadyReplyingAlert ] = useState(0)
+
+    const formRef = useRef(null)
+    const textAreaRef = useRef(null)
+
+    const [postRequest, makePostRequest, resetPostRequest] = useRequest()
     const [patchRequest, makePatchRequest] = useRequest()
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
@@ -77,6 +93,46 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
         setShowForm(true)
         setShowComments(true)
     }
+
+    /**
+     * Start a comment replying to another comment's author, by opening it
+     * with a mention of them.  Only meaningful on the new comment form, where
+     * PostComments calls it (through the handle below) when the user clicks
+     * "Reply" on a comment.
+     *
+     * If the user already has a draft in progress, we don't want to clobber
+     * it, so the mention is added to the end of the draft instead.  If the
+     * draft already mentions that user, we leave it alone and let them know
+     * they're already replying.
+     *
+     * @param {string} username The username of the author being replied to.
+     */
+    const replyTo = function(username) {
+        const mention = `@${username} `
+
+        let newContent = content
+        if ( content.trim().length <= 0 ) {
+            newContent = mention
+        } else if ( shared.lib.mentions.parseMentions(content).includes(username) ) {
+            setAlreadyReplyingAlert((count) => count + 1)
+        } else {
+            const separator = /\s$/.test(content) ? '' : ' '
+            newContent = `${content}${separator}${mention}`
+        }
+
+        if ( ! showForm ) {
+            startComment()
+        }
+
+        onChange(newContent)
+        setFocusRequest((count) => count + 1)
+    }
+
+    useImperativeHandle(ref, () => {
+        return {
+            replyTo: replyTo
+        }
+    }, [ postId, content, showForm ])
 
     const submit = function() {
         const newComment = {
@@ -188,8 +244,13 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
         setContent(draft.content)
     }, [ commentId ])
 
+    // Save the draft as the user types.  We don't save while the comment is
+    // being submitted, or once it has been, because the draft is cleared on
+    // success.  We do save after a failure, so that changes made before
+    // trying again aren't lost.
     useEffect(function() {
-        if ( ! postRequest && ! patchRequest && (showForm || commentId )) {
+        const isSubmitted = (request) => request?.state === 'pending' || request?.state === 'fulfilled'
+        if ( ! isSubmitted(postRequest) && ! isSubmitted(patchRequest) && (showForm || commentId )) {
             if ( isLocalStorageAvailable() ) {
                 try {
                     localStorage.setItem(getDraftKey(), JSON.stringify({ content: content }))
@@ -217,9 +278,24 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
 
             if ( commentId ) {
                 dispatch(finishPostCommentEdit(commentId))
+            } else {
+                // The new comment form stays mounted, ready for the next
+                // comment, so clear the finished request.  Otherwise we'd never
+                // save the next comment's draft.
+                resetPostRequest()
             }
         }
     }, [ commentId, postRequest, patchRequest])
+
+    // When a reply is started, focus the textarea and bring the form into
+    // view.  This waits for the render, because starting a reply may be what
+    // opened the form, and the reply link may be far up the comment thread.
+    useEffect(function() {
+        if ( focusRequest > 0 ) {
+            textAreaRef.current?.focusAtEnd()
+            formRef.current?.scrollIntoView({ block: 'nearest' })
+        }
+    }, [ focusRequest ])
 
     if ( ! currentUser ) {
         logger.error(new Error('Attempt to load PostCommentForm without logged in user.'))
@@ -239,8 +315,9 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
         )
     } else {
         return (
-            <div className="post-comment-form">
+            <div ref={formRef} className="post-comment-form">
                 <TextAreaWithMentions
+                    ref={textAreaRef}
                     value={content}
                     setValue={onChange}
                     placeholder="Write a comment..."
@@ -262,6 +339,12 @@ const PostCommentForm = function({ postId, groupId, commentId, setShowComments }
                 >
                     <p>Are you sure you want to discard your { commentId ? "edits" : "comment" }?</p>
                 </AreYouSure>
+                { alreadyReplyingAlert > 0 && <Alert
+                    key={alreadyReplyingAlert}
+                    type="warn"
+                    timeout={3000}
+                    onClear={() => setAlreadyReplyingAlert(0)}
+                >You're already replying.</Alert> }
                 <RequestErrorModal message="Attempt to create comment" request={postRequest} />
                 <RequestErrorModal message="Attempt to edit comment" request={patchRequest} />
             </div>

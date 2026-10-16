@@ -36,6 +36,10 @@
     white-space: pre-line;
     max-width: 100%;
 }
+.post-comment .post-comment__footer {
+    padding: 0 10px 10px 10px;
+    font-size: 14px;
+}
 .post-comment .post-comment__content .post-comment__moderated {
     font-size: 14px;
     padding: 7px;

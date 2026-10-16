@@ -5,6 +5,7 @@ import { useLocation } from 'react-router-dom'
 import { useFeature } from '/lib/hooks/feature'
 import { usePost } from '/lib/hooks/Post'
 import { usePostComment } from '/lib/hooks/PostComment'
+import { useUser } from '/lib/hooks/User'
 import { useSiteModeration } from '/lib/hooks/SiteModeration'
 import { useGroupModeration } from '/lib/hooks/GroupModeration'
 import { usePostLink } from '/lib/hooks/Post'
@@ -19,11 +20,26 @@ import TextWithMentions from '/components/posts/TextWithMentions'
 
 import './PostComment.css'
 
-const PostComment = function({ postId, id }) {
+/**
+ * @param {object} props
+ * @param {string} props.postId
+ * @param {string} props.id The id of the comment.
+ * @param {function} [props.onReply] Called with the comment author's username
+ * when the user clicks "Reply".  The "Reply" link is only shown when this is
+ * provided, since there needs to be a comment form to reply in.
+ */
+const PostComment = function({ postId, id, onReply }) {
     const [highlight, setHighlight] = useState(false)
+
+    const currentUser = useSelector((state) => state.authentication.currentUser)
 
     const [post, postRequest] = usePost(postId)
     const [comment, request] = usePostComment(postId, id)
+
+    // Replies mention the comment's author, so we need their username.  The
+    // UserTag below queries for the author, so we don't need to query here.
+    const [author] = useUser(comment?.userId, { noQuery: true })
+
     const [siteModeration, siteModerationRequest] = useSiteModeration(comment?.siteModerationId)
     const [groupModeration, groupModerationRequest] = useGroupModeration(post?.groupId, comment?.groupModerationId)
    
@@ -89,6 +105,11 @@ const PostComment = function({ postId, id }) {
         )
     }
 
+    // Replying to yourself would only mention yourself, so we don't offer it.
+    // We also can't reply until we know the author's username.
+    const canReply = typeof onReply === 'function'
+        && currentUser && author && author.id !== currentUser.id
+
     return (
         <div id={`comment-${comment.id}`} key={comment.id} role="article" className={`post-comment ${ highlight ? 'highlight' : ''}`}>
             <div className="post-comment__header">
@@ -105,6 +126,14 @@ const PostComment = function({ postId, id }) {
             <div className="post-comment__content">
                 <TextWithMentions text={ comment.content } />
             </div>
+            { canReply && <div className="post-comment__footer">
+                <a
+                    href=""
+                    className="post-comment__reply"
+                    aria-label={`Reply to ${author.name}`}
+                    onClick={(e) => { e.preventDefault(); onReply(author.username) }}
+                >Reply</a>
+            </div> }
         </div>
     )
 }
