@@ -61,7 +61,9 @@ const rateLimit = function(core, limit) {
             requestCount += 1
         }
 
-        const userId = request.session.user?.id
+        // Pages are rate limited too, and requests for pages don't have a
+        // session.
+        const userId = request.session?.user?.id
         previousRequests[now] = {
             userId: userId || null
         }
