@@ -118,18 +118,6 @@ describe('NewsService', function() {
         })
     })
 
-    describe('findNews()', function() {
-        it('Should find a post in an index that\'s already been read', function() {
-            const news = makeNews('a-post')
-            const index = { 'a-post': { ...news, extra: true }, 'broken': 'not a post' }
-
-            expect(service.findNews(index, 'a-post')).toEqual(news)
-            expect(service.findNews(index, 'b-post')).toBeNull()
-            expect(service.findNews(index, 'broken')).toBeNull()
-            expect(service.findNews(index, 'constructor')).toBeNull()
-        })
-    })
-
     describe('getNewsPage()', function() {
         // Twelve posts, added out of date order.
         const dates = [

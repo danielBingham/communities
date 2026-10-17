@@ -31,9 +31,15 @@
  * To give another page its own metadata, add a method for it to
  * PageMetadataService (and a builder to `lib.pageMetadata` in
  * @communities/shared), a method that uses it to PageController and a route
- * for it here.
+ * for it here.  If the page reads anything to build its metadata, preload
+ * the API responses the client would request for it too.
+ *
+ * Pages that read from storage or the database are rate limited like the API
+ * requests they stand in for.
  ******************************************************************************/
 const express = require('express')
+
+const rateLimit = require('./middleware/rateLimit')
 
 const PageController = require('./controllers/PageController')
 
@@ -51,13 +57,13 @@ const createPageRouter = function(core) {
     /**************************************************************************
      * News (`/about/news/:url?` in client/App.js)
      **************************************************************************/
-    router.get('/about/news', function(request, response, next) {
+    router.get('/about/news', rateLimit(core, 2400), function(request, response, next) {
         pageController.getNewsList(request, response).catch(function(error) {
             next(error)
         })
     })
 
-    router.get('/about/news/:slug', function(request, response, next) {
+    router.get('/about/news/:slug', rateLimit(core, 2400), function(request, response, next) {
         pageController.getNews(request, response).catch(function(error) {
             next(error)
         })

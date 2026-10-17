@@ -20,6 +20,22 @@
 const multer = require('multer')
 const ControllerError = require('./errors/ControllerError')
 
+/**
+ * The body of the response the API sends for a ControllerError.
+ *
+ * @param {ControllerError} error   The error.
+ *
+ * @return {Object} `{ error: { type, message } }`
+ */
+const getControllerErrorBody = function(error) {
+    return {
+        error: {
+            type: error.type,
+            message: error.publicMessage
+        }
+    }
+}
+
 const createErrorsMiddleware = function(core) {
     return function(error, request, response, next) {
         const logger = 'logger' in request ? request.logger : core.logger
@@ -36,12 +52,7 @@ const createErrorsMiddleware = function(core) {
             }
 
             if ( error instanceof ControllerError) {
-                response.status(error.status).json({
-                    error: {
-                        type: error.type,
-                        message: error.publicMessage
-                    }
-                })
+                response.status(error.status).json(getControllerErrorBody(error))
                 return
             } else if ( error instanceof multer.MulterError ) {
                 if ( error.code === 'LIMIT_FILE_SIZE' ) {
@@ -82,5 +93,6 @@ const createErrorsMiddleware = function(core) {
 }
 
 module.exports = {
+    getControllerErrorBody: getControllerErrorBody,
     createErrorsMiddleware: createErrorsMiddleware
 }
