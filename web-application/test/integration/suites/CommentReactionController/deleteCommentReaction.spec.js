@@ -121,6 +121,20 @@ describe('DELETE /post/:postId/comment/:commentId/reaction', function() {
         assert.equal(reaction.userId, reactor.user.id)
     })
 
+    it(`Should return 400 when the post or comment id in the path isn't a uuid`, async function(t) {
+        if ( ! enabled ) { t.skip(`${COMMENT_REACTIONS_FEATURE} feature is not enabled`); return }
+
+        const { post, comment } = await createCommentedPost()
+        await addCommentReaction(reactor.session, post.id, comment.id)
+
+        for ( const [ postId, commentId ] of [ [ 'not-a-uuid', comment.id ], [ post.id, 'not-a-uuid' ] ] ) {
+            const response = await deleteCommentReaction(reactor.session, postId, commentId)
+
+            assert.equal(response.status, 400, `Post(${postId}) Comment(${commentId}) should be rejected.`)
+            assert.equal(response.content?.error?.type, 'invalid')
+        }
+    })
+
     it(`Should return 404 when the user hasn't liked the comment`, async function(t) {
         if ( ! enabled ) { t.skip(`${COMMENT_REACTIONS_FEATURE} feature is not enabled`); return }
 

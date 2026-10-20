@@ -154,6 +154,53 @@ describe('POST /post/:postId/comment/:commentId/reactions', function() {
         }
     })
 
+    it(`Should clean the reaction before validating it`, async function(t) {
+        if ( ! enabled ) { t.skip(`${COMMENT_REACTIONS_FEATURE} feature is not enabled`); return }
+
+        const { post, comment } = await createCommentedPost()
+
+        const response = await postCommentReaction(reactor.session, post.id, comment.id, { reaction: '  like ' })
+
+        assert.equal(response.status, 201)
+        assert.equal(response.content.entity.reaction, 'like')
+    })
+
+    it(`Should only take the reaction from the body`, async function(t) {
+        if ( ! enabled ) { t.skip(`${COMMENT_REACTIONS_FEATURE} feature is not enabled`); return }
+
+        const { post, comment } = await createCommentedPost()
+
+        // Everything but the reaction comes from the route and the session,
+        // so a body can't react on someone else's behalf, or to another
+        // comment.
+        const other = await createCommentedPost()
+        const response = await postCommentReaction(reactor.session, post.id, comment.id, {
+            reaction: 'like',
+            id: crypto.randomUUID(),
+            userId: author.user.id,
+            postId: other.post.id,
+            commentId: other.comment.id
+        })
+
+        assert.equal(response.status, 201)
+        assert.equal(response.content.entity.userId, reactor.user.id)
+        assert.equal(response.content.entity.postId, post.id)
+        assert.equal(response.content.entity.commentId, comment.id)
+    })
+
+    it(`Should return 400 when the post or comment id in the path isn't a uuid`, async function(t) {
+        if ( ! enabled ) { t.skip(`${COMMENT_REACTIONS_FEATURE} feature is not enabled`); return }
+
+        const { post, comment } = await createCommentedPost()
+
+        for ( const [ postId, commentId ] of [ [ 'not-a-uuid', comment.id ], [ post.id, 'not-a-uuid' ] ] ) {
+            const response = await postCommentReaction(reactor.session, postId, commentId, { reaction: 'like' })
+
+            assert.equal(response.status, 400, `Post(${postId}) Comment(${commentId}) should be rejected.`)
+            assert.equal(response.content?.error?.type, 'invalid')
+        }
+    })
+
     it(`Should return 404 for a comment that doesn't exist`, async function(t) {
         if ( ! enabled ) { t.skip(`${COMMENT_REACTIONS_FEATURE} feature is not enabled`); return }
 

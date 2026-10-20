@@ -49,7 +49,8 @@ None.
 
 The Integration suite covers removing likes
 (`web-application/test/integration/suites/CommentReactionController/deleteCommentReaction.spec.js`):
-unauthenticated users, removing a like that doesn't exist, only removing the
-current user's like, and comments that aren't on the post.  All of the user
+unauthenticated users, ids in the path that aren't uuids, removing a like
+that doesn't exist, only removing the current user's like, and comments that
+aren't on the post.  All of the user
 interface cases are defined in the Smoke Test and Manual Regression sections
 above.

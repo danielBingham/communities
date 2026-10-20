@@ -28,6 +28,8 @@ const {
     PermissionService,
     ValidationService
 } = require('@communities/backend')
+const { schema } = require('@communities/shared')
+
 const ControllerError = require('../errors/ControllerError')
 
 module.exports = class CommentReactionController {
@@ -41,6 +43,8 @@ module.exports = class CommentReactionController {
 
         this.permissionService = new PermissionService(core)
         this.validationService = new ValidationService(core)
+
+        this.commentReactionSchema = new schema.CommentReactionSchema()
     }
 
     /**
@@ -62,8 +66,9 @@ module.exports = class CommentReactionController {
 
     /**
      * Run the checks shared by every CommentReaction endpoint: the feature is
-     * enabled, the user is authenticated, and the user can view both the Post
-     * and the PostComment, which must be on that Post.
+     * enabled, the user is authenticated, the route's `postId` and
+     * `commentId` are valid, and the user can view both the Post and the
+     * PostComment, which must be on that Post.
      *
      * Users who are blocked by (or have blocked) the comment's author can't
      * view the comment, so they can't react to it either.
@@ -85,8 +90,22 @@ module.exports = class CommentReactionController {
                 `You must be authenticated to react to a comment.`)
         }
 
-        const postId = request.params.postId
-        const commentId = request.params.commentId
+        // Clean and validate the route parameters before we use them in any
+        // queries.
+        const postId = this.commentReactionSchema.properties.postId.clean(request.params.postId)
+        const commentId = this.commentReactionSchema.properties.commentId.clean(request.params.commentId)
+
+        const parameterErrors = [
+            ...this.commentReactionSchema.properties.postId.validate(postId),
+            ...this.commentReactionSchema.properties.commentId.validate(commentId)
+        ]
+        if ( parameterErrors.length > 0 ) {
+            const errorString = parameterErrors.reduce((string, error) => `${string}\n${error.message}`, '')
+            const logString = parameterErrors.reduce((string, error) => `${string}\n${error.log}`, '')
+            throw new ControllerError(400, 'invalid',
+                `User(${currentUser.id}) used invalid route parameters for a CommentReaction: ${logString}`,
+                errorString)
+        }
 
         const post = await this.postDAO.getPostById(postId)
         if ( post === null ) {
@@ -139,12 +158,16 @@ module.exports = class CommentReactionController {
                 `You can only react to a comment once.`)
         }
 
+        // Only the reaction itself comes from the body.  Everything else is
+        // set from the route and the session.
+        const body = this.commentReactionSchema.clean(request.body) ?? {}
+
         const reaction = {
             id: Uuid.v4(),
             postId: post.id,
             commentId: postComment.id,
             userId: currentUser.id,
-            reaction: request.body?.reaction
+            reaction: body.reaction
         }
 
         const validationErrors = await this.validationService.validateCommentReaction(currentUser, reaction)

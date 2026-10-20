@@ -18,7 +18,7 @@
  *
  ******************************************************************************/
 
-const { util, validation } = require('@communities/shared')
+const { util, schema } = require('@communities/shared')
 
 const ServiceError = require('../../errors/ServiceError')
 
@@ -27,6 +27,8 @@ module.exports = class CommentReactionValidation {
     constructor(core, validationService) {
         this.core = core
         this.validationService = validationService
+
+        this.schema = new schema.CommentReactionSchema()
     }
 
 
@@ -39,7 +41,7 @@ module.exports = class CommentReactionValidation {
         }
 
         // Do basic validation the fields.
-        const validationErrors = validation.CommentReaction.validate(commentReaction, existing)
+        const validationErrors = this.schema.validate(commentReaction, existing)
         if ( validationErrors.all.length > 0 ) {
             errors.push(...validationErrors.all)
         }

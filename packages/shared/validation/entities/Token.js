@@ -1,3 +1,9 @@
+/******************************************************************************
+ * @deprecated Entity validation in `packages/shared/validation` is deprecated
+ * in favor of the Schema classes in `packages/shared/schema`.  Don't add to
+ * this file.  When this entity's validation needs to change, move it to a
+ * Schema instead.  See packages/shared/validation/README.md.
+ ******************************************************************************/
 const { UUIDValidator, DateValidator, StringValidator } = require('../types')
 const { validateEntity } = require('../validate')
 

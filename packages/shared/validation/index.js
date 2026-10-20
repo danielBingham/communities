@@ -1,5 +1,17 @@
+/******************************************************************************
+ * @deprecated Entity validation (`validation.<Entity>`, from `entities/`) is
+ * deprecated in favor of the Schema classes in `packages/shared/schema`, which
+ * define both how to clean and how to validate each property of an entity.
+ *
+ * - Don't add new entities here.  Write a Schema.
+ * - When an entity's validation needs to change, move it to a Schema.
+ *
+ * The field validators in `types/` (`validation.types`) are NOT deprecated:
+ * the Schemas are built from them.
+ *
+ * See packages/shared/validation/README.md.
+ ******************************************************************************/
 const Blocklist  = require('./entities/Blocklist')
-const CommentReaction = require('./entities/CommentReaction')
 const Group = require('./entities/Group')
 const GroupMember = require('./entities/GroupMember')
 const GroupModeration = require('./entities/GroupModeration')
@@ -15,7 +27,6 @@ const types = require('./types')
 
 module.exports = {
     Blocklist: Blocklist,
-    CommentReaction: CommentReaction,
     Group: Group,
     GroupMember: GroupMember,
     GroupModeration: GroupModeration,
