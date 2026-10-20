@@ -1,0 +1,55 @@
+.comment-reactions {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.comment-reactions a {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    /* A bit of padding so the small icons are easier to tap on mobile. */
+    padding: 2px 4px;
+}
+
+.comment-reactions a svg {
+    display: inline-block;
+    width: 1.15em;
+    height: 1.15em;
+    color: var(--link-color);
+}
+
+.comment-reactions a:hover svg {
+    color: var(--link-highlight-color);
+}
+
+.comment-reactions a.comment-reactions__like.reacted svg {
+    color: var(--success-color-main);
+}
+
+.comment-reactions a.comment-reactions__like.reacted:hover svg {
+    color: var(--success-color-main-light);
+}
+
+.comment-reactions__detail-modal .modal {
+    max-width: 600px;
+    padding: 40px 0;
+}
+
+.comment-reactions__detail {
+    font-size: 18px;
+    text-align: left;
+    padding: 10px 30px;
+}
+.comment-reactions__detail div {
+    padding: 2px 0;
+}
+
+.comment-reactions__detail svg.reaction {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    margin-right: 5px;
+    margin-bottom: -2px;
+    color: var(--link-color);
+}

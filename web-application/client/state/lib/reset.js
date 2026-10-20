@@ -1,4 +1,5 @@
 import { resetBlocklistSlice } from '/state/Blocklist'
+import { resetCommentReactionSlice } from '/state/CommentReaction'
 import { resetFileSlice } from '/state/File'
 import { resetGroupSlice } from '/state/Group'
 import { resetGroupMemberSlice } from '/state/GroupMember'
@@ -18,6 +19,7 @@ import { resetUserRelationshipSlice } from '/state/UserRelationship'
 export const resetEntities = function() {
     return function(dispatch, getState) {
         dispatch(resetBlocklistSlice())
+        dispatch(resetCommentReactionSlice())
         dispatch(resetFileSlice())
         dispatch(resetGroupSlice())
         dispatch(resetGroupMemberSlice())

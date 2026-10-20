@@ -25,6 +25,7 @@ const {
     NotificationService,
     ValidationService,
 
+    CommentReactionDAO,
     FileDAO,
     GroupDAO,
     GroupMemberDAO,
@@ -49,6 +50,7 @@ module.exports = class PostController {
     constructor(core) {
         this.core = core
 
+        this.commentReactionDAO = new CommentReactionDAO(core)
         this.fileDAO = new FileDAO(core)
         this.groupDAO = new GroupDAO(core)
         this.groupMemberDAO = new GroupMemberDAO(core)
@@ -214,6 +216,17 @@ module.exports = class PostController {
             postSubscriptions: postSubscriptionResults.dictionary,
             siteModerations: siteModerationResults.dictionary,
             users: userResults.dictionary
+        }
+
+        // ==== CommentReactions ====
+        // Only for the comments we're sending, and leaving out reactions from
+        // users who are blocked by, or have blocked, the current user.
+        if ( this.core.features.has('feat-585-comment-reactions') ) {
+            const commentReactionResults = await this.commentReactionDAO.selectCommentReactions({
+                where: `comment_reactions.comment_id = ANY($1::uuid[]) AND comment_reactions.user_id != ALL($2::uuid[])`,
+                params: [ postCommentResults.list, blockIds ]
+            })
+            relations.commentReactions = commentReactionResults.dictionary
         }
 
         if ( this.core.features.has('issue-165-subgroups') ) {
