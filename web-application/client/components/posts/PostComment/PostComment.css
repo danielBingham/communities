@@ -43,6 +43,14 @@
     padding: 0 10px 10px 10px;
     font-size: 14px;
 }
+/* The like count is on the left, and the actions (like and reply) are pushed
+ * to the right, even when there's no like count. */
+.post-comment .post-comment__actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+}
 .post-comment .post-comment__content .post-comment__moderated {
     font-size: 14px;
     padding: 7px;

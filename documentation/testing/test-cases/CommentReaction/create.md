@@ -16,7 +16,7 @@ Cases covering liking PostComments.
     - As User1:
         - Click the thumbs up to the left of "Reply" on the comment on User2's post.
             - **Confirm the thumbs up is filled in and highlighted.**
-            - **Confirm a like count of 1 is shown to the left of the thumbs up, with a filled in blue thumbs up.**
+            - **Confirm a like count of 1, with a filled in blue thumbs up, is shown on the left side of the comment, in line with the thumbs up and "Reply" on the right.**
         - Click on the like count.
             - **Confirm a modal opens with User1 listed as liking the comment.**
 
@@ -41,11 +41,15 @@ Cases covering liking PostComments.
         - Click on the like count.
             - **Confirm both User1 and User3 are listed as liking the comment.**
 
-- [ ] As a user, I can like my own comment.
+- [ ] As a user, I can't like my own comment, but I can see other users' likes on it.
     - As User1:
-        - Click the thumbs up on User1's own comment.
-            - **Confirm the thumbs up is filled in and highlighted, and a like count of 1 is shown.**
-            - **Confirm "Reply" is not shown on User1's own comment, but the thumbs up is.**
+        - View User1's own comment on User2's post.
+            - **Confirm neither the thumbs up nor "Reply" is shown on it.**
+    - As User3:
+        - Like User1's comment.
+    - As User1:
+        - View User1's own comment again.
+            - **Confirm a like count of 1 is shown on the left side of the comment, and there is still no thumbs up or "Reply".**
 
 - [ ] As a user, double clicking the thumbs up doesn't like a comment twice.
     - As User1:

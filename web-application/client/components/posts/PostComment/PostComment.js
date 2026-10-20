@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux'
 import { useLocation } from 'react-router-dom'
 
 import { useFeature } from '/lib/hooks/feature'
+import { useCommentReactions } from '/lib/hooks/CommentReaction'
 import { usePost } from '/lib/hooks/Post'
 import { usePostComment } from '/lib/hooks/PostComment'
 import { useUser } from '/lib/hooks/User'
@@ -13,7 +14,7 @@ import { usePostLink } from '/lib/hooks/Post'
 import DateTag from '/components/DateTag'
 import UserTag from '/components/users/UserTag'
 
-import CommentReactions from './CommentReactions'
+import { CommentReactionButton, CommentReactionCount } from './CommentReactions'
 import PostCommentDotsMenu from './PostCommentDotsMenu'
 import PostCommentModeration from './PostCommentModeration'
 
@@ -35,6 +36,7 @@ const PostComment = function({ postId, id, onReply }) {
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
     const hasCommentReactions = useFeature('feat-268-comment-reactions')
+    const { likes } = useCommentReactions(id)
 
     const [post, postRequest] = usePost(postId)
     const [comment, request] = usePostComment(postId, id)
@@ -113,6 +115,10 @@ const PostComment = function({ postId, id, onReply }) {
     const canReply = typeof onReply === 'function'
         && currentUser && author && author.id !== currentUser.id
 
+    // As with replies, we don't offer likes on your own comments.
+    const canReact = hasCommentReactions && currentUser && comment.userId !== currentUser.id
+    const showLikes = hasCommentReactions && likes.length > 0
+
     return (
         <div id={`comment-${comment.id}`} key={comment.id} role="article" className={`post-comment ${ highlight ? 'highlight' : ''}`}>
             <div className="post-comment__header">
@@ -129,14 +135,17 @@ const PostComment = function({ postId, id, onReply }) {
             <div className="post-comment__content">
                 <TextWithMentions text={ comment.content } />
             </div>
-            { ( hasCommentReactions || canReply ) && <div className="post-comment__footer">
-                { hasCommentReactions && <CommentReactions postId={postId} commentId={id} /> }
-                { canReply && <a
-                    href=""
-                    className="post-comment__reply"
-                    aria-label={`Reply to ${author.name}`}
-                    onClick={(e) => { e.preventDefault(); onReply(author.username) }}
-                >Reply</a> }
+            { ( showLikes || canReact || canReply ) && <div className="post-comment__footer">
+                { showLikes && <CommentReactionCount commentId={id} /> }
+                { ( canReact || canReply ) && <div className="post-comment__actions">
+                    { canReact && <CommentReactionButton postId={postId} commentId={id} /> }
+                    { canReply && <a
+                        href=""
+                        className="post-comment__reply"
+                        aria-label={`Reply to ${author.name}`}
+                        onClick={(e) => { e.preventDefault(); onReply(author.username) }}
+                    >Reply</a> }
+                </div> }
             </div> }
         </div>
     )
